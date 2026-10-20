@@ -1,0 +1,2907 @@
+{
+  "schema": "fairyc.build-footprint/v1",
+  "started": "2026-10-20T16:43:09Z",
+  "finished": "2026-10-20T16:54:39Z",
+  "commit": "3f2e1125afae2c1187f35e834b41ad1b9618a7d1",
+  "dirty": false,
+  "host": {
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logicalCpus": 12,
+    "runnerGoVersion": "go1.27.1"
+  },
+  "method": "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.",
+  "settings": {
+    "languages": [
+      "fairy",
+      "rust",
+      "c",
+      "zig"
+    ],
+    "profiles": [
+      "dev",
+      "small-dev"
+    ],
+    "workloads": [
+      "file-search"
+    ],
+    "edits": 5,
+    "modules": 16,
+    "repetitions": 1,
+    "commandTimeout": "20m0s"
+  },
+  "toolchains": [
+    {
+      "language": "fairy",
+      "version": "checkout 3f2e1125afae2c1187f35e834b41ad1b9618a7d1",
+      "executable": "fairyc.exe",
+      "executableSha256": "1c2dc45506d7bd656b214483c3b59750367865ba5dd62df002cf74134dd3a699",
+      "executableBytes": 17681408,
+      "backend": "MSVC 14.51.36231; Windows SDK 10.0.26100.0",
+      "status": "ready"
+    },
+    {
+      "language": "rust",
+      "version": "cargo 1.96.1 (356927216 2026-06-26)",
+      "executable": "cargo.exe",
+      "executableSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "executableBytes": 12814336,
+      "backend": "rustc 1.96.1 (31fca3adb 2026-06-26)\nbinary: rustc\ncommit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd\ncommit-date: 2026-06-26\nhost: x86_64-pc-windows-msvc\nrelease: 1.96.1\nLLVM version: 22.1.2",
+      "status": "ready"
+    },
+    {
+      "language": "c",
+      "version": "MSVC 14.51.36231",
+      "executable": "cl.exe",
+      "executableSha256": "dc8426b8760d92cf757df3d10b9f0244a95b454ff43194a58161568a0ec70d53",
+      "executableBytes": 893328,
+      "backend": "Windows SDK 10.0.26100.0; direct compile+link, full rebuild on every invocation",
+      "status": "ready"
+    },
+    {
+      "language": "zig",
+      "version": "0.17.0",
+      "executable": "zig.exe",
+      "executableSha256": "f54b14f02a4d7d8ac62a94a0663486eb166bba3745d85b466238c1b93e723d46",
+      "executableBytes": 190064128,
+      "backend": "zig build; libc linked for console and file I/O",
+      "status": "ready"
+    }
+  ],
+  "installations": [
+    {
+      "name": "Fairy C compiler",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "standalone executable; embedded SDK included; Go build environment excluded",
+      "bytes": 17681408,
+      "files": 1,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "MSVC 14.51.36231",
+      "usedBy": [
+        "fairy",
+        "rust",
+        "c"
+      ],
+      "scope": "active MSVC version tree; includes installed architecture variants",
+      "bytes": 2585203456,
+      "files": 1752,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Include",
+      "usedBy": [
+        "fairy",
+        "rust",
+        "c"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 361818190,
+      "files": 4771,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Lib",
+      "usedBy": [
+        "fairy",
+        "rust",
+        "c"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 805656732,
+      "files": 1454,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 bin",
+      "usedBy": [
+        "fairy",
+        "rust",
+        "c"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 248928991,
+      "files": 699,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Rust active toolchain",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active rustc sysroot, including installed libraries, tools and documentation",
+      "bytes": 1300174402,
+      "files": 52118,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Zig distribution",
+      "usedBy": [
+        "zig"
+      ],
+      "scope": "installed executable directory, including bundled libraries and documentation",
+      "bytes": 378717093,
+      "files": 19505,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    }
+  ],
+  "cases": [
+    {
+      "id": "fairy-dev-file-search-01",
+      "language": "fairy",
+      "profile": "dev",
+      "workload": "file-search",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "6fd47f53f60fa6083879b62ad7c38c0b4637379b6f18545d1822fab98d8e08c3",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 4070.312,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 114.59
+            }
+          ],
+          "buildWallMs": 4070.312,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "6fd47f53f60fa6083879b62ad7c38c0b4637379b6f18545d1822fab98d8e08c3",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 2057.292,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock unchanged)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 94.229
+            }
+          ],
+          "buildWallMs": 2057.292,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "950f4cdf566fd74b1b85fb4a8646efcfa54f416de1a84e286e712cd73c040faa",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 2612.227,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 170.549
+            }
+          ],
+          "buildWallMs": 2612.227,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "1cd7b5b5e1d8cd5353d83faeedecf0c1bd27c235fa0cf073a3908f95156a54aa",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 3048.98,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 90.229
+            }
+          ],
+          "buildWallMs": 3048.98,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "4f8eb9febd0bc344f4fbb67a7d09724131465a0275d3788eeb5c24c985180c0e",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 1931.543,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 89.74
+            }
+          ],
+          "buildWallMs": 1931.543,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "4f72b80267a9a1265020191adbc7a5a6d737ed0a3b45102726a92e3dbc3783a1",
+          "sourceBytes": 2460,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 2052.115,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 116.787
+            }
+          ],
+          "buildWallMs": 2052.115,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220160,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291285
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "afb1b77aa6a5bc115bb76fdf73d08c2eebbfb0da3fbc59ac7b0899a3f5ba4f33",
+          "sourceBytes": 2480,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 5685.619,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 103.954
+            }
+          ],
+          "buildWallMs": 5685.619,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 220672,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 291797
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "remove project build outputs; preserve experiment shared caches",
+          "commands": null,
+          "buildWallMs": 0,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 71125,
+            "retainedTempBytes": 0,
+            "files": 1,
+            "totalBytes": 71125
+          },
+          "reclaimedBytes": 220672
+        }
+      ]
+    },
+    {
+      "id": "rust-dev-file-search-01",
+      "language": "rust",
+      "profile": "dev",
+      "workload": "file-search",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "436e1860d1281245cc490f460711b50fbfdf88e8c211dbf827e5567450c6b7c3",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 2448.627,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.85s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 164.778
+            }
+          ],
+          "buildWallMs": 2448.627,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 1581225,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 59,
+            "totalBytes": 5308224
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "436e1860d1281245cc490f460711b50fbfdf88e8c211dbf827e5567450c6b7c3",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 920.005,
+              "log": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 135.967
+            }
+          ],
+          "buildWallMs": 920.005,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 1581225,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 59,
+            "totalBytes": 5308224
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "c89e226133ae0ec38829073ca48650234c5116e42a14a0d93a52bd33e82977b8",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1461.934,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.28s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 128.701
+            }
+          ],
+          "buildWallMs": 1461.934,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 3148158,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 100,
+            "totalBytes": 6875157
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "87ede92ade889915374c116d66d47a9467f1238d0bd0dfd0863aab3d02fa51c1",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1758.635,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.28s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 218.372
+            }
+          ],
+          "buildWallMs": 1758.635,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 3133866,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 100,
+            "totalBytes": 6860865
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "7e45d331eb06fc1bf4eb653e5aa2af1755302977e9ad88825f889019ab576de0",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 6050.913,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.31s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 503.035
+            }
+          ],
+          "buildWallMs": 6050.913,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 3133868,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 100,
+            "totalBytes": 6860867
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "28cc0fabdc3ad2d7f83b66e770b0f3771eb29c6bd1e9600e5bfd8b3e00c9ef71",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 2518.076,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.49s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 118.069
+            }
+          ],
+          "buildWallMs": 2518.076,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 3133870,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 100,
+            "totalBytes": 6860869
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "d608d343772eefe0bccb044e9607c1d77b189cc2ed2c2ecfdf6654a3b27c55f8",
+          "sourceBytes": 1470,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1855.415,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.62s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 66.004
+            }
+          ],
+          "buildWallMs": 1855.415,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 166400,
+            "separateDebugBytes": 3334144,
+            "incrementalBytes": 3142005,
+            "intermediateBytes": 169111,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 100,
+            "totalBytes": 6869004
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "cargo clean --offline; preserve isolated CARGO_HOME",
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "clean",
+                "--offline"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-file-search-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 330.636,
+              "log": "     Removed 97 files, 6.5MiB total\n"
+            }
+          ],
+          "buildWallMs": 330.636,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 3,
+            "totalBytes": 57344
+          },
+          "reclaimedBytes": 6811660
+        }
+      ]
+    },
+    {
+      "id": "rust-small-dev-file-search-01",
+      "language": "rust",
+      "profile": "small-dev",
+      "workload": "file-search",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "436e1860d1281245cc490f460711b50fbfdf88e8c211dbf827e5567450c6b7c3",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1295.409,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.16s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 91.683
+            }
+          ],
+          "buildWallMs": 1295.409,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "436e1860d1281245cc490f460711b50fbfdf88e8c211dbf827e5567450c6b7c3",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 327.932,
+              "log": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 57.357
+            }
+          ],
+          "buildWallMs": 327.932,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "c89e226133ae0ec38829073ca48650234c5116e42a14a0d93a52bd33e82977b8",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1281.733,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.08s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 105.813
+            }
+          ],
+          "buildWallMs": 1281.733,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "87ede92ade889915374c116d66d47a9467f1238d0bd0dfd0863aab3d02fa51c1",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1368.057,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.18s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 86.945
+            }
+          ],
+          "buildWallMs": 1368.057,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "7e45d331eb06fc1bf4eb653e5aa2af1755302977e9ad88825f889019ab576de0",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1202.433,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.02s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 115.889
+            }
+          ],
+          "buildWallMs": 1202.433,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "28cc0fabdc3ad2d7f83b66e770b0f3771eb29c6bd1e9600e5bfd8b3e00c9ef71",
+          "sourceBytes": 1449,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1790.932,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.53s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 155.828
+            }
+          ],
+          "buildWallMs": 1790.932,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "d608d343772eefe0bccb044e9607c1d77b189cc2ed2c2ecfdf6654a3b27c55f8",
+          "sourceBytes": 1470,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 2703.805,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-file-search-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.28s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-file-search-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 56.071
+            }
+          ],
+          "buildWallMs": 2703.805,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 162816,
+            "separateDebugBytes": 2727936,
+            "incrementalBytes": 0,
+            "intermediateBytes": 165557,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 18,
+            "totalBytes": 3113653
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "cargo clean --offline; preserve isolated CARGO_HOME",
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "clean",
+                "--offline"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-file-search-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 214.356,
+              "log": "     Removed 15 files, 2.9MiB total\n"
+            }
+          ],
+          "buildWallMs": 214.356,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 57344,
+            "retainedTempBytes": 0,
+            "files": 3,
+            "totalBytes": 57344
+          },
+          "reclaimedBytes": 3056309
+        }
+      ]
+    },
+    {
+      "id": "c-dev-file-search-01",
+      "language": "c",
+      "profile": "dev",
+      "workload": "file-search",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "b7d4042b210f1aab9b3ec9f62fef8850b3bca2d31c57cb98e3cc7b9da2073277",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 2423.601,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 119.419
+            }
+          ],
+          "buildWallMs": 2423.601,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 614400,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 640007
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "b7d4042b210f1aab9b3ec9f62fef8850b3bca2d31c57cb98e3cc7b9da2073277",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 542.103,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 53.615
+            }
+          ],
+          "buildWallMs": 542.103,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672775
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "9d6b86df3bb737cc896685ea05a3f4547d60c84c22e1bd1136f87b820c85bb36",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 434.916,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 45.631
+            }
+          ],
+          "buildWallMs": 434.916,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672775
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "b041836ba88165b7aa5f0cb36c495181d71e25c490a00aeb09d236085883f2fe",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 616.338,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 71.316
+            }
+          ],
+          "buildWallMs": 616.338,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672775
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "452809d1fd17e1963c69f4e31d2c9c34c2046d49e8c0b19e1db59918418ccf3b",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 583.671,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 103.123
+            }
+          ],
+          "buildWallMs": 583.671,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672775
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "5d08dfe7e2bbd46f87070b9fbfaf2b120955c4105c880cb260f42b754818fcd2",
+          "sourceBytes": 1337,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 621.937,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 75.706
+            }
+          ],
+          "buildWallMs": 621.937,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9735,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672775
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "74b1be583f4e1147f9172f5e17ad5862430a1e87616bbae0c9e5801acd9e632d",
+          "sourceBytes": 1367,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+                "/nologo",
+                "/std:c11",
+                "/MD",
+                "/Fo$RUN\\cases\\c-dev-file-search-01\\project\\build\\",
+                "/Fe$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "/Od",
+                "/Zi",
+                "/Fd$RUN\\cases\\c-dev-file-search-01\\project\\build\\compile.pdb",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\m000.c",
+                "$RUN\\cases\\c-dev-file-search-01\\project\\src\\main.c",
+                "/link",
+                "/INCREMENTAL:NO",
+                "/DEBUG",
+                "/PDB:$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.pdb"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 713.204,
+              "log": "m000.c\r\nmain.c\r\nGenerating Code...\r\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\c-dev-file-search-01\\project\\build\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "PATH=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64;C:\\Program Files\\Go\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\.codex\\tmp\\arg0-windows\\codex-arg0phGMa7;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\libheif\\libheif\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\jxrlib\\jxrlib\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\poppler\\Library\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\override;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\;C:\\Program Files\\GitHub CLI\\;C:\\Program Files\\nodejs\\;C:\\Program Files (x86)\\cloudflared\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\KeePassXC\\;C:\\Program Files\\Go\\bin;$HOME\\.grok\\bin;$HOME\\.local\\bin;$HOME\\AppData\\Local\\hermes\\bin;$HOME\\.cargo\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell;$HOME\\AppData\\Local\\Microsoft\\WindowsApps;$HOME\\AppData\\Local\\Programs\\Zed\\bin;$HOME\\AppData\\Local\\Python\\bin;$HOME\\.deno\\bin;$HOME\\.bun\\bin;$HOME\\go\\bin;$HOME\\AppData\\Roaming\\npm;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\pnpm.pnpm_Microsoft.Winget.Source_8wekyb3d8bbwe;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin;$HOME\\AppData\\Local\\Microsoft\\WinGet\\Links;$HOME\\AppData\\Local\\Coolify;$HOME\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;$HOME\\AppData\\Local\\Programs\\orca\\resources\\bin;$HOME\\AppData\\Local\\bin;$HOME\\go\\bin;$HOME\\AppData\\Local\\Rodisoft\\BuildTools\\StrawberryPerl-5.42.3.1\\perl\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin;$HOME\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\git\\cmd;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\ce4759538b7f2f1a;$HOME\\AppData\\Local\\OpenAI\\Codex\\bin\\896a0166b774037a",
+                "INCLUDE=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\include;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\ucrt;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\shared;C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um",
+                "LIB=C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\lib\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\ucrt\\x64;C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.26100.0\\um\\x64",
+                "LOCALAPPDATA=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\c-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\c-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 181.432
+            }
+          ],
+          "buildWallMs": 713.204,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 15872,
+            "separateDebugBytes": 647168,
+            "incrementalBytes": 0,
+            "intermediateBytes": 9773,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 5,
+            "totalBytes": 672813
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "remove project build outputs; preserve experiment shared caches",
+          "commands": null,
+          "buildWallMs": 0,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 0,
+            "retainedTempBytes": 0,
+            "files": 0,
+            "totalBytes": 0
+          },
+          "reclaimedBytes": 672813
+        }
+      ]
+    },
+    {
+      "id": "zig-dev-file-search-01",
+      "language": "zig",
+      "profile": "dev",
+      "workload": "file-search",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "47108b29176cdd95990ab1a8c85204dac698cb594c398dcdde9d3579f5982e2d",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 545327.034
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 37.178
+            }
+          ],
+          "buildWallMs": 545327.034,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 11870208,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 19664193,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1709,
+            "totalBytes": 122948318
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "47108b29176cdd95990ab1a8c85204dac698cb594c398dcdde9d3579f5982e2d",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 219.515
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 19.366
+            }
+          ],
+          "buildWallMs": 219.515,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223429\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 11870208,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 19664193,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1709,
+            "totalBytes": 122948318
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "a94790c325d3f2b492237a73d43e242362b7ab2db5fd57866bd30980d8fc5fc6",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 7935.994
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 73.721
+            }
+          ],
+          "buildWallMs": 7935.994,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223430\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 15433728,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 26844702,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1712,
+            "totalBytes": 133692347
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "fd451137a1633f8764d1dcfc80847ee6ea2c4c72780198954c4fc8309407e7fb",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 12728.142
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 116.627
+            }
+          ],
+          "buildWallMs": 12728.142,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223431\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 18997248,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 34025198,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1715,
+            "totalBytes": 144436363
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "413516cb3ca6f27754c59b4557752bf6711f935423f71b7e5be6d12a220a410a",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 11604.733
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 62.807
+            }
+          ],
+          "buildWallMs": 11604.733,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223432\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 22560768,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 41205694,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1718,
+            "totalBytes": 155180379
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "9e1069da21609c4f6603453bbcc9778d0f0c481d2e9cd0306ccfcc8c547b32b3",
+          "sourceBytes": 2049,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 10434.074
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 56.12
+            }
+          ],
+          "buildWallMs": 10434.074,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223433\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 26124288,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 48386190,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1721,
+            "totalBytes": 165924395
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "b62b2eceedd49729b0935f8f6d0347fdb2b207b8408efb213f77980372b940e6",
+          "sourceBytes": 2070,
+          "sourceFiles": 3,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\toolchains\\zig-x86_64-windows-0.17.0\\zig.exe",
+                "build",
+                "-Doptimize=Debug",
+                "--cache-dir",
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 12355.397
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\zig-dev-file-search-01\\project\\zig-out\\bin\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\zig-dev-file-search-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\zig-dev-file-search-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "ZIG_GLOBAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\state\\shared\\zig",
+                "ZIG_LOCAL_CACHE_DIR=$RUN\\cases\\zig-dev-file-search-01\\project\\.zig-cache"
+              ],
+              "exitCode": 0,
+              "wallMs": 114.045
+            }
+          ],
+          "buildWallMs": 12355.397,
+          "expectedStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "actualStdout": "lines=55671 matches=33403 checksum=223434\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 2125824,
+            "separateDebugBytes": 29687808,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 55566918,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1724,
+            "totalBytes": 176668643
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "remove project build outputs; preserve experiment shared caches",
+          "commands": null,
+          "buildWallMs": 0,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 89288093,
+            "retainedTempBytes": 0,
+            "files": 1691,
+            "totalBytes": 89288093
+          },
+          "reclaimedBytes": 87380550
+        }
+      ]
+    }
+  ]
+}

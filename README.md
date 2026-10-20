@@ -105,6 +105,9 @@ Rust, and C. Run configuration: commit `ec446d2d`, Windows/amd64, 20 source edit
 [Full footprint SVG](docs/benchmarks/latest/footprint.svg) ·
 [Download HTML report](docs/benchmarks/latest/report.html)
 
+[File-search CLI benchmark](docs/benchmarks/file-search/README.md): buffered file I/O with the same
+matching rules in all four languages, including Rust's default and `small-dev` profiles.
+
 Download the HTML report and open it locally; GitHub's file view does not run it.
 
 ## Design anchors

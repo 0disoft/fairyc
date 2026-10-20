@@ -11,6 +11,10 @@ inspecting build workflow cost; these synthetic workloads do not establish a uni
 
 [English](latest/report.html) · [한국어](latest/report.ko.html) · [中文](latest/report.zh.html) · [Español](latest/report.es.html) · [Français](latest/report.fr.html) · [हिन्दी](latest/report.hi.html)
 
+The [file-search CLI snapshot](file-search/README.md) adds buffered file I/O with the same
+matching rules in all four languages. Its reports and receipt are separate from the original
+tokenizer and many-module snapshot below.
+
 - [Development summary SVG](latest/summary.svg) and [PNG](latest/summary.png): `dev` and Rust
   `small-dev` for `many-modules`
 - [Full footprint SVG](latest/footprint.svg) and [PNG](latest/footprint.png)
@@ -40,7 +44,7 @@ go run ./tools/dev/fairyc-bench run --output .cache/bench-smoke --workloads toke
 For an optional five-edit file-I/O run against the default language set:
 
 ```text
-go run ./tools/dev/fairyc-bench run --output .cache/bench-file-search --workloads file-search --profiles dev --edits 5
+go run ./tools/dev/fairyc-bench run --output .cache/bench-file-search --workloads file-search --profiles dev --edits 5 --timeout 20m
 ```
 
 A run does not render the report. It writes `receipt.json` and the case workspaces, plus the built

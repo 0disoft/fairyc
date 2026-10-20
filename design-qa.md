@@ -54,3 +54,12 @@ final result: passed
 - Screenshots: `.cache/bench-design-qa/pinned-columns.png` and `.cache/bench-design-qa/pinned-columns-ko.png` at the same desktop viewport used above.
 - Re-rendered all six HTML reports from the unchanged receipt. Report package tests and diff checks passed; browser console had no warnings or errors.
 - final result: passed
+
+## File-search snapshot (2026-10-21)
+
+- New receipt: `docs/benchmarks/file-search/receipt.json`, clean source commit `3f2e1125`, Windows/amd64, 1 MiB corpus, five edits and one sequence for each of five configurations.
+- Fairy C, Rust dev, Rust small-dev, C and Zig all passed, including 35 verified program executions and the public-signature edit. The earlier Zig 10-minute cold-build timeout is preserved in `timeout-10m.receipt.json`; the successful run allows 20 minutes per command.
+- All six localized HTML/SVG/PNG report sets rendered successfully. Browser screenshot: `.cache/bench-design-qa/file-search-summary-ko.png` at the desktop viewport above.
+- Korean Summary shows five measured configurations and the correct file-search label, without an unrelated helper-module count. Measurements contains five rows; Growth exports the localized `growth.ko.svg`; no browser warnings or errors observed.
+- Source package tests, glyph coverage, catalog checks and diff checks passed. No compiler-wide test or manual Actions benchmark run: compiler code and automatic benchmark scheduling are unchanged.
+- final result: passed
