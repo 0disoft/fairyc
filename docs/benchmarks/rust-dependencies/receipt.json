@@ -1,0 +1,1315 @@
+{
+  "schema": "fairyc.build-footprint/v1",
+  "started": "2026-10-20T17:55:09Z",
+  "finished": "2026-10-20T17:56:48Z",
+  "commit": "943628d163019d7b39450f3d896eef4346dccb9f",
+  "dirty": false,
+  "host": {
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logicalCpus": 12,
+    "runnerGoVersion": "go1.27.1"
+  },
+  "method": "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults. Rust dependency builds start with prefetched registry files and empty build outputs; network preparation is outside build timing. Retained registry files are included in shared cache.",
+  "settings": {
+    "languages": [
+      "rust"
+    ],
+    "profiles": [
+      "dev",
+      "small-dev"
+    ],
+    "workloads": [
+      "rust-dependencies"
+    ],
+    "edits": 5,
+    "modules": 16,
+    "repetitions": 1,
+    "commandTimeout": "10m0s"
+  },
+  "toolchains": [
+    {
+      "language": "rust",
+      "version": "cargo 1.96.1 (356927216 2026-06-26)",
+      "executable": "cargo.exe",
+      "executableSha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "executableBytes": 12814336,
+      "backend": "rustc 1.96.1 (31fca3adb 2026-06-26)\nbinary: rustc\ncommit-hash: 31fca3adb283cc9dfd56b49cdee9a96eb9c96ffd\ncommit-date: 2026-06-26\nhost: x86_64-pc-windows-msvc\nrelease: 1.96.1\nLLVM version: 22.1.2",
+      "status": "ready"
+    }
+  ],
+  "installations": [
+    {
+      "name": "Rust active toolchain",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active rustc sysroot, including installed libraries, tools and documentation",
+      "bytes": 1300174402,
+      "files": 52118,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "MSVC 14.51.36231",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active MSVC version tree; includes installed architecture variants",
+      "bytes": 2585203456,
+      "files": 1752,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Include",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 361818190,
+      "files": 4771,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Lib",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 805656732,
+      "files": 1454,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 bin",
+      "usedBy": [
+        "rust"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 248928991,
+      "files": 699,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    }
+  ],
+  "cases": [
+    {
+      "id": "rust-dev-rust-dependencies-01",
+      "language": "rust",
+      "profile": "dev",
+      "workload": "rust-dependencies",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "470ff41359cb1afd83b3ca6e06daf2aa977ee8cb51728529f8c826130eee4274",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "ad8cbacce6750494632de41b55aa4a8a7eb14964380cd1da0017aafeb8582c67",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 26615.468,
+              "log": "   Compiling proc-macro2 v1.0.107\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.27\n   Compiling windows-link v0.2.1\n   Compiling utf8parse v0.2.2\n   Compiling once_cell_polyfill v1.70.2\n   Compiling memchr v2.8.3\n   Compiling anstyle v1.0.14\n   Compiling serde_core v1.0.229\n   Compiling is_terminal_polyfill v1.70.2\n   Compiling zmij v1.0.23\n   Compiling colorchoice v1.0.5\n   Compiling windows-sys v0.61.2\n   Compiling anstyle-parse v1.0.0\n   Compiling strsim v0.11.1\n   Compiling clap_lex v1.1.1\n   Compiling serde v1.0.229\n   Compiling serde_json v1.0.154\n   Compiling regex-syntax v0.8.11\n   Compiling heck v0.5.0\n   Compiling aho-corasick v1.1.5\n   Compiling itoa v1.0.18\n   Compiling anstyle-query v1.1.5\n   Compiling anstyle-wincon v3.0.11\n   Compiling anstream v1.0.0\n   Compiling clap_builder v4.6.7\n   Compiling syn v3.0.9\n   Compiling regex-automata v0.4.18\n   Compiling regex v1.13.1\n   Compiling clap_derive v4.6.7\n   Compiling serde_derive v1.0.229\n   Compiling clap v4.6.7\n   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 26.47s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 61.201
+            }
+          ],
+          "buildWallMs": 26615.468,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 7651784,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1907,
+            "totalBytes": 290292834
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "ad8cbacce6750494632de41b55aa4a8a7eb14964380cd1da0017aafeb8582c67",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 289.945,
+              "log": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.20s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 44.41
+            }
+          ],
+          "buildWallMs": 289.945,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 7651784,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1907,
+            "totalBytes": 290292834
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "5d6308247f61b0371346e9ab3842eaf328c5bd0e6adcfeeaf1c3bfd64998c6b2",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1682.081,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.59s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 42.064
+            }
+          ],
+          "buildWallMs": 1682.081,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995629}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995629}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 15233234,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 2010,
+            "totalBytes": 297874284
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "5e2f73af2433250b141ba6874130b5fbceea3c9073bec0c78750f14b72b6b604",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1807.678,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.70s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 42.258
+            }
+          ],
+          "buildWallMs": 1807.678,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995630}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995630}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 15162901,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 2010,
+            "totalBytes": 297803951
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "a9bcfded28743f302d944d79804497cf32fdb42ec479c36880d6591a89c68285",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1743.658,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.63s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 42.528
+            }
+          ],
+          "buildWallMs": 1743.658,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995631}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995631}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 15162903,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 2010,
+            "totalBytes": 297803953
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "876d7bf56c311deb40f1d706988c33e0d1fa2adfd7c31696431e5961925e4910",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1651.5,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.54s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 36.887
+            }
+          ],
+          "buildWallMs": 1651.5,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995632}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995632}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 15162902,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 2010,
+            "totalBytes": 297803952
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "e8fdde3e66c00d3688fe31ae810b2887c0185596c26365945c5af73b5fed6393",
+          "sourceBytes": 8918,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 1812.376,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.70s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 91.421
+            }
+          ],
+          "buildWallMs": 1812.376,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995633}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995633}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 5303808,
+            "separateDebugBytes": 81100800,
+            "incrementalBytes": 15177722,
+            "intermediateBytes": 154941333,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 2010,
+            "totalBytes": 297818772
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "cargo clean --offline; preserve isolated CARGO_HOME",
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "clean",
+                "--offline"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target"
+              ],
+              "exitCode": 0,
+              "wallMs": 595.652,
+              "log": "     Removed 541 files, 244.6MiB total\n"
+            }
+          ],
+          "buildWallMs": 595.652,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1469,
+            "totalBytes": 41295109
+          },
+          "reclaimedBytes": 256523663
+        }
+      ],
+      "preparation": [
+        {
+          "argv": [
+            "$HOME\\.cargo\\bin\\cargo.exe",
+            "fetch",
+            "--locked",
+            "--color",
+            "never"
+          ],
+          "environmentOverrides": [
+            "LOCALAPPDATA=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+            "XDG_CACHE_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\shared",
+            "TMPDIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+            "TMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+            "TEMP=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\tmp",
+            "CARGO_HOME=$RUN\\cases\\rust-dev-rust-dependencies-01\\state\\cargo",
+            "CARGO_NET_OFFLINE=true",
+            "CARGO_TERM_COLOR=never",
+            "NO_COLOR=1",
+            "CARGO_TARGET_DIR=$RUN\\cases\\rust-dev-rust-dependencies-01\\project\\target",
+            "CARGO_NET_OFFLINE=false"
+          ],
+          "exitCode": 0,
+          "wallMs": 6297.553,
+          "log": "    Updating crates.io index\n Downloading crates ...\n  Downloaded serde_derive v1.0.229\n  Downloaded is_terminal_polyfill v1.70.2\n  Downloaded itoa v1.0.18\n  Downloaded anstyle-query v1.1.5\n  Downloaded clap_lex v1.1.1\n  Downloaded strsim v0.11.1\n  Downloaded windows-link v0.2.1\n  Downloaded heck v0.5.0\n  Downloaded utf8parse v0.2.2\n  Downloaded anstyle-parse v1.0.0\n  Downloaded anstyle v1.0.14\n  Downloaded quote v1.0.47\n  Downloaded anstream v1.0.0\n  Downloaded proc-macro2 v1.0.107\n  Downloaded unicode-ident v1.0.27\n  Downloaded clap v4.6.7\n  Downloaded serde_core v1.0.229\n  Downloaded memchr v2.8.3\n  Downloaded serde_json v1.0.154\n  Downloaded clap_builder v4.6.7\n  Downloaded serde v1.0.229\n  Downloaded clap_derive v4.6.7\n  Downloaded aho-corasick v1.1.5\n  Downloaded regex v1.13.1\n  Downloaded zmij v1.0.23\n  Downloaded once_cell_polyfill v1.70.2\n  Downloaded anstyle-wincon v3.0.11\n  Downloaded colorchoice v1.0.5\n  Downloaded syn v3.0.9\n  Downloaded regex-syntax v0.8.11\n  Downloaded regex-automata v0.4.18\n  Downloaded windows-sys v0.61.2\n"
+        }
+      ],
+      "dependencyLock": "# This file is automatically @generated by Cargo.\n# It is not intended for manual editing.\nversion = 4\n\n[[package]]\nname = \"aho-corasick\"\nversion = \"1.1.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba\"\ndependencies = [\n \"memchr\",\n]\n\n[[package]]\nname = \"anstream\"\nversion = \"1.0.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"824a212faf96e9acacdbd09febd34438f8f711fb84e09a8916013cd7815ca28d\"\ndependencies = [\n \"anstyle\",\n \"anstyle-parse\",\n \"anstyle-query\",\n \"anstyle-wincon\",\n \"colorchoice\",\n \"is_terminal_polyfill\",\n \"utf8parse\",\n]\n\n[[package]]\nname = \"anstyle\"\nversion = \"1.0.14\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000\"\n\n[[package]]\nname = \"anstyle-parse\"\nversion = \"1.0.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"52ce7f38b242319f7cabaa6813055467063ecdc9d355bbb4ce0c68908cd8130e\"\ndependencies = [\n \"utf8parse\",\n]\n\n[[package]]\nname = \"anstyle-query\"\nversion = \"1.1.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc\"\ndependencies = [\n \"windows-sys\",\n]\n\n[[package]]\nname = \"anstyle-wincon\"\nversion = \"3.0.11\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d\"\ndependencies = [\n \"anstyle\",\n \"once_cell_polyfill\",\n \"windows-sys\",\n]\n\n[[package]]\nname = \"bench\"\nversion = \"0.1.0\"\ndependencies = [\n \"clap\",\n \"regex\",\n \"serde\",\n \"serde_json\",\n]\n\n[[package]]\nname = \"clap\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946\"\ndependencies = [\n \"clap_builder\",\n \"clap_derive\",\n]\n\n[[package]]\nname = \"clap_builder\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d\"\ndependencies = [\n \"anstream\",\n \"anstyle\",\n \"clap_lex\",\n \"strsim\",\n]\n\n[[package]]\nname = \"clap_derive\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f9c751b79415d4e559e3d1fcf128e09e720eb673a06d26cf6f392d37d75b66e0\"\ndependencies = [\n \"heck\",\n \"proc-macro2\",\n \"quote\",\n \"syn\",\n]\n\n[[package]]\nname = \"clap_lex\"\nversion = \"1.1.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486\"\n\n[[package]]\nname = \"colorchoice\"\nversion = \"1.0.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570\"\n\n[[package]]\nname = \"heck\"\nversion = \"0.5.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea\"\n\n[[package]]\nname = \"is_terminal_polyfill\"\nversion = \"1.70.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695\"\n\n[[package]]\nname = \"itoa\"\nversion = \"1.0.18\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682\"\n\n[[package]]\nname = \"memchr\"\nversion = \"2.8.3\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98\"\n\n[[package]]\nname = \"once_cell_polyfill\"\nversion = \"1.70.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe\"\n\n[[package]]\nname = \"proc-macro2\"\nversion = \"1.0.107\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9\"\ndependencies = [\n \"unicode-ident\",\n]\n\n[[package]]\nname = \"quote\"\nversion = \"1.0.47\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001\"\ndependencies = [\n \"proc-macro2\",\n]\n\n[[package]]\nname = \"regex\"\nversion = \"1.13.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d\"\ndependencies = [\n \"aho-corasick\",\n \"memchr\",\n \"regex-automata\",\n \"regex-syntax\",\n]\n\n[[package]]\nname = \"regex-automata\"\nversion = \"0.4.18\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2\"\ndependencies = [\n \"aho-corasick\",\n \"memchr\",\n \"regex-syntax\",\n]\n\n[[package]]\nname = \"regex-syntax\"\nversion = \"0.8.11\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4\"\n\n[[package]]\nname = \"serde\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba\"\ndependencies = [\n \"serde_core\",\n \"serde_derive\",\n]\n\n[[package]]\nname = \"serde_core\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48\"\ndependencies = [\n \"serde_derive\",\n]\n\n[[package]]\nname = \"serde_derive\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348\"\ndependencies = [\n \"proc-macro2\",\n \"quote\",\n \"syn\",\n]\n\n[[package]]\nname = \"serde_json\"\nversion = \"1.0.154\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6\"\ndependencies = [\n \"itoa\",\n \"memchr\",\n \"serde\",\n \"serde_core\",\n \"zmij\",\n]\n\n[[package]]\nname = \"strsim\"\nversion = \"0.11.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f\"\n\n[[package]]\nname = \"syn\"\nversion = \"3.0.9\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b\"\ndependencies = [\n \"proc-macro2\",\n \"quote\",\n \"unicode-ident\",\n]\n\n[[package]]\nname = \"unicode-ident\"\nversion = \"1.0.27\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563\"\n\n[[package]]\nname = \"utf8parse\"\nversion = \"0.2.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821\"\n\n[[package]]\nname = \"windows-link\"\nversion = \"0.2.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5\"\n\n[[package]]\nname = \"windows-sys\"\nversion = \"0.61.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc\"\ndependencies = [\n \"windows-link\",\n]\n\n[[package]]\nname = \"zmij\"\nversion = \"1.0.23\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b\"\n"
+    },
+    {
+      "id": "rust-small-dev-rust-dependencies-01",
+      "language": "rust",
+      "profile": "small-dev",
+      "workload": "rust-dependencies",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "470ff41359cb1afd83b3ca6e06daf2aa977ee8cb51728529f8c826130eee4274",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "ad8cbacce6750494632de41b55aa4a8a7eb14964380cd1da0017aafeb8582c67",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 28896.71,
+              "log": "   Compiling proc-macro2 v1.0.107\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.27\n   Compiling windows-link v0.2.1\n   Compiling once_cell_polyfill v1.70.2\n   Compiling anstyle v1.0.14\n   Compiling memchr v2.8.3\n   Compiling utf8parse v0.2.2\n   Compiling serde_core v1.0.229\n   Compiling zmij v1.0.23\n   Compiling is_terminal_polyfill v1.70.2\n   Compiling colorchoice v1.0.5\n   Compiling windows-sys v0.61.2\n   Compiling anstyle-parse v1.0.0\n   Compiling serde v1.0.229\n   Compiling clap_lex v1.1.1\n   Compiling regex-syntax v0.8.11\n   Compiling heck v0.5.0\n   Compiling serde_json v1.0.154\n   Compiling strsim v0.11.1\n   Compiling itoa v1.0.18\n   Compiling aho-corasick v1.1.5\n   Compiling anstyle-wincon v3.0.11\n   Compiling anstyle-query v1.1.5\n   Compiling anstream v1.0.0\n   Compiling clap_builder v4.6.7\n   Compiling syn v3.0.9\n   Compiling regex-automata v0.4.18\n   Compiling regex v1.13.1\n   Compiling clap_derive v4.6.7\n   Compiling serde_derive v1.0.229\n   Compiling clap v4.6.7\n   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 28.75s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 63.114
+            }
+          ],
+          "buildWallMs": 28896.71,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "ad8cbacce6750494632de41b55aa4a8a7eb14964380cd1da0017aafeb8582c67",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 409.947,
+              "log": "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 32.904
+            }
+          ],
+          "buildWallMs": 409.947,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995628}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "5d6308247f61b0371346e9ab3842eaf328c5bd0e6adcfeeaf1c3bfd64998c6b2",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1860.109,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.72s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 59.685
+            }
+          ],
+          "buildWallMs": 1860.109,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995629}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995629}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "5e2f73af2433250b141ba6874130b5fbceea3c9073bec0c78750f14b72b6b604",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 2279.736,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.13s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 58.127
+            }
+          ],
+          "buildWallMs": 2279.736,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995630}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995630}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "a9bcfded28743f302d944d79804497cf32fdb42ec479c36880d6591a89c68285",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 2386.343,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.20s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 79.269
+            }
+          ],
+          "buildWallMs": 2386.343,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995631}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995631}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "876d7bf56c311deb40f1d706988c33e0d1fa2adfd7c31696431e5961925e4910",
+          "sourceBytes": 8897,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 2000.829,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.85s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 42.912
+            }
+          ],
+          "buildWallMs": 2000.829,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995632}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995632}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "e8fdde3e66c00d3688fe31ae810b2887c0185596c26365945c5af73b5fed6393",
+          "sourceBytes": 8918,
+          "sourceFiles": 4,
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "build",
+                "--offline",
+                "--color",
+                "never",
+                "--locked"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 1504.777,
+              "log": "   Compiling bench v0.1.0 ($RUN\\cases\\rust-small-dev-rust-dependencies-01\\project)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.40s\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target\\debug\\bench.exe",
+                "../input.txt"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 51.352
+            }
+          ],
+          "buildWallMs": 1504.777,
+          "expectedStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995633}\n",
+          "actualStdout": "{\"lines\":4096,\"matches\":1366,\"checksum\":995633}\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 4711936,
+            "separateDebugBytes": 51511296,
+            "incrementalBytes": 0,
+            "intermediateBytes": 112746556,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1804,
+            "totalBytes": 210264897
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 5,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "cargo clean --offline; preserve isolated CARGO_HOME",
+          "commands": [
+            {
+              "argv": [
+                "$HOME\\.cargo\\bin\\cargo.exe",
+                "clean",
+                "--offline"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1",
+                "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+                "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+                "CARGO_PROFILE_DEV_INCREMENTAL=false"
+              ],
+              "exitCode": 0,
+              "wallMs": 385.036,
+              "log": "     Removed 335 files, 161.1MiB total\n"
+            }
+          ],
+          "buildWallMs": 385.036,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 41295109,
+            "retainedTempBytes": 0,
+            "files": 1469,
+            "totalBytes": 41295109
+          },
+          "reclaimedBytes": 168969788
+        }
+      ],
+      "preparation": [
+        {
+          "argv": [
+            "$HOME\\.cargo\\bin\\cargo.exe",
+            "fetch",
+            "--locked",
+            "--color",
+            "never"
+          ],
+          "environmentOverrides": [
+            "LOCALAPPDATA=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+            "XDG_CACHE_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\shared",
+            "TMPDIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+            "TMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+            "TEMP=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\tmp",
+            "CARGO_HOME=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\state\\cargo",
+            "CARGO_NET_OFFLINE=true",
+            "CARGO_TERM_COLOR=never",
+            "NO_COLOR=1",
+            "CARGO_TARGET_DIR=$RUN\\cases\\rust-small-dev-rust-dependencies-01\\project\\target",
+            "CARGO_PROFILE_DEV_DEBUG=line-tables-only",
+            "CARGO_PROFILE_DEV_INCREMENTAL=false",
+            "CARGO_NET_OFFLINE=false"
+          ],
+          "exitCode": 0,
+          "wallMs": 11162.152,
+          "log": "    Updating crates.io index\n Downloading crates ...\n  Downloaded itoa v1.0.18\n  Downloaded once_cell_polyfill v1.70.2\n  Downloaded anstyle-query v1.1.5\n  Downloaded colorchoice v1.0.5\n  Downloaded strsim v0.11.1\n  Downloaded windows-link v0.2.1\n  Downloaded quote v1.0.47\n  Downloaded anstyle-parse v1.0.0\n  Downloaded anstyle v1.0.14\n  Downloaded anstream v1.0.0\n  Downloaded clap_derive v4.6.7\n  Downloaded clap v4.6.7\n  Downloaded serde v1.0.229\n  Downloaded memchr v2.8.3\n  Downloaded proc-macro2 v1.0.107\n  Downloaded serde_derive v1.0.229\n  Downloaded regex v1.13.1\n  Downloaded clap_builder v4.6.7\n  Downloaded aho-corasick v1.1.5\n  Downloaded serde_core v1.0.229\n  Downloaded serde_json v1.0.154\n  Downloaded unicode-ident v1.0.27\n  Downloaded zmij v1.0.23\n  Downloaded anstyle-wincon v3.0.11\n  Downloaded is_terminal_polyfill v1.70.2\n  Downloaded syn v3.0.9\n  Downloaded utf8parse v0.2.2\n  Downloaded regex-syntax v0.8.11\n  Downloaded clap_lex v1.1.1\n  Downloaded heck v0.5.0\n  Downloaded regex-automata v0.4.18\n  Downloaded windows-sys v0.61.2\n"
+        }
+      ],
+      "dependencyLock": "# This file is automatically @generated by Cargo.\n# It is not intended for manual editing.\nversion = 4\n\n[[package]]\nname = \"aho-corasick\"\nversion = \"1.1.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba\"\ndependencies = [\n \"memchr\",\n]\n\n[[package]]\nname = \"anstream\"\nversion = \"1.0.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"824a212faf96e9acacdbd09febd34438f8f711fb84e09a8916013cd7815ca28d\"\ndependencies = [\n \"anstyle\",\n \"anstyle-parse\",\n \"anstyle-query\",\n \"anstyle-wincon\",\n \"colorchoice\",\n \"is_terminal_polyfill\",\n \"utf8parse\",\n]\n\n[[package]]\nname = \"anstyle\"\nversion = \"1.0.14\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000\"\n\n[[package]]\nname = \"anstyle-parse\"\nversion = \"1.0.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"52ce7f38b242319f7cabaa6813055467063ecdc9d355bbb4ce0c68908cd8130e\"\ndependencies = [\n \"utf8parse\",\n]\n\n[[package]]\nname = \"anstyle-query\"\nversion = \"1.1.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc\"\ndependencies = [\n \"windows-sys\",\n]\n\n[[package]]\nname = \"anstyle-wincon\"\nversion = \"3.0.11\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d\"\ndependencies = [\n \"anstyle\",\n \"once_cell_polyfill\",\n \"windows-sys\",\n]\n\n[[package]]\nname = \"bench\"\nversion = \"0.1.0\"\ndependencies = [\n \"clap\",\n \"regex\",\n \"serde\",\n \"serde_json\",\n]\n\n[[package]]\nname = \"clap\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946\"\ndependencies = [\n \"clap_builder\",\n \"clap_derive\",\n]\n\n[[package]]\nname = \"clap_builder\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d\"\ndependencies = [\n \"anstream\",\n \"anstyle\",\n \"clap_lex\",\n \"strsim\",\n]\n\n[[package]]\nname = \"clap_derive\"\nversion = \"4.6.7\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f9c751b79415d4e559e3d1fcf128e09e720eb673a06d26cf6f392d37d75b66e0\"\ndependencies = [\n \"heck\",\n \"proc-macro2\",\n \"quote\",\n \"syn\",\n]\n\n[[package]]\nname = \"clap_lex\"\nversion = \"1.1.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486\"\n\n[[package]]\nname = \"colorchoice\"\nversion = \"1.0.5\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570\"\n\n[[package]]\nname = \"heck\"\nversion = \"0.5.0\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea\"\n\n[[package]]\nname = \"is_terminal_polyfill\"\nversion = \"1.70.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695\"\n\n[[package]]\nname = \"itoa\"\nversion = \"1.0.18\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682\"\n\n[[package]]\nname = \"memchr\"\nversion = \"2.8.3\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98\"\n\n[[package]]\nname = \"once_cell_polyfill\"\nversion = \"1.70.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe\"\n\n[[package]]\nname = \"proc-macro2\"\nversion = \"1.0.107\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9\"\ndependencies = [\n \"unicode-ident\",\n]\n\n[[package]]\nname = \"quote\"\nversion = \"1.0.47\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001\"\ndependencies = [\n \"proc-macro2\",\n]\n\n[[package]]\nname = \"regex\"\nversion = \"1.13.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d\"\ndependencies = [\n \"aho-corasick\",\n \"memchr\",\n \"regex-automata\",\n \"regex-syntax\",\n]\n\n[[package]]\nname = \"regex-automata\"\nversion = \"0.4.18\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2\"\ndependencies = [\n \"aho-corasick\",\n \"memchr\",\n \"regex-syntax\",\n]\n\n[[package]]\nname = \"regex-syntax\"\nversion = \"0.8.11\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4\"\n\n[[package]]\nname = \"serde\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba\"\ndependencies = [\n \"serde_core\",\n \"serde_derive\",\n]\n\n[[package]]\nname = \"serde_core\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48\"\ndependencies = [\n \"serde_derive\",\n]\n\n[[package]]\nname = \"serde_derive\"\nversion = \"1.0.229\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348\"\ndependencies = [\n \"proc-macro2\",\n \"quote\",\n \"syn\",\n]\n\n[[package]]\nname = \"serde_json\"\nversion = \"1.0.154\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6\"\ndependencies = [\n \"itoa\",\n \"memchr\",\n \"serde\",\n \"serde_core\",\n \"zmij\",\n]\n\n[[package]]\nname = \"strsim\"\nversion = \"0.11.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f\"\n\n[[package]]\nname = \"syn\"\nversion = \"3.0.9\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b\"\ndependencies = [\n \"proc-macro2\",\n \"quote\",\n \"unicode-ident\",\n]\n\n[[package]]\nname = \"unicode-ident\"\nversion = \"1.0.27\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563\"\n\n[[package]]\nname = \"utf8parse\"\nversion = \"0.2.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821\"\n\n[[package]]\nname = \"windows-link\"\nversion = \"0.2.1\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5\"\n\n[[package]]\nname = \"windows-sys\"\nversion = \"0.61.2\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc\"\ndependencies = [\n \"windows-link\",\n]\n\n[[package]]\nname = \"zmij\"\nversion = \"1.0.23\"\nsource = \"registry+https://github.com/rust-lang/crates.io-index\"\nchecksum = \"29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b\"\n"
+    }
+  ],
+  "preparation": [
+    {
+      "argv": [
+        "$HOME\\.cargo\\bin\\cargo.exe",
+        "generate-lockfile",
+        "--color",
+        "never"
+      ],
+      "environmentOverrides": [
+        "LOCALAPPDATA=$RUN\\preparation\\state\\shared",
+        "XDG_CACHE_HOME=$RUN\\preparation\\state\\shared",
+        "TMPDIR=$RUN\\preparation\\state\\tmp",
+        "TMP=$RUN\\preparation\\state\\tmp",
+        "TEMP=$RUN\\preparation\\state\\tmp",
+        "CARGO_HOME=$RUN\\preparation\\state\\cargo",
+        "CARGO_NET_OFFLINE=true",
+        "CARGO_TERM_COLOR=never",
+        "NO_COLOR=1",
+        "CARGO_TARGET_DIR=$RUN\\preparation\\project\\target",
+        "CARGO_NET_OFFLINE=false"
+      ],
+      "exitCode": 0,
+      "wallMs": 959.733,
+      "log": "    Updating crates.io index\n     Locking 32 packages to latest compatible versions\n"
+    }
+  ]
+}

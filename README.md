@@ -108,6 +108,12 @@ Rust, and C. Run configuration: commit `ec446d2d`, Windows/amd64, 20 source edit
 [File-search CLI benchmark](docs/benchmarks/file-search/README.md): buffered file I/O with the same
 matching rules in all four languages, including Rust's default and `small-dev` profiles.
 
+A Rust-only [dependency build snapshot](docs/benchmarks/rust-dependencies/README.md) measures a
+JSON-lines CLI using `clap` 4 derive, `serde` 1 derive, `serde_json` 1, and `regex` 1. It
+compares Rust `dev` and `small-dev` profiles and provides no cross-language ranking.
+
+![Rust dependency build footprint](docs/benchmarks/rust-dependencies/summary.svg)
+
 Download the HTML report and open it locally; GitHub's file view does not run it.
 
 ## Design anchors
