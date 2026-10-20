@@ -5,17 +5,18 @@ import "time"
 const receiptSchema = "fairyc.build-footprint/v1"
 
 type Options struct {
-	Output      string
-	Languages   []string
-	Profiles    []string
-	Workloads   []string
-	Edits       int
-	Modules     int
-	Repetitions int
-	Timeout     time.Duration
-	Fairy       string
-	Zig         string
-	CC          string
+	Output         string
+	Languages      []string
+	Profiles       []string
+	Workloads      []string
+	Edits          int
+	Modules        int
+	Repetitions    int
+	Timeout        time.Duration
+	Fairy          string
+	Zig            string
+	CC             string
+	dependencyLock string // Resolved once per run, reused across all profiles and repetitions.
 }
 
 type Receipt struct {
@@ -30,6 +31,7 @@ type Receipt struct {
 	Toolchains    []Toolchain    `json:"toolchains"`
 	Installations []Installation `json:"installations"`
 	Cases         []Case         `json:"cases"`
+	Preparation   []Command      `json:"preparation,omitempty"`
 }
 
 type Installation struct {
@@ -73,15 +75,17 @@ type Toolchain struct {
 }
 
 type Case struct {
-	ID         string   `json:"id"`
-	Language   string   `json:"language"`
-	Profile    string   `json:"profile"`
-	Workload   string   `json:"workload"`
-	Repetition int      `json:"repetition"`
-	Status     string   `json:"status"`
-	Reason     string   `json:"reason,omitempty"`
-	InputHash  string   `json:"inputSha256"`
-	Samples    []Sample `json:"samples"`
+	ID             string    `json:"id"`
+	Language       string    `json:"language"`
+	Profile        string    `json:"profile"`
+	Workload       string    `json:"workload"`
+	Repetition     int       `json:"repetition"`
+	Status         string    `json:"status"`
+	Reason         string    `json:"reason,omitempty"`
+	InputHash      string    `json:"inputSha256"`
+	Samples        []Sample  `json:"samples"`
+	Preparation    []Command `json:"preparation,omitempty"`
+	DependencyLock string    `json:"dependencyLock,omitempty"`
 }
 
 type Sample struct {

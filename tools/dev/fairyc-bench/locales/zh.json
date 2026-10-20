@@ -77,6 +77,8 @@
   "tokenizer": "分词器",
   "many-modules": "多模块",
   "file-search": "文件搜索",
+  "rust-dependencies": "Rust 依赖项",
+  "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.": "仅限 Rust 的依赖工作负载。下载会在计时前完成；保留的 Cargo 注册表文件计入共享缓存。",
   "dev": "开发",
   "release": "发布",
   "small-dev": "精简开发",

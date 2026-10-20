@@ -21,6 +21,9 @@ func run(ctx context.Context, o Options) error {
 	if runtime.GOOS != "windows" && runtime.GOOS != "linux" {
 		return fmt.Errorf("native benchmark supports Windows and Linux, got %s", runtime.GOOS)
 	}
+	if err := validateWorkloadSelection(o.Languages, o.Workloads); err != nil {
+		return err
+	}
 	var err error
 	o.Output, err = filepath.Abs(o.Output)
 	if err != nil {
@@ -36,6 +39,14 @@ func run(ctx context.Context, o Options) error {
 	installed := map[string]int{}
 	for _, language := range o.Languages {
 		a := discover(ctx, o, language)
+		if a.toolchain.Status == "ready" && o.Workloads[0] == "rust-dependencies" {
+			o.dependencyLock, r.Preparation, err = resolveDependencyLock(ctx, o, a)
+			if err != nil {
+				a.toolchain.Status = "unavailable"
+				a.toolchain.Reason = err.Error()
+			}
+			r.Method += " Rust dependency builds start with prefetched registry files and empty build outputs; network preparation is outside build timing. Retained registry files are included in shared cache."
+		}
 		r.Toolchains = append(r.Toolchains, a.toolchain)
 		if a.toolchain.Status == "ready" {
 			addInstallations(&r, a, installed)
@@ -48,6 +59,9 @@ func run(ctx context.Context, o Options) error {
 				input := workloadInput()
 				if workload == "file-search" {
 					input = searchInput()
+				}
+				if workload == "rust-dependencies" {
+					input = dependencyInput()
 				}
 				for repeat := 1; repeat <= o.Repetitions; repeat++ {
 					c := Case{ID: fmt.Sprintf("%s-%s-%s-%02d", language, profile, workload, repeat), Language: language, Profile: profile, Workload: workload, Repetition: repeat, Status: "passed", InputHash: digest(input)}
@@ -99,6 +113,11 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 	if err := os.WriteFile(filepath.Join(root, "input.txt"), input, 0o644); err != nil {
 		return err
 	}
+	if c.Workload == "rust-dependencies" {
+		if err := prepareDependencies(ctx, o, a, c, project, state); err != nil {
+			return err
+		}
+	}
 	modules := 1
 	if c.Workload == "many-modules" {
 		modules = o.Modules
@@ -122,6 +141,11 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 			files = searchSources(a.language, revision)
 			expected = searchReference(input, revision)
 		}
+		if c.Workload == "rust-dependencies" {
+			files = dependencySources(revision)
+			files["Cargo.lock"] = o.dependencyLock
+			expected = dependencyReference(input, revision)
+		}
 		if err := writeSources(project, files); err != nil {
 			return err
 		}
@@ -131,6 +155,9 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 		if err != nil {
 			return err
 		}
+		if c.Workload == "rust-dependencies" {
+			args = append(args, "--locked")
+		}
 		command, out, buildErr := execute(ctx, o.Timeout, project, env, nil, args...)
 		command.Log = out + command.Log
 		s.WallMS = command.WallMS
@@ -138,7 +165,7 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 		if buildErr == nil {
 			verifyArgs := []string{a.binary(project, c.Profile)}
 			var stdin = input
-			if c.Workload == "file-search" {
+			if c.Workload == "file-search" || c.Workload == "rust-dependencies" {
 				verifyArgs = append(verifyArgs, "../input.txt")
 				stdin = nil
 			}

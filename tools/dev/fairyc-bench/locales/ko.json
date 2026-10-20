@@ -77,6 +77,8 @@
   "tokenizer": "토크나이저",
   "many-modules": "다중 모듈",
   "file-search": "파일 검색",
+  "rust-dependencies": "Rust 의존성",
+  "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.": "Rust 전용 의존성 워크로드입니다. 다운로드는 시간 측정 전에 끝나며, 남아 있는 Cargo 레지스트리 파일은 공유 캐시에 포함됩니다.",
   "dev": "dev",
   "release": "release",
   "small-dev": "small-dev",

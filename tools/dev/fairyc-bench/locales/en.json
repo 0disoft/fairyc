@@ -77,6 +77,8 @@
   "tokenizer": "Tokenizer",
   "many-modules": "Many modules",
   "file-search": "File search",
+  "rust-dependencies": "Rust dependencies",
+  "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.": "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.",
   "dev": "dev",
   "release": "release",
   "small-dev": "small-dev",

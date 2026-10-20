@@ -2,10 +2,18 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
-var availableWorkloads = []string{"tokenizer", "many-modules", "file-search"}
+var availableWorkloads = []string{"tokenizer", "many-modules", "file-search", "rust-dependencies"}
+
+func validateWorkloadSelection(languages, workloads []string) error {
+	if slices.Contains(workloads, "rust-dependencies") && (len(workloads) != 1 || len(languages) != 1 || languages[0] != "rust") {
+		return fmt.Errorf("rust-dependencies must run separately with --languages rust --workloads rust-dependencies")
+	}
+	return nil
+}
 
 func workloadInput() []byte {
 	return []byte(strings.Repeat("let count_01 = 123 + alpha;\nif (count_01 > 7) { beta_2 = count_01 - 1; }\n", 256))

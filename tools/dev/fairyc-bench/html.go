@@ -22,6 +22,7 @@ type reportView struct {
 	SummaryRows       []summaryRow
 	HasTemp           bool
 	ShowModules       bool
+	HasDependencies   bool
 	Receipt           Receipt
 	Locale            string
 	Locales           []reportLocale
@@ -47,6 +48,7 @@ func renderHTML(r Receipt, path, locale string, locales []string) error {
 		v.Locales = append(v.Locales, reportLocale{code, localeNames[code], artifactName("report.html", code)})
 	}
 	for _, c := range r.Cases {
+		v.HasDependencies = v.HasDependencies || c.Workload == "rust-dependencies"
 		row := reportRow{Language: c.Language, Profile: c.Profile, Workload: c.Workload, Repetition: c.Repetition, Status: c.Status, Reason: c.Reason, Cold: "-", NoOp: "-", Private: "-", Public: "-", Final: "-", Project: "-", Shared: "-", Clean: "-", Binary: "-", Growth: "-", Amplification: "-"}
 		if c.Status == "passed" {
 			v.Passed++
@@ -181,7 +183,7 @@ a{color:#116d77;text-decoration:none}a:hover{text-decoration:underline}button,se
 SHA-256: {{.ExecutableHash}}
 {{.Reason}}</pre>{{end}}
 <h3>{{t "Installed toolchain files"}}</h3><p class="meta">{{t "Separate from build footprint. Shared installations appear once."}}</p><div class="scroll"><table><thead><tr><th>{{t "Installation"}}</th><th>{{t "Used by"}}</th><th>{{t "Logical bytes"}}</th><th>{{t "Files"}}</th><th>{{t "Status"}}</th><th>{{t "Scope"}}</th></tr></thead><tbody>{{range .Receipt.Installations}}<tr><td>{{.Name}}</td><td>{{.UsedBy}}</td><td>{{.Bytes}}</td><td>{{.Files}}</td><td>{{t .Status}} {{.Reason}}</td><td class="reason">{{.Scope}}</td></tr>{{end}}</tbody></table></div></section>
-<section id="panel-notes" role="tabpanel" tabindex="0" aria-labelledby="tab-notes" class="panel" hidden><h2>{{t "Notes"}}</h2><ul class="notes"><li>{{t "Retained logical bytes include project outputs, caches, and the shared experiment cache. Toolchain installs and transient peak disk use are excluded."}}</li><li>{{t "The fixtures are small and synthetic, with no third-party dependencies."}}</li><li>{{t "Development defaults differ by toolchain. Rust small-dev uses line-tables-only debug data and disables incremental builds."}}</li><li>{{t "Footprint bars are arithmetic means across repetitions; growth points are medians at each edit."}}</li></ul></section>
+<section id="panel-notes" role="tabpanel" tabindex="0" aria-labelledby="tab-notes" class="panel" hidden><h2>{{t "Notes"}}</h2><ul class="notes"><li>{{t "Retained logical bytes include project outputs, caches, and the shared experiment cache. Toolchain installs and transient peak disk use are excluded."}}</li><li>{{if .HasDependencies}}{{t "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache."}}{{else}}{{t "The fixtures are small and synthetic, with no third-party dependencies."}}{{end}}</li><li>{{t "Development defaults differ by toolchain. Rust small-dev uses line-tables-only debug data and disables incremental builds."}}</li><li>{{t "Footprint bars are arithmetic means across repetitions; growth points are medians at each edit."}}</li></ul></section>
 </div>
 </main>
 <script>

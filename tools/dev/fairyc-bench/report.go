@@ -59,6 +59,9 @@ func validateReceipt(r Receipt) error {
 	if len(r.Cases) == 0 {
 		return errors.New("receipt has no cases")
 	}
+	if err := validateWorkloadSelection(r.Options.Languages, r.Options.Workloads); err != nil {
+		return err
+	}
 	if r.Finished == "" {
 		return errors.New("receipt is unfinished")
 	}
@@ -89,6 +92,9 @@ func validateReceipt(r Receipt) error {
 	seen := map[string]bool{}
 	combinations := map[string]bool{}
 	for _, c := range r.Cases {
+		if c.Workload == "rust-dependencies" && c.Status == "passed" && (c.DependencyLock == "" || len(c.Preparation) == 0) {
+			return fmt.Errorf("missing dependency preparation for %s", c.ID)
+		}
 		if !slices.Contains(r.Options.Languages, c.Language) || !slices.Contains(r.Options.Profiles, c.Profile) || !slices.Contains(r.Options.Workloads, c.Workload) || (c.Profile == "small-dev" && c.Language != "rust") || c.Repetition < 1 || c.Repetition > r.Options.Repetitions {
 			return errors.New("case outside declared matrix")
 		}

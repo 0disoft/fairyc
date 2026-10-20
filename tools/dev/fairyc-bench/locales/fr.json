@@ -77,6 +77,8 @@
   "tokenizer": "Tokeniseur",
   "many-modules": "Modules multiples",
   "file-search": "Recherche de fichiers",
+  "rust-dependencies": "Dépendances Rust",
+  "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.": "Charge de travail dédiée aux dépendances Rust. Les téléchargements se terminent avant la mesure ; les fichiers du registre Cargo conservés sont inclus dans le cache partagé.",
   "dev": "développement",
   "release": "production",
   "small-dev": "développement léger",

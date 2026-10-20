@@ -77,6 +77,8 @@
   "tokenizer": "टोकनाइज़र",
   "many-modules": "कई मॉड्यूल",
   "file-search": "फ़ाइल खोज",
+  "rust-dependencies": "Rust निर्भरताएँ",
+  "Rust-only dependency workload. Downloads finish before timing; retained Cargo registry files are included in Shared cache.": "केवल Rust के लिए निर्भरता वर्कलोड। डाउनलोड समय मापने से पहले पूरे हो जाते हैं; रखी गई Cargo रजिस्ट्री फ़ाइलें साझा कैश में शामिल हैं।",
   "dev": "डेवलपमेंट",
   "release": "रिलीज़",
   "small-dev": "हल्का डेवलपमेंट",

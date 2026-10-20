@@ -47,6 +47,14 @@ For an optional five-edit file-I/O run against the default language set:
 go run ./tools/dev/fairyc-bench run --output .cache/bench-file-search --workloads file-search --profiles dev --edits 5 --timeout 20m
 ```
 
+For the opt-in Rust-only dependency workload:
+
+```text
+go run ./tools/dev/fairyc-bench run --output .cache/bench-rust-dependencies --languages rust --workloads rust-dependencies --profiles dev,small-dev --edits 5 --timeout 10m
+```
+
+This workload must run alone with Rust.
+
 A run does not render the report. It writes `receipt.json` and the case workspaces, plus the built
 checkout compiler under `tooling` when `--fairyc` is omitted. Rendering is a separate command:
 
@@ -138,6 +146,18 @@ not be used to estimate dependency-heavy Rust target growth.
 `file-search` reuses the standard cold, no-op, private-edit, public-interface, and clean sequence.
 Every fifth edit changes the public signature, as in the other workloads.
 
+`rust-dependencies` is an opt-in workload for Rust alone. It uses `clap` 4 with derive, `serde` 1
+with derive, `serde_json` 1, and `regex` 1 to search a deterministic JSON-lines input. Cargo.lock
+is resolved once per run and shared across every selected profile and repetition; the resolved
+lock is preserved in `cases[].dependencyLock`. For each isolated case, `cargo fetch --locked`
+runs before timing and its commands are recorded in `cases[].preparation`. Timed builds use
+`cargo build --offline --locked`. Project outputs/cache measures `target/`; Shared cache includes
+downloaded registry source, archives, and index. Clean removes `target/` and keeps the isolated
+Cargo home.
+
+The workload must run alone with Rust so its dependency-heavy footprint never appears as an
+equivalent cross-language comparison. The existing cross-language workloads remain unchanged.
+
 After every build, the runner executes the new binary and compares its normalized stdout with a Go
 reference implementation of the workload's token or matching-line counts and checksum rules. A case stops at the first build or
 verification failure. The reported performance data are build time and retained logical bytes;
@@ -147,8 +167,10 @@ post-build executions verify correctness and are not reported as runtime through
 
 Each case starts with an empty project output tree and isolated experiment state. The case contains
 the generated source, `input.txt`, project outputs, a Cargo home, shared user and Zig cache roots,
-and a temporary directory. A cold sample means those experiment-owned caches are empty; the
-operating system, installed toolchains, and their global files remain in place.
+and a temporary directory. For the default workloads, a cold sample means those experiment-owned
+caches are empty; the operating system, installed toolchains, and their global files remain in
+place. For `rust-dependencies`, a cold sample has empty build outputs in `target/` but a case-local
+Cargo home populated by the prefetch before timing.
 
 The footprint is the sum of regular file lengths found after a command in the known project output
 roots and case state:
@@ -166,10 +188,13 @@ Zig 0.17's `--global-cache-dir` argument is no longer used. The adapter sets
 caches.
 
 These are logical byte counts, not allocated disk usage. The per-case footprint excludes deleted
-transient files, peak disk use, peak memory, operating system caches, downloaded dependencies,
-runtime speed, and toolchain installation files, which are inventoried separately below. Sparse
-files, filesystem compression, hard links, allocation units, and files outside the selected roots
-can make physical use differ. Symlinks inside a measured root cause the sample to fail.
+transient files, peak disk use, peak memory, operating system caches, network download time, runtime
+speed, and toolchain installation files, which are inventoried separately below. The default
+`tokenizer`, `many-modules`, and `file-search` workloads have no third-party dependencies. For
+`rust-dependencies`, downloaded Cargo registry source, archives, and index retained in the case
+Cargo home are included in Shared cache. Sparse files, filesystem compression, hard links,
+allocation units, and files outside the selected roots can make physical use differ. Symlinks
+inside a measured root cause the sample to fail.
 
 The clean sample records what remains after removing project build outputs. Rust uses
 `cargo clean --offline`; Fairy C and C remove their project `build` directory; Zig removes
