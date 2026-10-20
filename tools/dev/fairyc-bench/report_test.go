@@ -120,7 +120,10 @@ func TestRejectMisleadingReceipts(t *testing.T) {
 func TestSingleLocaleRender(t *testing.T) {
 	root := t.TempDir()
 	receipt := filepath.Join(root, "receipt.json")
-	if err := writeJSON(receipt, fixtureReceipt()); err != nil {
+	r := fixtureReceipt()
+	r.Options.Workloads = []string{"file-search"}
+	r.Cases[0].Workload = "file-search"
+	if err := writeJSON(receipt, r); err != nil {
 		t.Fatal(err)
 	}
 	output := filepath.Join(root, "report")
@@ -130,6 +133,9 @@ func TestSingleLocaleRender(t *testing.T) {
 	b, err := os.ReadFile(filepath.Join(output, "report.ko.html"))
 	if err != nil || !strings.Contains(string(b), `<html lang="ko">`) || !strings.Contains(string(b), translator("ko")("Build footprint")) || strings.Contains(string(b), `id="locale"`) {
 		t.Fatal("single-locale report must not link to missing language variants")
+	}
+	if !strings.Contains(string(b), translator("ko")("file-search")) || strings.Contains(string(b), "16 "+translator("ko")("modules")) {
+		t.Fatal("file-search report must identify its workload without unrelated module counts")
 	}
 	if _, err := os.Stat(filepath.Join(output, "summary.png")); !os.IsNotExist(err) {
 		t.Fatal("single-locale render unexpectedly generated English")

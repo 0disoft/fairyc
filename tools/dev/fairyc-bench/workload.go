@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var availableWorkloads = []string{"tokenizer", "many-modules", "file-search"}
+
 func workloadInput() []byte {
 	return []byte(strings.Repeat("let count_01 = 123 + alpha;\nif (count_01 > 7) { beta_2 = count_01 - 1; }\n", 256))
 }

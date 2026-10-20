@@ -37,6 +37,12 @@ For a short smoke run before a full snapshot:
 go run ./tools/dev/fairyc-bench run --output .cache/bench-smoke --workloads tokenizer --edits 1 --profiles dev --languages fairy,rust,c
 ```
 
+For an optional five-edit file-I/O run against the default language set:
+
+```text
+go run ./tools/dev/fairyc-bench run --output .cache/bench-file-search --workloads file-search --profiles dev --edits 5
+```
+
 A run does not render the report. It writes `receipt.json` and the case workspaces, plus the built
 checkout compiler under `tooling` when `--fairyc` is omitted. Rendering is a separate command:
 
@@ -99,7 +105,7 @@ outside the measured project footprint.
 | Rust | Cargo development defaults | `cargo build --release` | Cargo development defaults with `debug = "line-tables-only"` and `incremental = false` |
 | C | Unoptimized with debug information (`-O0 -g`, or MSVC `/Od /Zi`) | `-O2`, or MSVC `/O2` | Not applicable |
 
-Rust uses its standard library, Zig links libc for `getchar` and `printf`, C uses libc directly,
+Rust uses its standard library, Zig links libc for console and file I/O, C uses libc directly,
 and Fairy C uses its SDK. The C adapter invokes the compiler directly and recompiles every source
 file on every build, including the no-op build. Its timings must not be read as incremental compiler
 timings. Development debug information and incremental behavior also differ between toolchains.
@@ -108,11 +114,30 @@ timings. Development debug information and incremental behavior also differ betw
 
 `tokenizer` reads a fixed input from stdin, counts token transitions, and prints a token count and a
 rolling checksum. `many-modules` does the same work and calls the configured number of helper
-modules. The fixtures are deliberately small and use no third-party packages.
+modules.
+
+`file-search` is an opt-in workload and remains outside the default `tokenizer,many-modules`
+selection. It builds a representative small file-I/O CLI whose `bench FILE` entry point reads one
+real on-disk file in 4096-byte chunks. The runner creates a fixed deterministic corpus of exactly
+1 MiB outside the measured project and cache roots. LF ends a line, while CR is an ordinary byte.
+A line matches when it contains the case-sensitive ASCII literal `error` at least once, and a final
+nonempty line without a trailing LF also counts. The program prints the line count, match count,
+and a rolling checksum that incorporates the revision helper. It handles arbitrary bytes and lines
+longer than one chunk without retaining the whole file in memory.
+
+All four implementations use the same matching algorithm and 4 KiB buffers. Rust uses
+`std::fs::File` and `Read`; Fairy C uses its `std::fs` API; C and Zig use libc `fread` on a
+binary-mode stream. The workload scans one file, with no recursive traversal, regular
+expressions, or third-party dependencies. It represents a small file-I/O CLI; its results should
+not be used to estimate dependency-heavy Rust target growth.
+
+`file-search` reuses the standard cold, no-op, private-edit, public-interface, and clean sequence.
+Every fifth edit changes the public signature, as in the other workloads.
 
 After every build, the runner executes the new binary and compares its normalized stdout with a Go
-reference implementation of the same token and checksum rules. A case stops at the first build or
-verification failure.
+reference implementation of the workload's token or matching-line counts and checksum rules. A case stops at the first build or
+verification failure. The reported performance data are build time and retained logical bytes;
+post-build executions verify correctness and are not reported as runtime throughput.
 
 ## What is measured
 

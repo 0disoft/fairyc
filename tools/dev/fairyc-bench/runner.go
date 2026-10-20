@@ -33,7 +33,6 @@ func run(ctx context.Context, o Options) error {
 	}
 	r := Receipt{Schema: receiptSchema, Started: time.Now().UTC().Format(time.RFC3339), Commit: gitValue("rev-parse", "HEAD"), Dirty: gitValue("status", "--porcelain") != "", Host: Host{OS: runtime.GOOS, Arch: runtime.GOARCH, CPU: cpuName(), CPUs: runtime.NumCPU(), GoVersion: runtime.Version()}, Method: "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.", Options: RunSettings{Languages: o.Languages, Profiles: o.Profiles, Workloads: o.Workloads, Edits: o.Edits, Modules: o.Modules, Repetitions: o.Repetitions, Timeout: o.Timeout.String()}}
 	failed := false
-	input := workloadInput()
 	installed := map[string]int{}
 	for _, language := range o.Languages {
 		a := discover(ctx, o, language)
@@ -46,6 +45,10 @@ func run(ctx context.Context, o Options) error {
 				continue
 			}
 			for _, workload := range o.Workloads {
+				input := workloadInput()
+				if workload == "file-search" {
+					input = searchInput()
+				}
 				for repeat := 1; repeat <= o.Repetitions; repeat++ {
 					c := Case{ID: fmt.Sprintf("%s-%s-%s-%02d", language, profile, workload, repeat), Language: language, Profile: profile, Workload: workload, Repetition: repeat, Status: "passed", InputHash: digest(input)}
 					if a.toolchain.Status != "ready" {
@@ -114,11 +117,16 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 			}
 		}
 		files := sources(a.language, modules, revision)
+		expected := reference(input, revision, modules)
+		if c.Workload == "file-search" {
+			files = searchSources(a.language, revision)
+			expected = searchReference(input, revision)
+		}
 		if err := writeSources(project, files); err != nil {
 			return err
 		}
 		hash, bytes, count := sourceIdentity(files)
-		s := Sample{Stage: stage, Change: change, Edit: revision, SourceHash: hash, SourceBytes: bytes, SourceFiles: count, Expected: reference(input, revision, modules)}
+		s := Sample{Stage: stage, Change: change, Edit: revision, SourceHash: hash, SourceBytes: bytes, SourceFiles: count, Expected: expected}
 		args, env, err := a.build(project, state, c.Profile)
 		if err != nil {
 			return err
@@ -128,7 +136,13 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 		s.WallMS = command.WallMS
 		s.Commands = append(s.Commands, portable(command, o.Output))
 		if buildErr == nil {
-			verification, actual, verifyErr := execute(ctx, o.Timeout, project, env, input, a.binary(project, c.Profile))
+			verifyArgs := []string{a.binary(project, c.Profile)}
+			var stdin = input
+			if c.Workload == "file-search" {
+				verifyArgs = append(verifyArgs, "../input.txt")
+				stdin = nil
+			}
+			verification, actual, verifyErr := execute(ctx, o.Timeout, project, env, stdin, verifyArgs...)
 			s.Commands = append(s.Commands, portable(verification, o.Output))
 			s.Actual = strings.ReplaceAll(actual, "\r\n", "\n")
 			s.Verified = verifyErr == nil && verification.Log == "" && s.Actual == s.Expected

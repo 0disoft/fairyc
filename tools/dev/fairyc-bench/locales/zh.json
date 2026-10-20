@@ -76,6 +76,7 @@
   "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.": "逻辑文件大小。不含工具链和峰值占用。调试默认值不同。",
   "tokenizer": "分词器",
   "many-modules": "多模块",
+  "file-search": "文件搜索",
   "dev": "开发",
   "release": "发布",
   "small-dev": "精简开发",

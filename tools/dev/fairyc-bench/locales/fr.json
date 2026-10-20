@@ -76,6 +76,7 @@
   "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.": "Tailles logiques. Chaînes d’outils et pic d’utilisation exclus. Les valeurs de débogage varient.",
   "tokenizer": "Tokeniseur",
   "many-modules": "Modules multiples",
+  "file-search": "Recherche de fichiers",
   "dev": "développement",
   "release": "production",
   "small-dev": "développement léger",

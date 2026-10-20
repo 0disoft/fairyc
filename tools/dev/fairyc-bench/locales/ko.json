@@ -76,6 +76,7 @@
   "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.": "논리 파일 크기입니다. 도구 체인과 최대 사용량은 제외합니다. 디버그 기본값은 도구 체인마다 다릅니다.",
   "tokenizer": "토크나이저",
   "many-modules": "다중 모듈",
+  "file-search": "파일 검색",
   "dev": "dev",
   "release": "release",
   "small-dev": "small-dev",

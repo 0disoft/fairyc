@@ -21,6 +21,7 @@ type reportView struct {
 	Date              string
 	SummaryRows       []summaryRow
 	HasTemp           bool
+	ShowModules       bool
 	Receipt           Receipt
 	Locale            string
 	Locales           []reportLocale
@@ -37,6 +38,8 @@ func renderHTML(r Receipt, path, locale string, locales []string) error {
 	v := reportView{Receipt: r, Locale: locale, Date: strings.Split(r.Started, "T")[0], Commit: shortCommit(r), Footprint: template.HTML(footprintChart(r, locale).svg()), Growth: template.HTML(growthChart(r, locale).svg())}
 	v.Logo, v.Icons = reportBrand()
 	v.SummaryWorkload, v.SummaryRows = reportSummary(r, locale)
+	workload, _, _ := summaryGroups(r)
+	v.ShowModules = workload == "many-modules"
 	for _, row := range v.SummaryRows {
 		v.HasTemp = v.HasTemp || row.TempWidth > 0
 	}
@@ -157,7 +160,7 @@ a{color:#116d77;text-decoration:none}a:hover{text-decoration:underline}button,se
 </div></header>
 <div class="content">
 <h1>{{t "Build footprint"}}</h1>
-<p class="meta"><span>{{.Date}}</span><span>{{.Receipt.Host.OS}}/{{.Receipt.Host.Arch}}</span><span>{{.SummaryWorkload}}</span><span>{{.Receipt.Options.Modules}} {{t "modules"}}</span><span>{{.Receipt.Options.Edits}} {{t "Source edits"}}</span><span>{{.Receipt.Options.Repetitions}} {{t "Run"}}</span></p>
+<p class="meta"><span>{{.Date}}</span><span>{{.Receipt.Host.OS}}/{{.Receipt.Host.Arch}}</span><span>{{.SummaryWorkload}}</span>{{if .ShowModules}}<span>{{.Receipt.Options.Modules}} {{t "modules"}}</span>{{end}}<span>{{.Receipt.Options.Edits}} {{t "Source edits"}}</span><span>{{.Receipt.Options.Repetitions}} {{t "Run"}}</span></p>
 <p class="run-status{{if .Failed}} has-failure{{end}}">{{.Passed}} {{t "passed"}} · {{.Failed}} {{t "failed or unavailable"}}</p>
 {{if .Failed}}<section class="failure"><strong>{{.Failed}} {{t "failed or unavailable"}}</strong><ul>{{range .Rows}}{{if ne .Status "passed"}}<li><strong>{{.Language}} / {{.Profile}} / {{.Workload}}</strong> — {{t .Status}}: {{.Reason}}</li>{{end}}{{end}}</ul></section>{{end}}
 <section id="panel-summary" role="tabpanel" tabindex="0" aria-labelledby="tab-summary" class="panel summary-panel">

@@ -65,7 +65,7 @@ func validateReceipt(r Receipt) error {
 	if r.Options.Edits < 0 || r.Options.Edits > 1000 || r.Options.Modules < 2 || r.Options.Modules > 64 || r.Options.Repetitions < 1 || r.Options.Repetitions > 100 {
 		return errors.New("invalid run settings")
 	}
-	for _, setting := range []struct{ values, allowed []string }{{r.Options.Languages, []string{"fairy", "zig", "rust", "c"}}, {r.Options.Profiles, []string{"dev", "release", "small-dev"}}, {r.Options.Workloads, []string{"tokenizer", "many-modules"}}} {
+	for _, setting := range []struct{ values, allowed []string }{{r.Options.Languages, []string{"fairy", "zig", "rust", "c"}}, {r.Options.Profiles, []string{"dev", "release", "small-dev"}}, {r.Options.Workloads, availableWorkloads}} {
 		if _, err := selection(strings.Join(setting.values, ","), setting.allowed...); err != nil {
 			return err
 		}

@@ -12,7 +12,7 @@ on:
         type: string
         default: dev
       workloads:
-        description: Comma-separated workloads (tokenizer,many-modules)
+        description: Comma-separated workloads (tokenizer,many-modules,file-search)
         type: string
         default: tokenizer
       edits:

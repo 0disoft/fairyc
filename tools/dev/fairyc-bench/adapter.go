@@ -59,7 +59,7 @@ func discover(ctx context.Context, o Options, language string) adapter {
 	case "zig":
 		a.executable = o.Zig
 		versionArgs = []string{"version"}
-		a.toolchain.Backend = "zig build; libc linked for getchar/printf"
+		a.toolchain.Backend = "zig build; libc linked for console and file I/O"
 	case "c":
 		a.executable = o.CC
 		if a.executable == "" && runtime.GOOS == "windows" {

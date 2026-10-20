@@ -76,6 +76,7 @@
   "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.": "तार्किक फ़ाइल आकार। टूलचेन और अधिकतम उपयोग शामिल नहीं। डिबग डिफ़ॉल्ट अलग हैं।",
   "tokenizer": "टोकनाइज़र",
   "many-modules": "कई मॉड्यूल",
+  "file-search": "फ़ाइल खोज",
   "dev": "डेवलपमेंट",
   "release": "रिलीज़",
   "small-dev": "हल्का डेवलपमेंट",
