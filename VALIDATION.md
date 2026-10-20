@@ -54,6 +54,13 @@ The Windows core job allows 20 minutes, with a 15-minute Go test timeout per pac
 it includes native compile/run regressions. Linux and the separate native/parser jobs retain
 their 10-minute limits. The test selection and runner count are unchanged.
 
+The existing `native-c` job uses `ubuntu-24.04` and provisions the
+[reference Linux toolchain](docs/abi/linux-toolchain-v0.md) with
+`.github/scripts/setup_linux_toolchain.sh`. Only missing compiler, development, linker, and sanitizer
+packages are installed; GCC 13 and Clang 18 are exposed through a job-local PATH directory.
+Package patch versions remain unpinned. The full native fixture command still validates actual
+headers, linking, startup, and sanitizers; version preflight is not a replacement for that execution.
+
 Local routing checks: `python -B -m unittest discover -s .github/scripts -p 'test_ci_changes.py'`.
 Workflow syntax: `actionlint .github/workflows/frontend.yml .github/workflows/measurements.yml`.
 

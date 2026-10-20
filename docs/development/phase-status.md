@@ -35,6 +35,12 @@ coverage, toolchain baseline, and toolchain provisioning remain missing in the t
 `complete-runtime`, `complete-standard-library`, `toolchain-baseline`, and `toolchain-provisioning`.
 The target's `emittable`, `conformant`, and `supported` maturity flags remain false.
 
+[ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
+[Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
+and installation. Driver checks were locally tested on Windows; provisioning and native execution
+are connected to the existing Ubuntu 24.04 C job. The two toolchain markers remain missing until
+a fresh hosted receipt covers these changes. Phase 2 is still partial.
+
 ## Cache evidence
 
 Current keys use [whole-package cache v4](../package/whole-package-cache-v4.md). The source and

@@ -224,6 +224,10 @@ scalar runtime serve both that lane and the experimental explicit-source-closure
 closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
 product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
+ADR 0474 defines the native Ubuntu 24.04 reference environment with glibc >= 2.39, GCC >= 13
+or Clang >= 18, version/target preflight, and provisioning in the existing Linux C job.
+The [toolchain contract](../abi/linux-toolchain-v0.md) distinguishes configured policy from the
+fresh hosted receipt still required to close `toolchain-baseline` and `toolchain-provisioning`.
 The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
 facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including an explicit zero or
 32-byte shadow-space rule and per-profile missing maturity evidence. The backend and driver also

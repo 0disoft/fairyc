@@ -135,7 +135,7 @@ jobs:
   native-c:
     name: C differential (Linux)
     needs: [validate, windows-native, windows-parser]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Check out source
@@ -145,5 +145,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Provision reference Linux toolchain
+        run: bash .github/scripts/setup_linux_toolchain.sh "$RUNNER_TEMP/fairyc-toolchain/bin"
       - name: Run C differential, sanitizer, layout, ABI, and product build checks
         run: go run -mod=readonly ./tools/dev/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json

@@ -13,6 +13,11 @@ from the [phase status](../development/phase-status.md). The target evidence in
 `toolchain-baseline`, and `toolchain-provisioning` as missing. It does not promote the target to
 `conformant` or `supported`; maintained distribution remains a separate support requirement.
 
+[ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) now defines the
+[reference toolchain and setup](linux-toolchain-v0.md). The implementation checks compiler/libc
+version floors and the native target; the existing native CI job provisions that environment.
+The two toolchain evidence markers remain pending a fresh hosted execution of those changes.
+
 Target claims use three levels:
 
 - `emittable`: the compiler can emit constrained C for the target profile;
