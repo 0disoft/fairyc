@@ -26,8 +26,8 @@ func TestLinuxRuntimeSnapshotFlags(t *testing.T) {
 			}
 			if name == "clang" {
 				wantExtra++
-				if snapshot[len(base)+2] != "-Wno-error=gnu-line-marker" {
-					t.Fatal("marker policy must preserve the diagnostic")
+				if snapshot[len(base)+2] != "-Wno-gnu-line-marker" {
+					t.Fatal("snapshot must suppress only the line-marker transport diagnostic")
 				}
 			}
 			if len(snapshot) != len(base)+wantExtra {

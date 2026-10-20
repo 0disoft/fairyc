@@ -95,10 +95,10 @@ func linuxRuntimeSnapshotFlags(compilerName string, flags []string) []string {
 	result = append(result, "-x", "cpp-output")
 	if compilerName == "clang" {
 		// Clang diagnoses its own GNU line markers even in .i input. Preserve
-		// their system-header semantics and diagnostic, but allow this transport
+		// their system-header semantics, but allow this transport
 		// extension only. Original preprocessing and generated unit compilation
 		// retain the unmodified strict flags; all other warnings remain errors.
-		result = append(result, "-Wno-error=gnu-line-marker")
+		result = append(result, "-Wno-gnu-line-marker")
 	}
 	return result
 }
