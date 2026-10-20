@@ -33,14 +33,14 @@ The initial milestone focuses on a compact compiler core with carefully scoped c
 2. Move-only resource types with deterministic cleanup (drop)
 3. Non-null references (borrows) alongside explicit raw pointers
 4. First-class arena allocation for grouped lifetimes
-5. Built-in `Option` and `Result` types for robust error handling
+5. Built-in `Option` and `Result` types for structured error handling
 6. Identical failure semantics across both debug and optimized builds
 
 ## Non-Goals
 
-Fairy C intentionally omits features that conflict with explicit control and small runtime footprint, including:
+Fairy C intentionally omits features that conflict with explicit control and a small runtime footprint, including:
 universal automatic memory safety, drop-in C source compatibility, built-in asynchronous runtimes, garbage collection, exceptions, class inheritance, and arbitrary cyclic alias graphs.
 
 ## Success Criteria
 
-The Stage 0 milestone succeeds when the compiler reliably builds representative programs utilizing resources, arenas, structured error handling, and C FFI, providing deterministic diagnostics and consistent cross-platform behavior. Broad ecosystem adoption and self-hosting are reserved for future phases.
+The Stage 0 milestone succeeds when the compiler reliably builds representative programs that use resources, arenas, structured error handling, and C FFI, and produces deterministic diagnostics and consistent cross-platform behavior. Broad ecosystem adoption and self-hosting are reserved for future phases.

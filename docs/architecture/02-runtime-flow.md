@@ -75,7 +75,7 @@ conveniences and records their behavior explicitly.
 
 `?` becomes a discriminant branch. Resource state becomes moves, flags where genuinely needed, and cleanup blocks. Resource construction and field reads refer to a verified MIR resource definition; a nonempty drop body becomes a compiler-private typed function linked by symbol and exact resource type. Aggregate construction carries field progress. Calls receive already ordered argument temporaries. Bounds, arithmetic, shift, and assertion failures become explicit checked branches and traps.
 
-Cleanup chains are created directly per normal exiting edge, verified, then identical suffixes may be merged. Traps have no cleanup edge. Calls have no unwind edge in Stage 0.
+Cleanup chains are created directly per normal exiting edge and then verified; identical suffixes may be merged. Traps have no cleanup edge. Calls have no unwind edge in Stage 0.
 
 ## Execution and backend flow
 
