@@ -67,7 +67,7 @@ func TestReportArtifactsAndEscaping(t *testing.T) {
 	if !strings.Contains(string(b), "data-language=") || !strings.Contains(string(b), "addEventListener") {
 		t.Fatal("report filters missing")
 	}
-	if strings.Count(string(b), `id="chart-`) != 4 {
+	if strings.Count(string(b), `id="chart-`) != 6 {
 		t.Fatal("inline SVG titles must have distinct IDs")
 	}
 	for letter, glyph := range glyphs {

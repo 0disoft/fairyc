@@ -37,18 +37,8 @@ func (s *scene) line(points []point, color string) {
 func chartHeader(r Receipt, title string) scene {
 	s := scene{Width: 1120, Title: title, Description: r.Method}
 	s.text(32, 42, 26, ink, title)
-	s.text(32, 69, 13, muted, fmt.Sprintf("%s  |  %s/%s  |  commit %s  |  %d sequence(s) per config", r.Started, r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
-	s.text(32, 92, 13, muted, "Retained logical bytes; toolchain installs and transient peaks excluded. Each configuration has isolated caches.")
-	y := 115.0
-	for _, t := range r.Toolchains {
-		version := strings.Split(t.Version, "\n")[0]
-		if len(version) > 100 {
-			version = version[:100]
-		}
-		s.text(32, y, 12, muted, t.Language+": "+version)
-		y += 19
-	}
-	s.Height = int(y + 20)
+	s.text(32, 69, 13, muted, fmt.Sprintf("%s | %s/%s | %s | %d run(s)", strings.Split(r.Started, "T")[0], r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
+	s.Height = 95
 	return s
 }
 func buckets(f Footprint) []int64 {
@@ -117,9 +107,7 @@ func footprintChart(r Receipt) scene {
 		s.text(x+19, y+row+11, 12, muted, name)
 	}
 	y += 75
-	s.text(32, y, 12, muted, "C: direct full rebuild. Development debug/safety defaults differ. Embedded debug bytes remain in their file bucket.")
-	y += 20
-	s.text(32, y, 12, muted, "Failed/unavailable cases are excluded from bars and listed in the HTML report. Read methodology and raw receipt.")
+	s.text(32, y, 12, muted, "Logical file sizes, including shared cache. Debug defaults differ. Details: report.html")
 	s.Height = int(y + 30)
 	return s
 }
@@ -169,7 +157,7 @@ func growthChart(r Receipt) scene {
 			s.line(points, lineColors[i%len(lineColors)])
 		}
 		y += height + 54
-		s.text(100, y, 12, muted, "Source edits (every fifth edit changes the public function signature)")
+		s.text(100, y, 12, muted, "Source edits")
 		y += 28
 		for i, g := range groups {
 			x := 32 + float64(i%3)*360
@@ -179,7 +167,7 @@ func growthChart(r Receipt) scene {
 		}
 		y += float64((len(groups)+2)/3)*23 + 32
 	}
-	s.text(32, y, 12, muted, "Cold = empty experiment output/caches. OS caches remain uncontrolled. No-op and clean samples are in HTML/JSON.")
+	s.text(32, y, 12, muted, "Logical file sizes, including shared cache. Details: report.html")
 	s.Height = int(y + 30)
 	return s
 }
@@ -211,7 +199,7 @@ func (s scene) svg() string {
 }
 
 func summaryChart(r Receipt) scene {
-	workload := "tokenizer"
+	workload := r.Options.Workloads[0]
 	for _, name := range r.Options.Workloads {
 		if name == "many-modules" {
 			workload = name
@@ -225,8 +213,59 @@ func summaryChart(r Receipt) scene {
 			filtered.Cases = append(filtered.Cases, c)
 		}
 	}
-	s := footprintChart(filtered)
-	s.Title = fmt.Sprintf("Development footprint after %d edits", r.Options.Edits)
-	s.Shapes[0].Text = s.Title
+	profiles := "development profiles"
+	if len(filtered.Cases) == 0 {
+		filtered.Cases = r.Cases
+		profiles = "all profiles"
+	}
+	s := chartHeader(r, "Build footprint")
+	s.text(32, 99, 13, muted, fmt.Sprintf("%s | %d source edits | %s", workload, r.Options.Edits, profiles))
+	groups := seriesFor(filtered, workload)
+	maximum := 1.0
+	for _, g := range groups {
+		total := 0.0
+		for _, c := range g.Cases {
+			total += float64(finalSample(c).Footprint.Total)
+		}
+		maximum = max(maximum, total/float64(len(g.Cases)))
+	}
+	y := 132.0
+	for _, g := range groups {
+		project, shared, temporary := 0.0, 0.0, 0.0
+		for _, c := range g.Cases {
+			f := finalSample(c).Footprint
+			project += float64(f.Total - f.SharedCache - f.Temporary)
+			shared += float64(f.SharedCache)
+			temporary += float64(f.Temporary)
+		}
+		n := float64(len(g.Cases))
+		label := map[string]string{"fairy": "Fairy C", "zig": "Zig", "rust": "Rust", "c": "C"}[g.Language]
+		if g.Profile != "dev" {
+			label += " / " + g.Profile
+		}
+		s.text(32, y+19, 16, ink, label)
+		s.rect(250, y, 590, 26, "#e9eef3")
+		x := 250.0
+		for i, b := range []float64{project, shared, temporary} {
+			w := b / n / maximum * 590
+			if w > 0 {
+				s.rect(x, y, w, 26, []string{bucketColors[0], bucketColors[5], bucketColors[6]}[i])
+				x += w
+			}
+		}
+		s.text(860, y+19, 16, ink, bytesLabel((project+shared+temporary)/n))
+		y += 48
+	}
+	if len(groups) == 0 {
+		s.text(32, y+19, 16, muted, "No passed measurements")
+		y += 48
+	}
+	for i, name := range []string{"Project outputs/cache", "Shared cache", "Retained temp"} {
+		x := 32 + float64(i)*300
+		s.rect(x, y+4, 12, 12, []string{bucketColors[0], bucketColors[5], bucketColors[6]}[i])
+		s.text(x+20, y+15, 12, muted, name)
+	}
+	s.text(32, y+45, 12, muted, "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.")
+	s.Height = int(y + 65)
 	return s
 }
