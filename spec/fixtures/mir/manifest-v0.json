@@ -174,8 +174,8 @@
           {
             "kind": "result-branch",
             "function": "main::run",
-            "question": { "source": "main.fy", "startByte": 267, "endByte": 268 },
-            "resultExpression": { "source": "main.fy", "startByte": 262, "endByte": 267 },
+            "question": { "source": "main.fy", "startByte": 254, "endByte": 255 },
+            "resultExpression": { "source": "main.fy", "startByte": 249, "endByte": 254 },
             "evaluationCount": 1,
             "successPayload": "Move",
             "errorPayload": "Move",
@@ -183,31 +183,31 @@
             "errorCleanupActions": [
               {
                 "kind": "drop",
-                "binding": { "source": "main.fy", "startByte": 212, "endByte": 217 }
+                "binding": { "source": "main.fy", "startByte": 199, "endByte": 204 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "main.fy", "startByte": 186, "endByte": 194 }
+                "binding": { "source": "main.fy", "startByte": 173, "endByte": 181 }
               }
             ]
           },
           {
             "kind": "move",
             "function": "main::run",
-            "binding": { "source": "main.fy", "startByte": 186, "endByte": 194 },
-            "operand": { "source": "main.fy", "startByte": 281, "endByte": 289 },
-            "destination": "return-value",
+            "binding": { "source": "main.fy", "startByte": 173, "endByte": 181 },
+            "operand": { "source": "main.fy", "startByte": 273, "endByte": 281 },
+            "destination": "result-payload",
             "cleanupObligationTransferred": true
           },
           {
             "kind": "cleanup-path",
             "function": "main::run",
-            "exit": { "source": "main.fy", "startByte": 281, "endByte": 289 },
+            "exit": { "source": "main.fy", "startByte": 268, "endByte": 282 },
             "exitKind": "return",
             "actions": [
               {
                 "kind": "drop",
-                "binding": { "source": "main.fy", "startByte": 212, "endByte": 217 }
+                "binding": { "source": "main.fy", "startByte": 199, "endByte": 204 }
               }
             ]
           },

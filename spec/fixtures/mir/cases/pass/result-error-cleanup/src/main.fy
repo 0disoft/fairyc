@@ -12,8 +12,8 @@ resource Token {
     cleanup {}
 }
 
-fn Result<i32, Error> run(Result<i32, Error> input, Result<i32, Error> fallback) {
+fn Result<i32, Error> run(Result<i32, Error> input, Error fallback) {
     let Token token = Token { .value = 1 };
     let i32 value = input?;
-    return fallback;
+    return .err(fallback);
 }
