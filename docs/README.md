@@ -19,7 +19,7 @@ Supporting pages:
 
 ### Additional pointers
 
-These entries name paths that are not yet in the index pages above, so they stay here.
+These entries name paths that are not yet covered by the index pages above, so they stay here.
 
 - Checked x64 integer conversions: [ADR 0418](adr/0418-sdk-checked-integer-conversions.md), `internal/sdkstdlib/sources/std/num.fy`
 - Bounded native runtime object reuse, invalidation and fallback: docs/adr/0428-native-runtime-object-reuse.md, internal/cdriver/runtime_cache.go
@@ -53,4 +53,4 @@ These entries name paths that are not yet in the index pages above, so they stay
 
 ## Authority order
 
-Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence; parser fixtures own syntax acceptance, semantic fixtures own stable name, type, and borrow assertions, resource fixtures own whole-root state transitions, Region fixtures own capability origins, Result fixtures own handling and propagation, MIR fixtures own source-linked normalization events after verification, MIR verifier fixtures own isolated `Vxxxx` mutation recipes, C-emission fixtures own the bounded verified scalar source-to-C unit facts, and package fixtures own resolved instance and direct-visibility facts. Detailed language, MIR, package, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.
+Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence. Parser fixtures own syntax acceptance, semantic fixtures own stable name, type, and borrow assertions, resource fixtures own whole-root state transitions, Region fixtures own capability origins, Result fixtures own handling and propagation, MIR fixtures own source-linked normalization events after verification, MIR verifier fixtures own isolated `Vxxxx` mutation recipes, C-emission fixtures own the bounded verified scalar source-to-C unit facts, and package fixtures own resolved instance and direct-visibility facts. Detailed language, MIR, package, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.

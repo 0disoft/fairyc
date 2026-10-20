@@ -1,6 +1,6 @@
 # Development Guide
 
-This document outlines development guidelines, local build instructions, and architectural boundaries for the Go Stage 0 compiler.
+This document covers development guidelines, local build instructions, and architectural boundaries for the Go Stage 0 compiler.
 
 ## Reference Specifications
 
@@ -16,7 +16,7 @@ This document outlines development guidelines, local build instructions, and arc
 
 ## Building the Windows Compiler Binary
 
-You can compile the Stage 0 compiler into a standalone Windows binary (`fairyc.exe`) to avoid the overhead of `go run` during local testing.
+Compile the Stage 0 compiler into a standalone Windows binary (`fairyc.exe`) to avoid the overhead of `go run` during local testing.
 
 From the repository root in PowerShell:
 
@@ -48,7 +48,7 @@ Pop-Location
 
 ## PR Review Checklist
 
-Pull requests should adhere to these core guidelines:
+Pull requests should follow these guidelines:
 
 - **Clear Requirements**: Feature additions must map to an approved design or ADR.
 - **Strict Validation**: Do not weaken existing tests or skip error diagnostics.

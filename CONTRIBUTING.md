@@ -1,10 +1,10 @@
 # Contributing
 
-Thank you for your interest in contributing to Fairy C!
+Thanks for your interest in contributing to Fairy C.
 
 ## Prerequisites
 
-- **Go**: Use the version specified in `go.mod`. Dependencies are managed standardly through `go.mod` and `go.sum`.
+- **Go**: Use the version specified in `go.mod`. Dependencies are managed through `go.mod` and `go.sum`.
 - **C Toolchain** (required for native tests):
   - **Windows**: x64 MSVC and the Windows SDK.
   - **Linux**: amd64/glibc environment with GCC and Clang available on `PATH`.
@@ -13,7 +13,7 @@ Standard development does not require Bun, PowerShell, or external cache directo
 
 ## Building and Testing
 
-C source files included within Go packages are embedded compiler resources. Set `CGO_ENABLED=0` so Go does not attempt to compile them as cgo files:
+C source files included in Go packages are embedded compiler resources. Set `CGO_ENABLED=0` so Go does not attempt to compile them as cgo files:
 
 ### Linux / macOS (bash/zsh)
 ```sh
@@ -31,11 +31,11 @@ go vet -mod=readonly ./...
 go test -mod=readonly ./...
 ```
 
-> **Note**: `tools/run-go.ts` is an internal script for offline maintainer builds; contributors should use the standard `go` CLI directly.
+> **Note**: `tools/run-go.ts` is an internal script for offline maintainer builds; contributors should use the `go` CLI directly.
 
 ## Running Focused Tests
 
-When working on specific runtime or compiler components, you can target individual packages:
+To work on a specific runtime or compiler component, target individual packages:
 
 ```sh
 go test -mod=readonly ./internal/cstdlibcontract ./internal/cstdlib ./internal/sdkstdlib
@@ -43,7 +43,7 @@ go test -mod=readonly -run '^TestTaskManager' -v ./internal/cli
 go test -mod=readonly ./internal/adoptionaudit ./internal/testprocess
 ```
 
-Task manager tests copy sample Fairy sources into a temporary directory (`t.TempDir`), lower them through the compiler, and run native builds across both debug and release configurations. Platform-specific tests are automatically skipped on unsupported operating systems.
+Task manager tests copy sample Fairy sources into a temporary directory (`t.TempDir`), lower them through the compiler, and run native builds in both debug and release configurations. Platform-specific tests are automatically skipped on unsupported operating systems.
 
 ## Native Backend Selection
 
@@ -57,7 +57,7 @@ To test the Linux CLI and prepared file replacement workflow together:
 FAIRYC_TEST_EVIDENCE_DIR="$PWD/.cache/linux-native-evidence" CGO_ENABLED=0 go test -mod=readonly -count=1 -v -run '^(TestStableNativePortableExecution|TestStableLinux.*|TestTaskManagerPortableNativeSmoke|TestTaskManagerLinuxPreparedSaveFaults|TestLinuxPreparedPublication|TestExecuteLinux.*)$' ./internal/cli ./internal/cstdlib ./internal/cdriver
 ```
 
-*(This requires a Linux environment with GCC and Clang installed.)*
+*This requires a Linux environment with GCC and Clang installed.*
 
 ## Historical Tools and Artifacts
 
