@@ -23,8 +23,15 @@ func main() {
 }
 
 func entry(ctx context.Context, args []string) error {
+	if len(args) > 0 && (args[0] == "--help" || args[0] == "-h" || args[0] == "help") {
+		fmt.Fprintln(os.Stdout, "usage: fairyc-bench run --output NEW_DIR [--languages fairy,zig,rust,c] [--workloads tokenizer,many-modules] [--edits 20] [--repetitions 1]\n       fairyc-bench render --input receipt.json --output REPORT_DIR\nUse run --help or render --help for all options.")
+		return nil
+	}
 	if len(args) == 0 {
 		return errors.New("usage: fairyc-bench run [options] | render --input receipt.json --output DIR")
+	}
+	if args[0] == "render" {
+		return renderCLI(args[1:])
 	}
 	if args[0] != "run" {
 		return fmt.Errorf("unknown command %q", args[0])
@@ -39,11 +46,14 @@ func entry(ctx context.Context, args []string) error {
 	fs.IntVar(&o.Edits, "edits", 20, "number of successive source edits")
 	fs.IntVar(&o.Modules, "modules", 16, "module count for many-modules")
 	fs.IntVar(&o.Repetitions, "repetitions", 1, "independent cold-to-edit sequences")
-	fs.DurationVar(&o.Timeout, "timeout", 3*time.Minute, "timeout per command")
+	fs.DurationVar(&o.Timeout, "timeout", 10*time.Minute, "timeout per command (empty Zig build-system caches can take several minutes)")
 	fs.StringVar(&o.Fairy, "fairyc", "", "prebuilt compiler path (otherwise builds current checkout before measuring)")
 	fs.StringVar(&o.Zig, "zig", "zig", "Zig executable")
 	fs.StringVar(&o.CC, "cc", "", "C compiler (MSVC on Windows; cc elsewhere)")
 	if err := fs.Parse(args[1:]); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return err
 	}
 	if fs.NArg() != 0 {

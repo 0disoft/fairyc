@@ -1,0 +1,198 @@
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+)
+
+func renderCLI(args []string) error {
+	fs := flag.NewFlagSet("render", flag.ContinueOnError)
+	var input, output string
+	fs.StringVar(&input, "input", "", "receipt JSON")
+	fs.StringVar(&output, "output", "", "report directory")
+	if err := fs.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+		return err
+	}
+	if input == "" || output == "" || fs.NArg() != 0 {
+		return errors.New("render requires --input FILE --output DIR")
+	}
+	file, err := os.Open(input)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(io.LimitReader(file, 64<<20))
+	decoder.DisallowUnknownFields()
+	var receipt Receipt
+	if err := decoder.Decode(&receipt); err != nil {
+		return err
+	}
+	if err := decoder.Decode(new(any)); err != io.EOF {
+		return errors.New("receipt contains trailing data or exceeds 64 MiB")
+	}
+	return render(receipt, output)
+}
+
+func validateReceipt(r Receipt) error {
+	if r.Schema != receiptSchema {
+		return fmt.Errorf("unsupported schema %q", r.Schema)
+	}
+	if len(r.Cases) == 0 {
+		return errors.New("receipt has no cases")
+	}
+	for _, i := range r.Installations {
+		if i.Bytes < 0 || i.Files < 0 || i.Symlinks < 0 {
+			return errors.New("invalid installation inventory")
+		}
+	}
+	seen := map[string]bool{}
+	for _, c := range r.Cases {
+		if c.ID == "" || seen[c.ID] {
+			return errors.New("missing or duplicate case ID")
+		}
+		seen[c.ID] = true
+		if c.Status != "passed" && c.Status != "failed" && c.Status != "unavailable" {
+			return fmt.Errorf("invalid case status %q", c.Status)
+		}
+		if c.Status == "passed" && len(c.Samples) != r.Options.Edits+3 {
+			return fmt.Errorf("incomplete passed case %s", c.ID)
+		}
+		for _, s := range c.Samples {
+			f := s.Footprint
+			var sum int64
+			for _, n := range []int64{f.Binary, f.Debug, f.Incremental, f.Intermediate, f.LocalCache, f.SharedCache, f.Temporary} {
+				if n < 0 || n > 1<<60 {
+					return errors.New("invalid footprint byte count")
+				}
+				sum += n
+			}
+			if f.Total != sum || f.Files < 0 || s.WallMS < 0 {
+				return fmt.Errorf("invalid inventory for %s", c.ID)
+			}
+			if c.Status == "passed" && s.Stage != "clean" && (!s.Verified || s.Actual != s.Expected || f.Binary <= 0) {
+				return fmt.Errorf("unverified passed sample for %s", c.ID)
+			}
+		}
+		if c.Status == "passed" {
+			for i, s := range c.Samples {
+				stage, edit := "edit", i-1
+				switch i {
+				case 0:
+					stage = "cold"
+					edit = 0
+				case 1:
+					stage = "no-op"
+					edit = 0
+				case len(c.Samples) - 1:
+					stage = "clean"
+					edit = r.Options.Edits
+				}
+				if s.Stage != stage || s.Edit != edit {
+					return fmt.Errorf("invalid sample sequence for %s", c.ID)
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func render(r Receipt, output string) error {
+	if err := validateReceipt(r); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(output, 0o755); err != nil {
+		return err
+	}
+	for name, chart := range map[string]scene{"footprint": footprintChart(r), "growth": growthChart(r)} {
+		if err := os.WriteFile(filepath.Join(output, name+".svg"), []byte(chart.svg()), 0o644); err != nil {
+			return err
+		}
+		if err := chart.png(filepath.Join(output, name+".png")); err != nil {
+			return err
+		}
+	}
+	if err := writeJSON(filepath.Join(output, "receipt.json"), r); err != nil {
+		return err
+	}
+	return renderHTML(r, filepath.Join(output, "report.html"))
+}
+
+type series struct {
+	Language, Profile, Workload string
+	Cases                       []Case
+}
+
+func seriesFor(r Receipt, workload string) []series {
+	var result []series
+	indexes := map[string]int{}
+	for _, c := range r.Cases {
+		if c.Status != "passed" || c.Workload != workload {
+			continue
+		}
+		key := c.Language + "/" + c.Profile
+		index, ok := indexes[key]
+		if !ok {
+			index = len(result)
+			indexes[key] = index
+			result = append(result, series{Language: c.Language, Profile: c.Profile, Workload: c.Workload})
+		}
+		result[index].Cases = append(result[index].Cases, c)
+	}
+	return result
+}
+func median(values []float64) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+	sort.Float64s(values)
+	middle := len(values) / 2
+	if len(values)%2 == 0 {
+		return (values[middle-1] + values[middle]) / 2
+	}
+	return values[middle]
+}
+func findSample(c Case, stage string, edit int) Sample {
+	for _, s := range c.Samples {
+		if s.Stage == stage && (stage != "edit" || s.Edit == edit) {
+			return s
+		}
+	}
+	return Sample{}
+}
+func finalSample(c Case) Sample {
+	if len(c.Samples) < 2 {
+		return Sample{}
+	}
+	return c.Samples[len(c.Samples)-2]
+}
+func bytesLabel(n float64) string {
+	if n >= 1<<30 {
+		return fmt.Sprintf("%.2f GiB", n/(1<<30))
+	}
+	if n >= 1<<20 {
+		return fmt.Sprintf("%.2f MiB", n/(1<<20))
+	}
+	if n >= 1<<10 {
+		return fmt.Sprintf("%.1f KiB", n/(1<<10))
+	}
+	return fmt.Sprintf("%.0f B", n)
+}
+func shortCommit(r Receipt) string {
+	c := r.Commit
+	if len(c) > 10 {
+		c = c[:10]
+	}
+	if r.Dirty {
+		c += " +dirty"
+	}
+	return c
+}

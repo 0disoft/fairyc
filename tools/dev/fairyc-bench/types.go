@@ -19,16 +19,28 @@ type Options struct {
 }
 
 type Receipt struct {
-	Schema     string      `json:"schema"`
-	Started    string      `json:"started"`
-	Finished   string      `json:"finished"`
-	Commit     string      `json:"commit"`
-	Dirty      bool        `json:"dirty"`
-	Host       Host        `json:"host"`
-	Method     string      `json:"method"`
-	Options    RunSettings `json:"settings"`
-	Toolchains []Toolchain `json:"toolchains"`
-	Cases      []Case      `json:"cases"`
+	Schema        string         `json:"schema"`
+	Started       string         `json:"started"`
+	Finished      string         `json:"finished"`
+	Commit        string         `json:"commit"`
+	Dirty         bool           `json:"dirty"`
+	Host          Host           `json:"host"`
+	Method        string         `json:"method"`
+	Options       RunSettings    `json:"settings"`
+	Toolchains    []Toolchain    `json:"toolchains"`
+	Installations []Installation `json:"installations"`
+	Cases         []Case         `json:"cases"`
+}
+
+type Installation struct {
+	Name     string   `json:"name"`
+	UsedBy   []string `json:"usedBy"`
+	Scope    string   `json:"scope"`
+	Bytes    int64    `json:"bytes"`
+	Files    int      `json:"files"`
+	Symlinks int      `json:"skippedSymlinks"`
+	Status   string   `json:"status"`
+	Reason   string   `json:"reason,omitempty"`
 }
 
 type Host struct {

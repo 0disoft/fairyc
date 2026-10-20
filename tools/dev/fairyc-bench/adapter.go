@@ -36,7 +36,11 @@ func discover(ctx context.Context, o Options, language string) adapter {
 				return a
 			}
 		}
-		a.toolchain.Version = "checkout " + gitValue("rev-parse", "HEAD")
+		if o.Fairy == "" {
+			a.toolchain.Version = "checkout " + gitValue("rev-parse", "HEAD")
+		} else {
+			a.toolchain.Version = "external prebuilt; identity is executable SHA-256"
+		}
 		if runtime.GOOS == "windows" {
 			tc, err := cdriver.ResolveWindowsHostMSVC()
 			if err != nil {
@@ -159,7 +163,10 @@ func (a adapter) build(project, state, profile string) ([]string, []string, erro
 		if profile == "release" {
 			opt = "ReleaseFast"
 		}
-		args = append(args, "build", "-Doptimize="+opt, "--cache-dir", filepath.Join(project, ".zig-cache"), "--global-cache-dir", filepath.Join(state, "zig-global"))
+		// Environment form also isolates the build-system executable itself.
+		// Zig 0.17 no longer accepts --global-cache-dir on `zig build`.
+		env = append(env, "ZIG_GLOBAL_CACHE_DIR="+filepath.Join(state, "shared", "zig"), "ZIG_LOCAL_CACHE_DIR="+filepath.Join(project, ".zig-cache"))
+		args = append(args, "build", "-Doptimize="+opt, "--cache-dir", filepath.Join(project, ".zig-cache"))
 	case "c":
 		if err := os.MkdirAll(filepath.Join(project, "build"), 0o755); err != nil {
 			return nil, nil, err

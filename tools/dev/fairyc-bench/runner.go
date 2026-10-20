@@ -31,12 +31,16 @@ func run(ctx context.Context, o Options) error {
 	if err = os.Mkdir(o.Output, 0o755); err != nil {
 		return fmt.Errorf("create new output directory: %w", err)
 	}
-	r := Receipt{Schema: receiptSchema, Started: time.Now().UTC().Format(time.RFC3339), Commit: gitValue("rev-parse", "HEAD"), Dirty: gitValue("status", "--porcelain") != "", Host: Host{OS: runtime.GOOS, Arch: runtime.GOARCH, CPU: cpuName(), CPUs: runtime.NumCPU(), GoVersion: runtime.Version()}, Method: "Logical file lengths after each command; disjoint output/cache roots; no toolchain installation or peak transient disk usage; cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.", Options: RunSettings{Languages: o.Languages, Profiles: o.Profiles, Workloads: o.Workloads, Edits: o.Edits, Modules: o.Modules, Repetitions: o.Repetitions, Timeout: o.Timeout.String()}}
+	r := Receipt{Schema: receiptSchema, Started: time.Now().UTC().Format(time.RFC3339), Commit: gitValue("rev-parse", "HEAD"), Dirty: gitValue("status", "--porcelain") != "", Host: Host{OS: runtime.GOOS, Arch: runtime.GOARCH, CPU: cpuName(), CPUs: runtime.NumCPU(), GoVersion: runtime.Version()}, Method: "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.", Options: RunSettings{Languages: o.Languages, Profiles: o.Profiles, Workloads: o.Workloads, Edits: o.Edits, Modules: o.Modules, Repetitions: o.Repetitions, Timeout: o.Timeout.String()}}
 	failed := false
 	input := workloadInput()
+	installed := map[string]int{}
 	for _, language := range o.Languages {
 		a := discover(ctx, o, language)
 		r.Toolchains = append(r.Toolchains, a.toolchain)
+		if a.toolchain.Status == "ready" {
+			addInstallations(&r, a, installed)
+		}
 		for _, profile := range o.Profiles {
 			if profile == "small-dev" && language != "rust" {
 				continue
@@ -127,7 +131,7 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 			verification, actual, verifyErr := execute(ctx, o.Timeout, project, env, input, a.binary(project, c.Profile))
 			s.Commands = append(s.Commands, portable(verification, o.Output))
 			s.Actual = strings.ReplaceAll(actual, "\r\n", "\n")
-			s.Verified = verifyErr == nil && s.Actual == s.Expected
+			s.Verified = verifyErr == nil && verification.Log == "" && s.Actual == s.Expected
 		}
 		s.Footprint, err = inventory(project, state, a.binary(project, c.Profile))
 		if err != nil {

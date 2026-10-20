@@ -66,6 +66,8 @@ other developer command paths with `tools/dev/<name>` when following old instruc
 
 ## Related documents
 
+- [Build footprint benchmark](../docs/benchmarks/README.md) for the manual retained-output and
+  cache-growth comparison tool.
 - [Development guide](../DEVELOPMENT.md) for building the Windows compiler binary.
 - [Contributing](../CONTRIBUTING.md) for building, focused tests, native backend selection, and
   historical tools and artifacts.

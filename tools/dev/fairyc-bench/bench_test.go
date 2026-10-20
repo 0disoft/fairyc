@@ -62,6 +62,21 @@ func TestSourceIdentityAndEdits(t *testing.T) {
 	}
 }
 
+func TestInstallationDeduplication(t *testing.T) {
+	root := t.TempDir()
+	if err := writeSources(root, map[string]string{"zig": "123", "lib/stdlib": "12345"}); err != nil {
+		t.Fatal(err)
+	}
+	r := Receipt{}
+	a := adapter{language: "zig", executable: filepath.Join(root, "zig")}
+	seen := map[string]int{}
+	addInstallations(&r, a, seen)
+	addInstallations(&r, a, seen)
+	if len(r.Installations) != 1 || r.Installations[0].Bytes != 8 || r.Installations[0].Files != 2 || len(r.Installations[0].UsedBy) != 1 {
+		t.Fatalf("incorrect installation inventory: %+v", r.Installations)
+	}
+}
+
 func TestReference(t *testing.T) {
 	// 'a' and '12' are two tokens; '+' is a third. Whitespace is ignored.
 	if got := reference([]byte("a 12+"), 0, 1); got != "tokens=3 checksum=583262\n" {

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/0disoft/fairyc/blob/main/docs/benchmarks/receipt-v1.schema.json",
+  "title": "Fairy C native build footprint receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "started", "finished", "commit", "dirty", "host", "method", "settings", "toolchains", "cases"],
+  "properties": {
+    "schema": {"const": "fairyc.build-footprint/v1"},
+    "started": {"type": "string"},
+    "finished": {"type": "string"},
+    "commit": {"type": "string"},
+    "dirty": {"type": "boolean"},
+    "method": {"type": "string"},
+    "host": {
+      "type": "object", "additionalProperties": false,
+      "required": ["os", "arch", "cpu", "logicalCpus", "runnerGoVersion"],
+      "properties": {"os": {"type": "string"}, "arch": {"type": "string"}, "cpu": {"type": "string"}, "logicalCpus": {"type": "integer", "minimum": 1}, "runnerGoVersion": {"type": "string"}}
+    },
+    "settings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["languages", "profiles", "workloads", "edits", "modules", "repetitions", "commandTimeout"],
+      "properties": {
+        "languages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["fairy", "zig", "rust", "c"]}},
+        "profiles": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["dev", "release", "small-dev"]}},
+        "workloads": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["tokenizer", "many-modules"]}},
+        "edits": {"type": "integer", "minimum": 0, "maximum": 1000},
+        "modules": {"type": "integer", "minimum": 2, "maximum": 64},
+        "repetitions": {"type": "integer", "minimum": 1, "maximum": 100},
+        "commandTimeout": {"type": "string"}
+      }
+    },
+    "toolchains": {"type": "array", "items": {"$ref": "#/$defs/toolchain"}},
+    "installations": {"type": ["array", "null"], "items": {"$ref": "#/$defs/installation"}},
+    "cases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "installation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "usedBy", "scope", "bytes", "files", "skippedSymlinks", "status"],
+      "properties": {
+        "name": {"type": "string"}, "usedBy": {"type": "array", "items": {"type": "string"}},
+        "scope": {"type": "string"}, "bytes": {"$ref": "#/$defs/bytes"},
+        "files": {"type": "integer", "minimum": 0}, "skippedSymlinks": {"type": "integer", "minimum": 0},
+        "status": {"enum": ["measured", "incomplete", "unmeasured"]}, "reason": {"type": "string"}
+      }
+    },
+    "bytes": {"type": "integer", "minimum": 0},
+    "toolchain": {
+      "type": "object", "additionalProperties": false,
+      "required": ["language", "version", "executable", "executableSha256", "executableBytes", "status"],
+      "properties": {
+        "language": {"enum": ["fairy", "zig", "rust", "c"]},
+        "version": {"type": "string"}, "executable": {"type": "string"},
+        "executableSha256": {"type": "string"}, "executableBytes": {"$ref": "#/$defs/bytes"},
+        "backend": {"type": "string"}, "status": {"enum": ["ready", "unavailable"]}, "reason": {"type": "string"}
+      }
+    },
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "language", "profile", "workload", "repetition", "status", "inputSha256", "samples"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "language": {"enum": ["fairy", "zig", "rust", "c"]},
+        "profile": {"enum": ["dev", "release", "small-dev"]},
+        "workload": {"enum": ["tokenizer", "many-modules"]},
+        "repetition": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["passed", "failed", "unavailable"]},
+        "reason": {"type": "string"}, "inputSha256": {"type": "string"},
+        "samples": {"type": ["array", "null"], "items": {"$ref": "#/$defs/sample"}}
+      }
+    },
+    "sample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["stage", "edit", "change", "sourceSha256", "sourceBytes", "sourceFiles", "commands", "buildWallMs", "expectedStdout", "actualStdout", "verified", "footprint"],
+      "properties": {
+        "stage": {"enum": ["cold", "no-op", "edit", "clean"]},
+        "edit": {"type": "integer", "minimum": 0}, "change": {"enum": ["none", "private", "public-interface"]},
+        "sourceSha256": {"type": "string"}, "sourceBytes": {"$ref": "#/$defs/bytes"},
+        "sourceFiles": {"type": "integer", "minimum": 0}, "action": {"type": "string"},
+        "commands": {"type": ["array", "null"], "items": {"$ref": "#/$defs/command"}},
+        "buildWallMs": {"type": "number", "minimum": 0},
+        "expectedStdout": {"type": "string"}, "actualStdout": {"type": "string"}, "verified": {"type": "boolean"},
+        "footprint": {"$ref": "#/$defs/footprint"}, "reclaimedBytes": {"type": "integer"}
+      }
+    },
+    "command": {
+      "type": "object", "additionalProperties": false,
+      "required": ["argv", "exitCode", "wallMs"],
+      "properties": {
+        "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "environmentOverrides": {"type": "array", "items": {"type": "string"}},
+        "exitCode": {"type": "integer"}, "wallMs": {"type": "number", "minimum": 0},
+        "log": {"type": "string"}, "timedOut": {"type": "boolean"}
+      }
+    },
+    "footprint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["binaryBytes", "separateDebugBytes", "incrementalBytes", "intermediateBytes", "localCacheBytes", "sharedCacheBytes", "retainedTempBytes", "files", "totalBytes"],
+      "properties": {
+        "binaryBytes": {"$ref": "#/$defs/bytes"}, "separateDebugBytes": {"$ref": "#/$defs/bytes"},
+        "incrementalBytes": {"$ref": "#/$defs/bytes"}, "intermediateBytes": {"$ref": "#/$defs/bytes"},
+        "localCacheBytes": {"$ref": "#/$defs/bytes"}, "sharedCacheBytes": {"$ref": "#/$defs/bytes"},
+        "retainedTempBytes": {"$ref": "#/$defs/bytes"}, "files": {"type": "integer", "minimum": 0},
+        "totalBytes": {"$ref": "#/$defs/bytes"}
+      }
+    }
+  }
+}
