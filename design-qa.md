@@ -23,7 +23,7 @@ final result: passed
 ## Fidelity review
 
 - Typography: system/Segoe UI fallback, 42px heading and 20–21px desktop table/menu text preserve the reference hierarchy. Generated mock typography differs slightly (P3).
-- Layout: 260px fixed sidebar, main content scroll container, table above proportional bars. Compact icon navigation and horizontal table scrolling work at 390px.
+- Layout: fixed sidebar, main content scroll container, table above proportional bars. The sidebar was widened from 260px to 296px in the follow-up below. Compact icon navigation and horizontal table scrolling work at 390px.
 - Colors: pale sidebar, white content, mint selected menu, teal totals/project output and blue shared-cache bars match the selected direction.
 - Assets: reuse the project logo and bundled Feather icons; the existing logo differs slightly in spacing from the generated reference (P3).
 - Content: receipt values match the reference. Existing catalog terminology and accurate cache/measurement notes are retained. The chart scales to the largest actual total, rather than naming Zig as a permanent baseline.
@@ -44,3 +44,13 @@ final result: passed
 
 - Minor font/icon and logo-spacing differences from the generated mock are P3 polish.
 - No compiler-wide test run: this change only affects report presentation. No API, database, command contract, source-of-truth specification or CI runner changes.
+
+## Follow-up: sidebar width and pinned measurement columns (2026-10-21)
+
+- User-requested adjustments: 296px desktop sidebar and 260px medium-width sidebar. English Measurements and all French menu labels fit on one line at the desktop viewport.
+- Language, Profile and Workload headers and cells stay pinned to the left of the measurement scroller. ResizeObserver recalculates offsets from the actual translated header widths after filters, panel visibility or viewport size changes.
+- Verified English horizontal scroll of 672.89px: pinned header x positions stayed 366.89, 444.89, 519.56 while Run moved from 625.06 to -47.83. Data cells match their headers and have opaque backgrounds.
+- Verified filtering to one Fairy C/dev/tokenizer row updates the narrower column offsets correctly; Korean columns also stay visible at the right edge of the table.
+- Screenshots: `.cache/bench-design-qa/pinned-columns.png` and `.cache/bench-design-qa/pinned-columns-ko.png` at the same desktop viewport used above.
+- Re-rendered all six HTML reports from the unchanged receipt. Report package tests and diff checks passed; browser console had no warnings or errors.
+- final result: passed
