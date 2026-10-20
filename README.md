@@ -2,7 +2,7 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/fairyc-logo-horizontal-dark-v1.png">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/fairyc-logo-horizontal-dark-v2.png">
     <img src="assets/brand/fairyc-logo-horizontal-v1.png" alt="Fairy C — a cat fairy holding a turquoise C medallion" width="540">
   </picture>
 </p>
