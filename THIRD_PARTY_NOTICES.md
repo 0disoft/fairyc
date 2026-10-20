@@ -8,6 +8,9 @@ Third-party licenses are not replaced by Fairy C's Apache-2.0 license.
 subsets for multilingual chart exports. Sources and full notices are in
 [tools/dev/fairyc-bench/fonts](tools/dev/fairyc-bench/fonts/README.md).
 
+The report also embeds Feather 4.29.2 icons (MIT). Source and license:
+[tools/dev/fairyc-bench/assets](tools/dev/fairyc-bench/assets/README.md).
+
 ## Go runtime and standard library
 
 - Toolchain inspected: Go 1.27.1 (Windows AMD64, CGO disabled)

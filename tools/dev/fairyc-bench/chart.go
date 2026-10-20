@@ -204,9 +204,7 @@ func (s scene) svg() string {
 	return b.String()
 }
 
-func summaryChart(r Receipt, codes ...string) scene {
-	locale := chartLocale(codes)
-	t := translator(locale)
+func summaryGroups(r Receipt) (string, []series, bool) {
 	workload := r.Options.Workloads[0]
 	for _, name := range r.Options.Workloads {
 		if name == "many-modules" {
@@ -221,14 +219,23 @@ func summaryChart(r Receipt, codes ...string) scene {
 			filtered.Cases = append(filtered.Cases, c)
 		}
 	}
-	profiles := "development profiles"
-	if len(filtered.Cases) == 0 {
+	development := len(filtered.Cases) > 0
+	if !development {
 		filtered.Cases = r.Cases
+	}
+	return workload, seriesFor(filtered, workload), development
+}
+
+func summaryChart(r Receipt, codes ...string) scene {
+	locale := chartLocale(codes)
+	t := translator(locale)
+	workload, groups, development := summaryGroups(r)
+	profiles := "development profiles"
+	if !development {
 		profiles = "all profiles"
 	}
 	s := chartHeader(r, t("Build footprint"), locale)
 	s.text(32, 99, 13, muted, t("%s | %d source edits | %s", t(workload), r.Options.Edits, t(profiles)))
-	groups := seriesFor(filtered, workload)
 	maximum := 1.0
 	for _, g := range groups {
 		total := 0.0
