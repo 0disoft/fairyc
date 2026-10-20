@@ -70,9 +70,20 @@ func TestReportArtifactsAndEscaping(t *testing.T) {
 	if strings.Count(string(b), `id="chart-`) != 6 {
 		t.Fatal("inline SVG titles must have distinct IDs")
 	}
-	for letter, glyph := range glyphs {
-		if len(glyph) != 35 {
-			t.Fatalf("bad bitmap for %c: %d", letter, len(glyph))
+	for _, code := range supportedLocales {
+		html, err := os.ReadFile(filepath.Join(root, artifactName("report.html", code)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, text := range []string{`lang="` + code + `"`, translator(code)("Build footprint"), `href="` + artifactName("summary.png", code) + `"`, `id="locale"`} {
+			if !strings.Contains(string(html), text) {
+				t.Errorf("%s: missing localized report content: %s", code, text)
+			}
+		}
+		for _, name := range []string{"summary.svg", "summary.png", "footprint.svg", "footprint.png", "growth.svg", "growth.png"} {
+			if info, err := os.Stat(filepath.Join(root, artifactName(name, code))); err != nil || info.Size() == 0 {
+				t.Fatalf("%s: missing artifact %s", code, name)
+			}
 		}
 	}
 }
@@ -97,5 +108,31 @@ func TestRejectMisleadingReceipts(t *testing.T) {
 	r.Cases[0].Samples = r.Cases[0].Samples[:2]
 	if err := validateReceipt(r); err == nil {
 		t.Fatal("accepted missing clean")
+	}
+}
+
+func TestSingleLocaleRender(t *testing.T) {
+	root := t.TempDir()
+	receipt := filepath.Join(root, "receipt.json")
+	if err := writeJSON(receipt, fixtureReceipt()); err != nil {
+		t.Fatal(err)
+	}
+	output := filepath.Join(root, "report")
+	if err := renderCLI([]string{"--input", receipt, "--output", output, "--locale", "fr"}); err != nil {
+		t.Fatal(err)
+	}
+	b, err := os.ReadFile(filepath.Join(output, "report.fr.html"))
+	if err != nil || !strings.Contains(string(b), `<html lang="fr">`) || strings.Contains(string(b), `id="locale"`) {
+		t.Fatal("single-locale report must not link to missing language variants")
+	}
+	if _, err := os.Stat(filepath.Join(output, "summary.png")); !os.IsNotExist(err) {
+		t.Fatal("single-locale render unexpectedly generated English")
+	}
+	invalid := filepath.Join(root, "invalid")
+	if err := renderCLI([]string{"--input", receipt, "--output", invalid, "--locale", "de"}); err == nil {
+		t.Fatal("unsupported locale was accepted")
+	}
+	if _, err := os.Stat(invalid); !os.IsNotExist(err) {
+		t.Fatal("unsupported locale created output")
 	}
 }

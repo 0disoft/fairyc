@@ -24,7 +24,7 @@ func main() {
 
 func entry(ctx context.Context, args []string) error {
 	if len(args) > 0 && (args[0] == "--help" || args[0] == "-h" || args[0] == "help") {
-		fmt.Fprintln(os.Stdout, "usage: fairyc-bench run --output NEW_DIR [--languages fairy,zig,rust,c] [--workloads tokenizer,many-modules] [--edits 20] [--repetitions 1]\n       fairyc-bench render --input receipt.json --output REPORT_DIR\nUse run --help or render --help for all options.")
+		fmt.Fprintln(os.Stdout, "usage: fairyc-bench run --output NEW_DIR [--languages fairy,zig,rust,c] [--workloads tokenizer,many-modules] [--edits 20] [--repetitions 1]\n       fairyc-bench render --input receipt.json --output REPORT_DIR [--locale all|en|zh|es|fr|hi]\nUse run --help or render --help for all options.")
 		return nil
 	}
 	if len(args) == 0 {

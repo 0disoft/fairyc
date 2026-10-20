@@ -15,9 +15,10 @@ import (
 
 func renderCLI(args []string) error {
 	fs := flag.NewFlagSet("render", flag.ContinueOnError)
-	var input, output string
+	var input, output, locale string
 	fs.StringVar(&input, "input", "", "receipt JSON")
 	fs.StringVar(&output, "output", "", "report directory")
+	fs.StringVar(&locale, "locale", "all", "report language: all, en, zh, es, fr, hi")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -26,6 +27,13 @@ func renderCLI(args []string) error {
 	}
 	if input == "" || output == "" || fs.NArg() != 0 {
 		return errors.New("render requires --input FILE --output DIR")
+	}
+	codes := supportedLocales
+	if locale != "all" {
+		if !slices.Contains(supportedLocales, locale) {
+			return fmt.Errorf("unsupported report locale %q (use all, en, zh, es, fr, hi)", locale)
+		}
+		codes = []string{locale}
 	}
 	file, err := os.Open(input)
 	if err != nil {
@@ -41,7 +49,7 @@ func renderCLI(args []string) error {
 	if err := decoder.Decode(new(any)); err != io.EOF {
 		return errors.New("receipt contains trailing data or exceeds 64 MiB")
 	}
-	return render(receipt, output)
+	return renderLocales(receipt, output, codes)
 }
 
 func validateReceipt(r Receipt) error {
@@ -139,24 +147,30 @@ func validateReceipt(r Receipt) error {
 }
 
 func render(r Receipt, output string) error {
+	return renderLocales(r, output, supportedLocales)
+}
+
+func renderLocales(r Receipt, output string, locales []string) error {
 	if err := validateReceipt(r); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(output, 0o755); err != nil {
 		return err
 	}
-	for name, chart := range map[string]scene{"footprint": footprintChart(r), "growth": growthChart(r), "summary": summaryChart(r)} {
-		if err := os.WriteFile(filepath.Join(output, name+".svg"), []byte(chart.svg()), 0o644); err != nil {
-			return err
+	for _, locale := range locales {
+		for name, chart := range map[string]scene{"footprint": footprintChart(r, locale), "growth": growthChart(r, locale), "summary": summaryChart(r, locale)} {
+			if err := os.WriteFile(filepath.Join(output, artifactName(name+".svg", locale)), []byte(chart.svg()), 0o644); err != nil {
+				return err
+			}
+			if err := chart.png(filepath.Join(output, artifactName(name+".png", locale))); err != nil {
+				return err
+			}
 		}
-		if err := chart.png(filepath.Join(output, name+".png")); err != nil {
+		if err := renderHTML(r, filepath.Join(output, artifactName("report.html", locale)), locale, locales); err != nil {
 			return err
 		}
 	}
-	if err := writeJSON(filepath.Join(output, "receipt.json"), r); err != nil {
-		return err
-	}
-	return renderHTML(r, filepath.Join(output, "report.html"))
+	return writeJSON(filepath.Join(output, "receipt.json"), r)
 }
 
 type series struct {

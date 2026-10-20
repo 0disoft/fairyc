@@ -2,6 +2,12 @@
 
 Third-party licenses are not replaced by Fairy C's Apache-2.0 license.
 
+## Benchmark report renderer
+
+`tools/dev/fairyc-bench` uses go-text/typesetting, golang.org/x/image and renamed Noto font
+subsets for multilingual chart exports. Sources and full notices are in
+[tools/dev/fairyc-bench/fonts](tools/dev/fairyc-bench/fonts/README.md).
+
 ## Go runtime and standard library
 
 - Toolchain inspected: Go 1.27.1 (Windows AMD64, CGO disabled)

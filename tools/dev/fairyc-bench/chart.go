@@ -15,6 +15,7 @@ type shape struct {
 type scene struct {
 	Width, Height      int
 	Title, Description string
+	Locale             string
 	Shapes             []shape
 }
 
@@ -34,10 +35,11 @@ func (s *scene) rect(x, y, w, h float64, color string) {
 func (s *scene) line(points []point, color string) {
 	s.Shapes = append(s.Shapes, shape{Kind: "line", Points: points, Color: color})
 }
-func chartHeader(r Receipt, title string) scene {
-	s := scene{Width: 1120, Title: title, Description: r.Method}
+func chartHeader(r Receipt, title string, locale string) scene {
+	t := translator(locale)
+	s := scene{Width: 1120, Title: title, Description: t("Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ."), Locale: locale}
 	s.text(32, 42, 26, ink, title)
-	s.text(32, 69, 13, muted, fmt.Sprintf("%s | %s/%s | %s | %d run(s)", strings.Split(r.Started, "T")[0], r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
+	s.text(32, 69, 13, muted, t("%s | %s/%s | %s | %d run(s)", strings.Split(r.Started, "T")[0], r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
 	s.Height = 95
 	return s
 }
@@ -45,14 +47,16 @@ func buckets(f Footprint) []int64 {
 	return []int64{f.Binary, f.Debug, f.Incremental, f.Intermediate, f.LocalCache, f.SharedCache, f.Temporary}
 }
 
-func footprintChart(r Receipt) scene {
-	s := chartHeader(r, fmt.Sprintf("Build footprints after %d source edits", r.Options.Edits))
+func footprintChart(r Receipt, codes ...string) scene {
+	locale := chartLocale(codes)
+	t := translator(locale)
+	s := chartHeader(r, t("Build footprints after %d source edits", r.Options.Edits), locale)
 	y := float64(s.Height) + 10
 	for _, workload := range r.Options.Workloads {
 		groups := seriesFor(r, workload)
-		s.text(32, y, 19, ink, workload)
+		s.text(32, y, 19, ink, t(workload))
 		y += 25
-		s.text(32, y, 12, muted, "Components: mean bytes across repetitions. End total / binary / files / clean remainder.")
+		s.text(32, y, 12, muted, t("Components: mean bytes across repetitions. End total / binary / files / clean remainder."))
 		y += 27
 		maximum := 1.0
 		for _, g := range groups {
@@ -80,7 +84,7 @@ func footprintChart(r Receipt) scene {
 			binary /= n
 			remaining /= n
 			files /= n
-			s.text(32, y+17, 14, ink, g.Language+" / "+g.Profile)
+			s.text(32, y+17, 14, ink, g.Language+" / "+t(g.Profile))
 			x := 245.0
 			s.rect(x, y, 510, 23, "#e9eef3")
 			for i, b := range values {
@@ -90,12 +94,12 @@ func footprintChart(r Receipt) scene {
 					x += w
 				}
 			}
-			s.text(775, y+15, 13, ink, bytesLabel(total)+" total")
-			s.text(775, y+33, 12, muted, fmt.Sprintf("%s binary / %.0f files / %s clean", bytesLabel(binary), files, bytesLabel(remaining)))
+			s.text(775, y+15, 13, ink, t("%s total", bytesLabel(total)))
+			s.text(775, y+33, 12, muted, t("%s binary / %.0f files / %s clean", bytesLabel(binary), files, bytesLabel(remaining)))
 			y += 54
 		}
 		if len(groups) == 0 {
-			s.text(32, y+16, 14, muted, "No verified measurements for this workload.")
+			s.text(32, y+16, 14, muted, t("No verified measurements for this workload."))
 			y += 40
 		}
 		y += 18
@@ -104,20 +108,22 @@ func footprintChart(r Receipt) scene {
 		x := 32 + float64(i%4)*267
 		row := float64(i/4) * 25
 		s.rect(x, y+row, 12, 12, bucketColors[i])
-		s.text(x+19, y+row+11, 12, muted, name)
+		s.text(x+19, y+row+11, 12, muted, t(name))
 	}
 	y += 75
-	s.text(32, y, 12, muted, "Logical file sizes, including shared cache. Debug defaults differ. Details: report.html")
+	s.text(32, y, 12, muted, t("Logical file sizes, including shared cache. Debug defaults differ. Details: report.html"))
 	s.Height = int(y + 30)
 	return s
 }
 
-func growthChart(r Receipt) scene {
-	s := chartHeader(r, "Disk growth while editing")
+func growthChart(r Receipt, codes ...string) scene {
+	locale := chartLocale(codes)
+	t := translator(locale)
+	s := chartHeader(r, t("Disk growth while editing"), locale)
 	y := float64(s.Height) + 10
 	for _, workload := range r.Options.Workloads {
 		groups := seriesFor(r, workload)
-		s.text(32, y, 19, ink, workload+" - median retained MiB")
+		s.text(32, y, 19, ink, t("%s - median retained MiB", t(workload)))
 		y += 28
 		left, top, width, height := 100.0, y, 970.0, 220.0
 		maximum := 1.0
@@ -157,17 +163,17 @@ func growthChart(r Receipt) scene {
 			s.line(points, lineColors[i%len(lineColors)])
 		}
 		y += height + 54
-		s.text(100, y, 12, muted, "Source edits")
+		s.text(100, y, 12, muted, t("Source edits"))
 		y += 28
 		for i, g := range groups {
 			x := 32 + float64(i%3)*360
 			row := float64(i/3) * 23
 			s.rect(x, y+row, 14, 4, lineColors[i%len(lineColors)])
-			s.text(x+22, y+row+6, 12, ink, g.Language+" / "+g.Profile)
+			s.text(x+22, y+row+6, 12, ink, g.Language+" / "+t(g.Profile))
 		}
 		y += float64((len(groups)+2)/3)*23 + 32
 	}
-	s.text(32, y, 12, muted, "Logical file sizes, including shared cache. Details: report.html")
+	s.text(32, y, 12, muted, t("Logical file sizes, including shared cache. Details: report.html"))
 	s.Height = int(y + 30)
 	return s
 }
@@ -175,11 +181,11 @@ func growthChart(r Receipt) scene {
 func (s scene) svg() string {
 	var b strings.Builder
 	id := "chart-" + digest([]byte(s.Title))[:8]
-	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-labelledby="%s-title %s-desc"><title id="%s-title">%s</title><desc id="%s-desc">%s</desc><rect width="100%%" height="100%%" fill="#f8fafc"/>`, s.Width, s.Height, s.Width, s.Height, id, id, id, html.EscapeString(s.Title), id, html.EscapeString(s.Description))
+	fmt.Fprintf(&b, `<svg lang="%s" xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-labelledby="%s-title %s-desc"><title id="%s-title">%s</title><desc id="%s-desc">%s</desc><rect width="100%%" height="100%%" fill="#f8fafc"/>`, s.Locale, s.Width, s.Height, s.Width, s.Height, id, id, id, html.EscapeString(s.Title), id, html.EscapeString(s.Description))
 	for _, p := range s.Shapes {
 		switch p.Kind {
 		case "text":
-			fmt.Fprintf(&b, `<text x="%.2f" y="%.2f" font-family="Arial,Helvetica,sans-serif" font-size="%.0f" fill="%s">%s</text>`, p.X, p.Y, p.Size, p.Color, html.EscapeString(p.Text))
+			fmt.Fprintf(&b, `<g role="img" aria-label="%s"><path fill="%s" d="%s"/></g>`, html.EscapeString(p.Text), p.Color, outlineSVG(textOutline(p, s.Locale, float64(s.Width)-p.X-32)))
 		case "rect":
 			fmt.Fprintf(&b, `<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" fill="%s"/>`, p.X, p.Y, p.W, p.H, p.Color)
 		case "line":
@@ -198,7 +204,9 @@ func (s scene) svg() string {
 	return b.String()
 }
 
-func summaryChart(r Receipt) scene {
+func summaryChart(r Receipt, codes ...string) scene {
+	locale := chartLocale(codes)
+	t := translator(locale)
 	workload := r.Options.Workloads[0]
 	for _, name := range r.Options.Workloads {
 		if name == "many-modules" {
@@ -218,8 +226,8 @@ func summaryChart(r Receipt) scene {
 		filtered.Cases = r.Cases
 		profiles = "all profiles"
 	}
-	s := chartHeader(r, "Build footprint")
-	s.text(32, 99, 13, muted, fmt.Sprintf("%s | %d source edits | %s", workload, r.Options.Edits, profiles))
+	s := chartHeader(r, t("Build footprint"), locale)
+	s.text(32, 99, 13, muted, t("%s | %d source edits | %s", t(workload), r.Options.Edits, t(profiles)))
 	groups := seriesFor(filtered, workload)
 	maximum := 1.0
 	for _, g := range groups {
@@ -241,7 +249,7 @@ func summaryChart(r Receipt) scene {
 		n := float64(len(g.Cases))
 		label := map[string]string{"fairy": "Fairy C", "zig": "Zig", "rust": "Rust", "c": "C"}[g.Language]
 		if g.Profile != "dev" {
-			label += " / " + g.Profile
+			label += " / " + t(g.Profile)
 		}
 		s.text(32, y+19, 16, ink, label)
 		s.rect(250, y, 590, 26, "#e9eef3")
@@ -257,15 +265,15 @@ func summaryChart(r Receipt) scene {
 		y += 48
 	}
 	if len(groups) == 0 {
-		s.text(32, y+19, 16, muted, "No passed measurements")
+		s.text(32, y+19, 16, muted, t("No passed measurements"))
 		y += 48
 	}
 	for i, name := range []string{"Project outputs/cache", "Shared cache", "Retained temp"} {
 		x := 32 + float64(i)*300
 		s.rect(x, y+4, 12, 12, []string{bucketColors[0], bucketColors[5], bucketColors[6]}[i])
-		s.text(x+20, y+15, 12, muted, name)
+		s.text(x+20, y+15, 12, muted, t(name))
 	}
-	s.text(32, y+45, 12, muted, "Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ.")
+	s.text(32, y+45, 12, muted, t("Logical file sizes. Toolchains and peak usage excluded. Debug defaults differ."))
 	s.Height = int(y + 65)
 	return s
 }

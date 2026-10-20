@@ -9,6 +9,8 @@ inspecting build workflow cost; these synthetic workloads do not establish a uni
 
 ## Latest snapshot
 
+[English](latest/report.html) · [中文](latest/report.zh.html) · [Español](latest/report.es.html) · [Français](latest/report.fr.html) · [हिन्दी](latest/report.hi.html)
+
 - [Development summary SVG](latest/summary.svg) and [PNG](latest/summary.png): `dev` and Rust
   `small-dev` for `many-modules`
 - [Full footprint SVG](latest/footprint.svg) and [PNG](latest/footprint.png)
@@ -41,6 +43,11 @@ checkout compiler under `tooling` when `--fairyc` is omitted. Rendering is a sep
 ```text
 go run ./tools/dev/fairyc-bench render --input .cache/bench-YYYY-MM-DD/receipt.json --output docs/benchmarks/latest
 ```
+
+Rendering produces all five languages by default. Use `--locale en`, `zh` (Simplified Chinese),
+`es`, `fr`, or `hi` for one language. Localized files use a suffix, such as `summary.hi.png`
+or `report.fr.html`; English keeps the original filenames. Keep the HTML files together to use
+the language selector. Each HTML file embeds its own charts and works offline.
 
 The `run` output directory must not already exist. The parent directory must exist, and a failed or
 unavailable case makes the command exit non-zero after the receipt has been updated.
@@ -163,9 +170,9 @@ installation requirement for each language.
 `render` validates the receipt and writes a self-contained, static `report.html` with its charts,
 styles, and table filters embedded. It also writes `footprint.svg`, `footprint.png`, `growth.svg`,
 `growth.png`, `summary.svg`, `summary.png`, and a copy of `receipt.json`. The compact summary selects
-`dev` and Rust `small-dev` for `many-modules` when that workload is present. PNG charts use a built-in
-ASCII bitmap font, so rendering does not need a browser or an external rasterizer. The tool adds no
-Go module dependencies.
+`dev` and Rust `small-dev` for `many-modules` when that workload is present. SVG and PNG use bundled
+font subsets and Go text shaping, including Hindi conjuncts. Rendering needs no browser, installed
+fonts, or network connection. See [font sources and licenses](../../tools/dev/fairyc-bench/fonts/README.md).
 
 The footprint bars average retained bytes across repetitions, so their stacked components add up to
 the mean total. The growth chart uses the median at each edit. The HTML table reports median

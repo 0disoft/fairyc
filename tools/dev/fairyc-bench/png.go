@@ -2,22 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-text/typesetting/font/opentype"
+	"golang.org/x/image/vector"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"math"
 	"os"
-	"strings"
 )
-
-// A small built-in ASCII bitmap font keeps PNG export independent of browsers,
-// network fonts, and rasterizer installations. PNG uses the same scene as SVG.
-var glyphs = map[rune]string{
-	'A': "01110100011000111111100011000110001", 'B': "11110100011000111110100011000111110", 'C': "01111100001000010000100001000001111", 'D': "11110100011000110001100011000111110", 'E': "11111100001000011110100001000011111", 'F': "11111100001000011110100001000010000", 'G': "01111100001000010111100011000101111", 'H': "10001100011000111111100011000110001", 'I': "11111001000010000100001000010011111", 'J': "00111000100001000010000101001001100", 'K': "10001100101010011000101001001010001", 'L': "10000100001000010000100001000011111", 'M': "10001110111010110101100011000110001", 'N': "10001110011010110011100011000110001", 'O': "01110100011000110001100011000101110", 'P': "11110100011000111110100001000010000", 'Q': "01110100011000110001101011001001101", 'R': "11110100011000111110101001001010001", 'S': "01111100001000001110000010000111110", 'T': "11111001000010000100001000010000100", 'U': "10001100011000110001100011000101110", 'V': "10001100011000110001100010101000100", 'W': "10001100011000110101101011010101010", 'X': "10001100010101000100010101000110001", 'Y': "10001100010101000100001000010000100", 'Z': "11111000010001000100010001000011111",
-	'0': "01110100011001110101110011000101110", '1': "00100011000010000100001000010001110", '2': "01110100010000100010001000100011111", '3': "11110000010000101110000010000111110", '4': "00010001100101010010111110001000010", '5': "11111100001000011110000010000111110", '6': "01110100001000011110100011000101110", '7': "11111000010001000100010000100001000", '8': "01110100011000101110100011000101110", '9': "01110100011000101111000010000101110",
-	'.': "00000000000000000000000000011000110", ',': "00000000000000000000001100011000100", ':': "00000001100011000000001100011000000", ';': "00000001100011000000001100011000100", '-': "00000000000000011111000000000000000", '_': "00000000000000000000000000000011111", '/': "00001000100001000100010000100010000", '(': "00010001000100001000010000010000010", ')': "01000001000001000010000100010001000", '=': "00000000001111100000111110000000000", '+': "00000001000010011111001000010000000", '|': "00100001000010000100001000010000100", '%': "11001110100001000100010001001110011", '?': "01110100010000100010001000000000100", '[': "01110010000100001000010000100001110", ']': "01110000100001000010000100001001110", ' ': "00000000000000000000000000000000000",
-}
 
 func paint(hex string) color.RGBA {
 	var r, g, b uint8
@@ -37,20 +30,45 @@ func (s scene) png(path string) error {
 		case "rect":
 			rect(int(p.X*scale), int(p.Y*scale), max(1, int(p.W*scale)), max(1, int(p.H*scale)), c)
 		case "text":
-			fontScale := max(1, int(p.Size*scale/9))
-			x, y := int(p.X*scale), int(p.Y*scale)-7*fontScale
-			for _, letter := range strings.ToUpper(p.Text) {
-				glyph, ok := glyphs[letter]
-				if !ok {
-					glyph = glyphs['?']
-				}
-				for i, pixel := range glyph {
-					if pixel == '1' {
-						rect(x+(i%5)*fontScale, y+(i/5)*fontScale, fontScale, fontScale, c)
-					}
-				}
-				x += 6 * fontScale
+			paths := textOutline(p, s.Locale, float64(s.Width)-p.X-32)
+			if len(paths) == 0 {
+				continue
 			}
+			minX, minY, maxX, maxY := math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)
+			for _, segment := range paths {
+				for _, pt := range segment.ArgsSlice() {
+					minX = min(minX, float64(pt.X)*scale)
+					minY = min(minY, float64(pt.Y)*scale)
+					maxX = max(maxX, float64(pt.X)*scale)
+					maxY = max(maxY, float64(pt.Y)*scale)
+				}
+			}
+			bounds := image.Rect(int(math.Floor(minX))-1, int(math.Floor(minY))-1, int(math.Ceil(maxX))+1, int(math.Ceil(maxY))+1)
+			z := vector.NewRasterizer(bounds.Dx(), bounds.Dy())
+			started := false
+			for _, segment := range paths {
+				pts := segment.Args
+				for i := range pts {
+					pts[i].X = pts[i].X*scale - float32(bounds.Min.X)
+					pts[i].Y = pts[i].Y*scale - float32(bounds.Min.Y)
+				}
+				switch segment.Op {
+				case opentype.SegmentOpMoveTo:
+					if started {
+						z.ClosePath()
+					}
+					z.MoveTo(pts[0].X, pts[0].Y)
+					started = true
+				case opentype.SegmentOpLineTo:
+					z.LineTo(pts[0].X, pts[0].Y)
+				case opentype.SegmentOpQuadTo:
+					z.QuadTo(pts[0].X, pts[0].Y, pts[1].X, pts[1].Y)
+				case opentype.SegmentOpCubeTo:
+					z.CubeTo(pts[0].X, pts[0].Y, pts[1].X, pts[1].Y, pts[2].X, pts[2].Y)
+				}
+			}
+			z.ClosePath()
+			z.Draw(canvas, bounds, image.NewUniform(c), image.Point{})
 		case "line":
 			for i, a := range p.Points {
 				b := a
