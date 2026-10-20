@@ -63,7 +63,7 @@ func TestInlineNominalArrayFieldRoundTrip(t *testing.T) {
 			}
 			found := false
 			for _, failure := range mir.Verify(bad) {
-				if failure.Code == "V1001" && failure.Detail == "invalid inline array struct field" {
+				if failure.Code == mir.CodeAggregateFields && failure.Detail == "invalid inline array struct field" {
 					found = true
 				}
 			}

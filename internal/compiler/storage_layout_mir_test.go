@@ -106,7 +106,7 @@ func TestPrivateStorageQueryHIRAndConsumerBoundaries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := mircodec.Decode(encoded, 1<<20); err == nil || !strings.Contains(err.Error(), "private storage query") {
+	if _, err := mircodec.Decode(encoded, 1<<20); err == nil || !strings.Contains(err.Error(), mir.CodeStorageAdmission) || !strings.Contains(err.Error(), "private storage-layout is not admitted") {
 		t.Fatalf("default MIR artifact decoder: %v", err)
 	}
 }

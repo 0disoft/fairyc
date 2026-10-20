@@ -55,8 +55,20 @@ func TestGenericStructViewHeaderRetainsSlices(t *testing.T) {
 	}
 }
 
+func TestGenericStructViewHeaderRetainsBoolSlice(t *testing.T) {
+	text := "module main; pub fn usize count<T>(ref (bool)[] tokens) {return missing;} fn i32 main(){return 0;}"
+	declarations, _, err := genericSourceDeclarations(t, text)
+	if err != nil || len(declarations) != 1 {
+		t.Fatalf("bool slice header: %v %+v", err, declarations)
+	}
+	want := semanticsnapshot.TypeRef{Kind: semanticsnapshot.TypeBorrow, Arguments: []semanticsnapshot.TypeRef{{Kind: semanticsnapshot.TypeBuiltin, Name: "[bool]"}}}
+	if !reflect.DeepEqual(declarations[0].Parameters[0].Type, want) {
+		t.Fatalf("bool slice header lost: %+v", declarations[0])
+	}
+}
+
 func TestGenericStructViewHeaderRejectsNonNominalSliceChildren(t *testing.T) {
-	for _, element := range []string{"bool", "ref T", "Option<T>"} {
+	for _, element := range []string{"ref T", "Option<T>"} {
 		text := "module main; pub fn usize count<T>(ref (" + element + ")[] tokens) {return missing;} fn i32 main(){return 0;}"
 		if _, _, err := genericSourceDeclarations(t, text); err == nil {
 			t.Fatalf("slice of %s admitted", element)
