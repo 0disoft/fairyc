@@ -67,8 +67,11 @@ func TestReportArtifactsAndEscaping(t *testing.T) {
 	if !strings.Contains(string(b), "data-language=") || !strings.Contains(string(b), "addEventListener") {
 		t.Fatal("report filters missing")
 	}
-	if strings.Count(string(b), `id="chart-`) != 6 {
+	if strings.Count(string(b), `<title id="chart-`) != 2 || strings.Count(string(b), `<desc id="chart-`) != 2 {
 		t.Fatal("inline SVG titles must have distinct IDs")
+	}
+	if !strings.Contains(string(b), `data:image/png;base64,`) || strings.Contains(string(b), "ZgotmplZ") {
+		t.Fatal("report branding must be embedded and safe for offline use")
 	}
 	for _, code := range supportedLocales {
 		html, err := os.ReadFile(filepath.Join(root, artifactName("report.html", code)))

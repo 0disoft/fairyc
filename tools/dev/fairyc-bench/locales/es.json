@@ -78,6 +78,8 @@
   "many-modules": "Muchos módulos",
   "dev": "desarrollo",
   "release": "producción",
-  "small-dev": "desarrollo ligero"
+  "small-dev": "desarrollo ligero",
+  "Export": "Exportar",
+  "modules": "módulos"
 }
 

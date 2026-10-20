@@ -78,6 +78,8 @@
   "many-modules": "多模块",
   "dev": "开发",
   "release": "发布",
-  "small-dev": "精简开发"
+  "small-dev": "精简开发",
+  "Export": "导出",
+  "modules": "个模块"
 }
 

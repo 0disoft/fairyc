@@ -78,5 +78,7 @@
   "many-modules": "Many modules",
   "dev": "dev",
   "release": "release",
-  "small-dev": "small-dev"
+  "small-dev": "small-dev",
+  "Export": "Export",
+  "modules": "modules"
 }
