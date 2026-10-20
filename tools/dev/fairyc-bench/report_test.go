@@ -80,6 +80,9 @@ func TestReportArtifactsAndEscaping(t *testing.T) {
 				t.Errorf("%s: missing localized report content: %s", code, text)
 			}
 		}
+		if strings.Contains(string(html), "<details") || strings.Count(string(html), `role="tab"`) != 6 || strings.Count(string(html), `role="tabpanel"`) != 6 {
+			t.Errorf("%s: report must use six menu panels without disclosures", code)
+		}
 		for _, name := range []string{"summary.svg", "summary.png", "footprint.svg", "footprint.png", "growth.svg", "growth.png"} {
 			if info, err := os.Stat(filepath.Join(root, artifactName(name, code))); err != nil || info.Size() == 0 {
 				t.Fatalf("%s: missing artifact %s", code, name)

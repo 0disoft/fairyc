@@ -1,5 +1,10 @@
 {
   "Build footprint": "Build footprint",
+  "Summary": "Summary",
+  "Footprint": "Footprint",
+  "Measurements": "Measurements",
+  "Toolchains": "Toolchains",
+  "Notes": "Notes",
   "Language": "Language",
   "Profile": "Profile",
   "Workload": "Workload",

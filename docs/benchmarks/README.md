@@ -168,7 +168,9 @@ installation requirement for each language.
 ## Reports and receipt data
 
 `render` validates the receipt and writes a self-contained, static `report.html` with its charts,
-styles, and table filters embedded. It also writes `footprint.svg`, `footprint.png`, `growth.svg`,
+styles, and table filters embedded. The top menu switches between summary, footprint, growth,
+measurements, toolchains, and notes. The selected menu stays active when changing language.
+It also writes `footprint.svg`, `footprint.png`, `growth.svg`,
 `growth.png`, `summary.svg`, `summary.png`, and a copy of `receipt.json`. The compact summary selects
 `dev` and Rust `small-dev` for `many-modules` when that workload is present. SVG and PNG use bundled
 font subsets and Go text shaping, including Hindi conjuncts. Rendering needs no browser, installed

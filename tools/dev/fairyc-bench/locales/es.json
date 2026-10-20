@@ -1,5 +1,10 @@
 {
   "Build footprint": "Huella de compilación",
+  "Summary": "Resumen",
+  "Footprint": "Huella",
+  "Measurements": "Mediciones",
+  "Toolchains": "Herramientas",
+  "Notes": "Notas",
   "Language": "Idioma",
   "Profile": "Perfil",
   "Workload": "Carga de trabajo",

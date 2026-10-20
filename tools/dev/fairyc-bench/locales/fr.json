@@ -1,5 +1,10 @@
 {
   "Build footprint": "Empreinte de compilation",
+  "Summary": "Résumé",
+  "Footprint": "Empreinte",
+  "Measurements": "Mesures",
+  "Toolchains": "Chaînes d’outils",
+  "Notes": "Notes",
   "Language": "Langue",
   "Profile": "Profil",
   "Workload": "Charge de travail",

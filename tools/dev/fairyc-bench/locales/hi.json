@@ -1,5 +1,10 @@
 {
   "Build footprint": "बिल्ड फ़ुटप्रिंट",
+  "Summary": "सारांश",
+  "Footprint": "फ़ुटप्रिंट",
+  "Measurements": "माप",
+  "Toolchains": "टूलचेन",
+  "Notes": "नोट्स",
   "Language": "भाषा",
   "Profile": "प्रोफ़ाइल",
   "Workload": "वर्कलोड",

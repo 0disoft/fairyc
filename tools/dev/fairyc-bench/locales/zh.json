@@ -1,5 +1,10 @@
 {
   "Build footprint": "构建占用",
+  "Summary": "摘要",
+  "Footprint": "占用",
+  "Measurements": "测量",
+  "Toolchains": "工具链",
+  "Notes": "说明",
   "Language": "语言",
   "Profile": "配置",
   "Workload": "工作负载",
