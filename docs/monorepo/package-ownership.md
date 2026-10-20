@@ -50,6 +50,11 @@
 | `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, interpreter, C-emission, target-layout, C ABI, resolved-package-graph, project-manifest, workspace-loader, PackageInstanceId, package-source, public-interface, and whole-package-cache fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, arbitrary MIR exchange, lockfile syntax, or implementation-owned snapshots |
 | `tests` | executable language, backend, ABI, and diagnostic contracts | production implementation logic |
 
+`runtime` and `std` name planned top-level boundaries. Their current sources live in
+`internal/cruntime`, `internal/cstdlib` with the closed symbol contract in
+`internal/cstdlibcontract`, and `internal/sdkstdlib/sources/std` for Fairy standard-library
+sources. The table's ownership split stays conceptual; the files are under `internal/` today.
+
 ## Public-contract policy
 
 Before a stable language revision, internal Go packages are not public APIs. The public surfaces are the documented `fairyc` CLI, language revision, runtime ABI selected for conformant or supported targets, standard-library APIs, emitted schema formats, and declared C interoperability. `pub` source visibility and internal module interfaces are not binary compatibility.

@@ -21,7 +21,8 @@ Pass assertions identify source text with source-root-relative paths and half-op
 
 Fail assertions list the complete deterministic set of independent diagnostics. Diagnostics caused only by an already-poisoned name or type are suppressed as cascades. Full prose is intentionally outside the fixture contract.
 
-`internal/semanticfixture` executes all 61 listed `resolve`, `type`, and local `flow` cases. The type
+`internal/semanticfixture` executes all 63 listed `resolve`, `type`, and local `flow` cases
+(27 pass and 36 fail). The type
 cases include public inert-struct literals, explicit public resource factories, cross-module
 resource-literal `E0103`, explicit static `source_location()` expansion and `E4401`/`E4402` boundaries, bounded private scalar constants, private straight-line `@const_eval`, module
 `static_assert`, deterministic `E4301` through `E4305`, `E1012` rejection for loop control, and

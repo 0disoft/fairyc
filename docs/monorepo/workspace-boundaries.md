@@ -8,6 +8,9 @@ The repository is a toolchain monorepo, not a collection of independently deploy
 
 ## Planned top-level boundaries
 
+The block records the planned target shape. Current runtime and standard-library sources live
+under `internal/`; `docs/monorepo/package-ownership.md` names the exact packages.
+
 ```text
 cmd/fairyc/        product compiler executable
 cmd/fairyc-lsp/    product language-server executable
@@ -23,10 +26,11 @@ docs/              product and engineering rationale
 ```
 
 The grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, and
-resolved-package-graph fixtures under `spec/` exist as design-owned executable data. The first
-boundary now exists under `internal/` for source management, lexing, recoverable syntax,
-error-free AST lowering, diagnostics, and parser-fixture execution. The remaining planned package
-boundaries are created only when their phase starts.
+resolved-package-graph fixtures under `spec/` exist as design-owned executable data. Source
+management, lexing, recoverable syntax, error-free AST lowering, diagnostics, parser-fixture
+execution, C emission, and native source selection already live under `internal/`. `runtime/`,
+`std/`, and `tests/` remain planned top-level directories. Current runtime and standard-library
+sources are embedded under `internal/`.
 
 ## Dependency direction
 
@@ -44,7 +48,7 @@ boundaries are created only when their phase starts.
 
 ## Build ownership
 
-The Stage 0 compiler is one Go module unless measurement proves a need for multiple modules. Fairy C runtime and standard-library artifacts are target-specific toolchain components, not Go packages. A directory boundary does not imply an independently versioned package.
+The Stage 0 compiler is one Go module unless measurement proves a need for multiple modules. Fairy C runtime and standard-library artifacts are target-specific toolchain components. Their sources are currently embedded in Go packages: `internal/cruntime`, `internal/cstdlib`, and `internal/sdkstdlib`. A directory boundary does not imply an independently versioned package.
 
 ## Change coordination
 

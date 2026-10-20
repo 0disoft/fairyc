@@ -18,8 +18,8 @@ vertices=4 sum_x=16000000020
 Plain structs with bool/integer leaves, including nested plain structs, support
 fixed arrays, value copies, list/repeated initialization, whole-element stores,
 shared/exclusive views and copied/shared/exclusive loops. Repeated initialization
-evaluates once, then makes independent element values. `src/main.fy` updates
-stored fields directly before translating and summing:
+evaluates once, then makes independent element values. This equivalent direct-store
+form updates stored fields before translating and summing:
 
 ```fairy
 polygon[0].y = 9;
@@ -30,8 +30,7 @@ polygon[3].x -= 10;
 Direct indexed field stores (`polygon[i].field = value`), nested scalar and
 nested plain-struct paths and checked scalar compound assignment write into the
 array element itself. An exclusive element reference or a mutable view can change
-stored fields too. These direct updates leave the stdout and exit status
-unchanged.
+stored fields too.
 
 A direct field reference lends a stored field in place instead of copying the
 whole element, for example `ref polygon[0].x`, `ref mut polygon[3].x` or a nested
@@ -47,8 +46,9 @@ assert(*first_x == 4000000010);
 Shared field references come from immutable or by-value array bindings; mutable
 ones need a mutable array binding. Fields and indices never prove disjointness,
 so a live mutable field reference blocks other access to the same array until its
-last use, while a shared field reference blocks writes to the array. These
-updates leave the stdout and exit status unchanged.
+last use, while a shared field reference blocks writes to the array. Both update
+forms above leave the example result unchanged: stdout
+`vertices=4 sum_x=16000000020`, exit status 0, and empty stderr.
 
 The current array bound is 1..=4096. Exact nominal types remain distinct, even
 when layouts match. Resources, pointers, reference-typed fields, tagged fields,
