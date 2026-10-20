@@ -34,11 +34,11 @@ func TestWindowsFairyParserRepeatedArrays(t *testing.T) {
 		fmt.Fprintf(&p, "{let i32 r=switch(make(b%s)){case .ok(parsed):{assert(syntax::problem_count(ref parsed)>0 && syntax::expression_count(ref parsed)==0 && syntax::entry_count(ref parsed)==0 && syntax::declaration_count(ref parsed)==2);0}case .err(_):{1}};assert(r==0);}\n", strconv.Quote(input))
 	}
 	p.WriteString(`
-var usize n=1039;while(n<=1040){
+var usize n=4095;while(n<=4096){
  var bytes::Buffer data=bytes::empty();discard bytes::append(ref mut data,b"module main;fn void f(){return +++[");
  var usize i=0;while(i<n){discard bytes::append(ref mut data,b"[0;1],");i+=1;}
  discard bytes::append(ref mut data,b"];}");
- let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(n==1039 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==4160);0}case .err(status):{assert(n==1040 && status==4);0}};assert(r==0);n+=1;
+ let i32 r=switch(make(bytes::view(ref data))){case .ok(parsed):{assert(n==4095 && syntax::problem_count(ref parsed)==0 && syntax::expression_count(ref parsed)==16384);0}case .err(status):{assert(n==4096 && status==4);0}};assert(r==0);n+=1;
 }
 var usize depth=63;while(depth<=64){
  var bytes::Buffer data=bytes::empty();discard bytes::append(ref mut data,b"module main;fn void f(){return ");

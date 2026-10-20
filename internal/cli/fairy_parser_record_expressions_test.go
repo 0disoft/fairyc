@@ -114,8 +114,8 @@ case .ok(parsed): {
 	p.WriteString(`
 var usize form = 0;
 while (form < 2) {
-var usize n = 2079;
-while (n <= 2080) {
+var usize n = 8191;
+while (n <= 8192) {
  let bytes::Buffer input = switch(bytes::copy(b"module main; fn void f() { return ")) { case .ok(value): { value } case .err(_): { bytes::empty() } };
  var bytes::Buffer data = input;
  if (form == 0) { discard bytes::append(ref mut data,b"R{"); } else { discard bytes::append(ref mut data,b".R{"); }
@@ -123,8 +123,8 @@ while (n <= 2080) {
  while (i < n) { discard bytes::append(ref mut data,b".x=0,"); i += 1; }
  discard bytes::append(ref mut data,b"};}");
  let i32 result = switch(make(bytes::view(ref data))) {
-  case .ok(parsed): { assert(n == 2079 && syntax::expression_count(ref parsed) == 4160 && syntax::problem_count(ref parsed) == 0 && integrity::valid(ref parsed)); assert(syntax::expression_at(ref parsed,1).kind == (if (form == 0) { 2 } else { 28 })); 0 }
-  case .err(status): { assert(n == 2080 && status == 4); 0 }
+  case .ok(parsed): { assert(n == 8191 && syntax::expression_count(ref parsed) == 16384 && syntax::problem_count(ref parsed) == 0 && integrity::valid(ref parsed)); assert(syntax::expression_at(ref parsed,1).kind == (if (form == 0) { 2 } else { 28 })); 0 }
+  case .err(status): { assert(n == 8192 && status == 4); 0 }
  };
  assert(result == 0); n += 1;
 }

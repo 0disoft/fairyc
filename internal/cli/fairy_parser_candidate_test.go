@@ -38,7 +38,7 @@ fn Result<syntax::Parsed, i32> make(ref u8[] input, usize limit) {
     var bool allocated = true;
     let bytes::Buffer owned = switch (bytes::copy(input)) { case .ok(value): { value } case .err(_): { allocated = false; bytes::empty() } };
     if (!allocated) { return .err(3); }
-    return switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
+    return switch (scanner::collect(owned, false, 65536, 1048576, 256, 16777216)) {
         case .ok(stream): { syntax::parse(stream, limit) }
         case .err(status): { .err(status) }
     };
@@ -291,13 +291,13 @@ fn i32 tree(syntax::Parsed parsed) {
 			limit, declarations, problems, offset, status int
 		}{input, 512, decls, 0, 0, status})
 	}
-	// One versus two prefix operators straddle the 4160-node expression ceiling.
+	// One versus two prefix operators straddle the 16384-node expression ceiling.
 	for _, prefix := range []string{"+", "+ +"} {
 		decls, status := 2, 0
 		if prefix == "+ +" {
 			decls, status = 0, 4
 		}
-		fmt.Fprintf(&program, "assert(repeated(b%s, b\"1+\", 2079, b\"1; }\", %d, %d) == 0);\n", strconv.Quote("module main; fn i32 f() { return "+prefix), decls, status)
+		fmt.Fprintf(&program, "assert(repeated(b%s, b\"1+\", 8191, b\"1; }\", %d, %d) == 0);\n", strconv.Quote("module main; fn i32 f() { return "+prefix), decls, status)
 	}
 	for _, input := range []string{"module", "module main", "module main; import x as", "module main; fn void f(", "module main; fn i32 f() { return"} {
 		declarations := 0

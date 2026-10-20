@@ -23,7 +23,7 @@ fn Result<syntax::Parsed, i32> make(ref u8[] input) {
     var bool allocated = true;
     let bytes::Buffer owned = switch (bytes::copy(input)) { case .ok(value): { value } case .err(_): { allocated = false; bytes::empty() } };
     if (!allocated) { return .err(3); }
-    return switch (scanner::collect(owned, false, 32768, 1048576, 256, 16777216)) {
+    return switch (scanner::collect(owned, false, 65536, 1048576, 256, 16777216)) {
         case .ok(stream): { syntax::parse(stream, 512) } case .err(status): { .err(status) }
     };
 }
