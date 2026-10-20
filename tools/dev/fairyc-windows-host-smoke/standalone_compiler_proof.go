@@ -116,12 +116,7 @@ func runStandaloneCompiler(
 	if err != nil {
 		return 0, fmt.Errorf("read standalone compiler generated starter guide: %w", err)
 	}
-	const starterExecutableCommand = `.\build\starter-smoke.exe`
-	if bytes.Count(starterReadme, []byte(starterExecutableCommand)) != 1 ||
-		bytes.Count(starterReadme, []byte("fairyc test --native --locked")) != 1 ||
-		!bytes.Contains(starterReadme, []byte("The default test command uses the fast semantic interpreter.")) ||
-		!bytes.Contains(starterReadme, []byte("```fairyc\nmodule main;\n\nimport std::io as io;\n")) ||
-		!bytes.Contains(starterReadme, []byte("`fairyc run` forwards program output and returns `main`'s `i32` as the process status.")) {
+	if !validStandaloneStarterGuide(starterReadme) {
 		return 0, fmt.Errorf("standalone compiler generated an invalid starter guide: %q", starterReadme)
 	}
 	starterCheckCode, starterCheckStdout, starterCheckStderr, err := runStandaloneCommand(
@@ -638,6 +633,14 @@ fn void directory_excluded_fails() { assert(false); }
 		fmt.Printf("Fairy C workspace-session process measurement: %s\n", sessionMeasurementJSON)
 	}
 	return info.Size(), nil
+}
+
+func validStandaloneStarterGuide(readme []byte) bool {
+	return bytes.Count(readme, []byte(`.\build\starter-smoke.exe`)) == 1 &&
+		bytes.Count(readme, []byte("fairyc test --native --locked")) == 2 &&
+		bytes.Contains(readme, []byte("The default test command uses the fast semantic interpreter.")) &&
+		bytes.Contains(readme, []byte("```fairyc\nmodule main;\n\nimport std::io as io;\n")) &&
+		bytes.Contains(readme, []byte("`fairyc run` forwards program output and returns `main`'s `i32` as the process status."))
 }
 
 type standaloneWorkspaceSessionResponse struct {
