@@ -37,7 +37,7 @@ func (s *scene) line(points []point, color string) {
 func chartHeader(r Receipt, title string) scene {
 	s := scene{Width: 1120, Title: title, Description: r.Method}
 	s.text(32, 42, 26, ink, title)
-	s.text(32, 69, 13, muted, fmt.Sprintf("%s  |  %s/%s  |  commit %s  |  %d independent sequence(s)", r.Started, r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
+	s.text(32, 69, 13, muted, fmt.Sprintf("%s  |  %s/%s  |  commit %s  |  %d sequence(s) per config", r.Started, r.Host.OS, r.Host.Arch, shortCommit(r), r.Options.Repetitions))
 	s.text(32, 92, 13, muted, "Retained logical bytes; toolchain installs and transient peaks excluded. Each configuration has isolated caches.")
 	y := 115.0
 	for _, t := range r.Toolchains {

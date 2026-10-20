@@ -7,11 +7,11 @@ import (
 )
 
 type reportRow struct {
-	Language, Profile, Workload, Status, Reason                              string
-	Repetition                                                               int
-	Cold, NoOp, Private, Public, Final, Clean, Binary, Growth, Amplification string
-	Files                                                                    int
-	Verified                                                                 int
+	Language, Profile, Workload, Status, Reason                                               string
+	Repetition                                                                                int
+	Cold, NoOp, Private, Public, Final, Project, Shared, Clean, Binary, Growth, Amplification string
+	Files                                                                                     int
+	Verified                                                                                  int
 }
 type reportView struct {
 	Receipt           Receipt
@@ -24,7 +24,7 @@ type reportView struct {
 func renderHTML(r Receipt, path string) error {
 	v := reportView{Receipt: r, Commit: shortCommit(r), Footprint: template.HTML(footprintChart(r).svg()), Growth: template.HTML(growthChart(r).svg())}
 	for _, c := range r.Cases {
-		row := reportRow{Language: c.Language, Profile: c.Profile, Workload: c.Workload, Repetition: c.Repetition, Status: c.Status, Reason: c.Reason, Cold: "-", NoOp: "-", Private: "-", Public: "-", Final: "-", Clean: "-", Binary: "-", Growth: "-"}
+		row := reportRow{Language: c.Language, Profile: c.Profile, Workload: c.Workload, Repetition: c.Repetition, Status: c.Status, Reason: c.Reason, Cold: "-", NoOp: "-", Private: "-", Public: "-", Final: "-", Project: "-", Shared: "-", Clean: "-", Binary: "-", Growth: "-", Amplification: "-"}
 		if c.Status == "passed" {
 			v.Passed++
 			cold := findSample(c, "cold", 0)
@@ -32,6 +32,8 @@ func renderHTML(r Receipt, path string) error {
 			row.Cold = fmt.Sprintf("%.1f", cold.WallMS)
 			row.NoOp = fmt.Sprintf("%.1f", findSample(c, "no-op", 0).WallMS)
 			row.Final = bytesLabel(float64(last.Footprint.Total))
+			row.Project = bytesLabel(float64(last.Footprint.Total - last.Footprint.SharedCache - last.Footprint.Temporary))
+			row.Shared = bytesLabel(float64(last.Footprint.SharedCache))
 			row.Binary = bytesLabel(float64(last.Footprint.Binary))
 			row.Clean = bytesLabel(float64(findSample(c, "clean", 0).Footprint.Total))
 			row.Growth = bytesLabel(float64(last.Footprint.Total - cold.Footprint.Total))
@@ -85,10 +87,10 @@ var reportTemplate = template.Must(template.New("report").Parse(`<!doctype html>
 <p>Rust small-dev sets <code>debug = "line-tables-only"</code> and <code>incremental = false</code>. Zig release uses <code>ReleaseFast</code>. C dev requests debug information; Fairy C development does not promise equivalent debugger support. The Zig and C fixtures use libc stdin/stdout, Rust uses its standard library, and Fairy C uses its SDK. These are build workflow measurements with different runtime and debugging facilities.</p>
 <div class="downloads"><a href="receipt.json">Raw JSON and exact commands</a><a href="footprint.svg">Footprint SVG</a><a href="footprint.png">Footprint PNG</a><a href="growth.svg">Growth SVG</a><a href="growth.png">Growth PNG</a></div></section>
 <section class="chart">{{.Footprint}}</section><section class="chart">{{.Growth}}</section>
-<section><h2>Measurements</h2><p class="meta">Times in milliseconds. Private/public edit times are medians within each sequence. End size is the final build before cleaning. Filters apply to this table.</p>
+<section><h2>Measurements</h2><p class="meta">Times in milliseconds. Private/public edit times are medians within each sequence. End total is the final build before cleaning. Project outputs/cache and shared cache are shown separately; for Rust, the project column measures target/. Retained temporary files also contribute to the total. Filters apply to this table.</p>
 <div class="filters"><label>Language <select id="language"><option value="">All</option>{{range .Receipt.Options.Languages}}<option>{{.}}</option>{{end}}</select></label><label>Profile <select id="profile"><option value="">All</option>{{range .Receipt.Options.Profiles}}<option>{{.}}</option>{{end}}</select></label><label>Workload <select id="workload"><option value="">All</option>{{range .Receipt.Options.Workloads}}<option>{{.}}</option>{{end}}</select></label></div>
-<div class="scroll"><table id="measurements"><thead><tr><th>Language</th><th>Profile</th><th>Workload</th><th>Run</th><th>Status</th><th>Cold ms</th><th>No-op ms</th><th>Private edit ms</th><th>Public edit ms</th><th>End size</th><th>Growth</th><th>Binary</th><th>Total/source</th><th>Files</th><th>After clean</th><th>Verified builds</th><th>Reason</th></tr></thead><tbody>
-{{range .Rows}}<tr data-language="{{.Language}}" data-profile="{{.Profile}}" data-workload="{{.Workload}}"><td>{{.Language}}</td><td>{{.Profile}}</td><td>{{.Workload}}</td><td>{{.Repetition}}</td><td>{{.Status}}</td><td>{{.Cold}}</td><td>{{.NoOp}}</td><td>{{.Private}}</td><td>{{.Public}}</td><td>{{.Final}}</td><td>{{.Growth}}</td><td>{{.Binary}}</td><td>{{.Amplification}}</td><td>{{.Files}}</td><td>{{.Clean}}</td><td>{{.Verified}}</td><td class="reason">{{.Reason}}</td></tr>{{end}}</tbody></table></div></section>
+<div class="scroll"><table id="measurements"><thead><tr><th>Language</th><th>Profile</th><th>Workload</th><th>Run</th><th>Status</th><th>Cold ms</th><th>No-op ms</th><th>Private edit ms</th><th>Public edit ms</th><th>End total</th><th>Project outputs/cache</th><th>Shared cache</th><th>Growth</th><th>Binary</th><th>Total/source</th><th>Files</th><th>After clean</th><th>Verified builds</th><th>Reason</th></tr></thead><tbody>
+{{range .Rows}}<tr data-language="{{.Language}}" data-profile="{{.Profile}}" data-workload="{{.Workload}}"><td>{{.Language}}</td><td>{{.Profile}}</td><td>{{.Workload}}</td><td>{{.Repetition}}</td><td>{{.Status}}</td><td>{{.Cold}}</td><td>{{.NoOp}}</td><td>{{.Private}}</td><td>{{.Public}}</td><td>{{.Final}}</td><td>{{.Project}}</td><td>{{.Shared}}</td><td>{{.Growth}}</td><td>{{.Binary}}</td><td>{{.Amplification}}</td><td>{{.Files}}</td><td>{{.Clean}}</td><td>{{.Verified}}</td><td class="reason">{{.Reason}}</td></tr>{{end}}</tbody></table></div></section>
 <section><h2>Toolchains</h2>{{range .Receipt.Toolchains}}<details><summary>{{.Language}} — {{.Status}}</summary><pre>{{.Version}}
 {{.Backend}}
 Executable: {{.Executable}} ({{.ExecutableBytes}} bytes; this is NOT total installation size)
