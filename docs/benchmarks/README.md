@@ -9,7 +9,7 @@ inspecting build workflow cost; these synthetic workloads do not establish a uni
 
 ## Latest snapshot
 
-[English](latest/report.html) · [中文](latest/report.zh.html) · [Español](latest/report.es.html) · [Français](latest/report.fr.html) · [हिन्दी](latest/report.hi.html)
+[English](latest/report.html) · [한국어](latest/report.ko.html) · [中文](latest/report.zh.html) · [Español](latest/report.es.html) · [Français](latest/report.fr.html) · [हिन्दी](latest/report.hi.html)
 
 - [Development summary SVG](latest/summary.svg) and [PNG](latest/summary.png): `dev` and Rust
   `small-dev` for `many-modules`
@@ -44,7 +44,7 @@ checkout compiler under `tooling` when `--fairyc` is omitted. Rendering is a sep
 go run ./tools/dev/fairyc-bench render --input .cache/bench-YYYY-MM-DD/receipt.json --output docs/benchmarks/latest
 ```
 
-Rendering produces all five languages by default. Use `--locale en`, `zh` (Simplified Chinese),
+Rendering produces all six languages by default. Use `--locale en`, `ko` (Korean), `zh` (Simplified Chinese),
 `es`, `fr`, or `hi` for one language. Localized files use a suffix, such as `summary.hi.png`
 or `report.fr.html`; English keeps the original filenames. Keep the HTML files together to use
 the language selector. Each HTML file embeds its own charts and works offline.

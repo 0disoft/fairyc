@@ -35,7 +35,7 @@ var chartFonts = loadChartFonts()
 
 func loadChartFonts() fontSet {
 	var result fontSet
-	for _, name := range []string{"BenchSans.ttf", "BenchDevanagari.ttf", "BenchChinese.ttf"} {
+	for _, name := range []string{"BenchSans.ttf", "BenchDevanagari.ttf", "BenchChinese.ttf", "BenchKorean.ttf"} {
 		data, err := fontFiles.ReadFile("fonts/" + name)
 		if err != nil {
 			panic(err)

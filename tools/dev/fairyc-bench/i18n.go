@@ -11,8 +11,8 @@ import (
 //go:embed locales/*.json
 var localeFiles embed.FS
 
-var supportedLocales = []string{"en", "zh", "es", "fr", "hi"}
-var localeNames = map[string]string{"en": "English", "zh": "中文", "es": "Español", "fr": "Français", "hi": "हिन्दी"}
+var supportedLocales = []string{"en", "ko", "zh", "es", "fr", "hi"}
+var localeNames = map[string]string{"en": "English", "ko": "한국어", "zh": "中文", "es": "Español", "fr": "Français", "hi": "हिन्दी"}
 var catalogs = loadCatalogs()
 
 func loadCatalogs() map[string]map[string]string {

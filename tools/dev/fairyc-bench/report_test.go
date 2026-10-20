@@ -124,11 +124,11 @@ func TestSingleLocaleRender(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := filepath.Join(root, "report")
-	if err := renderCLI([]string{"--input", receipt, "--output", output, "--locale", "fr"}); err != nil {
+	if err := renderCLI([]string{"--input", receipt, "--output", output, "--locale", "ko"}); err != nil {
 		t.Fatal(err)
 	}
-	b, err := os.ReadFile(filepath.Join(output, "report.fr.html"))
-	if err != nil || !strings.Contains(string(b), `<html lang="fr">`) || strings.Contains(string(b), `id="locale"`) {
+	b, err := os.ReadFile(filepath.Join(output, "report.ko.html"))
+	if err != nil || !strings.Contains(string(b), `<html lang="ko">`) || !strings.Contains(string(b), translator("ko")("Build footprint")) || strings.Contains(string(b), `id="locale"`) {
 		t.Fatal("single-locale report must not link to missing language variants")
 	}
 	if _, err := os.Stat(filepath.Join(output, "summary.png")); !os.IsNotExist(err) {

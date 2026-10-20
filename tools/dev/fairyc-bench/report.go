@@ -18,7 +18,7 @@ func renderCLI(args []string) error {
 	var input, output, locale string
 	fs.StringVar(&input, "input", "", "receipt JSON")
 	fs.StringVar(&output, "output", "", "report directory")
-	fs.StringVar(&locale, "locale", "all", "report language: all, en, zh, es, fr, hi")
+	fs.StringVar(&locale, "locale", "all", "report language: all, en, ko, zh, es, fr, hi")
 	if err := fs.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -31,7 +31,7 @@ func renderCLI(args []string) error {
 	codes := supportedLocales
 	if locale != "all" {
 		if !slices.Contains(supportedLocales, locale) {
-			return fmt.Errorf("unsupported report locale %q (use all, en, zh, es, fr, hi)", locale)
+			return fmt.Errorf("unsupported report locale %q (use all, en, ko, zh, es, fr, hi)", locale)
 		}
 		codes = []string{locale}
 	}

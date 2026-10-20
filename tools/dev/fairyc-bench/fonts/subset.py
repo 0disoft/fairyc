@@ -15,7 +15,8 @@ for catalog in (destination.parent / "locales").glob("*.json"):
 
 for source, name in [("NotoSans.ttf", "BenchSans"),
                      ("NotoSansDevanagari.ttf", "BenchDevanagari"),
-                     ("NotoSansSC.ttf", "BenchChinese")]:
+                     ("NotoSansSC.ttf", "BenchChinese"),
+                     ("NotoSansKR.ttf", "BenchKorean")]:
     font = TTFont(Path(sys.argv[1]) / source)
     axes = {axis.axisTag: axis.defaultValue for axis in font["fvar"].axes}
     axes["wght"] = 400
