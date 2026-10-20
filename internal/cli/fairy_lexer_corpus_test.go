@@ -163,7 +163,7 @@ func runWindowsFairyLexerCorpus(t *testing.T, emittedC string, report *candidate
 	appendCase("long-unterminated-comment", []byte("/*"+strings.Repeat("a", 12000)), false)
 	root := t.TempDir()
 	if emittedC == "" {
-		copyLexerFileCLIExample(t, root)
+		copyLexerStdinCorpusExample(t, root)
 	}
 	report.FixtureFiles = fixtureCount
 	report.ProjectFiles = len(paths) - fixtureCount
@@ -244,4 +244,28 @@ func runWindowsFairyLexerCorpus(t *testing.T, emittedC string, report *candidate
 	}
 	report.Passed = true
 	t.Logf("compared %d fixture files, %d real project files and %d framed cases at both profiles", fixtureCount, len(paths)-fixtureCount, len(names))
+}
+
+// Keep the authored framing/scanning loop, excluding file-mode dispatch and its
+// unrelated platform FFI from this stdin-only corpus proof.
+func copyLexerStdinCorpusExample(t *testing.T, root string) {
+	t.Helper()
+	copyLexerExample(t, root)
+	data, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := strings.ReplaceAll(string(data), "\r\n", "\n")
+	for _, edit := range []struct{ old, replacement string }{
+		{"import file_cli as file_cli;\n", ""},
+		{"import std::process as process;\n", ""},
+		{"@effects(filesystem, console, environment, clock)", "@effects(console)"},
+		{"    if (process::arg_count() != 1) { return file_cli::run(); }\n", ""},
+	} {
+		if strings.Count(text, edit.old) != 1 {
+			t.Fatalf("stdin corpus entry changed: %q", edit.old)
+		}
+		text = strings.Replace(text, edit.old, edit.replacement, 1)
+	}
+	writeTestSource(t, root, "src/main.fy", text)
 }
