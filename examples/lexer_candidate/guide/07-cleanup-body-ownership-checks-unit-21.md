@@ -154,7 +154,7 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 
 ### 후보 60: 값 보존 스칼라 캐스트
 
-`as`는 u8→i32/i64/u32/usize, i32→i64, u32→i64/usize의 기존 값 보존 조합만 연결한다. 피연산자는 한 번 평가하고 원래 정수 trap 의미를 유지한다. HIR kind 26/MIR kind 35는 원본·결과 타입을 독립 검증하며 위조 타입과 operator를 거부한다. 좁히기·부호 변경·같은 타입·bool/enum/포인터 cast는 허용하지 않는다. 실행 증거는 `docs/ops/evidence/candidate-resource-scalar-casts-20261007.json`에 있다. 전체 자기 소스 분류는 아직 완료로 세지 않는다.
+`as`는 u8→i32/i64/u32/usize, i32→i64, u32→i64/usize의 기존 값 보존 조합만 허용한다. 피연산자는 한 번 평가하고 원래 정수 trap 의미를 유지한다. HIR kind 26/MIR kind 35는 원본·결과 타입을 독립 검증하며 위조 타입과 operator를 거부한다. 좁히기·부호 변경·같은 타입·bool/enum/포인터 cast는 허용하지 않는다. 실행 증거는 `docs/ops/evidence/candidate-resource-scalar-casts-20261007.json`에 있다. 전체 자기 소스 분류는 아직 완료로 치지 않는다.
 
 ### 후보 53a: 함수 효과 권한
 
@@ -162,11 +162,11 @@ Same-module `fn T id<T>(T n)` and `id<i32>(7)` specialize in Fairy code before o
 
 ### 후보 53b: 자원 정리 효과
 
-자원 선언의 `@effects`는 비어 있지 않은 cleanup에만 붙인다. 실제로 정리되는 root·임시값·중첩 자원·Option/Result payload의 권한 union을 검사한다. 반환/전달하는 sender, 비-unwind trap과 no-drop burn에는 자동 정리 권한을 요구하지 않는다. `@abilities`와 `@effects`는 순서와 무관하게 해석한다. owned HIR의 resource와 cleanup 함수 권한이 일치해야 하며, MIR은 직접 cleanup call과 tagged/중첩 drop op의 권한을 독립 검증한다. source flow는 root의 Live/Dead 상태를 쓰고 최종 MIR은 부분 임시값까지 확인한다. 증거는 `docs/ops/evidence/candidate-resource-effects-cleanup-20261007.json`. 최초 assertion trap 기대값 1은 실제 계약의 5로 수정했다. 고정 Go 기준 도구는 literal assert(false) 뒤에도 정리 효과를 요구하는 차이가 있다. 후보의 기존 30번 trap 규칙은 유지했고 이를 일치로 세지 않았다.
+자원 선언의 `@effects`는 비어 있지 않은 cleanup에만 붙인다. 실제로 정리되는 root·임시값·중첩 자원·Option/Result payload의 권한 union을 검사한다. 반환/전달하는 sender, 비-unwind trap과 no-drop burn에는 자동 정리 권한을 요구하지 않는다. `@abilities`와 `@effects`는 순서와 무관하게 해석한다. owned HIR의 resource와 cleanup 함수 권한이 일치해야 하며, MIR은 직접 cleanup call과 tagged/중첩 drop op의 권한을 독립 검증한다. source flow는 root의 Live/Dead 상태를 쓰고 최종 MIR은 부분 임시값까지 확인한다. 증거는 `docs/ops/evidence/candidate-resource-effects-cleanup-20261007.json`. 최초 assertion trap 기대값 1은 실제 계약의 5로 수정했다. 고정 Go 기준 도구는 literal assert(false) 뒤에도 정리 효과를 요구하는 차이가 있다. 후보의 기존 30번 trap 규칙은 유지했고 이를 일치로 보지 않았다.
 
 ### 후보 56a: must-use 호출 계약
 
-단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding에 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. scalar import marker는 63번, extern-C marker는 55번에서 연결했다. @test/@const_eval 조합은 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.
+단일 무인자 `@must_use`는 inert 반환 함수에만 붙인다. 직접 무시한 호출 및 괄호·블록·if/switch의 무시된 끝값은 E4202로 거부한다. binding/return/argument/operator/cast/condition/aggregate 또는 명시 `discard`는 호출 값의 처리로 인정한다. 일반 함수와 scalar generic 특수화의 HIR binding이 marker를 소유하며 MIR/C에는 실행 비용을 추가하지 않는다. resource/Result/safe borrow/void 반환과 malformed 선언은 E4201이다. scalar import marker는 63번, extern-C marker는 55번에서 연결했다. @test/@const_eval 조합은 남았다. 증거: `docs/ops/evidence/candidate-resource-must-use-20261007.json`. tagged .some 생성자를 함수로 잘못 분류하던 초기 walker 오류는 수정했고 정상 Option 처리 fixture로 검증했다.
 
 ### Imported scalar call contracts (unit 63 partial)
 
