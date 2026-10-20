@@ -119,7 +119,12 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
         assert(switch (bytes::append_byte(ref mut oversized, 97)) { case .ok(_) : { true } case .err(_) : { false } });
         index += 1;
     }
-    assert(scanner::report(bytes::view(ref oversized)) == 4);
+    let scanner::Stream stream = switch (scanner::collect(oversized, false, 32768, 1048576, 256, 16777216)) {
+        case .ok(value): { value } case .err(_): { assert(false); }
+    };
+    assert(scanner::diagnostic_count(ref stream) == 1 && scanner::diagnostic_info(ref stream, 0).code == 10);
+    assert(scanner::token_count(ref stream) == 2 && scanner::token_info(ref stream, 0).kind == 0);
+    assert(scanner::token_info(ref stream, 0).end == 32769 && scanner::token_info(ref stream, 1).start == 32769);
 }
 `)
 	writeInput("1e20000", 101, 4)
@@ -238,7 +243,7 @@ func TestWindowsFairyLexerCandidate(t *testing.T) {
 		}
 		code, stdout, stderr := runForTest(args, root)
 		if code != ExitSuccess || stderr != "" {
-			t.Fatalf("candidate release=%v code=%d stderr=%s", release, code, stderr)
+			t.Fatalf("candidate release=%v code=%d stderr=%s output_bytes=%d tail=%q", release, code, stderr, len(stdout), stdout[max(0, len(stdout)-200):])
 		}
 		if stdout != expected.String() {
 			want := expected.String()
