@@ -76,6 +76,7 @@ func TestWindowsFairyLexerStreamSelfCorpus(t *testing.T) {
 		data []byte
 	}
 	var inputs []inputCase
+	sourceCount := 0
 	for _, entry := range entries {
 		if entry.Type()&os.ModeSymlink != 0 {
 			t.Fatal("unexpected source symlink")
@@ -87,12 +88,17 @@ func TestWindowsFairyLexerStreamSelfCorpus(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		sourceCount++
 		if len(data) > 32768 {
-			t.Fatalf("source exceeds candidate admission: %s", entry.Name())
+			// Retain every byte of larger compiler modules as independent lexer
+			// inputs while keeping the page transport's 32 KiB frame contract.
+			for start := 0; start < len(data); start += 32768 {
+				inputs = append(inputs, inputCase{fmt.Sprintf("%s/bytes-%d", entry.Name(), start), data[start:min(start+32768, len(data))]})
+			}
+			continue
 		}
 		inputs = append(inputs, inputCase{entry.Name(), data})
 	}
-	sourceCount := len(inputs)
 	if sourceCount == 0 {
 		t.Fatal("empty own-source corpus")
 	}
@@ -114,21 +120,23 @@ func TestWindowsFairyLexerStreamSelfCorpus(t *testing.T) {
 		}
 		for _, input := range inputs {
 			for _, previous := range []bool{false, true} {
-				values := streamObservation(t, input.data, previous)
-				for start := 0; start < len(values); start += 4096 {
-					var expected strings.Builder
-					for _, value := range values[start:min(start+4096, len(values))] {
-						fmt.Fprintf(&expected, "%d ", value)
+				t.Run(fmt.Sprintf("%s/%s/previous-%t", input.name, profile.Name, previous), func(t *testing.T) {
+					values := streamObservation(t, input.data, previous)
+					for start := 0; start < len(values); start += 4096 {
+						var expected strings.Builder
+						for _, value := range values[start:min(start+4096, len(values))] {
+							fmt.Fprintf(&expected, "%d ", value)
+						}
+						if expected.Len() >= 60000 {
+							t.Fatal("page exceeds bounded transport")
+						}
+						outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(streamPageFrame(input.data, previous, uint32(start))))
+						if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" || outcome.Stdout != expected.String() {
+							t.Fatalf("%s previous=%v profile=%v start=%d: exit=%d err=%v stderr=%s output lengths %d/%d", input.name, previous, profile, start, outcome.ExitCode, err, outcome.Stderr, len(outcome.Stdout), expected.Len())
+						}
+						pageCount++
 					}
-					if expected.Len() >= 60000 {
-						t.Fatal("page exceeds bounded transport")
-					}
-					outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, bytes.NewReader(streamPageFrame(input.data, previous, uint32(start))))
-					if err != nil || outcome.ExitCode != 0 || outcome.Stderr != "" || outcome.TrapControl != "" || outcome.Stdout != expected.String() {
-						t.Fatalf("%s previous=%v profile=%v start=%d: exit=%d err=%v stderr=%s output lengths %d/%d", input.name, previous, profile, start, outcome.ExitCode, err, outcome.Stderr, len(outcome.Stdout), expected.Len())
-					}
-					pageCount++
-				}
+				})
 			}
 		}
 		valid := streamPageFrame([]byte("a"), false, 0)
@@ -150,5 +158,5 @@ func TestWindowsFairyLexerStreamSelfCorpus(t *testing.T) {
 			}
 		}
 	}
-	t.Logf("compared all %d own source files plus 4 boundary inputs in both revisions/profiles across %d bounded pages", sourceCount, pageCount)
+	t.Logf("own-source corpus inventory: %d files as %d bounded inputs plus 4 boundary inputs; compared %d native pages", sourceCount, len(inputs)-4, pageCount)
 }
