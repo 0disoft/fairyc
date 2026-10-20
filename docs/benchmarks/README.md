@@ -4,8 +4,21 @@
 
 `fairyc-bench` measures the files a native build keeps after each command and the disk growth
 caused by a sequence of source edits. It runs the same small workload in Fairy C, Zig, Rust, and C
-inside separate experiment directories. It is a local developer tool for inspecting build workflow
-cost; it is not a CI job or a universal language ranking.
+inside separate experiment directories. It supports local runs and manually dispatched CI runs for
+inspecting build workflow cost; these synthetic workloads do not establish a universal language ranking.
+
+## Latest snapshot
+
+- [Development summary SVG](latest/summary.svg) and [PNG](latest/summary.png): `dev` and Rust
+  `small-dev` for `many-modules`
+- [Full footprint SVG](latest/footprint.svg) and [PNG](latest/footprint.png)
+- [Growth SVG](latest/growth.svg) and [PNG](latest/growth.png)
+- [Raw receipt](latest/receipt.json)
+- [Download HTML report](latest/report.html)
+
+Download the HTML report and open it locally; GitHub's file view does not run it. The report is
+self-contained and needs no hosting. The receipt records the snapshot's exact commit, dirty flag,
+host, toolchain versions, settings, case statuses, and commands.
 
 ## Quick start
 
@@ -31,6 +44,27 @@ go run ./tools/dev/fairyc-bench render --input .cache/bench-YYYY-MM-DD/receipt.j
 
 The `run` output directory must not already exist. The parent directory must exist, and a failed or
 unavailable case makes the command exit non-zero after the receipt has been updated.
+
+## Manual CI
+
+The [Build footprint workflow](../../.github/workflows/build-footprint.yml) runs only through
+`workflow_dispatch`, using GitHub Actions' **Run workflow** control. Pushes, pull requests, and
+schedules do not trigger it. Its inputs default to `languages=fairy,zig,rust,c`, `profiles=dev`,
+`workloads=tokenizer`, `edits=5`, `modules=16`, and `repetitions=1`.
+
+This small default matrix keeps manual runner use down. To request the full 18-case matrix, set
+`profiles=dev,release,small-dev`, `workloads=tokenizer,many-modules`, and `edits=20`, leaving the other
+inputs at their defaults. These match the CLI defaults used for a full local snapshot.
+
+The job uses a Windows hosted runner with a 90-minute timeout, Go from `go.mod`, and preinstalled
+Rust, MSVC, and Windows SDK tools. It downloads the latest stable Zig from the official index and
+verifies the archive's SHA-256. Each cold Zig build can take several minutes; charged Windows runner
+usage depends on the account's plan.
+
+Run outputs stay under `runner.temp`. Artifacts contain only `receipt.json` and HTML, SVG, and PNG
+reports, with seven-day retention; caches and binaries are not uploaded. The workflow uses
+`contents: read`, publishes no site, and makes no README commits. Its syntax has been checked
+locally, but it has not been dispatched or verified on a GitHub runner.
 
 ## Defaults
 
@@ -128,14 +162,18 @@ installation requirement for each language.
 
 `render` validates the receipt and writes a self-contained, static `report.html` with its charts,
 styles, and table filters embedded. It also writes `footprint.svg`, `footprint.png`, `growth.svg`,
-`growth.png`, and a copy of `receipt.json`. PNG charts use a built-in ASCII bitmap font, so rendering
-does not need a browser or an external rasterizer. The tool adds no Go module dependencies.
+`growth.png`, `summary.svg`, `summary.png`, and a copy of `receipt.json`. The compact summary selects
+`dev` and Rust `small-dev` for `many-modules` when that workload is present. PNG charts use a built-in
+ASCII bitmap font, so rendering does not need a browser or an external rasterizer. The tool adds no
+Go module dependencies.
 
 The footprint bars average retained bytes across repetitions, so their stacked components add up to
 the mean total. The growth chart uses the median at each edit. The HTML table reports median
 private-edit and public-edit build times for each case. The raw receipt keeps every sample from every
 repetition. Failed or unavailable cases remain in the table and raw data and are excluded from the
-charts.
+charts. The HTML table separates **Project outputs/cache** from **Shared cache**. For Rust, the
+project column measures `target/` directly. **End total** includes both columns plus retained
+temporary files, so it should not be read as the size of `target/` alone.
 
 The receipt records the UTC start and finish, Git commit and dirty flag, OS, architecture, CPU, CPU
 count, runner Go version, selected settings, toolchain versions and backends, and every case sample.
@@ -145,19 +183,17 @@ and the user's home directory are shortened before commands are stored. The tool
 size and SHA-256 are identity metadata; installation sizes are recorded in the separate inventory.
 See [the receipt schema](receipt-v1.schema.json) for the JSON structure.
 
-A reviewed snapshot belongs under `docs/benchmarks/latest`; the generated receipt remains the
-source of exact commands and raw observations. Root README links and images can point to that
-directory when a snapshot is ready.
+Snapshots live under `docs/benchmarks/latest`; the receipt is the source of exact commands and raw
+observations. Reproduce the selected matrix with `run`, then regenerate the reports with `render`.
 
 ## Limits
 
 The runner accepts Windows and Linux. The Windows path has been exercised; the Linux adapter has
-not yet been tested. Zig 0.17 Debug and ReleaseFast builds have succeeded manually using isolated,
-existing diagnostic caches; Debug's output checksum was verified with the exact benchmark stdin.
-The full matrix snapshot with empty experiment caches is still pending. A cold Zig 0.17 maker build
-can take several minutes, which is why the default command timeout is 10 minutes.
+not yet been tested. A cold Zig 0.17 maker build can take several minutes, which is why the default
+command timeout is 10 minutes. Use the receipt's case statuses and verification records to assess a
+snapshot's coverage.
 
 Use these results to compare repeated configurations under the same host, fixture, and profile.
 Differences in compiler behavior, runtime libraries, debug information, and cleanup policy make
-cross-language rankings unreliable. The benchmark does not establish equivalent debugging features,
-and it has no CI workflow; runs are manual and local.
+cross-language rankings unreliable. The benchmark does not establish equivalent debugging features.
+Local and CI runs are both started manually.

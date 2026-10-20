@@ -93,6 +93,20 @@ Examples that drive a checkout directly with `go run` have moved to
 [docs/development/prototype-usage.md](docs/development/prototype-usage.md). They are examples, not
 an authority on command behavior.
 
+## Build footprint
+
+A local synthetic benchmark compares retained build outputs and cache growth for Fairy C, Zig,
+Rust, and C. Run configuration: commit `ec446d2d`, Windows/amd64, 20 source edits, one sequence per configuration.
+
+![Development build footprint](docs/benchmarks/latest/summary.svg)
+
+[Methodology](docs/benchmarks/README.md) ·
+[Raw receipt](docs/benchmarks/latest/receipt.json) ·
+[Full footprint SVG](docs/benchmarks/latest/footprint.svg) ·
+[Download HTML report](docs/benchmarks/latest/report.html)
+
+Download the HTML report and open it locally; GitHub's file view does not run it.
+
 ## Design anchors
 
 - [Architecture](ARCHITECTURE.md)
