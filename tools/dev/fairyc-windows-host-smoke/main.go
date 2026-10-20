@@ -32,6 +32,9 @@ func run(arguments []string) error {
 	if err != nil {
 		return fmt.Errorf("resolve repository root: %w", err)
 	}
+	if mode == hostSmokeCacheMeasurementsOnly {
+		return runCacheMeasurementsOnly(repositoryRoot)
+	}
 	sources, err := loadHostSmokeSources()
 	if err != nil {
 		return err

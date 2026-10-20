@@ -57,6 +57,14 @@ their 10-minute limits. The test selection and runner count are unchanged.
 Local routing checks: `python -B -m unittest discover -s .github/scripts -p 'test_ci_changes.py'`.
 Workflow syntax: `actionlint .github/workflows/frontend.yml .github/workflows/measurements.yml`.
 
+Local Windows cache-only measurements:
+`go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke --cache-measurements-only`.
+This mode builds a standalone compiler, then reuses the process-cache, edit-invalidation,
+persistent cold/warm, and bounded-growth measurement oracles. It writes four validated JSON
+receipts to stdout with the same labels as the full measurement lane and removes its temporary
+workspaces and compiler. Compiler construction is outside the recorded durations. It does not
+run native or Atlas smokes, and neither workflow selects this mode automatically.
+
 ## Repository Shape
 
 cli-tool and monorepo validation must stay focused on repository shape and must not imply generated application source code.

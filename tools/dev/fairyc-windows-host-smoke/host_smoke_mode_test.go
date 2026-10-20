@@ -37,10 +37,20 @@ func TestParseHostSmokeModeRejectsUnknownOrCombinedArguments(t *testing.T) {
 	for _, arguments := range [][]string{
 		{"--measurements"},
 		{"--with-measurements", "extra"},
+		{"--with-measurements", "--cache-measurements-only"},
+		{"--cache-measurements-only", "extra"},
 	} {
 		if _, err := parseHostSmokeMode(arguments); err == nil {
 			t.Fatalf("arguments %q were accepted", arguments)
 		}
+	}
+}
+
+func TestParseHostSmokeModeAdmitsCacheOnly(t *testing.T) {
+	t.Parallel()
+	mode, err := parseHostSmokeMode([]string{"--cache-measurements-only"})
+	if err != nil || mode != hostSmokeCacheMeasurementsOnly {
+		t.Fatalf("cache-only mode = %d, %v", mode, err)
 	}
 }
 
