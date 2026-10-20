@@ -12,7 +12,7 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 - Product decision: UNDECIDED
 - Technical owner: UNASSIGNED
 - Related ADRs: `docs/adr/0159-bounded-workspace-check-session.md`,
-  `docs/adr/0166-experimental-persistent-workspace-cache-command.md`, and
+  `docs/adr/0166-experimental-persistent-workspace-cache-command.md`,
   `docs/adr/0180-stable-workspace-c-emission-v1.md`, and
   `docs/adr/0181-stable-workspace-semantic-test-v1.md`
 

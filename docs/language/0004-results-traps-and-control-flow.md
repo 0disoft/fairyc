@@ -21,7 +21,7 @@ The explicit discard spelling is `discard expression;`. Discarding `Option` or `
 Every evaluated Result carries one must-use obligation. Storing it transfers that obligation to the
 destination local, and passing it by value transfers the obligation to the callee's Result
 parameter. Result parameters therefore begin pending. Return, `discard`, exhaustive Result switch,
-`.is_ok`, and `?` discharge the obligation; assignment cannot silently discharge the previous destination.
+`.is_ok`, and `?` discharge the obligation; assignment cannot silently discharge the obligation the destination already carries.
 
 `value.is_ok` evaluates one owned `Result<T, E>` once and yields `bool`: true for `.ok`, false for
 `.err`. It handles that Result exactly like `switch (value) { case .ok(_): { true } case .err(_): { false } }`.

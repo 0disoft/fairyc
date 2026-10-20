@@ -21,7 +21,7 @@ the corresponding safe API, typed errors, runtime transport, and target evidence
 
 ADR 0342 admits the target-neutral on-chain effects in `fairyc-language/11`. Direct analysis and
 resolved-package check, build, run, test, cache, and native emission now share the same closed
-vocabulary. This admission transports authority facts only; an effect has no operation unless an
+vocabulary. This admission carries authority facts only; an effect has no operation unless an
 explicit SDK and target contract implements one.
 
 ## Declaration syntax
