@@ -1212,16 +1212,24 @@ ADR 0220 cuts the exact language pin to `fairyc-language/5` and implements priva
 module `static_assert`. Checked compile-time traps use `E4303`, cycles and budgets use `E4304`,
 runtime references enter HIR as folded scalar literals, and no evaluator state reaches MIR or C.
 
-Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
+Exit gate for current Stage 0: clean and warm build evidence is reproducible on a declared
+machine and workload; invalidation fixtures distinguish admitted public-interface changes from
+private implementation changes; incompatible caches are safe misses. Inline-body invalidation is
+not applicable to Stage 0, which has no public inline function contract.
 
-Current gate gap: public-interface and private-implementation invalidation have executable
-fixtures, but [inline-body reuse](../../spec/fixtures/module-interface/README.md) has no Stage 0
-function contract or fixture. Phase 3 is therefore not fully closed under the exit gate as written.
-Cache measurements run in the separate Measurements workflow; ordinary Frontend success does
-not establish a fresh cold/warm measurement.
-The [local cache-only snapshot](../benchmarks/package-cache/README.md) at clean `b2181e66`
-records cold/warm process timing, private/public edit invalidation, and bounded retained bytes
-on a declared Windows machine. The inline-body clause remains open.
+Current gate: satisfied for the bounded Stage 0 verified-MIR package-cache scope at evidence
+snapshot `6c0bea17`.
+The [interface fixtures](../../spec/fixtures/module-interface/README.md),
+[whole-package cache v4](../package/whole-package-cache-v4.md) incompatible-input checks, and stable
+local-workspace commands cover the admitted behavior. The [local cache-only snapshot](../benchmarks/package-cache/README.md)
+at clean `b2181e66` supplies 65 validated cold/warm, edit-invalidation, and bounded-retention observations.
+Reference-machine speed comparisons and default-cache policies remain separate promotion decisions.
+
+Before admitting an inline function contract or new cross-package inline-body reuse, reopen Phase 3.
+Require a separate versioned inline-body hash and invalidation class: a body-only change must
+invalidate dependent caches on cold/warm and persistent paths, while private-implementation stability
+and incompatible safe misses remain checked. This scope decision adds no language/runtime feature
+or cache algorithm; see the [2026-10-21 decision](../development/phase-status.md#phase-3-scope-decision-2026-10-21).
 
 ## Phase 4: Atlas fact export
 

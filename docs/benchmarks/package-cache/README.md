@@ -31,7 +31,7 @@ exit, including workspace and cache I/O; they require verified MIR via the cache
 the interpreter. A 1-hit/1-miss row means one hit and one miss; fallback may lower the full program.
 
 Retained bytes are logical cache record bytes; physical disk, temp files, and compiler outputs are not
-measured. The Phase 3 inline-body exit condition remains unresolved.
+measured. [Phase 3 is satisfied for current Stage 0 scope; inline admission requires reopening](../../product/01-roadmap.md#phase-3-modules-package-builds-and-bounded-caching).
 
 Raw: [process.json](process.json) · [edits.json](edits.json) · [persistent.json](persistent.json) · [growth.json](growth.json) · [environment.json](environment.json)
 
