@@ -37,6 +37,22 @@ pollution, tracked secret files, ignored build/cache artifacts, and generated-ou
 
 General validation routes must stay stack-neutral unless a runner file explicitly defines a command.
 
+## Frontend CI routing
+
+`frontend.yml` first runs a lightweight changed-path check. Root Markdown, documentation and
+agent-guide Markdown, example/editor/fixture READMEs, example/editor guides, and images under
+`assets/brand/`, `docs/`, or `diagrams/` can skip compiler jobs when they are the only changes.
+Mermaid files under `diagrams/` also qualify. Other paths, including fixture JSON, grammar,
+source, dependency files, and workflows, retain the full compiler checks.
+
+The check reads the complete push diff or PR merge-base diff, including removed paths. Empty
+diffs, new branches, tags, missing history, and failed path classification run compiler checks.
+Manual Frontend runs also execute the full checks. The scheduled/manual Measurements workflow
+keeps its existing triggers.
+
+Local routing checks: `python -B -m unittest discover -s .github/scripts -p 'test_ci_changes.py'`.
+Workflow syntax: `actionlint .github/workflows/frontend.yml .github/workflows/measurements.yml`.
+
 ## Repository Shape
 
 cli-tool and monorepo validation must stay focused on repository shape and must not imply generated application source code.

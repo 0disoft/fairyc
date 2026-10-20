@@ -3,6 +3,7 @@ name: Frontend
 on:
   push: {}
   pull_request: {}
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -16,8 +17,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Classify changed paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      run_tests: ${{ steps.paths.outputs.run_tests }}
+    steps:
+      - name: Check out history for the complete push or PR diff
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - name: Test CI path routing
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -m unittest discover -s .github/scripts -p 'test_ci_changes.py'
+      - name: Decide whether compiler checks are needed
+        id: paths
+        run: python3 .github/scripts/ci_changes.py >> "$GITHUB_OUTPUT"
+
   validate:
     name: Go frontend (${{ matrix.os }})
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     strategy:
@@ -62,6 +84,8 @@ jobs:
 
   windows-native:
     name: Windows native target smoke
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: windows-latest
     # Keep native proof independent of the full Go suite's timeout budget.
     timeout-minutes: 10
@@ -78,6 +102,8 @@ jobs:
 
   windows-parser:
     name: Windows candidate proof (${{ matrix.group }})
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: windows-latest
     timeout-minutes: 10
     # All groups remain required by native-c. Separate runners avoid shared
