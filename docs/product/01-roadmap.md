@@ -6,6 +6,10 @@
 
 This roadmap defines capability gates, not calendar promises. Exact durations, fixture totals, latency targets, and storage limits remain absent until an executable harness and source of truth exist.
 
+The [phase status](../development/phase-status.md) records the current gate evidence and remaining
+work. The implementation notes below accumulate earlier slices; later entries supersede earlier
+limitations. This roadmap defines Phase 0 through Phase 4 only.
+
 ## Phase 0: freeze the executable contracts
 
 - Freeze Stage 0 surface syntax through `spec/grammar/stage0.ebnf`, parser fixtures, semantic fixtures, resource, Region, Result Flow, verified-MIR, and resolved-package-graph fixtures, one-file modules, alias imports, restricted enums, ownership, borrow origins, regions, `Result`, evaluation order, traps, unsafe boundaries, and exclusions.
@@ -144,7 +148,7 @@ module and source paths remain distinct through typed HIR types and verified MIR
 choosing a public package ID. Package-aware spans keep that identity separate from the original
 relative source path so private numbering cannot leak into diagnostics. Mutable-local MIR lowering and verification
   execute all 13 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, classic-`for` and lexical-`defer` lowering, loop-control cleanup, call,
-  division, and checked-arithmetic trap subset. All 10 verifier baselines and 22 isolated mutation cases execute through
+  division, and checked-arithmetic trap subset. All 11 verifier baselines and 23 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 94 interpreter v0 cases, including classic scalar `for`, bounded lexical `defer`, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and
 scalar `Option` and `Result` construction, exhaustive switching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
@@ -172,7 +176,7 @@ Verified resource definitions now preserve ordered fields and
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through contextual leading-dot variants, require exhaustive shallow switches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 49
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 52
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, switch, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
@@ -187,9 +191,8 @@ Verified resource definitions now preserve ordered fields and
   binary output operations. `read_stdin` adds one allocation-free bounded mutable-byte-view input
   operation with EOF-as-success semantics. Windows has exact separated output plus direct-artifact
   EOF, short-input, and bounded-prefix evidence; ADR 0214 records the Linux probes' first hosted run.
-  Input forwarding for other native commands, portable files, broader console operations, effect-bearing function values,
-  and every later Phase 1
-  capability remain unimplemented.
+  Broader console operations and effect-bearing function values require separate admission.
+  Later entries below record the implemented input routing and File slices.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `switch`, and explicit `?` and `discard`.
@@ -211,8 +214,11 @@ private compiler-owned `ref u8[]` view, plus separate generated-Fairy-to-C calls
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
   and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 104 fail-closed sanitizer
-executions. GitHub Actions run `30442310794` passed the complete lane for exact commit `0bb4199`;
-ADR 0214 records that first hosted receipt. It closes the receipt marker only, not native
+executions. ADR 0214 records the first hosted receipt at commit `0bb4199`.
+[Run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965/job/118803299115)
+passes the current lane at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`, including the layout,
+bidirectional ABI, runtime, and source-call probes described below. This closes those bounded
+hosted receipt gaps, not native
 conformance. A shared bounded C driver and embedded
 scalar runtime serve both that lane and the experimental explicit-source-closure build command, while a separate
 closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
@@ -220,31 +226,29 @@ product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
 facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including an explicit zero or
-32-byte shadow-space rule and per-profile missing maturity evidence. The C backend and driver still
-use only the Linux typed target ID, while local toolchain paths remain outside both contracts.
+32-byte shadow-space rule and per-profile missing maturity evidence. The backend and driver also
+have the Windows profile described below; local toolchain paths remain outside both contracts.
 Host-independent scalar,
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 16 versioned
 Linux v0 cases. A separate nine-case Windows MSVC manifest covers LLP64-sensitive C `long`,
 `size_t`, pointer, function-pointer, explicit-enum, and nested-record expectations while rejecting
 the absent POSIX `ssize_t` identity. Its eight pass cases now generate one non-POSIX C11 assertion
 unit compiled and executed by local x64 MSVC at low and optimized profiles. The eleven valid Linux
-cases generate one deterministic C11 plus POSIX-typedef layout probe configured
-for four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
-host. A host-independent SysV AMD64 classifier now executes 17 versioned cases for eightbyte
-classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
-and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
-Clang/GCC crossings in both compiler directions and profiles; these are not yet hosted evidence or
- source-level aggregate Fairy FFI fixtures. An explicitly `@link_name`-mapped scalar `i32 -> i32`
- source fixture now traverses AST, HIR, MIR, C emission, separate objects, and both compiler
- directions, but its four
- native executions remain unobserved on this Windows host.
+cases generate one deterministic C11 plus POSIX-typedef layout probe. The current Linux receipt
+records all four Clang/GCC low/optimized executions. A host-independent SysV AMD64 classifier
+executes 17 versioned cases for eightbyte classes, registers, exhaustion rollback, and hidden
+returns. Its 14 pass plans produce 56 separate-object Clang/GCC crossings in both compiler
+directions and profiles, all observed in that receipt. Those C probes do not establish general
+source-level aggregate Fairy FFI. An explicitly `@link_name`-mapped scalar `i32 -> i32` source
+fixture traverses AST, HIR, MIR, C emission, and separate objects; its four native executions
+also pass in the current Linux receipt.
 The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
 failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
 not exposed through a public `std::alloc` API. One internal generated Fairy caller now crosses its
 exact `void *`/`size_t` block into the real allocate and deallocate
-helpers for four additional configured native executions. All eight native SystemHeap executions
-remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
+helpers for four additional native executions. All eight native SystemHeap executions pass in
+the current Linux receipt; the later Arena, text ownership, and Linux File C slices now
 exist and each has a raw generated-Fairy source crossing.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
@@ -317,8 +321,8 @@ assignment. Bounds are proven before right-hand-side evaluation. Mutable slicing
 retained foreign pointers remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
-rejection, and exact termination. Four Linux C-only native runs remain configured and locally
-unobserved; the same probe now executes as two separate-translation-unit x64 MSVC runs. Separate
+rejection, and exact termination. Four Linux C-only native runs pass in the current hosted receipt;
+the same probe also executes as two separate-translation-unit x64 MSVC runs. Separate
 generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
 ADR 0257 additionally executes a generated-Fairy `String.append` growth-failure `.err` arm at both
 MSVC profiles: copy succeeds on the first probe allocation, append growth fails on the second, and
@@ -545,7 +549,7 @@ Exit gate: the target reaches `conformant`: interpreter and generated-C runs agr
 
 ## Phase 3: modules, package builds, and bounded caching
 
-Current implementation status: the first concrete `PackageInstanceId` is now executable. It hashes
+Initial implementation history: the first concrete `PackageInstanceId` is executable. It hashes
 the already-resolved package tuple with a domain-separated, length-prefixed v1 encoding and full
 SHA-256, exposes one canonical lowercase text form, rejects malformed feature sets, and rechecks the
 complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
@@ -564,7 +568,9 @@ toolchain, backend, runtime, standard-library, feature, and profile compatibilit
 caller-bounded process-local LRU store proves byte/entry bounds, deep-copy isolation, and safe
 eviction without inventing an unmeasured default. Registry coordinates, source acquisition,
 serialized module interfaces, persistent cross-process storage, measurements, and stable package
-commands remain Phase 3 work.
+commands were still pending at that point. The later entries below implement persistent storage,
+process measurements, and stable local-workspace commands. Current fixtures use public-interface
+v5 and whole-package cache key v4; older version numbers below describe earlier slices.
 
 The manifest/lockfile readiness audit separates the fixed compiler graph contract from broader
 package-manager choices. Its local-only, exact-version, per-edge-feature, explicit-workspace,
@@ -1207,6 +1213,12 @@ module `static_assert`. Checked compile-time traps use `E4303`, cycles and budge
 runtime references enter HIR as folded scalar literals, and no evaluator state reaches MIR or C.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
+
+Current gate gap: public-interface and private-implementation invalidation have executable
+fixtures, but [inline-body reuse](../../spec/fixtures/module-interface/README.md) has no Stage 0
+function contract or fixture. Phase 3 is therefore not fully closed under the exit gate as written.
+Cache measurements run in the separate Measurements workflow; ordinary Frontend success does
+not establish a fresh cold/warm measurement.
 
 ## Phase 4: Atlas fact export
 

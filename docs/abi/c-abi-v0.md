@@ -6,9 +6,12 @@
 
 ## Target status
 
-The first planned conformance target is `x86_64-linux-gnu`. It is not currently supported because
-the complete runtime, sysroot policy, public layout and ABI fixtures, maintained distribution, and
-observed clean hosted evidence do not exist.
+The first planned conformance target is `x86_64-linux-gnu`. Hosted layout, bidirectional C ABI,
+runtime, and generated-source probes pass for the admitted subset; the current receipt is linked
+from the [phase status](../development/phase-status.md). The target evidence in
+`internal/target/spec.go` still lists `complete-runtime`, `complete-standard-library`,
+`toolchain-baseline`, and `toolchain-provisioning` as missing. It does not promote the target to
+`conformant` or `supported`; maintained distribution remains a separate support requirement.
 
 Target claims use three levels:
 

@@ -14,6 +14,7 @@ The topical index of every contract, implementation, and fixture owner lives in 
 Supporting pages:
 
 - [Implementation status](development/implementation-status.md) - phase history moved out of the root README
+- [Phase status](development/phase-status.md) - current Phase 0–4 exit evidence and remaining work
 - [Prototype usage](development/prototype-usage.md) - manual developer examples moved out of the root README
 - [Agent context map](../.agents/context-map.md) - workflow and skill routes
 
