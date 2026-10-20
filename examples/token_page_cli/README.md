@@ -81,7 +81,7 @@ first_sum	4000000000
 ```
 
 No stdout is written before validation completes and both the all-token and first-segment
-summaries are ready, and lexical or sum errors produce no stdout. The token-capacity check
+summaries are ready. Lexical or sum errors produce no stdout. The token-capacity check
 runs before parsing the next significant token, so the token-limit diagnostic wins when the
 129th token begins.
 

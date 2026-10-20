@@ -22,11 +22,11 @@ workspace rules. Source contents are overlaid in memory and receive fresh graph,
 digest and compilation identities. A file without a manifest receives
 single-file compiler analysis.
 
-When a workspace cannot load, publish precise available syntax diagnostics and
-an explicit unavailable diagnostic for affected open files; never reuse stale
-definition results. Completion can use the last clean declaration snapshot while
-the user is typing invalid syntax. That fallback is a suggestion, not a current
-compiler fact.
+When a workspace cannot load, publish the precise syntax diagnostics that are
+available and an explicit unavailable diagnostic for affected open files; never
+reuse stale definition results. Completion can use the last clean declaration
+snapshot while the user is typing invalid syntax. That fallback is a suggestion,
+not a current compiler fact.
 
 ## Editor setup
 

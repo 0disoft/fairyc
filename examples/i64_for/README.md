@@ -9,7 +9,7 @@ for (let i64 value in view) {
 The iterable must be a named immutable local or parameter of exact type
 `ref i64[]`. Bind array/Vec views or subranges to a name first. Each iteration
 copies one i64 in index order; an empty view executes no body. The item's scope
-is the body. Length is observed once, with checked indexing and arithmetic.
+is the body. Length is observed once; indexing and arithmetic are checked.
 
 The owner stays borrowed throughout the loop, including a body ending with
 `break` or `return`. Mutation/move may occur after loop exit if there are no

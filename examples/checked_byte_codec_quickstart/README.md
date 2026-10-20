@@ -71,7 +71,7 @@ example-local `codec::encode_le` checks sign, width, capacity and excess high
 bits before writing. It extracts `remaining % 256`, converts only that digit,
 then divides by 256. Invalid fields leave the caller's buffer unchanged;
 successful fields leave all bytes beyond WIDTH unchanged. The SDK conversion
-still performs its own conversion work; no speed claim is made.
+still does its own conversion work; no speed claim is made.
 
 `codec::decode_le` takes a shared raw byte view of length 1..8 and returns
 `Result<i64, DecodeError>`; `codec::decode_hex_le` takes a shared ASCII hex view
@@ -91,7 +91,7 @@ using a `width` local captured before that exclusive owner loan. The renderer ta
 `for (let u8 byte in ...)` loop, rendering into the existing 24-byte scratch output.
 
 Successful `byte` and `le` commands print lowercase two-digit hex bytes separated by single spaces and
-terminated by LF, and exits 0. No stdout is written until complete input and
+terminated by LF, and exit 0. No stdout is written until complete input and
 encoding validation succeeds. Input/field failures print a `checked-byte-codec:`
 diagnostic to stderr and exit 1; usage errors exit 2. Output or internal failure
 exits 3. A short or failed console write may have emitted partial output;

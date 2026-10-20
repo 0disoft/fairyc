@@ -19,7 +19,7 @@ errors here. The 128-byte padded array is only fixture storage; the helper adds
 no input-length limit. UTF-8 validation, row/field/line diagnostics, aggregate
 overflow and output policy belong to the application.
 
-With an already built current Fairy compiler, the standalone commands are:
+With the current compiler already built, the standalone commands are:
 
 ```text
 fairyc check --path examples/digits_only_quickstart
