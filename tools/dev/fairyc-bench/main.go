@@ -35,8 +35,8 @@ func entry(ctx context.Context, args []string) error {
 	fs.StringVar(&o.Output, "output", "", "new output directory (required; never overwrites)")
 	fs.StringVar(&languages, "languages", "fairy,zig,rust,c", "comma-separated languages")
 	fs.StringVar(&profiles, "profiles", "dev,release,small-dev", "small-dev applies only to Rust")
-	fs.StringVar(&workloads, "workloads", "tokenizer", "comma-separated workloads")
-	fs.IntVar(&o.Edits, "edits", 0, "number of successive source edits")
+	fs.StringVar(&workloads, "workloads", "tokenizer,many-modules", "comma-separated workloads")
+	fs.IntVar(&o.Edits, "edits", 20, "number of successive source edits")
 	fs.IntVar(&o.Modules, "modules", 16, "module count for many-modules")
 	fs.IntVar(&o.Repetitions, "repetitions", 1, "independent cold-to-edit sequences")
 	fs.DurationVar(&o.Timeout, "timeout", 3*time.Minute, "timeout per command")
@@ -56,11 +56,20 @@ func entry(ctx context.Context, args []string) error {
 	if o.Profiles, err = selection(profiles, "dev", "release", "small-dev"); err != nil {
 		return err
 	}
-	if o.Workloads, err = selection(workloads, "tokenizer"); err != nil {
+	if o.Workloads, err = selection(workloads, "tokenizer", "many-modules"); err != nil {
 		return err
 	}
 	if o.Output == "" || o.Edits < 0 || o.Edits > 1000 || o.Modules < 2 || o.Modules > 64 || o.Repetitions < 1 || o.Repetitions > 100 || o.Timeout <= 0 {
 		return errors.New("require --output, edits 0..1000, modules 2..64, repetitions 1..100, positive timeout")
+	}
+	applicable := false
+	for _, language := range o.Languages {
+		for _, profile := range o.Profiles {
+			applicable = applicable || profile != "small-dev" || language == "rust"
+		}
+	}
+	if !applicable {
+		return errors.New("selected profiles do not apply to any selected language")
 	}
 	return run(ctx, o)
 }

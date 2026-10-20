@@ -93,6 +93,9 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 		return err
 	}
 	modules := 1
+	if c.Workload == "many-modules" {
+		modules = o.Modules
+	}
 	for step := 0; step < 2+o.Edits; step++ {
 		revision := max(0, step-1)
 		stage, change := "cold", "none"
@@ -138,6 +141,47 @@ func runCase(ctx context.Context, o Options, a adapter, c *Case, input []byte) e
 			return fmt.Errorf("%s edit %d: output mismatch or program failed", stage, revision)
 		}
 	}
+	before := c.Samples[len(c.Samples)-1].Footprint.Total
+	clean := Sample{Stage: "clean", Change: "none", Edit: o.Edits, Action: "remove project build outputs; preserve experiment shared caches"}
+	if a.language == "rust" {
+		_, env, err := a.build(project, state, c.Profile)
+		if err != nil {
+			return err
+		}
+		command, out, err := execute(ctx, o.Timeout, project, env, nil, a.executable, "clean", "--offline")
+		command.Log = out + command.Log
+		clean.Commands = append(clean.Commands, portable(command, o.Output))
+		clean.WallMS = command.WallMS
+		clean.Action = "cargo clean --offline; preserve isolated CARGO_HOME"
+		if err != nil {
+			return fmt.Errorf("cargo clean failed: %s", command.Log)
+		}
+	} else {
+		roots := []string{"build"}
+		if a.language == "zig" {
+			roots = []string{"zig-out", ".zig-cache"}
+		}
+		boundary, err := os.OpenRoot(project)
+		if err != nil {
+			return err
+		}
+		for _, name := range roots {
+			if err := boundary.RemoveAll(name); err != nil {
+				boundary.Close()
+				return err
+			}
+		}
+		if err := boundary.Close(); err != nil {
+			return err
+		}
+	}
+	var err error
+	clean.Footprint, err = inventory(project, state, a.binary(project, c.Profile))
+	if err != nil {
+		return err
+	}
+	clean.ReclaimedBytes = before - clean.Footprint.Total
+	c.Samples = append(c.Samples, clean)
 	return nil
 }
 

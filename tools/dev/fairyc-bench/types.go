@@ -79,6 +79,7 @@ type Sample struct {
 	SourceHash     string    `json:"sourceSha256"`
 	SourceBytes    int64     `json:"sourceBytes"`
 	SourceFiles    int       `json:"sourceFiles"`
+	Action         string    `json:"action,omitempty"`
 	Commands       []Command `json:"commands"`
 	WallMS         float64   `json:"buildWallMs"`
 	Expected       string    `json:"expectedStdout"`
