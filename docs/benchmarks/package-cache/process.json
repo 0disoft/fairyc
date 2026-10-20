@@ -1,0 +1,61 @@
+{
+  "schema": "fairyc.process-cache-measurement/v1",
+  "workload": "workspace_quickstart",
+  "scope": "semantic-through-verified-mir",
+  "clock": "process-monotonic-wall-nanoseconds",
+  "clockResolutionNs": 518100,
+  "cacheImplementation": "bounded-process-package-mir-v0",
+  "decision": "observed-only-no-speedup-claim",
+  "environment": {
+    "os": "windows",
+    "arch": "amd64",
+    "target": "x86_64-windows-msvc"
+  },
+  "policy": {
+    "maxEntries": 8,
+    "maxBytes": 33554432,
+    "maxArtifactBytes": 8388608
+  },
+  "samples": [
+    {
+      "sequence": 1,
+      "condition": "cold-fallback",
+      "durationNs": 4827200,
+      "belowClockResolution": false,
+      "outcome": "fallback",
+      "packages": 2,
+      "hits": 0,
+      "misses": 2,
+      "rejected": 0,
+      "stored": 2,
+      "storeSkipped": 0,
+      "lowered": true,
+      "reassemblyFallback": false,
+      "mirFunctions": 2,
+      "interpreterResult": 42,
+      "retainedEntries": 2,
+      "retainedBytes": 10505,
+      "verifiedHits": 0
+    },
+    {
+      "sequence": 2,
+      "condition": "warm-all-hit",
+      "durationNs": 0,
+      "belowClockResolution": true,
+      "outcome": "all-hit",
+      "packages": 2,
+      "hits": 2,
+      "misses": 0,
+      "rejected": 0,
+      "stored": 0,
+      "storeSkipped": 0,
+      "lowered": false,
+      "reassemblyFallback": false,
+      "mirFunctions": 2,
+      "interpreterResult": 42,
+      "retainedEntries": 2,
+      "retainedBytes": 10505,
+      "verifiedHits": 2
+    }
+  ]
+}

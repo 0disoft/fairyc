@@ -1219,6 +1219,9 @@ fixtures, but [inline-body reuse](../../spec/fixtures/module-interface/README.md
 function contract or fixture. Phase 3 is therefore not fully closed under the exit gate as written.
 Cache measurements run in the separate Measurements workflow; ordinary Frontend success does
 not establish a fresh cold/warm measurement.
+The [local cache-only snapshot](../benchmarks/package-cache/README.md) at clean `b2181e66`
+records cold/warm process timing, private/public edit invalidation, and bounded retained bytes
+on a declared Windows machine. The inline-body clause remains open.
 
 ## Phase 4: Atlas fact export
 

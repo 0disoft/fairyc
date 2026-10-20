@@ -1,0 +1,21 @@
+{
+  "commit": "b2181e660a78555bc2066ae640d3e80d362d29ab",
+  "memoryBytes": 33654575104,
+  "cpu": {
+    "Name": "AMD Ryzen 5 7430U with Radeon Graphics",
+    "NumberOfCores": 6,
+    "NumberOfLogicalProcessors": 12
+  },
+  "os": {
+    "Caption": "Microsoft Windows 11 Pro",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300"
+  },
+  "measuredAt": "2026-10-21T04:08:41.1424592+09:00",
+  "go": "go version go1.27.1 windows/amd64",
+  "dirty": false,
+  "cgoEnabled": "0",
+  "command": "go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke --cache-measurements-only",
+  "scope": "verified-MIR package cache; excludes native build outputs",
+  "retryPolicy": "none; first run"
+}

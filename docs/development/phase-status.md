@@ -14,7 +14,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
 | 2 — hosted executable | Partial | [Linux native CI](https://github.com/0disoft/fairyc/actions/runs/39471634965/job/118803299115) observes layout, ABI, runtime, and generated-source probes. The [target spec](../../internal/target/spec.go) still lists four missing maturity entries, detailed below; `conformant` remains false. |
-| 3 — modules, packages, cache | Partial under the written exit gate | Stable local-workspace commands, coordinate-based invalidation, opt-in persistent cache, and safe incompatible-cache misses exist. Public/private invalidation has fixtures; [inline-body reuse](../../spec/fixtures/module-interface/README.md) has no Stage 0 function contract or fixture. Current-commit cache timing was not observed in the inspected Frontend run. |
+| 3 — modules, packages, cache | Partial under the written exit gate | Stable local-workspace commands, coordinate-based invalidation, opt-in persistent cache, and safe incompatible-cache misses exist. A [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) records cold/warm timing, edit invalidation, and bounded retention. [Inline-body reuse](../../spec/fixtures/module-interface/README.md) still has no Stage 0 function contract or fixture. |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
 ## Linux receipt
@@ -49,8 +49,12 @@ validation, before the final persistent-cache process/growth measurements. Its e
 Neither establishes fresh measurements for the inspected commit or a current cache regression.
 Reference-machine speed comparisons and default-cache policy are later promotion decisions.
 
+The later [local cache-only run](../benchmarks/package-cache/README.md) at clean `b2181e66`
+records 65 validated observations on a declared Windows machine. It supplies raw cold/warm,
+edit-invalidation, and retained-byte evidence without rerunning the full smoke or claiming hosted
+measurement success. These observations cover verified MIR caching, not native executable builds.
+
 ## Next work
 
 1. Resolve Phase 2's four target-evidence entries before conformance promotion.
 2. Reconcile Phase 3's inline-body clause with the admitted language scope, keeping any gate change explicit.
-3. Collect current-commit cold/warm receipts on a declared machine and workload through the measurement lane.

@@ -19,6 +19,9 @@ The [Rust dependency snapshot](rust-dependencies/README.md) measures a Rust-only
 with `clap` 4 derive, `serde` 1 derive, `serde_json` 1, and `regex` 1. It compares `dev` and
 `small-dev` build footprints and shared Cargo cache, and is not a cross-language ranking.
 
+The [package-cache snapshot](package-cache/README.md) records Fairy C verified-MIR cold/warm
+timing, edit invalidation, and bounded cache retention separately from native build footprints.
+
 - [Development summary SVG](latest/summary.svg) and [PNG](latest/summary.png): `dev` and Rust
   `small-dev` for `many-modules`
 - [Full footprint SVG](latest/footprint.svg) and [PNG](latest/footprint.png)
