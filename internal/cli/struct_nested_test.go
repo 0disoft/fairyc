@@ -14,7 +14,7 @@ func nestedStructSource(action string) string {
 func TestStructNestedRejections(t *testing.T) {
 	for name, leaf := range map[string]string{
 		"empty": "struct Span {}", "pointer": "struct Span {ptr mut i32 address;}",
-		"borrow": "struct Span {ref i32 value;}", "array": "struct Span {i32[2] values;}",
+		"borrow": "struct Span {ref i32 value;}", "array-of-borrows": "struct Span {(ref i32)[2] values;}",
 		"resource": "resource Span {cleanup {}}", "enum": "enum Span {one,two}",
 		"option": "struct Span {Option<i32> value;}", "result": "struct Span {Result<i32,u32> value;}",
 		"self-cycle": "struct Span {Span value;}", "indirect-cycle": "struct Span {Child value;} struct Child {Span value;}",

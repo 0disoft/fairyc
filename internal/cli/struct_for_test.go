@@ -26,7 +26,7 @@ func TestStructForRejections(t *testing.T) {
 		{"scalar-item", "for(let i64 item in view){}", ""},
 		{"wrong-nominal", "for(let Other item in view){}", ""},
 		{"mutable-descriptor", "var ref Token[] alias=view;for(let Token item in alias){}", ""},
-		{"slice-expression", "for(let Token item in view[..]){}", ""},
+		{"nested-slice-expression", "for(let Token item in view[..][..]){}", ""},
 		{"call-expression", "for(let Token item in tail(ref owned)){}", ""},
 		{"direct-vector", "for(let Token item in owned){}", ""},
 		{"move-propagation", "for(let Token item in view){let i32 value=take_result(owned)?;}", "E2105"},

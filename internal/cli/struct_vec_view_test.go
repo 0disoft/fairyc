@@ -52,12 +52,12 @@ func TestStructVecViewRejections(t *testing.T) {
 		})
 	}
 	for name, definition := range map[string]string{
-		"empty":    "struct Token {}",
-		"pointer":  "struct Token {ptr mut i32 address;}",
-		"borrow":   "struct Token {ref i32 borrowed;}",
-		"array":    "struct Token {i32[2] values;}",
-		"resource": "resource Token {cleanup {}}",
-		"enum":     "enum Token {one, two}",
+		"empty":            "struct Token {}",
+		"pointer":          "struct Token {ptr mut i32 address;}",
+		"borrow":           "struct Token {ref i32 borrowed;}",
+		"array-of-borrows": "struct Token {(ref i32)[2] values;}",
+		"resource":         "resource Token {cleanup {}}",
+		"enum":             "enum Token {one, two}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			source := "module main; import std::vec as vec; " + definition + " fn i32 main(){let vec::Vec<Token> owned=vec::empty<Token>();let ref Token[] view=vec::view<Token>(ref owned);assert(view.is_empty);return 0;}"

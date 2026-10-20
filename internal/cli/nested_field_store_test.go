@@ -9,7 +9,7 @@ fn i32 main(){var Token s=Token{.position=Position{.span=Span{.start=3,.end=7,.s
 
 func TestNestedFieldStoreNative(t *testing.T) {
 	cases := []struct{ name, source, trap string }{{"scalar-types-order-copy", nestedFieldNativeSource, ""}}
-	cases = append(cases, struct{ name, source, trap string }{"reference-selection", `module main;struct Span{i64 start;}struct Token{Span position;}fn i32 main(){var Token first=Token{.position=Span{.start=3}};var Token second=Token{.position=Span{.start=7}};var ref mut Token selected=ref mut first;selected.position.start+={selected=ref mut second;2};assert(first.position.start==5 && second.position.start==7);selected.position.start=9;assert(second.position.start==9);return 0;}`, ""})
+	cases = append(cases, struct{ name, source, trap string }{"reference-selection", `module main;struct Span{i64 start;}struct Token{Span position;}fn i32 main(){var Token first=Token{.position=Span{.start=3}};var Token second=Token{.position=Span{.start=7}};var ref mut Token selected=ref mut first;selected.position.start+={selected=ref mut second;2};assert(first.position.start==5 && selected.position.start==7);selected.position.start=9;assert(second.position.start==9);return 0;}`, ""})
 	cases = append(cases, struct{ name, source, trap string }{"owner-replacement", `module main;struct Span{i64 start;}struct Token{Span position;}fn i32 main(){var Token s=Token{.position=Span{.start=3}};s.position.start+={s=Token{.position=Span{.start=99}};2};assert(s.position.start==5);return 0;}`, ""})
 
 	for _, item := range []struct{ name, typ, initial, action, trap string }{
