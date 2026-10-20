@@ -338,8 +338,8 @@ trap. Both use ordinary lock
 refresh unless `--locked` requires a valid exact no-write match. They perform no registry access,
 version solving, source download, environment expansion, WSL invocation, persistent cache write, or
 user linker-input discovery. The checked-in `examples/workspace_quickstart` proves one direct local
-dependency and native result 42; configurable entries, multiple binaries, program stream forwarding,
-and multiple binaries remain deferred; stable check/build/run have separate closed spellings.
+dependency and native result 42; configurable entries, multiple binaries, and program stream forwarding
+remain deferred; stable check/build/run have separate closed spellings.
 
 `experimental check` uses the same repeated-`--source` closure syntax and limits, but its first file
 is a primary source rather than an executable entry. It requires no `main`, runs no interpreter or

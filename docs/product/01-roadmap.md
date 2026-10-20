@@ -203,7 +203,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
 requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 52 emission
 cases at low and optimized profiles for 208 process-status and exact
-source-linked drop-trace comparisons, then drive
+source-linked drop-trace comparisons, then drives
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
 smokes. It now adds four-way product builds containing compiler-owned nonempty `ref CStr` storage and a

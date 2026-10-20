@@ -12,11 +12,11 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 - Product decision: `docs/cli/command-contract.md`
 - Technical owner: UNASSIGNED
 - Related ADRs: `docs/adr/0027-experimental-c-emission-cli.md`,
-  `docs/adr/0028-experimental-linux-scalar-build-cli.md`, and
-  `docs/adr/0180-stable-workspace-c-emission-v1.md`, and
-  `docs/adr/0181-stable-workspace-semantic-test-v1.md`, and
-  `docs/adr/0204-stable-starter-project-creation-v1.md`, and
-  `docs/adr/0206-starter-project-guide-v2.md`, and
+  `docs/adr/0028-experimental-linux-scalar-build-cli.md`,
+  `docs/adr/0180-stable-workspace-c-emission-v1.md`,
+  `docs/adr/0181-stable-workspace-semantic-test-v1.md`,
+  `docs/adr/0204-stable-starter-project-creation-v1.md`,
+  `docs/adr/0206-starter-project-guide-v2.md`,
   `docs/adr/0207-stable-windows-workspace-run-v2.md`, and
   `docs/adr/0208-starter-project-guide-v3.md`
 

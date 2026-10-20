@@ -155,9 +155,9 @@ symbol rejection, and output-failure classification.
 probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
 output. The Linux native runner compiles and executes the probe with Clang and GCC at low and
 optimized profiles, checking zero-size normalization, fundamental alignment, growth and shrink
-prefix preservation, unsupported-alignment rollback, release, and invalid output rejection. These
-four configured executions are not source-level standard-library fixtures, deterministic OOM
-injection, or hosted evidence until a Linux receipt is observed.
+prefix preservation, unsupported-alignment rollback, release, and invalid output rejection. Until a
+Linux receipt is observed, these four configured executions are not source-level standard-library
+fixtures, deterministic OOM injection, or hosted evidence.
 
 The Buffer probe adds ordinary append, no-op reserve identity, relocating initialized-prefix
 self-append, length-overflow rollback, zeroed growth, truncate, clear, malformed state, and drop.
