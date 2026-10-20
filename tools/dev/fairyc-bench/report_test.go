@@ -14,18 +14,19 @@ func fixtureReceipt() Receipt {
 	base := Sample{Stage: "cold", Change: "none", Verified: true, Expected: "ok\n", Actual: "ok\n", WallMS: 1, Footprint: Footprint{Binary: 10, Intermediate: 5, Total: 15, Files: 2}}
 	noop := base
 	noop.Stage = "no-op"
-	return Receipt{Schema: receiptSchema, Started: "2026-10-20T00:00:00Z", Commit: "test-fixture", Options: RunSettings{Languages: []string{"fairy"}, Profiles: []string{"dev"}, Workloads: []string{"tokenizer"}, Repetitions: 1}, Cases: []Case{{ID: "test", Language: "fairy", Profile: "dev", Workload: "tokenizer", Status: "passed", Samples: []Sample{base, noop, {Stage: "clean", Change: "none", Footprint: Footprint{}}}}}}
+	return Receipt{Schema: receiptSchema, Started: "2026-10-20T00:00:00Z", Finished: "2026-10-20T00:01:00Z", Commit: "test-fixture", Options: RunSettings{Languages: []string{"fairy"}, Profiles: []string{"dev"}, Workloads: []string{"tokenizer"}, Modules: 16, Repetitions: 1}, Cases: []Case{{ID: "test", Language: "fairy", Profile: "dev", Workload: "tokenizer", Repetition: 1, Status: "passed", Samples: []Sample{base, noop, {Stage: "clean", Change: "none", Footprint: Footprint{}}}}}}
 }
 
 func TestReportArtifactsAndEscaping(t *testing.T) {
 	r := fixtureReceipt()
 	r.Toolchains = []Toolchain{{Language: "fairy", Version: "<script>alert('x')</script>"}}
-	r.Cases = append(r.Cases, Case{ID: "failure", Status: "unavailable", Reason: "<script>alert('x')</script>"})
+	r.Options.Languages = append(r.Options.Languages, "zig")
+	r.Cases = append(r.Cases, Case{ID: "failure", Language: "zig", Profile: "dev", Workload: "tokenizer", Repetition: 1, Status: "unavailable", Reason: "<script>alert('x')</script>"})
 	root := t.TempDir()
 	if err := render(r, root); err != nil {
 		t.Fatal(err)
 	}
-	for _, name := range []string{"footprint", "growth"} {
+	for _, name := range []string{"footprint", "growth", "summary"} {
 		b, err := os.ReadFile(filepath.Join(root, name+".svg"))
 		if err != nil {
 			t.Fatal(err)
@@ -65,6 +66,9 @@ func TestReportArtifactsAndEscaping(t *testing.T) {
 	}
 	if !strings.Contains(string(b), "data-language=") || !strings.Contains(string(b), "addEventListener") {
 		t.Fatal("report filters missing")
+	}
+	if strings.Count(string(b), `id="chart-`) != 4 {
+		t.Fatal("inline SVG titles must have distinct IDs")
 	}
 	for letter, glyph := range glyphs {
 		if len(glyph) != 35 {

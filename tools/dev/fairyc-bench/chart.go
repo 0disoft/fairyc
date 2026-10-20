@@ -186,7 +186,8 @@ func growthChart(r Receipt) scene {
 
 func (s scene) svg() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-labelledby="title desc"><title id="title">%s</title><desc id="desc">%s</desc><rect width="100%%" height="100%%" fill="#f8fafc"/>`, s.Width, s.Height, s.Width, s.Height, html.EscapeString(s.Title), html.EscapeString(s.Description))
+	id := "chart-" + digest([]byte(s.Title))[:8]
+	fmt.Fprintf(&b, `<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" role="img" aria-labelledby="%s-title %s-desc"><title id="%s-title">%s</title><desc id="%s-desc">%s</desc><rect width="100%%" height="100%%" fill="#f8fafc"/>`, s.Width, s.Height, s.Width, s.Height, id, id, id, html.EscapeString(s.Title), id, html.EscapeString(s.Description))
 	for _, p := range s.Shapes {
 		switch p.Kind {
 		case "text":
@@ -207,4 +208,25 @@ func (s scene) svg() string {
 	}
 	b.WriteString("</svg>\n")
 	return b.String()
+}
+
+func summaryChart(r Receipt) scene {
+	workload := "tokenizer"
+	for _, name := range r.Options.Workloads {
+		if name == "many-modules" {
+			workload = name
+		}
+	}
+	filtered := r
+	filtered.Options.Workloads = []string{workload}
+	filtered.Cases = nil
+	for _, c := range r.Cases {
+		if c.Workload == workload && (c.Profile == "dev" || c.Profile == "small-dev") {
+			filtered.Cases = append(filtered.Cases, c)
+		}
+	}
+	s := footprintChart(filtered)
+	s.Title = fmt.Sprintf("Development footprint after %d edits", r.Options.Edits)
+	s.Shapes[0].Text = s.Title
+	return s
 }

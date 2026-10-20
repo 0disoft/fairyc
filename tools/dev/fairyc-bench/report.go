@@ -8,7 +8,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
+	"strings"
 )
 
 func renderCLI(args []string) error {
@@ -49,13 +51,44 @@ func validateReceipt(r Receipt) error {
 	if len(r.Cases) == 0 {
 		return errors.New("receipt has no cases")
 	}
+	if r.Finished == "" {
+		return errors.New("receipt is unfinished")
+	}
+	if r.Options.Edits < 0 || r.Options.Edits > 1000 || r.Options.Modules < 2 || r.Options.Modules > 64 || r.Options.Repetitions < 1 || r.Options.Repetitions > 100 {
+		return errors.New("invalid run settings")
+	}
+	for _, setting := range []struct{ values, allowed []string }{{r.Options.Languages, []string{"fairy", "zig", "rust", "c"}}, {r.Options.Profiles, []string{"dev", "release", "small-dev"}}, {r.Options.Workloads, []string{"tokenizer", "many-modules"}}} {
+		if _, err := selection(strings.Join(setting.values, ","), setting.allowed...); err != nil {
+			return err
+		}
+	}
+	expected := 0
+	for _, language := range r.Options.Languages {
+		for _, profile := range r.Options.Profiles {
+			if profile != "small-dev" || language == "rust" {
+				expected += len(r.Options.Workloads) * r.Options.Repetitions
+			}
+		}
+	}
+	if len(r.Cases) != expected {
+		return errors.New("receipt does not cover its declared matrix")
+	}
 	for _, i := range r.Installations {
 		if i.Bytes < 0 || i.Files < 0 || i.Symlinks < 0 {
 			return errors.New("invalid installation inventory")
 		}
 	}
 	seen := map[string]bool{}
+	combinations := map[string]bool{}
 	for _, c := range r.Cases {
+		if !slices.Contains(r.Options.Languages, c.Language) || !slices.Contains(r.Options.Profiles, c.Profile) || !slices.Contains(r.Options.Workloads, c.Workload) || (c.Profile == "small-dev" && c.Language != "rust") || c.Repetition < 1 || c.Repetition > r.Options.Repetitions {
+			return errors.New("case outside declared matrix")
+		}
+		key := fmt.Sprintf("%s/%s/%s/%d", c.Language, c.Profile, c.Workload, c.Repetition)
+		if combinations[key] {
+			return errors.New("duplicate matrix configuration")
+		}
+		combinations[key] = true
 		if c.ID == "" || seen[c.ID] {
 			return errors.New("missing or duplicate case ID")
 		}
@@ -112,7 +145,7 @@ func render(r Receipt, output string) error {
 	if err := os.MkdirAll(output, 0o755); err != nil {
 		return err
 	}
-	for name, chart := range map[string]scene{"footprint": footprintChart(r), "growth": growthChart(r)} {
+	for name, chart := range map[string]scene{"footprint": footprintChart(r), "growth": growthChart(r), "summary": summaryChart(r)} {
 		if err := os.WriteFile(filepath.Join(output, name+".svg"), []byte(chart.svg()), 0o644); err != nil {
 			return err
 		}
