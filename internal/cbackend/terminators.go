@@ -321,7 +321,11 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked byte-view slice end in %s: %w", function.Name, err)
 		}
-		if start.Kind == mir.OperandUSize && start.U64 == 0 {
+		if end.Kind == mir.OperandUSize && end.U64 == 0 {
+			// The length is unsigned, so only a nonzero start can fail when
+			// the end is zero. Avoid generating 0 > length under -Wtype-limits.
+			fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { %sgoto fy_b_%d; }\n", startValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
+		} else if start.Kind == mir.OperandUSize && start.U64 == 0 {
 			fmt.Fprintf(output, "    if ((%s) > (%s).length) { %sgoto fy_b_%d; }\n", endValue, receiverValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
 		} else {
 			fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { %sgoto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_BOUNDS"), failure)
