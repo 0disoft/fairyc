@@ -1413,7 +1413,7 @@ bounded, verifier-checked bytes for a complete MIR program, but the workspace pa
 no independently reusable per-package MIR/object artifact and has no configured comparable
 cold/warm measurement. Disk format, defaults, and cleanup policy therefore remain `UNDECIDED`.
 
-The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
+The separation of resolved-graph fixtures from public manifest syntax reflects fixture ownership,
 not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, ADR 0145 owns
 generated lock bytes, ADR 0147 owns current SDK selection, and ADR 0148 owns the experimental
 Windows project commands. Stable public command policy, registry, and solver behavior remain

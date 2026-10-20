@@ -22,8 +22,8 @@ tests/             future compile, run, trap, runtime, differential, compatibili
 docs/              product and engineering rationale
 ```
 
-The `spec/` grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, and
-resolved-package-graph fixtures exist as design-owned executable data. The first implementation
+The grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, and
+resolved-package-graph fixtures under `spec/` exist as design-owned executable data. The first
 boundary now exists under `internal/` for source management, lexing, recoverable syntax,
 error-free AST lowering, diagnostics, and parser-fixture execution. The remaining planned package
 boundaries are created only when their phase starts.
