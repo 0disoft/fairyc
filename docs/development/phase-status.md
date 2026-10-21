@@ -56,6 +56,12 @@ from the compiled snapshot, using build-local package IDs to distinguish duplica
 packages and feature instances; unknown locations retain category-only output. This CLI addition
 does not promote target maturity.
 
+Static byte-string index/slice failures now feed C-only non-returning callee inference, fixing
+the MSVC optimized-build C4702 observed in the cross-package probe. Local low/optimized native
+probes check the original `bounds` category and source range, including a wrapper call chain;
+the package-aware CLI probe checks both run commands. This is local Windows evidence, not a new
+hosted Linux receipt or target-maturity promotion.
+
 ## Cache evidence
 
 Current keys use [whole-package cache v4](../package/whole-package-cache-v4.md). The source and
@@ -101,6 +107,3 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 1. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
-3. Investigate MSVC optimized builds rejecting called functions with a constant out-of-bounds byte-slice access
-   as C4702 (unreachable code). This was observed during the local cross-package trap-location probe;
-   the passing execution probe uses a runtime index. It does not establish support for those constant-trap builds.

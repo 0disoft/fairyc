@@ -38,6 +38,18 @@ fn i32 main() {
     let u8 second = data[1];
     return if (first == second) { 0 } else { 1 };
 }`, "data[1]", "bounds"},
+		{"constant-slice-callee", "main.fy", `module main;
+fn i32 trapped() {
+    let ref u8[] data = b"a";
+    let ref u8[] part = data[0..2];
+    return 0;
+}
+fn i32 main() { return trapped(); }
+`, "data[0..2]", "bounds"},
+		{"constant-direct-index-callee", "main.fy", `module main;
+fn i32 trapped() { return b"a"[1] as i32; }
+fn i32 main() { return trapped(); }
+`, `b"a"[1]`, "bounds"},
 		{"second-assert", "main.fy", `module main;
 fn i32 main() {
     let u8 first = 1; assert(first == 1);
@@ -48,6 +60,17 @@ fn i32 main() {
 fn i32 shift(i32 value, i32 count) { return value << count; }
 fn i32 main() { return shift(1, 32); }
 `, "value << count", "invalid-shift"},
+		{"constant-bounds-callee", "main.fy", `module main;
+fn i32 trapped() {
+    let ref u8[] data = b"a";
+    return data[1] as i32;
+}
+fn i32 wrapper() { return trapped(); }
+fn i32 main() {
+    let i32 value = wrapper();
+    assert(value == 0);
+    return 0;
+}`, "data[1]", "bounds"},
 		{"qualified-dynamic-shift", "main.fy", `module main;
 fn i32 shift(i32 value, i32 count) { return value << count; }
 fn i32 main() { return shift(1, 32); }
@@ -82,7 +105,7 @@ fn i32 main() { return shift(1, 32); }
 			for _, optimization := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 				artifact, err := toolchain.Build(cdriver.NativeBuildOptions{Profile: optimization, UnitSource: unit.Source, RuntimeSource: support, TrapControl: true})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("%v\n%s", err, unit.Source)
 				}
 				outcome, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{RejectOutput: true})
 				if err != nil || outcome.TrapCategory != sample.category {

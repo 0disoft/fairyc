@@ -53,7 +53,7 @@ func (s assertionState) value(op mir.Operand) assertionValue {
 		return assertionValue{}
 	}
 	switch op.Kind {
-	case mir.OperandI32, mir.OperandI64, mir.OperandU8, mir.OperandU32, mir.OperandUSize:
+	case mir.OperandI32, mir.OperandI64, mir.OperandU8, mir.OperandU32, mir.OperandUSize, mir.OperandByteString:
 		return assertionValue{literal: op}
 	}
 	return assertionValue{}
@@ -72,7 +72,7 @@ func (s assertionState) resolve(op mir.Operand) mir.Operand {
 }
 func (s *assertionState) operation(op mir.Operation) {
 	// Definitions are not SSA: descriptor/scalar rebinding invalidates identities.
-	if op.Kind != mir.OperationArithmeticCheck {
+	if op.Kind != mir.OperationArithmeticCheck && op.Kind != mir.OperationViewIndexCheck && op.Kind != mir.OperationViewSliceCheck {
 		_, defined := s.locals[op.DestinationLocal]
 		_, compared := s.equalities[op.DestinationLocal]
 		if defined || compared || s.addressed[op.DestinationLocal] {
@@ -141,7 +141,7 @@ func (s *assertionState) operation(op mir.Operation) {
 			s.equalities[op.DestinationLocal] = assertionValue{place: a.place, literal: b.literal}
 		}
 		delete(s.locals, op.DestinationLocal)
-	case mir.OperationArithmeticCheck:
+	case mir.OperationArithmeticCheck, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck:
 		// Verified marker has no write.
 	default:
 		*s = newAssertionState()
@@ -243,12 +243,12 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 				s.operation(op)
 			}
 			term := f.Blocks[int(id)].Terminator
-			if term.Kind == mir.TerminatorSwitch && len(term.Successors) == 2 && (term.SwitchKind == "checked-arithmetic" || term.SwitchKind == "checked-unary") {
+			if term.Kind == mir.TerminatorSwitch && len(term.Successors) == 2 {
 				operands := make([]mir.Operand, len(term.SwitchOperands))
 				for i, op := range term.SwitchOperands {
 					operands[i] = s.resolve(op)
 				}
-				if literalCheckedOverflow(term.SwitchType, term.Operator, term.SwitchKind, operands) {
+				if literalCheckedFailure(term, operands) {
 					selected[id] = term.Successors[1]
 				}
 			}

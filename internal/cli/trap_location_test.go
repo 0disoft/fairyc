@@ -91,7 +91,8 @@ func TestNativeTrapLocationsAcrossPackages(t *testing.T) {
 		t.Skip(err)
 	}
 	native, _ := cdriver.LookupNativeTarget(id)
-	for _, memberTrap := range []bool{false, true} {
+	for _, scenario := range []string{"root", "dynamic member", "constant member"} {
+		memberTrap := scenario != "root"
 		root := t.TempDir()
 		writeNativeWorkspace(t, root, true)
 		writeTestSource(t, root, "libs/answer/src/answer.fy", `module answer;
@@ -106,6 +107,9 @@ pub fn i32 value() {
     let ref u8[] data = b"a";
     return data[process::arg_count()] as i32;
 }`
+		}
+		if scenario == "constant member" {
+			member = strings.Replace(member, "process::arg_count()", "1", 1)
 		}
 		writeTestSource(t, root, "libs/answer/src/main.fy", member)
 		writeTestSource(t, root, "src/main.fy", `module main;
@@ -133,7 +137,7 @@ fn i32 main() {
 			for _, command := range [][]string{args, experimental} {
 				code, stdout, stderr := runForTest(command, root)
 				if code != ExitProgramTrap || stdout != "" || stderr != want {
-					t.Fatalf("memberTrap=%t args=%v: code=%d stdout=%q stderr=%q", memberTrap, command, code, stdout, stderr)
+					t.Fatalf("scenario=%s args=%v: code=%d stdout=%q stderr=%q", scenario, command, code, stdout, stderr)
 				}
 			}
 		}

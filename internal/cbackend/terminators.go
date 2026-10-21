@@ -54,12 +54,19 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
 		}
 	case mir.TerminatorSwitch:
-		if failure, known := e.analysis.checkedFailures[function.Symbol][blockID]; known {
-			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW", terminator.Span), failure)
-			return nil
+		failure, known := e.analysis.checkedFailures[function.Symbol][blockID]
+		if !known {
+			failure, known = constantCheckedFailure(function.Blocks[int(blockID)])
 		}
-		if failure, known := constantCheckedFailure(function.Blocks[int(blockID)]); known {
-			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_INTEGER_OVERFLOW", terminator.Span), failure)
+		if known {
+			// A direct literal no longer appears in the guard. Keep its static
+			// storage referenced for strict C consumers, with no runtime read.
+			for _, operand := range terminator.SwitchOperands {
+				if operand.Kind == mir.OperandByteString {
+					fmt.Fprintf(output, "    (void)%s;\n", byteStringStorageSymbol(operand.StaticData))
+				}
+			}
+			fmt.Fprintf(output, "    %sgoto fy_b_%d;\n", e.pendingTrapAssignment(functionIndex, failure, checkedFailureTrapCategory(terminator), terminator.Span), failure)
 			return nil
 		}
 		return e.emitSwitch(output, functionIndex, terminator)

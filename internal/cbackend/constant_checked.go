@@ -6,14 +6,13 @@ import (
 	"math"
 )
 
-// constantCheckedFailure proves only checked integer failures. Copy facts are
+// constantCheckedFailure proves checked integer and static byte-view failures. Copy facts are
 // local to this straight-line block; unknown operations discard all facts so
 // indirect writes, calls and predecessor state cannot silently preserve them.
 // MIR verification remains mandatory before this C-only reachability decision.
 func constantCheckedFailure(block mir.Block) (mir.BlockID, bool) {
 	term := block.Terminator
-	if term.Kind != mir.TerminatorSwitch || len(term.Successors) != 2 ||
-		(term.SwitchKind != "checked-arithmetic" && term.SwitchKind != "checked-unary") {
+	if term.Kind != mir.TerminatorSwitch || len(term.Successors) != 2 {
 		return mir.NoBlock, false
 	}
 	known := map[mir.LocalID]mir.Operand{}
@@ -35,10 +34,10 @@ func constantCheckedFailure(block mir.Block) (mir.BlockID, bool) {
 			value := resolve(op.Operands[0])
 			delete(known, op.DestinationLocal)
 			switch value.Kind {
-			case mir.OperandI32, mir.OperandI64, mir.OperandU8, mir.OperandU32, mir.OperandUSize:
+			case mir.OperandI32, mir.OperandI64, mir.OperandU8, mir.OperandU32, mir.OperandUSize, mir.OperandByteString:
 				known[op.DestinationLocal] = value
 			}
-		case mir.OperationArithmeticCheck:
+		case mir.OperationArithmeticCheck, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck:
 			// A verified marker performs no write; its actual guard is the terminator.
 		default:
 			clear(known)
@@ -48,10 +47,34 @@ func constantCheckedFailure(block mir.Block) (mir.BlockID, bool) {
 	for i, op := range term.SwitchOperands {
 		operands[i] = resolve(op)
 	}
-	if literalCheckedOverflow(term.SwitchType, term.Operator, term.SwitchKind, operands) {
+	if literalCheckedFailure(term, operands) {
 		return term.Successors[1], true
 	}
 	return mir.NoBlock, false
+}
+
+func literalCheckedFailure(term mir.Terminator, operands []mir.Operand) bool {
+	switch term.SwitchKind {
+	case "checked-view-index", "checked-view-slice":
+		if len(operands) == 0 || operands[0].Kind != mir.OperandByteString {
+			return false
+		}
+		length := uint64(len(operands[0].StaticData))
+		if term.SwitchKind == "checked-view-index" {
+			return len(operands) == 2 && operands[1].Kind == mir.OperandUSize && operands[1].U64 >= length
+		}
+		return len(operands) == 3 && operands[1].Kind == mir.OperandUSize && operands[2].Kind == mir.OperandUSize &&
+			(operands[1].U64 > operands[2].U64 || operands[2].U64 > length)
+	default:
+		return literalCheckedOverflow(term.SwitchType, term.Operator, term.SwitchKind, operands)
+	}
+}
+
+func checkedFailureTrapCategory(term mir.Terminator) string {
+	if term.SwitchKind == "checked-view-index" || term.SwitchKind == "checked-view-slice" {
+		return "FY_TRAP_BOUNDS"
+	}
+	return "FY_TRAP_INTEGER_OVERFLOW"
 }
 
 func literalCheckedOverflow(typ hir.Type, operator, kind string, operands []mir.Operand) bool {

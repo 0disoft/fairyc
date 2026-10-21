@@ -476,6 +476,15 @@ or calls, merges and unwind entries invalidate those facts. One failure map
 controls checked guard output, reachable blocks, non-returning inference and
 helper demand. Assertion trap ordering and original verified MIR remain intact.
 
+The same C-only failure analysis tracks exact static byte-string descriptors through copies.
+A literal `usize` index at or beyond the byte length, or a reversed/out-of-range literal slice,
+selects the existing `bounds` trap edge. Writes, unknown operations/calls and control-flow joins
+invalidate the facts. Proven failures also feed non-returning callee inference, so callers omit
+impossible result assignments and continuations. Operations before the failing guard and its source
+location remain intact. Direct literals keep a no-read reference to their static storage for strict
+C consumers. This avoids MSVC C4702 for these constant-trap callees without suppressing warnings,
+changing verified MIR, or adding runtime helpers.
+
 ADR 0448 uses `fy_mut_struct_slice { void *data; uintptr_t length; }` for
 exclusive plain nominal views. Whole indexed stores and copied loads cast to
 the exact concrete struct type. Empty zero-start slices do no pointer arithmetic.
