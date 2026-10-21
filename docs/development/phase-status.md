@@ -2,9 +2,9 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current Frontend receipt: `e2aba615a2063202398eb5b295bfdd24d3aad4e4`
+- Current Frontend receipt: `c845848c95395622441b059c25c4a27a4bb6fee7`
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
-- Evidence: [Frontend run 39571134661](https://github.com/0disoft/fairyc/actions/runs/39571134661), all nine jobs passed; earlier [run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965) remains historical evidence
+- Evidence: [Frontend run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722), all nine jobs passed; earlier [run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965) remains historical evidence
 
 This page summarizes gate evidence. The roadmap, language contracts, and owning fixtures retain
 authority. The roadmap defines no Phase 5, 6, or 7.
@@ -15,15 +15,15 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native CI](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187) passes provisioning, layout, ABI, runtime, and generated-source probes. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Linux native CI](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059) passes provisioning, layout, ABI, runtime, and generated-source probes. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
 ## Linux receipt
 
-[Linux job 119130288187](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
-at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed both Provision reference Linux toolchain and
-native fixtures on Ubuntu 24.04 amd64. Its `fairyc.native-c-report/v36` records glibc 2.39,
+[Linux job 119164496059](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
+at `c845848c95395622441b059c25c4a27a4bb6fee7` passed both Provision reference Linux toolchain and
+native fixtures on Ubuntu 24.04 amd64. Its `fairyc.native-c-report/v37` records glibc 2.39,
 Clang 18.1.3, and GCC 13.3.0:
 
 | Observation | Result |
@@ -33,6 +33,7 @@ Clang 18.1.3, and GCC 13.3.0:
 | Sanitizer executions | 104 |
 | Layout pass cases / native probe executions | 11 / 4 |
 | ABI pass cases / bidirectional Clang–GCC crossings | 14 / 56 |
+| Scripted Linux console failure executions | 4 |
 
 Every runtime and generated-source-call counter is 4. This receipt fulfills the bounded Linux
 toolchain baseline/provisioning evidence alongside the existing layout/ABI observations.
@@ -43,7 +44,13 @@ The target's `emittable`, `conformant`, and `supported` maturity flags remain fa
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
 [Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
 and installation. The hosted receipt above verifies their implementation for the bounded Ubuntu
-24.04 native profile; Windows maturity evidence is unchanged. Phase 2 is still partial.
+24.04 native profile; Windows target maturity flags are unchanged. Phase 2 is still partial.
+
+The same run's [Linux Go lane](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119159050977)
+and [Windows Go lane](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119159050850)
+pass the native low/optimized [trap-location probes](../../internal/cbackend/trap_location_native_test.go):
+distinct bounds/assert sites, dynamic shifts, escaped UTF-8 names, and unknown overlong names.
+The [runtime contract](../runtime/runtime-stdlib-v0.md#thin-runtime) defines that bounded payload.
 
 ## Cache evidence
 
@@ -88,11 +95,5 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Collect a hosted v37 receipt for the new deterministic Linux console failure probe in the existing
-   native lane; this extends the v36 observations above rather than replacing that receipt.
-2. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance
-   promotion. The [bounded trap source-location payload](../runtime/runtime-stdlib-v0.md#thin-runtime)
-   now connects MIR, C emission, runtime, and execution outcomes. Local Windows low/optimized
-   probes cover distinct bounds/assert sites, dynamic shifts, escaped UTF-8 names, and unknown
-   overlong names; a hosted Linux receipt for this addition is pending.
-3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
+1. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance promotion.
+2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

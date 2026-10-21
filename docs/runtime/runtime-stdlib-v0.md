@@ -492,13 +492,14 @@ compiler repeats the locked run with short input plus build and artifact executi
 attaches input only after successful compilation and image inspection and does not pre-read or retain
 it.
 The Linux native lane exercises stdin, stdout, stderr, and the full-domain `i32` decimal boundaries;
-the observed v36 receipt is linked from [phase status](../development/phase-status.md).
+the observed v37 receipt is linked from [phase status](../development/phase-status.md).
 Report v37 adds `linuxConsoleFailureExecutions`: a separate deterministic probe compiles the
 production console implementation with private scripted `read`/`write` replacements under Clang
 and GCC at low and optimized profiles. It checks interrupted-call retries, short writes, failure
 after partial progress, zero progress, short reads, EOF, and unchanged buffer suffixes. The
-replacements are confined to the probe; product linkage retains the real POSIX calls. A hosted
-receipt for this additional probe is still pending.
+replacements are confined to the probe; product linkage retains the real POSIX calls.
+[Linux job 119164496059](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
+at `c845848c95395622441b059c25c4a27a4bb6fee7` records four successful failure-probe executions.
 
 ## Process arguments v0
 

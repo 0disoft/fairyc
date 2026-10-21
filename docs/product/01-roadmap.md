@@ -226,13 +226,15 @@ product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 ADR 0474 defines the native Ubuntu 24.04 reference environment with glibc >= 2.39, GCC >= 13
 or Clang >= 18, version/target preflight, and provisioning in the existing Linux C job.
-The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
-at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed reference provisioning and native fixtures
-with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v36 counts match the earlier observations.
+The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
+at `c845848c95395622441b059c25c4a27a4bb6fee7` passed reference provisioning and native fixtures
+with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v37 report preserves the existing counts
+and adds four deterministic console failure executions. The same run passes native trap-location
+transport probes in both Linux and Windows Go lanes; see [phase status](../development/phase-status.md).
 All nine Frontend jobs passed. This fulfills `toolchain-baseline` and `toolchain-provisioning`
 for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
 Phase 2 remains partial: `complete-runtime` and `complete-standard-library` remain missing for Linux;
-`emittable`, `conformant`, and `supported` stay false. Windows evidence is unchanged.
+`emittable`, `conformant`, and `supported` stay false. Windows target maturity flags are unchanged.
 The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
 facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including an explicit zero or
 32-byte shadow-space rule and per-profile missing maturity evidence. The backend and driver also
