@@ -23,7 +23,7 @@ func TestEmitLiteralBooleanOmitsImpossiblePaths(t *testing.T) {
 				if strings.Contains(unit.Source, sample.absent) {
 					t.Fatalf("impossible path emitted: %s\n%s", sample.absent, unit.Source)
 				}
-				if sample.name == "assert-false" && !strings.Contains(unit.Source, "fy_runtime_trap(FY_TRAP_ASSERTION_FAILED);") {
+				if sample.name == "assert-false" && !strings.Contains(unit.Source, "fy_runtime_trap_at_v0(FY_TRAP_ASSERTION_FAILED,") {
 					t.Fatal("assertion trap removed")
 				}
 			}

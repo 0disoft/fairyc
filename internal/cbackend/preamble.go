@@ -158,6 +158,8 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 			fmt.Fprintf(output, "#define %s UINT32_C(%d)\n", name, code)
 		}
 		output.WriteString("_Noreturn void fy_runtime_trap(uint32_t category);\n\n")
+		output.WriteString("_Noreturn void fy_runtime_trap_at_v0(uint32_t category, const char *source, uint32_t source_length, uint64_t start_byte, uint64_t end_byte);\n\n")
+		output.WriteString("struct fy_runtime_location_v0 { const char *source; uint32_t length; uint64_t start, end; };\n\n")
 	}
 	if e.analysis.needsBitcast {
 		output.WriteString("static int32_t fy_bits_to_i32(uint32_t bits) {\n")

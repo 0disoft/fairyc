@@ -25,7 +25,7 @@ fn i32 main() { let i32 left = 40; let i32 right = 2; let Choice item = .Pair { 
 		if err != nil {
 			t.Fatal(err)
 		}
-		if fullUnit.Source != shortUnit.Source {
+		if withoutTrapLocations(fullUnit.Source) != withoutTrapLocations(shortUnit.Source) {
 			t.Fatalf("shorthand changed executable C:\nFULL:\n%s\nSHORT:\n%s", fullUnit.Source, shortUnit.Source)
 		}
 	}

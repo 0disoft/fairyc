@@ -21,7 +21,7 @@ func TestArgumentLabelsIdenticalC(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Source != base.Source {
+		if withoutTrapLocations(got.Source) != withoutTrapLocations(base.Source) {
 			t.Fatal("labels changed generated C")
 		}
 	}

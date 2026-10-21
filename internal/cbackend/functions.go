@@ -62,6 +62,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	dynamicTargets := e.analysis.dynamicTrapTargets[functionIndex]
 	if len(dynamicTargets) != 0 {
 		output.WriteString("    uint32_t fy_pending_trap = FY_TRAP_UNREACHABLE;\n")
+		output.WriteString("    struct fy_runtime_location_v0 fy_pending_trap_location = {0};\n")
 	}
 	fmt.Fprintf(output, "    goto fy_b_%d;\n", function.Entry)
 	blocks := slices.Clone(function.Blocks)
@@ -69,8 +70,8 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	reachable := e.analysis.reachableBlocks[functionIndex]
 	fixedTrapGroups := make(map[string][]mir.BlockID)
 	for _, block := range blocks {
-		// Empty, non-returning traps with the same category have identical C behavior.
-		// Keep dynamic-category targets separate because their incoming edges set state.
+		// Collect fixed-category candidates; sharing also requires equal source spans.
+		// Dynamic-category targets retain state set by their incoming edges.
 		if !reachable[int(block.ID)] || len(block.Operations) != 0 ||
 			block.Terminator.Kind != mir.TerminatorTrap || len(block.Terminator.TrapCategories) != 1 ||
 			len(block.Terminator.Successors) != 0 || block.Terminator.UnwindSuccessor != mir.NoBlock {
@@ -86,6 +87,17 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	var groupedCategories []string
 	for category, ids := range fixedTrapGroups {
 		if len(ids) < 2 {
+			continue
+		}
+		// A shared category is no longer enough: the source payload is observable.
+		sharedSpan := true
+		for _, id := range ids[1:] {
+			if function.Blocks[int(id)].Terminator.Span != function.Blocks[int(ids[0])].Terminator.Span {
+				sharedSpan = false
+				break
+			}
+		}
+		if !sharedSpan {
 			continue
 		}
 		groupedCategories = append(groupedCategories, category)
@@ -120,7 +132,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		for _, id := range fixedTrapGroups[category] {
 			fmt.Fprintf(output, "fy_b_%d:\n", id)
 		}
-		fmt.Fprintf(output, "    fy_runtime_trap(%s);\n", name)
+		fmt.Fprintf(output, "    %s;\n", trapCall(name, function.Blocks[int(fixedTrapGroups[category][0])].Terminator.Span))
 	}
 	output.WriteString("}\n\n")
 	return nil

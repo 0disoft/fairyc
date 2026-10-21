@@ -73,8 +73,15 @@ stderr, a public runtime ABI, a C header, or serialized compatibility data. Lega
 category byte. Location-bearing calls send a v1 header (category, version, little-endian `u16` source
 length, little-endian `u64` start and end) followed by the exact UTF-8 source-name bytes, up to 276
 bytes total. Invalid, truncated, overlong, or status-mismatched receipts are rejected. The complete
-product runtime and distribution bundle remain unimplemented; backend location emission is a
-separate producer of this runtime payload.
+product runtime and distribution bundle remain unimplemented.
+
+The C backend supplies the MIR trap's source display name and end-exclusive byte range to the
+versioned entry point. A checked branch with a shared dynamic trap target retains the failing
+branch's location; fixed-category blocks may share one call only when their source spans also
+match. UTF-8 file names are emitted as exact octal-escaped C bytes. Missing, malformed, or over-256-byte
+source names fall back to the category-only entry point rather than publishing a truncated name.
+The execution outcome retains the location separately from stdout and stderr. Stable CLI trap
+text still reports the category; this payload adds no line/column reconstruction or source-file I/O.
 
 `internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
 for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr

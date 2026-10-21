@@ -1,0 +1,91 @@
+package cbackend_test
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/target"
+)
+
+func TestEmittedTrapSourceLocationsNative(t *testing.T) {
+	id, err := cdriver.HostNativeTarget()
+	if err != nil {
+		t.Skip(err)
+	}
+	toolchain, err := cdriver.ResolveNativeToolchain(id, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	profile := cbackend.Stage0Profile()
+	renderRuntime := cruntime.LinuxRunSource
+	if id == target.X8664WindowsMSVC {
+		profile = cbackend.Stage0WindowsMSVCProfile()
+		renderRuntime = cruntime.WindowsRunSource
+	}
+	support, err := renderRuntime(cdriver.NativeTrapExitBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, sample := range []struct{ name, path, code, expression, category string }{
+		{"second-bounds", "src/한\"글\\main.fy", `module main;
+fn i32 main() {
+    let ref u8[] data = b"a";
+    let u8 first = data[0];
+    let u8 second = data[1];
+    return if (first == second) { 0 } else { 1 };
+}`, "data[1]", "bounds"},
+		{"second-assert", "main.fy", `module main;
+fn i32 main() {
+    let u8 first = 1; assert(first == 1);
+    let u8 second = 2; assert(second == 0);
+    return 0;
+}`, "assert(second == 0);", "assertion-failed"},
+		{"dynamic-shift", "main.fy", `module main;
+fn i32 shift(i32 value, i32 count) { return value << count; }
+fn i32 main() { return shift(1, 32); }
+`, "value << count", "invalid-shift"},
+		{"unknown-long-source", strings.Repeat("s", 257) + ".fy", "module main; fn i32 main() { assert(false); return 0; }", "assert(false);", "assertion-failed"},
+	} {
+		t.Run(sample.name, func(t *testing.T) {
+			program := lowerSource(t, sample.code)
+			// Exercise source-display bytes independently of module-path grammar.
+			for i := range program.Functions {
+				for j := range program.Functions[i].Blocks {
+					block := &program.Functions[i].Blocks[j]
+					block.Terminator.Span.Source = sample.path
+					for k := range block.Operations {
+						block.Operations[k].Span.Source = sample.path
+					}
+				}
+			}
+			unit, err := cbackend.Emit(program, "main::main", profile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, optimization := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				artifact, err := toolchain.Build(cdriver.NativeBuildOptions{Profile: optimization, UnitSource: unit.Source, RuntimeSource: support, TrapControl: true})
+				if err != nil {
+					t.Fatal(err)
+				}
+				outcome, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{RejectOutput: true})
+				if err != nil || outcome.TrapCategory != sample.category {
+					t.Fatalf("%s: %+v, %v", optimization.Name, outcome, err)
+				}
+				if len(sample.path) > 256 {
+					if outcome.TrapLocation != nil {
+						t.Fatal("overlong source acquired an inexact location")
+					}
+					continue
+				}
+				start := strings.Index(sample.code, sample.expression)
+				want := cdriver.TrapLocation{Source: sample.path, StartByte: uint64(start), EndByte: uint64(start + len(sample.expression))}
+				if outcome.TrapLocation == nil || *outcome.TrapLocation != want {
+					t.Fatalf("%s: location %+v, want %+v", optimization.Name, outcome.TrapLocation, want)
+				}
+			}
+		})
+	}
+}

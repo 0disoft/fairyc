@@ -91,6 +91,8 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 1. Collect a hosted v37 receipt for the new deterministic Linux console failure probe in the existing
    native lane; this extends the v36 observations above rather than replacing that receipt.
 2. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance
-   promotion. The runtime still lacks the bounded trap source-location payload described in the
-   [runtime contract](../runtime/runtime-stdlib-v0.md#thin-runtime).
+   promotion. The [bounded trap source-location payload](../runtime/runtime-stdlib-v0.md#thin-runtime)
+   now connects MIR, C emission, runtime, and execution outcomes. Local Windows low/optimized
+   probes cover distinct bounds/assert sites, dynamic shifts, escaped UTF-8 names, and unknown
+   overlong names; a hosted Linux receipt for this addition is pending.
 3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

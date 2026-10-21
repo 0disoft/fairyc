@@ -409,7 +409,7 @@ fn i32 main() {
 	for _, required := range []string{
 		"FY_TRAP_BOUNDS",
 		".length) { goto fy_b_",
-		"fy_runtime_trap(FY_TRAP_BOUNDS);",
+		"fy_runtime_trap_at_v0(FY_TRAP_BOUNDS,",
 		".data[",
 	} {
 		if !strings.Contains(unit.Source, required) {
@@ -647,7 +647,7 @@ fn i32 main() {
 		" || ",
 		" > (",
 		").length) { goto fy_b_",
-		"fy_runtime_trap(FY_TRAP_BOUNDS);",
+		"fy_runtime_trap_at_v0(FY_TRAP_BOUNDS,",
 		"(fy_byte_slice){ .data = ",
 		".data + (",
 		".length = (",
@@ -694,7 +694,7 @@ fn i32 main() {
 	}
 	for _, required := range []string{
 		").length) { goto fy_b_",
-		"fy_runtime_trap(FY_TRAP_BOUNDS);",
+		"fy_runtime_trap_at_v0(FY_TRAP_BOUNDS,",
 		"(fy_byte_slice){ .data = ",
 		".length = (",
 	} {
@@ -2374,7 +2374,7 @@ fn i32 main() { return score(.Pair { .left = 20, .right = 22 }); }
 		"(fy_enum_0){ .tag = UINT32_C(2), .payload.v_2 = { .f_0 = INT32_C(20), .f_1 = INT32_C(22) } }",
 		".tag == UINT32_C(0)",
 		".payload.v_2.f_0;",
-		"fy_runtime_trap(FY_TRAP_UNREACHABLE);",
+		"fy_runtime_trap_at_v0(FY_TRAP_UNREACHABLE,",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
@@ -2547,7 +2547,7 @@ fn i32 main() {
 		"(fy_result_i32_i32){ .tag = FY_RESULT_OK",
 		".tag == FY_OPTION_SOME",
 		".tag == FY_RESULT_OK",
-		"fy_runtime_trap(FY_TRAP_UNREACHABLE)",
+		"fy_runtime_trap_at_v0(FY_TRAP_UNREACHABLE,",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q", required)
@@ -3129,7 +3129,7 @@ func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	for _, required := range []string{
 		"FY_TRAP_ASSERTION_FAILED",
 		"== INT32_C(0)) { goto fy_b_",
-		"fy_runtime_trap(FY_TRAP_ASSERTION_FAILED);",
+		"fy_runtime_trap_at_v0(FY_TRAP_ASSERTION_FAILED,",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
@@ -3140,7 +3140,7 @@ func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	}
 }
 
-func TestEmitSharesEmptyFixedCategoryTrapBlocks(t *testing.T) {
+func TestEmitKeepsDifferentTrapSourceLocationsSeparate(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 fn i32 main() {
@@ -3157,13 +3157,13 @@ fn i32 main() {
 		t.Fatalf("Emit() error = %v", err)
 	}
 	for _, category := range []string{"FY_TRAP_BOUNDS", "FY_TRAP_ASSERTION_FAILED"} {
-		call := "fy_runtime_trap(" + category + ");"
-		if count := strings.Count(unit.Source, call); count != 1 {
-			t.Errorf("generated C has %d %s calls, want one shared call:\n%s", count, category, unit.Source)
+		call := "fy_runtime_trap_at_v0(" + category + ","
+		if count := strings.Count(unit.Source, call); count != 2 {
+			t.Errorf("generated C has %d %s calls, want two source locations:\n%s", count, category, unit.Source)
 		}
-		sharedLabels := regexp.MustCompile(`(?:fy_b_\d+:\n){2,}    fy_runtime_trap\(` + category + `\);`)
-		if !sharedLabels.MatchString(unit.Source) {
-			t.Errorf("generated C did not merge two %s trap labels:\n%s", category, unit.Source)
+		sharedLabels := regexp.MustCompile(`(?:fy_b_\d+:\n){2,}    fy_runtime_trap_at_v0\(` + category + `,`)
+		if sharedLabels.MatchString(unit.Source) {
+			t.Errorf("generated C merged distinct %s source locations:\n%s", category, unit.Source)
 		}
 	}
 	if strings.Contains(unit.Source, "fy_pending_trap") {

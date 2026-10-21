@@ -514,7 +514,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil || operand.Kind != mir.OperandLocal {
 			return fmt.Errorf("Region entry in %s has invalid Arena owner", function)
 		}
-		fmt.Fprintf(output, "    if (fy_std_region_begin_v0((void *)&fy_l_%d, (void *)&fy_region_%d) != UINT32_C(0)) fy_runtime_trap(FY_TRAP_UNREACHABLE);\n", operand.Local, operation.Symbol)
+		fmt.Fprintf(output, "    if (fy_std_region_begin_v0((void *)&fy_l_%d, (void *)&fy_region_%d) != UINT32_C(0)) %s;\n", operand.Local, operation.Symbol, trapCall("FY_TRAP_UNREACHABLE", operation.Span))
 	case mir.OperationRegionPlace:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -547,7 +547,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_ERR, .p_1 = (%s){ .%s = fy_region_status_%d } };\n", operation.DestinationLocal, taggedIndex, e.analysis.structCTypeName(errorIndex), errorField, operation.DestinationLocal)
 		output.WriteString("    }\n")
 	case mir.OperationRegionReset:
-		fmt.Fprintf(output, "    if (fy_std_region_reset_v0((void *)&fy_region_%d) != UINT32_C(0)) fy_runtime_trap(FY_TRAP_UNREACHABLE);\n", operation.Symbol)
+		fmt.Fprintf(output, "    if (fy_std_region_reset_v0((void *)&fy_region_%d) != UINT32_C(0)) %s;\n", operation.Symbol, trapCall("FY_TRAP_UNREACHABLE", operation.Span))
 	case mir.OperationUnary:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
