@@ -151,7 +151,7 @@ source = "src"
 				}
 				code, stdout, stderr := runForTest(arguments, root)
 				if scenario.trap {
-					if code != ExitProgramTrap || stdout != "" || stderr != "trap: assertion-failed\n" {
+					if code != ExitProgramTrap || stdout != "" || stderr != "trap: assertion-failed\n  at @sdk/stdlib/std/vec.fy:124:5\n" {
 						t.Fatalf("%s: code=%d stdout=%q stderr=%q", profile, code, stdout, stderr)
 					}
 				} else if code != ExitSuccess || !strings.Contains(stdout, "native workspace status: 131 (") || stderr != "" {

@@ -78,7 +78,7 @@ func TestStableLinuxStreamsAndTrap(t *testing.T) {
 		out.Reset()
 		diag.Reset()
 		code = RunWithInput(args, root, strings.NewReader("B"), &out, &diag)
-		if code != ExitProgramTrap || out.String() != "" || diag.String() != "trap: assertion-failed\n" {
+		if code != ExitProgramTrap || out.String() != "" || diag.String() != "trap: assertion-failed\n  at src/main.fy:6:5\n" {
 			t.Fatalf("trap: %d %q %q", code, out.String(), diag.String())
 		}
 	}

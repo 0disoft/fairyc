@@ -51,7 +51,7 @@ func TestStableNativeRuntimeCache(t *testing.T) {
 		}
 		var out, diag strings.Builder
 		code := RunWithInput(args, root, strings.NewReader("B"), &out, &diag)
-		if code != ExitProgramTrap || out.String() != "" || diag.String() != "trap: assertion-failed\n" {
+		if code != ExitProgramTrap || out.String() != "" || diag.String() != "trap: assertion-failed\n  at src/main.fy:6:5\n" {
 			t.Fatalf("warm CLI trap: %d %q %q", code, out.String(), diag.String())
 		}
 	}

@@ -33,6 +33,7 @@ type compiledNativeWorkspace struct {
 	nativeCompilation
 	lockState       string
 	rootPackageName string
+	trapSources     map[string]trapSource
 }
 
 type loweredWorkspace struct {
@@ -41,6 +42,7 @@ type loweredWorkspace struct {
 	lockState       string
 	rootPackageName string
 	sdkStorage      bool
+	trapSources     map[string]trapSource
 }
 
 type workspaceCompilePolicy struct {
@@ -114,7 +116,7 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 	}
 	programStderr := outcome.Stderr
 	if outcome.TrapCategory != "" {
-		programStderr += fmt.Sprintf("trap: %s\n", outcome.TrapCategory)
+		programStderr += formatNativeTrap(outcome, compiled.trapSources)
 	}
 	if code := forwardProgramOutput(outcome.Stdout, programStderr, stdout, stderr); code != ExitSuccess {
 		return code
@@ -208,7 +210,7 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 		return buildFailure(stderr, err)
 	}
 	if outcome.TrapCategory != "" {
-		if _, err := fmt.Fprintf(stderr, "trap: %s\n", outcome.TrapCategory); err != nil {
+		if _, err := io.WriteString(stderr, formatNativeTrap(outcome, compiled.trapSources)); err != nil {
 			return ExitInternalFailure
 		}
 		return ExitProgramTrap
@@ -298,7 +300,7 @@ func compileWorkspace(sourceRoot string, options workspaceTargetOptions, policy 
 		return compiledNativeWorkspace{}, code
 	}
 	compiled, code := compileNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
-	return compiledNativeWorkspace{nativeCompilation: compiled, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName}, code
+	return compiledNativeWorkspace{nativeCompilation: compiled, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName, trapSources: lowered.trapSources}, code
 }
 
 func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {
@@ -358,10 +360,15 @@ func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockSta
 	if !found {
 		return loweredWorkspace{}, packageFailure(stderr, fmt.Errorf("workspace root package is missing"))
 	}
+	var trapSources map[string]trapSource
+	if policy.runTrapReceipt {
+		trapSources = workspaceTrapSources(workspace)
+	}
 	return loweredWorkspace{
 		program: checked.MIR, entryName: entryName, lockState: lockState,
 		rootPackageName: rootPackage.Manifest.Package.Name,
 		sdkStorage:      sdkStorage,
+		trapSources:     trapSources,
 	}, ExitSuccess
 }
 

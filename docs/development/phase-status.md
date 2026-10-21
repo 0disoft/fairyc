@@ -51,6 +51,9 @@ and [Windows Go lane](https://github.com/0disoft/fairyc/actions/runs/39581207722
 pass the native low/optimized [trap-location probes](../../internal/cbackend/trap_location_native_test.go):
 distinct bounds/assert sites, dynamic shifts, escaped UTF-8 names, and unknown overlong names.
 The [runtime contract](../runtime/runtime-stdlib-v0.md#thin-runtime) defines that bounded payload.
+Stable `run` and experimental `run-workspace` now display its source path and one-based line/column
+from the compiled snapshot when the source is unambiguous; unknown locations retain category-only
+output. This CLI addition does not promote target maturity.
 
 ## Cache evidence
 

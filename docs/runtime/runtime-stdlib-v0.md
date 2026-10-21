@@ -80,8 +80,11 @@ versioned entry point. A checked branch with a shared dynamic trap target retain
 branch's location; fixed-category blocks may share one call only when their source spans also
 match. UTF-8 file names are emitted as exact octal-escaped C bytes. Missing, malformed, or over-256-byte
 source names fall back to the category-only entry point rather than publishing a truncated name.
-The execution outcome retains the location separately from stdout and stderr. Stable CLI trap
-text still reports the category; this payload adds no line/column reconstruction or source-file I/O.
+The execution outcome retains the location separately from stdout and stderr. Stable `run` and
+experimental `run-workspace` reconstruct one-based lines and Unicode scalar columns from the
+compiled source snapshot and append `  at <workspace-path>:<line>:<column>` after the category line.
+No post-execution source-file I/O is needed. The private receipt has no package ID, so duplicate
+source names across packages, missing sources, and invalid ranges keep category-only CLI output.
 
 `internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
 for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr

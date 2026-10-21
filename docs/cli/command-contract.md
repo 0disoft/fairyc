@@ -600,8 +600,14 @@ Input liveness remains bounded by the existing process timeout.
 A normal return becomes the `fairyc` process status (full `i32` on Windows, low eight bits on Linux). After launch, a
 status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
 trap-control pipe distinguishes reserved trap statuses from equal normal results: every program
-stderr byte is forwarded, `trap: <category>` is appended, and the command returns 5. The control
-channel is not public runtime ABI, authentication, or hostile-code isolation.
+stderr byte is forwarded, `trap: <category>\n` is appended, and the command returns 5. When the
+private receipt identifies one unambiguous source in the compiled snapshot with a valid UTF-8 byte
+range, a second line follows: `  at <workspace-path>:<line>:<column>\n`. Lines and Unicode scalar
+columns are one-based; tabs count as one column. Local paths include the manifest's source directory;
+SDK paths use the `@sdk/stdlib/` prefix. CR, LF, and tab in display paths use diagnostic path quoting.
+Missing, ambiguous, or invalid locations keep the category-only form. Positions use the compiled
+source bytes without rereading files after execution. Experimental `run-workspace` uses the same
+trap text. The control channel is not public runtime ABI, authentication, or hostile-code isolation.
 Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
 2, 3, 4, 6, and 7 respectively without promoting target maturity. The same private
 runtime-object cache policy as stable build applies.

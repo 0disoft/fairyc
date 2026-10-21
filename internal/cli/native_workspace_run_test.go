@@ -18,7 +18,7 @@ func TestNativeWorkspaceRunOutcomes(t *testing.T) {
 		code                         int
 	}{
 		{name: "reserved ordinary result", source: "module main; fn i32 main() { return 131; }", stdout: "native workspace " + native.ResultLabel + ": 131 (", code: ExitSuccess},
-		{name: "private trap receipt", source: "module main; fn i32 main() { assert(false); return 0; }", stderr: "trap: assertion-failed\n", code: ExitProgramTrap},
+		{name: "private trap receipt", source: "module main; fn i32 main() { assert(false); return 0; }", stderr: "trap: assertion-failed\n  at src/main.fy:1:30\n", code: ExitProgramTrap},
 		{name: "unexpected program output", source: `module main; import std::io as io;
 @effects(console)
 fn i32 main() { assert(switch (io::write_i32(42)) { case .ok(_) : { true } case .err(_) : { false } }); return 0; }`, stderr: native.Platform + " workspace executable produced unexpected output", code: ExitBuildFailure},
