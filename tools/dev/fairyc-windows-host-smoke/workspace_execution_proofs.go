@@ -149,7 +149,7 @@ fn i32 main() {
 	if restoreErr != nil {
 		return 0, fmt.Errorf("restore source after stable run trap proof: %w", restoreErr)
 	}
-	if trapCode != cli.ExitProgramTrap || trapStdout.String() != "" || trapStderr.String() != "before trap\nfairyc-run-trap-v1:3trap: division-by-zero\n" {
+	if trapCode != cli.ExitProgramTrap || trapStdout.String() != "" || trapStderr.String() != "before trap\nfairyc-run-trap-v1:3trap: division-by-zero\n  at src/main.fy:9:61\n" {
 		return 0, fmt.Errorf("stable trap run returned code %d, stdout %q, stderr %q", trapCode, trapStdout.String(), trapStderr.String())
 	}
 

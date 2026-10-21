@@ -1,12 +1,46 @@
 package cli
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
+
+var nativeTrapLocationLine = regexp.MustCompile(`\A  at src/main\.fy:[1-9][0-9]*:[1-9][0-9]*\n\z`)
+
+// Native view suites use stable CLI output on Linux and raw cdriver outcomes on Windows.
+// Exact source coordinates are owned by the focused trap-location execution tests below.
+func matchesNativeTrapStderr(stderr, category string, withLocation bool) bool {
+	prefix := "trap: " + category + "\n"
+	if !withLocation {
+		return stderr == prefix
+	}
+	location, found := strings.CutPrefix(stderr, prefix)
+	return found && nativeTrapLocationLine.MatchString(location)
+}
+
+func TestNativeTrapStderrContract(t *testing.T) {
+	const category = "bounds"
+	for _, test := range []struct {
+		stderr       string
+		withLocation bool
+		want         bool
+	}{
+		{"trap: bounds\n", false, true},
+		{"trap: bounds\n  at src/main.fy:2:3\n", true, true},
+		{"trap: bounds\n", true, false},
+		{"trap: assertion-failed\n  at src/main.fy:2:3\n", true, false},
+		{"trap: bounds\n  at src/main.fy:0:3\n", true, false},
+		{"trap: bounds\n  at src/main.fy:2:3\nextra\n", true, false},
+	} {
+		if got := matchesNativeTrapStderr(test.stderr, category, test.withLocation); got != test.want {
+			t.Errorf("stderr %q withLocation=%t: %t, want %t", test.stderr, test.withLocation, got, test.want)
+		}
+	}
+}
 
 func TestFormatNativeTrap(t *testing.T) {
 	const contents = "module main;\r\n한글 assert(false);\n"

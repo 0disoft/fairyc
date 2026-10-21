@@ -181,7 +181,7 @@ func runI64ViewNativeCases(t *testing.T, label string, cases []struct{ name, sou
 					row["executor"], row["argv"] = "stable CLI run", args
 				}
 				if item.trap != "" {
-					if code != ExitProgramTrap || out != "" || diag != "trap: "+item.trap+"\n" {
+					if code != ExitProgramTrap || out != "" || !matchesNativeTrapStderr(diag, item.trap, runtime.GOOS == "linux") {
 						t.Fatalf("trap: %d %q %q", code, out, diag)
 					}
 				} else if code != 0 || out != "" || diag != "" {

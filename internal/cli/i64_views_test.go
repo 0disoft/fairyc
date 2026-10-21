@@ -108,7 +108,7 @@ func TestI64ViewLinuxNative(t *testing.T) {
 				}
 				code, out, diag := runForTest(args, root)
 				if item.trap != "" {
-					if code != ExitProgramTrap || out != "" || diag != "trap: "+item.trap+"\n" {
+					if code != ExitProgramTrap || out != "" || !matchesNativeTrapStderr(diag, item.trap, true) {
 						t.Fatalf("trap: %d %q %q", code, out, diag)
 					}
 				} else if code != 0 || out != "" || diag != "" {
