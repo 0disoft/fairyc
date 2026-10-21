@@ -60,8 +60,6 @@ func TestStableTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
   missing evidence:
     - complete-runtime
     - complete-standard-library
-    - toolchain-baseline
-    - toolchain-provisioning
 
 x86_64-windows-msvc
   schema: fairyc.target-spec/v0

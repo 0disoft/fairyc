@@ -27,6 +27,9 @@ WSL requirement, custom sysroot, or broader distribution compatibility is introd
 ## Evidence boundary
 
 Only the full native fixture lane proves header, linker, startup, and sanitizer readiness.
-Keep `toolchain-baseline` and `toolchain-provisioning` in EvidenceMissing pending a fresh hosted
-exact-commit receipt. Windows cannot supply that Linux receipt; this decision promotes no target.
+[Linux job 119130288187](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
+at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed provisioning and native fixtures with glibc 2.39,
+GCC 13.3.0, and Clang 18.1.3 (report v36). This fulfills the two toolchain evidence markers for the
+bounded Ubuntu 24.04 native profile. Complete runtime and standard-library evidence remain missing;
+all three Linux maturity flags stay false. This receipt adds no distribution or support claim.
 Package and runner sources, manual installation, and PATH setup are linked in the contract.

@@ -36,10 +36,13 @@ The existing Frontend `native-c` job uses `ubuntu-24.04`; no new job or matrix i
 Preflight probes `getconf GNU_LIBC_VERSION`, GCC `-dumpfullversion -dumpversion` or Clang `--version`,
 and `-dumpmachine` matching `x86_64-*-linux-gnu`. Reject old, malformed, or wrong-target results
 with installation hints; automatic selection tries valid GCC, then Clang.
-Version strings do not prove C11 headers, linking, startup, or sanitizer readiness: the full existing
-native fixture lane must establish those. `toolchain-baseline` and `toolchain-provisioning` remain
-in EvidenceMissing until a fresh hosted receipt for the exact implementation commit; no target promotion.
-The current Windows host cannot supply Linux native execution evidence.
+Version strings alone do not prove C11 headers, linking, startup, or sanitizer readiness.
+[Linux job 119130288187](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
+at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed reference-toolchain provisioning and the full
+native fixture lane on Ubuntu 24.04 amd64: glibc 2.39, GCC 13.3.0, Clang 18.1.3, report v36.
+This fulfills `toolchain-baseline` and `toolchain-provisioning` for this bounded native profile.
+Complete runtime and standard-library evidence remain missing; `emittable`, `conformant`, and
+`supported` remain false. The hosted Linux job supplies execution evidence unavailable on Windows.
 
 Package sources: [GCC 13](https://packages.ubuntu.com/noble/gcc-13),
 [Clang 18](https://packages.ubuntu.com/noble/clang-18), [libc development](https://packages.ubuntu.com/noble/libc6-dev).

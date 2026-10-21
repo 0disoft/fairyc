@@ -142,8 +142,6 @@ var x8664LinuxGNUSpec = Spec{
 		Missing: []string{
 			"complete-runtime",
 			"complete-standard-library",
-			"toolchain-baseline",
-			"toolchain-provisioning",
 		},
 	},
 }

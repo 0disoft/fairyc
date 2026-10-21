@@ -9,14 +9,16 @@
 The first planned conformance target is `x86_64-linux-gnu`. Hosted layout, bidirectional C ABI,
 runtime, and generated-source probes pass for the admitted subset; the current receipt is linked
 from the [phase status](../development/phase-status.md). The target evidence in
-`internal/target/spec.go` still lists `complete-runtime`, `complete-standard-library`,
-`toolchain-baseline`, and `toolchain-provisioning` as missing. It does not promote the target to
-`conformant` or `supported`; maintained distribution remains a separate support requirement.
+`internal/target/spec.go` retains `complete-runtime` and `complete-standard-library` as missing.
+The Linux `emittable`, `conformant`, and `supported` flags remain false;
+maintained distribution remains a separate support requirement.
 
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) now defines the
 [reference toolchain and setup](linux-toolchain-v0.md). The implementation checks compiler/libc
 version floors and the native target; the existing native CI job provisions that environment.
-The two toolchain evidence markers remain pending a fresh hosted execution of those changes.
+[Linux job 119130288187](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
+at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed provisioning and native fixtures, fulfilling
+both toolchain evidence markers for the bounded Ubuntu 24.04 amd64 profile.
 
 Target claims use three levels:
 
@@ -350,9 +352,9 @@ remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
-lists the missing complete C layout, bidirectional ABI, runtime, standard-library, toolchain
-baseline, and provisioning gates. ADR 0214 records the first hosted Linux receipt without closing
-those gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
+retains the missing complete-runtime and complete-standard-library gates. ADR 0214 records the first
+hosted Linux receipt; the current receipt above fulfills the later baseline/provisioning gates.
+`fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 
 The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping all maturity

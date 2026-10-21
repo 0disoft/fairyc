@@ -216,7 +216,7 @@ also compiles and executes each production, uninstrumented C unit with Clang
   and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 104 fail-closed sanitizer
 executions. ADR 0214 records the first hosted receipt at commit `0bb4199`.
 [Run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965/job/118803299115)
-passes the current lane at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`, including the layout,
+passed the earlier lane at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`, including the layout,
 bidirectional ABI, runtime, and source-call probes described below. This closes those bounded
 hosted receipt gaps, not native
 conformance. A shared bounded C driver and embedded
@@ -226,8 +226,13 @@ product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 ADR 0474 defines the native Ubuntu 24.04 reference environment with glibc >= 2.39, GCC >= 13
 or Clang >= 18, version/target preflight, and provisioning in the existing Linux C job.
-The [toolchain contract](../abi/linux-toolchain-v0.md) distinguishes configured policy from the
-fresh hosted receipt still required to close `toolchain-baseline` and `toolchain-provisioning`.
+The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39571134661/job/119130288187)
+at `e2aba615a2063202398eb5b295bfdd24d3aad4e4` passed reference provisioning and native fixtures
+with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v36 counts match the earlier observations.
+All nine Frontend jobs passed. This fulfills `toolchain-baseline` and `toolchain-provisioning`
+for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
+Phase 2 remains partial: `complete-runtime` and `complete-standard-library` remain missing for Linux;
+`emittable`, `conformant`, and `supported` stay false. Windows evidence is unchanged.
 The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
 facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including an explicit zero or
 32-byte shadow-space rule and per-profile missing maturity evidence. The backend and driver also

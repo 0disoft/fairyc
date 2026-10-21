@@ -45,7 +45,8 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 		t.Fatalf("target evidence overclaims maturity = %+v", spec.Evidence)
 	}
 	for _, missing := range spec.Evidence.Missing {
-		if missing == "hosted-linux-receipt" || missing == "c-layout-probes" || missing == "bidirectional-c-abi-fixtures" {
+		if missing == "hosted-linux-receipt" || missing == "c-layout-probes" || missing == "bidirectional-c-abi-fixtures" ||
+			missing == "toolchain-baseline" || missing == "toolchain-provisioning" {
 			t.Fatalf("observed Linux hosted evidence remains marked missing: %+v", spec.Evidence)
 		}
 	}
