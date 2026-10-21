@@ -88,5 +88,9 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance promotion.
-2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
+1. Collect a hosted v37 receipt for the new deterministic Linux console failure probe in the existing
+   native lane; this extends the v36 observations above rather than replacing that receipt.
+2. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance
+   promotion. The runtime still lacks the bounded trap source-location payload described in the
+   [runtime contract](../runtime/runtime-stdlib-v0.md#thin-runtime).
+3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

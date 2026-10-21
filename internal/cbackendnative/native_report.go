@@ -33,6 +33,7 @@ type Report struct {
 	OwnedTextExecutions                 int        `json:"ownedTextExecutions"`
 	OwnedTextSourceCallExecutions       int        `json:"ownedTextSourceCallExecutions"`
 	LinuxConsoleExecutions              int        `json:"linuxConsoleExecutions"`
+	LinuxConsoleFailureExecutions       int        `json:"linuxConsoleFailureExecutions"`
 	LinuxFileExecutions                 int        `json:"linuxFileExecutions"`
 	LinuxFileSourceCallExecutions       int        `json:"linuxFileSourceCallExecutions"`
 	LinuxPublicFileExecutions           int        `json:"linuxPublicFileExecutions"`

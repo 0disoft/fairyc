@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v36"
+	reportSchemaVersion = "fairyc.native-c-report/v37"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -249,6 +249,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.LinuxConsoleExecutions = linuxConsoleExecutions
+	linuxConsoleFailureExecutions, err := runLinuxConsoleFailureProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.LinuxConsoleFailureExecutions = linuxConsoleFailureExecutions
 	linuxFileSource, err := cstdlib.LinuxFileSource()
 	if err != nil {
 		return Report{}, fmt.Errorf("load Linux File implementation: %w", err)
