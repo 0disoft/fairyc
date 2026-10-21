@@ -22,10 +22,11 @@ func TestEmissionTransportAcrossResponsibilitySplit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Measured before the responsibility split at b49cfbfb. Include both source
-	// bytes and Unit metadata for production and drop-trace profiles of 52 cases.
-	const wantHash = "42a758b79df7b3f0139a3ed9a7617ebe21b1b11e1b1bbd6bc845ea2819270c8a"
-	if len(units) != 104 || len(encoded) != 392816 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
+	// Include source bytes and Unit metadata for production and drop-trace profiles
+	// of 52 cases. Refreshed at 03008309 for intentional trap-location emission;
+	// the original pre-split snapshot at b49cfbfb predates that runtime payload.
+	const wantHash = "bf5799da6db22b0fb2cfb25b2b86fb90e503852d017253ee65fb9655ab7043b6"
+	if len(units) != 104 || len(encoded) != 446318 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
 		t.Fatalf("transport changed: units=%d bytes=%d sha256=%x", len(units), len(encoded), sha256.Sum256(encoded))
 	}
 }
