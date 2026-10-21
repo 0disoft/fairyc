@@ -5,7 +5,9 @@ import (
 	"path"
 	"unicode/utf8"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -15,21 +17,36 @@ type trapSource struct {
 }
 
 // Retain the compilation's source snapshot rather than reading files after execution.
-// Receipts do not carry a package ID: duplicate source names must remain unknown,
-// even when their contents match, to avoid attributing a trap to the wrong package.
+// Match the emitter's build-local package/file keys, including distinct feature instances.
 func workspaceTrapSources(workspace workspaceloader.Workspace) map[string]trapSource {
 	sources := make(map[string]trapSource)
+	packages := make(map[string]workspaceloader.Package, len(workspace.Packages))
 	for _, pkg := range workspace.Packages {
+		packages[pkg.Path] = pkg
+	}
+	instances := make(map[string]string, len(workspace.Instances))
+	for _, instance := range workspace.Instances {
+		instances[instance.NodeID] = instance.PackagePath
+	}
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			continue
+		}
+		packagePath, found := instances[class.Members[0]]
+		if !found {
+			continue
+		}
+		pkg, found := packages[packagePath]
+		if !found {
+			continue
+		}
 		for _, file := range pkg.Sources {
-			if _, duplicate := sources[file.Path]; duplicate {
-				sources[file.Path] = trapSource{}
-				continue
-			}
 			display := path.Join(pkg.Path, file.Path)
 			if pkg.SourceKind == workspaceloader.SourceKindLocal {
 				display = path.Join(pkg.Path, pkg.Manifest.Package.Source, file.Path)
 			}
-			sources[file.Path] = trapSource{display: display, bytes: file.Bytes}
+			key := cbackend.PackageTrapSource(hir.PackageID(index+1), file.Path)
+			sources[key] = trapSource{display: display, bytes: file.Bytes}
 		}
 	}
 	return sources

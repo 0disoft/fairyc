@@ -26,7 +26,7 @@ func compileNativeProgram(program mir.Program, entry string, options workspaceTa
 	if sdkStorage {
 		emit = cbackend.EmitStorageTransfers
 	}
-	unit, err := emit(program, entry, cbackend.Profile{Target: options.targetID, Dialect: cbackend.DialectC11})
+	unit, err := emit(program, entry, cbackend.Profile{Target: options.targetID, Dialect: cbackend.DialectC11, PackageTrapSources: policy.packageTrapSources})
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
 
@@ -50,24 +51,92 @@ func TestWorkspaceTrapSourceSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	sources := workspaceTrapSources(workspace)
+	memberID, err := workspace.PackageID("libs/answer")
+	if err != nil {
+		t.Fatal(err)
+	}
 	writeTestSource(t, root, "libs/answer/src/answer.fy", "changed after compilation")
-	outcome := cdriver.NativeOutcome{TrapCategory: "bounds", TrapLocation: &cdriver.TrapLocation{Source: "answer.fy", StartByte: 16, EndByte: 16}}
+	outcome := cdriver.NativeOutcome{TrapCategory: "bounds", TrapLocation: &cdriver.TrapLocation{Source: cbackend.PackageTrapSource(memberID, "answer.fy"), StartByte: 16, EndByte: 16}}
 	if got := formatNativeTrap(outcome, sources); got != "trap: bounds\n  at libs/answer/src/answer.fy:3:1\n" {
 		t.Fatalf("snapshot = %q", got)
 	}
-	// A package-local receipt name cannot distinguish these files, even if their bytes match.
-	member := workspace.Packages[0]
-	member.Path = "other"
-	workspace.Packages = append(workspace.Packages, member)
-	for _, file := range member.Sources {
-		outcome.TrapLocation.Source = file.Path
-		if got := formatNativeTrap(outcome, workspaceTrapSources(workspace)); got != "trap: bounds\n" {
-			t.Fatalf("ambiguous source %s: %q", file.Path, got)
+	// Identical package-local names retain separate compiled snapshots.
+	for i := range workspace.Packages {
+		if workspace.Packages[i].Path == "libs/answer" {
+			workspace.Packages[i].Sources[0].Path = "main.fy"
 		}
 	}
+	outcome.TrapLocation.Source = cbackend.PackageTrapSource(memberID, "main.fy")
+	if got := formatNativeTrap(outcome, workspaceTrapSources(workspace)); got != "trap: bounds\n  at libs/answer/src/main.fy:3:1\n" {
+		t.Fatalf("duplicate member source = %q", got)
+	}
+	rootID, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome.TrapLocation = &cdriver.TrapLocation{Source: cbackend.PackageTrapSource(rootID, "main.fy")}
+	if got := formatNativeTrap(outcome, workspaceTrapSources(workspace)); got != "trap: bounds\n  at src/main.fy:1:1\n" {
+		t.Fatalf("duplicate root source = %q", got)
+	}
+	outcome.TrapLocation.StartByte, outcome.TrapLocation.EndByte = 16, 16
 	// Control characters in a source path cannot insert a second output line.
 	if got := formatNativeTrap(outcome, map[string]trapSource{outcome.TrapLocation.Source: {display: "src/a\nb.fy", bytes: make([]byte, 16)}}); got != "trap: bounds\n  at \"src/a\\nb.fy\":1:17\n" {
 		t.Fatalf("escaped path = %q", got)
+	}
+}
+
+func TestNativeTrapLocationsAcrossPackages(t *testing.T) {
+	id, err := cdriver.HostNativeTarget()
+	if err != nil {
+		t.Skip(err)
+	}
+	native, _ := cdriver.LookupNativeTarget(id)
+	for _, memberTrap := range []bool{false, true} {
+		root := t.TempDir()
+		writeNativeWorkspace(t, root, true)
+		writeTestSource(t, root, "libs/answer/src/answer.fy", `module answer;
+import main as helper;
+pub fn i32 value() { return helper::value(); }
+`)
+		member := "module main;\npub fn i32 value() { return 42; }\n"
+		if memberTrap {
+			member = `module main;
+import std::process as process;
+pub fn i32 value() {
+    let ref u8[] data = b"a";
+    return data[process::arg_count()] as i32;
+}`
+		}
+		writeTestSource(t, root, "libs/answer/src/main.fy", member)
+		writeTestSource(t, root, "src/main.fy", `module main;
+import answer as answer;
+fn i32 main() {
+    let i32 value = answer::value();
+    assert(value == 0);
+    return 0;
+}`)
+		want := "trap: assertion-failed\n  at src/main.fy:5:5\n"
+		if memberTrap {
+			want = "trap: bounds\n  at libs/answer/src/main.fy:5:12\n"
+		}
+		for _, release := range []bool{false, true} {
+			args := []string{"run"}
+			profile := "low"
+			if release {
+				args = append(args, "--release", "--locked")
+				profile = "optimized"
+			}
+			experimental := []string{"experimental", "run-workspace", "--target", string(id), "--profile", profile, "--locked"}
+			if len(native.Compilers) != 0 {
+				experimental = append(experimental, "--cc", native.Compilers[0])
+			}
+			for _, command := range [][]string{args, experimental} {
+				code, stdout, stderr := runForTest(command, root)
+				if code != ExitProgramTrap || stdout != "" || stderr != want {
+					t.Fatalf("memberTrap=%t args=%v: code=%d stdout=%q stderr=%q", memberTrap, command, code, stdout, stderr)
+				}
+			}
+		}
 	}
 }
 

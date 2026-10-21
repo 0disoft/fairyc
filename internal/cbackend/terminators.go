@@ -90,9 +90,9 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 		if !ok {
 			return CapabilityError{Function: function.Name, Feature: "trap category " + strconv.Quote(terminator.TrapCategories[0])}
 		}
-		fmt.Fprintf(output, "    %s;\n", trapCall(name, terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall(name, terminator.Span))
 	case mir.TerminatorUnreachable:
-		fmt.Fprintf(output, "    %s;\n", trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	default:
 		return CapabilityError{Function: function.Name, Feature: "MIR terminator " + strconv.Quote(string(terminator.Kind))}
 	}
@@ -132,7 +132,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			}
 			fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) goto fy_b_%d;\n", value, variantIndex, terminator.Successors[branchIndex])
 		}
-		fmt.Fprintf(output, "    %s;\n", trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 		return nil
 	}
 	if len(terminator.Successors) != 2 {
@@ -182,7 +182,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_SOME) goto fy_b_%d;\n", value, success)
 		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_NONE) goto fy_b_%d;\n", value, failure)
-		fmt.Fprintf(output, "    %s;\n", trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	case "result":
 		operand, err := oneOperand(terminator.SwitchOperands)
 		if err != nil {
@@ -194,7 +194,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_OK) goto fy_b_%d;\n", value, success)
 		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_ERR) goto fy_b_%d;\n", value, failure)
-		fmt.Fprintf(output, "    %s;\n", trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	case "checked-unary":
 		operand, err := oneOperand(terminator.SwitchOperands)
 		if err != nil {
@@ -384,7 +384,7 @@ func (e *emitter) pendingTrapAssignment(functionIndex int, failure mir.BlockID, 
 	if _, dynamic := e.analysis.dynamicTrapTargets[functionIndex][failure]; !dynamic {
 		return ""
 	}
-	arguments, valid := trapLocationArguments(span)
+	arguments, valid := e.trapLocationArguments(span)
 	if !valid {
 		return "fy_pending_trap = " + category + "; fy_pending_trap_location.length = 0; "
 	}

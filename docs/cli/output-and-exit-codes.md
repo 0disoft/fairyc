@@ -65,11 +65,12 @@ stdin has no separate byte ceiling and is consumed only on program demand. Cross
 unspecified, program arguments forward verbatim after `--` with embedded NUL rejected before
 compilation, and no temporary executable is retained.
 
-A valid, unambiguous location adds `  at <workspace-path>:<line>:<column>\n` after the trap line.
+A valid location adds `  at <workspace-path>:<line>:<column>\n` after the trap line.
 Lines and Unicode scalar columns are one-based; tabs count as one column. Paths include the local
 source directory or the `@sdk/stdlib/` prefix, with CR, LF, and tab quoted as in source diagnostics.
-Locations come from the compiled source snapshot, without post-execution source reads. Missing,
-ambiguous (the private receipt has no package ID), or invalid locations add no second line.
+Locations come from the compiled source snapshot, without post-execution source reads. Private
+receipt keys include build-local package IDs to distinguish identical file names across packages
+and feature instances; those keys are not displayed. Missing or invalid locations add no second line.
 This applies to stable `run` and experimental `run-workspace`; other experimental run commands
 retain their existing category-only output.
 

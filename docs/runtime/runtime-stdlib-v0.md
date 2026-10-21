@@ -75,7 +75,7 @@ length, little-endian `u64` start and end) followed by the exact UTF-8 source-na
 bytes total. Invalid, truncated, overlong, or status-mismatched receipts are rejected. The complete
 product runtime and distribution bundle remain unimplemented.
 
-The C backend supplies the MIR trap's source display name and end-exclusive byte range to the
+The C backend supplies the MIR trap's source name and end-exclusive byte range to the
 versioned entry point. A checked branch with a shared dynamic trap target retains the failing
 branch's location; fixed-category blocks may share one call only when their source spans also
 match. UTF-8 file names are emitted as exact octal-escaped C bytes. Missing, malformed, or over-256-byte
@@ -83,8 +83,11 @@ source names fall back to the category-only entry point rather than publishing a
 The execution outcome retains the location separately from stdout and stderr. Stable `run` and
 experimental `run-workspace` reconstruct one-based lines and Unicode scalar columns from the
 compiled source snapshot and append `  at <workspace-path>:<line>:<column>` after the category line.
-No post-execution source-file I/O is needed. The private receipt has no package ID, so duplicate
-source names across packages, missing sources, and invalid ranges keep category-only CLI output.
+No post-execution source-file I/O is needed. Workspace run emission qualifies the source name as
+`p<build-local-package-id>/<source-name>`; CLI snapshot keys use the same package-instance numbering.
+This distinguishes duplicate source names across packages without changing the receipt format or
+runtime ABI. The existing 256-byte source-name bound includes that prefix. Other emission profiles
+keep their original source names. Missing sources and invalid ranges keep category-only CLI output.
 
 `internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
 for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr

@@ -52,8 +52,9 @@ pass the native low/optimized [trap-location probes](../../internal/cbackend/tra
 distinct bounds/assert sites, dynamic shifts, escaped UTF-8 names, and unknown overlong names.
 The [runtime contract](../runtime/runtime-stdlib-v0.md#thin-runtime) defines that bounded payload.
 Stable `run` and experimental `run-workspace` now display its source path and one-based line/column
-from the compiled snapshot when the source is unambiguous; unknown locations retain category-only
-output. This CLI addition does not promote target maturity.
+from the compiled snapshot, using build-local package IDs to distinguish duplicate file names across
+packages and feature instances; unknown locations retain category-only output. This CLI addition
+does not promote target maturity.
 
 ## Cache evidence
 
@@ -100,3 +101,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 1. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
+3. Investigate MSVC optimized builds rejecting called functions with a constant out-of-bounds byte-slice access
+   as C4702 (unreachable code). This was observed during the local cross-package trap-location probe;
+   the passing execution probe uses a runtime index. It does not establish support for those constant-trap builds.

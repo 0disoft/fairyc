@@ -132,7 +132,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		for _, id := range fixedTrapGroups[category] {
 			fmt.Fprintf(output, "fy_b_%d:\n", id)
 		}
-		fmt.Fprintf(output, "    %s;\n", trapCall(name, function.Blocks[int(fixedTrapGroups[category][0])].Terminator.Span))
+		fmt.Fprintf(output, "    %s;\n", e.trapCall(name, function.Blocks[int(fixedTrapGroups[category][0])].Terminator.Span))
 	}
 	output.WriteString("}\n\n")
 	return nil

@@ -20,6 +20,8 @@ type Profile struct {
 	Target          target.ID
 	Dialect         string
 	Instrumentation string
+	// PackageTrapSources qualifies private trap source names with build-local package IDs.
+	PackageTrapSources bool
 }
 
 // Stage0Profile returns the Linux GNU Stage 0 C emission profile.

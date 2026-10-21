@@ -7,6 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -47,21 +48,34 @@ fn i32 main() {
 fn i32 shift(i32 value, i32 count) { return value << count; }
 fn i32 main() { return shift(1, 32); }
 `, "value << count", "invalid-shift"},
+		{"qualified-dynamic-shift", "main.fy", `module main;
+fn i32 shift(i32 value, i32 count) { return value << count; }
+fn i32 main() { return shift(1, 32); }
+`, "value << count", "invalid-shift"},
 		{"unknown-long-source", strings.Repeat("s", 257) + ".fy", "module main; fn i32 main() { assert(false); return 0; }", "assert(false);", "assertion-failed"},
 	} {
 		t.Run(sample.name, func(t *testing.T) {
 			program := lowerSource(t, sample.code)
+			sampleProfile := profile
+			qualified := sample.name == "qualified-dynamic-shift"
+			sampleProfile.PackageTrapSources = qualified
 			// Exercise source-display bytes independently of module-path grammar.
 			for i := range program.Functions {
 				for j := range program.Functions[i].Blocks {
 					block := &program.Functions[i].Blocks[j]
 					block.Terminator.Span.Source = sample.path
+					if qualified {
+						block.Terminator.Span.Package = hir.PackageID(2)
+					}
 					for k := range block.Operations {
 						block.Operations[k].Span.Source = sample.path
+						if qualified {
+							block.Operations[k].Span.Package = hir.PackageID(2)
+						}
 					}
 				}
 			}
-			unit, err := cbackend.Emit(program, "main::main", profile)
+			unit, err := cbackend.Emit(program, "main::main", sampleProfile)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -82,6 +96,9 @@ fn i32 main() { return shift(1, 32); }
 				}
 				start := strings.Index(sample.code, sample.expression)
 				want := cdriver.TrapLocation{Source: sample.path, StartByte: uint64(start), EndByte: uint64(start + len(sample.expression))}
+				if qualified {
+					want.Source = cbackend.PackageTrapSource(hir.PackageID(2), sample.path)
+				}
 				if outcome.TrapLocation == nil || *outcome.TrapLocation != want {
 					t.Fatalf("%s: location %+v, want %+v", optimization.Name, outcome.TrapLocation, want)
 				}

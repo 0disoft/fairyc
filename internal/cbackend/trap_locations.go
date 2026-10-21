@@ -23,8 +23,24 @@ func trapLocationArguments(span hir.Span) (string, bool) {
 		source.String(), len(span.Source), span.StartByte, span.EndByte), true
 }
 
-func trapCall(category string, span hir.Span) string {
-	if arguments, valid := trapLocationArguments(span); valid {
+// PackageTrapSource names a package-local file within one compilation. It is a
+// private receipt key, not a portable package identity or a filesystem path.
+func PackageTrapSource(packageID hir.PackageID, source string) string {
+	if packageID == hir.DefaultPackage || source == "" {
+		return ""
+	}
+	return fmt.Sprintf("p%d/%s", packageID, source)
+}
+
+func (e *emitter) trapLocationArguments(span hir.Span) (string, bool) {
+	if e.analysis.profile.PackageTrapSources {
+		span.Source = PackageTrapSource(span.Package, span.Source)
+	}
+	return trapLocationArguments(span)
+}
+
+func (e *emitter) trapCall(category string, span hir.Span) string {
+	if arguments, valid := e.trapLocationArguments(span); valid {
 		return "fy_runtime_trap_at_v0(" + category + ", " + arguments + ")"
 	}
 	return "fy_runtime_trap(" + category + ")"

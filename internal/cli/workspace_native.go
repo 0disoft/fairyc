@@ -46,8 +46,9 @@ type loweredWorkspace struct {
 }
 
 type workspaceCompilePolicy struct {
-	stableDiagnostics bool
-	runTrapReceipt    bool
+	stableDiagnostics  bool
+	runTrapReceipt     bool
+	packageTrapSources bool
 }
 
 func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -299,6 +300,7 @@ func compileWorkspace(sourceRoot string, options workspaceTargetOptions, policy 
 	if code != ExitSuccess {
 		return compiledNativeWorkspace{}, code
 	}
+	policy.packageTrapSources = policy.runTrapReceipt
 	compiled, code := compileNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
 	return compiledNativeWorkspace{nativeCompilation: compiled, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName, trapSources: lowered.trapSources}, code
 }

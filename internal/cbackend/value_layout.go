@@ -88,6 +88,8 @@ func (e *analysisBuilder) storageQueryValue(operation mir.Operation) (uint64, er
 }
 
 func emissionTarget(profile Profile) (target.Spec, error) {
+	// Source naming does not change the accepted target/dialect/instrumentation set.
+	profile.PackageTrapSources = false
 	if profile != Stage0Profile() && profile != Stage0WindowsMSVCProfile() && profile != Stage0DropTraceProfile() && profile != Stage0WindowsMSVCDropTraceProfile() {
 		return target.Spec{}, fmt.Errorf("unsupported C emission profile target=%q dialect=%q instrumentation=%q", profile.Target, profile.Dialect, profile.Instrumentation)
 	}
