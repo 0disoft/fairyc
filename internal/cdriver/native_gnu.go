@@ -44,9 +44,5 @@ func (toolchain linuxNativeToolchain) Execute(artifact NativeArtifact, options N
 	if err != nil {
 		return NativeOutcome{}, err
 	}
-	receipt := ""
-	if outcome.TrapCategory != 0 {
-		receipt = string([]byte{outcome.TrapCategory})
-	}
-	return finishNativeOutcome("Linux workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, receipt, options)
+	return finishNativeOutcome("Linux workspace", outcome.ExitCode, outcome.Stdout, outcome.Stderr, outcome.TrapControl, options)
 }

@@ -93,9 +93,9 @@ func TestNativeToolchainBuildExecute(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/trap=%t", profile.Name, trap), func(t *testing.T) {
 				body := "return 131;"
 				if trap {
-					body = "fy_runtime_trap(3);"
+					body = "fy_runtime_trap_at_v0(3, \"src/main.fy\", 11, UINT64_C(17), UINT64_C(29));"
 				}
-				source := "#include <stdint.h>\n#include <stdio.h>\n_Noreturn void fy_runtime_trap(uint32_t category);\nint main(int argc, char **argv) { if(argc != 2 || getchar() != 'A') return 42; (void)fputs(argv[1], stdout); (void)fflush(stdout); (void)fputs(\"warning\", stderr); " + body + " }\n"
+				source := "#include <stdint.h>\n#include <stdio.h>\n_Noreturn void fy_runtime_trap_at_v0(uint32_t, const char *, uint32_t, uint64_t, uint64_t);\nint main(int argc, char **argv) { if(argc != 2 || getchar() != 'A') return 42; (void)fputs(argv[1], stdout); (void)fflush(stdout); (void)fputs(\"warning\", stderr); " + body + " }\n"
 				artifact, err := toolchain.Build(NativeBuildOptions{Profile: profile, UnitSource: source, RuntimeSource: support, TrapControl: true})
 				if err != nil {
 					t.Fatal(err)
@@ -107,6 +107,13 @@ func TestNativeToolchainBuildExecute(t *testing.T) {
 				}
 				if err != nil || outcome.ExitCode != 131 || outcome.Stdout != "argument" || outcome.Stderr != "warning" || outcome.TrapCategory != category {
 					t.Fatalf("%+v %v", outcome, err)
+				}
+				if trap {
+					if outcome.TrapLocation == nil || *outcome.TrapLocation != (TrapLocation{Source: "src/main.fy", StartByte: 17, EndByte: 29}) {
+						t.Fatalf("native trap location: %+v", outcome.TrapLocation)
+					}
+				} else if outcome.TrapLocation != nil {
+					t.Fatal("ordinary return acquired a trap location")
 				}
 			})
 		}

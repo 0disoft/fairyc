@@ -48,7 +48,7 @@ func WindowsRunSource(trapExitBase uint8) (string, error) {
 	return renderScalarSource(trapExitBase, trapReceiptWindows)
 }
 
-// LinuxRunSource writes a single trap category byte to the runner-owned fd 3.
+// LinuxRunSource writes a bounded trap receipt to the runner-owned fd 3.
 // Ordinary program exits never write to this private channel.
 func LinuxRunSource(trapExitBase uint8) (string, error) {
 	return renderScalarSource(trapExitBase, trapReceiptLinux)
@@ -79,10 +79,10 @@ func renderScalarSource(trapExitBase uint8, receiptMode trapReceiptMode) (string
 		write = stage0WindowsTrapReceipt
 	case trapReceiptLinux:
 		include = "#include <errno.h>\n#include <unistd.h>\n"
-		write = "    unsigned char fy_trap_receipt = (unsigned char)category;\n" +
-			"    for (;;) {\n" +
-			"        ssize_t fy_trap_written = write(3, &fy_trap_receipt, 1);\n" +
-			"        if (fy_trap_written == 1) { break; }\n" +
+		write = "    size_t fy_trap_offset = 0;\n" +
+			"    while (fy_trap_offset < fy_trap_receipt_length) {\n" +
+			"        ssize_t fy_trap_written = write(3, fy_trap_receipt + fy_trap_offset, fy_trap_receipt_length - fy_trap_offset);\n" +
+			"        if (fy_trap_written > 0) { fy_trap_offset += (size_t)fy_trap_written; continue; }\n" +
 			"        if (fy_trap_written == -1 && errno == EINTR) { continue; }\n" +
 			"        _Exit(254);\n" +
 			"    }\n"

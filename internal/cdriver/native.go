@@ -99,6 +99,7 @@ type NativeExecutionOptions struct {
 type NativeOutcome struct {
 	ExitCode                     int32
 	Stdout, Stderr, TrapCategory string
+	TrapLocation                 *TrapLocation
 }
 
 func ResolveNativeToolchain(id target.ID, compiler string) (result NativeToolchain, err error) {
@@ -122,14 +123,12 @@ func classifyNativeOutcome(label string, exit int32, stdout, stderr, receipt str
 	if receipt == "" {
 		return outcome, nil
 	}
-	if exit <= NativeTrapExitBase || exit > NativeTrapExitBase+7 {
-		return NativeOutcome{}, fmt.Errorf("%s executable produced unexpected trap control data", label)
-	}
-	code := uint8(exit - NativeTrapExitBase)
-	if receipt != string([]byte{code}) {
-		return NativeOutcome{}, fmt.Errorf("%s executable produced invalid trap control data", label)
+	code, location, err := decodeTrapControl(exit, receipt)
+	if err != nil {
+		return NativeOutcome{}, fmt.Errorf("%s executable produced invalid trap control data: %w", label, err)
 	}
 	outcome.TrapCategory, _ = NativeTrapCategory(code)
+	outcome.TrapLocation = location
 	return outcome, nil
 }
 

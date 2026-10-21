@@ -48,7 +48,7 @@ func TestLinuxRunSourceAddsDedicatedTrapControlWrite(t *testing.T) {
 	}
 	for _, required := range []string{
 		"#include <errno.h>", "#include <unistd.h>",
-		"write(3, &fy_trap_receipt, 1)", "errno == EINTR", "_Exit(254)",
+		"write(3, fy_trap_receipt + fy_trap_offset, fy_trap_receipt_length - fy_trap_offset)", "errno == EINTR", "_Exit(254)",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("LinuxRunSource() is missing %q", required)

@@ -11,8 +11,6 @@ import (
 	"syscall"
 )
 
-const maxTrapControlBytes = 8
-
 type boundedTrapControl struct {
 	bytes    []byte
 	overflow bool

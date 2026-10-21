@@ -22,10 +22,12 @@ type LinuxHostOutcome struct {
 	Stdout       string
 	Stderr       string
 	TrapCategory uint8
+	TrapLocation *TrapLocation
+	TrapControl  string
 }
 
 // ExecuteLinuxTarget runs one temporary Linux ELF with bounded time and output.
-// fd 3 is reserved for the compiler-private one-byte trap receipt.
+// fd 3 is reserved for the compiler-private bounded trap receipt.
 func ExecuteLinuxTarget(artifact Artifact) (LinuxHostOutcome, error) {
 	return ExecuteLinuxTargetWithOptions(artifact, LinuxExecutionOptions{Input: strings.NewReader(""), Timeout: commandTimeout})
 }
@@ -110,16 +112,14 @@ func ExecuteLinuxTargetWithOptions(artifact Artifact, options LinuxExecutionOpti
 	if err := receiptRead.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
 		return LinuxHostOutcome{}, fmt.Errorf("bound Linux trap channel: %w", err)
 	}
-	receipt, err := io.ReadAll(io.LimitReader(receiptRead, 2))
+	receipt, err := io.ReadAll(io.LimitReader(receiptRead, maxTrapControlBytes+1))
 	if err != nil {
 		return LinuxHostOutcome{}, fmt.Errorf("read Linux trap channel: %w", err)
 	}
-	if len(receipt) > 1 || len(receipt) == 1 && (receipt[0] < 1 || receipt[0] > 7 || exitCode != 128+int(receipt[0])) {
-		return LinuxHostOutcome{}, fmt.Errorf("Linux executable produced invalid trap control data")
+	category, location, err := decodeTrapControl(int32(exitCode), string(receipt))
+	if err != nil {
+		return LinuxHostOutcome{}, fmt.Errorf("Linux executable produced invalid trap control data: %w", err)
 	}
-	category := uint8(0)
-	if len(receipt) == 1 {
-		category = receipt[0]
-	}
-	return LinuxHostOutcome{ExitCode: int32(exitCode), Stdout: stdout, Stderr: stderr, TrapCategory: category}, nil
+	return LinuxHostOutcome{ExitCode: int32(exitCode), Stdout: stdout, Stderr: stderr,
+		TrapCategory: category, TrapLocation: location, TrapControl: string(receipt)}, nil
 }

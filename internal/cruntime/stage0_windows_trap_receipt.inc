@@ -11,8 +11,15 @@
         }
         fy_trap_handle_value = fy_trap_handle_value * (uintptr_t)10 + (uintptr_t)fy_digit;
     }
-    unsigned char fy_trap_receipt = (unsigned char)category;
-    DWORD fy_trap_written = (DWORD)0;
-    if (fy_trap_handle_value == (uintptr_t)0 || !WriteFile((HANDLE)fy_trap_handle_value, &fy_trap_receipt, (DWORD)1, &fy_trap_written, NULL) || fy_trap_written != (DWORD)1) {
+    if (fy_trap_handle_value == (uintptr_t)0) {
         _Exit(254);
+    }
+    size_t fy_trap_offset = 0;
+    while (fy_trap_offset < fy_trap_receipt_length) {
+        DWORD fy_trap_written = (DWORD)0;
+        DWORD fy_trap_requested = (DWORD)(fy_trap_receipt_length - fy_trap_offset);
+        if (!WriteFile((HANDLE)fy_trap_handle_value, fy_trap_receipt + fy_trap_offset, fy_trap_requested, &fy_trap_written, NULL) || fy_trap_written == (DWORD)0) {
+            _Exit(254);
+        }
+        fy_trap_offset += (size_t)fy_trap_written;
     }

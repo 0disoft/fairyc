@@ -55,8 +55,10 @@ The Stage 0 runtime owns only:
 - a canonical empty-storage sentinel whose pointer identity is not a language guarantee;
 - a small set of memory helpers needed to keep generated C defined.
 
-The current scalar C transport names one internal non-returning symbol,
-`fy_runtime_trap(uint32_t category)`. Category codes 1 through 7 correspond exactly to the canonical
+The scalar runtime provides internal non-returning `fy_runtime_trap(uint32_t category)` and
+`fy_runtime_trap_at_v0(category, source, source_length, start_byte, end_byte)` entry points.
+The latter accepts 1–256 source-name bytes and an ordered, end-exclusive `uint64_t` byte range.
+Category codes 1 through 7 correspond exactly to the canonical
 MIR trap identities and do not depend on which traps a translation unit uses. The symbol is an
 implementation boundary, not a stable public runtime ABI or C header.
 
@@ -64,12 +66,15 @@ implementation boundary, not a stable public runtime ABI or C header.
 experimental build and native differential runner. It maps those codes to caller-bound reserved
 process statuses with `_Exit` and performs no cleanup. Receipt-free product builds emit no runtime
 output and currently bind base `128`; differential fixtures bind base `192` so their small
-ordinary-return oracle stays disjoint. The Windows workspace-run rendering alone inserts one
-unbuffered compiler-private trap token before `_Exit`. The CLI consumes and validates that token so
+ordinary-return oracle stays disjoint. Workspace-run renderings send a bounded compiler-private
+receipt before `_Exit`, over an inherited Windows handle or Linux fd 3. The runner validates it so
 a normal `i32` sharing a reserved OS status is not mistaken for a trap. The token is not program
-stderr, a public runtime ABI, a C header, or serialized compatibility data. The complete product
-runtime, bounded source-location payload, runtime ABI version suffix, and distribution bundle remain
-unimplemented.
+stderr, a public runtime ABI, a C header, or serialized compatibility data. Legacy calls send one
+category byte. Location-bearing calls send a v1 header (category, version, little-endian `u16` source
+length, little-endian `u64` start and end) followed by the exact UTF-8 source-name bytes, up to 276
+bytes total. Invalid, truncated, overlong, or status-mismatched receipts are rejected. The complete
+product runtime and distribution bundle remain unimplemented; backend location emission is a
+separate producer of this runtime payload.
 
 `internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
 for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr
