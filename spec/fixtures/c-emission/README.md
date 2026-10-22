@@ -12,7 +12,7 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 55 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 56 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, copy-only `Result<usize, inert-struct>`, user-enum-bearing `Result` transport and
 propagation, user-enum-bearing `Option` Some and None, and copy fixed-array `Option` Some/None plus
@@ -60,3 +60,8 @@ implicit `Some`/`None` cleanup and explicit `discard` of `Result<Success, Failur
 resource-tag cases. The [current 55-case native run](https://github.com/0disoft/fairyc/actions/runs/39787424010)
 executes 220 process-status/drop comparisons and 110 sanitizer executions, including these three
 cases.
+
+The new `nested-resource-drop` case covers parent cleanup, a cleanup-local temporary, and
+reverse child cleanup. Distinct child resource types and independent binding spans distinguish
+sibling order. The 56-case native matrix expects 224 differential/drop comparisons and 112
+sanitizer executions; its hosted execution is pending. The linked 55-case receipt is historical.

@@ -4,7 +4,7 @@
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
     "output, negative and larger i32 returns, user drop-body effects, and sanitizer observations beyond the native process-status and compiler-owned drop-trace oracle",
-    "non-i32, empty, nested, partial-initialization, nonempty-drop, and nested-tag resource values plus Region, borrow, complete runtime, and general standard-library C lowering; foreign calls requiring host binding are owned by separate C-backend and native-runner evidence",
+    "empty, partial-initialization, and nested-tag resource values plus general runtime and standard-library C lowering outside the named cases; directly nested cleanup is observed by nested-resource-drop, while effect-bearing foreign cleanup, Region and borrow extensions are owned by separate C-backend and native-runner evidence",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
   "contracts": [
@@ -930,6 +930,22 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["flat-i32-resource", "resource-result"]
+      }
+    },
+    {
+      "id": "pass.c-emission.nested-resource-drop",
+      "sourceRoot": "cases/pass/nested-resource-drop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::$drop$Box", "main::main"],
+        "features": ["flat-i32-resource", "nested-resource", "non-empty-resource-drop"]
       }
     }
   ]

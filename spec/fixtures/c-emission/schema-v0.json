@@ -55,6 +55,7 @@
         "inert-enum",
         "inert-struct",
         "nested-copy-resource",
+        "nested-resource",
         "non-empty-resource-drop",
         "resource-option",
         "resource-result",

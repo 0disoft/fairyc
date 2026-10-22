@@ -16,10 +16,12 @@ func TestEmissionTransportAcrossResponsibilitySplit(t *testing.T) {
 	}
 	var units []cbackend.Unit
 	for _, fixture := range report.Emitted {
-		// Preserve the original 52-case refactor snapshot. New active-payload cases
-		// have independent source-linked drop assertions in assertActivePayloadDrops.
+		// Preserve the original 52-case refactor snapshot. Added cases have
+		// independent source-linked drop assertions in the fixture tests.
 		switch fixture.ID {
 		case "pass.c-emission.resource-option-drop", "pass.c-emission.resource-result-drop-ok", "pass.c-emission.resource-result-drop-err":
+			continue
+		case "pass.c-emission.nested-resource-drop":
 			continue
 		}
 		units = append(units, fixture.Unit, fixture.TraceUnit)
