@@ -161,14 +161,23 @@ func runByteViewExecution(t *testing.T, text, operation string, cases any, oracl
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 0 {
 		t.Fatalf("interpreter: %v %+v", err, outcome)
 	}
+	var linuxUnit cbackend.Unit
 	for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
-		if _, err := cbackend.Emit(decoded, entry, profile); err != nil {
+		unit, err := cbackend.Emit(decoded, entry, profile)
+		if err != nil {
 			t.Fatal(err)
+		}
+		if profile.Target == target.X8664LinuxGNU {
+			linuxUnit = unit
 		}
 	}
 	t.Logf("%s oracle cases, both orders, owner preservation, overlap and reborrows passed", oracle)
+	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
+		runLinuxSDKHelperExecution(t, linuxUnit)
+		return
+	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("Windows AMD64 native evidence; interpreter already checked")
+		t.Skip("requires Linux GNU or Windows MSVC amd64; interpreter and emission already checked")
 	}
 	evidenceRoot, err := filepath.Abs(filepath.Join("..", "..", ".cache", "bytes-"+operation))
 	if err != nil {

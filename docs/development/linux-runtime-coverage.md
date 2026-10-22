@@ -2,6 +2,8 @@
 
 Hosted evidence baseline: 2026-10-22, source `3ea6d1b5923386155f4ffd66b51040a046f2827d`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
+That receipt remains historical for the current source. The current source adds the pure-helper
+Linux matrix; a v2 hosted receipt for six roots and 24 native cases is pending.
 This inventory supports the [Phase 2 exit decision](phase-status.md#phase-2-exit-decision-2026-10-22);
 it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
@@ -77,7 +79,7 @@ coverage. The existing Linux `go test -json` stream is checked by
 | File open/read/write/sync/close/drop, position, logical size, bounded seeks | [Linux adapter](../../internal/cstdlib/stage0_linux_file_portable.c), ADRs [0331](../adr/0331-target-neutral-public-file-core.md), [0332](../adr/0332-target-neutral-public-file-positioning.md), [0333](../adr/0333-target-neutral-public-file-size.md), [0334](../adr/0334-target-neutral-public-file-relative-end-seek.md) | [Public File source](../../internal/cbackendnative/smoke_files.go): `linuxFileExecutions`, `linuxFileSourceCallExecutions`, `linuxPublicFileExecutions` are each 4. |
 | Exact read, file removal/replacement, UTF-8 argv copying | [ADR 0424](../adr/0424-linux-prepared-publication-and-process-arguments.md), [Linux argv](../../internal/cstdlib/stage0_linux_process_args.c) | [Prepared publication](../../internal/cstdlib/linux_publication_test.go) defines GCC/Clang low/optimized cases; [save-failure test](../../internal/cli/task_manager_linux_save_test.go) defines 40 injected-failure/process-kill cases. Current evidence is suite-level; [older focused receipts](../compatibility/linux-drimi-20261003.md) retain their original revisions. No power-loss guarantee. |
 | SDK Vec and native workspace execution | [Vector source](../../internal/sdkstdlib/sources/optional/std/vec.fy), [Linux support](../../internal/cstdlib/vector_storage_test.go), [ADR 0426](../adr/0426-linux-native-workspace-tests.md) | [Portable native tests](../../internal/cli/native_test_portable_test.go), [Linux vector tests](../../internal/cli/vector_linux_candidate_test.go), [loop test](../../internal/compiler/vector_for_linux_emit_test.go). Linux implementation exists; these pointers do not prove every later vector-view case ran on Linux. |
-| Pure bytes and number helpers | [SDK bytes](../../internal/sdkstdlib/sources/std/bytes.fy), [SDK num](../../internal/sdkstdlib/sources/std/num.fy) | [Equality](../../internal/cli/bytes_equal_test.go), [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) check interpretation/emission; their native sections require Windows. No new target C symbols are needed, but full Linux execution coverage is not established here. |
+| Pure bytes and number helpers | [SDK bytes](../../internal/sdkstdlib/sources/std/bytes.fy), [SDK num](../../internal/sdkstdlib/sources/std/num.fy) | [Equality/comparison](../../internal/cli/bytes_equal_test.go), [decimal parsing](../../internal/cli/checked_i64_decimal_test.go), and the shared [Linux SDK helper runner](../../internal/cli/linux_sdk_helpers_test.go) reuse independent Go oracles, MIR codec/interpreter, and production C emission. The three tests add `/gcc/low`, `/gcc/optimized`, `/clang/low`, and `/clang/optimized` subtests and retain Windows MSVC coverage. Linux matrix added; hosted execution is pending. No new target C symbols are needed. |
 
 ## Missing Linux implementations
 
@@ -173,7 +175,7 @@ receipt proves representative success, not blanket completeness.
 | Open evidence | What the receipt establishes | Why closure remains open |
 | --- | --- | --- |
 | Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [runtime_test.go](../../internal/cruntime/runtime_test.go) checks rendered strings for those branches. Deterministic native progress/failure observations are still absent. |
-| Pure helper native execution | [Equality/comparison](../../internal/cli/bytes_equal_test.go) and [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) have admitted contracts and independent Go oracles. | Their non-Windows native sections skip Linux and use Windows MSVC only, even when Linux C is emitted. These are beyond the representative initial minimum, but the declared no-skip standard-library evidence stays incomplete. |
+| Pure helper native execution | [Equality/comparison](../../internal/cli/bytes_equal_test.go) and [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) have admitted contracts and independent Go oracles. The shared [Linux SDK helper runner](../../internal/cli/linux_sdk_helpers_test.go) executes production emitted C with native support. | The current source adds GCC/Clang low/optimized subtests to the three existing roots. A missing compiler, build or run failure, nonzero exit, or any stdout/stderr fails the case; unsupported hosts still skip. Windows MSVC low/optimized coverage remains. The v2 24-case hosted receipt is pending, so Linux execution of the 12 new profile cases is not verified here. |
 | Whole-target observation | The v38 process/drop oracle checks admitted fixtures under two compilers and profiles. | [Exit values](../../internal/cbackendnative/oracle_results.go) cover 0–191, while the manifest defers complex resources and effects. Partial compiler-semantic coverage is not a thin-runtime defect or evidence of entire-language conformance. |
 
 ## Phase 2 contract-to-fixture review
@@ -266,8 +268,9 @@ does not prove complete runtime or standard-library coverage, and no requirement
 
 ## Next work
 
-Next single task: adapt the existing equality, comparison, and checked-decimal native tests to run
-the admitted helpers through GCC and Clang at low and optimized profiles on Linux, retain their
-independent Go oracles, and record explicit no-skip evidence in the existing Linux Go job. Use no
-new workflow or runner. This removes the concrete helper gap above but does not by itself close
-Phase 2 or prove the complete runtime or standard library.
+Next single task: obtain the new 24-case v2 hosted receipt from the existing Linux Go job for the
+six focused roots. The receipt must show GCC and Clang at low and optimized profiles with no skips;
+the Linux suite still runs once and no native tests are repeated. The Linux native baseline remains
+55 C emission cases, 220 interpreter/C comparisons, 220 drop-trace executions, and 110 sanitizer
+executions. The 12-case v1 receipt remains historical. This removes the concrete helper execution
+gap but does not by itself close Phase 2 or prove the complete runtime or standard library.

@@ -2,7 +2,8 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current Frontend receipt: `3ea6d1b5923386155f4ffd66b51040a046f2827d`
+- Hosted Frontend receipt: `3ea6d1b5923386155f4ffd66b51040a046f2827d` (v1 focused Linux evidence;
+  historical to the current helper matrix)
 - Previous SDK receipt: `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`, historical evidence
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
 - Evidence: [Frontend run 39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010), all nine jobs passed; native
@@ -20,7 +21,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passes the 12 focused Linux cases without skips. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the prior 12 focused Linux cases without skips; this v1 evidence is historical to the current source. Current source adds three pure-helper roots for a v2 required set of 24 cases; the hosted receipt is pending. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -95,7 +96,7 @@ payload and tracking-node OOM, including recovery, preserved data, and zero live
 These four compiler/profile SDK executions are separate from the 110 sanitizer executions.
 
 All nine Frontend jobs passed. The same run's
-[Linux Go job 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the 12 focused Linux cases without skips.
+[Linux Go job 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the prior 12 focused Linux cases without skips. This v1 receipt predates the current pure-helper matrix and is not a current-source run. The current source requires six roots and 24 cases under v2; that hosted receipt is pending.
 The previous [run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
 remains historical evidence for its 52-case receipt. The earlier
 [Linux job 119796130897](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
@@ -113,8 +114,9 @@ toolchain fixture to pass without skips, as defined by the [C ABI target claims]
 and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice).
 
 The open evidence is bounded. Linux receipt-write progress has no deterministic fault-injected
-observation; the equality, comparison, and decimal-parse native tests still skip Linux; and the
-0–191 process-status oracle plus manifest deferrals do not observe the whole target. The
+observation; the equality, comparison, and decimal-parse tests now add GCC/Clang low/optimized
+Linux subtests, but their v2 24-case hosted receipt is pending; and the 0–191 process-status oracle
+plus manifest deferrals do not observe the whole target. The
 [coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) records the source
 owners and remaining evidence. Windows filesystem parity and distribution remain outside this gate.
 
@@ -185,9 +187,11 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Adapt the existing [equality/comparison](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22)
-   and [checked-decimal](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) native tests to
-   run GCC and Clang at low and optimized profiles on Linux, retain their independent Go oracles,
-   and record explicit no-skip evidence in the existing Linux Go job. Add no workflow or runner.
-   This is the next single task and does not by itself close Phase 2.
+1. Obtain the new v2 24-case hosted receipt from the existing Linux Go job for
+   [equality/comparison](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) and
+   [checked-decimal](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22). Require six roots
+   with GCC and Clang at low and optimized profiles and no skips. The suite still runs once, with
+   no workflow or runner change and no repeated native tests. The Linux native baseline remains 55
+   C emission cases, 220 interpreter/C comparisons, 220 drop-trace executions, and 110 sanitizer
+   executions. This is the next single task and does not by itself close Phase 2.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

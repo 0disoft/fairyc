@@ -64,11 +64,14 @@ headers, linking, startup, and sanitizers; version preflight is not a replacemen
 
 The Linux Go suite now runs exactly once, with `go test -mod=readonly -count=1 -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
-package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v1` and marks a
+package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v2` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
-`TestLinuxPreparedPublication` and all 12 GCC/Clang low and optimized subtests pass without skips,
-missing cases or duplicates, with any other suite failure also rejecting completeness. Existing
-runners and test selection are unchanged, and no native tests are repeated.
+`TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`, and
+`TestCheckedI64DecimalExecution` pass all 24 GCC/Clang low and optimized subtests without skips,
+missing cases or duplicates, with any other suite failure also rejecting completeness. The schema
+version changed because the required evidence set grew from 12 to 24 cases. Existing v1 receipts
+remain historical. The Go suite command and runner count are unchanged, and no native tests are
+repeated.
 The explicit Bash shell preserves pipeline failure if either the Go suite or receipt checker fails.
 
 Local CI helper checks: `python -B -m unittest discover -s .github/scripts -p 'test_*.py'`.

@@ -18,14 +18,29 @@ class LinuxPhase2Evidence(unittest.TestCase):
     def test_requires_all_native_cases_and_parent_results(self):
         report, _ = self.run_events(events())
         self.assertTrue(report["complete"])
-        self.assertEqual(len(report["passedCases"]), 12)
-        for missing in (next(iter(ROOTS)), next(iter(CASES))):
+        self.assertEqual(report["schema"], "fairyc.phase2-linux-evidence/v2")
+        self.assertEqual(len(report["passedCases"]), 24)
+        for missing in sorted(ROOTS | CASES):
             with self.subTest(missing=missing):
                 report, _ = self.run_events([
                     e for e in events() if (e["Package"], e["Test"]) != missing
                 ])
                 self.assertFalse(report["complete"])
                 self.assertEqual(len(report["missing"]), 1)
+
+    def test_profile_only_helper_results_cannot_replace_linux_compiler_matrix(self):
+        for test in ("TestBytesEqualExecution", "TestBytesCompareExecution", "TestCheckedI64DecimalExecution"):
+            with self.subTest(test=test):
+                package = "github.com/0disoft/fairyc/internal/cli"
+                items = [e for e in events() if e["Test"] not in {
+                    f"{test}/{compiler}/{profile}"
+                    for compiler in ("gcc", "clang") for profile in ("low", "optimized")
+                }]
+                items += [{"Package": package, "Test": f"{test}/{profile}", "Action": "pass"}
+                          for profile in ("low", "optimized")]
+                report, _ = self.run_events(items)
+                self.assertFalse(report["complete"])
+                self.assertEqual(len(report["missing"]), 4)
 
     def test_skip_failure_duplicate_and_unrelated_failure_reject_receipt(self):
         package, test = sorted(CASES)[0]
