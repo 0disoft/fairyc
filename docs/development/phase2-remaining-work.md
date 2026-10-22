@@ -1,9 +1,12 @@
 # Phase 2 remaining work
 
 Current [target scope assessment](phase2-target-scope.md) separates the completed runtime minimum,
-contracted C ABI gaps and explicitly deferred resource shapes. F1, by-value foreign record
-arguments for existing supported record shapes, is implemented with hosted Linux evidence pending;
-F2 field families are the next bounded implementation.
+the hosted F1–F3 slice, remaining C ABI gaps and explicitly deferred resource shapes. F1 record
+arguments, F2-1 through F2-4 field transports and the first bounded F3 callback have a
+[hosted receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23) at
+`82b760cbb743eef4608441e127f9fa9e41d1f513`. Phase 2 remains partial. The next bounded source task
+is repr(C) array fields for `i8`, `i16`, `u16`, `u64` and `isize`; broader array and pointer
+support remains separate, and retained or asynchronous callbacks stay excluded.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

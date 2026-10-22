@@ -1,7 +1,8 @@
 # Phase 2 target scope assessment
 
 - Date: 2026-10-23
-- Inspected checkout: `3b6f58c9de4ee12f212e68b152d374d055b81b55`
+- Baseline inspected checkout: `3b6f58c9de4ee12f212e68b152d374d055b81b55`
+- Current implementation receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
 - Scope: `x86_64-linux-gnu`; roadmap Phase 2, runtime minimum, C ABI and the identified resource boundaries
 - Decision: the representative runtime/SDK minimum passes; full target conformance remains incomplete
 
@@ -23,7 +24,7 @@ maps the runtime minimum to implementation and probe owners.
 | Scalar/tagged outcomes, active payload and drop order | [emission manifest](../../spec/fixtures/c-emission/manifest-v0.json), [mutation observer](../../internal/compiler/nested_resource_test.go) | E1/E2 pass: 56 cases, 224 outcome and 224 exact drop-trace comparisons, 112 sanitizers, plus the focused mutation/sanitizer observations. |
 | Target layout and bidirectional C ABI plans | [layout manifest](../../spec/fixtures/layout/manifest-v0.json), [ABI manifest](../../spec/fixtures/c-abi/manifest-v0.json), [ABI probe generator](../../internal/cbackendnative/abi_probe.go) | All 16 layout and 17 ABI manifest cases run through their Go runners; the native report records four layout probes and 56 cross-compiler ABI executions. These generated C probes do not establish all Fairy-source foreign-call forms. |
 
-The full [Frontend run 39817319718](https://github.com/0disoft/fairyc/actions/runs/39817319718)
+The baseline [Frontend run 39817319718](https://github.com/0disoft/fairyc/actions/runs/39817319718)
 at `5f62c9c3e8d4ceeed8830c96b82215c96784ea29` passed all nine jobs.
 Its [native job](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119965856725)
 records the 56-case matrix. Its [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193676)
@@ -75,9 +76,10 @@ an executable checklist or a reason to repeat the completed runtime failure test
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
 F1, F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating transport, F2-4 remaining integer
-field transport and the first bounded F3 callback signature are implemented below. Hosted Linux
-execution remains pending. Additional field operations and callback signatures require separate
-admissions; none of these updates opens excluded resource representations.
+field transport and the first bounded F3 callback signature are implemented below. The
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers their shared native probe at
+`82b760cb`. Additional field operations and callback signatures require separate admissions; none
+of these updates opens excluded resource representations.
 
 ## F1 implementation update
 
@@ -100,14 +102,15 @@ Local validation passed:
   passes its existing target/workspace/runtime/layout/ABI checks. Optional measurements are skipped.
 - Changed-document relative links and `git diff --check` pass.
 
-Linux GCC/Clang directions and profiles are configured but have not run for this source revision;
-local WSL discovery failed with `REGDB_E_CLASSNOTREG`. No Linux installation or host configuration
-was changed. F1's hosted evidence remains open, and the earlier full CI receipt above cannot attest
-these new checks. The full repository Go suite and hosted CI were not rerun locally. Phase 2 and
-all target maturity flags remain unchanged; no DB, repository setting, workflow or runner changes.
+The local checks above are historical pre-push validation. Local WSL discovery failed with
+`REGDB_E_CLASSNOTREG`, and no Linux installation or host configuration was changed. The
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) records the configured Linux directions and
+profiles at `82b760cb`; the earlier full CI receipt above cannot attest these checks. The full
+repository Go suite was not rerun locally. Phase 2 and all target maturity flags remain unchanged;
+no DB, repository setting, workflow or runner changes.
 
-The F2-1 update below implements the first field family. Batch the current commits for one
-authorized push to collect F1 and F2-1 Linux receipts before marking that evidence complete.
+The F2-1 update below implements the first field family. Its checks are included in the hosted
+F1–F3 receipt.
 
 ## F2-1 integer array fields
 
@@ -142,10 +145,11 @@ Changed-document relative links and `git diff --check` pass.
 The focused test was renamed from `TestReprCArrayFieldNativeCrossing` when ADR 0478 added enums;
 the command above uses its current name.
 
-Hosted Linux GCC/Clang execution is pending for this expanded probe. Earlier F1 and runtime
-receipts do not attest the array observations. The full repository Go suite was not rerun locally.
-Phase 2 remains partial and all target maturity flags remain unchanged. No CLI or SDK API, DB,
-repository setting or workflow changes were made.
+The local validation above is historical pre-push validation. The
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) executes this expanded probe in all four
+Linux compiler/profile combinations. The full repository Go suite was not rerun locally. Phase 2
+remains partial and all target maturity flags remain unchanged. No CLI or SDK API, DB, repository
+setting or workflow changes were made.
 
 The F2-2 update below implements the next field family. Fairy floating scalars and remaining integer
 fields follow it; bounded callbacks (F3) remain a separate step after the field families.
@@ -181,10 +185,11 @@ Local validation passed:
 - `go vet -mod=readonly` for all affected implementation packages and the Windows smoke tool.
 - Changed-document relative links and `git diff --check`.
 
-Hosted Linux GCC/Clang execution is pending for this expanded fixture. Earlier receipts attest
-their original sources only. The full repository suite and full Windows smoke were not repeated;
-the focused native crossing covers the changed probe. No SDK/CLI API, DB, repository setting or
-workflow changes. Phase 2 stays partial and all target maturity flags stay unchanged.
+The local validation above is historical pre-push validation; earlier receipts attest their
+original sources only. The [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) executes this
+expanded fixture. The full repository suite and full Windows smoke were not repeated; the focused
+native crossing covers the changed probe. No SDK/CLI API, DB, repository setting or workflow
+changes. Phase 2 stays partial and all target maturity flags stay unchanged.
 
 The F2-3 update below connects Fairy `f32`/`f64` field transport. Remaining fixed-width integer
 fields follow it.
@@ -221,10 +226,11 @@ Local validation passed:
 - The shared probe's Linux-profile C emission test and affected-package `go vet -mod=readonly`.
 - Changed-document relative links and `git diff --check`.
 
-Hosted Linux GCC/Clang execution is pending. Previous C-scalar or record receipts do not attest
-this expanded Fairy floating source. The full repository suite and full Windows smoke were not
-repeated; the changed native probe was run directly. There is no SDK/CLI API, DB, workflow, runner,
-runtime or target-maturity change. Phase 2 stays partial.
+The local validation above is historical pre-push validation; previous C-scalar or record receipts
+do not attest this expanded Fairy floating source. The
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. The full repository suite and
+full Windows smoke were not repeated; the changed native probe was run directly. There is no
+SDK/CLI API, DB, workflow, runner, runtime or target-maturity change. Phase 2 stays partial.
 
 The F2-4 update below connects the remaining integer field families. Bounded callbacks (F3)
 follow separately.
@@ -261,11 +267,12 @@ Local validation passed:
   four combinations with four integer cases each, alongside prior record/array/enum/float checks.
 - Affected-package `go vet -mod=readonly`, changed-document relative links and `git diff --check`.
 
-Hosted Linux GCC/Clang execution remains pending. Earlier receipts do not attest the new integer
-probe. The full repository suite and full Windows smoke were not repeated; the changed crossing
-was run directly. No SDK/CLI API, DB, workflow, runner or target-maturity changes. Phase 2 remains
-partial. The F3 update below connects bounded callbacks. Further field-family admissions remain
-separate changes rather than implicit consequences of this transport slice.
+The local validation above is historical pre-push validation; earlier receipts do not attest the
+new integer probe. The [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. The full
+repository suite and full Windows smoke were not repeated; the changed crossing was run directly.
+No SDK/CLI API, DB, workflow, runner or target-maturity changes. Phase 2 remains partial. The F3
+update below connects bounded callbacks. Further field-family admissions remain separate changes
+rather than implicit consequences of this transport slice.
 
 ## F3 bounded C callbacks
 
@@ -305,10 +312,59 @@ Local validation passed:
 - Affected-package vet, changed-document relative links and `git diff --check`.
 
 The full repository suite and full Windows smoke were not repeated because the changed compiler
-packages and native crossing were checked directly. Hosted Linux GCC/Clang execution is pending
-an authorized batched push; old receipts do not attest callbacks. There are no SDK/CLI API, DB,
-workflow, runner or target-maturity changes. Phase 2 remains partial. Next: collect hosted evidence,
-then reassess the declared target scope against these explicit admissions and exclusions.
+packages and native crossing were checked directly. Old receipts do not attest callbacks; the
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) does. There are no SDK/CLI API, DB, workflow,
+runner or target-maturity changes. Phase 2 remains partial. The next bounded source task is the
+array-field family described below.
+
+The local-validation lists in F1–F3 describe implementation-time checks and remain historical.
+The hosted receipt below is the current execution record for the shared probe.
+
+## Hosted F1–F3 receipt (2026-10-23)
+
+[Frontend run 39839678199](https://github.com/0disoft/fairyc/actions/runs/39839678199) at
+`82b760cbb743eef4608441e127f9fa9e41d1f513` completed successfully, with all nine jobs passing.
+The [native job 120043200670](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120043200670)
+records `fairyc.native-c-report/v38` on Ubuntu 24.04 amd64 with glibc 2.39, Clang 18.1.3 and GCC
+13.3.0 at low and optimized profiles: 56 cases, 224 outcome comparisons, 224 drop-trace
+comparisons, 112 sanitizer executions, 56 ABI crossings, four layout probes and four SDK
+executions. It also reports `foreignCStructResultCallExecutions=4`.
+
+[probes_foreign.go](../../internal/cbackendnative/probes_foreign.go) and
+[probes_source.go](../../internal/cbackendnative/probes_source.go) show that this counter runs the
+current shared `internal/foreignstructprobe` source. The four executions cover F1 record arguments;
+F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating fields and F2-4 remaining integer
+fields; and F3 callbacks in both Clang-caller/GCC-callee and GCC-caller/Clang-callee directions at
+low and optimized profiles as separate objects, with expected exit 42. Each execution checks five
+floating cases, four integer cases and six callback invocations. They are checks inside four
+shared executions, not separate report counters, and are not separately sanitizer-proven.
+
+The separate [Linux Go job 120037158582](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120037158582)
+reports `fairyc.phase2-linux-evidence/v4`, `complete:true`, 32 cases and empty `missing`,
+`skipped` and `errors` lists. The [Windows native job 120037158483](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120037158483)
+and [Windows Go job 120037158472](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120037158472)
+succeeded. Phase 2 remains partial; the two completeness markers and all three maturity flags stay
+unchanged.
+
+## Remaining source boundaries after F1–F3
+
+At implementation commit `82b760cb`, the new native probe covers the admitted record arguments,
+field transports and first callback signature. It does not expand every C-representable shape.
+
+- Array fields still use [ReprCArrayField](../../internal/hir/views.go): only `u8`, `i32`, `i64`,
+  `u32` and `usize`, with lengths `1..=4096`. The integer and floating transport boundary tests
+  reject arrays of the new scalar families. The broader fixed-array contract is therefore not
+  fully implemented. The next bounded source task is array transport for `i8/i16/u16/u64/isize`,
+  followed by separate decisions and evidence for other C-representable element families.
+- [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) still permits only
+  `void`, `u8`, `i32`, `i64`, `u32`, `usize` and admitted repr(C) records as pointees. New direct
+  scalar-field support does not imply pointers to those scalars or C scalars. This is a current
+  source guard, not a newly executed native pointer failure.
+- F3 implements the exact signature in ADR 0481. Retained, asynchronous, cross-thread and
+  unwind-crossing integrations remain exclusions; they are not new Phase 2 minimum tasks.
+
+Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged;
+successful execution of the current probe cannot establish the unimplemented array families.
 
 ## Validation of the original assessment
 
