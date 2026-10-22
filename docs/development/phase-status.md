@@ -58,8 +58,9 @@ drop-site observations. No missing mandatory rule is waived by this review. Phas
 
 `TestLinuxFileProgressEmission` compiles the real bundled SDK to Linux C successfully on Windows,
 but `TestLinuxFileProgressNative` (GCC/Clang low and optimized execution) is skipped on this host,
-so Linux native evidence remains pending. Phase 2 stays partial, with heap resize-OOM and focused
-Linux/active-payload evidence still open. See the [File progress
+so Linux native evidence remains pending. The [direct heap OOM fixture](../../internal/cstdlib/system_heap_oom_test.go)
+passes local MSVC low/optimized execution; its Linux runs and focused active-payload evidence remain
+open. Phase 2 stays partial. See the [File progress
 fixture](../../internal/cli/linux_file_progress_test.go).
 
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
