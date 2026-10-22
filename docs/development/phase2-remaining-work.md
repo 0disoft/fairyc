@@ -1,5 +1,9 @@
 # Phase 2 remaining work
 
+Current [target scope assessment](phase2-target-scope.md) separates the completed runtime minimum,
+contracted C ABI gaps and explicitly deferred resource shapes. F1, by-value foreign record
+arguments for existing supported record shapes, is the next bounded implementation.
+
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.
 
@@ -90,8 +94,10 @@ The focused collector now requires v4/32 cases; v3/28 remains historical.
 
 Phase 2 verdict: do not promote the full target merely because its representative runtime/SDK
 minimum and these cleanup observations pass. The complete target claim must account for the
-backend's explicitly rejected shapes (zero-field resources, conditional drop state and nested
-owning tags), the source-level foreign-call boundary, and every declared target fixture. Existing
+backend's explicitly rejected shapes, the source-level foreign-call boundary, and every declared
+target fixture. The [current assessment](phase2-target-scope.md#resource-boundaries-not-three-new-runtime-tasks)
+distinguishes zero-field/nested-tag deferrals from conditional root flags reserved outside the
+admitted source model; these are not three new runtime tasks. Existing
 closed capabilities are not newly admitted by this audit. The two completeness markers and all
 three maturity flags stay unchanged; this is a scope/evidence decision, not a request to add more
 random runtime failure tests or implement excluded SDK APIs.
