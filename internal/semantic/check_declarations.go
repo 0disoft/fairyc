@@ -92,7 +92,7 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	}
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]
-		parameterType := a.canonicalType(module, parameter.Type)
+		parameterType := a.foreignParameterType(module, parameter.Type)
 		if containsSafeBorrow(parameterType) {
 			a.addDiagnostic("E5102", span(module.file.Path, parameter.Type.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
 		}
@@ -101,6 +101,13 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 		if parameterType != hir.TypeInvalid {
 			a.types = append(a.types, TypeFact{Expression: parameterSpan, CanonicalType: parameterType})
 		}
+	}
+	parameterTypes := make([]hir.Type, len(result.Parameters))
+	for index, parameter := range result.Parameters {
+		parameterTypes[index] = parameter.Type
+	}
+	if !hir.ValidBoundedCallbackParameters(parameterTypes) {
+		a.addUnsupported(module.file.Path, function.Span, "callback must precede the final ptr mut void user-data parameter")
 	}
 	if result.ResultType != hir.TypeInvalid {
 		a.types = append(a.types, TypeFact{Expression: span(module.file.Path, function.ResultType.Span), CanonicalType: result.ResultType})

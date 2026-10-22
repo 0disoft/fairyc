@@ -383,6 +383,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0478-explicit-c-enum-fields.md](0478-explicit-c-enum-fields.md): preserves an explicit C integer enum base through source typing, verified MIR and package identities, then connects scalar record-field transport.
 - [0479-repr-c-floating-field-transport.md](0479-repr-c-floating-field-transport.md): admits distinct f32/f64 record-field and internal value transport with target/provider checks and shared native crossings.
 - [0480-repr-c-integer-field-transport.md](0480-repr-c-integer-field-transport.md): adds the remaining Fairy integer field families with exact identities, target layouts and bounded record transport.
+- [0481-bounded-c-callbacks.md](0481-bounded-c-callbacks.md): admits one non-capturing synchronous C callback signature with explicit call-bounded user data.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

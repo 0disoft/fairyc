@@ -263,10 +263,16 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 		expected := hir.TypeInvalid
 		expectedSpan := declaration.ResultType.Span
 		if index < len(declaration.Parameters) {
-			expected = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), declaration.Parameters[index].Type)
+			expected = c.analyzer.foreignParameterType(c.analyzer.symbolModule(callee), declaration.Parameters[index].Type)
 			expectedSpan = declaration.Parameters[index].Type.Span
 		}
-		child, actual := c.checkExpression(argument, expected)
+		var child *hir.Expression
+		var actual hir.Type
+		if expected == hir.TypeCCallbackI32UserData {
+			child, actual = c.checkCallbackArgument(argument)
+		} else {
+			child, actual = c.checkExpression(argument, expected)
+		}
 		result.Children = appendExpression(result.Children, child)
 		if expected != hir.TypeInvalid {
 			c.requireType("E1006", span(c.module.file.Path, argument.Span), actual, expected, span(callee.source, expectedSpan))
