@@ -64,15 +64,19 @@ headers, linking, startup, and sanitizers; version preflight is not a replacemen
 
 The Linux Go suite now runs exactly once, with `go test -mod=readonly -count=1 -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
-package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v3` and marks a
+package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v4` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
 `TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`,
-`TestCheckedI64DecimalExecution`, and `TestLinuxTrapReceiptProgressNative` pass all 28 GCC/Clang
+`TestCheckedI64DecimalExecution`, `TestLinuxTrapReceiptProgressNative`, and
+`TestPrivateVectorNestedResourceDrops` pass all 32 GCC/Clang
 low and optimized subtests without skips, missing cases or duplicates, with any other suite failure
 also rejecting completeness. The schema
-version changed because the required evidence set grew from 24 to 28 cases (seven roots, four
-compiler/profile cases each). Each new trap-receipt case runs six progress/failure scenarios.
-Existing v1/12-case and v2/24-case receipts remain historical. The
+version changed because the required evidence set grew from 28 to 32 cases (eight roots, four
+compiler/profile cases each). Each trap-receipt case runs six progress/failure scenarios.
+The nested-resource root checks parent mutation and active payload cleanup, with one extra
+ASan+UBSan execution per compiler inside its low-profile case. These two executions are separate
+from the native fixture report's sanitizer count. Hosted v4 execution is pending.
+Existing v1/12-case, v2/24-case, and v3/28-case receipts remain historical. The
 [v3 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
 at `7f7362b87c231c30ea89f3907396957f0d599032` records all 28 cases passing without skips.
 The Go suite command and runner count are unchanged, and no native tests are

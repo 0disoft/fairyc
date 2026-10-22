@@ -9,7 +9,7 @@ import (
 )
 
 func TestPrivateVectorNestedResourceDrops(t *testing.T) {
-	runPrivateVectorStorageNative(t, `module main;
+	runNestedResourceCleanupNative(t, `module main;
 @link_name("nested_record") unsafe extern C fn i32 record(i32 value);
 @link_name("nested_mutate") unsafe extern C fn i32 mutate(ptr mut void value);
 @link_name("nested_finished") unsafe extern C fn i32 finished();
