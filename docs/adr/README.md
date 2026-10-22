@@ -381,6 +381,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0476-repr-c-struct-foreign-arguments.md](0476-repr-c-struct-foreign-arguments.md): admits by-value foreign arguments for existing nonempty repr(C) record shapes and extends the shared native argument/result probe.
 - [0477-repr-c-integer-array-fields.md](0477-repr-c-integer-array-fields.md): admits bounded integer array members in repr(C) records with element-copy value transport and shared native crossing checks.
 - [0478-explicit-c-enum-fields.md](0478-explicit-c-enum-fields.md): preserves an explicit C integer enum base through source typing, verified MIR and package identities, then connects scalar record-field transport.
+- [0479-repr-c-floating-field-transport.md](0479-repr-c-floating-field-transport.md): admits distinct f32/f64 record-field and internal value transport with target/provider checks and shared native crossings.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

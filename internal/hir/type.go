@@ -268,7 +268,7 @@ func typeParts(text string, separator byte) ([]string, bool) {
 }
 
 var builtinTypesByName = func() map[string]Type {
-	values := append(CScalarTypes(), TypeInvalid, TypeVoid, TypeBool, TypeU8, TypeI32, TypeI64, TypeU32, TypeUSize, TypeStr, TypeCStr, TypeRegion)
+	values := append(CScalarTypes(), TypeInvalid, TypeVoid, TypeBool, TypeU8, TypeI32, TypeI64, TypeU32, TypeUSize, TypeF32, TypeF64, TypeStr, TypeCStr, TypeRegion)
 	result := make(map[string]Type, len(values))
 	for _, t := range values {
 		result[t.String()] = t

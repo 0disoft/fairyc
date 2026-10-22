@@ -17,6 +17,8 @@ var (
 	TypeI64        Type = builtin("i64")
 	TypeU32        Type = builtin("u32")
 	TypeUSize      Type = builtin("usize")
+	TypeF32        Type = builtin("f32")
+	TypeF64        Type = builtin("f64")
 	TypeByteSlice  Type = Slice(TypeU8)
 	TypeBoolSlice  Type = Slice(TypeBool)
 	TypeI64Slice   Type = Slice(TypeI64)
@@ -59,6 +61,10 @@ func CScalarTypes() []Type {
 func IsCScalar(value Type) bool {
 	return slices.Contains(cScalarTypes, value)
 }
+
+// IsFloatScalar identifies the Fairy floating types, distinct from C scalar identities.
+// Their initial executable admission is value transport, not arithmetic or literals.
+func IsFloatScalar(value Type) bool { return value == TypeF32 || value == TypeF64 }
 
 // SharedBorrow returns the canonical non-null shared-borrow type for element.
 func SharedBorrow(element Type) Type {

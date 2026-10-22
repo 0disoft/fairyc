@@ -142,7 +142,7 @@ func (a *analyzer) prepareEnumTypes() {
 }
 
 func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool {
-	if hir.IsCScalar(value) {
+	if hir.IsCScalar(value) || hir.IsFloatScalar(value) {
 		return true
 	}
 	switch value {
@@ -456,6 +456,10 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 		return hir.TypeU32, true
 	case "usize":
 		return hir.TypeUSize, true
+	case "f32":
+		return hir.TypeF32, true
+	case "f64":
+		return hir.TypeF64, true
 	case "str":
 		return hir.TypeStr, true
 	case "CStr":

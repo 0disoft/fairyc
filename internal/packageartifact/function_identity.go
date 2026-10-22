@@ -456,7 +456,7 @@ func builtinType(value hir.Type) bool {
 	_, integerSlice := hir.ScalarViewElement(value)
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 ||
 		value == hir.TypeU32 || value == hir.TypeUSize || integerSlice || value == hir.TypeStr ||
-		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
+		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value) || hir.IsFloatScalar(value)
 }
 
 func writeStrings(buffer *bytes.Buffer, values []string) {
