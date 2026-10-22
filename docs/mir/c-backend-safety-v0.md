@@ -127,9 +127,11 @@ preserving prior root order when no dependency requires movement. Enum fields in
 and recursive aggregate dependencies fail closed. Private restricted inert enums may contain other
 restricted inert enums by value; the same graph orders and lays out both complete definitions.
 The same admitted records may be foreign results by value. MIR retains the nominal destination type
-and generated C uses the exact public tag plus ordinary assignment. Foreign aggregate parameters
-remain closed. The native matrix includes an 8-byte register result and a 20-byte hidden-memory
-result from a separately compiled C callee.
+and generated C uses the exact public tag plus ordinary assignment. ADR 0476 also admits the same
+record shapes as foreign arguments, retaining nominal types without flattening or pointer
+substitution. Private records and other foreign aggregate families remain closed. The shared
+native source checks an 8-byte record and a 20-byte hidden-memory result together with argument
+copy isolation and a nested mixed-class record after six integer arguments.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty and every declaration-ordered field is a Fairy copy scalar or raw pointer. An empty body
@@ -444,7 +446,9 @@ sorted translation-unit `static const uint8_t[]` storage; MIR never delegates li
 string-token spelling.
 The struct-result count requires a generated Fairy caller to receive both a register-sized and a
 hidden-memory result from a separately compiled hand-written C callee in both compiler directions
-and profiles; it does not admit aggregate parameters.
+and profiles. With ADR 0476's extended shared fixture, the same executions additionally check
+record arguments, scalar neighbors, copy isolation and mixed-class register exhaustion. Prior
+receipts retain their original source-specific result-only meaning.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

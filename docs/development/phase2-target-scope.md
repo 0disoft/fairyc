@@ -31,7 +31,7 @@ records v4, 32 required compiler/profile cases, `complete:true`, and empty missi
 lists. The two nested-mutation sanitizer executions are separate from the native report's 112.
 The subsequent `3b6f58c9` commit changes documentation only.
 
-## Contracted C ABI paths that remain unimplemented
+## Contracted C ABI gaps at the assessment baseline
 
 The language/ABI contract includes more than the currently executable source subset. Passing
 ABI classification and generated C-to-C probes cannot fill the following source-to-C gaps.
@@ -74,11 +74,40 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-Next bounded implementation: F1 for the existing supported repr(C) record shapes, with independent
-cross-compiler argument observations. F2 and F3 stay separate follow-ups; no new field family,
-callback or resource representation is bundled into F1.
+F1 is implemented in the update below; hosted Linux execution remains pending. F2 and F3 stay
+separate follow-ups; no new field family, callback or resource representation is bundled into F1.
 
-## Validation of this assessment
+## F1 implementation update
+
+[ADR 0476](../adr/0476-repr-c-struct-foreign-arguments.md) admits foreign arguments using the same
+nonempty repr(C) record shapes already supported as results. Private record arguments still
+produce an explicit capability error. The shared `foreignstructprobe` fixture now checks small,
+large and nested mixed-class arguments, scalar neighbors, exhausted SysV integer registers,
+unchanged caller copies, and the original small/large results. Existing Linux and Windows native
+lanes consume this fixture without new jobs, reports or execution-count fields.
+
+Local validation passed:
+
+- `go test -mod=readonly -count=1` for `internal/cbackend`, `internal/foreignstructprobe`,
+  `internal/cbackendnative` and `internal/cbackendfixture`; the original 56 emission cases remain
+  valid, and private record arguments still fail explicitly.
+- `go vet -mod=readonly` for the backend, shared probe and native-runner packages.
+- `go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke`: correctness smoke passes with
+  MSVC 14.51.36231. Its shared record probe executes four separate-object combinations:
+  C11/C17 consumer modes, each at low/optimized profiles, all returning 42. The command also
+  passes its existing target/workspace/runtime/layout/ABI checks. Optional measurements are skipped.
+- Changed-document relative links and `git diff --check` pass.
+
+Linux GCC/Clang directions and profiles are configured but have not run for this source revision;
+local WSL discovery failed with `REGDB_E_CLASSNOTREG`. No Linux installation or host configuration
+was changed. F1's hosted evidence remains open, and the earlier full CI receipt above cannot attest
+these new checks. The full repository Go suite and hosted CI were not rerun locally. Phase 2 and
+all target maturity flags remain unchanged; no DB, repository setting, workflow or runner changes.
+
+Next implementation: F2, one repr(C) field family at a time. Batch the current commits for one
+authorized push to collect F1's Linux receipt before marking that evidence complete.
+
+## Validation of the original assessment
 
 - Reran the existing `TestEmitReprCStructForeignResult`, `TestEmitRejectsReprCStructForeignParameter`
   and `TestEmitRejectsNestedResourceTag` tests with `-mod=readonly -count=1`; all pass.

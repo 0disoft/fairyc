@@ -2,7 +2,8 @@
 
 Current [target scope assessment](phase2-target-scope.md) separates the completed runtime minimum,
 contracted C ABI gaps and explicitly deferred resource shapes. F1, by-value foreign record
-arguments for existing supported record shapes, is the next bounded implementation.
+arguments for existing supported record shapes, is implemented with hosted Linux evidence pending;
+F2 field families are the next bounded implementation.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

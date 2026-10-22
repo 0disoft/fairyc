@@ -1752,7 +1752,7 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsReprCStructForeignParameter(t *testing.T) {
+func TestEmitReprCStructForeignParameter(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @repr(C)
@@ -1763,10 +1763,13 @@ fn i32 main() {
     return unsafe { consume_status(value) };
 }
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || capability.Function != "main::consume_status" || capability.Feature != `foreign parameter type "main::fairyc_fixture_status"` {
-		t.Fatalf("Emit() error = %v", err)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Contains(unit.Features, "foreign-c-struct-argument") ||
+		!strings.Contains(unit.Source, "extern int32_t consume_status(struct fairyc_fixture_status fy_a_0);") {
+		t.Fatalf("missing nominal struct argument transport: features=%v\n%s", unit.Features, unit.Source)
 	}
 }
 

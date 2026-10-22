@@ -25,6 +25,9 @@ func (e *analysisBuilder) inspectForeignFunctions() error {
 			if _, err := e.foreignCType(parameterType, false); err != nil {
 				return CapabilityError{Function: function.Name, Feature: err.Error()}
 			}
+			if _, structure := e.structByType[parameterType]; structure {
+				e.features["foreign-c-struct-argument"] = struct{}{}
+			}
 			e.recordCScalarFeature(parameterType)
 		}
 	}

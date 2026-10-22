@@ -66,11 +66,12 @@ func (e *emissionAnalysis) foreignCType(value hir.Type, result bool) (string, er
 		return "const " + pointee + " *", nil
 	}
 	if index, structure := e.structByType[value]; structure {
-		if !result {
-			return "", fmt.Errorf("foreign parameter type %q", value)
-		}
 		if !e.structTypes[index].definition.ReprC {
-			return "", fmt.Errorf("foreign result struct %q is not repr(C)", value)
+			role := "parameter"
+			if result {
+				role = "result"
+			}
+			return "", fmt.Errorf("foreign %s struct %q is not repr(C)", role, value)
 		}
 		return e.structCTypeName(index), nil
 	}

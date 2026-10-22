@@ -115,8 +115,9 @@ argument. Exact `c::int` additionally supports explicit bidirectional conversion
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of exports, callbacks, array or enum `@repr(C)` fields, or by-value aggregate
-parameters. The interpreter remains fail-closed on every foreign call.
+implementation of exports, callbacks, or array or enum `@repr(C)` fields. By-value record arguments
+are admitted only for the existing record shapes described below. The interpreter remains
+fail-closed on every foreign call.
 
 ## C-representable types
 
@@ -151,7 +152,7 @@ The same Windows product smoke now carries private 16-byte text and CStr views, 
 String/CString records, and an 8-byte two-`u32` owned-text result. It executes small aggregate return
 transport from the separately compiled C unit for String and CString operations at both profiles.
 That is one closed same-toolchain source crossing, not a stable record ABI, broad aggregate-return
-conformance, byte-content proof, or permission for by-value aggregate parameters.
+conformance, or byte-content proof. ADR 0476 separately admits by-value record parameters below.
 
 The safe owned-text example and ADR 0247's public SDK wrapper use a separate opaque storage bridge
 rather than passing those records as public Fairy types. C loads and stores the private record bytes
@@ -162,7 +163,14 @@ The implemented foreign-result slice admits those same nonempty acyclic `@repr(C
 Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
 caller is configured to receive both an 8-byte INTEGER-class result and a 20-byte MEMORY-class
 hidden result from a separately compiled C callee in both compiler directions and profiles.
-Aggregate parameters remain fail-closed.
+[ADR 0476](../adr/0476-repr-c-struct-foreign-arguments.md) additionally admits those same record
+shapes as foreign arguments. The generated prototype and call retain the exact public struct type;
+the C compiler handles register and stack transport without flattening or pointer substitution.
+The shared source fixture checks small and large argument/result copies, unchanged caller values,
+and a nested record with a `c::double` field after six integer arguments. The existing native lanes
+compile caller and callee separately. Hosted Linux evidence for these new argument observations
+is pending; prior struct-result receipts attest results only. Other aggregate parameter families
+remain closed.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
 

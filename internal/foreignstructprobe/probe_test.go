@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGenerateOwnsBothAggregateResultShapes(t *testing.T) {
+func TestGenerateOwnsAggregateArgumentAndResultShapes(t *testing.T) {
 	t.Parallel()
 	unit := Generate()
 	if unit.FairySource == "" || unit.CompanionC == "" || unit.ExpectedExit != 42 {
@@ -16,6 +16,10 @@ func TestGenerateOwnsBothAggregateResultShapes(t *testing.T) {
 		"struct fairyc_fixture_large_status_v0",
 		"fairyc_fixture_make_status_v0",
 		"fairyc_fixture_make_large_status_v0",
+		"fairyc_fixture_change_status_v0",
+		"fairyc_fixture_change_large_v0",
+		"fairyc_fixture_mixed_status_v0",
+		"fairyc_fixture_exhausted_v0",
 	} {
 		if !strings.Contains(unit.FairySource, required) || !strings.Contains(unit.CompanionC, required) {
 			t.Errorf("probe sources do not both contain %q", required)

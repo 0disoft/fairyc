@@ -378,6 +378,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0421-sdk-immutable-byte-view-equality.md](0421-sdk-immutable-byte-view-equality.md): accepts one pure `std::bytes::equal` function for exact immutable binary view equality; implementation and SDK availability remain pending.
 - [0475-region-byte-allocation-and-copy.md](0475-region-byte-allocation-and-copy.md): accepts Region zeroed-byte allocation and byte copying through the existing `region-place` transport; implementation and verification remain pending.
 
+- [0476-repr-c-struct-foreign-arguments.md](0476-repr-c-struct-foreign-arguments.md): admits by-value foreign arguments for existing nonempty repr(C) record shapes and extends the shared native argument/result probe.
+
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
 ## Review Blockers
