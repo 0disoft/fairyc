@@ -376,6 +376,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0409-terminal-false-assert-match-arms.md`: admits a terminal literal-false assertion as a non-continuing Result or Option switch arm in language `/20`.
 
 - [0421-sdk-immutable-byte-view-equality.md](0421-sdk-immutable-byte-view-equality.md): accepts one pure `std::bytes::equal` function for exact immutable binary view equality; implementation and SDK availability remain pending.
+- [0475-region-byte-allocation-and-copy.md](0475-region-byte-allocation-and-copy.md): accepts Region zeroed-byte allocation and byte copying through the existing `region-place` transport; implementation and verification remain pending.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -226,6 +226,21 @@ first hosted success. Product linkage contains no probe controls.
 
 There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resource placement, resource-aware reset, or fallible reset.
 
+The byte operations have the source types
+`alloc_zeroed_bytes(usize) -> Result<ref mut u8[], std::alloc::AllocError>` and
+`copy_bytes(ref u8[]) -> Result<ref mut u8[], std::alloc::AllocError>`. Each evaluates its argument
+once. Success returns fresh, independently owned initialized bytes: all zeroes for allocation, or
+an exact copy of the source. The `.ok` view's lifetime is the Region and carries no borrow of the
+input; `.err` carries only allocation status. Empty input succeeds with length zero and performs no
+platform allocation; pointer identity is unspecified. Failure preserves existing Region
+allocations and source bytes and publishes no view. Lexical reset releases successful byte
+allocations without running resource cleanup.
+
+ADR 0475 reuses verified `region-place` for these operations, with `Operator` set to
+`alloc_zeroed_bytes` or `copy_bytes`, `OwnerType` set to the argument type, and the complete
+tagged Result type retained. Empty `Operator` retains the legacy `place` rule. Source lowering and
+end-to-end verification for the byte operations remain pending.
+
 The bounded Region fixture surface still exports its own opaque `std::alloc::Arena` test resource.
 The compiler-bundled SDK separately exposes the move-only runtime-backed Arena accepted by
 `region name in expression`, plus `create() -> Result<Arena, AllocError>` and exact status
