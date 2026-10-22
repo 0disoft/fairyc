@@ -35,6 +35,10 @@ func (e *analysisBuilder) inspectForeignFunctions() error {
 }
 
 func (e *analysisBuilder) recordCScalarFeature(value hir.Type) {
+	if element, _, array := hir.FixedArrayParts(value); array {
+		e.recordCScalarFeature(element)
+		return
+	}
 	if hir.IsIntegerTransportScalar(value) {
 		e.features["fairy-"+value.String()+"-transport"] = struct{}{}
 	}

@@ -86,15 +86,18 @@ func TestIntegerArrayTransportMIRRoundTrip(t *testing.T) {
 func TestIntegerArrayTransportBoundaries(t *testing.T) {
 	for _, typ := range []string{"i8", "i16", "u16", "u64", "isize"} {
 		for name, body := range map[string]string{
-			"private":      `struct P{%[1]s[3] values;} fn i32 main(){return 0;}`,
-			"zero":         `@repr(C) struct P{%[1]s[0] values;} fn i32 main(){return 0;}`,
-			"oversize":     `@repr(C) struct P{%[1]s[4097] values;} fn i32 main(){return 0;}`,
-			"nested":       `@repr(C) struct P{%[1]s[3][2] values;} fn i32 main(){return 0;}`,
-			"index":        `@repr(C) struct P{%[1]s[3] values;} unsafe extern C fn P produce(); fn %[1]s bad(){let P p=unsafe{produce()};return p.values[0];} fn i32 main(){return 0;}`,
-			"literal":      `fn %[1]s[3] bad(%[1]s v){return [v;3];} fn i32 main(){return 0;}`,
-			"list":         `fn %[1]s[3] bad(%[1]s v){return [v,v,v];} fn i32 main(){return 0;}`,
-			"view":         `fn void bad(%[1]s[3] v){let ref %[1]s[] s=ref v;} fn i32 main(){return 0;}`,
-			"nested-store": `@repr(C) struct P{%[1]s[3] values;} @repr(C) struct E{P p;} fn void bad(ref mut E e,P q){e.p.values=q.values;} fn i32 main(){return 0;}`,
+			"private":       `struct P{%[1]s[3] values;} fn i32 main(){return 0;}`,
+			"zero":          `@repr(C) struct P{%[1]s[0] values;} fn i32 main(){return 0;}`,
+			"oversize":      `@repr(C) struct P{%[1]s[4097] values;} fn i32 main(){return 0;}`,
+			"nested":        `@repr(C) struct P{%[1]s[3][2] values;} fn i32 main(){return 0;}`,
+			"index":         `@repr(C) struct P{%[1]s[3] values;} unsafe extern C fn P produce(); fn %[1]s bad(){let P p=unsafe{produce()};return p.values[0];} fn i32 main(){return 0;}`,
+			"literal":       `fn %[1]s[3] bad(%[1]s v){return [v;3];} fn i32 main(){return 0;}`,
+			"list":          `fn %[1]s[3] bad(%[1]s v){return [v,v,v];} fn i32 main(){return 0;}`,
+			"view":          `fn void bad(%[1]s[3] v){let ref %[1]s[] s=ref v;} fn i32 main(){return 0;}`,
+			"field-ref":     `@repr(C) struct P{%[1]s[3] values;} fn void bad(ref P p){let ref %[1]s[3] v=ref p.values;} fn i32 main(){return 0;}`,
+			"field-mut-ref": `@repr(C) struct P{%[1]s[3] values;} fn void bad(ref mut P p){let ref mut %[1]s[3] v=ref mut p.values;} fn i32 main(){return 0;}`,
+			"element-store": `@repr(C) struct P{%[1]s[3] values;} fn void bad(ref mut P p,%[1]s v){p.values[0]=v;} fn i32 main(){return 0;}`,
+			"nested-store":  `@repr(C) struct P{%[1]s[3] values;} @repr(C) struct E{P p;} fn void bad(ref mut E e,P q){e.p.values=q.values;} fn i32 main(){return 0;}`,
 		} {
 			t.Run(typ+"/"+name, func(t *testing.T) {
 				checked, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;"+fmt.Sprintf(body, typ))})

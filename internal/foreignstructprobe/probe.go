@@ -16,10 +16,17 @@ type Unit struct {
 // C ABIs while keeping the observable result target-independent.
 func Generate() Unit {
 	return Unit{
-		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource,
-		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC,
+		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource + integerArrayFairySource,
+		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC + integerArrayCompanionC,
 		ExpectedExit: 42,
 		RequiredCFragments: []string{
+			"int8_t tiny[UINT64_C(3)];",
+			"int16_t small[UINT64_C(3)];",
+			"uint16_t word[UINT64_C(3)];",
+			"uint64_t wide[UINT64_C(3)];",
+			"intptr_t offset[UINT64_C(3)];",
+			"sizeof(struct fairyc_fixture_integer_array_packet_v0) == UINT64_C(72)",
+
 			"struct fairyc_fixture_status_v0 {",
 			"uint32_t status;",
 			"uint32_t allocation_status;",
@@ -121,7 +128,7 @@ fn i32 main() {
         changed.status == 99 && changed.allocation_status == 7 &&
         changed_large.first == 101 && changed_large.second == 2 &&
         changed_large.third == 3 && changed_large.fourth == 4 && changed_large.fifth == 105 &&
-        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks()) {
+        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks() && check_integer_arrays()) {
         42
     } else {
         0

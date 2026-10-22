@@ -18,5 +18,5 @@ func TestReprCRecordFieldNativeCrossing(t *testing.T) {
 	if executions != 4 {
 		t.Fatalf("record argument/result probe ran %d combinations, want 4", executions)
 	}
-	t.Logf("MSVC %s: C11/C17, low/optimized array, C enum, floating/integer records and bounded callbacks passed (5 floating cases, 4 integer cases, 6 callback invocations per combination)", toolchain.Version)
+	t.Logf("MSVC %s: C11/C17, low/optimized array, C enum, floating/integer records and bounded callbacks passed (5 floating cases, 4 integer cases, 4 integer-array cases, 6 callback invocations per combination)", toolchain.Version)
 }
