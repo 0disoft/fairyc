@@ -1,14 +1,25 @@
 # Linux runtime and SDK coverage
 
-Audit: 2026-10-22, source `4f7798689bcd6a6ef797c9079ed4e28092647cca`,
+Audit: 2026-10-22, source `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
 This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
 ## Execution evidence
 
+[Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686)
+passed all nine jobs at the audited source revision on 2026-10-22.
+Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39762433686/job/119774556489)
+records report v38 on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and GCC 13.3.0:
+`sdkStorageExecutions: 4`, differential/drop-trace executions 208 each, sanitizer executions 104,
+bidirectional ABI executions 56, and layout probe executions 4. SystemHeap, Buffer, Arena,
+text-view, owned-text and public-File probe counters are each 4.
+
+The following v37 receipt records the earlier baseline:
+
 [Frontend run 39589657672](https://github.com/0disoft/fairyc/actions/runs/39589657672)
-passed all nine jobs at the source revision above on 2026-10-21.
+passed all nine jobs at `4f7798689bcd6a6ef797c9079ed4e28092647cca` on 2026-10-21.
+That v37 receipt is historical and does not attest the current source revision.
 Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39589657672/job/119191708329)
 records report v37 on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and GCC 13.3.0.
 It records 208 differential executions, 208 drop-trace executions, 104 sanitizer executions,
@@ -63,7 +74,10 @@ and returned ownership; the outer C wrapper requires zero live allocations after
 existing native Linux lane: four executions under GCC/Clang at low/optimized profiles, with no new
 workflow or runner. The [focused test](../../internal/cbackendnative/sdk_storage_test.go) also
 checks Linux emission on Windows and executes the same fixture at both MSVC profiles.
-Local Windows tests passed; a hosted Linux v38 execution receipt is still pending.
+Local Windows tests passed. The first Linux attempt exposed C11 label/declaration emission and
+an unrelated Atlas crash-helper deadlock; `e149ac29` and `2c8997ee` correct those paths.
+[Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686)
+passed on the corrected source, including all four public SDK storage executions in report v38.
 
 The current [standard-library build smoke](../../internal/cbackendnative/smoke_build.go)
 uses a [raw empty-input UTF-8 call](../../internal/cbackendnative/smoke_text_views.go).
@@ -71,10 +85,29 @@ Its `standardLibraryBuildSmokeExecutions: 4` does not establish those public SDK
 The [Windows generated failure probes](../../tools/dev/fairyc-windows-host-smoke/generated_failure_probes.go)
 provide existing source cases to adapt rather than inventing new APIs.
 
+## Remaining Phase 2 review
+
+The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`,
+text/`String`/`CString`, and Linux `File` paths, with differential, layout, bidirectional ABI, and
+sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)).
+
+| Requirement | Existing fixture owner | Actual gap |
+| --- | --- | --- |
+| Thin runtime and SystemHeap | [runner](../../internal/cbackendnative/runner.go), [trap locations](../../internal/cbackend/trap_location_native_test.go), [generated heap crossing](../../internal/cbackendnative/smoke_heap.go) | Current runtime/source probes pass. SystemHeap remains internal support by contract. |
+| Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38; byte-level zeroing/copy and broader failure atomicity remain raw evidence. |
+| Buffer | Combined SDK check; [raw Buffer](../../internal/cbackendnative/smoke_buffer.go) | The combined fixture does not execute public `empty`, `resize_zeroed`, `truncate`, or `view_mut`. The raw fixture already covers zeroed resize, truncate, and failure paths. |
+| Text | Combined SDK check; [raw owned text](../../internal/cbackendnative/smoke_owned_text.go), [raw text views](../../internal/cbackendnative/smoke_text_views.go) | Empty text, successful Unicode text, and successful/empty `from_buffer` are absent from the combined public fixture; raw C already covers the corresponding byte-level cases. |
+| Linux `File` | [Public File source](../../internal/cbackendnative/smoke_files.go), [raw Linux File](../../internal/cbackendnative/smoke_linux_file.go) | The representative safe File path passes four executions; partial I/O and close failure are raw evidence. The Windows-only operations listed above are outside the Phase 2 minimum. |
+| Differential, layout, ABI, sanitizer | [runner](../../internal/cbackendnative/runner.go), [layout probes](../../internal/cbackendnative/probes_layout.go), [ABI probe](../../internal/cbackendnative/abi_probe.go) | The current receipt records 208 differential/drop comparisons, 4 layout probes, 56 ABI crossings, and 104 sanitizer executions for the admitted fixtures. |
+
+The next bounded fixture edit is to extend `sdkStorageSource` with the four listed public `Buffer`
+operations and empty/Unicode/from-buffer-success `text` cases; it requires no API or target-gate change.
+
 ## Next slice
 
-Collect the v38 Linux receipt, then map remaining mandatory runtime/library rules to explicit fixtures or justified
-deferrals before considering conformance. Both `complete-runtime` and `complete-standard-library`
+Extend the public SDK fixture with the Buffer/text cases listed above, then review remaining
+mandatory rules against fixtures or justified deferrals before considering conformance.
+Both `complete-runtime` and `complete-standard-library`
 remain missing in the [target spec](../../internal/target/spec.go); `emittable`, `conformant`,
 and `supported` remain false. The fixture changes no product API, runtime implementation, DB,
 hygiene policy, or CI runner allocation.

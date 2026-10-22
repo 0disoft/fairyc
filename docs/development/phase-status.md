@@ -2,9 +2,9 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current Frontend receipt: `c845848c95395622441b059c25c4a27a4bb6fee7`
+- Current Frontend receipt: `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
-- Evidence: [Frontend run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722), all nine jobs passed; earlier [run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965) remains historical evidence
+- Evidence: [Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686), all nine jobs passed; earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remains historical evidence
 
 This page summarizes gate evidence. The roadmap, language contracts, and owning fixtures retain
 authority. The roadmap defines no Phase 5, 6, or 7.
@@ -64,8 +64,19 @@ does not promote target maturity.
 Static byte-string index/slice failures now feed C-only non-returning callee inference, fixing
 the MSVC optimized-build C4702 observed in the cross-package probe. Local low/optimized native
 probes check the original `bounds` category and source range, including a wrapper call chain;
-the package-aware CLI probe checks both run commands. This is local Windows evidence, not a new
-hosted Linux receipt or target-maturity promotion.
+the package-aware CLI probe checks both run commands. The later hosted receipt below also covers
+the corrected code; target maturity is unchanged.
+
+## Public SDK Linux receipt (v38)
+
+[Linux job 119774556489](https://github.com/0disoft/fairyc/actions/runs/39762433686/job/119774556489)
+at `2c8997ee` records four public SDK storage executions under Clang/GCC at low/optimized profiles.
+It checks Arena/Region allocation and rollback, Buffer growth, String/CString allocation failures,
+preserved contents/ownership, and zero live allocations after cleanup. The same v38 report retains
+208 differential/drop-trace executions, 104 sanitizer executions, and 56 ABI crossings.
+All nine Frontend jobs passed. The [coverage review](linux-runtime-coverage.md#remaining-phase-2-review)
+maps remaining public Buffer/text paths separately from the existing raw C evidence.
+Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
 
 ## Cache evidence
 
@@ -110,6 +121,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Collect the [public SDK allocation/text Linux v38 receipt](linux-runtime-coverage.md#next-slice),
+1. Extend the [public SDK Buffer/text fixtures](linux-runtime-coverage.md#next-slice),
    then resolve Phase 2's two remaining Linux runtime/standard-library entries before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
