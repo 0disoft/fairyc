@@ -39,7 +39,7 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 	if _, borrow := e.safeBorrowCType(value); borrow {
 		return true
 	}
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if _, array := e.arrayByType[value]; array {
@@ -84,6 +84,10 @@ func (e *emissionAnalysis) cValueType(value hir.Type) (string, error) {
 		return "const uint8_t *", nil
 	case value == hir.TypeU8:
 		return "uint8_t", nil
+	case value == hir.TypeF32:
+		return "float", nil
+	case value == hir.TypeF64:
+		return "double", nil
 	case value == hir.TypeI64:
 		return "int64_t", nil
 	case value == hir.TypeI32:

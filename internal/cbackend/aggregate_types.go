@@ -214,6 +214,11 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 	}
 	switch value {
+	case hir.TypeF32, hir.TypeF64:
+		if reprC {
+			return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
+		}
+		return layout.Type{}, fmt.Errorf("floating field %q requires repr(C)", value)
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
 	default:

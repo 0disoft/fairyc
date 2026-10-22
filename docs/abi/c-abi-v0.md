@@ -30,7 +30,7 @@ The Windows Go compiler host does not define Linux target layout. Proving the fi
 
 The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
-includes nonempty source `@repr(C)` records whose fields may use `u8`, `i32`, `u32`, `usize`, all
+includes nonempty source `@repr(C)` records whose fields may use `u8`, `i32`, `u32`, `usize`, `f32`, `f64`, all
 sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer arrays, and acyclic nested
 `@repr(C)` records. It preserves the public C tag and field names, emits dependencies before their
 users, and emits target-
@@ -132,14 +132,14 @@ aggregate rejection.
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, all sixteen exact TargetSpec
+accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
 C scalars, admitted raw pointers including opaque `void`, bounded integer arrays, and nested structs
 that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
 unit. The Arena crossing requires that the selected provider's `uint64_t` is exactly
-`unsigned long` before using `c::ulong` for the generation fields. Floating Fairy scalars and other
-contracted field families remain fail-closed until their source typing, layout,
+`unsigned long` before using `c::ulong` for the generation fields. Other contracted field families
+remain fail-closed until their source typing, layout,
 ABI, and native crossing tests are connected together.
 
 [ADR 0477](../adr/0477-repr-c-integer-array-fields.md) admits array fields with `u8`, `i32`, `i64`,
@@ -185,6 +185,18 @@ is pending; prior struct-result receipts attest results only. Other aggregate pa
 remain closed.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
+
+[ADR 0479](../adr/0479-repr-c-floating-field-transport.md) admits distinct Fairy `f32`/`f64`
+transport in repr(C) fields, including nested repr(C) records. C-produced records supply exact
+floating values for local copies, internal value arguments/results, explicit record construction
+and foreign record argument/results. C storage uses `float`/`double` with target-derived
+size/alignment assertions plus binary32/binary64 precision and exponent checks. The source types
+remain distinct from `c::float`/`c::double`. Floating literals, arithmetic, comparisons, casts,
+arrays/views, tagged/resource payloads, direct floating-field stores, private direct floating
+fields and standalone foreign floating signatures remain closed. The pure interpreter rejects
+foreign calls. The shared native record probe observes finite values, signed zero, infinities,
+quiet NaNs and subnormals; it does not promise signaling NaN behavior or NaN payload identity.
+Current evidence is in the [F2-3 update](../development/phase2-target-scope.md#f2-3-floating-field-transport).
 
 [ADR 0478](../adr/0478-explicit-c-enum-fields.md) implements payload-free enums with an explicit
 `@repr(c::integer)` base. Variants use zero-based declaration ordinals within the base's admitted

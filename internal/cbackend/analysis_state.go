@@ -51,6 +51,7 @@ type emissionAnalysis struct {
 	needsShift         bool
 	i64Helpers         i64Helpers
 	cScalars           map[hir.Type]target.Scalar
+	floatingScalars    map[hir.Type]target.Scalar
 	instrumentation    string
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32

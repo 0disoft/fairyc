@@ -74,7 +74,8 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1, the F2-1 integer-array subset and F2-2 explicit C enums are implemented below; hosted Linux execution
+F1, F2-1 integer arrays, F2-2 explicit C enums and F2-3 floating transport are implemented below;
+hosted Linux execution
 remains pending. Other F2 families and F3 stay separate follow-ups; no callback or resource
 representation is added by either update.
 
@@ -185,7 +186,47 @@ their original sources only. The full repository suite and full Windows smoke we
 the focused native crossing covers the changed probe. No SDK/CLI API, DB, repository setting or
 workflow changes. Phase 2 stays partial and all target maturity flags stay unchanged.
 
-Next implementation: Fairy `f32`/`f64` fields, then remaining fixed-width integer fields.
+The F2-3 update below connects Fairy `f32`/`f64` field transport. Remaining fixed-width integer
+fields follow it.
+
+## F2-3 floating field transport
+
+[ADR 0479](../adr/0479-repr-c-floating-field-transport.md) connects distinct Fairy `f32`/`f64`
+types to repr(C) fields and local/internal value copies. Type/cache commit `db47dc2f` preserves
+the identities through MIR encoding, public interfaces and stable package contexts/rebinding.
+The C backend emits float/double using target language-scalar size/alignment plus binary-format
+provider assertions. Explicit reconstruction and whole-record copies, including nested repr(C)
+records, retain exact source types without implicit width or C-scalar conversions.
+
+This is a transport admission. Floating literals, operators, comparisons, casts, arrays/views,
+direct floating-field stores, tagged/resource payloads, direct private floating fields and bare
+foreign floating signatures remain closed. The interpreter continues to reject foreign calls.
+
+The expanded shared native probe includes a 4-byte floating record, a 16-byte double pair, a
+16-byte mixed integer/floating record and a 24-byte record. Each configured execution checks
+finite values, negative zero, infinities, quiet NaNs and the smallest positive subnormals, including
+Fairy field reads, internal value calls, reconstruction and C by-value mutation with caller copies
+unchanged. Every floating member is observed by independent C code. Quiet NaN classification is
+checked; signaling NaN behavior and NaN payload identity are not promised.
+
+Local validation passed:
+
+- Full HIR, semantic, public-interface, package-artifact and MIR-codec package tests for the type
+  slice; backend and emission-fixture package tests for C transport. Focused compiler tests cover
+  both emission targets, MIR codec preservation, foreign-call interpreter rejection and boundaries
+  including `<float.h>` macro-name collisions.
+- `go test -mod=readonly -count=1 -v ./tools/dev/fairyc-windows-host-smoke
+  -run '^TestReprCRecordFieldNativeCrossing$'`: MSVC 14.51.36231 passes C11/C17 low/optimized,
+  four combinations with five floating cases each, along with earlier record/array/enum checks.
+- The shared probe's Linux-profile C emission test and affected-package `go vet -mod=readonly`.
+- Changed-document relative links and `git diff --check`.
+
+Hosted Linux GCC/Clang execution is pending. Previous C-scalar or record receipts do not attest
+this expanded Fairy floating source. The full repository suite and full Windows smoke were not
+repeated; the changed native probe was run directly. There is no SDK/CLI API, DB, workflow, runner,
+runtime or target-maturity change. Phase 2 stays partial.
+
+Next implementation: remaining fixed-width integer field families, then bounded callbacks (F3).
 
 ## Validation of the original assessment
 

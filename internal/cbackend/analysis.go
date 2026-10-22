@@ -153,6 +153,7 @@ func analyzeEmissionContext(ctx context.Context, program mir.Program, entry stri
 			dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 			localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
 			cScalars:           cScalars,
+			floatingScalars:    floatingScalarsForTarget(targetSpec),
 			instrumentation:    profile.Instrumentation,
 			byteStringStorage:  byteStringStorage,
 			stringStorage:      stringStorage,

@@ -212,12 +212,13 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. Collect hosted F1, F2-1 and F2-2 evidence after an authorized batched push. The
+1. Collect hosted F1 and F2-1 through F2-3 evidence after an authorized batched push. The
    [record argument implementation](phase2-target-scope.md#f1-implementation-update),
    [integer array fields](phase2-target-scope.md#f2-1-integer-array-fields),
-   [explicit C enum fields](phase2-target-scope.md#f2-2-explicit-c-enum-fields) and expanded shared
-   native fixture are ready; prior receipts do not attest the new argument/array/enum checks.
-2. Continue F2 with Fairy floating scalars and remaining integer fields,
+   [explicit C enum fields](phase2-target-scope.md#f2-2-explicit-c-enum-fields),
+   [floating field transport](phase2-target-scope.md#f2-3-floating-field-transport) and expanded shared
+   native fixture are ready; prior receipts do not attest the new argument/array/enum/float checks.
+2. Continue F2 with remaining integer fields,
    followed separately by bounded callbacks (F3).
 3. Keep target maturity flags unchanged. Contracted field families and bounded callbacks remain
    separate C ABI gaps; conditional root drop flags are not a missing admitted source feature.

@@ -342,6 +342,11 @@ additional typed-HIR types. In particular, planner recognition alone cannot make
 `i64`, `u16`, `u64`, `isize`, `f32`, or `f64` executable. C scalars and nominal/composite generic
 arguments are not admitted to user function templates by the source expansion contract.
 
+ADR 0479 separately admits distinct `f32`/`f64` types for repr(C) record fields and local/internal
+value transport from C-produced records. This does not widen the generic scalar argument set.
+Floating literals, operators, comparisons and conversions remain unsupported; see
+[ADR 0479](../adr/0479-repr-c-floating-field-transport.md) for the exact transport boundary.
+
 ADR 0390 adds a controlled SDK exception: `std::vec::Vec<T>` and its SDK-owned
 operations accept supported scalars and directly named non-generic structs/resources
 through stable Windows workspace compilation. The SDK is authenticated by its

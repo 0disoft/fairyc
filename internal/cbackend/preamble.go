@@ -17,6 +17,11 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, %s */\n", e.analysis.targetID, transportProfile)
 	output.WriteString("#include <stdint.h>\n")
+	_, usesF32 := e.analysis.features["fairy-f32-transport"]
+	_, usesF64 := e.analysis.features["fairy-f64-transport"]
+	if usesF32 || usesF64 {
+		output.WriteString("#include <float.h>\n")
+	}
 	_, usesCSizeT := e.analysis.features["c-size-t"]
 	_, usesRegion := e.analysis.features["region-lifecycle"]
 	if len(e.analysis.structTypes) != 0 || len(e.analysis.enumTypes) != 0 || len(e.analysis.resourceTypes) != 0 || len(e.analysis.taggedTypes) != 0 || usesCSizeT || usesRegion {
@@ -99,6 +104,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteByte('\n')
 	}
 	_, scalarOption := e.analysis.features["scalar-option"]
+	if err := e.emitFloatingTransportAssertions(output); err != nil {
+		return err
+	}
 	_, copyOption := e.analysis.features["copy-option"]
 	_, resourceOption := e.analysis.features["resource-option"]
 	if scalarOption || copyOption || resourceOption {

@@ -77,6 +77,10 @@ var generatedCNames = map[string]struct{}{
 }
 
 var cHeaderMacroNames = map[string]struct{}{
+	"FLT_RADIX": {}, "FLT_ROUNDS": {}, "FLT_EVAL_METHOD": {}, "DECIMAL_DIG": {},
+	"FLT_MANT_DIG": {}, "FLT_DIG": {}, "FLT_DECIMAL_DIG": {}, "FLT_MIN_EXP": {}, "FLT_MIN_10_EXP": {}, "FLT_MAX_EXP": {}, "FLT_MAX_10_EXP": {}, "FLT_MAX": {}, "FLT_EPSILON": {}, "FLT_MIN": {}, "FLT_TRUE_MIN": {}, "FLT_HAS_SUBNORM": {},
+	"DBL_MANT_DIG": {}, "DBL_DIG": {}, "DBL_DECIMAL_DIG": {}, "DBL_MIN_EXP": {}, "DBL_MIN_10_EXP": {}, "DBL_MAX_EXP": {}, "DBL_MAX_10_EXP": {}, "DBL_MAX": {}, "DBL_EPSILON": {}, "DBL_MIN": {}, "DBL_TRUE_MIN": {}, "DBL_HAS_SUBNORM": {},
+	"LDBL_MANT_DIG": {}, "LDBL_DIG": {}, "LDBL_DECIMAL_DIG": {}, "LDBL_MIN_EXP": {}, "LDBL_MIN_10_EXP": {}, "LDBL_MAX_EXP": {}, "LDBL_MAX_10_EXP": {}, "LDBL_MAX": {}, "LDBL_EPSILON": {}, "LDBL_MIN": {}, "LDBL_TRUE_MIN": {}, "LDBL_HAS_SUBNORM": {},
 	"NULL": {}, "offsetof": {},
 	"INT8_C": {}, "INT16_C": {}, "INT64_C": {},
 	"UINT16_C": {}, "UINT32_C": {}, "UINT64_C": {},
