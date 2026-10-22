@@ -47,6 +47,15 @@ SDK surfaces to source owners, fixtures, and the current passing Frontend run at
 It distinguishes missing Linux implementations from incomplete execution evidence and design
 exclusions. Windows API parity is not the Phase 2 exit gate.
 
+The [contract-to-fixture review](linux-runtime-coverage.md#phase-2-contract-to-fixture-review)
+maps the mandatory minimum to implementation owners, raw and public fixtures, and the existing
+hosted receipts. It leaves two concrete evidence gaps: deterministic File retry/no-progress and
+completed-prefix checks, and direct SystemHeap resize-OOM preservation. The existing save-failure
+tests already cover partial-write, sync, close, and replacement failures; these gaps do not mean
+those paths are unimplemented. Before promotion, the review also requires individual no-skip Linux
+evidence and an explicit mapping of the roadmap's active-payload agreement to tagged values and
+drop-site observations. No missing mandatory rule is waived by this review. Phase 2 remains partial.
+
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
 [Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
 and installation. The hosted receipt above verifies their implementation for the bounded Ubuntu
@@ -84,7 +93,7 @@ All nine Frontend jobs passed. The same run's hosted Go lanes and existing Windo
 and lexer jobs passed. The previous [Linux job 119796130897](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
 at `54cbeb17` remains historical evidence for its recorded revision, including public Buffer
 `empty`, `resize_zeroed`, `truncate`, `view_mut`, and text and `from_buffer` cases. The
-[coverage review](linux-runtime-coverage.md#remaining-phase-2-review) maps the current cases.
+[coverage review](linux-runtime-coverage.md#phase-2-contract-to-fixture-review) maps the current cases.
 Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
 
 ## Region byte evidence (2026-10-22)
@@ -154,7 +163,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Complete the remaining Phase 2 contract-to-fixture review before conformance promotion. The
-   [Region byte evidence](linux-runtime-coverage.md#region-byte-evidence) is already covered by the
-   current receipt.
+1. Close the [File progress/retry and direct heap-OOM evidence gaps](linux-runtime-coverage.md#next-work),
+   then collect focused no-skip Linux evidence and finish the active-payload observation mapping
+   before conformance review. The current receipt already covers the Region byte cases.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
