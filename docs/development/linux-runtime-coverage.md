@@ -1,15 +1,15 @@
 # Linux runtime and SDK coverage
 
-Hosted evidence baseline: 2026-10-22, source `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`,
+Hosted evidence baseline: 2026-10-22, source `1413b4b1855f2bdb7f6b2bc2205b062e028b4870`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
 This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
 ## Execution evidence
 
-[Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874)
+[Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
 passed all nine jobs at the audited source revision on 2026-10-22.
-Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39774562874/job/119814527459)
+Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119842277429)
 records report `fairyc.native-c-report/v38` on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and
 GCC 13.3.0: `sdkStorageExecutions: 4`, interpreter/C and drop-trace executions 208 each,
 sanitizer executions 104, bidirectional ABI executions 56, and layout probe executions 4.
@@ -38,6 +38,31 @@ covering both compilers at low and optimized profiles.
 The [Ubuntu Go job](https://github.com/0disoft/fairyc/actions/runs/39589657672/job/119187202941)
 also passed. Its non-verbose suite output is not an individual-test or no-skip receipt.
 The source pointers below identify coverage, not additional executions performed during this audit.
+
+## Focused Linux receipt
+
+- Run: [39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
+- Job: [Linux Go 119836149873](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119836149873)
+- Source: [`1413b4b`](https://github.com/0disoft/fairyc/commit/1413b4b1855f2bdb7f6b2bc2205b062e028b4870)
+
+| Test | Executions | Skips |
+| --- | ---: | ---: |
+| `TestLinuxFileProgressNative` | 4 | 0 |
+| `TestSystemHeapOOMNative` | 4 | 0 |
+| `TestLinuxPreparedPublication` | 4 | 0 |
+
+Evidence `fairyc.phase2-linux-evidence/v1`: `complete:true`, 12 entries in `passedCases`,
+`missing:[]`, `skipped:[]`, `errors:[]`. Each test passed GCC and Clang at low and optimized
+settings (4 executions each).
+
+The file public SDK test exercises EINTR retry, short reads/writes, exact error status/OS
+code/completed count, partial no-progress/EOF, unmodified suffix, empty, recovery, sync, and
+consuming close without retry. Heap coverage exercises direct initial OOM, resize grow/shrink,
+alignment-changing resize failure preservation, recovery, empty with no platform allocation, and
+zero-live cleanup. Prepared publication exercises exact-read early EOF, remove, and replace
+semantics. These close focused Linux evidence gaps only, not complete runtime or standard-library
+coverage. The existing Linux `go test -json` stream is checked by
+`.github/scripts/linux_phase2_evidence.py`, so no tests are duplicated.
 
 ## Implemented surfaces
 
@@ -127,7 +152,7 @@ allocations. See [`sdk_storage_source.go`](../../internal/cbackendnative/sdk_sto
 
 `TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution. It
 executes all three Region modes before and after disk-cache restoration.
-[Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874) now covers
+[Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105) now covers
 both byte operations in four compiler/profile SDK executions, including normal, empty, forced
 payload and tracking-node OOM, recovery, preserved data, and zero live allocations. This receipt
 establishes the current Linux runtime cases; the SDK probe is distinct from the separate 104
@@ -141,12 +166,12 @@ The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Are
 | Contract rule | Source owner | Fixture owner | Evidence | Scope / gap |
 | --- | --- | --- | --- | --- |
 | Thin runtime: traps, entry adaptation, empty storage, memory helpers | [runtime.go](../../internal/cruntime/runtime.go), [stage0_scalar.c](../../internal/cruntime/stage0_scalar.c) | [runner.go](../../internal/cbackendnative/runner.go), [trap_location_native_test.go](../../internal/cbackend/trap_location_native_test.go) | v38 records the differential/drop matrix below; the earlier focused trap-location receipts are linked above. CLI trap receipts remain separate from program streams. | Mandatory. Current fixtures cover the admitted thin-runtime paths, not every possible runtime path. |
-| SystemHeap backing and direct resize | [system_heap.go](../../internal/cstdlib/system_heap.go), [stage0_system_heap.c](../../internal/cstdlib/stage0_system_heap.c) | [probes_stdlib.go](../../internal/cbackendnative/probes_stdlib.go), [smoke_heap.go](../../internal/cbackendnative/smoke_heap.go), [stage0_system_heap_probe.c](../../internal/cstdlib/stage0_system_heap_probe.c), [stage0_system_heap_probe_allocator.c](../../internal/cstdlib/stage0_system_heap_probe_allocator.c) | v38 system-heap runtime/source counters are each 4. Resize is allocate-copy-release; the raw probe checks empty, alignment, prefix, invalid-alignment rollback, grow, shrink, and release. The allocator probe enables caller Buffer/Arena/text OOM. | Mandatory. The [direct OOM fixture](#direct-heap-oom-fixture) now passes at both MSVC profiles; Linux evidence remains pending. Caller failure alone is not equivalent. SystemHeap remains internal support, not an exported SDK type. |
+| SystemHeap backing and direct resize | [system_heap.go](../../internal/cstdlib/system_heap.go), [stage0_system_heap.c](../../internal/cstdlib/stage0_system_heap.c) | [probes_stdlib.go](../../internal/cbackendnative/probes_stdlib.go), [smoke_heap.go](../../internal/cbackendnative/smoke_heap.go), [stage0_system_heap_probe.c](../../internal/cstdlib/stage0_system_heap_probe.c), [stage0_system_heap_probe_allocator.c](../../internal/cstdlib/stage0_system_heap_probe_allocator.c) | v38 system-heap runtime/source counters are each 4. Resize is allocate-copy-release; the raw probe checks empty, alignment, prefix, invalid-alignment rollback, grow, shrink, and release. The allocator probe enables caller Buffer/Arena/text OOM. | Mandatory. The [focused Linux receipt](#focused-linux-receipt) records four direct OOM executions without skips; local MSVC low/optimized also pass. Caller failure alone is not equivalent. SystemHeap remains internal support, not an exported SDK type. |
 | Arena/Region | [stage0_arena.c](../../internal/cstdlib/stage0_arena.c), [alloc.fy](../../internal/sdkstdlib/sources/std/alloc.fy), [region_bytes.go](../../internal/cbackend/region_bytes.go) | [sdk_storage_source.go](../../internal/cbackendnative/sdk_storage_source.go), [smoke_arena.go](../../internal/cbackendnative/smoke_arena.go), [region_bytes_test.go](../../internal/workspacecompiler/region_bytes_test.go), [probes_stdlib.go](../../internal/cbackendnative/probes_stdlib.go) | v38 reports 4 SDK storage executions covering both Region byte operations with normal, empty, forced payload and tracking-node OOM, recovery, preserved data, and zero live allocations; Arena counters are each 4. Targeted workspace tests cover both byte operations and expected rejections. | Mandatory minimum. Public placement, rollback, reuse, and reset are covered; no unchanged Region rerun is needed. |
 | Buffer | [stage0_buffer.c](../../internal/cstdlib/stage0_buffer.c), [bytes.fy](../../internal/sdkstdlib/sources/std/bytes.fy) | [sdk_storage_source.go](../../internal/cbackendnative/sdk_storage_source.go), [smoke_buffer.go](../../internal/cbackendnative/smoke_buffer.go), [stage0_buffer_probe.c](../../internal/cstdlib/stage0_buffer_probe.c) | v38 Buffer counters are each 4. The public fixture executes `empty`, `resize_zeroed`, `truncate`, and `view_mut`, including zeroing and regrowth. The raw probe checks overlap, overflow, reserve/resize failure, preserved storage, and cleanup. | Mandatory. The raw and public cases are complementary; this does not establish every public failure path. |
 | Text, `String`, `CString` | [stage0_text_view.c](../../internal/cstdlib/stage0_text_view.c), [stage0_owned_text.c](../../internal/cstdlib/stage0_owned_text.c), [text.fy](../../internal/sdkstdlib/sources/std/text.fy) | [sdk_storage_source.go](../../internal/cbackendnative/sdk_storage_source.go), [smoke_text_views.go](../../internal/cbackendnative/smoke_text_views.go), [smoke_owned_text.go](../../internal/cbackendnative/smoke_owned_text.go), [stage0_text_view_probe.c](../../internal/cstdlib/stage0_text_view_probe.c), [stage0_owned_text_probe.c](../../internal/cstdlib/stage0_owned_text_probe.c) | v38 text-view and owned-text counters are each 4. Public checks include empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips; raw probes supply boundaries, NUL rejection, empty, rollback, and OOM. | Mandatory. Coverage is representative; this does not establish every public failure path. |
 | Linux `File` core: open/read/write_all/sync/close/drop, position, size, bounded seeks | [stage0_linux_file.c](../../internal/cstdlib/stage0_linux_file.c), [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [fs.fy](../../internal/sdkstdlib/sources/std/fs.fy) | [stage0_linux_file_probe.c](../../internal/cstdlib/stage0_linux_file_probe.c), [smoke_linux_file.go](../../internal/cbackendnative/smoke_linux_file.go), [smoke_files.go](../../internal/cbackendnative/smoke_files.go) | v38 reports `linuxFileExecutions`, `linuxFileSourceCallExecutions`, and `linuxPublicFileExecutions` at 4 each. Raw coverage includes partial read/EOF/write_all/sync/consuming close/EBADF/raw drop; safe coverage includes create/read/write_all/seeks/size/close. | Mandatory core. The representative safe path and raw failure path are covered; the remaining progress/error assertions are listed below. |
-| `File` exact read, publication, and failure paths | [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [ADR 0424](../adr/0424-linux-prepared-publication-and-process-arguments.md) | [linux_publication_test.go](../../internal/cstdlib/linux_publication_test.go), [task_manager_linux_save_test.go](../../internal/cli/task_manager_linux_save_test.go), [task_manager_linux_save_hooks_test.go](../../internal/cli/task_manager_linux_save_hooks_test.go) | `TestLinuxPreparedPublication` defines GCC/Clang low/optimized exact-read early EOF, suffix preservation, remove/replace error, and old-open-owner cases. The save tests define 40 cases (four compiler profiles x ten modes): first/partial writes ENOSPC, sync EIO, close EIO, replace failure, and kill/restart preservation. Current non-verbose Go-lane success is suite-level, not an individual no-skip receipt. | Mandatory evidence gap: deterministic File EINTR retry, zero progress, and exact partial error counts including the public error path. These tests assert application errors/data, not exact File completed counts. Process kill is not power-loss proof. Reuse test-only POSIX seams; no new public API. |
+| `File` exact read, publication, and failure paths | [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [ADR 0424](../adr/0424-linux-prepared-publication-and-process-arguments.md) | [linux_publication_test.go](../../internal/cstdlib/linux_publication_test.go), [task_manager_linux_save_test.go](../../internal/cli/task_manager_linux_save_test.go), [task_manager_linux_save_hooks_test.go](../../internal/cli/task_manager_linux_save_hooks_test.go) | `TestLinuxPreparedPublication` defines GCC/Clang low/optimized exact-read early EOF, suffix preservation, remove/replace error, and old-open-owner cases. The save tests define 40 cases (four compiler profiles x ten modes): first/partial writes ENOSPC, sync EIO, close EIO, replace failure, and kill/restart preservation. The focused receipt now records four passing `TestLinuxPreparedPublication` executions without skips; the separate 40 save-failure cases retain suite-level evidence. | Mandatory. The [focused receipt](#focused-linux-receipt) now covers deterministic File EINTR retry, zero progress, and exact partial error counts through the public SDK. The save-failure cases separately assert application errors and data. Process kill is not power-loss proof. Reuse test-only POSIX seams; no new public API. |
 | Differential, layout, ABI, sanitizer | [execution.go](../../internal/cbackendnative/execution.go), [oracle_results.go](../../internal/cbackendnative/oracle_results.go), [probes_layout.go](../../internal/cbackendnative/probes_layout.go), [abi_probe.go](../../internal/cbackendnative/abi_probe.go) | [runner.go](../../internal/cbackendnative/runner.go), [c-emission fixture](../../spec/fixtures/c-emission/README.md) | v38 reports 208 differential and drop-trace executions, 4 layout probes, 56 bidirectional ABI executions, and 104 sanitizer executions. Execution/oracle results compare exit status/trap code and source-linked drop IDs. | Mandatory. The fixture README says active built-in payload selection is observed; no separate native payload event stream exists. Before promotion, map roadmap active-payload agreement to tagged fixture values/drop sites or add only missing observations. The absence of a separate event stream alone does not establish a missing semantic check. |
 | Target maturity | [spec.go](../../internal/target/spec.go) | [spec_test.go](../../internal/target/spec_test.go) | The spec stores `complete-runtime` and `complete-standard-library` as missing. The test validates structural maturity ordering and nonempty missing values. | Mandatory review gate. The test does not compute fixture completeness. Both missing markers remain; `emittable`, `conformant`, and `supported` stay false. |
 
@@ -163,9 +188,8 @@ transfers, initial and partial errors, zero-progress, EOF/empty requests, recove
 retry/error plus consuming close failure without retry. Test-only POSIX hooks reuse the existing
 pattern, leaving production API, runtime ABI, SDK bytes, DB, hygiene, and CI runners unchanged.
 
-`TestLinuxFileProgressEmission` passes on Windows. `TestLinuxFileProgressNative` defines four
-GCC/Clang low/optimized executions but is skipped on this host; the Linux evidence gap remains
-open until those executions pass. The scripts supply syscall outcomes, while production File
+`TestLinuxFileProgressEmission` passes on Windows. The [focused Linux receipt](#focused-linux-receipt)
+records all four GCC/Clang low/optimized `TestLinuxFileProgressNative` executions passing without skips. The scripts supply syscall outcomes, while production File
 algorithms and SDK error conversion remain in the compiled program.
 
 ## Direct heap OOM fixture
@@ -175,18 +199,17 @@ test-only allocator adapter against real target-selected SystemHeap C. It checks
 empty storage, then growth, shrink, and alignment-changing resize failures preserving pointer, size,
 alignment, bytes, and one live allocation; recovery, zero requests that leave the injected failure
 armed, and final cleanup are checked too. MSVC low and optimized local native builds and runs pass.
-The test's GCC/Clang low and optimized Linux executions are defined but have not run on this Windows
-host, so Linux evidence and Phase 2 conformance remain pending.
+The [focused Linux receipt](#focused-linux-receipt) now records all four GCC/Clang low/optimized
+executions passing without skips. This closes the direct heap OOM evidence gap for those profiles;
+Phase 2 conformance remains under review.
 
 ## Next work
 
-1. Execute the [File progress fixture](#file-progress-fixture) on Linux with GCC and Clang at both
-   profiles. Its syscall scripts and public SDK assertions are now defined; native evidence is pending.
-2. Execute the [direct heap OOM fixture](#direct-heap-oom-fixture) under Linux GCC/Clang at both
-   profiles; local MSVC low/optimized executions already pass.
-3. Record focused no-skip Linux evidence for these checks and the existing exact-read/publication
-   cases, and map active-payload agreement to the tagged fixture values and drop sites before
-   reviewing either target maturity marker. The non-verbose Go suite is not that focused receipt.
+Map the roadmap's active-payload agreement to the tagged fixture values and drop sites before
+reviewing either target maturity marker. The focused Linux receipt closes the File progress,
+direct heap OOM, and exact-read/publication execution gaps for the recorded cases; it does not
+establish complete runtime or standard-library coverage. Keep both missing markers and all
+three maturity flags unchanged until that review is complete.
 
 The current receipt already covers the Region byte cases. The review and follow-up fixtures change no API,
 runtime ABI, SDK source bytes, DB, hygiene policy, CI runner allocation, or version. The new tests

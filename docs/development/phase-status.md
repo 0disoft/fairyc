@@ -2,10 +2,10 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current Frontend receipt: `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`
-- Previous SDK receipt: `54cbeb17ebdc28a2797cc19c6b45882381c6cc3a`, historical evidence
+- Current Frontend receipt: `1413b4b1855f2bdb7f6b2bc2205b062e028b4870`
+- Previous SDK receipt: `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`, historical evidence
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
-- Evidence: [Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874), all nine jobs passed; earlier [run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761) and [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remain historical evidence
+- Evidence: [Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105), all nine jobs passed; earlier [run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761) and [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remain historical evidence
 
 This page summarizes gate evidence. The roadmap, language contracts, and owning fixtures retain
 authority. The roadmap defines no Phase 5, 6, or 7.
@@ -16,7 +16,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native CI](https://github.com/0disoft/fairyc/actions/runs/39774562874/job/119814527459) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Linux native CI](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119842277429) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes, plus the 12 focused Linux cases. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -43,25 +43,16 @@ Full runtime and standard-library coverage remain missing as `complete-runtime` 
 The target's `emittable`, `conformant`, and `supported` maturity flags remain false.
 
 The [2026-10-22 Linux coverage audit](linux-runtime-coverage.md) maps the implemented runtime and
-SDK surfaces to source owners, fixtures, and the current passing Frontend run at `ea0957e6`.
+SDK surfaces to source owners, fixtures, and the current passing Frontend run at `1413b4b1`.
 It distinguishes missing Linux implementations from incomplete execution evidence and design
 exclusions. Windows API parity is not the Phase 2 exit gate.
 
-The [contract-to-fixture review](linux-runtime-coverage.md#phase-2-contract-to-fixture-review)
-maps the mandatory minimum to implementation owners, raw and public fixtures, and the existing
-hosted receipts. It leaves two concrete evidence gaps: deterministic File retry/no-progress and
-completed-prefix checks, and direct SystemHeap resize-OOM preservation. The existing save-failure
-tests already cover partial-write, sync, close, and replacement failures; these gaps do not mean
-those paths are unimplemented. Before promotion, the review also requires individual no-skip Linux
-evidence and an explicit mapping of the roadmap's active-payload agreement to tagged values and
-drop-site observations. No missing mandatory rule is waived by this review. Phase 2 remains partial.
-
-`TestLinuxFileProgressEmission` compiles the real bundled SDK to Linux C successfully on Windows,
-but `TestLinuxFileProgressNative` (GCC/Clang low and optimized execution) is skipped on this host,
-so Linux native evidence remains pending. The [direct heap OOM fixture](../../internal/cstdlib/system_heap_oom_test.go)
-passes local MSVC low/optimized execution; its Linux runs and focused active-payload evidence remain
-open. Phase 2 stays partial. See the [File progress
-fixture](../../internal/cli/linux_file_progress_test.go).
+The [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) confirms the completed
+Linux Go job passed all 12 evidence cases with no missing, skipped, or errored cases. These results
+close the focused Linux evidence gaps for file progress, heap OOM, and prepared publication only,
+not complete runtime or standard-library coverage. Active-payload mapping is next;
+`complete-runtime` and `complete-standard-library` remain missing, and `emittable`, `conformant`,
+and `supported` stay false.
 
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
 [Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
@@ -86,8 +77,8 @@ the corrected code; target maturity is unchanged.
 
 ## Public SDK Linux receipt (v38)
 
-[Linux job 119814527459](https://github.com/0disoft/fairyc/actions/runs/39774562874/job/119814527459)
-at `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d` records report
+[Linux job 119842277429](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119842277429)
+at `1413b4b1855f2bdb7f6b2bc2205b062e028b4870` records report
 `fairyc.native-c-report/v38` for `x86_64-linux-gnu` on Ubuntu 24.04 with glibc 2.39,
 Clang 18.1.3, and GCC 13.3.0. It records four public SDK storage executions, 208 interpreter/C and
 208 drop-trace executions, 104 sanitizer executions, 56 ABI crossings, and four layout probes.
@@ -120,7 +111,7 @@ allocation, recovery, prior-byte preservation, and zero live allocations. See
 `TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution; it
 executes all three Region modes before and after disk-cache restoration.
 
-[Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874) covers both
+[Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105) covers both
 byte operations in four compiler/profile SDK executions at the current source revision. The fixture
 checks normal, empty, forced payload and tracking-node OOM, recovery, prior-data preservation, and
 zero live allocations. The SDK probe is separate from the 104 sanitizer executions. Related
@@ -170,7 +161,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Close the [File progress/retry and direct heap-OOM evidence gaps](linux-runtime-coverage.md#next-work),
-   then collect focused no-skip Linux evidence and finish the active-payload observation mapping
-   before conformance review. The current receipt already covers the Region byte cases.
+1. Finish the active-payload observation mapping before conformance review. The
+   [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) now closes the File
+   progress/retry, direct heap-OOM, and exact-read/publication execution gaps for its recorded cases.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
