@@ -51,8 +51,9 @@ Manual Frontend runs also execute the full checks. The scheduled/manual Measurem
 keeps its existing triggers.
 
 The Windows core job allows 20 minutes, with a 15-minute Go test timeout per package, because
-it includes native compile/run regressions. Linux and the separate native/parser jobs retain
-their 10-minute limits. The test selection and runner count are unchanged.
+it includes native compile/run regressions. The separate lexer proof allows 12 minutes so its
+native tests and job setup/cleanup fit within the limit. Linux and the separate native/parser jobs
+retain their 10-minute limits. The test selection and runner count are unchanged.
 
 The existing `native-c` job uses `ubuntu-24.04` and provisions the
 [reference Linux toolchain](docs/abi/linux-toolchain-v0.md) with

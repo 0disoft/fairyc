@@ -106,7 +106,8 @@ jobs:
     needs: changes
     if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: windows-latest
-    timeout-minutes: 10
+    # The lexer proof approaches ten minutes before checkout/setup/cleanup.
+    timeout-minutes: ${{ matrix.group == 'lexer' && 12 || 10 }}
     # All groups remain required by native-c. Separate runners avoid shared
     # native-build state; verbose output preserves the active test on timeout.
     strategy:
