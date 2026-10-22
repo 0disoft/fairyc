@@ -283,6 +283,8 @@ does not prove complete runtime or standard-library coverage, and no requirement
 
 ## Next work
 
-Next single task: use the contract-to-fixture review above to identify the next required runtime
-or SDK observation gap. Keep both missing completeness markers and all three target flags unchanged
-until their owning requirements have evidence; excluded API surfaces remain separate decisions.
+Next single task: add the existing pure nested-resource cleanup scenario to the emission and Linux
+native fixture matrix, checking return 42 and all four ordered drop events. The
+[remaining-work audit](phase2-remaining-work.md) separates this execution gap from implemented
+runtime/SDK minimums, backend capability limits, and excluded features. Both completeness markers
+and all three target flags remain unchanged.

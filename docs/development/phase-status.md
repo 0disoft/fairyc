@@ -191,6 +191,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Review the existing runtime/SDK contract-to-fixture inventory and select the next required
-   observation gap. Keep Phase 2 partial and both missing completeness markers unchanged.
+1. Add the pure nested-resource cleanup fixture to the existing Linux differential/drop/sanitizer
+   matrix. Require return 42 and four ordered drop events under GCC/Clang low/optimized; see the
+   [remaining-work audit](phase2-remaining-work.md). Keep Phase 2 partial and both missing markers.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

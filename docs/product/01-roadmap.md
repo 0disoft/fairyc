@@ -237,8 +237,9 @@ for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
 The [v3 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
 at `7f7362b87c231c30ea89f3907396957f0d599032` records all 28 required compiler/profile cases passing
 without skips, including four trap-receipt progress/failure cases with six scenarios each.
-The v2/24-case and v1/12-case receipts remain historical. Next review the runtime/SDK fixture
-inventory for the next required observation gap.
+The v2/24-case and v1/12-case receipts remain historical. The
+[remaining-work audit](../development/phase2-remaining-work.md) selects the existing pure
+nested-resource cleanup scenario for the next Linux differential/drop/sanitizer fixture.
 The earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
 at `c845848c95395622441b059c25c4a27a4bb6fee7` remains historical evidence for its v37
 52/208/104 baseline. The same run passed native trap-location transport probes in both Linux
