@@ -24,7 +24,7 @@ func (p typeProperties) plainStructFields(value hir.Type) ([]hir.Type, bool) {
 
 func (p typeProperties) validStructViewType(value hir.Type) bool {
 	if element, length, array := hir.FixedArrayParts(value); array {
-		return hir.FixedArrayScalarElement(element) || hir.ExecutableFixedArrayShape(element, length) && p.plainViewStruct(element)
+		return hir.IntegerTransportArray(value) || hir.FixedArrayScalarElement(element) || hir.ExecutableFixedArrayShape(element, length) && p.plainViewStruct(element)
 	}
 	if slice, _, borrowed := hir.BorrowElement(value); borrowed {
 		if element, nominal := hir.StructSliceElement(slice); nominal {

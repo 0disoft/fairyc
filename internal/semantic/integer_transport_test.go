@@ -8,13 +8,13 @@ import (
 func TestIntegerTransportBoundaries(t *testing.T) {
 	for _, typ := range []string{"i8", "i16", "u16", "u64", "isize"} {
 		for name, body := range map[string]string{
-			"literal":    `fn %[1]s bad(){return 1;}`,
-			"arithmetic": `fn %[1]s bad(%[1]s a,%[1]s b){return a+b;}`,
-			"comparison": `fn bool bad(%[1]s a,%[1]s b){return a==b;}`,
-			"width":      `fn %[1]s bad(i32 a){return a;}`,
-			"cast":       `fn %[1]s bad(i32 a){return a as %[1]s;}`,
-			"array":      `@repr(C) struct P{%[1]s[2] values;}`,
-			"c-scalar":   `fn %[1]s bad(c::longlong a){return a;}`,
+			"literal":       `fn %[1]s bad(){return 1;}`,
+			"arithmetic":    `fn %[1]s bad(%[1]s a,%[1]s b){return a+b;}`,
+			"comparison":    `fn bool bad(%[1]s a,%[1]s b){return a==b;}`,
+			"width":         `fn %[1]s bad(i32 a){return a;}`,
+			"cast":          `fn %[1]s bad(i32 a){return a as %[1]s;}`,
+			"array-literal": `fn void bad(%[1]s value){let %[1]s[2] values=[value;2];}`,
+			"c-scalar":      `fn %[1]s bad(c::longlong a){return a;}`,
 		} {
 			t.Run(typ+"/"+name, func(t *testing.T) {
 				r := analyzeText(t, map[string]string{"main.fy": "module main;" + fmt.Sprintf(body, typ)})

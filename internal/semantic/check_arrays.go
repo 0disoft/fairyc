@@ -75,6 +75,10 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	index, indexType := c.checkExpression(expression.Children[1], hir.TypeUSize)
 	result.Children = appendExpression(result.Children, receiver, index)
 	arrayElement, _, fixedArray := hir.FixedArrayParts(receiverType)
+	if hir.IntegerTransportArray(receiverType) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "indexing transport-only integer arrays")
+		return hir.TypeInvalid
+	}
 	viewElement, indexedView := hir.IndexedViewElement(receiverType)
 	if !indexedView && !fixedArray {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside executable array views")

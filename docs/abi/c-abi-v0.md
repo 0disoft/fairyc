@@ -145,15 +145,29 @@ remain fail-closed until their source typing, layout,
 ABI, and native crossing tests are connected together.
 
 [ADR 0477](../adr/0477-repr-c-integer-array-fields.md) admits array fields with `u8`, `i32`, `i64`,
-`u32` or `usize` elements and lengths `1..=4096`. These are actual C array members with target-derived
-layout assertions. Construction, whole-field reads and replacement bridge to private Fairy array
-values by copying elements. Nested whole-field replacement and record argument/result copies retain
-value semantics. Direct references, views, element stores and iteration over the raw field remain
-closed; read indexing copies the field first. Other array element families and bare foreign array
-parameters/results remain closed. The shared native record probe checks array layout, all elements
-and copy isolation. Local MSVC execution is recorded in the
-[F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields); hosted Linux evidence
-is pending.
+`u32` or `usize` elements and lengths `1..=4096`. [ADR 0482](../adr/0482-repr-c-integer-array-transport.md)
+adds `i8`, `i16`, `u16`, `u64` and `isize` elements, using `int8_t`, `int16_t`, `uint16_t`,
+`uint64_t` and `intptr_t` C element types. Together these are the ten Fairy integer families; each
+uses actual C array members with target-derived layout assertions.
+
+ADR 0477 arrays retain construction, whole-field reads, whole-field and nested replacement, and
+record argument/result copy value semantics. Their raw-field references, views, element stores and
+iteration remain closed; read indexing copies the field first. Bare foreign array parameters/results
+remain closed for both admissions.
+
+For the ADR 0482 families, C-produced values support whole-field reads, inferred and typed array
+locals, internal by-value array arguments/results, record copies, explicit reconstruction and direct
+whole-field replacement through a mutable record or record reference. Nested record reads and copies
+are allowed. The `IntegerTransportArray` source helper distinguishes these fields from ordinary
+executable arrays. Element literals, indexing, stores, views and iteration, scalar operations and
+casts, private structs with these direct arrays, bare foreign array parameters/results, new scalar
+pointers and direct arrays in resource, enum or tagged payloads remain outside executable admission.
+New nested field-store paths are also excluded. ADR 0480's scalar restrictions remain unchanged.
+
+The shared native record probe checks ADR 0477 array layout, all elements and copy isolation. Local
+MSVC execution is recorded in the [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields);
+hosted Linux evidence passed in the [F1-F3 receipt](../development/phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23).
+ADR 0482's shared-probe extension remains planned and native evidence is pending.
 
 The Windows target product smoke uses a separate private `usize` generation transport. Under the
 selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned

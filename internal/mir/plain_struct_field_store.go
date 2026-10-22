@@ -8,6 +8,10 @@ func ValidPlainStructFieldStoreShape(op Operation, lookup func(hir.Type) *Struct
 	if !validFieldStoreCommonShape(op) || op.Operands[1].Kind != OperandLocal || op.Operands[1].Local < 0 {
 		return false
 	}
+	if len(op.Fields) == 0 && hir.IntegerTransportArray(op.Type) {
+		owner := lookup(fieldAggregateType(op.OwnerType))
+		return owner != nil && owner.ReprC
+	}
 	return (hir.InlineArrayField(op.Type, plainFieldStoreLookup(lookup)) || plainStoredStruct(op.Type, lookup)) && plainStoredStruct(fieldAggregateType(op.OwnerType), lookup)
 }
 

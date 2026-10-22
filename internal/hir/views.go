@@ -103,8 +103,15 @@ func ScalarArrayField(value Type) bool {
 // value transport and is not admitted as a C array element here.
 func ReprCArrayField(value Type) bool {
 	element, length, array := FixedArrayParts(value)
-	return array && ExecutableFixedArrayShape(element, length) &&
+	return IntegerTransportArray(value) || array && ExecutableFixedArrayShape(element, length) &&
 		(element == TypeU8 || element == TypeI32 || element == TypeI64 || element == TypeU32 || element == TypeUSize)
+}
+
+// IntegerTransportArray admits whole-array copies without opening element
+// operations, literals or views for the additional transport-only integers.
+func IntegerTransportArray(value Type) bool {
+	element, length, array := FixedArrayParts(value)
+	return array && IsIntegerTransportScalar(element) && length <= MaxExecutableFixedArrayElements
 }
 
 // InlineArrayField also admits arrays of actual scalar-leaf structs. Array

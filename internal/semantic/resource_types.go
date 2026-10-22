@@ -324,8 +324,8 @@ func (a *analyzer) canonicalStructFieldType(module *moduleScope, reference ast.T
 	if reference.Kind == ast.TypeKindArray && reference.Element != nil && reference.Length != nil {
 		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
 		length, sized := parsePositiveArrayLength(reference.Length.Text)
-		if ok && sized && hir.ExecutableFixedArrayShape(element, length) &&
-			(hir.FixedArrayScalarElement(element) || a.structTypes[element] != nil) {
+		if ok && sized && (hir.IntegerTransportArray(hir.FixedArray(element, length)) ||
+			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.structTypes[element] != nil)) {
 			return hir.FixedArray(element, length)
 		}
 		a.addUnsupported(module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
@@ -358,7 +358,8 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		}
 		element, elementOK := a.canonicalTypeReference(module, *reference.Element, false)
 		length, lengthOK := parsePositiveArrayLength(reference.Length.Text)
-		if !elementOK || !lengthOK || !hir.ExecutableFixedArrayShape(element, length) || (!hir.FixedArrayScalarElement(element) && !a.plainViewStruct(element)) {
+		if !elementOK || !lengthOK || !(hir.IntegerTransportArray(hir.FixedArray(element, length)) ||
+			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.plainViewStruct(element))) {
 			return hir.TypeInvalid, false
 		}
 		return hir.FixedArray(element, length), true
