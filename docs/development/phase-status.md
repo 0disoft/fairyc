@@ -113,9 +113,11 @@ false. Conformance requires every declared language, layout, bidirectional ABI, 
 toolchain fixture to pass without skips, as defined by the [C ABI target claims](../abi/c-abi-v0.md#target-status)
 and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice).
 
-The open evidence is bounded. Linux receipt-write progress has no deterministic fault-injected
-observation; the 0–191 process-status oracle and manifest deferrals do not observe the whole
-target. Equality, comparison, and decimal parsing now pass all 12 GCC/Clang low/optimized
+The open evidence is bounded. Linux receipt-write progress now has a deterministic fault-injected
+test, but its hosted execution is pending under the v3/28-case matrix. Windows runtime tests and
+Linux Go cross-compilation pass; the native test skips on Windows. The 0–191 process-status oracle
+and manifest deferrals do not observe the whole target. Equality, comparison, and decimal parsing
+now pass all 12 GCC/Clang low/optimized
 executions in the v2 receipt. The
 [coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) records the source
 owners and remaining evidence. Windows filesystem parity and distribution remain outside this gate.
@@ -187,7 +189,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Add deterministic Linux trap-receipt write-progress and failure observations using the existing
-   runtime C and test-only POSIX hooks: short writes, EINTR, zero progress, and failed writes.
-   Keep product API/runtime ABI and runner allocation unchanged.
+1. Obtain the v3/28-case receipt from the existing Linux Go CI job, including all four compiler/profile
+   cases of `TestLinuxTrapReceiptProgressNative` without skips. Keep the v2 receipt as historical
+   evidence and product API/runtime ABI and runner allocation unchanged.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

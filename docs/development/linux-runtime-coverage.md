@@ -70,6 +70,14 @@ semantics. These close focused Linux evidence gaps only, not complete runtime or
 coverage. The existing Linux `go test -json` stream is checked by
 `.github/scripts/linux_phase2_evidence.py`, so no tests are duplicated.
 
+The current validator requires `fairyc.phase2-linux-evidence/v3`, with 28 compiler/profile cases.
+Its seventh root, [TestLinuxTrapReceiptProgressNative](../../internal/cruntime/trap_receipt_progress_test.go),
+executes production `LinuxRunSource` with only the receipt `write` call replaced by a test hook.
+Each GCC/Clang low/optimized case checks short writes, repeated EINTR, zero progress and EIO before
+or after progress, including exact fd, pointer, remaining bytes, trace and exit status.
+Local Windows runtime tests and Linux Go cross-compilation pass; native execution skips on Windows.
+Hosted v3 execution is pending. The v2/24-case receipt above remains the latest complete baseline.
+
 ## Implemented surfaces
 
 | Area | Implementation and contract | Fixtures and observed evidence |
@@ -176,7 +184,7 @@ receipt proves representative success, not blanket completeness.
 
 | Evidence area | What the receipt establishes | Status |
 | --- | --- | --- |
-| Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [runtime_test.go](../../internal/cruntime/runtime_test.go) checks rendered strings for those branches. Deterministic native progress/failure observations are still absent. |
+| Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [Progress tests](../../internal/cruntime/trap_receipt_progress_test.go) now define deterministic native observations across all four compiler/profile cases. Hosted v3 execution remains pending; the v2 receipt does not attest them. |
 | Pure helper native execution | [Equality/comparison](../../internal/cli/bytes_equal_test.go) and [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) have admitted contracts and independent Go oracles. The shared [Linux SDK helper runner](../../internal/cli/linux_sdk_helpers_test.go) executes production emitted C with native support. | The current source adds GCC/Clang low/optimized subtests to the three existing roots. A missing compiler, build or run failure, nonzero exit, or any stdout/stderr fails the case; unsupported hosts still skip. Windows MSVC low/optimized coverage remains. The v2 receipt records all 12 helper profile cases passing, with no missing or skipped cases. |
 | Whole-target observation | The v38 process/drop oracle checks admitted fixtures under two compilers and profiles. | [Exit values](../../internal/cbackendnative/oracle_results.go) cover 0–191, while the manifest defers complex resources and effects. Partial compiler-semantic coverage is not a thin-runtime defect or evidence of entire-language conformance. |
 
@@ -270,6 +278,6 @@ does not prove complete runtime or standard-library coverage, and no requirement
 
 ## Next work
 
-Next single task: add deterministic Linux trap-receipt write-progress and failure observations
-using the existing runtime C and test-only POSIX hooks. Cover short writes, EINTR, zero progress,
-and failed writes without changing product API/runtime ABI or adding runners.
+Next single task: obtain the v3/28-case receipt from the existing Linux Go CI job, including all
+four trap-receipt compiler/profile cases without skips. Preserve the v2 receipt as historical
+evidence; no product API/runtime ABI or additional runner is needed.

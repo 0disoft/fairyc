@@ -234,6 +234,9 @@ ABI crossings, four layout probe executions, and four SDK storage executions. Al
 jobs passed, including the [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769)
 with 24 focused Linux cases and no skips. This fulfills `toolchain-baseline` and `toolchain-provisioning`
 for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
+The current v3 matrix adds the implemented trap-receipt progress/failure test and requires 28
+compiler/profile cases; its Linux execution is pending. Next obtain that receipt from the existing
+Linux CI job. The v2/24-case receipt above remains the latest complete hosted baseline.
 The earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
 at `c845848c95395622441b059c25c4a27a4bb6fee7` remains historical evidence for its v37
 52/208/104 baseline. The same run passed native trap-location transport probes in both Linux

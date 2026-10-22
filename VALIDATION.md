@@ -64,13 +64,16 @@ headers, linking, startup, and sanitizers; version preflight is not a replacemen
 
 The Linux Go suite now runs exactly once, with `go test -mod=readonly -count=1 -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
-package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v2` and marks a
+package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v3` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
-`TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`, and
-`TestCheckedI64DecimalExecution` pass all 24 GCC/Clang low and optimized subtests without skips,
-missing cases or duplicates, with any other suite failure also rejecting completeness. The schema
-version changed because the required evidence set grew from 12 to 24 cases. Existing v1 receipts
-remain historical. The Go suite command and runner count are unchanged, and no native tests are
+`TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`,
+`TestCheckedI64DecimalExecution`, and `TestLinuxTrapReceiptProgressNative` pass all 28 GCC/Clang
+low and optimized subtests without skips, missing cases or duplicates, with any other suite failure
+also rejecting completeness. The schema
+version changed because the required evidence set grew from 24 to 28 cases (seven roots, four
+compiler/profile cases each). Each new trap-receipt case runs six progress/failure scenarios.
+Existing v1/12-case and v2/24-case receipts remain historical; v3 hosted execution is pending.
+The Go suite command and runner count are unchanged, and no native tests are
 repeated.
 The explicit Bash shell preserves pipeline failure if either the Go suite or receipt checker fails.
 

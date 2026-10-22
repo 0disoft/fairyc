@@ -18,8 +18,8 @@ class LinuxPhase2Evidence(unittest.TestCase):
     def test_requires_all_native_cases_and_parent_results(self):
         report, _ = self.run_events(events())
         self.assertTrue(report["complete"])
-        self.assertEqual(report["schema"], "fairyc.phase2-linux-evidence/v2")
-        self.assertEqual(len(report["passedCases"]), 24)
+        self.assertEqual(report["schema"], "fairyc.phase2-linux-evidence/v3")
+        self.assertEqual(len(report["passedCases"]), 28)
         for missing in sorted(ROOTS | CASES):
             with self.subTest(missing=missing):
                 report, _ = self.run_events([
