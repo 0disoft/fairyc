@@ -9,9 +9,47 @@ import std::text as text;
 @link_name("fairyc_sdk_probe_fail_after")
 unsafe extern C fn void fail_after(usize count) ;
 
+fn usize size_once(ref mut usize calls) { *calls = *calls + 1; return 4; }
+
 fn void check_arena(alloc::Arena input) {
     var alloc::Arena arena = input;
+    var usize calls = 0;
     region scratch in ref mut arena {
+        let i32 bytes_code = switch (scratch.alloc_zeroed_bytes(size_once(ref mut calls))) {
+            case .ok(value): {
+                assert(calls == 1 && value.len == 4 && value[0] == 0 && value[1] == 0 && value[2] == 0 && value[3] == 0);
+                value[0] = 65;
+                value[3] = 90;
+                unsafe { fail_after(0); }
+                assert(switch (scratch.alloc_zeroed_bytes(8)) {
+                    case .ok(_): { false }
+                    case .err(error): { alloc::error_status(error) == 1 }
+                });
+                unsafe { fail_after(1); }
+                assert(switch (scratch.alloc_zeroed_bytes(8)) {
+                    case .ok(_): { false }
+                    case .err(error): { alloc::error_status(error) == 1 }
+                });
+                assert(value[0] == 65 && value[3] == 90 && value.len == 4);
+                assert(switch (scratch.alloc_zeroed_bytes(2)) {
+                    case .ok(next): { next.len == 2 && next[0] == 0 && next[1] == 0 }
+                    case .err(_): { false }
+                });
+                0
+            }
+            case .err(_): { 1 }
+        };
+        assert(bytes_code == 0);
+        unsafe { fail_after(0); }
+        assert(switch (scratch.alloc_zeroed_bytes(0)) {
+            case .ok(empty): { empty.is_empty && empty.len == 0 }
+            case .err(_): { false }
+        });
+        // Empty allocation must not consume the armed allocation failure.
+        assert(switch (scratch.alloc_zeroed_bytes(1)) {
+            case .ok(_): { false }
+            case .err(error): { alloc::error_status(error) == 1 }
+        });
         assert(switch (scratch.place(42)) {
             case .ok(value): { *value == 42 }
             case .err(_): { false }

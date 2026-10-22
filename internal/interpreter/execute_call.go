@@ -436,9 +436,19 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
 				}
 				stored := value.cloneForValueCopy()
+				if operation.Operator == "alloc_zeroed_bytes" {
+					stored, err = r.regionBytes(value)
+					if err != nil {
+						return callCompletion{}, err
+					}
+				}
 				region.placements = append(region.placements, stored)
 				borrow, _, result := hir.ResultElements(operation.Type)
-				if !result || borrow != hir.SharedBorrow(operation.OwnerType) {
+				expectedBorrow := hir.SharedBorrow(operation.OwnerType)
+				if operation.Operator == "alloc_zeroed_bytes" {
+					expectedBorrow = hir.MutableBorrow(hir.TypeByteSlice)
+				}
+				if !result || borrow != expectedBorrow {
 					return callCompletion{}, fmt.Errorf("region placement has incompatible result type")
 				}
 				stored.typ = borrow

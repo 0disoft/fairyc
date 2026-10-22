@@ -598,7 +598,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 			}
 			return cloneBorrowValue(argumentValues[0]), true
 		}
-		if isRegionPlaceCall(expression) {
+		if f.analyzer.isRegionAllocationCall(expression) {
 			for index := range expression.Children {
 				if _, reachable := f.evaluateExpression(expression.Children[index], environment); !reachable {
 					return borrowValueState{}, false
@@ -985,7 +985,7 @@ func (f *borrowFlowAnalyzer) probing() bool {
 }
 
 func (f *borrowFlowAnalyzer) regionBorrowValue(expression *ast.Expression) borrowValueState {
-	if !isRegionPlaceCall(expression) {
+	if !f.analyzer.isRegionAllocationCall(expression) {
 		return borrowValueState{known: false}
 	}
 	receiver := expression.Children[0].Children[0]

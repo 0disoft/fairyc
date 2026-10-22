@@ -6,18 +6,28 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-func isRegionPlaceCall(expression *ast.Expression) bool {
+func (a *analyzer) isRegionAllocationCall(expression *ast.Expression) bool {
 	if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) == 0 {
 		return false
 	}
 	callee := expression.Children[0]
-	return callee.Kind == syntax.KindFieldExpr && callee.Text == "place" && len(callee.Children) == 1
+	if callee.Kind != syntax.KindFieldExpr || len(callee.Children) != 1 {
+		return false
+	}
+	if callee.Text == "place" {
+		return true
+	}
+	if callee.Text != "alloc_zeroed_bytes" {
+		return false
+	}
+	receiver := a.resolved[callee.Children[0]]
+	return receiver != nil && (receiver.kind == "region" || receiver.typ == hir.TypeRegion)
 }
 
 func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.Expression) hir.Type {
 	callee := expression.Children[0]
 	receiver, receiverType := c.checkExpression(callee.Children[0], hir.TypeRegion)
-	result.Operator = "place"
+	result.Operator = callee.Text
 	result.Children = appendExpression(result.Children, receiver)
 	if receiverType != hir.TypeInvalid && receiverType != hir.TypeRegion {
 		c.analyzer.addUnsupported(c.module.file.Path, callee.Span, "place on a non-Region receiver")
@@ -27,7 +37,11 @@ func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.E
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Region.place argument count")
 		return hir.TypeInvalid
 	}
-	value, valueType := c.checkExpression(expression.Children[1], hir.TypeInvalid)
+	expected := hir.TypeInvalid
+	if callee.Text == "alloc_zeroed_bytes" {
+		expected = hir.TypeUSize
+	}
+	value, valueType := c.checkExpression(expression.Children[1], expected)
 	result.Children = appendExpression(result.Children, value)
 	if valueType == hir.TypeInvalid {
 		return hir.TypeInvalid
@@ -36,6 +50,10 @@ func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.E
 	if !ok {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Region.place without one public std::alloc::AllocError type")
 		return hir.TypeInvalid
+	}
+	if callee.Text == "alloc_zeroed_bytes" {
+		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), valueType, hir.TypeUSize, span(c.module.file.Path, expression.Span))
+		return hir.Result(hir.MutableBorrow(hir.TypeByteSlice), errorType)
 	}
 	return hir.Result(hir.SharedBorrow(valueType), errorType)
 }

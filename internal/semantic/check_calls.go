@@ -14,7 +14,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	calleeExpression := expression.Children[0]
-	if calleeExpression != nil && calleeExpression.Kind == syntax.KindFieldExpr && !isRegionPlaceCall(expression) {
+	if calleeExpression != nil && calleeExpression.Kind == syntax.KindFieldExpr && !c.analyzer.isRegionAllocationCall(expression) {
 		return c.checkMethodCall(expression, result)
 	}
 	if calleeExpression != nil && calleeExpression.Kind == syntax.KindPath {
@@ -31,7 +31,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 			return c.checkBorrowedViewConstructor(expression, result, calleeExpression.Text, constructor)
 		}
 	}
-	if isRegionPlaceCall(expression) {
+	if c.analyzer.isRegionAllocationCall(expression) {
 		return c.checkRegionPlace(expression, result)
 	}
 	callee := c.analyzer.resolved[calleeExpression]

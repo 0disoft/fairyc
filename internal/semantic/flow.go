@@ -157,7 +157,7 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 		if isBorrowedViewConstructorCall(expression) && len(expression.Children) == 4 {
 			return a.expressionOrigins(module, expression.Children[1], origins)
 		}
-		if isRegionPlaceCall(expression) {
+		if a.isRegionAllocationCall(expression) {
 			receiver := expression.Children[0].Children[0]
 			value := a.resolved[receiver]
 			allocation := span(module.file.Path, expression.Span)
@@ -174,7 +174,7 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 
 func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flowInventory, origins map[*symbol]flowOrigin) {
 	for _, expression := range inventory.expressions {
-		if !isRegionPlaceCall(expression) {
+		if !a.isRegionAllocationCall(expression) {
 			continue
 		}
 		candidates := compactOrigins(a.expressionOrigins(module, expression, origins))
@@ -182,7 +182,7 @@ func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flow
 			continue
 		}
 		origin := candidates[0]
-		fact := RegionOriginFact{Operation: "place", Allocation: span(module.file.Path, expression.Span), Origin: origin.name}
+		fact := RegionOriginFact{Operation: strings.ReplaceAll(expression.Children[0].Text, "_", "-"), Allocation: span(module.file.Path, expression.Span), Origin: origin.name}
 		if binding := a.bindingForExpression(expression); binding != nil {
 			fact.LastUse = lastUseOf(inventory.expressions, a.resolved, binding, expression.Span.EndByte)
 		}

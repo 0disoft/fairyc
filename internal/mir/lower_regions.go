@@ -68,9 +68,14 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 	if value.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("Region.place value has no executable operand")
 	}
+	operator := ""
+	if expression.Operator != "place" {
+		operator = expression.Operator
+	}
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
-		Kind: OperationRegionPlace, Span: expression.Span, Symbol: receiver.Symbol,
+		Operator: operator,
+		Kind:     OperationRegionPlace, Span: expression.Span, Symbol: receiver.Symbol,
 		DestinationLocal: destination, Operands: []Operand{value}, Type: expression.Type, OwnerType: valueExpression.Type,
 	})
 	l.result.RegionScopes[factIndex].Placements = append(l.result.RegionScopes[factIndex].Placements, expression.Span)

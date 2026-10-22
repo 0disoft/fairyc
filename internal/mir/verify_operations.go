@@ -450,7 +450,12 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 		failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 		successType, failureType, result := hir.ResultElements(operation.Type)
 		placedType, mutable, borrow := hir.BorrowElement(successType)
-		shapeValid := result && borrow && !mutable && placedType == operation.OwnerType &&
+		payloadValid := borrow && !mutable && placedType == operation.OwnerType && operation.Operator == ""
+		if operation.Operator == "alloc_zeroed_bytes" {
+			payloadValid = successType == hir.MutableBorrow(hir.TypeByteSlice) && operation.OwnerType == hir.TypeUSize &&
+				len(operation.Operands) == 1 && fieldStoreOperandType(operation.Operands[0], storeTypes) == hir.TypeUSize
+		}
+		shapeValid := result && payloadValid &&
 			failureType != hir.TypeInvalid && failureType != hir.ParseType("") && len(operation.Operands) == 1 &&
 			operation.DestinationLocal != NoLocal && operation.OwnerType != hir.TypeInvalid && operation.OwnerType != hir.ParseType("")
 		if _, active := state.regions[operation.Symbol]; !active || !shapeValid {

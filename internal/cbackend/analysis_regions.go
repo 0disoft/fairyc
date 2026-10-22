@@ -36,7 +36,11 @@ func (e *analysisBuilder) inspectRegionOperation(functionIndex int, operation mi
 		successType, failureType, feature, supported := e.resultCSpec(operation.Type)
 		placedType, mutable, borrow := hir.BorrowElement(successType)
 		errorIndex, errorStruct := e.structByType[failureType]
-		if !supported || !borrow || mutable || placedType != operation.OwnerType || !errorStruct ||
+		payloadValid := borrow && !mutable && placedType == operation.OwnerType && operation.Operator == ""
+		if operation.Operator == "alloc_zeroed_bytes" {
+			payloadValid = successType == hir.MutableBorrow(hir.TypeByteSlice) && operation.OwnerType == hir.TypeUSize
+		}
+		if !supported || !payloadValid || !errorStruct ||
 			len(e.structTypes[errorIndex].definition.Fields) != 1 || e.structTypes[errorIndex].definition.Fields[0].Type != hir.TypeU32 {
 			return CapabilityError{Function: function.Name, Feature: "fallible Region placement result " + strconv.Quote(operation.Type.String())}
 		}

@@ -516,6 +516,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		fmt.Fprintf(output, "    if (fy_std_region_begin_v0((void *)&fy_l_%d, (void *)&fy_region_%d) != UINT32_C(0)) %s;\n", operand.Local, operation.Symbol, e.trapCall("FY_TRAP_UNREACHABLE", operation.Span))
 	case mir.OperationRegionPlace:
+		if operation.Operator == "alloc_zeroed_bytes" {
+			return e.emitRegionBytes(output, functionIndex, operation)
+		}
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
 			return fmt.Errorf("Region placement in %s: %w", function, err)
