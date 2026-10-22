@@ -152,10 +152,26 @@ The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Are
 
 Outside the representative Phase 2 minimum ([Linux File contract](../runtime/runtime-stdlib-v0.md#linux-file-v0)): directory lifecycle/enumeration, rename/hardlink/copy/`set_len`, extended metadata, and File-to-Buffer. Admission depends on Linux target adapters and owning native fixtures. `Vec<T>` and extra pure helpers are later surfaces, not required full SDK parity. Portable paths, sockets, mapped files, async I/O, generic allocators, and freestanding support remain design exclusions. No deferral or waiver is claimed for the missing mandatory evidence.
 
+## File progress fixture
+
+The [File progress fixture](../../internal/cli/linux_file_progress_test.go) adds
+`TestLinuxFileProgressEmission` plus [syscall
+scripts](../../internal/cli/linux_file_progress_hooks_test.go) and a source-level companion that
+exercise the public SDK write/write_all/read/read_exact paths. The native cases assert exact
+payloads and untouched suffixes, status/OS-code/completed-byte errors, EINTR retries, short
+transfers, initial and partial errors, zero-progress, EOF/empty requests, recovery, and sync
+retry/error plus consuming close failure without retry. Test-only POSIX hooks reuse the existing
+pattern, leaving production API, runtime ABI, SDK bytes, DB, hygiene, and CI runners unchanged.
+
+`TestLinuxFileProgressEmission` passes on Windows. `TestLinuxFileProgressNative` defines four
+GCC/Clang low/optimized executions but is skipped on this host; the Linux evidence gap remains
+open until those executions pass. The scripts supply syscall outcomes, while production File
+algorithms and SDK error conversion remain in the compiled program.
+
 ## Next work
 
-1. Add deterministic File EINTR/no-progress and exact completed-prefix checks, including the public
-   error path, using the existing test-only POSIX interception pattern.
+1. Execute the [File progress fixture](#file-progress-fixture) on Linux with GCC and Clang at both
+   profiles. Its syscall scripts and public SDK assertions are now defined; native evidence is pending.
 2. Add direct SystemHeap resize-OOM preservation checks using the existing probe allocator.
 3. Record focused no-skip Linux evidence for these checks and the existing exact-read/publication
    cases, and map active-payload agreement to the tagged fixture values and drop sites before

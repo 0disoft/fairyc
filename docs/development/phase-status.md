@@ -56,6 +56,12 @@ those paths are unimplemented. Before promotion, the review also requires indivi
 evidence and an explicit mapping of the roadmap's active-payload agreement to tagged values and
 drop-site observations. No missing mandatory rule is waived by this review. Phase 2 remains partial.
 
+`TestLinuxFileProgressEmission` compiles the real bundled SDK to Linux C successfully on Windows,
+but `TestLinuxFileProgressNative` (GCC/Clang low and optimized execution) is skipped on this host,
+so Linux native evidence remains pending. Phase 2 stays partial, with heap resize-OOM and focused
+Linux/active-payload evidence still open. See the [File progress
+fixture](../../internal/cli/linux_file_progress_test.go).
+
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
 [Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
 and installation. The hosted receipt above verifies their implementation for the bounded Ubuntu
