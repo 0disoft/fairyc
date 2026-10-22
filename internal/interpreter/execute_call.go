@@ -436,8 +436,8 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
 				}
 				stored := value.cloneForValueCopy()
-				if operation.Operator == "alloc_zeroed_bytes" {
-					stored, err = r.regionBytes(value)
+				if operation.Operator == "alloc_zeroed_bytes" || operation.Operator == "copy_bytes" {
+					stored, err = r.regionBytes(value, operation.Operator == "copy_bytes")
 					if err != nil {
 						return callCompletion{}, err
 					}
@@ -445,7 +445,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				region.placements = append(region.placements, stored)
 				borrow, _, result := hir.ResultElements(operation.Type)
 				expectedBorrow := hir.SharedBorrow(operation.OwnerType)
-				if operation.Operator == "alloc_zeroed_bytes" {
+				if operation.Operator == "alloc_zeroed_bytes" || operation.Operator == "copy_bytes" {
 					expectedBorrow = hir.MutableBorrow(hir.TypeByteSlice)
 				}
 				if !result || borrow != expectedBorrow {

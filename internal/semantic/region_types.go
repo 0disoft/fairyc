@@ -17,7 +17,7 @@ func (a *analyzer) isRegionAllocationCall(expression *ast.Expression) bool {
 	if callee.Text == "place" {
 		return true
 	}
-	if callee.Text != "alloc_zeroed_bytes" {
+	if callee.Text != "alloc_zeroed_bytes" && callee.Text != "copy_bytes" {
 		return false
 	}
 	receiver := a.resolved[callee.Children[0]]
@@ -40,8 +40,13 @@ func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.E
 	expected := hir.TypeInvalid
 	if callee.Text == "alloc_zeroed_bytes" {
 		expected = hir.TypeUSize
+	} else if callee.Text == "copy_bytes" {
+		expected = hir.SharedBorrow(hir.TypeByteSlice)
 	}
 	value, valueType := c.checkExpression(expression.Children[1], expected)
+	if callee.Text == "copy_bytes" {
+		value, valueType = c.sharedCallArgument(&expression.Children[1], value, valueType, expected)
+	}
 	result.Children = appendExpression(result.Children, value)
 	if valueType == hir.TypeInvalid {
 		return hir.TypeInvalid
@@ -51,8 +56,8 @@ func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.E
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Region.place without one public std::alloc::AllocError type")
 		return hir.TypeInvalid
 	}
-	if callee.Text == "alloc_zeroed_bytes" {
-		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), valueType, hir.TypeUSize, span(c.module.file.Path, expression.Span))
+	if callee.Text == "alloc_zeroed_bytes" || callee.Text == "copy_bytes" {
+		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), valueType, expected, span(c.module.file.Path, expression.Span))
 		return hir.Result(hir.MutableBorrow(hir.TypeByteSlice), errorType)
 	}
 	return hir.Result(hir.SharedBorrow(valueType), errorType)

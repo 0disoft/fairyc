@@ -37,6 +37,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("} fy_region;\n")
 		output.WriteString("extern uint32_t fy_std_region_begin_v0(void *arena, void *output);\n")
 		output.WriteString("extern uint32_t fy_std_region_allocate_zeroed_v0(void *region, size_t size, size_t alignment, void **output);\n")
+		if _, copyBytes := e.analysis.usedForeignSymbols["fy_std_region_copy_bytes_v0"]; copyBytes {
+			output.WriteString("extern uint32_t fy_std_region_copy_bytes_v0(void *region, const void *source, size_t size, size_t alignment, void **output);\n")
+		}
 		output.WriteString("extern uint32_t fy_std_region_reset_v0(void *region);\n\n")
 	}
 	_, usesStaticByteString := e.analysis.features["static-byte-string"]

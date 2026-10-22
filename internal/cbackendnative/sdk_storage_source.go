@@ -11,10 +11,56 @@ unsafe extern C fn void fail_after(usize count) ;
 
 fn usize size_once(ref mut usize calls) { *calls = *calls + 1; return 4; }
 
+fn ref u8[] source_once(ref mut usize calls, ref u8[] source) { *calls = *calls + 1; return source; }
+
 fn void check_arena(alloc::Arena input) {
     var alloc::Arena arena = input;
     var usize calls = 0;
+    var usize copy_calls = 0;
     region scratch in ref mut arena {
+        var u8[4] source = [65, 0, 255, 90];
+        let i32 copy_code = switch (scratch.copy_bytes(source_once(ref mut copy_calls, ref source))) {
+            case .ok(copied): {
+                assert(copy_calls == 1 && bytes::equal(copied, b"A\0\xffZ"));
+                source[0] = 66;
+                copied[3] = 88;
+                assert(copied[0] == 65 && source[3] == 90);
+                unsafe { fail_after(0); }
+                assert(switch (scratch.copy_bytes(copied)) {
+                    case .ok(_): { false }
+                    case .err(error): { alloc::error_status(error) == 1 }
+                });
+                unsafe { fail_after(1); }
+                assert(switch (scratch.copy_bytes(copied)) {
+                    case .ok(_): { false }
+                    case .err(error): { alloc::error_status(error) == 1 }
+                });
+                assert(bytes::equal(copied, b"A\0\xffX"));
+                assert(source[0] == 66 && source[3] == 90);
+                let i32 recovery = switch (scratch.copy_bytes(copied[1..3])) {
+                    case .ok(next): {
+                        assert(bytes::equal(next, b"\0\xff"));
+                        next[0] = 7;
+                        assert(copied[1] == 0);
+                        0
+                    }
+                    case .err(_): { 1 }
+                };
+                assert(recovery == 0);
+                0
+            }
+            case .err(_): { 1 }
+        };
+        assert(copy_code == 0);
+        unsafe { fail_after(0); }
+        assert(switch (scratch.copy_bytes(b"")) {
+            case .ok(empty): { empty.len == 0 && empty.is_empty }
+            case .err(_): { false }
+        });
+        assert(switch (scratch.copy_bytes(b"x")) {
+            case .ok(_): { false }
+            case .err(error): { alloc::error_status(error) == 1 }
+        });
         let i32 bytes_code = switch (scratch.alloc_zeroed_bytes(size_once(ref mut calls))) {
             case .ok(value): {
                 assert(calls == 1 && value.len == 4 && value[0] == 0 && value[1] == 0 && value[2] == 0 && value[3] == 0);

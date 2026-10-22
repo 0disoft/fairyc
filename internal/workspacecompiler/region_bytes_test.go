@@ -2,6 +2,7 @@ package workspacecompiler
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -57,6 +58,11 @@ func TestRegionByteAllocationWorkspace(t *testing.T) {
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || len(outcome.RegionTrace) != 1 || outcome.RegionTrace[0].Placements != 2 {
 		t.Fatalf("Region byte interpreter outcome: %+v %v", outcome, err)
 	}
+	assertRegionByteMIRRejectsMutations(t, &checked.MIR, "alloc_zeroed_bytes")
+}
+
+func assertRegionByteMIRRejectsMutations(t *testing.T, program *mir.Program, operator string) {
+	t.Helper()
 	// Reject corrupted selectors, argument types, and borrowed result payloads.
 	mutations := []struct {
 		name  string
@@ -66,6 +72,10 @@ func TestRegionByteAllocationWorkspace(t *testing.T) {
 		{"missing-operator", func(op *mir.Operation) { op.Operator = "" }},
 		{"wrong-owner", func(op *mir.Operation) { op.OwnerType = hir.TypeI32 }},
 		{"wrong-operand", func(op *mir.Operation) { op.Operands = []mir.Operand{{Kind: mir.OperandI32, I32: 4}} }},
+		{"wrong-error", func(op *mir.Operation) {
+			success, _, _ := hir.ResultElements(op.Type)
+			op.Type = hir.Result(success, hir.TypeI32)
+		}},
 		{"shared-payload", func(op *mir.Operation) {
 			_, failure, _ := hir.ResultElements(op.Type)
 			op.Type = hir.Result(hir.SharedBorrow(hir.TypeByteSlice), failure)
@@ -73,19 +83,23 @@ func TestRegionByteAllocationWorkspace(t *testing.T) {
 	}
 	for _, mutation := range mutations {
 		t.Run(mutation.name, func(t *testing.T) {
-			for fi := range checked.MIR.Functions {
-				for bi := range checked.MIR.Functions[fi].Blocks {
-					for oi := range checked.MIR.Functions[fi].Blocks[bi].Operations {
-						op := &checked.MIR.Functions[fi].Blocks[bi].Operations[oi]
-						if op.Kind != mir.OperationRegionPlace || op.Operator != "alloc_zeroed_bytes" {
+			for fi := range program.Functions {
+				for bi := range program.Functions[fi].Blocks {
+					for oi := range program.Functions[fi].Blocks[bi].Operations {
+						op := &program.Functions[fi].Blocks[bi].Operations[oi]
+						if op.Kind != mir.OperationRegionPlace || op.Operator != operator {
 							continue
 						}
 						original := *op
 						mutation.apply(op)
-						failures := mir.Verify(checked.MIR)
+						failures := mir.Verify(*program)
 						*op = original
-						if len(failures) == 0 {
-							t.Fatal("malformed Region byte operation verified")
+						rejected := false
+						for _, failure := range failures {
+							rejected = rejected || failure.Code == "V1403"
+						}
+						if !rejected {
+							t.Fatalf("malformed Region bytes lack V1403: %+v", failures)
 						}
 						return
 					}
@@ -97,15 +111,16 @@ func TestRegionByteAllocationWorkspace(t *testing.T) {
 }
 
 func TestRegionByteAllocationRejectsEscapeAndWrongType(t *testing.T) {
-	for _, item := range []struct{ name, source, code string }{
-		{"escape", `module main; import std::alloc as alloc;
+	for _, operation := range []string{"alloc_zeroed_bytes", "copy_bytes"} {
+		for _, item := range []struct{ name, source, code string }{
+			{"escape", `module main; import std::alloc as alloc;
 fn Result<ref mut u8[], alloc::AllocError> escape(alloc::Arena input) {
     var alloc::Arena arena = input;
     region scratch in ref mut arena { return scratch.alloc_zeroed_bytes(1); }
     return .err(alloc::AllocError { .status = 1 });
 }
 fn i32 main() { return 0; }`, "E3101"},
-		{"exclusive-alias", `module main; import std::alloc as alloc;
+			{"exclusive-alias", `module main; import std::alloc as alloc;
 fn void check(alloc::Arena input) { var alloc::Arena arena = input;
     region scratch in ref mut arena {
         discard switch (scratch.alloc_zeroed_bytes(2)) {
@@ -115,26 +130,32 @@ fn void check(alloc::Arena input) { var alloc::Arena arena = input;
     }
 }
 fn i32 main() { return 0; }`, "E2101"},
-		{"wrong-type", `module main; import std::alloc as alloc;
+			{"wrong-type", `module main; import std::alloc as alloc;
 fn void check(alloc::Arena input) { var alloc::Arena arena = input; region scratch in ref mut arena { discard scratch.alloc_zeroed_bytes(true); } }
 fn i32 main() { return 0; }`, "E1006"},
-	} {
-		t.Run(item.name, func(t *testing.T) {
-			root := writeCacheWorkspace(t, testAnswer42)
-			writeFile(t, filepath.Join(root, "src", "main.fy"), item.source)
-			checked, err := Check(loadCacheWorkspace(t, root))
-			if err != nil {
-				t.Fatal(err)
-			}
-			if checked.Verified {
-				t.Fatal("invalid Region byte source verified")
-			}
-			for _, diagnostic := range checked.Semantic.Diagnostics {
-				if diagnostic.Code == item.code {
-					return
+		} {
+			t.Run(operation+"/"+item.name, func(t *testing.T) {
+				source := item.source
+				if operation == "copy_bytes" {
+					source = strings.NewReplacer("alloc_zeroed_bytes(1)", `copy_bytes(b"x")`, "alloc_zeroed_bytes(2)", `copy_bytes(b"xy")`, "alloc_zeroed_bytes(true)", "copy_bytes(true)").Replace(source)
 				}
-			}
-			t.Fatalf("missing %s: diagnostics=%+v unsupported=%+v", item.code, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
-		})
+				root := writeCacheWorkspace(t, testAnswer42)
+				writeFile(t, filepath.Join(root, "src", "main.fy"), source)
+				checked, err := Check(loadCacheWorkspace(t, root))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if checked.Verified {
+					t.Fatal("invalid Region byte source verified")
+				}
+				for _, diagnostic := range checked.Semantic.Diagnostics {
+					if diagnostic.Code == item.code {
+						return
+					}
+				}
+				t.Fatalf("missing %s: diagnostics=%+v unsupported=%+v", item.code, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+			})
+		}
 	}
+
 }

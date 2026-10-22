@@ -29,8 +29,13 @@ func (e *emitter) emitRegionBytes(output *strings.Builder, functionIndex int, op
 	// The compound statement also makes this valid directly after a C11 label.
 	output.WriteString("    {\n")
 	fmt.Fprintf(output, "    void *fy_region_storage_%d = NULL;\n", id)
-	fmt.Fprintf(output, "    uintptr_t fy_region_length_%d = %s;\n", id, value)
-	fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)&fy_region_%d, (size_t)fy_region_length_%d, _Alignof(uint8_t), &fy_region_storage_%d);\n", id, operation.Symbol, id, id)
+	if operation.Operator == "copy_bytes" {
+		fmt.Fprintf(output, "    uintptr_t fy_region_length_%d = (%s).length;\n", id, value)
+		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_copy_bytes_v0((void *)&fy_region_%d, (%s).data, (size_t)fy_region_length_%d, _Alignof(uint8_t), &fy_region_storage_%d);\n", id, operation.Symbol, value, id, id)
+	} else {
+		fmt.Fprintf(output, "    uintptr_t fy_region_length_%d = %s;\n", id, value)
+		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)&fy_region_%d, (size_t)fy_region_length_%d, _Alignof(uint8_t), &fy_region_storage_%d);\n", id, operation.Symbol, id, id)
+	}
 	fmt.Fprintf(output, "    if (fy_region_status_%d == UINT32_C(0)) {\n", id)
 	fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_OK, .p_0 = (fy_mut_byte_slice){ .data = (uint8_t *)fy_region_storage_%d, .length = fy_region_length_%d } };\n", id, taggedIndex, id, id)
 	output.WriteString("    } else {\n")

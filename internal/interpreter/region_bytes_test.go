@@ -9,7 +9,7 @@ import (
 
 func TestRegionByteAllocationBudgetAndBacking(t *testing.T) {
 	r := executionState{steps: 8}
-	view, err := r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: 4})
+	view, err := r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: 4}, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,14 +25,14 @@ func TestRegionByteAllocationBudgetAndBacking(t *testing.T) {
 	if err := view.storeIndexed(1, runtimeValue{kind: valueU8, typ: hir.TypeU8, scalar: 42}); err != nil {
 		t.Fatal(err)
 	}
-	other, err := r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: 4})
+	other, err := r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: 4}, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if b, err := other.byteAt(1); err != nil || b != 0 {
 		t.Fatal("independent Region allocations share storage")
 	}
-	_, err = r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: ^uint64(0)})
+	_, err = r.regionBytes(runtimeValue{kind: valueUSize, typ: hir.TypeUSize, scalar: ^uint64(0)}, false)
 	var capability CapabilityError
 	if !errors.As(err, &capability) || capability.Kind != LimitStep {
 		t.Fatalf("unbounded allocation was not rejected: %v", err)

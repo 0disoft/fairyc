@@ -153,7 +153,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case hir.ExpressionCall:
-		if (expression.Operator == "place" || expression.Operator == "alloc_zeroed_bytes") && len(expression.Children) == 2 && expression.Children[0].Type == hir.TypeRegion {
+		if (expression.Operator == "place" || expression.Operator == "alloc_zeroed_bytes" || expression.Operator == "copy_bytes") && len(expression.Children) == 2 && expression.Children[0].Type == hir.TypeRegion {
 			return l.lowerRegionPlace(expression)
 		}
 		return l.lowerCall(expression)

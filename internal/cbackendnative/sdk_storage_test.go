@@ -15,7 +15,7 @@ func TestSDKStorageProbe(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, symbol := range []string{"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0",
+	for _, symbol := range []string{"fy_std_region_allocate_zeroed_v0", "fy_std_region_copy_bytes_v0", "fy_std_region_reset_v0",
 		"fy_std_buffer_reserve_v0", "fy_std_string_append_storage_v0", "fy_std_cstring_from_text_storage_v0"} {
 		if !strings.Contains(source, symbol) || !strings.Contains(support, symbol) {
 			t.Errorf("SDK storage call/support missing %s", symbol)

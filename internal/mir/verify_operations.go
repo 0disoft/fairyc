@@ -455,6 +455,14 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 			payloadValid = successType == hir.MutableBorrow(hir.TypeByteSlice) && operation.OwnerType == hir.TypeUSize &&
 				len(operation.Operands) == 1 && fieldStoreOperandType(operation.Operands[0], storeTypes) == hir.TypeUSize
 		}
+		if operation.Operator == "copy_bytes" {
+			payloadValid = successType == hir.MutableBorrow(hir.TypeByteSlice) && operation.OwnerType == hir.SharedBorrow(hir.TypeByteSlice) &&
+				len(operation.Operands) == 1 && fieldStoreOperandType(operation.Operands[0], storeTypes) == operation.OwnerType
+		}
+		if operation.Operator != "" {
+			errorRecord := structTypes[failureType]
+			payloadValid = payloadValid && errorRecord != nil && len(errorRecord.Fields) == 1 && errorRecord.Fields[0].Type == hir.TypeU32
+		}
 		shapeValid := result && payloadValid &&
 			failureType != hir.TypeInvalid && failureType != hir.ParseType("") && len(operation.Operands) == 1 &&
 			operation.DestinationLocal != NoLocal && operation.OwnerType != hir.TypeInvalid && operation.OwnerType != hir.ParseType("")
