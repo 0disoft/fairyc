@@ -74,8 +74,11 @@ at `2c8997ee` records four public SDK storage executions under Clang/GCC at low/
 It checks Arena/Region allocation and rollback, Buffer growth, String/CString allocation failures,
 preserved contents/ownership, and zero live allocations after cleanup. The same v38 report retains
 208 differential/drop-trace executions, 104 sanitizer executions, and 56 ABI crossings.
-All nine Frontend jobs passed. The [coverage review](linux-runtime-coverage.md#remaining-phase-2-review)
-maps remaining public Buffer/text paths separately from the existing raw C evidence.
+All nine Frontend jobs in that run passed. The fixture has since expanded to public Buffer
+`empty`, `resize_zeroed`, `truncate`, `view_mut` and text empty, exact multibyte UTF-8, and
+successful/empty `from_buffer` cases; the receipt above predates those additions.
+A fresh Linux receipt is pending. The
+[coverage review](linux-runtime-coverage.md#remaining-phase-2-review) now maps those expanded cases.
 Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
 
 ## Cache evidence
@@ -121,6 +124,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Extend the [public SDK Buffer/text fixtures](linux-runtime-coverage.md#next-slice),
-   then resolve Phase 2's two remaining Linux runtime/standard-library entries before conformance promotion.
+1. Collect a fresh Linux receipt for the [expanded public SDK Buffer/text fixture](linux-runtime-coverage.md#next-slice),
+   then review Phase 2's remaining declared runtime/library rules before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

@@ -55,10 +55,37 @@ fn void check_buffer(bytes::Buffer input) {
         case .ok(n): { n == 3 } case .err(_): { false }
     });
     assert(bytes::equal(bytes::view(ref value), b"ABC"));
+    assert(switch (bytes::resize_zeroed(ref mut value, 6)) {
+        case .ok(n): { n == 6 } case .err(_): { false }
+    });
+    let usize grown_capacity = bytes::capacity(ref value);
+    let ref mut u8[] writable = bytes::view_mut(ref mut value);
+    assert(writable.len == 6 && writable[3] == 0 && writable[4] == 0 && writable[5] == 0);
+    writable[4] = 88;
+    writable[5] = 89;
+    assert(bytes::equal(bytes::view(ref value), b"ABC\0XY"));
+    assert(switch (bytes::truncate(ref mut value, 4)) {
+        case .ok(n): { n == 4 } case .err(_): { false }
+    });
+    assert(bytes::capacity(ref value) == grown_capacity);
+    assert(bytes::equal(bytes::view(ref value), b"ABC\0"));
+    assert(switch (bytes::resize_zeroed(ref mut value, 6)) {
+        case .ok(n): { n == 6 } case .err(_): { false }
+    });
+    assert(bytes::capacity(ref value) == grown_capacity);
+    assert(bytes::equal(bytes::view(ref value), b"ABC\0\0\0"));
     assert(switch (bytes::clear(ref mut value)) {
         case .ok(n): { n == 0 } case .err(_): { false }
     });
     assert(bytes::is_empty(ref value));
+}
+
+fn void check_empty_buffer() {
+    var bytes::Buffer value = bytes::empty();
+    assert(bytes::is_empty(ref value) && bytes::len(ref value) == 0);
+    assert(bytes::capacity(ref value) == 0 && bytes::view(ref value).is_empty);
+    let ref mut u8[] writable = bytes::view_mut(ref mut value);
+    assert(writable.is_empty && writable.len == 0);
 }
 
 fn void check_string(text::String input) {
@@ -96,7 +123,65 @@ fn void check_invalid_buffer(bytes::Buffer input) {
     });
 }
 
+fn void check_text_round_trip(bytes::Buffer input, ref u8[] expected) {
+    let usize original_capacity = bytes::capacity(ref input);
+    let i32 code = switch (text::from_buffer(input)) {
+        case .ok(value): {
+            assert(text::string_len(ref value) == expected.len);
+            assert(text::string_is_empty(ref value) == expected.is_empty);
+            assert(bytes::equal(text::as_bytes(text::string_as_str(ref value)), expected));
+            let bytes::Buffer returned = text::into_buffer(value);
+            assert(bytes::capacity(ref returned) == original_capacity);
+            assert(bytes::equal(bytes::view(ref returned), expected));
+            0
+        }
+        case .err(_): { 1 }
+    };
+    assert(code == 0);
+}
+
+fn void check_text_edges() {
+    assert(switch (text::copy("")) {
+        case .ok(value): {
+            text::string_is_empty(ref value) && text::string_len(ref value) == 0 &&
+                text::as_bytes(text::string_as_str(ref value)).is_empty
+        }
+        case .err(_): { false }
+    });
+    assert(switch (text::cstring_from_text("")) {
+        case .ok(value): {
+            text::cstring_is_empty(ref value) && text::cstring_len(ref value) == 0 &&
+                consume_cstr(text::cstring_as_cstr(ref value)) == 0
+        }
+        case .err(_): { false }
+    });
+    let ref u8[] unicode = b"\xed\x95\x9c\xea\xb8\x80\xce\xbb";
+    let i32 unicode_code = switch (text::validate_utf8(unicode)) {
+        case .ok(view): {
+            assert(view.len == 8 && bytes::equal(text::as_bytes(view), unicode));
+            switch (text::copy(view)) {
+                case .ok(value): {
+                    assert(text::string_len(ref value) == 8);
+                    assert(bytes::equal(text::as_bytes(text::string_as_str(ref value)), unicode));
+                    0
+                }
+                case .err(_): { 2 }
+            }
+        }
+        case .err(_): { 3 }
+    };
+    assert(unicode_code == 0);
+    let i32 round_trip_code = switch (bytes::copy(unicode)) {
+        case .ok(value): { check_text_round_trip(value, unicode); 0 }
+        case .err(_): { 4 }
+    };
+    assert(round_trip_code == 0);
+    check_text_round_trip(bytes::empty(), b"");
+}
+
 fn i32 main() {
+    check_empty_buffer();
+    check_text_edges();
     let i32 arena_code = switch (alloc::create()) {
         case .ok(value): { check_arena(value); 0 } case .err(_): { 1 }
     };

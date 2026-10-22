@@ -1,6 +1,6 @@
 # Linux runtime and SDK coverage
 
-Audit: 2026-10-22, source `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`,
+Hosted evidence baseline: 2026-10-22, source `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
 This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
@@ -14,6 +14,8 @@ records report v38 on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and GCC 13.3.
 `sdkStorageExecutions: 4`, differential/drop-trace executions 208 each, sanitizer executions 104,
 bidirectional ABI executions 56, and layout probe executions 4. SystemHeap, Buffer, Arena,
 text-view, owned-text and public-File probe counters are each 4.
+That v38 receipt predates the public fixture expansion described below; its report shape and four
+SDK executions are unchanged, and a fresh Linux receipt is pending.
 
 The following v37 receipt records the earlier baseline:
 
@@ -74,7 +76,10 @@ and returned ownership; the outer C wrapper requires zero live allocations after
 existing native Linux lane: four executions under GCC/Clang at low/optimized profiles, with no new
 workflow or runner. The [focused test](../../internal/cbackendnative/sdk_storage_test.go) also
 checks Linux emission on Windows and executes the same fixture at both MSVC profiles.
-Local Windows tests passed. The first Linux attempt exposed C11 label/declaration emission and
+Focused `TestSDKStorageProbe` passes locally: Linux C emission on Windows, MSVC low/optimized
+executions, and zero live allocations, covering resize/zeroing, view mutation, truncate capacity,
+empty views, Korean/Greek UTF-8, and `from_buffer` roundtrips. Fresh Linux execution is pending.
+The first Linux attempt exposed C11 label/declaration emission and
 an unrelated Atlas crash-helper deadlock; `e149ac29` and `2c8997ee` correct those paths.
 [Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686)
 passed on the corrected source, including all four public SDK storage executions in report v38.
@@ -95,18 +100,18 @@ sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-exec
 | --- | --- | --- |
 | Thin runtime and SystemHeap | [runner](../../internal/cbackendnative/runner.go), [trap locations](../../internal/cbackend/trap_location_native_test.go), [generated heap crossing](../../internal/cbackendnative/smoke_heap.go) | Current runtime/source probes pass. SystemHeap remains internal support by contract. |
 | Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38; byte-level zeroing/copy and broader failure atomicity remain raw evidence. |
-| Buffer | Combined SDK check; [raw Buffer](../../internal/cbackendnative/smoke_buffer.go) | The combined fixture does not execute public `empty`, `resize_zeroed`, `truncate`, or `view_mut`. The raw fixture already covers zeroed resize, truncate, and failure paths. |
-| Text | Combined SDK check; [raw owned text](../../internal/cbackendnative/smoke_owned_text.go), [raw text views](../../internal/cbackendnative/smoke_text_views.go) | Empty text, successful Unicode text, and successful/empty `from_buffer` are absent from the combined public fixture; raw C already covers the corresponding byte-level cases. |
+| Buffer | Combined SDK check; [raw Buffer](../../internal/cbackendnative/smoke_buffer.go) | The combined fixture now executes public `empty`, `resize_zeroed`, `truncate`, and `view_mut`, including zeroing and regrowth. The raw fixture supplies the earlier byte-level and failure evidence. |
+| Text | Combined SDK check; [raw owned text](../../internal/cbackendnative/smoke_owned_text.go), [raw text views](../../internal/cbackendnative/smoke_text_views.go) | The combined fixture now executes empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips. Raw C supplies the byte-level cases. |
 | Linux `File` | [Public File source](../../internal/cbackendnative/smoke_files.go), [raw Linux File](../../internal/cbackendnative/smoke_linux_file.go) | The representative safe File path passes four executions; partial I/O and close failure are raw evidence. The Windows-only operations listed above are outside the Phase 2 minimum. |
 | Differential, layout, ABI, sanitizer | [runner](../../internal/cbackendnative/runner.go), [layout probes](../../internal/cbackendnative/probes_layout.go), [ABI probe](../../internal/cbackendnative/abi_probe.go) | The current receipt records 208 differential/drop comparisons, 4 layout probes, 56 ABI crossings, and 104 sanitizer executions for the admitted fixtures. |
 
-The next bounded fixture edit is to extend `sdkStorageSource` with the four listed public `Buffer`
-operations and empty/Unicode/from-buffer-success `text` cases; it requires no API or target-gate change.
+The expanded `sdkStorageSource` now covers those public `Buffer` and text cases; it requires no API
+or target-gate change. A fresh Linux receipt for the expanded fixture is pending.
 
 ## Next slice
 
-Extend the public SDK fixture with the Buffer/text cases listed above, then review remaining
-mandatory rules against fixtures or justified deferrals before considering conformance.
+Collect a fresh Linux receipt for the expanded public SDK fixture, then review remaining
+mandatory runtime/library rules against fixtures or justified deferrals before considering conformance.
 Both `complete-runtime` and `complete-standard-library`
 remain missing in the [target spec](../../internal/target/spec.go); `emittable`, `conformant`,
 and `supported` remain false. The fixture changes no product API, runtime implementation, DB,
