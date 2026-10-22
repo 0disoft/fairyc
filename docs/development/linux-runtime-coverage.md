@@ -2,6 +2,7 @@
 
 Hosted evidence baseline: 2026-10-22, source `5856f62109877c53c6388a4a03e0ac56c101a7a6`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
+Focused Linux evidence: source `7f7362b87c231c30ea89f3907396957f0d599032`, v3/28 cases.
 This inventory supports the [Phase 2 exit decision](phase-status.md#phase-2-exit-decision-2026-10-22);
 it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
@@ -43,9 +44,9 @@ The source pointers below identify coverage, not additional executions performed
 
 ## Focused Linux receipt
 
-- Run: [39798530273](https://github.com/0disoft/fairyc/actions/runs/39798530273)
-- Job: [Linux Go 119892384769](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769)
-- Source: [`5856f621`](https://github.com/0disoft/fairyc/commit/5856f62109877c53c6388a4a03e0ac56c101a7a6)
+- Run: [39805612550](https://github.com/0disoft/fairyc/actions/runs/39805612550)
+- Job: [Linux Go 119918006715](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
+- Source: [`7f7362b8`](https://github.com/0disoft/fairyc/commit/7f7362b87c231c30ea89f3907396957f0d599032)
 
 | Test | Executions | Skips |
 | --- | ---: | ---: |
@@ -55,10 +56,13 @@ The source pointers below identify coverage, not additional executions performed
 | `TestBytesEqualExecution` | 4 | 0 |
 | `TestBytesCompareExecution` | 4 | 0 |
 | `TestCheckedI64DecimalExecution` | 4 | 0 |
+| `TestLinuxTrapReceiptProgressNative` | 4 | 0 |
 
-Evidence `fairyc.phase2-linux-evidence/v2`: `complete:true`, 24 entries in `passedCases`,
+Evidence `fairyc.phase2-linux-evidence/v3`: `complete:true`, 28 entries in `passedCases`,
 `missing:[]`, `skipped:[]`, `errors:[]`. Each test passed GCC and Clang at low and optimized
-settings (4 executions each). The previous [v1 receipt](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
+settings (4 executions each). The previous [v2 receipt](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769)
+at `5856f62109877c53c6388a4a03e0ac56c101a7a6` records 24 cases and remains historical.
+The earlier [v1 receipt](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
 at `3ea6d1b` records 12 cases and remains historical.
 
 The file public SDK test exercises EINTR retry, short reads/writes, exact error status/OS
@@ -76,7 +80,8 @@ executes production `LinuxRunSource` with only the receipt `write` call replaced
 Each GCC/Clang low/optimized case checks short writes, repeated EINTR, zero progress and EIO before
 or after progress, including exact fd, pointer, remaining bytes, trace and exit status.
 Local Windows runtime tests and Linux Go cross-compilation pass; native execution skips on Windows.
-Hosted v3 execution is pending. The v2/24-case receipt above remains the latest complete baseline.
+The hosted v3 receipt records all six scenarios passing under every compiler/profile combination
+(24 scenario executions): success exits 195, zero-progress/error exits 254, and exact traces match.
 
 ## Implemented surfaces
 
@@ -184,7 +189,7 @@ receipt proves representative success, not blanket completeness.
 
 | Evidence area | What the receipt establishes | Status |
 | --- | --- | --- |
-| Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [Progress tests](../../internal/cruntime/trap_receipt_progress_test.go) now define deterministic native observations across all four compiler/profile cases. Hosted v3 execution remains pending; the v2 receipt does not attest them. |
+| Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [Progress tests](../../internal/cruntime/trap_receipt_progress_test.go) pass all four compiler/profile cases in the v3 receipt, with six scenarios per case and no skips. The v2 receipt remains historical and does not attest this test. |
 | Pure helper native execution | [Equality/comparison](../../internal/cli/bytes_equal_test.go) and [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) have admitted contracts and independent Go oracles. The shared [Linux SDK helper runner](../../internal/cli/linux_sdk_helpers_test.go) executes production emitted C with native support. | The current source adds GCC/Clang low/optimized subtests to the three existing roots. A missing compiler, build or run failure, nonzero exit, or any stdout/stderr fails the case; unsupported hosts still skip. Windows MSVC low/optimized coverage remains. The v2 receipt records all 12 helper profile cases passing, with no missing or skipped cases. |
 | Whole-target observation | The v38 process/drop oracle checks admitted fixtures under two compilers and profiles. | [Exit values](../../internal/cbackendnative/oracle_results.go) cover 0–191, while the manifest defers complex resources and effects. Partial compiler-semantic coverage is not a thin-runtime defect or evidence of entire-language conformance. |
 
@@ -278,6 +283,6 @@ does not prove complete runtime or standard-library coverage, and no requirement
 
 ## Next work
 
-Next single task: obtain the v3/28-case receipt from the existing Linux Go CI job, including all
-four trap-receipt compiler/profile cases without skips. Preserve the v2 receipt as historical
-evidence; no product API/runtime ABI or additional runner is needed.
+Next single task: use the contract-to-fixture review above to identify the next required runtime
+or SDK observation gap. Keep both missing completeness markers and all three target flags unchanged
+until their owning requirements have evidence; excluded API surfaces remain separate decisions.

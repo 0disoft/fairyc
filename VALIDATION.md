@@ -72,7 +72,9 @@ low and optimized subtests without skips, missing cases or duplicates, with any 
 also rejecting completeness. The schema
 version changed because the required evidence set grew from 24 to 28 cases (seven roots, four
 compiler/profile cases each). Each new trap-receipt case runs six progress/failure scenarios.
-Existing v1/12-case and v2/24-case receipts remain historical; v3 hosted execution is pending.
+Existing v1/12-case and v2/24-case receipts remain historical. The
+[v3 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
+at `7f7362b87c231c30ea89f3907396957f0d599032` records all 28 cases passing without skips.
 The Go suite command and runner count are unchanged, and no native tests are
 repeated.
 The explicit Bash shell preserves pipeline failure if either the Go suite or receipt checker fails.

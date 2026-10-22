@@ -2,7 +2,9 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Hosted Frontend receipt: `5856f62109877c53c6388a4a03e0ac56c101a7a6` (v2 focused Linux evidence, 24 cases)
+- Focused Linux receipt: `7f7362b87c231c30ea89f3907396957f0d599032` (v3, 28 cases),
+  [Linux Go job 119918006715](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
+- Previous focused Linux receipt: `5856f62109877c53c6388a4a03e0ac56c101a7a6` (v2, 24 cases), historical
 - Previous SDK receipt: `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`, historical evidence
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
 - Evidence: [Frontend run 39798530273](https://github.com/0disoft/fairyc/actions/runs/39798530273), all nine jobs passed; native
@@ -20,7 +22,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769) passed all 24 focused Linux cases without skips, including 12 equality, comparison, and checked-decimal executions. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715) passed all 28 focused Linux cases without skips, including four trap-receipt cases and 12 equality, comparison, and checked-decimal cases. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -113,12 +115,12 @@ false. Conformance requires every declared language, layout, bidirectional ABI, 
 toolchain fixture to pass without skips, as defined by the [C ABI target claims](../abi/c-abi-v0.md#target-status)
 and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice).
 
-The open evidence is bounded. Linux receipt-write progress now has a deterministic fault-injected
-test, but its hosted execution is pending under the v3/28-case matrix. Windows runtime tests and
-Linux Go cross-compilation pass; the native test skips on Windows. The 0–191 process-status oracle
-and manifest deferrals do not observe the whole target. Equality, comparison, and decimal parsing
-now pass all 12 GCC/Clang low/optimized
-executions in the v2 receipt. The
+The [v3 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
+records all 28 required compiler/profile cases passing with no missing, skipped, or failed cases.
+Linux receipt-write progress contributes four cases, each running six deterministic scenarios
+with exact receipt suffix, pointer, trace, and exit checks. Equality, comparison, and decimal
+parsing retain their 12 passing cases. The earlier v2/24-case and v1/12-case receipts remain
+historical. The 0–191 process-status oracle and manifest deferrals do not observe the whole target. The
 [coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) records the source
 owners and remaining evidence. Windows filesystem parity and distribution remain outside this gate.
 
@@ -189,7 +191,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Obtain the v3/28-case receipt from the existing Linux Go CI job, including all four compiler/profile
-   cases of `TestLinuxTrapReceiptProgressNative` without skips. Keep the v2 receipt as historical
-   evidence and product API/runtime ABI and runner allocation unchanged.
+1. Review the existing runtime/SDK contract-to-fixture inventory and select the next required
+   observation gap. Keep Phase 2 partial and both missing completeness markers unchanged.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
