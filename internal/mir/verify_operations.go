@@ -45,6 +45,11 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 		failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "payload move is attached to a non-payload operation"})
 	}
 	switch operation.Kind {
+	case OperationCCallback:
+		if operation.DestinationLocal < 0 || operation.Symbol == hir.NoSymbol || operation.Type != hir.TypeCCallbackI32UserData || len(operation.Operands) != 0 || operation.Variant != "" {
+			failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "invalid bounded callback construction"})
+		}
+		state.live[hir.SymbolID(operation.DestinationLocal)] = true
 	case OperationInitialize:
 		failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 		if len(operation.Operands) > 1 || len(operation.Operands) == 1 && operation.DestinationLocal != LocalID(operation.Symbol) {

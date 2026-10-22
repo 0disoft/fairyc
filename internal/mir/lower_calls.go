@@ -18,6 +18,11 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 	for index := range arguments {
 		argument := &arguments[index]
 		hasNestedSideEffect = hasNestedSideEffect || containsCall(argument)
+		if argument.Kind == hir.ExpressionCCallback {
+			argumentSpans = append(argumentSpans, argument.Span)
+			argumentValues = append(argumentValues, Operand{})
+			continue
+		}
 		value, err := l.lowerExpression(argument)
 		if err != nil {
 			return Operand{}, err
@@ -38,6 +43,17 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 			}
 		}
 		argumentValues = append(argumentValues, value)
+	}
+	// Forming a named static callback address has no source side effect. Materialize
+	// it after all user-data evaluation so it belongs to the final foreign-call block.
+	for index := range arguments {
+		if arguments[index].Kind == hir.ExpressionCCallback {
+			value, err := l.lowerExpression(&arguments[index])
+			if err != nil {
+				return Operand{}, err
+			}
+			argumentValues[index] = value
+		}
 	}
 	if len(argumentSpans) >= 2 {
 		l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{

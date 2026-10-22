@@ -147,6 +147,13 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	importSymbols := make(map[hir.SymbolID]struct{})
 	for _, record := range artifact.Functions {
 		for _, block := range record.Body.Blocks {
+			for _, op := range block.Operations {
+				if op.Kind == mir.OperationCCallback {
+					if _, owned := ownedSymbols[op.Symbol]; !owned {
+						importSymbols[op.Symbol] = struct{}{}
+					}
+				}
+			}
 			terminator := block.Terminator
 			if terminator.Kind != mir.TerminatorCall || terminator.ForeignABI != "" {
 				continue
@@ -350,6 +357,21 @@ func reassemble(artifacts []Artifact, verifyMIR func(mir.Program) []mir.Verifica
 		function := cloneFunction(record.Body)
 		function.Symbol = fresh[id]
 		for blockIndex := range function.Blocks {
+			for oi := range function.Blocks[blockIndex].Operations {
+				op := &function.Blocks[blockIndex].Operations[oi]
+				if op.Kind != mir.OperationCCallback {
+					continue
+				}
+				id, found := bindings[op.Symbol]
+				if !found {
+					return mir.Program{}, fmt.Errorf("callback target has no artifact binding")
+				}
+				symbol, found := fresh[id]
+				if !found {
+					return mir.Program{}, fmt.Errorf("callback target %s is unresolved", id)
+				}
+				op.Symbol = symbol
+			}
 			terminator := &function.Blocks[blockIndex].Terminator
 			if terminator.Kind != mir.TerminatorCall || terminator.ForeignABI != "" {
 				continue

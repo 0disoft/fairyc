@@ -16,6 +16,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	}
 	function := e.analysis.functions[functionIndex].Name
 	switch operation.Kind {
+	case mir.OperationCCallback:
+		index, found := e.analysis.bySymbol[operation.Symbol]
+		if !found {
+			return fmt.Errorf("missing callback target %d", operation.Symbol)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = &fy_cb_%d;\n", operation.DestinationLocal, index)
 	case mir.OperationAssign, mir.OperationInitialize:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {

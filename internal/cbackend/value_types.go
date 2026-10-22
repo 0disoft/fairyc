@@ -39,7 +39,7 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 	if _, borrow := e.safeBorrowCType(value); borrow {
 		return true
 	}
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeCCallbackI32UserData || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if _, array := e.arrayByType[value]; array {
@@ -65,6 +65,9 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 
 func (e *emissionAnalysis) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
+	if value == hir.TypeCCallbackI32UserData {
+		return "fy_c_callback_i32_userdata", nil
+	}
 	if cType, ok := integerTransportCType(value); ok {
 		return cType, nil
 	}

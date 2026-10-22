@@ -71,7 +71,8 @@ func reservedBackendCRecordName(value string) bool {
 }
 
 var generatedCNames = map[string]struct{}{
-	"int8_t": {}, "int16_t": {}, "uint16_t": {}, "intptr_t": {},
+	"fy_c_callback_i32_userdata": {},
+	"int8_t":                     {}, "int16_t": {}, "uint16_t": {}, "intptr_t": {},
 	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {}, "ssize_t": {},
 	"UINT8_C": {}, "INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
 	"INT32_MIN": {}, "INT32_MAX": {}, "UINT8_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},

@@ -160,6 +160,20 @@ func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 		return nil
 	}
 	for _, body := range artifact.Functions {
+		for _, block := range body.Function.Blocks {
+			for _, op := range block.Operations {
+				if op.Kind != mir.OperationCCallback {
+					continue
+				}
+				id, err := ParseFunctionID(op.Variant)
+				if err != nil {
+					return err
+				}
+				if err := recordReference(id); err != nil {
+					return err
+				}
+			}
+		}
 		for _, call := range body.Calls {
 			switch {
 			case strings.HasPrefix(call.Target, bodyInternalCallPrefix):

@@ -11,6 +11,13 @@
 
 [ADR 0423](../adr/0423-lossless-mir-static-bytes.md) defines the current lossless
 `StaticDataBase64` operand representation and exact process/stable/body versions.
+
+[ADR 0481](../adr/0481-bounded-c-callbacks.md) adds the `c-callback` opcode. Process bodies carry
+the referenced internal function symbol. Stable bodies clear that symbol and store its exact
+FunctionID in the opcode's existing `Variant` field; rebinding resolves a fresh symbol and clears
+the field. Callback targets participate in owned/import dependency checks, including process
+reassembly and stable package projection. No other opcode uses this interpretation. Existing
+envelopes and opcode names retain their formats; a consumer without the opcode rejects it.
 Previous payloads are rejected; in-memory raw bytes and source semantics are unchanged.
 
 This boundary splits one already verified whole-program MIR value into package-owned function

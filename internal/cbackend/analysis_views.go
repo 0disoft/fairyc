@@ -17,7 +17,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice, mir.OperationScalarCast, mir.OperationSharedReborrow,
-		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+		mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)

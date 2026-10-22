@@ -87,6 +87,11 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			}
 			return Operand{}, fmt.Errorf("unsupported literal %q of type %q", expression.Value, expression.Type)
 		}
+	case hir.ExpressionCCallback:
+		destination := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationCCallback, Symbol: expression.Symbol, Type: hir.TypeCCallbackI32UserData,
+			DestinationLocal: destination, Span: expression.Span})
+		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case hir.ExpressionPath:
 		return Operand{Kind: OperandLocal, Local: LocalID(expression.Symbol)}, nil
 	case hir.ExpressionGroup:

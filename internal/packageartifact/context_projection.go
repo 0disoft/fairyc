@@ -265,6 +265,18 @@ func stableArtifactImports(artifact Artifact, context ContextDescriptor) ([]Func
 	required := make(map[FunctionID]struct{})
 	for _, record := range artifact.Functions {
 		for _, block := range record.Body.Blocks {
+			for _, op := range block.Operations {
+				if op.Kind != mir.OperationCCallback {
+					continue
+				}
+				id, found := bindings[op.Symbol]
+				if !found {
+					return nil, fmt.Errorf("callback target has no artifact binding")
+				}
+				if _, local := owned[id]; !local {
+					required[id] = struct{}{}
+				}
+			}
 			terminator := block.Terminator
 			if terminator.Kind != mir.TerminatorCall || terminator.ForeignABI != "" {
 				continue

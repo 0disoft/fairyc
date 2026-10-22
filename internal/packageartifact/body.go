@@ -99,6 +99,20 @@ func describeStableBody(record FunctionRecord, context ContextDescriptor, coordi
 	}
 	calls := make([]StableBodyCall, 0)
 	for blockIndex := range function.Blocks {
+		for oi := range function.Blocks[blockIndex].Operations {
+			op := &function.Blocks[blockIndex].Operations[oi]
+			if op.Kind != mir.OperationCCallback {
+				continue
+			}
+			if !allowCalls {
+				return StableBodyArtifact{}, fmt.Errorf("stable leaf body does not admit callbacks")
+			}
+			id, found := bindings[op.Symbol]
+			if !found {
+				return StableBodyArtifact{}, fmt.Errorf("callback target %d has no stable FunctionID", op.Symbol)
+			}
+			op.Symbol, op.Variant = hir.NoSymbol, id.String()
+		}
 		terminator := &function.Blocks[blockIndex].Terminator
 		if terminator.Kind != mir.TerminatorCall {
 			continue
@@ -225,6 +239,23 @@ func rebindStableBody(body StableBodyArtifact, context ContextDescriptor, coordi
 	}
 	function.Symbol = functionSymbol
 	function.Name = hir.QualifiedModulePath(owner, body.Function.Name)
+	for bi := range function.Blocks {
+		for oi := range function.Blocks[bi].Operations {
+			op := &function.Blocks[bi].Operations[oi]
+			if op.Kind != mir.OperationCCallback {
+				continue
+			}
+			id, err := ParseFunctionID(op.Variant)
+			if err != nil {
+				return mir.Function{}, err
+			}
+			symbol, found := functionSymbols[id]
+			if !found || symbol == hir.NoSymbol {
+				return mir.Function{}, fmt.Errorf("callback target %s is unresolved", id)
+			}
+			op.Symbol, op.Variant = symbol, ""
+		}
+	}
 	for _, call := range body.Calls {
 		terminator := &function.Blocks[call.Block].Terminator
 		switch {
@@ -365,6 +396,18 @@ func ValidateStableBody(body StableBodyArtifact) error {
 	}
 	callIndex := 0
 	for blockIndex, block := range body.Function.Blocks {
+		for _, op := range block.Operations {
+			if op.Kind != mir.OperationCCallback {
+				continue
+			}
+			if op.Symbol != hir.NoSymbol {
+				return fmt.Errorf("stable callback retains a build-local target")
+			}
+			id, err := ParseFunctionID(op.Variant)
+			if err != nil || id == (FunctionID{}) {
+				return fmt.Errorf("invalid stable callback target")
+			}
+		}
 		if block.Terminator.Kind != mir.TerminatorCall {
 			continue
 		}

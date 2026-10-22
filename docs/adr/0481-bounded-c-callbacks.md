@@ -30,3 +30,15 @@ Target maturity flags and Phase 2 status remain unchanged.
 Implement in small commits: source typing and contract; verified MIR, package preservation and C
 transport; native crossing evidence. Verify target rebinding and reject callback values that
 escape the designated foreign argument. Reuse existing native runners without new CI jobs.
+
+The executable MIR opcode is `c-callback`. It names one internal function in `Symbol` and
+produces a dedicated local consumed only as the designated foreign argument in that block.
+The address is materialized after user-data evaluation because naming a static function has
+no side effect. This also permits a nested user-data producer call without extending the callback
+temporary across calls. Signature/origin, unique use and overwrite checks reject forged MIR.
+
+Stable package bodies encode the target FunctionID in the new opcode's existing `Variant` field,
+with `Symbol` cleared. Rebinding resolves it to a fresh symbol and clears `Variant`. Both process
+and stable artifacts include callback targets in their dependency sets. The codec envelope and
+all existing opcode wire names remain unchanged; old consumers reject the new opcode, and
+compiler-build identities keep incompatible caches separate.

@@ -66,10 +66,12 @@ const (
 	OperationStorageLayout
 	OperationStoragePut
 	OperationStorageTake
+	OperationCCallback
 	operationKindCount
 )
 
 var operationNames = [operationKindCount]string{
+	OperationCCallback:                "c-callback",
 	OperationInvalid:                  "",
 	OperationInitialize:               "initialize",
 	OperationMove:                     "move",

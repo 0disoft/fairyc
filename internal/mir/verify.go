@@ -62,6 +62,7 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 	functions, functionFailures := verifyFunctionDefinitions(program.Functions, foreignFunctions)
 	failures = append(failures, functionFailures...)
 	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions, functions)...)
+	failures = append(failures, verifyBoundedCallbacks(program, functions, foreignFunctions)...)
 	properties := newTypeProperties(program.ResourceTypes, program.StructTypes, program.EnumTypes)
 	for index := range program.Functions {
 		if err := ctx.Err(); err != nil {

@@ -75,6 +75,7 @@ func (value *emitter) emitUnit() (Unit, error) {
 		}
 	}
 	output.WriteByte('\n')
+	value.emitCallbackAdapters(output)
 	for index := range functions {
 		if err := value.contextError(); err != nil {
 			return Unit{}, err

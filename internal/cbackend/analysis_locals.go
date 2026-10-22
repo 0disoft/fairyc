@@ -47,7 +47,7 @@ func (e *emissionAnalysis) inferLocalTypes(functionIndex int) (map[mir.LocalID]h
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
-					mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+					mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
@@ -289,7 +289,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
-		mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

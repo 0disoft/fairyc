@@ -338,6 +338,8 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					return callCompletion{}, fmt.Errorf("enum payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
+			case mir.OperationCCallback:
+				return callCompletion{}, capabilityErrorKind("bounded-c-callback", "C callback in %q requires a native backend", function.Name)
 			case mir.OperationRawAddress, mir.OperationRawBorrowPointer:
 				return callCompletion{}, capabilityErrorKind("raw-address", "raw address in %q requires a native backend", function.Name)
 			case mir.OperationStructConstruct:

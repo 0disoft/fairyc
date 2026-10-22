@@ -117,7 +117,7 @@ argument. Exact `c::int` additionally supports explicit bidirectional conversion
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of exports or callbacks. Integer array and explicit C enum fields have the
+implementation of public exports. Bounded callbacks have the separate admission below. Integer array and explicit C enum fields have the
 separate admissions described below. By-value record arguments are admitted only for the existing
 record shapes described below. The interpreter remains
 fail-closed on every foreign call.
@@ -232,6 +232,31 @@ By-value `@repr(C)` struct arguments and returns are included. The target layout
 C variadics are rejected and require a fixed-signature shim.
 
 The only Stage 0 callback form is non-capturing, synchronous, same-thread, call-bounded `unsafe extern C fn` with explicit user data. Nullable, retained, asynchronous, cross-thread, and exception- or `longjmp`-crossing callbacks remain unsafe raw integrations.
+
+[ADR 0481](../adr/0481-bounded-c-callbacks.md) implements the first bounded source signature:
+
+```fairy
+unsafe extern C fn i32 visit(
+    i32 value, unsafe extern C fn i32(i32, ptr mut void) callback, ptr mut void data);
+unsafe fn i32 handle(i32 value, ptr mut void data) { return value + 1; }
+fn i32 main() { return unsafe { visit(41, handle, null) }; }
+```
+
+The callback is the penultimate import parameter, followed by final `ptr mut void` user data.
+The argument must name a non-capturing unsafe Fairy function with the exact `i32(i32, ptr mut void)`
+signature and no declared effects. An internal C adapter supplies the function-pointer ABI;
+it does not publish the Fairy function as a C symbol. The generated pointer size and alignment
+are checked against TargetSpec. Null user data is allowed if the handler does not dereference it;
+the callback itself cannot be null. Other signatures, callback locals/fields/arrays/results,
+casts and indirect calls remain closed.
+
+The unsafe import promises same-thread synchronous invocation before returning and no retention
+of the callback or call-bounded data. C must not unwind or `longjmp` across Fairy frames. The
+compiler verifies the source signature, direct argument placement and nonescaping MIR temporary;
+it cannot prove a C implementation honors those promises. Raw user-data validity remains the
+caller's responsibility, with existing borrow-to-pointer checks retained. The pure interpreter
+rejects this integration. Local and pending hosted evidence is recorded in the
+[F3 update](../development/phase2-target-scope.md#f3-bounded-c-callbacks).
 
 Fairy source TLS, C TLS symbol import or export, C++ ABI, and foreign unwinding are excluded.
 

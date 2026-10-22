@@ -67,6 +67,8 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 				return err
 			}
 			switch operation.Kind {
+			case mir.OperationCCallback:
+				e.features["bounded-c-callback"] = struct{}{}
 			case mir.OperationAssign:
 				if err := e.inspectAssignment(functionIndex, *operation); err != nil {
 					return err

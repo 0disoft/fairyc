@@ -36,6 +36,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
+	if err := e.emitCallbackType(output); err != nil {
+		return err
+	}
 	if usesRegion {
 		output.WriteString("typedef struct fy_region {\n")
 		output.WriteString("    void *arena;\n    void *mark;\n    uint64_t generation;\n    uint8_t active;\n")

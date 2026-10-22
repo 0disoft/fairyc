@@ -7,7 +7,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	needed := false
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
-			needed = needed || op.Kind == OperationArrayConstruct || op.Kind == OperationArrayIndex || op.Kind == OperationArrayIndexStore || op.Kind == OperationArrayIndexCheck || op.Kind == OperationArrayLength || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewElementBorrow || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty || op.Kind == OperationRegionPlace
+			needed = needed || op.Kind == OperationCCallback || op.Kind == OperationArrayConstruct || op.Kind == OperationArrayIndex || op.Kind == OperationArrayIndexStore || op.Kind == OperationArrayIndexCheck || op.Kind == OperationArrayLength || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewElementBorrow || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty || op.Kind == OperationRegionPlace
 		}
 	}
 	if !needed {
@@ -47,7 +47,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 					if len(op.Operands) == 1 {
 						typ = fieldStoreOperandType(op.Operands[0], types)
 					}
-				case OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
+				case OperationRawAddress, OperationRawBorrowPointer, OperationCCallback, OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
 					OperationResultConstruct, OperationResultPayload, OperationOptionConstruct, OperationOptionPayload,
 					OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
 					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
