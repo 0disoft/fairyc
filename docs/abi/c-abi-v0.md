@@ -30,7 +30,8 @@ The Windows Go compiler host does not define Linux target layout. Proving the fi
 
 The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
-includes nonempty source `@repr(C)` records whose fields may use `u8`, `i32`, `u32`, `usize`, `f32`, `f64`, all
+includes nonempty source `@repr(C)` records whose fields may use `i8`, `i16`, `i32`, `i64`, `isize`,
+`u8`, `u16`, `u32`, `u64`, `usize`, `f32`, `f64`, all
 sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer arrays, and acyclic nested
 `@repr(C)` records. It preserves the public C tag and field names, emits dependencies before their
 users, and emits target-
@@ -77,7 +78,7 @@ unsafe extern C fn
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
 `i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to
-the fixed-width Fairy scalar set or opaque `void`, and raw pointers to an
+the previously admitted Fairy scalar set (`u8`, `i32`, `i64`, `u32`, `usize`) or opaque `void`, and raw pointers to an
 admitted nonempty `@repr(C)` struct. One pointer-to-opaque-pointer output-slot shape is additionally
 admitted for exact `void **` calls; it does not open arbitrary pointer nesting. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
@@ -132,7 +133,8 @@ aggregate rejection.
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
+accepts only acyclic nonempty structs over `i8`, `i16`, `i32`, `i64`, `isize`, `u8`, `u16`, `u32`,
+`u64`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
 C scalars, admitted raw pointers including opaque `void`, bounded integer arrays, and nested structs
 that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
@@ -197,6 +199,18 @@ fields and standalone foreign floating signatures remain closed. The pure interp
 foreign calls. The shared native record probe observes finite values, signed zero, infinities,
 quiet NaNs and subnormals; it does not promise signaling NaN behavior or NaN payload identity.
 Current evidence is in the [F2-3 update](../development/phase2-target-scope.md#f2-3-floating-field-transport).
+
+[ADR 0480](../adr/0480-repr-c-integer-field-transport.md) adds distinct Fairy `i8`, `i16`, `u16`,
+`u64` and `isize` field transport using `int8_t`, `int16_t`, `uint16_t`, `uint64_t` and `intptr_t`.
+C-produced values support typed locals, internal value calls, record copies, explicit reconstruction
+and foreign record arguments/results, including nested repr(C) records. Generated assertions check
+the target size, alignment and signedness. `isize` follows target pointer width rather than C `long`.
+Literals, operators, comparisons, casts, arrays/views, direct scalar-field stores, direct private
+fields, scalar resource/tagged/enum payloads, bare foreign signatures and pointers to these new
+scalar families remain closed. These restrictions do not remove existing nested-record operations.
+The shared probe observes signed minima/maxima, unsigned maxima, zero and ordinary values and
+checks caller-copy isolation. See the [F2-4 update](../development/phase2-target-scope.md#f2-4-remaining-integer-field-transport)
+for current evidence and pending Linux execution.
 
 [ADR 0478](../adr/0478-explicit-c-enum-fields.md) implements payload-free enums with an explicit
 `@repr(c::integer)` base. Variants use zero-based declaration ordinals within the base's admitted

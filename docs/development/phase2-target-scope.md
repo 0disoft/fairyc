@@ -74,8 +74,8 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1, F2-1 integer arrays, F2-2 explicit C enums and F2-3 floating transport are implemented below;
-hosted Linux execution
+F1, F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating transport and F2-4 remaining integer
+field transport are implemented below; hosted Linux execution
 remains pending. Other F2 families and F3 stay separate follow-ups; no callback or resource
 representation is added by either update.
 
@@ -226,7 +226,46 @@ this expanded Fairy floating source. The full repository suite and full Windows 
 repeated; the changed native probe was run directly. There is no SDK/CLI API, DB, workflow, runner,
 runtime or target-maturity change. Phase 2 stays partial.
 
-Next implementation: remaining fixed-width integer field families, then bounded callbacks (F3).
+The F2-4 update below connects the remaining integer field families. Bounded callbacks (F3)
+follow separately.
+
+## F2-4 remaining integer field transport
+
+[ADR 0480](../adr/0480-repr-c-integer-field-transport.md) connects Fairy `i8`, `i16`, `u16`, `u64`
+and `isize` fields to target layouts and C record arguments/results. Type/cache commit `cc48bf52`
+preserves their distinct builtin identities through verified MIR, MIR encoding, public-interface
+hashes and stable package contexts/rebinding. Field reads, typed locals, internal value calls,
+whole-record copies and explicit reconstruction work, including nested repr(C) records.
+
+C storage uses `int8_t`, `int16_t`, `uint16_t`, `uint64_t` and `intptr_t`, with target-derived
+size/alignment and signedness assertions. In particular `isize` remains pointer-sized on LLP64;
+it is not C `long`. The new provider typedef names are reserved against public C-name collisions.
+Literals, operators, comparisons, casts, arrays/views, direct scalar-field stores, direct private
+fields, scalar resource/tagged/enum payloads, bare foreign signatures and pointers to these new
+scalar types remain closed. Existing nested-record operations remain admitted. Foreign calls
+remain unavailable in the pure interpreter.
+
+The shared native probe adds a 24-byte mixed record, its nested envelope and individual
+1/2/8-byte scalar records. Four cases cover zero, signed minima/maxima, minus one, unsigned
+maxima and values above signed 64-bit range. Independent C code observes every member after
+Fairy field reads, internal calls, reconstruction and record calls. C by-value mutation changes
+all members while original and reconstructed caller records remain unchanged.
+
+Local validation passed:
+
+- HIR, semantic, public-interface, package-artifact and MIR-codec package tests for type identities;
+  focused compiler MIR round-trip, both target emission profiles and unsupported-operation checks.
+- Backend emission tests, emission fixtures and the shared probe's Linux-profile source emission.
+- `go test -mod=readonly -count=1 -v ./tools/dev/fairyc-windows-host-smoke
+  -run '^TestReprCRecordFieldNativeCrossing$'`: MSVC 14.51.36231 passes C11/C17 low/optimized,
+  four combinations with four integer cases each, alongside prior record/array/enum/float checks.
+- Affected-package `go vet -mod=readonly`, changed-document relative links and `git diff --check`.
+
+Hosted Linux GCC/Clang execution remains pending. Earlier receipts do not attest the new integer
+probe. The full repository suite and full Windows smoke were not repeated; the changed crossing
+was run directly. No SDK/CLI API, DB, workflow, runner or target-maturity changes. Phase 2 remains
+partial. Next implementation: bounded callbacks (F3); any further field-family admissions remain
+separate changes rather than implicit consequences of this transport slice.
 
 ## Validation of the original assessment
 

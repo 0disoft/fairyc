@@ -107,6 +107,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if err := e.emitFloatingTransportAssertions(output); err != nil {
 		return err
 	}
+	if err := e.emitIntegerTransportAssertions(output); err != nil {
+		return err
+	}
 	_, copyOption := e.analysis.features["copy-option"]
 	_, resourceOption := e.analysis.features["resource-option"]
 	if scalarOption || copyOption || resourceOption {

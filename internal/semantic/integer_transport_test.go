@@ -14,6 +14,7 @@ func TestIntegerTransportBoundaries(t *testing.T) {
 			"width":      `fn %[1]s bad(i32 a){return a;}`,
 			"cast":       `fn %[1]s bad(i32 a){return a as %[1]s;}`,
 			"array":      `@repr(C) struct P{%[1]s[2] values;}`,
+			"c-scalar":   `fn %[1]s bad(c::longlong a){return a;}`,
 		} {
 			t.Run(typ+"/"+name, func(t *testing.T) {
 				r := analyzeText(t, map[string]string{"main.fy": "module main;" + fmt.Sprintf(body, typ)})

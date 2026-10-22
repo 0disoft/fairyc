@@ -35,6 +35,9 @@ func (e *analysisBuilder) inspectForeignFunctions() error {
 }
 
 func (e *analysisBuilder) recordCScalarFeature(value hir.Type) {
+	if hir.IsIntegerTransportScalar(value) {
+		e.features["fairy-"+value.String()+"-transport"] = struct{}{}
+	}
 	if hir.IsFloatScalar(value) {
 		e.features["fairy-"+value.String()+"-transport"] = struct{}{}
 	}

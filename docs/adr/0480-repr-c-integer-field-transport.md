@@ -33,3 +33,12 @@ minima/maxima, unsigned maxima (including values above signed 64-bit range), zer
 values after Fairy copies/reconstruction and by-value C calls. Caller records must remain
 unchanged when the callee mutates its copy. Hosted Linux evidence is collected after an
 authorized batched push; earlier receipts do not attest these new sources.
+
+The implementation now checks a mixed 24-byte record, its nested envelope and one-field
+1/2/8-byte records through the shared native probe. Four cases cover the required boundaries;
+C mutation changes every field while caller copies remain unchanged. MSVC 14.51.36231 passes
+all four C11/C17 low/optimized combinations, alongside the existing array/enum/float checks.
+Focused compiler tests pass for Linux and Windows emission, including MIR codec preservation
+and rejection of bare foreign signatures, raw pointers and provider-name collisions. Type and
+package identity tests, backend emission tests, emission fixtures and affected-package vet pass.
+The full repository suite, full Windows smoke and hosted Linux execution were not repeated.

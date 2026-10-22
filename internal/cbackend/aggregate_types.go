@@ -214,6 +214,11 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 	}
 	switch value {
+	case hir.TypeI8, hir.TypeI16, hir.TypeU16, hir.TypeU64, hir.TypeISize:
+		if reprC {
+			return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
+		}
+		return layout.Type{}, fmt.Errorf("integer transport field %q requires repr(C)", value)
 	case hir.TypeF32, hir.TypeF64:
 		if reprC {
 			return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, nil
