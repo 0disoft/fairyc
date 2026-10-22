@@ -379,6 +379,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0475-region-byte-allocation-and-copy.md](0475-region-byte-allocation-and-copy.md): accepts Region zeroed-byte allocation and byte copying through the existing `region-place` transport; implementation and verification remain pending.
 
 - [0476-repr-c-struct-foreign-arguments.md](0476-repr-c-struct-foreign-arguments.md): admits by-value foreign arguments for existing nonempty repr(C) record shapes and extends the shared native argument/result probe.
+- [0477-repr-c-integer-array-fields.md](0477-repr-c-integer-array-fields.md): admits bounded integer array members in repr(C) records with element-copy value transport and shared native crossing checks.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

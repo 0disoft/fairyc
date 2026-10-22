@@ -242,9 +242,13 @@ func runFairyStructResultProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 			return 0, fmt.Errorf("generated-Fairy Windows struct-result C lost required fragment %q", required)
 		}
 	}
+	runtimeSource, err := cruntime.ScalarSource(generatedFairyProbeTrapExitBase)
+	if err != nil {
+		return 0, fmt.Errorf("render generated-Fairy struct-result scalar runtime: %w", err)
+	}
 	executions := 0
 	for _, consumerMode := range []cdriver.ConsumerMode{cdriver.C11ConsumerMode, cdriver.C17ConsumerMode} {
-		count, runErr := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy struct-result", caller.Source, probe.CompanionC, probe.ExpectedExit, consumerMode)
+		count, runErr := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy struct-result", caller.Source, probe.CompanionC+"\n"+runtimeSource, probe.ExpectedExit, consumerMode)
 		if runErr != nil {
 			return executions, runErr
 		}

@@ -16,8 +16,8 @@ type Unit struct {
 // C ABIs while keeping the observable result target-independent.
 func Generate() Unit {
 	return Unit{
-		FairySource:  fairySource,
-		CompanionC:   companionC,
+		FairySource:  fairySource + arrayFairySource,
+		CompanionC:   companionC + arrayCompanionC,
 		ExpectedExit: 42,
 		RequiredCFragments: []string{
 			"struct fairyc_fixture_status_v0 {",
@@ -39,6 +39,15 @@ func Generate() Unit {
 			"struct fairyc_fixture_mixed_status_v0 {",
 			"double ratio;",
 			"extern int32_t fairyc_fixture_exhausted_v0(int32_t fy_a_0, int32_t fy_a_1, int32_t fy_a_2, int32_t fy_a_3, int32_t fy_a_4, int32_t fy_a_5, struct fairyc_fixture_mixed_status_v0 fy_a_6, int32_t fy_a_7);",
+			"uint32_t words[UINT64_C(3)];",
+			"int64_t wide[UINT64_C(2)];",
+			"int32_t codes[UINT64_C(2)];",
+			"uintptr_t sizes[UINT64_C(2)];",
+			"uint8_t bytes[UINT64_C(4)];",
+			"offsetof(struct fairyc_fixture_array_packet_v0, words) == UINT64_C(4)",
+			"offsetof(struct fairyc_fixture_array_packet_v0, tail) == UINT64_C(60)",
+			"sizeof(struct fairyc_fixture_array_packet_v0) == UINT64_C(64)",
+			"extern struct fairyc_fixture_array_packet_v0 fairyc_fixture_array_change_v0(int32_t fy_a_0, struct fairyc_fixture_array_packet_v0 fy_a_1, int32_t fy_a_2);",
 		},
 	}
 }
@@ -87,7 +96,7 @@ fn i32 main() {
         changed.status == 99 && changed.allocation_status == 7 &&
         changed_large.first == 101 && changed_large.second == 2 &&
         changed_large.third == 3 && changed_large.fourth == 4 && changed_large.fifth == 105 &&
-        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42) {
+        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays()) {
         42
     } else {
         0

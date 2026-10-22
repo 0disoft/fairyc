@@ -212,10 +212,12 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. Collect hosted F1 evidence after an authorized batched push. The
-   [record argument implementation](phase2-target-scope.md#f1-implementation-update) and shared
-   native fixture are ready; prior receipts do not attest the new argument checks.
-2. Implement F2 one repr(C) field family at a time, followed separately by bounded callbacks (F3).
+1. Collect hosted F1 and F2-1 evidence after an authorized batched push. The
+   [record argument implementation](phase2-target-scope.md#f1-implementation-update),
+   [integer array fields](phase2-target-scope.md#f2-1-integer-array-fields) and expanded shared
+   native fixture are ready; prior receipts do not attest the new argument/array checks.
+2. Continue F2 with explicitly based C enums, Fairy floating scalars and remaining integer fields,
+   followed separately by bounded callbacks (F3).
 3. Keep target maturity flags unchanged. Contracted field families and bounded callbacks remain
    separate C ABI gaps; conditional root drop flags are not a missing admitted source feature.
 4. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.

@@ -133,6 +133,14 @@ substitution. Private records and other foreign aggregate families remain closed
 native source checks an 8-byte record and a 20-byte hidden-memory result together with argument
 copy isolation and a nested mixed-class record after six integer arguments.
 
+ADR 0477 admits fixed `u8`, `i32`, `i64`, `u32` and `usize` array fields of length `1..=4096` in
+these records. Public fields emit as actual C arrays; construction, reads and whole-field stores
+copy elements between raw members and private array value wrappers using already-evaluated MIR
+locals. Read indexing copies the array first. Nested whole-field stores are supported, while raw
+field references, views, direct element stores and iteration remain closed. MIR verification
+rejects raw-member borrowing independently of source checking. The shared record probe additionally
+checks array layout, argument/result elements and caller-copy isolation.
+
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty and every declaration-ordered field is a Fairy copy scalar or raw pointer. An empty body
 needs no user call; a nonempty body must name one verifier-matched compiler-private drop function.
@@ -241,8 +249,8 @@ semantics, and it is emitted only in functions containing checked division or re
   padding from that description. The C emitter consumes those results for flat all-`i32` private
   resources, their permitted resource-bearing built-in tags, private enum-containing inert structs,
   and nonempty source `@repr(C)` structs
-  over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw pointers, and acyclic nested
-  `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
+  over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw pointers, bounded integer arrays,
+  and acyclic nested `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
   `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field
   names. Any emitted struct, enum, resource, or generic tagged record owns the required
   `<stddef.h>` include directly rather than depending on another feature. Acyclic directly nested
@@ -264,8 +272,9 @@ semantics, and it is emitted only in functions containing checked division or re
 - A folded direct `i32` minimum literal emits `INT32_MIN`; generated C never relies on the
   implementation-defined type or conversion of a positive decimal `2147483648` token.
 - A bounded scalar fixed array emits as a private struct containing one exact C array so ordinary
-  internal assignments, parameters, and results preserve Fairy value semantics. Raw C arrays,
-  field embedding, foreign signatures, and layout stability are not inferred from this wrapper.
+  internal assignments, parameters, and results preserve Fairy value semantics. ADR 0477 separately
+  admits raw integer array members in repr(C) records through element copies. Bare foreign array
+  signatures and layout stability are not inferred from the private wrapper.
 - The deterministic C unit emits only the functions reachable from the selected entry through
   internal calls and resource drop glue. The generated C `main` keeps `(void)&fy_fn_N` only for
   reachable non-entry functions so warnings-as-errors builds stay free of false unused-function
@@ -353,9 +362,10 @@ The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so s
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, direct-local address passing, opaque `void` pointers, exact C-scalar fields,
-and acyclic nested `@repr(C)` fields are implemented, but by-value aggregate ABI, nested enum or
-built-in-tag payloads, array fields, C-scalar value operations, non-`@repr(C)` C-scalar fields, and
-callbacks remain outside this slice.
+acyclic nested `@repr(C)` fields, by-value record arguments/results and bounded integer array fields
+are implemented. Other aggregate ABI forms, nested enum or built-in-tag payloads, other array field
+families, C-scalar value operations beyond the exact `c::int` conversion above, non-`@repr(C)`
+C-scalar fields, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -449,6 +459,10 @@ hidden-memory result from a separately compiled hand-written C callee in both co
 and profiles. With ADR 0476's extended shared fixture, the same executions additionally check
 record arguments, scalar neighbors, copy isolation and mixed-class register exhaustion. Prior
 receipts retain their original source-specific result-only meaning.
+ADR 0477 adds independently declared integer array records to the same probe, including exact
+size/alignment/offset checks and element observations before and after callee mutation. Earlier
+receipts do not attest these new observations; the
+[F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields) records current evidence.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

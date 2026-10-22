@@ -74,8 +74,9 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1 is implemented in the update below; hosted Linux execution remains pending. F2 and F3 stay
-separate follow-ups; no new field family, callback or resource representation is bundled into F1.
+F1 and the F2-1 integer-array subset are implemented in the updates below; hosted Linux execution
+remains pending. Other F2 families and F3 stay separate follow-ups; no callback or resource
+representation is added by either update.
 
 ## F1 implementation update
 
@@ -104,8 +105,47 @@ was changed. F1's hosted evidence remains open, and the earlier full CI receipt 
 these new checks. The full repository Go suite and hosted CI were not rerun locally. Phase 2 and
 all target maturity flags remain unchanged; no DB, repository setting, workflow or runner changes.
 
-Next implementation: F2, one repr(C) field family at a time. Batch the current commits for one
-authorized push to collect F1's Linux receipt before marking that evidence complete.
+The F2-1 update below implements the first field family. Batch the current commits for one
+authorized push to collect F1 and F2-1 Linux receipts before marking that evidence complete.
+
+## F2-1 integer array fields
+
+[ADR 0477](../adr/0477-repr-c-integer-array-fields.md) admits fixed array fields of `u8`, `i32`,
+`i64`, `u32` and `usize`, with lengths `1..=4096`, in nonempty acyclic repr(C) records.
+Implementation commit `0171fe50` carries source typing, verified MIR and raw C member emission.
+Whole-field reads and replacement copy elements between raw members and private array values;
+nested replacement and record argument/result copies preserve value semantics. Raw-field
+references/views, direct element stores/iteration, other element families and bare foreign arrays
+remain closed.
+
+The existing shared record probe now includes independently declared 64-byte and 8-byte C records
+with arrays, size/alignment/offset assertions, every element family, caller-copy isolation and
+whole-field replacement after a copied read. Existing native lanes consume the expanded source;
+there is no new job, execution-count field or runner. The Windows probe now links the canonical
+scalar runtime with its companion C unit for checked indexing; the Linux probe already links it.
+
+Local validation passed:
+
+- `go test -mod=readonly -count=1` for HIR, semantic, MIR, C backend, emission fixtures, shared
+  probe and native-runner packages; focused compiler tests cover MIR codec round-trip, interpreter
+  copy/replacement behavior and both target emission profiles.
+- `go vet -mod=readonly` for HIR, semantic, MIR, C backend, compiler, shared probe and native runner.
+- `go test -mod=readonly -count=1 -v ./tools/dev/fairyc-windows-host-smoke
+  -run '^TestReprCArrayFieldNativeCrossing$'`: MSVC 14.51.36231 passes all four C11/C17
+  low/optimized separate-object combinations, each returning 42 with empty output.
+
+The initial full Windows smoke stopped at the expanded record probe because its runtime trap
+symbol was not linked. After adding the canonical runtime, the focused native test above passed;
+the entire smoke was not repeated. No product runtime implementation or link policy changed.
+Changed-document relative links and `git diff --check` pass.
+
+Hosted Linux GCC/Clang execution is pending for this expanded probe. Earlier F1 and runtime
+receipts do not attest the array observations. The full repository Go suite was not rerun locally.
+Phase 2 remains partial and all target maturity flags remain unchanged. No CLI or SDK API, DB,
+repository setting or workflow changes were made.
+
+Next implementation: explicitly based C enum fields, followed by Fairy floating scalars and
+remaining integer fields. Bounded callbacks (F3) remain a separate step after the field families.
 
 ## Validation of the original assessment
 

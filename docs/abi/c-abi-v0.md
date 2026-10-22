@@ -31,8 +31,9 @@ The Windows Go compiler host does not define Linux target layout. Proving the fi
 The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
 includes nonempty source `@repr(C)` records whose fields may use `u8`, `i32`, `u32`, `usize`, all
-sixteen exact TargetSpec C scalars, admitted raw pointers, and acyclic nested `@repr(C)` records. It
-preserves the public C tag and field names, emits dependencies before their users, and emits target-
+sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer arrays, and acyclic nested
+`@repr(C)` records. It preserves the public C tag and field names, emits dependencies before their
+users, and emits target-
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
 all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
 forbidden from `@repr(C)` and the public C ABI.
@@ -115,8 +116,9 @@ argument. Exact `c::int` additionally supports explicit bidirectional conversion
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of exports, callbacks, or array or enum `@repr(C)` fields. By-value record arguments
-are admitted only for the existing record shapes described below. The interpreter remains
+implementation of exports, callbacks, or enum `@repr(C)` fields. Integer array fields have the
+separate admission described below. By-value record arguments are admitted only for the existing
+record shapes described below. The interpreter remains
 fail-closed on every foreign call.
 
 ## C-representable types
@@ -131,15 +133,25 @@ aggregate rejection.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
 accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, all sixteen exact TargetSpec
-C scalars, admitted raw pointers including opaque `void`, and nested structs that are themselves
-`@repr(C)`. C-scalar fields use the same exact transport table and provider assertions as foreign
-scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
+C scalars, admitted raw pointers including opaque `void`, bounded integer arrays, and nested structs
+that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
+assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
 unit. The Arena crossing requires that the selected provider's `uint64_t` is exactly
-`unsigned long` before using `c::ulong` for the generation fields. Arrays, explicit C enums,
-floating Fairy scalars, and other contracted field
-families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
-connected together.
+`unsigned long` before using `c::ulong` for the generation fields. Explicit C enums, floating Fairy
+scalars, and other contracted field families remain fail-closed until their source typing, layout,
+ABI, and native crossing tests are connected together.
+
+[ADR 0477](../adr/0477-repr-c-integer-array-fields.md) admits array fields with `u8`, `i32`, `i64`,
+`u32` or `usize` elements and lengths `1..=4096`. These are actual C array members with target-derived
+layout assertions. Construction, whole-field reads and replacement bridge to private Fairy array
+values by copying elements. Nested whole-field replacement and record argument/result copies retain
+value semantics. Direct references, views, element stores and iteration over the raw field remain
+closed; read indexing copies the field first. Other array element families and bare foreign array
+parameters/results remain closed. The shared native record probe checks array layout, all elements
+and copy isolation. Local MSVC execution is recorded in the
+[F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields); hosted Linux evidence
+is pending.
 
 The Windows target product smoke uses a separate private `usize` generation transport. Under the
 selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned
