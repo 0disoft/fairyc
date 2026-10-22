@@ -62,7 +62,16 @@ packages are installed; GCC 13 and Clang 18 are exposed through a job-local PATH
 Package patch versions remain unpinned. The full native fixture command still validates actual
 headers, linking, startup, and sanitizers; version preflight is not a replacement for that execution.
 
-Local routing checks: `python -B -m unittest discover -s .github/scripts -p 'test_ci_changes.py'`.
+The Linux Go suite now runs exactly once, with `go test -mod=readonly -count=1 -json ./...` piped
+into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
+package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v1` and marks a
+run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
+`TestLinuxPreparedPublication` and all 12 GCC/Clang low and optimized subtests pass without skips,
+missing cases or duplicates, with any other suite failure also rejecting completeness. Existing
+runners and test selection are unchanged, and no native tests are repeated.
+The explicit Bash shell preserves pipeline failure if either the Go suite or receipt checker fails.
+
+Local CI helper checks: `python -B -m unittest discover -s .github/scripts -p 'test_*.py'`.
 Workflow syntax: `actionlint .github/workflows/frontend.yml .github/workflows/measurements.yml`.
 
 Local Windows cache-only measurements:

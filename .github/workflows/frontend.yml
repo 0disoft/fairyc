@@ -31,7 +31,7 @@ jobs:
       - name: Test CI path routing
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-        run: python3 -m unittest discover -s .github/scripts -p 'test_ci_changes.py'
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
       - name: Decide whether compiler checks are needed
         id: paths
         run: python3 .github/scripts/ci_changes.py >> "$GITHUB_OUTPUT"
@@ -61,7 +61,8 @@ jobs:
         run: go vet -mod=readonly ./...
       - name: Test
         if: runner.os == 'Linux'
-        run: go test -mod=readonly -count=1 ./...
+        shell: bash
+        run: go test -mod=readonly -count=1 -json ./... | python3 -B .github/scripts/linux_phase2_evidence.py
       - name: Test Windows core without separate native or cost proofs
         if: runner.os == 'Windows'
         run: |
