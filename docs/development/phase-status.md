@@ -110,6 +110,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Add the [public SDK allocation/text execution evidence](linux-runtime-coverage.md#next-slice),
+1. Collect the [public SDK allocation/text Linux v38 receipt](linux-runtime-coverage.md#next-slice),
    then resolve Phase 2's two remaining Linux runtime/standard-library entries before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

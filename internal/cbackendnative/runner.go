@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v37"
+	reportSchemaVersion = "fairyc.native-c-report/v38"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -390,6 +390,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.StandardLibraryBuildSmokeExecutions = standardLibraryBuildSmoke
+	sdkStorageExecutions, err := runSDKStorageProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.SDKStorageExecutions = sdkStorageExecutions
 	publicFileBuildSmoke, err := runPublicFileBuildSmoke(temporaryRoot)
 	if err != nil {
 		return Report{}, err

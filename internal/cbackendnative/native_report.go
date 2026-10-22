@@ -53,6 +53,7 @@ type Report struct {
 	CStringLiteralSourceCallExecutions  int        `json:"cStringLiteralSourceCallExecutions"`
 	BuildSmokeExecutions                int        `json:"buildSmokeExecutions"`
 	StandardLibraryBuildSmokeExecutions int        `json:"standardLibraryBuildSmokeExecutions"`
+	SDKStorageExecutions                int        `json:"sdkStorageExecutions"`
 	ByteStringBuildSmokeExecutions      int        `json:"byteStringLiteralBuildSmokeExecutions"`
 	UTF8StringBuildSmokeExecutions      int        `json:"utf8StringLiteralBuildSmokeExecutions"`
 	CStringLiteralBuildSmokeExecutions  int        `json:"cStringLiteralBuildSmokeExecutions"`

@@ -50,12 +50,20 @@ runtime/library surface exercised by representative fixtures, rather than Window
 Portable paths, sockets, mapped files, async I/O, generic allocator interfaces and freestanding
 support remain design exclusions; they are not implied implementation tasks.
 
-## Next slice
+## Public SDK storage fixture
 
-Add a focused Linux execution fixture importing the bundled `std::alloc`, `std::bytes`, and
-`std::text`: Arena/Region allocation, Buffer growth, String/CString construction, cleanup,
-and observable error preservation. Reuse existing source examples and probe allocation controls
-where applicable; run GCC and Clang at low/optimized profiles in the existing Linux lane.
+The [SDK storage fixture](../../internal/cbackendnative/sdk_storage_source.go) imports the bundled
+`std::alloc`, `std::bytes`, and `std::text` through the workspace compiler. It checks Arena/Region
+allocation and reuse, Buffer growth, String/CString construction, and UTF-8/NUL rejection.
+The existing probe allocator forces both Region allocation failures, Buffer reserve failure,
+String copy/append failure, and CString allocation failure. SDK observations check preserved values
+and returned ownership; the outer C wrapper requires zero live allocations after cleanup.
+
+[Report v38](../../internal/cbackendnative/native_report.go) adds `sdkStorageExecutions` to the
+existing native Linux lane: four executions under GCC/Clang at low/optimized profiles, with no new
+workflow or runner. The [focused test](../../internal/cbackendnative/sdk_storage_test.go) also
+checks Linux emission on Windows and executes the same fixture at both MSVC profiles.
+Local Windows tests passed; a hosted Linux v38 execution receipt is still pending.
 
 The current [standard-library build smoke](../../internal/cbackendnative/smoke_build.go)
 uses a [raw empty-input UTF-8 call](../../internal/cbackendnative/smoke_text_views.go).
@@ -63,7 +71,10 @@ Its `standardLibraryBuildSmokeExecutions: 4` does not establish those public SDK
 The [Windows generated failure probes](../../tools/dev/fairyc-windows-host-smoke/generated_failure_probes.go)
 provide existing source cases to adapt rather than inventing new APIs.
 
-After that slice, map remaining mandatory runtime/library rules to explicit fixtures or justified
+## Next slice
+
+Collect the v38 Linux receipt, then map remaining mandatory runtime/library rules to explicit fixtures or justified
 deferrals before considering conformance. Both `complete-runtime` and `complete-standard-library`
 remain missing in the [target spec](../../internal/target/spec.go); `emittable`, `conformant`,
-and `supported` remain false. This audit changes no API, runtime, DB, hygiene policy, or runner.
+and `supported` remain false. The fixture changes no product API, runtime implementation, DB,
+hygiene policy, or CI runner allocation.
