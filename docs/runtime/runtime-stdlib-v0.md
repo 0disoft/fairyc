@@ -100,30 +100,35 @@ It does not own a general allocator API, collections, files, strings, formatting
 
 ### Standard library
 
+Current hosted Linux evidence, boundaries, and known gaps are summarized in
+[Linux runtime coverage](../development/linux-runtime-coverage.md). The probe history below
+records how each slice was established; it is not a list of currently unsupported Linux APIs.
+
 The initial library surface is:
 
 ```text
-std::alloc  SystemHeap, Arena, AllocError
+std::alloc  Arena and AllocError, backed by the SDK-owned internal SystemHeap component
 std::bytes  Buffer with fallible bulk/single-byte append and canonical scalar text append
 std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
-std::fs     target-neutral File open/read/write/sync/close, absolute and bounded relative/end positioning, and logical size plus Windows MSVC exact I/O, owned-Buffer reads, path mutation, and other metadata
+std::fs     target-neutral File open/read/write/sync/close, exact reads, file removal/replacement, absolute and bounded relative/end positioning, and logical size; Windows MSVC also supplies owned-Buffer reads, directory/path mutation, and extended metadata
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
-std::vec    on-demand Windows move-only Vec<T> with fallible growth and immutable element borrows
+std::vec    SDK-owned move-only Vec<T> with fallible growth, mutable element access, initialized-prefix views, and bounded iteration on the implemented Linux GNU and Windows MSVC targets
 std::c      C scalar types and raw wrapper helpers
 ```
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.60` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.86` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, target-neutral File core, positioning,
-and logical size, Windows MSVC `std::fs` extensions, console I/O, scalar output, and effect-free
-`std::process` argument slices recorded by ADRs 0205 through 0311 and ADRs 0331 through 0334.
+logical size, exact reads, file removal/replacement, Windows MSVC `std::fs` extensions, console I/O,
+scalar output, and effect-free `std::process` argument slices. The filesystem decisions include
+ADRs 0331 through 0334 and 0424; the vector surface is described below.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
 recursive parent creation, and ADR 0311's bounded recursive directory removal with exact completed-
-object progress. The remaining standard-library list stays planned and may be backed only by
-provisional target C components or examples. The `std::*` prefix creates neither an implicit
-prelude nor authority to discover host installations.
+object progress. Target extensions without an implementation in the bundled `std::fs` source remain
+planned. The `std::*` prefix creates neither an implicit prelude nor authority to discover host
+installations.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -135,7 +140,10 @@ any host operation.
 
 ## Allocation v0
 
-There is no generic allocator interface, borrowed allocator context, or hidden default allocator. `SystemHeap` is an inert zero-size handle whose concrete implementation is selected by the target standard library. `Arena` is a resource and lexical `Region` is the only safe bulk-allocation capability.
+There is no generic allocator interface, borrowed allocator context, or hidden default allocator.
+`std::alloc` exposes `Arena` and `AllocError`; it does not export a `SystemHeap` type. Arena storage is
+backed by the SDK-owned internal SystemHeap component, whose concrete implementation is selected by
+the target. `Arena` is a resource and lexical `Region` is the only safe bulk-allocation capability.
 
 Allocation is fallible and reports at least out-of-memory, size overflow, unsupported alignment, and capacity exhaustion. Stage 0 does not trap on OOM by default.
 
@@ -149,22 +157,24 @@ alignment ceiling. Over-aligned requests fail closed on both targets. Zero-size 
 validate alignment but never call `malloc`. Growth and shrink use allocate-copy-release rather than
 raw `realloc`, so validation and allocation failures leave the original block unchanged.
 
-This helper is not yet a source-visible `std::alloc` module. Linux product linkage selects it for
-exact called symbols; Windows `build-target` uses a private pointer/`usize`/`usize` record to request
-eight bytes, observe size/alignment, release, and observe normalized zero state at both MSVC
+The SystemHeap component is internal SDK support, not a source-visible type or export. Linux product
+linkage selects it for exact called symbols; Windows `build-target` uses a private
+pointer/`usize`/`usize` record to request eight bytes, observe size/alignment, release, and observe normalized zero state at both MSVC
 profiles. The same component is selected once for Buffer and Arena dependency closures. A separate
 internal Linux generated Fairy caller
 declares the exact `void *`, `size_t`, `size_t` block and observes allocation plus normalized release
 through a bounded C test observer. Its independent closed Linux probe still checks empty normalization,
 alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
-under Clang/GCC at low and optimized profiles. ADR 0214 records the first hosted success. Neither
-path deterministically forces host OOM.
+under Clang/GCC at low and optimized profiles. The current v37 Linux receipt records four executions
+for each runtime/source counter, including SystemHeap and its generated-Fairy caller; see the
+[Linux coverage inventory](../development/linux-runtime-coverage.md). Neither path deterministically
+forces host OOM.
 
 ## `Buffer`
 
 `Buffer` is a resource owning initialized bytes from `SystemHeap`. It starts with length zero, exposes only `[0, len)`, and may grow only through fallible methods.
 
-The minimum operations are construction with capacity, copy from a byte slice, length and capacity inspection, immutable and mutable initialized-byte views, reserve, append, zero-initialized resize, truncate, and clear. Safe code cannot access spare capacity or raw parts. ADR 0390 additionally admits the SDK-owned Windows `Vec<T>` described below.
+The minimum operations are construction with capacity, copy from a byte slice, length and capacity inspection, immutable and mutable initialized-byte views, reserve, append, zero-initialized resize, truncate, and clear. Safe code cannot access spare capacity or raw parts. ADR 0390 and later vector decisions additionally admit the SDK-owned `Vec<T>` surface described below.
 
 The provisional C Buffer slice implements the storage operations behind that surface. Its invariant
 is `len <= capacity`; reserve copies only initialized bytes and publishes replacement storage only
@@ -261,9 +271,10 @@ executions select `.err`, observe status 1, complete lexical reset and automatic
 finish with zero live probe allocations. The product runtime and public SDK still contain no
 failure-injection control. The raw C probe retains the broader failure-atomic and byte-level matrix.
 
-Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
-rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,
-but no Linux execution receipt has been observed. The same caller and target-specific implementation
+Its four-way C-only native probe covers exclusive begin, zeroed allocation, copy, allocation
+rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop.
+The v37 Linux receipt records four Arena probe executions and four generated-source executions.
+The same caller and target-specific implementation
 execute as separate translation units at low and optimized x64 MSVC profiles, including both forced
 allocation stages, recovery zeroing, and final live-allocation cleanup. Product linkage retains the
 ordinary allocator and contains no probe controls.
@@ -309,8 +320,9 @@ checks length overflow, rejects text containing NUL, and publishes its Buffer on
 bytes and one terminator are complete. Empty CString therefore owns one terminator byte while its
 CStr view has length zero.
 
-The owned-text four-way Linux native probe is configured for these ownership, rollback, overlap,
-UTF-8, NUL, terminator, and empty-value cases but remains locally unobserved. The same raw probe now
+The owned-text four-way Linux native probe covers these ownership, rollback, overlap,
+UTF-8, NUL, terminator, and empty-value cases; the v37 hosted receipt records four executions.
+The same raw probe now
 links against the target-specific owned-text closure as separate caller and callee translation units
 and executes at low and optimized x64 MSVC profiles. It additionally checks opaque storage null and
 malformed rejection, failure preservation, self-overlap, deterministic size overflow, normal drop,
@@ -593,7 +605,9 @@ new source should use `std::io::write`.
 The C implementation is explicitly tied to `x86_64-linux-gnu`; the shared source API accepts
 `ref CStr`, not a purported portable filesystem-path abstraction.
 
-The minimum operations are fallible open, partial read, partial write, `write_all`, `sync`, and consuming `close`. `write` returns the actual byte count. A `write_all` error reports the number already written.
+The minimum operations are fallible open, partial read, exact read, partial write, `write_all`,
+`sync`, consuming `close`, single-file removal, and prepared-file replacement. `write` returns the
+actual byte count. A `write_all` error reports the number already written.
 
 On the Linux v0 profile, `close(self)` consumes ownership on success and failure and is never retried automatically. A caller requiring durability uses `sync` before `close`. Automatic drop performs best-effort close, returns no error, allocates nothing, and emits no log.
 
@@ -622,10 +636,14 @@ through `fstat` on the same descriptor, retries `EINTR`, and maps a negative ker
 `EOVERFLOW`; every result preserves the cursor and owner. ADR 0334 adds bounded `i32` current- and
 end-relative movement through `lseek(SEEK_CUR)` and `lseek(SEEK_END)`, including cursor-only
 movement beyond EOF. Ordinary POSIX path lookup remains; containment, no-follow authorization,
-path mutation, other metadata, exact reads, Buffer growth, and Unicode normalization stay outside
-the Linux public slice. Native report v36 requires four generated product executions returning 42
-after observing position and size seven; moving to two, one, five, and ten; preserving logical size
-seven beyond EOF; rejecting `usize` maximum without cursor movement; and restoring seven.
+directory lifecycle and rename, hard links, copies, length changes, extended metadata, Buffer-backed
+reads, and Unicode normalization stay outside the Linux public slice. ADR 0424 adds exact reads,
+single-file removal and prepared-file replacement. Its Linux implementation fills the exact view,
+uses `unlink` for one file name, and publishes a prepared regular file with same-filesystem
+`rename`; it does not close an open owner or promise directory-sync durability. The 2026-10-21 v37
+receipt records four generated public-File executions returning 42 after observing position and
+size seven; moving to two, one, five, and ten; preserving logical size seven beyond EOF;
+rejecting `usize` maximum without cursor movement; and restoring seven.
 
 ## Windows `File` C slice v0
 
@@ -668,7 +686,9 @@ the resulting offset. Because the admitted target is Windows x86-64, `usize` car
 `i32` deltas and the same absolute `usize` result. A negative resulting position fails with the
 exact Windows error and leaves the cursor unchanged. Moving beyond EOF changes only the cursor;
 the file length remains unchanged until a later write or `set_len`. Wider signed deltas, sparse-gap
-content promises, portable offsets, and Linux public linkage remain outside the slice.
+content promises, and portable offsets remain outside this Windows adapter description. The shared
+`position`, `seek_start`, `seek_current`, `seek_end` and `size` operations are target-neutral under
+ADRs 0332 through 0334.
 
 Size observation uses `GetFileSizeEx` through a shared File borrow and does not move the cursor.
 It returns the exact byte length as `usize` on the admitted 64-bit target, status 3 for a closed
@@ -926,9 +946,11 @@ first error in that order. The result allocates nothing, moves no cursor or owne
 symbol, and is not an atomic snapshot.
 
 ADR 0331 makes the create/open family, partial read/write, write-all, sync, close, and drop portable
-across the two implemented targets. The remaining path, metadata, seek, exact-read, and Buffer APIs
-stay specific to `x86_64-windows-msvc`; none of the slice is a portable Unicode path, retained-
-pointer contract, or public resource-layout contract.
+across the two implemented targets. ADRs 0332 through 0334 make position, size, and bounded seeks
+target-neutral; ADR 0424 does the same for exact read, file removal, and prepared-file replacement.
+Directory lifecycle and enumeration, file rename/hard-link/copy/length change, extended metadata,
+and Buffer-backed reads remain target extensions rather than portable contracts. None of the slice
+is a portable Unicode path, retained-pointer contract, or public resource-layout contract.
 
 ## Compiler-private contract-state runtime
 
@@ -972,12 +994,14 @@ This is not a generic POSIX contract. POSIX.1-2024 and Linux differ for interrup
 
 Composite resources may contain resources for infallible reverse-order drop. Stage 0 does not define a general fallible close protocol that extracts several owned fields or accumulates multiple close errors. Such APIs keep their leaves separate or remain target- and module-specific until a no-partial-move design is proven.
 
-## `Vec<T>` on Windows
+## `Vec<T>`
 
 SDK `0.0.0-stage0.60` selects the core-plus-vector bundle when source imports
 `std::vec`; other SDK imports keep the six-module core. The bundle's exact digest
 and SDK version participate in lock and cache identity. The stable workspace CLI
-checks, builds and runs it; tests require `--native` on Windows AMD64 MSVC.
+checks, builds and runs it on Linux GNU AMD64 and Windows AMD64 MSVC. Linux native portable tests
+and the vector support/candidate tests exercise the same SDK-owned source; ADRs that recorded
+Windows evidence before the Linux run retain that historical wording.
 
 `empty<T>` creates an allocation-free move-only vector. `len<T>`, `is_empty<T>`
 and `capacity<T>` inspect it. `reserve<T>(ref mut Vec<T>, usize)` returns
@@ -992,7 +1016,8 @@ and destroys the initialized prefix in reverse order,
 returns its old length and keeps capacity. Cleanup destroys remaining elements
 and frees the allocation. Neither operation destroys uninitialized spare capacity.
 
-`at<T>(ref Vec<T>, usize)` returns an immutable owner-bound `ref T`; an invalid
+`at<T>(ref Vec<T>, usize)` returns an immutable owner-bound `ref T` and
+`at_mut<T>(ref mut Vec<T>, usize)` returns an exclusive owner-bound `ref mut T`; an invalid
 index traps with `assertion-failed`. Mutation and movement are rejected while an
 element reference remains live. Supported element types are explicit builtin
 scalars or directly named non-generic structs/resources with an admitted nonzero
@@ -1119,7 +1144,11 @@ codec; both literal and numeric-array/subview byte inputs are now verified.
 
 ## Explicit exclusions
 
-Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, non-Windows or nested generic vectors, mutable vector element access, vector iteration, resource-aware arenas, safe spare capacity, implicit string allocation, mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks, drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
+Hidden allocation, infallible heap allocation, generic allocator vtables, public raw realloc, nested
+generic vectors, vector views over resource/enum/array/borrow/raw-pointer/Option/Result fields,
+user-defined iterators, resource-aware arenas, safe spare capacity, implicit string allocation,
+mutable `String` bytes, portable `Path`, sockets, mapped files, async I/O, cross-thread callbacks,
+drop-time logging or allocation, and embedded or freestanding support claims remain excluded.
 
 ## Windows read-only directory enumeration
 
@@ -1155,7 +1184,8 @@ replacement and move wait for the last retained use; exclusive views also block
 other owner access. Short reader/subview reborrows and conservative sibling
 rules match ADR 0415. No implicit conversion, generic slice API, reinterpretation,
 new runtime C symbol or host-storage interpreter is provided. See
-`examples/vec_integer_views`; Linux execution is deferred to the owner's batch.
+`examples/vec_integer_views`. The 2026-10-21 Ubuntu Go suite passed, but this audit did not establish
+a focused Linux execution receipt for these view operations.
 
 ## Nominal struct vector views (SDK stage0.84)
 
@@ -1179,8 +1209,8 @@ apply. ADR 0448 adds the separate exclusive form below; fixed-array struct
 conversion remains closed. ADR 0440
 adds copied-value for-in over named immutable shared struct views with loop-held
 owner loans. No new runtime C symbol or host-storage interpreter is introduced. The descriptor is one
-`const void *`/`uintptr_t` record. See `examples/struct_vec_view`; Linux
-execution is deferred to the owner's batch.
+`const void *`/`uintptr_t` record. See `examples/struct_vec_view`. This audit did not establish
+a focused Linux execution receipt for these struct-view operations.
 
 ## Mutable nominal vector views (SDK stage0.85)
 
@@ -1190,9 +1220,9 @@ borrows the initialized prefix without allocation or copies; indices and bounds
 count elements. Indexed reads copy values and indexed whole-element assignment
 replaces the exact nominal value. The view and its returned/tagged descendants
 hold the owner exclusively, blocking direct owner access and structural changes
-until last use. Subviews retain ADR 0415 parent/sibling rules. Indexed field
-stores/borrows, mutable struct-view for-in and fixed-array struct conversion
-remain closed. The C descriptor is a mutable void pointer and uintptr_t count;
+until last use. Subviews retain ADR 0415 parent/sibling rules. ADRs 0449 through 0460 admit bounded
+indexed field updates, field-address borrows, and mutable plain-struct view iteration. Fixed-array
+struct conversion remains closed. The C descriptor is a mutable void pointer and uintptr_t count;
 there is no new runtime C symbol or allocator behavior.
 
 ADR 0449 allows field updates and shared/mutable field address borrows through named nominal descriptors returned by `vec::view<T>` and `vec::view_mut<T>`. Shared descriptors cannot write. Whole-owner and conservative sibling loan rules stay in force; no SDK export or runtime C symbol is added.

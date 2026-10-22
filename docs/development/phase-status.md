@@ -41,6 +41,11 @@ Full runtime and standard-library coverage remain missing as `complete-runtime` 
 `complete-standard-library`.
 The target's `emittable`, `conformant`, and `supported` maturity flags remain false.
 
+The [2026-10-22 Linux coverage audit](linux-runtime-coverage.md) maps the implemented runtime and
+SDK surfaces to source owners, fixtures, and the later passing Frontend run at `4f779868`.
+It distinguishes missing Linux implementations from incomplete execution evidence and design
+exclusions. Windows API parity is not the Phase 2 exit gate.
+
 [ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) and the
 [Linux toolchain contract](../abi/linux-toolchain-v0.md) now define version floors, preflight,
 and installation. The hosted receipt above verifies their implementation for the bounded Ubuntu
@@ -105,5 +110,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Resolve Phase 2's two remaining Linux runtime/standard-library evidence entries before conformance promotion.
+1. Add the [public SDK allocation/text execution evidence](linux-runtime-coverage.md#next-slice),
+   then resolve Phase 2's two remaining Linux runtime/standard-library entries before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

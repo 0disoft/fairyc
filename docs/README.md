@@ -15,6 +15,7 @@ Supporting pages:
 
 - [Implementation status](development/implementation-status.md) - phase history moved out of the root README
 - [Phase status](development/phase-status.md) - current Phase 0–4 exit evidence and remaining work
+- [Linux runtime coverage](development/linux-runtime-coverage.md) - implemented APIs, execution evidence, and remaining gaps
 - [Linux toolchain](abi/linux-toolchain-v0.md) - prototype version floors, installation, and CI provisioning
 - [Prototype usage](development/prototype-usage.md) - manual developer examples moved out of the root README
 - [Agent context map](../.agents/context-map.md) - workflow and skill routes
