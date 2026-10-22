@@ -50,7 +50,11 @@ packageartifact suites; and Linux-profile `TestForeignCStructResultCallSmokeSour
 MSVC 14.51.36231 passed C11/C17 low/optimized, all four executions, expected 42 and empty output,
 alongside prior probe checks.
 
-Hosted GCC/Clang native evidence remains pending; the `82b760cb` hosted receipt covers F1–F3 only.
-The full repository suite, full Windows smoke and local Linux native run were not executed. Scope
-remains whole-array and record value transport; all element and payload restrictions in the decision
-stand. Phase 2 remains partial and all maturity flags remain unchanged.
+The F2-5 slice is covered by the [current hosted F2-5
+receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` in
+[Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646); all nine
+jobs passed. The [historical F1–F3 run 39839678199](https://github.com/0disoft/fairyc/actions/runs/39839678199)
+at `82b760cb` remains historical. Locally, the full repository suite and full Windows
+smoke were not repeated, and no local Linux native run was made; hosted CI and Windows smoke passed
+for this commit. Scope remains whole-array and record value transport; all element and payload
+restrictions in the decision stand. Phase 2 remains partial and all maturity flags remain unchanged.

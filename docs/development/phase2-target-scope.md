@@ -2,8 +2,11 @@
 
 - Date: 2026-10-23
 - Baseline inspected checkout: `3b6f58c9de4ee12f212e68b152d374d055b81b55`
-- Current hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
-- Current local F2-5 slice: type slice `fe4beed8`, backend/native proof `af181d65`; MSVC and focused compiler/backend checks pass; hosted Linux pending
+- Current hosted F2-5 receipt: `f79e55c6bdc904c677c117789feb4839b53d4b80`,
+  [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646), all nine
+  jobs passed; [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
+  and [Linux Go job 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704)
+- Historical hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
 - Scope: `x86_64-linux-gnu`; roadmap Phase 2, runtime minimum, C ABI and the identified resource boundaries
 - Decision: the representative runtime/SDK minimum passes; full target conformance remains incomplete
 
@@ -76,10 +79,11 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1, F2-1 through F2-4 and the first bounded F3 callback have the
+F1, F2-1 through F2-4 and the first bounded F3 callback have the historical
 [hosted receipt](#hosted-f1f3-receipt-2026-10-23) at `82b760cb`. F2-5 adds the remaining five
-integer-array families and has local MSVC, compiler and backend evidence; hosted Linux execution is
-pending. The old receipt does not cover F2-5. Additional field operations and callback signatures
+integer-array families and has local MSVC, compiler and backend evidence. Its
+[current hosted receipt](#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed all nine jobs.
+The old receipt does not cover F2-5. Additional field operations and callback signatures
 require separate admissions; none of these updates opens excluded resource representations.
 
 ## F1 implementation update
@@ -188,7 +192,7 @@ Local validation passed:
 
 The local validation above is historical pre-push validation; earlier receipts attest their
 original sources only. The [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) executes this
-expanded fixture. The full repository suite and full Windows smoke were not repeated; the focused
+expanded fixture. Locally, the full repository suite and full Windows smoke were not repeated; the focused
 native crossing covers the changed probe. No SDK/CLI API, DB, repository setting or workflow
 changes. Phase 2 stays partial and all target maturity flags stay unchanged.
 
@@ -229,7 +233,7 @@ Local validation passed:
 
 The local validation above is historical pre-push validation; previous C-scalar or record receipts
 do not attest this expanded Fairy floating source. The
-[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. The full repository suite and
+[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. Locally, the full repository suite and
 full Windows smoke were not repeated; the changed native probe was run directly. There is no
 SDK/CLI API, DB, workflow, runner, runtime or target-maturity change. Phase 2 stays partial.
 
@@ -269,7 +273,7 @@ Local validation passed:
 - Affected-package `go vet -mod=readonly`, changed-document relative links and `git diff --check`.
 
 The local validation above is historical pre-push validation; earlier receipts do not attest the
-new integer probe. The [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. The full
+new integer probe. The [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers it. Locally, the full
 repository suite and full Windows smoke were not repeated; the changed crossing was run directly.
 No SDK/CLI API, DB, workflow, runner or target-maturity changes. Phase 2 remains partial. The F3
 update below connects bounded callbacks. Further field-family admissions remain separate changes
@@ -312,7 +316,7 @@ Local validation passed:
   execution: four combinations, six callback invocations each, alongside all prior probe cases.
 - Affected-package vet, changed-document relative links and `git diff --check`.
 
-The full repository suite and full Windows smoke were not repeated because the changed compiler
+Locally, the full repository suite and full Windows smoke were not repeated because the changed compiler
 packages and native crossing were checked directly. Old receipts do not attest callbacks; the
 [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) does. There are no SDK/CLI API, DB, workflow,
 runner or target-maturity changes. Phase 2 remains partial.
@@ -336,11 +340,26 @@ The new cases cover five families in 72-byte mixed/nested records, length-3 arra
 arguments/results, borrowed nested reads, direct and referenced mutable replacement, all-element C
 observation, reconstruction/mutation with saved originals unchanged, and per-family `[1]` records.
 
-No hosted GCC/Clang native execution, full repository suite, full Windows smoke or local Linux
-native run was made for this expansion. The `82b760cb` receipt remains historical for F1–F3.
+Locally, the full repository suite and full Windows smoke were not repeated, and no local Linux
+native run was made. Hosted CI and Windows smoke passed for this commit.
 
-The local-validation lists in F1–F3 and F2-5 describe implementation-time checks. The hosted receipt
-below remains the F1–F3 execution record; F2-5 requires a later authorized push and run.
+## Hosted F2-5 receipt (2026-10-23)
+
+[Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646) at
+`f79e55c6bdc904c677c117789feb4839b53d4b80` completed successfully with all nine jobs passing.
+The [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
+reports `fairyc.native-c-report/v38` for `x86_64-linux-gnu` with glibc 2.39, Clang 18.1.3 and
+GCC 13.3.0 at low and optimized profiles: 56 cases, 224 outcomes, 224 drop traces, 112
+sanitizers, 56 ABI crossings, four layout probes, four SDK executions and
+`foreignCStructResultCallExecutions=4`.
+
+The four shared executions include four new integer-array cases each and cover both
+Clang-caller/GCC-callee and GCC-caller/Clang-callee directions at low and optimized profiles as
+separate objects. These checks are inside the four shared executions; they add no report counters
+and are not independently sanitizer-proven. The [Linux Go job
+120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704) reports
+`fairyc.phase2-linux-evidence/v4`, `complete:true`, 32 passed cases and empty `missing`,
+`skipped` and `errors` lists.
 
 ## Hosted F1–F3 receipt (2026-10-23)
 
@@ -373,8 +392,8 @@ unchanged.
 The `82b760cb` hosted receipt covers F1–F3. F2-5 is a later local expansion and is not included.
 
 - Array fields currently admit all ten Fairy integer families, with lengths `1..=4096`. F2-5's
-  five new families pass local MSVC, focused compiler/backend and shared-probe checks; hosted
-  GCC/Clang is pending. Remaining floating, C-scalar and enum array forms and pointer forms require
+  five new families pass local MSVC, focused compiler/backend and shared-probe checks, and the
+  current hosted receipt covers them. Remaining floating, C-scalar and enum array forms and pointer forms require
   a contract-to-source audit and separate bounded implementation/evidence decisions before full
   conformance. Existing explicit exclusions remain unchanged.
 - [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) still permits only

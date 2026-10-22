@@ -2,12 +2,12 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513`,
+- Current F2-5 receipt: `f79e55c6bdc904c677c117789feb4839b53d4b80`,
+  [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646), all nine
+  jobs passed; [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
+  and [Linux Go job 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704)
+- Historical F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513`,
   [Frontend run 39839678199](https://github.com/0disoft/fairyc/actions/runs/39839678199), all nine jobs passed
-- Current local F2-5 slice: type slice `fe4beed8`, backend/native proof `af181d65`, focused
-  compiler/backend and MSVC checks pass; hosted Linux pending
-- Focused Linux receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (v4, 32 cases),
-  [Linux Go job 120037158582](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120037158582)
 - Previous focused Linux receipt: `5f62c9c3e8d4ceeed8830c96b82215c96784ea29` (v4, 32 cases), historical,
   [Linux Go job 119959193676](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193676)
 - Previous focused Linux receipt: `7f7362b87c231c30ea89f3907396957f0d599032` (v3, 28 cases), historical,
@@ -33,7 +33,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Audited contract/fixture scope passes; full exit not asserted | The [contract and fixture audit](phase0-exit-audit.md) finds every mandatory fixture family present, corrects three stale documentation claims, and records passing current hosted execution. The bounded audit does not establish the absence of contradictions across every written contract. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120043200670) passes 56 cases, 224 outcome and 224 drop-trace comparisons, 112 sanitizer executions, the layout, ABI, runtime and SDK probes, and the four shared F1–F3 record/field/callback executions. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39839678199/job/120037158582) passes all 32 focused cases without skips. See the [hosted F1–F3 receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23). Later F2-5 integer-array cases pass local MSVC, compiler and backend checks but await hosted evidence. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646) at `f79e55c6` passed all nine jobs, including the [F2-5 native job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359) and [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704). See the [current F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23); the [F1–F3 receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23) remains historical. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -211,16 +211,17 @@ The focused receipt has no missing, skipped or erroneous cases; the nested mutat
 passes two separate sanitizer executions. All nine jobs and the aggregate run succeeded.
 Older v3/28 and v38/55-case receipts remain historical.
 
-F1, F2-1 through F2-4 and the first bounded F3 callback have a hosted receipt at
+F1, F2-1 through F2-4 and the first bounded F3 callback have a historical hosted receipt at
 `82b760cbb743eef4608441e127f9fa9e41d1f513`. [Frontend run 39839678199](https://github.com/0disoft/fairyc/actions/runs/39839678199)
 passed all nine jobs. Its native job records four shared `foreignstructprobe` executions in both
 Clang/GCC caller directions and both profiles. Each execution contains the record, array, enum,
 floating, remaining-integer and callback checks, not separate report counters, and the checks are
 not separately sanitizer-proven. The Linux Go lane independently reports v4/32 cases without
 missing, skipped or failed cases; the Windows native and Go jobs also succeeded. F2-5 adds the
-remaining integer-array families and passes local MSVC, focused compiler/backend and shared-probe
-checks; hosted Linux evidence is pending, so the old receipt does not attest it. Phase 2 remains
-partial and all maturity flags stay false. The local validation paragraphs in the
+remaining integer-array families and is covered by the [current hosted F2-5
+receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23); that run passed all nine jobs,
+including Windows and Linux lanes. The old receipt does not attest F2-5. Phase 2 remains partial
+and all maturity flags stay false. The local validation paragraphs in the
 [target scope](phase2-target-scope.md#f1-implementation-update) are historical pre-push checks.
 
 Phase 2 stays partial: the representative runtime/SDK minimum is covered, but the complete target
@@ -230,11 +231,9 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. After an authorized batched push, collect hosted GCC/Clang evidence for F2-5's ten-family
-   repr(C) integer-array transport. The `82b760cb` receipt remains F1–F3 only.
-2. Audit remaining floating, C-scalar and enum array forms and pointer forms against the C ABI, then
+1. Audit remaining floating, C-scalar and enum array forms and pointer forms against the C ABI, then
    make separate bounded implementation/evidence decisions before full conformance. Keep existing
    explicit exclusions unchanged.
-3. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted
+2. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted
    source feature; retained and asynchronous callbacks remain excluded.
-4. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.
+3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.
