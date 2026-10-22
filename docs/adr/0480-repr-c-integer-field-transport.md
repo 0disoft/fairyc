@@ -31,8 +31,7 @@ The first commit adds type identities and package preservation. The next connect
 layout/emission and the shared native record probe. Independent C code must observe signed
 minima/maxima, unsigned maxima (including values above signed 64-bit range), zero and ordinary
 values after Fairy copies/reconstruction and by-value C calls. Caller records must remain
-unchanged when the callee mutates its copy. Hosted Linux evidence is collected after an
-authorized batched push; earlier receipts do not attest these new sources.
+unchanged when the callee mutates its copy. Earlier receipts did not attest these new sources.
 
 The implementation now checks a mixed 24-byte record, its nested envelope and one-field
 1/2/8-byte records through the shared native probe. Four cases cover the required boundaries;
@@ -41,4 +40,7 @@ all four C11/C17 low/optimized combinations, alongside the existing array/enum/f
 Focused compiler tests pass for Linux and Windows emission, including MIR codec preservation
 and rejection of bare foreign signatures, raw pointers and provider-name collisions. Type and
 package identity tests, backend emission tests, emission fixtures and affected-package vet pass.
-The full repository suite, full Windows smoke and hosted Linux execution were not repeated.
+The full repository suite and full Windows smoke were not repeated in that local pass. The later
+[hosted F2-5 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) records
+GCC 13.3 and Clang 18.1 crossings in both directions and profiles at `f79e55c6`, with all nine jobs
+passing.

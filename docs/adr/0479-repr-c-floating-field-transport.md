@@ -47,6 +47,7 @@ MIR codec tests pass, including rejection of unsupported operations and exact ty
 Backend/emission-fixture tests and affected-package vet pass. The full repository suite and full
 Windows smoke were not repeated; the changed native crossing was run directly.
 
-Old C-scalar floating receipts do not attest the distinct Fairy types. Hosted Linux execution remains
-pending until the expanded source runs under GCC and Clang in both configured directions and
-profiles. No existing CI job, report counter, product runtime or target maturity flag changes.
+Old C-scalar floating receipts do not attest the distinct Fairy types. The later
+[hosted F2-5 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) records
+GCC 13.3 and Clang 18.1 crossings in both directions and profiles at `f79e55c6`, with all nine jobs
+passing. No existing CI job, report counter, product runtime or target maturity flag changes.

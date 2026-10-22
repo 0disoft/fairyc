@@ -389,22 +389,32 @@ unchanged.
 
 ## Remaining source boundaries after F1–F3
 
-The `82b760cb` hosted receipt covers F1–F3. F2-5 is a later local expansion and is not included.
+The `82b760cb` F1–F3 receipt remains historical. The later `f79e55c6` F2-5 receipt covers the
+remaining integer-array families, so the current boundaries are:
 
-- Array fields currently admit all ten Fairy integer families, with lengths `1..=4096`. F2-5's
-  five new families pass local MSVC, focused compiler/backend and shared-probe checks, and the
-  current hosted receipt covers them. Remaining floating, C-scalar and enum array forms and pointer forms require
-  a contract-to-source audit and separate bounded implementation/evidence decisions before full
-  conformance. Existing explicit exclusions remain unchanged.
-- [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) still permits only
-  `void`, `u8`, `i32`, `i64`, `u32`, `usize` and admitted repr(C) records as pointees. New direct
-  scalar-field support does not imply pointers to those scalars or C scalars. This is a current
-  source guard, not a newly executed native pointer failure.
-- F3 implements the exact signature in ADR 0481. Retained, asynchronous, cross-thread and
-  unwind-crossing integrations remain exclusions; they are not new Phase 2 minimum tasks.
+| Surface | Implemented subset | Remaining boundary or exclusion | Owners |
+| --- | --- | --- | --- |
+| repr(C) integer array fields | All ten Fairy integer families at lengths `1..=4096`; whole-field reads, replacement and record/argument value copies. ADR 0482's five newer families are transport-only and have no element indexing, arithmetic or views. | C scalar and C enum arrays need separate admissions. | [HIR guard](../../internal/hir/views.go), [layout resolution](../../internal/cbackend/aggregate_types.go), [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0482](../adr/0482-repr-c-integer-array-transport.md) |
+| Fairy `f32`/`f64` arrays | Scalar field transport is implemented. | Array values are deferred; this is the recommended next bounded field family. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [ADR 0479](../adr/0479-repr-c-floating-field-transport.md) |
+| Exact C-scalar arrays | Scalar fields are implemented. | Array members are deferred to a separate admission. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [layout resolution](../../internal/cbackend/aggregate_types.go) |
+| Explicit C enum arrays | Explicitly based enum fields are implemented, including replacement and record transport. | Array members are deferred to a separate admission. | [ADR 0478](../adr/0478-explicit-c-enum-fields.md), [layout resolution](../../internal/cbackend/aggregate_types.go) |
+| repr(C) record-element arrays | Private scalar and plain-struct arrays remain supported in their existing paths. | Repr(C) member arrays are deferred and currently rejected. Private array support does not imply C record-element arrays. | [HIR guard](../../internal/hir/views.go), [semantic checks](../../internal/semantic/resource_types.go) |
+| Other array element shapes | The ten integer families and lengths are executable in repr(C). | Nested arrays, `bool` arrays and raw-pointer element arrays are not admitted by ADR 0477. These admission limits do not establish permanent C ABI exclusions. | [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [HIR guard](../../internal/hir/views.go) |
+| Foreign raw pointers | [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) permits `void`, `u8`, `i32`, `i64`, `u32`, `usize` and admitted repr(C) records as pointees; `ptr mut ptr mut void` is the only nested shape. | Pointers to the new integers, floats, C scalars and C enums remain closed. Raw dereference, arithmetic, general casts and other nesting remain closed. | [Pointer guard](../../internal/cbackend/foreign_types.go), [C ABI](../abi/c-abi-v0.md#c-representable-types) |
 
-Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged;
-local MSVC evidence cannot stand in for the configured hosted GCC/Clang lanes.
+Resources, safe borrows, slices and tagged values remain explicit exclusions as C ABI values or
+record fields under the [C ABI contract](../abi/c-abi-v0.md#c-representable-types).
+
+[ADR 0481](../adr/0481-bounded-c-callbacks.md)'s `ptr mut void` callback data is a separate,
+single-signature admission with the same non-retention and same-thread obligations. It does not
+open general callback signatures or pointer nesting.
+
+The next bounded implementation should add `f32`/`f64` repr(C) array value transport: whole-field
+copies, locals, internal value arguments/results, reconstruction and replacement. It should not add
+floating literals, arithmetic, indexing or views. C-scalar arrays and explicit C enum arrays should
+follow as separate admissions; repr(C) record-element arrays remain deferred.
+
+Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged.
 
 ## Validation of the original assessment
 

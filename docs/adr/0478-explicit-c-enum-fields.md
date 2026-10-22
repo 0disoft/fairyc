@@ -46,5 +46,8 @@ Windows lanes consume this source without new jobs or report counters.
 Local MSVC 14.51.36231 passes all four C11/C17 low/optimized combinations. Compiler tests check all
 13 C integer bases in both target emission profiles, with Windows rejecting unavailable
 `c::ssize_t`. MIR codec/interpreter, public interface invalidation and stable context rebind tests
-pass. Hosted Linux execution remains pending; older array/record receipts do not attest enums.
-The full Windows smoke and full repository Go suite were not repeated for this bounded addition.
+pass. The full Windows smoke and full repository Go suite were not repeated for this bounded
+addition. The later
+[hosted F2-5 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) records
+GCC 13.3 and Clang 18.1 crossings in both directions and profiles at `f79e55c6`, with all nine jobs
+passing; the older array/record receipts did not attest enums.

@@ -231,9 +231,11 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. Audit remaining floating, C-scalar and enum array forms and pointer forms against the C ABI, then
-   make separate bounded implementation/evidence decisions before full conformance. Keep existing
-   explicit exclusions unchanged.
+1. Implement `f32`/`f64` repr(C) array value transport next: whole-field copies, locals, internal
+   value arguments/results, reconstruction and replacement. Add no new literals, arithmetic,
+   indexing or views. Then assess exact C-scalar arrays and explicit C enum arrays as separate
+   admissions; repr(C) record-element arrays remain deferred. Keep the current raw-pointer pointee
+   set and closed raw-pointer operations unless a separate pointer admission changes them.
 2. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted
    source feature; retained and asynchronous callbacks remain excluded.
 3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.

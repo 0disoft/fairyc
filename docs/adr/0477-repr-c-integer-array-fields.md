@@ -56,3 +56,6 @@ full Windows smoke exposed the missing runtime link at this probe; after correct
 probe was rerun. Hosted Linux GCC/Clang crossings and the full repository Go suite were not rerun.
 Previous F1 receipts do not attest arrays. Current commands and evidence limits are recorded in the
 [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields).
+The later [hosted F2-5 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23)
+records GCC 13.3 and Clang 18.1 crossings in both directions and profiles at `f79e55c6`, with all
+nine jobs passing.
