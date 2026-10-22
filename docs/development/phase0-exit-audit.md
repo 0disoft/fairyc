@@ -7,7 +7,8 @@
   documentation corrections recorded below
 - Supplied build evidence: root Go CI passes all package fixtures; latest local E1 and E2 MSVC checks pass
 
-This audit did not rerun those suites and does not treat passing fixtures as proof that contradictory prose is correct.
+The initial inspection reused those results. Remediation checks below add focused execution;
+passing fixtures alone do not establish that contradictory prose is correct.
 
 ## Inspected owners
 
@@ -78,12 +79,33 @@ expectation agrees with the manifest; the fixture README needed correction.
 - P0-2: replaced the stale compatibility exclusions with the later repeated-initialization, mutation,
   element, field, and typed-view decisions. The provisional size ceiling and foreign ABI boundary remain.
 - P0-3: corrected the interpreter README to 94 cases, matching the manifest and runner.
-- Updated the emission README to distinguish the pending 56-case/224-comparison/112-sanitizer matrix
+- Updated the emission README to distinguish the 56-case/224-comparison/112-sanitizer matrix
   from the historical 55-case/220-comparison/110-sanitizer receipt.
+
+Local remediation validation passed:
+
+- `go test -mod=readonly -count=1 ./internal/interpreterfixture ./internal/cbackendfixture`.
+- Manifest counts: 94 interpreter, 56 emission and 63 semantic cases.
+- 610 schema, case-root and declared source paths in mandatory manifests exist.
+- All 69 relative link targets in the eight remediation documents exist; `git diff --check` is clean.
+
+The full local suite was not repeated: hosted Frontend owns the cross-platform execution, and the
+earlier focused MSVC and CI-helper results remain valid for the unchanged implementation.
+
+## Hosted validation
+
+[Frontend run 39817319718](https://github.com/0disoft/fairyc/actions/runs/39817319718) at
+`5f62c9c3e8d4ceeed8830c96b82215c96784ea29` passes all nine jobs and the aggregate run.
+The [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193676)
+passes the full fixture suite and the v4/32-case focused receipt without missing, skipped or
+erroneous cases. The [native job](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119965856725)
+records 56 emission cases, 224 outcome and 224 exact drop-trace comparisons, and 112 sanitizer
+executions. Windows core, native smoke, lexer and all three parser proof groups also pass.
 
 ## Phase 0 judgment
 
-**Awaiting hosted validation for the audited scope.** The mandatory fixture classes are present and all three
-identified documentation defects are corrected. The new hosted run must cover the current source baseline,
-including the 56-case emission matrix and v4/32-case focused Linux receipt. This bounded inspection does not
-claim an exhaustive audit of every ADR or promote Phase 2 target maturity.
+**The audited contract/fixture scope passes.** The mandatory fixture classes are present, all three
+identified documentation defects are corrected, and current hosted execution passes, including the
+56-case emission matrix and v4/32-case focused Linux receipt. Full Phase 0 exit is not asserted:
+this bounded inspection does not establish that every written contract is free of contradictions.
+It also does not promote Phase 2 target maturity.

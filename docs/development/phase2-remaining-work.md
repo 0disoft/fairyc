@@ -3,7 +3,7 @@
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.
 
-## Findings
+## Findings at the audit baseline
 
 The representative runtime/SDK minimum in the [roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)
 has execution evidence. This audit found no additional missing implementation in that minimum.
@@ -22,10 +22,10 @@ already admit nonempty cleanup, directly nested resources and Region lowering. I
 [ADR 0392](../adr/0392-nested-resource-c-storage-and-cleanup.md) distinguishes directly nested
 resource fields from unsupported nested owning tags. Neither can stand in for the other's evidence.
 
-## Evidence baseline
+## Historical evidence baseline
 
 - [Frontend run 39805612550](https://github.com/0disoft/fairyc/actions/runs/39805612550):
-  all nine jobs individually succeeded. The aggregate API still reported `in_progress` when checked.
+  all nine jobs and the aggregate run succeeded.
 - [Linux Go job 119918006715](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715):
   `fairyc.phase2-linux-evidence/v3`, `complete:true`, exactly 28 compiler/profile cases,
   `missing:[]`, `skipped:[]`, `errors:[]`. Trap progress covers six scenarios in each of four cases.
@@ -35,7 +35,7 @@ resource fields from unsupported nested owning tags. Neither can stand in for th
 - Local audit checks passed: focused resource/backend tests and
   `TestPrivateVectorNestedResourceDropTrace` under its two MSVC profiles. No Linux test was rerun locally.
 
-## Remaining cleanup observations
+## Cleanup acceptance criteria (implemented below)
 
 | ID | Existing implementation and test | Missing Linux observation / completion criterion |
 | --- | --- | --- |
@@ -46,7 +46,7 @@ These are admitted cleanup semantics under ADR 0392, not new SDK APIs. An existi
 does not attest Linux execution. Conversely, adding a Linux fixture does not implement a missing
 language feature or remove a backend capability restriction.
 
-## Next single task: E1
+## E1 implementation plan (completed below)
 
 Add the existing pure Box/two-Leaf/temporary-Leaf scenario to the emission manifest and native lane.
 Retain independent golden resource types and binding spans so interpreter and C cannot agree on
@@ -84,7 +84,8 @@ Different FirstLeaf/LastLeaf types make sibling order independently observable.
 E2 is implemented at `893cfbc9`: the existing `10,2,99` observer runs under GCC/Clang low/optimized
 and both MSVC profiles. Linux low-profile cases additionally require one ASan+UBSan execution per
 compiler. These two sanitizer executions belong to the focused Go test, not the v38 native count.
-Local fixture tests, both MSVC cases, and the 12 CI-helper tests pass. Hosted execution is pending.
+Local fixture tests, both MSVC cases, and the 12 CI-helper tests pass. Hosted execution passes
+in the receipt below.
 The focused collector now requires v4/32 cases; v3/28 remains historical.
 
 Phase 2 verdict: do not promote the full target merely because its representative runtime/SDK
@@ -94,3 +95,24 @@ owning tags), the source-level foreign-call boundary, and every declared target 
 closed capabilities are not newly admitted by this audit. The two completeness markers and all
 three maturity flags stay unchanged; this is a scope/evidence decision, not a request to add more
 random runtime failure tests or implement excluded SDK APIs.
+
+## Hosted cleanup receipt (2026-10-23)
+
+[Frontend run 39817319718](https://github.com/0disoft/fairyc/actions/runs/39817319718) at
+`5f62c9c3e8d4ceeed8830c96b82215c96784ea29` completed successfully, with all nine jobs passing.
+
+- E1: [native job 119965856725](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119965856725)
+  records `fairyc.native-c-report/v38`, 56 cases including `nested-resource-drop`, 224 outcome and
+  224 exact drop-trace comparisons, and 112 ASan+UBSan executions. Its Ubuntu 24.04 amd64 toolchain
+  is glibc 2.39, Clang 18.1.3 and GCC 13.3.0, with low/optimized profiles. It also records 56 ABI
+  crossings, four layout probes and four SDK storage executions.
+- E2: [Linux Go job 119959193676](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193676)
+  records `fairyc.phase2-linux-evidence/v4`, `complete:true`, exactly 32 cases and empty
+  `missing`, `skipped` and `errors` lists. The four nested-cleanup mutation cases pass, and the
+  log separately confirms one sanitizer execution per compiler. These two executions are not
+  part of the native report's 112.
+- [Windows Go job 119959193834](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193834)
+  passes the full core suite, including the existing MSVC low/optimized mutation observer.
+
+E1 and E2 are closed. The remaining Phase 2 decision is the complete declared target scope
+described above; both completeness markers and all maturity flags remain unchanged.

@@ -47,7 +47,7 @@ same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
 instrumented units from this runner, requires glibc plus Clang and GCC, links the scalar runtime plus
-a closed four-byte recorder, and configures 224 process-status and exact drop-sequence comparisons
+a closed four-byte recorder, and executes 224 process-status and exact drop-sequence comparisons
 plus 112 sanitizer executions at low and optimized profiles. Those executions include scalar fixed-array indexing plus explicit and
 omitted-bound byte-view slicing. This observes compiler-owned empty resource cleanup and active built-in
 payload selection plus pure user drop bodies. Effect-bearing drop remains deferred. The
@@ -63,5 +63,6 @@ cases.
 
 The new `nested-resource-drop` case covers parent cleanup, a cleanup-local temporary, and
 reverse child cleanup. Distinct child resource types and independent binding spans distinguish
-sibling order. The 56-case native matrix expects 224 differential/drop comparisons and 112
-sanitizer executions; its hosted execution is pending. The linked 55-case receipt is historical.
+sibling order. The [56-case native run](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119965856725)
+at `5f62c9c3e8d4ceeed8830c96b82215c96784ea29` passes 224 differential comparisons,
+224 exact drop-trace comparisons and 112 sanitizer executions. The linked 55-case receipt is historical.

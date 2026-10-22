@@ -283,8 +283,13 @@ does not prove complete runtime or standard-library coverage, and no requirement
 
 ## Next work
 
-Next single task: add the existing pure nested-resource cleanup scenario to the emission and Linux
-native fixture matrix, checking return 42 and all four ordered drop events. The
-[remaining-work audit](phase2-remaining-work.md) separates this execution gap from implemented
-runtime/SDK minimums, backend capability limits, and excluded features. Both completeness markers
-and all three target flags remain unchanged.
+The nested-resource cleanup fixture is implemented at `ecd0e909`, and the mutation/active-payload
+observer is extended to Linux at `893cfbc9`. The
+[current cleanup evidence](phase2-remaining-work.md#hosted-cleanup-receipt-2026-10-23) supersedes the
+earlier Windows-only gap. The v4 focused Linux receipt at `5f62c9c3` passes all 32 cases, including
+the four mutation cases and two additional sanitizer executions. The 56-case native receipt is
+tracked separately there.
+
+The remaining decision is the complete declared target scope, including the explicit backend
+capability boundaries and source-level foreign-call scope identified by that audit. Both
+completeness markers and all three target flags remain unchanged.

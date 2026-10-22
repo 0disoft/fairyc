@@ -75,7 +75,10 @@ version changed because the required evidence set grew from 28 to 32 cases (eigh
 compiler/profile cases each). Each trap-receipt case runs six progress/failure scenarios.
 The nested-resource root checks parent mutation and active payload cleanup, with one extra
 ASan+UBSan execution per compiler inside its low-profile case. These two executions are separate
-from the native fixture report's sanitizer count. Hosted v4 execution is pending.
+from the native fixture report's sanitizer count. The
+[v4 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39817319718/job/119959193676)
+at `5f62c9c3e8d4ceeed8830c96b82215c96784ea29` records all 32 cases passing without skips,
+plus both nested-cleanup sanitizer executions.
 Existing v1/12-case, v2/24-case, and v3/28-case receipts remain historical. The
 [v3 Linux Go receipt](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715)
 at `7f7362b87c231c30ea89f3907396957f0d599032` records all 28 cases passing without skips.
