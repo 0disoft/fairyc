@@ -80,6 +80,26 @@ successful/empty `from_buffer` cases; the receipt above covers those additions. 
 [coverage review](linux-runtime-coverage.md#remaining-phase-2-review) now maps those expanded cases.
 Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
 
+## Local Region byte implementation (2026-10-22)
+
+The Region byte contract is committed at `ca44226b`; zeroed allocation lowering is committed at
+`e035e79c`. Byte-copy lowering is committed at `0ed33081`. Targeted workspace tests pass for
+both operations, including one-time evaluation, zeroed and copied bytes, subviews and independent
+writes, using a copy after its source local leaves scope, legacy `place`, and the expected `E3101`, `E2101`, and
+`E1006` rejections. See [Region byte tests](../../internal/workspacecompiler/region_bytes_test.go)
+and [copy tests](../../internal/workspacecompiler/region_copy_test.go).
+
+`TestSDKStorageProbe` passed Linux C emission on Windows and low/optimized MSVC runtime execution.
+It covers payload and tracking-node forced OOM for both operations, empty requests without
+allocation, recovery, prior-byte preservation, and zero live allocations. See
+[SDK storage source](../../internal/cbackendnative/sdk_storage_source.go) and
+[SDK storage test](../../internal/cbackendnative/sdk_storage_test.go).
+`TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution; it
+executes all three Region modes before and after disk-cache restoration.
+
+No new Linux runtime execution or hosted CI covers these cases. The latest hosted v38 receipt at
+`54cbeb17` predates them and retains its historical counts. Related Go/fixture suites and vet pass locally; the full repository Go suite was not rerun. Phase 2 remains partial, and every target maturity gate remains unchanged.
+
 ## Cache evidence
 
 Current keys use [whole-package cache v4](../package/whole-package-cache-v4.md). The source and
@@ -123,6 +143,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Review the [Region byte-operation contract/implementation gap](linux-runtime-coverage.md#remaining-phase-2-review),
-   then map Phase 2's remaining declared runtime/library rules to fixtures or justified deferrals before conformance promotion.
+1. Obtain a fresh Linux receipt for the current [Region byte implementation](linux-runtime-coverage.md#local-region-byte-implementation),
+   then complete the remaining Phase 2 contract review before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

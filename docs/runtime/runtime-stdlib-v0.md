@@ -238,8 +238,17 @@ allocations without running resource cleanup.
 
 ADR 0475 reuses verified `region-place` for these operations, with `Operator` set to
 `alloc_zeroed_bytes` or `copy_bytes`, `OwnerType` set to the argument type, and the complete
-tagged Result type retained. Empty `Operator` retains the legacy `place` rule. Source lowering and
-end-to-end verification for the byte operations remain pending.
+tagged Result type retained. Empty `Operator` retains the legacy `place` rule. Both operations
+now have local semantic, MIR, interpreter, and C lowering paths. Targeted workspace tests pass for
+once-only evaluation, subviews and independent writes, using a copy after its source local leaves scope, legacy
+`place`, and the `E3101`, `E2101`, and `E1006` rejections.
+
+`TestSDKStorageProbe` passed Linux C emission on Windows plus low/optimized MSVC execution. It
+forces payload and tracking-node allocation failure for both byte operations, observes empty
+requests consuming no allocation, and checks recovery, prior-byte preservation, and zero live
+allocations. A fresh Linux runtime execution and hosted receipt are still pending; v38 predates
+these Region cases. See [ADR 0475](../adr/0475-region-byte-allocation-and-copy.md) and the
+[Linux coverage inventory](../development/linux-runtime-coverage.md).
 
 The bounded Region fixture surface still exports its own opaque `std::alloc::Arena` test resource.
 The compiler-bundled SDK separately exposes the move-only runtime-backed Arena accepted by

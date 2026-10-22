@@ -16,6 +16,8 @@ bidirectional ABI executions 56, and layout probe executions 4. SystemHeap, Buff
 text-view, owned-text and public-File probe counters are each 4.
 This v38 receipt includes the expanded public Buffer/text fixture described below. The report shape
 and four compiler/profile executions are unchanged.
+The hosted v38 receipt above predates the local Region byte implementation. A fresh Linux receipt is still required before
+claiming those cases for the current source.
 
 The following v37 receipt records the earlier baseline:
 
@@ -95,6 +97,31 @@ Its `standardLibraryBuildSmokeExecutions: 4` does not establish those public SDK
 The [Windows generated failure probes](../../tools/dev/fairyc-windows-host-smoke/generated_failure_probes.go)
 provide existing source cases to adapt rather than inventing new APIs.
 
+## Local Region byte implementation
+
+The Region byte contract is committed at `ca44226b`; zeroed allocation lowering is committed at
+`e035e79c`. Byte-copy lowering is committed at `0ed33081`. Source typing and recognition are in
+[`internal/semantic/region_types.go`](../../internal/semantic/region_types.go), with MIR lowering
+and verification in [`internal/mir/lower_regions.go`](../../internal/mir/lower_regions.go) and
+[`internal/mir/verify_operations.go`](../../internal/mir/verify_operations.go). C emission is in
+[`internal/cbackend/region_bytes.go`](../../internal/cbackend/region_bytes.go); the interpreter
+uses [`internal/interpreter/region_bytes.go`](../../internal/interpreter/region_bytes.go).
+
+Targeted workspace tests pass for `alloc_zeroed_bytes` and `copy_bytes`: one-time argument
+evaluation, zeroed and copied contents, subviews with independent writes, using a copy after its source local leaves scope, legacy `place`, and the expected `E3101`, `E2101`, and `E1006` rejections. See
+[`region_bytes_test.go`](../../internal/workspacecompiler/region_bytes_test.go) and
+[`region_copy_test.go`](../../internal/workspacecompiler/region_copy_test.go).
+
+`TestSDKStorageProbe` passed Linux C emission on Windows and low/optimized MSVC execution. The
+fixture forces payload and tracking-node allocation failure for both new operations, checks empty
+requests consume no allocation, and verifies recovery, prior-data preservation, and zero live
+allocations. See [`sdk_storage_source.go`](../../internal/cbackendnative/sdk_storage_source.go) and
+[`sdk_storage_test.go`](../../internal/cbackendnative/sdk_storage_test.go).
+
+`TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution. It
+executes all three Region modes before and after disk-cache restoration. No fresh Linux runtime execution or
+hosted CI covers these cases; v38 remains historical evidence for its recorded revision. Related Go/fixture suites and vet pass locally; the full repository Go suite was not rerun.
+
 ## Remaining Phase 2 review
 
 The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`,
@@ -104,7 +131,7 @@ sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-exec
 | Requirement | Existing fixture owner | Actual gap |
 | --- | --- | --- |
 | Thin runtime and SystemHeap | [runner](../../internal/cbackendnative/runner.go), [trap locations](../../internal/cbackend/trap_location_native_test.go), [generated heap crossing](../../internal/cbackendnative/smoke_heap.go) | Current runtime/source probes pass. SystemHeap remains internal support by contract. |
-| Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38; byte-level zeroing/copy and broader failure atomicity remain raw evidence. The contract's `alloc_zeroed_bytes` and `copy_bytes` have C helpers but no admitted public source call; [Region call recognition](../../internal/semantic/region_types.go) currently selects only `place`. Review this contract/implementation gap before conformance. |
+| Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [Region byte tests](../../internal/workspacecompiler/region_bytes_test.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38. Locally, `alloc_zeroed_bytes` and `copy_bytes` now have source recognition, MIR verification, interpreter, and C paths with focused evidence for zeroing, copying, evaluation order, diagnostics, forced allocation failure, recovery, and cleanup. A fresh Linux receipt is pending; v38 predates these cases. |
 | Buffer | Combined SDK check; [raw Buffer](../../internal/cbackendnative/smoke_buffer.go) | The combined fixture now executes public `empty`, `resize_zeroed`, `truncate`, and `view_mut`, including zeroing and regrowth. The raw fixture supplies the earlier byte-level and failure evidence. |
 | Text | Combined SDK check; [raw owned text](../../internal/cbackendnative/smoke_owned_text.go), [raw text views](../../internal/cbackendnative/smoke_text_views.go) | The combined fixture now executes empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips. Raw C supplies the byte-level cases. |
 | Linux `File` | [Public File source](../../internal/cbackendnative/smoke_files.go), [raw Linux File](../../internal/cbackendnative/smoke_linux_file.go) | The representative safe File path passes four executions; partial I/O and close failure are raw evidence. The Windows-only operations listed above are outside the Phase 2 minimum. |
@@ -115,10 +142,11 @@ receipt; it requires no API or target-gate change.
 
 ## Next slice
 
-Review the Region byte-operation contract/implementation gap above, then map remaining mandatory
-runtime/library rules to fixtures or justified deferrals before considering conformance.
+Run a fresh Linux receipt covering the current Region byte source paths, then complete the remaining
+Phase 2 contract review by mapping mandatory runtime/library rules to fixtures or justified
+deferrals before considering conformance.
 Both `complete-runtime` and `complete-standard-library`
 remain missing in the [target spec](../../internal/target/spec.go); `emittable`, `conformant`,
-and `supported` remain false. The fixture changes no product API, runtime implementation, DB,
-hygiene policy, or CI runner allocation. The separate lexer job timeout increased from ten to twelve
+and `supported` remain false. This slice connects the declared Region source APIs without changing
+the C runtime ABI, SDK source bytes, DB, hygiene policy, or CI runner allocation. The separate lexer job timeout increased from ten to twelve
 minutes to accommodate its existing tests and job setup/cleanup; no tests or runners were added.

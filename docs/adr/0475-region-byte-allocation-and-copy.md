@@ -1,6 +1,6 @@
 # ADR 0475: Region byte allocation and copy
 
-- Status: Accepted (contract only; implementation and verification pending)
+- Status: Accepted; locally implemented; Linux hosted verification pending
 - Date: 2026-10-22
 - Depends on: ADR 0042, ADR 0251, ADR 0252
 - Contract: `docs/runtime/runtime-stdlib-v0.md`
@@ -73,10 +73,32 @@ that transport keeps the three Region allocation forms on one verified path.
 - No C runtime ABI, SDK source bundle, public C header, grammar, or package artifact schema changes.
 - Existing source-level `place` behavior and generated C remain unchanged unless byte allocation is
   used.
-- Compiler implementation and verification are pending. Acceptance of this ADR does not claim that
-  semantic checks, MIR emission and verification, interpreter execution, C emission, native
-  execution, or cache identity checks have passed.
-- Required implementation evidence must cover one-time argument evaluation, zeroed and copied
-  contents, empty results, Region provenance and escape rejection, failure without publication or
-  damage to earlier allocations, source preservation, lexical reset, legacy `place`, and the three
-  MIR operator forms.
+- A fresh Linux runtime and hosted receipt are still required. The latest hosted v38 receipt predates
+  these Region byte cases and does not establish them for the current source.
+- Related Go/fixture suites and vet pass locally. The full repository Go suite was not rerun.
+
+## Implementation evidence
+
+The contract is committed at `ca44226b`, and zeroed byte allocation is committed at `e035e79c`.
+Byte-copy lowering is committed at `0ed33081`. Source recognition and typing are in
+[`region_types.go`](../../internal/semantic/region_types.go); MIR lowering and verification are in
+[`lower_regions.go`](../../internal/mir/lower_regions.go) and
+[`verify_operations.go`](../../internal/mir/verify_operations.go); C emission is in
+[`region_bytes.go`](../../internal/cbackend/region_bytes.go).
+
+Targeted `workspacecompiler` tests pass for both operations. They cover one-time argument
+evaluation, zeroed and copied bytes, subviews followed by independent writes, and using a copy after its source local leaves scope. They also check `E3101` Region escape, `E2101` exclusive-alias
+rejection, and `E1006` wrong-input rejection for both names. See
+[`region_copy_test.go`](../../internal/workspacecompiler/region_copy_test.go) and
+[`region_bytes_test.go`](../../internal/workspacecompiler/region_bytes_test.go). The interpreter
+path is [`region_bytes.go`](../../internal/interpreter/region_bytes.go).
+
+`TestSDKStorageProbe` passed Linux C emission on Windows and low/optimized MSVC execution. The
+fixture forces both payload and tracking-node allocation failure for each new operation, checks that
+empty requests consume no allocation, and verifies recovery, prior-data preservation, and zero live
+allocations. See [`sdk_storage_source.go`](../../internal/cbackendnative/sdk_storage_source.go) and
+[`sdk_storage_test.go`](../../internal/cbackendnative/sdk_storage_test.go).
+
+`TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution. It
+executes all three Region modes before and after disk-cache restoration. These are focused local
+results, not a replacement for Linux runtime execution or hosted CI.
