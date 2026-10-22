@@ -1,28 +1,29 @@
 # Linux runtime and SDK coverage
 
-Hosted evidence baseline: 2026-10-22, source `1413b4b1855f2bdb7f6b2bc2205b062e028b4870`,
+Hosted evidence baseline: 2026-10-22, source `3ea6d1b5923386155f4ffd66b51040a046f2827d`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
 This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
 ## Execution evidence
 
-[Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
-passed all nine jobs at the audited source revision on 2026-10-22.
-Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119842277429)
-records report `fairyc.native-c-report/v38` on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and
-GCC 13.3.0: `sdkStorageExecutions: 4`, interpreter/C and drop-trace executions 208 each,
-sanitizer executions 104, bidirectional ABI executions 56, and layout probe executions 4.
+[Frontend run 39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010)
+passed all nine jobs at `3ea6d1b5923386155f4ffd66b51040a046f2827d`. Its
+[native Linux job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870) records report `fairyc.native-c-report/v38` on Ubuntu
+24.04 amd64, glibc 2.39, Clang 18.1.3 and GCC 13.3.0: 55 C emission cases,
+interpreter/C and drop-trace executions 220 each, sanitizer executions 110,
+bidirectional ABI executions 56, layout probe executions 4, and `sdkStorageExecutions: 4`.
 SystemHeap, Buffer, Arena, text-view, owned-text and public-File probe counters are each 4.
 The four SDK storage executions cover both Region byte operations with normal, empty, and forced
 payload and tracking-node allocation failures, recovery, preserved data, and zero live allocations.
-That SDK probe is separate from the 104 sanitizer executions. The same run's hosted Go lanes and
-existing Windows native, parser, and lexer jobs passed.
+That SDK probe is separate from the 110 sanitizer executions. The separate
+[Linux Go job 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the 12 focused Linux cases without skips.
 
-The previous [Frontend run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761)
-at `54cbeb17ebdc28a2797cc19c6b45882381c6cc3a` remains historical evidence for its recorded
-revision. Its expanded public Buffer/text fixture and four compiler/profile SDK executions are
-described below.
+The previous [Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
+at `1413b4b1855f2bdb7f6b2bc2205b062e028b4870` remains historical evidence for its recorded
+52-case receipt. Earlier [run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761)
+at `54cbeb17ebdc28a2797cc19c6b45882381c6cc3a` also remains historical evidence. Their public
+Buffer/text fixture and four compiler/profile SDK executions are described below.
 
 The following v37 receipt records the earlier baseline:
 
@@ -41,9 +42,9 @@ The source pointers below identify coverage, not additional executions performed
 
 ## Focused Linux receipt
 
-- Run: [39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
-- Job: [Linux Go 119836149873](https://github.com/0disoft/fairyc/actions/runs/39782215105/job/119836149873)
-- Source: [`1413b4b`](https://github.com/0disoft/fairyc/commit/1413b4b1855f2bdb7f6b2bc2205b062e028b4870)
+- Run: [39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010)
+- Job: [Linux Go 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
+- Source: [`3ea6d1b`](https://github.com/0disoft/fairyc/commit/3ea6d1b5923386155f4ffd66b51040a046f2827d)
 
 | Test | Executions | Skips |
 | --- | ---: | ---: |
@@ -152,16 +153,16 @@ allocations. See [`sdk_storage_source.go`](../../internal/cbackendnative/sdk_sto
 
 `TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution. It
 executes all three Region modes before and after disk-cache restoration.
-[Frontend run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105) now covers
+[Frontend run 39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010) now covers
 both byte operations in four compiler/profile SDK executions, including normal, empty, forced
 payload and tracking-node OOM, recovery, preserved data, and zero live allocations. This receipt
-establishes the current Linux runtime cases; the SDK probe is distinct from the separate 104
+establishes the current Linux runtime cases; the SDK probe is distinct from the separate 110
 sanitizer executions. Related Go/fixture suites and vet pass locally. The local full repository Go
-suite was not rerun, while the hosted Go lanes in the receipt passed.
+suite was not rerun, while the hosted native and focused Linux Go jobs passed.
 
 ## Phase 2 contract-to-fixture review
 
-The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`, text/`String`/`CString`, and Linux `File` paths, with differential, layout, bidirectional ABI, and sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)). This is a source review against the existing receipts, not a new execution or a target promotion. SDK storage probes are separate from the 104 sanitizer executions.
+The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`, text/`String`/`CString`, and Linux `File` paths, with differential, layout, bidirectional ABI, and sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)). This is a source review against the existing receipts, not a new execution or a target promotion. SDK storage probes are separate from the 110 sanitizer executions.
 
 | Contract rule | Source owner | Fixture owner | Evidence | Scope / gap |
 | --- | --- | --- | --- | --- |
@@ -172,7 +173,7 @@ The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Are
 | Text, `String`, `CString` | [stage0_text_view.c](../../internal/cstdlib/stage0_text_view.c), [stage0_owned_text.c](../../internal/cstdlib/stage0_owned_text.c), [text.fy](../../internal/sdkstdlib/sources/std/text.fy) | [sdk_storage_source.go](../../internal/cbackendnative/sdk_storage_source.go), [smoke_text_views.go](../../internal/cbackendnative/smoke_text_views.go), [smoke_owned_text.go](../../internal/cbackendnative/smoke_owned_text.go), [stage0_text_view_probe.c](../../internal/cstdlib/stage0_text_view_probe.c), [stage0_owned_text_probe.c](../../internal/cstdlib/stage0_owned_text_probe.c) | v38 text-view and owned-text counters are each 4. Public checks include empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips; raw probes supply boundaries, NUL rejection, empty, rollback, and OOM. | Mandatory. Coverage is representative; this does not establish every public failure path. |
 | Linux `File` core: open/read/write_all/sync/close/drop, position, size, bounded seeks | [stage0_linux_file.c](../../internal/cstdlib/stage0_linux_file.c), [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [fs.fy](../../internal/sdkstdlib/sources/std/fs.fy) | [stage0_linux_file_probe.c](../../internal/cstdlib/stage0_linux_file_probe.c), [smoke_linux_file.go](../../internal/cbackendnative/smoke_linux_file.go), [smoke_files.go](../../internal/cbackendnative/smoke_files.go) | v38 reports `linuxFileExecutions`, `linuxFileSourceCallExecutions`, and `linuxPublicFileExecutions` at 4 each. Raw coverage includes partial read/EOF/write_all/sync/consuming close/EBADF/raw drop; safe coverage includes create/read/write_all/seeks/size/close. | Mandatory core. The representative safe path and raw failure path are covered; the remaining progress/error assertions are listed below. |
 | `File` exact read, publication, and failure paths | [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [ADR 0424](../adr/0424-linux-prepared-publication-and-process-arguments.md) | [linux_publication_test.go](../../internal/cstdlib/linux_publication_test.go), [task_manager_linux_save_test.go](../../internal/cli/task_manager_linux_save_test.go), [task_manager_linux_save_hooks_test.go](../../internal/cli/task_manager_linux_save_hooks_test.go) | `TestLinuxPreparedPublication` defines GCC/Clang low/optimized exact-read early EOF, suffix preservation, remove/replace error, and old-open-owner cases. The save tests define 40 cases (four compiler profiles x ten modes): first/partial writes ENOSPC, sync EIO, close EIO, replace failure, and kill/restart preservation. The focused receipt now records four passing `TestLinuxPreparedPublication` executions without skips; the separate 40 save-failure cases retain suite-level evidence. | Mandatory. The [focused receipt](#focused-linux-receipt) now covers deterministic File EINTR retry, zero progress, and exact partial error counts through the public SDK. The save-failure cases separately assert application errors and data. Process kill is not power-loss proof. Reuse test-only POSIX seams; no new public API. |
-| Differential, layout, ABI, sanitizer | [execution.go](../../internal/cbackendnative/execution.go), [oracle_results.go](../../internal/cbackendnative/oracle_results.go), [probes_layout.go](../../internal/cbackendnative/probes_layout.go), [abi_probe.go](../../internal/cbackendnative/abi_probe.go) | [runner.go](../../internal/cbackendnative/runner.go), [c-emission fixture](../../spec/fixtures/c-emission/README.md) | v38 reports 208 differential and drop-trace executions, 4 layout probes, 56 bidirectional ABI executions, and 104 sanitizer executions. Execution/oracle results compare exit status/trap code and source-linked drop IDs. | Mandatory. The fixture README says active built-in payload selection is observed; no separate native payload event stream exists. The [active-payload mapping](#active-payload-observation-mapping) identifies three direct-cleanup fixtures added after this receipt. Their Linux execution is pending; the existing observer and wire format are unchanged. |
+| Differential, layout, ABI, sanitizer | [execution.go](../../internal/cbackendnative/execution.go), [oracle_results.go](../../internal/cbackendnative/oracle_results.go), [probes_layout.go](../../internal/cbackendnative/probes_layout.go), [abi_probe.go](../../internal/cbackendnative/abi_probe.go) | [runner.go](../../internal/cbackendnative/runner.go), [c-emission fixture](../../spec/fixtures/c-emission/README.md) | v38 reports 55 emission cases, 220 differential and drop-trace executions, 4 layout probes, 56 bidirectional ABI executions, and 110 sanitizer executions. Execution/oracle results compare exit status/trap code and source-linked drop IDs. | Mandatory. The fixture README says active built-in payload selection is observed; no separate native payload event stream exists. The [active-payload mapping](#active-payload-observation-mapping) identifies three direct-cleanup fixtures; their Linux execution is included in this receipt. The existing observer and wire format are unchanged. |
 | Target maturity | [spec.go](../../internal/target/spec.go) | [spec_test.go](../../internal/target/spec_test.go) | The spec stores `complete-runtime` and `complete-standard-library` as missing. The test validates structural maturity ordering and nonempty missing values. | Mandatory review gate. The test does not compute fixture completeness. Both missing markers remain; `emittable`, `conformant`, and `supported` stay false. |
 
 Outside the representative Phase 2 minimum ([Linux File contract](../runtime/runtime-stdlib-v0.md#linux-file-v0)): directory lifecycle/enumeration, rename/hardlink/copy/`set_len`, extended metadata, and File-to-Buffer. Admission depends on Linux target adapters and owning native fixtures. `Vec<T>` and extra pure helpers are later surfaces, not required full SDK parity. Portable paths, sockets, mapped files, async I/O, generic allocators, and freestanding support remain design exclusions. No deferral or waiver is claimed for the missing mandatory evidence.
@@ -229,12 +230,11 @@ and emits production/closed trace units;
 [execution.go](../../internal/cbackendnative/execution.go) compares exact runtime drop ID sequence
 and process status. Moves must not introduce extra drops; there is no new event wire format.
 
-Counters: the baseline hosted run 39782215105 at `1413b4b1` covers only the prior 52 cases (208
-process-status/drop comparisons, 104 sanitizer executions). Local
-[manifest-v0.json](../../spec/fixtures/c-emission/manifest-v0.json) is now 55; the configured native
-matrix is 220 process-status/drop comparisons and 110 sanitizer executions, but it has not been run
-for the new 3. Three new fixtures still await Linux execution at GCC/Clang low/optimized (12
-additional runs, 6 sanitizer runs); no new jobs or runners are required. Local `go test
+Counters: the previous hosted run 39782215105 at `1413b4b1` remains historical evidence for
+the prior 52 cases (208 process-status/drop comparisons, 104 sanitizer executions). The current
+hosted run 39787424010 at `3ea6d1b` covers all 55 cases with 220 process-status/drop comparisons
+and 110 sanitizer executions, including the three direct-cleanup cases at GCC/Clang low and
+optimized profiles. No new jobs or runners were required. Local `go test
 -mod=readonly -count=1 ./internal/cbackendfixture ./internal/cbackendnative` passed, and
 `TestEmissionTransportAcrossResponsibilitySplit` preserves the production and instrumented C units
 of the original 52 cases byte-for-byte; the new 3 are excluded from the historical hash and covered
@@ -242,15 +242,15 @@ by independent golden observations, not rebaselined.
 
 Phase 2 stays partial: `complete-runtime` and `complete-standard-library` remain missing;
 `emittable`, `conformant`, and `supported` stay false. Nested resource tags and effectful cleanup
-are not admitted by this mapping. Next bounded step: run the expanded 55-case native lane, then
-reassess minimum exit evidence; no requirement is automatically waived.
+are not admitted by this mapping. Next bounded step: reassess the mandatory Phase 2 exit evidence;
+no requirement is automatically waived.
 
 ## Next work
 
-Run the expanded 55-case native lane under GCC/Clang at low and optimized profiles. Its planned
-220 process-status/drop comparisons and 110 sanitizer executions need a new hosted receipt; the
-existing 52-case receipt does not cover the three added cleanup cases. Reassess the minimum exit
-evidence only after that execution; both missing markers and all three maturity flags stay unchanged.
+The expanded 55-case native lane has passed under GCC/Clang at low and optimized profiles. Its
+220 process-status/drop comparisons and 110 sanitizer executions are recorded in the current
+receipt and cover the three added cleanup cases. Reassess the mandatory Phase 2 exit evidence
+next; both missing markers and all three maturity flags stay unchanged.
 
 The current receipt already covers the Region byte cases. The review and follow-up fixtures change no API,
 runtime ABI, SDK source bytes, DB, hygiene policy, CI runner allocation, or version. The new tests
