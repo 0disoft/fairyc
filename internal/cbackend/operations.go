@@ -538,6 +538,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("Region placement in %s has no allocation error C type", function)
 		}
 		errorField := e.analysis.structCFieldName(errorIndex, 0)
+		// A MIR block label may precede this operation. C11 labels require a
+		// statement, so keep placement temporaries inside a compound statement.
+		output.WriteString("    {\n")
 		fmt.Fprintf(output, "    void *fy_region_storage_%d = NULL;\n", operation.DestinationLocal)
 		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)&fy_region_%d, sizeof(%s), _Alignof(%s), &fy_region_storage_%d);\n", operation.DestinationLocal, operation.Symbol, ownerType, ownerType, operation.DestinationLocal)
 		fmt.Fprintf(output, "    if (fy_region_status_%d == UINT32_C(0)) {\n", operation.DestinationLocal)
@@ -545,6 +548,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_OK, .p_0 = (const %s *)fy_region_storage_%d };\n", operation.DestinationLocal, taggedIndex, ownerType, operation.DestinationLocal)
 		output.WriteString("    } else {\n")
 		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_ERR, .p_1 = (%s){ .%s = fy_region_status_%d } };\n", operation.DestinationLocal, taggedIndex, e.analysis.structCTypeName(errorIndex), errorField, operation.DestinationLocal)
+		output.WriteString("    }\n")
 		output.WriteString("    }\n")
 	case mir.OperationRegionReset:
 		fmt.Fprintf(output, "    if (fy_std_region_reset_v0((void *)&fy_region_%d) != UINT32_C(0)) %s;\n", operation.Symbol, e.trapCall("FY_TRAP_UNREACHABLE", operation.Span))
