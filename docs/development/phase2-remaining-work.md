@@ -75,3 +75,22 @@ to the representative SDK minimum.
 Keep Phase 2 `partial`, `complete-runtime` and `complete-standard-library` present, and `emittable`,
 `conformant`, `supported` false. Removing a marker requires an explicit evidence-backed assessment
 of its declared scope; completing E1 alone is insufficient.
+
+## Implementation update (2026-10-23)
+
+E1 is implemented at `ecd0e909`: 56 emission cases, independent parent/temporary/reverse-child
+expectations, unchanged original 52-case transport hash, and no production trace instrumentation.
+Different FirstLeaf/LastLeaf types make sibling order independently observable.
+E2 is implemented at `893cfbc9`: the existing `10,2,99` observer runs under GCC/Clang low/optimized
+and both MSVC profiles. Linux low-profile cases additionally require one ASan+UBSan execution per
+compiler. These two sanitizer executions belong to the focused Go test, not the v38 native count.
+Local fixture tests, both MSVC cases, and the 12 CI-helper tests pass. Hosted execution is pending.
+The focused collector now requires v4/32 cases; v3/28 remains historical.
+
+Phase 2 verdict: do not promote the full target merely because its representative runtime/SDK
+minimum and these cleanup observations pass. The complete target claim must account for the
+backend's explicitly rejected shapes (zero-field resources, conditional drop state and nested
+owning tags), the source-level foreign-call boundary, and every declared target fixture. Existing
+closed capabilities are not newly admitted by this audit. The two completeness markers and all
+three maturity flags stay unchanged; this is a scope/evidence decision, not a request to add more
+random runtime failure tests or implement excluded SDK APIs.

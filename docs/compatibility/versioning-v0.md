@@ -217,8 +217,11 @@ preserving receiver evaluation and forbidding storage-based reflection. ADR 0112
 contextual direct shared borrow from `[u8; N]` to immutable `&[u8]`, retaining the local origin and
 whole-array loan. Element order, length, `bounds`, and this contextual conversion are pre-1
 semantics. The current `1..=4096` element admission ceiling and private C wrappers are provisional
-implementation guards rather than compatibility promises; empty/repeated literals, fields,
-nesting, mutation, general slicing, and ABI use remain unstabilized or excluded. Exact whole-array
+implementation guards rather than compatibility promises. Later ADRs admit repeated scalar
+initialization (0416), indexed mutation (0126), plain-struct elements (0462), and bounded scalar
+and plain-struct array fields (0468/0471), with separately bounded typed-view extensions.
+Empty/zero-count arrays, nested arrays, resource elements, broad implicit coercions, and foreign
+array signatures remain excluded. Exact whole-array
 safe-borrow parameters are pre-1 internal-call semantics and do not stabilize a C ABI.
 ADR 0125 adds the exact contextual mutable pair from a mutable `[u8; N]` place to `&mut [u8]`,
 retaining one exclusive origin and canonical length through internal calls. The private writable C

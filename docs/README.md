@@ -15,6 +15,7 @@ Supporting pages:
 
 - [Implementation status](development/implementation-status.md) - phase history moved out of the root README
 - [Phase status](development/phase-status.md) - current Phase 0–4 exit evidence and remaining work
+- [Phase 0 exit audit](development/phase0-exit-audit.md) - current contract contradictions, fixture owners, and exit decision
 - [Linux runtime coverage](development/linux-runtime-coverage.md) - implemented APIs, execution evidence, and remaining gaps
 - [Phase 2 remaining work](development/phase2-remaining-work.md) - satisfied minimums, execution gaps, capability limits, and the next fixture
 - [Linux toolchain](abi/linux-toolchain-v0.md) - prototype version floors, installation, and CI provisioning

@@ -20,7 +20,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 
 | Phase | Status | Evidence and remaining work |
 | --- | --- | --- |
-| 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
+| 0 — contracts | Bounded audit corrected; current hosted validation pending | The [contract and fixture audit](phase0-exit-audit.md) finds every mandatory fixture family present and corrects three stale documentation claims. The updated source still requires hosted execution; this is not an exhaustive audit of every ADR. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
 | 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39805612550/job/119918006715) passed all 28 focused Linux cases without skips, including four trap-receipt cases and 12 equality, comparison, and checked-decimal cases. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
@@ -189,9 +189,21 @@ and require that separate versioned hash/class plus body-only dependent-cache in
 cold/warm and persistent paths. Keep private-implementation stability and incompatible safe misses
 checked. No language/runtime feature or cache algorithm changes here; Phase 2 remains partial.
 
+## Current assessment (2026-10-23)
+
+Nested cleanup E1 and E2 are implemented at `ecd0e909` and `893cfbc9`. Local emission/golden
+checks preserve the original 52-case C hash, and both MSVC profiles pass the mutation observer.
+The next hosted run must establish the 56-case native matrix and v4/32-case focused receipt;
+older v3/28 and v38/55-case receipts do not attest these changes.
+
+Phase 2 stays partial: the representative runtime/SDK minimum is covered, but the complete target
+claim must account for every declared capability, including the backend's explicit rejection
+boundaries and source-level foreign-call scope. See the
+[remaining-work decision](phase2-remaining-work.md#implementation-update-2026-10-23).
+
 ## Next work
 
-1. Add the pure nested-resource cleanup fixture to the existing Linux differential/drop/sanitizer
-   matrix. Require return 42 and four ordered drop events under GCC/Clang low/optimized; see the
-   [remaining-work audit](phase2-remaining-work.md). Keep Phase 2 partial and both missing markers.
-2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
+1. Verify the batched hosted receipts, then record exact source/run/job identities for E1 and E2.
+2. Keep target maturity flags unchanged until the complete declared target scope is assessed;
+   passing the bounded cleanup matrix alone does not waive unsupported source shapes.
+3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.

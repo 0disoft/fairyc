@@ -11,12 +11,15 @@
 
 The compiler and MIR directly own checked, wrapping, saturating, and checked-result arithmetic; division and shift validation; bounds checks and traps; layout queries; bit copy and bit cast; built-in `Option` and `Result` tags and active-payload movement; resource move and drop glue; borrow and region markers; raw memory operations; and slice construction and indexing.
 
-The compiler also owns the current bounded scalar fixed-array value, list-construction, internal
-copy transport, exact length observation, checked indexing, and contextual shared `u8[N]` to
-`ref u8[]` view construction. They require no runtime allocation or library entry point. The
-provisional Stage 0 by-value implementation admits `1..=4096` elements; that ceiling is not a
-stable language or ABI limit. Empty/repeated literals, array fields, mutation, general slicing,
-properties other than `.len`, other array borrows, and ABI exposure remain outside this slice.
+The compiler owns bounded fixed-array construction, copy transport, checked indexing and stores,
+length observation, and the admitted shared/exclusive typed views. Arrays require no runtime
+allocation or library entry point. The provisional by-value limit is `1..=4096` elements, not a
+stable language or ABI limit. ADR 0416 admits repeated scalar initializers evaluated once; ADR
+0462 extends the element set to admitted plain structs. ADRs 0468/0471 admit bounded scalar and
+plain-struct array fields, with later field-view extensions. Empty/zero-count arrays, nested
+arrays, resource elements and foreign array signatures remain closed. The current syntax and
+view boundaries are owned by [surface syntax](../language/0005-surface-syntax-v0.md), rather than
+by the original scalar-array slice.
 Safe-borrow reassignment is compiler-owned local descriptor transport after Flow proves branch and
 loop-edge provenance and loans; it adds no runtime allocation, phi object, or library entry point.
 Internal borrow-return summaries are likewise Flow-only proof metadata. They select an existing

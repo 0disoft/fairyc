@@ -47,8 +47,8 @@ same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
 instrumented units from this runner, requires glibc plus Clang and GCC, links the scalar runtime plus
-a closed four-byte recorder, and executes 220 process-status and exact drop-sequence comparisons
-plus 110 sanitizer executions at low and optimized profiles. Those executions include scalar fixed-array indexing plus explicit and
+a closed four-byte recorder, and configures 224 process-status and exact drop-sequence comparisons
+plus 112 sanitizer executions at low and optimized profiles. Those executions include scalar fixed-array indexing plus explicit and
 omitted-bound byte-view slicing. This observes compiler-owned empty resource cleanup and active built-in
 payload selection plus pure user drop bodies. Effect-bearing drop remains deferred. The
 emission runner itself remains
@@ -57,7 +57,7 @@ toolchain-free and does not inherit native evidence from the presence of that se
 The three direct-cleanup cases `resource-option-drop` and `resource-result-drop-ok/err` exercise
 implicit `Some`/`None` cleanup and explicit `discard` of `Result<Success, Failure>` for `Ok` and
 `Err`. Independent expected resource types and binding spans cover these and the six existing
-resource-tag cases. The [current 55-case native run](https://github.com/0disoft/fairyc/actions/runs/39787424010)
+resource-tag cases. The [historical 55-case native run](https://github.com/0disoft/fairyc/actions/runs/39787424010)
 executes 220 process-status/drop comparisons and 110 sanitizer executions, including these three
 cases.
 
