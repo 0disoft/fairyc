@@ -2,9 +2,9 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Current Frontend receipt: `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`
+- Current Frontend receipt: `54cbeb17ebdc28a2797cc19c6b45882381c6cc3a`
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
-- Evidence: [Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686), all nine jobs passed; earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remains historical evidence
+- Evidence: [Frontend run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761), all nine jobs passed; earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remains historical evidence
 
 This page summarizes gate evidence. The roadmap, language contracts, and owning fixtures retain
 authority. The roadmap defines no Phase 5, 6, or 7.
@@ -42,7 +42,7 @@ Full runtime and standard-library coverage remain missing as `complete-runtime` 
 The target's `emittable`, `conformant`, and `supported` maturity flags remain false.
 
 The [2026-10-22 Linux coverage audit](linux-runtime-coverage.md) maps the implemented runtime and
-SDK surfaces to source owners, fixtures, and the later passing Frontend run at `4f779868`.
+SDK surfaces to source owners, fixtures, and the current passing Frontend run at `54cbeb17`.
 It distinguishes missing Linux implementations from incomplete execution evidence and design
 exclusions. Windows API parity is not the Phase 2 exit gate.
 
@@ -69,15 +69,14 @@ the corrected code; target maturity is unchanged.
 
 ## Public SDK Linux receipt (v38)
 
-[Linux job 119774556489](https://github.com/0disoft/fairyc/actions/runs/39762433686/job/119774556489)
-at `2c8997ee` records four public SDK storage executions under Clang/GCC at low/optimized profiles.
+[Linux job 119796130897](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
+at `54cbeb17` records four public SDK storage executions under Clang/GCC at low/optimized profiles.
 It checks Arena/Region allocation and rollback, Buffer growth, String/CString allocation failures,
 preserved contents/ownership, and zero live allocations after cleanup. The same v38 report retains
-208 differential/drop-trace executions, 104 sanitizer executions, and 56 ABI crossings.
-All nine Frontend jobs in that run passed. The fixture has since expanded to public Buffer
+208 differential/drop-trace executions, 104 sanitizer executions, 56 ABI crossings, and four layout probes.
+All nine Frontend jobs in that run passed. The fixture includes public Buffer
 `empty`, `resize_zeroed`, `truncate`, `view_mut` and text empty, exact multibyte UTF-8, and
-successful/empty `from_buffer` cases; the receipt above predates those additions.
-A fresh Linux receipt is pending. The
+successful/empty `from_buffer` cases; the receipt above covers those additions. The
 [coverage review](linux-runtime-coverage.md#remaining-phase-2-review) now maps those expanded cases.
 Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
 
@@ -124,6 +123,6 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Collect a fresh Linux receipt for the [expanded public SDK Buffer/text fixture](linux-runtime-coverage.md#next-slice),
-   then review Phase 2's remaining declared runtime/library rules before conformance promotion.
+1. Review the [Region byte-operation contract/implementation gap](linux-runtime-coverage.md#remaining-phase-2-review),
+   then map Phase 2's remaining declared runtime/library rules to fixtures or justified deferrals before conformance promotion.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

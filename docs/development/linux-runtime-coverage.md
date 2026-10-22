@@ -1,21 +1,21 @@
 # Linux runtime and SDK coverage
 
-Hosted evidence baseline: 2026-10-22, source `2c8997ee1e2a856b8370a3a3d2ab40fa65d2252d`,
+Hosted evidence baseline: 2026-10-22, source `54cbeb17ebdc28a2797cc19c6b45882381c6cc3a`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
 This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
 ## Execution evidence
 
-[Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686)
+[Frontend run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761)
 passed all nine jobs at the audited source revision on 2026-10-22.
-Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39762433686/job/119774556489)
+Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
 records report v38 on Ubuntu 24.04 amd64, glibc 2.39, Clang 18.1.3 and GCC 13.3.0:
 `sdkStorageExecutions: 4`, differential/drop-trace executions 208 each, sanitizer executions 104,
 bidirectional ABI executions 56, and layout probe executions 4. SystemHeap, Buffer, Arena,
 text-view, owned-text and public-File probe counters are each 4.
-That v38 receipt predates the public fixture expansion described below; its report shape and four
-SDK executions are unchanged, and a fresh Linux receipt is pending.
+This v38 receipt includes the expanded public Buffer/text fixture described below. The report shape
+and four compiler/profile executions are unchanged.
 
 The following v37 receipt records the earlier baseline:
 
@@ -78,11 +78,16 @@ workflow or runner. The [focused test](../../internal/cbackendnative/sdk_storage
 checks Linux emission on Windows and executes the same fixture at both MSVC profiles.
 Focused `TestSDKStorageProbe` passes locally: Linux C emission on Windows, MSVC low/optimized
 executions, and zero live allocations, covering resize/zeroing, view mutation, truncate capacity,
-empty views, Korean/Greek UTF-8, and `from_buffer` roundtrips. Fresh Linux execution is pending.
+empty views, Korean/Greek UTF-8, and `from_buffer` roundtrips. The current hosted receipt also
+executes those expanded cases under GCC/Clang at low/optimized profiles, with zero live allocations.
 The first Linux attempt exposed C11 label/declaration emission and
 an unrelated Atlas crash-helper deadlock; `e149ac29` and `2c8997ee` correct those paths.
 [Frontend run 39762433686](https://github.com/0disoft/fairyc/actions/runs/39762433686)
 passed on the corrected source, including all four public SDK storage executions in report v38.
+The [expanded-fixture attempt](https://github.com/0disoft/fairyc/actions/runs/39767151309)
+at `dc71e198` passed the lexer tests but exceeded that job's ten-minute limit during cleanup,
+blocking the dependent Linux native lane. `54cbeb17` allows twelve minutes for the lexer job;
+test selection and runner count are unchanged.
 
 The current [standard-library build smoke](../../internal/cbackendnative/smoke_build.go)
 uses a [raw empty-input UTF-8 call](../../internal/cbackendnative/smoke_text_views.go).
@@ -99,20 +104,21 @@ sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-exec
 | Requirement | Existing fixture owner | Actual gap |
 | --- | --- | --- |
 | Thin runtime and SystemHeap | [runner](../../internal/cbackendnative/runner.go), [trap locations](../../internal/cbackend/trap_location_native_test.go), [generated heap crossing](../../internal/cbackendnative/smoke_heap.go) | Current runtime/source probes pass. SystemHeap remains internal support by contract. |
-| Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38; byte-level zeroing/copy and broader failure atomicity remain raw evidence. |
+| Arena | [Combined SDK source](../../internal/cbackendnative/sdk_storage_source.go); [raw Arena](../../internal/cbackendnative/smoke_arena.go) | Public placement, rollback, reuse, and reset pass in v38; byte-level zeroing/copy and broader failure atomicity remain raw evidence. The contract's `alloc_zeroed_bytes` and `copy_bytes` have C helpers but no admitted public source call; [Region call recognition](../../internal/semantic/region_types.go) currently selects only `place`. Review this contract/implementation gap before conformance. |
 | Buffer | Combined SDK check; [raw Buffer](../../internal/cbackendnative/smoke_buffer.go) | The combined fixture now executes public `empty`, `resize_zeroed`, `truncate`, and `view_mut`, including zeroing and regrowth. The raw fixture supplies the earlier byte-level and failure evidence. |
 | Text | Combined SDK check; [raw owned text](../../internal/cbackendnative/smoke_owned_text.go), [raw text views](../../internal/cbackendnative/smoke_text_views.go) | The combined fixture now executes empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips. Raw C supplies the byte-level cases. |
 | Linux `File` | [Public File source](../../internal/cbackendnative/smoke_files.go), [raw Linux File](../../internal/cbackendnative/smoke_linux_file.go) | The representative safe File path passes four executions; partial I/O and close failure are raw evidence. The Windows-only operations listed above are outside the Phase 2 minimum. |
 | Differential, layout, ABI, sanitizer | [runner](../../internal/cbackendnative/runner.go), [layout probes](../../internal/cbackendnative/probes_layout.go), [ABI probe](../../internal/cbackendnative/abi_probe.go) | The current receipt records 208 differential/drop comparisons, 4 layout probes, 56 ABI crossings, and 104 sanitizer executions for the admitted fixtures. |
 
-The expanded `sdkStorageSource` now covers those public `Buffer` and text cases; it requires no API
-or target-gate change. A fresh Linux receipt for the expanded fixture is pending.
+The expanded `sdkStorageSource` covers those public `Buffer` and text cases in the current hosted
+receipt; it requires no API or target-gate change.
 
 ## Next slice
 
-Collect a fresh Linux receipt for the expanded public SDK fixture, then review remaining
-mandatory runtime/library rules against fixtures or justified deferrals before considering conformance.
+Review the Region byte-operation contract/implementation gap above, then map remaining mandatory
+runtime/library rules to fixtures or justified deferrals before considering conformance.
 Both `complete-runtime` and `complete-standard-library`
 remain missing in the [target spec](../../internal/target/spec.go); `emittable`, `conformant`,
 and `supported` remain false. The fixture changes no product API, runtime implementation, DB,
-hygiene policy, or CI runner allocation.
+hygiene policy, or CI runner allocation. The separate lexer job timeout increased from ten to twelve
+minutes to accommodate its existing tests and job setup/cleanup; no tests or runners were added.
