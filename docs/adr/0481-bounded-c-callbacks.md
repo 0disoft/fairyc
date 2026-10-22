@@ -42,3 +42,17 @@ with `Symbol` cleared. Rebinding resolves it to a fresh symbol and clears `Varia
 and stable artifacts include callback targets in their dependency sets. The codec envelope and
 all existing opcode wire names remain unchanged; old consumers reject the new opcode, and
 compiler-build identities keep incompatible caches separate.
+
+Local delivery passes type/semantic/interface, MIR/codec/interpreter, package-artifact,
+C-backend and emission-fixture tests. Focused compiler tests cover both target emission profiles
+and reject forged callback targets, null substitution, duplicate use and overwrite. Stable
+package rebinding preserves bytes after fresh package/function/local numbering; unresolved
+targets are rejected. Memory and independent-session disk hits retain a cross-package callback
+target without lowering again.
+
+The shared native unit executes six callback invocations per C11/C17 low/optimized combination
+under MSVC 14.51.36231: pure handling with null data, updates to a Fairy stack counter through
+an independent C helper, and nested C data production. All four combinations pass, alongside
+the previous aggregate/array/enum/float/integer cases. Linux-profile C emission and affected-package
+vet pass. Hosted GCC/Clang execution awaits an authorized batched push; the full repository suite
+and full Windows smoke were not repeated. No SDK/CLI API, DB, workflow or runner changes.

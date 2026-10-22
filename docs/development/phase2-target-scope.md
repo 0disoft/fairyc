@@ -74,10 +74,10 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1, F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating transport and F2-4 remaining integer
-field transport are implemented below; hosted Linux execution
-remains pending. Other F2 families and F3 stay separate follow-ups; no callback or resource
-representation is added by either update.
+F1, F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating transport, F2-4 remaining integer
+field transport and the first bounded F3 callback signature are implemented below. Hosted Linux
+execution remains pending. Additional field operations and callback signatures require separate
+admissions; none of these updates opens excluded resource representations.
 
 ## F1 implementation update
 
@@ -264,8 +264,51 @@ Local validation passed:
 Hosted Linux GCC/Clang execution remains pending. Earlier receipts do not attest the new integer
 probe. The full repository suite and full Windows smoke were not repeated; the changed crossing
 was run directly. No SDK/CLI API, DB, workflow, runner or target-maturity changes. Phase 2 remains
-partial. Next implementation: bounded callbacks (F3); any further field-family admissions remain
+partial. The F3 update below connects bounded callbacks. Further field-family admissions remain
 separate changes rather than implicit consequences of this transport slice.
+
+## F3 bounded C callbacks
+
+[ADR 0481](../adr/0481-bounded-c-callbacks.md) admits one non-capturing callback signature:
+`unsafe extern C fn i32(i32, ptr mut void)`. It appears as the penultimate unsafe import parameter,
+followed by final `ptr mut void` user data. Calls pass a named unsafe Fairy function with the exact
+signature and no declared effects. C adapters keep ordinary Fairy functions private. Callback
+locals, fields, arrays, results, casts, null callback arguments and indirect calls remain closed.
+
+Source typing is committed at `7071809c`; verified MIR, C transport and package/cache preservation
+are committed at `f49b7433`. MIR checks callback origin, exact signature, unique use and no local
+overwrite. Callback temporaries are formed after user-data evaluation and consumed only by the
+designated foreign argument in that block. This permits a nested user-data producer without
+extending the callback value across a call. Process and stable artifacts preserve callback target
+dependencies; stable targets rebind through FunctionID rather than saved process-local symbols.
+
+The unsafe import promises same-thread synchronous calls ending before it returns. The external
+callee must not retain call-bounded data, unwind or `longjmp` through Fairy. Raw data validity is
+the caller's obligation; existing borrow-to-pointer checks apply. These C obligations are explicit
+contracts, not compiler-proven properties or retained/asynchronous callback support.
+
+The shared native probe runs six callback invocations per configured execution: null data with a
+pure handler, a Fairy stack counter updated through an independent C helper, and nested C user-data
+production. C observes the expected invocation count and data updates. Prior record/array/enum/
+float/integer checks remain in the same unit.
+
+Local validation passed:
+
+- HIR, semantic, public-interface, MIR, MIR-codec, interpreter, package-artifact, C-backend and
+  emission-fixture package tests; focused compiler tests cover both emission profiles and forged
+  callback origins, null substitution, duplicate use and overwrite rejection.
+- Process/stable package reassembly with fresh symbols/package numbers and identical re-encoding;
+  unresolved callback targets are rejected. Cross-package callback targets survive memory cache
+  hits and disk hits in an independent session without MIR lowering.
+- The shared probe's Linux-profile C emission test and MSVC 14.51.36231 C11/C17 low/optimized
+  execution: four combinations, six callback invocations each, alongside all prior probe cases.
+- Affected-package vet, changed-document relative links and `git diff --check`.
+
+The full repository suite and full Windows smoke were not repeated because the changed compiler
+packages and native crossing were checked directly. Hosted Linux GCC/Clang execution is pending
+an authorized batched push; old receipts do not attest callbacks. There are no SDK/CLI API, DB,
+workflow, runner or target-maturity changes. Phase 2 remains partial. Next: collect hosted evidence,
+then reassess the declared target scope against these explicit admissions and exclusions.
 
 ## Validation of the original assessment
 

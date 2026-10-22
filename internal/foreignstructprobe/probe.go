@@ -16,8 +16,8 @@ type Unit struct {
 // C ABIs while keeping the observable result target-independent.
 func Generate() Unit {
 	return Unit{
-		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource,
-		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC,
+		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource,
+		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC,
 		ExpectedExit: 42,
 		RequiredCFragments: []string{
 			"struct fairyc_fixture_status_v0 {",
@@ -67,6 +67,9 @@ func Generate() Unit {
 			"uint16_t word;",
 			"uint64_t wide;",
 			"intptr_t offset;",
+			"typedef int32_t (*fy_c_callback_i32_userdata)(int32_t, void *);",
+			"fy_c_callback_i32_userdata fy_a_1",
+			"= &fy_cb_",
 			"offsetof(struct fairyc_fixture_integer_packet_v0, tiny) == UINT64_C(1)",
 			"offsetof(struct fairyc_fixture_integer_packet_v0, offset) == UINT64_C(16)",
 			"sizeof(struct fairyc_fixture_integer_packet_v0) == UINT64_C(24)",
@@ -118,7 +121,7 @@ fn i32 main() {
         changed.status == 99 && changed.allocation_status == 7 &&
         changed_large.first == 101 && changed_large.second == 2 &&
         changed_large.third == 3 && changed_large.fourth == 4 && changed_large.fifth == 105 &&
-        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers()) {
+        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks()) {
         42
     } else {
         0

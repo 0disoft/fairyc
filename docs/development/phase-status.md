@@ -212,16 +212,16 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. Collect hosted F1 and F2-1 through F2-4 evidence after an authorized batched push. The
+1. Collect hosted F1, F2-1 through F2-4 and F3 evidence after an authorized batched push. The
    [record argument implementation](phase2-target-scope.md#f1-implementation-update),
    [integer array fields](phase2-target-scope.md#f2-1-integer-array-fields),
    [explicit C enum fields](phase2-target-scope.md#f2-2-explicit-c-enum-fields),
    [floating field transport](phase2-target-scope.md#f2-3-floating-field-transport),
-   [remaining integer field transport](phase2-target-scope.md#f2-4-remaining-integer-field-transport)
-   and expanded shared native fixture are ready; prior receipts do not attest the new
-   argument/array/enum/float/integer checks.
-2. Implement bounded callbacks (F3) separately. Remaining operations outside the admitted field
-   transport subsets require their own contract and implementation changes.
-3. Keep target maturity flags unchanged. Contracted field families and bounded callbacks remain
-   separate C ABI gaps; conditional root drop flags are not a missing admitted source feature.
+   [remaining integer field transport](phase2-target-scope.md#f2-4-remaining-integer-field-transport),
+   [bounded callbacks](phase2-target-scope.md#f3-bounded-c-callbacks) and expanded shared native
+   fixture are ready; prior receipts do not attest the new argument/field/callback checks.
+2. Reassess Phase 2 after that execution. Additional field operations and callback signatures
+   outside the admitted subsets require their own contract and implementation changes.
+3. Keep target maturity flags unchanged while evidence is pending. Conditional root drop flags
+   are not a missing admitted source feature; retained/asynchronous callbacks remain excluded.
 4. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.
