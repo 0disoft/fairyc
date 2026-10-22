@@ -226,13 +226,13 @@ product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 ADR 0474 defines the native Ubuntu 24.04 reference environment with glibc >= 2.39, GCC >= 13
 or Clang >= 18, version/target preflight, and provisioning in the existing Linux C job.
-The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870)
-at `3ea6d1b5923386155f4ffd66b51040a046f2827d` passed reference provisioning and native fixtures
+The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035)
+at `5856f62109877c53c6388a4a03e0ac56c101a7a6` passed reference provisioning and native fixtures
 with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v38 report records 55 emission cases,
 220 interpreter/C and drop-trace comparisons each, 110 sanitizer executions, 56 bidirectional
 ABI crossings, four layout probe executions, and four SDK storage executions. All nine Frontend
-jobs passed, including the [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
-with 12 focused Linux cases and no skips. This fulfills `toolchain-baseline` and `toolchain-provisioning`
+jobs passed, including the [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769)
+with 24 focused Linux cases and no skips. This fulfills `toolchain-baseline` and `toolchain-provisioning`
 for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
 The earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
 at `c845848c95395622441b059c25c4a27a4bb6fee7` remains historical evidence for its v37

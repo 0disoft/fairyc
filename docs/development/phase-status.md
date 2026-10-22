@@ -2,12 +2,11 @@
 
 - Phase 3 evidence snapshot: 2026-10-21 at `6c0bea17`; local measurements at clean `b2181e66`
 - Earlier Frontend inspection: 2026-10-21 at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`
-- Hosted Frontend receipt: `3ea6d1b5923386155f4ffd66b51040a046f2827d` (v1 focused Linux evidence;
-  historical to the current helper matrix)
+- Hosted Frontend receipt: `5856f62109877c53c6388a4a03e0ac56c101a7a6` (v2 focused Linux evidence, 24 cases)
 - Previous SDK receipt: `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`, historical evidence
 - Scope: [roadmap](../product/01-roadmap.md) Phases 0–4, current Stage 0
-- Evidence: [Frontend run 39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010), all nine jobs passed; native
-  [job 119861675870](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870) and Linux Go [job 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
+- Evidence: [Frontend run 39798530273](https://github.com/0disoft/fairyc/actions/runs/39798530273), all nine jobs passed; native
+  [job 119899431035](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035) and Linux Go [job 119892384769](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769)
   passed. Earlier [run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105),
   [run 39768680761](https://github.com/0disoft/fairyc/actions/runs/39768680761), and
   [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722) remain historical evidence
@@ -21,7 +20,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Fixture coverage passes; full exit not established by this review | Mandatory parser, semantic, resource, Region, Result, MIR, verifier, and package runners pass in the inspected Go CI lane. This review did not audit every written contract for contradictions, which is also part of the exit gate. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the prior 12 focused Linux cases without skips; this v1 evidence is historical to the current source. Current source adds three pure-helper roots for a v2 required set of 24 cases; the hosted receipt is pending. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Linux native job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035) passes provisioning, layout, ABI, runtime, Region byte, and generated-source probes. The separate [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769) passed all 24 focused Linux cases without skips, including 12 equality, comparison, and checked-decimal executions. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -48,12 +47,13 @@ Full runtime and standard-library coverage remain missing as `complete-runtime` 
 The target's `emittable`, `conformant`, and `supported` maturity flags remain false.
 
 The [2026-10-22 Linux coverage audit](linux-runtime-coverage.md) maps the implemented runtime and
-SDK surfaces to source owners, fixtures, and the current Frontend evidence at `3ea6d1b`.
+SDK surfaces to source owners, fixtures, and the current Frontend evidence at `5856f621`.
 It distinguishes missing Linux implementations from incomplete execution evidence and design
 exclusions. Windows API parity is not the Phase 2 exit gate.
 
-The [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) passes all 12 File
-progress, heap OOM, and prepared-publication executions without skips. The [active-payload
+The [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) passes all 24 File
+progress, heap OOM, prepared-publication, equality, comparison, and checked-decimal executions
+without skips. The [active-payload
 mapping](linux-runtime-coverage.md#active-payload-observation-mapping) adds three direct-cleanup
 cases: implicit `Some`/`None` cleanup and explicit discard of `Result<Success, Failure>` for both
 alternatives. All 55 cases now pass the expanded hosted Linux lane with 220 process-status/drop
@@ -84,8 +84,8 @@ the corrected code; target maturity is unchanged.
 
 ## Public SDK Linux receipt (v38)
 
-[Linux job 119861675870](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870)
-at `3ea6d1b5923386155f4ffd66b51040a046f2827d` records report
+[Linux job 119899431035](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119899431035)
+at `5856f62109877c53c6388a4a03e0ac56c101a7a6` records report
 `fairyc.native-c-report/v38` for `x86_64-linux-gnu` on Ubuntu 24.04 with glibc 2.39,
 Clang 18.1.3, and GCC 13.3.0. It records 55 C emission cases, 220 interpreter/C and
 220 drop-trace executions, 110 sanitizer executions, 56 ABI crossings, and four layout probes.
@@ -96,7 +96,7 @@ payload and tracking-node OOM, including recovery, preserved data, and zero live
 These four compiler/profile SDK executions are separate from the 110 sanitizer executions.
 
 All nine Frontend jobs passed. The same run's
-[Linux Go job 119854250599](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599) passed the prior 12 focused Linux cases without skips. This v1 receipt predates the current pure-helper matrix and is not a current-source run. The current source requires six roots and 24 cases under v2; that hosted receipt is pending.
+[Linux Go job 119892384769](https://github.com/0disoft/fairyc/actions/runs/39798530273/job/119892384769) passed all 24 focused Linux cases without skips under v2, including the 12 new helper cases.
 The previous [run 39782215105](https://github.com/0disoft/fairyc/actions/runs/39782215105)
 remains historical evidence for its 52-case receipt. The earlier
 [Linux job 119796130897](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
@@ -114,9 +114,9 @@ toolchain fixture to pass without skips, as defined by the [C ABI target claims]
 and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice).
 
 The open evidence is bounded. Linux receipt-write progress has no deterministic fault-injected
-observation; the equality, comparison, and decimal-parse tests now add GCC/Clang low/optimized
-Linux subtests, but their v2 24-case hosted receipt is pending; and the 0–191 process-status oracle
-plus manifest deferrals do not observe the whole target. The
+observation; the 0–191 process-status oracle and manifest deferrals do not observe the whole
+target. Equality, comparison, and decimal parsing now pass all 12 GCC/Clang low/optimized
+executions in the v2 receipt. The
 [coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) records the source
 owners and remaining evidence. Windows filesystem parity and distribution remain outside this gate.
 
@@ -137,7 +137,7 @@ allocation, recovery, prior-byte preservation, and zero live allocations. See
 `TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution; it
 executes all three Region modes before and after disk-cache restoration.
 
-[Frontend run 39787424010](https://github.com/0disoft/fairyc/actions/runs/39787424010) covers both
+[Frontend run 39798530273](https://github.com/0disoft/fairyc/actions/runs/39798530273) covers both
 byte operations in four compiler/profile SDK executions at the current source revision. The fixture
 checks normal, empty, forced payload and tracking-node OOM, recovery, prior-data preservation, and
 zero live allocations. The SDK probe is separate from the 110 sanitizer executions. Related
@@ -187,11 +187,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Obtain the new v2 24-case hosted receipt from the existing Linux Go job for
-   [equality/comparison](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) and
-   [checked-decimal](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22). Require six roots
-   with GCC and Clang at low and optimized profiles and no skips. The suite still runs once, with
-   no workflow or runner change and no repeated native tests. The Linux native baseline remains 55
-   C emission cases, 220 interpreter/C comparisons, 220 drop-trace executions, and 110 sanitizer
-   executions. This is the next single task and does not by itself close Phase 2.
+1. Add deterministic Linux trap-receipt write-progress and failure observations using the existing
+   runtime C and test-only POSIX hooks: short writes, EINTR, zero progress, and failed writes.
+   Keep product API/runtime ABI and runner allocation unchanged.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
