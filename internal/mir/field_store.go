@@ -101,7 +101,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		DestinationLocal: NoLocal, OwnerType: owner.Type, Type: target.Type, Field: target.Operator, Fields: fields,
 		Operands: []Operand{receiver, value}}
 	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) &&
-		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) {
+		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) && !ValidCEnumFieldStoreShape(op, l.properties.Enum(target.Type)) {
 		return unsupported
 	}
 	l.appendOperation(op)
@@ -122,6 +122,14 @@ func validFieldStoreCommonShape(op Operation) bool {
 // and path types are checked separately by ResolveNestedFieldStore.
 func ValidFieldStoreShape(op Operation) bool {
 	return fieldStoreScalar(op.Type) && validFieldStoreCommonShape(op) && scalarOperandMatches(op.Operands[1], op.Type)
+}
+
+// ValidCEnumFieldStoreShape admits a typed local into one direct enum field.
+// The verifier separately checks the exact owner field and nominal operand types.
+func ValidCEnumFieldStoreShape(op Operation, definition *EnumType) bool {
+	return len(op.Fields) == 0 && definition != nil && definition.Type == op.Type &&
+		hir.CEnumVariantCapacity(definition.CBase) > 0 && validFieldStoreCommonShape(op) &&
+		op.Operands[1].Kind == OperandLocal && op.Operands[1].Local >= 0
 }
 
 // ValidOneWordStructFieldStoreShape admits only an inert, non-FFI usize wrapper

@@ -188,6 +188,9 @@ func analyzeEmissionContext(ctx context.Context, program mir.Program, entry stri
 		}
 	}
 	for _, enumeration := range enumTypes {
+		if enumeration.definition.CBase != "" {
+			value.recordCScalarFeature(hir.ParseType(strings.ReplaceAll(enumeration.definition.CBase, ".", "::")))
+		}
 		for _, variant := range enumeration.definition.Variants {
 			for _, field := range variant.Fields {
 				value.recordScalarTaggedFeature(field.Type)

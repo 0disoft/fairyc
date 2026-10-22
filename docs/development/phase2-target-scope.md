@@ -74,7 +74,7 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1 and the F2-1 integer-array subset are implemented in the updates below; hosted Linux execution
+F1, the F2-1 integer-array subset and F2-2 explicit C enums are implemented below; hosted Linux execution
 remains pending. Other F2 families and F3 stay separate follow-ups; no callback or resource
 representation is added by either update.
 
@@ -131,21 +131,61 @@ Local validation passed:
   copy/replacement behavior and both target emission profiles.
 - `go vet -mod=readonly` for HIR, semantic, MIR, C backend, compiler, shared probe and native runner.
 - `go test -mod=readonly -count=1 -v ./tools/dev/fairyc-windows-host-smoke
-  -run '^TestReprCArrayFieldNativeCrossing$'`: MSVC 14.51.36231 passes all four C11/C17
+  -run '^TestReprCRecordFieldNativeCrossing$'`: MSVC 14.51.36231 passes all four C11/C17
   low/optimized separate-object combinations, each returning 42 with empty output.
 
 The initial full Windows smoke stopped at the expanded record probe because its runtime trap
 symbol was not linked. After adding the canonical runtime, the focused native test above passed;
 the entire smoke was not repeated. No product runtime implementation or link policy changed.
 Changed-document relative links and `git diff --check` pass.
+The focused test was renamed from `TestReprCArrayFieldNativeCrossing` when ADR 0478 added enums;
+the command above uses its current name.
 
 Hosted Linux GCC/Clang execution is pending for this expanded probe. Earlier F1 and runtime
 receipts do not attest the array observations. The full repository Go suite was not rerun locally.
 Phase 2 remains partial and all target maturity flags remain unchanged. No CLI or SDK API, DB,
 repository setting or workflow changes were made.
 
-Next implementation: explicitly based C enum fields, followed by Fairy floating scalars and
-remaining integer fields. Bounded callbacks (F3) remain a separate step after the field families.
+The F2-2 update below implements the next field family. Fairy floating scalars and remaining integer
+fields follow it; bounded callbacks (F3) remain a separate step after the field families.
+
+## F2-2 explicit C enum fields
+
+[ADR 0478](../adr/0478-explicit-c-enum-fields.md) admits nonempty, payload-free enums with one
+`@repr(c::integer)` base and zero-based declaration ordinals. Metadata commit `9b8ba65f` preserves
+the base through HIR/MIR, public interface hashing and stable package contexts/rebinding. The C
+backend now uses the selected scalar typedef and existing target C-enum layout, with exact size,
+alignment, containing-field offsets and provider checks. Construction, switch, record copies,
+direct enum-field replacement and foreign record arguments/results are connected. Plain enum
+fields in repr(C), payloads, explicit discriminant values, enum arrays, enum-field borrows, nested
+enum leaf replacement and bare foreign enum signatures remain closed.
+
+The shared native fixture includes unsigned char/short/int, long long and long enum fields,
+separately declared C records, a small record and a large record, scalar neighbors, field
+replacement and unchanged caller copies. The same existing native lanes consume it; no job,
+report counter or workflow was added.
+
+Local validation passed:
+
+- Full HIR, semantic, MIR, MIR codec, package-artifact and public-interface package tests for the
+  metadata slice; full MIR, interpreter, backend, emission-fixture and shared-probe tests after
+  connecting execution.
+- Focused compiler tests cover codec/interpreter behavior, all 13 C integer bases in Linux and
+  Windows emission profiles, field-store/borrow regressions, and rejection of plain repr(C) enum
+  fields and bare foreign enum signatures. Windows correctly rejects unavailable `c::ssize_t`.
+- `go test -mod=readonly -count=1 -v ./tools/dev/fairyc-windows-host-smoke
+  -run '^TestReprCRecordFieldNativeCrossing$'`: MSVC 14.51.36231 passes all four C11/C17
+  low/optimized combinations. The fixture observes 1/2/4/8-byte enum fields and LLP64 C long storage,
+  along with the previous record and array checks.
+- `go vet -mod=readonly` for all affected implementation packages and the Windows smoke tool.
+- Changed-document relative links and `git diff --check`.
+
+Hosted Linux GCC/Clang execution is pending for this expanded fixture. Earlier receipts attest
+their original sources only. The full repository suite and full Windows smoke were not repeated;
+the focused native crossing covers the changed probe. No SDK/CLI API, DB, repository setting or
+workflow changes. Phase 2 stays partial and all target maturity flags stay unchanged.
+
+Next implementation: Fairy `f32`/`f64` fields, then remaining fixed-width integer fields.
 
 ## Validation of the original assessment
 

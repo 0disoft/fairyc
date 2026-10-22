@@ -15,6 +15,12 @@
 
 ## Lexical and declaration rules
 
+- ADR 0478 admits `@repr(c::uint) enum Status { Ready; Busy; }`, using any admitted C integer
+  base. These payload-free enums use zero-based declaration ordinals and may appear in repr(C)
+  record fields. This reuses the existing attribute grammar; explicit discriminant values and
+  payloads are excluded. See [ADR 0478](../adr/0478-explicit-c-enum-fields.md) for the bounded
+  source and transport rules.
+
 - Source files use `.fy` and UTF-8. Stage 0 identifiers are ASCII letters, digits, and underscore and cannot start with a digit.
 - Simple statements end with explicit semicolons. Compound `if`, standalone `{ ... }`, and
   standalone `unsafe { ... }` block statements do not; there is no automatic insertion.

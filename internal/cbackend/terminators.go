@@ -137,7 +137,11 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			if !found {
 				return fmt.Errorf("enum switch in %s names missing variant %q", function.Name, variant)
 			}
-			fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) goto fy_b_%d;\n", value, variantIndex, terminator.Successors[branchIndex])
+			if enumeration.definition.CBase != "" {
+				fmt.Fprintf(output, "    if ((%s) == (fy_enum_%d)UINT64_C(%d)) goto fy_b_%d;\n", value, enumIndex, variantIndex, terminator.Successors[branchIndex])
+			} else {
+				fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) goto fy_b_%d;\n", value, variantIndex, terminator.Successors[branchIndex])
+			}
 		}
 		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 		return nil

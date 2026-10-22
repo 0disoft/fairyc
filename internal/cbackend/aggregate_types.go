@@ -196,8 +196,8 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 		return r.resolve(value)
 	}
-	if _, found := r.enumerations[value]; found {
-		if reprC {
+	if enumeration, found := r.enumerations[value]; found {
+		if reprC && enumeration.CBase == "" {
 			return layout.Type{}, fmt.Errorf("inert enum type %q is not a repr(C) field", value)
 		}
 		return r.resolve(value)
@@ -229,7 +229,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 
 func (r *aggregateLayoutResolver) resolveEnum(definition mir.EnumType) (layout.Type, error) {
 	if definition.CBase != "" {
-		return layout.Type{}, CapabilityError{Feature: "C enum source storage"}
+		return layout.Type{Kind: layout.KindCEnum, Name: definition.CBase}, nil
 	}
 	if len(definition.Variants) == 0 {
 		return layout.Type{}, CapabilityError{Feature: "empty enum type " + strconv.Quote(definition.Type.String())}
@@ -571,6 +571,9 @@ func (e *emitter) emitStructType(output *strings.Builder, index int) error {
 
 func (e *emitter) emitEnumType(output *strings.Builder, enumIndex int) error {
 	enumeration := e.analysis.enumTypes[enumIndex]
+	if enumeration.definition.CBase != "" {
+		return e.emitCEnumType(output, enumIndex)
+	}
 	output.WriteString("typedef union {\n    uint8_t unused;\n")
 	for variantIndex, variant := range enumeration.definition.Variants {
 		if len(variant.Fields) == 0 {

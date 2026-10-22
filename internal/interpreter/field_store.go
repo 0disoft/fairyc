@@ -26,6 +26,8 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		if !scalarStoreValueMatches(value, op.Type) {
 			return fmt.Errorf("field store scalar type mismatch")
 		}
+	} else if value.kind == valueEnum && value.typ == op.Type && value.enum() != nil && mir.ValidCEnumFieldStoreShape(op, value.enum().definition) {
+		// Keep the nominal enum and copy it into the declared owner field below.
 	} else if _, _, array := hir.FixedArrayParts(op.Type); array && mir.ValidPlainStructFieldStoreShape(op, func(typ hir.Type) *mir.StructType { return structs[typ] }) {
 		element, length, _ := hir.FixedArrayParts(op.Type)
 		if value.kind != valueArray || value.typ != op.Type || value.array() == nil || uint64(len(value.array().elements)) != length {

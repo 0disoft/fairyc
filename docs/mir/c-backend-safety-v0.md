@@ -123,8 +123,8 @@ orders complete definitions by dependency and reuses the child target layout whe
 containing field; recursive value dependencies and non-`@repr(C)` nested structs fail closed.
 Private inert structs may also contain admitted inert enums by value. Struct and enum layouts share
 one acyclic aggregate dependency graph, and complete definitions are emitted topologically while
-preserving prior root order when no dependency requires movement. Enum fields in `@repr(C)` structs,
-and recursive aggregate dependencies fail closed. Private restricted inert enums may contain other
+preserving prior root order when no dependency requires movement. Plain private enum fields in
+`@repr(C)` structs and recursive aggregate dependencies fail closed. Private restricted inert enums may contain other
 restricted inert enums by value; the same graph orders and lays out both complete definitions.
 The same admitted records may be foreign results by value. MIR retains the nominal destination type
 and generated C uses the exact public tag plus ordinary assignment. ADR 0476 also admits the same
@@ -140,6 +140,14 @@ locals. Read indexing copies the array first. Nested whole-field stores are supp
 field references, views, direct element stores and iteration remain closed. MIR verification
 rejects raw-member borrowing independently of source checking. The shared record probe additionally
 checks array layout, argument/result elements and caller-copy isolation.
+
+ADR 0478 separately admits payload-free enums with `@repr(c::integer)`. Their verified base and
+declaration-order ordinal determine scalar typedef storage, construction and switch comparisons;
+target C-scalar provider checks and exact enum/containing-record layout assertions remain required.
+Direct enum-field stores require a writable owner and exactly typed local. Undeclared ordinals
+fall through to the existing unreachable trap. Nested enum leaf stores, enum-field borrowing,
+enum arrays and standalone foreign enum signatures remain closed. The shared probe checks small
+and large record transport with 1/2/4/8-byte enum fields and a target-sized C long.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty and every declaration-ordered field is a Fairy copy scalar or raw pointer. An empty body
@@ -362,7 +370,8 @@ The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so s
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, direct-local address passing, opaque `void` pointers, exact C-scalar fields,
-acyclic nested `@repr(C)` fields, by-value record arguments/results and bounded integer array fields
+acyclic nested `@repr(C)` fields, by-value record arguments/results, bounded integer array fields
+and explicitly based C enum fields
 are implemented. Other aggregate ABI forms, nested enum or built-in-tag payloads, other array field
 families, C-scalar value operations beyond the exact `c::int` conversion above, non-`@repr(C)`
 C-scalar fields, and callbacks remain outside this slice.
@@ -463,6 +472,9 @@ ADR 0477 adds independently declared integer array records to the same probe, in
 size/alignment/offset checks and element observations before and after callee mutation. Earlier
 receipts do not attest these new observations; the
 [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields) records current evidence.
+ADR 0478 adds independently declared integer-backed enum fields, direct replacement and ordinal
+observations to these same executions. Older receipts do not cover the new enum observations; see
+the [F2-2 update](../development/phase2-target-scope.md#f2-2-explicit-c-enum-fields).
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

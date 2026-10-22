@@ -10,6 +10,9 @@ import (
 
 func (e *analysisBuilder) inspectFieldStore(functionIndex int, operation mir.Operation) error {
 	valid := mir.ValidFieldStoreShape(operation) || mir.ValidPlainStructFieldStoreShape(operation, e.fieldStoreStruct)
+	if index, found := e.enumByType[operation.Type]; found {
+		valid = valid || mir.ValidCEnumFieldStoreShape(operation, &e.enumTypes[index].definition)
+	}
 	if index, found := e.structByType[operation.Type]; found {
 		valid = valid || mir.ValidOneWordStructFieldStoreShape(operation, &e.structTypes[index].definition)
 	}

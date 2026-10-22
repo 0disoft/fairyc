@@ -109,6 +109,10 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if !found {
 			return fmt.Errorf("enum construction in %s names missing variant %q", function, operation.Variant)
 		}
+		if enumeration.definition.CBase != "" {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_enum_%d)UINT64_C(%d);\n", operation.DestinationLocal, enumIndex, variantIndex)
+			return nil
+		}
 		fmt.Fprintf(output, "    fy_l_%d = (fy_enum_%d){ .tag = UINT32_C(%d)", operation.DestinationLocal, enumIndex, variantIndex)
 		if len(operation.Operands) != 0 {
 			fmt.Fprintf(output, ", .payload.v_%d = { ", variantIndex)

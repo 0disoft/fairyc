@@ -116,8 +116,8 @@ argument. Exact `c::int` additionally supports explicit bidirectional conversion
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of exports, callbacks, or enum `@repr(C)` fields. Integer array fields have the
-separate admission described below. By-value record arguments are admitted only for the existing
+implementation of exports or callbacks. Integer array and explicit C enum fields have the
+separate admissions described below. By-value record arguments are admitted only for the existing
 record shapes described below. The interpreter remains
 fail-closed on every foreign call.
 
@@ -138,8 +138,8 @@ that are themselves `@repr(C)`. C-scalar fields use the same exact transport tab
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
 unit. The Arena crossing requires that the selected provider's `uint64_t` is exactly
-`unsigned long` before using `c::ulong` for the generation fields. Explicit C enums, floating Fairy
-scalars, and other contracted field families remain fail-closed until their source typing, layout,
+`unsigned long` before using `c::ulong` for the generation fields. Floating Fairy scalars and other
+contracted field families remain fail-closed until their source typing, layout,
 ABI, and native crossing tests are connected together.
 
 [ADR 0477](../adr/0477-repr-c-integer-array-fields.md) admits array fields with `u8`, `i32`, `i64`,
@@ -185,6 +185,19 @@ is pending; prior struct-result receipts attest results only. Other aggregate pa
 remain closed.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
+
+[ADR 0478](../adr/0478-explicit-c-enum-fields.md) implements payload-free enums with an explicit
+`@repr(c::integer)` base. Variants use zero-based declaration ordinals within the base's admitted
+range. The enum retains its nominal type in Fairy; its C storage is a typedef of the exact selected
+integer scalar with target size/alignment and provider assertions. Such enums may be fields of
+repr(C) records, including nested records, and cross foreign calls inside record arguments/results.
+Direct enum-field replacement preserves exact nominal typing and copy isolation. A switch traps on
+an undeclared foreign ordinal rather than assuming it is valid. Plain private enums, payloads,
+explicit discriminant values, enum arrays, enum-field borrows, nested enum leaf replacement and
+standalone foreign enum arguments/results remain outside this admission. Target availability still
+applies, including the absence of `c::ssize_t` on Windows. The
+[F2-2 update](../development/phase2-target-scope.md#f2-2-explicit-c-enum-fields) records local native
+execution and pending hosted Linux evidence.
 
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 
