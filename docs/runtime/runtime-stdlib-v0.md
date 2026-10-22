@@ -165,7 +165,7 @@ internal Linux generated Fairy caller
 declares the exact `void *`, `size_t`, `size_t` block and observes allocation plus normalized release
 through a bounded C test observer. Its independent closed Linux probe still checks empty normalization,
 alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
-under Clang/GCC at low and optimized profiles. The current v37 Linux receipt records four executions
+under Clang/GCC at low and optimized profiles. The current v38 Linux receipt records four executions
 for each runtime/source counter, including SystemHeap and its generated-Fairy caller; see the
 [Linux coverage inventory](../development/linux-runtime-coverage.md). Neither path deterministically
 forces host OOM.
@@ -246,9 +246,11 @@ once-only evaluation, subviews and independent writes, using a copy after its so
 `TestSDKStorageProbe` passed Linux C emission on Windows plus low/optimized MSVC execution. It
 forces payload and tracking-node allocation failure for both byte operations, observes empty
 requests consuming no allocation, and checks recovery, prior-byte preservation, and zero live
-allocations. A fresh Linux runtime execution and hosted receipt are still pending; v38 predates
-these Region cases. See [ADR 0475](../adr/0475-region-byte-allocation-and-copy.md) and the
-[Linux coverage inventory](../development/linux-runtime-coverage.md).
+allocations. [Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874)
+now executes both operations in the four compiler/profile SDK executions recorded by its native
+receipt. That SDK probe is separate from the 104 sanitizer executions. See
+[ADR 0475](../adr/0475-region-byte-allocation-and-copy.md) and the
+[Linux coverage inventory](../development/linux-runtime-coverage.md#region-byte-evidence).
 
 The bounded Region fixture surface still exports its own opaque `std::alloc::Arena` test resource.
 The compiler-bundled SDK separately exposes the move-only runtime-backed Arena accepted by
@@ -297,7 +299,7 @@ failure-injection control. The raw C probe retains the broader failure-atomic an
 
 Its four-way C-only native probe covers exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop.
-The v37 Linux receipt records four Arena probe executions and four generated-source executions.
+The current v38 Linux receipt records four Arena probe executions and four generated-source executions.
 The same caller and target-specific implementation
 execute as separate translation units at low and optimized x64 MSVC profiles, including both forced
 allocation stages, recovery zeroing, and final live-allocation cleanup. Product linkage retains the

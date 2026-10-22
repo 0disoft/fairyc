@@ -1,6 +1,6 @@
 # ADR 0475: Region byte allocation and copy
 
-- Status: Accepted; locally implemented; Linux hosted verification pending
+- Status: Accepted; locally implemented; Linux hosted verification passed
 - Date: 2026-10-22
 - Depends on: ADR 0042, ADR 0251, ADR 0252
 - Contract: `docs/runtime/runtime-stdlib-v0.md`
@@ -73,14 +73,15 @@ that transport keeps the three Region allocation forms on one verified path.
 - No C runtime ABI, SDK source bundle, public C header, grammar, or package artifact schema changes.
 - Existing source-level `place` behavior and generated C remain unchanged unless byte allocation is
   used.
-- A fresh Linux runtime and hosted receipt are still required. The latest hosted v38 receipt predates
-  these Region byte cases and does not establish them for the current source.
-- Related Go/fixture suites and vet pass locally. The full repository Go suite was not rerun.
+- Frontend run 39774562874 passed all nine jobs at `ea0957e6d45dc63bf248108cdb5f47b6a0f3002d`
+  on 2026-10-22. Its native job verifies these Region byte cases at the current source revision.
+- The local full repository Go suite was not rerun; the hosted Go lanes passed in that run.
 
 ## Implementation evidence
 
 The contract is committed at `ca44226b`, and zeroed byte allocation is committed at `e035e79c`.
-Byte-copy lowering is committed at `0ed33081`. Source recognition and typing are in
+Byte-copy lowering is committed at `0ed33081`. Those three commits and the evidence commit
+`ea0957e6` are on `origin/main`. Source recognition and typing are in
 [`region_types.go`](../../internal/semantic/region_types.go); MIR lowering and verification are in
 [`lower_regions.go`](../../internal/mir/lower_regions.go) and
 [`verify_operations.go`](../../internal/mir/verify_operations.go); C emission is in
@@ -99,6 +100,18 @@ empty requests consume no allocation, and verifies recovery, prior-data preserva
 allocations. See [`sdk_storage_source.go`](../../internal/cbackendnative/sdk_storage_source.go) and
 [`sdk_storage_test.go`](../../internal/cbackendnative/sdk_storage_test.go).
 
+[Frontend run 39774562874](https://github.com/0disoft/fairyc/actions/runs/39774562874) completed
+successfully with all nine jobs passing. Its [native Linux job](https://github.com/0disoft/fairyc/actions/runs/39774562874/job/119814527459)
+records `fairyc.native-c-report/v38` for `x86_64-linux-gnu` on Ubuntu 24.04 with glibc 2.39,
+Clang 18.1.3, and GCC 13.3.0. The report records `sdkStorageExecutions: 4`, 208
+interpreter/C executions and 208 drop-trace executions, 104 sanitizer executions, 56 ABI crossings,
+and four layout probes. SystemHeap, Buffer, Arena, text-view, owned-text, and public-File counters
+are each four. The four SDK storage executions exercise both operations with normal, empty, and
+forced payload and tracking-node OOM cases, including recovery, preserved data, and zero live
+allocations after cleanup. The SDK probe is separate from the 104 sanitizer executions, which cover
+their own admitted fixtures. The same run's hosted Go lanes and existing Windows native, parser, and
+lexer jobs passed.
+
 `TestRegionByteCopyPersistentWorkspace` passed a cross-session disk-cache hit and execution. It
-executes all three Region modes before and after disk-cache restoration. These are focused local
-results, not a replacement for Linux runtime execution or hosted CI.
+executes all three Region modes before and after disk-cache restoration. The hosted receipt above
+establishes the Linux runtime cases; this documentation update changes no source code.
