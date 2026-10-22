@@ -31,13 +31,26 @@ There is no new opcode, cache schema, SDK export, CLI contract, workflow or targ
 ADR 0480 remains the existing scalar decision and is unchanged; this ADR only adds the
 corresponding array fields.
 
-## Planned evidence
+## Delivery and evidence
 
-The existing shared `internal/foreignstructprobe` source will supply and observe every element
-from independent C declarations. Coverage includes zero, signed minima and maxima, unsigned
-maxima, `u64` values above the signed 64-bit range, and callee copy mutation with the caller's
-originals unchanged. Target-layout assertions will cover the array fields and their C providers.
+Source typing is committed at `fe4beed8`; backend and native proof are committed at `af181d65`.
+`internal/foreignstructprobe/integer_arrays.go` extends
+the shared probe. Independent C supplies length-3 arrays for all five families in a 72-byte mixed
+record and nested envelope, then observes internal array argument/result copies, reads through a
+borrowed nested record, and direct whole-field replacement through mutable records and references.
+It checks reconstruction, C by-value mutation and replacement while saved originals stay unchanged.
+Values cover zero, signed minima/maxima, unsigned maxima, `u64` above signed 64-bit range and
+ordinary values. Individual 1/2/8-byte records with `[1]` arrays cover every family. Generated
+assertions cover target size, alignment, offsets and signedness.
 
-The implementation type slice has passed full HIR, semantic, MIR, MIR codec, moduleinterface and
-packageartifact tests, along with focused compiler MIR round-trip and boundary tests. Native
-evidence for this admission remains planned and pending.
+Local validation passed: focused compiler `TestIntegerArray*` on both target profiles, boundaries
+and lengths 1/4096; full `cbackend` (65.557s), `cbackendfixture`, `cbackendnative` and
+`foreignstructprobe`; affected backend/probe vet; HIR, semantic, MIR, codec, moduleinterface and
+packageartifact suites; and Linux-profile `TestForeignCStructResultCallSmokeSourceReachesCEmission`.
+MSVC 14.51.36231 passed C11/C17 low/optimized, all four executions, expected 42 and empty output,
+alongside prior probe checks.
+
+Hosted GCC/Clang native evidence remains pending; the `82b760cb` hosted receipt covers F1–F3 only.
+The full repository suite, full Windows smoke and local Linux native run were not executed. Scope
+remains whole-array and record value transport; all element and payload restrictions in the decision
+stand. Phase 2 remains partial and all maturity flags remain unchanged.

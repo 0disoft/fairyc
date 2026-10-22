@@ -2,8 +2,9 @@ package mir
 
 import "github.com/0disoft/fairyc/internal/hir"
 
-// ValidPlainStructFieldStoreShape admits copied plain aggregates only under a
-// plain struct root. Exact path and local types remain verifier-owned facts.
+// ValidPlainStructFieldStoreShape admits copied plain aggregates and direct
+// integer-transport array fields of repr(C) records. Exact path and local types
+// remain verifier-owned facts.
 func ValidPlainStructFieldStoreShape(op Operation, lookup func(hir.Type) *StructType) bool {
 	if !validFieldStoreCommonShape(op) || op.Operands[1].Kind != OperandLocal || op.Operands[1].Local < 0 {
 		return false

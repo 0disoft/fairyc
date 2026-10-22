@@ -4,9 +4,14 @@ Current [target scope assessment](phase2-target-scope.md) separates the complete
 the hosted F1–F3 slice, remaining C ABI gaps and explicitly deferred resource shapes. F1 record
 arguments, F2-1 through F2-4 field transports and the first bounded F3 callback have a
 [hosted receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23) at
-`82b760cbb743eef4608441e127f9fa9e41d1f513`. Phase 2 remains partial. The next bounded source task
-is repr(C) array fields for `i8`, `i16`, `u16`, `u64` and `isize`; broader array and pointer
-support remains separate, and retained or asynchronous callbacks stay excluded.
+`82b760cbb743eef4608441e127f9fa9e41d1f513`. F2-5 extends repr(C) integer arrays to `i8`, `i16`,
+`u16`, `u64` and `isize`, with source typing at `fe4beed8` and backend/native proof at `af181d65`;
+its shared probe, focused compiler/backend checks and four MSVC C11/C17 low/optimized executions
+pass. Hosted GCC/Clang evidence is pending, and the `82b760cb` receipt does not cover F2-5. Phase 2
+remains partial. After an authorized batched push, collect hosted evidence. Remaining floating,
+C-scalar and enum array forms and pointer forms require a contract-to-source audit and separate
+bounded implementation/evidence decisions before full conformance; existing explicit exclusions
+remain unchanged.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

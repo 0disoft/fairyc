@@ -2,7 +2,8 @@
 
 - Date: 2026-10-23
 - Baseline inspected checkout: `3b6f58c9de4ee12f212e68b152d374d055b81b55`
-- Current implementation receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
+- Current hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
+- Current local F2-5 slice: type slice `fe4beed8`, backend/native proof `af181d65`; MSVC and focused compiler/backend checks pass; hosted Linux pending
 - Scope: `x86_64-linux-gnu`; roadmap Phase 2, runtime minimum, C ABI and the identified resource boundaries
 - Decision: the representative runtime/SDK minimum passes; full target conformance remains incomplete
 
@@ -75,11 +76,11 @@ admitted features or additional minimum-runtime tasks. The two static completene
 an executable checklist or a reason to repeat the completed runtime failure tests. This assessment
 does not silently narrow the C ABI contract or claim an exhaustive test of every SDK operation.
 
-F1, F2-1 integer arrays, F2-2 explicit C enums, F2-3 floating transport, F2-4 remaining integer
-field transport and the first bounded F3 callback signature are implemented below. The
-[hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) covers their shared native probe at
-`82b760cb`. Additional field operations and callback signatures require separate admissions; none
-of these updates opens excluded resource representations.
+F1, F2-1 through F2-4 and the first bounded F3 callback have the
+[hosted receipt](#hosted-f1f3-receipt-2026-10-23) at `82b760cb`. F2-5 adds the remaining five
+integer-array families and has local MSVC, compiler and backend evidence; hosted Linux execution is
+pending. The old receipt does not cover F2-5. Additional field operations and callback signatures
+require separate admissions; none of these updates opens excluded resource representations.
 
 ## F1 implementation update
 
@@ -314,11 +315,32 @@ Local validation passed:
 The full repository suite and full Windows smoke were not repeated because the changed compiler
 packages and native crossing were checked directly. Old receipts do not attest callbacks; the
 [hosted F1–F3 receipt](#hosted-f1f3-receipt-2026-10-23) does. There are no SDK/CLI API, DB, workflow,
-runner or target-maturity changes. Phase 2 remains partial. The next bounded source task is the
-array-field family described below.
+runner or target-maturity changes. Phase 2 remains partial.
 
-The local-validation lists in F1–F3 describe implementation-time checks and remain historical.
-The hosted receipt below is the current execution record for the shared probe.
+## F2-5 remaining integer-array transport
+
+[ADR 0482](../adr/0482-repr-c-integer-array-transport.md) extends [ADR 0477](../adr/0477-repr-c-integer-array-fields.md)
+to `i8`, `i16`, `u16`, `u64` and `isize`, completing the ten Fairy integer-array families for lengths
+`1..=4096`. Source typing is committed at `fe4beed8`; backend and native proof are committed at
+`af181d65`. `internal/foreignstructprobe/integer_arrays.go` extends the shared probe. Scope remains
+whole-array and record value transport; element indexing/stores/views/
+iteration, nested stores, bare foreign arrays, new scalar pointers and direct resource/enum/tagged
+payload arrays remain closed.
+
+Local validation passed: focused compiler `TestIntegerArray*` in both profiles with boundary and
+1/4096 lengths; full `cbackend` (65.557s), `cbackendfixture`, `cbackendnative` and
+`foreignstructprobe`; affected backend/probe vet; HIR, semantic, MIR, codec, moduleinterface and
+packageartifact suites; and Linux-profile `TestForeignCStructResultCallSmokeSourceReachesCEmission`.
+MSVC 14.51.36231 passes C11/C17 low/optimized, all four executions, expected 42 and empty output.
+The new cases cover five families in 72-byte mixed/nested records, length-3 arrays, internal value
+arguments/results, borrowed nested reads, direct and referenced mutable replacement, all-element C
+observation, reconstruction/mutation with saved originals unchanged, and per-family `[1]` records.
+
+No hosted GCC/Clang native execution, full repository suite, full Windows smoke or local Linux
+native run was made for this expansion. The `82b760cb` receipt remains historical for F1–F3.
+
+The local-validation lists in F1–F3 and F2-5 describe implementation-time checks. The hosted receipt
+below remains the F1–F3 execution record; F2-5 requires a later authorized push and run.
 
 ## Hosted F1–F3 receipt (2026-10-23)
 
@@ -348,14 +370,13 @@ unchanged.
 
 ## Remaining source boundaries after F1–F3
 
-At implementation commit `82b760cb`, the new native probe covers the admitted record arguments,
-field transports and first callback signature. It does not expand every C-representable shape.
+The `82b760cb` hosted receipt covers F1–F3. F2-5 is a later local expansion and is not included.
 
-- Array fields still use [ReprCArrayField](../../internal/hir/views.go): only `u8`, `i32`, `i64`,
-  `u32` and `usize`, with lengths `1..=4096`. The integer and floating transport boundary tests
-  reject arrays of the new scalar families. The broader fixed-array contract is therefore not
-  fully implemented. The next bounded source task is array transport for `i8/i16/u16/u64/isize`,
-  followed by separate decisions and evidence for other C-representable element families.
+- Array fields currently admit all ten Fairy integer families, with lengths `1..=4096`. F2-5's
+  five new families pass local MSVC, focused compiler/backend and shared-probe checks; hosted
+  GCC/Clang is pending. Remaining floating, C-scalar and enum array forms and pointer forms require
+  a contract-to-source audit and separate bounded implementation/evidence decisions before full
+  conformance. Existing explicit exclusions remain unchanged.
 - [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) still permits only
   `void`, `u8`, `i32`, `i64`, `u32`, `usize` and admitted repr(C) records as pointees. New direct
   scalar-field support does not imply pointers to those scalars or C scalars. This is a current
@@ -364,7 +385,7 @@ field transports and first callback signature. It does not expand every C-repres
   unwind-crossing integrations remain exclusions; they are not new Phase 2 minimum tasks.
 
 Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged;
-successful execution of the current probe cannot establish the unimplemented array families.
+local MSVC evidence cannot stand in for the configured hosted GCC/Clang lanes.
 
 ## Validation of the original assessment
 

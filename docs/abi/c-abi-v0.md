@@ -167,7 +167,13 @@ New nested field-store paths are also excluded. ADR 0480's scalar restrictions r
 The shared native record probe checks ADR 0477 array layout, all elements and copy isolation. Local
 MSVC execution is recorded in the [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields);
 hosted Linux evidence passed in the [F1-F3 receipt](../development/phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23).
-ADR 0482's shared-probe extension remains planned and native evidence is pending.
+
+The ADR 0482 implementation and native proof at `af181d65` use
+[`integer_arrays.go`](../../internal/foreignstructprobe/integer_arrays.go) to check independent C
+observation of every element, array value arguments/results, borrowed nested reads and whole-field
+replacement. Focused compiler and backend checks pass, and MSVC 14.51.36231 passes all four
+C11/C17 low/optimized executions with expected 42 and empty output. Hosted GCC/Clang native
+evidence is pending; the `82b760cb` F1-F3 receipt does not cover this expansion.
 
 The Windows target product smoke uses a separate private `usize` generation transport. Under the
 selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned
