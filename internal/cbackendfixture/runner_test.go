@@ -84,14 +84,14 @@ func TestCEmissionManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 52 {
-		t.Fatalf("Run() cases = %d, want 52", report.CasesRun)
+	if report.CasesRun != 55 {
+		t.Fatalf("Run() cases = %d, want 55", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
 	}
-	if len(report.Emitted) != 52 {
-		t.Errorf("Run() emitted = %d, want 52", len(report.Emitted))
+	if len(report.Emitted) != 55 {
+		t.Errorf("Run() emitted = %d, want 55", len(report.Emitted))
 	}
 	observedDrops := 0
 	for _, fixture := range report.Emitted {
@@ -106,6 +106,7 @@ func TestCEmissionManifestV0(t *testing.T) {
 	if observedDrops == 0 {
 		t.Error("C emission fixtures exercise no interpreter-approved resource drops")
 	}
+	assertActivePayloadDrops(t, report)
 }
 
 func TestResolveWithinRejectsEscape(t *testing.T) {

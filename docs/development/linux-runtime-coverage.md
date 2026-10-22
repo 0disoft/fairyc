@@ -172,7 +172,7 @@ The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Are
 | Text, `String`, `CString` | [stage0_text_view.c](../../internal/cstdlib/stage0_text_view.c), [stage0_owned_text.c](../../internal/cstdlib/stage0_owned_text.c), [text.fy](../../internal/sdkstdlib/sources/std/text.fy) | [sdk_storage_source.go](../../internal/cbackendnative/sdk_storage_source.go), [smoke_text_views.go](../../internal/cbackendnative/smoke_text_views.go), [smoke_owned_text.go](../../internal/cbackendnative/smoke_owned_text.go), [stage0_text_view_probe.c](../../internal/cstdlib/stage0_text_view_probe.c), [stage0_owned_text_probe.c](../../internal/cstdlib/stage0_owned_text_probe.c) | v38 text-view and owned-text counters are each 4. Public checks include empty `String`, exact multibyte UTF-8, and successful/empty `from_buffer` roundtrips; raw probes supply boundaries, NUL rejection, empty, rollback, and OOM. | Mandatory. Coverage is representative; this does not establish every public failure path. |
 | Linux `File` core: open/read/write_all/sync/close/drop, position, size, bounded seeks | [stage0_linux_file.c](../../internal/cstdlib/stage0_linux_file.c), [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [fs.fy](../../internal/sdkstdlib/sources/std/fs.fy) | [stage0_linux_file_probe.c](../../internal/cstdlib/stage0_linux_file_probe.c), [smoke_linux_file.go](../../internal/cbackendnative/smoke_linux_file.go), [smoke_files.go](../../internal/cbackendnative/smoke_files.go) | v38 reports `linuxFileExecutions`, `linuxFileSourceCallExecutions`, and `linuxPublicFileExecutions` at 4 each. Raw coverage includes partial read/EOF/write_all/sync/consuming close/EBADF/raw drop; safe coverage includes create/read/write_all/seeks/size/close. | Mandatory core. The representative safe path and raw failure path are covered; the remaining progress/error assertions are listed below. |
 | `File` exact read, publication, and failure paths | [stage0_linux_file_portable.c](../../internal/cstdlib/stage0_linux_file_portable.c), [ADR 0424](../adr/0424-linux-prepared-publication-and-process-arguments.md) | [linux_publication_test.go](../../internal/cstdlib/linux_publication_test.go), [task_manager_linux_save_test.go](../../internal/cli/task_manager_linux_save_test.go), [task_manager_linux_save_hooks_test.go](../../internal/cli/task_manager_linux_save_hooks_test.go) | `TestLinuxPreparedPublication` defines GCC/Clang low/optimized exact-read early EOF, suffix preservation, remove/replace error, and old-open-owner cases. The save tests define 40 cases (four compiler profiles x ten modes): first/partial writes ENOSPC, sync EIO, close EIO, replace failure, and kill/restart preservation. The focused receipt now records four passing `TestLinuxPreparedPublication` executions without skips; the separate 40 save-failure cases retain suite-level evidence. | Mandatory. The [focused receipt](#focused-linux-receipt) now covers deterministic File EINTR retry, zero progress, and exact partial error counts through the public SDK. The save-failure cases separately assert application errors and data. Process kill is not power-loss proof. Reuse test-only POSIX seams; no new public API. |
-| Differential, layout, ABI, sanitizer | [execution.go](../../internal/cbackendnative/execution.go), [oracle_results.go](../../internal/cbackendnative/oracle_results.go), [probes_layout.go](../../internal/cbackendnative/probes_layout.go), [abi_probe.go](../../internal/cbackendnative/abi_probe.go) | [runner.go](../../internal/cbackendnative/runner.go), [c-emission fixture](../../spec/fixtures/c-emission/README.md) | v38 reports 208 differential and drop-trace executions, 4 layout probes, 56 bidirectional ABI executions, and 104 sanitizer executions. Execution/oracle results compare exit status/trap code and source-linked drop IDs. | Mandatory. The fixture README says active built-in payload selection is observed; no separate native payload event stream exists. Before promotion, map roadmap active-payload agreement to tagged fixture values/drop sites or add only missing observations. The absence of a separate event stream alone does not establish a missing semantic check. |
+| Differential, layout, ABI, sanitizer | [execution.go](../../internal/cbackendnative/execution.go), [oracle_results.go](../../internal/cbackendnative/oracle_results.go), [probes_layout.go](../../internal/cbackendnative/probes_layout.go), [abi_probe.go](../../internal/cbackendnative/abi_probe.go) | [runner.go](../../internal/cbackendnative/runner.go), [c-emission fixture](../../spec/fixtures/c-emission/README.md) | v38 reports 208 differential and drop-trace executions, 4 layout probes, 56 bidirectional ABI executions, and 104 sanitizer executions. Execution/oracle results compare exit status/trap code and source-linked drop IDs. | Mandatory. The fixture README says active built-in payload selection is observed; no separate native payload event stream exists. The [active-payload mapping](#active-payload-observation-mapping) identifies three direct-cleanup fixtures added after this receipt. Their Linux execution is pending; the existing observer and wire format are unchanged. |
 | Target maturity | [spec.go](../../internal/target/spec.go) | [spec_test.go](../../internal/target/spec_test.go) | The spec stores `complete-runtime` and `complete-standard-library` as missing. The test validates structural maturity ordering and nonempty missing values. | Mandatory review gate. The test does not compute fixture completeness. Both missing markers remain; `emittable`, `conformant`, and `supported` stay false. |
 
 Outside the representative Phase 2 minimum ([Linux File contract](../runtime/runtime-stdlib-v0.md#linux-file-v0)): directory lifecycle/enumeration, rename/hardlink/copy/`set_len`, extended metadata, and File-to-Buffer. Admission depends on Linux target adapters and owning native fixtures. `Vec<T>` and extra pure helpers are later surfaces, not required full SDK parity. Portable paths, sockets, mapped files, async I/O, generic allocators, and freestanding support remain design exclusions. No deferral or waiver is claimed for the missing mandatory evidence.
@@ -203,13 +203,54 @@ The [focused Linux receipt](#focused-linux-receipt) now records all four GCC/Cla
 executions passing without skips. This closes the direct heap OOM evidence gap for those profiles;
 Phase 2 conformance remains under review.
 
+## Active-payload observation mapping
+
+Phase 2 exit ([roadmap](../product/01-roadmap.md)) requires interpreter/C agreement on values,
+status, trap, and active-payload/drop traces. Concrete tagged payload types and `MovePayload` are
+owned by [ADR 0034](../adr/0034-resource-tagged-c-transport.md); active-only source/type/span drop
+observation by [ADR 0035](../adr/0035-native-drop-trace-differential.md). Existing drop
+instrumentation suffices for bounded admitted paths; no new payload event stream, product observer,
+public API/runtime ABI, or emitter algorithm is added.
+
+| Observation | Fixtures | Source | Expectation |
+| --- | --- | --- | --- |
+| Scalar payload selection | `option-some/none`, `result-propagate-ok/err` | [manifest](../../spec/fixtures/c-emission/manifest-v0.json) | selected scalar observable via final value |
+| Resource extraction/move | `resource-option-some/none`, `resource-result-ok/err`, `resource-result-propagate-ok/err` | [manifest](../../spec/fixtures/c-emission/manifest-v0.json) | exact resource type and binding span |
+| Propagation | `resource-result-propagate-ok/err` | [manifest](../../spec/fixtures/c-emission/manifest-v0.json) | move/propagation preserves exact drop trace |
+| Direct Option cleanup (new) | `resource-option-drop` | [main.fy](../../spec/fixtures/c-emission/cases/pass/resource-option-drop/src/main.fy) | `Token` dropped at `present` only; absent `None` yields zero drops; return 42 |
+| Direct Result cleanup (new) | `resource-result-drop-ok/err` | [ok](../../spec/fixtures/c-emission/cases/pass/resource-result-drop-ok/src/main.fy), [err](../../spec/fixtures/c-emission/cases/pass/resource-result-drop-err/src/main.fy) | explicit discard; `Success` drops at `wrapped` for `Ok`, `Failure` at `wrapped` for `Err`; other alternative never dropped; return 42 |
+
+[active_payload_test.go](../../internal/cbackendfixture/active_payload_test.go) authors independent
+expected resource type and exact binding span for all nine resource cases; `None` expects zero
+drops, so interpreter and C cannot agree on an omitted or wrong-source expectation.
+[runner.go](../../internal/cbackendfixture/runner.go) compares interpreter outcome to the manifest
+and emits production/closed trace units;
+[oracle_results.go](../../internal/cbackendnative/oracle_results.go) maps source/type/span to IDs;
+[execution.go](../../internal/cbackendnative/execution.go) compares exact runtime drop ID sequence
+and process status. Moves must not introduce extra drops; there is no new event wire format.
+
+Counters: the baseline hosted run 39782215105 at `1413b4b1` covers only the prior 52 cases (208
+process-status/drop comparisons, 104 sanitizer executions). Local
+[manifest-v0.json](../../spec/fixtures/c-emission/manifest-v0.json) is now 55; the configured native
+matrix is 220 process-status/drop comparisons and 110 sanitizer executions, but it has not been run
+for the new 3. Three new fixtures still await Linux execution at GCC/Clang low/optimized (12
+additional runs, 6 sanitizer runs); no new jobs or runners are required. Local `go test
+-mod=readonly -count=1 ./internal/cbackendfixture ./internal/cbackendnative` passed, and
+`TestEmissionTransportAcrossResponsibilitySplit` preserves the production and instrumented C units
+of the original 52 cases byte-for-byte; the new 3 are excluded from the historical hash and covered
+by independent golden observations, not rebaselined.
+
+Phase 2 stays partial: `complete-runtime` and `complete-standard-library` remain missing;
+`emittable`, `conformant`, and `supported` stay false. Nested resource tags and effectful cleanup
+are not admitted by this mapping. Next bounded step: run the expanded 55-case native lane, then
+reassess minimum exit evidence; no requirement is automatically waived.
+
 ## Next work
 
-Map the roadmap's active-payload agreement to the tagged fixture values and drop sites before
-reviewing either target maturity marker. The focused Linux receipt closes the File progress,
-direct heap OOM, and exact-read/publication execution gaps for the recorded cases; it does not
-establish complete runtime or standard-library coverage. Keep both missing markers and all
-three maturity flags unchanged until that review is complete.
+Run the expanded 55-case native lane under GCC/Clang at low and optimized profiles. Its planned
+220 process-status/drop comparisons and 110 sanitizer executions need a new hosted receipt; the
+existing 52-case receipt does not cover the three added cleanup cases. Reassess the minimum exit
+evidence only after that execution; both missing markers and all three maturity flags stay unchanged.
 
 The current receipt already covers the Region byte cases. The review and follow-up fixtures change no API,
 runtime ABI, SDK source bytes, DB, hygiene policy, CI runner allocation, or version. The new tests

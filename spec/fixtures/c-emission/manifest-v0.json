@@ -883,6 +883,54 @@
         "functions": ["main::main", "main::score"],
         "features": ["checked-arithmetic", "copy-option", "copy-result", "inert-enum", "inert-struct", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"]
       }
+    },
+    {
+      "id": "pass.c-emission.resource-option-drop",
+      "sourceRoot": "cases/pass/resource-option-drop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-option"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-drop-ok",
+      "sourceRoot": "cases/pass/resource-result-drop-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-result"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-drop-err",
+      "sourceRoot": "cases/pass/resource-result-drop-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-result"]
+      }
     }
   ]
 }

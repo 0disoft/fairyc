@@ -47,10 +47,11 @@ SDK surfaces to source owners, fixtures, and the current passing Frontend run at
 It distinguishes missing Linux implementations from incomplete execution evidence and design
 exclusions. Windows API parity is not the Phase 2 exit gate.
 
-The [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) confirms the completed
-Linux Go job passed all 12 evidence cases with no missing, skipped, or errored cases. These results
-close the focused Linux evidence gaps for file progress, heap OOM, and prepared publication only,
-not complete runtime or standard-library coverage. Active-payload mapping is next;
+The [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) passes all 12 File
+progress, heap OOM, and prepared-publication executions without skips. The [active-payload
+mapping](linux-runtime-coverage.md#active-payload-observation-mapping) adds three direct-cleanup
+cases: implicit `Some`/`None` cleanup and explicit discard of `Result<Success, Failure>` for both
+alternatives. All 55 cases pass local emission checks; the expanded Linux native receipt is pending.
 `complete-runtime` and `complete-standard-library` remain missing, and `emittable`, `conformant`,
 and `supported` stay false.
 
@@ -161,7 +162,7 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Finish the active-payload observation mapping before conformance review. The
-   [focused Linux receipt](linux-runtime-coverage.md#focused-linux-receipt) now closes the File
-   progress/retry, direct heap-OOM, and exact-read/publication execution gaps for its recorded cases.
+1. Run the expanded 55-case native lane and record the three new direct-cleanup cases before
+   reassessing Phase 2 exit evidence. The [mapping](linux-runtime-coverage.md#active-payload-observation-mapping)
+   preserves the existing 52-case hosted receipt as baseline evidence only.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.
