@@ -120,7 +120,11 @@ func TestMapStoreCrashHelper(t *testing.T) {
 		if err := os.WriteFile(os.Getenv(mapCrashMarkerEnv), []byte(path), 0o600); err != nil {
 			panic(fmt.Sprintf("write crash marker: %v", err))
 		}
-		select {}
+		// Keep a timer pending so Go's deadlock detector cannot end the helper
+		// after publication but before the parent sends the intended kill.
+		for {
+			time.Sleep(time.Hour)
+		}
 	}
 	hooks := mapPublishHooks{}
 	switch stage {
