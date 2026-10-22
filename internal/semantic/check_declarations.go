@@ -9,6 +9,9 @@ import (
 func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enum {
 	value := a.enums[enumeration]
 	for _, attribute := range enumeration.Attributes {
+		if attribute.Name == "repr" {
+			continue // Validated while preparing enum identities and fields.
+		}
 		if attribute.Name == constEvalAttribute {
 			continue
 		}
@@ -24,6 +27,7 @@ func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enu
 		DocumentationSpan: optionalSpan(module.file.Path, enumeration.DocumentationSpan),
 	}
 	if info := a.enumTypes[value.typ]; info != nil {
+		result.CBase = info.cBase
 		for _, variant := range info.orderedVariants {
 			hirVariant := hir.EnumVariant{Name: variant.name, Span: variant.span}
 			for _, field := range variant.orderedFields {

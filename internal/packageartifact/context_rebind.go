@@ -60,7 +60,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		if err != nil {
 			return mir.Program{}, err
 		}
-		enumeration := mir.EnumType{Type: typeRef, Name: item.Name, Span: hir.Span{Package: owner}}
+		enumeration := mir.EnumType{Type: typeRef, Name: item.Name, CBase: item.CBase, Span: hir.Span{Package: owner}}
 		for _, variant := range item.Variants {
 			reboundVariant := mir.EnumVariant{Name: variant.Name, Span: hir.Span{Package: owner}}
 			for _, field := range variant.Fields {

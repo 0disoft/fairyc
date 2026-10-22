@@ -333,6 +333,7 @@ type Module struct {
 
 // Enum is one resolved restricted inert tagged definition in declaration order.
 type Enum struct {
+	CBase             string `json:",omitempty"`
 	Name              string
 	Public            bool
 	Type              Type

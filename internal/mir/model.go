@@ -87,6 +87,7 @@ type Program struct {
 
 // EnumType is one verified restricted inert tagged definition used by executable MIR.
 type EnumType struct {
+	CBase    string `json:",omitempty"`
 	Type     hir.Type
 	Name     string
 	Span     hir.Span

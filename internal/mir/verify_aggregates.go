@@ -21,6 +21,17 @@ func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []Verifica
 			continue
 		}
 		enums[definition.Type] = definition
+		if definition.CBase != "" {
+			capacity := hir.CEnumVariantCapacity(definition.CBase)
+			if capacity == 0 || len(definition.Variants) == 0 || uint64(len(definition.Variants)) > capacity {
+				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "invalid C enum base or discriminant range"})
+			}
+			for _, variant := range definition.Variants {
+				if len(variant.Fields) != 0 {
+					failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "C enum has payload fields"})
+				}
+			}
+		}
 		variantNames := make(map[string]struct{}, len(definition.Variants))
 		for _, variant := range definition.Variants {
 			if variant.Name == "" {

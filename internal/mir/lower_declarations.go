@@ -21,7 +21,8 @@ func lowerEnumTypes(input hir.Package) ([]EnumType, error) {
 			}
 			seen[enumeration.Type] = struct{}{}
 			definition := EnumType{
-				Type: enumeration.Type, Name: enumeration.Name, Span: enumeration.Span,
+				CBase: enumeration.CBase,
+				Type:  enumeration.Type, Name: enumeration.Name, Span: enumeration.Span,
 				Entity: enumTypeEntity(enumeration.Type), Variants: make([]EnumVariant, 0, len(enumeration.Variants)),
 			}
 			variantNames := make(map[string]struct{}, len(enumeration.Variants))

@@ -85,6 +85,7 @@ type Module struct {
 
 // Item contains only source-visible facts that can affect another package.
 type Item struct {
+	CBase      string `json:",omitempty"`
 	Kind       string
 	Name       string
 	ReprC      bool
@@ -192,7 +193,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		if !enumeration.Public {
 			continue
 		}
-		item := Item{Kind: "enum", Name: enumeration.Name}
+		item := Item{Kind: "enum", Name: enumeration.Name, CBase: enumeration.CBase}
 		for _, variant := range enumeration.Variants {
 			stableVariant := Variant{Name: variant.Name}
 			for _, field := range variant.Fields {
@@ -535,6 +536,17 @@ func validateDescriptor(value Descriptor) error {
 			return fmt.Errorf("public interface modules are not sorted and unique")
 		}
 		for itemIndex, item := range module.Items {
+			if item.CBase != "" {
+				capacity := hir.CEnumVariantCapacity(item.CBase)
+				if item.Kind != "enum" || capacity == 0 || len(item.Variants) == 0 || uint64(len(item.Variants)) > capacity {
+					return fmt.Errorf("invalid public C enum representation")
+				}
+				for _, variant := range item.Variants {
+					if len(variant.Fields) != 0 {
+						return fmt.Errorf("public C enum has payload fields")
+					}
+				}
+			}
 			if item.Kind == "" || item.Name == "" || itemIndex > 0 && compareItem(module.Items[itemIndex-1], item) >= 0 {
 				return fmt.Errorf("module %q public items are not sorted and unique", module.Path)
 			}
@@ -572,6 +584,10 @@ func compareItem(left, right Item) int {
 }
 
 func writeItem(buffer *bytes.Buffer, item Item) {
+	if item.CBase != "" {
+		writeString(buffer, "c-enum-base")
+		writeString(buffer, item.CBase)
+	}
 	writeString(buffer, item.Kind)
 	writeString(buffer, item.Name)
 	writeBool(buffer, item.ReprC)

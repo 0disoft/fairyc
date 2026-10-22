@@ -228,6 +228,9 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 }
 
 func (r *aggregateLayoutResolver) resolveEnum(definition mir.EnumType) (layout.Type, error) {
+	if definition.CBase != "" {
+		return layout.Type{}, CapabilityError{Feature: "C enum source storage"}
+	}
 	if len(definition.Variants) == 0 {
 		return layout.Type{}, CapabilityError{Feature: "empty enum type " + strconv.Quote(definition.Type.String())}
 	}

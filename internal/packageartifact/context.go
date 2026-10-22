@@ -85,6 +85,7 @@ type ContextStruct struct {
 }
 
 type ContextEnum struct {
+	CBase    string           `json:"cBase,omitempty"`
 	Type     string           `json:"type"`
 	Name     string           `json:"name"`
 	Variants []ContextVariant `json:"variants"`
@@ -150,7 +151,7 @@ func DescribeContext(context mir.Program, coordinates map[hir.PackageID]packageg
 		if err != nil {
 			return ContextDescriptor{}, fmt.Errorf("enum %q type: %w", value.Name, err)
 		}
-		item := ContextEnum{Type: typeName, Name: value.Name}
+		item := ContextEnum{Type: typeName, Name: value.Name, CBase: value.CBase}
 		for _, variant := range value.Variants {
 			stableVariant := ContextVariant{Name: variant.Name}
 			for _, field := range variant.Fields {
@@ -310,6 +311,17 @@ func ValidateContextDescriptor(value ContextDescriptor) error {
 		}
 	}
 	for index, item := range value.Enums {
+		if item.CBase != "" {
+			capacity := hir.CEnumVariantCapacity(item.CBase)
+			if capacity == 0 || len(item.Variants) == 0 || uint64(len(item.Variants)) > capacity {
+				return fmt.Errorf("stable enum %q has an invalid C base or discriminant range", item.Type)
+			}
+			for _, variant := range item.Variants {
+				if len(variant.Fields) != 0 {
+					return fmt.Errorf("stable C enum %q has payload fields", item.Type)
+				}
+			}
+		}
 		if index > 0 && value.Enums[index-1].Type >= item.Type {
 			return fmt.Errorf("stable type-context enums are not sorted and unique")
 		}

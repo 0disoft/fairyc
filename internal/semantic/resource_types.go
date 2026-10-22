@@ -23,6 +23,7 @@ type structInfo struct {
 }
 
 type enumInfo struct {
+	cBase           string
 	symbol          *symbol
 	variants        map[string]enumVariant
 	orderedVariants []enumVariant
@@ -81,6 +82,7 @@ func (a *analyzer) prepareEnumTypes() {
 				continue
 			}
 			info := a.enumTypes[value.typ]
+			info.cBase = a.prepareCEnumBase(module, enumeration)
 			for variantIndex := range enumeration.Variants {
 				variantDeclaration := &enumeration.Variants[variantIndex]
 				if previous, duplicate := info.variants[variantDeclaration.Name]; duplicate {
