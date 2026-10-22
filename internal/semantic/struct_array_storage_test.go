@@ -7,7 +7,7 @@ func TestStructArrayStorageBoundary(t *testing.T) {
 		{"immutable", `struct P{u8[2] bytes;}fn void bad(){let P p=P{.bytes=[1,2]};p.bytes=[3,4];}`, "E1008"},
 		{"width", `struct P{u8[2] bytes;}fn void bad(){var P p=P{.bytes=[1,2]};let i32[2] b=[1,2];p.bytes=b;}`, "E1006"},
 		{"length", `struct P{u8[2] bytes;}fn void bad(){var P p=P{.bytes=[1,2]};p.bytes=[1,2,3];}`, ""},
-		{"repr-c", `@repr(C) struct P{u8[2] bytes;}`, ""},
+		{"repr-c-bool", `@repr(C) struct P{bool[2] bytes;}`, ""},
 		{"zero", `struct P{u8[0] bytes;}`, ""},
 		{"oversize", `struct P{u8[4097] bytes;}`, ""},
 		{"nominal-array-element", `struct T{i32[2] x;}struct P{T[2] data;}`, ""},

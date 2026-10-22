@@ -62,6 +62,10 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 			index := e.analysis.structByType[typ]
 			place += access + e.analysis.structCFieldName(index, e.analysis.structTypes[index].fieldIndex[field.Name])
 			access = "."
+			if e.analysis.rawArrayMember(typ, field.Type) {
+				writeRawArrayCopy(output, place, "("+value+").data", operation.Type)
+				return nil
+			}
 			typ = field.Type
 		}
 		fmt.Fprintf(output, "    %s = %s;\n", place, value)
@@ -87,6 +91,10 @@ func (e *emitter) writeFieldStore(output *strings.Builder, operation mir.Operati
 	access := "."
 	if _, _, borrowed := hir.BorrowElement(operation.OwnerType); borrowed {
 		access = "->"
+	}
+	if e.analysis.rawArrayMember(operation.OwnerType, operation.Type) {
+		writeRawArrayCopy(output, "("+receiver+")"+access+name, "("+value+").data", operation.Type)
+		return nil
 	}
 	fmt.Fprintf(output, "    (%s)%s%s = %s;\n", receiver, access, name, value)
 	return nil

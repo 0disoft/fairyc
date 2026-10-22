@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
@@ -13,9 +14,9 @@ func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expres
 		if !c.indexedStructPlace(source) {
 			return c.arrayFieldBorrow(source, field, false)
 		}
-		return projectFieldBorrow(field, false)
+		return c.projectFieldBorrow(field, false)
 	}
-	if result, ok := projectFieldBorrow(field, false); ok {
+	if result, ok := c.projectFieldBorrow(field, false); ok {
 		return result, true
 	}
 	root := fieldAssignmentRoot(source)
@@ -27,7 +28,7 @@ func (c *typeChecker) sharedFieldBorrow(source *ast.Expression, field hir.Expres
 	if !borrowed || !mutable || !c.analyzer.plainViewStruct(element) {
 		return hir.Expression{}, false
 	}
-	return projectFieldBorrow(shareFieldRoot(field), false)
+	return c.projectFieldBorrow(shareFieldRoot(field), false)
 }
 
 // Shorten the named root before projecting shared addresses. Rebuild the HIR
@@ -45,9 +46,9 @@ func shareFieldRoot(field hir.Expression) hir.Expression {
 	return field
 }
 
-func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, bool) {
+func (c *typeChecker) projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, bool) {
 	if field.Kind == hir.ExpressionGroup && len(field.Children) == 1 {
-		return projectFieldBorrow(field.Children[0], mutable)
+		return c.projectFieldBorrow(field.Children[0], mutable)
 	}
 	if field.Kind != hir.ExpressionFieldExpression || len(field.Children) != 1 || field.Type == hir.TypeInvalid {
 		return hir.Expression{}, false
@@ -56,6 +57,10 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 		return hir.Expression{}, false
 	}
 	owner := field.Children[0]
+	if c.reprCArrayFieldExpression(field) {
+		c.analyzer.addUnsupported(c.module.file.Path, diagnostic.Span{StartByte: field.Span.StartByte, EndByte: field.Span.EndByte}, "references and views of repr(C) array fields")
+		return hir.Expression{}, false
+	}
 	for owner.Kind == hir.ExpressionGroup && len(owner.Children) == 1 {
 		owner = owner.Children[0]
 	}
@@ -77,7 +82,7 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 				Span: owner.Span, Symbol: hir.NoSymbol, Operator: operator, Children: []hir.Expression{owner}}
 		} else {
 			var ok bool
-			owner, ok = projectFieldBorrow(owner, mutable)
+			owner, ok = c.projectFieldBorrow(owner, mutable)
 			if !ok {
 				return hir.Expression{}, false
 			}
@@ -89,6 +94,24 @@ func projectFieldBorrow(field hir.Expression, mutable bool) (hir.Expression, boo
 	}
 	return hir.Expression{Kind: hir.ExpressionFieldBorrow, Type: borrowType,
 		Span: field.Span, Symbol: hir.NoSymbol, Operator: field.Operator, Children: []hir.Expression{owner}}, true
+}
+
+func (c *typeChecker) reprCArrayFieldExpression(field hir.Expression) bool {
+	for field.Kind == hir.ExpressionGroup && len(field.Children) == 1 {
+		field = field.Children[0]
+	}
+	if field.Kind != hir.ExpressionFieldExpression || len(field.Children) != 1 {
+		return false
+	}
+	if _, _, array := hir.FixedArrayParts(field.Type); !array {
+		return false
+	}
+	ownerType := field.Children[0].Type
+	if element, _, borrowed := hir.BorrowElement(ownerType); borrowed {
+		ownerType = element
+	}
+	info := c.analyzer.structTypes[ownerType]
+	return info != nil && info.reprC
 }
 
 func borrowPlaceRoot(expression *ast.Expression) *ast.Expression {
@@ -111,7 +134,7 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 		return hir.Expression{}, false
 	}
 	if c.indexedStructPlace(source) {
-		return projectFieldBorrow(*child, true)
+		return c.projectFieldBorrow(*child, true)
 	}
 	if field, ok := c.arrayFieldBorrow(source, *child, true); ok {
 		return field, true
@@ -133,7 +156,7 @@ func (c *typeChecker) mutableFieldBorrow(source *ast.Expression, child *hir.Expr
 	if !c.analyzer.plainViewStruct(rootType) {
 		return hir.Expression{}, false
 	}
-	return projectFieldBorrow(*child, true)
+	return c.projectFieldBorrow(*child, true)
 }
 
 // Rebase each field projection on an address in the original fixed array.
@@ -161,7 +184,7 @@ func (c *typeChecker) arrayFieldBorrow(source *ast.Expression, field hir.Express
 		return hir.Expression{}, false
 	}
 	field.Children = []hir.Expression{borrowed}
-	return projectFieldBorrow(field, mutable)
+	return c.projectFieldBorrow(field, mutable)
 }
 
 // Reuse exclusive-subview generations for field children. The generation freezes

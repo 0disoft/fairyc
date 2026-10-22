@@ -157,6 +157,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if !found {
 			return CapabilityError{Function: function, Feature: "struct construction type " + strconv.Quote(operation.Type.String())}
 		}
+		for _, field := range e.analysis.structTypes[index].definition.Fields {
+			if e.analysis.rawArrayMember(operation.Type, field.Type) {
+				return e.writeReprCArrayConstruction(output, operation, index)
+			}
+		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ ", operation.DestinationLocal, e.analysis.structCTypeName(index))
 		if len(operation.Operands) == 0 {
 			output.WriteString("0")
@@ -211,7 +216,14 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			if err != nil {
 				return fmt.Errorf("struct field read in %s: %w", function, err)
 			}
-			if borrowed {
+			if e.analysis.rawArrayMember(operation.OwnerType, operation.Type) {
+				access := "."
+				if borrowed {
+					access = "->"
+				}
+				place := "(" + value + ")" + access + e.analysis.structCFieldName(index, fieldIndex)
+				writeRawArrayCopy(output, fmt.Sprintf("fy_l_%d.data", operation.DestinationLocal), place, operation.Type)
+			} else if borrowed {
 				fmt.Fprintf(output, "    fy_l_%d = (%s)->%s;\n", operation.DestinationLocal, value, e.analysis.structCFieldName(index, fieldIndex))
 			} else {
 				fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, value, e.analysis.structCFieldName(index, fieldIndex))

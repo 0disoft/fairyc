@@ -303,8 +303,12 @@ func (a *analyzer) prepareStructTypes() {
 			info := a.structTypes[value.typ]
 			for _, declared := range structure.Fields {
 				field := info.fields[declared.Name]
-				if _, _, array := hir.FixedArrayParts(field.typ); array && (info.reprC || !a.inlineArrayField(field.typ)) {
-					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded scalar or scalar-leaf struct elements in a non-repr(C) struct")
+				allowed := a.inlineArrayField(field.typ)
+				if info.reprC {
+					allowed = hir.ReprCArrayField(field.typ)
+				}
+				if _, _, array := hir.FixedArrayParts(field.typ); array && !allowed {
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded integer elements for repr(C), or scalar/plain-struct elements for a private struct")
 				}
 			}
 		}

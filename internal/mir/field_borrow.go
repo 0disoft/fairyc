@@ -43,6 +43,11 @@ func validFieldBorrowShape(op Operation) bool {
 // Mutable projection preserves only plain, non-owning field addresses.
 func validMutableFieldBorrow(op Operation, lookup func(hir.Type) *StructType) bool {
 	element, mutable, _ := hir.BorrowElement(op.Type)
+	if _, _, array := hir.FixedArrayParts(element); array {
+		if owner := lookup(fieldAggregateType(op.OwnerType)); owner != nil && owner.ReprC {
+			return false // A raw C array is not the private fixed-array wrapper.
+		}
+	}
 	if _, _, array := hir.FixedArrayParts(element); array && !hir.InlineArrayField(element, plainFieldStoreLookup(lookup)) {
 		return false
 	}

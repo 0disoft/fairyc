@@ -98,6 +98,15 @@ func ScalarArrayField(value Type) bool {
 	return array && FixedArrayScalarElement(element) && ExecutableFixedArrayShape(element, length)
 }
 
+// ReprCArrayField is the bounded integer-array member subset with an exact C
+// scalar representation. In particular, Fairy bool uses a different private
+// value transport and is not admitted as a C array element here.
+func ReprCArrayField(value Type) bool {
+	element, length, array := FixedArrayParts(value)
+	return array && ExecutableFixedArrayShape(element, length) &&
+		(element == TypeU8 || element == TypeI32 || element == TypeI64 || element == TypeU32 || element == TypeUSize)
+}
+
 // InlineArrayField also admits arrays of actual scalar-leaf structs. Array
 // fields inside the element graph remain closed, keeping this subset acyclic
 // and independent of array-field borrowing and iteration.

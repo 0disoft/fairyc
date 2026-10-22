@@ -43,7 +43,7 @@ func TestStructArrayStorageRoundTrip(t *testing.T) {
 		typ  hir.Type
 		repr bool
 	}{
-		{"zero", hir.FixedArray(hir.TypeU8, 0), false}, {"oversize", hir.FixedArray(hir.TypeU8, 4097), false}, {"nested", hir.FixedArray(hir.FixedArray(hir.TypeU8, 2), 2), false}, {"foreign", hir.FixedArray(hir.TypeU8, 4), true},
+		{"zero", hir.FixedArray(hir.TypeU8, 0), false}, {"oversize", hir.FixedArray(hir.TypeU8, 4097), false}, {"nested", hir.FixedArray(hir.FixedArray(hir.TypeU8, 2), 2), false}, {"foreign-bool", hir.FixedArray(hir.TypeBool, 4), true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			bad, e := mircodec.Decode(data, 1<<20)

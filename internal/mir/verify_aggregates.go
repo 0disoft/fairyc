@@ -83,7 +83,11 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 	properties := typeProperties{structs: structs}
 	for _, definition := range definitions {
 		for _, field := range definition.Fields {
-			if _, _, array := hir.FixedArrayParts(field.Type); array && (definition.ReprC || !properties.inlineArrayField(field.Type)) {
+			allowed := properties.inlineArrayField(field.Type)
+			if definition.ReprC {
+				allowed = hir.ReprCArrayField(field.Type)
+			}
+			if _, _, array := hir.FixedArrayParts(field.Type); array && !allowed {
 				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})
 			}
 		}

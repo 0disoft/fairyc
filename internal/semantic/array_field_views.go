@@ -19,6 +19,11 @@ func arrayFieldRoot(source *ast.Expression) *ast.Expression {
 }
 
 func (c *typeChecker) arrayFieldView(source *ast.Expression, field hir.Expression, mutable bool) (hir.Expression, bool) {
+	// Repr(C) arrays use raw C members, not the private wrapper-reference
+	// representation. Implicit read-index optimization must fall back to a copy.
+	if c.reprCArrayFieldExpression(field) {
+		return hir.Expression{}, false
+	}
 	root := arrayFieldRoot(source)
 	owner := c.analyzer.resolved[root]
 	if root == nil || owner == nil || (owner.kind != "local" && owner.kind != "parameter") || !c.analyzer.inlineArrayField(field.Type) {
