@@ -2,7 +2,8 @@
 
 Hosted evidence baseline: 2026-10-22, source `3ea6d1b5923386155f4ffd66b51040a046f2827d`,
 SDK `0.0.0-stage0.86`, language `/20`, runtime `/0`.
-This inventory supports the [Phase 2 review](phase-status.md); it does not promote target maturity.
+This inventory supports the [Phase 2 exit decision](phase-status.md#phase-2-exit-decision-2026-10-22);
+it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
 ## Execution evidence
@@ -160,9 +161,28 @@ establishes the current Linux runtime cases; the SDK probe is distinct from the 
 sanitizer executions. Related Go/fixture suites and vet pass locally. The local full repository Go
 suite was not rerun, while the hosted native and focused Linux Go jobs passed.
 
+## Phase 2 exit decision (2026-10-22)
+
+Decision: keep Phase 2 partial. The representative minimum passes, but `complete-runtime` and
+`complete-standard-library` remain missing and `emittable`, `conformant`, and `supported` stay false.
+Conformance requires every declared language, layout, bidirectional ABI, runtime, and toolchain
+fixture to pass without skips, under the [C ABI target claims](../abi/c-abi-v0.md#target-status)
+and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice). The v38
+receipt proves representative success, not blanket completeness.
+
+| Open evidence | What the receipt establishes | Why closure remains open |
+| --- | --- | --- |
+| Linux trap-receipt write progress | [runtime.go](../../internal/cruntime/runtime.go) handles partial writes, EINTR, zero progress, and failure; [native tests](../../internal/cdriver/native_test.go) establish ordinary receipt transport. | [runtime_test.go](../../internal/cruntime/runtime_test.go) checks rendered strings for those branches. Deterministic native progress/failure observations are still absent. |
+| Pure helper native execution | [Equality/comparison](../../internal/cli/bytes_equal_test.go) and [decimal parsing](../../internal/cli/checked_i64_decimal_test.go) have admitted contracts and independent Go oracles. | Their non-Windows native sections skip Linux and use Windows MSVC only, even when Linux C is emitted. These are beyond the representative initial minimum, but the declared no-skip standard-library evidence stays incomplete. |
+| Whole-target observation | The v38 process/drop oracle checks admitted fixtures under two compilers and profiles. | [Exit values](../../internal/cbackendnative/oracle_results.go) cover 0–191, while the manifest defers complex resources and effects. Partial compiler-semantic coverage is not a thin-runtime defect or evidence of entire-language conformance. |
+
 ## Phase 2 contract-to-fixture review
 
-The mandatory minimum is the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`, text/`String`/`CString`, and Linux `File` paths, with differential, layout, bidirectional ABI, and sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)). This is a source review against the existing receipts, not a new execution or a target promotion. SDK storage probes are separate from the 110 sanitizer executions.
+The mandatory minimum remains the thin runtime plus representative `SystemHeap`, `Arena`, `Buffer`,
+text/`String`/`CString`, and Linux `File` paths, with differential, layout, bidirectional ABI, and
+sanitizer coverage ([roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice)).
+Windows filesystem parity, distribution, and new APIs are not exit requirements. SDK storage probes
+remain separate from the 110 sanitizer executions.
 
 | Contract rule | Source owner | Fixture owner | Evidence | Scope / gap |
 | --- | --- | --- | --- | --- |
@@ -201,8 +221,8 @@ empty storage, then growth, shrink, and alignment-changing resize failures prese
 alignment, bytes, and one live allocation; recovery, zero requests that leave the injected failure
 armed, and final cleanup are checked too. MSVC low and optimized local native builds and runs pass.
 The [focused Linux receipt](#focused-linux-receipt) now records all four GCC/Clang low/optimized
-executions passing without skips. This closes the direct heap OOM evidence gap for those profiles;
-Phase 2 conformance remains under review.
+executions passing without skips. This closes the direct heap OOM evidence gap for those profiles.
+The exit decision above keeps Phase 2 partial; this focused receipt does not close either missing marker.
 
 ## Active-payload observation mapping
 
@@ -240,18 +260,14 @@ optimized profiles. No new jobs or runners were required. Local `go test
 of the original 52 cases byte-for-byte; the new 3 are excluded from the historical hash and covered
 by independent golden observations, not rebaselined.
 
-Phase 2 stays partial: `complete-runtime` and `complete-standard-library` remain missing;
-`emittable`, `conformant`, and `supported` stay false. Nested resource tags and effectful cleanup
-are not admitted by this mapping. Next bounded step: reassess the mandatory Phase 2 exit evidence;
-no requirement is automatically waived.
+The exit decision above leaves both missing markers and all three maturity flags unchanged. Nested
+resource tags and effectful cleanup are not admitted by this mapping. This representative receipt
+does not prove complete runtime or standard-library coverage, and no requirement is waived.
 
 ## Next work
 
-The expanded 55-case native lane has passed under GCC/Clang at low and optimized profiles. Its
-220 process-status/drop comparisons and 110 sanitizer executions are recorded in the current
-receipt and cover the three added cleanup cases. Reassess the mandatory Phase 2 exit evidence
-next; both missing markers and all three maturity flags stay unchanged.
-
-The current receipt already covers the Region byte cases. The review and follow-up fixtures change no API,
-runtime ABI, SDK source bytes, DB, hygiene policy, CI runner allocation, or version. The new tests
-run in the existing Go lanes; no runners were added.
+Next single task: adapt the existing equality, comparison, and checked-decimal native tests to run
+the admitted helpers through GCC and Clang at low and optimized profiles on Linux, retain their
+independent Go oracles, and record explicit no-skip evidence in the existing Linux Go job. Use no
+new workflow or runner. This removes the concrete helper gap above but does not by itself close
+Phase 2 or prove the complete runtime or standard library.

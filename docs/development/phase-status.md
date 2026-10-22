@@ -101,8 +101,22 @@ remains historical evidence for its 52-case receipt. The earlier
 [Linux job 119796130897](https://github.com/0disoft/fairyc/actions/runs/39768680761/job/119796130897)
 at `54cbeb17` also remains historical evidence for its recorded revision, including public Buffer
 `empty`, `resize_zeroed`, `truncate`, `view_mut`, and text and `from_buffer` cases. The
-[coverage review](linux-runtime-coverage.md#phase-2-contract-to-fixture-review) maps the current cases.
+[coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) maps the current cases.
 Phase 2 remains partial; neither target maturity nor supported-distribution status changes.
+
+## Phase 2 exit decision (2026-10-22)
+
+Keep Phase 2 partial. The representative minimum is covered by the v38 receipt, but
+`complete-runtime` and `complete-standard-library` remain missing and all three target flags stay
+false. Conformance requires every declared language, layout, bidirectional ABI, runtime, and
+toolchain fixture to pass without skips, as defined by the [C ABI target claims](../abi/c-abi-v0.md#target-status)
+and [roadmap exit gate](../product/01-roadmap.md#phase-2-first-hosted-executable-slice).
+
+The open evidence is bounded. Linux receipt-write progress has no deterministic fault-injected
+observation; the equality, comparison, and decimal-parse native tests still skip Linux; and the
+0–191 process-status oracle plus manifest deferrals do not observe the whole target. The
+[coverage decision](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) records the source
+owners and remaining evidence. Windows filesystem parity and distribution remain outside this gate.
 
 ## Region byte evidence (2026-10-22)
 
@@ -171,7 +185,9 @@ checked. No language/runtime feature or cache algorithm changes here; Phase 2 re
 
 ## Next work
 
-1. Reassess the mandatory Phase 2 exit evidence using the expanded 55-case native receipt. The
-   [mapping](linux-runtime-coverage.md#active-payload-observation-mapping) preserves the existing
-   52-case hosted receipt as historical baseline evidence only.
+1. Adapt the existing [equality/comparison](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22)
+   and [checked-decimal](linux-runtime-coverage.md#phase-2-exit-decision-2026-10-22) native tests to
+   run GCC and Clang at low and optimized profiles on Linux, retain their independent Go oracles,
+   and record explicit no-skip evidence in the existing Linux Go job. Add no workflow or runner.
+   This is the next single task and does not by itself close Phase 2.
 2. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission, as specified above.

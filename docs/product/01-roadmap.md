@@ -204,8 +204,8 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 ## Phase 2: first hosted executable slice
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
-requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 52 emission
-cases at low and optimized profiles for 208 process-status and exact
+requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It runs all 55 emission
+cases at low and optimized profiles for 220 process-status and exact
 source-linked drop-trace comparisons, then drives
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -213,7 +213,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `ref u8[]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 104 fail-closed sanitizer
+  and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 110 fail-closed sanitizer
 executions. ADR 0214 records the first hosted receipt at commit `0bb4199`.
 [Run 39471634965](https://github.com/0disoft/fairyc/actions/runs/39471634965/job/118803299115)
 passed the earlier lane at `24dbbae016c45f50c168a1ff6840aa9bfa6636c1`, including the layout,
@@ -226,13 +226,18 @@ product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 ADR 0474 defines the native Ubuntu 24.04 reference environment with glibc >= 2.39, GCC >= 13
 or Clang >= 18, version/target preflight, and provisioning in the existing Linux C job.
-The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
-at `c845848c95395622441b059c25c4a27a4bb6fee7` passed reference provisioning and native fixtures
-with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v37 report preserves the existing counts
-and adds four deterministic console failure executions. The same run passes native trap-location
-transport probes in both Linux and Windows Go lanes; see [phase status](../development/phase-status.md).
-All nine Frontend jobs passed. This fulfills `toolchain-baseline` and `toolchain-provisioning`
+The [current Linux receipt](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119861675870)
+at `3ea6d1b5923386155f4ffd66b51040a046f2827d` passed reference provisioning and native fixtures
+with glibc 2.39, GCC 13.3.0, and Clang 18.1.3. Its v38 report records 55 emission cases,
+220 interpreter/C and drop-trace comparisons each, 110 sanitizer executions, 56 bidirectional
+ABI crossings, four layout probe executions, and four SDK storage executions. All nine Frontend
+jobs passed, including the [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39787424010/job/119854250599)
+with 12 focused Linux cases and no skips. This fulfills `toolchain-baseline` and `toolchain-provisioning`
 for the [bounded Ubuntu 24.04 native profile](../abi/linux-toolchain-v0.md).
+The earlier [run 39581207722](https://github.com/0disoft/fairyc/actions/runs/39581207722/job/119164496059)
+at `c845848c95395622441b059c25c4a27a4bb6fee7` remains historical evidence for its v37
+52/208/104 baseline. The same run passed native trap-location transport probes in both Linux
+and Windows Go lanes; see [phase status](../development/phase-status.md).
 Phase 2 remains partial: `complete-runtime` and `complete-standard-library` remain missing for Linux;
 `emittable`, `conformant`, and `supported` stay false. Windows target maturity flags are unchanged.
 The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
