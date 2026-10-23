@@ -59,5 +59,8 @@ Key tests cover every identity dimension and separation from the runtime key. Ex
 cache and stable CLI probes retain their independent output/trap expectations.
 
 CLI flags, stdout, exit codes, language/SDK/runtime revisions and target maturity are unchanged.
-Linux generated-unit reuse is not enabled by this decision. Timing and retained-byte observations
-must be recorded before asserting a performance improvement.
+Linux generated-unit reuse is not enabled by this decision. The
+[three-repeat file-search result](../benchmarks/completion-unit-cache-20261023.json) records matching
+outputs in 24 builds: release no-op median falls from 3.60 to 0.93 seconds, edited-build median
+rises from 3.64 to 3.91 seconds, and shared retention after two edits grows by 63,242 bytes.
+This supports release reuse for repeated unchanged builds; it is not an edit-speed improvement.

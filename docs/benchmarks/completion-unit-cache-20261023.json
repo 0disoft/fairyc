@@ -1,0 +1,167 @@
+{
+  "workload": "file-search",
+  "profile": "release",
+  "repetitions": 3,
+  "edits": 2,
+  "method": "Existing fairyc-bench; before then after on one Windows host. Medians of three cold/no-op runs and six edits. Synthetic workload, no isolated-machine or general-language speed claim. Retained logical bytes exclude directory metadata and transient peak usage.",
+  "versions": {
+    "before": {
+      "compilerRevision": "8ba3fab746c2b83b97bf595213592bd30d238e4c",
+      "compilerBytes": 13094400,
+      "compilerSha256": "37fc0e8997245379d224351fba67e482fd75ab48504700487028639550e59fa7",
+      "receiptPath": ".cache/completion-20261023/unit-before/receipt.json",
+      "receiptSha256": "c2eb16c8bb6b15b043202a6a399ea7cc2f9ac2a269ad53d18ca2cdb6d95ce3de",
+      "stages": {
+        "cold": {
+          "buildMs": [
+            4290.438,
+            3878.237,
+            4539.831
+          ],
+          "medianMs": 4290.438,
+          "retainedBytes": [
+            228653
+          ],
+          "sharedCacheBytes": [
+            105773
+          ]
+        },
+        "no-op": {
+          "buildMs": [
+            4301.827,
+            3602.874,
+            3547.904
+          ],
+          "medianMs": 3602.874,
+          "retainedBytes": [
+            228653
+          ],
+          "sharedCacheBytes": [
+            105773
+          ]
+        },
+        "edit": {
+          "buildMs": [
+            3669.521,
+            3685.777,
+            3549.639,
+            3541.935,
+            3601.175,
+            3781.666
+          ],
+          "medianMs": 3635.348,
+          "retainedBytes": [
+            228653
+          ],
+          "sharedCacheBytes": [
+            105773
+          ]
+        },
+        "clean": {
+          "buildMs": [
+            0,
+            0,
+            0
+          ],
+          "medianMs": 0,
+          "retainedBytes": [
+            105773
+          ],
+          "sharedCacheBytes": [
+            105773
+          ]
+        }
+      }
+    },
+    "after": {
+      "compilerRevision": "d6aa974bb0218434faf6c19730a9e6775d076df5",
+      "compilerBytes": 13111808,
+      "compilerSha256": "4857e0363e1b21c611654e89b71428a6da08c939df1af25660c544dc00873f0d",
+      "receiptPath": ".cache/completion-20261023/unit-release-final/receipt.json",
+      "receiptSha256": "caa876b323a75a9c09f35536843a65b3d84fa688e94e751e31815d1d028be1a8",
+      "stages": {
+        "cold": {
+          "buildMs": [
+            4201.797,
+            4178.901,
+            4213.737
+          ],
+          "medianMs": 4201.797,
+          "retainedBytes": [
+            260278
+          ],
+          "sharedCacheBytes": [
+            137398
+          ]
+        },
+        "no-op": {
+          "buildMs": [
+            933.473,
+            929.004,
+            1069.588
+          ],
+          "medianMs": 933.473,
+          "retainedBytes": [
+            260278
+          ],
+          "sharedCacheBytes": [
+            137398
+          ]
+        },
+        "edit": {
+          "buildMs": [
+            3874.192,
+            3927.496,
+            3901.517,
+            3780.909,
+            4031.541,
+            4278.33
+          ],
+          "medianMs": 3914.506,
+          "retainedBytes": [
+            291895
+          ],
+          "sharedCacheBytes": [
+            169015
+          ]
+        },
+        "clean": {
+          "buildMs": [
+            0,
+            0,
+            0
+          ],
+          "medianMs": 0,
+          "retainedBytes": [
+            169015
+          ],
+          "sharedCacheBytes": [
+            169015
+          ]
+        }
+      }
+    }
+  },
+  "verifiedBuilds": 24,
+  "unitCacheAfterEditsAndClean": [
+    {
+      "repetition": 1,
+      "directories": 2,
+      "records": 2,
+      "bytes": 63234
+    },
+    {
+      "repetition": 2,
+      "directories": 2,
+      "records": 2,
+      "bytes": 63234
+    },
+    {
+      "repetition": 3,
+      "directories": 2,
+      "records": 2,
+      "bytes": 63234
+    }
+  ],
+  "decision": "Enable generated-unit reuse only for Windows release builds. Development retains its existing runtime-only path: exploratory measurements showed little no-op gain and increased edited-build time and retained bytes. Release no-op gains trade a modest edited-build overhead for two bounded objects."
+}

@@ -15,7 +15,7 @@ valid execution records are reused instead of reopening completed work.
 | 1 | Establish a current native-build time/footprint baseline with the existing runner, and keep one finite list of unfinished work. | Complete: six cases and 42 verified builds at clean `31ce0891`. |
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Bounded production-object inventory recorded below. Linux execution, mixed-stack unwind and clean-machine evidence remain open. |
-| 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | In progress: preview compiler size reduced; native compile/link cost is the next performance focus. |
+| 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter pass at clean `8ba3fab7`; clean-machine proof and publication remain open. LSP stays a separate executable. |
 | 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Pending |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
@@ -82,6 +82,32 @@ starter generation, locked checking, semantic/native tests and both run profiles
 stripped-compiler smoke at `3679d2a3` also passes with an empty PATH on this development host.
 Neither observation substitutes for transfer to a clean Windows machine. The artifact remains
 under `.cache/starter-smoke-wJnMau/`; no release, push or visibility change was performed.
+
+## Windows build cost result
+
+[ADR 0486](../adr/0486-bounded-windows-generated-unit-reuse.md) caches only the two most recent
+Windows release generated-unit objects, with a 4 MiB encoded-byte ceiling. Development retains
+runtime-only reuse: the exploratory measurements did not justify its extra time and storage.
+Fresh preprocessing and linking preserve header/library changes. Cache corruption, incompatible
+objects, persistent link failures and outage are covered by native execution. Eight generated-source
+edits keep the two-record limit. Empty key-directory collection now also removes evicted directories
+and retries the writer/collector race without deleting live temporaries or unrelated files.
+
+The [three-repeat file-search comparison](../benchmarks/completion-unit-cache-20261023.json)
+checks 24 identical-output builds across clean `8ba3fab7` and `d6aa974b` compilers:
+
+| Release observation | Before | After |
+| --- | ---: | ---: |
+| Cold build, median | 4.29 s | 4.20 s |
+| No-op build, median | 3.60 s | 0.93 s |
+| Edited build, median | 3.64 s | 3.91 s |
+| Retained total after two edits | 228,653 B | 291,895 B |
+| Shared cache after project clean | 105,773 B | 169,015 B |
+
+No-op time falls about 74%; edits cost about 0.28 s more because they must prepare and publish a
+new object. Total shared-cache retention grows by 63,242 bytes in this workload, and exactly two
+unit-key directories remain after collection. The stripped compiler is 13,111,808 bytes. This is a local
+synthetic comparison, not a universal build-speed guarantee or a transient peak-disk measurement.
 
 ## Feature proposals
 
