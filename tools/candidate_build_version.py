@@ -47,6 +47,14 @@ def generate(output, root=ROOT):
     """Build a fresh version oracle and replace only the module's version function."""
     root, output = root.resolve(), output.resolve()
     before = source_state(root)
+    # Reject stale help/targets/diagnostic data before an expensive self-build.
+    # This generator is a bootstrap-time check, never a shipped Go dependency.
+    embedded = subprocess.run(
+        ['go', 'run', '-mod=readonly', './tools/candidate/fairyc-candidate-cli-embed',
+         '--check', str(root / TEMPLATE.parent)], cwd=root, capture_output=True, timeout=120)
+    if embedded.returncode:
+        raise ValueError('candidate CLI metadata check failed: ' +
+                         embedded.stderr.decode('utf-8', errors='replace').strip())
     oracle = output / ('source-version.exe' if os.name == 'nt' else 'source-version')
     subprocess.run(['go', 'build', '-buildvcs=true', '-o', str(oracle), './cmd/fairyc'],
                    cwd=root, check=True, capture_output=True, timeout=180)
