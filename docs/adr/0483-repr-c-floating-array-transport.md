@@ -13,7 +13,7 @@ respectively. The target layout engine owns size, alignment and offsets; generat
 those facts against the C providers. The fields remain distinct Fairy array types rather than
 pointers or ordinary executable array storage.
 
-Source checking will carry these fields as `TransportOnlyArray`, a source helper spanning the
+Source checking carries these fields as `TransportOnlyArray`, a source helper spanning the
 existing `IntegerTransportArray` families and the new floating-array families. Raw C members and
 whole-array values bridge by element copies. C-produced values support whole-field reads, inferred
 and explicitly typed array locals, internal by-value array arguments and results, record copies,
@@ -31,8 +31,27 @@ unchanged.
 There is no new opcode, cache schema, SDK export, CLI contract, workflow or target promotion.
 Phase 2 remains partial and all target maturity flags remain false.
 
-## Validation
+## Delivery and evidence
 
-Source typing, backend emission, focused compiler checks and native C probe execution for this
-admission are pending. This documentation slice makes no delivery or validation claim. Existing
-ADR 0479 floating-field evidence and ADR 0482 integer-array evidence do not attest floating arrays.
+Source typing, backend emission and focused tests are committed at `36dc9dcc`. The expanded shared
+probe is committed at `2199a87d` in
+[`floating_arrays.go`](../../internal/foreignstructprobe/floating_arrays.go). It adds a 48-byte mixed
+record with length-3 `f32` and `f64` arrays, plus length-1 records for both families. Independent C
+checks every element with the existing floating helpers across five rotating value classes. The
+probe observes whole-field reads, inferred and typed locals, internal calls, nested reads and
+references, direct and referenced replacement, and unchanged caller copies after record and C
+by-value mutation. No new runtime, workflow or target-maturity surface was added.
+
+Local validation passed: the full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact
+suites; focused `TestFloatingArray*` emission for the Linux and Windows profiles, MIR round-trip and
+length/boundary rejection including bare foreign arrays and `Option`, `Result`, enum and resource
+payloads; the shared probe's Linux-profile `TestForeignCStructResultCallSmokeSourceReachesCEmission`
+and `Generate` tests; affected-package vet; and full `cbackend`, `cbackendfixture`, `cbackendnative`
+and `foreignstructprobe` tests (38.239s, 2.583s, 3.098s and 0.047s).
+
+A temporary local `TestLocalFloatingArrayNativeCrossing` invoked `runFairyStructResultProbe` and was
+removed after execution. Local Windows MSVC passed C11/C17 low/optimized, all four executions, with
+five rotating floating-array cases each and expected 42 with empty stdout and stderr. The exact
+MSVC version was not rechecked. Linux native execution, hosted CI, the full repository suite and
+the full Windows smoke were not rerun. The hosted F2-5 receipt at `f79e55c6` predates this slice and
+does not attest it. Phase 2 remains partial and all target maturity flags remain false.

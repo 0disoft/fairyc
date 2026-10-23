@@ -9,10 +9,12 @@ arguments, F2-1 through F2-4 field transports and the first bounded F3 callback 
 its shared probe, focused compiler/backend checks and four MSVC C11/C17 low/optimized executions
 pass. The [current hosted F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at
 `f79e55c6` passed all nine jobs in [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646).
-The historical `82b760cb` receipt does not cover F2-5. Phase 2 remains partial. Remaining floating,
-C-scalar and enum array forms and pointer forms require a contract-to-source audit and separate
-bounded implementation/evidence decisions before full conformance; existing explicit exclusions
-remain unchanged.
+The historical `82b760cb` receipt does not cover F2-5. F2-6 adds `f32`/`f64` array value transport
+at `36dc9dcc`, with the expanded shared probe at `2199a87d`. Its
+[local compiler and Windows native evidence](phase2-target-scope.md#f2-6-floating-array-transport)
+does not establish Linux native or hosted coverage. Phase 2 remains partial. C-scalar and enum
+array forms and pointer forms require separate bounded implementation/evidence decisions before
+full conformance; existing explicit exclusions remain unchanged.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

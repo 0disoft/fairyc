@@ -7,8 +7,9 @@
 ## Target status
 
 The first planned conformance target is `x86_64-linux-gnu`. Hosted layout, bidirectional C ABI,
-runtime, and generated-source probes pass for the admitted subset. The current F2-5 receipt and
-the historical F1–F3 receipt are linked from the
+runtime, and generated-source probes pass for the subset through F2-5. F2-6 floating-array transport
+has local package, emission and Windows native evidence; no Linux native or hosted receipt covers
+it. The F2-5 receipt and the historical F1–F3 receipt are linked from the
 [phase status](../development/phase-status.md). The target evidence in
 `internal/target/spec.go` retains `complete-runtime` and `complete-standard-library` as missing.
 The Linux `emittable`, `conformant`, and `supported` flags remain false;
@@ -33,9 +34,9 @@ The current Go prototype can emit deterministic C11 for a verified scalar, inert
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
 includes nonempty source `@repr(C)` records whose fields may use `i8`, `i16`, `i32`, `i64`, `isize`,
 `u8`, `u16`, `u32`, `u64`, `usize`, `f32`, `f64`, all
-sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer arrays, and acyclic nested
-`@repr(C)` records. It preserves the public C tag and field names, emits dependencies before their
-users, and emits target-
+sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer and floating arrays, and
+acyclic nested `@repr(C)` records. It preserves the public C tag and field names, emits dependencies
+before their users, and emits target-
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
 all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
 forbidden from `@repr(C)` and the public C ABI.
@@ -118,9 +119,9 @@ argument. Exact `c::int` additionally supports explicit bidirectional conversion
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of public exports. Bounded callbacks have the separate admission below. Integer array and explicit C enum fields have the
-separate admissions described below. By-value record arguments are admitted only for the existing
-record shapes described below. The interpreter remains
+implementation of public exports. Bounded callbacks have the separate admission below.
+Integer-array, floating-array and explicit C enum admissions are described below. By-value record
+arguments are admitted only for the existing record shapes described below. The interpreter remains
 fail-closed on every foreign call.
 
 ## C-representable types
@@ -136,8 +137,8 @@ aggregate rejection.
 The implemented source/backend slice is deliberately smaller than that language contract: it
 accepts only acyclic nonempty structs over `i8`, `i16`, `i32`, `i64`, `isize`, `u8`, `u16`, `u32`,
 `u64`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
-C scalars, admitted raw pointers including opaque `void`, bounded integer arrays, and nested structs
-that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
+C scalars, admitted raw pointers including opaque `void`, bounded integer and floating arrays, and
+nested structs that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
 unit. The Arena crossing requires that the selected provider's `uint64_t` is exactly
@@ -165,6 +166,15 @@ casts, private structs with these direct arrays, bare foreign array parameters/r
 pointers and direct arrays in resource, enum or tagged payloads remain outside executable admission.
 New nested field-store paths are also excluded. ADR 0480's scalar restrictions remain unchanged.
 
+[ADR 0483](../adr/0483-repr-c-floating-array-transport.md) extends those whole-field rules to
+`f32` and `f64` arrays of lengths `1..=4096`, using actual `float[]` and `double[]` C members. The
+`TransportOnlyArray` helper covers these fields together with the existing `IntegerTransportArray`
+families. Inferred and typed locals, internal value arguments/results, nested record reads and
+copies, reconstruction and direct referenced replacement are admitted. Floating literals,
+arithmetic, comparisons, casts, indexing, element stores, iteration and views; bare foreign arrays;
+pointer elements or pointer-based array transport; `c::float`/`c::double` arrays; direct private arrays;
+resource, enum, `Option` or `Result` payload arrays; and record-element arrays remain closed.
+
 The shared native record probe checks ADR 0477 array layout, all elements and copy isolation. Local
 MSVC execution is recorded in the [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields);
 hosted Linux evidence passed in the [F1-F3 receipt](../development/phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23).
@@ -177,6 +187,11 @@ C11/C17 low/optimized executions with expected 42 and empty output. The [current
 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed
 all nine jobs in [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646).
 The historical `82b760cb` F1-F3 receipt remains historical and does not cover this expansion.
+
+ADR 0483 source, emission and focused tests are committed at `36dc9dcc`; its expanded shared probe
+is committed at `2199a87d`. Local compiler, package and shared-emission checks pass, and local
+Windows MSVC passes C11/C17 low/optimized with all four executions. Linux native execution and
+hosted CI remain pending. The `f79e55c6` hosted receipt predates this slice and does not attest it.
 
 The Windows target product smoke uses a separate private `usize` generation transport. Under the
 selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned
@@ -218,8 +233,8 @@ floating values for local copies, internal value arguments/results, explicit rec
 and foreign record argument/results. C storage uses `float`/`double` with target-derived
 size/alignment assertions plus binary32/binary64 precision and exponent checks. The source types
 remain distinct from `c::float`/`c::double`. Floating literals, arithmetic, comparisons, casts,
-arrays/views, tagged/resource payloads, direct floating-field stores, private direct floating
-fields and standalone foreign floating signatures remain closed. The pure interpreter rejects
+array element operations and views, tagged/resource payloads, direct floating-field stores, private
+direct floating fields and standalone foreign floating signatures remain closed. The pure interpreter rejects
 foreign calls. The shared native record probe observes finite values, signed zero, infinities,
 quiet NaNs and subnormals; it does not promise signaling NaN behavior or NaN payload identity.
 The [F2-3 update](../development/phase2-target-scope.md#f2-3-floating-field-transport) records the

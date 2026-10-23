@@ -6,6 +6,8 @@
   [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646), all nine
   jobs passed; [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
   and [Linux Go job 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704)
+- F2-6 floating-array transport: local evidence at `36dc9dcc` with probe `2199a87d`;
+  `f79e55c6` predates the slice and is historical for it
 - Historical hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
 - Scope: `x86_64-linux-gnu`; roadmap Phase 2, runtime minimum, C ABI and the identified resource boundaries
 - Decision: the representative runtime/SDK minimum passes; full target conformance remains incomplete
@@ -83,8 +85,10 @@ F1, F2-1 through F2-4 and the first bounded F3 callback have the historical
 [hosted receipt](#hosted-f1f3-receipt-2026-10-23) at `82b760cb`. F2-5 adds the remaining five
 integer-array families and has local MSVC, compiler and backend evidence. Its
 [current hosted receipt](#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed all nine jobs.
-The old receipt does not cover F2-5. Additional field operations and callback signatures
-require separate admissions; none of these updates opens excluded resource representations.
+F2-6 adds `f32`/`f64` array value transport with local compiler, emission and Windows native
+evidence; no hosted receipt covers it. The `f79e55c6` receipt does not cover F2-6. Additional field
+operations and callback signatures require separate admissions; none of these updates opens
+excluded resource representations.
 
 ## F1 implementation update
 
@@ -343,6 +347,44 @@ observation, reconstruction/mutation with saved originals unchanged, and per-fam
 Locally, the full repository suite and full Windows smoke were not repeated, and no local Linux
 native run was made. Hosted CI and Windows smoke passed for this commit.
 
+## F2-6 floating-array transport
+
+[ADR 0483](../adr/0483-repr-c-floating-array-transport.md) extends transport-only array fields to
+Fairy `f32` and `f64` elements at lengths `1..=4096` in nonempty acyclic repr(C) records. Source
+typing, backend emission and focused tests are committed at `36dc9dcc`; the expanded shared probe is
+committed at `2199a87d` in
+[`floating_arrays.go`](../../internal/foreignstructprobe/floating_arrays.go). C storage uses actual
+`float[]` and `double[]` members. `TransportOnlyArray` spans the existing `IntegerTransportArray`
+families and the new floating families.
+
+The probe adds a 48-byte mixed record with length-3 `f32` and `f64` arrays and length-1 records for
+both families. Each configured execution checks every element with the existing float helpers over
+five rotating value classes. It observes whole-field reads, inferred and typed locals, internal
+value calls, nested reads and references, direct and referenced replacement, and unchanged caller
+copies after record and C by-value mutation. Floating literals, arithmetic, comparisons and casts;
+indexing, element stores, iteration and views; bare foreign arrays; pointer elements or pointer-based array
+transport; `c::float`/`c::double` arrays; direct private arrays; resource, enum, `Option` or `Result`
+payload arrays; and record-element arrays remain closed.
+
+Local validation passed:
+
+- Full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact suites.
+- Focused compiler `TestFloatingArray*` emission for Linux and Windows profiles, MIR round-trip,
+  length 1/4096 boundaries and rejection of bare foreign arrays, `Option`, `Result`, enum and
+  resource payloads.
+- Shared probe Linux-profile `TestForeignCStructResultCallSmokeSourceReachesCEmission` and
+  `Generate` tests.
+- Affected HIR, semantic, MIR, backend, compiler and probe vet.
+- `go test -mod=readonly ./internal/cbackend ./internal/cbackendfixture ./internal/cbackendnative
+  ./internal/foreignstructprobe -count=1`: 38.239s, 2.583s, 3.098s and 0.047s.
+- A temporary local `TestLocalFloatingArrayNativeCrossing`, removed after execution, ran
+  `runFairyStructResultProbe` through local MSVC on C11/C17 low/optimized, four executions, with
+  expected 42 and empty stdout/stderr. The exact MSVC version was not rechecked.
+
+This is local-only coverage. Linux native execution, hosted CI, the full repository suite and the
+full Windows smoke were not rerun. The `f79e55c6` F2-5 receipt remains historical for F2-6. Phase 2
+stays partial and all target maturity flags stay false; no workflow or runner changed.
+
 ## Hosted F2-5 receipt (2026-10-23)
 
 [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646) at
@@ -360,6 +402,9 @@ and are not independently sanitizer-proven. The [Linux Go job
 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704) reports
 `fairyc.phase2-linux-evidence/v4`, `complete:true`, 32 passed cases and empty `missing`,
 `skipped` and `errors` lists.
+
+This remains the current F2-5 receipt and is historical for F2-6. It does not execute the expanded
+floating-array probe.
 
 ## Hosted F1–F3 receipt (2026-10-23)
 
@@ -395,11 +440,11 @@ remaining integer-array families, so the current boundaries are:
 | Surface | Implemented subset | Remaining boundary or exclusion | Owners |
 | --- | --- | --- | --- |
 | repr(C) integer array fields | All ten Fairy integer families at lengths `1..=4096`; whole-field reads, replacement and record/argument value copies. ADR 0482's five newer families are transport-only and have no element indexing, arithmetic or views. | C scalar and C enum arrays need separate admissions. | [HIR guard](../../internal/hir/views.go), [layout resolution](../../internal/cbackend/aggregate_types.go), [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0482](../adr/0482-repr-c-integer-array-transport.md) |
-| Fairy `f32`/`f64` arrays | Scalar field transport is implemented. | Array values are deferred; this is the recommended next bounded field family. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [ADR 0479](../adr/0479-repr-c-floating-field-transport.md) |
+| Fairy `f32`/`f64` arrays | Lengths `1..=4096`; whole-field reads, inferred and typed locals, internal value arguments/results, reconstruction, referenced replacement and nested record copies. | Element operations, views, bare foreign arrays, pointer transport and payload arrays remain closed. Local compiler and Windows native evidence exists; Linux native and hosted CI are pending. | [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [floating probe](../../internal/foreignstructprobe/floating_arrays.go) |
 | Exact C-scalar arrays | Scalar fields are implemented. | Array members are deferred to a separate admission. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | Explicit C enum arrays | Explicitly based enum fields are implemented, including replacement and record transport. | Array members are deferred to a separate admission. | [ADR 0478](../adr/0478-explicit-c-enum-fields.md), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | repr(C) record-element arrays | Private scalar and plain-struct arrays remain supported in their existing paths. | Repr(C) member arrays are deferred and currently rejected. Private array support does not imply C record-element arrays. | [HIR guard](../../internal/hir/views.go), [semantic checks](../../internal/semantic/resource_types.go) |
-| Other array element shapes | The ten integer families and lengths are executable in repr(C). | Nested arrays, `bool` arrays and raw-pointer element arrays are not admitted by ADR 0477. These admission limits do not establish permanent C ABI exclusions. | [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [HIR guard](../../internal/hir/views.go) |
+| Other array element shapes | The ten integer families and both Fairy floating families are executable in repr(C). | Nested arrays, `bool` arrays and raw-pointer element arrays are not admitted. These admission limits do not establish permanent C ABI exclusions. | [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [HIR guard](../../internal/hir/views.go) |
 | Foreign raw pointers | [foreignPointerElementCType](../../internal/cbackend/foreign_types.go) permits `void`, `u8`, `i32`, `i64`, `u32`, `usize` and admitted repr(C) records as pointees; `ptr mut ptr mut void` is the only nested shape. | Pointers to the new integers, floats, C scalars and C enums remain closed. Raw dereference, arithmetic, general casts and other nesting remain closed. | [Pointer guard](../../internal/cbackend/foreign_types.go), [C ABI](../abi/c-abi-v0.md#c-representable-types) |
 
 Resources, safe borrows, slices and tagged values remain explicit exclusions as C ABI values or
@@ -409,10 +454,9 @@ record fields under the [C ABI contract](../abi/c-abi-v0.md#c-representable-type
 single-signature admission with the same non-retention and same-thread obligations. It does not
 open general callback signatures or pointer nesting.
 
-The next bounded implementation should add `f32`/`f64` repr(C) array value transport: whole-field
-copies, locals, internal value arguments/results, reconstruction and replacement. It should not add
-floating literals, arithmetic, indexing or views. C-scalar arrays and explicit C enum arrays should
-follow as separate admissions; repr(C) record-element arrays remain deferred.
+F2-6 implements the bounded `f32`/`f64` repr(C) array transport. Complete its Linux native and
+hosted evidence before treating it as hosted coverage. C-scalar arrays and explicit C enum arrays
+remain separate admissions; repr(C) record-element arrays remain deferred.
 
 Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged.
 

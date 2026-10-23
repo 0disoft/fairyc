@@ -6,6 +6,8 @@
   [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646), all nine
   jobs passed; [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
   and [Linux Go job 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704)
+- F2-6 floating-array transport: local evidence at `36dc9dcc` with probe `2199a87d`;
+  `f79e55c6` predates the slice and is historical for it
 - Historical F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513`,
   [Frontend run 39839678199](https://github.com/0disoft/fairyc/actions/runs/39839678199), all nine jobs passed
 - Previous focused Linux receipt: `5f62c9c3e8d4ceeed8830c96b82215c96784ea29` (v4, 32 cases), historical,
@@ -33,7 +35,7 @@ authority. The roadmap defines no Phase 5, 6, or 7.
 | --- | --- | --- |
 | 0 — contracts | Audited contract/fixture scope passes; full exit not asserted | The [contract and fixture audit](phase0-exit-audit.md) finds every mandatory fixture family present, corrects three stale documentation claims, and records passing current hosted execution. The bounded audit does not establish the absence of contradictions across every written contract. |
 | 1 — interpreted semantics | Exit fixtures pass for the admitted scope | Positive/negative, active-payload/drop-trace, and verifier mutation runners pass in that lane. The [verifier runner](../../internal/mirverifyfixture/runner_test.go) checks 11 seeds and 23 isolated mutations. Later language capabilities remain separate admissions. |
-| 2 — hosted executable | Partial | [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646) at `f79e55c6` passed all nine jobs, including the [F2-5 native job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359) and [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704). See the [current F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23); the [F1–F3 receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23) remains historical. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
+| 2 — hosted executable | Partial | [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646) at `f79e55c6` passed all nine jobs, including the [F2-5 native job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359) and [Linux Go job](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704). See the [F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23); the [F1–F3 receipt](phase2-target-scope.md#hosted-f1f3-receipt-2026-10-23) remains historical. F2-6 floating-array transport at `36dc9dcc`, with probe `2199a87d`, has local compiler, emission and Windows native evidence only; `f79e55c6` predates it. Only `complete-runtime` and `complete-standard-library` remain missing for Linux in the [target spec](../../internal/target/spec.go); all three maturity flags remain false. |
 | 3 — modules, packages, cache | Satisfied for current Stage 0 verified-MIR cache scope | Stable local-workspace commands, public/private invalidation, opt-in persistent cache, and v4 incompatible safe misses are verified. The [local snapshot at `b2181e66`](../benchmarks/package-cache/README.md) supplies 65 validated observations. Inline bodies are outside the admitted contract; [future admission reopens this gate](#phase-3-scope-decision-2026-10-21). |
 | 4 — Atlas export | Satisfied for current Stage 0 | The [exit evidence](../atlas/phase4-exit-evidence.md) covers the one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text non-authority. Broader Atlas capabilities remain separate gates. |
 
@@ -224,6 +226,14 @@ including Windows and Linux lanes. The old receipt does not attest F2-5. Phase 2
 and all maturity flags stay false. The local validation paragraphs in the
 [target scope](phase2-target-scope.md#f1-implementation-update) are historical pre-push checks.
 
+F2-6 adds `f32`/`f64` repr(C) array value transport at `36dc9dcc`, with the expanded shared probe at
+`2199a87d`. Full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact suites pass;
+focused `TestFloatingArray*` emission, MIR round-trip and rejection boundaries pass; full backend,
+fixture, native-runner and probe package tests pass; and local MSVC passes C11/C17 low/optimized,
+all four executions with expected 42 and empty stdout/stderr. The native test was temporary and was
+removed. Linux native execution and hosted CI were not rerun, so `f79e55c6` remains historical for
+F2-6. Phase 2 stays partial and all maturity flags remain false.
+
 Phase 2 stays partial: the representative runtime/SDK minimum is covered, but the complete target
 claim must account for every declared capability, including the backend's explicit rejection
 boundaries and source-level foreign-call scope. See the
@@ -231,11 +241,11 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. Implement `f32`/`f64` repr(C) array value transport next: whole-field copies, locals, internal
-   value arguments/results, reconstruction and replacement. Add no new literals, arithmetic,
-   indexing or views. Then assess exact C-scalar arrays and explicit C enum arrays as separate
-   admissions; repr(C) record-element arrays remain deferred. Keep the current raw-pointer pointee
-   set and closed raw-pointer operations unless a separate pointer admission changes them.
+1. Complete F2-6 evidence with Linux native and hosted coverage; its floating-array transport is
+   already implemented at `36dc9dcc`. Then assess exact C-scalar arrays and explicit C enum arrays
+   as separate admissions; repr(C) record-element arrays remain deferred. Keep the current
+   raw-pointer pointee set and closed raw-pointer operations unless a separate pointer admission
+   changes them.
 2. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted
    source feature; retained and asynchronous callbacks remain excluded.
 3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.
