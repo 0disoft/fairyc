@@ -87,6 +87,12 @@ var stage0WindowsFileRemoveTree string
 //go:embed stage0_windows_file_buffer.c
 var stage0WindowsFileBuffer string
 
+//go:embed stage0_file_buffer.c
+var stage0FileBuffer string
+
+//go:embed stage0_linux_file_buffer.c
+var stage0LinuxFileBuffer string
+
 //go:embed stage0_windows_file_probe.c
 var stage0WindowsFileProbe string
 
@@ -459,7 +465,9 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		source, err := WindowsFileSource()
 		return "Windows File", source, err
 	case cstdlibcontract.ComponentWindowsFileBuffer:
-		return "Windows File Buffer adapter", stage0WindowsFileBuffer, nil
+		return "Windows File Buffer adapter", stage0FileBuffer + "\n" + stage0WindowsFileBuffer, nil
+	case cstdlibcontract.ComponentLinuxFileBuffer:
+		return "Linux File Buffer adapter", stage0FileBuffer + "\n" + stage0LinuxFileBuffer, nil
 	case cstdlibcontract.ComponentWindowsDirectory:
 		return "Windows read-only directory enumeration", stage0WindowsPath + "\n" + stage0WindowsDirectory, nil
 	case cstdlibcontract.ComponentLinuxProcessArgs:

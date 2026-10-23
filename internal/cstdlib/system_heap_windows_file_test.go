@@ -464,7 +464,7 @@ func TestWindowsMSVCSourceForSymbolsClosesOwnedBufferReadDependencies(t *testing
 	for _, required := range []string{
 		"fy_std_windows_file_read_v0", "fy_std_system_heap_allocate_v0",
 		"fy_std_buffer_reserve_v0", "fy_std_windows_file_read_append_v0",
-		"buffer->length = old_length + file_result.count",
+		"fy_std_file_read_append_v0",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("owned-buffer read closure is missing %q", required)

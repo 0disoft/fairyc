@@ -43,6 +43,7 @@ pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bo
     var bool written=false;var u32 id=1;
     while(id<=14){if(selection::contains(ref plan,id)){
         if(id==4 || id==5){let usize path=part(bundle,21,ref mut output,ref mut written)?;}
+        if(id==10){let usize shared=part(bundle,22,ref mut output,ref mut written)?;}
         let usize asset=if(id==3){3}else if(id==5){9}else if(id==6){10}else if(id==7){11}else if(id==8){12}else if(id==9){13}else if(id==10){14}else if(id==11){15}else if(id==12){16}else if(id==14){17}else{0};
         if(id==4){var usize file=4;while(file<=8){let usize n=part(bundle,file,ref mut output,ref mut written)?;file+=1;}}
         else if(asset!=0){let usize n=part(bundle,asset,ref mut output,ref mut written)?;}

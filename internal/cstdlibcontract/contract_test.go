@@ -8,6 +8,21 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
+func TestFileBufferComponentsForBothTargets(t *testing.T) {
+	const symbol = "fy_std_file_read_append_v0"
+	if !AdmittedForTarget(symbol, target.X8664LinuxGNU) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+		t.Fatal("portable File Buffer symbol is not admitted on both targets")
+	}
+	linux, err := ComponentsForSymbols([]string{symbol, symbol})
+	if err != nil || !slices.Equal(linux, []Component{ComponentLinuxFile, ComponentSystemHeap, ComponentBuffer, ComponentLinuxFileBuffer}) {
+		t.Fatalf("Linux File Buffer closure: %v %v", linux, err)
+	}
+	windows, err := WindowsMSVCComponentsForSymbols([]string{symbol, "fy_std_windows_file_read_append_v0"})
+	if err != nil || !slices.Equal(windows, []Component{ComponentWindowsFile, ComponentSystemHeap, ComponentBuffer, ComponentWindowsFileBuffer}) {
+		t.Fatalf("Windows File Buffer closure: %v %v", windows, err)
+	}
+}
+
 func TestComponentsForSymbolsClosesDependenciesInDeterministicOrder(t *testing.T) {
 	t.Parallel()
 	components, err := ComponentsForSymbols([]string{

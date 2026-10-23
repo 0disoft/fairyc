@@ -14,6 +14,7 @@ type Component string
 const (
 	ComponentLinuxConsole       Component = "linux-console"
 	ComponentLinuxFile          Component = "linux-file"
+	ComponentLinuxFileBuffer    Component = "linux-file-buffer"
 	ComponentLinuxProcessArgs   Component = "linux-process-args"
 	ComponentWindowsConsole     Component = "windows-console"
 	ComponentWindowsFile        Component = "windows-file"
@@ -29,6 +30,7 @@ const (
 )
 
 var symbolComponents = map[string]Component{
+	"fy_std_file_read_append_v0":           ComponentLinuxFileBuffer,
 	"fy_std_stdout_write_all_v0":           ComponentLinuxConsole,
 	"fy_std_stdout_write_i32_v0":           ComponentLinuxConsole,
 	"fy_std_stdout_write_u32_v0":           ComponentLinuxConsole,
@@ -139,6 +141,7 @@ var windowsOnlySymbolComponents = map[string]Component{
 }
 
 var windowsMSVCSymbolComponents = map[string]Component{
+	"fy_std_file_read_append_v0":           ComponentWindowsFileBuffer,
 	"fy_std_windows_read_dir_open_v0":      ComponentWindowsDirectory,
 	"fy_std_windows_read_dir_next_v0":      ComponentWindowsDirectory,
 	"fy_std_windows_read_dir_close_v0":     ComponentWindowsDirectory,
@@ -247,6 +250,7 @@ var componentLinkOrder = []Component{
 	ComponentSystemHeap,
 	ComponentByteCompare,
 	ComponentBuffer,
+	ComponentLinuxFileBuffer,
 	ComponentWindowsFileBuffer,
 	ComponentArena,
 	ComponentTextView,
@@ -342,6 +346,10 @@ func addComponentClosure(required map[Component]struct{}, component Component) {
 		required[ComponentSystemHeap] = struct{}{}
 	case ComponentWindowsFileBuffer:
 		required[ComponentWindowsFile] = struct{}{}
+		required[ComponentSystemHeap] = struct{}{}
+		required[ComponentBuffer] = struct{}{}
+	case ComponentLinuxFileBuffer:
+		required[ComponentLinuxFile] = struct{}{}
 		required[ComponentSystemHeap] = struct{}{}
 		required[ComponentBuffer] = struct{}{}
 	case ComponentArena:

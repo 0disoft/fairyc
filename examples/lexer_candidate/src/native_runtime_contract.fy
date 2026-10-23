@@ -77,7 +77,7 @@ pub fn u32 classify(ref u8[] name){
        bytes::equal(name,b"fy_std_buffer_reserve_v0") ||
        bytes::equal(name,b"fy_std_buffer_resize_zeroed_v0") ||
        bytes::equal(name,b"fy_std_buffer_truncate_v0")){return 9;}
-    if(bytes::equal(name,b"fy_std_windows_file_read_append_v0")){return 10;}
+    if(bytes::equal(name,b"fy_std_windows_file_read_append_v0") || bytes::equal(name,b"fy_std_file_read_append_v0")){return 10;}
     if(bytes::equal(name,b"fy_std_arena_drop_v0") ||
        bytes::equal(name,b"fy_std_arena_initialize_v0") ||
        bytes::equal(name,b"fy_std_region_allocate_zeroed_v0") ||

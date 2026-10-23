@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `c8f5964e`. A separate hashed portability ZIP passes seven toolchain-free execution steps locally; its dependency manifest and standalone verifier are ready for transfer. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass for the 512-source `91762c18` snapshot. Region diagnostics match 12/12 against Go `b0cd35b1`. Native tests match 30/30 and examples 78/78 in each profile. The [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) records both-profile build/run execution against Go `cbe0bff1`, after restoring generic signature admission. Candidate sources are unchanged; Linux host implementation/execution remain open. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Full CLI builds and fixed-point equality pass for snapshot `91762c18`; the [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) closes its recorded Windows comparisons. ADR 0487 now changes the runtime selector/asset inputs: 249 runtime byte comparisons pass, but full CLI/fixed-point renewal is pending for those new inputs. Linux host implementation/execution remain open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -178,6 +178,15 @@ is not established. This host has Visual Studio and the Windows SDK, and no Wind
 executable is available, so clean-machine execution remains open. No host service was installed.
 
 ## Feature proposals
+
+The first [portable file-to-Buffer slice](../adr/0487-portable-file-buffer-reads.md) adds a shared
+reserve/read/commit implementation and Linux adapter while retaining the Windows symbol. Both
+MSVC profiles pass the native allocation/read/failure observer; the Linux probe cross-compiles
+and links at low/optimized settings but has not executed here. The authored runtime pack is
+150,925 bytes across 22 assets, four bytes smaller than the preceding pack. Its two authored
+tests pass 249 exact output/error comparisons through Go-native and both candidate C profiles.
+SDK linkage is next. The altered pack pin and selector require later full candidate rebuild and
+fixed-point renewal; earlier full-CLI records remain evidence for their original snapshots.
 
 Keep existing effects. Consider only the narrow public-interface comparison and source-size
 notices after the compiler/user path is ready. Data trust and state protocols first use ordinary
