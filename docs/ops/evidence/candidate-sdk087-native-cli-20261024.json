@@ -1,0 +1,59 @@
+{
+  "schema": "fairyc.sdk087-native-cli/v1",
+  "passed": true,
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "sourceInputsVerified": true,
+  "receipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/native-cli-isolated/execution-receipt.json",
+    "bytes": 73194,
+    "sha256": "9490963cffe9975f677888d36e60da5f019060b97e3197b4c69ecf0ef7019e50"
+  },
+  "verifier": {
+    "path": "tools/verify-candidate-native-cli.py",
+    "bytes": 11232,
+    "sha256": "3d0ba17d045c646d79b8e6746f7a8b179e637d0e8e089938a77136cc5bf4bb68"
+  },
+  "profiles": [
+    "development",
+    "release"
+  ],
+  "executions": 53,
+  "goReferenceInvocations": 5,
+  "scratchDirectoryLeaks": false,
+  "isolatedTemporaryDirectoryRemoved": true,
+  "initialAttempt": {
+    "passed": false,
+    "evidence": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/native-cli/executions.json",
+      "bytes": 18161,
+      "sha256": "d46cfa1e4b673a3cfdc7a30a2a5bbc891fae007f25bece3e45c8b51da207670f"
+    },
+    "assertion": "owned scratch directory leaked",
+    "lastRecordedInvocation": "development locked release build",
+    "context": "Global temporary-name sets were compared while other native probes ran concurrently."
+  },
+  "fix": "Supply per-invocation TMP/TEMP to every child, compare only its owned native scratch names, and require empty-directory removal at completion.",
+  "coverage": [
+    "default and locked release build/run",
+    "generic/vector source and rejected signature parity",
+    "preserved output on failure and escaped-output rejection",
+    "Unicode/long argv and binary stdin/stdout/stderr",
+    "exact trap locations and full Windows exit bits",
+    "combined output limit and owned scratch cleanup"
+  ],
+  "limitations": [
+    "The initial global-set assertion is retained as a verification failure, not evidence of a product leak.",
+    "This development host is not a clean-machine portability proof."
+  ],
+  "publicApiChanged": false,
+  "ciChanged": false,
+  "linuxExecuted": false,
+  "targetMaturityPromoted": false,
+  "defaultCompiler": "Go",
+  "pushed": false
+}

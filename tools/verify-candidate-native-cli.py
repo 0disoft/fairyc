@@ -1,6 +1,6 @@
 """Verify the Fairy-owned public Windows build/run pipeline with real programs."""
 from pathlib import Path
-import argparse,subprocess,json,hashlib,ctypes,shutil,time
+import argparse,subprocess,json,hashlib,shutil,time,os
 root=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--development',type=Path,required=True)
@@ -16,11 +16,14 @@ work=selected.output.resolve();work.mkdir(parents=True,exist_ok=True)
 profiles=['development','release'] if selected.profile=='both' else [selected.profile]
 images={'development':selected.development.resolve(),'release':selected.release.resolve()}
 invocation_tag='run-'+str(time.time_ns())
+temporary=work/'scratch'/invocation_tag
+assert temporary.is_relative_to(work) and not temporary.exists()
+temporary.mkdir(parents=True)
+child_environment=os.environ.copy()
+child_environment.update(TMP=str(temporary),TEMP=str(temporary))
 rows=[]
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 save=lambda p,v:p.write_text(json.dumps(v,indent=2)+'\n',encoding='utf-8',newline='\n')
-buffer=ctypes.create_unicode_buffer(32768);assert ctypes.windll.kernel32.GetTempPathW(32768,buffer)>0
-temporary=Path(buffer.value)
 def scratch_names():return {p.name for p in temporary.glob('fairyc-native-*')}
 def fixture(profile,name,source):
     path=work/'fixtures'/profile/invocation_tag/('한글 '+name)
@@ -30,7 +33,7 @@ def fixture(profile,name,source):
     return path
 def run(argv,cwd,code=0,out=b'',err=b'',stdin=None,label=''):
     before=scratch_names();start=time.monotonic()
-    result=subprocess.run(list(map(str,argv)),cwd=cwd,input=stdin,capture_output=True,timeout=selected.invocation_timeout_seconds)
+    result=subprocess.run(list(map(str,argv)),cwd=cwd,input=stdin,capture_output=True,timeout=selected.invocation_timeout_seconds,env=child_environment)
     def logged(a):
         a=str(a);data=a.encode('utf-8');return a if len(data)<=256 else dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
     row=dict(label=label,argv=[logged(a) for a in argv],cwd=str(cwd),exit=result.returncode,seconds=time.monotonic()-start,stdoutBytes=len(result.stdout),stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode(errors='replace'))
@@ -53,7 +56,7 @@ for profile in profiles:
     base=fixture(profile,'simple','module main;fn i32 main(){return 42;}\n')
     # The full public dispatcher appends usage to syntax failures. Earlier
     # command-only probes predate that contract; use Go when supplied.
-    help_result=subprocess.run([str(selected.reference.resolve() if selected.reference else image),'--help'],cwd=base,capture_output=True,check=True,timeout=30)
+    help_result=subprocess.run([str(selected.reference.resolve() if selected.reference else image),'--help'],cwd=base,capture_output=True,check=True,timeout=30,env=child_environment)
     assert help_result.stdout.startswith(b'Fairy C Stage 0') and not help_result.stderr
     usage=b'\n'+help_result.stdout
     run([image,'build','--bad'],base,2,err=b'fairyc: command "build" accepts only optional --release and --locked\n'+usage,label=profile+' invalid build option')
@@ -113,4 +116,6 @@ for profile in profiles:
     run([image,'run','--locked'],missing,7,err=None,label=profile+' missing lock')
     oversized=fixture(profile,'output-limit',r'''module main;import std::io as io;@effects(console) fn i32 main(){var u8[4096] data=[65;4096];var usize i=0;while(i<17){assert(io::write_bytes(ref data).is_ok);i+=1;}return 0;}''')
     run([image,'run'],oversized,6,err=None,label=profile+' bounded combined output')
-save(work/'execution-receipt.json',dict(schema='fairyc.candidate-native-cli-execution/v1',passed=True,executions=rows,profiles=profiles,images={p:dict(path=str(images[p]),sha256=sha(images[p]),driverSHA256=sha(images[p].parent/'fairyc-candidate-build.exe')) for p in profiles},productGoFrontendInvoked=False,goReferenceInvocations=sum('Go ' in r['label'] for r in rows),arguments=dict(values=args[:-1],lastRepeatedByte='x',lastBytes=8192),stdinSHA256=hashlib.sha256(stdin).hexdigest(),programStdoutSHA256=hashlib.sha256(expected).hexdigest(),scratchDirectoryLeaks=False,verifierSHA256=sha(Path(__file__))))
+assert not list(temporary.iterdir()),'verification temporary directory is not empty'
+temporary.rmdir()
+save(work/'execution-receipt.json',dict(schema='fairyc.candidate-native-cli-execution/v1',passed=True,executions=rows,profiles=profiles,images={p:dict(path=str(images[p]),sha256=sha(images[p]),driverSHA256=sha(images[p].parent/'fairyc-candidate-build.exe')) for p in profiles},productGoFrontendInvoked=False,goReferenceInvocations=sum('Go ' in r['label'] for r in rows),arguments=dict(values=args[:-1],lastRepeatedByte='x',lastBytes=8192),stdinSHA256=hashlib.sha256(stdin).hexdigest(),programStdoutSHA256=hashlib.sha256(expected).hexdigest(),scratchDirectoryLeaks=False,isolatedTemporaryDirectory=str(temporary),isolatedTemporaryDirectoryRemoved=True,verifierSHA256=sha(Path(__file__))))

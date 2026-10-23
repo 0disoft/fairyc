@@ -1,5 +1,22 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 native command execution (2026-10-24)
+
+The [native CLI record](../ops/evidence/candidate-sdk087-native-cli-20261024.json)
+passes 53 executions across development/release compilers, including Go reference
+observations. It checks actual builds/runs, generic/vector admission and exact
+rejections, preserved output on failure, output-directory escape rejection,
+Unicode/long argv, binary streams, trap locations and full Windows exit bits.
+Every invocation preserves its owned scratch-directory set; the isolated temporary
+root is empty and removed at completion.
+
+The first verification attempt failed a global temporary-name-set assertion while
+other native probes were running. The verifier now supplies private TMP/TEMP values
+to every child and observes only its own native scratch names. The initial failure
+remains in the record; it does not establish a product leak. The updated verifier
+passes while example probes continue concurrently. Product behavior, public APIs,
+CI and target maturity are unchanged. Shipped-example comparisons remain pending.
+
 ## SDK 0.87 starter and workspace commands (2026-10-24)
 
 The [starter/workspace follow-up](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json)

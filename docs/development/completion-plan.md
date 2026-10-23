@@ -187,6 +187,14 @@ remain unchanged.
 
 ## SDK 0.87 verification follow-up
 
+The [native command record](../ops/evidence/candidate-sdk087-native-cli-20261024.json)
+passes 53 development/release executions, including reference observations, with
+exact program streams, diagnostics, trap locations and exit bits. The verifier
+isolates child TMP/TEMP so parallel probes cannot alter its scratch-name baseline;
+the original global-set assertion failure is retained. Its owned temporary root
+is empty and removed. This closes native build/run verification; shipped examples
+remain separate, and clean-machine execution is still unavailable.
+
 The [starter/workspace record](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json)
 closes 28 starter and 60 workspace command comparisons across both compiler
 profiles. Existing entries and live/dangling links are preserved. Native build/run
