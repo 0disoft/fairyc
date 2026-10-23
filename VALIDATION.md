@@ -64,15 +64,19 @@ headers, linking, startup, and sanitizers; version preflight is not a replacemen
 
 The Linux Go suite now runs exactly once, with `go test -mod=readonly -count=1 -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
-package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v4` and marks a
+package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v5` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
 `TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`,
 `TestCheckedI64DecimalExecution`, `TestLinuxTrapReceiptProgressNative`, and
-`TestPrivateVectorNestedResourceDrops` pass all 32 GCC/Clang
+`TestPrivateVectorNestedResourceDrops`, `TestFileBufferNative`, and
+`TestSDKFileBufferExecution` pass all 40 GCC/Clang
 low and optimized subtests without skips, missing cases or duplicates, with any other suite failure
 also rejecting completeness. The schema
-version changed because the required evidence set grew from 28 to 32 cases (eight roots, four
-compiler/profile cases each). Each trap-receipt case runs six progress/failure scenarios.
+version changed because the required evidence set grew from 32 to 40 cases (ten roots, four
+compiler/profile cases each). The two File Buffer roots cover the native reserve/read/commit
+implementation and the public SDK's binary and multi-window reads. They are consumed from the
+same Go suite; no job or repeated native invocation is added. A native Linux v5 receipt remains
+pending. Each trap-receipt case runs six progress/failure scenarios.
 The nested-resource root checks parent mutation and active payload cleanup, with one extra
 ASan+UBSan execution per compiler inside its low-profile case. These two executions are separate
 from the native fixture report's sanitizer count. The

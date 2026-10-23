@@ -74,7 +74,7 @@ semantics. These close focused Linux evidence gaps only, not complete runtime or
 coverage. The existing Linux `go test -json` stream is checked by
 `.github/scripts/linux_phase2_evidence.py`, so no tests are duplicated.
 
-The current validator requires `fairyc.phase2-linux-evidence/v3`, with 28 compiler/profile cases.
+The v3 validator required `fairyc.phase2-linux-evidence/v3`, with 28 compiler/profile cases.
 Its seventh root, [TestLinuxTrapReceiptProgressNative](../../internal/cruntime/trap_receipt_progress_test.go),
 executes production `LinuxRunSource` with only the receipt `write` call replaced by a test hook.
 Each GCC/Clang low/optimized case checks short writes, repeated EINTR, zero progress and EIO before
@@ -112,6 +112,12 @@ and Linux adapter in [ADR 0487](../adr/0487-portable-file-buffer-reads.md), thro
 public SDK `0.0.0-stage0.87`. Both-target source emission and Windows execution
 pass. Linux runtime and public-SDK execution tests are present but have not run
 on this Windows host; this closes the implementation gap, not the Linux receipt.
+
+The current focused collector requires `fairyc.phase2-linux-evidence/v5`: the prior
+32 compiler/profile cases plus four `TestFileBufferNative` and four
+`TestSDKFileBufferExecution` cases. It reads the existing single Go suite stream
+and rejects missing or skipped cases. Its local collector tests pass; this is
+not a Linux native receipt. Historical v3/v4 results retain their original scope.
 
 These are implementation gaps, not all mandatory Phase 2 work. The
 [roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice) requires the minimum

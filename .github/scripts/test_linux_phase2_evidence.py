@@ -18,8 +18,8 @@ class LinuxPhase2Evidence(unittest.TestCase):
     def test_requires_all_native_cases_and_parent_results(self):
         report, _ = self.run_events(events())
         self.assertTrue(report["complete"])
-        self.assertEqual(report["schema"], "fairyc.phase2-linux-evidence/v4")
-        self.assertEqual(len(report["passedCases"]), 32)
+        self.assertEqual(report["schema"], "fairyc.phase2-linux-evidence/v5")
+        self.assertEqual(len(report["passedCases"]), 40)
         for missing in sorted(ROOTS | CASES):
             with self.subTest(missing=missing):
                 report, _ = self.run_events([
@@ -29,7 +29,7 @@ class LinuxPhase2Evidence(unittest.TestCase):
                 self.assertEqual(len(report["missing"]), 1)
 
     def test_profile_only_helper_results_cannot_replace_linux_compiler_matrix(self):
-        for test in ("TestBytesEqualExecution", "TestBytesCompareExecution", "TestCheckedI64DecimalExecution"):
+        for test in ("TestBytesEqualExecution", "TestBytesCompareExecution", "TestCheckedI64DecimalExecution", "TestSDKFileBufferExecution"):
             with self.subTest(test=test):
                 package = "github.com/0disoft/fairyc/internal/cli"
                 items = [e for e in events() if e["Test"] not in {
@@ -41,6 +41,15 @@ class LinuxPhase2Evidence(unittest.TestCase):
                 report, _ = self.run_events(items)
                 self.assertFalse(report["complete"])
                 self.assertEqual(len(report["missing"]), 4)
+
+    def test_previous_v4_results_do_not_prove_file_buffer_execution(self):
+        added = {"TestFileBufferNative", "TestSDKFileBufferExecution"}
+        report, _ = self.run_events([
+            e for e in events() if e["Test"].split("/")[0] not in added
+        ])
+        self.assertFalse(report["complete"])
+        self.assertEqual(len(report["passedCases"]), 32)
+        self.assertEqual(len(report["missing"]), 10)
 
     def test_skip_failure_duplicate_and_unrelated_failure_reject_receipt(self):
         package, test = sorted(CASES)[0]

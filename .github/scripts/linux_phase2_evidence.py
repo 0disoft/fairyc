@@ -14,6 +14,8 @@ ROOTS = {
     ("github.com/0disoft/fairyc/internal/cli", "TestCheckedI64DecimalExecution"),
     ("github.com/0disoft/fairyc/internal/cruntime", "TestLinuxTrapReceiptProgressNative"),
     ("github.com/0disoft/fairyc/internal/compiler", "TestPrivateVectorNestedResourceDrops"),
+    ("github.com/0disoft/fairyc/internal/cstdlib", "TestFileBufferNative"),
+    ("github.com/0disoft/fairyc/internal/cli", "TestSDKFileBufferExecution"),
 }
 CASES = {
     (package, f"{test}/{compiler}/{profile}")
@@ -57,7 +59,7 @@ def collect(lines, output=sys.stdout):
             tails.pop(key, None)
     missing = (ROOTS | CASES) - passed
     report = {
-        "schema": "fairyc.phase2-linux-evidence/v4",
+        "schema": "fairyc.phase2-linux-evidence/v5",
         "complete": not (errors or skipped or missing),
         "passedCases": sorted(f"{p}::{t}" for p, t in passed & CASES),
         "missing": sorted(f"{p}::{t}" for p, t in missing),
