@@ -12,6 +12,9 @@ func TestGenerateOwnsAggregateArgumentAndResultShapes(t *testing.T) {
 		t.Fatalf("Generate() returned an incomplete unit: exit=%d", unit.ExpectedExit)
 	}
 	for _, required := range []string{
+		"struct fairyc_fixture_floating_array_packet_v0",
+		"fairyc_fixture_floating_array_observe_v0",
+		"fairyc_fixture_floating_array_small_observe_v0",
 		"struct fairyc_fixture_status_v0",
 		"struct fairyc_fixture_large_status_v0",
 		"fairyc_fixture_make_status_v0",

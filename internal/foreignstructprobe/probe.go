@@ -16,10 +16,18 @@ type Unit struct {
 // C ABIs while keeping the observable result target-independent.
 func Generate() Unit {
 	return Unit{
-		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource + integerArrayFairySource,
-		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC + integerArrayCompanionC,
+		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource + integerArrayFairySource + floatingArrayFairySource,
+		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC + integerArrayCompanionC + floatingArrayCompanionC,
 		ExpectedExit: 42,
 		RequiredCFragments: []string{
+			"float single[UINT64_C(3)];",
+			"double wide[UINT64_C(3)];",
+			"float value[UINT64_C(1)];",
+			"double value[UINT64_C(1)];",
+			"sizeof(struct fairyc_fixture_floating_array_packet_v0) == UINT64_C(48)",
+			"offsetof(struct fairyc_fixture_floating_array_packet_v0, single) == UINT64_C(4)",
+			"offsetof(struct fairyc_fixture_floating_array_packet_v0, wide) == UINT64_C(16)",
+			"offsetof(struct fairyc_fixture_floating_array_packet_v0, tail) == UINT64_C(40)",
 			"int8_t tiny[UINT64_C(3)];",
 			"int16_t small[UINT64_C(3)];",
 			"uint16_t word[UINT64_C(3)];",
@@ -128,7 +136,7 @@ fn i32 main() {
         changed.status == 99 && changed.allocation_status == 7 &&
         changed_large.first == 101 && changed_large.second == 2 &&
         changed_large.third == 3 && changed_large.fourth == 4 && changed_large.fifth == 105 &&
-        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks() && check_integer_arrays()) {
+        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks() && check_integer_arrays() && check_floating_arrays()) {
         42
     } else {
         0
