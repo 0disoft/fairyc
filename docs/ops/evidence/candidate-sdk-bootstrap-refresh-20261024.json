@@ -1,0 +1,95 @@
+{
+  "schema": "fairyc.sdk-bootstrap-refresh/v1",
+  "passed": true,
+  "sourceRevision": "9d45ad687d3ef0adea6614b2d2b6f2b14699256e",
+  "sdk": "0.0.0-stage0.87",
+  "seed": {
+    "recipe": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/refresh-seed-v2.py",
+      "bytes": 4499,
+      "sha256": "0109f97d5cce2c3ce3d439ec703329a2971ce072a624846544c7fff4980fdd89"
+    },
+    "receipt": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/seed-v2/receipt.json",
+      "bytes": 80581,
+      "sha256": "6e86498b0bb6bede305cda5785086c68babd1ca248ef5a777f8280f788fda5bd"
+    },
+    "sourceCount": 449,
+    "sourceInventorySHA256": "52897a35be9bb0cb8c56b6d10e1aed0e74dedb04f85d286c835a9177c6455b2d",
+    "sourceOverride": {
+      "module": "std::fs",
+      "gitRevision": "648b75e2",
+      "sha256": "fd7ddfa9f0deed98304cecf94911644087d1e2a46e8be8995c35acbcb183b335",
+      "difference": "only the private file-read-append link name"
+    },
+    "image": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/seed-v2/seed.exe",
+      "bytes": 2790400,
+      "sha256": "4e8fb072396fb2f472c96a9eaee1998cba5747ee53b93021b60570fa255c6048"
+    },
+    "packet": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/seed-v2/seed.bin",
+      "bytes": 19682184,
+      "sha256": "fcf6bc1669ab300d41ae253a7ce961dce6e5860cbcb5cd7a2054807c95780d91"
+    },
+    "frontendSeconds": 366.94762659999833,
+    "buildSeconds": 154.03753240000515,
+    "scope": "private C-project emission only; previous SDK File source is a bootstrap input, not the distributed SDK"
+  },
+  "runtimePackaging": {
+    "receipt": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/runtime-packaging-current/receipt.json",
+      "bytes": 7823,
+      "sha256": "85a63dcdcebd1af43dbfb5adcb8becf7b45fa034c38e53d31b7c7db895d3506c"
+    },
+    "cases": 249,
+    "authoredTests": 2,
+    "profiles": [
+      "Go-native",
+      "development",
+      "release"
+    ],
+    "assets": 22,
+    "assetPack": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/runtime-packaging-current/cases.bin.assets",
+      "bytes": 150925,
+      "sha256": "05ebcfa6fb35b44a9bc3a7b2b615e213353a0c2d22a5c7898331fbadd8c51de7"
+    }
+  },
+  "sdkBundle": {
+    "receipt": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/bundle-candidate/receipt.json",
+      "bytes": 15649,
+      "sha256": "8d4dd30dd49777fcb5bd1e2ca8a3bd4dec873f8c7e532d518ebfd063ca53b9cb"
+    },
+    "authoredTests": {
+      "mode": "all-authored",
+      "authoredTests": 2,
+      "selectedTests": 2
+    },
+    "profiles": [
+      "development",
+      "release"
+    ],
+    "executions": [
+      {
+        "profile": "development",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\bundle-candidate\\development.exe",
+        "sha256": "a259277bf6845942e789c8298dc58d6f7565b2d7a77c8e7dd2909aac98dc34c3",
+        "exit": 0
+      },
+      {
+        "profile": "release",
+        "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\bundle-candidate\\release.exe",
+        "sha256": "a124c8ca5155dfc68d65fdebb4e5bf31d85d1088327ba702347265d5f67e58a0",
+        "exit": 0
+      }
+    ]
+  },
+  "fullCliBuilt": false,
+  "fullCliFixedPointRefreshed": false,
+  "linuxExecuted": false,
+  "defaultCompilerChanged": false,
+  "targetMaturityChanged": false,
+  "pushed": false
+}

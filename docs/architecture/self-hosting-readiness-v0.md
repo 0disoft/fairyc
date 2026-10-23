@@ -1,5 +1,22 @@
 # Self-hosting readiness v0
 
+## Portable file SDK refresh (2026-10-24)
+
+The [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json)
+updates the private C-project bootstrap seed for SDK `0.0.0-stage0.87`. The old
+candidate correctly rejected the changed SDK source. Its replacement was built
+from 449 sources using the authenticated previous File source as one explicit
+bootstrap input; no source-authentication check was disabled. The replacement
+then compiled the current SDK sources for both candidate C profiles.
+
+Current runtime packaging passes 249 complete Go byte/admission comparisons in
+Go-native, development and release execution. The unchanged 22-asset pack is
+150,925 bytes. Both candidate profiles also pass the two SDK bundle tests for
+exact core/vector authentication and changed/incomplete/over-budget rejection.
+This is a private seed and focused execution proof. The full latest-source CLI
+build, consecutive-generation fixed point and complete command comparisons
+remain pending. Go remains the default; Linux and target maturity are unchanged.
+
 ## Runtime refresh (2026-10-23)
 
 The authored companion's runtime pin includes the shared Windows long-path helper and trap locations:

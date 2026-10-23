@@ -187,9 +187,11 @@ and links at low/optimized settings but has not executed here. The authored runt
 tests pass 249 exact output/error comparisons through Go-native and both candidate C profiles.
 SDK `0.0.0-stage0.87` now links the public operations to the portable symbol. Both-target
 emission, Windows low/optimized binary/multi-window reads, and the existing allocation-failure
-probes pass. The candidate SDK source pin and embedded literals are updated. The old candidate
-rejects the changed SDK, so a refreshed bootstrap seed precedes full candidate rebuilding and
-fixed-point renewal. Earlier full-CLI records remain evidence for their original snapshots;
+probes pass. The candidate SDK source pin, embedded literals, foreign rule and C result record
+are updated. The [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json)
+provides a refreshed private seed, 249 runtime comparisons in three execution paths and both
+SDK bundle tests in development/release candidate C. Full CLI rebuilding and fixed-point
+renewal follow; earlier full-CLI records remain evidence for their original snapshots.
 Linux native execution remains open.
 
 Keep existing effects. Consider only the narrow public-interface comparison and source-size
