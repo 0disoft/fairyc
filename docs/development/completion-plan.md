@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `b0cd35b1`; clean-machine proof and publication remain open. LSP stays a separate executable. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass for the 512-source `91762c18` snapshot. [Region diagnostics](../ops/evidence/candidate-region-diagnostics-20261024.json) match 12/12 against the corrected `b0cd35b1` Go reference; the authored inputs are unchanged by that Go-only fix. Native-test/example comparisons are running. Linux host implementation/execution remain open. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass for the 512-source `91762c18` snapshot. Region diagnostics match 12/12 against Go `b0cd35b1`. Native tests match 30/30 and examples 78/78 in each profile. The [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) records both-profile build/run execution against Go `cbe0bff1`, after restoring generic signature admission. Candidate sources are unchanged; Linux host implementation/execution remain open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -129,9 +129,10 @@ output; ordinary dependency and replaced-source cases retain their locations.
 The [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json) at clean
 `1dbca9ad` includes both 512-source full CLI builds, exact consecutive C-packet/optimized-PE
 equality, and the Windows correctness smoke. Command tests and test listing pass 208 and 178
-exact comparisons respectively across both profiles. Native-test/example comparisons are still
-running. The [Region workspace audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23)
-records implementation and diagnostic gaps that keep full parity open. Linux execution,
+exact comparisons respectively across both profiles. Native-test/example comparisons were
+incomplete at that snapshot; the later records below supersede them. The [Region workspace
+audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23) records the gaps subsequently
+addressed by the Region input and diagnostic changes below. Linux execution,
 clean-machine portability and the remaining Windows maturity requirements stay open.
 
 Region input transport is now implemented without extra runtime allocation. Callees borrow the
@@ -145,7 +146,18 @@ adapter. Semantic-test and test-list comparisons match 208 and 178 rows. Command
 the version-only case use the candidate's authenticated build oracle; behavior uses Go `b0cd35b1`.
 The two compilers therefore retain their own source identities without forcing a rebuild of
 unchanged Fairy sources. Consecutive C packets and optimized PE images are byte-identical;
-native-test and example comparisons remain in progress.
+native-test and example comparisons have since completed: 30/30 native-test cases and
+78/78 examples match in each profile. The compiler self-source example is excluded from that
+example count and covered by the separate fixed-point receipt.
+
+The subsequent native CLI sequence found that adding ordinary C transport scalars had accidentally
+widened Go's generic signatures. `cbe0bff1` restores the existing generic boundary without rejecting
+ordinary C transport or unused planner type arguments. All 22 original-signature cases and the two
+Fairy native report tests pass. The full development/release native CLI sequence also passes against
+that clean Go build, including exact diagnostics, preserved output on failure, program streams,
+trap locations, exit bits and temporary-directory cleanup. The [follow-up
+record](../ops/evidence/candidate-cli-parity-20261024.json) retains the earlier comparisons' own
+reference revision; they were not silently relabeled or repeated. No candidate source changed.
 
 The current Go preview at `b0cd35b1` is 4,628,074 bytes zipped, with a 13,126,144-byte compiler.
 All twelve packaging/starter steps pass in `.cache/starter-smoke-5jmjhK/receipt.json`.

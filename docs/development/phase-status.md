@@ -251,9 +251,17 @@ boundaries and source-level foreign-call scope. See the
 
 1. F2-6 has hosted evidence at `9e1500e1`. ADRs 0484/0485 add exact C-scalar and explicit C enum
    arrays with local compiler, target-emission and four-profile MSVC proof; native Linux coverage
-   is pending. Next assess repr(C) record-element arrays and pointer needs. Keep the current
+   is pending. The caller assessment in the [completion plan](completion-plan.md) found no
+   record-element array or broader pointer requirement in the inspected SDK/candidate callers.
+   Those additions remain deferred. Keep the current
    raw-pointer pointee set and closed raw-pointer operations unless a separate pointer admission
    changes them.
 2. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted
    source feature; retained and asynchronous callbacks remain excluded.
 3. Reopen Phase 3 before any inline contract or cross-package inline-body reuse admission.
+
+The [2026-10-24 CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) closes the
+recorded Windows native-test/example comparisons and the separate native CLI sequence.
+It also records the `cbe0bff1` Go fix preserving generic scalar admission after C field transport
+was added. Candidate sources and the existing fixed-point record are unchanged. Linux execution,
+remaining Windows target obligations and clean-machine distribution proof remain open.

@@ -1,0 +1,98 @@
+{
+  "schema": "fairyc.candidate-cli-parity-followup/v1",
+  "sourceRevision": "cbe0bff139aad65d077682c964085e8193acac3a",
+  "candidateSourceRevision": "91762c18981dcea1f2889996afdb006678793f4f",
+  "candidateAuthoredSourceFilesUnchanged": 512,
+  "reference": {
+    "path": ".cache/completion-20261024/generic-final-reference.exe",
+    "sha256": "bab60b541959895f82f01634328b2d967e05658f6e7db09f784b7f1e0b57c3d9",
+    "bytes": 13134336,
+    "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261023174200-cbe0bff139aa\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: cbe0bff139aad65d077682c964085e8193acac3a\nmodified: false\n"
+  },
+  "priorComparisons": {
+    "referenceRevision": "b0cd35b1ccce917c68230bf49819d71680bcc004",
+    "rows": [
+      {
+        "label": "native-tests-development",
+        "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/native-tests-development/receipt.json",
+        "sha256": "cfb974d59c66351cb97fab4c3b3f039eb8b8a7436f278e599c30f1d96dd1bd39",
+        "exactMatches": 30,
+        "skipped": []
+      },
+      {
+        "label": "native-tests-release",
+        "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/native-tests-release/receipt.json",
+        "sha256": "b7578ed06980f73a8935b891247bf9549dbf267b167e0806111e2f40c08ef076",
+        "exactMatches": 30,
+        "skipped": []
+      },
+      {
+        "label": "examples-development",
+        "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/examples-development/receipt.json",
+        "sha256": "d605691ad8b845cb3450fc5e706d7b0b5af3d29069844db934f410675fa8829b",
+        "exactMatches": 78,
+        "skipped": [
+          {
+            "id": "lexer_candidate",
+            "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+          }
+        ]
+      },
+      {
+        "label": "examples-release",
+        "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/examples-release/receipt.json",
+        "sha256": "3946b89d56b7d3d6555f133ea08da8ec0592d14ed5745f04c95f127fbce4d86d",
+        "exactMatches": 78,
+        "skipped": [
+          {
+            "id": "lexer_candidate",
+            "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+          }
+        ]
+      }
+    ]
+  },
+  "genericSignatureOracle": {
+    "path": ".cache/completion-20261024/generic-signatures-final/observations.json",
+    "sha256": "2a74e532280e6afa05aca2025b87568c7405e5682259bd63e3de6a84b674f8e3",
+    "cases": 22,
+    "fixtureSHA256": "60895952eab2564702561d5c552e3fdf22bd3cc21ab639b160367d32797a402d"
+  },
+  "nativeCLI": {
+    "path": ".cache/completion-20261024/native-cli-generic-fixed/execution-receipt.json",
+    "sha256": "cf419802394b7c66d4e27cf8f4371f00e99325604b7ca35a5c57a6cdeb6bfd68",
+    "passed": true,
+    "profiles": [
+      "development",
+      "release"
+    ],
+    "executions": 53,
+    "scratchDirectoryLeaks": false,
+    "productGoFrontendInvoked": false
+  },
+  "validation": [
+    {
+      "command": "go test ./internal/compiler -run '^(TestGeneric|TestIntegerTransport|TestIntegerArray|TestFloatingArray)' -count=1 -timeout=12m",
+      "exit": 0
+    },
+    {
+      "command": "go test ./internal/workspacecompiler ./internal/cli -run 'Generic|UnsupportedSignature' -count=1 -timeout=12m",
+      "exit": 0
+    },
+    {
+      "command": "generic-reference.exe test --native --file tests/generic_signature_diagnostics.fy -- <fixture.bin>",
+      "exit": 0,
+      "passed": 2,
+      "fixtureUnchangedWithCleanReference": true
+    }
+  ],
+  "scope": {
+    "fix": "C field transport must not widen executable generic signatures. Ordinary transport and phantom type arguments remain available.",
+    "evidenceReuse": "Unchanged candidate sources and prior native-test/example receipts retain their recorded Go reference. Only signature admission and native CLI were rerun with cbe0bff1.",
+    "linuxNativeExecution": false,
+    "cleanMachinePortability": false,
+    "defaultCompilerChanged": false,
+    "targetMaturityChanged": false,
+    "pushed": false
+  }
+}

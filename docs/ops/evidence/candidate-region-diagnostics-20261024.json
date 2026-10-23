@@ -220,7 +220,7 @@
     "nativeExecutionInComparison": false,
     "timing": "Single CLI observations during other verification work, not a benchmark or speedup claim.",
     "defaultCompilerChanged": false,
-    "fullCurrentBehaviorComparison": "running",
+    "fullCurrentBehaviorComparison": "Recorded native-test/example comparisons complete; native CLI follow-up at cbe0bff1 is in candidate-cli-parity-20261024.json. Reference revisions remain separate.",
     "currentFixedPoint": {
       "passed": true,
       "receipt": ".cache/completion-20261023/self-hosting/fixed-point-regions-v4/receipt.json",
@@ -235,7 +235,11 @@
     "cleanMachinePortability": false,
     "targetMaturityChanged": false,
     "pushed": false,
-    "buildIdentityComparison": "Candidate 91762c18 reports its frozen identity, checked against its authenticated build oracle. Behavioral checks use Go b0cd35b1; all candidate source hashes still match. The version-only CLI case is checked separately rather than equating distinct revisions."
+    "buildIdentityComparison": "Candidate 91762c18 reports its frozen identity, checked against its authenticated build oracle. Behavioral checks use Go b0cd35b1; all candidate source hashes still match. The version-only CLI case is checked separately rather than equating distinct revisions.",
+    "cliFollowUp": {
+      "path": "docs/ops/evidence/candidate-cli-parity-20261024.json",
+      "sha256": "7ff008be1799c8cee0509687a56053dd2199c8999dfa52c798b0c2a25c3aefc4"
+    }
   },
   "completedCommandComparisons": [
     {
