@@ -137,3 +137,35 @@ random runtime failure tests or implement excluded SDK APIs.
 
 E1 and E2 are closed. The remaining Phase 2 decision is the complete declared target scope
 described above; both completeness markers and all maturity flags remain unchanged.
+
+## Region workspace audit (2026-10-23)
+
+At clean `1dbca9ad`, development and release full CLI builds pass over 512 sources. Consecutive
+C packets and optimized PE images are byte-identical. The Windows correctness smoke passes.
+Native-test/example comparisons are still running; full candidate/reference parity remains open.
+
+Test-list and semantic-test CLI comparisons pass 178/178 and 208/208 respectively, counted across
+both profiles. The original check comparison matches 173 rows per profile, but three only test
+SDK namespace rejection and one package-graph Region case is skipped.
+
+Real SDK reproduction found two positive Region parameter fixtures, `pass.flow.param-local-use`
+and `pass.flow.param-return`, where the Go reference check exits 4 with an internal failure.
+`workspacecompiler.Check` reports `mir-lower: Region.place uses inactive region`; the candidate
+check exits 0. That does not prove candidate native execution.
+
+For the candidate resource-placement negative, the result is a generic unsupported-source message rather than
+Go's E3102. `local-region-escape` has the same E3101 primary diagnostic but lacks Go's related
+allocation span. The two other Region negatives agree.
+
+The [Region workspace record](../ops/evidence/candidate-region-workspace-gaps-20261023.json)
+contains 12 comparisons (six per profile): four exact matches and eight differences. The
+[adapter](../../tools/compare-candidate-region-workspaces.py) preserves each original `main.fy`,
+replaces the fixture SDK stub with the real SDK, and exits 1 for the unresolved differences.
+
+Next implementation slices, in order:
+
+1. Region input-capability MIR/native transport without resetting a caller-owned region.
+2. Explicit unsupported diagnostics where the behavior is not implemented.
+3. Exact candidate Region diagnostic comparison.
+
+Phase 2 remains partial.

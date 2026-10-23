@@ -14,10 +14,10 @@ valid execution records are reused instead of reopening completed work.
 | --- | --- | --- |
 | 1 | Establish a current native-build time/footprint baseline with the existing runner, and keep one finite list of unfinished work. | Complete: six cases and 42 verified builds at clean `31ce0891`. |
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
-| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Bounded production-object inventory recorded below. Linux execution, mixed-stack unwind and clean-machine evidence remain open. |
+| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter renewed at clean `4c5967c9`; clean-machine proof and publication remain open. LSP stays a separate executable. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Companion authentication and focused runtime/trap checks pass. Latest clean-source whole-CLI build, full parity and fixed-point refresh remain pending. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Fix Region input-capability transport and diagnostic differences, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | At clean `1dbca9ad`, both full CLI builds and consecutive C-packet/optimized-PE equality pass over 512 sources. The [Region workspace audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23) identifies the next implementation slices. Native-test/example comparisons are still running; full parity remains open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -126,10 +126,13 @@ test binaries. It also passes 24 trap comparisons using the development command 
 12 cases each in development and release program profiles. The oversized source-key case keeps category-only
 output; ordinary dependency and replaced-source cases retain their locations.
 
-Next local work is a whole-CLI build from the latest clean source, followed by full candidate/reference
-parity and consecutive-generation fixed-point refresh. Release command-compiler coverage and
-those full runs remain pending; no compiler or target is promoted. Linux execution, clean-machine
-portability and the remaining Windows maturity requirements stay open.
+The [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json) at clean
+`1dbca9ad` includes both 512-source full CLI builds, exact consecutive C-packet/optimized-PE
+equality, and the Windows correctness smoke. Command tests and test listing pass 208 and 178
+exact comparisons respectively across both profiles. Native-test/example comparisons are still
+running. The [Region workspace audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23)
+records implementation and diagnostic gaps that keep full parity open. Linux execution,
+clean-machine portability and the remaining Windows maturity requirements stay open.
 
 ## Feature proposals
 

@@ -1,0 +1,720 @@
+{
+  "schema": "fairyc.candidate-region-workspace-gaps/v1",
+  "sourceBaseCommit": "1dbca9ade24d2810725cd747e6f774d452313732",
+  "comparisonCompleted": true,
+  "passed": false,
+  "fullParityClaimed": false,
+  "scope": "Stable check with real SDK; original main.fy bytes and primary spans retained",
+  "receipt": {
+    "path": ".cache/completion-20261023/self-hosting/region-sdk-current-v3/receipt.json",
+    "bytes": 127356,
+    "sha256": "84a39605334632c75ee589227914aefd7fd93be905beb2931353092076e6c5af"
+  },
+  "fullCLIBuild": {
+    "receipt": {
+      "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/receipt.json",
+      "bytes": 103587,
+      "sha256": "db55ed9ebc9dbb7cd9c785be43b92467a535cb16fde8c76cea2cafa00256375f"
+    },
+    "passed": true,
+    "sourceFiles": 512,
+    "version": "Fairy C Stage 0\ncompiler: v0.0.0-20261023134049-1dbca9ade24d\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.86\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 1dbca9ade24d2810725cd747e6f774d452313732\nmodified: false\n",
+    "packet": {
+      "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/candidate-packet.bin",
+      "bytes": 44733394,
+      "sha256": "28693853542eaa5340ed377ca0b8baf2ed270bb660d4de0d17099c51653b4e12"
+    },
+    "images": [
+      {
+        "profile": "development",
+        "compiler": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/development/fairyc.exe",
+          "bytes": 17130496,
+          "sha256": "c885a12f6afd6f0489794cf8081d870fc880f8d16c1134f65529f844132b8273"
+        },
+        "companion": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/development/fairyc-candidate-build.exe",
+          "bytes": 890880,
+          "sha256": "125948cc77eef30de12436af5a55cc15df99793274ab7229f3fb2e9bb0db09a5"
+        },
+        "runtimePack": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/development/fairyc-runtime-assets.pack",
+          "bytes": 150929,
+          "sha256": "3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98"
+        }
+      },
+      {
+        "profile": "release",
+        "compiler": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/release/fairyc.exe",
+          "bytes": 6405632,
+          "sha256": "aef23b1c1f3429897abcf43c8d94642268f32df69f6d560b3e72b4f43d6f36c6"
+        },
+        "companion": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/release/fairyc-candidate-build.exe",
+          "bytes": 361472,
+          "sha256": "30bf0729e7235362a543f4af92aa4570441658529a85156b5757e5793cd44a47"
+        },
+        "runtimePack": {
+          "path": ".cache/completion-20261023/self-hosting/candidate-current-v3/release/fairyc-runtime-assets.pack",
+          "bytes": 150929,
+          "sha256": "3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98"
+        }
+      }
+    ]
+  },
+  "regionCases": 12,
+  "regionExactMatches": 4,
+  "sourceInputs": [
+    {
+      "path": "spec/fixtures/region/manifest-v1.json",
+      "sha256": "3c450f2dc62cc64ffb20992c50b17ba2ba331fbf29fb1a0a1209e2ed15f78c72"
+    },
+    {
+      "path": "tools/compare-candidate-region-workspaces.py",
+      "sha256": "1833d99b1cd81acc798cbaeeb2616266790a1ee309e51d5c3b2f1beb00d9b873"
+    },
+    {
+      "path": "tools/compare-candidate-go-behavior.py",
+      "sha256": "0e87627821b09d87bec6d334f3a84298085a4559c319dff22405404a872cc20c"
+    },
+    {
+      "path": "spec/fixtures/region/cases/pass/param-local-use/src/main.fy",
+      "sha256": "cbf2ce8fa9361c1b4da25a9007db2831d3e467f5b1e9ea68516941472068b292"
+    },
+    {
+      "path": "spec/fixtures/region/cases/pass/param-local-use/src/std/alloc.fy",
+      "sha256": "bcbb60e854885ec91f7970de7363420e0a87d5a8dcabc4d4e157e71f2d80742a"
+    },
+    {
+      "path": "spec/fixtures/region/cases/pass/param-return/src/main.fy",
+      "sha256": "6b1b74b0f3d982830ea7d3f0f4eae970a093c48090f751846bc79ff5d3a8ce2c"
+    },
+    {
+      "path": "spec/fixtures/region/cases/pass/param-return/src/std/alloc.fy",
+      "sha256": "bcbb60e854885ec91f7970de7363420e0a87d5a8dcabc4d4e157e71f2d80742a"
+    },
+    {
+      "path": "spec/fixtures/package/cases/pass/stdlib-arena-region/packages/app/src/main.fy",
+      "sha256": "1e4b69331f6890d1b78c30b12ac1bf0b0987076c8919e324ad5d1da04ddbbeeb"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/resource-placement/src/main.fy",
+      "sha256": "76e1ccd83c572f8f91ab4bc75283541f9e94536a573d920e4952852911135113"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/resource-placement/src/std/alloc.fy",
+      "sha256": "bcbb60e854885ec91f7970de7363420e0a87d5a8dcabc4d4e157e71f2d80742a"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/capability-storage/src/main.fy",
+      "sha256": "cdc0f6e7cca4560bf463c8af52dbda043551c9bdbfb7c99960039d39fb4f2001"
+    },
+    {
+      "path": "spec/fixtures/region/cases/fail/direct-construction/src/main.fy",
+      "sha256": "dedae8fad279c003192f8bab62dec417a9e280e1c64fda44b41af909be8300c3"
+    }
+  ],
+  "rows": [
+    {
+      "id": "pass.flow.param-local-use",
+      "adaptation": {
+        "id": "pass.flow.param-local-use",
+        "mainSourceUnchanged": true,
+        "omittedStub": "std/alloc.fy",
+        "replacedFixtureGraph": null,
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "origins": [
+          {
+            "operation": "place",
+            "allocation": {
+              "source": "main.fy",
+              "startByte": 74,
+              "endByte": 94
+            },
+            "origin": "RegionParam(0)",
+            "escapes": false
+          }
+        ]
+      },
+      "go": {
+        "exit": 4,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "fairyc: internal compiler invariant failed\n"
+      },
+      "goMatchesExpected": false,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "timedOut": false,
+          "stdout": "check ok: 2 instance(s), 9 source file(s), 153 MIR function(s), lock verified\n",
+          "stderr": "",
+          "exactMatch": false,
+          "matchesExpected": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "timedOut": false,
+          "stdout": "check ok: 2 instance(s), 9 source file(s), 153 MIR function(s), lock verified\n",
+          "stderr": "",
+          "exactMatch": false,
+          "matchesExpected": true
+        }
+      ]
+    },
+    {
+      "id": "pass.flow.param-return",
+      "adaptation": {
+        "id": "pass.flow.param-return",
+        "mainSourceUnchanged": true,
+        "omittedStub": "std/alloc.fy",
+        "replacedFixtureGraph": null,
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "origins": [
+          {
+            "operation": "place",
+            "allocation": {
+              "source": "main.fy",
+              "startByte": 127,
+              "endByte": 147
+            },
+            "origin": "RegionParam(0)",
+            "escapes": true
+          }
+        ]
+      },
+      "go": {
+        "exit": 4,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "fairyc: internal compiler invariant failed\n"
+      },
+      "goMatchesExpected": false,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 0,
+          "timedOut": false,
+          "stdout": "check ok: 2 instance(s), 9 source file(s), 153 MIR function(s), lock verified\n",
+          "stderr": "",
+          "exactMatch": false,
+          "matchesExpected": true
+        },
+        {
+          "profile": "release",
+          "exit": 0,
+          "timedOut": false,
+          "stdout": "check ok: 2 instance(s), 9 source file(s), 153 MIR function(s), lock verified\n",
+          "stderr": "",
+          "exactMatch": false,
+          "matchesExpected": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.local-region-escape",
+      "adaptation": {
+        "id": "fail.flow.local-region-escape",
+        "mainSourceUnchanged": true,
+        "omittedStub": null,
+        "replacedFixtureGraph": {
+          "manifest": "../package/manifest-v1.json",
+          "caseId": "pass.package.stdlib-arena-region",
+          "rootNode": "app"
+        },
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E3101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 175,
+              "endByte": 195
+            },
+            "related": [
+              {
+                "role": "allocation",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 175,
+                  "endByte": 195
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "go": {
+        "exit": 3,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "main.fy:7:16: E3101: Region-derived value escapes its lexical region [bytes 175..195]\n  allocation: main.fy:7:16 [bytes 175..195]\n"
+      },
+      "goMatchesExpected": true,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:7:16: E3101: Region-derived value escapes its lexical region [bytes 175..195]\n",
+          "exactMatch": false,
+          "matchesExpected": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:7:16: E3101: Region-derived value escapes its lexical region [bytes 175..195]\n",
+          "exactMatch": false,
+          "matchesExpected": true
+        }
+      ]
+    },
+    {
+      "id": "fail.flow.resource-placement",
+      "adaptation": {
+        "id": "fail.flow.resource-placement",
+        "mainSourceUnchanged": true,
+        "omittedStub": "std/alloc.fy",
+        "replacedFixtureGraph": null,
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E3102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 123,
+              "endByte": 143
+            },
+            "related": [
+              {
+                "role": "type",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 23,
+                  "endByte": 28
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "go": {
+        "exit": 3,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "main.fy:10:13: E3102: plain Region placement cannot contain a resource that needs drop [bytes 123..143]\n  type: main.fy:3:10 [bytes 23..28]\n"
+      },
+      "goMatchesExpected": true,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:10:13: source is outside the supported compiler subset [bytes 123..143]\n",
+          "exactMatch": false,
+          "matchesExpected": false
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:10:13: source is outside the supported compiler subset [bytes 123..143]\n",
+          "exactMatch": false,
+          "matchesExpected": false
+        }
+      ]
+    },
+    {
+      "id": "fail.type.capability-storage",
+      "adaptation": {
+        "id": "fail.type.capability-storage",
+        "mainSourceUnchanged": true,
+        "omittedStub": null,
+        "replacedFixtureGraph": null,
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E3103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 34,
+              "endByte": 40
+            },
+            "related": [
+              {
+                "role": "capability",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 41,
+                  "endByte": 48
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "go": {
+        "exit": 3,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n"
+      },
+      "goMatchesExpected": true,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+          "exactMatch": true,
+          "matchesExpected": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:4:5: E3103: compiler-owned Region capability cannot be stored [bytes 34..40]\n  capability: main.fy:4:12 [bytes 41..48]\n",
+          "exactMatch": true,
+          "matchesExpected": true
+        }
+      ]
+    },
+    {
+      "id": "fail.type.direct-construction",
+      "adaptation": {
+        "id": "fail.type.direct-construction",
+        "mainSourceUnchanged": true,
+        "omittedStub": null,
+        "replacedFixtureGraph": null,
+        "addedSource": "module fixture_sdk;\nimport std::alloc as alloc;\n"
+      },
+      "expectation": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E3104",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 58,
+              "endByte": 67
+            },
+            "related": []
+          }
+        ]
+      },
+      "go": {
+        "exit": 3,
+        "timedOut": false,
+        "stdout": "",
+        "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n"
+      },
+      "goMatchesExpected": true,
+      "candidates": [
+        {
+          "profile": "development",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+          "exactMatch": true,
+          "matchesExpected": true
+        },
+        {
+          "profile": "release",
+          "exit": 3,
+          "timedOut": false,
+          "stdout": "",
+          "stderr": "main.fy:4:26: E3104: compiler-owned Region capability cannot be constructed directly [bytes 58..67]\n",
+          "exactMatch": true,
+          "matchesExpected": true
+        }
+      ]
+    }
+  ],
+  "otherComparisons": [
+    {
+      "profile": "development",
+      "suite": "metadata",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-development/metadata/receipt.json",
+        "bytes": 373537,
+        "sha256": "4ed3d04fec034d2ecb1cda806e7fe47ed1d7acacbe8d2395d39e22deaacc4f49"
+      },
+      "cases": null,
+      "summary": null,
+      "passed": true,
+      "skipped": [],
+      "goFixtureMismatches": []
+    },
+    {
+      "profile": "development",
+      "suite": "check-development",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-development/check-development/receipt.json",
+        "bytes": 845943,
+        "sha256": "7c052d744cce6ba3e42c7bacbfa6f93e079a62699458b8317239c63a66cdd478"
+      },
+      "cases": 173,
+      "summary": {
+        "completed": 173,
+        "acceptanceMatch": 173,
+        "exitMatch": 173,
+        "firstDiagnosticMatch": 173,
+        "allDiagnosticsMatch": 173,
+        "stdoutMatch": 173,
+        "stderrMatch": 173,
+        "exactMatch": 173
+      },
+      "passed": null,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "goFixtureMismatches": [
+        "pass.flow.param-local-use",
+        "pass.flow.param-return",
+        "fail.flow.resource-placement"
+      ]
+    },
+    {
+      "profile": "development",
+      "suite": "cli-development",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-development/cli-development/receipt.json",
+        "bytes": 776065,
+        "sha256": "d833be0d8685ece9c34d612c043d7a4700015bbdc0951c1e6741647a4c85fe74"
+      },
+      "cases": 30,
+      "summary": {
+        "completed": 30,
+        "acceptanceMatch": 30,
+        "exitMatch": 30,
+        "firstDiagnosticMatch": 30,
+        "allDiagnosticsMatch": 30,
+        "stdoutMatch": 30,
+        "stderrMatch": 30,
+        "exactMatch": 30
+      },
+      "passed": null,
+      "skipped": [],
+      "goFixtureMismatches": []
+    },
+    {
+      "profile": "release",
+      "suite": "metadata",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-remaining/metadata/receipt.json",
+        "bytes": 373018,
+        "sha256": "b90e0632ff2e5bd50c8c2a77d17be9afccdcad8dca10476b7cc9919d03053a2a"
+      },
+      "cases": null,
+      "summary": null,
+      "passed": true,
+      "skipped": [],
+      "goFixtureMismatches": []
+    },
+    {
+      "profile": "release",
+      "suite": "check-release",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-remaining/check-release/receipt.json",
+        "bytes": 845988,
+        "sha256": "26a63877305eeb1b6f1577b301f7cf46f8002b773685f5f8fd38694dc4f7e1bf"
+      },
+      "cases": 173,
+      "summary": {
+        "completed": 173,
+        "acceptanceMatch": 173,
+        "exitMatch": 173,
+        "firstDiagnosticMatch": 173,
+        "allDiagnosticsMatch": 173,
+        "stdoutMatch": 173,
+        "stderrMatch": 173,
+        "exactMatch": 173
+      },
+      "passed": null,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "goFixtureMismatches": [
+        "pass.flow.param-local-use",
+        "pass.flow.param-return",
+        "fail.flow.resource-placement"
+      ]
+    },
+    {
+      "profile": "release",
+      "suite": "cli-release",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-remaining/cli-release/receipt.json",
+        "bytes": 776065,
+        "sha256": "539aaa9cf35c0048f54ec2fe301d4bde79820cfa48c727facdf5b3ef05996a60"
+      },
+      "cases": 30,
+      "summary": {
+        "completed": 30,
+        "acceptanceMatch": 30,
+        "exitMatch": 30,
+        "firstDiagnosticMatch": 30,
+        "allDiagnosticsMatch": 30,
+        "stdoutMatch": 30,
+        "stderrMatch": 30,
+        "exactMatch": 30
+      },
+      "passed": null,
+      "skipped": [],
+      "goFixtureMismatches": []
+    },
+    {
+      "suite": "semantic-tests",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-remaining/semantic-tests/receipt.json",
+        "bytes": 532722,
+        "sha256": "88280d15393452a9245057e6624fa42418803f4f06605f01549eac9c5c800ccb"
+      },
+      "cases": 208,
+      "exactMatches": 208,
+      "passed": true
+    },
+    {
+      "suite": "test-list",
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/parity-1dbca9ad-stage2-remaining/test-list/receipt.json",
+        "bytes": 1760441,
+        "sha256": "dc6683156ed27de515347aa5d0fabea0cd1e42115c2a99247230b61f357c5ec7"
+      },
+      "passed": true,
+      "cases": 178,
+      "exactMatches": 178
+    }
+  ],
+  "semanticFixtureCheck": {
+    "command": "go test -mod=readonly ./internal/regionfixture -count=1",
+    "exit": 0
+  },
+  "referenceLoweringObservation": {
+    "case": "pass.flow.param-return",
+    "stage": "mir-lower",
+    "detail": "Region.place uses inactive region",
+    "source": "internal/mir/lower_regions.go"
+  },
+  "remaining": [
+    "Implement Region input-capability executable transport without resetting caller-owned Regions.",
+    "Report unimplemented lowering as a source subset diagnostic, not an internal compiler failure.",
+    "Preserve E3102 and related E3101 allocation spans in candidate workspace diagnostics.",
+    "Finish full native/example parity; the consecutive full C-packet and optimized PE fixed point passes, without a full-parity or target promotion claim."
+  ],
+  "nativeRegionExecution": false,
+  "originFactsCompared": false,
+  "ciChanged": false,
+  "pushed": false,
+  "verifierStartupGuard": {
+    "optimizedPythonRejected": true,
+    "outputDirectoryCreated": false,
+    "normalReleaseRecheck": {
+      "receipt": {
+        "path": ".cache/completion-20261023/self-hosting/region-sdk-current-v3-release/receipt.json",
+        "bytes": 113781,
+        "sha256": "517f716280494af9addcbbb76503faf187a593af40635d1ac9d2dab7a51444c7"
+      },
+      "cases": 6,
+      "exactMatches": 2,
+      "passed": false
+    },
+    "source": {
+      "path": "tools/compare-candidate-region-workspaces.py",
+      "bytes": 6623,
+      "sha256": "ccd644d62eb422c71d0627161007b6288164bb0fd38190e56098007945b73a5b"
+    }
+  },
+  "fixedPoint": {
+    "receipt": {
+      "path": ".cache/completion-20261023/self-hosting/fixed-point-current-v3/receipt.json",
+      "bytes": 105745,
+      "sha256": "56b1b94cde776dbf9a1e8203df7d515ccec948aed062db89fd731eba0ae09a9e"
+    },
+    "passed": true,
+    "sourceFiles": 512,
+    "packetBytesEqual": true,
+    "optimizedImageBytesEqual": true,
+    "stage2": {
+      "path": "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261023\\self-hosting\\fixed-point-current-v3\\stage2.exe",
+      "bytes": 6405632,
+      "sha256": "aef23b1c1f3429897abcf43c8d94642268f32df69f6d560b3e72b4f43d6f36c6"
+    },
+    "companion": "authored Fairy",
+    "limitations": [
+      "Windows full file_cli dispatcher only; stdin lexer protocol and non-Windows targets are not included.",
+      "The runtime companion and pack are authenticated separately; their own fixed point is not proved by this dispatcher check."
+    ]
+  },
+  "windowsHostSmoke": {
+    "command": [
+      "go",
+      "run",
+      "-mod=readonly",
+      "./tools/dev/fairyc-windows-host-smoke"
+    ],
+    "exit": 0,
+    "passed": true,
+    "seconds": 195.9108666000102,
+    "logs": [
+      {
+        "path": ".cache/completion-20261023/windows-host-smoke-current/stdout.log",
+        "bytes": 451,
+        "sha256": "97409081fa02fe8092ab53025abda6ff4126a713df629a755b248e058410a529"
+      },
+      {
+        "path": ".cache/completion-20261023/windows-host-smoke-current/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "receipt": {
+      "path": ".cache/completion-20261023/windows-host-smoke-current/receipt.json",
+      "sha256": "7303e2e7865fa2de8efd958e173ba56930b160766cf51a83fdb0147b6c1f4696"
+    },
+    "stdout": "Windows host correctness smoke passed: 2 target builds, 27 workspace builds, 9 workspace runs, 2 direct target runs, 2 native File probes, and 20 ABI/layout cases with msvc 14.51.36231\nWindows host measurements skipped; use --with-measurements for the scheduled/manual measurement lane\nGenerated Fairy/C mixed stack proof passed: 4 separate-object executions covering metadata walks, C-boundary exception containment, and non-unwinding callback traps\n",
+    "measurementsRun": false,
+    "cleanMachine": false,
+    "hostedCI": false
+  }
+}
