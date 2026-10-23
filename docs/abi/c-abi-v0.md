@@ -35,7 +35,7 @@ The current Go prototype can emit deterministic C11 for a verified scalar, inert
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
 includes nonempty source `@repr(C)` records whose fields may use `i8`, `i16`, `i32`, `i64`, `isize`,
 `u8`, `u16`, `u32`, `u64`, `usize`, `f32`, `f64`, all
-sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer and floating arrays, and
+sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer, floating and C-scalar arrays, and
 acyclic nested `@repr(C)` records. It preserves the public C tag and field names, emits dependencies
 before their users, and emits target-
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
@@ -138,7 +138,7 @@ aggregate rejection.
 The implemented source/backend slice is deliberately smaller than that language contract: it
 accepts only acyclic nonempty structs over `i8`, `i16`, `i32`, `i64`, `isize`, `u8`, `u16`, `u32`,
 `u64`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
-C scalars, admitted raw pointers including opaque `void`, bounded integer and floating arrays, and
+C scalars, admitted raw pointers including opaque `void`, bounded integer, floating and C-scalar arrays, and
 nested structs that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
@@ -173,8 +173,17 @@ New nested field-store paths are also excluded. ADR 0480's scalar restrictions r
 families. Inferred and typed locals, internal value arguments/results, nested record reads and
 copies, reconstruction and direct referenced replacement are admitted. Floating literals,
 arithmetic, comparisons, casts, indexing, element stores, iteration and views; bare foreign arrays;
-pointer elements or pointer-based array transport; `c::float`/`c::double` arrays; direct private arrays;
+pointer elements or pointer-based array transport; direct private arrays;
 resource, enum, `Option` or `Result` payload arrays; and record-element arrays remain closed.
+
+[ADR 0484](../adr/0484-repr-c-scalar-array-transport.md) extends the same bounded whole-array
+transport to all sixteen exact `c::*` identities when the selected target supplies them.
+`c::long` arrays follow target LP64/LLP64 layout; `c::ssize_t` remains POSIX-only. C `_Bool` arrays
+do not admit Fairy `bool` arrays. C/Fairy arrays remain distinct even when their representations
+match, and scalar conversions do not convert arrays. Existing wrappers and element copies carry
+the values without additional runtime code or cache formats. Local source/MIR/interface checks,
+both target emission profiles and all four MSVC C11/C17 low/optimized native crossings pass.
+Native Linux execution for this addition remains pending.
 
 The shared native record probe checks ADR 0477 array layout, all elements and copy isolation. Local
 MSVC execution is recorded in the [F2-1 update](../development/phase2-target-scope.md#f2-1-integer-array-fields);

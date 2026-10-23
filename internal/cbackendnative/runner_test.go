@@ -127,7 +127,7 @@ func TestForeignPointerCallSmokeSourceReachesCEmission(t *testing.T) {
 func TestForeignCStructResultCallSmokeSourceReachesCEmission(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	unit := foreignstructprobe.Generate()
+	unit := foreignstructprobe.GeneratePOSIX()
 	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(unit.FairySource), 0o600); err != nil {
 		t.Fatal(err)
 	}

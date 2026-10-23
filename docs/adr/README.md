@@ -385,6 +385,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0480-repr-c-integer-field-transport.md](0480-repr-c-integer-field-transport.md): adds the remaining Fairy integer field families with exact identities, target layouts and bounded record transport.
 - [0481-bounded-c-callbacks.md](0481-bounded-c-callbacks.md): admits one non-capturing synchronous C callback signature with explicit call-bounded user data.
 
+- [0484-repr-c-scalar-array-transport.md](0484-repr-c-scalar-array-transport.md): adds exact target C-scalar array members through existing value-copy transport and preserves LP64/LLP64 and POSIX provider boundaries.
+
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
 ## Review Blockers

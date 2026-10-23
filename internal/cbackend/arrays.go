@@ -97,6 +97,10 @@ func scalarArrayLayoutType(value hir.Type) (layout.Type, bool) {
 		return layout.Type{}, false
 	}
 	element = canonicalCValueType(element)
+	if transport, ok := cScalarTransportForType(element); ok {
+		elementLayout := layout.Type{Kind: layout.KindCScalar, Name: transport.targetName}
+		return layout.Type{Kind: layout.KindArray, Element: &elementLayout, Length: length}, true
+	}
 	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeI64 && element != hir.TypeU32 && element != hir.TypeUSize && !hir.IsIntegerTransportScalar(element) && !hir.IsFloatScalar(element) {
 		return layout.Type{}, false
 	}

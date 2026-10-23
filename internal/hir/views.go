@@ -98,7 +98,7 @@ func ScalarArrayField(value Type) bool {
 	return array && FixedArrayScalarElement(element) && ExecutableFixedArrayShape(element, length)
 }
 
-// ReprCArrayField is the bounded integer/floating-array member subset with an exact C
+// ReprCArrayField is the bounded scalar-array member subset with an exact C
 // scalar representation. In particular, Fairy bool uses a different private
 // value transport and is not admitted as a C array element here.
 func ReprCArrayField(value Type) bool {
@@ -117,7 +117,7 @@ func IntegerTransportArray(value Type) bool {
 // TransportOnlyArray admits whole-array values without element operations.
 func TransportOnlyArray(value Type) bool {
 	element, length, array := FixedArrayParts(value)
-	return IntegerTransportArray(value) || array && IsFloatScalar(element) && length <= MaxExecutableFixedArrayElements
+	return IntegerTransportArray(value) || array && (IsFloatScalar(element) || IsCScalar(element)) && length <= MaxExecutableFixedArrayElements
 }
 
 // InlineArrayField also admits arrays of actual scalar-leaf structs. Array

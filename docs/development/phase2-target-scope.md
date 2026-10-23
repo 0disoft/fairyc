@@ -474,9 +474,9 @@ F2-6 receipt covers the bounded floating-array addition, so the current boundari
 
 | Surface | Implemented subset | Remaining boundary or exclusion | Owners |
 | --- | --- | --- | --- |
-| repr(C) integer array fields | All ten Fairy integer families at lengths `1..=4096`; whole-field reads, replacement and record/argument value copies. ADR 0482's five newer families are transport-only and have no element indexing, arithmetic or views. | C scalar and C enum arrays need separate admissions. | [HIR guard](../../internal/hir/views.go), [layout resolution](../../internal/cbackend/aggregate_types.go), [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0482](../adr/0482-repr-c-integer-array-transport.md) |
+| repr(C) integer array fields | All ten Fairy integer families at lengths `1..=4096`; whole-field reads, replacement and record/argument value copies. ADR 0482's five newer families are transport-only and have no element indexing, arithmetic or views. | Exact C scalars follow ADR 0484 below; C enum arrays need a separate admission. | [HIR guard](../../internal/hir/views.go), [layout resolution](../../internal/cbackend/aggregate_types.go), [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0482](../adr/0482-repr-c-integer-array-transport.md) |
 | Fairy `f32`/`f64` arrays | Lengths `1..=4096`; whole-field reads, inferred and typed locals, internal value arguments/results, reconstruction, referenced replacement and nested record copies. | Element operations, views, bare foreign arrays, pointer transport and payload arrays remain closed. Local compiler and Windows native evidence is historical pre-push validation; the [hosted F2-6 receipt](#hosted-f2-6-receipt-2026-10-23) records Linux native and hosted coverage. | [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [floating probe](../../internal/foreignstructprobe/floating_arrays.go) |
-| Exact C-scalar arrays | Scalar fields are implemented. | Array members are deferred to a separate admission. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [layout resolution](../../internal/cbackend/aggregate_types.go) |
+| Exact C-scalar arrays | ADR 0484 admits all sixteen exact scalar array families at lengths `1..=4096`, preserving target layout and whole-value transport. Local compiler/MIR/interface and Linux/Windows emission checks pass; all four MSVC C11/C17 low/optimized crossings pass for the fifteen Windows providers. | POSIX `ssize_t` has Linux emission coverage; native Linux execution of the expanded probe remains pending. Element operations and bare foreign arrays remain closed. | [ADR 0484](../adr/0484-repr-c-scalar-array-transport.md), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | Explicit C enum arrays | Explicitly based enum fields are implemented, including replacement and record transport. | Array members are deferred to a separate admission. | [ADR 0478](../adr/0478-explicit-c-enum-fields.md), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | repr(C) record-element arrays | Private scalar and plain-struct arrays remain supported in their existing paths. | Repr(C) member arrays are deferred and currently rejected. Private array support does not imply C record-element arrays. | [HIR guard](../../internal/hir/views.go), [semantic checks](../../internal/semantic/resource_types.go) |
 | Other array element shapes | The ten integer families and both Fairy floating families are executable in repr(C). | Nested arrays, `bool` arrays and raw-pointer element arrays are not admitted. These admission limits do not establish permanent C ABI exclusions. | [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [HIR guard](../../internal/hir/views.go) |
@@ -491,8 +491,9 @@ open general callback signatures or pointer nesting.
 
 F2-6 implements the bounded `f32`/`f64` repr(C) array transport, and the [hosted F2-6
 receipt](#hosted-f2-6-receipt-2026-10-23) covers Linux native and hosted execution. Next assess
-exact C-scalar arrays, then explicit C enum arrays, as separate admissions; repr(C) record-element
-arrays remain deferred.
+explicit C enum arrays as the next separate admission. Exact C-scalar arrays are implemented by
+ADR 0484 with local Windows proof; their expanded native Linux probe remains unexecuted locally.
+Repr(C) record-element arrays remain deferred.
 
 Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged.
 

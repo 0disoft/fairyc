@@ -43,3 +43,21 @@ func TestGenerateReturnsIndependentExpectations(t *testing.T) {
 		t.Fatal("Generate() shared mutable expectation storage")
 	}
 }
+
+func TestCScalarArrayTargetCoverage(t *testing.T) {
+	portable := Generate()
+	posix := GeneratePOSIX()
+	for _, name := range []string{"bool", "char", "double", "float", "int", "long", "longlong", "schar", "short", "size_t", "uchar", "uint", "ulong", "ulonglong", "ushort"} {
+		for _, unit := range []Unit{portable, posix} {
+			if !strings.Contains(unit.FairySource, "check_c_array_"+name+"(2)") || !strings.Contains(unit.CompanionC, "fairyc_c_array_"+name+"_observe") {
+				t.Fatalf("missing C array oracle %s", name)
+			}
+		}
+	}
+	if strings.Contains(portable.FairySource, "c::ssize_t") || !strings.Contains(posix.FairySource, "c::ssize_t[3]") {
+		t.Fatal("POSIX array provider boundary lost")
+	}
+	if strings.Contains(posix.CompanionC, "%!") || strings.Contains(posix.FairySource, "%!") {
+		t.Fatal("invalid probe template expansion")
+	}
+}

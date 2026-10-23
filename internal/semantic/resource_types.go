@@ -310,7 +310,7 @@ func (a *analyzer) prepareStructTypes() {
 					allowed = hir.ReprCArrayField(field.typ)
 				}
 				if _, _, array := hir.FixedArrayParts(field.typ); array && !allowed {
-					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded integer or floating elements for repr(C), or scalar/plain-struct elements for a private struct")
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded C-compatible scalar elements for repr(C), or scalar/plain-struct elements for a private struct")
 				}
 			}
 		}

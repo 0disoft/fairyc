@@ -128,7 +128,7 @@ func runForeignPointerCallProbe(temporaryRoot string, toolchains []cdriver.Toolc
 }
 
 func runForeignCStructResultCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
-	unit := foreignstructprobe.Generate()
+	unit := foreignstructprobe.GeneratePOSIX()
 	return runForeignSourceProbe(
 		temporaryRoot,
 		toolchains,

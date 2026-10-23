@@ -63,6 +63,19 @@ Broader generics/interfaces/closures, QBE or LLVM, additional targets, remote pa
 Atlas impact/MCP/structural edits, and chain-specific execution/persistence remain later candidates.
 They need a demonstrated user or measured benefit before becoming work in this queue.
 
+## Completed slices
+
+- Exact C-scalar array fields: [ADR 0484](../adr/0484-repr-c-scalar-array-transport.md).
+  All sixteen identities retain target layout and internal value transport. Local compiler,
+  MIR/interface and Linux/Windows emission checks pass; MSVC C11/C17 low/optimized native
+  execution passes for all fifteen portable providers. Native Linux execution remains pending.
+  Next: explicitly based C enum array fields.
+
+Local Linux execution is currently unavailable: `wsl --list --quiet` exits with
+`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`, and no Docker command is installed. This is a host
+limitation, not a successful Linux run. Continue target-independent implementation and Windows
+execution; retain Linux-native checks for an available runner without installing host services.
+
 ## Working rules
 
 - Implement, check the affected behavior, and commit each coherent slice.

@@ -15,9 +15,19 @@ type Unit struct {
 // both the register-sized and hidden-result-pointer paths on supported AMD64
 // C ABIs while keeping the observable result target-independent.
 func Generate() Unit {
+	return generate(false)
+}
+
+// GeneratePOSIX also exercises the target-owned ssize_t provider.
+func GeneratePOSIX() Unit {
+	return generate(true)
+}
+
+func generate(posix bool) Unit {
+	cArrayFairy, cArrayC := cScalarArraySources(posix)
 	return Unit{
-		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource + integerArrayFairySource + floatingArrayFairySource,
-		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC + integerArrayCompanionC + floatingArrayCompanionC,
+		FairySource:  fairySource + arrayFairySource + enumFairySource + floatingFairySource + integerFairySource + callbackFairySource + integerArrayFairySource + floatingArrayFairySource + cArrayFairy,
+		CompanionC:   companionC + arrayCompanionC + enumCompanionC + floatingCompanionC + integerCompanionC + callbackCompanionC + integerArrayCompanionC + floatingArrayCompanionC + cArrayC,
 		ExpectedExit: 42,
 		RequiredCFragments: []string{
 			"float single[UINT64_C(3)];",
@@ -136,7 +146,7 @@ fn i32 main() {
         changed.status == 99 && changed.allocation_status == 7 &&
         changed_large.first == 101 && changed_large.second == 2 &&
         changed_large.third == 3 && changed_large.fourth == 4 && changed_large.fifth == 105 &&
-        mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks() && check_integer_arrays() && check_floating_arrays()) {
+		mixed.detail.status == 17 && mixed.detail.allocation_status == 19 && exhausted_result == 42 && check_arrays() && check_c_enums() && check_floats() && check_integers() && check_callbacks() && check_integer_arrays() && check_floating_arrays() && check_c_scalar_arrays()) {
         42
     } else {
         0
