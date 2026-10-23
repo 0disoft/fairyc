@@ -1,5 +1,19 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 full CLI comparisons (2026-10-24)
+
+The [CLI refresh record](../ops/evidence/candidate-sdk087-cli-refresh-20261024.json)
+adopts the completed development/release build with frozen identity `890b3da4`.
+All 512 authored input hashes still match the checkout. Both compiler profiles
+pass 122 command-metadata comparisons and 104 semantic-test comparisons each:
+452 exact exit/stdout/stderr matches in total. Semantic tests execute with only
+the compiler image installed and preserve locked workspace files and timestamps.
+The release compiler, authored companion and runtime pack total 6,955,917 bytes;
+optional debugging symbols and transient build files are excluded.
+Latest-source consecutive-generation equality, native-test comparisons and the
+remaining workspace/check/test-list/example comparisons are still pending.
+Go remains the default; no Linux execution, target promotion or publication is claimed.
+
 ## Portable file SDK refresh (2026-10-24)
 
 The [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json)
@@ -13,9 +27,10 @@ Current runtime packaging passes 249 complete Go byte/admission comparisons in
 Go-native, development and release execution. The unchanged 22-asset pack is
 150,925 bytes. Both candidate profiles also pass the two SDK bundle tests for
 exact core/vector authentication and changed/incomplete/over-budget rejection.
-This is a private seed and focused execution proof. The full latest-source CLI
-build, consecutive-generation fixed point and complete command comparisons
-remain pending. Go remains the default; Linux and target maturity are unchanged.
+This is a private seed and focused execution proof. The full CLI build and first
+command comparisons are now recorded above; consecutive-generation equality and
+the remaining command comparisons stay pending. Go remains the default; Linux
+and target maturity are unchanged.
 
 ## Runtime refresh (2026-10-23)
 

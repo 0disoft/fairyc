@@ -187,6 +187,15 @@ remain unchanged.
 
 ## Feature proposals
 
+The [SDK 0.87 CLI refresh](../ops/evidence/candidate-sdk087-cli-refresh-20261024.json)
+records completed development/release full CLI builds at frozen `890b3da4`, with
+all 512 authored source hashes matching the checkout. Metadata and semantic tests
+pass 452 exact comparisons across both profiles. The release compiler plus required
+companion and runtime pack occupy 6,955,917 bytes, excluding optional debugging
+symbols and transient build files. Latest-source consecutive-generation equality,
+native-test comparisons and the remaining workspace/check/test-list/example
+comparisons stay open; Go remains the default.
+
 The first [portable file-to-Buffer slice](../adr/0487-portable-file-buffer-reads.md) adds a shared
 reserve/read/commit implementation and Linux adapter while retaining the Windows symbol. Both
 MSVC profiles pass the native allocation/read/failure observer; the Linux probe cross-compiles

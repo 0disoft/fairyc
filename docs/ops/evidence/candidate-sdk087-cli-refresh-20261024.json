@@ -1,0 +1,115 @@
+{
+  "schema": "fairyc.sdk087-cli-refresh/v1",
+  "passed": true,
+  "recordedAtRevision": "e06d40d611ffc6170aba1f30fd3c74f755982997",
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "sourceFiles": 512,
+  "sourceInputsVerified": true,
+  "packet": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/candidate-packet.bin",
+    "bytes": 44747876,
+    "sha256": "6ccd98a3725a55abbfff0a541b8edba8b1203cb889667a2d1d6414eb85fec5fb"
+  },
+  "images": [
+    {
+      "profile": "development",
+      "compiler": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/development/fairyc.exe",
+        "bytes": 17136640,
+        "sha256": "8fe4122540700d8257be7edf8e262219b1f32854b981271459cf6152cac3f2ad"
+      },
+      "companion": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/development/fairyc-candidate-build.exe",
+        "bytes": 950272,
+        "sha256": "c779aafd70a8371ae35345430f80a503481c207d99390ad0d9f31772740ef842"
+      },
+      "assets": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/development/fairyc-runtime-assets.pack",
+        "bytes": 150925,
+        "sha256": "05ebcfa6fb35b44a9bc3a7b2b615e213353a0c2d22a5c7898331fbadd8c51de7"
+      },
+      "requiredFilesBytes": 18237837
+    },
+    {
+      "profile": "release",
+      "compiler": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc.exe",
+        "bytes": 6407680,
+        "sha256": "132c0edff961630d84ca5d1589fe44e689544a1b4355ee2333d49ac579df9170"
+      },
+      "companion": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc-candidate-build.exe",
+        "bytes": 397312,
+        "sha256": "db229954373972326cc4067dfb44cb4b98013a7a1ae0f1f74bc2f4a9c491fe05"
+      },
+      "assets": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc-runtime-assets.pack",
+        "bytes": 150925,
+        "sha256": "05ebcfa6fb35b44a9bc3a7b2b615e213353a0c2d22a5c7898331fbadd8c51de7"
+      },
+      "requiredFilesBytes": 6955917
+    }
+  ],
+  "comparisons": [
+    {
+      "group": "metadata-development",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/metadata-development/receipt.json",
+        "bytes": 373474,
+        "sha256": "c9dfbf9af8e4fa7ffbf110b95b0e64123ae756c0c6da16a726abef167303b0a1"
+      },
+      "cases": 122,
+      "exactMatches": 122
+    },
+    {
+      "group": "metadata-release",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/metadata-release/receipt.json",
+        "bytes": 372943,
+        "sha256": "944a8ca3cb1676e6a57e507acd9a1e57e2fc86aa97ed317a21cd7bb34137bc6f"
+      },
+      "cases": 122,
+      "exactMatches": 122
+    },
+    {
+      "group": "semantic-development",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/semantic-development/receipt.json",
+        "bytes": 266831,
+        "sha256": "53ff6fe1d0dd7aee34d6e1bf011904ce816c830bb72c492f2ba0a7676bad2ff5"
+      },
+      "cases": 104,
+      "exactMatches": 104
+    },
+    {
+      "group": "semantic-release",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/semantic-release/receipt.json",
+        "bytes": 266456,
+        "sha256": "7f62cd39b634988742def67d534e2a0d7e854791ebe1e11291de3cdbca8cb7b7"
+      },
+      "cases": 104,
+      "exactMatches": 104
+    }
+  ],
+  "totalExactComparisons": 452,
+  "pending": [
+    "latest-source consecutive C-packet and optimized-image fixed point",
+    "native-test CLI comparisons in development and release",
+    "remaining workspace/check/test-list/example CLI comparisons"
+  ],
+  "linuxExecuted": false,
+  "defaultCompiler": "Go",
+  "targetMaturityPromoted": false,
+  "pushed": false,
+  "limitations": [
+    "Build identity is frozen at 890b3da4; all recorded authored input hashes still match this checkout.",
+    "These are correctness comparisons, not performance benchmarks.",
+    "Required file totals exclude optional debugging symbols, installation metadata and temporary build files."
+  ]
+}
