@@ -1,0 +1,226 @@
+{
+  "schema": "fairyc.candidate-region-diagnostic-comparison/v1",
+  "sourceRevision": "b0cd35b1ccce917c68230bf49819d71680bcc004",
+  "candidateSourceRevision": "91762c18981dcea1f2889996afdb006678793f4f",
+  "candidateSourcesUnchangedAtSourceRevision": true,
+  "candidateBuild": {
+    "path": ".cache/completion-20261023/self-hosting/candidate-regions-v4/receipt.json",
+    "sha256": "f90b37be499769f13a4a8165ede73764e4babfcc9c089cfa7b3ec2ab9bc4c885"
+  },
+  "candidateSourceCount": 512,
+  "candidateImages": [
+    {
+      "profile": "development",
+      "path": ".cache/completion-20261023/self-hosting/candidate-regions-v4/development/fairyc.exe",
+      "sha256": "39a76109ff8c78b3c7b0929593d2ad0e3ec3aa4f231f98b28d28f2a573fe6a91",
+      "driverSHA256": "125948cc77eef30de12436af5a55cc15df99793274ab7229f3fb2e9bb0db09a5",
+      "driverImplementation": "authored Fairy",
+      "assetPath": ".cache/completion-20261023/self-hosting/candidate-regions-v4/development/fairyc-runtime-assets.pack",
+      "assetSHA256": "3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98",
+      "bytes": 17135616
+    },
+    {
+      "profile": "release",
+      "path": ".cache/completion-20261023/self-hosting/candidate-regions-v4/release/fairyc.exe",
+      "sha256": "4a913b56730c8e0e92f30731e4174d7843640c0ebd524add8870e17d7dcacffd",
+      "driverSHA256": "30bf0729e7235362a543f4af92aa4570441658529a85156b5757e5793cd44a47",
+      "driverImplementation": "authored Fairy",
+      "assetPath": ".cache/completion-20261023/self-hosting/candidate-regions-v4/release/fairyc-runtime-assets.pack",
+      "assetSHA256": "3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98",
+      "bytes": 6407680
+    }
+  ],
+  "comparisons": [
+    {
+      "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-development/region-sdk/receipt.json",
+      "sha256": "4bb359fc17b521a2bf8966f61b52eb0504a31f9c00b6909b27e5a55247e00b8a",
+      "profile": "development",
+      "exactMatches": 6,
+      "referenceSHA256": "d3bc8b7482e0293ac1c33c9673380369e955387356067a1abcf13416c8a01385",
+      "cases": [
+        {
+          "id": "pass.flow.param-local-use",
+          "expected": true,
+          "exact": true,
+          "exit": 0,
+          "stdoutSHA256": "8f83e4a054e64b239fc64e8a4ab9857b3318bf8523b884663b4906dfaf788b3c",
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "goSeconds": 0.1543288999964716,
+          "candidateSeconds": 58.13476090000768
+        },
+        {
+          "id": "pass.flow.param-return",
+          "expected": true,
+          "exact": true,
+          "exit": 0,
+          "stdoutSHA256": "8f83e4a054e64b239fc64e8a4ab9857b3318bf8523b884663b4906dfaf788b3c",
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "goSeconds": 0.13797650000196882,
+          "candidateSeconds": 69.61797740000475
+        },
+        {
+          "id": "fail.flow.local-region-escape",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "f68b663ad50352b61fd24b8ffbe9e046cd4c80a016237dd43ebfa35e45abeed1",
+          "goSeconds": 0.1303775999986101,
+          "candidateSeconds": 47.29900240000279
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "351d031a86de220301552a5dd40b287333e804aa541644538bc57710ec1e0258",
+          "goSeconds": 0.1394021000014618,
+          "candidateSeconds": 38.49801149999257
+        },
+        {
+          "id": "fail.type.capability-storage",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+          "goSeconds": 0.12169229998835362,
+          "candidateSeconds": 39.22176549999858
+        },
+        {
+          "id": "fail.type.direct-construction",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+          "goSeconds": 0.10946030000923201,
+          "candidateSeconds": 36.68304160000116
+        }
+      ]
+    },
+    {
+      "path": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/region-sdk/receipt.json",
+      "sha256": "5358dd491f41c61a7758f833c554a10ae92a116f504250b9a39c950801a5e7c2",
+      "profile": "release",
+      "exactMatches": 6,
+      "referenceSHA256": "d3bc8b7482e0293ac1c33c9673380369e955387356067a1abcf13416c8a01385",
+      "cases": [
+        {
+          "id": "pass.flow.param-local-use",
+          "expected": true,
+          "exact": true,
+          "exit": 0,
+          "stdoutSHA256": "8f83e4a054e64b239fc64e8a4ab9857b3318bf8523b884663b4906dfaf788b3c",
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "goSeconds": 0.1530367999948794,
+          "candidateSeconds": 4.439958399991156
+        },
+        {
+          "id": "pass.flow.param-return",
+          "expected": true,
+          "exact": true,
+          "exit": 0,
+          "stdoutSHA256": "8f83e4a054e64b239fc64e8a4ab9857b3318bf8523b884663b4906dfaf788b3c",
+          "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "goSeconds": 0.13306249999732245,
+          "candidateSeconds": 4.667073699994944
+        },
+        {
+          "id": "fail.flow.local-region-escape",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "f68b663ad50352b61fd24b8ffbe9e046cd4c80a016237dd43ebfa35e45abeed1",
+          "goSeconds": 0.11516719999781344,
+          "candidateSeconds": 3.547437799992622
+        },
+        {
+          "id": "fail.flow.resource-placement",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "351d031a86de220301552a5dd40b287333e804aa541644538bc57710ec1e0258",
+          "goSeconds": 0.11947199999121949,
+          "candidateSeconds": 2.903507199996966
+        },
+        {
+          "id": "fail.type.capability-storage",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "4655043bbc7c4577d276dc77d8c79d5c2c8a8e1a543b38017609178bae2c8ed4",
+          "goSeconds": 0.11573619999398943,
+          "candidateSeconds": 2.9550511999987066
+        },
+        {
+          "id": "fail.type.direct-construction",
+          "expected": true,
+          "exact": true,
+          "exit": 3,
+          "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSHA256": "753aedbec1b47eea2432c4a9b0525301f60309932f3249bd5e28b74fab923c08",
+          "goSeconds": 0.11633620000793599,
+          "candidateSeconds": 2.8267572000040673
+        }
+      ]
+    }
+  ],
+  "exactMatches": 12,
+  "nativeDiagnosticTests": {
+    "receipt": {
+      "path": ".cache/completion-20261023/self-hosting/region-diagnostic-tests-final.json",
+      "sha256": "5d326203a171241d4757b6b78f8f0f052080f3fff30f4e8d4d058840a6677654"
+    },
+    "passed": 3,
+    "failed": 0
+  },
+  "additionalChecks": [
+    {
+      "command": "region-final-reference.exe test --native --file tests/project_diagnostic_codes.fy --locked",
+      "exit": 0,
+      "passed": 3
+    },
+    {
+      "command": "go test -mod=readonly ./internal/semantic ./internal/regionfixture",
+      "exit": 0
+    },
+    {
+      "command": "go test -mod=readonly ./internal/workspacecompiler -run TestRegion -count=1",
+      "exit": 0
+    },
+    {
+      "command": "go run -mod=readonly ./tools/candidate/fairyc-candidate-cli-embed --check examples/lexer_candidate/src",
+      "exit": 0
+    }
+  ],
+  "preview": {
+    "path": ".cache/starter-smoke-5jmjhK/receipt.json",
+    "sha256": "c82f67e53c716da379689f3161d3ae9764b2ba79d51d3c8616cb9461c984447f",
+    "executable_sha256": "d2aa75a24bfcad1245d4837e51863b3a64116cd38c02c3512b49487d1564b4b5",
+    "executable_bytes": 13126144,
+    "archive_sha256": "6628f8626e5690f275e430fcf27e7fd9967213fa073348567b58c31287003070",
+    "archive_bytes": 4628074,
+    "preview_candidate_archive": ".cache\\starter-smoke-5jmjhK\\fairyc-windows-amd64-preview-candidate.zip",
+    "vcs_revision": "b0cd35b1ccce917c68230bf49819d71680bcc004",
+    "stepsPassed": 12
+  },
+  "observations": {
+    "firstGoReferenceRegression": "e589f062 also reported E3103 for already-invalid direct Region construction; b0cd35b1 suppresses that cascade and preserves E3104.",
+    "scope": "Stable check in six real SDK workspaces, preserving original main.fy and exact primary/related diagnostic output.",
+    "runtimeOriginFactsCompared": false,
+    "nativeExecutionInComparison": false,
+    "timing": "Single CLI observations during other verification work, not a benchmark or speedup claim.",
+    "defaultCompilerChanged": false,
+    "fullCurrentBehaviorComparison": "running",
+    "currentFixedPoint": "running",
+    "linuxNativeExecution": false,
+    "cleanMachinePortability": false,
+    "targetMaturityChanged": false,
+    "pushed": false
+  }
+}

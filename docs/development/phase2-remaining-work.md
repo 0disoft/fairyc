@@ -184,5 +184,10 @@ passes; native Linux execution remains unavailable. Direct Region returns and ex
 local copies now report E3103 before MIR lowering.
 
 The refreshed Go reference agrees with the frozen candidate on both previously failing positive
-Region cases. Candidate E3102 and related E3101 diagnostics remain open. The older whole-CLI
-comparisons belong to the frozen `1dbca9ad` images, not this newer Go compiler.
+Region cases. Candidate E3102 and related E3101 diagnostics were subsequently fixed at `91762c18`.
+The fresh comparison also found an extra Go E3103 on direct Region construction; `b0cd35b1`
+suppresses that cascade and retains the contracted E3104. All six real-SDK cases now match in both
+candidate profiles, with exact primary and related output; see the [12-case
+record](../ops/evidence/candidate-region-diagnostics-20261024.json).
+The older whole-CLI comparisons belong to the frozen `1dbca9ad` images. Remaining current CLI
+comparisons and consecutive self-build equality are being renewed separately. Phase 2 stays partial.
