@@ -1,0 +1,177 @@
+{
+  "schema": "fairyc.windows-sdk-preview-refresh/v1",
+  "passed": true,
+  "sourceRevision": "890b3da498aeb5088455d50a0263741f3b6da159",
+  "sdk": "0.0.0-stage0.87",
+  "preview": {
+    "receipt": {
+      "path": ".cache/starter-smoke-WoFMJY/receipt.json",
+      "bytes": 3183,
+      "sha256": "923df73f72e58ec447158c483aff466921e6c0d244e21e7f4a17e3782459333a"
+    },
+    "archive": {
+      "path": ".cache/starter-smoke-WoFMJY/fairyc-windows-amd64-preview-candidate.zip",
+      "bytes": 4633250,
+      "sha256": "885925c4e9b14981748baa8e4f9783f82d31093b8759cdd822ca2efa43217aea"
+    },
+    "compiler": {
+      "path": ".cache/windows-portability-D9M9X9/bundle/fairyc.exe",
+      "bytes": 13135872,
+      "sha256": "a89e9d58ae842fa7a23986a8c36af12726c351f870f1274a30083ec9d901e0ce"
+    },
+    "buildFlags": [
+      "-trimpath",
+      "-ldflags=-s -w"
+    ],
+    "goVersion": "go1.27.1",
+    "steps": [
+      {
+        "name": "build",
+        "exit": 0
+      },
+      {
+        "name": "build-metadata",
+        "exit": 0
+      },
+      {
+        "name": "go-root",
+        "exit": 0
+      },
+      {
+        "name": "zip-roundtrip",
+        "exit": 0
+      },
+      {
+        "name": "new",
+        "exit": 0
+      },
+      {
+        "name": "check",
+        "exit": 0
+      },
+      {
+        "name": "check-locked",
+        "exit": 0
+      },
+      {
+        "name": "test",
+        "exit": 0
+      },
+      {
+        "name": "native-test",
+        "exit": 0
+      },
+      {
+        "name": "native-test-release",
+        "exit": 0
+      },
+      {
+        "name": "run",
+        "exit": 0
+      },
+      {
+        "name": "run-release",
+        "exit": 0
+      }
+    ]
+  },
+  "portability": {
+    "preparation": {
+      "path": ".cache/windows-portability-D9M9X9/preparation.json",
+      "bytes": 4386,
+      "sha256": "41e577f6d0218d1c505c8ed915acd5d592a65b5be2faa5a1a7c9109fd15b2cb3"
+    },
+    "archive": {
+      "path": ".cache/windows-portability-D9M9X9/fairyc-windows-portability.zip",
+      "bytes": 4762128,
+      "sha256": "1bd1a95f0afa067085c351089627be50994e27643414479f47c1594912cc94e6"
+    },
+    "manifest": {
+      "path": ".cache/windows-portability-D9M9X9/bundle/manifest.json",
+      "bytes": 2752,
+      "sha256": "e48445a57c8d18a3532af32a284647efefed7776ac3aa301b112ef386f49b459"
+    },
+    "executionReceipt": {
+      "path": ".cache/windows-portability-D9M9X9/local-receipt.json",
+      "bytes": 4435,
+      "sha256": "0c7cdea315478a95d4acb8c1f4d5524f17487a43de8a222a14436525471b35ba"
+    },
+    "powershellVersion": "5.1.26100.9711",
+    "windowsVersion": "10.0.26300.0",
+    "childPath": "",
+    "scratchRemoved": true,
+    "images": {
+      "fairyc.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "Go, CGO disabled"
+      },
+      "native-development.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "MSVC /MT static CRT"
+      },
+      "native-release.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "MSVC /MT static CRT"
+      }
+    },
+    "executions": [
+      {
+        "name": "version",
+        "exit": 0,
+        "stdout": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+        "stderr": ""
+      },
+      {
+        "name": "new",
+        "exit": 0,
+        "stdout": "created Fairy C package \"hello\" at hello\n",
+        "stderr": ""
+      },
+      {
+        "name": "check",
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n",
+        "stderr": ""
+      },
+      {
+        "name": "check-locked",
+        "exit": 0,
+        "stdout": "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock verified\n",
+        "stderr": ""
+      },
+      {
+        "name": "semantic-test",
+        "exit": 0,
+        "stdout": "test tests::main::answer_is_42 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n",
+        "stderr": ""
+      },
+      {
+        "name": "native-development",
+        "exit": 0,
+        "stdout": "Fairy C portability\n",
+        "stderr": ""
+      },
+      {
+        "name": "native-release",
+        "exit": 0,
+        "stdout": "Fairy C portability\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "cleanMachineEvidence": false,
+  "cleanMachineRemaining": "Run the transferred archive on an independently identified Windows host without development toolchains; account for dynamic DLL loads.",
+  "linuxExecuted": false,
+  "targetMaturityChanged": false,
+  "released": false,
+  "pushed": false
+}

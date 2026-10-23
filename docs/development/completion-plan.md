@@ -177,6 +177,14 @@ identities retained separately. Static imports are only `kernel32.dll`; runtime-
 is not established. This host has Visual Studio and the Windows SDK, and no Windows Sandbox
 executable is available, so clean-machine execution remains open. No host service was installed.
 
+The [SDK 0.87 preview refresh](../ops/evidence/windows-sdk-preview-refresh-20261024.json)
+uses clean source `890b3da4`. All twelve extracted starter steps and seven isolated
+portability executions pass. The compiler is 13,135,872 bytes; its preview ZIP is
+4,633,250 bytes and the transfer fixture is 4,762,128 bytes. PowerShell 5.1 runs the
+unchanged standalone verifier. This supersedes the earlier local preview for the
+portable File Buffer SDK; clean-machine evidence, publication and target maturity
+remain unchanged.
+
 ## Feature proposals
 
 The first [portable file-to-Buffer slice](../adr/0487-portable-file-buffer-reads.md) adds a shared
