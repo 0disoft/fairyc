@@ -16,7 +16,7 @@ valid execution records are reused instead of reopening completed work.
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
-| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `b0cd35b1`; clean-machine proof and publication remain open. LSP stays a separate executable. |
+| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `c8f5964e`. A separate hashed portability ZIP passes seven toolchain-free execution steps locally; its dependency manifest and standalone verifier are ready for transfer. Clean-machine proof and publication remain open. LSP stays separate. |
 | 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass for the 512-source `91762c18` snapshot. Region diagnostics match 12/12 against Go `b0cd35b1`. Native tests match 30/30 and examples 78/78 in each profile. The [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) records both-profile build/run execution against Go `cbe0bff1`, after restoring generic signature admission. Candidate sources are unchanged; Linux host implementation/execution remain open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
@@ -159,12 +159,23 @@ trap locations, exit bits and temporary-directory cleanup. The [follow-up
 record](../ops/evidence/candidate-cli-parity-20261024.json) retains the earlier comparisons' own
 reference revision; they were not silently relabeled or repeated. No candidate source changed.
 
-The current Go preview at `b0cd35b1` is 4,628,074 bytes zipped, with a 13,126,144-byte compiler.
+The Go preview at `b0cd35b1` is 4,628,074 bytes zipped, with a 13,126,144-byte compiler.
 All twelve packaging/starter steps pass in `.cache/starter-smoke-5jmjhK/receipt.json`.
 The authored release compiler is 6,407,680 bytes, excluding its separate companion/runtime pack.
 Keep Go as the default: the two positive Region check observations took 4.44–4.67 seconds with
 the authored release compiler versus 0.13–0.15 seconds with Go. These were single observations
 during other verification, not a benchmark. A smaller executable alone does not justify promotion.
+
+The [Windows portability record](../ops/evidence/windows-portability-local-20261024.json) refreshes
+the Go preview at clean `c8f5964e`: 4,632,523 bytes zipped and 13,134,336 bytes for the compiler,
+with all twelve starter steps passing. A separate 4,761,405-byte transfer ZIP contains the same
+compiler, two prebuilt native profiles, a file/DLL manifest, a PowerShell verifier and licenses.
+Seven executions pass after extraction with empty child PATH; byte-buffer/file round trips match
+and scratch files are removed. The verifier also rejects corrupted images, incorrect native
+behavior and existing receipt paths. PowerShell 5.1 and 7 are exercised, with their compiler
+identities retained separately. Static imports are only `kernel32.dll`; runtime-loaded DLL closure
+is not established. This host has Visual Studio and the Windows SDK, and no Windows Sandbox
+executable is available, so clean-machine execution remains open. No host service was installed.
 
 ## Feature proposals
 

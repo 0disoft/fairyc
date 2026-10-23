@@ -121,6 +121,13 @@ The final promotion receipt must identify the exact repository commit, Fairy lan
 
 Successful execution on `windows-latest` proves hosted compatibility, not redistributability. Distribution maturity requires artifact transfer to a clean environment containing only the documented Windows baseline and explicitly declared redistributable runtime components.
 
+The [2026-10-24 local portability record](../ops/evidence/windows-portability-local-20261024.json)
+at `c8f5964e` records the transfer ZIP, declared file hashes and compiler/native DLL imports.
+After ZIP extraction, the verifier passes five toolchain-free compiler operations and both
+prebuilt byte/file/console programs with empty child PATH. The development host still has
+Visual Studio and the Windows SDK. These results prepare the transfer fixture; they do not
+change the clean-machine row or establish dynamic DLL-load closure.
+
 ## Promotion rule
 
 `x86_64-windows-msvc` remains below complete maturity while any mandatory row is `partial` or `blocked`. No README, TargetSpec flag, release note, or installer may imply complete target or distribution support before the matrix is fully proven.

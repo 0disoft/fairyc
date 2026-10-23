@@ -1,0 +1,162 @@
+{
+  "schema": "fairyc.windows-portability-local/v1",
+  "sourceRevision": "c8f5964e28e6a2bcb8c1a25111a15fd0e99cf8aa",
+  "sources": [
+    {
+      "path": "tools/windows-portability/prepare.mjs",
+      "sha256": "a60b4bcf147d6b012d3ac92d6cf5b3ab0a054096c801f6be91737bd54d4fa97f"
+    },
+    {
+      "path": "tools/windows-portability/verify.ps1",
+      "sha256": "426bb4f95bcf74d4f635b6cf30691c1eb8023082929c02e0b2891bc2874b7ede"
+    },
+    {
+      "path": "tools/windows-portability/test.mjs",
+      "sha256": "9aec7475988103e2aeaaa36ae0cac4508617b78aef21e6aa26764eaf92c0d611"
+    },
+    {
+      "path": "tools/windows-portability/main.fy",
+      "sha256": "5a10232f2ff730a1a1eb34f22fb4d8a901bbcc095d56fefb1de38569f9f9bd00"
+    },
+    {
+      "path": "tools/windows-portability/README.txt",
+      "sha256": "a9022195eb9b0d00cd8e81bbaf28b8d93646f96c7e24f2138f445cf6d9ae0a00"
+    }
+  ],
+  "preview": {
+    "path": ".cache/starter-smoke-xYXaae/receipt.json",
+    "sha256": "71b3af009f3957c453556af8d524d6bcab018c51be167175701412506dc0b106",
+    "executableBytes": 13134336,
+    "archiveBytes": 4632523,
+    "archiveSHA256": "b93169c1b6b3f64cf985a0f75dad00a9a7cb9ea55cb8b9fede5621a326853d26",
+    "passedSteps": 12
+  },
+  "portability": {
+    "preparation": {
+      "path": ".cache/windows-portability-G1Nelb/preparation.json",
+      "sha256": "e89227552ff7cc010e0ac6b14305f747ed291af6ec663078c144d8bdb6d133a5"
+    },
+    "manifest": {
+      "path": ".cache/windows-portability-G1Nelb/extracted/manifest.json",
+      "sha256": "b013596e11cca343d05579a007584693c169e4eb1104bce5bee004e3df8d969b"
+    },
+    "archive": {
+      "path": ".cache/windows-portability-G1Nelb/fairyc-windows-portability.zip",
+      "sha256": "a47660bc5f62c9ada9ce651c62b13bb4a376db60e9a55c4a459287a6c721a481"
+    },
+    "archiveBytes": 4761405,
+    "declaredFiles": [
+      {
+        "name": "GO-LICENSE.txt",
+        "bytes": 1453,
+        "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+      },
+      {
+        "name": "LICENSE",
+        "bytes": 11303,
+        "sha256": "3a0b32a74c46bdda3499ec9f39ab4f2a98fc2b239a1c1c1592086d26fdf76159"
+      },
+      {
+        "name": "LICENSING.md",
+        "bytes": 2043,
+        "sha256": "8232abe33a075b02891750914c83958c1880b76fb2b180bcf1f2cc103def0f45"
+      },
+      {
+        "name": "README.txt",
+        "bytes": 1463,
+        "sha256": "a9022195eb9b0d00cd8e81bbaf28b8d93646f96c7e24f2138f445cf6d9ae0a00"
+      },
+      {
+        "name": "THIRD_PARTY_NOTICES.md",
+        "bytes": 2241,
+        "sha256": "0b877671ce7eeefd35eb88e31cc1be63d08d4283e5bbb80b0d98ea21d5bcbc04"
+      },
+      {
+        "name": "fairyc.exe",
+        "bytes": 13134336,
+        "sha256": "decbb18efe62abe148d5c32a45fe4a6a3c8e5f5138bcd1117b345bd0ad6a181d"
+      },
+      {
+        "name": "native-development.exe",
+        "bytes": 147968,
+        "sha256": "1ecea6a680e61950a30c3992bd8e4e9eff648462faaf9ba34c81fd334e452bb8"
+      },
+      {
+        "name": "native-release.exe",
+        "bytes": 114176,
+        "sha256": "9c844766ed960525cd590e006c5fb537eb7ef8b37782d047dbd42d836d7b6906"
+      },
+      {
+        "name": "verify.ps1",
+        "bytes": 8848,
+        "sha256": "426bb4f95bcf74d4f635b6cf30691c1eb8023082929c02e0b2891bc2874b7ede"
+      }
+    ],
+    "images": {
+      "fairyc.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "Go, CGO disabled"
+      },
+      "native-development.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "MSVC /MT static CRT"
+      },
+      "native-release.exe": {
+        "imports": [
+          "kernel32.dll"
+        ],
+        "importScope": "dumpbin direct and delay-load dependencies; dynamic LoadLibrary calls are not enumerated",
+        "crt": "MSVC /MT static CRT"
+      }
+    },
+    "localReceipt": {
+      "path": ".cache/windows-portability-G1Nelb/local-receipt.json",
+      "sha256": "da75293a4187e0d4f8a13289f94ebd89701ad26874c9dac4c60a430937a2adc1"
+    },
+    "passedExecutions": 7,
+    "scratchRemoved": true,
+    "nativeCompilationAttempted": false,
+    "childPath": "",
+    "powershellVersion": "5.1.26100.9711",
+    "visualStudioDirectoryPresent": true,
+    "windowsSDKDirectoryPresent": true
+  },
+  "powershell7": {
+    "receipt": {
+      "path": ".cache/windows-portability-G1Nelb/powershell7-reference-receipt.json",
+      "sha256": "3df1c48c2dacd835bf478449c13e3685b6787ed941bd7fc1a2172db626f39997"
+    },
+    "manifest": {
+      "path": ".cache/windows-portability-G1Nelb/powershell7-reference-manifest.json",
+      "sha256": "9366dd2c85ea732c01d064d51f44e5d55422b4658a106909f4b6a4fd5b435644"
+    },
+    "compilerRevision": "cbe0bff139aad65d077682c964085e8193acac3a",
+    "verifierSHA256": "426bb4f95bcf74d4f635b6cf30691c1eb8023082929c02e0b2891bc2874b7ede",
+    "passedExecutions": 7,
+    "scratchRemoved": true
+  },
+  "negativeChecks": {
+    "command": "node tools/windows-portability/test.mjs --bundle <verified extracted bundle>",
+    "exit": 0,
+    "cases": [
+      "corrupt image rejected before execution",
+      "wrong native behavior fails despite matching hash",
+      "existing receipt preserved"
+    ]
+  },
+  "limitations": {
+    "cleanMachineEvidence": false,
+    "dynamicDLLLoadClosureVerified": false,
+    "linuxNativeExecution": false,
+    "windowsSandboxAvailable": false,
+    "targetMaturityChanged": false,
+    "published": false,
+    "pushed": false
+  }
+}
