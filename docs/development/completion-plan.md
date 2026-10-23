@@ -16,7 +16,7 @@ valid execution records are reused instead of reopening completed work.
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Bounded production-object inventory recorded below. Linux execution, mixed-stack unwind and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
-| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter pass at clean `8ba3fab7`; clean-machine proof and publication remain open. LSP stays a separate executable. |
+| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter renewed at clean `4c5967c9`; clean-machine proof and publication remain open. LSP stays a separate executable. |
 | 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Pending |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
@@ -109,6 +109,16 @@ new object. Total shared-cache retention grows by 63,242 bytes in this workload,
 unit-key directories remain after collection. The stripped compiler is 13,111,808 bytes. This is a local
 synthetic comparison, not a universal build-speed guarantee or a transient peak-disk measurement.
 
+The current local preview contains the cache changes at clean `4c5967c9`. All twelve packaging and
+starter steps pass, including extracted native tests and runs in both profiles. The ZIP is
+4,622,649 bytes, SHA-256 `405d51b5d48d24d0bf0b76603a60f61b62f6720b8d29b0e1cb586a67051f0696`;
+its receipt is `.cache/starter-smoke-TvUBvY/receipt.json`. This supersedes the earlier preview for
+local use, without changing the outstanding clean-machine and publication gates.
+
+Next local work is step 6. The fixed-point verifier still equates the installed companion with the
+bootstrap builder. Current authored-companion receipts identify them separately, so that check
+must authenticate the companion and runtime pack before renewing the latest-source comparison.
+
 ## Feature proposals
 
 Keep existing effects. Consider only the narrow public-interface comparison and source-size
@@ -130,7 +140,7 @@ They need a demonstrated user or measured benefit before becoming work in this q
   All thirteen bases preserve nominal identity and target-owned representation through whole-array
   copies. Source/MIR/interface and both target-emission checks pass; four MSVC combinations each
   execute 36 enum-array cases, including undeclared foreign ordinals. Native Linux is pending.
-  Next: assess record-element array and raw-pointer scope against the target contract and users.
+  The caller assessment above retains record-element arrays and further pointer forms as deferrals.
 
 Local Linux execution is currently unavailable: `wsl --list --quiet` exits with
 `Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`, and no Docker command is installed. This is a host
