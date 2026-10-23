@@ -18,6 +18,11 @@ import os
 from pathlib import Path
 import subprocess
 
+LOCATION_TRAP_SHIM = (
+    '_Noreturn void fy_runtime_trap_at_v0(uint32_t category,const char *source,'
+    'uint32_t length,uint64_t start,uint64_t end){'
+    '(void)source;(void)length;(void)start;(void)end;fy_runtime_trap(category);}\n'
+)
 
 EXPECTED = {
     "module_c_executes_calls_loops_and_lazy_branch_values": 0,
@@ -238,7 +243,7 @@ def main():
                     "for(uintptr_t i=0;i<bl;i++)if(b[i]!=bytes[i])return 0;"
                     "for(uintptr_t i=0;i<4;i++)if(c[i]!=cstr[i])return 0;return 42;}\n"
                     "_Noreturn void fy_runtime_trap(uint32_t category)"
-                    "{exit(100+(int)category);}\n", encoding="utf-8")
+                    "{exit(100+(int)category);}\n" + LOCATION_TRAP_SHIM, encoding="utf-8")
     executions = []
     for name, (expected, trace) in expected_cases.items():
         source = output / f"{name}.c"

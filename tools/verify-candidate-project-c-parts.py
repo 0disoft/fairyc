@@ -103,7 +103,7 @@ def execute(data, folder, compiler, env, expected_frames, expected_stdout, compl
     for path, source in zip(sources, [literals, *units]):
         path.write_bytes(source)
     shim = folder / "trap.c"
-    shim.write_text('#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\nvoid observe_cleanup(int32_t n){printf("%d,",(int)n);}\n_Noreturn void fy_runtime_trap(uint32_t n){exit(100+(int)n);}\n')
+    shim.write_text('#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\nvoid observe_cleanup(int32_t n){printf("%d,",(int)n);}\n_Noreturn void fy_runtime_trap(uint32_t n){exit(100+(int)n);}\n' + driver.LOCATION_TRAP_SHIM)
     observations = []
     for profile, flag in (("low", "/Od"), ("optimized", "/O2")):
         binary = folder / f"project-{profile}.exe"

@@ -162,7 +162,7 @@ def main():
     output = args.output.resolve()
     trap = output / "trap.c"
     trap.write_text("#include <stdint.h>\n#include <stdlib.h>\n"
-                    "_Noreturn void fy_runtime_trap(uint32_t category){exit(100+(int)category);}\n",
+                    "_Noreturn void fy_runtime_trap(uint32_t category){exit(100+(int)category);}\n" + driver.LOCATION_TRAP_SHIM,
                     encoding="utf-8")
     executions = []
     for name in dict.fromkeys(args.case or CASES):

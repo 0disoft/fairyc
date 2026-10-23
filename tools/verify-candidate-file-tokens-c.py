@@ -212,7 +212,7 @@ int main(void){int32_t status=fy_candidate_entry();const char *path=getenv("FY_T
 """
     runtime.write_bytes(prefix + b"\n".join(path.read_bytes() for path in components) + suffix)
     trap = output / "trap.c"
-    trap.write_text("#include <stdint.h>\n#include <stdlib.h>\n_Noreturn void fy_runtime_trap(uint32_t category){exit(100+(int)category); }\n", encoding="utf-8")
+    trap.write_text("#include <stdint.h>\n#include <stdlib.h>\n_Noreturn void fy_runtime_trap(uint32_t category){exit(100+(int)category); }\n" + probe.driver.LOCATION_TRAP_SHIM, encoding="utf-8")
     executions = []
     builds = []
     reference_runs = []
