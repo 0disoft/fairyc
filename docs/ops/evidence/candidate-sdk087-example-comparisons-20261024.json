@@ -1,0 +1,122 @@
+{
+  "schema": "fairyc.sdk087-example-comparisons/v1",
+  "passed": true,
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "sourceInputsVerified": true,
+  "records": [
+    {
+      "group": "examples-release",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/examples-release/receipt.json",
+        "bytes": 512800,
+        "sha256": "ae4335be5e26edc1ce959225224147e3e35175101a8d77ed2f8bdbc1bf60e99a"
+      },
+      "profile": "release",
+      "cases": 78,
+      "exactMatches": 78,
+      "skipped": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ]
+    },
+    {
+      "group": "examples-development-1",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/examples-development-1/receipt.json",
+        "bytes": 413296,
+        "sha256": "e88386c704d0ef6de3dd3b53493bc762c7bb6c0fd7988527f9bd35aba7b3013a"
+      },
+      "profile": "development",
+      "cases": 22,
+      "exactMatches": 22,
+      "skipped": [
+        {
+          "id": "lexer_candidate",
+          "reason": "compiler self-source is a separate bootstrap/fixed-point gate"
+        }
+      ]
+    },
+    {
+      "group": "examples-development-2",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/examples-development-2/receipt.json",
+        "bytes": 430675,
+        "sha256": "2e0e626330d646e962bd7685b6918330b8f58a9edcec2b157ae5bd46172705eb"
+      },
+      "profile": "development",
+      "cases": 33,
+      "exactMatches": 33,
+      "skipped": []
+    },
+    {
+      "group": "examples-development-3",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/examples-development-3/receipt.json",
+        "bytes": 420670,
+        "sha256": "4fbb96b575806fca46bfe52624471cbc73b32025f371ed387e42f9fb741878d2"
+      },
+      "profile": "development",
+      "cases": 23,
+      "exactMatches": 23,
+      "skipped": []
+    }
+  ],
+  "exactComparisons": 156,
+  "developmentPartitions": 3,
+  "verificationTimeoutSeconds": 300,
+  "totalCurrentCommandComparisons": 1306,
+  "nativePipelineExecutions": 53,
+  "companionFixedPoint": {
+    "path": "docs/ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json",
+    "bytes": 5967,
+    "sha256": "ea448cc4041f2d1f0b93d3a48f91f1adc95b9958bdb90748b6833c743b7a609a"
+  },
+  "slowestObservedInvocation": {
+    "development": {
+      "case": "std_fs_quickstart/build-release",
+      "argv": [
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "seconds": 239.45373789999576
+    },
+    "release": {
+      "case": "std_vec_quickstart/run",
+      "argv": [
+        "run",
+        "--locked"
+      ],
+      "seconds": 31.759674699991592
+    }
+  },
+  "hostAvailability": {
+    "wslListTimedOut": true,
+    "wslListTimeoutSeconds": 15,
+    "dockerCommandFound": false,
+    "windowsSandboxCommandFound": false,
+    "linuxExecutionEstablished": false
+  },
+  "limits": [
+    "Compiler self-source is excluded from example runs and covered by the independent SDK 0.87 dispatcher fixed-point record.",
+    "Native example runs use the script-declared representative subset; other examples are source-checked.",
+    "Correctness observations under concurrent verification are not performance benchmarks."
+  ],
+  "pending": [
+    "Linux implementation/execution",
+    "Windows clean-machine distribution and remaining target-maturity obligations"
+  ],
+  "defaultCompiler": "Go",
+  "publicApiChanged": false,
+  "ciChanged": false,
+  "linuxExecuted": false,
+  "targetMaturityPromoted": false,
+  "pushed": false
+}

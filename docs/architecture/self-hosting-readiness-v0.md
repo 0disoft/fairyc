@@ -1,5 +1,26 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 comparison renewal complete (2026-10-24)
+
+The [shipped-example record](../ops/evidence/candidate-sdk087-example-comparisons-20261024.json)
+closes this Windows comparison sequence at frozen `890b3da4`. Release passes
+78 exact comparisons; three disjoint development partitions pass 22, 33 and 23.
+Source/image hashes still match and both profiles cover the same 78 observations.
+Only the compiler self-source is excluded from examples, with its separate
+dispatcher/companion fixed-point proofs below. Native execution covers the runner's
+declared representative subset; other examples are source-checked.
+
+Together with the preceding records, this supplies 1,306 exact command comparisons
+and 53 separate native-pipeline executions. All selected rows match exit status
+and output; filesystem builds additionally preserve independent 0/42 expectations.
+These concurrent correctness runs do not establish acceptable compiler speed.
+
+The host refresh found no Docker or Windows Sandbox command; WSL listing timed out
+after 15 seconds. Linux execution and implementation, remaining Windows maturity
+requirements, clean-machine distribution and performance assessment remain open.
+Go stays the default. No product API, SDK ABI, CI or target flag changes here;
+the earlier records below retain their original snapshot and scope.
+
 ## SDK 0.87 companion consecutive generations (2026-10-24)
 
 The [companion fixed-point record](../ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json)
@@ -32,7 +53,7 @@ other native probes were running. The verifier now supplies private TMP/TEMP val
 to every child and observes only its own native scratch names. The initial failure
 remains in the record; it does not establish a product leak. The updated verifier
 passes while example probes continue concurrently. Product behavior, public APIs,
-CI and target maturity are unchanged. Shipped-example comparisons remain pending.
+CI and target maturity are unchanged. Shipped-example comparisons are now recorded above.
 
 ## SDK 0.87 starter and workspace commands (2026-10-24)
 

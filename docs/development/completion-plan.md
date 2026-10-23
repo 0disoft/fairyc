@@ -16,8 +16,8 @@ valid execution records are reused instead of reopening completed work.
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
-| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `c8f5964e`. A separate hashed portability ZIP passes seven toolchain-free execution steps locally; its dependency manifest and standalone verifier are ready for transfer. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Full CLI builds and fixed-point equality pass for snapshot `91762c18`; the [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) closes its recorded Windows comparisons. SDK 0.87 full CLI builds, 249 runtime byte comparisons and exact consecutive C-packet/optimized-image equality now pass; the verification follow-up below tracks remaining command comparisons. Linux host implementation/execution remain open. |
+| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | SDK 0.87 preview at clean `890b3da4` passes all twelve packaging/starter steps and seven local portability executions; its hashed transfer ZIP and standalone verifier are ready. Clean-machine proof and publication remain open. LSP stays separate. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Linux host implementation/execution and compiler selection remain open; Go stays the default. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -187,72 +187,37 @@ remain unchanged.
 
 ## SDK 0.87 verification follow-up
 
-The [companion fixed-point record](../ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json)
-closes companion renewal independently of the CLI dispatcher: the authored compiler
-reproduces the 1,991,476-byte C packet, and authored companions produce two successive
-397,312-byte release images exactly equal to the installed image. The probe invokes
-no Go frontend or bootstrap builder and retains MSVC as its backend. It uses the
-existing one-minute native compile allowance and authenticates the runtime pack.
+The full CLI snapshot has frozen identity `890b3da4`; all 512 authored input hashes
+still match the checkout. Current completed observations are:
 
-The [native command record](../ops/evidence/candidate-sdk087-native-cli-20261024.json)
-passes 53 development/release executions, including reference observations, with
-exact program streams, diagnostics, trap locations and exit bits. The verifier
-isolates child TMP/TEMP so parallel probes cannot alter its scratch-name baseline;
-the original global-set assertion failure is retained. Its owned temporary root
-is empty and removed. This closes native build/run verification; shipped examples
-remain separate, and clean-machine execution is still unavailable.
+| Area | Result | Record |
+| --- | --- | --- |
+| Metadata, semantic/native tests, checks, listing and real-SDK Region checks | 1,062 exact comparisons across both compiler profiles | [Command comparisons](../ops/evidence/candidate-sdk087-command-comparisons-20261024.json) |
+| Starter and workspace commands | 88 exact comparisons; existing entries and links preserved | [Starter/workspace](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json) |
+| Native build/run pipeline | 53 executions; exact streams, diagnostics, trap locations and exit bits; owned scratch removed | [Native commands](../ops/evidence/candidate-sdk087-native-cli-20261024.json) |
+| CLI consecutive generations | Complete 44,747,876-byte C packets and 6,407,680-byte optimized images match | [CLI fixed point](../ops/evidence/candidate-sdk087-fixed-point-20261024.json) |
+| Companion consecutive generations | 1,991,476-byte C packet reproduced; three 397,312-byte release images match | [Companion fixed point](../ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json) |
+| Shipped examples | 78 exact comparisons per profile; compiler self-source covered by the separate fixed-point records | [Examples](../ops/evidence/candidate-sdk087-example-comparisons-20261024.json) |
 
-The [starter/workspace record](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json)
-closes 28 starter and 60 workspace command comparisons across both compiler
-profiles. Existing entries and live/dangling links are preserved. Native build/run
-and shipped examples remain separate from those 88 exact observations.
+The original 90/120-second verification failures remain recorded. Listing passes
+with a 180-second allowance; seven remaining native-test cases pass at 300 seconds.
+The native CLI verifier isolates child TMP/TEMP after a global scratch-name-set
+assertion failed during parallel probes. Companion renewal uses the existing
+one-minute compile contract, invokes no Go frontend or bootstrap builder, and
+retains MSVC as its backend. Product timeouts and target maturity are unchanged.
 
-The [fixed-point refresh](../ops/evidence/candidate-sdk087-fixed-point-20261024.json)
-closes latest-input full CLI dispatcher equality at frozen `890b3da4`. All 512
-authored input hashes still match the checkout. Consecutive 44,747,876-byte C
-packets and 6,407,680-byte optimized images match without excluded bytes;
-the authored companion and runtime pack retain their authenticated identities.
-The companion's fixed point is now recorded in this follow-up; remaining example
-comparisons stay separate.
-Development SDK-dependent checks also exceeded the original verification deadlines;
-retain those failures and their focused retries when assessing authored-compiler speed.
+The selected comparison sequence now totals 1,306 exact command comparisons plus
+53 separate native-pipeline executions. The examples use the runner's declared
+native subset and source-check the others. Development compiler invocations can
+take minutes for SDK-dependent examples; these concurrent observations are not
+benchmarks and do not justify changing the default compiler.
 
-The [command comparison follow-up](../ops/evidence/candidate-sdk087-command-comparisons-20261024.json)
-records 1,062 exact comparisons across metadata, semantic tests, checks, CLI input
-handling, test listing, native tests and real-SDK Region checks in both profiles.
-Test listing passes all 178 cases with a verification-only 180-second allowance.
-Native development execution combines 23 original exact observations with seven
-successful remaining cases at a 300-second allowance; release passes all 30.
-The initial 90/120-second failures remain recorded. Remaining native/starter/workspace
-and example comparisons, Linux execution
-and clean-machine distribution stay open. These results do not change product
-deadlines, default compiler selection or target maturity.
+Go remains the default. Linux execution, required Linux implementation, remaining
+Windows maturity obligations and clean-machine distribution remain open. Correctness
+receipts do not establish acceptable build speed; measured time/storage improvements
+remain a separate requirement before compiler promotion.
 
 ## Feature proposals
-
-The [SDK 0.87 CLI refresh](../ops/evidence/candidate-sdk087-cli-refresh-20261024.json)
-records completed development/release full CLI builds at frozen `890b3da4`, with
-all 512 authored source hashes matching the checkout. Metadata and semantic tests
-pass 452 exact comparisons across both profiles. The release compiler plus required
-companion and runtime pack occupy 6,955,917 bytes, excluding optional debugging
-symbols and transient build files. The later fixed-point record above closes
-consecutive-generation equality. Remaining command comparisons are tracked separately;
-Go remains the default.
-
-The first [portable file-to-Buffer slice](../adr/0487-portable-file-buffer-reads.md) adds a shared
-reserve/read/commit implementation and Linux adapter while retaining the Windows symbol. Both
-MSVC profiles pass the native allocation/read/failure observer; the Linux probe cross-compiles
-and links at low/optimized settings but has not executed here. The authored runtime pack is
-150,925 bytes across 22 assets, four bytes smaller than the preceding pack. Its two authored
-tests pass 249 exact output/error comparisons through Go-native and both candidate C profiles.
-SDK `0.0.0-stage0.87` now links the public operations to the portable symbol. Both-target
-emission, Windows low/optimized binary/multi-window reads, and the existing allocation-failure
-probes pass. The candidate SDK source pin, embedded literals, foreign rule and C result record
-are updated. The [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json)
-provides a refreshed private seed, 249 runtime comparisons in three execution paths and both
-SDK bundle tests in development/release candidate C. Full CLI rebuilding and fixed-point
-renewal follow; earlier full-CLI records remain evidence for their original snapshots.
-Linux native execution remains open.
 
 Keep existing effects. Consider only the narrow public-interface comparison and source-size
 notices after the compiler/user path is ready. Data trust and state protocols first use ordinary
@@ -265,6 +230,12 @@ They need a demonstrated user or measured benefit before becoming work in this q
 
 ## Completed slices
 
+- Portable File-to-Buffer SDK reads: [ADR 0487](../adr/0487-portable-file-buffer-reads.md).
+  SDK 0.87 links the shared reserve/read/commit implementation and Linux adapter.
+  Windows emission/execution and allocator-failure observations pass; runtime packaging
+  passes 249 exact comparisons. The pack has 22 assets and 150,925 bytes. See the
+  [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json);
+  native Linux execution remains pending.
 - Exact C-scalar array fields: [ADR 0484](../adr/0484-repr-c-scalar-array-transport.md).
   All sixteen identities retain target layout and internal value transport. Local compiler,
   MIR/interface and Linux/Windows emission checks pass; MSVC C11/C17 low/optimized native
@@ -275,10 +246,11 @@ They need a demonstrated user or measured benefit before becoming work in this q
   execute 36 enum-array cases, including undeclared foreign ordinals. Native Linux is pending.
   The caller assessment above retains record-element arrays and further pointer forms as deferrals.
 
-Local Linux execution is currently unavailable: `wsl --list --quiet` exits with
-`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`, and no Docker command is installed. This is a host
-limitation, not a successful Linux run. Continue target-independent implementation and Windows
-execution; retain Linux-native checks for an available runner without installing host services.
+Local Linux execution remains unverified. The earlier WSL query returned
+`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`; the 2026-10-24 refresh of
+`wsl --list --quiet` timed out after 15 seconds. Neither Docker nor Windows Sandbox
+was found on PATH. Continue local implementation and Windows execution, keeping
+Linux-native and clean-machine checks pending without installing host services.
 
 ## Working rules
 
