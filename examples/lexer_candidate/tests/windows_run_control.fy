@@ -26,6 +26,22 @@ fn bytes::Buffer block(ref v::Vec<bytes::Buffer> entries){var bytes::Buffer resu
     let full=switch(control::classify(4294967295,b"",7)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(full.status==4294967295 && full.trap==0);
     assert(!control::classify(42,b"\x03",1).is_ok && !control::classify(131,b"\x02",1).is_ok && !control::classify(131,b"\x03\x03",1).is_ok && !control::classify(128,b"\0",1).is_ok && !control::classify(136,b"\x08",1).is_ok);
 }
+@test fn void validates_extended_trap_location_records(){
+    let record=b"\x05\x01\x0a\0\x01\0\0\0\0\0\0\0\x09\0\0\0\0\0\0\0p1/main.fy";
+    let accepted=switch(control::classify(133,record,42)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(accepted.trap==6 && accepted.status==5 && accepted.pid==42);
+    assert(bytes::equal(control::location_source(record),b"p1/main.fy") && control::location_start(record)==1 && control::location_end(record)==9);
+    assert(control::location_source(b"\x05").len==0 && control::location_start(b"\x05")==0 && control::location_end(b"")==0);
+    var usize n=2;while(n<record.len){assert(!control::classify(133,record[..n],42).is_ok);n+=1;}
+    var bytes::Buffer data=bytes::empty();assert(bytes::append(ref mut data,record[..20]).is_ok);while(bytes::len(ref data)<277){assert(bytes::append_byte(ref mut data,97).is_ok);}
+    bytes::view_mut(ref mut data)[2]=0;bytes::view_mut(ref mut data)[3]=1;assert(control::classify(133,bytes::view(ref data)[..276],42).is_ok);
+    assert(!control::classify(133,bytes::view(ref data),42).is_ok && !control::classify(132,record,42).is_ok);
+    bytes::view_mut(ref mut data)[1]=2;assert(!control::classify(133,bytes::view(ref data)[..276],42).is_ok);bytes::view_mut(ref mut data)[1]=1;
+    bytes::view_mut(ref mut data)[20]=0;assert(!control::classify(133,bytes::view(ref data)[..276],42).is_ok);bytes::view_mut(ref mut data)[20]=255;assert(!control::classify(133,bytes::view(ref data)[..276],42).is_ok);bytes::view_mut(ref mut data)[20]=97;
+    bytes::view_mut(ref mut data)[4]=10;assert(!control::classify(133,bytes::view(ref data)[..276],42).is_ok);
+    var usize i=4;while(i<20){bytes::view_mut(ref mut data)[i]=255;i+=1;}assert(control::classify(133,bytes::view(ref data)[..276],42).is_ok);
+    assert(control::location_start(bytes::view(ref data)[..276])==18446744073709551615 && control::location_end(bytes::view(ref data)[..276])==18446744073709551615);
+}
 @test fn void replaces_case_insensitive_control_name_and_preserves_environment_bytes(){
     var v::Vec<bytes::Buffer> entries=v::empty<bytes::Buffer>();add(ref mut entries,b"=C:=C:\\where");add(ref mut entries,b"AAA=kept");add(ref mut entries,b"fairyc_trap_control_handle_v1=old");add(ref mut entries,b"FAIRYC_TRAP_CONTROL_HANDLE_V1=duplicate");add(ref mut entries,b"ZED=\xed\x95\x9c\xea\xb8\x80\xf0\x9f\xa7\x9a");let original=block(ref entries);
     let actual=switch(control::with_handle(bytes::view(ref original),123)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(v::clear<bytes::Buffer>(ref mut entries)==5);add(ref mut entries,b"=C:=C:\\where");add(ref mut entries,b"AAA=kept");add(ref mut entries,b"FAIRYC_TRAP_CONTROL_HANDLE_V1=123");add(ref mut entries,b"ZED=\xed\x95\x9c\xea\xb8\x80\xf0\x9f\xa7\x9a");let expected=block(ref entries);assert(bytes::equal(bytes::view(ref actual),bytes::view(ref expected)));

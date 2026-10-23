@@ -2,6 +2,7 @@ module windows_run_control;
 import windows_process as child;
 import windows_command as command;
 import std::bytes as bytes;
+import std::text as text;
 import std::vec as v;
 
 @effects(filesystem) @link_name("fairyc_private_windows_pipe_v1") unsafe extern C fn i32 create_pipe(ptr mut void reader,ptr mut void writer);
@@ -25,9 +26,23 @@ fn child::Problem fail(u32 kind,u32 os_code,u32 pid){return child::Problem{.kind
 pub fn ref u8[] category(u32 trap){let ref u8[] names=b"boundsinteger-overflowdivision-by-zerosigned-division-overflowinvalid-shiftassertion-failedunreachable";return if(trap==1){names[..6]}else if(trap==2){names[6..22]}else if(trap==3){names[22..38]}else if(trap==4){names[38..62]}else if(trap==5){names[62..75]}else if(trap==6){names[75..91]}else if(trap==7){names[91..102]}else{names[..0]};}
 pub fn Result<Outcome,u32> classify(u32 exit_code,ref u8[] receipt,u32 pid){
     if(receipt.len==0){return .ok(Outcome{.status=exit_code,.trap=0,.pid});}
-    if(receipt.len!=1 || exit_code<129 || exit_code>135 || (receipt[0] as u32)!=exit_code-128){return .err(10);}
+    if(exit_code<129 || exit_code>135 || (receipt[0] as u32)!=exit_code-128){return .err(10);}
+    if(receipt.len!=1){
+        if(receipt.len<21 || receipt.len>max_receipt_bytes() || receipt[1]!=1){return .err(10);}
+        let length=(receipt[2] as usize)+(receipt[3] as usize)*256;
+        if(length==0 || length>256 || receipt.len!=20+length || location_start(receipt)>location_end(receipt)){return .err(10);}
+        let source=location_source(receipt);if(!text::validate_utf8(source).is_ok){return .err(10);}
+        var usize i=0;while(i<source.len){if(source[i]==0){return .err(10);}i+=1;}
+    }
     return .ok(Outcome{.status=5,.trap=canonical(exit_code-128),.pid});
 }
+// The runtime's v1 location record is a 20-byte LE header and up to 256 UTF-8 bytes.
+// Accessors are used only after classify accepts the record; legacy records have no location.
+pub fn usize max_receipt_bytes(){return 276;}
+fn usize offset(ref u8[] data,usize at){var usize value=0;var usize i=8;while(i>0){i-=1;value=value*256+(data[at+i] as usize);}return value;}
+pub fn ref u8[] location_source(ref u8[] data){return if(data.len>20){data[20..]}else{data[..0]};}
+pub fn usize location_start(ref u8[] data){return if(data.len>20){offset(data,4)}else{0};}
+pub fn usize location_end(ref u8[] data){return if(data.len>20){offset(data,12)}else{0};}
 // The private candidate C emitter's established tags are overflow=1,
 // division=2, signed division=3, shift=4, assertion=5, bounds=6, unreachable=7.
 // Only authenticated receipts are normalized to public category numbering.
@@ -80,7 +95,7 @@ pub fn Result<Outcome,child::Problem> run(ref u8[] program,ref v::Vec<bytes::Buf
     // The child job has closed before inspection. Never wait on pipe EOF:
     // descendants may inherit a writer, and an oversized receipt is a failure.
     var u32 available=0;if(unsafe{peek(pipe.reader,ref mut available as ptr mut u32)}==0){return .err(fail(9,unsafe{last_error()},completed.pid));}
-    if(available>1){return .err(fail(10,0,completed.pid));}var u8[1] data=[0;1];var u32 copied=0;
-    if(available==1){let ref mut u8[] target=ref mut data;if(unsafe{read(pipe.reader,target as ptr mut u8,1,ref mut copied as ptr mut u32)}==0 || copied!=1){return .err(fail(9,unsafe{last_error()},completed.pid));}}
+    if((available as usize)>max_receipt_bytes()){return .err(fail(10,0,completed.pid));}var u8[276] data=[0;276];var u32 copied=0;
+    if(available!=0){let ref mut u8[] target=ref mut data;if(unsafe{read(pipe.reader,target as ptr mut u8,available,ref mut copied as ptr mut u32)}==0 || copied!=available){return .err(fail(9,unsafe{last_error()},completed.pid));}}
     let ref u8[] receipt=ref data;return switch(classify(completed.exit_code,receipt[..copied as usize],completed.pid)){case .ok(p):{.ok(p)}case .err(code):{.err(fail(code,0,completed.pid))}};
 }

@@ -16,7 +16,7 @@ import std::vec as v;
 @effects(clock) @link_name("fairyc_private_windows_ticks_v1") unsafe extern C fn usize ticks();
 
 @effects(filesystem) resource Pipe{ptr mut void reader;ptr mut void writer;cleanup{unsafe{if(this.writer!=null){discard close(this.writer);}if(this.reader!=null){discard close(this.reader);}};}}
-pub resource Captured{u32 status;u32 trap;u32 pid;bytes::Buffer output;bytes::Buffer error;cleanup{}}
+pub resource Captured{u32 status;u32 trap;u32 pid;bytes::Buffer output;bytes::Buffer error;bytes::Buffer signal;cleanup{}}
 @effects(filesystem) resource Input{ptr mut void raw;bool owned;cleanup{if(this.owned && this.raw!=null){unsafe{discard close(this.raw);};}}}
 // 0 inherits caller input, 1 supplies EOF, 2 reopens a private replay file.
 @effects(filesystem,console) fn Result<Input,child::Problem> input(u32 mode,ref u8[] path){
@@ -26,6 +26,9 @@ pub resource Captured{u32 status;u32 trap;u32 pid;bytes::Buffer output;bytes::Bu
 }
 pub fn u32 status(ref Captured result){return result.status;}
 pub fn u32 trap(ref Captured result){return result.trap;}
+pub fn ref u8[] location_source(ref Captured result){return control::location_source(bytes::view(ref result.signal));}
+pub fn usize location_start(ref Captured result){return control::location_start(bytes::view(ref result.signal));}
+pub fn usize location_end(ref Captured result){return control::location_end(bytes::view(ref result.signal));}
 pub fn u32 pid(ref Captured result){return result.pid;}
 pub fn ref u8[] stdout(ref Captured result){return bytes::view(ref result.output);}
 pub fn ref u8[] stderr(ref Captured result){return bytes::view(ref result.error);}
@@ -68,12 +71,12 @@ pub fn Result<Captured,child::Problem> run_environment(ref u8[] program,ref v::V
     while(true){
         let a=switch(pump(ref output,ref mut out,ref mut scratch,ref mut retained,65536,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let b=switch(pump(ref error,ref mut err,ref mut scratch,ref mut retained,65536,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
-        let c=switch(pump(ref receipt,ref mut signal,ref mut scratch,ref mut signal_retained,2,ref mut signal_truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
+        let c=switch(pump(ref receipt,ref mut signal,ref mut scratch,ref mut signal_retained,control::max_receipt_bytes(),ref mut signal_truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let now=unsafe{ticks()};if(!stopped && (now<started || now-started>=timeout as usize)){child::terminate(ref running);return .err(fail(8,0,id));}
         if(stopped){if(!a && !b && !c){break;}if(now<collected || now-collected>=2000){return .err(fail(9,0,id));}}
         else{switch(child::poll(ref running,1)){case .ok(done):{if(done){completed=switch(child::result(ref running)){case .ok(p):{p}case .err(e):{return .err(e);}};child::terminate(ref running);stopped=true;collected=unsafe{ticks()};}}case .err(e):{child::terminate(ref running);return .err(e);}};}
     }
     if(truncated){return .err(fail(11,0,id));}if(signal_truncated){return .err(fail(10,0,id));}
     let classified=switch(control::classify(completed.exit_code,bytes::view(ref signal),id)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,id));}};
-    return .ok(Captured{.status=classified.status,.trap=classified.trap,.pid=id,.output=out,.error=err});
+    return .ok(Captured{.status=classified.status,.trap=classified.trap,.pid=id,.output=out,.error=err,.signal});
 }

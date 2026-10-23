@@ -1,5 +1,6 @@
 module tests::windows_run_capture;
 import windows_run_capture as capture;
+import windows_run_control as control;
 import windows_process as child;
 import file_source as files;
 import std::bytes as bytes;
@@ -27,6 +28,20 @@ fn bytes::Buffer joined(ref u8[] root,ref u8[] file){var bytes::Buffer out=bytes
 fn void pattern(ref u8[] data,ref u8[] expected){var usize i=0;while(i<data.len){assert(data[i]==expected[i%expected.len]);i+=1;}}
 
 @test fn void preserves_signed_main_exit_bits(){assert(capture::exit_bits(0)==0 && capture::exit_bits(5)==5 && capture::exit_bits(2147483647)==2147483647 && capture::exit_bits(2147483648)==-2147483648 && capture::exit_bits(2147483690)==-2147483606 && capture::exit_bits(4294967295)==-1);}
+@test @effects(filesystem,console,environment,clock) fn void retains_extended_trap_locations_from_the_private_pipe(){
+    let directory=root();let program=joined(bytes::view(ref directory),b"receiver.exe");var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>();add(ref mut args,b"control");add(ref mut args,b"133");
+    let receipt=b"\x05\x01\x0a\0\x01\0\0\0\0\0\0\0\x09\0\0\0\0\0\0\0p1/main.fy";
+    var usize i=0;while(i<receipt.len){var bytes::Buffer number=bytes::empty();assert(bytes::append_u32(ref mut number,receipt[i] as u32).is_ok);add(ref mut args,bytes::view(ref number));i+=1;}
+    let result=invoke(bytes::view(ref program),ref args,bytes::view(ref directory));
+    assert(capture::status(ref result)==5 && capture::trap(ref result)==6 && capture::stdout(ref result).len==0 && capture::stderr(ref result).len==0);
+    assert(bytes::equal(capture::location_source(ref result),b"p1/main.fy") && capture::location_start(ref result)==1 && capture::location_end(ref result)==9);
+    let direct=switch(control::run(bytes::view(ref program),ref args,bytes::view(ref directory),2000)){case .ok(p):{p}case .err(e):{failure(e);return;}};
+    assert(direct.status==5 && direct.trap==6);
+    assert(v::clear<bytes::Buffer>(ref mut args)==receipt.len+2);add(ref mut args,b"control");add(ref mut args,b"133");
+    i=0;while(i<276){var bytes::Buffer number=bytes::empty();let u32 value=if(i==2){0}else if(i==3){1}else if(i<20){receipt[i] as u32}else{97};assert(bytes::append_u32(ref mut number,value).is_ok);add(ref mut args,bytes::view(ref number));i+=1;}
+    let maximum=invoke(bytes::view(ref program),ref args,bytes::view(ref directory));assert(capture::trap(ref maximum)==6 && capture::location_source(ref maximum).len==256);
+    add(ref mut args,b"97");switch(capture::run(bytes::view(ref program),ref args,bytes::view(ref directory),2000)){case .ok(_):{assert(false);}case .err(e):{assert(e.kind==10 && e.pid!=0);}};
+}
 @test @effects(filesystem,console,environment,clock) fn void retains_the_exact_shared_output_limit_and_drains_overflow(){
     let directory=root();let program=joined(bytes::view(ref directory),b"receiver.exe");let report=joined(bytes::view(ref directory),b"capture-bulk.done");var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>();add(ref mut args,b"bulk");add(ref mut args,b"32768");add(ref mut args,b"32768");add(ref mut args,bytes::view(ref report));reset(bytes::view(ref report));
     let exact=invoke(bytes::view(ref program),ref args,bytes::view(ref directory));require(capture::status(ref exact)==42 && capture::trap(ref exact)==0 && capture::stdout(ref exact).len==32768 && capture::stderr(ref exact).len==32768 && done(bytes::view(ref report)),1);pattern(capture::stdout(ref exact),b"\0\x01\x02\xff");pattern(capture::stderr(ref exact),b"\xff\0A\n");let before=handles();
