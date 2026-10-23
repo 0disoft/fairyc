@@ -705,6 +705,10 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	mixedStack, err := runWindowsMixedStackProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	receipt := hostSmokeReceipt{
 		artifactBytes:                  len(artifact),
 		validatedSections:              len(peReport.Sections),
@@ -761,6 +765,7 @@ func run(arguments []string) error {
 		structResultExecutions:         structResultExecutions,
 		unwindCases:                    unwindCases,
 		unwindExecutions:               unwindExecutions,
+		mixedStackExecutions:           len(mixedStack),
 		standaloneCompilerBytes:        standaloneCompilerBytes,
 		toolchainVersion:               toolchain.Version,
 	}
@@ -769,5 +774,6 @@ func run(arguments []string) error {
 	} else {
 		reportHostCorrectnessSuccess(receipt)
 	}
+	fmt.Printf("Generated Fairy/C mixed stack proof passed: %d separate-object executions covering metadata walks, C-boundary exception containment, and non-unwinding callback traps\n", len(mixedStack))
 	return nil
 }

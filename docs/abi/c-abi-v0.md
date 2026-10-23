@@ -500,9 +500,13 @@ requires the raiser, termination frame, and catcher in order. Selecting the hand
 the intervening `__finally` exactly once with `AbnormalTermination()` true. The probe is closed C
 target evidence and does not add source exceptions or unwind successors to Fairy C. ADR 0240 binds
 the frame's exact handler-tail `ADDR32NB` relocation to its final executable target at both
-profiles. Version-2 epilog offset meaning, language-specific handler payload parsing, recursive
-chain equivalence and chained-tail relocation, source-level Fairy or foreign-frame crossings, and hosted fixtures
-remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
+profiles. Mixed-stack walks and C-boundary exception containment now have
+[bounded generated-Fairy evidence](../ops/evidence/windows-mixed-stack-20261023.json): separate
+Fairy/C objects pass four local low/optimized executions, including callback trap termination
+without unwinding. Foreign exceptions still must not cross Fairy frames. Version-2 epilog offset
+meaning, language-specific handler payload parsing, recursive chain equivalence and chained-tail
+relocation, and complete hosted fixtures remain unproven; `windows-x64-unwind-fixtures` therefore
+remains missing. No runtime feature or dependency is added.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and

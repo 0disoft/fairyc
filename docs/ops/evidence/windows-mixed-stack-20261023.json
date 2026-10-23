@@ -1,0 +1,96 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "case": "walk-and-c-boundary-catch",
+      "profile": "low",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "de89dd867e901c2ddf0ea599c6996e19ab6b7e7c668cdea5261961288564cde9",
+      "generatedCSHA256": "2356a20a2b6cba53b787baf1f8b96bc1b18ad06ceae012de874247210da78e8d",
+      "imageSHA256": "7511628ff6e7a108de868e9cc00bf4c3f9af2c28519f9647a684f98af1621d88",
+      "callerSHA256": "db83ef30ebfd8a122c4cccbe18bbcff0b60684f4f21b544bada6defc0b27c0d0",
+      "calleeSHA256": "68fe4ce66a7f45ab01a3c33afe0ecfa8a9f5acb42fe9dbe272f58d6372ee1874",
+      "runtimeFunctions": 369,
+      "exit": 42,
+      "trapCode": 0
+    },
+    {
+      "case": "walk-and-c-boundary-catch",
+      "profile": "optimized",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "de89dd867e901c2ddf0ea599c6996e19ab6b7e7c668cdea5261961288564cde9",
+      "generatedCSHA256": "2356a20a2b6cba53b787baf1f8b96bc1b18ad06ceae012de874247210da78e8d",
+      "imageSHA256": "191bef6b32ebb2d826fe8079a1fb34d7a0d88b34ad10977fc35b0fcd24c3dfc1",
+      "callerSHA256": "4da4296fa6c66a12c60cfc38b05600ea88d5b231a80998e4b32b19f622b4747b",
+      "calleeSHA256": "8997a8140e2316b133f7a5b9f8e954d6c8463058c66fad70c93abc08c9ec2bf6",
+      "runtimeFunctions": 366,
+      "exit": 42,
+      "trapCode": 0
+    },
+    {
+      "case": "callback-trap-no-unwind",
+      "profile": "low",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "3db29fcf2c73aee52aa32f537d47d72eb4b1b276bf6e237c4c92f49db6f6f6ad",
+      "generatedCSHA256": "496c6786e9160245d3c89996cd151c669d2b26fd349d1d29858f864e9fb4cf1e",
+      "imageSHA256": "cd4b8f5174da81ab29faa06977d940f4fec0bd433c9cda9261beec7f0f57e540",
+      "callerSHA256": "26795052bb1fa5819bff5ae8af1d01267bda12d64cd979322f869bf52e902e54",
+      "calleeSHA256": "537c9ad400398043278ce38fe3241c514aa3978c2e0a0000143fc294822c9316",
+      "runtimeFunctions": 369,
+      "exit": 134,
+      "trapCode": 6
+    },
+    {
+      "case": "callback-trap-no-unwind",
+      "profile": "optimized",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "3db29fcf2c73aee52aa32f537d47d72eb4b1b276bf6e237c4c92f49db6f6f6ad",
+      "generatedCSHA256": "496c6786e9160245d3c89996cd151c669d2b26fd349d1d29858f864e9fb4cf1e",
+      "imageSHA256": "276a52d3beecf2cc53ed6a0fd898a36389c68074057cf91cbd5306b504bdea57",
+      "callerSHA256": "1d2905a545525aeab253edd3ea540a1ba7ad4d5f8c564b652065c3ac04880763",
+      "calleeSHA256": "287fa1f28216f8fa2f660a8a7f2d6edfe0fe1fad4dafb190233c356003216290",
+      "runtimeFunctions": 366,
+      "exit": 134,
+      "trapCode": 6
+    }
+  ],
+  "schema": "fairyc.windows-mixed-stack/v1",
+  "sourceBaseCommit": "65600896ddc3480b82f26e7e4602bbf296337db1",
+  "sourceInputs": [
+    {
+      "path": "internal/windowsunwindprobe/mixed.go",
+      "sha256": "35564c343a3fdf68aabe4d0aa1e1eba50f6b78b92140af7aeddbbedef90f35ec"
+    },
+    {
+      "path": "tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go",
+      "sha256": "2ddf3b3af2756459d63a5e18f5e398b12efa9147a18429d89448c33345bc13b7"
+    },
+    {
+      "path": "tools/dev/fairyc-windows-host-smoke/mixed_stack_windows_amd64_test.go",
+      "sha256": "5d163362d5b62c89e35db9d292b98d98a8888398943979eb35a4f741944ff1bd"
+    },
+    {
+      "path": "tools/dev/fairyc-windows-host-smoke/main.go",
+      "sha256": "e55a00ab102ec904b899c3274185ef2f7b8b0158d05f3fd2880c16d4a5aff08b"
+    },
+    {
+      "path": "tools/dev/fairyc-windows-host-smoke/host_smoke_receipt.go",
+      "sha256": "2c0fc4a66fcaaaa840512fb3b30841df0d95587105ac77306066a52a763ac5f4"
+    }
+  ],
+  "command": "go test ./tools/dev/fairyc-windows-host-smoke -run '^TestWindowsMixedStackBoundaries$' -count=1 -v",
+  "scope": [
+    "virtual metadata walk across C inspector, Fairy callback, C caller, Fairy main",
+    "C-only exception handling before normal Fairy return",
+    "Fairy callback assertion trap with exact process and private control status; no foreign finally"
+  ],
+  "testExit": 0,
+  "existingSmokeExtended": true,
+  "hosted": false,
+  "wholeWindowsSmokeRun": false,
+  "runtimeABIChanged": false,
+  "productionRuntimeChanged": false,
+  "ciJobsChanged": false,
+  "targetPromoted": false,
+  "pushed": false
+}

@@ -27,8 +27,8 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Archives and COMDAT selection | partial | COMDAT/archive probes and ADRs under `docs/adr/` | Associative COMDAT and discarded-child behavior have direct evidence | Cover every archive/COMDAT form emitted by the promoted production path and retain exact selected/discarded evidence |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
 | Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are already inspected | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
-| Fairy frame to foreign frame unwind crossing | partial | Windows native smoke | Individual Fairy and foreign frame behavior exists | Add direct mixed-stack execution proving the required unwind direction across independently compiled boundaries |
-| Foreign frame to Fairy frame unwind crossing | partial | Windows native smoke | Individual Fairy and foreign frame behavior exists | Add the reverse mixed-stack execution and exact failure/trap mapping |
+| Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
+| Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
 | PDB association | partial | ADR 0238, Windows host smoke | Ephemeral MSF 7 PDB identity is associated with final PE RSDS data | Add hosted same-commit artifact retention/retrieval evidence before any distribution/debug-package claim |
 | DbgHelp symbolication | partial | ADR 0239, `tools/dev/fairyc-windows-host-smoke/symbolication_windows.go` | One exact function and source-line canary resolves through system DbgHelp | Cover representative optimized Fairy frames and failure behavior; one canary never promotes the whole debugger surface |
@@ -55,7 +55,22 @@ contains all four observations; these are local evidence, not the mandatory same
   mixed-stack unwind execution through every such frame.
 
 Keep the table's statuses unchanged. Other production shapes, selected/discarded COMDAT evidence,
-mixed-stack execution and distribution transfer remain distinct work.
+hosted mixed-stack evidence and distribution transfer remain distinct work.
+
+## Bounded mixed-stack execution (2026-10-23)
+
+Mixed-frame Windows maturity means walking live stack metadata and containing exceptions at the C
+boundary. It does not mean propagating exceptions through Fairy, which the existing product and
+C ABI forbid. Virtual unwinding reads metadata and captured registers; it does not run cleanup.
+
+Four local MSVC 14.51.36231 executions at `/Od` and `/O2` pass in the
+[mixed-stack record](../ops/evidence/windows-mixed-stack-20261023.json). Generated Fairy and the C
+companion are separate objects. `RtlCaptureContext`/`RtlVirtualUnwind` observes the C inspector,
+Fairy callback, C caller and Fairy main in order. The exception code and payload are checked and
+caught entirely in C, with abnormal inner and normal outer `finally` observations. A Fairy callback
+trap exits with code 134, control tag 6 and no output or C `finally` execution. The existing host
+smoke now runs these cases. Both rows remain partial; the hosted lane and remaining target gaps
+are not covered by this local run.
 
 ## Ownership rule
 
