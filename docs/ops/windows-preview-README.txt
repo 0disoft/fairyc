@@ -12,8 +12,9 @@ with redistributions. See LICENSING.md for runtime/SDK and generated-code scope.
 The adjacent .zip.sha256 file checks the archive. SHA-256 detects changes; it
 does not authenticate a publisher.
 
-Requirements: Windows AMD64. Native testing and running require the locally
-installed x64 MSVC toolchain. Go/Node/Bun are build tools, not included here.
+Requirements: Windows AMD64. Native builds, tests and runs require the locally
+installed x64 MSVC toolchain and Windows SDK. Go/Node/Bun are compiler build
+tools; you do not need them to use this package.
 
 In PowerShell, retain the absolute executable path, then use an empty scratch
 parent folder (do not create hello-fairy yourself):

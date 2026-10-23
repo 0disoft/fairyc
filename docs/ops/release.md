@@ -15,13 +15,19 @@ GCC or Clang and the production SDK. This does not add a Linux binary release
 or promote target conformance. Linux native results for this change are still pending;
 see [ADR 0426](../adr/0426-linux-native-workspace-tests.md).
 
-Build one candidate from a clean `main` commit with the configured
-`fairyc_local_preview_zip` intent. Record its commit, ZIP SHA-256, executable
+Build one candidate from a clean `main` commit with
+`node tools/starter-smoke.mjs --package-local`. Record its commit, ZIP SHA-256, executable
 SHA-256, Go toolchain and smoke receipt. Choose a SemVer prerelease tag only
 after the candidate is fixed; the SDK version and language revision are separate
 identities and must not be used as the compiler release number. Publish the
 exact verified ZIP and its `.zip.sha256` file together. Do not rebuild after
 approving an artifact and then reuse the earlier validation receipt.
+
+The packaging command uses `-trimpath -ldflags="-s -w"` for the Go compiler executable.
+It preserves version metadata and Go stack traces but omits native compiler debugging data.
+Ordinary development builds keep that data. The receipt records build flags and executable/ZIP
+bytes. At `3679d2a3` with Go 1.27.1, the compiler shrank from 17,849,344 to 13,094,400 bytes
+(26.6%); these are executable sizes, not ZIP sizes or native-program size changes.
 
 ## Owners
 
