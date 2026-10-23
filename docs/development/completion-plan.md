@@ -185,8 +185,12 @@ MSVC profiles pass the native allocation/read/failure observer; the Linux probe 
 and links at low/optimized settings but has not executed here. The authored runtime pack is
 150,925 bytes across 22 assets, four bytes smaller than the preceding pack. Its two authored
 tests pass 249 exact output/error comparisons through Go-native and both candidate C profiles.
-SDK linkage is next. The altered pack pin and selector require later full candidate rebuild and
-fixed-point renewal; earlier full-CLI records remain evidence for their original snapshots.
+SDK `0.0.0-stage0.87` now links the public operations to the portable symbol. Both-target
+emission, Windows low/optimized binary/multi-window reads, and the existing allocation-failure
+probes pass. The candidate SDK source pin and embedded literals are updated. The old candidate
+rejects the changed SDK, so a refreshed bootstrap seed precedes full candidate rebuilding and
+fixed-point renewal. Earlier full-CLI records remain evidence for their original snapshots;
+Linux native execution remains open.
 
 Keep existing effects. Consider only the narrow public-interface comparison and source-size
 notices after the compiler/user path is ready. Data trust and state protocols first use ordinary

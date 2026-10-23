@@ -20,7 +20,7 @@ pub struct Problem{u32 code;usize file;}
 pub resource Bundle{bool candidate;v::Vec<syntax::Parsed> modules;bytes::Buffer digest;bytes::Buffer identity;bytes::Buffer paths;cleanup{}}
 pub fn ref u8[] uid(){return b"fairyc.std";}
 pub fn ref u8[] package_name(){return b"fairyc-std";}
-pub fn ref u8[] version(){return b"0.0.0-stage0.86";}
+pub fn ref u8[] version(){return b"0.0.0-stage0.87";}
 pub fn ref u8[] language(){return b"fairyc-language/20";}
 pub fn ref u8[] runtime_abi(){return b"fairyc-runtime/0";}
 pub fn ref u8[] package_path(){return b"@sdk/stdlib";}

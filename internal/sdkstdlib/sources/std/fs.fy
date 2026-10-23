@@ -184,7 +184,7 @@ unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 b
 unsafe extern C fn raw_file_result file_read_exact_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
-@link_name("fy_std_windows_file_read_append_v0")
+@link_name("fy_std_file_read_append_v0")
 unsafe extern C fn raw_file_buffer_result file_read_append_raw(ptr mut void file, ptr mut void buffer, usize maximum) ;
 
 @effects(filesystem)

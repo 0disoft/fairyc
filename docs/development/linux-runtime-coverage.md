@@ -106,7 +106,12 @@ to Windows implementations:
 - File rename, hard links, byte copying, and `set_len`.
 - Extended metadata: kind, read-only observation/mutation, link count, allocated size,
   path kind, file identity, and the compound metadata record. Logical `size` is already available.
-- File-to-Buffer `read_append` and `read_to_end`; ordinary Buffer allocation is already available.
+
+File-to-Buffer `read_append` and `read_to_end` now select the shared implementation
+and Linux adapter in [ADR 0487](../adr/0487-portable-file-buffer-reads.md), through
+public SDK `0.0.0-stage0.87`. Both-target source emission and Windows execution
+pass. Linux runtime and public-SDK execution tests are present but have not run
+on this Windows host; this closes the implementation gap, not the Linux receipt.
 
 These are implementation gaps, not all mandatory Phase 2 work. The
 [roadmap](../product/01-roadmap.md#phase-2-first-hosted-executable-slice) requires the minimum
