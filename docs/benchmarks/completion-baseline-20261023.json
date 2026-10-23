@@ -1,0 +1,318 @@
+{
+  "commit": "31ce089138fd399834c75f898843d7600f5dbb76",
+  "dirty": false,
+  "started": "2026-10-23T10:46:07Z",
+  "finished": "2026-10-23T10:49:31Z",
+  "host": {
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logicalCpus": 12,
+    "runnerGoVersion": "go1.27.1"
+  },
+  "settings": {
+    "languages": [
+      "fairy"
+    ],
+    "profiles": [
+      "dev",
+      "release"
+    ],
+    "workloads": [
+      "tokenizer",
+      "many-modules",
+      "file-search"
+    ],
+    "edits": 5,
+    "modules": 16,
+    "repetitions": 1,
+    "commandTimeout": "5m0s"
+  },
+  "method": "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.",
+  "installations": [
+    {
+      "name": "Fairy C compiler",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "standalone executable; embedded SDK included; Go build environment excluded",
+      "bytes": 17831936,
+      "files": 1,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "MSVC 14.51.36231",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active MSVC version tree; includes installed architecture variants",
+      "bytes": 2585203456,
+      "files": 1752,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Include",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 361818190,
+      "files": 4771,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Lib",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 805656732,
+      "files": 1454,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 bin",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 248928991,
+      "files": 699,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    }
+  ],
+  "rawReceiptSha256": "775620e13ef5f452879425abbe4fd4ae48e6120f86148604bb97654c02ec1ac0",
+  "rawReceiptLocalPath": ".cache/completion-20261023/baseline/receipt.json",
+  "toolchains": [
+    {
+      "language": "fairy",
+      "version": "checkout 31ce089138fd399834c75f898843d7600f5dbb76",
+      "executableSha256": "0dd785b91992890766ffbd758025f3c56a5a0e74c50fc1eeaaf05eab55825e92",
+      "executableBytes": 17831936,
+      "backend": "MSVC 14.51.36231; Windows SDK 10.0.26100.0",
+      "status": "ready"
+    }
+  ],
+  "cases": [
+    {
+      "id": "fairy-dev-tokenizer-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "e780da0d1fa7eecc5c157ea809a11f796bbcb4edf285c9314fe40485e660f523",
+      "coldMs": 2480.154,
+      "noOpMs": 1610.459,
+      "privateEditMedianMs": 1636.2935,
+      "publicEditMs": 1378.341,
+      "binaryBytes": 156672,
+      "endFootprint": {
+        "binaryBytes": 156672,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 11225,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 167897
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 11225,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 11225
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 167897
+    },
+    {
+      "id": "fairy-dev-many-modules-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "e780da0d1fa7eecc5c157ea809a11f796bbcb4edf285c9314fe40485e660f523",
+      "coldMs": 1774.145,
+      "noOpMs": 1830.187,
+      "privateEditMedianMs": 1334.19,
+      "publicEditMs": 2395.865,
+      "binaryBytes": 165888,
+      "endFootprint": {
+        "binaryBytes": 165888,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 11229,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 177117
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 11229,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 11229
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 177117
+    },
+    {
+      "id": "fairy-dev-file-search-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "coldMs": 5140.007,
+      "noOpMs": 2750.458,
+      "privateEditMedianMs": 2021.012,
+      "publicEditMs": 2685.308,
+      "binaryBytes": 223744,
+      "endFootprint": {
+        "binaryBytes": 223744,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 72297,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 296041
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 72297,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 72297
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 296041
+    },
+    {
+      "id": "fairy-release-tokenizer-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "e780da0d1fa7eecc5c157ea809a11f796bbcb4edf285c9314fe40485e660f523",
+      "coldMs": 6613.779,
+      "noOpMs": 5467.754,
+      "privateEditMedianMs": 6148.5635,
+      "publicEditMs": 5118.783,
+      "binaryBytes": 115712,
+      "endFootprint": {
+        "binaryBytes": 115712,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 17517,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 133229
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 17517,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 17517
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 133229
+    },
+    {
+      "id": "fairy-release-many-modules-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "e780da0d1fa7eecc5c157ea809a11f796bbcb4edf285c9314fe40485e660f523",
+      "coldMs": 4971.937,
+      "noOpMs": 7071.525,
+      "privateEditMedianMs": 9108.7455,
+      "publicEditMs": 7495.974,
+      "binaryBytes": 117760,
+      "endFootprint": {
+        "binaryBytes": 117760,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 17521,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 135281
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 17521,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 17521
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 135281
+    },
+    {
+      "id": "fairy-release-file-search-01",
+      "status": "passed",
+      "verifiedBuilds": 7,
+      "inputSha256": "9dbb3fd0b7b74a7bb89f8ddd8f0a7816a47efb89e216bf3ca2ab97815018992a",
+      "coldMs": 8956.303,
+      "noOpMs": 8533.295,
+      "privateEditMedianMs": 5959.9065,
+      "publicEditMs": 5845.309,
+      "binaryBytes": 122880,
+      "endFootprint": {
+        "binaryBytes": 122880,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 105765,
+        "retainedTempBytes": 0,
+        "files": 2,
+        "totalBytes": 228645
+      },
+      "postCleanFootprint": {
+        "binaryBytes": 0,
+        "separateDebugBytes": 0,
+        "incrementalBytes": 0,
+        "intermediateBytes": 0,
+        "localCacheBytes": 0,
+        "sharedCacheBytes": 105765,
+        "retainedTempBytes": 0,
+        "files": 1,
+        "totalBytes": 105765
+      },
+      "growthBytes": 0,
+      "largestObservedPostCommandBytes": 228645
+    }
+  ],
+  "limitations": [
+    "One sequence per workload/profile; timing outliers need focused repeated measurements.",
+    "Only post-command logical file lengths are measured; transient peak disk use is unknown.",
+    "Original logs and experiment workspaces remain ignored local files; no cross-language ranking."
+  ]
+}
