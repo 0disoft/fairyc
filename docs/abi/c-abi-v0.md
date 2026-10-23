@@ -278,12 +278,21 @@ integer scalar with target size/alignment and provider assertions. Such enums ma
 repr(C) records, including nested records, and cross foreign calls inside record arguments/results.
 Direct enum-field replacement preserves exact nominal typing and copy isolation. A switch traps on
 an undeclared foreign ordinal rather than assuming it is valid. Plain private enums, payloads,
-explicit discriminant values, enum arrays, enum-field borrows, nested enum leaf replacement and
+explicit discriminant values, enum-field borrows, nested enum leaf replacement and
 standalone foreign enum arguments/results remain outside this admission. Target availability still
 applies, including the absence of `c::ssize_t` on Windows. The
 [F2-2 update](../development/phase2-target-scope.md#f2-2-explicit-c-enum-fields) records local native
 execution; the [current hosted F2-6
 receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers hosted Linux.
+
+[ADR 0485](../adr/0485-repr-c-enum-array-transport.md) admits bounded `1..=4096` element arrays of
+these explicit enums as repr(C) fields. Whole-value transport preserves nominal identity and exact
+integer representation, including undeclared foreign ordinals. Typed/inferred locals, internal
+array arguments/results, reconstruction, nested record reads/copies and direct whole-field
+replacement follow the existing transport-only array rules. Array literals, indexing, length,
+views/iteration, field borrowing, nested field stores, bare foreign arrays and direct private/
+resource/tagged payload arrays remain closed. Local source/MIR/interface and both target-emission
+checks pass; MSVC C11/C17 low/optimized native execution passes. Native Linux proof is pending.
 
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 

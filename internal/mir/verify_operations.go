@@ -322,6 +322,7 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 	case OperationFieldStore:
 		failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 		valid := ValidFieldStoreShape(operation) ||
+			ValidCEnumArrayFieldStoreShape(operation, func(typ hir.Type) *StructType { return structTypes[typ] }, func(typ hir.Type) *EnumType { return enumTypes[typ] }) ||
 			ValidCEnumFieldStoreShape(operation, enumTypes[operation.Type]) ||
 			ValidOneWordStructFieldStoreShape(operation, structTypes[operation.Type]) ||
 			ValidPlainStructFieldStoreShape(operation, func(typ hir.Type) *StructType { return structTypes[typ] })

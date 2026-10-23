@@ -57,7 +57,7 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 	if l.blockTerminated(l.current) {
 		return nil
 	}
-	if len(fields) > 0 || hir.TransportOnlyArray(target.Type) || l.properties.inlineArrayField(target.Type) || plainStoredStruct(target.Type, l.properties.Struct) {
+	if len(fields) > 0 || l.properties.transportOnlyArray(target.Type) || l.properties.inlineArrayField(target.Type) || plainStoredStruct(target.Type, l.properties.Struct) {
 		if _, _, borrowed := hir.BorrowElement(owner.Type); borrowed {
 			saved := l.newTemporary()
 			l.appendOperation(Operation{Kind: OperationAssign, Span: target.Span, DestinationLocal: saved, Operands: []Operand{receiver}})
@@ -101,7 +101,8 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		DestinationLocal: NoLocal, OwnerType: owner.Type, Type: target.Type, Field: target.Operator, Fields: fields,
 		Operands: []Operand{receiver, value}}
 	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) &&
-		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) && !ValidCEnumFieldStoreShape(op, l.properties.Enum(target.Type)) {
+		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) && !ValidCEnumFieldStoreShape(op, l.properties.Enum(target.Type)) &&
+		!ValidCEnumArrayFieldStoreShape(op, l.properties.Struct, l.properties.Enum) {
 		return unsupported
 	}
 	l.appendOperation(op)

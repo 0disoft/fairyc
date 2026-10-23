@@ -39,8 +39,8 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 	if err := capabilities.Validate(); err != nil {
 		return []VerificationError{{Code: CodeAdmission, Entity: "program", Detail: err.Error()}}, nil
 	}
-	structTypes, failures := verifyStructTypes(program.StructTypes)
 	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
+	structTypes, failures := verifyStructTypes(program.StructTypes, enumTypes)
 	failures = append(failures, enumFailures...)
 	resourceTypes, resourceFailures := verifyResourceTypes(program.ResourceTypes)
 	failures = append(failures, resourceFailures...)

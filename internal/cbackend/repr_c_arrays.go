@@ -10,7 +10,7 @@ import (
 
 func (e *emissionAnalysis) rawArrayMember(owner, field hir.Type) bool {
 	index, ok := e.structByType[fieldAggregateType(owner)]
-	return ok && e.structTypes[index].definition.ReprC && hir.ReprCArrayField(field)
+	return ok && e.structTypes[index].definition.ReprC && e.reprCArrayField(field)
 }
 
 // Copy actual C array elements, never reinterpret them as private wrapper structs.
@@ -29,7 +29,7 @@ func (e *emitter) writeReprCArrayConstruction(output *strings.Builder, operation
 			return err
 		}
 		place := fmt.Sprintf("fy_l_%d.%s", operation.DestinationLocal, field.Name)
-		if hir.ReprCArrayField(field.Type) {
+		if e.analysis.reprCArrayField(field.Type) {
 			writeRawArrayCopy(output, place, "("+value+").data", field.Type)
 		} else {
 			fmt.Fprintf(output, "    %s = %s;\n", place, value)

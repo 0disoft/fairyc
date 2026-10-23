@@ -120,6 +120,13 @@ func TransportOnlyArray(value Type) bool {
 	return IntegerTransportArray(value) || array && (IsFloatScalar(element) || IsCScalar(element)) && length <= MaxExecutableFixedArrayElements
 }
 
+// CEnumArray requires the owning stage's resolved enum base, not just a nominal name.
+func CEnumArray(value Type, base func(Type) string) bool {
+	element, length, array := FixedArrayParts(value)
+	return array && length <= MaxExecutableFixedArrayElements && base != nil &&
+		element.Descriptor().Kind == TypeKindNominal && CEnumVariantCapacity(base(element)) != 0
+}
+
 // InlineArrayField also admits arrays of actual scalar-leaf structs. Array
 // fields inside the element graph remain closed, keeping this subset acyclic
 // and independent of array-field borrowing and iteration.

@@ -249,9 +249,9 @@ boundaries and source-level foreign-call scope. See the
 
 ## Next work
 
-1. F2-6 has hosted evidence at `9e1500e1`. ADR 0484 adds exact C-scalar arrays with local compiler,
-   target-emission and four-profile MSVC proof; native Linux coverage is pending. Next assess explicit
-   C enum arrays; repr(C) record-element arrays remain deferred. Keep the current
+1. F2-6 has hosted evidence at `9e1500e1`. ADRs 0484/0485 add exact C-scalar and explicit C enum
+   arrays with local compiler, target-emission and four-profile MSVC proof; native Linux coverage
+   is pending. Next assess repr(C) record-element arrays and pointer needs. Keep the current
    raw-pointer pointee set and closed raw-pointer operations unless a separate pointer admission
    changes them.
 2. Keep target maturity flags unchanged. Conditional root drop flags are not a missing admitted

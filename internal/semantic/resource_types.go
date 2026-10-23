@@ -82,7 +82,6 @@ func (a *analyzer) prepareEnumTypes() {
 				continue
 			}
 			info := a.enumTypes[value.typ]
-			info.cBase = a.prepareCEnumBase(module, enumeration)
 			for variantIndex := range enumeration.Variants {
 				variantDeclaration := &enumeration.Variants[variantIndex]
 				if previous, duplicate := info.variants[variantDeclaration.Name]; duplicate {
@@ -307,10 +306,10 @@ func (a *analyzer) prepareStructTypes() {
 				field := info.fields[declared.Name]
 				allowed := a.inlineArrayField(field.typ)
 				if info.reprC {
-					allowed = hir.ReprCArrayField(field.typ)
+					allowed = hir.ReprCArrayField(field.typ) || hir.CEnumArray(field.typ, a.cEnumBase)
 				}
 				if _, _, array := hir.FixedArrayParts(field.typ); array && !allowed {
-					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded C-compatible scalar elements for repr(C), or scalar/plain-struct elements for a private struct")
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded C-compatible scalar/enum elements for repr(C), or scalar/plain-struct elements for a private struct")
 				}
 			}
 		}
@@ -324,7 +323,7 @@ func (a *analyzer) canonicalStructFieldType(module *moduleScope, reference ast.T
 	if reference.Kind == ast.TypeKindArray && reference.Element != nil && reference.Length != nil {
 		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
 		length, sized := parsePositiveArrayLength(reference.Length.Text)
-		if ok && sized && (hir.TransportOnlyArray(hir.FixedArray(element, length)) ||
+		if ok && sized && (a.transportOnlyArray(hir.FixedArray(element, length)) ||
 			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.structTypes[element] != nil)) {
 			return hir.FixedArray(element, length)
 		}
@@ -358,7 +357,7 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		}
 		element, elementOK := a.canonicalTypeReference(module, *reference.Element, false)
 		length, lengthOK := parsePositiveArrayLength(reference.Length.Text)
-		if !elementOK || !lengthOK || !(hir.TransportOnlyArray(hir.FixedArray(element, length)) ||
+		if !elementOK || !lengthOK || !(a.transportOnlyArray(hir.FixedArray(element, length)) ||
 			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.plainViewStruct(element))) {
 			return hir.TypeInvalid, false
 		}

@@ -75,7 +75,7 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	index, indexType := c.checkExpression(expression.Children[1], hir.TypeUSize)
 	result.Children = appendExpression(result.Children, receiver, index)
 	arrayElement, _, fixedArray := hir.FixedArrayParts(receiverType)
-	if hir.TransportOnlyArray(receiverType) {
+	if c.analyzer.transportOnlyArray(receiverType) {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "indexing transport-only arrays")
 		return hir.TypeInvalid
 	}

@@ -176,6 +176,14 @@ func (r *aggregateLayoutResolver) resolveStruct(definition mir.StructType) (layo
 
 func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool) (layout.Type, error) {
 	value = canonicalCValueType(value)
+	if reprC && hir.CEnumArray(value, r.cEnumBase) {
+		element, length, _ := hir.FixedArrayParts(value)
+		resolved, err := r.resolve(element)
+		if err != nil {
+			return layout.Type{}, err
+		}
+		return layout.Type{Kind: layout.KindArray, Element: &resolved, Length: length}, nil
+	}
 	if (!reprC && hir.ScalarArrayField(value)) || (reprC && hir.ReprCArrayField(value)) {
 		if array, ok := scalarArrayLayoutType(value); ok {
 			return array, nil
@@ -549,7 +557,7 @@ func (e *emitter) emitStructType(output *strings.Builder, index int) error {
 		output.WriteString("    uint8_t f_0;\n")
 	}
 	for fieldIndex, field := range structure.definition.Fields {
-		if structure.definition.ReprC && hir.ReprCArrayField(field.Type) {
+		if structure.definition.ReprC && e.analysis.reprCArrayField(field.Type) {
 			element, length, _ := hir.FixedArrayParts(field.Type)
 			cType, err := e.analysis.cValueType(element)
 			if err != nil {

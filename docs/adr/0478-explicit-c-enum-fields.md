@@ -19,7 +19,8 @@ This attribute is valid only on a nonempty, payload-free enum. Its one argument 
 integer scalar; `c::bool`, `c::float`, `c::double` and Fairy integer types are excluded. Repeated
 representation attributes are rejected. Discriminants are zero-based declaration ordinals, bounded
 by the base's portable range for the supported targets. Explicit values, aliases, negative values
-and enum arrays are deferred. Plain enums retain their existing private tagged representation.
+remain deferred. ADR 0485 later admits bounded whole-value enum array fields in repr(C) records.
+Plain enums retain their existing private tagged representation.
 
 The declared base travels through HIR, verified MIR, public interface identity and stable package
 context encoding/rebinding. Changing it invalidates the corresponding interface/context identity.

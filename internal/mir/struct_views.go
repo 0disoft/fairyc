@@ -24,7 +24,7 @@ func (p typeProperties) plainStructFields(value hir.Type) ([]hir.Type, bool) {
 
 func (p typeProperties) validStructViewType(value hir.Type) bool {
 	if element, length, array := hir.FixedArrayParts(value); array {
-		return hir.TransportOnlyArray(value) || hir.FixedArrayScalarElement(element) || hir.ExecutableFixedArrayShape(element, length) && p.plainViewStruct(element)
+		return p.transportOnlyArray(value) || hir.FixedArrayScalarElement(element) || hir.ExecutableFixedArrayShape(element, length) && p.plainViewStruct(element)
 	}
 	if slice, _, borrowed := hir.BorrowElement(value); borrowed {
 		if element, nominal := hir.StructSliceElement(slice); nominal {
@@ -58,6 +58,13 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 	}
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
+			switch op.Kind {
+			case OperationArrayConstruct, OperationArrayBorrowView, OperationArrayLength,
+				OperationArrayIndexCheck, OperationArrayIndex, OperationArrayIndexStore:
+				if hir.CEnumArray(op.Type, p.cEnumBase) || hir.CEnumArray(op.OwnerType, p.cEnumBase) {
+					failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C enum arrays support whole-value transport only"})
+				}
+			}
 			check(op.Type)
 			check(op.OwnerType)
 			check(op.IndexType)

@@ -171,7 +171,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 			return hir.TypeInvalid
 		}
 	}
-	if element, length, array := hir.FixedArrayParts(receiverType); array && hir.ExecutableFixedArrayShape(element, length) {
+	if element, length, array := hir.FixedArrayParts(receiverType); array && !c.analyzer.transportOnlyArray(receiverType) && hir.ExecutableFixedArrayShape(element, length) {
 		if expression.Text == "len" {
 			result.Kind = hir.ExpressionArrayLength
 			result.Operator = "len"

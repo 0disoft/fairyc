@@ -60,7 +60,7 @@ func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []Verifica
 	return enums, failures
 }
 
-func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []VerificationError) {
+func verifyStructTypes(definitions []StructType, enums map[hir.Type]*EnumType) (map[hir.Type]*StructType, []VerificationError) {
 	structs := make(map[hir.Type]*StructType, len(definitions))
 	var failures []VerificationError
 	for index := range definitions {
@@ -91,12 +91,12 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 			fieldNames[field.Name] = struct{}{}
 		}
 	}
-	properties := typeProperties{structs: structs}
+	properties := typeProperties{structs: structs, enums: enums}
 	for _, definition := range definitions {
 		for _, field := range definition.Fields {
 			allowed := properties.inlineArrayField(field.Type)
 			if definition.ReprC {
-				allowed = hir.ReprCArrayField(field.Type)
+				allowed = hir.ReprCArrayField(field.Type) || hir.CEnumArray(field.Type, properties.cEnumBase)
 			}
 			if _, _, array := hir.FixedArrayParts(field.Type); array && !allowed {
 				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})

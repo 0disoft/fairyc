@@ -14,9 +14,10 @@ historical for F2-6. F2-6 adds `f32`/`f64` array value transport at `36dc9dcc`, 
 expanded shared probe at `2199a87d`. Those local compiler, emission and Windows native results are
 historical pre-push evidence. The [current hosted F2-6
 receipt](phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) at `9e1500e1` passed all nine jobs
-and covers Linux native and hosted execution. Phase 2 remains partial. Next assess exact C-scalar
-arrays, then explicit C enum arrays, as separate admissions; pointer forms require separate bounded
-implementation and evidence decisions, and existing explicit exclusions remain unchanged.
+and covers Linux native and hosted execution. Phase 2 remains partial. ADRs 0484/0485 subsequently
+add exact C-scalar and explicit C enum arrays with local Windows proof; native Linux execution of
+their expanded probe is pending. Next assess record-element arrays and pointer needs against
+actual callers and the declared target scope. Existing explicit exclusions remain unchanged.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

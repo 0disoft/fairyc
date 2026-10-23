@@ -13,7 +13,7 @@ valid execution records are reused instead of reopening completed work.
 | Order | Work and completion condition | Status |
 | --- | --- | --- |
 | 1 | Establish a current native-build time/footprint baseline with the existing runner, and keep one finite list of unfinished work. | Complete: six cases and 42 verified builds at clean `31ce0891`. |
-| 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | Pending |
+| 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays complete locally; native Linux and the remaining scope assessment are pending. |
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Pending |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Pending |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Pending |
@@ -69,7 +69,11 @@ They need a demonstrated user or measured benefit before becoming work in this q
   All sixteen identities retain target layout and internal value transport. Local compiler,
   MIR/interface and Linux/Windows emission checks pass; MSVC C11/C17 low/optimized native
   execution passes for all fifteen portable providers. Native Linux execution remains pending.
-  Next: explicitly based C enum array fields.
+- Explicit C enum array fields: [ADR 0485](../adr/0485-repr-c-enum-array-transport.md).
+  All thirteen bases preserve nominal identity and target-owned representation through whole-array
+  copies. Source/MIR/interface and both target-emission checks pass; four MSVC combinations each
+  execute 36 enum-array cases, including undeclared foreign ordinals. Native Linux is pending.
+  Next: assess record-element array and raw-pointer scope against the target contract and users.
 
 Local Linux execution is currently unavailable: `wsl --list --quiet` exits with
 `Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`, and no Docker command is installed. This is a host

@@ -34,3 +34,25 @@ func (a *analyzer) prepareCEnumBase(module *moduleScope, enumeration *ast.Enum) 
 	}
 	return base
 }
+
+func (a *analyzer) prepareCEnumBases() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Enums {
+			definition := &module.file.Module.Enums[index]
+			if symbol := a.enums[definition]; symbol != nil {
+				a.enumTypes[symbol.typ].cBase = a.prepareCEnumBase(module, definition)
+			}
+		}
+	}
+}
+
+func (a *analyzer) cEnumBase(value hir.Type) string {
+	if definition := a.enumTypes[value]; definition != nil {
+		return definition.cBase
+	}
+	return ""
+}
+
+func (a *analyzer) transportOnlyArray(value hir.Type) bool {
+	return hir.TransportOnlyArray(value) || hir.CEnumArray(value, a.cEnumBase)
+}

@@ -18,6 +18,7 @@ type typeChecker struct {
 func (a *analyzer) typeCheck() Result {
 	result := Result{}
 	a.prepareAggregateIdentities()
+	a.prepareCEnumBases()
 	a.prepareResourceTypes()
 	a.prepareStructTypes()
 	a.prepareEnumTypes()

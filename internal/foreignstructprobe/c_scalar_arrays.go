@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-// This independent C oracle uses the provider's limits, including LP64/LLP64 long.
-// It exercises every portable C scalar, plus ssize_t in the POSIX runner.
-func cScalarArraySources(posix bool) (string, string) {
-	types := []struct{ name, c, first, middle, last string }{
+type cArrayProbeType struct{ name, c, first, middle, last string }
+
+func cArrayProbeTypes(posix bool) []cArrayProbeType {
+	types := []cArrayProbeType{
 		{"bool", "_Bool", "0", "1", "0"},
 		{"char", "char", "CHAR_MIN", "0", "CHAR_MAX"},
 		{"double", "double", "-DBL_MAX", "0.0", "DBL_MAX"},
@@ -26,15 +26,21 @@ func cScalarArraySources(posix bool) (string, string) {
 		{"ushort", "unsigned short", "0", "17", "USHRT_MAX"},
 	}
 	if posix {
-		types = append(types, struct{ name, c, first, middle, last string }{"ssize_t", "ssize_t", "INT64_MIN", "0", "INT64_MAX"})
+		types = append(types, cArrayProbeType{"ssize_t", "ssize_t", "INT64_MIN", "0", "INT64_MAX"})
 	}
+	return types
+}
+
+// This independent C oracle uses the provider's limits, including LP64/LLP64 long.
+// It exercises every portable C scalar, plus ssize_t in the POSIX runner.
+func cScalarArraySources(posix bool) (string, string) {
 	var fairy, c strings.Builder
 	c.WriteString("\n#include <limits.h>\n#include <float.h>\n#include <stddef.h>\n")
 	if posix {
 		c.WriteString("#include <sys/types.h>\n")
 	}
 	var calls []string
-	for _, typ := range types {
+	for _, typ := range cArrayProbeTypes(posix) {
 		fmt.Fprintf(&fairy, cScalarArrayFairyTemplate, typ.name)
 		fmt.Fprintf(&c, cScalarArrayCTemplate, typ.name, typ.c, typ.first, typ.middle, typ.last)
 		calls = append(calls, "check_c_array_"+typ.name+"(0)", "check_c_array_"+typ.name+"(1)", "check_c_array_"+typ.name+"(2)")
