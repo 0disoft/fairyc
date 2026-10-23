@@ -27,3 +27,21 @@ func TestRegionCapabilityStorageIsSourceDiagnostic(t *testing.T) {
 		})
 	}
 }
+
+func TestRegionConstructionDoesNotAddStorageDiagnostic(t *testing.T) {
+	for _, binding := range []string{"let Region", "var Region", "let", "var"} {
+		t.Run(binding, func(t *testing.T) {
+			input := "module main;\nfn i32 main() { " + binding + " scratch = Region {}; return 0; }\n"
+			root := writeCacheWorkspace(t, testAnswer42)
+			writeFile(t, filepath.Join(root, "src", "main.fy"), input)
+			checked, err := Check(loadCacheWorkspace(t, root))
+			if err != nil || checked.Verified || len(checked.Semantic.Diagnostics) != 1 {
+				t.Fatalf("Region construction: verified=%v diagnostics=%+v error=%v", checked.Verified, checked.Semantic.Diagnostics, err)
+			}
+			diagnostic := checked.Semantic.Diagnostics[0]
+			if diagnostic.Code != "E3104" || input[diagnostic.Primary.StartByte:diagnostic.Primary.EndByte] != "Region {}" {
+				t.Fatalf("Region construction diagnostic: %+v", diagnostic)
+			}
+		})
+	}
+}
