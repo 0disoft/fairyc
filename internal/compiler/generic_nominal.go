@@ -23,7 +23,8 @@ func CheckNominalGenericFunctions(file semantic.File, coordinate packagegraph.Co
 		return Result{}, genericplan.Plan{}, err
 	}
 	file.Module = expansion.Modules[0]
-	result, err := Check([]semantic.File{file})
+	files := []semantic.File{file}
+	result, err := LowerAnalyzed(Analysis{Semantic: restrictGenericSignatures(semantic.Analyze(files), files, expansion)})
 	if result.Verified {
 		result.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: []semantic.File{original}},
 			map[hir.PackageID]genericplan.PackageID{file.Package: owner}, expansion, result.Semantic.NominalTypes)

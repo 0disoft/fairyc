@@ -30,6 +30,14 @@ unbounded expansion remain rejected. Planner defaults bound depth and total/per-
 specializations. Workspaces without generic declarations retain ordinary analysis and diagnostics
 without generic preparation.
 
+The later `i64` admission extends the executable set. The C field-transport
+additions for other integer and floating types do not extend generic function
+signatures. Expanded signatures retain this separate check, including nested
+type references and concrete types written in the template. Rejections point to
+the original signature, after name resolution and before MIR publication.
+Ordinary transport functions remain available. A planner-only argument such as
+`constant<u16>()` remains valid when the specialization's signature does not use it.
+
 Source-owned generic rejection uses E4501-E4503 and the existing name/access codes; source
 diagnostics retain exit 3 and original locations. Native execution preserves existing target,
 toolchain, stream, lock, and program-exit rules. No new CLI flags are introduced.

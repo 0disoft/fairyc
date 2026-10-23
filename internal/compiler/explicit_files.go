@@ -56,7 +56,7 @@ func AnalyzeExplicitFiles(files []semantic.File) (Analysis, error) {
 	for i := range prepared {
 		prepared[i].Module = expansion.Modules[i]
 	}
-	analysis := Analysis{Semantic: semantic.Analyze(prepared)}
+	analysis := Analysis{Semantic: restrictGenericSignatures(semantic.Analyze(prepared), prepared, expansion)}
 	checked := analysis.Semantic
 	if checked.CompletedThrough == semantic.PhaseFlow && checked.FailedPhase == semantic.PhaseNone && len(checked.Diagnostics) == 0 && len(checked.Unsupported) == 0 {
 		analysis.Semantic.RequiresGenericProvenance = len(expansion.Declarations) != 0

@@ -34,7 +34,8 @@ func checkStorageGenericFunctions(file semantic.File, coordinate packagegraph.Co
 		return Result{}, genericplan.Plan{}, err
 	}
 	file.Module = expansion.Modules[0]
-	result, err := lowerWithCapabilities(semantic.Analyze([]semantic.File{file}), capabilities)
+	files := []semantic.File{file}
+	result, err := lowerWithCapabilities(restrictGenericSignatures(semantic.Analyze(files), files, expansion), capabilities)
 	if err == nil && result.Verified {
 		result.GenericProvenance, err = genericProvenance(semantic.PackageInput{Files: []semantic.File{original}},
 			map[hir.PackageID]genericplan.PackageID{file.Package: owner}, expansion, result.Semantic.NominalTypes)
@@ -170,7 +171,7 @@ func analyzePackageGraphContext(ctx context.Context, input semantic.PackageInput
 	if err != nil {
 		return semantic.Result{}, genericsource.PackageExpansion{}, &Error{Stage: StagePackageInput, Cause: err}
 	}
-	return analysis, expansion, nil
+	return restrictGenericSignatures(analysis, prepared.Files, expansion), expansion, nil
 }
 
 func checkStorageGenericPackages(input semantic.PackageInput, coordinates map[hir.PackageID]packagegraph.CoordinateID, limits genericplan.PlanLimits, policy admission.Policy[hir.PackageID]) (Result, genericplan.Plan, error) {
