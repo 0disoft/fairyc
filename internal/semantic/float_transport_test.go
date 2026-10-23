@@ -10,7 +10,7 @@ func TestFloatingTransportBoundaries(t *testing.T) {
 		"width":      `fn f32 bad(f64 a){return a;}`,
 		"c-scalar":   `fn f32 bad(c::float a){return a;}`,
 		"cast":       `fn f32 bad(c::float a){return a as f32;}`,
-		"array":      `@repr(C) struct P{f32[2] values;}`,
+		"array":      `struct P{f32[2] values;}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			r := analyzeText(t, map[string]string{"main.fy": "module main;" + body})

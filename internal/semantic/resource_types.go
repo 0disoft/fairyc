@@ -310,7 +310,7 @@ func (a *analyzer) prepareStructTypes() {
 					allowed = hir.ReprCArrayField(field.typ)
 				}
 				if _, _, array := hir.FixedArrayParts(field.typ); array && !allowed {
-					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded integer elements for repr(C), or scalar/plain-struct elements for a private struct")
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded integer or floating elements for repr(C), or scalar/plain-struct elements for a private struct")
 				}
 			}
 		}
@@ -324,7 +324,7 @@ func (a *analyzer) canonicalStructFieldType(module *moduleScope, reference ast.T
 	if reference.Kind == ast.TypeKindArray && reference.Element != nil && reference.Length != nil {
 		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
 		length, sized := parsePositiveArrayLength(reference.Length.Text)
-		if ok && sized && (hir.IntegerTransportArray(hir.FixedArray(element, length)) ||
+		if ok && sized && (hir.TransportOnlyArray(hir.FixedArray(element, length)) ||
 			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.structTypes[element] != nil)) {
 			return hir.FixedArray(element, length)
 		}
@@ -358,7 +358,7 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 		}
 		element, elementOK := a.canonicalTypeReference(module, *reference.Element, false)
 		length, lengthOK := parsePositiveArrayLength(reference.Length.Text)
-		if !elementOK || !lengthOK || !(hir.IntegerTransportArray(hir.FixedArray(element, length)) ||
+		if !elementOK || !lengthOK || !(hir.TransportOnlyArray(hir.FixedArray(element, length)) ||
 			hir.ExecutableFixedArrayShape(element, length) && (hir.FixedArrayScalarElement(element) || a.plainViewStruct(element))) {
 			return hir.TypeInvalid, false
 		}

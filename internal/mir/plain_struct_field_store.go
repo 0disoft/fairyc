@@ -3,13 +3,13 @@ package mir
 import "github.com/0disoft/fairyc/internal/hir"
 
 // ValidPlainStructFieldStoreShape admits copied plain aggregates and direct
-// integer-transport array fields of repr(C) records. Exact path and local types
+// transport-only array fields of repr(C) records. Exact path and local types
 // remain verifier-owned facts.
 func ValidPlainStructFieldStoreShape(op Operation, lookup func(hir.Type) *StructType) bool {
 	if !validFieldStoreCommonShape(op) || op.Operands[1].Kind != OperandLocal || op.Operands[1].Local < 0 {
 		return false
 	}
-	if len(op.Fields) == 0 && hir.IntegerTransportArray(op.Type) {
+	if len(op.Fields) == 0 && hir.TransportOnlyArray(op.Type) {
 		owner := lookup(fieldAggregateType(op.OwnerType))
 		return owner != nil && owner.ReprC
 	}

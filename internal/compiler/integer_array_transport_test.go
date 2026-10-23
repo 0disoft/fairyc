@@ -62,7 +62,7 @@ func TestIntegerArrayTransportMIRRoundTrip(t *testing.T) {
 			t.Fatalf("array identity lost: %s", typ)
 		}
 	}
-	for _, mutation := range []string{"private", "oversize", "float"} {
+	for _, mutation := range []string{"private", "oversize", "c-float"} {
 		t.Run(mutation, func(t *testing.T) {
 			forged, err := mircodec.Decode(encoded, 1<<20)
 			if err != nil {
@@ -73,8 +73,8 @@ func TestIntegerArrayTransportMIRRoundTrip(t *testing.T) {
 				forged.StructTypes[packet].ReprC = false
 			case "oversize":
 				forged.StructTypes[packet].Fields[0].Type = hir.FixedArray(hir.TypeI8, 4097)
-			case "float":
-				forged.StructTypes[packet].Fields[0].Type = hir.FixedArray(hir.TypeF32, 3)
+			case "c-float":
+				forged.StructTypes[packet].Fields[0].Type = hir.FixedArray(hir.TypeCFloat, 3)
 			}
 			if len(mir.Verify(forged)) == 0 {
 				t.Fatal("forged array declaration accepted")

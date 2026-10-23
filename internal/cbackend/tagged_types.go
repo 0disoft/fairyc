@@ -334,7 +334,7 @@ func taggedPayloadLayout(
 		return enumerations[index].layoutType, true
 	}
 	if _, found := arrayByType[value]; found {
-		if hir.IntegerTransportArray(value) {
+		if hir.TransportOnlyArray(value) {
 			return layout.Type{}, false
 		}
 		if result, ok := scalarArrayLayoutType(value); ok {

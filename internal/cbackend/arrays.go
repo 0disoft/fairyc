@@ -39,7 +39,7 @@ func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCTy
 		if !array {
 			return nil
 		}
-		if !hir.ExecutableFixedArrayShape(element, length) && !hir.IntegerTransportArray(value) {
+		if !hir.ExecutableFixedArrayShape(element, length) && !hir.TransportOnlyArray(value) {
 			return fmt.Errorf("fixed array %q is outside the bounded executable C subset", value)
 		}
 		seen[value] = arrayCType{typ: value, element: element, length: length}
@@ -93,11 +93,11 @@ func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCTy
 
 func scalarArrayLayoutType(value hir.Type) (layout.Type, bool) {
 	element, length, array := hir.FixedArrayParts(value)
-	if !array || (!hir.ExecutableFixedArrayShape(element, length) && !hir.IntegerTransportArray(value)) {
+	if !array || (!hir.ExecutableFixedArrayShape(element, length) && !hir.TransportOnlyArray(value)) {
 		return layout.Type{}, false
 	}
 	element = canonicalCValueType(element)
-	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeI64 && element != hir.TypeU32 && element != hir.TypeUSize && !hir.IsIntegerTransportScalar(element) {
+	if element != hir.TypeU8 && element != hir.TypeI32 && element != hir.TypeI64 && element != hir.TypeU32 && element != hir.TypeUSize && !hir.IsIntegerTransportScalar(element) && !hir.IsFloatScalar(element) {
 		return layout.Type{}, false
 	}
 	elementLayout := layout.Type{Kind: layout.KindLanguageScalar, Name: element.String()}
