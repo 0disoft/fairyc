@@ -29,6 +29,37 @@ Ordinary development builds keep that data. The receipt records build flags and 
 bytes. At `3679d2a3` with Go 1.27.1, the compiler shrank from 17,849,344 to 13,094,400 bytes
 (26.6%); these are executable sizes, not ZIP sizes or native-program size changes.
 
+## Portability fixture
+
+Use the extracted preview compiler to prepare a separate transfer fixture:
+
+```text
+node tools/windows-portability/prepare.mjs --compiler <extracted/fairyc.exe> --dumpbin <Hostx64/x64/dumpbin.exe>
+```
+
+Preparation needs Node, Go, MSVC and the Windows SDK on the build host. It records the exact
+compiler identity, CGO setting, direct/delay-load DLL imports and file hashes, then checks the ZIP
+round trip. The ZIP contains the compiler, two prebuilt native probes, a PowerShell verifier and
+licenses; no source checkout, compiler cache or editor tooling is included.
+
+On the receiving Windows/AMD64 host, `verify.ps1 -Receipt <new-receipt.json>` requires only Windows
+PowerShell 5.1 or PowerShell 7. It verifies the bundle, creates/checks/tests a fresh starter, and
+executes both native profiles with an empty child PATH. The probes exercise allocated bytes,
+binary file reads/writes, sync/close and console output. Scratch data is removed; existing receipts
+are never overwritten. The builder also runs this verifier locally, but that receipt explicitly
+does not prove a clean host. Retain separate host/image and transfer evidence for that claim.
+
+Current generated programs use `/MT`; the fixture requires only `kernel32.dll` in each image's
+direct/delay-load import list. It does not enumerate dynamic DLL loads or establish compatibility
+with every Windows version. A changed import stops preparation for dependency review. The separate
+fixture does not replace the preview's native-build checks or promote target maturity.
+
+Verifier regression check, using an already prepared bundle:
+
+```text
+node tools/windows-portability/test.mjs --bundle <extracted-bundle>
+```
+
 ## Owners
 
 - Primary owner: the `0disoft/fairyc` repository administrator performing the release
