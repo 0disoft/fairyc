@@ -1,0 +1,208 @@
+{
+  "schema": "fairyc.sdk087-command-comparisons/v1",
+  "passed": true,
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "sourceFiles": 512,
+  "sourceInputsVerified": true,
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "records": [
+    {
+      "group": "metadata-development",
+      "cases": 122,
+      "exactMatches": 122,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/metadata-development/receipt.json",
+        "bytes": 373474,
+        "sha256": "c9dfbf9af8e4fa7ffbf110b95b0e64123ae756c0c6da16a726abef167303b0a1"
+      }
+    },
+    {
+      "group": "metadata-release",
+      "cases": 122,
+      "exactMatches": 122,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/metadata-release/receipt.json",
+        "bytes": 372943,
+        "sha256": "944a8ca3cb1676e6a57e507acd9a1e57e2fc86aa97ed317a21cd7bb34137bc6f"
+      }
+    },
+    {
+      "group": "semantic-development",
+      "cases": 104,
+      "exactMatches": 104,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/semantic-development/receipt.json",
+        "bytes": 266831,
+        "sha256": "53ff6fe1d0dd7aee34d6e1bf011904ce816c830bb72c492f2ba0a7676bad2ff5"
+      }
+    },
+    {
+      "group": "semantic-release",
+      "cases": 104,
+      "exactMatches": 104,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/semantic-release/receipt.json",
+        "bytes": 266456,
+        "sha256": "7f62cd39b634988742def67d534e2a0d7e854791ebe1e11291de3cdbca8cb7b7"
+      }
+    },
+    {
+      "group": "test-list-180",
+      "cases": 178,
+      "exactMatches": 178,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/test-list-180/receipt.json",
+        "bytes": 1760336,
+        "sha256": "32085d8cf9636cdba2b6d0f34d709466201a47a97ad43e6c21e527c83346a8c2"
+      }
+    },
+    {
+      "group": "region-sdk",
+      "cases": 12,
+      "exactMatches": 12,
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/region-sdk/receipt.json",
+        "bytes": 127910,
+        "sha256": "1013a559a96f43f6f6a084d0baed3c1d3e30851904f9d34645e364d573d08621"
+      }
+    },
+    {
+      "group": "check-development",
+      "cases": 173,
+      "exactMatches": 173,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/check-development/receipt.json",
+        "bytes": 848749,
+        "sha256": "c3c207225e78a0c1fd917a30522fa0829e3a8ce9fbec05be2a6692d6c9b4f798"
+      }
+    },
+    {
+      "group": "check-release",
+      "cases": 173,
+      "exactMatches": 173,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/check-release/receipt.json",
+        "bytes": 848769,
+        "sha256": "95045399e9b20278a49a514c60ac3c2135f1fcec30bb35da79cb183b36bc72fd"
+      }
+    },
+    {
+      "group": "cli-development",
+      "cases": 7,
+      "exactMatches": 7,
+      "skipped": [],
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/cli-development/receipt.json",
+        "bytes": 471902,
+        "sha256": "0b5ccde985657c905bbba0f3c4dafdff0782c461d03cb600c17f5f654ff6368f"
+      }
+    },
+    {
+      "group": "cli-release",
+      "cases": 7,
+      "exactMatches": 7,
+      "skipped": [],
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/cli-release/receipt.json",
+        "bytes": 471889,
+        "sha256": "c1bb77da2b55cda59714e8bf5cb628b7943f77d2df8f830251b57d8de3aa2faa"
+      }
+    },
+    {
+      "group": "native-tests-development",
+      "cases": 30,
+      "exactMatches": 30,
+      "evidence": [
+        {
+          "path": ".cache/completion-20261024/file-buffer-sdk/native-tests-development/observations.json",
+          "bytes": 62850,
+          "sha256": "ee0ac9fa7aeedbc4efa69460ed511e067523f80bfdba557a33ce3a4d72216507"
+        },
+        {
+          "path": ".cache/completion-20261024/file-buffer-sdk/native-tests-development-remaining/receipt.json",
+          "bytes": 8164,
+          "sha256": "2c6f54cc6730d24c9f296dd64582edf5ed65cd284f5320f3cd54de3cc81b3a64"
+        }
+      ]
+    },
+    {
+      "group": "native-tests-release",
+      "cases": 30,
+      "exactMatches": 30,
+      "evidence": [
+        {
+          "path": ".cache/completion-20261024/file-buffer-sdk/native-tests-release/receipt.json",
+          "bytes": 72065,
+          "sha256": "f864d8e9193e70c5bb8fda06357cfd9d9a6c44b8f89f2f82bd0c1af9970ed78b"
+        }
+      ]
+    }
+  ],
+  "exactComparisons": 1062,
+  "initialTimeouts": [
+    {
+      "group": "test-list/development",
+      "case": "sdk-tests-only",
+      "seconds": 90,
+      "originalPassed": false,
+      "observations": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/test-list/observations.json",
+        "bytes": 812714,
+        "sha256": "6311a656f1a4bd90f0eefb73ceb3f6384ac638292b350a4533b89dc6e8d368da"
+      },
+      "followup": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/test-list-sdk-timeout-followup.json",
+        "bytes": 3364,
+        "sha256": "350eb6bbd9f38cb93809886e2d40c60a603de4317f9b8e4cd38c709096161d0f"
+      },
+      "fullSuiteVerificationAllowanceSeconds": 180
+    },
+    {
+      "group": "native-tests-development",
+      "case": "stdin-binary",
+      "seconds": 120,
+      "originalPassed": false,
+      "exception": "subprocess.TimeoutExpired",
+      "successfulOriginalCases": 23,
+      "remainingCases": 7,
+      "followupAllowanceSeconds": 300
+    }
+  ],
+  "pending": [
+    "Remaining native/starter/workspace and example command comparisons",
+    "Authored companion independent fixed point",
+    "Linux execution",
+    "Clean-machine distribution and Windows maturity requirements"
+  ],
+  "limitations": [
+    "Check fixtures skip one package graph per profile; real-SDK Region adapter is recorded separately.",
+    "Three direct Region fixtures reject the reserved SDK namespace; the real-SDK adapter supplies meaningful Region coverage.",
+    "Initial timeout failures are retained; successful extended-allowance verification does not establish speed.",
+    "Timings were observed during concurrent verification and are not statistical benchmarks."
+  ],
+  "productTimeoutChanged": false,
+  "publicApiChanged": false,
+  "ciChanged": false,
+  "defaultCompiler": "Go",
+  "linuxExecuted": false,
+  "targetMaturityPromoted": false,
+  "pushed": false
+}

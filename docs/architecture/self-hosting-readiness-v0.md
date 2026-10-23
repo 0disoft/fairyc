@@ -1,5 +1,27 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 command comparison follow-up (2026-10-24)
+
+The [comparison follow-up](../ops/evidence/candidate-sdk087-command-comparisons-20261024.json)
+records 1,062 exact comparisons: metadata 244, semantic tests 208, checks 346,
+CLI input handling 14, test listing 178, native tests 60 and real-SDK Region checks 12.
+Both compiler profiles are covered. The check runner skips one package graph per
+profile; the real-SDK adapter separately checks all six Region fixtures in both
+profiles, including the three whose direct fixture form only rejects SDK namespaces.
+
+Initial development runs failed verification deadlines: SDK-only test listing at
+90 seconds and native stdin handling at 120 seconds. The focused listing retry
+matched Go at about 92 seconds (release about 7 seconds); the full listing suite
+then passed with a 180-second allowance. Native tests retain the initial 23 exact
+observations and pass the remaining seven distinct cases with a 300-second allowance;
+release passes all 30. The original failures remain in the record. These are
+verification-only allowances; product deadlines are unchanged. Concurrent local
+timings establish neither a speed target nor a statistical regression.
+
+Remaining native/starter/workspace and example command comparisons, the companion's
+independent fixed point, Linux execution and clean-machine distribution stay open.
+Go remains the default; no public API, CI or target-maturity flag changed.
+
 ## SDK 0.87 consecutive-generation equality (2026-10-24)
 
 The [fixed-point refresh](../ops/evidence/candidate-sdk087-fixed-point-20261024.json)

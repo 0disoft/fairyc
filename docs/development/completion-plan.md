@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `c8f5964e`. A separate hashed portability ZIP passes seven toolchain-free execution steps locally; its dependency manifest and standalone verifier are ready for transfer. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Full CLI builds and fixed-point equality pass for snapshot `91762c18`; the [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) closes its recorded Windows comparisons. ADR 0487 now changes the runtime selector/asset inputs: 249 runtime byte comparisons pass, but full CLI/fixed-point renewal is pending for those new inputs. Linux host implementation/execution remain open. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Full CLI builds and fixed-point equality pass for snapshot `91762c18`; the [CLI follow-up](../ops/evidence/candidate-cli-parity-20261024.json) closes its recorded Windows comparisons. SDK 0.87 full CLI builds, 249 runtime byte comparisons and exact consecutive C-packet/optimized-image equality now pass; the verification follow-up below tracks remaining command comparisons. Linux host implementation/execution remain open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -193,6 +193,19 @@ authored input hashes still match the checkout. Consecutive 44,747,876-byte C
 packets and 6,407,680-byte optimized images match without excluded bytes;
 the authored companion and runtime pack retain their authenticated identities.
 The companion's own fixed point and remaining command comparisons remain separate.
+Development SDK-dependent checks also exceeded the original verification deadlines;
+retain those failures and their focused retries when assessing authored-compiler speed.
+
+The [command comparison follow-up](../ops/evidence/candidate-sdk087-command-comparisons-20261024.json)
+records 1,062 exact comparisons across metadata, semantic tests, checks, CLI input
+handling, test listing, native tests and real-SDK Region checks in both profiles.
+Test listing passes all 178 cases with a verification-only 180-second allowance.
+Native development execution combines 23 original exact observations with seven
+successful remaining cases at a 300-second allowance; release passes all 30.
+The initial 90/120-second failures remain recorded. Remaining native/starter/workspace
+and example comparisons, the companion's independent fixed point, Linux execution
+and clean-machine distribution stay open. These results do not change product
+deadlines, default compiler selection or target maturity.
 
 ## Feature proposals
 
@@ -201,9 +214,9 @@ records completed development/release full CLI builds at frozen `890b3da4`, with
 all 512 authored source hashes matching the checkout. Metadata and semantic tests
 pass 452 exact comparisons across both profiles. The release compiler plus required
 companion and runtime pack occupy 6,955,917 bytes, excluding optional debugging
-symbols and transient build files. Latest-source consecutive-generation equality,
-native-test comparisons and the remaining workspace/check/test-list/example
-comparisons stay open; Go remains the default.
+symbols and transient build files. The later fixed-point record above closes
+consecutive-generation equality. Remaining command comparisons are tracked separately;
+Go remains the default.
 
 The first [portable file-to-Buffer slice](../adr/0487-portable-file-buffer-reads.md) adds a shared
 reserve/read/commit implementation and Linux adapter while retaining the Windows symbol. Both
