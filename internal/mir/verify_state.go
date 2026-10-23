@@ -22,6 +22,11 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 	for _, operand := range operands {
 		switch operand.Kind {
 		case OperandInvalid:
+		case OperandRegion:
+			_, active := state.regions[hir.SymbolID(operand.Local)]
+			if !active || operand.Local < 0 || operand.Type != hir.TypeRegion || operand.I32 != 0 || operand.I64 != 0 || operand.U64 != 0 || operand.StaticData != "" {
+				failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "Region operand does not name an active capability"})
+			}
 		case OperandLocal:
 			if operand.Local < 0 || !state.live[hir.SymbolID(operand.Local)] {
 				failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})

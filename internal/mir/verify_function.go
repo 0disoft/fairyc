@@ -32,8 +32,12 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			failures = append(failures, VerificationError{Code: CodeAggregateUse, Entity: resourceTypeEntity(resource.Type), Detail: "resource local type has no definition"})
 		}
 	}
-	for _, parameter := range function.Parameters {
+	for index, parameter := range function.Parameters {
 		initial.live[hir.SymbolID(parameter)] = true
+		if index < len(function.ParameterTypes) && function.ParameterTypes[index] == hir.TypeRegion {
+			// Empty entity marks a caller-owned capability: active, but not ours to reset.
+			initial.regions[hir.SymbolID(parameter)] = ""
+		}
 	}
 	flags := make(map[string]DropFlag, len(function.DropFlags))
 	for _, flag := range function.DropFlags {
@@ -110,6 +114,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			failures = append(failures, verifyOperands(state, terminator.Arguments, entity)...)
 			foreign := foreignFunctions[terminator.Callee]
 			internal := functions[terminator.Callee]
+			failures = append(failures, verifyRegionCall(state, terminator, internal, entity)...)
 			if terminator.ForeignABI != "" {
 				provenance, hasProvenance := unsafeByEntity[entity]
 				callEntity := sourceEntity("call", terminator.Span)
@@ -151,6 +156,9 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			}
 		}
 		if terminator.Kind == TerminatorReturn {
+			if function.ResultType == hir.TypeRegion || terminator.ReturnValue.Kind == OperandRegion || fieldStoreOperandType(terminator.ReturnValue, storeTypes) == hir.TypeRegion {
+				failures = append(failures, VerificationError{Code: "V1403", Entity: function.Name, Detail: "Region capability cannot be returned"})
+			}
 			if function.ResultType == hir.TypeVoid {
 				if terminator.ReturnValue.Kind != OperandInvalid {
 					failures = append(failures, VerificationError{Code: CodeReturnShape, Entity: terminatorEntity(item.id, terminator), Detail: "void return carries a value"})
@@ -167,7 +175,9 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 				}
 			}
 			for _, entity := range state.regions {
-				failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "normal return exits an active region without reset"})
+				if entity != "" {
+					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "normal return exits an active region without reset"})
+				}
 			}
 			continue
 		}

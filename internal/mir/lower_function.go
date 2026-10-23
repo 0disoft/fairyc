@@ -82,6 +82,10 @@ func (l *functionLowerer) lower() (Function, error) {
 		l.result.Parameters = append(l.result.Parameters, LocalID(parameter.Symbol))
 		l.result.ParameterTypes = append(l.result.ParameterTypes, parameter.Type)
 		l.bindings[parameter.Symbol] = bindingInfo{typ: parameter.Type, span: parameter.Span}
+		if parameter.Type == hir.TypeRegion {
+			// Input capabilities belong to the caller and never enter our reset stack.
+			l.regions[parameter.Symbol] = -1
+		}
 		isDropReceiver := l.source.DropGlueFor != hir.ParseType("") && index == 0 && parameter.Type == l.source.DropGlueFor
 		if l.properties.NeedsDrop(parameter.Type) && !isDropReceiver {
 			l.live[parameter.Symbol] = true

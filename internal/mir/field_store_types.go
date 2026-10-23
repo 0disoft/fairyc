@@ -5,6 +5,9 @@ import "github.com/0disoft/fairyc/internal/hir"
 // Operand annotations alone cannot grant writes to an unrelated local.
 func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction) map[LocalID]hir.Type {
 	needed := false
+	for _, typ := range function.ParameterTypes {
+		needed = needed || typ == hir.TypeRegion
+	}
 	for _, block := range function.Blocks {
 		for _, op := range block.Operations {
 			needed = needed || op.Kind == OperationCCallback || op.Kind == OperationArrayConstruct || op.Kind == OperationArrayIndex || op.Kind == OperationArrayIndexStore || op.Kind == OperationArrayIndexCheck || op.Kind == OperationArrayLength || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewElementBorrow || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty || op.Kind == OperationRegionPlace

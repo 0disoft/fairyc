@@ -78,7 +78,9 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 		Kind:     OperationRegionPlace, Span: expression.Span, Symbol: receiver.Symbol,
 		DestinationLocal: destination, Operands: []Operand{value}, Type: expression.Type, OwnerType: valueExpression.Type,
 	})
-	l.result.RegionScopes[factIndex].Placements = append(l.result.RegionScopes[factIndex].Placements, expression.Span)
+	if factIndex >= 0 {
+		l.result.RegionScopes[factIndex].Placements = append(l.result.RegionScopes[factIndex].Placements, expression.Span)
+	}
 	regionEntity := fmt.Sprintf("region:%d", receiver.Symbol)
 	operationEntity := fmt.Sprintf("operation:region-place:%d:%d", expression.Span.StartByte, expression.Span.EndByte)
 	l.result.RegionValues = append(l.result.RegionValues, RegionValue{

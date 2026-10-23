@@ -270,6 +270,9 @@ const OperandByteString OperandKind = "byte-string"
 
 const OperandString OperandKind = "string"
 
+// Region identities occupy their own namespace, separate from value locals.
+const OperandRegion OperandKind = "region"
+
 // Operand is an already-evaluated scalar value source.
 type Operand struct {
 	Kind  OperandKind

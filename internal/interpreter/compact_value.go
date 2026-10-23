@@ -20,6 +20,7 @@ func (*resourceState) runtimeValuePayload()    {}
 func (*arrayState) runtimeValuePayload()       {}
 func (*indexedViewState) runtimeValuePayload() {}
 func (*scalarReference) runtimeValuePayload()  {}
+func (*runtimeRegion) runtimeValuePayload()    {}
 
 func i32Bits(value int32) uint64   { return uint64(uint32(value)) }
 func i64Bits(value int64) uint64   { return uint64(value) }

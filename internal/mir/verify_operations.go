@@ -38,6 +38,11 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 	if detail := verifyIndexedViewOperands(operation, storeTypes); detail != "" {
 		failures = append(failures, VerificationError{Code: CodeStorageOperands, Entity: entity, Detail: detail})
 	}
+	for _, operand := range operation.Operands {
+		if operand.Kind == OperandRegion || fieldStoreOperandType(operand, storeTypes) == hir.TypeRegion {
+			failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "Region capability is only an internal call argument"})
+		}
+	}
 	if operation.SourceForm != "" {
 		failures = append(failures, VerificationError{Code: "V1601", Entity: entity, Detail: "source-only form remains: " + operation.SourceForm})
 	}
@@ -478,11 +483,11 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 		}
 		state.live[hir.SymbolID(operation.DestinationLocal)] = true
 	case OperationRegionReset:
-		_, active := state.regions[operation.Symbol]
-		if !active || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal || !validRegionExitKind(operation.ExitKind) {
+		owner, active := state.regions[operation.Symbol]
+		if !active || owner == "" || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal || !validRegionExitKind(operation.ExitKind) {
 			failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region reset does not close one active region"})
 		}
-		if active {
+		if active && owner != "" {
 			delete(state.regions, operation.Symbol)
 		}
 	case OperationResultSwitch:

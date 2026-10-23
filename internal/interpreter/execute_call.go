@@ -16,6 +16,7 @@ type runtimeRegion struct {
 	span       hir.Span
 	owner      *resourceState
 	placements []runtimeValue
+	active     bool
 }
 
 func (r *executionState) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
@@ -39,6 +40,13 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 	regions := make(map[hir.SymbolID]*runtimeRegion)
 	for index, parameter := range function.Parameters {
 		locals[parameter] = arguments[index].cloneForValueCopy()
+		if index < len(function.ParameterTypes) && function.ParameterTypes[index] == hir.TypeRegion {
+			region, ok := arguments[index].payload.(*runtimeRegion)
+			if !ok || region == nil || arguments[index].kind != valueRegion || !region.active {
+				return callCompletion{}, fmt.Errorf("call %q received an inactive Region capability", function.Name)
+			}
+			regions[hir.SymbolID(parameter)] = region
+		}
 	}
 	current := function.Entry
 	for {
@@ -421,7 +429,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					owner.resource().definition.Type != operation.OwnerType || operation.Type != hir.MutableBorrow(operation.OwnerType) {
 					return callCompletion{}, fmt.Errorf("region enter in %q has incompatible Arena owner", function.Name)
 				}
-				regions[operation.Symbol] = &runtimeRegion{span: operation.Span, owner: owner.resource()}
+				regions[operation.Symbol] = &runtimeRegion{span: operation.Span, owner: owner.resource(), active: true}
 				if r.abstractArenas[owner.resource()] {
 					if owner.resource().fields[2].u64() != 0 || owner.resource().fields[1].u64() == 0 {
 						return callCompletion{trapCategory: "unreachable"}, nil
@@ -430,7 +438,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				}
 			case mir.OperationRegionPlace:
 				region := regions[operation.Symbol]
-				if region == nil {
+				if region == nil || !region.active {
 					return callCompletion{}, fmt.Errorf("region place in %q uses inactive region %d", function.Name, operation.Symbol)
 				}
 				value, err := evaluateOne(locals, operation.Operands)
@@ -461,7 +469,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				locals[operation.DestinationLocal] = placed
 			case mir.OperationRegionReset:
 				region := regions[operation.Symbol]
-				if region == nil {
+				if region == nil || !region.active || regionParameter(function, operation.Symbol) {
 					return callCompletion{}, fmt.Errorf("region reset in %q uses inactive region %d", function.Name, operation.Symbol)
 				}
 				r.regionTrace = append(r.regionTrace, RegionEvent{
@@ -477,6 +485,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					region.owner.fields[1].scalar = generation + 1
 				}
 				delete(regions, operation.Symbol)
+				region.active = false
 			case mir.OperationMove:
 				delete(locals, mir.LocalID(operation.Symbol))
 			case mir.OperationDrop:
@@ -526,6 +535,14 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 			}
 			values := make([]runtimeValue, len(terminator.Arguments))
 			for index, operand := range terminator.Arguments {
+				if operand.Kind == mir.OperandRegion {
+					region := regions[hir.SymbolID(operand.Local)]
+					if region == nil || !region.active {
+						return callCompletion{}, fmt.Errorf("call in %q uses an inactive Region", function.Name)
+					}
+					values[index] = runtimeValue{kind: valueRegion, typ: hir.TypeRegion, payload: region}
+					continue
+				}
 				value, err := evaluate(locals, operand)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("call argument in %q: %w", function.Name, err)
@@ -564,8 +581,10 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 			}
 			current = next
 		case mir.TerminatorReturn:
-			if len(regions) != 0 {
-				return callCompletion{}, fmt.Errorf("return from %q leaves %d active region(s)", function.Name, len(regions))
+			for symbol := range regions {
+				if !regionParameter(function, symbol) {
+					return callCompletion{}, fmt.Errorf("return from %q leaves an owned active region", function.Name)
+				}
 			}
 			if function.ResultType == hir.TypeVoid {
 				return callCompletion{value: runtimeValue{kind: valueVoid, typ: hir.TypeVoid}}, nil

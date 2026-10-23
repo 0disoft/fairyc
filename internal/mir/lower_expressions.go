@@ -93,6 +93,9 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			DestinationLocal: destination, Span: expression.Span})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case hir.ExpressionPath:
+		if expression.Type == hir.TypeRegion {
+			return Operand{Kind: OperandRegion, Local: LocalID(expression.Symbol), Type: hir.TypeRegion}, nil
+		}
 		return Operand{Kind: OperandLocal, Local: LocalID(expression.Symbol)}, nil
 	case hir.ExpressionGroup:
 		if len(expression.Children) != 1 {
