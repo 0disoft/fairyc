@@ -4,6 +4,7 @@ import module_project_identified_ir as project;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
+import generic_package_bindings as provenance;
 import candidate_limits as limits;
 import c_text as w;
 import std::bytes as bytes;
@@ -12,8 +13,9 @@ import std::vec as v;
 struct Row{u32 kind;usize start;usize end;clean::Frame frame;}
 // Detached private C names, derived only from checked source identity rows.
 // Ordinary frames retain their numeric spelling. This is not a cache authority.
-pub resource Table{bytes::Buffer text;v::Vec<Row> rows;usize work;cleanup{}}
-pub fn Table empty(){return Table{.text=bytes::empty(),.rows=v::empty<Row>(),.work=0};}
+struct Source{usize start;usize end;}
+pub resource Table{bytes::Buffer text;v::Vec<Row> rows;v::Vec<Source> sources;usize work;cleanup{}}
+pub fn Table empty(){return Table{.text=bytes::empty(),.rows=v::empty<Row>(),.sources=v::empty<Source>(),.work=0};}
 pub fn usize work(ref Table p){return p.work;}
 pub fn usize count(ref Table p){return v::len<Row>(ref p.rows);}
 fn clean::Problem fail(u32 code,ref ir::Program p,usize frame){return clean::Problem{.code,.module_index=if(frame==0){0}else{clean::frame_at(ir::cleanup_ir(p),frame).module_index},.start=if(frame==0){0}else{ir::start(ir::at(p,frame))},.end=if(frame==0){0}else{ir::end(ir::at(p,frame))}};}
@@ -29,9 +31,29 @@ fn clean::Problem retain(ref ir::Program program,usize i,usize node,ref u8[] id,
             start=bytes::len(text);if(start>1048576-id.len){return fail(1002,program,i);}if(!bytes::append(text,id).is_ok){return fail(1003,program,i);}end=bytes::len(text);
         }
         if(!v::push<Row>(rows,Row{.kind,.start,.end,.frame=f}).is_ok){return fail(1003,program,i);}return fail(0,program,0);}
-pub fn Result<Table,clean::Problem> build(ref identified::Program input,ref mut usize work){let program=identified::ir_program(input);if(identified::frame_count(input)!=ir::count(program)){return .err(fail(1001,program,0));}let before=*work;var seen=switch(index(program,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer text=bytes::empty();var v::Vec<Row> rows=v::empty<Row>();var usize i=1;while(i<=ir::count(program)){let row=identified::frame_at(input,i);let e=retain(program,i,row.node,identified::identity(input,row),ref mut seen,ref mut text,ref mut rows,work);if(e.code!=0){return .err(e);}i+=1;}return .ok(Table{.text,.rows,.work=*work-before});}
-pub fn Result<Table,clean::Problem> build_project(ref project::Program input,ref mut usize work){let program=project::ir_program(input);if(project::frame_count(input)!=ir::count(program)){return .err(fail(1001,program,0));}let before=*work;var seen=switch(index(program,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer text=bytes::empty();var v::Vec<Row> rows=v::empty<Row>();var usize i=1;while(i<=ir::count(program)){let row=project::frame_at(input,i);let e=retain(program,i,row.node,project::identity(input,row),ref mut seen,ref mut text,ref mut rows,work);if(e.code!=0){return .err(e);}i+=1;}return .ok(Table{.text,.rows,.work=*work-before});}
+pub fn Result<Table,clean::Problem> build(ref identified::Program input,ref mut usize work){let program=identified::ir_program(input);if(identified::frame_count(input)!=ir::count(program)){return .err(fail(1001,program,0));}let before=*work;var seen=switch(index(program,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer text=bytes::empty();var v::Vec<Row> rows=v::empty<Row>();var usize i=1;while(i<=ir::count(program)){let row=identified::frame_at(input,i);let e=retain(program,i,row.node,identified::identity(input,row),ref mut seen,ref mut text,ref mut rows,work);if(e.code!=0){return .err(e);}i+=1;}return .ok(Table{.text,.rows,.sources=v::empty<Source>(),.work=*work-before});}
+pub fn Result<Table,clean::Problem> build_project(ref project::Program input,ref mut usize work){let program=project::ir_program(input);if(project::frame_count(input)!=ir::count(program)){return .err(fail(1001,program,0));}let before=*work;var seen=switch(index(program,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer text=bytes::empty();var v::Vec<Row> rows=v::empty<Row>();var usize i=1;while(i<=ir::count(program)){let row=project::frame_at(input,i);let e=retain(program,i,row.node,project::identity(input,row),ref mut seen,ref mut text,ref mut rows,work);if(e.code!=0){return .err(e);}i+=1;}let sources=switch(source_names(input,ref mut text,work)){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(Table{.text,.rows,.sources,.work=*work-before});}
 pub fn bool matches(ref Table names,ref ir::Program program,ref mut usize work){if(count(names)==0){return true;}if(count(names)!=ir::count(program)){return false;}var usize i=1;while(i<=count(names)){if(!budget::charge(work,1)){return false;}let a=v::at<Row>(ref names.rows,i-1);let b=clean::frame_at(ir::cleanup_ir(program),i);if(a.frame.kind!=b.kind || a.frame.context!=b.context || a.frame.module_index!=b.module_index || a.frame.declaration!=b.declaration || a.frame.result!=b.result || a.frame.effects!=b.effects || a.frame.receiver!=b.receiver || a.frame.receiver_type!=b.receiver_type){return false;}i+=1;}return true;}
 pub fn bool function(ref Table names,usize frame,ref mut bytes::Buffer out,ref mut w::State s){
     if(s.code!=0){return false;}if(count(names)==0){return w::function(out,s,frame);}if(frame==0 || frame>count(names)){s.code=1001;return false;}let row=*v::at<Row>(ref names.rows,frame-1);return if(row.kind==0){w::function(out,s,frame)}else{w::text(out,s,if(row.kind==2){b"fy_cleanup_"}else{b"fy_fn_"}) && w::text(out,s,bytes::view(ref names.text)[row.start..row.end])};
+}
+
+// These names come from checked package provenance, not producer-local parser IDs.
+fn Result<v::Vec<Source>,clean::Problem> source_names(ref project::Program input,ref mut bytes::Buffer text,ref mut usize work){
+    let stamps=project::source_provenance(input);var v::Vec<Source> rows=v::empty<Source>();var usize i=0;
+    while(i<provenance::count(stamps)){
+        let stamp=provenance::module_at(stamps,i);let path=provenance::text(stamps,stamp.path);if(!budget::charge(work,path.len+16)){return .err(fail(1002,project::ir_program(input),0));}
+        var bytes::Buffer key=bytes::empty();if(!bytes::append_byte(ref mut key,112).is_ok || !bytes::append_usize(ref mut key,stamp.owner+1).is_ok || !bytes::append_byte(ref mut key,47).is_ok){return .err(fail(1003,project::ir_program(input),0));}
+        var usize at=0;while(at<path.len && bytes::len(ref key)<=256){if(path[at]==58){if(at+1>=path.len || path[at+1]!=58){return .err(fail(1001,project::ir_program(input),0));}if(!bytes::append_byte(ref mut key,47).is_ok){return .err(fail(1003,project::ir_program(input),0));}at+=2;}else{if(!bytes::append_byte(ref mut key,path[at]).is_ok){return .err(fail(1003,project::ir_program(input),0));}at+=1;}}
+        if(!bytes::append(ref mut key,b".fy").is_ok){return .err(fail(1003,project::ir_program(input),0));}let start=bytes::len(text);
+        if(bytes::len(ref key)<=256 && (start>1048576 || bytes::len(ref key)>1048576-start)){return .err(fail(1002,project::ir_program(input),0));}
+        if(bytes::len(ref key)<=256 && !bytes::append(text,bytes::view(ref key)).is_ok){return .err(fail(1003,project::ir_program(input),0));}
+        if(!v::push<Source>(ref mut rows,Source{.start,.end=bytes::len(text)}).is_ok){return .err(fail(1003,project::ir_program(input),0));}i+=1;
+    }return .ok(rows);
+}
+pub fn bool source(ref Table names,usize module_index,ref mut bytes::Buffer out,ref mut w::State s){
+    if(!w::text(out,s,b"\n#undef FY_UNIT_SOURCE\n#define FY_UNIT_SOURCE \"")){return false;}
+    if(module_index<v::len<Source>(ref names.sources)){let row=*v::at<Source>(ref names.sources,module_index);let key=bytes::view(ref names.text)[row.start..row.end];var usize i=0;
+        while(i<key.len){let n=key[i] as usize;if(!w::text(out,s,b"\\") || !w::number(out,s,n/64) || !w::number(out,s,n/8%8) || !w::number(out,s,n%8)){return false;}i+=1;}}
+    return w::text(out,s,b"\"\n");
 }

@@ -68,3 +68,11 @@ pub fn bool maximum(ref mut bytes::Buffer out, ref mut State s, u32 code) {
 }
 pub fn bool minimum(ref mut bytes::Buffer out, ref mut State s, u32 code) { return text(out,s,if (code == 1) { b"INT32_MIN" } else { b"INT64_MIN" }); }
 pub fn bool divisor(ref mut bytes::Buffer out, ref mut State s, u32 code) { return text(out,s,b"fy_div_") && number(out,s,code as usize); }
+// Package-qualified source names distinguish files in different package instances.
+// The enclosing function defines FY_UNIT_SOURCE; only actual checks carry its bytes.
+pub fn bool location(ref mut bytes::Buffer out,ref mut State s,usize start,usize end){
+    return text(out,s,b"FY_UNIT_SOURCE,(uint32_t)(sizeof FY_UNIT_SOURCE-1),UINT64_C(") && number(out,s,start) && text(out,s,b"),UINT64_C(") && number(out,s,end) && text(out,s,b")");
+}
+pub fn bool trap(ref mut bytes::Buffer out,ref mut State s,u32 category,usize start,usize end){
+    return text(out,s,b"fy_unit_trap(") && number(out,s,category as usize) && text(out,s,b",") && location(out,s,start,end) && text(out,s,b")");
+}

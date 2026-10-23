@@ -101,7 +101,10 @@ for profile in profiles:
     if profile=='development' and selected.reference:
         run([selected.reference.resolve(),'run','--locked','--',*args],io_project,134,out=expected,err=b'child stderr\n',stdin=stdin,label='Go reference exact program streams')
     trap=fixture(profile,'trap','module main;fn i32 main(){assert(false);return 0;}\n')
-    run([image,'run','--release'],trap,5,err=b'trap: assertion-failed\n',label=profile+' recognized trap')
+    expected_trap=b'trap: assertion-failed\n  at src/main.fy:1:27\n'
+    if selected.reference:
+        run([selected.reference.resolve(),'run','--release'],trap,5,err=expected_trap,label=profile+' Go reference trap location')
+    run([image,'run','--release'],trap,5,err=expected_trap,label=profile+' recognized trap location')
     negative=fixture(profile,'negative','module main;fn i32 main(){return -1;}\n')
     run([image,'run'],negative,4294967295,label=profile+' full Windows exit bits')
     invalid=fixture(profile,'invalid','module main;fn bool main(){return true;}\n')

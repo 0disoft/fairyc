@@ -35,11 +35,11 @@ fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffe
     let op=ir::assignment_operator(b,n.target-1);let plain=stmt.kind==2 || bytes::equal(op,b"=");
     if(!(if(stmt.kind==2){w::local(out,s,local)}else{aggregate::place(p,b,target,out,s,0)}) || !w::text(out,s,b"=")){return false;}
     if(plain){if(!scalar::value(out,s,n.source)){return false;}}
-    else{if(op.len<2 || op[op.len-1]!=61){s.code=1001;return false;}let code=scalar::operator(op[..op.len-1]);if(code==0 || code==3 || code==4 || code>12 || type==0 || type==6){s.code=1004;return false;}if(!scalar::math_start(out,s,type,code) || !snapshot(out,s,n.target) || !w::text(out,s,b",") || !scalar::value(out,s,n.source) || !scalar::math_end(out,s,type)){return false;}}
+    else{if(op.len<2 || op[op.len-1]!=61){s.code=1001;return false;}let code=scalar::operator(op[..op.len-1]);if(code==0 || code==3 || code==4 || code>12 || type==0 || type==6){s.code=1004;return false;}if(!scalar::math_start(out,s,type,code) || !snapshot(out,s,n.target) || !w::text(out,s,b",") || !scalar::value(out,s,n.source) || !scalar::math_end(out,s,type,n.start,n.end)){return false;}}
     return w::text(out,s,b";\n");
 }
 pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end,bool shared){
-    let b=ir::at(p,cfg::frame(g));if(!calls::signature(p,named,cfg::frame(g),out,s,shared) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
+    let frame=clean::frame_at(ir::cleanup_ir(p),cfg::frame(g));if(!names::source(named,frame.module_index,out,s)){return false;}let b=ir::at(p,cfg::frame(g));if(!calls::signature(p,named,cfg::frame(g),out,s,shared) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
     if(cfg::frame(g)==sdk::byte_equal_frame(plan)){return byte_compare::body(b,out,s);}
     let invocations=switch(calls::invocation_index(b,work)){case .ok(p):{p}case .err(code):{s.code=code;return false;}};
     let arrays=switch(borrowed_arrays::build(p,b,g,work)){case .ok(a):{a}case .err(code):{s.code=code;return false;}};
@@ -67,10 +67,10 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
         else if(n.kind==4){if(!w::text(out,s,b"if(") || !scalar::value(out,s,n.source) || !w::text(out,s,b".fy_tag){") || !w::jump(out,s,n.first) || !w::text(out,s,b"}else{") || !w::jump(out,s,n.second) || !w::text(out,s,b"}\n")){return false;}}
         else if(n.kind==5){let d=clean::drop_at(ir::cleanup_ir(p),n.drop-1);let o=clean::operand_at(ir::cleanup_ir(p),d.operand);if(!aggregate::drop_call(p,o.type,out,s) || !w::text(out,s,b"&") || !(if(o.kind==1){w::local(out,s,o.id)}else{scalar::value(out,s,ir::node(b,o.id))}) || !w::text(out,s,b");\n")){return false;}}
         else if(n.kind==6){if(!w::text(out,s,b"return") || n.source!=0 && (!w::text(out,s,b" ") || !scalar::value(out,s,n.source)) || !w::text(out,s,b";\n")){return false;}}
-        else if(n.kind==8){if(!w::text(out,s,b"if(!") || !scalar::value(out,s,n.source) || !w::text(out,s,b")fy_runtime_trap(5);\n")){return false;}}
+        else if(n.kind==8){if(!w::text(out,s,b"if(!") || !scalar::value(out,s,n.source) || !w::text(out,s,b")") || !w::trap(out,s,5,n.start,n.end) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==9){let f=clean::frame_at(ir::cleanup_ir(p),cfg::frame(g));if(!w::text(out,s,b"return (") || !aggregate::type(p,f.result,out,s) || !w::text(out,s,b"){.fy_tag=0,.fy_payload.fy_err=") || !scalar::value(out,s,n.source) || !w::text(out,s,b".fy_payload.fy_err};\n")){return false;}}
         else if(n.kind==10 || n.kind==11){let type=scalar::scalar(p,ir::node_at(b,n.source-1).value.type);if(type!=7){if(n.target==0){s.code=1001;return false;}if(!scalar::value(out,s,n.source) || !w::text(out,s,b"=") || !scalar::value(out,s,n.target) || !w::text(out,s,b";\n")){return false;}}}
-        else if(n.kind==12){if(!w::text(out,s,b"fy_runtime_trap(7);\n")){return false;}}
+        else if(n.kind==12){if(!w::trap(out,s,7,n.start,n.end) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==13){if(!scalar::capture(out,s,n.target) || !w::text(out,s,b"=") || !scalar::value(out,s,n.source) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==14){if(!calls::call(p,named,plan,indexed,body_index,ref invocations,g,n.source,n.target,out,s,work)){return false;}}
         else if(n.kind==15 || n.kind==16){if(!lifecycle::block(b,n,out,s)){return false;}}
@@ -88,7 +88,7 @@ fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return
 pub fn bool project_prologue(ref ir::Program p,ref mut bytes::Buffer text,ref mut w::State s,ref mut usize work){
     var usize i=1;var bool posix=false;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){s.code=1002;return false;}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==1 && t.scalar==138){posix=true;}i+=1;}
     if(posix && !abi::posix_header(text,s)){return false;}
-    if(!w::text(text,s,b"/* fairyc.candidate-module-owned-c/v1 */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n") || !scalar::helpers(text,s)){return false;}
+    if(!w::text(text,s,b"/* fairyc.candidate-module-owned-c/v1 */\n#include <stdint.h>\n#include <limits.h>\n#include <string.h>\n_Static_assert(CHAR_BIT==8 && UINTPTR_MAX==UINT64_MAX,\"requires 64-bit target\");\n_Static_assert(INT32_MIN==(-INT32_MAX-1) && INT64_MIN==(-INT64_MAX-1),\"requires two's complement\");\n_Noreturn void fy_runtime_trap(uint32_t category);\n_Noreturn void fy_runtime_trap_at_v0(uint32_t,const char *,uint32_t,uint64_t,uint64_t);\nstatic _Noreturn void fy_unit_trap(uint32_t category,const char *source,uint32_t length,uint64_t start,uint64_t end){if(length)fy_runtime_trap_at_v0(category,source,length,start,end);fy_runtime_trap(category);}\n") || !scalar::helpers(text,s)){return false;}
     // Keep aggregate reads from live owner storage behind an opaque CRT copy
     // on MSVC. Inline aggregate copies cached a pre-view-write array element
     // under /O2; the scalar helpers keep their normal intrinsic behavior.

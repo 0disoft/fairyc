@@ -39,7 +39,7 @@ pub fn Result<Plan,u32> build(ref ir::Program p,ref ir::Body b,ref cfg::Graph g,
 }
 pub fn bool read(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s){
     let e=ir::node_at(b,id-1).value;let left=ir::node(b,e.left);let right=ir::node(b,e.right);let t=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,left-1).value.type);
-    return w::text(out,s,b"if(") && scalar::value(out,s,right) && w::text(out,s,b">=") && w::number(out,s,t.second) && w::text(out,s,b")fy_runtime_trap(6);\n")
+    return w::text(out,s,b"if(") && scalar::value(out,s,right) && w::text(out,s,b">=") && w::number(out,s,t.second) && w::text(out,s,b")") && w::trap(out,s,6,e.start,e.end) && w::text(out,s,b";\n")
         && scalar::value(out,s,id) && w::text(out,s,b"=") && aggregate::place(p,b,left,out,s,0) && w::text(out,s,b".fy_items[") && scalar::value(out,s,right) && w::text(out,s,b"];\n");
 }
 // Preserve the opaque live-storage read required by the MSVC alias regression,
