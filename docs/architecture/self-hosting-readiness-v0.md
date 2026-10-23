@@ -1,5 +1,16 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 starter and workspace commands (2026-10-24)
+
+The [starter/workspace follow-up](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json)
+adds 88 exact comparisons: 28 starter cases and 30 workspace command cases per
+compiler profile. Fresh and repeated creation, Unicode parents, existing files,
+directories and live/dangling links preserve the Go behavior and file contents.
+Workspace command options, diagnostics, test listing and forwarded run arguments
+also match. Source and image hashes are verified against the frozen `890b3da4`
+build. Full native build/run and example comparisons remain separate below;
+Go stays the default and target/distribution claims are unchanged.
+
 ## SDK 0.87 command comparison follow-up (2026-10-24)
 
 The [comparison follow-up](../ops/evidence/candidate-sdk087-command-comparisons-20261024.json)

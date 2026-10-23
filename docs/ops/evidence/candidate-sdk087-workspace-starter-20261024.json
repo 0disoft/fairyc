@@ -1,0 +1,59 @@
+{
+  "schema": "fairyc.sdk087-workspace-starter/v1",
+  "passed": true,
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "records": [
+    {
+      "group": "starter-cli",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/starter-cli/receipt.json",
+        "bytes": 310907,
+        "sha256": "8f529163740716dabe476ea923e7e30a4396a8ab265defed644e26fd3ff82af9"
+      },
+      "exactComparisons": 28
+    },
+    {
+      "group": "workspace-cli-development",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/workspace-cli-development/receipt.json",
+        "bytes": 778890,
+        "sha256": "3f2ba7e5a0ed8e25d83742c569ea51b83659c7757e65158007b4f352a911e8c8"
+      },
+      "exactComparisons": 30
+    },
+    {
+      "group": "workspace-cli-release",
+      "receipt": {
+        "path": ".cache/completion-20261024/file-buffer-sdk/workspace-cli-release/receipt.json",
+        "bytes": 778889,
+        "sha256": "e007f8b25f6c7b076d103d14a42b4e473305a7cadea926f020ff50d9aad3cda2"
+      },
+      "exactComparisons": 30
+    }
+  ],
+  "exactComparisons": 88,
+  "coverage": [
+    "fresh/repeated/Unicode-parent project generation",
+    "existing entries and live/dangling link preservation",
+    "invalid commands and option diagnostics",
+    "workspace check/build/run/test command boundaries"
+  ],
+  "sourceInputsVerified": true,
+  "publicApiChanged": false,
+  "ciChanged": false,
+  "linuxExecuted": false,
+  "targetMaturityPromoted": false,
+  "defaultCompiler": "Go",
+  "pushed": false,
+  "remaining": [
+    "full native build/run pipeline",
+    "shipped example comparisons",
+    "authored companion independent fixed point",
+    "Linux execution and clean-machine distribution"
+  ]
+}

@@ -187,6 +187,11 @@ remain unchanged.
 
 ## SDK 0.87 verification follow-up
 
+The [starter/workspace record](../ops/evidence/candidate-sdk087-workspace-starter-20261024.json)
+closes 28 starter and 60 workspace command comparisons across both compiler
+profiles. Existing entries and live/dangling links are preserved. Native build/run
+and shipped examples remain separate from those 88 exact observations.
+
 The [fixed-point refresh](../ops/evidence/candidate-sdk087-fixed-point-20261024.json)
 closes latest-input full CLI dispatcher equality at frozen `890b3da4`. All 512
 authored input hashes still match the checkout. Consecutive 44,747,876-byte C
