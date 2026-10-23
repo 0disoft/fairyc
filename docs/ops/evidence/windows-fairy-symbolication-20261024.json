@@ -1,0 +1,64 @@
+{
+  "schema": "fairyc.windows-fairy-symbolication/v1",
+  "passed": true,
+  "sourceBaseRevision": "3a57a334199104590d6b0bad6b7528c812c7b580",
+  "modifiedSource": "internal/compiler/vector_lexer_debug_map_test.go",
+  "command": [
+    "go",
+    "test",
+    "./internal/compiler",
+    "-run",
+    "^TestPrivateVectorSDKCandidateScannerDebugMapLayout$",
+    "-count=1",
+    "-v",
+    "-timeout=5m"
+  ],
+  "log": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/windows-fairy-debug-verified.log",
+    "sha256": "270753e8baa52ac9ad317c8fc32852537069106d1ca400cf8be19a03c2d08c22"
+  },
+  "sources": [
+    {
+      "path": "internal/compiler/vector_lexer_debug_map_test.go",
+      "sha256": "6bea0160c2609df1496d837158991baa72b96eb2a0f460f5b7f6a02787dd978c"
+    },
+    {
+      "path": "internal/cdriver/windows_debug_symbols_windows.go",
+      "sha256": "a9a531cc9ee2ec65230443eb305cf77b68da9b349ada616aa8229e8b33c53c69"
+    },
+    {
+      "path": "internal/cdriver/windows_build.go",
+      "sha256": "cf7705aa8fc72ce505ee345d6ab5f75001a2f7a057c71e68b9af45303e0c8caa"
+    },
+    {
+      "path": "internal/pecoff/program_database.go",
+      "sha256": "04216a66e2d85e623b60f98c1434d41a3c320c405d1725bc7c6e2975053c8783"
+    },
+    {
+      "path": "internal/pecoff/program_database_procedures.go",
+      "sha256": "1b673d9b1da76758597f5d05a02f3a4d1a1220d7d90d0b34f2d3ad536bc9634a"
+    }
+  ],
+  "fairyVariants": [
+    "explicit_index",
+    "all_vector_for"
+  ],
+  "profile": "optimized, with and without private debug information",
+  "exactFunctionStartsPerVariant": 3,
+  "functions": [
+    "scanner::scan",
+    "scanner::report_work",
+    "numbers::decimal"
+  ],
+  "functionNameAuthority": "emitter function table and independently decoded retained PDB procedure records; DbgHelp must return the exact matching symbol with zero displacement",
+  "mismatchedIdentity": "one byte of the PE RSDS GUID changed while retaining the executable code and original PDB; lookup rejects before symbol use",
+  "executedImages": 6,
+  "executionScope": "two Fairy scanner variants plus independent C, each with release and debug images and equal parsed scanner output",
+  "fairyImageBytes": 211968,
+  "fairyPDBBytes": 4231168,
+  "originalFairySourceLinesProven": false,
+  "hostedReceipt": false,
+  "defaultBuildChanged": false,
+  "targetMaturityChanged": false,
+  "pushed": false
+}

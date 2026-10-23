@@ -3,6 +3,7 @@
 package compiler_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -75,7 +76,8 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		if len(debug.ProgramDatabase) == 0 || len(debug.LinkMap) == 0 {
 			t.Fatal("debug image omitted PDB or map")
 		}
-		if _, err := pecoff.InspectProgramDatabaseAssociation(debug.Bytes, debug.ProgramDatabase); err != nil {
+		association, err := pecoff.InspectProgramDatabaseAssociation(debug.Bytes, debug.ProgramDatabase)
+		if err != nil {
 			t.Fatal(err)
 		}
 		contributions, err := pecoff.InspectPDBSectionContributions(debug.Bytes, debug.ProgramDatabase)
@@ -162,6 +164,8 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		t.Logf("PDB unwind owner coverage attributed=%d unmatched=%d ambiguous=%d total=%d intervals=%d; .text code contribution sum=%d top modules=%v",
 			ownership.Attributed, ownership.Unmatched, ownership.Ambiguous, ownership.TotalBytes,
 			ownership.MatchedEntries, codeContributionBytes, modules)
+		type fairySymbol struct{ name, source string }
+		expectedSymbols := make(map[uint32]fairySymbol)
 		procedureModules := map[string]bool{"probe.obj": name == "independent C", "unit.obj": name != "independent C", "runtime.obj": name != "independent C"}
 		for _, module := range contributions.Modules {
 			if !procedureModules[module.Name] {
@@ -227,6 +231,18 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 						t.Fatalf("PDB procedure %q has no emitted Fairy source function", procedure.Name)
 					}
 					source := sourceFunctions[index]
+					for _, wanted := range []string{"scanner::scan", "scanner::report_work", "numbers::decimal"} {
+						if strings.HasSuffix(source, "::"+wanted) {
+							rva := uint64(debugPE.Sections[procedure.Section-1].VirtualAddress) + uint64(procedure.Offset)
+							if rva > uint64(^uint32(0)) {
+								t.Fatal("Fairy procedure RVA overflows")
+							}
+							if _, duplicate := expectedSymbols[uint32(rva)]; duplicate {
+								t.Fatal("representative Fairy procedures unexpectedly share an address")
+							}
+							expectedSymbols[uint32(rva)] = fairySymbol{procedure.Name, source}
+						}
+					}
 					var target string
 					for _, name := range []string{"scanner::report_work", "scanner::storage"} {
 						if strings.HasSuffix(source, "::"+name) {
@@ -275,6 +291,36 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 		symbols, err := cdriver.ResolveWindowsDebugSymbols(debug, starts)
 		if err != nil {
 			t.Fatal(err)
+		}
+		if len(sourceFunctions) != 0 {
+			if len(expectedSymbols) != 3 {
+				t.Fatalf("missing representative Fairy procedures: %v", expectedSymbols)
+			}
+			matched := 0
+			for _, symbol := range symbols {
+				if expected, selected := expectedSymbols[symbol.RVA]; selected {
+					if !symbol.Found || symbol.Displacement != 0 || symbol.Name != expected.name {
+						t.Fatalf("DbgHelp did not resolve exact %s (%s): %+v", expected.source, expected.name, symbol)
+					}
+					matched++
+				}
+			}
+			if matched != len(expectedSymbols) {
+				t.Fatalf("DbgHelp checked %d/%d representative Fairy function starts", matched, len(expectedSymbols))
+			}
+			// Keep the valid PDB and executable code. Alter only the PE's debug
+			// identity so a plausible but mismatched symbol file cannot be used.
+			marker := append([]byte("RSDS"), association.GUID[:]...)
+			if bytes.Count(debug.Bytes, marker) != 1 {
+				t.Fatal("cannot identify the unique validated PE debug identity")
+			}
+			mismatched := debug
+			mismatched.Bytes = bytes.Clone(debug.Bytes)
+			mismatched.Bytes[bytes.Index(mismatched.Bytes, marker)+4] ^= 1
+			if _, err := cdriver.ResolveWindowsDebugSymbols(mismatched, starts); err == nil || !strings.Contains(err.Error(), "debug symbol PDB identity") {
+				t.Fatalf("mismatched PE/PDB was not rejected at its identity boundary: %v", err)
+			}
+			t.Logf("DbgHelp exact Fairy function starts=%d; mismatched PE/PDB rejected", matched)
 		}
 		pe, err := pecoff.InspectExecutable(release.Bytes)
 		if err != nil {

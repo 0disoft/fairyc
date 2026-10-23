@@ -31,7 +31,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
 | PDB association | partial | ADR 0238, Windows host smoke | Ephemeral MSF 7 PDB identity is associated with final PE RSDS data | Add hosted same-commit artifact retention/retrieval evidence before any distribution/debug-package claim |
-| DbgHelp symbolication | partial | ADR 0239, `tools/dev/fairyc-windows-host-smoke/symbolication_windows.go` | One exact function and source-line canary resolves through system DbgHelp | Cover representative optimized Fairy frames and failure behavior; one canary never promotes the whole debugger surface |
+| DbgHelp symbolication | partial | ADR 0239, `tools/dev/fairyc-windows-host-smoke/symbolication_windows.go`, `internal/compiler/vector_lexer_debug_map_test.go` | The source-line canary is joined by exact DbgHelp names for three Fairy functions in two optimized scanner variants and rejected PE/PDB identity mismatches | Retain these generated-source checks in the same-commit hosted receipt; bounded symbol lookup does not promote the whole debugger surface |
 | UCRT dependency closure | partial | runtime/link smoke, PE import inspection and `tools/windows-portability/` | The transfer fixture records `/MT` program builds and direct/delay-load DLL dependencies in a hashed deployment manifest | Execute the declared files on a clean Windows host and account for runtime-loaded dependencies; local import inspection does not prove closure |
 | VCRuntime dependency closure | partial | runtime/link smoke, PE import inspection and `tools/windows-portability/` | The transfer fixture includes development and release artifacts with independent hashes | Same clean-machine manifest/execution requirement as UCRT, including development and release artifacts |
 | Clean-machine executable portability | blocked | `tools/windows-portability/` | A transferable ZIP and standalone PowerShell verifier cover toolchain-free compiler use and prebuilt native programs; local execution is not clean-machine proof | Move only the declared files to a clean Windows environment and retain host/image evidence plus the execution receipt; preserve the separate hosted-source identity requirement |
@@ -106,6 +106,24 @@ caught entirely in C, with abnormal inner and normal outer `finally` observation
 trap exits with code 134, control tag 6 and no output or C `finally` execution. The existing host
 smoke now runs these cases. Both rows remain partial; the hosted lane and remaining target gaps
 are not covered by this local run.
+
+## Optimized Fairy symbol lookup (2026-10-24)
+
+The [local record](../ops/evidence/windows-fairy-symbolication-20261024.json) runs
+the existing independent-C and Fairy scanner debug-map test. Both indexed and
+vector-loop Fairy variants require system DbgHelp to resolve `scanner::scan`,
+`scanner::report_work` and `numbers::decimal` at their exact retained function
+starts with zero displacement. Expected names come from the emitter's function
+table and independently decoded PDB procedure records. Previously, DbgHelp
+results were collected only for cost reporting without these assertions.
+
+Changing one byte of each PE's validated RSDS GUID while keeping its code and
+PDB causes identity rejection before symbol lookup. The existing six release/
+debug executions retain equal scanner results and matching function intervals.
+The Fairy images are 211,968 bytes each; the optional test PDB is 4,231,168 bytes.
+No PDB is added to default builds or the preview. This proves bounded function
+names and identity rejection, not original `.fy` line mapping, universal stack
+symbolication or hosted execution. The row and target maturity flags remain unchanged.
 
 ## Ownership rule
 
