@@ -22,6 +22,9 @@ func (c *typeChecker) checkFunction() hir.Function {
 	}
 	c.resultType = resultType
 	functionSymbol.typ = resultType
+	if resultType == hir.TypeRegion {
+		c.analyzer.addDiagnostic("E3103", span(c.module.file.Path, c.function.ResultType.Span))
+	}
 	if _, _, borrowLeaves := safeBorrowLeaf(resultType); borrowLeaves > 1 {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.ResultType.Span, "function result with more than one safe-borrow leaf")
 	}

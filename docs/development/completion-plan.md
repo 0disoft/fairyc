@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter renewed at clean `4c5967c9`; clean-machine proof and publication remain open. LSP stays a separate executable. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Fix Region input-capability transport and diagnostic differences, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | At clean `1dbca9ad`, both full CLI builds and consecutive C-packet/optimized-PE equality pass over 512 sources. The [Region workspace audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23) identifies the next implementation slices. Native-test/example comparisons are still running; full parity remains open. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass at `1dbca9ad`. [Region input transport](../ops/evidence/region-input-transport-20261023.json) now passes MIR, interpreter, cross-package Windows native and disk-cache checks at `a13dbfa4`/`ac5326d1`. Candidate E3102/E3101 diagnostics and remaining comparisons stay open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -133,6 +133,11 @@ exact comparisons respectively across both profiles. Native-test/example compari
 running. The [Region workspace audit](phase2-remaining-work.md#region-workspace-audit-2026-10-23)
 records implementation and diagnostic gaps that keep full parity open. Linux execution,
 clean-machine portability and the remaining Windows maturity requirements stay open.
+
+Region input transport is now implemented without extra runtime allocation. Callees borrow the
+caller's handle and never begin or reset it. Next are candidate E3102/E3101 diagnostic parity
+and the remaining native/example comparisons, before optional tooling. The whole-CLI observations
+above use frozen `1dbca9ad` compiler images; they do not validate the newer Go implementation.
 
 ## Feature proposals
 

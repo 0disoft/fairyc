@@ -77,6 +77,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			hirStatement.Binding = symbol.id
 			hirStatement.Expression = expression
 			localSpan := span(c.module.file.Path, binding.NameSpan)
+			if symbol.typ == hir.TypeRegion {
+				c.analyzer.addDiagnostic("E3103", localSpan)
+			}
 			c.hir.Locals = append(c.hir.Locals, hir.Local{
 				Symbol:  symbol.id,
 				Name:    binding.Name,

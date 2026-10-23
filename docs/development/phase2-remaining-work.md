@@ -162,10 +162,27 @@ contains 12 comparisons (six per profile): four exact matches and eight differen
 [adapter](../../tools/compare-candidate-region-workspaces.py) preserves each original `main.fy`,
 replaces the fixture SDK stub with the real SDK, and exits 1 for the unresolved differences.
 
-Next implementation slices, in order:
+Implementation slices identified by that audit:
 
 1. Region input-capability MIR/native transport without resetting a caller-owned region.
 2. Explicit unsupported diagnostics where the behavior is not implemented.
 3. Exact candidate Region diagnostic comparison.
 
 Phase 2 remains partial.
+
+## Region input transport (2026-10-24)
+
+Go MIR/interpreter support landed in `a13dbfa4`; native C and cache transport landed in `ac5326d1`.
+Region operands cannot be ordinary copied or stored values. Callees borrow the caller's existing
+handle without beginning, resetting or copying it, or adding runtime allocation.
+
+The [transport record](../ops/evidence/region-input-transport-20261023.json) covers public
+cross-package calls, Result success/error propagation, all three allocation operations, the same
+Region passed twice, caller reentry and independent-session cache restoration. Windows low and
+optimized executions return 42 with no output and zero final live allocations. Linux emission
+passes; native Linux execution remains unavailable. Direct Region returns and explicit/inferred
+local copies now report E3103 before MIR lowering.
+
+The refreshed Go reference agrees with the frozen candidate on both previously failing positive
+Region cases. Candidate E3102 and related E3101 diagnostics remain open. The older whole-CLI
+comparisons belong to the frozen `1dbca9ad` images, not this newer Go compiler.
