@@ -21,6 +21,14 @@ fn void overlapping_internal_statuses_do_not_become_resolution_diagnostics(){
 @test
 fn void argument_label_failures_keep_their_public_code_in_analysis_phases(){
     assert(diagnostics::code(3,4,1014)==1014 && diagnostics::code(3,6,1014)==1014);
-    assert(bytes::equal(diagnostics::summary(1014),b"call argument label does not match its position or target"));
+    assert(bytes::equal(diagnostics::summary(1014),b"Call argument label does not match its position or the call target does not support labels."));
     assert(diagnostics::code(4,0,1014)==0 && diagnostics::code(3,6,14)==0);
+}
+
+@test
+fn void region_failures_keep_their_public_codes_and_messages(){
+    assert(diagnostics::code(3,4,3102)==3102);
+    assert(bytes::equal(diagnostics::summary(3102),b"plain Region placement cannot contain a resource that needs drop"));
+    assert(bytes::equal(diagnostics::summary(3101),b"Region-derived value escapes its lexical region"));
+    assert(diagnostics::code(4,0,3102)==0);
 }

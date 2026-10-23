@@ -24,10 +24,23 @@ pub fn ref moves::Plan checked_moves(ref Plan p){return ref p.moved;}
 pub fn ref interfaces::Interfaces checked_interfaces(ref Plan p){return closure::imported(ref p.ready);}
 pub fn ref policy::Plan cleanup_policy(ref Plan p){return ref p.cleanup_policy;}
 fn Problem failed(u32 stage,u32 code,usize module_index,usize start,usize end,usize expected,usize actual){return Problem{.stage,.code,.module_index,.start,.end,.expected,.actual,.declaration_start=0,.declaration_end=0,.move_start=0,.move_end=0,.header_start=0,.header_end=0,.field_module=0,.field_start=0,.field_end=0};}
+// Value analysis preserves the imported type graph as an exact prefix. Retain
+// its nominal declaration before the failed typed plan is discarded.
+fn Problem value_failure(ref v::Vec<syntax::Parsed> sources,ref interfaces::Interfaces imported,u32 code,usize module_index,usize start,usize end,usize expected,usize actual){
+    var p=failed(4,code,module_index,start,end,expected,actual);
+    if(code!=3102 || actual==0 || actual>interfaces::type_count(imported)){return p;}
+    let t=interfaces::type_at(imported,actual);
+    if((t.kind!=2 && t.kind!=3 && t.kind!=4 && t.kind!=13) || t.module_index>=v::len<syntax::Parsed>(sources)){return p;}
+    let source=v::at<syntax::Parsed>(sources,t.module_index);
+    if(t.declaration==0 || t.declaration>syntax::declaration_count(source)){return p;}
+    let declaration=syntax::declaration_at(source,t.declaration-1);
+    p.field_module=t.module_index;p.field_start=declaration.name_start;p.field_end=declaration.name_end;
+    return p;
+}
 pub fn Result<Plan,Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,0,0));}};
     let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(e):{return .err(failed(3,e.code,e.module_index,e.start,e.end,0,0));}};
-    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
+    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(value_failure(sources,closure::imported(ref ready),e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
     // Type, ownership and borrow phases retain their independent histories.
     let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
     if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);var Problem p=failed(5,e.code,e.module_index,e.start,e.end,0,0);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}
@@ -63,7 +76,7 @@ pub fn Problem validate_sources_catalog(ref Plan p,ref v::Vec<syntax::Parsed> so
 pub fn Result<diagnostics::Report,Problem> origin_report(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop){
     let bound=switch(binding::bind(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(failed(2,e.code,e.module_index,e.start,e.end,0,0));}};
     let ready=switch(closure::build_unit(sources,metadata,ref bound)){case .ok(p):{p}case .err(e):{return .err(failed(3,e.code,e.module_index,e.start,e.end,0,0));}};
-    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(failed(4,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
+    let typed=switch(values::build(sources,metadata,ref ready)){case .ok(p):{p}case .err(e):{return .err(value_failure(sources,closure::imported(ref ready),e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
     let moved=switch(moves::build(sources,ref typed,0)){case .ok(p):{p}case .err(e):{return .err(failed(5,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
     if(moves::count(ref moved)!=0){let e=moves::at(ref moved,0);return .err(failed(5,e.code,e.module_index,e.start,e.end,0,0));}
     let inferred=switch(origins::build(sources,metadata,ref typed)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};

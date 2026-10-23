@@ -6,6 +6,7 @@ import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;
 import std::vec as v;
+import project_sdk_data_alloc_0 as allocator;
 
 fn syntax::Parsed parsed(ref u8[] text){let data=switch(bytes::copy(text)){case .ok(p):{p}case .err(_):{assert(false);return parsed(b"module empty;");}};
     let stream=switch(scanner::collect(data,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return parsed(b"module empty;");}};
@@ -23,4 +24,17 @@ fn void nonchecking_failures_keep_zero_type_and_limit_details(){
     let empty=v::empty<syntax::Parsed>();switch(cli::build(ref empty)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==1 && e.code==1001 && e.expected==0 && e.actual==0);}};
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module main;fn void main(){}")).is_ok);
     switch(cli::build(ref sources)){case .ok(_):{assert(false);}case .err(e):{assert(e.phase==5 && e.code==1001 && e.expected==0 && e.actual==0);}};
+}
+
+@test
+fn void region_placement_retains_nominal_type_location(){
+    let source=b"module main;resource Token{i32 value;cleanup{}}fn void bad(Region input,Token token){discard input.place(token);}";
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(source)).is_ok);
+    var bytes::Buffer sdk=bytes::empty();var usize work=0;assert(allocator::append(ref mut sdk,ref mut work)==0);
+    assert(v::push<syntax::Parsed>(ref mut sources,parsed(bytes::view(ref sdk))).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    switch(compile::build(ref sources,ref metadata)){
+        case .ok(_):{assert(false);}
+        case .err(e):{assert(e.stage==4 && e.code==3102 && e.actual!=0 && e.field_module==0);assert(bytes::equal(source[e.start..e.end],b"input.place(token)"));assert(bytes::equal(source[e.field_start..e.field_end],b"Token"));}
+    };
 }
