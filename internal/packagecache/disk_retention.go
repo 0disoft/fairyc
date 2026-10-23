@@ -59,6 +59,9 @@ func (store *DiskStore) scanNamespace(versionPath string, clean bool) ([]diskGen
 		}
 		directoryPath := filepath.Join(versionPath, keyDirectory.Name())
 		entries, err := readCacheDirectory(store.retentionRoot, directoryPath)
+		if errors.Is(err, os.ErrNotExist) {
+			continue // Another collector removed this empty key directory.
+		}
 		if err != nil {
 			return nil, fmt.Errorf("scan package cache key directory: %w", err)
 		}
@@ -88,6 +91,11 @@ func (store *DiskStore) scanNamespace(versionPath string, clean bool) ([]diskGen
 			// MaxRecordBytes is a reader bound, not a reason to erase a sibling
 			// store's larger record. Every generation still counts toward retention.
 			result = append(result, diskGeneration{path: path, name: entry.Name(), size: uint64(info.Size()), modTime: info.ModTime()})
+		}
+		if clean {
+			// Never recurse: unknown files, live temporaries and concurrent
+			// publications keep their directory. Failure is harmless.
+			removeEmptyKeyDirectory(store.retentionRoot, directoryPath)
 		}
 	}
 	return result, nil

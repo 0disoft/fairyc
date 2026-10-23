@@ -32,6 +32,13 @@ deleted and counted as rejected. Collection removes caller-expired temporary fil
 oldest immutable generations until entry and byte bounds both hold. Eviction time is a disposable
 hint, never correctness or source truth.
 
+Collection also removes empty digest-key directories, including empty directories left by older
+writers. Eviction, rejected-record cleanup and failed publication attempt the same cleanup.
+Removal is nonrecursive and best-effort: unknown files, live temporary files and concurrently
+published generations keep their directory. A writer retries once if collection removes its empty
+directory before temporary-file creation. Directory metadata is not included in the byte limit,
+but successful repeated edits no longer leave one empty directory per evicted key.
+
 ## Evidence
 
 Tests use independent store instances and concurrent writers over one directory, then require a

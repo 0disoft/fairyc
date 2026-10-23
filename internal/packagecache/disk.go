@@ -86,8 +86,9 @@ type diskGeneration struct {
 }
 
 type diskPutHooks struct {
-	afterTemporaryClosed func(string)
-	afterPublished       func(string)
+	beforeTemporaryCreate func(string)
+	afterTemporaryClosed  func(string)
+	afterPublished        func(string)
 }
 
 // NewDiskStore creates the versioned root and rejects every missing bound.
@@ -210,29 +211,9 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 		return ErrRecordTooLarge
 	}
 	keyDirectory := store.keyDirectoryName(record.Key)
-	createdKeyDirectory := false
-	if err := store.root.Mkdir(keyDirectory, 0o700); err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			return fmt.Errorf("create package cache key directory: %w", err)
-		}
-		info, statErr := store.root.Lstat(keyDirectory)
-		if statErr != nil {
-			return fmt.Errorf("inspect package cache key directory: %w", statErr)
-		}
-		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
-			return fmt.Errorf("package cache key path is not a real directory")
-		}
-	} else {
-		createdKeyDirectory = true
-	}
-	if createdKeyDirectory {
-		if err := durablefile.SyncDirectory(store.root, "."); err != nil {
-			return fmt.Errorf("sync package cache key-directory parent: %w", err)
-		}
-	}
 	digest := sha256.Sum256(encoded)
 	finalPath := filepath.Join(keyDirectory, hex.EncodeToString(digest[:])+".json")
-	temporary, temporaryPath, err := durablefile.CreateTemporary(store.root, keyDirectory)
+	temporary, temporaryPath, err := store.createKeyTemporary(keyDirectory, hooks.beforeTemporaryCreate)
 	if err != nil {
 		return fmt.Errorf("create package cache temporary file: %w", err)
 	}
@@ -242,6 +223,7 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 			_ = temporary.Close()
 		}
 		_ = store.root.Remove(temporaryPath)
+		removeEmptyKeyDirectory(store.root, keyDirectory)
 	}()
 	if err := temporary.Chmod(0o600); err != nil {
 		return fmt.Errorf("protect package cache temporary file: %w", err)
@@ -308,6 +290,7 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 			}
 		}
 		store.recordMiss()
+		removeEmptyKeyDirectory(store.root, keyDirectory)
 		return Record{}, false
 	}
 	store.recordHit()
@@ -336,7 +319,11 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 	if readErr != nil || closeErr != nil || !bytes.Equal(actual, encoded) {
 		return false
 	}
-	return store.root.Remove(path) == nil
+	if store.root.Remove(path) != nil {
+		return false
+	}
+	removeEmptyKeyDirectory(store.root, filepath.Dir(path))
+	return true
 }
 
 // Sweep removes expired temporary files and oldest immutable generations until both caller bounds
@@ -372,6 +359,7 @@ func (store *DiskStore) Sweep() (err error) {
 		if err := store.retentionRoot.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("evict package cache generation: %w", err)
 		}
+		removeEmptyKeyDirectory(store.retentionRoot, filepath.Dir(oldest.path))
 		if total >= oldest.size {
 			total -= oldest.size
 		} else {

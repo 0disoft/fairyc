@@ -92,7 +92,7 @@ func TestDiskStoreRecoversTemporaryFileLeftByExitedProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries, err = os.ReadDir(keyDirectory)
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		t.Fatal(err)
 	}
 	for _, entry := range entries {
