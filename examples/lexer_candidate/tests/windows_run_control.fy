@@ -42,6 +42,16 @@ fn bytes::Buffer block(ref v::Vec<bytes::Buffer> entries){var bytes::Buffer resu
     var usize i=4;while(i<20){bytes::view_mut(ref mut data)[i]=255;i+=1;}assert(control::classify(133,bytes::view(ref data)[..276],42).is_ok);
     assert(control::location_start(bytes::view(ref data)[..276])==18446744073709551615 && control::location_end(bytes::view(ref data)[..276])==18446744073709551615);
 }
+@test fn void formats_snapshot_locations_with_unicode_columns_and_safe_paths(){
+    var bytes::Buffer out=bytes::empty();let source=b"first\n\xed\x95\x9c\xea\xb8\x80X";
+    assert(control::append_location(b"src/main.fy",source,12,13,ref mut out));
+    assert(bytes::equal(bytes::view(ref out),b"  at src/main.fy:2:3\n"));
+    let before=bytes::len(ref out);
+    assert(control::append_location(b"src/main.fy",source,7,13,ref mut out) && control::append_location(b"src/main.fy",source,12,14,ref mut out) && control::append_location(b"src/main.fy",source,13,12,ref mut out));
+    assert(control::append_location(b"",source,0,0,ref mut out) && control::append_location(b"src/main.fy",b"\xff",0,1,ref mut out) && bytes::len(ref out)==before);
+    assert(bytes::truncate(ref mut out,0).is_ok && control::append_location(b"src/a\nb.fy",b"a\n",2,2,ref mut out));
+    assert(bytes::equal(bytes::view(ref out),b"  at \"src/a\\nb.fy\":2:1\n"));
+}
 @test fn void replaces_case_insensitive_control_name_and_preserves_environment_bytes(){
     var v::Vec<bytes::Buffer> entries=v::empty<bytes::Buffer>();add(ref mut entries,b"=C:=C:\\where");add(ref mut entries,b"AAA=kept");add(ref mut entries,b"fairyc_trap_control_handle_v1=old");add(ref mut entries,b"FAIRYC_TRAP_CONTROL_HANDLE_V1=duplicate");add(ref mut entries,b"ZED=\xed\x95\x9c\xea\xb8\x80\xf0\x9f\xa7\x9a");let original=block(ref entries);
     let actual=switch(control::with_handle(bytes::view(ref original),123)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(v::clear<bytes::Buffer>(ref mut entries)==5);add(ref mut entries,b"=C:=C:\\where");add(ref mut entries,b"AAA=kept");add(ref mut entries,b"FAIRYC_TRAP_CONTROL_HANDLE_V1=123");add(ref mut entries,b"ZED=\xed\x95\x9c\xea\xb8\x80\xf0\x9f\xa7\x9a");let expected=block(ref entries);assert(bytes::equal(bytes::view(ref actual),bytes::view(ref expected)));

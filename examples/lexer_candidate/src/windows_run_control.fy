@@ -3,6 +3,7 @@ import windows_process as child;
 import windows_command as command;
 import std::bytes as bytes;
 import std::text as text;
+import project_json_string as quoted;
 import std::vec as v;
 
 @effects(filesystem) @link_name("fairyc_private_windows_pipe_v1") unsafe extern C fn i32 create_pipe(ptr mut void reader,ptr mut void writer);
@@ -43,6 +44,18 @@ fn usize offset(ref u8[] data,usize at){var usize value=0;var usize i=8;while(i>
 pub fn ref u8[] location_source(ref u8[] data){return if(data.len>20){data[20..]}else{data[..0]};}
 pub fn usize location_start(ref u8[] data){return if(data.len>20){offset(data,4)}else{0};}
 pub fn usize location_end(ref u8[] data){return if(data.len>20){offset(data,12)}else{0};}
+// Use the compilation snapshot, with Unicode columns and an end-exclusive byte range.
+// Unknown or invalid locations keep the category-only diagnostic.
+pub fn bool append_location(ref u8[] path,ref u8[] source,usize start,usize end,ref mut bytes::Buffer out){
+    if(path.len==0 || start>end || end>source.len || !text::validate_utf8(source).is_ok){return true;}
+    if(start<source.len && source[start]>=128 && source[start]<192 || end<source.len && source[end]>=128 && source[end]<192){return true;}
+    var usize line=1;var usize column=1;var usize i=0;while(i<start){if(source[i]==10){line+=1;column=1;}else if(source[i]<128 || source[i]>=192){column+=1;}i+=1;}
+    var bool escaped=false;i=0;while(i<path.len){if(path[i]==9 || path[i]==10 || path[i]==13){escaped=true;}i+=1;}
+    if(!bytes::append(out,b"  at ").is_ok){return false;}
+    if(escaped){var usize work=0;let display=switch(quoted::quote_diagnostic(path,ref mut work)){case .ok(p):{p}case .err(_):{return false;}};if(!bytes::append(out,bytes::view(ref display)).is_ok){return false;}}
+    else if(!bytes::append(out,path).is_ok){return false;}
+    return bytes::append_byte(out,58).is_ok && bytes::append_usize(out,line).is_ok && bytes::append_byte(out,58).is_ok && bytes::append_usize(out,column).is_ok && bytes::append_byte(out,10).is_ok;
+}
 // The private candidate C emitter's established tags are overflow=1,
 // division=2, signed division=3, shift=4, assertion=5, bounds=6, unreachable=7.
 // Only authenticated receipts are normalized to public category numbering.
