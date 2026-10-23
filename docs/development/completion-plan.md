@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | All twelve local packaging/starter steps pass at clean `b0cd35b1`; clean-machine proof and publication remain open. LSP stays a separate executable. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds pass at `91762c18`. [Region diagnostics](../ops/evidence/candidate-region-diagnostics-20261024.json) match 12/12 against the corrected `b0cd35b1` Go reference; the authored inputs are unchanged by that Go-only fix. Remaining CLI comparisons and renewed self-build equality are running. Linux host implementation/execution remain open. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Both full CLI builds and consecutive C-packet/optimized-PE equality pass for the 512-source `91762c18` snapshot. [Region diagnostics](../ops/evidence/candidate-region-diagnostics-20261024.json) match 12/12 against the corrected `b0cd35b1` Go reference; the authored inputs are unchanged by that Go-only fix. Native-test/example comparisons are running. Linux host implementation/execution remain open. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -139,7 +139,13 @@ caller's handle and never begin or reset it. Candidate E3102/type and E3101/allo
 now match the reference. The six real-SDK cases pass in both compiler profiles, including E3104
 without the extra E3103 introduced by the earlier Go storage check. The [current
 record](../ops/evidence/candidate-region-diagnostics-20261024.json) identifies each compiler and
-comparison. The whole-CLI observations above still belong to `1dbca9ad`; their renewal is running.
+comparison. The older whole-CLI observations above still belong to `1dbca9ad`. Current checks
+match 173 rows per profile, with the skipped Region graph covered separately by the real-SDK
+adapter. Semantic-test and test-list comparisons match 208 and 178 rows. Command metadata and
+the version-only case use the candidate's authenticated build oracle; behavior uses Go `b0cd35b1`.
+The two compilers therefore retain their own source identities without forcing a rebuild of
+unchanged Fairy sources. Consecutive C packets and optimized PE images are byte-identical;
+native-test and example comparisons remain in progress.
 
 The current Go preview at `b0cd35b1` is 4,628,074 bytes zipped, with a 13,126,144-byte compiler.
 All twelve packaging/starter steps pass in `.cache/starter-smoke-5jmjhK/receipt.json`.

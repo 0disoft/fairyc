@@ -189,5 +189,8 @@ The fresh comparison also found an extra Go E3103 on direct Region construction;
 suppresses that cascade and retains the contracted E3104. All six real-SDK cases now match in both
 candidate profiles, with exact primary and related output; see the [12-case
 record](../ops/evidence/candidate-region-diagnostics-20261024.json).
-The older whole-CLI comparisons belong to the frozen `1dbca9ad` images. Remaining current CLI
-comparisons and consecutive self-build equality are being renewed separately. Phase 2 stays partial.
+The older whole-CLI comparisons belong to the frozen `1dbca9ad` images. Current command, check,
+semantic-test and test-list comparisons pass, and consecutive C packets and optimized PE images
+are byte-identical for the 512-source `91762c18` snapshot. Native-test/example comparisons remain
+in progress. Go `b0cd35b1` changes no authored candidate input; each executable's version is
+checked against its own build identity. Phase 2 stays partial.

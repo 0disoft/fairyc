@@ -177,7 +177,11 @@
       "sha256": "5d326203a171241d4757b6b78f8f0f052080f3fff30f4e8d4d058840a6677654"
     },
     "passed": 3,
-    "failed": 0
+    "failed": 0,
+    "compiler": {
+      "path": ".cache/completion-20261023/self-hosting/region-final-reference.exe",
+      "sha256": "fbb7e44dedfec82cb6584a9f2b3d6b3863a07b9f75714d32d5f17713164fa409"
+    }
   },
   "additionalChecks": [
     {
@@ -217,10 +221,114 @@
     "timing": "Single CLI observations during other verification work, not a benchmark or speedup claim.",
     "defaultCompilerChanged": false,
     "fullCurrentBehaviorComparison": "running",
-    "currentFixedPoint": "running",
+    "currentFixedPoint": {
+      "passed": true,
+      "receipt": ".cache/completion-20261023/self-hosting/fixed-point-regions-v4/receipt.json",
+      "receiptSHA256": "3b6852f1ecf843c05305919a49219486569090d659a4ce194c59a59effd87b01",
+      "sourceFiles": 512,
+      "packetBytes": 44748066,
+      "packetSHA256": "164cb6d12027dd55704e6e496d4dd8bc7f206858826e1566933758c5df53a773",
+      "optimizedPEBytes": 6407680,
+      "optimizedPESHA256": "4a913b56730c8e0e92f30731e4174d7843640c0ebd524add8870e17d7dcacffd"
+    },
     "linuxNativeExecution": false,
     "cleanMachinePortability": false,
     "targetMaturityChanged": false,
-    "pushed": false
-  }
+    "pushed": false,
+    "buildIdentityComparison": "Candidate 91762c18 reports its frozen identity, checked against its authenticated build oracle. Behavioral checks use Go b0cd35b1; all candidate source hashes still match. The version-only CLI case is checked separately rather than equating distinct revisions."
+  },
+  "completedCommandComparisons": [
+    {
+      "label": "development/metadata",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-development/metadata/receipt.json",
+      "sha256": "d7a40bf9f26088de08dc3dfc2ec6abc6e5ee89161c69b098126bff14184355b2",
+      "cases": null,
+      "skipped": [],
+      "passed": true
+    },
+    {
+      "label": "development/check-development",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-development/check-development/receipt.json",
+      "sha256": "fcd05bfaf8b422f2019a3612f1745cd4bac7a8b91231393815149e9a7726b222",
+      "cases": 173,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "exactMatches": 173
+    },
+    {
+      "label": "development/cli-development",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-development/cli-development/receipt.json",
+      "sha256": "1ed59b95eb1014fe4b283c9cf6343ab472e56d2811b028a53cecb148d8e56fc4",
+      "cases": 29,
+      "skipped": [],
+      "exactMatches": 29
+    },
+    {
+      "label": "development/version-development",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-development/version-development/receipt.json",
+      "sha256": "46c8a4c84cee233ac4bccf292d4e4a47d4f6e9b596fc1f0fad60d15f357dc2c2",
+      "cases": 1,
+      "skipped": [],
+      "exactMatches": 1
+    },
+    {
+      "label": "remaining/metadata",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/metadata/receipt.json",
+      "sha256": "d3ac3a6a267721dfa8355142f944427b82ae15b7e9e5567d690bcfc731ebd630",
+      "cases": null,
+      "skipped": [],
+      "passed": true
+    },
+    {
+      "label": "remaining/check-release",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/check-release/receipt.json",
+      "sha256": "a9bd7a65bddf6668d15393be8a221c8c4189281521af16e1192c5ff64000afd2",
+      "cases": 173,
+      "skipped": [
+        {
+          "family": "region",
+          "id": "fail.flow.local-region-escape",
+          "reason": "direct fixture packageGraph requires a separate workspace adapter"
+        }
+      ],
+      "exactMatches": 173
+    },
+    {
+      "label": "remaining/cli-release",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/cli-release/receipt.json",
+      "sha256": "c98722804b99ec155a2a175b2609b30e301d7de039bb23e9c990978829698cd7",
+      "cases": 29,
+      "skipped": [],
+      "exactMatches": 29
+    },
+    {
+      "label": "remaining/version-release",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/version-release/receipt.json",
+      "sha256": "f4513a7d161f6cbaa503c7cd0a8f2548e46b902409736e66afcf4b343c97b976",
+      "cases": 1,
+      "skipped": [],
+      "exactMatches": 1
+    },
+    {
+      "label": "remaining/semantic-tests",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/semantic-tests/receipt.json",
+      "sha256": "1f57078dad84623b16040fa16eae218deffa354e918347762712b0e23346bbfa",
+      "cases": 208,
+      "skipped": [],
+      "passed": true
+    },
+    {
+      "label": "remaining/test-list",
+      "receipt": ".cache/completion-20261023/self-hosting/parity-b0cd35b1-remaining/test-list/receipt.json",
+      "sha256": "75c4d4fa073a80aa370e756a6a458880878541a6f06862147fdeb616adc11f1c",
+      "cases": 178,
+      "skipped": [],
+      "passed": true
+    }
+  ]
 }
