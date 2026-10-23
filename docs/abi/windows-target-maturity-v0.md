@@ -24,7 +24,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | COFF relocation families used by emitted/runtime objects | partial | `internal/windowsrelocationprobe/`, Windows host smoke, relocation ADRs | Multiple AMD64 relocation formulas and linked-image observations exist | Enumerate every relocation emitted by current Fairy/runtime objects and require an object plus linked-image assertion for each mandatory family |
 | Weak externals and fallback chains | partial | Windows relocation/link probes and associated ADRs | Bounded weak-external alias and search-mode behavior has dedicated probes | Add weak chains and cycles used by production objects and require selected plus discarded-target evidence |
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
-| Archives and COMDAT selection | partial | COMDAT/archive probes and ADRs under `docs/adr/` | Associative COMDAT and discarded-child behavior have direct evidence | Cover every archive/COMDAT form emitted by the promoted production path and retain exact selected/discarded evidence |
+| Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parent retention/removal have direct evidence | Cover every archive/COMDAT form emitted by the promoted production path, including associated unwind children and library inputs, in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
 | Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are already inspected | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
@@ -54,8 +54,26 @@ contains all four observations; these are local evidence, not the mandatory same
   These requirements cannot be dismissed as unused. Image inspection alone does not establish
   mixed-stack unwind execution through every such frame.
 
-Keep the table's statuses unchanged. Other production shapes, selected/discarded COMDAT evidence,
+Keep the table's statuses unchanged. Other production shapes, complete COMDAT/unwind evidence,
 hosted mixed-stack evidence and distribution transfer remain distinct work.
+
+## Generated COMDAT retention and removal (2026-10-24)
+
+The [production record](../ops/evidence/windows-generated-comdat-selection-20261024.json) checks
+the existing tokenizer and file-search workloads at both MSVC profiles. All four executions retain
+their expected output. Of 158 non-associative generated-unit/runtime COMDAT parents, 43 have an
+owned map entry and matching final bytes outside relocation fields; 115 have an exact named
+discard record and no owned map entry. The observed parent kinds are NODUPLICATES and ANY.
+
+`TestGeneratedCOMDATSelection` uses the shipped bytes example in the existing Windows Go lane.
+Both profiles execute. Its optimized image checks 20 retained and 32 discarded parents, and the
+checker rejects a missing map row, a missing discard record, contradictory retention/removal and
+changed machine code. No workflow or runner was added.
+
+This closes the bounded production-parent observation gap. The 376 associative sections in the
+two-workload record are inventoried, not validated as final unwind metadata. Relocation values,
+associated-child retention/removal, CRT archive selection and hosted execution remain separate.
+The row and target maturity flags stay unchanged.
 
 ## Bounded mixed-stack execution (2026-10-23)
 
