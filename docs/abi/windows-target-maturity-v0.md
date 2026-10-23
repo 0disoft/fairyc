@@ -24,7 +24,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | COFF relocation families used by emitted/runtime objects | partial | `internal/windowsrelocationprobe/`, Windows host smoke, relocation ADRs | Multiple AMD64 relocation formulas and linked-image observations exist | Enumerate every relocation emitted by current Fairy/runtime objects and require an object plus linked-image assertion for each mandatory family |
 | Weak externals and fallback chains | partial | Windows relocation/link probes and associated ADRs | Bounded weak-external alias and search-mode behavior has dedicated probes | Add weak chains and cycles used by production objects and require selected plus discarded-target evidence |
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
-| Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parent retention/removal have direct evidence | Cover every archive/COMDAT form emitted by the promoted production path, including associated unwind children and library inputs, in the hosted receipt |
+| Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, `internal/pecoff/generated_unwind_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parents and unwind children have direct retention/removal evidence | Cover every archive/COMDAT form emitted by the promoted production path and library inputs in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
 | Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are already inspected | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
@@ -70,10 +70,27 @@ Both profiles execute. Its optimized image checks 20 retained and 32 discarded p
 checker rejects a missing map row, a missing discard record, contradictory retention/removal and
 changed machine code. No workflow or runner was added.
 
-This closes the bounded production-parent observation gap. The 376 associative sections in the
-two-workload record are inventoried, not validated as final unwind metadata. Relocation values,
-associated-child retention/removal, CRT archive selection and hosted execution remain separate.
-The row and target maturity flags stay unchanged.
+This closes the bounded production-parent observation gap. The child check below subsequently
+validates the 376 associated unwind sections. Code relocation values, CRT archive selection and
+hosted execution remain separate. The row and target maturity flags stay unchanged.
+
+## Generated unwind children (2026-10-24)
+
+The [child record](../ops/evidence/windows-generated-unwind-selection-20261024.json) reuses the
+same four executed images. It checks all 376 direct associative `.pdata`/`.xdata` source sections:
+130 are retained and 246 have exact discard records and no owned map entries. Retained `.pdata`
+must name its code parent and an `.xdata` sibling. Resolving 318 ADDR32NB fields reproduces all
+65 source runtime-function entries and 1,192 source `.xdata` bytes in the final image. Identical-code
+folding can share final metadata storage, so these are source counts rather than retained-byte totals.
+The checker also rejects nonzero orphan `.pdata` bytes outside the exception directory.
+
+`TestGeneratedUnwindSelection` executes the bytes example under both profiles. The optimized
+case validates 88 children and 102 RVA fields. It rejects missing map/discard records, structurally
+valid altered final unwind data and a changed source function range. These checks add no runner.
+
+This establishes the bounded metadata selection and relocation result. Live virtual unwinding
+through every required v2/handler/chained frame, CRT archive selection, hosted execution and
+clean-machine transfer remain open. No target maturity flag changes.
 
 ## Bounded mixed-stack execution (2026-10-23)
 
