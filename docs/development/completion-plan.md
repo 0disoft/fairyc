@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Bounded production-object inventory recorded below. Linux execution, mixed-stack unwind and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter renewed at clean `4c5967c9`; clean-machine proof and publication remain open. LSP stays a separate executable. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Pending |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Companion authentication and focused runtime/trap checks pass. Latest clean-source whole-CLI build, full parity and fixed-point refresh remain pending. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 ## Scope and evidence
@@ -115,9 +115,21 @@ starter steps pass, including extracted native tests and runs in both profiles. 
 its receipt is `.cache/starter-smoke-TvUBvY/receipt.json`. This supersedes the earlier preview for
 local use, without changing the outstanding clean-machine and publication gates.
 
-Next local work is step 6. The fixed-point verifier still equates the installed companion with the
-bootstrap builder. Current authored-companion receipts identify them separately, so that check
-must authenticate the companion and runtime pack before renewing the latest-source comparison.
+The fixed-point verifier fix in `e6a16993` independently authenticates the authored companion and
+runtime pack, then copies the verified files into the second-generation directory. Only historical
+Go-companion receipts retain the builder-equality check. The earlier runtime pin refresh in
+`cf6c4206` is preserved in the [self-hosting history](../architecture/self-hosting-readiness-v0.md).
+
+The [Windows long-path evidence](../ops/evidence/candidate-windows-long-path-20261023.json) passes
+234 exact runtime C byte/admission comparisons through Go-native and development/release candidate
+test binaries. It also passes 24 trap comparisons using the development command compiler, with
+12 cases each in development and release program profiles. The oversized source-key case keeps category-only
+output; ordinary dependency and replaced-source cases retain their locations.
+
+Next local work is a whole-CLI build from the latest clean source, followed by full candidate/reference
+parity and consecutive-generation fixed-point refresh. Release command-compiler coverage and
+those full runs remain pending; no compiler or target is promoted. Linux execution, clean-machine
+portability and the remaining Windows maturity requirements stay open.
 
 ## Feature proposals
 

@@ -106,13 +106,13 @@ CASES = {
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c", "stage0_owned_text.c"], [], "")
               for name in TEXT_CASES})
 CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffer_" in name else []) +
-                    ["stage0_windows_file.c", "stage0_windows_file_portable.c"] +
+                    ["stage0_windows_path.inc", "stage0_windows_file.c", "stage0_windows_file_portable.c"] +
                     (["stage0_windows_file_link.c"] if "file_hard_link_" in name or "file_metadata_" in name else []) +
                     (["stage0_windows_file_metadata.c"] if "file_metadata_" in name else []) +
                     (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
               for name in FILE_CASES})
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
-                     "stage0_windows_file.c", "stage0_windows_file_portable.c"], [], "")
+                     "stage0_windows_path.inc", "stage0_windows_file.c", "stage0_windows_file_portable.c"], [], "")
               for name in FILE_SOURCE_CASES})
 PROOFS = {"byte_loop_c_rejects_forged_iteration_cfg","sdk_c_rejects_forged_cstring_view_authority","sdk_c_rejects_forged_storage_metadata","pointer_c_rejects_forged_raw_view_metadata","rejected_import_expansion_rolls_back_borrow_types","sdk_c_plan_respects_work_budget_before_authority_or_output",
           "sdk_c_region_plan_respects_placement_budget_before_output"}

@@ -2,17 +2,28 @@
 
 ## Runtime refresh (2026-10-23)
 
-The authored companion's runtime pin now includes the current trap-location implementation:
-20 sources, 148,490 bytes, SHA-256 `0efd00709b2095482e0884f18818bf01431e1a1863ce905a37df754e847455dd`.
-The [refresh record](../ops/evidence/candidate-runtime-refresh-20261023.json) passes 234 exact Go
-runtime-byte/admission comparisons through Go-native and both candidate C profiles, including
-tampered-asset rejection. The older 147,033-byte companion distribution below is historical;
-its source hashes no longer match the current runtime. A fresh public CLI build, reference
-comparison and consecutive-generation proof remain pending.
+The authored companion's runtime pin includes the shared Windows long-path helper and trap locations:
+21 source assets, 150,929 bytes, SHA-256 `3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98`.
+The [Windows long-path record](../ops/evidence/candidate-windows-long-path-20261023.json) passes 234
+exact runtime C byte/admission comparisons through Go-native and development/release candidate test
+binaries. The completed trap run passes all 24 comparisons using the development command compiler:
+12 cases each with development and release programs. `long-source-key` loads but emits only the
+trap category because its source key exceeds 256 bytes. Ordinary dependency and replaced-source
+cases retain locations from compiled snapshots.
+
+The earlier [runtime refresh](../ops/evidence/candidate-runtime-refresh-20261023.json) remains a
+historical record of its 234 comparisons against 20 assets, 148,490 bytes, SHA-256
+`0efd00709b2095482e0884f18818bf01431e1a1863ce905a37df754e847455dd`.
+The older 147,033-byte companion distribution and receipts below also describe historical snapshots.
 
 The fixed-point verifier now authenticates authored companions and their packs independently of
 the bootstrap builder, and carries those verified files into the second-generation directory.
 It still preserves the historical builder-equality check for old Go-companion receipts.
+
+Next is a whole-CLI build from the latest clean source, then full candidate/reference parity and
+consecutive-generation fixed-point refresh. Those runs and release command-compiler coverage
+remain pending; compiler selection and target maturity are unchanged. Live UNC share, Linux execution,
+clean-machine portability and the remaining Windows maturity requirements stay open.
 
 ## Current status (2026-10-19)
 

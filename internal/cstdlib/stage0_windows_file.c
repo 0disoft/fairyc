@@ -295,6 +295,14 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
             0
         );
     }
+    DWORD path_error = fy_std_windows_long_path_v0(wide_path, FY_STD_WINDOWS_PATH_CAPACITY_V0);
+    if (path_error != ERROR_SUCCESS) {
+        return fy_std_windows_file_result_v0(
+            path_error == ERROR_FILENAME_EXCED_RANGE ? FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0 :
+                FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            path_error, 0
+        );
+    }
     DWORD access = 0;
     if (options->read != UINT8_C(0)) {
         access |= GENERIC_READ;

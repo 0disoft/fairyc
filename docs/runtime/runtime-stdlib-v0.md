@@ -686,6 +686,17 @@ and non-closed output storage fail before ownership changes. `ref CStr` itself d
 UTF-8, so this is a Windows path-entry contract, not a cross-target path type or Unicode
 normalization policy.
 
+ADR 0487 makes file open, including create through the open options, and `read_dir_utf8` share a
+stack-only normalization step. Both decode UTF-8 strictly as before, then call `GetFullPathNameW`.
+Normalized absolute paths below 248 WCHARs keep ordinary Win32 handling; longer drive and UNC paths
+receive the internal `\\?\` or `\\?\UNC\` prefix within a 4,096-WCHAR cap. The component does not
+opt into Windows long-path support through a manifest and registry setting; it uses internal
+prefixes. Normalized or expanded output beyond that buffer returns status 6 with
+`ERROR_FILENAME_EXCED_RANGE`; existing input-length validation is unchanged, so `open_utf8` rejects
+a 4,096-byte input with status 2 while `read_dir_utf8` returns status 6 above 4,095 bytes. The step
+allocates nothing and adds no external dependency. File open keeps its existing explicit namespace
+handling; remove, rename and other path mutation APIs are unchanged and make no long-path claim.
+
 The target-neutral `std::fs::create_truncate_utf8(ref str)` and
 `std::fs::open_read_utf8(ref str)` entries use a bounded stack copy with one
 terminator and reject empty, embedded-NUL, or 4,096-byte-or-longer text before
@@ -1187,6 +1198,13 @@ caller-owned buffer; EOF, retryable buffer shortage, file kind, logical size and
 reparse status are explicit. The directory runtime is selected only by its own
 symbols. See [ADR 0410](../adr/0410-public-windows-directory-enumeration.md) for
 allocation, cleanup, path bounds, ordering and concurrent-replacement limits.
+ADR 0487 normalizes the decoded path with the same bounded helper before
+enumeration; the `\*` suffix space is checked after expansion. User-supplied
+device or extended namespace, wildcard, NUL, malformed UTF-8, non-drive colon
+and reparse-point directory prefixes remain rejected. Normalization adds no heap
+allocation or external dependency, and the existing per-open state allocation is
+unchanged. `create_dir_all` keeps its lexical validation, and Linux behavior is
+unchanged.
 
 ## External references
 

@@ -13,7 +13,7 @@ fn Problem fail(u32 kind){return Problem{.kind,.symbol_kind=0,.start=0,.end=0};}
 pub fn Result<Bundle,Problem> load(bytes::Buffer data){
     let input=bytes::view(ref data);if(input.len!=pin::size() || input.len>1048576 || !sha::matches(input,pin::digest())){return .err(fail(1));}return .ok(Bundle{.data});
 }
-fn ref u8[] raw(ref Bundle bundle,usize id){assert(id>=1 && id<=20);return bytes::view(ref bundle.data)[pin::start(id)..pin::end(id)];}
+fn ref u8[] raw(ref Bundle bundle,usize id){assert(id>=1 && id<=pin::count());return bytes::view(ref bundle.data)[pin::start(id)..pin::end(id)];}
 fn bool at(ref u8[] data,usize i,ref u8[] prefix){return i<=data.len && prefix.len<=data.len-i && bytes::equal(data[i..i+prefix.len],prefix);}
 fn Result<usize,Problem> append(ref mut bytes::Buffer output,ref u8[] value){
     if(value.len>8388608 || bytes::len(output)>8388608-value.len || !bytes::append(output,value).is_ok){return .err(fail(3));}return .ok(bytes::len(output));
@@ -42,6 +42,7 @@ pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bo
     if(selection::contains(ref plan,7)){let usize alignment=append(ref mut output,b"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n")?;}
     var bool written=false;var u32 id=1;
     while(id<=14){if(selection::contains(ref plan,id)){
+        if(id==4 || id==5){let usize path=part(bundle,21,ref mut output,ref mut written)?;}
         let usize asset=if(id==3){3}else if(id==5){9}else if(id==6){10}else if(id==7){11}else if(id==8){12}else if(id==9){13}else if(id==10){14}else if(id==11){15}else if(id==12){16}else if(id==14){17}else{0};
         if(id==4){var usize file=4;while(file<=8){let usize n=part(bundle,file,ref mut output,ref mut written)?;file+=1;}}
         else if(asset!=0){let usize n=part(bundle,asset,ref mut output,ref mut written)?;}

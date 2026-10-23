@@ -35,8 +35,11 @@ static struct fy_std_directory_entry_result_v0 fy_std_directory_entry_result_v0(
 static DWORD fy_std_directory_check_path_v0(WCHAR *path) {
     size_t length = (size_t)lstrlenW(path);
     size_t start = 3;
-    if (path[0] == L'\\' && path[1] == L'\\') {
-        start = 2;
+    int extended = length >= 4 && wcsncmp(path, L"\\\\?\\", 4) == 0;
+    if (extended) { start = 7; }
+    if ((extended && length >= 8 && wcsncmp(path + 4, L"UNC\\", 4) == 0) ||
+        (!extended && path[0] == L'\\' && path[1] == L'\\')) {
+        start = extended ? 8 : 2;
         while (start < length && path[start] != L'\\') { ++start; }
         if (start == length) { return ERROR_INVALID_NAME; }
         ++start;
@@ -75,16 +78,18 @@ struct fy_std_directory_result_v0 fy_std_windows_read_dir_open_v0(
             return fy_std_directory_result_v0(2, ERROR_INVALID_NAME);
         }
     }
-    WCHAR input[4096];
-    int converted = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path,
-        (int)length, input, 4095);
-    if (converted == 0) { return fy_std_directory_result_v0(5, GetLastError()); }
-    input[converted] = L'\0';
     WCHAR absolute[4096];
-    DWORD full_length = GetFullPathNameW(input, 4096, absolute, NULL);
-    if (full_length == 0) { return fy_std_directory_result_v0(1, GetLastError()); }
+    int converted = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path,
+        (int)length, absolute, 4095);
+    if (converted == 0) { return fy_std_directory_result_v0(5, GetLastError()); }
+    absolute[converted] = L'\0';
+    DWORD code = fy_std_windows_long_path_v0(absolute, 4096);
+    if (code != ERROR_SUCCESS) {
+        return fy_std_directory_result_v0(code == ERROR_FILENAME_EXCED_RANGE ? 6u : 1u, code);
+    }
+    size_t full_length = (size_t)lstrlenW(absolute);
     if (full_length > 4093) { return fy_std_directory_result_v0(6, ERROR_FILENAME_EXCED_RANGE); }
-    DWORD code = fy_std_directory_check_path_v0(absolute);
+    code = fy_std_directory_check_path_v0(absolute);
     if (code != ERROR_SUCCESS) { return fy_std_directory_result_v0(1, code); }
     if (absolute[full_length - 1] != L'\\') { absolute[full_length++] = L'\\'; }
     absolute[full_length++] = L'*';

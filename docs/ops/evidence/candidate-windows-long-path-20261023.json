@@ -1,0 +1,359 @@
+{
+  "schema": "fairyc.windows-long-path-loading/v1",
+  "passed": true,
+  "sourceBaseCommit": "3b3e33b7225131f5dab655f9575d50bfc0df4c45",
+  "scope": "bounded Windows File open and read-only directory enumeration; candidate source loading and trap output parity",
+  "sourceInputs": [
+    {
+      "path": "internal/cstdlib/stage0_windows_path.inc",
+      "bytes": 1789,
+      "sha256": "d9192f6e03ad498840928c6febb6d573c6835bc210a20566da190c41b35b8b52"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file.c",
+      "bytes": 40709,
+      "sha256": "a5465c17487f43c5a5432746fd43ae9d5abd1beda7cf5998100f297c6ed234a8"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_directory.c",
+      "bytes": 8913,
+      "sha256": "48f5b610264909e5dbdba7692f5d79c48834079f75785a5b780a40da6ffa3b52"
+    },
+    {
+      "path": "internal/cstdlib/system_heap.go",
+      "bytes": 16339,
+      "sha256": "024de20f7abaf898dad41b1c65c74ad7bb90c79de12f7a19864e866289d43839"
+    },
+    {
+      "path": "internal/cstdlib/windows_long_path_test.go",
+      "bytes": 5838,
+      "sha256": "e0be2098df620af0f3085aa3cf86edf0883ea2208d6d7b05aa7dc5c55896ae6c"
+    },
+    {
+      "path": "internal/cstdlib/stage0_windows_file_remove_tree_probe.c",
+      "bytes": 9739,
+      "sha256": "ef072c80acb0e2ab0d3c45ef84fd362dc5768dcbfa5f9084bd05ed0b5d857d53"
+    },
+    {
+      "path": "tools/package-candidate-runtime-assets.py",
+      "bytes": 3534,
+      "sha256": "e7923f7f8eedbd3ee8df7b44704abe66bd2b2fef02913fe414bbf072ea524f9a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_assets.fy",
+      "bytes": 4063,
+      "sha256": "0552480fad6f8b86bd3db4baa02ac6800744fa40470c6af0faa9670c057f84fa"
+    },
+    {
+      "path": "examples/lexer_candidate/src/native_runtime_asset_pin.fy",
+      "bytes": 2629,
+      "sha256": "ed4a03ef1f2982dfc4729563a24b336c920777a4a33ecf61be040189c086c149"
+    },
+    {
+      "path": "tools/verify-candidate-trap-locations.py",
+      "bytes": 7345,
+      "sha256": "57e6f8dbe36e07c661ef2af288e454848decf03f4efc315e8e399f67ef245a00"
+    },
+    {
+      "path": "tools/verify-candidate-runtime-packaging.py",
+      "bytes": 5037,
+      "sha256": "488e0578ec3ff86cfdebc51d26a08e5374c8c46ae1878616ef5d102ac0cf4a5a"
+    }
+  ],
+  "native": {
+    "command": "go test ./internal/cstdlib -run TestWindowsLongPathNative -count=1 -v",
+    "exit": 0,
+    "profiles": [
+      "low",
+      "optimized"
+    ],
+    "utf8PathBytes": 346,
+    "checks": [
+      "file create and exact read-back",
+      "Korean filename",
+      "relative and absolute paths",
+      "slash and dot normalization",
+      "parent segment selects different absent file",
+      "directory entry and EOF",
+      "junction ancestor rejected",
+      "device namespace, wildcard, NUL and invalid UTF-8 rejected",
+      "UNC lexical prefix conversion",
+      "normalized output capacity rejected"
+    ]
+  },
+  "packageTests": {
+    "command": "go test ./internal/cstdlib ./internal/cstdlibcontract",
+    "exit": 0
+  },
+  "runtimePackaging": {
+    "receipt": {
+      "path": ".cache/completion-20261023/self-hosting/runtime-long-path-v2/receipt.json",
+      "bytes": 7628,
+      "sha256": "618b02384b65a0149c799dfa8f73f73520d11e78872317cd50f5e02aab4aff05"
+    },
+    "cases": 234,
+    "profiles": [
+      "Go-native",
+      "development",
+      "release"
+    ],
+    "rawAssets": 21,
+    "assetPack": {
+      "path": ".cache/completion-20261023/self-hosting/runtime-long-path-v2/cases.bin.assets",
+      "bytes": 150929,
+      "sha256": "3901b09793e9f63dcc5817d2db7a7a385532c905b281fa9dcd2cffeea664cf98"
+    }
+  },
+  "commandBuild": {
+    "path": ".cache/completion-20261023/self-hosting/trap-cli-v5/receipt.json",
+    "bytes": 82424,
+    "sha256": "49274afa9b4d0f1b1206517a743f1517940782ca38ac8ce07a6375a84ddc44f0"
+  },
+  "companionBuild": {
+    "path": ".cache/completion-20261023/self-hosting/native-driver-long-path-v2/receipt.json",
+    "bytes": 13628,
+    "sha256": "4aea160c6dd373d1dd6c4953718bae73db8a134c44bae5659cb185ef0e82965f"
+  },
+  "trapComparison": {
+    "receipt": {
+      "path": ".cache/completion-20261023/self-hosting/trap-locations-v5/receipt.json",
+      "bytes": 13588,
+      "sha256": "9bf759fbfce7230032b3a29e520e91b2d8a252d22d4459b05da0ef79d20a1c9c"
+    },
+    "comparisons": 24,
+    "compilerProfiles": [
+      "development"
+    ],
+    "programProfiles": [
+      "development",
+      "release"
+    ],
+    "rows": [
+      {
+        "case": "assertion",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:3:5\n"
+      },
+      {
+        "case": "unicode",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:3:45\n"
+      },
+      {
+        "case": "bounds",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: bounds\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "slice",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: bounds\n  at src/main.fy:2:71\n"
+      },
+      {
+        "case": "compound-overflow",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: integer-overflow\n  at src/main.fy:2:28\n"
+      },
+      {
+        "case": "negation-overflow",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: integer-overflow\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "division-zero",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: division-by-zero\n  at src/main.fy:2:34\n"
+      },
+      {
+        "case": "division-overflow",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: signed-division-overflow\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "shift",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: invalid-shift\n  at src/main.fy:2:36\n"
+      },
+      {
+        "case": "dependency",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at dep/src/main.fy:2:5\n"
+      },
+      {
+        "case": "long-source-key",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n"
+      },
+      {
+        "case": "source-replaced",
+        "programProfile": "development",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:5:1\n"
+      },
+      {
+        "case": "assertion",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:3:5\n"
+      },
+      {
+        "case": "unicode",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:3:45\n"
+      },
+      {
+        "case": "bounds",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: bounds\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "slice",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: bounds\n  at src/main.fy:2:71\n"
+      },
+      {
+        "case": "compound-overflow",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: integer-overflow\n  at src/main.fy:2:28\n"
+      },
+      {
+        "case": "negation-overflow",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: integer-overflow\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "division-zero",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: division-by-zero\n  at src/main.fy:2:34\n"
+      },
+      {
+        "case": "division-overflow",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: signed-division-overflow\n  at src/main.fy:2:44\n"
+      },
+      {
+        "case": "shift",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: invalid-shift\n  at src/main.fy:2:36\n"
+      },
+      {
+        "case": "dependency",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at dep/src/main.fy:2:5\n"
+      },
+      {
+        "case": "long-source-key",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n"
+      },
+      {
+        "case": "source-replaced",
+        "programProfile": "release",
+        "exactMatch": true,
+        "validReference": true,
+        "exit": 5,
+        "stderr": "trap: assertion-failed\n  at src/main.fy:5:1\n"
+      }
+    ]
+  },
+  "skipped": [
+    "live UNC share execution",
+    "Linux native execution",
+    "full latest-source CLI fixed point",
+    "clean-machine portability"
+  ],
+  "sdkAbiChanged": false,
+  "databaseChanged": false,
+  "ciChanged": false,
+  "pushed": false,
+  "publicApiShapeChanged": false,
+  "runtimeContractChanged": true,
+  "commandDistributionBytes": [
+    {
+      "file": "fairyc.exe",
+      "beforeBytes": 11965952,
+      "afterBytes": 11966976,
+      "deltaBytes": 1024
+    },
+    {
+      "file": "fairyc-candidate-build.exe",
+      "beforeBytes": 888832,
+      "afterBytes": 890880,
+      "deltaBytes": 2048
+    },
+    {
+      "file": "fairyc-runtime-assets.pack",
+      "beforeBytes": 148490,
+      "afterBytes": 150929,
+      "deltaBytes": 2439
+    }
+  ],
+  "costScope": "development command-only compiler and companion; not the full release compiler or preview ZIP"
+}

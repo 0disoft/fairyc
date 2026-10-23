@@ -66,6 +66,9 @@ var stage0WindowsConsole string
 //go:embed stage0_windows_file.c
 var stage0WindowsFile string
 
+//go:embed stage0_windows_path.inc
+var stage0WindowsPath string
+
 //go:embed stage0_windows_directory.c
 var stage0WindowsDirectory string
 
@@ -296,7 +299,7 @@ func WindowsConsoleSource() (string, error) {
 
 // WindowsFileSource returns the target-specific partial-I/O and consuming-close implementation.
 func WindowsFileSource() (string, error) {
-	implementation, err := canonicalSource("Windows File", stage0WindowsFile)
+	implementation, err := canonicalSource("Windows File", stage0WindowsPath+"\n"+stage0WindowsFile)
 	if err != nil {
 		return "", err
 	}
@@ -458,7 +461,7 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 	case cstdlibcontract.ComponentWindowsFileBuffer:
 		return "Windows File Buffer adapter", stage0WindowsFileBuffer, nil
 	case cstdlibcontract.ComponentWindowsDirectory:
-		return "Windows read-only directory enumeration", stage0WindowsDirectory, nil
+		return "Windows read-only directory enumeration", stage0WindowsPath + "\n" + stage0WindowsDirectory, nil
 	case cstdlibcontract.ComponentLinuxProcessArgs:
 		return "Linux process args", stage0LinuxProcessArgs, nil
 	case cstdlibcontract.ComponentWindowsProcessArgs:

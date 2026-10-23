@@ -171,7 +171,7 @@ def main():
     generated.write_bytes(source)
     components = [ROOT / "internal/cstdlib" / name for name in
                   ("stage0_system_heap.c", "stage0_buffer.c", "stage0_vector_storage.c",
-                   "stage0_windows_console.c", "stage0_text_view.c", "stage0_windows_file.c",
+                   "stage0_windows_console.c", "stage0_text_view.c", "stage0_windows_path.inc", "stage0_windows_file.c",
                    "stage0_windows_file_portable.c", "stage0_windows_process_args.c")]
     runtime = output / "runtime.c"
     prefix = b"""#include <stdint.h>
