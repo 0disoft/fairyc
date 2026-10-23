@@ -1,0 +1,99 @@
+{
+  "schema": "fairyc.sdk087-fixed-point/v1",
+  "passed": true,
+  "frozenBuildVersion": "Fairy C Stage 0\ncompiler: v0.0.0-20261023184703-890b3da498ae\nsdk: fairyc-sdk-stdlib/0 0.0.0-stage0.87\nlanguage: fairyc-language/20\nruntime: fairyc-runtime/0\nrevision: 890b3da498aeb5088455d50a0263741f3b6da159\nmodified: false\n",
+  "receipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli-fixed-point/receipt.json",
+    "bytes": 105576,
+    "sha256": "5052eee3b97e2280c0e62d964baa0ca485602acee308149ab684e7207bad9244"
+  },
+  "sourceFiles": 512,
+  "sourceInputsVerified": true,
+  "packetBytesEqual": true,
+  "packets": [
+    {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/candidate-packet.bin",
+      "bytes": 44747876,
+      "sha256": "6ccd98a3725a55abbfff0a541b8edba8b1203cb889667a2d1d6414eb85fec5fb"
+    },
+    {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli-fixed-point/stage2-input.bin",
+      "bytes": 44747876,
+      "sha256": "6ccd98a3725a55abbfff0a541b8edba8b1203cb889667a2d1d6414eb85fec5fb"
+    }
+  ],
+  "optimizedImageBytesEqual": true,
+  "stage1": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc.exe",
+    "bytes": 6407680,
+    "sha256": "132c0edff961630d84ca5d1589fe44e689544a1b4355ee2333d49ac579df9170"
+  },
+  "stage2": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli-fixed-point/stage2.exe",
+    "bytes": 6407680,
+    "sha256": "132c0edff961630d84ca5d1589fe44e689544a1b4355ee2333d49ac579df9170"
+  },
+  "excludedImageBytes": [],
+  "stackReserveBytes": 16777216,
+  "companion": {
+    "implementation": "authored Fairy",
+    "driver": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc-candidate-build.exe",
+      "bytes": 397312,
+      "sha256": "db229954373972326cc4067dfb44cb4b98013a7a1ae0f1f74bc2f4a9c491fe05"
+    },
+    "assets": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc-runtime-assets.pack",
+      "bytes": 150925,
+      "sha256": "05ebcfa6fb35b44a9bc3a7b2b615e213353a0c2d22a5c7898331fbadd8c51de7"
+    },
+    "receipt": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/native-driver/receipt.json",
+      "bytes": 13733,
+      "sha256": "4e0466f05aac032ffcfc6215456f6039439b907b87c0a5c2e4d7a136e9208b85"
+    },
+    "manifest": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/native-driver/sources.list",
+      "bytes": 1701,
+      "sha256": "6220648673e51cfafad1ce0eb85c4926781b5c00b2da9038793b17d226c4557b"
+    },
+    "packet": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/native-driver/driver.bin",
+      "bytes": 1991476,
+      "sha256": "ea5489ae8bd1451cd9211cb8a632b672ce64fd9c5df7c24e8000fdba7d9ba60a"
+    },
+    "sourceFiles": 34
+  },
+  "invocations": [
+    {
+      "seconds": 630.7653912999958,
+      "exit": 0,
+      "timedOut": false,
+      "stdoutBytes": 44747876,
+      "stdoutSHA256": "6ccd98a3725a55abbfff0a541b8edba8b1203cb889667a2d1d6414eb85fec5fb"
+    },
+    {
+      "seconds": 478.95390690000204,
+      "exit": 0,
+      "timedOut": false,
+      "stdoutBytes": 200,
+      "stdoutSHA256": "12d40b94157f1557b02aaace0e8c01998e221e02aadd19df7d5ea7bd28445d63"
+    },
+    {
+      "seconds": 0.07077700000081677,
+      "exit": 0,
+      "timedOut": false,
+      "stdoutBytes": 224,
+      "stdoutSHA256": "a5779339708723a118af7f85eb27543039dee0b28ddab546724a8f2ac74b54f0"
+    }
+  ],
+  "scope": "Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes",
+  "limitations": [
+    "Windows full file_cli dispatcher only; stdin lexer protocol and non-Windows targets are not included.",
+    "The runtime companion and pack are authenticated separately; their own fixed point is not proved by this dispatcher check."
+  ],
+  "linuxExecuted": false,
+  "defaultCompiler": "Go",
+  "targetMaturityPromoted": false,
+  "pushed": false
+}

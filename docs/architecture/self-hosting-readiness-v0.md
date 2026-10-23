@@ -1,5 +1,18 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 consecutive-generation equality (2026-10-24)
+
+The [fixed-point refresh](../ops/evidence/candidate-sdk087-fixed-point-20261024.json)
+passes for the 512-source full CLI snapshot with frozen identity `890b3da4`.
+Both complete 44,747,876-byte C packets and both 6,407,680-byte optimized PE
+images are identical, with no excluded bytes. The next generation reports the
+same frozen version and retains the authenticated authored companion/runtime pack.
+The observed frontend and native-build invocations took about 631 and 479 seconds;
+these are verification timings during other local work, not benchmark results.
+This closes latest-input dispatcher fixed-point renewal. The companion's own
+fixed point, remaining command comparisons, Linux execution and default-compiler
+selection are separate; Go remains the default.
+
 ## SDK 0.87 full CLI comparisons (2026-10-24)
 
 The [CLI refresh record](../ops/evidence/candidate-sdk087-cli-refresh-20261024.json)
@@ -10,8 +23,9 @@ pass 122 command-metadata comparisons and 104 semantic-test comparisons each:
 the compiler image installed and preserve locked workspace files and timestamps.
 The release compiler, authored companion and runtime pack total 6,955,917 bytes;
 optional debugging symbols and transient build files are excluded.
-Latest-source consecutive-generation equality, native-test comparisons and the
-remaining workspace/check/test-list/example comparisons are still pending.
+Latest-source consecutive-generation equality is recorded above. Native-test
+comparisons and the remaining workspace/check/test-list/example comparisons are
+tracked separately from this first comparison record.
 Go remains the default; no Linux execution, target promotion or publication is claimed.
 
 ## Portable file SDK refresh (2026-10-24)

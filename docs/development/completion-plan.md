@@ -185,6 +185,15 @@ unchanged standalone verifier. This supersedes the earlier local preview for the
 portable File Buffer SDK; clean-machine evidence, publication and target maturity
 remain unchanged.
 
+## SDK 0.87 verification follow-up
+
+The [fixed-point refresh](../ops/evidence/candidate-sdk087-fixed-point-20261024.json)
+closes latest-input full CLI dispatcher equality at frozen `890b3da4`. All 512
+authored input hashes still match the checkout. Consecutive 44,747,876-byte C
+packets and 6,407,680-byte optimized images match without excluded bytes;
+the authored companion and runtime pack retain their authenticated identities.
+The companion's own fixed point and remaining command comparisons remain separate.
+
 ## Feature proposals
 
 The [SDK 0.87 CLI refresh](../ops/evidence/candidate-sdk087-cli-refresh-20261024.json)
