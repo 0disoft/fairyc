@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-23",
+  "passed": true,
+  "scope": "Refresh the authored runtime asset pin and compare complete runtime C bytes and admission outcomes. This does not attest a rebuilt public CLI or fixed point.",
+  "sources": 20,
+  "packBytes": 148490,
+  "packSha256": "0efd00709b2095482e0884f18818bf01431e1a1863ce905a37df754e847455dd",
+  "pinSha256": "3ef1cce8d0bb9835672447b38dce74ebc0c23bbf6b42bb7c13d22c3aa0846d06",
+  "goOracleCases": 234,
+  "profiles": [
+    "Go-native",
+    "development",
+    "release"
+  ],
+  "authoredTests": 2,
+  "receiptPath": ".cache/completion-20261023/self-hosting/runtime-packaging/receipt.json",
+  "receiptSha256": "de16352e7185b2db938ff03823ecda505dd22bfd243cd88388b49fe3fcec6109",
+  "linuxExecuted": false
+}

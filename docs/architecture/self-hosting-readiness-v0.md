@@ -1,5 +1,19 @@
 # Self-hosting readiness v0
 
+## Runtime refresh (2026-10-23)
+
+The authored companion's runtime pin now includes the current trap-location implementation:
+20 sources, 148,490 bytes, SHA-256 `0efd00709b2095482e0884f18818bf01431e1a1863ce905a37df754e847455dd`.
+The [refresh record](../ops/evidence/candidate-runtime-refresh-20261023.json) passes 234 exact Go
+runtime-byte/admission comparisons through Go-native and both candidate C profiles, including
+tampered-asset rejection. The older 147,033-byte companion distribution below is historical;
+its source hashes no longer match the current runtime. A fresh public CLI build, reference
+comparison and consecutive-generation proof remain pending.
+
+The fixed-point verifier now authenticates authored companions and their packs independently of
+the bootstrap builder, and carries those verified files into the second-generation directory.
+It still preserves the historical builder-equality check for old Go-companion receipts.
+
 ## Current status (2026-10-19)
 
 The newer native-companion checkpoint below replaces the runtime Go builder in
