@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import struct
+import shutil
 import subprocess
 import time
 
@@ -28,6 +29,44 @@ def stack_reserve(path):
     pe = struct.unpack_from('<I', raw, 60)[0]
     assert raw[pe:pe+4] == b'PE\0\0' and struct.unpack_from('<H', raw, pe+24)[0] == 0x20b
     return struct.unpack_from('<Q', raw, pe+24+72)[0]
+
+
+def checked_companion(built, release, root=ROOT):
+    """Authenticate the installed runtime companion independently of the bootstrap tool."""
+    image = Path(release['path'])
+    driver = artifact(image.with_name('fairyc-candidate-build.exe'))
+    assert driver['sha256'] == release['driverSHA256'], 'installed companion changed'
+    implementation = release.get('driverImplementation')
+    if implementation is None:
+        assert 'authoredDriverReceipt' not in built['tools'], 'missing authored companion identity'
+        assert driver['sha256'] == sha(Path(built['tools']['builder']['path']))
+        return dict(implementation='historical bootstrap builder', driver=driver)
+    assert implementation == 'authored Fairy', 'unknown companion implementation'
+    descriptor = built['tools']['authoredDriverReceipt']
+    path = Path(descriptor['path'])
+    receipt = artifact(path)
+    assert receipt['sha256'] == descriptor['sha256'], 'companion receipt changed'
+    authored = json.loads(path.read_text(encoding='utf-8'))
+    assert authored['schema'] == 'fairyc.candidate-authored-driver-build/v1' and authored['passed']
+    assert not authored['goFrontendInvoked'] and not authored['runtimeGoBuilderRequired']
+    assert authored['sourceFiles'] == len(authored['sources']) > 0 and authored['runtimeSources']
+    for item in authored['sources'] + authored['runtimeSources']:
+        assert sha(root / item['path']) == item['sha256'], 'companion source changed: ' + item['path']
+    for item in authored['tools'].values():
+        assert sha(Path(item['path'])) == item['sha256'], 'companion bootstrap tool changed'
+    providers = [item for item in authored['images'] if item['profile'] == release['profile']]
+    assert len(providers) == 1, 'ambiguous companion profile'
+    provider = providers[0]
+    assert sha(Path(provider['path'])) == provider['sha256'] == driver['sha256']
+    assets = artifact(image.with_name('fairyc-runtime-assets.pack'))
+    assert Path(release['assetPath']).resolve() == Path(assets['path'])
+    assert sha(Path(provider['assetPath'])) == provider['assetSHA256'] == release['assetSHA256'] == assets['sha256']
+    manifest = path.parent / 'sources.list'
+    assert manifest.read_text(encoding='utf-8') == ''.join(item['path']+'\n' for item in authored['sources'])
+    packet = artifact(path.parent / 'driver.bin')
+    assert packet['sha256'] == authored['packetSHA256']
+    return dict(implementation=implementation, driver=driver, assets=assets, receipt=receipt,
+                manifest=artifact(manifest), packet=packet, sourceFiles=authored['sourceFiles'])
 
 
 def main():
@@ -67,7 +106,7 @@ def main():
     stage1, builder = Path(release['path']), Path(built['tools']['builder']['path'])
     stage1_identity, builder_identity = artifact(stage1), artifact(builder)
     assert stage1_identity['sha256'] == release['sha256']
-    assert sha(stage1.with_name('fairyc-candidate-build.exe')) == release['driverSHA256'] == sha(builder)
+    companion = checked_companion(built, release)
     build1 = next(row for row in built['invocations'] if '--output' in row['argv']
                   and row['argv'][row['argv'].index('--output')+1] == str(stage1))
     assert build1['exit'] == 0 and not build1['stderr'] and '--release' in build1['argv']
@@ -123,6 +162,14 @@ def main():
     assert stage2.read_bytes() == stage1.read_bytes(), 'consecutive optimized PE images differ'
     assert stack_reserve(stage1) == stack_reserve(stage2)
     assert not reserve or stack_reserve(stage2) == reserve
+    copied_companion = {}
+    for role in ('driver', 'assets'):
+        if role in companion:
+            original = Path(companion[role]['path'])
+            copied = output / original.name
+            shutil.copyfile(original, copied)
+            copied_companion[role] = artifact(copied)
+            assert copied_companion[role]['sha256'] == companion[role]['sha256']
     assert run([stage2, '--version'], 30) == built['buildVersion']['text'].encode('utf-8')
     for row in inputs:
         assert sha(ROOT / row['path']) == row['sha256'], row['path']
@@ -130,16 +177,19 @@ def main():
     assert sha(Path(version['oracle']['path'])) == version['oracle']['sha256']
     assert artifact(receipt_path) == receipt_identity and artifact(stage1) == stage1_identity
     assert artifact(builder) == builder_identity and sha(packet1) == built['candidatePacketSHA256']
+    assert checked_companion(built, release) == companion
     save('receipt.json', dict(schema='fairyc.candidate-native-cli-fixed-point/v1', passed=True,
          scope='Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes',
          adoptedStage1Build=receipt_identity, sourceInputs=inputs, sourceFiles=len(inputs),
          frozenBuildVersion=built['buildVersion'], originalFrontend=first, originalReleaseBuild=build1,
          invocations=calls, packets=[artifact(packet1), artifact(packet2)],
          stage1=stage1_identity, stage2=artifact(stage2), builder=builder_identity,
+         companion=companion, stage2Companion=copied_companion,
          packetBytesEqual=True, optimizedImageBytesEqual=True, excludedImageBytes=[],
          stackReserveBytes=stack_reserve(stage2), goFrontendInvoked=False,
          productTimeoutChanged=False, pushed=False,
-         limitations=['Windows full file_cli dispatcher only; stdin lexer protocol and non-Windows targets are not included.']))
+         limitations=['Windows full file_cli dispatcher only; stdin lexer protocol and non-Windows targets are not included.',
+                      'The runtime companion and pack are authenticated separately; their own fixed point is not proved by this dispatcher check.']))
     print('full CLI consecutive-generation fixed point verified', flush=True)
 
 
