@@ -82,6 +82,10 @@ func canonicalRuntimeEnvironment(environment []string) []string {
 }
 
 func openRuntimeObjectStore() (*packagecache.DiskStore, error) {
+	return openNativeObjectStore("native-runtime-v1", runtimeObjectLimits())
+}
+
+func openNativeObjectStore(name string, limits packagecache.DiskLimits) (*packagecache.DiskStore, error) {
 	base, err := os.UserCacheDir()
 	if err != nil {
 		return nil, err
@@ -94,7 +98,7 @@ func openRuntimeObjectStore() (*packagecache.DiskStore, error) {
 		return nil, err
 	}
 	defer boundary.Close()
-	return packagecache.NewDiskStoreInRoot(boundary, filepath.Join("fairyc", "native-runtime-v1"), runtimeObjectLimits())
+	return packagecache.NewDiskStoreInRoot(boundary, filepath.Join("fairyc", name), limits)
 }
 
 func runtimeObjectLimits() packagecache.DiskLimits {

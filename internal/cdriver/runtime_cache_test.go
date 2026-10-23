@@ -31,10 +31,13 @@ func TestRuntimeObjectCacheIdentity(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			changed := base
 			mutate(&changed)
-			if changed.key() == base.key() {
+			if changed.key() == base.key() || changed.unitKey() == base.unitKey() {
 				t.Fatal("identity did not invalidate")
 			}
 		})
+	}
+	if base.key() == base.unitKey() {
+		t.Fatal("runtime and unit key domains overlap")
 	}
 	reordered := base
 	reordered.Environment = []string{"A=1", "B=2"}

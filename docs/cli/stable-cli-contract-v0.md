@@ -102,14 +102,16 @@ CLI workspace build/run and native tests share `compileNativeProgram` and descri
 
 The experimental `build-workspace --target x86_64-linux-gnu` path retains its explicit `--cc gcc` or `--cc clang`, Linux amd64 glibc host, and output-under-`build/` contract. It shares the private Linux storage transport with stable build/run.
 
-Native workspace compilation can reuse only the runtime/support object in the
+Native workspace compilation can reuse the runtime/support object in the
 bounded OS user cache (`fairyc/native-runtime-v1`): 64 generations and 64 MiB
-encoded bytes. Source checks, generated-unit compilation, linking and image
-inspection stay fresh. Header preprocessing and compiler/profile/input identity
+encoded bytes. Windows additionally keeps two generated-unit objects within a separate 4 MiB
+encoded-byte limit at `fairyc/native-unit-v1`; Linux still recompiles the generated unit.
+Source checks, C emission, linking and image inspection stay fresh. Header preprocessing and compiler/profile/input identity
 gate reuse; cache failures fall back to compilation. `--locked` verifies the lock
 and does not disable this private cache. CLI arguments, stdout and exit codes
 are unchanged. See [ADR 0428](../adr/0428-native-runtime-object-reuse.md) for
-invalidation, recovery, exact bounds and the unverified Linux execution boundary.
+invalidation, recovery, exact bounds and the unverified Linux execution boundary, and
+[ADR 0486](../adr/0486-bounded-windows-generated-unit-reuse.md) for Windows unit reuse.
 
 The experimental Linux `run-workspace` path uses the same explicit toolchain and private vector linkage, executes a temporary ELF, and reports the eight-bit process status. A dedicated one-byte trap channel distinguishes a trap from an ordinary return with the same status. It retains its output rejection; stable `run` forwards program output, stdin and arguments.
 

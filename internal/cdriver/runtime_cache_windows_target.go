@@ -11,16 +11,21 @@ import (
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
-// BuildWindowsMSVCTargetCached keeps generated-unit compilation and linking
-// fresh while reusing only an exact-input runtime object in the user cache.
+// BuildWindowsMSVCTargetCached reuses exact-input runtime and generated-unit
+// objects in separately bounded user caches. Linking always stays fresh.
 func BuildWindowsMSVCTargetCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsRuntimeCached(toolchain, profile, unitSource, runtimeSource, openRuntimeObjectStore)
+	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, openRuntimeObjectStore, openUnitObjectStore)
 }
 
 func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open runtimeStoreOpener) (WindowsHostArtifact, error) {
+	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, open, nil)
+}
+
+func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open, openUnit runtimeStoreOpener) (WindowsHostArtifact, error) {
 	uncached := func() (WindowsHostArtifact, error) {
 		artifact, err := BuildWindowsMSVCTarget(toolchain, profile, unitSource, runtimeSource)
 		artifact.RuntimeCache = RuntimeCacheBypass
+		artifact.UnitCache = RuntimeCacheBypass
 		return artifact, err
 	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" ||
@@ -59,10 +64,11 @@ func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, 
 	if err := os.WriteFile(sourcePath, []byte(preprocessed), 0o600); err != nil {
 		return uncached()
 	}
-	key := (runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
+	identity := runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
 		CompilerDigest: sha256.Sum256(compiler), Target: "x86_64-windows-msvc", Mode: C11ConsumerMode,
 		Profile: profile, Flags: flags, Environment: toolchain.Environment, Source: sha256.Sum256([]byte(runtimeSource)),
-		Preprocessed: sha256.Sum256([]byte(preprocessed))}).key()
+		Preprocessed: sha256.Sum256([]byte(preprocessed))}
+	key := identity.key()
 	store, _ := open()
 	if store != nil {
 		defer store.Close()
@@ -79,9 +85,7 @@ func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, 
 		return err
 	}, func(object []byte) error {
 		var err error
-		artifact, err = buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode,
-			[]windowsMSVCSource{{Name: "unit.c", Contents: unitSource}},
-			WindowsMSVCBuildOptions{PrebuiltObjects: []WindowsHostObject{{Name: "runtime.obj", Bytes: object}}})
+		artifact, err = buildWindowsUnitCached(toolchain, profile, unitSource, object, directory, identity, openUnit)
 		return err
 	})
 	artifact.RuntimeCache = status

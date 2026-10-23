@@ -564,12 +564,13 @@ the previous artifact and remove staging state.
 Success is exactly `built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <development|release>, lock
 <updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
-status. Native compilation uses only the bounded private runtime-object cache
-described in [ADR 0428](../adr/0428-native-runtime-object-reuse.md); package MIR
-and executables are not reused. Header preprocessing, generated-unit compilation,
+status. Native compilation uses the bounded private runtime-object cache
+described in [ADR 0428](../adr/0428-native-runtime-object-reuse.md) and, on Windows, the separate
+two-entry generated-unit cache in [ADR 0486](../adr/0486-bounded-windows-generated-unit-reuse.md).
+Package MIR and executables are not reused. Source checking, C emission, header preprocessing,
 linking and image inspection remain current. The OS user cache is separate from
 workspace outputs and may be written with `--locked`. Cache failure falls back
-to runtime compilation without changing stable output or exit codes.
+to object compilation without changing stable output or exit codes.
 
 ## Stable workspace run v4
 
@@ -613,7 +614,7 @@ form. Positions use the compiled source bytes without rereading files after exec
 authentication, or hostile-code isolation.
 Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
 2, 3, 4, 6, and 7 respectively without promoting target maturity. The same private
-runtime-object cache policy as stable build applies.
+native-object cache policy as stable build applies.
 An input transport failure after launch is an execution failure and cannot roll back program effects.
 The embedding helper `cli.Run` still supplies EOF; callers use `cli.RunWithInput` to provide a stream.
 

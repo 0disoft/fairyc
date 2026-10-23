@@ -38,6 +38,7 @@ type WindowsHostObject struct {
 // It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
 	RuntimeCache    RuntimeObjectCacheStatus
+	UnitCache       RuntimeObjectCacheStatus
 	Bytes           []byte
 	Objects         []WindowsHostObject
 	LinkMap         []byte
@@ -414,7 +415,7 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
 		return WindowsHostArtifact{}, fmt.Errorf("invalid resolved MSVC host toolchain")
 	}
-	if len(sources) == 0 {
+	if len(sources) == 0 && len(options.PrebuiltObjects) == 0 {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC build has no C sources")
 	}
 	temporaryRoot, err := os.MkdirTemp("", "fairyc-msvc-host-")
@@ -475,6 +476,13 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	arguments = append(arguments, sourcePaths...)
 	arguments = append(arguments, "/Fe:"+executablePath, "/link")
 	arguments = append(arguments, prebuiltPaths...)
+	commandPath := toolchain.Path
+	if len(sources) == 0 {
+		// Cached objects still link against the current libraries. Invoke LINK
+		// directly: CL requires a source input and would reinterpret /TC objects.
+		commandPath = filepath.Join(filepath.Dir(toolchain.Path), "link.exe")
+		arguments = append([]string{"/NOLOGO", "/OUT:" + executablePath}, prebuiltPaths...)
+	}
 	arguments = append(arguments, "/INCREMENTAL:NO")
 	programDatabasePath := ""
 	if options.CaptureProgramDatabase {
@@ -502,7 +510,7 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	if options.CaptureLibraryLog {
 		outputLimit = 8 * 1024 * 1024
 	}
-	output, err := runWindowsHostCommandWithLimit(toolchain.Path, toolchain.Environment, temporaryRoot, outputLimit, arguments...)
+	output, err := runWindowsHostCommandWithLimit(commandPath, toolchain.Environment, temporaryRoot, outputLimit, arguments...)
 	if err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
