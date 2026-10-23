@@ -48,15 +48,19 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 		return artifact
 	}
 	for _, profile := range []Profile{LowProfile, OptimizedProfile} {
-		build(profile, source, support, RuntimeCacheMiss, RuntimeCacheMiss, 8)
-		build(profile, source, support, RuntimeCacheHit, RuntimeCacheHit, 8)
+		cold, warm := RuntimeCacheMiss, RuntimeCacheHit
+		if profile == LowProfile {
+			cold, warm = RuntimeCacheBypass, RuntimeCacheBypass
+		}
+		build(profile, source, support, RuntimeCacheMiss, cold, 8)
+		build(profile, source, support, RuntimeCacheHit, warm, 8)
 	}
 	writeHeader(4)
-	build(LowProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 9)
+	build(OptimizedProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 9)
 	source += "\n/* edited generated source */\n"
-	build(LowProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 9)
+	build(OptimizedProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 9)
 	support = "int answer(void){return 9;}\n"
-	build(LowProfile, source, support, RuntimeCacheMiss, RuntimeCacheHit, 13)
+	build(OptimizedProfile, source, support, RuntimeCacheMiss, RuntimeCacheHit, 13)
 
 	// A hit still links current library inputs: changing only the runtime changes output.
 	// Corrupt files must miss without blocking source-based reconstruction.
@@ -69,7 +73,7 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	valid := build(LowProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 13)
+	valid := build(OptimizedProfile, source, support, RuntimeCacheHit, RuntimeCacheMiss, 13)
 	// Replace the valid unit with a checksum-valid runtime object, which lacks main.
 	// The failed real link must trigger a fresh unit compile and recover.
 	store, err := openUnit()
@@ -103,10 +107,10 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 	if poisoned != 1 {
 		t.Fatalf("poisoned %d entries, want 1", poisoned)
 	}
-	build(LowProfile, source, support, RuntimeCacheHit, RuntimeCacheRecovered, 13)
-	build(LowProfile, source, support, RuntimeCacheHit, RuntimeCacheHit, 13)
+	build(OptimizedProfile, source, support, RuntimeCacheHit, RuntimeCacheRecovered, 13)
+	build(OptimizedProfile, source, support, RuntimeCacheHit, RuntimeCacheHit, 13)
 	for index := range 8 {
-		build(LowProfile, source+fmt.Sprintf("/* edit %d */\n", index), support, RuntimeCacheHit, RuntimeCacheMiss, 13)
+		build(OptimizedProfile, source+fmt.Sprintf("/* edit %d */\n", index), support, RuntimeCacheHit, RuntimeCacheMiss, 13)
 	}
 	store, err = openUnit()
 	if err != nil {
@@ -116,7 +120,7 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 	if err != nil || before.Entries != 2 || before.Bytes > unitObjectLimits().MaxBytes {
 		t.Fatalf("unbounded unit retention: %+v %v", before, err)
 	}
-	if _, err := buildWindowsObjectsCached(toolchain, LowProfile,
+	if _, err := buildWindowsObjectsCached(toolchain, OptimizedProfile,
 		"int missing(void); int main(void){return missing();}\n", support, openRuntime, openUnit); err == nil {
 		t.Fatal("missing symbol link falsely succeeded")
 	}
@@ -126,7 +130,7 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 		t.Fatalf("failed link published a unit: before=%+v after=%+v err=%v", before, after, err)
 	}
 	openUnit = func() (*packagecache.DiskStore, error) { return nil, fmt.Errorf("unavailable") }
-	build(LowProfile, source, support, RuntimeCacheMiss, RuntimeCacheBypass, 13)
+	build(OptimizedProfile, source, support, RuntimeCacheMiss, RuntimeCacheBypass, 13)
 	toolchain.Environment = append(toolchain.Environment, "CL=/DCACHE_BYPASS_PROBE=1")
-	build(LowProfile, source, support, RuntimeCacheBypass, RuntimeCacheBypass, 13)
+	build(OptimizedProfile, source, support, RuntimeCacheBypass, RuntimeCacheBypass, 13)
 }

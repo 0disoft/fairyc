@@ -104,7 +104,7 @@ The experimental `build-workspace --target x86_64-linux-gnu` path retains its ex
 
 Native workspace compilation can reuse the runtime/support object in the
 bounded OS user cache (`fairyc/native-runtime-v1`): 64 generations and 64 MiB
-encoded bytes. Windows additionally keeps two generated-unit objects within a separate 4 MiB
+encoded bytes. Windows release builds additionally keep two generated-unit objects within a separate 4 MiB
 encoded-byte limit at `fairyc/native-unit-v1`; Linux still recompiles the generated unit.
 Source checks, C emission, linking and image inspection stay fresh. Header preprocessing and compiler/profile/input identity
 gate reuse; cache failures fall back to compilation. `--locked` verifies the lock

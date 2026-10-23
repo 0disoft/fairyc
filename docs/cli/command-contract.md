@@ -565,7 +565,7 @@ Success is exactly `built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <deve
 <updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status. Native compilation uses the bounded private runtime-object cache
-described in [ADR 0428](../adr/0428-native-runtime-object-reuse.md) and, on Windows, the separate
+described in [ADR 0428](../adr/0428-native-runtime-object-reuse.md) and, for Windows release builds, the separate
 two-entry generated-unit cache in [ADR 0486](../adr/0486-bounded-windows-generated-unit-reuse.md).
 Package MIR and executables are not reused. Source checking, C emission, header preprocessing,
 linking and image inspection remain current. The OS user cache is separate from

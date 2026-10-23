@@ -6,16 +6,17 @@
 
 ## Decision
 
-Reuse the generated C translation unit's object on the Windows workspace native path. Source,
+Reuse the generated C translation unit's object on the Windows **release** workspace native path. Source,
 lock, semantic and MIR checks, C emission and header preprocessing remain fresh. Link the current
 unit/runtime objects against the current host libraries and inspect the resulting PE/unwind on
 every build. The cache stores no executable, source tree, compiler process or background service.
-The raw driver probes and Linux path retain their existing behavior.
+Development builds, raw driver probes and the Linux path retain their existing behavior.
 
 The [current cost observations](../benchmarks/completion-followup-20261023.json) put loading/checking
 and C emission near 100 ms combined, while a warm runtime-only release build still takes over
 three seconds. Generated-unit object reuse targets that repeated C compilation, without retaining
-another frontend graph.
+another frontend graph. Three-repeat file-search measurements showed little development-build
+benefit while increasing edit time and retained bytes, so development keeps runtime-only reuse.
 
 ## Identity and bounds
 
@@ -29,7 +30,7 @@ Mutable toolchain installation during a build remains outside this cache's claim
 The existing opened-root, digest-checked `DiskStore` is reused in the OS user-cache directory at
 `fairyc/native-unit-v1`. It keeps at most **two generations and 4 MiB of encoded records in total**,
 with a 2 MiB per-record bound and the existing 24-hour temporary-file expiry. This is shared across
-projects and profiles; switching among more than two unit inputs can evict a useful object. It is
+projects; switching among more than two release unit inputs can evict a useful object. It is
 not a per-project cache multiplied by the number of projects. Oversized objects simply do not
 persist. Runtime retention stays at its existing independent 64-generation/64-MiB limit.
 
@@ -51,7 +52,7 @@ dummy source file, extra linker implementation or new library dependency is intr
 
 ## Validation
 
-The Windows native test checks cold/warm use in both profiles, generated-source and included-header
+The Windows native test checks development bypass, cold/warm release use, generated-source and included-header
 changes, runtime-only changes, checksum corruption, a checksum-valid object without `main`, a
 persistent missing-symbol link failure, cache outage and eight edits beyond the retention limit.
 Key tests cover every identity dimension and separation from the runtime key. Existing runtime

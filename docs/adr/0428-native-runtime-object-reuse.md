@@ -6,7 +6,8 @@
 ## Decision
 
 [ADR 0486](0486-bounded-windows-generated-unit-reuse.md) later adds a separate two-entry
-generated-unit cache on Windows. The runtime rules below and the Linux path remain unchanged.
+generated-unit cache for Windows release builds. The runtime rules below, development builds
+and the Linux path remain unchanged.
 
 Workspace native compilation reuses only the project-owned runtime/support C
 object. Generated Fairy C translation units are always compiled; linking and

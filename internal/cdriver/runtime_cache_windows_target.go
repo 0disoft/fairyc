@@ -11,8 +11,8 @@ import (
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
-// BuildWindowsMSVCTargetCached reuses exact-input runtime and generated-unit
-// objects in separately bounded user caches. Linking always stays fresh.
+// BuildWindowsMSVCTargetCached reuses exact-input runtime objects, plus generated
+// units for release builds, in bounded user caches. Linking always stays fresh.
 func BuildWindowsMSVCTargetCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
 	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, openRuntimeObjectStore, openUnitObjectStore)
 }
@@ -22,6 +22,11 @@ func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, 
 }
 
 func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open, openUnit runtimeStoreOpener) (WindowsHostArtifact, error) {
+	// Development compilation is already cheap. Its measured time/space tradeoff
+	// does not justify retaining generated objects or another preprocessor pass.
+	if profile != OptimizedProfile {
+		openUnit = nil
+	}
 	uncached := func() (WindowsHostArtifact, error) {
 		artifact, err := BuildWindowsMSVCTarget(toolchain, profile, unitSource, runtimeSource)
 		artifact.RuntimeCache = RuntimeCacheBypass
