@@ -154,6 +154,8 @@ func inferredOperandType(localTypes map[mir.LocalID]hir.Type, operand mir.Operan
 
 func (e *emissionAnalysis) operandType(functionIndex int, operand mir.Operand) (hir.Type, error) {
 	switch operand.Kind {
+	case mir.OperandRegion:
+		return hir.TypeRegion, nil
 	case mir.OperandI64:
 		return hir.TypeI64, nil
 	case mir.OperandI32:
@@ -246,7 +248,7 @@ func functionRegionSymbols(function mir.Function) []hir.SymbolID {
 	found := make(map[hir.SymbolID]struct{})
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
-			if operation.Kind == mir.OperationRegionEnter || operation.Kind == mir.OperationRegionPlace || operation.Kind == mir.OperationRegionReset {
+			if operation.Kind == mir.OperationRegionEnter {
 				found[operation.Symbol] = struct{}{}
 			}
 		}

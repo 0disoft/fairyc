@@ -43,6 +43,10 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			if index != 0 {
 				output.WriteString(", ")
 			}
+			if argument.Kind == mir.OperandRegion {
+				output.WriteString(e.regionPointer(functionIndex, hir.SymbolID(argument.Local)))
+				continue
+			}
 			value, err := cOperand(argument)
 			if err != nil {
 				return fmt.Errorf("call argument in %s: %w", function.Name, err)

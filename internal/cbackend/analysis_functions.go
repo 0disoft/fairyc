@@ -32,6 +32,10 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 		return fmt.Errorf("MIR function %s has %d parameter types for %d parameters", function.Name, len(function.ParameterTypes), len(function.Parameters))
 	}
 	for _, parameterType := range function.ParameterTypes {
+		if parameterType == hir.TypeRegion {
+			e.features["region-lifecycle"] = struct{}{}
+			continue
+		}
 		if !e.supportedCValueType(parameterType) {
 			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(parameterType.String())}
 		}

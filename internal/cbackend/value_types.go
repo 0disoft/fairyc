@@ -65,6 +65,11 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 
 func (e *emissionAnalysis) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
+	if value == hir.TypeRegion {
+		// Only verified internal parameters use this representation; Region is
+		// deliberately absent from supportedCValueType for ordinary value storage.
+		return "fy_region *", nil
+	}
 	if value == hir.TypeCCallbackI32UserData {
 		return "fy_c_callback_i32_userdata", nil
 	}

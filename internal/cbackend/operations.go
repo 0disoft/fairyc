@@ -567,7 +567,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		// statement, so keep placement temporaries inside a compound statement.
 		output.WriteString("    {\n")
 		fmt.Fprintf(output, "    void *fy_region_storage_%d = NULL;\n", operation.DestinationLocal)
-		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)&fy_region_%d, sizeof(%s), _Alignof(%s), &fy_region_storage_%d);\n", operation.DestinationLocal, operation.Symbol, ownerType, ownerType, operation.DestinationLocal)
+		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)%s, sizeof(%s), _Alignof(%s), &fy_region_storage_%d);\n", operation.DestinationLocal, e.regionPointer(functionIndex, operation.Symbol), ownerType, ownerType, operation.DestinationLocal)
 		fmt.Fprintf(output, "    if (fy_region_status_%d == UINT32_C(0)) {\n", operation.DestinationLocal)
 		fmt.Fprintf(output, "        *((%s *)fy_region_storage_%d) = %s;\n", ownerType, operation.DestinationLocal, value)
 		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_OK, .p_0 = (const %s *)fy_region_storage_%d };\n", operation.DestinationLocal, taggedIndex, ownerType, operation.DestinationLocal)

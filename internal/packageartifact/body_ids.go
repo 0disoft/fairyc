@@ -43,7 +43,7 @@ func canonicalizeFunctionGraphIDs(function mir.Function) (mir.Function, bodyGrap
 		return addLocal(mir.LocalID(value))
 	}
 	addOperand := func(value mir.Operand) error {
-		if value.Kind != mir.OperandLocal {
+		if value.Kind != mir.OperandLocal && value.Kind != mir.OperandRegion {
 			return nil
 		}
 		return addLocal(value.Local)
@@ -169,7 +169,7 @@ func rewriteFunctionGraphIDs(function *mir.Function, locals map[mir.LocalID]mir.
 		return hir.SymbolID(rewritten), err
 	}
 	operand := func(value *mir.Operand) error {
-		if value.Kind != mir.OperandLocal {
+		if value.Kind != mir.OperandLocal && value.Kind != mir.OperandRegion {
 			return nil
 		}
 		rewritten, err := local(value.Local)

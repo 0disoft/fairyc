@@ -1,0 +1,179 @@
+{
+  "schema": "fairyc.region-input-transport/v1",
+  "passed": true,
+  "sourceBaseCommit": "a13dbfa412d328843a6db72cbfe2f5c2f7dcc352",
+  "includesUncommittedNativeSlice": true,
+  "sourceInputs": [
+    {
+      "path": "internal/mir/model.go",
+      "bytes": 13225,
+      "sha256": "57d68a678decb364b7058331e0320f8692f2bc3cbdfeba9406ba260b50d419ae"
+    },
+    {
+      "path": "internal/mir/lower_expressions.go",
+      "bytes": 11468,
+      "sha256": "45eb9ee4b493b288bc73d1a90c2ba0d992b073ee55e27f5b35ac69eafd610363"
+    },
+    {
+      "path": "internal/mir/lower_function.go",
+      "bytes": 4715,
+      "sha256": "64a4e78b9adcab1d754d453d4f1566736a1941f2695d40bd7e00d930688c8d0a"
+    },
+    {
+      "path": "internal/mir/lower_regions.go",
+      "bytes": 4184,
+      "sha256": "4f474c3ec28db9765918d70fdaf26e8dedfff33bce411d171efd9187185f2400"
+    },
+    {
+      "path": "internal/mir/verify_state.go",
+      "bytes": 6114,
+      "sha256": "e686b1f7fe47fd76b2044e5edf17a2b9105b4cf1e34731aa85711a5f2cf4d9d8"
+    },
+    {
+      "path": "internal/mir/verify_regions.go",
+      "bytes": 899,
+      "sha256": "9ea1b9cbfb0c5ace0854006a2511bc92303439da618464e31d56ec19c7b33bb8"
+    },
+    {
+      "path": "internal/mir/verify_operations.go",
+      "bytes": 32497,
+      "sha256": "6175d4db6b2ff41ed492c38e337917192e09ea96a6e620081f06b355e0985aa5"
+    },
+    {
+      "path": "internal/mir/verify_function.go",
+      "bytes": 11250,
+      "sha256": "fcf12af5709eefd5c4be3a47bdbdbce0e228ba187aac9455ea52c7b704c505bd"
+    },
+    {
+      "path": "internal/interpreter/execute_call.go",
+      "bytes": 28950,
+      "sha256": "6eab217c222b2c7a75e4ebe6dfee30f92c82e0efb6c8bcb9080d4f1c7f0ee42a"
+    },
+    {
+      "path": "internal/interpreter/region_parameters.go",
+      "bytes": 406,
+      "sha256": "0dcb5c9ced205932fb353c201d76061d032172a745a2ec4fef7b0d300230af26"
+    },
+    {
+      "path": "internal/cbackend/analysis_functions.go",
+      "bytes": 19664,
+      "sha256": "3e1b04fd392fb68f88252e24505ced00c6386ef0e78f76c2242f5ec772640c54"
+    },
+    {
+      "path": "internal/cbackend/value_types.go",
+      "bytes": 5173,
+      "sha256": "396145dd73e0d9d8bb2a110fd3fac08abfd07421403b6dde8c67ad96dcb29cf2"
+    },
+    {
+      "path": "internal/cbackend/analysis_locals.go",
+      "bytes": 11332,
+      "sha256": "ba5360c7305a3f48c4d422b01f2c2e7cc6a31ef7702de2496f5a0333b4a96791"
+    },
+    {
+      "path": "internal/cbackend/terminators.go",
+      "bytes": 19931,
+      "sha256": "ddae1a14c77df778f48847598c51af36815d3b2e5401b4ad0b38873740889e10"
+    },
+    {
+      "path": "internal/cbackend/region_parameters.go",
+      "bytes": 602,
+      "sha256": "7ba6093786f0f60339efd6137d03a999a90ae2ec875cd4a151c343ecdae3a154"
+    },
+    {
+      "path": "internal/cbackend/operations.go",
+      "bytes": 35358,
+      "sha256": "fab86463bd8bd0a2b67e5429d49866eb50f883671d34b530bac3d57e272fc51e"
+    },
+    {
+      "path": "internal/cbackend/region_bytes.go",
+      "bytes": 2232,
+      "sha256": "e969aba8b1d575a57e2080eb80fbc24a7efba2674e7bf8419bbd2e547f1b89ee"
+    },
+    {
+      "path": "internal/packageartifact/body_ids.go",
+      "bytes": 9778,
+      "sha256": "15e71c4140d391b99085b021aaa793e194fccbdc3a068df38a361bd58a864880"
+    },
+    {
+      "path": "internal/workspacecompiler/region_parameters_test.go",
+      "bytes": 5993,
+      "sha256": "8991d259e4275c69d7abb6096ca4f0018029fd4a9a512590b4dbbfad83b6ba18"
+    },
+    {
+      "path": "internal/workspacecompiler/region_parameters_native_test.go",
+      "bytes": 5076,
+      "sha256": "aae839b2cc09307117fa8c329ce01d19a868c0a56bf188898909aba8b4ba2e41"
+    }
+  ],
+  "checks": [
+    {
+      "command": "go test -mod=readonly ./internal/mir ./internal/interpreter ./internal/regionfixture ./internal/workspacecompiler -run 'TestRegion|Test.*Region|Test.*Lower|Test.*Verify' -count=1",
+      "exit": 0,
+      "scope": "MIR/interpreter slice before native additions"
+    },
+    {
+      "command": "go test -mod=readonly ./internal/workspacecompiler ./internal/cbackend ./internal/packageartifact -run 'TestRegionParameters|Test.*Region' -count=1 -v",
+      "exit": 0,
+      "scope": "Region workspace and artifact checks; cbackend package matched no test names"
+    },
+    {
+      "command": "go test -mod=readonly ./internal/workspacecompiler -run 'TestRegionParametersNative|TestRegionParametersPersistentCache' -count=1 -v",
+      "exit": 0,
+      "scope": "Final cross-package native and persistent-cache cases"
+    }
+  ],
+  "observations": {
+    "interpreterReturn": 42,
+    "interpreterResets": 2,
+    "interpreterPlacements": [
+      3,
+      1
+    ],
+    "forbiddenMIR": [
+      "reset caller-owned Region",
+      "copy Region to value local",
+      "ordinary-local argument instead of Region identity",
+      "inactive Region argument"
+    ],
+    "independentSessionDiskHit": true,
+    "loweringSkippedOnDiskHit": true,
+    "publicProviderBoundary": true,
+    "windowsNativeProfiles": [
+      "low",
+      "optimized"
+    ],
+    "windowsNativeReturn": 42,
+    "windowsNativeStdout": "",
+    "windowsNativeStderr": "",
+    "windowsNativeLiveAllocationsAfterCleanup": 0,
+    "allocationForms": [
+      "place",
+      "alloc_zeroed_bytes",
+      "copy_bytes"
+    ],
+    "resultPropagation": [
+      "ok",
+      "err"
+    ],
+    "sameRegionPassedTwice": true,
+    "callerRegionReentered": true,
+    "linuxEmission": true,
+    "linuxNative": false
+  },
+  "implementation": {
+    "regionIdentitySeparateFromValueLocals": true,
+    "callerOwnedHandleForwardedAsPointer": true,
+    "calleeBeginsOrResetsInput": false,
+    "additionalRuntimeAllocation": false,
+    "cacheOperandIDsRebound": true,
+    "SDKSourceChanged": false,
+    "languageSyntaxChanged": false
+  },
+  "remaining": [
+    "Candidate Region diagnostic parity remains open.",
+    "Native execution on Linux requires an available Linux host.",
+    "Whole-CLI comparisons from 1dbca9ad refer to those frozen compiler images, not this newly modified Go compiler."
+  ],
+  "ciChanged": false,
+  "pushed": false
+}

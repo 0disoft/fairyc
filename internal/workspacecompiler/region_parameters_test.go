@@ -40,6 +40,16 @@ fn i32 check(alloc::Arena input) {
 fn i32 main() { return switch (alloc::create()) { case .ok(value): { check(value) } case .err(_): { 1 } }; }
 `
 
+const regionProviderSource = `module answer;
+import std::alloc as alloc;
+pub fn Result<ref i32, alloc::AllocError> store(Region input, i32 value) { return input.place(value); }
+`
+
+func regionProviderCaller(input string) string {
+	return strings.NewReplacer("module main;", "module main;\nimport answer as provider;",
+		"return scratch.place(value);", "return provider::store(scratch, value);").Replace(input)
+}
+
 func TestRegionParametersKeepCallerLifetime(t *testing.T) {
 	root := writeCacheWorkspace(t, testAnswer42)
 	writeFile(t, filepath.Join(root, "src", "main.fy"), regionParameterSource)
@@ -109,4 +119,39 @@ func TestRegionParametersKeepCallerLifetime(t *testing.T) {
 		return
 	}
 	t.Fatal("missing store function")
+}
+
+func TestRegionParametersPersistentCache(t *testing.T) {
+	root := writeCacheWorkspace(t, regionProviderSource)
+	writeFile(t, filepath.Join(root, "src", "main.fy"), regionProviderCaller(regionParameterSource))
+	workspace := loadCacheWorkspace(t, root)
+	owner, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sdkOwner, err := workspace.PackageID(sdkstdlib.PackagePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	configuration := persistentTestConfiguration(t.TempDir(), "region-input-capabilities")
+	for _, warm := range []bool{false, true} {
+		session, err := NewSession(configuration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		checked, err := session.Check(workspace)
+		closeErr := session.Close()
+		if err != nil || closeErr != nil || !checked.Compiler.Verified {
+			t.Fatalf("warm=%v check=%v close=%v", warm, err, closeErr)
+		}
+		if warm && (checked.Cache.Outcome != OutcomeAllHit || checked.Cache.Lowered) {
+			t.Fatalf("Region identities were not restored from disk: %+v", checked.Cache)
+		}
+		outcome, err := interpreter.ExecuteWithOptions(checked.Compiler.MIR, hir.QualifiedModulePath(owner, "main")+"::main",
+			interpreter.Options{AbstractArenaSDKPackages: []hir.PackageID{sdkOwner}})
+		if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 ||
+			len(outcome.RegionTrace) != 2 || outcome.RegionTrace[0].Placements != 3 || outcome.RegionTrace[1].Placements != 1 {
+			t.Fatalf("warm=%v Region identities: %+v %v", warm, outcome, err)
+		}
+	}
 }
