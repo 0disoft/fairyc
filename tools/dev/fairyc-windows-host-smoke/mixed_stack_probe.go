@@ -22,6 +22,7 @@ type mixedStackObservation struct {
 	Toolchain         string `json:"toolchain"`
 	FairySourceSHA256 string `json:"fairySourceSHA256"`
 	GeneratedCSHA256  string `json:"generatedCSHA256"`
+	CompanionSHA256   string `json:"companionSourceSHA256"`
 	ImageSHA256       string `json:"imageSHA256"`
 	CallerSHA256      string `json:"callerSHA256"`
 	CalleeSHA256      string `json:"calleeSHA256"`
@@ -39,7 +40,14 @@ func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedS
 	for _, item := range []struct {
 		name, value string
 		trap        bool
-	}{{"walk-and-c-boundary-catch", "40", false}, {"callback-trap-no-unwind", "13", true}} {
+		prefix      string
+	}{
+		{"walk-and-c-boundary-catch", "40", false, ""},
+		{"callback-trap-no-unwind", "13", true, ""},
+		{"reject-handler-address", "40", true, "#define FY_MIXED_HANDLER_SHIFT 1\n"},
+		{"reject-handler-data", "40", true, "#define FY_MIXED_DATA_SHIFT 4\n"},
+		{"reject-caller-stack", "40", true, "#define FY_MIXED_STACK_SHIFT 8\n"},
+	} {
 		input := strings.ReplaceAll(windowsunwindprobe.MixedFairySource, "INPUT_VALUE", item.value)
 		parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 		if err != nil || parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
@@ -54,7 +62,8 @@ func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedS
 			return nil, err
 		}
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-			artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, unit.Source, windowsunwindprobe.MixedCompanionC+runtimeSource)
+			companion := item.prefix + windowsunwindprobe.MixedCompanionC + runtimeSource
+			artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, unit.Source, companion)
 			if err != nil {
 				return nil, fmt.Errorf("mixed stack %s/%s: %w", item.name, profile.Name, err)
 			}
@@ -88,6 +97,7 @@ func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedS
 				Case: item.name, Profile: profile.Name, Toolchain: toolchain.Version,
 				FairySourceSHA256: fmt.Sprintf("%x", sha256.Sum256([]byte(input))),
 				GeneratedCSHA256:  fmt.Sprintf("%x", sha256.Sum256([]byte(unit.Source))),
+				CompanionSHA256:   fmt.Sprintf("%x", sha256.Sum256([]byte(companion))),
 				ImageSHA256:       fmt.Sprintf("%x", sha256.Sum256(artifact.Bytes)),
 				CallerSHA256:      fmt.Sprintf("%x", sha256.Sum256(artifact.Objects[0].Bytes)),
 				CalleeSHA256:      fmt.Sprintf("%x", sha256.Sum256(artifact.Objects[1].Bytes)),

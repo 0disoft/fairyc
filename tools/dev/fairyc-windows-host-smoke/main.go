@@ -774,6 +774,6 @@ func run(arguments []string) error {
 	} else {
 		reportHostCorrectnessSuccess(receipt)
 	}
-	fmt.Printf("Generated Fairy/C mixed stack proof passed: %d separate-object executions covering metadata walks, C-boundary exception containment, and non-unwinding callback traps\n", len(mixedStack))
+	fmt.Printf("Generated Fairy/C mixed stack proof passed: %d separate-object executions covering live handler/data and caller-context checks, mismatch rejection, C-boundary exception containment, and non-unwinding callback traps\n", len(mixedStack))
 	return nil
 }

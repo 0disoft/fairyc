@@ -503,7 +503,10 @@ the frame's exact handler-tail `ADDR32NB` relocation to its final executable tar
 profiles. Mixed-stack walks and C-boundary exception containment now have
 [bounded generated-Fairy evidence](../ops/evidence/windows-mixed-stack-20261023.json): separate
 Fairy/C objects pass four local low/optimized executions, including callback trap termination
-without unwinding. Foreign exceptions still must not cross Fairy frames. Version-2 epilog offset
+without unwinding. The later [live-handler record](../ops/evidence/windows-mixed-handler-20261024.json)
+also checks the suspended C outer frame's exact handler/data addresses and independently saved
+caller PC/SP, with six rejected expectation mutations across both profiles. Foreign exceptions
+still must not cross Fairy frames. Version-2 epilog offset
 meaning, language-specific handler payload parsing, recursive chain equivalence and chained-tail
 relocation, and complete hosted fixtures remain unproven; `windows-x64-unwind-fixtures` therefore
 remains missing. No runtime feature or dependency is added.

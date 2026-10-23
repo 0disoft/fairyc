@@ -26,7 +26,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
 | Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, `internal/pecoff/generated_unwind_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parents and unwind children have direct retention/removal evidence | Cover every archive/COMDAT form emitted by the promoted production path and library inputs in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
-| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are already inspected | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
+| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are inspected; the live mixed-stack probe checks the C outer frame's handler/data and independently saved caller PC/SP | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
 | Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
@@ -106,6 +106,24 @@ caught entirely in C, with abnormal inner and normal outer `finally` observation
 trap exits with code 134, control tag 6 and no output or C `finally` execution. The existing host
 smoke now runs these cases. Both rows remain partial; the hosted lane and remaining target gaps
 are not covered by this local run.
+
+## Live mixed-stack handler return (2026-10-24)
+
+The [handler record](../ops/evidence/windows-mixed-handler-20261024.json) runs the
+generated Fairy callback and independent C companion under both MSVC profiles.
+For the suspended C outer frame, the probe decodes its version-1 handler tail and
+requires `RtlVirtualUnwind` to return that exact handler and opaque data address.
+Handler-requested and ordinary walks must restore the same integer nonvolatile
+registers and frame value. Restored PC and SP must also match the return address
+and return-slot address saved independently before calling Fairy.
+
+All ten executions pass: two normal returns, two callback traps, and six rejected
+expectation mutations covering handler address, data address and caller SP. Every
+row records the Fairy, generated C, companion C, object and executable hashes.
+The existing Windows host smoke consumes the strengthened probe; no workflow or
+runner was added. Handler lookup does not invoke a handler or unwind an exception
+through Fairy. Opaque payload parsing, v2 epilog semantics, chained frames, hosted
+execution and clean-machine distribution remain open. Target statuses stay unchanged.
 
 ## Optimized Fairy symbol lookup (2026-10-24)
 

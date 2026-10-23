@@ -17,8 +17,8 @@ func TestWindowsMixedStackBoundaries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(rows) != 4 {
-		t.Fatalf("got %d executions, want 4", len(rows))
+	if len(rows) != 10 {
+		t.Fatalf("got %d executions, want 10", len(rows))
 	}
 	for _, row := range rows {
 		t.Logf("%s/%s: exit=%d trap=%d runtimeFunctions=%d", row.Case, row.Profile, row.Exit, row.TrapCode, row.RuntimeFunctions)
