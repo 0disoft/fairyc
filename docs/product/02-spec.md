@@ -1667,9 +1667,16 @@ catalog, map, query, or command compatibility surface.
 
 Registry coordinates, provider-qualified import spelling, range `for`, resource-aware or block-form
 `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
-public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
-baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
+public `Arena` capacity APIs, exact parser resource limits, the portable path model,
+targets beyond the declared Linux GNU and Windows MSVC profiles,
 package registry, and the `.fymap` default path, limits, and public command policy remain UNDECIDED.
 Alternate map encodings, compression, and chunking remain evidence-gated. The
 provisional pre-release SymbolId hash algorithm is now implemented by ADR 0183; its eventual stable
 release and cross-version migration policy remain open.
+
+Public Arena construction is implemented as `std::alloc::create() -> Result<Arena, AllocError>`;
+capacity and growth-policy APIs remain separate decisions. The
+[runtime contract](../runtime/runtime-stdlib-v0.md#arena-and-region) owns that boundary.
+[ADR 0474](../adr/0474-linux-toolchain-baseline-and-provisioning.md) also settles the bounded
+Linux reference environment: Ubuntu 24.04 amd64, glibc >= 2.39, GCC >= 13 or Clang >= 18,
+and ISO C11. This baseline does not establish broader target or distribution support.
