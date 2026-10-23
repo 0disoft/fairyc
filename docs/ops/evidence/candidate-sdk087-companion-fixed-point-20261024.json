@@ -1,0 +1,135 @@
+{
+  "schema": "fairyc.sdk087-companion-fixed-point/v1",
+  "passed": true,
+  "receipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/companion-fixed-point-v2/receipt.json",
+    "bytes": 7989,
+    "sha256": "be2757a04d62a49a0dccef26c6b96e6d456a1dae1c72007d0f01a3d6957024b3"
+  },
+  "verifier": {
+    "path": "tools/verify-candidate-companion-fixed-point.py",
+    "bytes": 6068,
+    "sha256": "dc41d5c8b57ea25587f4caddec844dc67d7287f103d2f8bdd74d81bfc656f27c"
+  },
+  "helper": {
+    "path": "tools/verify-candidate-native-fixed-point.py",
+    "bytes": 11303,
+    "sha256": "76acfda583741df964fc572d742b848b41d88b3dde39e2530f5cb0d64ca91001"
+  },
+  "buildReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/receipt.json",
+    "bytes": 103382,
+    "sha256": "2e3d72486c055675f900b9c03088fdffac1effc35c4c4eb0d58325b10c5be671"
+  },
+  "packetBytesEqual": true,
+  "originalPacket": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/native-driver/driver.bin",
+    "bytes": 1991476,
+    "sha256": "ea5489ae8bd1451cd9211cb8a632b672ce64fd9c5df7c24e8000fdba7d9ba60a"
+  },
+  "renewedPacket": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/companion-fixed-point-v2/driver.bin",
+    "bytes": 1991476,
+    "sha256": "ea5489ae8bd1451cd9211cb8a632b672ce64fd9c5df7c24e8000fdba7d9ba60a"
+  },
+  "optimizedImageBytesEqual": true,
+  "generations": [
+    {
+      "path": ".cache/completion-20261024/file-buffer-sdk/full-cli/release/fairyc-candidate-build.exe",
+      "bytes": 397312,
+      "sha256": "db229954373972326cc4067dfb44cb4b98013a7a1ae0f1f74bc2f4a9c491fe05"
+    },
+    {
+      "path": ".cache/completion-20261024/file-buffer-sdk/companion-fixed-point-v2/generation2/fairyc-candidate-build.exe",
+      "bytes": 397312,
+      "sha256": "db229954373972326cc4067dfb44cb4b98013a7a1ae0f1f74bc2f4a9c491fe05"
+    },
+    {
+      "path": ".cache/completion-20261024/file-buffer-sdk/companion-fixed-point-v2/generation3/fairyc-candidate-build.exe",
+      "bytes": 397312,
+      "sha256": "db229954373972326cc4067dfb44cb4b98013a7a1ae0f1f74bc2f4a9c491fe05"
+    }
+  ],
+  "excludedImageBytes": [],
+  "sourceFiles": 34,
+  "invocations": [
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\full-cli\\release\\fairyc.exe",
+        "--c-project-file",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\full-cli\\native-driver\\sources.list"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 13.459686899994267,
+      "stdoutBytes": 1991476,
+      "stdoutSHA256": "ea5489ae8bd1451cd9211cb8a632b672ce64fd9c5df7c24e8000fdba7d9ba60a",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\full-cli\\release\\fairyc-candidate-build.exe",
+        "--packet-input",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\companion-fixed-point-v2\\driver.bin",
+        "--output-root",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\companion-fixed-point-v2\\generation2",
+        "--output",
+        "fairyc-candidate-build.exe",
+        "--release",
+        "--compile-timeout",
+        "1m"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 44.84337470000901,
+      "stdoutBytes": 69,
+      "stdoutSHA256": "5b38979745ff766bd6b73500dccf9d5be14e19fdd46d9734b9f6ebb4721be758",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\companion-fixed-point-v2\\generation2\\fairyc-candidate-build.exe",
+        "--packet-input",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\companion-fixed-point-v2\\driver.bin",
+        "--output-root",
+        "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\companion-fixed-point-v2\\generation3",
+        "--output",
+        "fairyc-candidate-build.exe",
+        "--release",
+        "--compile-timeout",
+        "1m"
+      ],
+      "exit": 0,
+      "timedOut": false,
+      "seconds": 55.9253721999994,
+      "stdoutBytes": 69,
+      "stdoutSHA256": "5b38979745ff766bd6b73500dccf9d5be14e19fdd46d9734b9f6ebb4721be758",
+      "stderr": ""
+    }
+  ],
+  "scratchDirectoryRemoved": true,
+  "initialAttempt": {
+    "passed": false,
+    "progress": {
+      "path": ".cache/completion-20261024/file-buffer-sdk/companion-fixed-point/progress.json",
+      "bytes": 2080969,
+      "sha256": "1c9d3d2826c8bbd1748c2fc91790b9ce9b97ece9df00b28189b5c2a93c8edd7d"
+    },
+    "reason": "The probe requested unsupported --compile-timeout 3m. It now uses the existing 1m companion contract."
+  },
+  "bootstrapBuilderInvoked": false,
+  "goFrontendInvoked": false,
+  "nativeBackend": "MSVC",
+  "scope": "Authored frontend reproduces the companion packet; authored companions compile two exact successive release images.",
+  "limitations": [
+    "The driver consumes a C packet; this does not make it a Fairy frontend.",
+    "MSVC remains the native backend; Linux and clean-machine execution are separate."
+  ],
+  "publicApiChanged": false,
+  "productTimeoutChanged": false,
+  "ciChanged": false,
+  "linuxExecuted": false,
+  "targetMaturityChanged": false,
+  "defaultCompiler": "Go",
+  "pushed": false
+}

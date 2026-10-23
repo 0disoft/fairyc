@@ -187,6 +187,13 @@ remain unchanged.
 
 ## SDK 0.87 verification follow-up
 
+The [companion fixed-point record](../ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json)
+closes companion renewal independently of the CLI dispatcher: the authored compiler
+reproduces the 1,991,476-byte C packet, and authored companions produce two successive
+397,312-byte release images exactly equal to the installed image. The probe invokes
+no Go frontend or bootstrap builder and retains MSVC as its backend. It uses the
+existing one-minute native compile allowance and authenticates the runtime pack.
+
 The [native command record](../ops/evidence/candidate-sdk087-native-cli-20261024.json)
 passes 53 development/release executions, including reference observations, with
 exact program streams, diagnostics, trap locations and exit bits. The verifier
@@ -205,7 +212,8 @@ closes latest-input full CLI dispatcher equality at frozen `890b3da4`. All 512
 authored input hashes still match the checkout. Consecutive 44,747,876-byte C
 packets and 6,407,680-byte optimized images match without excluded bytes;
 the authored companion and runtime pack retain their authenticated identities.
-The companion's own fixed point and remaining command comparisons remain separate.
+The companion's fixed point is now recorded in this follow-up; remaining example
+comparisons stay separate.
 Development SDK-dependent checks also exceeded the original verification deadlines;
 retain those failures and their focused retries when assessing authored-compiler speed.
 
@@ -216,7 +224,7 @@ Test listing passes all 178 cases with a verification-only 180-second allowance.
 Native development execution combines 23 original exact observations with seven
 successful remaining cases at a 300-second allowance; release passes all 30.
 The initial 90/120-second failures remain recorded. Remaining native/starter/workspace
-and example comparisons, the companion's independent fixed point, Linux execution
+and example comparisons, Linux execution
 and clean-machine distribution stay open. These results do not change product
 deadlines, default compiler selection or target maturity.
 

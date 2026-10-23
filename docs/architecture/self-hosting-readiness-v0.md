@@ -1,5 +1,22 @@
 # Self-hosting readiness v0
 
+## SDK 0.87 companion consecutive generations (2026-10-24)
+
+The [companion fixed-point record](../ops/evidence/candidate-sdk087-companion-fixed-point-20261024.json)
+closes the independent companion equality observation. The authored release compiler
+reproduces the original 1,991,476-byte companion C packet exactly. The installed
+authored companion then compiles generation 2, which compiles generation 3; all
+three complete 397,312-byte optimized images are identical, with no excluded bytes.
+The authenticated runtime pack accompanies both generated tools. No Go frontend or
+bootstrap builder executes in this renewal; MSVC remains the native backend.
+
+The probe retains its initial rejection of an unsupported three-minute compile
+allowance and uses the existing one-minute companion contract. It checks source,
+image, pack and verifier identities and removes its empty owned temporary root.
+This observes C-packet consumption, not a Fairy frontend inside the companion.
+Default compiler selection, Linux execution and target/distribution maturity remain
+separate from this proof; the earlier sections below retain their original scope.
+
 ## SDK 0.87 native command execution (2026-10-24)
 
 The [native CLI record](../ops/evidence/candidate-sdk087-native-cli-20261024.json)
