@@ -1,5 +1,5 @@
 module tests::native_cli_timeout;
-import native_cli as cli;
+import project_test_options as cli;
 import std::bytes as bytes;
 
 @test fn void timeout_diagnostic_retains_identity_and_canonical_seconds(){

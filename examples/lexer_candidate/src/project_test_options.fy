@@ -130,3 +130,7 @@ fn bool test_location(ref mut bytes::Buffer out,ref TestIdentity test,ref input:
     }
     return if(switch(io::write_bytes(bytes::view(ref out))){case .ok(n):{n==bytes::len(ref out)}case .err(_):{false}}){if(failed==0){0}else{5}}else{4};
 }
+
+// Native execution diagnostics share the test command formatter.
+pub fn bool test_input_diagnostic(ref u8[] path,u32 kind,ref mut bytes::Buffer out){return test_append(out,if(kind==1){b"fairyc: package workspace failure: open native test stdin file "}else{b"fairyc: package workspace failure: native test stdin file "}) && test_diagnostic_quote(out,path) && test_append(out,if(kind==1){b"\n"}else if(kind==2){b" is not a canonical portable workspace file\n"}else if(kind==3){b" exceeds 65536 bytes\n"}else{b" is not a regular file\n"});}
+pub fn bool test_timeout_diagnostic(ref u8[] name,usize timeout_ms,ref mut bytes::Buffer out){return test_append(out,b"fairyc: build failed: execute native test ") && test_append(out,name) && test_append(out,b": MSVC target executable exceeded ") && if(timeout_ms==60000){test_append(out,b"1m0s\n")}else{test_number(out,timeout_ms/1000) && test_append(out,b"s\n")};}
