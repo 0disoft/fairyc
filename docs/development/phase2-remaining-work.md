@@ -7,14 +7,16 @@ arguments, F2-1 through F2-4 field transports and the first bounded F3 callback 
 `82b760cbb743eef4608441e127f9fa9e41d1f513`. F2-5 extends repr(C) integer arrays to `i8`, `i16`,
 `u16`, `u64` and `isize`, with source typing at `fe4beed8` and backend/native proof at `af181d65`;
 its shared probe, focused compiler/backend checks and four MSVC C11/C17 low/optimized executions
-pass. The [current hosted F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at
+pass. The [previous hosted F2-5 receipt](phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at
 `f79e55c6` passed all nine jobs in [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646).
-The historical `82b760cb` receipt does not cover F2-5. F2-6 adds `f32`/`f64` array value transport
-at `36dc9dcc`, with the expanded shared probe at `2199a87d`. Its
-[local compiler and Windows native evidence](phase2-target-scope.md#f2-6-floating-array-transport)
-does not establish Linux native or hosted coverage. Phase 2 remains partial. C-scalar and enum
-array forms and pointer forms require separate bounded implementation/evidence decisions before
-full conformance; existing explicit exclusions remain unchanged.
+The historical `82b760cb` receipt does not cover F2-5. The previous `f79e55c6` F2-5 receipt is
+historical for F2-6. F2-6 adds `f32`/`f64` array value transport at `36dc9dcc`, with the
+expanded shared probe at `2199a87d`. Those local compiler, emission and Windows native results are
+historical pre-push evidence. The [current hosted F2-6
+receipt](phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) at `9e1500e1` passed all nine jobs
+and covers Linux native and hosted execution. Phase 2 remains partial. Next assess exact C-scalar
+arrays, then explicit C enum arrays, as separate admissions; pointer forms require separate bounded
+implementation and evidence decisions, and existing explicit exclusions remain unchanged.
 
 Audit: 2026-10-23 at `952105fa`. Tested implementation:
 `7f7362b87c231c30ea89f3907396957f0d599032`.

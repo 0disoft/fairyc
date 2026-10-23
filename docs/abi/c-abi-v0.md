@@ -7,10 +7,11 @@
 ## Target status
 
 The first planned conformance target is `x86_64-linux-gnu`. Hosted layout, bidirectional C ABI,
-runtime, and generated-source probes pass for the subset through F2-5. F2-6 floating-array transport
-has local package, emission and Windows native evidence; no Linux native or hosted receipt covers
-it. The F2-5 receipt and the historical F1–F3 receipt are linked from the
-[phase status](../development/phase-status.md). The target evidence in
+runtime, and generated-source probes pass for the subset through F2-6. The [hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) at `9e1500e1` covers
+the expanded floating-array probe and passed all nine jobs. The previous F2-5 receipt and the
+historical F1–F3 receipt are linked from the [phase status](../development/phase-status.md). The
+target evidence in
 `internal/target/spec.go` retains `complete-runtime` and `complete-standard-library` as missing.
 The Linux `emittable`, `conformant`, and `supported` flags remain false;
 maintained distribution remains a separate support requirement.
@@ -183,15 +184,19 @@ The ADR 0482 implementation and native proof at `af181d65` use
 [`integer_arrays.go`](../../internal/foreignstructprobe/integer_arrays.go) to check independent C
 observation of every element, array value arguments/results, borrowed nested reads and whole-field
 replacement. Focused compiler and backend checks pass, and MSVC 14.51.36231 passes all four
-C11/C17 low/optimized executions with expected 42 and empty output. The [current hosted F2-5
+C11/C17 low/optimized executions with expected 42 and empty output. The [previous hosted F2-5
 receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed
-all nine jobs in [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646).
-The historical `82b760cb` F1-F3 receipt remains historical and does not cover this expansion.
+all nine jobs in [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646)
+and remains historical for F2-6. The historical `82b760cb` F1-F3 receipt remains historical and
+does not cover this expansion.
 
 ADR 0483 source, emission and focused tests are committed at `36dc9dcc`; its expanded shared probe
 is committed at `2199a87d`. Local compiler, package and shared-emission checks pass, and local
-Windows MSVC passes C11/C17 low/optimized with all four executions. Linux native execution and
-hosted CI remain pending. The `f79e55c6` hosted receipt predates this slice and does not attest it.
+Windows MSVC passes C11/C17 low/optimized with all four executions. Those local results are
+historical pre-push validation. The [hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) at `9e1500e1` covers
+Linux native and hosted execution. The previous `f79e55c6` hosted F2-5 receipt is historical for
+this slice.
 
 The Windows target product smoke uses a separate private `usize` generation transport. Under the
 selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned
@@ -220,10 +225,11 @@ shapes as foreign arguments. The generated prototype and call retain the exact p
 the C compiler handles register and stack transport without flattening or pointer substitution.
 The shared source fixture checks small and large argument/result copies, unchanged caller values,
 and a nested record with a `c::double` field after six integer arguments. The existing native lanes
-compile caller and callee separately. The [current hosted F2-5
-receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) covers these argument
-observations in both compiler directions and profiles; prior struct-result receipts attest results
-only historically. Other aggregate parameter families remain closed.
+compile caller and callee separately. The [current hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers these argument
+observations in both compiler directions and profiles; the previous F2-5 receipt remains historical
+for this expansion, and prior struct-result receipts attest results only historically. Other
+aggregate parameter families remain closed.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
 
@@ -238,8 +244,8 @@ direct floating fields and standalone foreign floating signatures remain closed.
 foreign calls. The shared native record probe observes finite values, signed zero, infinities,
 quiet NaNs and subnormals; it does not promise signaling NaN behavior or NaN payload identity.
 The [F2-3 update](../development/phase2-target-scope.md#f2-3-floating-field-transport) records the
-local checks; the [current hosted F2-5
-receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) covers the hosted
+local checks; the [current hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers the hosted
 compiler/profile combinations.
 
 [ADR 0480](../adr/0480-repr-c-integer-field-transport.md) adds distinct Fairy `i8`, `i16`, `u16`,
@@ -252,8 +258,8 @@ fields, scalar resource/tagged/enum payloads, bare foreign signatures and pointe
 scalar families remain closed. These restrictions do not remove existing nested-record operations.
 The shared probe observes signed minima/maxima, unsigned maxima, zero and ordinary values and
 checks caller-copy isolation. See the [F2-4 update](../development/phase2-target-scope.md#f2-4-remaining-integer-field-transport)
-for the local checks; the [current hosted F2-5
-receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) covers their hosted
+for the local checks; the [current hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers their hosted
 Linux execution.
 
 [ADR 0478](../adr/0478-explicit-c-enum-fields.md) implements payload-free enums with an explicit
@@ -267,8 +273,8 @@ explicit discriminant values, enum arrays, enum-field borrows, nested enum leaf 
 standalone foreign enum arguments/results remain outside this admission. Target availability still
 applies, including the absence of `c::ssize_t` on Windows. The
 [F2-2 update](../development/phase2-target-scope.md#f2-2-explicit-c-enum-fields) records local native
-execution; the [current hosted F2-5
-receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) covers hosted Linux.
+execution; the [current hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers hosted Linux.
 
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 
@@ -301,8 +307,8 @@ compiler verifies the source signature, direct argument placement and nonescapin
 it cannot prove a C implementation honors those promises. Raw user-data validity remains the
 caller's responsibility, with existing borrow-to-pointer checks retained. The pure interpreter
 rejects this integration. The [F3 update](../development/phase2-target-scope.md#f3-bounded-c-callbacks)
-records the local checks; the [current hosted F2-5
-receipt](../development/phase2-target-scope.md#hosted-f2-5-receipt-2026-10-23) covers hosted execution.
+records the local checks; the [current hosted F2-6
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers hosted execution.
 
 Fairy source TLS, C TLS symbol import or export, C++ ABI, and foreign unwinding are excluded.
 

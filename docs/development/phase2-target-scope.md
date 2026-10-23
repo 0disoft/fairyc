@@ -2,11 +2,15 @@
 
 - Date: 2026-10-23
 - Baseline inspected checkout: `3b6f58c9de4ee12f212e68b152d374d055b81b55`
-- Current hosted F2-5 receipt: `f79e55c6bdc904c677c117789feb4839b53d4b80`,
+- Current hosted F2-6 receipt: `9e1500e1dd4af8ad99f804c4d4add2af94792b96`,
+  [Frontend run 39934083156](https://github.com/0disoft/fairyc/actions/runs/39934083156), all nine
+  jobs passed; [native job 120352878194](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120352878194)
+  and [Linux Go job 120349277732](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120349277732)
+- Previous hosted F2-5 receipt (historical for F2-6): `f79e55c6bdc904c677c117789feb4839b53d4b80`,
   [Frontend run 39849506646](https://github.com/0disoft/fairyc/actions/runs/39849506646), all nine
   jobs passed; [native job 120076773359](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120076773359)
   and [Linux Go job 120071663704](https://github.com/0disoft/fairyc/actions/runs/39849506646/job/120071663704)
-- F2-6 floating-array transport: local evidence at `36dc9dcc` with probe `2199a87d`;
+- F2-6 floating-array transport: local pre-push evidence at `36dc9dcc` with probe `2199a87d`;
   `f79e55c6` predates the slice and is historical for it
 - Historical hosted F1–F3 receipt: `82b760cbb743eef4608441e127f9fa9e41d1f513` (below)
 - Scope: `x86_64-linux-gnu`; roadmap Phase 2, runtime minimum, C ABI and the identified resource boundaries
@@ -84,11 +88,12 @@ does not silently narrow the C ABI contract or claim an exhaustive test of every
 F1, F2-1 through F2-4 and the first bounded F3 callback have the historical
 [hosted receipt](#hosted-f1f3-receipt-2026-10-23) at `82b760cb`. F2-5 adds the remaining five
 integer-array families and has local MSVC, compiler and backend evidence. Its
-[current hosted receipt](#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed all nine jobs.
+[previous hosted receipt](#hosted-f2-5-receipt-2026-10-23) at `f79e55c6` passed all nine jobs.
 F2-6 adds `f32`/`f64` array value transport with local compiler, emission and Windows native
-evidence; no hosted receipt covers it. The `f79e55c6` receipt does not cover F2-6. Additional field
-operations and callback signatures require separate admissions; none of these updates opens
-excluded resource representations.
+pre-push evidence and the [hosted F2-6 receipt](#hosted-f2-6-receipt-2026-10-23) at `9e1500e1`.
+The previous `f79e55c6` receipt is historical for F2-6. Additional field operations and callback
+signatures require separate admissions; none of these updates opens excluded resource
+representations.
 
 ## F1 implementation update
 
@@ -366,7 +371,7 @@ indexing, element stores, iteration and views; bare foreign arrays; pointer elem
 transport; `c::float`/`c::double` arrays; direct private arrays; resource, enum, `Option` or `Result`
 payload arrays; and record-element arrays remain closed.
 
-Local validation passed:
+Local pre-push validation passed:
 
 - Full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact suites.
 - Focused compiler `TestFloatingArray*` emission for Linux and Windows profiles, MIR round-trip,
@@ -381,9 +386,39 @@ Local validation passed:
   `runFairyStructResultProbe` through local MSVC on C11/C17 low/optimized, four executions, with
   expected 42 and empty stdout/stderr. The exact MSVC version was not rechecked.
 
-This is local-only coverage. Linux native execution, hosted CI, the full repository suite and the
-full Windows smoke were not rerun. The `f79e55c6` F2-5 receipt remains historical for F2-6. Phase 2
-stays partial and all target maturity flags stay false; no workflow or runner changed.
+The local checks above are historical pre-push results. The full local repository suite and the full
+Windows smoke were not rerun. The previous `f79e55c6` F2-5 receipt remains historical for F2-6.
+Phase 2 stays partial and all target maturity flags stay false; no workflow or runner changed.
+
+## Hosted F2-6 receipt (2026-10-23)
+
+[Frontend run 39934083156](https://github.com/0disoft/fairyc/actions/runs/39934083156) at
+`9e1500e1dd4af8ad99f804c4d4add2af94792b96` completed successfully with all nine jobs passing.
+The [native job 120352878194](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120352878194)
+reports `fairyc.native-c-report/v38` for `x86_64-linux-gnu` with glibc 2.39, Clang 18.1.3 and
+GCC 13.3.0 at low and optimized profiles: 56 cases, 224 outcomes, 224 drop traces, 112 sanitizer
+executions, 56 ABI crossings, four layout probes, four SDK executions and
+`foreignCStructResultCallExecutions=4`.
+
+The shared probe path is `probes_foreign.go` to `foreignstructprobe.Generate`, and
+`probes_source.go` crosses Clang-caller/GCC-callee and GCC-caller/Clang-callee at low and optimized
+profiles with expected 42. At this head, `floating_arrays.go` adds five rotating classes per
+execution: finite, negative zero, infinity, quiet NaN and minimum subnormal. Independent C observes
+every element of the length-3 mixed 48-byte packet and the `f32[1]`/`f64[1]` records, including
+whole-field transport and copy isolation. These checks are inside the four shared executions; there
+is no separate F2-6 report counter, and they are not independently sanitizer-proven.
+
+The [Linux Go job 120349277732](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120349277732)
+reports `fairyc.phase2-linux-evidence/v4`, `complete:true`, exactly 32 passed cases and empty
+`missing`, `skipped` and `errors` lists. The [Windows native job
+120349277880](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120349277880) passed the
+Windows host correctness smoke with MSVC 14.51.36231; its compact receipt does not print a struct
+counter. `main.go` runs `runFairyStructResultProbe` before success, confirming the shared-probe
+path without adding a report field. The [Windows Go job
+120349277734](https://github.com/0disoft/fairyc/actions/runs/39934083156/job/120349277734) also
+passed; its core suite excludes the separate native and cost subsets, and the lexer and parser
+checks passed. Phase 2 remains partial; the two completeness markers and all three target maturity
+flags stay unchanged.
 
 ## Hosted F2-5 receipt (2026-10-23)
 
@@ -403,8 +438,8 @@ and are not independently sanitizer-proven. The [Linux Go job
 `fairyc.phase2-linux-evidence/v4`, `complete:true`, 32 passed cases and empty `missing`,
 `skipped` and `errors` lists.
 
-This remains the current F2-5 receipt and is historical for F2-6. It does not execute the expanded
-floating-array probe.
+This is the previous F2-5 receipt and is historical for F2-6. It does not execute the expanded
+floating-array probe; the [hosted F2-6 receipt](#hosted-f2-6-receipt-2026-10-23) does.
 
 ## Hosted F1–F3 receipt (2026-10-23)
 
@@ -434,13 +469,13 @@ unchanged.
 
 ## Remaining source boundaries after F1–F3
 
-The `82b760cb` F1–F3 receipt remains historical. The later `f79e55c6` F2-5 receipt covers the
-remaining integer-array families, so the current boundaries are:
+The `82b760cb` F1–F3 receipt and the `f79e55c6` F2-5 receipt remain historical. The current
+F2-6 receipt covers the bounded floating-array addition, so the current boundaries are:
 
 | Surface | Implemented subset | Remaining boundary or exclusion | Owners |
 | --- | --- | --- | --- |
 | repr(C) integer array fields | All ten Fairy integer families at lengths `1..=4096`; whole-field reads, replacement and record/argument value copies. ADR 0482's five newer families are transport-only and have no element indexing, arithmetic or views. | C scalar and C enum arrays need separate admissions. | [HIR guard](../../internal/hir/views.go), [layout resolution](../../internal/cbackend/aggregate_types.go), [ADR 0477](../adr/0477-repr-c-integer-array-fields.md), [ADR 0482](../adr/0482-repr-c-integer-array-transport.md) |
-| Fairy `f32`/`f64` arrays | Lengths `1..=4096`; whole-field reads, inferred and typed locals, internal value arguments/results, reconstruction, referenced replacement and nested record copies. | Element operations, views, bare foreign arrays, pointer transport and payload arrays remain closed. Local compiler and Windows native evidence exists; Linux native and hosted CI are pending. | [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [floating probe](../../internal/foreignstructprobe/floating_arrays.go) |
+| Fairy `f32`/`f64` arrays | Lengths `1..=4096`; whole-field reads, inferred and typed locals, internal value arguments/results, reconstruction, referenced replacement and nested record copies. | Element operations, views, bare foreign arrays, pointer transport and payload arrays remain closed. Local compiler and Windows native evidence is historical pre-push validation; the [hosted F2-6 receipt](#hosted-f2-6-receipt-2026-10-23) records Linux native and hosted coverage. | [ADR 0483](../adr/0483-repr-c-floating-array-transport.md), [floating probe](../../internal/foreignstructprobe/floating_arrays.go) |
 | Exact C-scalar arrays | Scalar fields are implemented. | Array members are deferred to a separate admission. | [C ABI](../abi/c-abi-v0.md#c-representable-types), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | Explicit C enum arrays | Explicitly based enum fields are implemented, including replacement and record transport. | Array members are deferred to a separate admission. | [ADR 0478](../adr/0478-explicit-c-enum-fields.md), [layout resolution](../../internal/cbackend/aggregate_types.go) |
 | repr(C) record-element arrays | Private scalar and plain-struct arrays remain supported in their existing paths. | Repr(C) member arrays are deferred and currently rejected. Private array support does not imply C record-element arrays. | [HIR guard](../../internal/hir/views.go), [semantic checks](../../internal/semantic/resource_types.go) |
@@ -454,9 +489,10 @@ record fields under the [C ABI contract](../abi/c-abi-v0.md#c-representable-type
 single-signature admission with the same non-retention and same-thread obligations. It does not
 open general callback signatures or pointer nesting.
 
-F2-6 implements the bounded `f32`/`f64` repr(C) array transport. Complete its Linux native and
-hosted evidence before treating it as hosted coverage. C-scalar arrays and explicit C enum arrays
-remain separate admissions; repr(C) record-element arrays remain deferred.
+F2-6 implements the bounded `f32`/`f64` repr(C) array transport, and the [hosted F2-6
+receipt](#hosted-f2-6-receipt-2026-10-23) covers Linux native and hosted execution. Next assess
+exact C-scalar arrays, then explicit C enum arrays, as separate admissions; repr(C) record-element
+arrays remain deferred.
 
 Phase 2 remains partial. Keep the completeness markers and all target maturity flags unchanged.
 

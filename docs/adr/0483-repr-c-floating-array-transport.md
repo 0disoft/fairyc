@@ -42,7 +42,7 @@ probe observes whole-field reads, inferred and typed locals, internal calls, nes
 references, direct and referenced replacement, and unchanged caller copies after record and C
 by-value mutation. No new runtime, workflow or target-maturity surface was added.
 
-Local validation passed: the full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact
+Local pre-push validation passed: the full HIR, semantic, MIR, MIR-codec, moduleinterface and packageartifact
 suites; focused `TestFloatingArray*` emission for the Linux and Windows profiles, MIR round-trip and
 length/boundary rejection including bare foreign arrays and `Option`, `Result`, enum and resource
 payloads; the shared probe's Linux-profile `TestForeignCStructResultCallSmokeSourceReachesCEmission`
@@ -52,6 +52,8 @@ and `foreignstructprobe` tests (38.239s, 2.583s, 3.098s and 0.047s).
 A temporary local `TestLocalFloatingArrayNativeCrossing` invoked `runFairyStructResultProbe` and was
 removed after execution. Local Windows MSVC passed C11/C17 low/optimized, all four executions, with
 five rotating floating-array cases each and expected 42 with empty stdout and stderr. The exact
-MSVC version was not rechecked. Linux native execution, hosted CI, the full repository suite and
-the full Windows smoke were not rerun. The hosted F2-5 receipt at `f79e55c6` predates this slice and
-does not attest it. Phase 2 remains partial and all target maturity flags remain false.
+MSVC version was not rechecked. The full repository suite and the full Windows smoke were not rerun
+locally. The [hosted F2-6 receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23)
+at `9e1500e1` covers Linux native and hosted execution; the previous `f79e55c6` F2-5 receipt
+remains historical for this slice. Phase 2 remains partial and all target maturity flags remain
+false.
