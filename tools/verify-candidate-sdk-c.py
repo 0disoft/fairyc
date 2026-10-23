@@ -109,7 +109,7 @@ CASES.update({name: ((["stage0_system_heap.c", "stage0_buffer.c"] if "file_buffe
                     ["stage0_windows_path.inc", "stage0_windows_file.c", "stage0_windows_file_portable.c"] +
                     (["stage0_windows_file_link.c"] if "file_hard_link_" in name or "file_metadata_" in name else []) +
                     (["stage0_windows_file_metadata.c"] if "file_metadata_" in name else []) +
-                    (["stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
+                    (["stage0_file_buffer.c", "stage0_windows_file_buffer.c"] if "file_buffer_" in name else []), [], "")
               for name in FILE_CASES})
 CASES.update({name: (["stage0_system_heap.c", "stage0_buffer.c", "stage0_text_view.c",
                      "stage0_windows_path.inc", "stage0_windows_file.c", "stage0_windows_file_portable.c"], [], "")

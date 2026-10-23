@@ -1,0 +1,318 @@
+{
+  "schema": "fairyc.candidate-portable-file-buffer/v1",
+  "passed": true,
+  "sdk": "0.0.0-stage0.87",
+  "sourceBaseRevision": "654acfa4b06ab1ca02000a3a05a0f103527a5c03",
+  "sourceChanges": [
+    "examples/lexer_candidate/src/sdk_file_rules.fy",
+    "examples/lexer_candidate/src/module_unit_c_file.fy",
+    "tools/verify-candidate-sdk-c.py"
+  ],
+  "sources": [
+    {
+      "path": "examples/lexer_candidate/src/sdk_file_rules.fy",
+      "sha256": "90a35392dd1b2d9a1e012a440806cb91d1bffd7023abc773aed8d6e7f72e334a"
+    },
+    {
+      "path": "examples/lexer_candidate/src/module_unit_c_file.fy",
+      "sha256": "ba000eeee2d90009a67e9045d6cf1fae723558a7f8afd715683cf7f20bf70d11"
+    },
+    {
+      "path": "examples/lexer_candidate/src/sdk_authority.fy",
+      "sha256": "3778a77ca7b3e660c03713942fdb11f1a0c472a35259527f2f32181630da3bfa"
+    },
+    {
+      "path": "examples/lexer_candidate/tests/module_unit_c_fs.fy",
+      "sha256": "a7246a7990cfaf78a6e3d832dba4110df3cfc8b0fbee7a3dfec7b9583bd07921"
+    },
+    {
+      "path": "internal/sdkstdlib/sources/std/fs.fy",
+      "sha256": "243b63642e2c26220322f82905dbc85c35e8b4cdf04556b9aca92be4b4783a2f"
+    },
+    {
+      "path": "internal/sdkstdlib/stdlib.go",
+      "sha256": "36add22b7d39f1652105e5e621fe85eb757b4609369312e440b1bbfcbf53a919"
+    },
+    {
+      "path": "tools/verify-candidate-sdk-c.py",
+      "sha256": "6abdd4d9e309102dc1dce93777a7dbcf9a251a193e3b2c2e80676ed9251db9ea"
+    }
+  ],
+  "authoredInputCount": 355,
+  "authoredInputInventorySHA256": "1968b1e5bdc0d67afb31372b85eaa4aee62d555cbfedc8e60b690c24302bbe15",
+  "goOracle": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/reference.exe",
+    "sha256": "5afd47ea1938c4e71ce18d9ccdc426aa27986c78458ea82d935e57d4fa73d968"
+  },
+  "nativeReport": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/candidate-c-fs-native/native.json",
+    "sha256": "3160741b9b01f7d06eb58a1682937146c56cf25c632953c30d549859c2535198"
+  },
+  "executionReceipt": {
+    "path": ".cache/completion-20261024/file-buffer-sdk/candidate-c-fs-execution/receipt.json",
+    "sha256": "b1f1747c0c32e53a52318c540039f6e1a072900a5f169c6ae14a953687028aa1"
+  },
+  "authoredTests": [
+    {
+      "identity": "tests::module_unit_c_fs::sdk_c_executes_file_buffer_failure_preserves_cursor",
+      "outcome": "passed",
+      "emittedCSHA256": "e7deaddb4711a57bd22ad9f92918156278e1342927ae911035e942fae454a582"
+    },
+    {
+      "identity": "tests::module_unit_c_fs::sdk_c_executes_file_buffer_read_to_end",
+      "outcome": "passed",
+      "emittedCSHA256": "fb6edaae8278c54a63b5709ce5bc2abf6814dccfb6f14fde8a5dcbca677456b7"
+    }
+  ],
+  "executions": [
+    {
+      "name": "sdk_c_executes_file_buffer_read_to_end",
+      "profile": "low",
+      "sourceSHA256": "fb6edaae8278c54a63b5709ce5bc2abf6814dccfb6f14fde8a5dcbca677456b7",
+      "heapFailureAt": null,
+      "heapBalanceVerified": true,
+      "heapCounts": {
+        "attempts": 3,
+        "liveAfter": 0
+      },
+      "fileCounts": {
+        "open": 2,
+        "close": 2,
+        "drop": 2,
+        "automaticClose": 0,
+        "dropStatusErrors": 0,
+        "closedHandleVerified": false
+      },
+      "bufferCounts": {
+        "drop": 1,
+        "dropStatusErrors": 0
+      },
+      "runtimeInputs": [
+        {
+          "path": "internal\\cstdlib\\stage0_system_heap.c",
+          "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_buffer.c",
+          "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_path.inc",
+          "sha256": "d9192f6e03ad498840928c6febb6d573c6835bc210a20566da190c41b35b8b52"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file.c",
+          "sha256": "a5465c17487f43c5a5432746fd43ae9d5abd1beda7cf5998100f297c6ed234a8"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+          "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_file_buffer.c",
+          "sha256": "dc49c6853b372a9f82bbd4e062a5861711ff63a26af0308c518de97885a26cb5"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+          "sha256": "eff1d81dc527e5ba5660c548a9fbc583ca9f9b621a57f14bf1c19d2b17a973f6"
+        }
+      ],
+      "run": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\candidate-c-fs-execution\\sdk_c_executes_file_buffer_read_to_end-low.exe"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "sdk_c_executes_file_buffer_read_to_end",
+      "profile": "optimized",
+      "sourceSHA256": "fb6edaae8278c54a63b5709ce5bc2abf6814dccfb6f14fde8a5dcbca677456b7",
+      "heapFailureAt": null,
+      "heapBalanceVerified": true,
+      "heapCounts": {
+        "attempts": 3,
+        "liveAfter": 0
+      },
+      "fileCounts": {
+        "open": 2,
+        "close": 2,
+        "drop": 2,
+        "automaticClose": 0,
+        "dropStatusErrors": 0,
+        "closedHandleVerified": false
+      },
+      "bufferCounts": {
+        "drop": 1,
+        "dropStatusErrors": 0
+      },
+      "runtimeInputs": [
+        {
+          "path": "internal\\cstdlib\\stage0_system_heap.c",
+          "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_buffer.c",
+          "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_path.inc",
+          "sha256": "d9192f6e03ad498840928c6febb6d573c6835bc210a20566da190c41b35b8b52"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file.c",
+          "sha256": "a5465c17487f43c5a5432746fd43ae9d5abd1beda7cf5998100f297c6ed234a8"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+          "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_file_buffer.c",
+          "sha256": "dc49c6853b372a9f82bbd4e062a5861711ff63a26af0308c518de97885a26cb5"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+          "sha256": "eff1d81dc527e5ba5660c548a9fbc583ca9f9b621a57f14bf1c19d2b17a973f6"
+        }
+      ],
+      "run": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\candidate-c-fs-execution\\sdk_c_executes_file_buffer_read_to_end-optimized.exe"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "sdk_c_executes_file_buffer_failure_preserves_cursor",
+      "profile": "low",
+      "sourceSHA256": "e7deaddb4711a57bd22ad9f92918156278e1342927ae911035e942fae454a582",
+      "heapFailureAt": 2,
+      "heapBalanceVerified": true,
+      "heapCounts": {
+        "attempts": 2,
+        "liveAfter": 0
+      },
+      "fileCounts": {
+        "open": 2,
+        "close": 2,
+        "drop": 2,
+        "automaticClose": 0,
+        "dropStatusErrors": 0,
+        "closedHandleVerified": false
+      },
+      "bufferCounts": {
+        "drop": 1,
+        "dropStatusErrors": 0
+      },
+      "runtimeInputs": [
+        {
+          "path": "internal\\cstdlib\\stage0_system_heap.c",
+          "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_buffer.c",
+          "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_path.inc",
+          "sha256": "d9192f6e03ad498840928c6febb6d573c6835bc210a20566da190c41b35b8b52"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file.c",
+          "sha256": "a5465c17487f43c5a5432746fd43ae9d5abd1beda7cf5998100f297c6ed234a8"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+          "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_file_buffer.c",
+          "sha256": "dc49c6853b372a9f82bbd4e062a5861711ff63a26af0308c518de97885a26cb5"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+          "sha256": "eff1d81dc527e5ba5660c548a9fbc583ca9f9b621a57f14bf1c19d2b17a973f6"
+        }
+      ],
+      "run": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\candidate-c-fs-execution\\sdk_c_executes_file_buffer_failure_preserves_cursor-low.exe"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "sdk_c_executes_file_buffer_failure_preserves_cursor",
+      "profile": "optimized",
+      "sourceSHA256": "e7deaddb4711a57bd22ad9f92918156278e1342927ae911035e942fae454a582",
+      "heapFailureAt": 2,
+      "heapBalanceVerified": true,
+      "heapCounts": {
+        "attempts": 2,
+        "liveAfter": 0
+      },
+      "fileCounts": {
+        "open": 2,
+        "close": 2,
+        "drop": 2,
+        "automaticClose": 0,
+        "dropStatusErrors": 0,
+        "closedHandleVerified": false
+      },
+      "bufferCounts": {
+        "drop": 1,
+        "dropStatusErrors": 0
+      },
+      "runtimeInputs": [
+        {
+          "path": "internal\\cstdlib\\stage0_system_heap.c",
+          "sha256": "cae6664fa1ec70722b76025c3e2c3daadc133cd90d95fa9f02f2385915d3e55c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_buffer.c",
+          "sha256": "41c7a26acb8b9f22fd5e0f82c976f4b59964df2e2e73e7ddb5fa8bee70e8390c"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_path.inc",
+          "sha256": "d9192f6e03ad498840928c6febb6d573c6835bc210a20566da190c41b35b8b52"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file.c",
+          "sha256": "a5465c17487f43c5a5432746fd43ae9d5abd1beda7cf5998100f297c6ed234a8"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_portable.c",
+          "sha256": "d965ef1295434c6cbb2873f2f4934c63c6b13c128cf49992bd0e048104cd5faf"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_file_buffer.c",
+          "sha256": "dc49c6853b372a9f82bbd4e062a5861711ff63a26af0308c518de97885a26cb5"
+        },
+        {
+          "path": "internal\\cstdlib\\stage0_windows_file_buffer.c",
+          "sha256": "eff1d81dc527e5ba5660c548a9fbc583ca9f9b621a57f14bf1c19d2b17a973f6"
+        }
+      ],
+      "run": {
+        "argv": [
+          "C:\\Users\\cherr\\Documents\\workspace\\zerodi-wd1\\projects\\hobby\\opensource\\fairyc\\.cache\\completion-20261024\\file-buffer-sdk\\candidate-c-fs-execution\\sdk_c_executes_file_buffer_failure_preserves_cursor-optimized.exe"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    }
+  ],
+  "authoredCompilerLogicExecuted": "Go-built native authored test module",
+  "fullCandidateRefreshed": false,
+  "linuxExecuted": false,
+  "targetMaturityChanged": false,
+  "pushed": false
+}

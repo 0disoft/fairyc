@@ -65,3 +65,12 @@ The candidate's SDK source pin, literal parts and bundle version are updated.
 An older candidate correctly rejects the changed SDK as code 6801. Refreshing
 that bootstrap seed and the complete candidate/fixed-point records remains
 separate work. No target maturity or distribution claim changes.
+
+The authored compiler's closed SDK rule table now recognizes the portable
+symbol, and its emitted result uses `fy_std_file_buffer_result_v0`. The existing
+SDK C execution harness includes the shared source before the Windows adapter.
+Two authored emission tests pass through a Go-built native test module; their
+generated C passes four MSVC low/optimized executions for `read_to_end` and
+allocation-failure cursor/prefix preservation, with zero retained allocations.
+The [execution record](../ops/evidence/candidate-portable-file-buffer-20261024.json)
+keeps this focused proof separate from full candidate rebuilding and Linux execution.
