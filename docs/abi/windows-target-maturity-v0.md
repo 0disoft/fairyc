@@ -37,6 +37,26 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Clean-machine executable portability | blocked | future distribution fixture | Hosted build runners are not a clean-machine distribution proof | Build artifact on one hosted job, move only declared distributable files to a clean Windows environment, execute the mandatory smoke without source tree or compiler toolchain |
 | TargetSpec maturity flags | blocked | target specification and compiler target registry | Existing support flags stay conservative | Promote only after every mandatory row in this matrix is `proven` on the same target contract generation |
 
+## Bounded production observations (2026-10-23)
+
+At clean `8ba3fab7`, the existing tokenizer and file-search benchmark sources were loaded through
+`workspacecompiler.Check`, emitted by `cbackend.EmitStorageTransfers`, and built by
+`BuildWindowsMSVCTargetCached` with MSVC 14.51.36231. Both profiles reproduce the benchmark's
+final-edit stdout exactly. The [compact record](../benchmarks/completion-followup-20261023.json)
+contains all four observations; these are local evidence, not the mandatory same-commit hosted receipt.
+
+- The generated and runtime objects use AMD64 `ADDR32NB` and `REL32`, with `libcmt` and `oldnames`
+  default libraries. Optimized objects contain COMDAT sections. No weak externals occur in this sample.
+- All four final images directly import `kernel32.dll` only. The `/MT` build path therefore adds no
+  direct UCRT/VCRuntime DLL import in these examples. This inspection does not enumerate dynamic
+  loads or transitive OS dependencies and does not prove clean-machine portability.
+- All four final images contain handlers, chained unwind records and three v2 unwind records.
+  These requirements cannot be dismissed as unused. Image inspection alone does not establish
+  mixed-stack unwind execution through every such frame.
+
+Keep the table's statuses unchanged. Other production shapes, selected/discarded COMDAT evidence,
+mixed-stack execution and distribution transfer remain distinct work.
+
 ## Ownership rule
 
 A future PR for issue #49 must name one or a small adjacent group of rows from this table. It must update the row status and evidence path in the same PR as the executable evidence. Broad cleanup, unrelated refactors, or measurement-only changes do not count as maturity evidence.

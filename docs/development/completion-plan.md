@@ -14,9 +14,9 @@ valid execution records are reused instead of reopening completed work.
 | --- | --- | --- |
 | 1 | Establish a current native-build time/footprint baseline with the existing runner, and keep one finite list of unfinished work. | Complete: six cases and 42 verified builds at clean `31ce0891`. |
 | 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
-| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Pending |
+| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Bounded production-object inventory recorded below. Linux execution, mixed-stack unwind and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | In progress: preview compiler size reduced; native compile/link cost is the next performance focus. |
-| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Pending |
+| 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | Local ZIP and extracted starter pass at clean `8ba3fab7`; clean-machine proof and publication remain open. LSP stays a separate executable. |
 | 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | Pending |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
@@ -67,6 +67,21 @@ The focused file-search probe at `3679d2a3` measured about 68 ms for checking an
 warm development native build. Process waiting dominated the profile; this single run is not a
 speedup claim. Do not add another frontend cache on that evidence. Packaging omits Go compiler
 debugging data, reducing its executable by 26.6%; see the [release procedure](../ops/release.md).
+
+The [follow-up observations](../benchmarks/completion-followup-20261023.json) at clean `8ba3fab7`
+cover tokenizer and file-search in both native profiles. Loading/checking takes 75–76 ms and C
+emission/support assembly 25–30 ms. With runtime object hits, native builds still take 745–941 ms
+in development and 3.22–3.51 seconds in release. The next optimization should address generated-unit
+compilation; increasing frontend cache retention does not address this measured cost. These are
+single observations per workload/profile, not statistical speed claims.
+
+The same record captures actual generated/runtime object relocations, default libraries and final
+PE imports/unwind. See the [Windows matrix](../abi/windows-target-maturity-v0.md#bounded-production-observations-2026-10-23).
+The local preview ZIP is 4,619,368 bytes and its compiler 13,094,400 bytes. ZIP hashes, extraction,
+starter generation, locked checking, semantic/native tests and both run profiles pass. A separate
+stripped-compiler smoke at `3679d2a3` also passes with an empty PATH on this development host.
+Neither observation substitutes for transfer to a clean Windows machine. The artifact remains
+under `.cache/starter-smoke-wJnMau/`; no release, push or visibility change was performed.
 
 ## Feature proposals
 

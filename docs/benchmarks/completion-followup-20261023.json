@@ -1,0 +1,306 @@
+{
+  "date": "2026-10-23",
+  "native": {
+    "msvc": "14.51.36231",
+    "observations": [
+      {
+        "checkMs": 74.683,
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "emitMs": 29.629,
+        "executableBytes": 156672,
+        "executableSha256": "ad389b49917e740f8de87ece2dfbdf1710d43881c1886fde97e2bc59c3e943f0",
+        "firstBuildMs": 1100.547,
+        "firstCache": "miss",
+        "objects": [
+          {
+            "bytes": 50616,
+            "comdatSections": 0,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "unit.obj",
+            "relocations": {
+              "0x0003": 46,
+              "0x0004": 132
+            },
+            "weakExternals": 0
+          },
+          {
+            "bytes": 8053,
+            "comdatSections": 0,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "runtime.obj",
+            "relocations": {
+              "0x0003": 55,
+              "0x0004": 35
+            },
+            "weakExternals": 0
+          }
+        ],
+        "profile": "low",
+        "runtimeSourceBytes": 8235,
+        "unitSourceBytes": 106267,
+        "unwind": {
+          "chained": 30,
+          "functions": 368,
+          "handlers": 70,
+          "version2": 3
+        },
+        "verified": true,
+        "warmBuildMs": 745.006,
+        "warmCache": "hit",
+        "workload": "tokenizer"
+      },
+      {
+        "checkMs": 74.683,
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "emitMs": 29.629,
+        "executableBytes": 115712,
+        "executableSha256": "247951c5d95b91c771f3f21dab9d6abda7c9d51c66d4b75e603db00deff79f3d",
+        "firstBuildMs": 3295.987,
+        "firstCache": "miss",
+        "objects": [
+          {
+            "bytes": 14556,
+            "comdatSections": 44,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "unit.obj",
+            "relocations": {
+              "0x0003": 53,
+              "0x0004": 58
+            },
+            "weakExternals": 0
+          },
+          {
+            "bytes": 12769,
+            "comdatSections": 60,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "runtime.obj",
+            "relocations": {
+              "0x0003": 89,
+              "0x0004": 31
+            },
+            "weakExternals": 0
+          }
+        ],
+        "profile": "optimized",
+        "runtimeSourceBytes": 8235,
+        "unitSourceBytes": 106267,
+        "unwind": {
+          "chained": 39,
+          "functions": 358,
+          "handlers": 58,
+          "version2": 3
+        },
+        "verified": true,
+        "warmBuildMs": 3215.536,
+        "warmCache": "hit",
+        "workload": "tokenizer"
+      },
+      {
+        "checkMs": 76.337,
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "emitMs": 24.837,
+        "executableBytes": 223744,
+        "executableSha256": "08236753a48ca1ac44231f2d7162c574ffe006c8203344a47edbaa34731f5e2e",
+        "firstBuildMs": 1190.839,
+        "firstCache": "miss",
+        "objects": [
+          {
+            "bytes": 91755,
+            "comdatSections": 0,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "unit.obj",
+            "relocations": {
+              "0x0003": 85,
+              "0x0004": 195
+            },
+            "weakExternals": 0
+          },
+          {
+            "bytes": 53853,
+            "comdatSections": 1,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "runtime.obj",
+            "relocations": {
+              "0x0003": 302,
+              "0x0004": 475
+            },
+            "weakExternals": 0
+          }
+        ],
+        "profile": "low",
+        "runtimeSourceBytes": 75697,
+        "unitSourceBytes": 176117,
+        "unwind": {
+          "chained": 32,
+          "functions": 461,
+          "handlers": 105,
+          "version2": 3
+        },
+        "verified": true,
+        "warmBuildMs": 941.115,
+        "warmCache": "hit",
+        "workload": "file-search"
+      },
+      {
+        "checkMs": 76.337,
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "emitMs": 24.837,
+        "executableBytes": 122880,
+        "executableSha256": "240bc6eb8901a1bb1d7dc646860e40033928a5e1d4828458ca8517711deeb634",
+        "firstBuildMs": 4244.198,
+        "firstCache": "miss",
+        "objects": [
+          {
+            "bytes": 23426,
+            "comdatSections": 88,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "unit.obj",
+            "relocations": {
+              "0x0003": 129,
+              "0x0004": 105
+            },
+            "weakExternals": 0
+          },
+          {
+            "bytes": 78956,
+            "comdatSections": 332,
+            "defaultLibraries": [
+              "libcmt",
+              "oldnames"
+            ],
+            "name": "runtime.obj",
+            "relocations": {
+              "0x0003": 537,
+              "0x0004": 254
+            },
+            "weakExternals": 0
+          }
+        ],
+        "profile": "optimized",
+        "runtimeSourceBytes": 75697,
+        "unitSourceBytes": 176117,
+        "unwind": {
+          "chained": 55,
+          "functions": 391,
+          "handlers": 63,
+          "version2": 3
+        },
+        "verified": true,
+        "warmBuildMs": 3513.068,
+        "warmCache": "hit",
+        "workload": "file-search"
+      }
+    ],
+    "scope": "Two existing benchmark workloads, low and optimized, exact final-edit output checked. Direct imports omit transitive and dynamic DLL loads. Local development-host observations do not prove clean-machine portability or complete target maturity.",
+    "sourceCommit": "8ba3fab746c2b83b97bf595213592bd30d238e4c",
+    "target": "x86_64-windows-msvc",
+    "toolchainResolveMs": 121.281
+  },
+  "preview": {
+    "sourceCommit": "8ba3fab746c2b83b97bf595213592bd30d238e4c",
+    "sourceModified": false,
+    "executableBytes": 13094400,
+    "executableSha256": "37fc0e8997245379d224351fba67e482fd75ab48504700487028639550e59fa7",
+    "archiveBytes": 4619368,
+    "archiveSha256": "308f312cf16ed073530bd8fd68fff4cfdaff85f04dd4afe81e8bf5116d994acc",
+    "buildFlags": [
+      "-trimpath",
+      "-ldflags=-s -w"
+    ],
+    "archiveLocalPath": ".cache/starter-smoke-wJnMau/fairyc-windows-amd64-preview-candidate.zip",
+    "receiptLocalPath": ".cache/starter-smoke-wJnMau/receipt.json",
+    "steps": [
+      {
+        "name": "build",
+        "exit": 0,
+        "elapsedMs": 24390
+      },
+      {
+        "name": "build-metadata",
+        "exit": 0,
+        "elapsedMs": 405
+      },
+      {
+        "name": "go-root",
+        "exit": 0,
+        "elapsedMs": 357
+      },
+      {
+        "name": "zip-roundtrip",
+        "exit": 0,
+        "elapsedMs": 3188
+      },
+      {
+        "name": "new",
+        "exit": 0,
+        "elapsedMs": 130
+      },
+      {
+        "name": "check",
+        "exit": 0,
+        "elapsedMs": 115
+      },
+      {
+        "name": "check-locked",
+        "exit": 0,
+        "elapsedMs": 115
+      },
+      {
+        "name": "test",
+        "exit": 0,
+        "elapsedMs": 122
+      },
+      {
+        "name": "native-test",
+        "exit": 0,
+        "elapsedMs": 2388
+      },
+      {
+        "name": "native-test-release",
+        "exit": 0,
+        "elapsedMs": 2377
+      },
+      {
+        "name": "run",
+        "exit": 0,
+        "elapsedMs": 1630
+      },
+      {
+        "name": "run-release",
+        "exit": 0,
+        "elapsedMs": 1526
+      }
+    ],
+    "published": false,
+    "cleanMachineVerified": false
+  }
+}
