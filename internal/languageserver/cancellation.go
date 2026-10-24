@@ -4,14 +4,23 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"sync"
 )
+
+const (
+	maxPendingRequests     = 64
+	maxPendingRequestBytes = 32 << 20
+)
+
+var errPendingRequestLimit = errors.New("LSP pending request limit exceeded")
 
 type pendingRequest struct {
 	cancel   context.CancelFunc
 	id       string
 	analysis bool
+	size     int
 }
 
 // Only cancellation crosses the protocol reader/handler boundary. Documents,
@@ -20,6 +29,7 @@ type requestControl struct {
 	mu      sync.Mutex
 	next    uint64
 	pending map[uint64]pendingRequest
+	bytes   int
 }
 
 func newRequestControl() *requestControl {
@@ -46,21 +56,37 @@ func rechecks(method string) bool {
 	}
 }
 
-func (control *requestControl) start(parent context.Context, m message) (context.Context, uint64) {
+func (control *requestControl) start(parent context.Context, m message) (context.Context, uint64, error) {
 	control.mu.Lock()
 	defer control.mu.Unlock()
+	if err := parent.Err(); err != nil {
+		return nil, 0, err
+	}
+	size := len(m.JSONRPC) + len(m.ID) + len(m.Method) + len(m.Params)
+	if len(control.pending) >= maxPendingRequests || size > maxPendingRequestBytes-control.bytes {
+		return nil, 0, errPendingRequestLimit
+	}
 	analysis := rechecks(m.Method)
 	if analysis || m.Method == "shutdown" || m.Method == "exit" {
-		for _, pending := range control.pending {
-			if pending.analysis {
+		// A queued query must still observe the analysis before it. Only
+		// supersede analyses newer than every outstanding query barrier.
+		var barrier uint64
+		for token, pending := range control.pending {
+			if pending.id != "" && token > barrier {
+				barrier = token
+			}
+		}
+		for token, pending := range control.pending {
+			if pending.analysis && token > barrier {
 				pending.cancel()
 			}
 		}
 	}
 	ctx, cancel := context.WithCancel(parent)
 	control.next++
-	control.pending[control.next] = pendingRequest{cancel: cancel, id: requestID(m.ID), analysis: analysis}
-	return ctx, control.next
+	control.pending[control.next] = pendingRequest{cancel: cancel, id: requestID(m.ID), analysis: analysis, size: size}
+	control.bytes += size
+	return ctx, control.next, nil
 }
 
 func (control *requestControl) cancelRequest(id json.RawMessage) {
@@ -82,8 +108,19 @@ func (control *requestControl) finish(token uint64) {
 	defer control.mu.Unlock()
 	if pending, found := control.pending[token]; found {
 		pending.cancel()
+		control.bytes -= pending.size
 		delete(control.pending, token)
 	}
+}
+
+func (control *requestControl) abort() {
+	control.mu.Lock()
+	defer control.mu.Unlock()
+	for _, pending := range control.pending {
+		pending.cancel()
+	}
+	clear(control.pending)
+	control.bytes = 0
 }
 
 type incomingMessage struct {
@@ -95,11 +132,47 @@ type incomingMessage struct {
 
 func readMessages(ctx context.Context, reader *bufio.Reader, control *requestControl, incoming chan<- incomingMessage) {
 	defer close(incoming)
+	ctx, stop := context.WithCancel(ctx)
+	defer func() {
+		stop()
+		control.abort()
+	}()
+	// Reading must continue while the ordered handler is busy. The admission
+	// limits cover active plus queued payloads; one extra slot carries an error.
+	queued := make(chan incomingMessage, maxPendingRequests+1)
+	go queueMessages(ctx, reader, control, queued)
 	for {
+		select {
+		case <-ctx.Done():
+			return
+		case next, open := <-queued:
+			if !open {
+				return
+			}
+			select {
+			case incoming <- next:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}
+}
+
+func queueMessages(ctx context.Context, reader *bufio.Reader, control *requestControl, queued chan<- incomingMessage) {
+	defer close(queued)
+	defer func() {
+		if ctx.Err() != nil {
+			control.abort()
+		}
+	}()
+	for {
+		if ctx.Err() != nil {
+			return
+		}
 		m, err := readMessage(reader)
 		if err != nil {
 			select {
-			case incoming <- incomingMessage{err: err}:
+			case queued <- incomingMessage{err: err}:
 			case <-ctx.Done():
 			}
 			return
@@ -113,9 +186,17 @@ func readMessages(ctx context.Context, reader *bufio.Reader, control *requestCon
 			}
 			continue
 		}
-		requestCtx, token := control.start(ctx, m)
+		requestCtx, token, err := control.start(ctx, m)
+		if err != nil {
+			control.abort()
+			select {
+			case queued <- incomingMessage{err: err}:
+			case <-ctx.Done():
+			}
+			return
+		}
 		select {
-		case incoming <- incomingMessage{message: m, ctx: requestCtx, token: token}:
+		case queued <- incomingMessage{message: m, ctx: requestCtx, token: token}:
 		case <-ctx.Done():
 			control.finish(token)
 			return

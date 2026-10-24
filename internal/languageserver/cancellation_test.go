@@ -13,14 +13,21 @@ import (
 
 func TestRequestControlCancelsOnlyMatchingRequestAndSupersededAnalysis(t *testing.T) {
 	control := newRequestControl()
-	first, one := control.start(context.Background(), message{ID: json.RawMessage(`"alpha"`), Method: "textDocument/definition"})
-	second, two := control.start(context.Background(), message{ID: json.RawMessage(`1`), Method: "textDocument/completion"})
+	start := func(m message) (context.Context, uint64) {
+		ctx, token, err := control.start(context.Background(), m)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return ctx, token
+	}
+	first, one := start(message{ID: json.RawMessage(`"alpha"`), Method: "textDocument/definition"})
+	second, two := start(message{ID: json.RawMessage(`1`), Method: "textDocument/completion"})
 	control.cancelRequest(json.RawMessage(`"\u0061lpha"`))
 	if !errors.Is(first.Err(), context.Canceled) || second.Err() != nil {
 		t.Fatalf("request selection: %v %v", first.Err(), second.Err())
 	}
-	analysis, three := control.start(context.Background(), message{Method: "textDocument/didOpen"})
-	latest, four := control.start(context.Background(), message{Method: "textDocument/didChange"})
+	analysis, three := start(message{Method: "textDocument/didOpen"})
+	latest, four := start(message{Method: "textDocument/didChange"})
 	if !errors.Is(analysis.Err(), context.Canceled) || latest.Err() != nil || second.Err() != nil {
 		t.Fatal("supersession canceled an unrelated request")
 	}
