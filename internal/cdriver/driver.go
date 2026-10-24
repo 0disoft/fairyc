@@ -296,6 +296,9 @@ func runBounded(name string, arguments ...string) (string, error) {
 	contextValue, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, name, arguments...)
+	configureToolCancellation(command)
+	// A descendant can retain output pipes after the compiler exits.
+	command.WaitDelay = 2 * time.Second
 	command.Stdin = nil
 	command.Env = append(os.Environ(), "LC_ALL=C", "LANG=C")
 	var output boundedBuffer
