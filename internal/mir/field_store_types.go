@@ -22,6 +22,12 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 		return nil, nil
 	}
 	types := make(map[LocalID]hir.Type)
+	type localCopy struct {
+		source, destination LocalID
+		next                int
+	}
+	var copies []localCopy
+	var ready []LocalID
 	var conflict error
 	set := func(local LocalID, typ hir.Type) bool {
 		if local < 0 || typ == hir.ParseType("") || typ == hir.TypeInvalid {
@@ -37,6 +43,9 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 			return false
 		}
 		types[local] = typ
+		if len(copies) > 0 {
+			ready = append(ready, local)
+		}
 		return true
 	}
 	for index, local := range function.Parameters {
@@ -47,35 +56,50 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 	for _, resource := range function.Resources {
 		set(LocalID(resource.Symbol), resource.Type)
 	}
-	for changed := true; changed; {
-		changed = false
-		for _, block := range function.Blocks {
-			for _, op := range block.Operations {
-				typ := hir.TypeInvalid
-				switch op.Kind {
-				case OperationAssign, OperationInitialize:
-					if len(op.Operands) == 1 {
-						typ = fieldStoreOperandType(op.Operands[0], types)
+	for _, block := range function.Blocks {
+		for _, op := range block.Operations {
+			typ := hir.TypeInvalid
+			switch op.Kind {
+			case OperationAssign, OperationInitialize:
+				if len(op.Operands) == 1 {
+					operand := op.Operands[0]
+					typ = fieldStoreOperandType(operand, types)
+					if operand.Kind == OperandLocal && typ == hir.ParseType("") && op.DestinationLocal >= 0 {
+						copies = append(copies, localCopy{source: operand.Local, destination: op.DestinationLocal})
 					}
-				case OperationRawAddress, OperationRawBorrowPointer, OperationCCallback, OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
-					OperationResultConstruct, OperationResultPayload, OperationOptionConstruct, OperationOptionPayload,
-					OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
-					OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
-					OperationArrayLength, OperationArrayIndex, OperationViewLength, OperationViewEmpty,
-					OperationViewIndex, OperationViewElementBorrow, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
-					OperationStorageBorrow, OperationStorageBorrowMut, OperationStorageElementAddress, OperationRegionPlace:
-					typ = op.Type
 				}
-				changed = set(op.DestinationLocal, typ) || changed
+			case OperationRawAddress, OperationRawBorrowPointer, OperationCCallback, OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
+				OperationResultConstruct, OperationResultPayload, OperationOptionConstruct, OperationOptionPayload,
+				OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
+				OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
+				OperationArrayLength, OperationArrayIndex, OperationViewLength, OperationViewEmpty,
+				OperationViewIndex, OperationViewElementBorrow, OperationViewSlice, OperationStorageLayout, OperationStorageTake,
+				OperationStorageBorrow, OperationStorageBorrowMut, OperationStorageElementAddress, OperationRegionPlace:
+				typ = op.Type
 			}
-			term := block.Terminator
-			if term.Kind == TerminatorCall {
-				if callee := functions[term.Callee]; callee != nil {
-					changed = set(term.DestinationLocal, callee.ResultType) || changed
-				} else if callee := foreign[term.Callee]; callee != nil {
-					changed = set(term.DestinationLocal, callee.ResultType) || changed
-				}
+			set(op.DestinationLocal, typ)
+		}
+		term := block.Terminator
+		if term.Kind == TerminatorCall {
+			if callee := functions[term.Callee]; callee != nil {
+				set(term.DestinationLocal, callee.ResultType)
+			} else if callee := foreign[term.Callee]; callee != nil {
+				set(term.DestinationLocal, callee.ResultType)
 			}
+		}
+	}
+	// Only unresolved local copies need dependency edges. Already known copies
+	// are handled during the scan, so straight-line code needs no worklist.
+	heads := make(map[LocalID]int, len(copies))
+	for index := len(copies) - 1; index >= 0; index-- {
+		copies[index].next = heads[copies[index].source]
+		heads[copies[index].source] = index + 1
+	}
+	for index := 0; index < len(ready); index++ {
+		source := ready[index]
+		for link := heads[source]; link != 0; link = copies[link-1].next {
+			copy := copies[link-1]
+			set(copy.destination, types[source])
 		}
 	}
 	if conflict != nil {
