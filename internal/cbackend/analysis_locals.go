@@ -12,65 +12,94 @@ import (
 func (e *emissionAnalysis) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, error) {
 	function := &e.functions[functionIndex]
 	localTypes := make(map[mir.LocalID]hir.Type)
+	type localCopy struct {
+		source, destination mir.LocalID
+		kind                mir.OperationKind
+		next                int
+	}
+	var copies []localCopy
+	var ready []mir.LocalID
+	assign := func(local mir.LocalID, value hir.Type) error {
+		added, err := assignLocalType(localTypes, local, value)
+		// A deferred copy can only be unblocked by a later discovery.
+		// The common case with no forward dependencies needs no queue.
+		if added && len(copies) > 0 {
+			ready = append(ready, local)
+		}
+		return err
+	}
 	for index, parameter := range function.Parameters {
 		if index >= len(function.ParameterTypes) {
 			return nil, fmt.Errorf("MIR function %s has %d parameter types for %d parameters", function.Name, len(function.ParameterTypes), len(function.Parameters))
 		}
-		if _, err := assignLocalType(localTypes, parameter, function.ParameterTypes[index]); err != nil {
+		if err := assign(parameter, function.ParameterTypes[index]); err != nil {
 			return nil, fmt.Errorf("parameter type in %s: %w", function.Name, err)
 		}
 	}
 	for _, resource := range function.Resources {
-		if _, err := assignLocalType(localTypes, mir.LocalID(resource.Symbol), resource.Type); err != nil {
+		if err := assign(mir.LocalID(resource.Symbol), resource.Type); err != nil {
 			return nil, fmt.Errorf("resource local type in %s: %w", function.Name, err)
 		}
 	}
-	changed := true
-	for changed {
-		changed = false
-		for _, block := range function.Blocks {
-			for _, operation := range block.Operations {
-				var inferred hir.Type
-				switch operation.Kind {
-				case mir.OperationAssign, mir.OperationInitialize:
-					if len(operation.Operands) == 1 {
-						inferred, _ = inferredOperandType(localTypes, operation.Operands[0])
+	for _, block := range function.Blocks {
+		for _, operation := range block.Operations {
+			var inferred hir.Type
+			switch operation.Kind {
+			case mir.OperationAssign, mir.OperationInitialize:
+				if len(operation.Operands) == 1 {
+					operand := operation.Operands[0]
+					var found bool
+					inferred, found = inferredOperandType(localTypes, operand)
+					if !found && operand.Kind == mir.OperandLocal && operation.DestinationLocal != mir.NoLocal {
+						copies = append(copies, localCopy{source: operand.Local, destination: operation.DestinationLocal, kind: operation.Kind})
 					}
-				case mir.OperationUnary:
-					inferred = operation.Type
-				case mir.OperationBinary:
-					inferred = operation.Type
-				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
-					mir.OperationResultPayload, mir.OperationOptionPayload,
-					mir.OperationEnumConstruct, mir.OperationEnumPayload,
-					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
-					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
-					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
-					mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
-					mir.OperationRegionPlace:
-					inferred = operation.Type
 				}
-				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == hir.ParseType("") {
-					continue
-				}
-				added, err := assignLocalType(localTypes, operation.DestinationLocal, inferred)
-				if err != nil {
-					return nil, fmt.Errorf("operation %s in %s: %w", operation.Kind, function.Name, err)
-				}
-				changed = changed || added
+			case mir.OperationUnary:
+				inferred = operation.Type
+			case mir.OperationBinary:
+				inferred = operation.Type
+			case mir.OperationResultConstruct, mir.OperationOptionConstruct,
+				mir.OperationResultPayload, mir.OperationOptionPayload,
+				mir.OperationEnumConstruct, mir.OperationEnumPayload,
+				mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+				mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
+				mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+				mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
+				mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+				mir.OperationRegionPlace:
+				inferred = operation.Type
 			}
-			terminator := block.Terminator
-			if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
-				resultType, found := e.callResultType(terminator.Callee)
-				if !found {
-					return nil, fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
-				}
-				added, err := assignLocalType(localTypes, terminator.DestinationLocal, resultType)
-				if err != nil {
-					return nil, fmt.Errorf("call result in %s: %w", function.Name, err)
-				}
-				changed = changed || added
+			if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == hir.ParseType("") {
+				continue
+			}
+			if err := assign(operation.DestinationLocal, inferred); err != nil {
+				return nil, fmt.Errorf("operation %s in %s: %w", operation.Kind, function.Name, err)
+			}
+		}
+		terminator := block.Terminator
+		if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
+			resultType, found := e.callResultType(terminator.Callee)
+			if !found {
+				return nil, fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
+			}
+			if err := assign(terminator.DestinationLocal, resultType); err != nil {
+				return nil, fmt.Errorf("call result in %s: %w", function.Name, err)
+			}
+		}
+	}
+	// Link copies by source without allocating a slice for every source local.
+	// Reverse insertion preserves source order among copies of the same local.
+	heads := make(map[mir.LocalID]int, len(copies))
+	for index := len(copies) - 1; index >= 0; index-- {
+		copies[index].next = heads[copies[index].source]
+		heads[copies[index].source] = index + 1
+	}
+	for index := 0; index < len(ready); index++ {
+		source := ready[index]
+		for link := heads[source]; link != 0; link = copies[link-1].next {
+			copy := copies[link-1]
+			if err := assign(copy.destination, localTypes[source]); err != nil {
+				return nil, fmt.Errorf("operation %s in %s: %w", copy.kind, function.Name, err)
 			}
 		}
 	}
