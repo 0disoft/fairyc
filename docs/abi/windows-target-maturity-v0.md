@@ -26,7 +26,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
 | Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, `internal/pecoff/generated_unwind_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parents and unwind children have direct retention/removal evidence | Cover every archive/COMDAT form emitted by the promoted production path and library inputs in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
-| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Live mixed-stack handler/data and caller PC/SP checks; linked v2 pop/ret epilogs and selected two-link CRT chains pass controlled-context restoration | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
+| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Live mixed-stack handler/data and caller PC/SP checks; linked v2 pop/ret epilogs, selected two-link chains and zero-prolog add/pop/ret epilogs pass controlled-context restoration | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
 | Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
@@ -176,6 +176,32 @@ the receipt count. No workflow, dependency, product API or maturity flag changes
 Live captures, zero-prolog and frame-register contexts, instruction agreement,
 other operation forms, exact chained-tail relocation, hosted execution and
 clean-machine distribution remain open.
+
+## Zero-prolog chained epilogs (2026-10-24)
+
+The [zero-prolog record](../ops/evidence/windows-chained-zero-prolog-20261024.json)
+extends the same probe with an instruction-derived oracle for nine linked
+add/pop/ret epilogs per MSVC profile. A closed decoder advances from the fragment
+entry through admitted MOV setup instructions; it never searches inside operands
+for an opcode. It admits positive, eight-byte-aligned ADD RSP immediates up to
+2 KiB, unique nonvolatile POPs and RET, with at most sixteen setup instructions.
+Both short and wide immediate encodings are exercised. At ADD, every POP and RET,
+36 controlled contexts per profile recover exact caller PC/SP, restore the pending
+registers and preserve registers already restored before that PC, including XMM.
+The epilogs contain 18 POP instructions per profile.
+
+Low has 21 zero-prolog fragments: nine tested epilogs, four CALL/INT3 tails and
+eight other instruction sequences. Optimized has 23: nine tested epilogs, four
+CALL/INT3 tails and ten other sequences. The added probe itself changes optimized
+code selection; these are counts for the new images, not a reduction of a frozen
+input set. Go independently checks the complete tested/untested partition of all
+37 low and 41 optimized chained entries. Nonempty-prolog contexts also still pass.
+
+Each profile rejects six decoder mutations before OS unwinding and rejects two
+plausible but wrong allocation/register expectations against the unchanged image.
+Live capture, the unadmitted instruction sequences, general frame-register forms,
+XMM save operations, chained-tail relocation and hosted/clean-machine receipts
+remain open. No product API, dependency, workflow or maturity flag changes.
 
 ## Optimized Fairy symbol lookup (2026-10-24)
 

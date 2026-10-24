@@ -10,9 +10,11 @@ fn i32 main() {
 
 // ChainCompanionC inverts the linked metadata onto a bounded controlled stack,
 // then asks the real OS unwinder to recover independent caller sentinels. These
-// are metadata-derived contexts, not live CRT captures or instruction decoding.
-// Frame-pointer and machine-frame forms are explicitly counted as untested.
-const ChainCompanionC = `
+// are not live CRT captures. Zero-prolog epilog contexts instead come from a
+// closed instruction decoder; other forms are explicitly counted as untested.
+const ChainCompanionC = chainContextC + chainEpilogC + chainRunnerC
+
+const chainContextC = `
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <stdint.h>
@@ -119,7 +121,9 @@ static int fy_chain_context(BYTE *image, PRUNTIME_FUNCTION entry, const BYTE **r
     if (memcmp(&context.Xmm6, &expected.Xmm6, 10 * sizeof(M128A))) { return 35; }
     return 0;
 }
+`
 
+const chainRunnerC = `
 int32_t fairyc_fixture_chained_unwind(void) {
     BYTE *image = (BYTE *)GetModuleHandleW(NULL);
     const IMAGE_DOS_HEADER *dos = (const IMAGE_DOS_HEADER *)(const void *)image;
@@ -127,22 +131,26 @@ int32_t fairyc_fixture_chained_unwind(void) {
     IMAGE_DATA_DIRECTORY directory = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXCEPTION];
     PRUNTIME_FUNCTION entries = (PRUNTIME_FUNCTION)(void *)(image + directory.VirtualAddress);
     unsigned int functions = 0, untested = 0, contexts = 0, max_depth = 0, integer_saves = 0, vector_saves = 0;
+    unsigned int chained_functions = 0, zero_functions = 0, zero_frames = 0, zero_operations = 0, zero_calls = 0, zero_other = 0;
+    unsigned int zero_epilogs = 0, zero_contexts = 0, zero_pops = 0, zero_wide_adds = 0;
+    unsigned int rejected_epilogs = 0, rejected_contexts = 0;
     for (DWORD index = 0; index < directory.Size / sizeof(RUNTIME_FUNCTION); ++index) {
         PRUNTIME_FUNCTION entry = &entries[index];
         const BYTE *record = image + entry->UnwindData, *records[65];
-        unsigned int links = 0, supported = 1;
+        unsigned int links = 0, frame_form = 0, operation_form = 0;
         if (!((record[0] >> 3) & UNW_FLAG_CHAININFO)) { continue; }
-        // Zero-prolog fragments can already be in an epilog, after explicit
-        // register reloads. Such PCs need instruction-specific input contexts.
-        if (!record[1]) { ++untested; continue; }
+        ++chained_functions;
+        unsigned int zero_prolog = record[1] == 0;
+        if (zero_prolog) { ++zero_functions; }
         for (;;) {
             if (links >= 65) { return 40; }
             records[links] = record;
-            if ((record[0] & 7) != 1 || record[3]) { supported = 0; }
+            if (record[3]) { frame_form = 1; }
+            if ((record[0] & 7) != 1) { operation_form = 1; }
             for (unsigned int slot = 0; slot < record[2];) {
                 unsigned int op = record[5 + slot * 2] & 15, info = record[5 + slot * 2] >> 4;
                 unsigned int consumed = fy_chain_slots(op, info);
-                if (!consumed || slot + consumed > record[2]) { supported = 0; break; }
+                if (!consumed || slot + consumed > record[2]) { operation_form = 1; break; }
                 slot += consumed;
             }
             if (!((record[0] >> 3) & UNW_FLAG_CHAININFO)) { break; }
@@ -150,7 +158,34 @@ int32_t fairyc_fixture_chained_unwind(void) {
             record = image + fy_chain_u32(tail + 8);
             ++links;
         }
-        if (!supported) { ++untested; continue; }
+        if (frame_form || operation_form) {
+            ++untested;
+            if (zero_prolog && frame_form) { ++zero_frames; }
+            else if (zero_prolog) { ++zero_operations; }
+            continue;
+        }
+        if (zero_prolog) {
+            fy_chain_epilog plan;
+            const BYTE *code = image + entry->BeginAddress;
+            size_t size = entry->EndAddress - entry->BeginAddress;
+            if (!fy_chain_decode_epilog(code, size, &plan)) {
+                if (size == 6 && code[0] == 0xe8 && code[5] == 0xcc) { ++zero_calls; }
+                else { ++zero_other; }
+                ++untested;
+                continue;
+            }
+            int result = fy_chain_epilog_context(image, entry, &plan, &zero_contexts);
+            if (result) { fprintf(stderr, "zero-prolog RVA=%lx result=%d\n", entry->BeginAddress, result); return result; }
+            if (!rejected_epilogs && plan.pops) {
+                result = fy_chain_reject_epilogs(image, entry, code, size, &plan, &rejected_epilogs, &rejected_contexts);
+                if (result) { return result; }
+            }
+            ++zero_epilogs;
+            zero_pops += plan.pops;
+            zero_wide_adds += plan.add_size == 7;
+            if (links > max_depth) { max_depth = links; }
+            continue;
+        }
         ++functions;
         if (links > max_depth) { max_depth = links; }
         int result = fy_chain_context(image, entry, records, links, 0, &integer_saves, &vector_saves);
@@ -163,8 +198,16 @@ int32_t fairyc_fixture_chained_unwind(void) {
         }
     }
     if (functions < 10 || contexts <= functions || max_depth < 2 || !integer_saves) { return 41; }
-    printf("{\"functions\":%u,\"untestedFunctions\":%u,\"contexts\":%u,\"maximumDepth\":%u,\"integerRestores\":%u,\"vectorRestores\":%u}\n",
-        functions, untested, contexts, max_depth, integer_saves, vector_saves);
+    if (!zero_epilogs || zero_contexts <= zero_epilogs || !zero_pops || !zero_wide_adds ||
+        zero_functions != zero_epilogs + zero_frames + zero_operations + zero_calls + zero_other ||
+        rejected_epilogs != 6 || rejected_contexts != 2) { return 43; }
+    printf("{\"functions\":%u,\"untestedFunctions\":%u,\"contexts\":%u,\"maximumDepth\":%u,\"integerRestores\":%u,\"vectorRestores\":%u,"
+        "\"zeroPrologFunctions\":%u,\"zeroPrologEpilogs\":%u,\"zeroPrologContexts\":%u,\"zeroPrologPops\":%u,\"zeroPrologWideAdds\":%u,"
+        "\"chainedFunctions\":%u,\"zeroPrologUnsupportedFrames\":%u,\"zeroPrologUnsupportedOperations\":%u,\"zeroPrologCallTails\":%u,\"zeroPrologOtherInstructions\":%u,"
+        "\"rejectedEpilogMutations\":%u,\"rejectedEpilogContexts\":%u}\n",
+        functions, untested, contexts, max_depth, integer_saves, vector_saves,
+        zero_functions, zero_epilogs, zero_contexts, zero_pops, zero_wide_adds, chained_functions, zero_frames, zero_operations, zero_calls, zero_other,
+        rejected_epilogs, rejected_contexts);
     return 42;
 }
 `

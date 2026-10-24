@@ -512,8 +512,11 @@ instruction boundaries with controlled stack/register contexts. The
 [chained-unwind record](../ops/evidence/windows-chained-unwind-20261024.json) adds
 metadata-derived controlled contexts for linked CRT fragments with nonempty prologs and no frame
 register: 16 fragments and 32 contexts per profile include two-link restoration, exact caller PC/SP,
-establisher frame, integer restoration and XMM preservation. Zero-prolog and frame-register forms
-are explicitly untested; no XMM save operation was exercised. The final-image inspector follows
+establisher frame, integer restoration and XMM preservation. The later
+[zero-prolog record](../ops/evidence/windows-chained-zero-prolog-20261024.json) checks nine
+add/pop/ret epilogs and 36 instruction-derived contexts per profile, including registers already
+restored before the selected PC. It counts unadmitted CALL/INT3 and other instruction sequences
+separately. General frame-register forms and XMM save operations remain untested. The final-image inspector follows
 each chain to a valid primary record, rejecting cycles, excessive inspector depth, mismatched frame
 fields and secondary stack changes. Live CRT capture, other epilog
 instruction shapes, language-specific handler payload parsing, complete chain equivalence and chained-tail
@@ -586,6 +589,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 - Microsoft x64 calling convention: <https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170>
 - Microsoft `RaiseException`: <https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-raiseexception>
 - Microsoft `RtlVirtualUnwind`: <https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-rtlvirtualunwind>
+- Microsoft x64 prolog and epilog: <https://learn.microsoft.com/en-us/cpp/build/prolog-and-epilog?view=msvc-170>
 - Microsoft structured exception handler syntax: <https://learn.microsoft.com/en-us/windows/win32/debug/handler-syntax>
 - musl reference manual: <https://musl.libc.org/doc/1.0.0/manual.txt>
 
