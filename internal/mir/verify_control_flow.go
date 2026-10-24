@@ -32,16 +32,8 @@ func verifyAssertEdges(function *Function) []VerificationError {
 }
 
 func verifyTrapCheckEdges(function *Function) []VerificationError {
-	blocks := make(map[BlockID]*Block, len(function.Blocks))
-	predecessors := make(map[BlockID][]BlockID, len(function.Blocks))
-	for index := range function.Blocks {
-		block := &function.Blocks[index]
-		blocks[block.ID] = block
-		for _, successor := range block.Terminator.Successors {
-			predecessors[successor] = append(predecessors[successor], block.ID)
-		}
-	}
-	dominators := blockDominators(function, predecessors)
+	var blocks map[BlockID]*Block
+	var dominators map[BlockID]map[BlockID]struct{}
 	var failures []VerificationError
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
@@ -49,6 +41,11 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 			switchKind, markerKind, categories, trapping := trappingOperationSpec(operation)
 			if !trapping {
 				continue
+			}
+			// Functions without trapping operations need no dominance analysis.
+			// Build the graph once, on the first operation that consumes it.
+			if dominators == nil {
+				blocks, dominators = trapCheckGraph(function)
 			}
 			entity := operationEntity(block.ID, operationIndex, operation)
 			checkedOperator, checkedOperands := trappingCheckIdentity(operation)
@@ -66,6 +63,19 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 		}
 	}
 	return failures
+}
+
+func trapCheckGraph(function *Function) (map[BlockID]*Block, map[BlockID]map[BlockID]struct{}) {
+	blocks := make(map[BlockID]*Block, len(function.Blocks))
+	predecessors := make(map[BlockID][]BlockID, len(function.Blocks))
+	for index := range function.Blocks {
+		block := &function.Blocks[index]
+		blocks[block.ID] = block
+		for _, successor := range block.Terminator.Successors {
+			predecessors[successor] = append(predecessors[successor], block.ID)
+		}
+	}
+	return blocks, blockDominators(function, predecessors)
 }
 
 func blockDominators(function *Function, predecessors map[BlockID][]BlockID) map[BlockID]map[BlockID]struct{} {
