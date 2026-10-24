@@ -33,7 +33,7 @@ func verifyAssertEdges(function *Function) []VerificationError {
 
 func verifyTrapCheckEdges(function *Function) []VerificationError {
 	var blocks map[BlockID]*Block
-	var dominators map[BlockID]map[BlockID]struct{}
+	var dominators *blockDominatorSets
 	var failures []VerificationError
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
@@ -65,7 +65,7 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 	return failures
 }
 
-func trapCheckGraph(function *Function) (map[BlockID]*Block, map[BlockID]map[BlockID]struct{}) {
+func trapCheckGraph(function *Function) (map[BlockID]*Block, *blockDominatorSets) {
 	blocks := make(map[BlockID]*Block, len(function.Blocks))
 	predecessors := make(map[BlockID][]BlockID, len(function.Blocks))
 	for index := range function.Blocks {
@@ -78,49 +78,7 @@ func trapCheckGraph(function *Function) (map[BlockID]*Block, map[BlockID]map[Blo
 	return blocks, blockDominators(function, predecessors)
 }
 
-func blockDominators(function *Function, predecessors map[BlockID][]BlockID) map[BlockID]map[BlockID]struct{} {
-	all := make(map[BlockID]struct{}, len(function.Blocks))
-	for _, block := range function.Blocks {
-		all[block.ID] = struct{}{}
-	}
-	dominators := make(map[BlockID]map[BlockID]struct{}, len(function.Blocks))
-	for _, block := range function.Blocks {
-		if block.ID == function.Entry {
-			dominators[block.ID] = map[BlockID]struct{}{block.ID: {}}
-		} else {
-			dominators[block.ID] = cloneBlockSet(all)
-		}
-	}
-	changed := true
-	for changed {
-		changed = false
-		for _, block := range function.Blocks {
-			if block.ID == function.Entry {
-				continue
-			}
-			incoming := predecessors[block.ID]
-			next := make(map[BlockID]struct{})
-			if len(incoming) > 0 {
-				next = cloneBlockSet(dominators[incoming[0]])
-				for _, predecessor := range incoming[1:] {
-					for candidate := range next {
-						if _, found := dominators[predecessor][candidate]; !found {
-							delete(next, candidate)
-						}
-					}
-				}
-			}
-			next[block.ID] = struct{}{}
-			if !sameBlockSet(dominators[block.ID], next) {
-				dominators[block.ID] = next
-				changed = true
-			}
-		}
-	}
-	return dominators
-}
-
-func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dominators map[BlockID]map[BlockID]struct{}, target BlockID,
+func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dominators *blockDominatorSets, target BlockID,
 	switchKind string, markerKind OperationKind, operator string, operands []Operand, ownerType, resultType hir.Type, categories []string) (string, bool) {
 	invalidMarker := ""
 	for index := range function.Blocks {
@@ -128,7 +86,7 @@ func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dom
 		if candidate.ID == target {
 			continue
 		}
-		if _, dominates := dominators[target][candidate.ID]; !dominates {
+		if !dominators.contains(target, candidate.ID) {
 			continue
 		}
 		markerEntity, markerValid := checkedMarkerStatus(candidate, markerKind, operator, operands, ownerType, resultType, categories)
@@ -139,7 +97,7 @@ func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dom
 			continue
 		}
 		success := candidate.Terminator.Successors[0]
-		if _, successDominates := dominators[target][success]; !successDominates {
+		if !dominators.contains(target, success) {
 			continue
 		}
 		if checkedTerminatorMatches(candidate.Terminator, success, switchKind, operator, operands, ownerType) &&
@@ -148,26 +106,6 @@ func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dom
 		}
 	}
 	return invalidMarker, false
-}
-
-func cloneBlockSet(source map[BlockID]struct{}) map[BlockID]struct{} {
-	result := make(map[BlockID]struct{}, len(source))
-	for value := range source {
-		result[value] = struct{}{}
-	}
-	return result
-}
-
-func sameBlockSet(left, right map[BlockID]struct{}) bool {
-	if len(left) != len(right) {
-		return false
-	}
-	for value := range left {
-		if _, found := right[value]; !found {
-			return false
-		}
-	}
-	return true
 }
 
 func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
