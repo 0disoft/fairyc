@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,8 +59,7 @@ func PublishImmutable(root *os.Root, temporaryPath, finalPath string, expected [
 		}
 		return nil
 	}
-	existing, readErr := root.ReadFile(finalPath)
-	if readErr == nil && bytes.Equal(existing, expected) {
+	if matchesFile(root, finalPath, expected) {
 		if syncErr := syncPublished(root, finalPath, directory); syncErr != nil {
 			return fmt.Errorf("sync converged durable file: %w", syncErr)
 		}
@@ -72,12 +72,42 @@ func PublishImmutable(root *os.Root, temporaryPath, finalPath string, expected [
 			}
 			return nil
 		}
-		existing, readErr = root.ReadFile(finalPath)
-		if readErr == nil && bytes.Equal(existing, expected) {
+		if matchesFile(root, finalPath, expected) {
 			return nil
 		}
 	}
 	return fmt.Errorf("publish immutable durable file: destination conflict")
+}
+
+func matchesFile(root *os.Root, path string, expected []byte) bool {
+	file, err := root.Open(path)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil || !info.Mode().IsRegular() || info.Size() != int64(len(expected)) {
+		return false
+	}
+	return matchesReader(file, expected)
+}
+
+const compareChunkBytes = 32 << 10
+
+// Never trust a destination's length to size an allocation. The final byte
+// check also rejects a file that grows after matchesFile's size inspection.
+func matchesReader(reader io.Reader, expected []byte) bool {
+	chunk := make([]byte, min(len(expected), compareChunkBytes))
+	for len(expected) > 0 {
+		size := min(len(expected), len(chunk))
+		if _, err := io.ReadFull(reader, chunk[:size]); err != nil || !bytes.Equal(chunk[:size], expected[:size]) {
+			return false
+		}
+		expected = expected[size:]
+	}
+	var extra [1]byte
+	count, err := reader.Read(extra[:])
+	return count == 0 && errors.Is(err, io.EOF)
 }
 
 // SyncDirectory persists a newly created directory entry where the host exposes such a contract.
