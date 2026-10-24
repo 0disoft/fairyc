@@ -26,7 +26,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
 | Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, `internal/pecoff/generated_unwind_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parents and unwind children have direct retention/removal evidence | Cover every archive/COMDAT form emitted by the promoted production path and library inputs in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
-| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Live mixed-stack handler/data and caller PC/SP checks; linked v2 pop/ret epilogs, selected two-link chains and zero-prolog add/pop/ret epilogs pass controlled-context restoration | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
+| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Live mixed-stack and controlled-context restoration checks; a closed COFF fixture also binds both chain tails to exact object/map addresses and executes through its frames | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
 | Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
@@ -202,6 +202,30 @@ plausible but wrong allocation/register expectations against the unchanged image
 Live capture, the unadmitted instruction sequences, general frame-register forms,
 XMM save operations, chained-tail relocation and hosted/clean-machine receipts
 remain open. No product API, dependency, workflow or maturity flag changes.
+
+## Closed chained-tail relocation (2026-10-24)
+
+The [chain-link record](../ops/evidence/windows-chained-link-20261024.json) links
+a small, project-built COFF platform fixture with a generated Fairy entry and
+independent C companion in low and optimized MSVC profiles. The fixture contains
+a real stack-allocating function returning 42, a primary unwind record and two
+chained fragments. It is not evidence that Fairy or MSVC emits this object shape.
+
+The inspector resolves the code and metadata anchors from exact owned map symbols.
+It matches all three source `.pdata` entries and compares the six chain-tail
+`ADDR32NB` fields against `S + A - ImageBase`, retaining each nonzero source addend
+and expected/linked RVA in the record. The C companion checks the linked machine
+instructions, calls the function and asks Windows to restore three controlled
+contexts at its primary and secondary entries. PC/SP, establisher frame and
+integer/XMM preservation pass in both profiles.
+
+Three wrong linked-parent fields per profile remain structurally valid and are
+rejected only by exact binding. Unit mutations also cover wrong object addends,
+relocation type/target, missing/duplicate relocations and map owner/address.
+The existing host smoke includes both images in its receipt count. No new
+dependency, workflow or product API is introduced. Production archive/COMDAT
+chains, live captures and same-commit hosted/clean-machine proof remain open;
+target maturity flags stay unchanged.
 
 ## Optimized Fairy symbol lookup (2026-10-24)
 

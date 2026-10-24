@@ -717,6 +717,10 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	chainedLinks, err := runWindowsChainedLinkProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	receipt := hostSmokeReceipt{
 		artifactBytes:                  len(artifact),
 		validatedSections:              len(peReport.Sections),
@@ -776,6 +780,7 @@ func run(arguments []string) error {
 		mixedStackExecutions:           len(mixedStack),
 		version2EpilogExecutions:       len(version2Epilogs),
 		chainedUnwindExecutions:        len(chainedUnwind),
+		chainedLinkExecutions:          len(chainedLinks),
 		standaloneCompilerBytes:        standaloneCompilerBytes,
 		toolchainVersion:               toolchain.Version,
 	}
@@ -787,5 +792,6 @@ func run(arguments []string) error {
 	fmt.Printf("Generated Fairy/C mixed stack proof passed: %d separate-object executions covering live handler/data and caller-context checks, mismatch rejection, C-boundary exception containment, and non-unwinding callback traps\n", len(mixedStack))
 	fmt.Printf("Linked unwind v2 epilog proof passed: %d MSVC profiles with controlled-context PC/SP, integer/XMM preservation and invalid-record rejection\n", len(version2Epilogs))
 	fmt.Printf("Linked chained unwind proof passed: %d MSVC profiles with metadata-derived prolog contexts, instruction-derived zero-prolog add/pop/ret contexts, caller PC/SP and nonvolatile restoration, including multi-link chains and invalid-record rejection\n", len(chainedUnwind))
+	fmt.Printf("Closed chained-tail relocation proof passed: %d MSVC profiles with six exact ADDR32NB fields, nonzero addends, three native unwind contexts and structurally valid wrong-target rejection\n", len(chainedLinks))
 	return nil
 }

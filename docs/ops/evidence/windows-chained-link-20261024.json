@@ -1,0 +1,114 @@
+{
+  "passed": true,
+  "mode": "closed-COFF-fixture-chain-relocations-and-native-unwind",
+  "rows": [
+    {
+      "profile": "low",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "ed8020aa202b11fc67ff34a1de878b7e9f5057c53979467f4a7498b8b4564c33",
+      "generatedCSHA256": "970483c3c97aa14dfebc07f5c4d7d0aad7551f6b6c460a59817b64705c86b8d4",
+      "companionSourceSHA256": "fd64720e1dce9d60a40cba4bbb3ad07b20ac92485016ac2bd09ec8d120d6c32b",
+      "fixtureObjectSHA256": "c0cbd4fb22b3d9314ec0f5dbc88e226884756c4696b6196bccf6c7ff4a929665",
+      "imageSHA256": "df56d763a8f25cf8c87773725b32a05b172e7cdfb9bf22bd1b001a4dc66d9d87",
+      "linkMapSHA256": "81f509b1f50a2659fb93ea93b46e2d224d005bb81990f19b69ffabeaef6b6df5",
+      "contexts": 3,
+      "rejectedMutations": 3,
+      "link": {
+        "SourceRVA": 4104,
+        "Records": [
+          {
+            "UnwindRVA": 98632,
+            "Addends": [
+              8,
+              12,
+              8
+            ],
+            "Expected": [
+              4104,
+              4108,
+              98624
+            ],
+            "Linked": [
+              4104,
+              4108,
+              98624
+            ]
+          },
+          {
+            "UnwindRVA": 98648,
+            "Addends": [
+              12,
+              16,
+              16
+            ],
+            "Expected": [
+              4108,
+              4112,
+              98632
+            ],
+            "Linked": [
+              4108,
+              4112,
+              98632
+            ]
+          }
+        ],
+        "RelocationFields": 6
+      }
+    },
+    {
+      "profile": "optimized",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "ed8020aa202b11fc67ff34a1de878b7e9f5057c53979467f4a7498b8b4564c33",
+      "generatedCSHA256": "970483c3c97aa14dfebc07f5c4d7d0aad7551f6b6c460a59817b64705c86b8d4",
+      "companionSourceSHA256": "fd64720e1dce9d60a40cba4bbb3ad07b20ac92485016ac2bd09ec8d120d6c32b",
+      "fixtureObjectSHA256": "c0cbd4fb22b3d9314ec0f5dbc88e226884756c4696b6196bccf6c7ff4a929665",
+      "imageSHA256": "8d8f260c1ff2cb3085dab9f736a8ab225db66984c521cf7bbff10092cc0c53d2",
+      "linkMapSHA256": "569e14846f877cb14743e4addbd2e37c0ea035dc83ad7a90d44176d44db73f86",
+      "contexts": 3,
+      "rejectedMutations": 3,
+      "link": {
+        "SourceRVA": 4104,
+        "Records": [
+          {
+            "UnwindRVA": 98632,
+            "Addends": [
+              8,
+              12,
+              8
+            ],
+            "Expected": [
+              4104,
+              4108,
+              98624
+            ],
+            "Linked": [
+              4104,
+              4108,
+              98624
+            ]
+          },
+          {
+            "UnwindRVA": 98648,
+            "Addends": [
+              12,
+              16,
+              16
+            ],
+            "Expected": [
+              4108,
+              4112,
+              98632
+            ],
+            "Linked": [
+              4108,
+              4112,
+              98632
+            ]
+          }
+        ],
+        "RelocationFields": 6
+      }
+    }
+  ]
+}
