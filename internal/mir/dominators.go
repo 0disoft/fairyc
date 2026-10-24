@@ -36,16 +36,17 @@ func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *bl
 		clear(sets.bits[entry*words : (entry+1)*words])
 		sets.bits[entry*words+entry/64] = uint64(1) << uint(entry%64)
 	}
+	order := dominatorBlockOrder(function, indices, predecessors)
 	// Preserve the original fixed point, including unreachable components.
 	// Words are independent, so updates can reuse each row without a scratch set.
 	for changed := true; changed; {
 		changed = false
-		for _, block := range function.Blocks {
-			if block.ID == function.Entry {
+		for _, id := range order {
+			if id == function.Entry {
 				continue
 			}
-			row := indices[block.ID]
-			incoming := predecessors[block.ID]
+			row := indices[id]
+			incoming := predecessors[id]
 			for word := range words {
 				next := uint64(0)
 				if len(incoming) > 0 {
@@ -71,4 +72,44 @@ func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *bl
 		}
 	}
 	return sets
+}
+
+// Visit predecessors before their users instead of depending on block storage
+// order. DAGs then settle in one update pass plus confirmation. Cycles still use
+// the same fixed point, and disconnected components retain their old semantics.
+func dominatorBlockOrder(function *Function, indices map[BlockID]int, predecessors map[BlockID][]BlockID) []BlockID {
+	seen := make([]bool, len(indices))
+	order := make([]BlockID, 0, len(indices))
+	if entry, found := indices[function.Entry]; found {
+		seen[entry] = true // The entry row is constant, even with incoming backedges.
+		order = append(order, function.Entry)
+	}
+	type frame struct {
+		id   BlockID
+		next int
+	}
+	var stack []frame
+	for _, block := range function.Blocks {
+		if seen[indices[block.ID]] {
+			continue
+		}
+		seen[indices[block.ID]] = true
+		stack = append(stack, frame{id: block.ID})
+		for len(stack) > 0 {
+			current := &stack[len(stack)-1]
+			incoming := predecessors[current.id]
+			if current.next < len(incoming) {
+				predecessor := incoming[current.next]
+				current.next++
+				if row, found := indices[predecessor]; found && !seen[row] {
+					seen[row] = true
+					stack = append(stack, frame{id: predecessor})
+				}
+				continue
+			}
+			order = append(order, current.id)
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return order
 }

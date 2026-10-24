@@ -136,3 +136,65 @@ func BenchmarkTrapCheckDominators(b *testing.B) {
 		})
 	}
 }
+
+func dominatorChain(count int, reverse bool) Function {
+	function := Function{Blocks: make([]Block, count)}
+	if reverse {
+		function.Entry = BlockID(count - 1)
+	}
+	for index := range count {
+		block := Block{ID: BlockID(index), Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock}}
+		next := index + 1
+		if reverse {
+			next = index - 1
+		}
+		if next >= 0 && next < count {
+			block.Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{BlockID(next)}, UnwindSuccessor: NoBlock}
+		}
+		function.Blocks[index] = block
+	}
+	return function
+}
+
+func TestBlockDominatorsReverseChain(t *testing.T) {
+	function := dominatorChain(65, true)
+	assertDominatorsMatchReference(t, &function, false)
+}
+
+func TestDominatorBlockOrderPredecessorsFirst(t *testing.T) {
+	function := dominatorChain(1024, true)
+	indices := make(map[BlockID]int, len(function.Blocks))
+	predecessors := make(map[BlockID][]BlockID, len(function.Blocks))
+	for index, block := range function.Blocks {
+		indices[block.ID] = index
+		for _, successor := range block.Terminator.Successors {
+			predecessors[successor] = append(predecessors[successor], block.ID)
+		}
+	}
+	order := dominatorBlockOrder(&function, indices, predecessors)
+	if len(order) != len(indices) {
+		t.Fatalf("order has %d blocks, want %d", len(order), len(indices))
+	}
+	for index, id := range order {
+		if want := BlockID(len(order) - 1 - index); id != want {
+			t.Fatalf("position %d: got %d, want predecessor %d first", index, id, want)
+		}
+	}
+}
+
+func BenchmarkTrapCheckDominatorsChain(b *testing.B) {
+	for _, reverse := range []bool{false, true} {
+		for _, count := range []int{128, 512, 1024} {
+			b.Run(fmt.Sprintf("reverse_%t/blocks_%d", reverse, count), func(b *testing.B) {
+				function := dominatorChain(count, reverse)
+				b.ReportAllocs()
+				for b.Loop() {
+					_, sets := trapCheckGraph(&function)
+					if !sets.contains(BlockID(count-1)-function.Entry, function.Entry) {
+						b.Fatal("entry must dominate the last executed block")
+					}
+				}
+			})
+		}
+	}
+}
