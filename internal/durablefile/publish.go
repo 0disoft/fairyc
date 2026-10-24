@@ -42,6 +42,14 @@ func CreateTemporary(root *os.Root, directory string) (*os.File, string, error) 
 // same-directory opened-root rename. An existing identical destination converges. Any different
 // bytes under the same content-derived name are replaced and independently reverified by readers.
 func PublishImmutable(root *os.Root, temporaryPath, finalPath string, expected []byte) error {
+	return publishImmutable(root, temporaryPath, finalPath, expected, rename, syncPublished)
+}
+
+// The two filesystem actions are injected privately for deterministic failure
+// and concurrent-publication tests; callers always use the host implementations.
+type publicationAction func(*os.Root, string, string) error
+
+func publishImmutable(root *os.Root, temporaryPath, finalPath string, expected []byte, move, flush publicationAction) error {
 	if root == nil {
 		return fmt.Errorf("durable file root must be initialized")
 	}
@@ -53,30 +61,20 @@ func PublishImmutable(root *os.Root, temporaryPath, finalPath string, expected [
 		return fmt.Errorf("durable file publication paths must be canonical and share one directory")
 	}
 	directory := filepath.Dir(finalPath)
-	if err := rename(root, temporaryPath, finalPath); err == nil {
-		if syncErr := syncPublished(root, finalPath, directory); syncErr != nil {
-			return fmt.Errorf("sync published durable file: %w", syncErr)
+	if err := move(root, temporaryPath, finalPath); err != nil && !matchesFile(root, finalPath, expected) {
+		if removeErr := root.Remove(finalPath); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
+			return fmt.Errorf("publish immutable durable file: destination conflict")
 		}
-		return nil
-	}
-	if matchesFile(root, finalPath, expected) {
-		if syncErr := syncPublished(root, finalPath, directory); syncErr != nil {
-			return fmt.Errorf("sync converged durable file: %w", syncErr)
-		}
-		return nil
-	}
-	if removeErr := root.Remove(finalPath); removeErr == nil || errors.Is(removeErr, os.ErrNotExist) {
-		if renameErr := rename(root, temporaryPath, finalPath); renameErr == nil {
-			if syncErr := syncPublished(root, finalPath, directory); syncErr != nil {
-				return fmt.Errorf("sync replaced durable file: %w", syncErr)
-			}
-			return nil
-		}
-		if matchesFile(root, finalPath, expected) {
-			return nil
+		if err := move(root, temporaryPath, finalPath); err != nil && !matchesFile(root, finalPath, expected) {
+			return fmt.Errorf("publish immutable durable file: destination conflict")
 		}
 	}
-	return fmt.Errorf("publish immutable durable file: destination conflict")
+	// Every successful publication, including a concurrent publisher's win,
+	// must cross the same host sync boundary before success is reported.
+	if syncErr := flush(root, finalPath, directory); syncErr != nil {
+		return fmt.Errorf("sync published durable file: %w", syncErr)
+	}
+	return nil
 }
 
 func matchesFile(root *os.Root, path string, expected []byte) bool {
