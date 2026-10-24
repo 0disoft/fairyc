@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "mode": "controlled-contexts-at-linked-CRT-epilog-instructions",
+  "rows": [
+    {
+      "profile": "low",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "3d9a0aa19c0bbc25a73c00461801a8132c6045f71033c37a5b94b3a16eecb4d4",
+      "generatedCSHA256": "f35ef19ede682e20dd0c9357c8e9c1945453663d022111d34e2fc78463ec0dcc",
+      "companionSourceSHA256": "2eb0426c8af4249e519341f534fe5cf0e93abb446a2fd845bc358756c8b37602",
+      "imageSHA256": "10bb18785ecf5126f74a4b26680e5f26bacb5a93b89e8a47598db2bee62e42af",
+      "functions": 3,
+      "epilogs": 3,
+      "contexts": 6,
+      "pops": 3,
+      "explicitOffsets": 1,
+      "rejectedMutations": 6
+    },
+    {
+      "profile": "optimized",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "3d9a0aa19c0bbc25a73c00461801a8132c6045f71033c37a5b94b3a16eecb4d4",
+      "generatedCSHA256": "f35ef19ede682e20dd0c9357c8e9c1945453663d022111d34e2fc78463ec0dcc",
+      "companionSourceSHA256": "2eb0426c8af4249e519341f534fe5cf0e93abb446a2fd845bc358756c8b37602",
+      "imageSHA256": "aca461daf38bbb16ccba95f0086ea8dc1a87520c6b4d15b5728530a8b75f654b",
+      "functions": 3,
+      "epilogs": 3,
+      "contexts": 6,
+      "pops": 3,
+      "explicitOffsets": 1,
+      "rejectedMutations": 6
+    }
+  ]
+}

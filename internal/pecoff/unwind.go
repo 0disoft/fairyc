@@ -144,24 +144,18 @@ func inspectUnwindInfo(image []byte, executable Report, rva, functionSize uint32
 		return 0, 0, 0, fmt.Errorf("map complete UNWIND_INFO %#x: %w", rva, err)
 	}
 	previousCodeOffset := 256
-	epilogSeen := false
-	for slot := 0; slot < codeCount; {
+	firstSlot := 0
+	if version == 2 {
+		firstSlot, err = version2EpilogSlots(image[recordOffset+unwindHeaderBytes:recordOffset+unwindHeaderBytes+codeCount*2], uint32(prologSize), functionSize)
+		if err != nil {
+			return 0, 0, 0, fmt.Errorf("UNWIND_INFO %#x: %w", rva, err)
+		}
+	}
+	for slot := firstSlot; slot < codeCount; {
 		codeOffset := int(image[recordOffset+unwindHeaderBytes+slot*2])
 		opAndInfo := image[recordOffset+unwindHeaderBytes+slot*2+1]
 		op := opAndInfo & 0x0f
 		opInfo := opAndInfo >> 4
-		if version == 2 && op == 6 {
-			consumed := 1
-			if !epilogSeen && opInfo&1 == 0 {
-				consumed = 2
-			}
-			if slot+consumed > codeCount {
-				return 0, 0, 0, fmt.Errorf("UNWIND_INFO %#x has a truncated version-2 epilog descriptor", rva)
-			}
-			epilogSeen = true
-			slot += consumed
-			continue
-		}
 		if version == 2 && op == 7 {
 			slot++
 			continue

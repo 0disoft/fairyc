@@ -69,7 +69,10 @@ func TestInspectAMD64UnwindAcceptsVersion2LongEpilogDescriptor(t *testing.T) {
 	image[testUnwindXDataRawOffset+2] = 2
 	image[testUnwindXDataRawOffset+4] = 4
 	image[testUnwindXDataRawOffset+5] = 6
-	image[testUnwindXDataRawOffset+6] = 1
+	image[testUnwindXDataRawOffset+6] = 4
+	image[testUnwindXDataRawOffset+7] = 6
+	binary.LittleEndian.PutUint32(image[testUnwindPDataRawOffset+4:], 0x1020)
+	binary.LittleEndian.PutUint32(image[testUnwindSectionsOffset+8:], 32)
 	report, err := InspectAMD64Unwind(image)
 	if err != nil {
 		t.Fatal(err)

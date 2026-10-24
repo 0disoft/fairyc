@@ -374,24 +374,19 @@ func plainUnwindSignatureSize(data []byte, functionSize uint32) (int, error) {
 		return 0, fmt.Errorf("plain unwind payload exceeds its data")
 	}
 	previousCodeOffset := 256
-	epilogSeen := false
-	for slot := 0; slot < codeCount; {
+	firstSlot := 0
+	if version == 2 {
+		var err error
+		firstSlot, err = version2EpilogSlots(data[unwindHeaderBytes:unwindHeaderBytes+codeCount*2], uint32(prologSize), functionSize)
+		if err != nil {
+			return 0, fmt.Errorf("plain unwind payload: %w", err)
+		}
+	}
+	for slot := firstSlot; slot < codeCount; {
 		codeOffset := int(data[unwindHeaderBytes+slot*2])
 		opAndInfo := data[unwindHeaderBytes+slot*2+1]
 		op := opAndInfo & 0x0f
 		opInfo := opAndInfo >> 4
-		if version == 2 && op == 6 {
-			consumed := 1
-			if !epilogSeen && opInfo&1 == 0 {
-				consumed = 2
-			}
-			if slot+consumed > codeCount {
-				return 0, fmt.Errorf("plain unwind payload has a truncated version-2 epilog descriptor")
-			}
-			epilogSeen = true
-			slot += consumed
-			continue
-		}
 		if version == 2 && op == 7 {
 			slot++
 			continue

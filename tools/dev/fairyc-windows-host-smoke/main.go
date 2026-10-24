@@ -709,6 +709,10 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	version2Epilogs, err := runWindowsVersion2EpilogProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	receipt := hostSmokeReceipt{
 		artifactBytes:                  len(artifact),
 		validatedSections:              len(peReport.Sections),
@@ -766,6 +770,7 @@ func run(arguments []string) error {
 		unwindCases:                    unwindCases,
 		unwindExecutions:               unwindExecutions,
 		mixedStackExecutions:           len(mixedStack),
+		version2EpilogExecutions:       len(version2Epilogs),
 		standaloneCompilerBytes:        standaloneCompilerBytes,
 		toolchainVersion:               toolchain.Version,
 	}
@@ -775,5 +780,6 @@ func run(arguments []string) error {
 		reportHostCorrectnessSuccess(receipt)
 	}
 	fmt.Printf("Generated Fairy/C mixed stack proof passed: %d separate-object executions covering live handler/data and caller-context checks, mismatch rejection, C-boundary exception containment, and non-unwinding callback traps\n", len(mixedStack))
+	fmt.Printf("Linked unwind v2 epilog proof passed: %d MSVC profiles with controlled-context PC/SP, integer/XMM preservation and invalid-record rejection\n", len(version2Epilogs))
 	return nil
 }

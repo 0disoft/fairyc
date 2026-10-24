@@ -506,8 +506,10 @@ Fairy/C objects pass four local low/optimized executions, including callback tra
 without unwinding. The later [live-handler record](../ops/evidence/windows-mixed-handler-20261024.json)
 also checks the suspended C outer frame's exact handler/data addresses and independently saved
 caller PC/SP, with six rejected expectation mutations across both profiles. Foreign exceptions
-still must not cross Fairy frames. Version-2 epilog offset
-meaning, language-specific handler payload parsing, recursive chain equivalence and chained-tail
+still must not cross Fairy frames. The [v2 epilog record](../ops/evidence/windows-v2-epilog-20261024.json)
+checks bounded end-relative pop/ret descriptors against Windows virtual unwinding at actual linked
+instruction boundaries with controlled stack/register contexts. Live CRT capture, other epilog
+instruction shapes, language-specific handler payload parsing, recursive chain equivalence and chained-tail
 relocation, and complete hosted fixtures remain unproven; `windows-x64-unwind-fixtures` therefore
 remains missing. No runtime feature or dependency is added.
 
