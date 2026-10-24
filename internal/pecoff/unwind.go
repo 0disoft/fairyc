@@ -25,6 +25,7 @@ type UnwindReport struct {
 	ChainedInfos       int
 	Version2Infos      int
 	MaximumUnwindCodes int
+	MaximumChainDepth  int
 }
 
 // RuntimeFunction is one validated final-image .pdata function interval.
@@ -83,14 +84,21 @@ func InspectAMD64Unwind(image []byte) (UnwindReport, error) {
 		report.Functions = append(report.Functions, RuntimeFunction{BeginRVA: begin, EndRVA: end, UnwindInfoRVA: unwindRVA})
 		previousBegin = begin
 		previousEnd = end
-		if _, duplicate := seenUnwind[unwindRVA]; duplicate {
-			continue
-		}
-		seenUnwind[unwindRVA] = struct{}{}
 		codes, flags, version, err := inspectUnwindInfo(image, executable, unwindRVA, end-begin)
 		if err != nil {
 			return UnwindReport{}, fmt.Errorf("PE unwind runtime function %d: %w", index, err)
 		}
+		if flags&unwindFlagChainInfo != 0 {
+			depth, err := inspectUnwindChain(image, executable, report.Functions[len(report.Functions)-1])
+			if err != nil {
+				return UnwindReport{}, fmt.Errorf("PE unwind runtime function %d: %w", index, err)
+			}
+			report.MaximumChainDepth = max(report.MaximumChainDepth, depth)
+		}
+		if _, duplicate := seenUnwind[unwindRVA]; duplicate {
+			continue
+		}
+		seenUnwind[unwindRVA] = struct{}{}
 		report.UniqueUnwindInfos++
 		if flags&(unwindFlagExceptionHandler|unwindFlagUnwindHandler) != 0 {
 			report.HandlerInfos++
