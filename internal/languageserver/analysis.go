@@ -37,6 +37,7 @@ type analysis struct {
 	files       map[sourceKey]sourceView
 	imports     map[sourceKey]hir.PackageID
 	diagnostics map[string][]lspDiagnostic
+	positions   map[string]*positionIndex
 	clean       bool
 }
 
@@ -199,5 +200,5 @@ func (a *analysis) add(filename string, text []byte, start, end int, code, messa
 	if strings.TrimSpace(message) == "" {
 		message = code
 	}
-	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{textRange(text, start, end), 1, code, "fairyc", message})
+	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{a.sourceRange(filename, text, start, end), 1, code, "fairyc", message})
 }

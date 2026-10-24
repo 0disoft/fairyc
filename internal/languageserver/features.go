@@ -32,7 +32,7 @@ func (s *server) definition(d *document, offset int) []Location {
 		if !ok || target.Path == "" {
 			continue
 		}
-		locations = append(locations, Location{fileURI(target.Path), textRange(target.Text, r.Target.Declaration.StartByte, r.Target.Declaration.EndByte)})
+		locations = append(locations, Location{fileURI(target.Path), d.View.sourceRange(target.Path, target.Text, r.Target.Declaration.StartByte, r.Target.Declaration.EndByte)})
 	}
 	return locations
 }
