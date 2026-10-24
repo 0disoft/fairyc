@@ -508,8 +508,15 @@ also checks the suspended C outer frame's exact handler/data addresses and indep
 caller PC/SP, with six rejected expectation mutations across both profiles. Foreign exceptions
 still must not cross Fairy frames. The [v2 epilog record](../ops/evidence/windows-v2-epilog-20261024.json)
 checks bounded end-relative pop/ret descriptors against Windows virtual unwinding at actual linked
-instruction boundaries with controlled stack/register contexts. Live CRT capture, other epilog
-instruction shapes, language-specific handler payload parsing, recursive chain equivalence and chained-tail
+instruction boundaries with controlled stack/register contexts. The
+[chained-unwind record](../ops/evidence/windows-chained-unwind-20261024.json) adds
+metadata-derived controlled contexts for linked CRT fragments with nonempty prologs and no frame
+register: 16 fragments and 32 contexts per profile include two-link restoration, exact caller PC/SP,
+establisher frame, integer restoration and XMM preservation. Zero-prolog and frame-register forms
+are explicitly untested; no XMM save operation was exercised. The final-image inspector follows
+each chain to a valid primary record, rejecting cycles, excessive inspector depth, mismatched frame
+fields and secondary stack changes. Live CRT capture, other epilog
+instruction shapes, language-specific handler payload parsing, complete chain equivalence and chained-tail
 relocation, and complete hosted fixtures remain unproven; `windows-x64-unwind-fixtures` therefore
 remains missing. No runtime feature or dependency is added.
 

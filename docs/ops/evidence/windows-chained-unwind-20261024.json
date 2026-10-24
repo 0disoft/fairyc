@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "mode": "metadata-derived-controlled-contexts-at-linked-CRT-chain-prologs",
+  "rows": [
+    {
+      "profile": "low",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "23216c641802490cc3b18ea5b5be070d667ef1092fd77bf8158034e514a467da",
+      "generatedCSHA256": "a387a593eb1003bf52484e83302ade970ae527caa2a675ec0f418ef94992b1df",
+      "companionSourceSHA256": "daad962f1cc076dbbd286447d706cbf86694b2e850a0647fbdc37c7b29392f96",
+      "imageSHA256": "ac5cad4cc26ebcdd4df044021ae1673391cfd63a0cbdde3bcd91dc8b7055547f",
+      "functions": 16,
+      "untestedFunctions": 21,
+      "contexts": 32,
+      "maximumDepth": 2,
+      "integerRestores": 136,
+      "vectorRestores": 0,
+      "rejectedMutations": 6
+    },
+    {
+      "profile": "optimized",
+      "toolchain": "14.51.36231",
+      "fairySourceSHA256": "23216c641802490cc3b18ea5b5be070d667ef1092fd77bf8158034e514a467da",
+      "generatedCSHA256": "a387a593eb1003bf52484e83302ade970ae527caa2a675ec0f418ef94992b1df",
+      "companionSourceSHA256": "daad962f1cc076dbbd286447d706cbf86694b2e850a0647fbdc37c7b29392f96",
+      "imageSHA256": "da889c9fb17131fc84aba1d04e50d8c504aa9010e0343a74e45c4ca5cdfc0527",
+      "functions": 16,
+      "untestedFunctions": 21,
+      "contexts": 32,
+      "maximumDepth": 2,
+      "integerRestores": 136,
+      "vectorRestores": 0,
+      "rejectedMutations": 6
+    }
+  ]
+}

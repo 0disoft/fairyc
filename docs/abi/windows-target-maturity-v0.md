@@ -26,7 +26,7 @@ No row may be promoted by prose alone. A mandatory row is complete only when its
 | Default-library resolution | partial | Windows linker/native smoke | Current MSVC link paths resolve required runtime libraries | Record exact default-library inputs and prove expected selection/failure behavior without relying on developer-machine accident |
 | Archives and COMDAT selection | partial | COMDAT/archive probes, `internal/pecoff/generated_selection.go`, `internal/pecoff/generated_unwind_selection.go`, and ADRs under `docs/adr/` | Associative archive probes and actual generated-unit/runtime parents and unwind children have direct retention/removal evidence | Cover every archive/COMDAT form emitted by the promoted production path and library inputs in the hosted receipt |
 | Basic AMD64 unwind tables | proven | unwind probes, PE inspection, Windows host smoke | Generated/runtime frames have bounded `.pdata`/`.xdata` evidence at both profiles | Keep mandatory in same-commit hosted receipt |
-| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Selected handler/relocation forms are inspected; the live mixed-stack probe checks the C outer frame's handler/data and independently saved caller PC/SP; linked v2 pop/ret epilogs pass controlled-context restoration | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
+| Unwind v2, handlers, and chained unwind | partial | Windows unwind probes and ADRs | Live mixed-stack handler/data and caller PC/SP checks; linked v2 pop/ret epilogs and selected two-link CRT chains pass controlled-context restoration | Complete v2/handler/chain cases that can be emitted by the admitted target and execute unwind through those exact frames |
 | Fairy to foreign mixed-frame inspection | partial | `internal/windowsunwindprobe/mixed.go`, Windows native smoke | Live metadata walk across generated Fairy and independent C frames at both profiles | Retain the mixed-stack proof in the same-commit hosted receipt; broader unwind requirements remain separate |
 | Foreign to Fairy callback inspection and trap boundary | partial | `tools/dev/fairyc-windows-host-smoke/mixed_stack_probe.go` | Callback frames occur in the live walk; C catches its own exception and Fairy traps terminate without unwinding | Retain both callback outcomes and exact trap mapping in the same-commit hosted receipt |
 | CodeView object records | partial | ADR 0238 and CodeView probes | Function-targeted `SECREL`/`SECTION` and RSDS/PDB association are checked | Expand only the records required by the promoted debug contract; do not claim full CodeView support |
@@ -148,6 +148,34 @@ The existing Windows host smoke runs the probe without adding a workflow or
 dependency. Other epilog instruction shapes, live CRT capture, chained frames,
 handler payload interpretation, hosted proof and clean-machine distribution
 remain open. Target maturity flags are unchanged.
+
+## Linked chained-unwind restoration (2026-10-24)
+
+The [chain record](../ops/evidence/windows-chained-unwind-20261024.json) builds
+a generated Fairy entry and an independent C companion in low and optimized
+MSVC profiles. In each image, 16 real CRT fragments with nonempty prologs and no
+frame register pass Windows `RtlVirtualUnwind` at fragment entry and prolog end:
+32 metadata-derived controlled contexts, including two-link chains, recover the
+exact caller PC/SP and establisher frame. Each profile exercises 136 integer
+restores and checks preservation of the other integer and XMM nonvolatile
+registers. No XMM save operation is exercised. The remaining 21 chained fragments
+per image have zero-length prologs or unsupported frame/operation forms and are
+explicitly counted as untested. These contexts do not establish agreement between
+the metadata and the actual machine instructions or capture live CRT execution.
+
+The final-image inspector now validates every reachable chain record and its
+copied function interval, including primary records absent from the top-level
+exception directory. It rejects cycles, unmapped or malformed targets, mismatched
+frame register/offset fields, and secondary pushes, allocations or frame setup.
+A 64-link inspection bound limits hostile input processing; it is not a Windows
+ABI limit. Focused unit cases cover that boundary and multi-link failures. Six
+mutations of real image records per profile are rejected before OS unwinding.
+
+The existing Windows host smoke consumes the probe and includes its images in
+the receipt count. No workflow, dependency, product API or maturity flag changes.
+Live captures, zero-prolog and frame-register contexts, instruction agreement,
+other operation forms, exact chained-tail relocation, hosted execution and
+clean-machine distribution remain open.
 
 ## Optimized Fairy symbol lookup (2026-10-24)
 
