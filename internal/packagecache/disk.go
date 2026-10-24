@@ -485,15 +485,9 @@ func decodeDiskRecord(encoded []byte, maxBytes uint64) (Record, error) {
 	if maxBytes == 0 || len(encoded) == 0 || uint64(len(encoded)) > maxBytes {
 		return Record{}, ErrRecordTooLarge
 	}
-	decoder := json.NewDecoder(bytes.NewReader(encoded))
-	decoder.DisallowUnknownFields()
 	var envelope diskEnvelope
-	if err := decoder.Decode(&envelope); err != nil {
+	if err := json.Unmarshal(encoded, &envelope); err != nil {
 		return Record{}, fmt.Errorf("decode package cache disk record: %w", err)
-	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		return Record{}, fmt.Errorf("decode package cache disk record trailing data")
 	}
 	if envelope.Schema != DiskRecordSchema || envelope.Version != DiskRecordVersion {
 		return Record{}, fmt.Errorf("package cache disk record schema or version is incompatible")
@@ -512,6 +506,8 @@ func decodeDiskRecord(encoded []byte, maxBytes uint64) (Record, error) {
 		return Record{}, err
 	}
 	if !bytes.Equal(encoded, canonical) {
+		// This exact comparison also rejects unknown/duplicate fields, field
+		// reordering and whitespace without a streaming decoder's input copy.
 		return Record{}, fmt.Errorf("package cache disk record is not canonically encoded")
 	}
 	return record, nil

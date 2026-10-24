@@ -88,9 +88,16 @@ func TestDiskCodecStillRejectsNoncanonicalRecords(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name, invalid := range map[string][]byte{
-		"whitespace": append([]byte(" "), encoded...),
-		"trailing":   append(bytes.Clone(encoded), []byte(" {}")...),
-		"unknown":    bytes.Replace(encoded, []byte(`"record":`), []byte(`"extra":true,"record":`), 1),
+		"whitespace":          append([]byte(" "), encoded...),
+		"trailing whitespace": append(bytes.Clone(encoded), '\n'),
+		"trailing":            append(bytes.Clone(encoded), []byte(" {}")...),
+		"trailing null":       append(bytes.Clone(encoded), []byte(" null")...),
+		"unknown":             bytes.Replace(encoded, []byte(`"record":`), []byte(`"extra":true,"record":`), 1),
+		"unknown record":      bytes.Replace(encoded, []byte(`"publicInterface":`), []byte(`"extra":true,"publicInterface":`), 1),
+		"unknown artifact":    bytes.Replace(encoded, []byte(`"kind":`), []byte(`"extra":true,"kind":`), 1),
+		"duplicate schema":    bytes.Replace(encoded, []byte(`"schema":`), []byte(`"schema":"ignored","schema":`), 1),
+		"duplicate key":       bytes.Replace(encoded, []byte(`"key":`), []byte(`"key":[],"key":`), 1),
+		"duplicate artifacts": bytes.Replace(encoded, []byte(`"artifacts":`), []byte(`"artifacts":[],"artifacts":`), 1),
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := decodeDiskRecord(invalid, 1<<20); err == nil {
