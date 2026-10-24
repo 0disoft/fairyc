@@ -33,6 +33,14 @@ func TestToolCancellationHelper(t *testing.T) {
 	child := exec.Command(os.Args[0], "-test.run=^TestToolCancellationHelper$")
 	child.Env = replaceWindowsEnvironment(os.Environ(), "FAIRYC_TOOL_CANCEL_TEST", "child")
 	child.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	child.Stdout, child.Stderr = os.Stdout, os.Stderr
+	if mode == "orphan" {
+		if err := child.Start(); err != nil {
+			os.Exit(2)
+		}
+		fmt.Print("incomplete preprocessor output")
+		os.Exit(0)
+	}
 	if err := child.Run(); err != nil {
 		os.Exit(2)
 	}

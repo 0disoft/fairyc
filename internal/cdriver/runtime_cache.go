@@ -147,7 +147,13 @@ func useRuntimeObject(store *packagecache.DiskStore, key packagecache.Key,
 func preprocessRuntime(path string, environment []string, directory string, arguments []string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
+	return preprocessRuntimeContext(ctx, path, environment, directory, arguments)
+}
+
+func preprocessRuntimeContext(ctx context.Context, path string, environment []string, directory string, arguments []string) (string, error) {
 	command := exec.CommandContext(ctx, path, arguments...)
+	configureToolCancellation(command)
+	command.WaitDelay = 2 * time.Second
 	command.Dir = directory
 	command.Env = environment
 	output := newBoundedProcessOutput(maxRuntimePreprocessedBytes)
