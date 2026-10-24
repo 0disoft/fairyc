@@ -1,9 +1,14 @@
 package mir
 
-import "github.com/0disoft/fairyc/internal/hir"
+import (
+	"fmt"
+
+	"github.com/0disoft/fairyc/internal/hir"
+)
 
 // Operand annotations alone cannot grant writes to an unrelated local.
-func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction) map[LocalID]hir.Type {
+// Conflicts are errors: an absent type map would disable Region/type checks.
+func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction) (map[LocalID]hir.Type, error) {
 	needed := false
 	for _, typ := range function.ParameterTypes {
 		needed = needed || typ == hir.TypeRegion
@@ -14,10 +19,10 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 		}
 	}
 	if !needed {
-		return nil
+		return nil, nil
 	}
 	types := make(map[LocalID]hir.Type)
-	conflicted := false
+	var conflict error
 	set := func(local LocalID, typ hir.Type) bool {
 		if local < 0 || typ == hir.ParseType("") || typ == hir.TypeInvalid {
 			return false
@@ -25,7 +30,9 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 		if previous, exists := types[local]; exists {
 			if previous != typ {
 				types[local] = hir.TypeInvalid
-				conflicted = true
+				if conflict == nil {
+					conflict = fmt.Errorf("local %d has conflicting types %q and %q", local, previous, typ)
+				}
 			}
 			return false
 		}
@@ -71,10 +78,10 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 			}
 		}
 	}
-	if conflicted {
-		return nil
+	if conflict != nil {
+		return nil, conflict
 	}
-	return types
+	return types, nil
 }
 
 func fieldStoreOperandType(operand Operand, locals map[LocalID]hir.Type) hir.Type {

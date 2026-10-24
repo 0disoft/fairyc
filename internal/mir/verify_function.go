@@ -13,7 +13,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 }
 
 func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
-	storeTypes := fieldStoreLocalTypes(function, functions, foreignFunctions)
+	storeTypes, err := fieldStoreLocalTypes(function, functions, foreignFunctions)
+	if err != nil {
+		return []VerificationError{{Code: CodeOperationType, Entity: function.Name, Detail: err.Error()}}
+	}
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: CodeControlFlow, Entity: function.Name, Detail: "entry block is missing"}}
 	}
