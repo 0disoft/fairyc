@@ -34,6 +34,7 @@ func verifyAssertEdges(function *Function) []VerificationError {
 func verifyTrapCheckEdges(function *Function) []VerificationError {
 	var blocks map[BlockID]*Block
 	var dominators *blockDominatorSets
+	var markers checkedMarkerIndex
 	var failures []VerificationError
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
@@ -46,10 +47,11 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 			// Build the graph once, on the first operation that consumes it.
 			if dominators == nil {
 				blocks, dominators = trapCheckGraph(function)
+				markers = indexCheckedMarkers(function)
 			}
 			entity := operationEntity(block.ID, operationIndex, operation)
 			checkedOperator, checkedOperands := trappingCheckIdentity(operation)
-			invalidMarker, complete := completeCheckedDominator(function, blocks, dominators, block.ID, switchKind, markerKind, checkedOperator,
+			invalidMarker, complete := completeCheckedDominator(markers, blocks, dominators, block.ID, switchKind, markerKind, checkedOperator,
 				checkedOperands, operation.OwnerType, operation.Type, categories)
 			if !complete {
 				failureEntity := entity
@@ -78,18 +80,22 @@ func trapCheckGraph(function *Function) (map[BlockID]*Block, *blockDominatorSets
 	return blocks, blockDominators(function, predecessors)
 }
 
-func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dominators *blockDominatorSets, target BlockID,
+func completeCheckedDominator(markers checkedMarkerIndex, blocks map[BlockID]*Block, dominators *blockDominatorSets, target BlockID,
 	switchKind string, markerKind OperationKind, operator string, operands []Operand, ownerType, resultType hir.Type, categories []string) (string, bool) {
 	invalidMarker := ""
-	for index := range function.Blocks {
-		candidate := &function.Blocks[index]
+	key, valid := markerKey(markerKind, operator, operands)
+	if !valid {
+		return "", false
+	}
+	for _, marker := range markers[key] {
+		candidate := marker.block
 		if candidate.ID == target {
 			continue
 		}
 		if !dominators.contains(target, candidate.ID) {
 			continue
 		}
-		markerEntity, markerValid := checkedMarkerStatus(candidate, markerKind, operator, operands, ownerType, resultType, categories)
+		markerEntity, markerValid := checkedMarkerStatus(marker, ownerType, resultType, categories)
 		if markerEntity != "" && !markerValid && invalidMarker == "" {
 			invalidMarker = markerEntity
 		}
@@ -160,16 +166,11 @@ func checkedTerminatorMatches(terminator Terminator, continuation BlockID, switc
 	return true
 }
 
-func checkedMarkerStatus(block *Block, markerKind OperationKind, operator string, operands []Operand, ownerType, resultType hir.Type, categories []string) (string, bool) {
-	for index := len(block.Operations) - 1; index >= 0; index-- {
-		operation := block.Operations[index]
-		if operation.Kind == markerKind && operation.Operator == operator && slices.Equal(operation.Operands, operands) {
-			typeMatches := (markerKind != OperationArithmeticCheck && markerKind != OperationCheckedDivision) ||
-				operation.OwnerType == ownerType && operation.Type == resultType
-			return operationEntity(block.ID, index, operation), typeMatches && slices.Equal(operation.TrapCategories, categories)
-		}
-	}
-	return "", false
+func checkedMarkerStatus(marker checkedMarker, ownerType, resultType hir.Type, categories []string) (string, bool) {
+	operation := marker.block.Operations[marker.operation]
+	typeMatches := (operation.Kind != OperationArithmeticCheck && operation.Kind != OperationCheckedDivision) ||
+		operation.OwnerType == ownerType && operation.Type == resultType
+	return operationEntity(marker.block.ID, marker.operation, operation), typeMatches && slices.Equal(operation.TrapCategories, categories)
 }
 
 func checkedTrapSuccessorMatches(blocks map[BlockID]*Block, terminator Terminator, categories []string) bool {
