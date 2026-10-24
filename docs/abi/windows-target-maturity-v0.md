@@ -245,6 +245,25 @@ No PDB is added to default builds or the preview. This proves bounded function
 names and identity rejection, not original `.fy` line mapping, universal stack
 symbolication or hosted execution. The row and target maturity flags remain unchanged.
 
+## Integrated local correctness smoke (2026-10-24)
+
+The [integrated record](../ops/evidence/windows-integrated-smoke-20261024.json)
+runs `go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke`, the Windows
+native CI command, on clean commit
+`a0db1238639ca6ea65dd94e6aedd5f61866cca0a` with `CGO_ENABLED=0`.
+The source tree is unchanged after the run. Exit 0 in 440.609 seconds covers
+two target builds, 27 workspace builds, nine workspace runs, two direct target
+runs, two native File probes and 20 ABI/layout cases. The same process also
+passes the ten mixed-stack executions and both profiles of v2 epilog,
+chain-context and exact chained-tail relocation verification.
+
+The record includes the commit/tree identities, Go/MSVC/Windows versions,
+Fairy language/SDK/runtime revisions and complete summary output. It is one
+local integrated execution, not a collection of earlier successful receipts.
+The recording commit changes documentation/evidence only. Performance/cache
+measurements and the full Go suite were not run. Hosted CI and clean-machine
+distribution remain separate requirements; no target maturity flag changes.
+
 ## Ownership rule
 
 A future PR for issue #49 must name one or a small adjacent group of rows from this table. It must update the row status and evidence path in the same PR as the executable evidence. Broad cleanup, unrelated refactors, or measurement-only changes do not count as maturity evidence.

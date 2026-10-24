@@ -1,0 +1,56 @@
+{
+  "schema": "fairyc.windows-integrated-smoke/v1",
+  "passed": true,
+  "testedCommit": "a0db1238639ca6ea65dd94e6aedd5f61866cca0a",
+  "testedTree": "4ac9b0527238e397885704c5c1483db89c8f4254",
+  "cleanAtStart": true,
+  "sourceUnchangedAfterRun": true,
+  "startedUTC": "2026-10-24T10:28:36.563801Z",
+  "finishedUTC": "2026-10-24T10:35:57.1731139Z",
+  "elapsedSeconds": 440.609,
+  "command": "go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke",
+  "exitCode": 0,
+  "environment": {
+    "kind": "local-development-host",
+    "os": "Microsoft Windows NT 10.0.26300.0",
+    "arch": "amd64",
+    "goVersion": "go version go1.27.1 windows/amd64",
+    "cgoEnabled": "0",
+    "msvcVersion": "14.51.36231"
+  },
+  "target": "x86_64-windows-msvc",
+  "profiles": [
+    "low",
+    "optimized"
+  ],
+  "revisions": {
+    "language": "fairyc-language/20",
+    "sdkStdlib": "0.0.0-stage0.87",
+    "runtimeABI": "fairyc-runtime/0"
+  },
+  "counts": {
+    "targetBuilds": 2,
+    "workspaceBuilds": 27,
+    "workspaceRuns": 9,
+    "directTargetRuns": 2,
+    "nativeFileProbes": 2,
+    "abiLayoutCases": 20
+  },
+  "output": [
+    "Windows host correctness smoke passed: 2 target builds, 27 workspace builds, 9 workspace runs, 2 direct target runs, 2 native File probes, and 20 ABI/layout cases with msvc 14.51.36231",
+    "Windows host measurements skipped; use --with-measurements for the scheduled/manual measurement lane",
+    "Generated Fairy/C mixed stack proof passed: 10 separate-object executions covering live handler/data and caller-context checks, mismatch rejection, C-boundary exception containment, and non-unwinding callback traps",
+    "Linked unwind v2 epilog proof passed: 2 MSVC profiles with controlled-context PC/SP, integer/XMM preservation and invalid-record rejection",
+    "Linked chained unwind proof passed: 2 MSVC profiles with metadata-derived prolog contexts, instruction-derived zero-prolog add/pop/ret contexts, caller PC/SP and nonvolatile restoration, including multi-link chains and invalid-record rejection",
+    "Closed chained-tail relocation proof passed: 2 MSVC profiles with six exact ADDR32NB fields, nonzero addends, three native unwind contexts and structurally valid wrong-target rejection"
+  ],
+  "sourceLogSHA256": "1a7dc7332c7cecda763858d3b3f468b3bfd6e34f9f8f19efb6e1919d39a47a33",
+  "skipped": [
+    "Performance/cache measurements: separate scheduled/manual lane, disabled in default correctness mode",
+    "Full Go test suite: not part of this native-smoke command",
+    "Hosted CI: no remote execution requested",
+    "Clean-machine distribution: run used a developer host with MSVC and Windows SDK installed"
+  ],
+  "completeMaturityReceipt": false,
+  "targetMaturityPromoted": false
+}
