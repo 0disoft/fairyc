@@ -294,7 +294,8 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 		return Record{}, false
 	}
 	store.recordHit()
-	return cloneRecord(valid[0]), true
+	// Each read decoded a fresh record; no store-owned payload is exposed.
+	return valid[0], true
 }
 
 // DeleteIfMatch removes only the immutable generation whose canonical bytes exactly match
@@ -457,8 +458,10 @@ func encodeDiskRecord(record Record, maxBytes uint64) (result []byte, err error)
 		return nil, err
 	}
 	wire := diskRecord{Key: record.Key, PublicInterface: record.PublicInterface}
+	// Marshal owns the encoded result and finishes before these borrowed inputs
+	// can escape. Copying each artifact before serialization adds no isolation.
 	for _, artifact := range record.Artifacts {
-		wire.Artifacts = append(wire.Artifacts, diskArtifact{Kind: artifact.Kind, Data: slices.Clone(artifact.Data)})
+		wire.Artifacts = append(wire.Artifacts, diskArtifact{Kind: artifact.Kind, Data: artifact.Data})
 	}
 	encoded, err := json.Marshal(diskEnvelope{Schema: DiskRecordSchema, Version: DiskRecordVersion, Record: wire})
 	if err != nil {
@@ -488,8 +491,10 @@ func decodeDiskRecord(encoded []byte, maxBytes uint64) (Record, error) {
 		return Record{}, fmt.Errorf("package cache disk record schema or version is incompatible")
 	}
 	record := Record{Key: envelope.Record.Key, PublicInterface: envelope.Record.PublicInterface}
+	// JSON decoding already allocated the base64 payloads independently of
+	// encoded. Transfer those buffers to the returned record rather than clone.
 	for _, artifact := range envelope.Record.Artifacts {
-		record.Artifacts = append(record.Artifacts, Artifact{Kind: artifact.Kind, Data: slices.Clone(artifact.Data)})
+		record.Artifacts = append(record.Artifacts, Artifact{Kind: artifact.Kind, Data: artifact.Data})
 	}
 	if _, err := validateRecord(record); err != nil {
 		return Record{}, err
