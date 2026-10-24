@@ -3,11 +3,29 @@ package packagecache
 import (
 	"bytes"
 	"crypto/sha256"
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 )
+
+func BenchmarkDiskEncodeRejectOversize(b *testing.B) {
+	for _, size := range []int{128 << 10, 4 << 20, 16 << 20} {
+		b.Run(fmt.Sprintf("payload_%d", size), func(b *testing.B) {
+			record := diskOwnershipRecord()
+			record.Artifacts = []Artifact{{Kind: ArtifactObject, Data: bytes.Repeat([]byte{'x'}, size)}}
+			b.ReportAllocs()
+			for b.Loop() {
+				encoded, err := encodeDiskRecord(record, 64<<10)
+				if encoded != nil || !errors.Is(err, ErrRecordTooLarge) {
+					b.Fatalf("got %d bytes, %v; want oversized rejection", len(encoded), err)
+				}
+			}
+		})
+	}
+}
 
 func BenchmarkDiskStoreGet4MiB(b *testing.B) {
 	const size = 4 << 20

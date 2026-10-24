@@ -458,9 +458,17 @@ func encodeDiskRecord(record Record, maxBytes uint64) (result []byte, err error)
 		return nil, err
 	}
 	wire := diskRecord{Key: record.Key, PublicInterface: record.PublicInterface}
+	remaining := maxBytes
 	// Marshal owns the encoded result and finishes before these borrowed inputs
 	// can escape. Copying each artifact before serialization adds no isolation.
 	for _, artifact := range record.Artifacts {
+		// Base64 payloads alone are a lower bound on the final JSON size.
+		// Use uint64 arithmetic so rounding cannot overflow an int.
+		encodedBytes := (uint64(len(artifact.Data)) + 2) / 3 * 4
+		if encodedBytes > remaining {
+			return nil, ErrRecordTooLarge
+		}
+		remaining -= encodedBytes
 		wire.Artifacts = append(wire.Artifacts, diskArtifact{Kind: artifact.Kind, Data: artifact.Data})
 	}
 	encoded, err := json.Marshal(diskEnvelope{Schema: DiskRecordSchema, Version: DiskRecordVersion, Record: wire})
