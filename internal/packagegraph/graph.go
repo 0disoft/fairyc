@@ -5,6 +5,7 @@ package packagegraph
 import (
 	"fmt"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/source"
@@ -206,9 +207,12 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 				visible = append(visible, targetClass)
 			}
 		}
+		// Provider indexes are consumed by this lookup only, so reuse one
+		// scratch buffer for the class instead of allocating for every import.
+		providers := make([]int, 0, len(visible))
 		for _, module := range representative.Modules {
 			for _, importPath := range module.Imports {
-				providers := providerClasses(graph, classes, visible, importPath)
+				providers = providerClasses(graph, classes, visible, importPath, providers[:0])
 				switch len(providers) {
 				case 0:
 					subjects := slices.Clone(class.members)
@@ -336,8 +340,7 @@ func modulesEqual(left, right []Module) bool {
 	return true
 }
 
-func providerClasses(graph Graph, classes []resolvedClass, visible []int, modulePath string) []int {
-	providers := make([]int, 0, len(visible))
+func providerClasses(graph Graph, classes []resolvedClass, visible []int, modulePath string, providers []int) []int {
 	for _, classIndex := range visible {
 		if classProvides(graph, classes[classIndex], modulePath) {
 			providers = append(providers, classIndex)
@@ -348,12 +351,12 @@ func providerClasses(graph Graph, classes []resolvedClass, visible []int, module
 
 func classProvides(graph Graph, class resolvedClass, modulePath string) bool {
 	representative := graph.Nodes[class.nodes[0]]
-	for _, module := range representative.Modules {
-		if module.Path == modulePath {
-			return true
-		}
-	}
-	return false
+	// Resolve validates that every node's module paths are sorted and unique
+	// before provider lookup. Search that catalog without building another index.
+	index := sort.Search(len(representative.Modules), func(index int) bool {
+		return representative.Modules[index].Path >= modulePath
+	})
+	return index < len(representative.Modules) && representative.Modules[index].Path == modulePath
 }
 
 func validModulePath(value string) bool {
