@@ -15,6 +15,7 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 		}
 	}
 	for _, function := range program.Functions {
+		var usage map[LocalID]callbackLocalUsage
 		if function.ResultType == hir.TypeCCallbackI32UserData {
 			reject(function.Name, "callback result is not admitted")
 		}
@@ -60,42 +61,67 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 					term.Arguments[len(term.Arguments)-2].Kind != OperandLocal || term.Arguments[len(term.Arguments)-2].Local != op.DestinationLocal {
 					reject(function.Name, "callback is not consumed by its call-bounded foreign argument")
 				}
-				uses, definitions := 0, 0
-				count := func(operand Operand) {
-					if operand.Kind == OperandLocal && operand.Local == op.DestinationLocal {
-						uses++
-					}
+				if usage == nil {
+					usage = countCallbackLocalUsage(&function)
 				}
-				for _, parameter := range function.Parameters {
-					if parameter == op.DestinationLocal {
-						definitions++
-					}
-				}
-				for _, other := range function.Blocks {
-					for _, operation := range other.Operations {
-						if operation.DestinationLocal == op.DestinationLocal {
-							definitions++
-						}
-						for _, operand := range operation.Operands {
-							count(operand)
-						}
-					}
-					if other.Terminator.DestinationLocal == op.DestinationLocal {
-						definitions++
-					}
-					count(other.Terminator.ReturnValue)
-					for _, operand := range other.Terminator.Arguments {
-						count(operand)
-					}
-					for _, operand := range other.Terminator.SwitchOperands {
-						count(operand)
-					}
-				}
-				if uses != 1 || definitions != 1 {
+				counts := usage[op.DestinationLocal]
+				if counts.uses != 1 || counts.definitions != 1 {
 					reject(function.Name, "callback address escapes or its temporary is overwritten")
 				}
 			}
 		}
 	}
 	return failures
+}
+
+type callbackLocalUsage struct {
+	uses, definitions int
+}
+
+// Only callback destinations need counts. Build them once per function, using
+// sparse keys because cached MIR can contain arbitrary local IDs. Callers defer
+// this work until a callback is found, so other functions allocate no index.
+func countCallbackLocalUsage(function *Function) map[LocalID]callbackLocalUsage {
+	usage := make(map[LocalID]callbackLocalUsage)
+	for _, block := range function.Blocks {
+		for _, op := range block.Operations {
+			if op.Kind == OperationCCallback {
+				usage[op.DestinationLocal] = callbackLocalUsage{}
+			}
+		}
+	}
+	define := func(local LocalID) {
+		if counts, found := usage[local]; found {
+			counts.definitions++
+			usage[local] = counts
+		}
+	}
+	use := func(operand Operand) {
+		if operand.Kind == OperandLocal {
+			if counts, found := usage[operand.Local]; found {
+				counts.uses++
+				usage[operand.Local] = counts
+			}
+		}
+	}
+	for _, parameter := range function.Parameters {
+		define(parameter)
+	}
+	for _, block := range function.Blocks {
+		for _, op := range block.Operations {
+			define(op.DestinationLocal)
+			for _, operand := range op.Operands {
+				use(operand)
+			}
+		}
+		define(block.Terminator.DestinationLocal)
+		use(block.Terminator.ReturnValue)
+		for _, operand := range block.Terminator.Arguments {
+			use(operand)
+		}
+		for _, operand := range block.Terminator.SwitchOperands {
+			use(operand)
+		}
+	}
+	return usage
 }
