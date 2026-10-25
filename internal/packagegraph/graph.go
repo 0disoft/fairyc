@@ -185,12 +185,11 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 
 	outgoing := make(map[int][]int, len(classes))
 	for _, dependency := range resolvedDependencies {
-		if !slices.Contains(outgoing[dependency.ownerClass], dependency.targetClass) {
-			outgoing[dependency.ownerClass] = append(outgoing[dependency.ownerClass], dependency.targetClass)
-		}
+		outgoing[dependency.ownerClass] = append(outgoing[dependency.ownerClass], dependency.targetClass)
 	}
-	for owner := range outgoing {
-		slices.Sort(outgoing[owner])
+	for owner, targets := range outgoing {
+		slices.Sort(targets)
+		outgoing[owner] = slices.Compact(targets)
 	}
 	if cycle := findDependencyCycle(outgoing, len(classes)); len(cycle) != 0 {
 		var subjects []string
@@ -201,12 +200,9 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 	}
 	for classIndex, class := range classes {
 		representative := graph.Nodes[class.nodes[0]]
-		visible := []int{classIndex}
-		for _, targetClass := range outgoing[classIndex] {
-			if !slices.Contains(visible, targetClass) {
-				visible = append(visible, targetClass)
-			}
-		}
+		// Targets are sorted and unique, and cycle rejection above excludes self.
+		// Preserve self-first lookup order without another quadratic deduplication.
+		visible := append([]int{classIndex}, outgoing[classIndex]...)
 		// Provider indexes are consumed by this lookup only, so reuse one
 		// scratch buffer for the class instead of allocating for every import.
 		providers := make([]int, 0, len(visible))
