@@ -27,8 +27,10 @@ func BenchmarkDiskEncodeRejectOversize(b *testing.B) {
 	}
 }
 
-func BenchmarkDiskStoreGet4MiB(b *testing.B) {
-	const size = 4 << 20
+func BenchmarkDiskStoreGet1KiB(b *testing.B) { benchmarkDiskStoreGet(b, 1<<10) }
+func BenchmarkDiskStoreGet4MiB(b *testing.B) { benchmarkDiskStoreGet(b, 4<<20) }
+
+func benchmarkDiskStoreGet(b *testing.B, size int) {
 	store, err := NewDiskStore(b.TempDir(), DiskLimits{
 		MaxEntries: 4, MaxBytes: 32 << 20, MaxRecordBytes: 16 << 20, TempMaxAge: time.Hour,
 	})
@@ -46,7 +48,7 @@ func BenchmarkDiskStoreGet4MiB(b *testing.B) {
 		b.Fatal("warm-up cache miss")
 	}
 	b.ReportAllocs()
-	b.SetBytes(size)
+	b.SetBytes(int64(size))
 	b.ResetTimer()
 	for range b.N {
 		got, found := store.Get(key)

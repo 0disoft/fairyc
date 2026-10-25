@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -273,7 +272,11 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 			continue
 		}
 		path := filepath.Join(keyDirectory, entry.Name())
-		record, readErr := store.readGeneration(path, entry.Name(), key)
+		var sizeHint int64
+		if info, err := entry.Info(); err == nil {
+			sizeHint = info.Size()
+		}
+		record, readErr := store.readGeneration(path, entry.Name(), key, sizeHint)
 		if readErr != nil {
 			store.recordRejected()
 			_ = store.root.Remove(path)
@@ -323,7 +326,7 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 	if err != nil {
 		return false
 	}
-	actual, readErr := io.ReadAll(io.LimitReader(file, diskReadLimit(store.limits.MaxRecordBytes)))
+	actual, readErr := readDiskRecordBytes(file, store.limits.MaxRecordBytes)
 	closeErr := file.Close()
 	if readErr != nil || closeErr != nil || !bytes.Equal(actual, encoded) {
 		return false
@@ -402,18 +405,15 @@ func (store *DiskStore) Stats() (result DiskStats, err error) {
 	return stats, nil
 }
 
-func (store *DiskStore) readGeneration(path, name string, expected Key) (Record, error) {
+func (store *DiskStore) readGeneration(path, name string, expected Key, sizeHint int64) (Record, error) {
 	file, err := store.root.Open(path)
 	if err != nil {
 		return Record{}, err
 	}
 	defer file.Close()
-	encoded, err := io.ReadAll(io.LimitReader(file, diskReadLimit(store.limits.MaxRecordBytes)))
+	encoded, err := readDiskBytes(file, sizeHint, store.limits.MaxRecordBytes)
 	if err != nil {
 		return Record{}, err
-	}
-	if uint64(len(encoded)) > store.limits.MaxRecordBytes {
-		return Record{}, ErrRecordTooLarge
 	}
 	digest := sha256.Sum256(encoded)
 	if hex.EncodeToString(digest[:])+".json" != name {
