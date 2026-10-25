@@ -128,13 +128,8 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	if isBigCOFFObject(object) {
 		return inspectBigCOFFObject(object)
 	}
-	// Enforce the shared ordinary/bigobj budget before debug/pe allocates
-	// and decodes the symbol table named by this untrusted header.
-	symbolCount := binary.LittleEndian.Uint32(object[12:16])
-	if symbolCount > maxObjectSymbols {
-		return ObjectReport{}, fmt.Errorf("COFF object has invalid symbol count %d", symbolCount)
-	}
-	if err := verifyCOFFRelocationBudget(object); err != nil {
+	// Bound parser allocations before decoding the untrusted ordinary COFF.
+	if err := VerifyObjectParserBudget(object); err != nil {
 		return ObjectReport{}, err
 	}
 	file, err := pe.NewFile(bytes.NewReader(object))

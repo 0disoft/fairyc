@@ -65,7 +65,7 @@ func TestObjectLongNamesStillRejectInvalidOffsets(t *testing.T) {
 }
 
 func BenchmarkOrdinaryObjectSharedLongNames(b *testing.B) {
-	const count = 2048
+	const count = 512 // Keep the admitted case below the materialized-name budget.
 	name := strings.Repeat("n", 64<<10)
 	object := ordinaryObjectWithSharedNames(count, name)
 	b.ReportAllocs()

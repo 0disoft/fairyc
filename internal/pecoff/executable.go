@@ -76,6 +76,9 @@ func InspectExecutable(image []byte) (Report, error) {
 		if sections == 0 || sections > maxSections {
 			return Report{}, fmt.Errorf("PE executable has invalid section count %d", sections)
 		}
+		if err := verifyCOFFNameBudget(image, int(peOffset)+4); err != nil {
+			return Report{}, err
+		}
 	}
 	file, err := pe.NewFile(bytes.NewReader(image))
 	if err != nil {

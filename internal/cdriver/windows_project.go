@@ -138,6 +138,9 @@ func inspectProjectObject(contents []byte) error {
 	// Literal-only and include-only units need not have a nonempty code
 	// section. Keep the existing code-object verifier unchanged, and admit
 	// only bounded AMD64 COFF files with no nonempty code in this fallback.
+	if err := pecoff.VerifyObjectParserBudget(contents); err != nil {
+		return err
+	}
 	object, err := pe.NewFile(bytes.NewReader(contents))
 	if err != nil {
 		return err
