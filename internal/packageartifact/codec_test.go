@@ -105,6 +105,37 @@ func TestProcessCodecRequiresIdentityAndBounds(t *testing.T) {
 	}
 }
 
+func TestProcessCodecBoundsCanonicalReencoding(t *testing.T) {
+	t.Parallel()
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
+	if err != nil {
+		t.Fatal(err)
+	}
+	artifact := artifacts[0]
+	artifact.Functions[0].Body.Span.Source = "a<b.fy"
+	codec := fixedProcessCodec(t, 1)
+	canonical, err := codec.Encode(artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Valid JSON may be shorter than its mandatory HTML-escaped canonical form.
+	raw := bytes.ReplaceAll(canonical, []byte(`\u003c`), []byte("<"))
+	if len(raw) >= len(canonical) {
+		t.Fatal("test requires a shorter noncanonical encoding")
+	}
+	if _, err := codec.Decode(raw); !errors.Is(err, ErrProcessArtifactEncoding) {
+		t.Fatalf("noncanonical raw JSON error = %v", err)
+	}
+	bounded, err := newProcessCodec(codec.identity, uint64(len(raw)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := bounded.Decode(raw); !errors.Is(err, ErrProcessArtifactTooLarge) {
+		t.Fatalf("canonical encoding exceeding the byte limit: %v", err)
+	}
+}
+
 func fixedProcessCodec(t *testing.T, marker byte) *ProcessCodec {
 	t.Helper()
 	var identity [32]byte

@@ -113,7 +113,7 @@ func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testi
 	}
 }
 
-func checkedWorkspaceProgram(t *testing.T) (workspaceloader.Workspace, mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.PackageID]packagegraph.CoordinateID) {
+func checkedWorkspaceProgram(t testing.TB) (workspaceloader.Workspace, mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.PackageID]packagegraph.CoordinateID) {
 	t.Helper()
 	workspace, err := workspaceloader.Load(filepath.Join("..", "..", "examples", "workspace_quickstart"))
 	if err != nil {

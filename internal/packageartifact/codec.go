@@ -82,13 +82,19 @@ func (codec *ProcessCodec) Encode(artifact Artifact) ([]byte, error) {
 	if err := verify(artifact); err != nil {
 		return nil, fmt.Errorf("verify process-local package artifact before encoding: %w", err)
 	}
-	encoded, err := json.Marshal(processEnvelope{
+	return marshalProcessEnvelope(processEnvelope{
 		Schema: schema, Version: version, Process: codec.Identity(), Artifact: artifact,
-	})
+	}, codec.maxBytes)
+}
+
+// marshalProcessEnvelope preserves the canonical encoding and byte bound after
+// the caller has verified the artifact and selected its exact codec contract.
+func marshalProcessEnvelope(envelope processEnvelope, maxBytes uint64) ([]byte, error) {
+	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode process-local package artifact: %w", err)
 	}
-	if uint64(len(encoded)) > codec.maxBytes {
+	if uint64(len(encoded)) > maxBytes {
 		return nil, ErrProcessArtifactTooLarge
 	}
 	return encoded, nil
@@ -132,7 +138,7 @@ func (codec *ProcessCodec) Decode(encoded []byte) (Artifact, error) {
 	if err := verify(envelope.Artifact); err != nil {
 		return Artifact{}, fmt.Errorf("verify decoded process-local package artifact: %w", err)
 	}
-	canonical, err := codec.Encode(envelope.Artifact)
+	canonical, err := marshalProcessEnvelope(envelope, codec.maxBytes)
 	if err != nil {
 		return Artifact{}, err
 	}
