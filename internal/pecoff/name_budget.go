@@ -14,6 +14,11 @@ var ErrNameBudgetExceeded = errors.New("PE/COFF name byte budget exceeded")
 // VerifyObjectParserBudget bounds allocations in debug/pe for ordinary COFF,
 // including data-only fallback callers. It does not replace structural validation.
 func VerifyObjectParserBudget(object []byte) error {
+	remaining := maxExecutableBytes
+	return verifyObjectParserBudget(object, &remaining)
+}
+
+func verifyObjectParserBudget(object []byte, remaining *int) error {
 	if len(object) < coffFileHeaderBytes || len(object) > maxExecutableBytes {
 		return fmt.Errorf("COFF object has invalid size %d", len(object))
 	}
@@ -27,13 +32,18 @@ func VerifyObjectParserBudget(object []byte) error {
 	if err := verifyCOFFRelocationBudget(object); err != nil {
 		return err
 	}
-	return verifyCOFFNameBudget(object, 0)
+	return consumeCOFFNameBudget(object, 0, remaining)
 }
 
 // debug/pe copies names for each symbol and section reference, even when
 // thousands of references share one on-disk name. Bound that expansion before
 // calling its parser. Structural validation and malformed-name errors stay there.
 func verifyCOFFNameBudget(data []byte, headerOffset int) error {
+	remaining := maxExecutableBytes
+	return consumeCOFFNameBudget(data, headerOffset, &remaining)
+}
+
+func consumeCOFFNameBudget(data []byte, headerOffset int, remaining *int) error {
 	header := data[headerOffset : headerOffset+coffFileHeaderBytes]
 	symbolStart := uint64(binary.LittleEndian.Uint32(header[8:]))
 	symbolCount := binary.LittleEndian.Uint32(header[12:])
@@ -52,13 +62,12 @@ func verifyCOFFNameBudget(data []byte, headerOffset int) error {
 		}
 		table = data[stringStart+4 : stringStart+stringSize]
 	}
-	remaining := maxExecutableBytes
 	charge := func(raw []byte, section bool) error {
 		size := coffExpandedNameBytes(raw, table, section)
-		if size > remaining {
+		if size > *remaining {
 			return fmt.Errorf("%w: limit %d bytes", ErrNameBudgetExceeded, maxExecutableBytes)
 		}
-		remaining -= size
+		*remaining -= size
 		return nil
 	}
 	for index := uint64(0); index < uint64(symbolCount); {

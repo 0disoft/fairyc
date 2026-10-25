@@ -73,6 +73,9 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 	if objectStart >= len(rawMembers) {
 		return ArchiveReport{}, fmt.Errorf("COFF archive has no object members")
 	}
+	if err := verifyArchiveObjectNameBudget(rawMembers[objectStart:]); err != nil {
+		return ArchiveReport{}, err
+	}
 
 	objectsByOffset := make(map[uint32]int, len(rawMembers)-objectStart)
 	externalSymbols := make(map[uint32]map[string]bool, len(rawMembers)-objectStart)
@@ -123,6 +126,23 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 		report.Symbols = append(report.Symbols, symbol)
 	}
 	return report, nil
+}
+
+// Ordinary COFF names are copied per reference by debug/pe. Share one expansion
+// budget across all members, before retaining even the first decoded object.
+// Bigobj instead owns one immutable string table bounded by its on-disk bytes;
+// all of those tables together already fit within the archive input limit.
+func verifyArchiveObjectNameBudget(members []rawArchiveMember) error {
+	remaining := maxExecutableBytes
+	for _, member := range members {
+		if isBigCOFFObject(member.data) {
+			continue // Its structural checks remain in InspectObject.
+		}
+		if err := verifyObjectParserBudget(member.data, &remaining); err != nil {
+			return fmt.Errorf("preflight COFF archive member at %d: %w", member.headerOffset, err)
+		}
+	}
+	return nil
 }
 
 func parseRawArchiveMembers(archive []byte) ([]rawArchiveMember, error) {
