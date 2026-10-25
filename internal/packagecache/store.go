@@ -57,6 +57,7 @@ type storedRecord struct {
 // MemoryStore is a concurrency-safe, byte- and entry-bounded LRU store. It is the first executable
 // storage policy and intentionally does not imply persistent or remote cache compatibility.
 type MemoryStore struct {
+	putMu   sync.Mutex
 	mu      sync.Mutex
 	limits  Limits
 	entries map[Key]*list.Element
@@ -88,18 +89,22 @@ func (store *MemoryStore) Put(record Record) (err error) {
 	if err != nil {
 		return err
 	}
-	store.mu.Lock()
-	defer store.mu.Unlock()
+	// Serialize writers without blocking readers during payload allocation/copy.
+	// Only one Put snapshot is prepared at a time, as with the original lock.
+	store.putMu.Lock()
+	defer store.putMu.Unlock()
 	if size > store.limits.MaxBytes {
 		return ErrRecordTooLarge
 	}
+	entry := &storedRecord{record: cloneRecord(record), size: size}
+	store.mu.Lock()
+	defer store.mu.Unlock()
 	if existing, found := store.entries[record.Key]; found {
 		store.remove(existing, false)
 	}
 	for len(store.entries) >= store.limits.MaxEntries || store.bytes+size > store.limits.MaxBytes {
 		store.remove(store.recent.Back(), true)
 	}
-	entry := &storedRecord{record: cloneRecord(record), size: size}
 	element := store.recent.PushFront(entry)
 	store.entries[record.Key] = element
 	store.bytes += size
