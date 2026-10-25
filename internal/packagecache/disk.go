@@ -266,7 +266,8 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 		return Record{}, false
 	}
 	slices.SortFunc(entries, func(left, right os.DirEntry) int { return strings.Compare(left.Name(), right.Name()) })
-	valid := make([]Record, 0, 1)
+	var candidate Record
+	validCount := 0
 	for _, entry := range entries {
 		if entry.IsDir() || !validGenerationName(entry.Name()) {
 			continue
@@ -278,11 +279,18 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 			_ = store.root.Remove(path)
 			continue
 		}
-		valid = append(valid, record)
+		validCount++
+		if validCount == 1 {
+			candidate = record
+		} else {
+			// A conflict can never produce a hit. Keep counting and validating
+			// generations without retaining their potentially large payloads.
+			candidate = Record{}
+		}
 	}
-	if len(valid) != 1 {
-		if len(valid) > 1 {
-			store.recordRejectedBy(uint64(len(valid)))
+	if validCount != 1 {
+		if validCount > 1 {
+			store.recordRejectedBy(uint64(validCount))
 			for _, entry := range entries {
 				if validGenerationName(entry.Name()) {
 					_ = store.root.Remove(filepath.Join(keyDirectory, entry.Name()))
@@ -295,7 +303,7 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 	}
 	store.recordHit()
 	// Each read decoded a fresh record; no store-owned payload is exposed.
-	return valid[0], true
+	return candidate, true
 }
 
 // DeleteIfMatch removes only the immutable generation whose canonical bytes exactly match
