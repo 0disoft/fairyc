@@ -5,6 +5,7 @@ package pecoff
 import (
 	"bytes"
 	"debug/pe"
+	"encoding/binary"
 	"fmt"
 )
 
@@ -65,6 +66,16 @@ func InspectExecutable(image []byte) (Report, error) {
 	}
 	if image[0] != 'M' || image[1] != 'Z' {
 		return Report{}, fmt.Errorf("PE executable is missing the DOS MZ signature")
+	}
+	// debug/pe eagerly allocates sections and their relocation arrays. Enforce
+	// our existing section budget first; malformed headers stay with its parser.
+	peOffset := uint64(binary.LittleEndian.Uint32(image[0x3c:]))
+	if len(image) >= 96 && peOffset+4+coffFileHeaderBytes <= uint64(len(image)) &&
+		string(image[peOffset:peOffset+4]) == "PE\x00\x00" {
+		sections := binary.LittleEndian.Uint16(image[peOffset+6:])
+		if sections == 0 || sections > maxSections {
+			return Report{}, fmt.Errorf("PE executable has invalid section count %d", sections)
+		}
 	}
 	file, err := pe.NewFile(bytes.NewReader(image))
 	if err != nil {
