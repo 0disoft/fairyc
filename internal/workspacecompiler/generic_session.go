@@ -122,11 +122,7 @@ func (session *GenericSession) CheckContext(ctx context.Context, workspace works
 	if err != nil {
 		return Result{}, err
 	}
-	identities, err := workspace.PackageIdentities()
-	if err != nil {
-		return Result{}, err
-	}
-	coordinates, err := workspace.PackageCoordinates()
+	identities, coordinates, err := packageIdentityMaps(metadata)
 	if err != nil {
 		return Result{}, err
 	}

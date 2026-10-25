@@ -187,11 +187,7 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 	if err != nil {
 		return Result{}, err
 	}
-	identities, err := workspace.PackageIdentities()
-	if err != nil {
-		return Result{}, err
-	}
-	coordinates, err := workspace.PackageCoordinates()
+	identities, coordinates, err := packageIdentityMaps(metadata)
 	if err != nil {
 		return Result{}, err
 	}
