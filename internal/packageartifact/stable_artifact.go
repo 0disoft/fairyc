@@ -223,6 +223,12 @@ func encodeStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bo
 	if err := validateStableArtifact(artifact, transfers); err != nil {
 		return nil, err
 	}
+	return marshalStableArtifact(artifact, maxBytes, transfers)
+}
+
+// marshalStableArtifact requires a validated artifact and a positive byte limit.
+// Decoding has already checked both before comparing canonical bytes.
+func marshalStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bool) ([]byte, error) {
 	schema, version := stableArtifactContract(transfers)
 	encoded, err := json.Marshal(stableArtifactEnvelope{Schema: schema, Version: version, Artifact: artifact})
 	if err != nil {
@@ -270,7 +276,7 @@ func decodeStableArtifact(encoded []byte, maxBytes uint64, transfers bool) (Stab
 	if err := validateStableArtifact(envelope.Artifact, transfers); err != nil {
 		return StableArtifact{}, fmt.Errorf("verify decoded stable package MIR artifact: %w", err)
 	}
-	canonical, err := encodeStableArtifact(envelope.Artifact, maxBytes, transfers)
+	canonical, err := marshalStableArtifact(envelope.Artifact, maxBytes, transfers)
 	if err != nil {
 		return StableArtifact{}, err
 	}
