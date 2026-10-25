@@ -75,8 +75,10 @@ func describeStableArtifact(artifact Artifact, maxBytes uint64, transfers bool) 
 		return StableArtifact{}, err
 	}
 	result := StableArtifact{Package: artifact.Package, Coordinate: artifact.PackageCoordinate, Context: context}
+	// Projection only reads bindings; every body shares the same complete table.
+	bindings := artifactBindings(artifact)
 	for _, record := range artifact.Functions {
-		body, err := describeStableBody(record, context, artifact.PackageCoordinates, artifactBindings(artifact), foreign, true, maxBytes)
+		body, err := describeStableBody(record, context, artifact.PackageCoordinates, bindings, foreign, true, maxBytes)
 		if err != nil {
 			return StableArtifact{}, fmt.Errorf("describe stable function body %s: %w", record.ID, err)
 		}
