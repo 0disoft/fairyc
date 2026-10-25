@@ -77,8 +77,14 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 	objectsByOffset := make(map[uint32]int, len(rawMembers)-objectStart)
 	externalSymbols := make(map[uint32]map[string]bool, len(rawMembers)-objectStart)
 	report := ArchiveReport{Members: make([]ArchiveMember, 0, len(rawMembers)-objectStart)}
+	var longnamesText string
 	for _, raw := range rawMembers[objectStart:] {
-		name, err := resolveArchiveMemberName(raw.rawName, longnames)
+		if strings.HasPrefix(raw.rawName, "/") && longnamesText == "" {
+			// Own one immutable table so repeated and overlapping references share
+			// bytes without retaining mutable input. Short names need no copy.
+			longnamesText = string(longnames)
+		}
+		name, err := resolveArchiveMemberName(raw.rawName, longnamesText)
 		if err != nil {
 			return ArchiveReport{}, err
 		}
@@ -165,7 +171,7 @@ func parseRawArchiveMembers(archive []byte) ([]rawArchiveMember, error) {
 	return members, nil
 }
 
-func resolveArchiveMemberName(raw string, longnames []byte) (string, error) {
+func resolveArchiveMemberName(raw string, longnames string) (string, error) {
 	if raw == "/" || raw == "//" {
 		return "", fmt.Errorf("COFF archive has a misplaced special member")
 	}
@@ -174,14 +180,11 @@ func resolveArchiveMemberName(raw string, longnames []byte) (string, error) {
 		if err != nil || offset >= uint64(len(longnames)) {
 			return "", fmt.Errorf("COFF archive member has invalid long-name reference %q", raw)
 		}
-		end := int(offset)
-		for end < len(longnames) && longnames[end] != 0 {
-			end++
-		}
-		if end == len(longnames) || end == int(offset) {
+		end := strings.IndexByte(longnames[offset:], 0)
+		if end <= 0 {
 			return "", fmt.Errorf("COFF archive member long name %q is not terminated", raw)
 		}
-		return string(longnames[offset:uint64(end)]), nil
+		return longnames[offset : offset+uint64(end)], nil
 	}
 	name := strings.TrimSuffix(raw, "/")
 	if name == "" || strings.ContainsAny(name, "\\/") {
