@@ -42,7 +42,7 @@ func TestBigObjectLongNameScansShareOneSpan(t *testing.T) {
 		binary.LittleEndian.PutUint32(object[symbolStart+index*coffBigObjectSymbolBytes+4:], uint32(4+(index*7919)%count))
 	}
 	spans := indexBigCOFFNameSpans(object[symbolStart:symbolEnd], string(object[symbolEnd:]))
-	if len(spans) != 1 || spans[0] != (bigCOFFNameSpan{start: 4, end: 4 + nameBytes}) {
+	if len(spans) != 1 || spans[0] != (coffNameSpan{start: 4, end: 4 + nameBytes}) {
 		t.Fatalf("suffix references should scan one %d-byte span, got %v", nameBytes, spans)
 	}
 }

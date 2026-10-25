@@ -3,6 +3,7 @@ package pecoff
 import (
 	"encoding/binary"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -81,13 +82,15 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 	externalSymbols := make(map[uint32]map[string]bool, len(rawMembers)-objectStart)
 	report := ArchiveReport{Members: make([]ArchiveMember, 0, len(rawMembers)-objectStart)}
 	var longnamesText string
+	var nameSpans []coffNameSpan
 	for _, raw := range rawMembers[objectStart:] {
 		if strings.HasPrefix(raw.rawName, "/") && longnamesText == "" {
 			// Own one immutable table so repeated and overlapping references share
 			// bytes without retaining mutable input. Short names need no copy.
 			longnamesText = string(longnames)
+			nameSpans = indexArchiveNameSpans(rawMembers[objectStart:], longnamesText)
 		}
-		name, err := resolveArchiveMemberName(raw.rawName, longnamesText)
+		name, err := resolveArchiveMemberName(raw.rawName, longnamesText, nameSpans)
 		if err != nil {
 			return ArchiveReport{}, err
 		}
@@ -191,7 +194,20 @@ func parseRawArchiveMembers(archive []byte) ([]rawArchiveMember, error) {
 	return members, nil
 }
 
-func resolveArchiveMemberName(raw string, longnames string) (string, error) {
+func indexArchiveNameSpans(members []rawArchiveMember, table string) []coffNameSpan {
+	offsets := make([]uint32, 0, len(members))
+	for _, member := range members {
+		if strings.HasPrefix(member.rawName, "/") {
+			offset, err := strconv.ParseUint(member.rawName[1:], 10, 32)
+			if err == nil && offset < uint64(len(table)) {
+				offsets = append(offsets, uint32(offset))
+			}
+		}
+	}
+	return indexCOFFNameSpans(offsets, table)
+}
+
+func resolveArchiveMemberName(raw string, longnames string, spans []coffNameSpan) (string, error) {
 	if raw == "/" || raw == "//" {
 		return "", fmt.Errorf("COFF archive has a misplaced special member")
 	}
@@ -200,11 +216,11 @@ func resolveArchiveMemberName(raw string, longnames string) (string, error) {
 		if err != nil || offset >= uint64(len(longnames)) {
 			return "", fmt.Errorf("COFF archive member has invalid long-name reference %q", raw)
 		}
-		end := strings.IndexByte(longnames[offset:], 0)
-		if end <= 0 {
+		index := sort.Search(len(spans), func(index int) bool { return uint64(spans[index].end) >= offset })
+		if index == len(spans) || uint64(spans[index].end) == uint64(len(longnames)) || uint64(spans[index].end) <= offset {
 			return "", fmt.Errorf("COFF archive member long name %q is not terminated", raw)
 		}
-		return longnames[offset : offset+uint64(end)], nil
+		return longnames[offset:spans[index].end], nil
 	}
 	name := strings.TrimSuffix(raw, "/")
 	if name == "" || strings.ContainsAny(name, "\\/") {

@@ -76,7 +76,7 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 	}
 	primaryByIndex := make(map[uint32]int, int(symbolCount))
 	var stringTableText string
-	var nameSpans []bigCOFFNameSpan
+	var nameSpans []coffNameSpan
 	for index := uint64(0); index < symbolCount; {
 		offset := symbolOffset + index*coffBigObjectSymbolBytes
 		entry := object[offset : offset+coffBigObjectSymbolBytes]
@@ -259,7 +259,7 @@ func bigCOFFShortSectionName(field []byte) (string, error) {
 	return string(field[:end]), nil
 }
 
-func bigCOFFName(field []byte, stringTable string, spans []bigCOFFNameSpan) (string, error) {
+func bigCOFFName(field []byte, stringTable string, spans []coffNameSpan) (string, error) {
 	if len(field) != 8 {
 		return "", fmt.Errorf("invalid name field size")
 	}

@@ -1,19 +1,11 @@
 package pecoff
 
-import (
-	"encoding/binary"
-	"slices"
-	"strings"
-)
-
-type bigCOFFNameSpan struct {
-	start, end uint32
-}
+import "encoding/binary"
 
 // Index referenced C-string spans in offset order. Repeated references and
 // suffixes reuse a terminator, so no string-table byte is scanned twice.
 // Invalid offsets and unterminated names are still diagnosed in symbol order.
-func indexBigCOFFNameSpans(symbols []byte, table string) []bigCOFFNameSpan {
+func indexBigCOFFNameSpans(symbols []byte, table string) []coffNameSpan {
 	offsets := make([]uint32, 0, len(symbols)/coffBigObjectSymbolBytes)
 	for position := 0; position < len(symbols); position += coffBigObjectSymbolBytes {
 		field := symbols[position : position+8]
@@ -24,18 +16,5 @@ func indexBigCOFFNameSpans(symbols []byte, table string) []bigCOFFNameSpan {
 			}
 		}
 	}
-	slices.Sort(offsets)
-	var spans []bigCOFFNameSpan
-	for _, offset := range offsets {
-		if len(spans) > 0 && offset <= spans[len(spans)-1].end {
-			continue
-		}
-		end := strings.IndexByte(table[offset:], 0)
-		if end < 0 {
-			spans = append(spans, bigCOFFNameSpan{start: offset, end: uint32(len(table))})
-			break
-		}
-		spans = append(spans, bigCOFFNameSpan{start: offset, end: offset + uint32(end)})
-	}
-	return spans
+	return indexCOFFNameSpans(offsets, table)
 }
