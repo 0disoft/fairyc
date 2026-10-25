@@ -94,3 +94,39 @@ func TestToolCompileDeadlineTerminatesChildrenAndUsesExplicitTimeout(t *testing.
 		}
 	}
 }
+
+func TestMSVCInstallationQueryRecoversFromInheritedOutputPipe(t *testing.T) {
+	pidFile := filepath.Join(t.TempDir(), "query-child.pid")
+	defer func() {
+		data, err := os.ReadFile(pidFile)
+		if err != nil {
+			t.Error("query helper child did not report its PID:", err)
+			return
+		}
+		pid, err := strconv.Atoi(string(data))
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		process, err := os.FindProcess(pid)
+		if err == nil {
+			defer process.Release()
+			_ = process.Kill()
+		}
+	}()
+	calls := 0
+	out, err := queryMSVCInstallation(8*time.Second, func(timeout time.Duration) (string, error) {
+		calls++
+		mode := "orphan"
+		if calls > 1 {
+			mode = "success"
+		}
+		environment := replaceWindowsEnvironment(os.Environ(), "FAIRYC_TOOL_CANCEL_TEST", mode)
+		environment = replaceWindowsEnvironment(environment, "FAIRYC_TOOL_CANCEL_PID", pidFile)
+		return runWindowsHostCommandWithLimitAndTimeout(os.Args[0], environment, "", 1024, timeout,
+			"-test.run=^TestToolCancellationHelper$")
+	})
+	if err != nil || out != "finished" || calls != 2 {
+		t.Fatalf("inherited-pipe query recovery: output=%q err=%v calls=%d", out, err, calls)
+	}
+}

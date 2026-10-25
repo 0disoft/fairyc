@@ -1,13 +1,16 @@
 package cdriver
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
 	"sync"
+	"time"
 )
 
 var cachedWindowsHostMSVC = memoizeWindowsHostResolver(discoverWindowsHostMSVC)
@@ -41,8 +44,10 @@ func discoverWindowsHostMSVC() (WindowsHostToolchain, error) {
 	if info, err := os.Stat(vswhere); err != nil || !info.Mode().IsRegular() {
 		return WindowsHostToolchain{}, fmt.Errorf("MSVC host smoke requires Visual Studio Installer vswhere.exe")
 	}
-	installationOutput, err := runWindowsHostCommand(vswhere, nil, "",
-		"-latest", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-property", "installationPath")
+	installationOutput, err := queryMSVCInstallation(commandTimeout, func(timeout time.Duration) (string, error) {
+		return runWindowsHostCommandWithLimitAndTimeout(vswhere, nil, "", maxProcessOutput, timeout,
+			"-latest", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-property", "installationPath")
+	})
 	if err != nil {
 		return WindowsHostToolchain{}, fmt.Errorf("locate Visual Studio: %w", err)
 	}
@@ -74,6 +79,22 @@ func discoverWindowsHostMSVC() (WindowsHostToolchain, error) {
 		return WindowsHostToolchain{}, err
 	}
 	return WindowsHostToolchain{Name: "msvc", Path: compilerPath, Version: version, Environment: environment}, nil
+}
+
+func queryMSVCInstallation(budget time.Duration, query func(time.Duration) (string, error)) (string, error) {
+	deadline := time.Now().Add(budget)
+	output, err := query(budget)
+	if !errors.Is(err, exec.ErrWaitDelay) {
+		return output, err
+	}
+	// An inherited pipe may outlive the query process. Discard its incomplete
+	// output and repeat only this read-only lookup, once, within the same budget.
+	// Compiler commands retain their normal fail-closed WaitDelay handling.
+	remaining := time.Until(deadline)
+	if remaining <= 0 {
+		return "", err
+	}
+	return query(remaining)
 }
 
 func resolveProgramFilesX86() (string, error) {
