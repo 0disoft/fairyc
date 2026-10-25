@@ -109,15 +109,19 @@ func (store *MemoryStore) Put(record Record) (err error) {
 // Get returns a deep copy and promotes the record to most recently used.
 func (store *MemoryStore) Get(key Key) (Record, bool) {
 	store.mu.Lock()
-	defer store.mu.Unlock()
 	element, found := store.entries[key]
 	if !found {
 		store.misses++
+		store.mu.Unlock()
 		return Record{}, false
 	}
 	store.hits++
 	store.recent.MoveToFront(element)
-	return cloneRecord(element.Value.(*storedRecord).record), true
+	// Published records are immutable: replacement and eviction only unlink them.
+	// Retain this snapshot before unlocking, then copy bytes without blocking peers.
+	record := element.Value.(*storedRecord).record
+	store.mu.Unlock()
+	return cloneRecord(record), true
 }
 
 // Delete removes a record without counting policy-driven eviction.
