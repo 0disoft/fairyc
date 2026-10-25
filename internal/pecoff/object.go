@@ -153,6 +153,9 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	if headerEnd > uint64(len(object)) {
 		return ObjectReport{}, fmt.Errorf("COFF object section table exceeds the file")
 	}
+	if err := verifyCOFFRawRanges(file.Sections, headerEnd, uint64(len(object))); err != nil {
+		return ObjectReport{}, err
+	}
 	report := ObjectReport{
 		Machine:         file.FileHeader.Machine,
 		Characteristics: file.FileHeader.Characteristics,
@@ -169,7 +172,6 @@ func InspectObject(object []byte) (ObjectReport, error) {
 		report.Symbols = append(report.Symbols, symbol.Name)
 	}
 	textSectionFound := false
-	rawRanges := make([][2]uint64, 0, len(file.Sections))
 	relocationsBySection := make([][]rawCOFFRelocation, len(file.Sections))
 	totalRelocations := 0
 	for index, section := range file.Sections {
@@ -190,25 +192,6 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	for index, section := range file.Sections {
 		if section.Name == "" {
 			return ObjectReport{}, fmt.Errorf("COFF object section %d has no name", index)
-		}
-		if section.Size > 0 {
-			if section.Offset == 0 {
-				if section.Characteristics&sectionUninitializedData == 0 {
-					return ObjectReport{}, fmt.Errorf("COFF object section %q has an invalid zero raw pointer", section.Name)
-				}
-			} else {
-				start := uint64(section.Offset)
-				end := start + uint64(section.Size)
-				if start < headerEnd || end > uint64(len(object)) {
-					return ObjectReport{}, fmt.Errorf("COFF object section %q has an invalid raw range", section.Name)
-				}
-				for _, existing := range rawRanges {
-					if start < existing[1] && existing[0] < end {
-						return ObjectReport{}, fmt.Errorf("COFF object section %q overlaps another raw range", section.Name)
-					}
-				}
-				rawRanges = append(rawRanges, [2]uint64{start, end})
-			}
 		}
 		relocations := relocationsBySection[index]
 		for _, relocation := range relocations {
