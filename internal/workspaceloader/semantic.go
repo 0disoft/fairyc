@@ -49,6 +49,22 @@ type SemanticPackage struct {
 // SemanticInput converts the validated, root-reachable instance graph into build-local package
 // numbers and exact import-provider bindings. Numeric ids never enter lockfiles or diagnostics.
 func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
+	// Match the first-entry behavior of instance and Package without rescanning
+	// both catalogs for every resolved class. Rebuild for each Workspace call.
+	instances := make(map[string]*Instance, len(workspace.Instances))
+	for index := range workspace.Instances {
+		instance := &workspace.Instances[index]
+		if instances[instance.NodeID] == nil {
+			instances[instance.NodeID] = instance
+		}
+	}
+	packages := make(map[string]*Package, len(workspace.Packages))
+	for index := range workspace.Packages {
+		loaded := &workspace.Packages[index]
+		if packages[loaded.Path] == nil {
+			packages[loaded.Path] = loaded
+		}
+	}
 	nodePackages := make(map[string]hir.PackageID, len(workspace.Graph.Nodes))
 	input := semantic.PackageInput{}
 	for index, class := range workspace.Resolution.InstanceClasses {
@@ -62,12 +78,12 @@ func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
 			}
 			nodePackages[member] = packageID
 		}
-		mapping, found := workspace.instance(class.Members[0])
-		if !found {
+		mapping := instances[class.Members[0]]
+		if mapping == nil {
 			return semantic.PackageInput{}, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
 		}
-		loaded, found := workspace.Package(mapping.PackagePath)
-		if !found {
+		loaded := packages[mapping.PackagePath]
+		if loaded == nil {
 			return semantic.PackageInput{}, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
 		for _, file := range loaded.Sources {
