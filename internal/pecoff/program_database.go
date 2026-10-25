@@ -149,17 +149,21 @@ func readPDBStream(pdb []byte, requestedIndex uint32) ([]byte, uint32, error) {
 	directoryBlockCount := uint32(directoryBlockCount64)
 	blockMapOffset := uint64(blockMap) * uint64(blockSize)
 	directory := make([]byte, 0, uint64(directoryBlockCount)*uint64(blockSize))
-	usedBlocks := map[uint32]string{0: "superblock", blockMap: "directory block map"}
+	// The validated file size bounds this dense table to four bytes per block.
+	// Keep owner labels numeric; only rejected input needs diagnostic strings.
+	usedBlocks := make([]pdbBlockOwner, numBlocks)
+	usedBlocks[0] = pdbSuperblockOwner
+	usedBlocks[blockMap] = pdbDirectoryMapOwner
 	for index := uint32(0); index < directoryBlockCount; index++ {
 		entry := blockMapOffset + uint64(index)*4
 		block := binary.LittleEndian.Uint32(pdb[entry:])
 		if block >= numBlocks {
 			return nil, 0, fmt.Errorf("program database directory references block %d outside the file", block)
 		}
-		if owner, duplicate := usedBlocks[block]; duplicate {
-			return nil, 0, fmt.Errorf("program database directory reuses %s block %d", owner, block)
+		if owner := usedBlocks[block]; owner != 0 {
+			return nil, 0, fmt.Errorf("program database directory reuses %s block %d", owner.label(), block)
 		}
-		usedBlocks[block] = "stream directory"
+		usedBlocks[block] = pdbStreamDirectoryOwner
 		start := uint64(block) * uint64(blockSize)
 		directory = append(directory, pdb[start:start+uint64(blockSize)]...)
 	}
@@ -199,10 +203,10 @@ func readPDBStream(pdb []byte, requestedIndex uint32) ([]byte, uint32, error) {
 			if block >= numBlocks {
 				return nil, 0, fmt.Errorf("program database stream %d references block %d outside the file", streamIndex, block)
 			}
-			if owner, duplicate := usedBlocks[block]; duplicate {
-				return nil, 0, fmt.Errorf("program database stream %d reuses %s block %d", streamIndex, owner, block)
+			if owner := usedBlocks[block]; owner != 0 {
+				return nil, 0, fmt.Errorf("program database stream %d reuses %s block %d", streamIndex, owner.label(), block)
 			}
-			usedBlocks[block] = fmt.Sprintf("stream %d", streamIndex)
+			usedBlocks[block] = pdbBlockOwner(streamIndex + 1)
 			if uint32(streamIndex) == requestedIndex {
 				start := uint64(block) * uint64(blockSize)
 				remaining := uint64(size) - uint64(len(selected))
