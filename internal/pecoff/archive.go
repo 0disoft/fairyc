@@ -75,6 +75,7 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 	}
 
 	objectsByOffset := make(map[uint32]int, len(rawMembers)-objectStart)
+	externalSymbols := make(map[uint32]map[string]bool, len(rawMembers)-objectStart)
 	report := ArchiveReport{Members: make([]ArchiveMember, 0, len(rawMembers)-objectStart)}
 	for _, raw := range rawMembers[objectStart:] {
 		name, err := resolveArchiveMemberName(raw.rawName, longnames)
@@ -89,13 +90,14 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 			return ArchiveReport{}, fmt.Errorf("COFF archive repeats member offset %d", raw.headerOffset)
 		}
 		objectsByOffset[raw.headerOffset] = len(report.Members)
+		externalSymbols[raw.headerOffset] = indexObjectExternalSymbols(object)
 		report.Members = append(report.Members, ArchiveMember{
 			Name: name, HeaderOffset: raw.headerOffset, DataOffset: raw.dataOffset,
 			Size: uint32(len(raw.data)), Object: object,
 		})
 	}
 
-	if err := validateFirstArchiveLinkerMember(rawMembers[0].data, objectsByOffset, report.Members); err != nil {
+	if err := validateFirstArchiveLinkerMember(rawMembers[0].data, externalSymbols); err != nil {
 		return ArchiveReport{}, err
 	}
 	index, memberOffsets, err := parseSecondArchiveLinkerMember(rawMembers[1].data, objectsByOffset)
@@ -107,7 +109,7 @@ func InspectArchive(archive []byte) (ArchiveReport, error) {
 	}
 	for _, symbol := range index {
 		memberIndex := objectsByOffset[symbol.MemberHeaderOffset]
-		if !objectDefinesExternalSymbol(report.Members[memberIndex].Object, symbol.Name) {
+		if !externalSymbols[symbol.MemberHeaderOffset][symbol.Name] {
 			return ArchiveReport{}, fmt.Errorf("COFF archive second linker member symbol %q is not defined externally by its indexed member", symbol.Name)
 		}
 		symbol.Member = report.Members[memberIndex].Name
@@ -188,7 +190,7 @@ func resolveArchiveMemberName(raw string, longnames []byte) (string, error) {
 	return name, nil
 }
 
-func validateFirstArchiveLinkerMember(data []byte, objectsByOffset map[uint32]int, members []ArchiveMember) error {
+func validateFirstArchiveLinkerMember(data []byte, externalSymbols map[uint32]map[string]bool) error {
 	if len(data) < 4 {
 		return fmt.Errorf("COFF archive first linker member is truncated")
 	}
@@ -203,7 +205,7 @@ func validateFirstArchiveLinkerMember(data []byte, objectsByOffset map[uint32]in
 	offsets := make([]uint32, 0, count)
 	for index := uint64(0); index < count; index++ {
 		offset := binary.BigEndian.Uint32(data[4+index*4:])
-		if _, found := objectsByOffset[offset]; !found {
+		if _, found := externalSymbols[offset]; !found {
 			return fmt.Errorf("COFF archive first linker member references unknown member offset %d", offset)
 		}
 		offsets = append(offsets, offset)
@@ -213,8 +215,7 @@ func validateFirstArchiveLinkerMember(data []byte, objectsByOffset map[uint32]in
 		return err
 	}
 	for index, name := range names {
-		member := members[objectsByOffset[offsets[index]]]
-		if !objectDefinesExternalSymbol(member.Object, name) {
+		if !externalSymbols[offsets[index]][name] {
 			return fmt.Errorf("COFF archive first linker member symbol %q is not defined externally by its indexed member", name)
 		}
 	}
@@ -299,10 +300,10 @@ func parseArchiveSymbolNames(data []byte, count int, linker string) ([]string, e
 	return names, nil
 }
 
-func objectDefinesExternalSymbol(report ObjectReport, name string) bool {
-	found := false
+func indexObjectExternalSymbols(report ObjectReport) map[string]bool {
+	definitions := make(map[string]bool)
 	for _, symbol := range report.SymbolRecords {
-		if symbol.Name != name || symbol.SectionNumber <= 0 || int(symbol.SectionNumber) > len(report.Sections) ||
+		if symbol.SectionNumber <= 0 || int(symbol.SectionNumber) > len(report.Sections) ||
 			symbol.StorageClass != coffStorageClassExternal {
 			continue
 		}
@@ -310,10 +311,10 @@ func objectDefinesExternalSymbol(report ObjectReport, name string) bool {
 		if section.RawSize == 0 || symbol.Value >= section.RawSize {
 			continue
 		}
-		if found {
-			return false
-		}
-		found = true
+		// Keep duplicate names present, including the third and later definition:
+		// only exactly one eligible external definition satisfies either index.
+		_, duplicate := definitions[symbol.Name]
+		definitions[symbol.Name] = !duplicate
 	}
-	return found
+	return definitions
 }
