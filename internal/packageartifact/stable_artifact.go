@@ -384,7 +384,8 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 			}
 			foreignByContext[item.context] = foreignSymbols
 		}
-		function, err := rebindStableBodyInContext(item.body, item.context, coordinates, functionSymbols, foreignSymbols, firstLocal)
+		// validateStableArtifact above already validated every owned body.
+		function, err := rebindValidatedStableBodyInContext(item.body, item.context, coordinates, functionSymbols, foreignSymbols, firstLocal)
 		if err != nil {
 			return StableReassembly{}, fmt.Errorf("rebind stable function %s: %w", id, err)
 		}

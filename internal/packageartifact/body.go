@@ -216,14 +216,17 @@ func RebindStableBody(body StableBodyArtifact, context ContextDescriptor, proces
 }
 
 func rebindStableBody(body StableBodyArtifact, context ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID, maxBytes uint64) (mir.Function, error) {
-	rebinding := &bodyContext{descriptor: context, maxBytes: maxBytes}
-	return rebindStableBodyInContext(body, rebinding, coordinates, functionSymbols, foreignSymbols, firstLocal)
-}
-
-func rebindStableBodyInContext(body StableBodyArtifact, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID) (mir.Function, error) {
 	if err := ValidateStableBody(body); err != nil {
 		return mir.Function{}, err
 	}
+	rebinding := &bodyContext{descriptor: context, maxBytes: maxBytes}
+	return rebindValidatedStableBodyInContext(body, rebinding, coordinates, functionSymbols, foreignSymbols, firstLocal)
+}
+
+// rebindValidatedStableBodyInContext requires body validation in the current
+// operation: standalone callers validate above, and batch callers validate the
+// enclosing artifact first. Context and fresh-namespace checks still run here.
+func rebindValidatedStableBodyInContext(body StableBodyArtifact, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID) (mir.Function, error) {
 	contextID, err := context.contextID()
 	if err != nil {
 		return mir.Function{}, fmt.Errorf("compute rebound body context id: %w", err)
