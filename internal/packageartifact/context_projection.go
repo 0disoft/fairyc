@@ -17,12 +17,20 @@ import (
 // declarations cannot change the package artifact bytes.
 func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.SymbolID]uint64, error) {
 	usedTypes := make(map[string]struct{})
+	pending := make([]string, 0)
+	enqueue := func(name string) {
+		if _, found := usedTypes[name]; found {
+			return
+		}
+		usedTypes[name] = struct{}{}
+		pending = append(pending, name)
+	}
 	collectType := func(value hir.Type) (hir.Type, error) {
 		stable, err := stableType(value, artifact.PackageCoordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
-		collectStableNominalTypes(stable, usedTypes)
+		collectStableNominalTypes(stable, enqueue)
 		return value, nil
 	}
 	usedForeign := make(map[hir.SymbolID]struct{})
@@ -59,9 +67,9 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 		}
 		result.ForeignFunctions = append(result.ForeignFunctions, foreign)
 		for _, parameterType := range foreign.ParameterTypes {
-			collectStableNominalTypes(parameterType, usedTypes)
+			collectStableNominalTypes(parameterType, enqueue)
 		}
-		collectStableNominalTypes(foreign.ResultType, usedTypes)
+		collectStableNominalTypes(foreign.ResultType, enqueue)
 	}
 
 	structs := make(map[string]ContextStruct, len(artifact.StableContext.Structs))
@@ -77,41 +85,29 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 		resources[item.Type] = item
 	}
 
-	visited := make(map[string]struct{})
-	for {
-		pending := make([]string, 0)
-		for name := range usedTypes {
-			if _, done := visited[name]; !done {
-				pending = append(pending, name)
+	// Enqueue each reachable type once; final sorting owns canonical ordering.
+	for next := 0; next < len(pending); next++ {
+		name := pending[next]
+		switch {
+		case structs[name].Type != "":
+			item := structs[name]
+			result.Structs = append(result.Structs, item)
+			for _, field := range item.Fields {
+				collectStableNominalTypes(field.Type, enqueue)
 			}
-		}
-		if len(pending) == 0 {
-			break
-		}
-		slices.Sort(pending)
-		for _, name := range pending {
-			visited[name] = struct{}{}
-			switch {
-			case structs[name].Type != "":
-				item := structs[name]
-				result.Structs = append(result.Structs, item)
-				for _, field := range item.Fields {
-					collectStableNominalTypes(field.Type, usedTypes)
+		case enums[name].Type != "":
+			item := enums[name]
+			result.Enums = append(result.Enums, item)
+			for _, variant := range item.Variants {
+				for _, field := range variant.Fields {
+					collectStableNominalTypes(field.Type, enqueue)
 				}
-			case enums[name].Type != "":
-				item := enums[name]
-				result.Enums = append(result.Enums, item)
-				for _, variant := range item.Variants {
-					for _, field := range variant.Fields {
-						collectStableNominalTypes(field.Type, usedTypes)
-					}
-				}
-			case resources[name].Type != "":
-				item := resources[name]
-				result.Resources = append(result.Resources, item)
-				for _, field := range item.Fields {
-					collectStableNominalTypes(field.Type, usedTypes)
-				}
+			}
+		case resources[name].Type != "":
+			item := resources[name]
+			result.Resources = append(result.Resources, item)
+			for _, field := range item.Fields {
+				collectStableNominalTypes(field.Type, enqueue)
 			}
 		}
 	}
@@ -127,33 +123,33 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 	return result, foreignIndices, nil
 }
 
-func collectStableNominalTypes(value string, result map[string]struct{}) {
+func collectStableNominalTypes(value string, collect func(string)) {
 	if value == "" || builtinType(hir.ParseType(value)) {
 		return
 	}
 	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
 		if strings.HasPrefix(value, prefix) {
-			collectStableNominalTypes(strings.TrimPrefix(value, prefix), result)
+			collectStableNominalTypes(strings.TrimPrefix(value, prefix), collect)
 			return
 		}
 	}
 	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
-		collectStableNominalTypes(element.String(), result)
+		collectStableNominalTypes(element.String(), collect)
 		return
 	}
 	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
-		collectStableNominalTypes(success.String(), result)
-		collectStableNominalTypes(failure.String(), result)
+		collectStableNominalTypes(success.String(), collect)
+		collectStableNominalTypes(failure.String(), collect)
 		return
 	}
 	if strings.HasSuffix(value, "]") {
 		if separator := strings.LastIndexByte(value, '['); separator > 0 {
-			collectStableNominalTypes(value[:separator], result)
+			collectStableNominalTypes(value[:separator], collect)
 			return
 		}
 	}
 	if validStableNominalType(value) {
-		result[value] = struct{}{}
+		collect(value)
 	}
 }
 
