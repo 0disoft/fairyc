@@ -69,6 +69,9 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 	}
 	visited := make(map[int]struct{})
 	reachableForeign := make(map[hir.SymbolID]struct{})
+	// Resource definitions are fixed for this pass. Each dropped type contributes
+	// the same glue edges regardless of which local or function drops it.
+	expandedDrops := make(map[hir.Type]struct{})
 	pending := []int{entryIndex}
 	for len(pending) != 0 {
 		index := pending[len(pending)-1]
@@ -98,6 +101,10 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 				if !found {
 					return nil, nil, fmt.Errorf("drop in %s names undeclared resource local %d", function.Name, operation.Symbol)
 				}
+				if _, expanded := expandedDrops[resourceType]; expanded {
+					continue
+				}
+				expandedDrops[resourceType] = struct{}{}
 				for _, dropSymbol := range dischargeDropSymbols(resourceType, resourceTypes) {
 					if dropSymbol == hir.NoSymbol {
 						continue
