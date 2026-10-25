@@ -339,10 +339,9 @@ func inspectPrimaryCOFFSymbols(file *pe.File, object []byte) (inspectedCOFFSymbo
 	}
 	for index := 0; index < len(file.COFFSymbols); {
 		symbol := &file.COFFSymbols[index]
-		name, err := symbol.FullName(file.StringTable)
-		if err != nil {
-			return inspectedCOFFSymbols{}, fmt.Errorf("read COFF object symbol %d name: %w", index, err)
-		}
+		// debug/pe already decoded each primary name in this order, excluding
+		// auxiliary records. Reuse its immutable string instead of copying it.
+		name := file.Symbols[len(result.records)].Name
 		if name == "" {
 			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object symbol %d has no name", index)
 		}
