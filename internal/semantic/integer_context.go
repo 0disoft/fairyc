@@ -41,21 +41,31 @@ func contextualIntegerOperator(operator string) bool {
 
 // Only source integer literals and their pure operator trees are flexible.
 // Typed names (including folded global constants), calls and casts are anchors.
-func contextualIntegerTree(expression *ast.Expression) bool {
+func (a *analyzer) contextualIntegerTree(expression *ast.Expression) (flexible bool) {
 	if expression == nil {
 		return false
 	}
+	if expression.Kind != syntax.KindGroup && expression.Kind != syntax.KindPrefix && expression.Kind != syntax.KindBinary {
+		return expression.Kind == syntax.KindLiteral && isIntegerLiteral(expression.Text)
+	}
+	// Classification depends only on immutable syntax, not the expected type.
+	// Share it across type checking and compile-time evaluation in this analysis.
+	if value, found := a.integerTrees[expression]; found {
+		return value
+	}
+	if a.integerTrees == nil {
+		a.integerTrees = make(map[*ast.Expression]bool)
+	}
+	defer func() { a.integerTrees[expression] = flexible }()
 	switch expression.Kind {
-	case syntax.KindLiteral:
-		return isIntegerLiteral(expression.Text)
 	case syntax.KindGroup:
-		return len(expression.Children) == 1 && contextualIntegerTree(expression.Children[0])
+		return len(expression.Children) == 1 && a.contextualIntegerTree(expression.Children[0])
 	case syntax.KindPrefix:
 		return (expression.Text == "+" || expression.Text == "-" || expression.Text == "~") &&
-			len(expression.Children) == 1 && contextualIntegerTree(expression.Children[0])
+			len(expression.Children) == 1 && a.contextualIntegerTree(expression.Children[0])
 	case syntax.KindBinary:
 		return integerValueOperator(expression.Text) && len(expression.Children) == 2 &&
-			contextualIntegerTree(expression.Children[0]) && contextualIntegerTree(expression.Children[1])
+			a.contextualIntegerTree(expression.Children[0]) && a.contextualIntegerTree(expression.Children[1])
 	}
 	return false
 }

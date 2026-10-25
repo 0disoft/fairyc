@@ -501,7 +501,7 @@ func (e *compileTimeEvaluator) binary(module *moduleScope, expression *ast.Expre
 		e.rejectExpression(module, expression)
 		return compileTimeValue{}, false
 	}
-	if contextualIntegerTree(expression.Children[0]) && !contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
+	if e.analyzer.contextualIntegerTree(expression.Children[0]) && !e.analyzer.contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
 		// The flexible side has no names, calls or effects. Evaluate the fixed
 		// peer once to select its type without converting that peer's value.
 		right, ok := e.eval(module, expression.Children[1], integerBinaryContext(expression.Text, expected), environment, depth)

@@ -1,6 +1,32 @@
 package semantic_test
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+func TestContextualIntegerLongChainsKeepTypedAnchors(t *testing.T) {
+	const count = 128
+	for name, expression := range map[string]string{
+		"right anchor": strings.Repeat("0 + ", count) + "4000000000 + peer",
+		"left anchor":  "peer + " + strings.Repeat("0 + ", count) + "4000000000",
+		"middle anchor": strings.Repeat("0 + ", count/2) + "peer + " +
+			strings.Repeat("0 + ", count/2) + "4000000000",
+	} {
+		t.Run(name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{"main.fy": `module main;
+@const_eval
+fn u32 sum(u32 peer) { return ` + expression + `; }
+fn u32 inferred(u32 peer) { let value = ` + expression + `; return value; }
+const u32 FIRST = sum(1);
+const u32 SECOND = sum(2);
+static_assert(FIRST == 4000000001 && SECOND == 4000000002);
+fn i32 main() { return 0; }
+`})
+			assertCleanTypeResult(t, result)
+		})
+	}
+}
 
 func TestContextualIntegerOperands(t *testing.T) {
 	for name, body := range map[string]string{

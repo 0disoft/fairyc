@@ -149,7 +149,7 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 	context := integerBinaryContext(expression.Text, expected)
 	var left, right *hir.Expression
 	var leftType, rightType hir.Type
-	if contextualIntegerTree(expression.Children[0]) && !contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
+	if c.analyzer.contextualIntegerTree(expression.Children[0]) && !c.analyzer.contextualIntegerTree(expression.Children[1]) && contextualIntegerOperator(expression.Text) {
 		// Select a fixed peer type before defaulting the literal tree. HIR children
 		// stay in source order, so lowering still evaluates left before right.
 		right, rightType = c.checkExpression(expression.Children[1], context)
