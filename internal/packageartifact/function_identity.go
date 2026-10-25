@@ -203,32 +203,65 @@ func validStableType(value string) bool {
 	if value == "" || !utf8.ValidString(value) || strings.Contains(value, "$p") {
 		return false
 	}
-	if builtinType(hir.ParseType(value)) {
-		return true
-	}
-	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
-		if strings.HasPrefix(value, prefix) {
-			return validStableType(strings.TrimPrefix(value, prefix))
+	// Substrings and HIR child spellings preserve the checked UTF-8 and cannot
+	// introduce a build-local prefix. Visit each child without recursive calls.
+	pending := []string{value}
+	for len(pending) != 0 {
+		value = stripStableIndirection(pending[len(pending)-1])
+		pending = pending[:len(pending)-1]
+		if value == "" {
+			return false
 		}
-	}
-	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
-		return validStableType(element.String())
-	}
-	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
-		return validStableType(success.String()) && validStableType(failure.String())
-	}
-	if strings.HasSuffix(value, "[]") {
-		element := strings.TrimSuffix(value, "[]")
-		return strings.HasPrefix(element, "pkg[") && !strings.HasSuffix(element, "]") && validStableType(element)
-	}
-	if strings.HasSuffix(value, "]") {
-		if separator := strings.LastIndexByte(value, '['); separator > 0 {
-			length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
-			if err == nil && length > 0 && validStableType(value[:separator]) {
-				return true
+		parsed := hir.ParseType(value)
+		if builtinType(parsed) {
+			continue
+		}
+		if element, ok := hir.OptionElement(parsed); ok {
+			pending = append(pending, element.String())
+			continue
+		}
+		if success, failure, ok := hir.ResultElements(parsed); ok {
+			pending = append(pending, failure.String(), success.String())
+			continue
+		}
+		if strings.HasSuffix(value, "[]") {
+			element := strings.TrimSuffix(value, "[]")
+			if !strings.HasPrefix(element, "pkg[") || strings.HasSuffix(element, "]") {
+				return false
+			}
+			pending = append(pending, element)
+			continue
+		}
+		if strings.HasSuffix(value, "]") {
+			if separator := strings.LastIndexByte(value, '['); separator > 0 {
+				length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
+				if err == nil && length > 0 {
+					pending = append(pending, value[:separator])
+					continue
+				}
 			}
 		}
+		if !validStableNominalSpelling(value) {
+			return false
+		}
 	}
+	return true
+}
+
+func stripStableIndirection(value string) string {
+	for {
+		switch {
+		case strings.HasPrefix(value, "ref mut "), strings.HasPrefix(value, "ptr mut "):
+			value = value[8:]
+		case strings.HasPrefix(value, "ref "), strings.HasPrefix(value, "ptr "):
+			value = value[4:]
+		default:
+			return value
+		}
+	}
+}
+
+func validStableNominalSpelling(value string) bool {
 	const nominalPrefix = "pkg["
 	if !strings.HasPrefix(value, nominalPrefix) {
 		return false
