@@ -525,10 +525,10 @@ func contextForeignIndices(processContext mir.Program, stable ContextDescriptor,
 		if len(described.ForeignFunctions) != 1 {
 			return nil, fmt.Errorf("foreign function %q did not produce one stable context entry", foreign.Name)
 		}
-		index := slices.IndexFunc(stable.ForeignFunctions, func(candidate ContextForeignFunction) bool {
-			return reflect.DeepEqual(candidate, described.ForeignFunctions[0])
-		})
-		if index < 0 {
+		declaration := described.ForeignFunctions[0]
+		// The validated context is sorted by package and logical name.
+		index, found := slices.BinarySearchFunc(stable.ForeignFunctions, declaration, compareContextForeign)
+		if !found || !reflect.DeepEqual(stable.ForeignFunctions[index], declaration) {
 			return nil, fmt.Errorf("foreign function %q is absent from the stable type context", foreign.Name)
 		}
 		result[foreign.Symbol] = uint64(index)

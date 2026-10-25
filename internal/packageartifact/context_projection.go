@@ -163,10 +163,10 @@ func contextForeignIndicesForSymbols(processContext mir.Program, stable ContextD
 		if err != nil {
 			return nil, fmt.Errorf("describe foreign function %q for stable body: %w", foreign.Name, err)
 		}
-		index := slices.IndexFunc(stable.ForeignFunctions, func(candidate ContextForeignFunction) bool {
-			return reflect.DeepEqual(candidate, described.ForeignFunctions[0])
-		})
-		if index < 0 {
+		declaration := described.ForeignFunctions[0]
+		// The projected context has already passed canonical ordering checks.
+		index, found := slices.BinarySearchFunc(stable.ForeignFunctions, declaration, compareContextForeign)
+		if !found || !reflect.DeepEqual(stable.ForeignFunctions[index], declaration) {
 			return nil, fmt.Errorf("foreign function %q is absent from the projected package context", foreign.Name)
 		}
 		result[foreign.Symbol] = uint64(index)
