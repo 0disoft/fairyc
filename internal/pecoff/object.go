@@ -134,6 +134,9 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	if symbolCount > maxObjectSymbols {
 		return ObjectReport{}, fmt.Errorf("COFF object has invalid symbol count %d", symbolCount)
 	}
+	if err := verifyCOFFRelocationBudget(object); err != nil {
+		return ObjectReport{}, err
+	}
 	file, err := pe.NewFile(bytes.NewReader(object))
 	if err != nil {
 		return ObjectReport{}, fmt.Errorf("parse COFF object: %w", err)
