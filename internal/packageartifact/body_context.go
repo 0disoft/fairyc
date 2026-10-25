@@ -1,16 +1,16 @@
 package packageartifact
 
-// bodyProjectionContext belongs to one projection call. Its descriptor and
+// bodyContext belongs to one batch of body conversions. Its descriptor and
 // byte limit stay fixed while bodies share the validated canonical context ID.
-// Standalone body projection uses its own context, never a process-wide cache.
-type bodyProjectionContext struct {
+// Standalone conversions use their own context, never a process-wide cache.
+type bodyContext struct {
 	descriptor ContextDescriptor
 	maxBytes   uint64
 	id         ContextID
 	ready      bool
 }
 
-func (context *bodyProjectionContext) contextID() (ContextID, error) {
+func (context *bodyContext) contextID() (ContextID, error) {
 	if context.ready {
 		return context.id, nil
 	}

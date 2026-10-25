@@ -86,11 +86,11 @@ func DescribeStableBody(record FunctionRecord, artifact Artifact, maxBytes uint6
 }
 
 func describeStableBody(record FunctionRecord, context ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool, maxBytes uint64) (StableBodyArtifact, error) {
-	projection := &bodyProjectionContext{descriptor: context, maxBytes: maxBytes}
+	projection := &bodyContext{descriptor: context, maxBytes: maxBytes}
 	return describeStableBodyInContext(record, projection, coordinates, bindings, foreign, allowCalls)
 }
 
-func describeStableBodyInContext(record FunctionRecord, context *bodyProjectionContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool) (StableBodyArtifact, error) {
+func describeStableBodyInContext(record FunctionRecord, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool) (StableBodyArtifact, error) {
 	if err := verifyBinding(record.ID, record.Descriptor, record.Body, coordinates); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("verify function binding before stable body projection: %w", err)
 	}
@@ -216,10 +216,15 @@ func RebindStableBody(body StableBodyArtifact, context ContextDescriptor, proces
 }
 
 func rebindStableBody(body StableBodyArtifact, context ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID, maxBytes uint64) (mir.Function, error) {
+	rebinding := &bodyContext{descriptor: context, maxBytes: maxBytes}
+	return rebindStableBodyInContext(body, rebinding, coordinates, functionSymbols, foreignSymbols, firstLocal)
+}
+
+func rebindStableBodyInContext(body StableBodyArtifact, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID) (mir.Function, error) {
 	if err := ValidateStableBody(body); err != nil {
 		return mir.Function{}, err
 	}
-	contextID, err := ComputeContextID(context, maxBytes)
+	contextID, err := context.contextID()
 	if err != nil {
 		return mir.Function{}, fmt.Errorf("compute rebound body context id: %w", err)
 	}

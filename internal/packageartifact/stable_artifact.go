@@ -77,7 +77,7 @@ func describeStableArtifact(artifact Artifact, maxBytes uint64, transfers bool) 
 	result := StableArtifact{Package: artifact.Package, Coordinate: artifact.PackageCoordinate, Context: context}
 	// Projection only reads bindings; every body shares the same complete table.
 	bindings := artifactBindings(artifact)
-	projection := &bodyProjectionContext{descriptor: context, maxBytes: maxBytes}
+	projection := &bodyContext{descriptor: context, maxBytes: maxBytes}
 	for _, record := range artifact.Functions {
 		body, err := describeStableBodyInContext(record, projection, artifact.PackageCoordinates, bindings, foreign, true)
 		if err != nil {
@@ -301,7 +301,7 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 	seenCoordinates := make(map[packagegraph.CoordinateID]struct{}, len(artifacts))
 	type ownedBody struct {
 		body    StableBodyArtifact
-		context ContextDescriptor
+		context *bodyContext
 	}
 	owned := make(map[FunctionID]ownedBody)
 	contexts := make([]ContextDescriptor, 0, len(artifacts))
@@ -318,11 +318,12 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 			return StableReassembly{}, fmt.Errorf("stable package MIR coordinate %s is duplicated", artifact.Coordinate)
 		}
 		seenCoordinates[artifact.Coordinate] = struct{}{}
+		rebinding := &bodyContext{descriptor: artifact.Context, maxBytes: ^uint64(0)}
 		for _, body := range artifact.Functions {
 			if _, duplicate := owned[body.ID]; duplicate {
 				return StableReassembly{}, fmt.Errorf("stable owned FunctionID %s is duplicated", body.ID)
 			}
-			owned[body.ID] = ownedBody{body: body, context: artifact.Context}
+			owned[body.ID] = ownedBody{body: body, context: rebinding}
 		}
 	}
 	for _, artifact := range artifacts {
@@ -360,11 +361,11 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 		bindings = append(bindings, StableFunctionBinding{
 			Package: item.body.Package, Name: item.body.Function.Name, Symbol: functionSymbols[id],
 		})
-		foreignSymbols, foreignErr := foreignSymbolsForContext(processContext, item.context, coordinates)
+		foreignSymbols, foreignErr := foreignSymbolsForContext(processContext, item.context.descriptor, coordinates)
 		if foreignErr != nil {
 			return StableReassembly{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, foreignErr)
 		}
-		function, err := rebindStableBody(item.body, item.context, coordinates, functionSymbols, foreignSymbols, firstLocal, ^uint64(0))
+		function, err := rebindStableBodyInContext(item.body, item.context, coordinates, functionSymbols, foreignSymbols, firstLocal)
 		if err != nil {
 			return StableReassembly{}, fmt.Errorf("rebind stable function %s: %w", id, err)
 		}
