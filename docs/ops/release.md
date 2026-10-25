@@ -1,6 +1,6 @@
 # Release
 
-- Status: Experimental Windows preview preparation; not published
+- Status: Experimental Windows preview published: [v0.1.0-preview.1](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)
 
 ## Operational Contract
 
@@ -74,7 +74,7 @@ node tools/windows-portability/test.mjs --bundle <extracted-bundle>
   exact commit's `Windows native target smoke` CI job must pass. Triage other
   failed CI jobs and block on failures that affect the stable user path. Verify
   the ZIP and executable hashes against the retained candidate receipt.
-- Public access gate: the repository is currently private. Before announcing
+- Public access gate: the repository is currently public. Before announcing
   a download, choose and verify a publicly accessible release location.
 - Security gate: enable GitHub private vulnerability reporting on a public
   repository and verify that an unauthenticated visitor can find the private
