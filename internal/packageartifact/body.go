@@ -86,10 +86,15 @@ func DescribeStableBody(record FunctionRecord, artifact Artifact, maxBytes uint6
 }
 
 func describeStableBody(record FunctionRecord, context ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool, maxBytes uint64) (StableBodyArtifact, error) {
+	projection := &bodyProjectionContext{descriptor: context, maxBytes: maxBytes}
+	return describeStableBodyInContext(record, projection, coordinates, bindings, foreign, allowCalls)
+}
+
+func describeStableBodyInContext(record FunctionRecord, context *bodyProjectionContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool) (StableBodyArtifact, error) {
 	if err := verifyBinding(record.ID, record.Descriptor, record.Body, coordinates); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("verify function binding before stable body projection: %w", err)
 	}
-	contextID, err := ComputeContextID(context, maxBytes)
+	contextID, err := context.contextID()
 	if err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("compute stable body context id: %w", err)
 	}
