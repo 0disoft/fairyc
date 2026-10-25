@@ -333,13 +333,19 @@ func stableType(value hir.Type, coordinates map[hir.PackageID]packagegraph.Coord
 // spelling for a fresh build. PackageCoordinateId values must map one-to-one to build-local package
 // numbers; an absent or ambiguous identity fails closed instead of guessing a package.
 func rebindStableType(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Type, error) {
+	return rebindStableTypeWithResolver(value, func(coordinate packagegraph.CoordinateID) (packageCoordinateBinding, bool) {
+		return scanPackageCoordinate(coordinate, coordinates)
+	})
+}
+
+func rebindStableTypeWithResolver(value string, resolve packageResolver) (hir.Type, error) {
 	if !validStableType(value) {
 		return hir.TypeInvalid, fmt.Errorf("invalid stable type %q", value)
 	}
-	return rebindValidatedStableType(value, coordinates)
+	return rebindValidatedStableType(value, resolve)
 }
 
-func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Type, error) {
+func rebindValidatedStableType(value string, resolve packageResolver) (hir.Type, error) {
 	if builtinType(hir.ParseType(value)) {
 		return hir.ParseType(value), nil
 	}
@@ -356,7 +362,7 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 		if !strings.HasPrefix(value, prefix.stable) {
 			continue
 		}
-		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), coordinates)
+		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -369,25 +375,25 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 		return hir.SharedBorrow(element), nil
 	}
 	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
-		rebound, err := rebindValidatedStableType(element.String(), coordinates)
+		rebound, err := rebindValidatedStableType(element.String(), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
 		return hir.Option(rebound), nil
 	}
 	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
-		reboundSuccess, err := rebindValidatedStableType(success.String(), coordinates)
+		reboundSuccess, err := rebindValidatedStableType(success.String(), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
-		reboundFailure, err := rebindValidatedStableType(failure.String(), coordinates)
+		reboundFailure, err := rebindValidatedStableType(failure.String(), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
 		return hir.Result(reboundSuccess, reboundFailure), nil
 	}
 	if strings.HasSuffix(value, "[]") {
-		element, err := rebindValidatedStableType(strings.TrimSuffix(value, "[]"), coordinates)
+		element, err := rebindValidatedStableType(strings.TrimSuffix(value, "[]"), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -400,7 +406,7 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 			if err != nil || length == 0 {
 				return hir.TypeInvalid, fmt.Errorf("invalid stable fixed-array type %q", value)
 			}
-			element, err := rebindValidatedStableType(value[:separator], coordinates)
+			element, err := rebindValidatedStableType(value[:separator], resolve)
 			if err != nil {
 				return hir.TypeInvalid, err
 			}
@@ -414,23 +420,15 @@ func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packa
 	if err != nil {
 		return hir.TypeInvalid, fmt.Errorf("parse stable nominal type %q: %w", value, err)
 	}
-	var packageID hir.PackageID
-	found := false
-	for candidate, candidateCoordinate := range coordinates {
-		if candidateCoordinate != coordinate {
-			continue
-		}
-		if found && candidate != packageID {
-			return hir.TypeInvalid, fmt.Errorf("stable type %q maps PackageCoordinateId %s to multiple local packages", value, coordinate)
-		}
-		packageID = candidate
-		found = true
+	binding, found := resolve(coordinate)
+	if binding.ambiguous {
+		return hir.TypeInvalid, fmt.Errorf("stable type %q maps PackageCoordinateId %s to multiple local packages", value, coordinate)
 	}
 	if !found {
 		return hir.TypeInvalid, fmt.Errorf("stable type %q references unknown PackageCoordinateId %s", value, coordinate)
 	}
 	logicalName := value[separator+3:]
-	return hir.ParseType(hir.QualifiedModulePath(packageID, logicalName)), nil
+	return hir.ParseType(hir.QualifiedModulePath(binding.id, logicalName)), nil
 }
 
 func nominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {

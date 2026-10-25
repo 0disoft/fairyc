@@ -31,19 +31,20 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		usedSymbols[symbol] = id.String()
 	}
 
+	resolvePackage := indexedPackageResolver(coordinates)
 	program := mir.Program{}
 	for _, item := range descriptor.Structs {
-		typeRef, err := rebindStableType(item.Type, coordinates)
+		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind struct %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, coordinates)
+		owner, err := packageForStableNominal(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, err
 		}
 		structure := mir.StructType{Type: typeRef, Name: item.Name, Span: hir.Span{Package: owner}, ReprC: item.ReprC}
 		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableType(field.Type, coordinates)
+			fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
 			if fieldErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind struct %q field %q: %w", item.Type, field.Name, fieldErr)
 			}
@@ -52,11 +53,11 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		program.StructTypes = append(program.StructTypes, structure)
 	}
 	for _, item := range descriptor.Enums {
-		typeRef, err := rebindStableType(item.Type, coordinates)
+		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind enum %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, coordinates)
+		owner, err := packageForStableNominal(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, err
 		}
@@ -64,7 +65,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		for _, variant := range item.Variants {
 			reboundVariant := mir.EnumVariant{Name: variant.Name, Span: hir.Span{Package: owner}}
 			for _, field := range variant.Fields {
-				fieldType, fieldErr := rebindStableType(field.Type, coordinates)
+				fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
 				if fieldErr != nil {
 					return mir.Program{}, fmt.Errorf("rebind enum %q variant %q field %q: %w", item.Type, variant.Name, field.Name, fieldErr)
 				}
@@ -76,17 +77,17 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 	}
 	bindings := make(map[hir.SymbolID]FunctionID, len(descriptor.Resources))
 	for _, item := range descriptor.Resources {
-		typeRef, err := rebindStableType(item.Type, coordinates)
+		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind resource %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, coordinates)
+		owner, err := packageForStableNominal(item.Type, resolvePackage)
 		if err != nil {
 			return mir.Program{}, err
 		}
 		resource := mir.ResourceType{Type: typeRef, Span: hir.Span{Package: owner}, DropKind: hir.ResourceDropKind(item.DropKind), DropSymbol: hir.NoSymbol}
 		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableType(field.Type, coordinates)
+			fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
 			if fieldErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind resource %q field %q: %w", item.Type, field.Name, fieldErr)
 			}
@@ -110,7 +111,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		program.ResourceTypes = append(program.ResourceTypes, resource)
 	}
 	for index, item := range descriptor.ForeignFunctions {
-		owner, err := packageForCoordinate(item.Package, coordinates)
+		owner, err := packageForCoordinateWithResolver(item.Package, resolvePackage)
 		if err != nil {
 			return mir.Program{}, err
 		}
@@ -127,13 +128,13 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 			ABI: item.ABI, Span: hir.Span{Package: owner}, ResultType: hir.TypeInvalid,
 		}
 		for _, parameterType := range item.ParameterTypes {
-			rebound, parameterErr := rebindStableType(parameterType, coordinates)
+			rebound, parameterErr := rebindStableTypeWithResolver(parameterType, resolvePackage)
 			if parameterErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind foreign function %q parameter: %w", item.Name, parameterErr)
 			}
 			foreign.ParameterTypes = append(foreign.ParameterTypes, rebound)
 		}
-		foreign.ResultType, err = rebindStableType(item.ResultType, coordinates)
+		foreign.ResultType, err = rebindStableTypeWithResolver(item.ResultType, resolvePackage)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind foreign function %q result: %w", item.Name, err)
 		}
@@ -150,7 +151,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 	return program, nil
 }
 
-func packageForStableNominal(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.PackageID, error) {
+func packageForStableNominal(value string, resolve packageResolver) (hir.PackageID, error) {
 	const prefix = "pkg["
 	separator := strings.Index(value, "]::")
 	if !strings.HasPrefix(value, prefix) || separator <= len(prefix) {
@@ -160,24 +161,22 @@ func packageForStableNominal(value string, coordinates map[hir.PackageID]package
 	if err != nil {
 		return 0, fmt.Errorf("parse stable nominal type %q: %w", value, err)
 	}
-	return packageForCoordinate(coordinate, coordinates)
+	return packageForCoordinateWithResolver(coordinate, resolve)
 }
 
 func packageForCoordinate(coordinate packagegraph.CoordinateID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.PackageID, error) {
-	var packageID hir.PackageID
-	found := false
-	for candidate, candidateCoordinate := range coordinates {
-		if candidateCoordinate != coordinate {
-			continue
-		}
-		if found && candidate != packageID {
-			return 0, fmt.Errorf("PackageCoordinateId %s maps to multiple local packages", coordinate)
-		}
-		packageID = candidate
-		found = true
+	return packageForCoordinateWithResolver(coordinate, func(coordinate packagegraph.CoordinateID) (packageCoordinateBinding, bool) {
+		return scanPackageCoordinate(coordinate, coordinates)
+	})
+}
+
+func packageForCoordinateWithResolver(coordinate packagegraph.CoordinateID, resolve packageResolver) (hir.PackageID, error) {
+	binding, found := resolve(coordinate)
+	if binding.ambiguous {
+		return 0, fmt.Errorf("PackageCoordinateId %s maps to multiple local packages", coordinate)
 	}
 	if !found {
 		return 0, fmt.Errorf("PackageCoordinateId %s has no local package", coordinate)
 	}
-	return packageID, nil
+	return binding.id, nil
 }
