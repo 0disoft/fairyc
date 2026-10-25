@@ -364,6 +364,7 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 	processContext := mir.Clone(program)
 	// Foreign bindings depend on the package context, not the individual body.
 	foreignByContext := make(map[*bodyContext]map[uint64]hir.SymbolID, len(artifacts))
+	var availableForeign foreignContextIndex
 	for _, id := range ids {
 		item := owned[id]
 		bindings = append(bindings, StableFunctionBinding{
@@ -371,7 +372,13 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 		})
 		foreignSymbols, found := foreignByContext[item.context]
 		if !found {
-			foreignSymbols, err = foreignSymbolsForContext(processContext, item.context.descriptor, coordinates)
+			if availableForeign == nil {
+				availableForeign, err = indexForeignContext(processContext, coordinates)
+				if err != nil {
+					return StableReassembly{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, err)
+				}
+			}
+			foreignSymbols, err = availableForeign.symbolsFor(item.context.descriptor)
 			if err != nil {
 				return StableReassembly{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, err)
 			}

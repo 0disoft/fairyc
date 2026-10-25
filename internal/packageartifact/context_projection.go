@@ -302,12 +302,17 @@ func stableArtifactImports(artifact Artifact, context ContextDescriptor) ([]Func
 	return result, nil
 }
 
-func foreignSymbolsForContext(processContext mir.Program, local ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[uint64]hir.SymbolID, error) {
-	type binding struct {
-		declaration ContextForeignFunction
-		symbol      hir.SymbolID
-	}
-	available := make(map[string]binding, len(processContext.ForeignFunctions))
+type foreignContextBinding struct {
+	declaration ContextForeignFunction
+	symbol      hir.SymbolID
+}
+
+// foreignContextIndex is owned by one reassembly. Package contexts share the
+// merged declarations, but each still resolves its own declaration order.
+type foreignContextIndex map[string]foreignContextBinding
+
+func indexForeignContext(processContext mir.Program, coordinates map[hir.PackageID]packagegraph.CoordinateID) (foreignContextIndex, error) {
+	available := make(foreignContextIndex, len(processContext.ForeignFunctions))
 	for _, foreign := range processContext.ForeignFunctions {
 		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, coordinates, nil)
 		if err != nil {
@@ -318,8 +323,12 @@ func foreignSymbolsForContext(processContext mir.Program, local ContextDescripto
 		if previous, duplicate := available[key]; duplicate && (!reflect.DeepEqual(previous.declaration, declaration) || previous.symbol != foreign.Symbol) {
 			return nil, fmt.Errorf("merged context has an ambiguous foreign function %q", declaration.Name)
 		}
-		available[key] = binding{declaration: declaration, symbol: foreign.Symbol}
+		available[key] = foreignContextBinding{declaration: declaration, symbol: foreign.Symbol}
 	}
+	return available, nil
+}
+
+func (available foreignContextIndex) symbolsFor(local ContextDescriptor) (map[uint64]hir.SymbolID, error) {
 	result := make(map[uint64]hir.SymbolID, len(local.ForeignFunctions))
 	for index, declaration := range local.ForeignFunctions {
 		key := declaration.Package.String() + "\x00" + declaration.Name
