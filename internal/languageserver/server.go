@@ -23,6 +23,7 @@ type server struct {
 	out                   io.Writer
 	root                  string
 	initialized, shutdown bool
+	analysisPending       bool
 	docs                  map[string]*document
 }
 type documentID struct {
@@ -167,6 +168,11 @@ func (s *server) handle(m message) error {
 		if !ok {
 			return bad("invalid UTF-16 position")
 		}
+		if s.analysisPending {
+			if err := s.recheck(); err != nil {
+				return err
+			}
+		}
 		if m.Method == "textDocument/definition" {
 			return s.response(m.ID, s.definition(d, offset), 0, "")
 		}
@@ -188,6 +194,9 @@ func (s *server) fits(uri, text string) bool {
 	return total <= 32<<20
 }
 func (s *server) recheck() error {
+	// A newer notification can cancel this analysis and then fail validation.
+	// Queries must recover it before reading views of older document contents.
+	s.analysisPending = true
 	ctx := s.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -232,6 +241,7 @@ func (s *server) recheck() error {
 			return err
 		}
 	}
+	s.analysisPending = false
 	return nil
 }
 func internalDiagnostic(err error) string { return fmt.Sprintf("editor analysis: %v", err) }
