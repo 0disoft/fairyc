@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"slices"
-	"strings"
+	"sort"
 )
 
 const (
@@ -76,6 +76,7 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 	}
 	primaryByIndex := make(map[uint32]int, int(symbolCount))
 	var stringTableText string
+	var nameSpans []bigCOFFNameSpan
 	for index := uint64(0); index < symbolCount; {
 		offset := symbolOffset + index*coffBigObjectSymbolBytes
 		entry := object[offset : offset+coffBigObjectSymbolBytes]
@@ -83,8 +84,9 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 			// Own one immutable copy so aliased names share bytes without
 			// retaining mutable input. Short-name-only objects need no copy.
 			stringTableText = string(stringTable)
+			nameSpans = indexBigCOFFNameSpans(object[symbolOffset:symbolEnd], stringTableText)
 		}
-		name, err := bigCOFFName(entry[:8], stringTableText)
+		name, err := bigCOFFName(entry[:8], stringTableText, nameSpans)
 		if err != nil {
 			return ObjectReport{}, fmt.Errorf("read COFF bigobj symbol %d name: %w", index, err)
 		}
@@ -257,7 +259,7 @@ func bigCOFFShortSectionName(field []byte) (string, error) {
 	return string(field[:end]), nil
 }
 
-func bigCOFFName(field []byte, stringTable string) (string, error) {
+func bigCOFFName(field []byte, stringTable string, spans []bigCOFFNameSpan) (string, error) {
 	if len(field) != 8 {
 		return "", fmt.Errorf("invalid name field size")
 	}
@@ -266,12 +268,11 @@ func bigCOFFName(field []byte, stringTable string) (string, error) {
 		if offset < 4 || offset >= uint64(len(stringTable)) {
 			return "", fmt.Errorf("string-table offset %d is out of range", offset)
 		}
-		remaining := stringTable[offset:]
-		end := strings.IndexByte(remaining, 0)
-		if end < 0 {
+		index := sort.Search(len(spans), func(index int) bool { return uint64(spans[index].end) >= offset })
+		if index == len(spans) || uint64(spans[index].end) == uint64(len(stringTable)) {
 			return "", fmt.Errorf("string-table name at offset %d is unterminated", offset)
 		}
-		return remaining[:end], nil
+		return stringTable[offset:spans[index].end], nil
 	}
 	end := bytes.IndexByte(field, 0)
 	if end < 0 {
