@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 const (
@@ -72,10 +73,16 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 		SymbolRecords: make([]ObjectSymbol, 0, int(symbolCount)),
 	}
 	primaryByIndex := make(map[uint32]int, int(symbolCount))
+	var stringTableText string
 	for index := uint64(0); index < symbolCount; {
 		offset := symbolOffset + index*coffBigObjectSymbolBytes
 		entry := object[offset : offset+coffBigObjectSymbolBytes]
-		name, err := bigCOFFName(entry[:8], stringTable)
+		if binary.LittleEndian.Uint32(entry[:4]) == 0 && stringTableText == "" {
+			// Own one immutable copy so aliased names share bytes without
+			// retaining mutable input. Short-name-only objects need no copy.
+			stringTableText = string(stringTable)
+		}
+		name, err := bigCOFFName(entry[:8], stringTableText)
 		if err != nil {
 			return ObjectReport{}, fmt.Errorf("read COFF bigobj symbol %d name: %w", index, err)
 		}
@@ -225,7 +232,7 @@ func bigCOFFShortSectionName(field []byte) (string, error) {
 	return string(field[:end]), nil
 }
 
-func bigCOFFName(field, stringTable []byte) (string, error) {
+func bigCOFFName(field []byte, stringTable string) (string, error) {
 	if len(field) != 8 {
 		return "", fmt.Errorf("invalid name field size")
 	}
@@ -235,11 +242,11 @@ func bigCOFFName(field, stringTable []byte) (string, error) {
 			return "", fmt.Errorf("string-table offset %d is out of range", offset)
 		}
 		remaining := stringTable[offset:]
-		end := bytes.IndexByte(remaining, 0)
+		end := strings.IndexByte(remaining, 0)
 		if end < 0 {
 			return "", fmt.Errorf("string-table name at offset %d is unterminated", offset)
 		}
-		return string(remaining[:end]), nil
+		return remaining[:end], nil
 	}
 	end := bytes.IndexByte(field, 0)
 	if end < 0 {
