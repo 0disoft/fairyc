@@ -152,18 +152,30 @@ func computeLineMapID(contents []byte) LineMapID {
 	digest := sha256.New()
 	writeIdentityHeader(digest, lineMapDomain)
 	writeHashUint64(digest, uint64(len(contents)))
-	lineCount := uint64(1)
-	for _, value := range contents {
-		if value == '\n' {
-			lineCount++
-		}
-	}
+	lineCount := uint64(bytes.Count(contents, []byte{'\n'})) + 1
 	writeHashUint64(digest, lineCount)
 	writeHashUint64(digest, 0)
-	for index, value := range contents {
-		if value == '\n' {
-			writeHashUint64(digest, uint64(index+1))
+	if lineCount == 1 {
+		return LineMapID(digestValue(digest))
+	}
+	// Batch offsets in eight SHA-256 blocks instead of issuing one write per line.
+	var offsets [8 * sha256.BlockSize]byte
+	used := 0
+	for offset := 0; offset < len(contents); {
+		next := bytes.IndexByte(contents[offset:], '\n')
+		if next < 0 {
+			break
 		}
+		offset += next + 1
+		binary.BigEndian.PutUint64(offsets[used:used+8], uint64(offset))
+		used += 8
+		if used == len(offsets) {
+			_, _ = digest.Write(offsets[:])
+			used = 0
+		}
+	}
+	if used != 0 {
+		_, _ = digest.Write(offsets[:used])
 	}
 	return LineMapID(digestValue(digest))
 }
