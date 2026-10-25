@@ -277,9 +277,10 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 
 // SemanticFiles computes detached exact file identities only for consumers that explicitly need
 // source-integrity metadata. The ordinary SemanticPackages/cache path pays no per-file Atlas hash
-// cost.
+// cost. Feature instances reuse identities only within this call, never across source edits.
 func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 	result := make([]SemanticFile, 0)
+	fileRanges := make(map[string][2]int)
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
@@ -291,6 +292,14 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 		mapping, found := workspace.instance(class.Members[0])
 		if !found {
 			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+		}
+		if span, found := fileRanges[mapping.PackagePath]; found {
+			for fileIndex := span[0]; fileIndex < span[1]; fileIndex++ {
+				file := result[fileIndex]
+				file.Package = packageID
+				result = append(result, file)
+			}
+			continue
 		}
 		loaded, found := workspace.Package(mapping.PackagePath)
 		if !found {
@@ -307,6 +316,7 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 		if currentDigest != loaded.Digest {
 			return nil, fmt.Errorf("workspace package %q source bytes changed after validation", mapping.PackagePath)
 		}
+		firstFile := len(result)
 		for _, sourceFile := range loaded.Sources {
 			kind := SemanticFileSource
 			if sourceFile.Test {
@@ -317,6 +327,7 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 				Package: packageID, Path: sourceFile.Path, Digest: digest, LineMap: lineMap, Kind: kind,
 			})
 		}
+		fileRanges[mapping.PackagePath] = [2]int{firstFile, len(result)}
 	}
 	slices.SortFunc(result, func(left, right SemanticFile) int {
 		if value := cmp.Compare(left.Package, right.Package); value != 0 {
