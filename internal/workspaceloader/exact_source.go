@@ -17,8 +17,8 @@ type ExactSource struct {
 }
 
 // ResolveExactSource selects one retained source by exact package instance and canonical path. It
-// clones the complete package source closure before rederiving aggregate and file identities, so a
-// caller never receives bytes that disagree with the validated package identity.
+// hashes the complete package source closure, cloning the selected file before hashing so a caller
+// never receives bytes that disagree with the validated package identity.
 func (workspace Workspace) ResolveExactSource(packageInstance, sourcePath string) (ExactSource, error) {
 	instance, err := packagegraph.ParseInstanceID(packageInstance)
 	if err != nil {
@@ -49,14 +49,15 @@ func (workspace Workspace) ResolveExactSource(packageInstance, sourcePath string
 	files := make([]packagecontent.File, 0, len(loaded.Sources))
 	selectedIndex := -1
 	for index, sourceFile := range loaded.Sources {
-		contents := slices.Clone(sourceFile.Bytes)
-		files = append(files, packagecontent.File{Path: sourceFile.Path, Bytes: contents})
+		contents := sourceFile.Bytes
 		if sourceFile.Path == sourcePath {
 			if selectedIndex >= 0 {
 				return ExactSource{}, fmt.Errorf("resolve exact workspace source: source path is duplicated")
 			}
 			selectedIndex = index
+			contents = slices.Clone(contents)
 		}
+		files = append(files, packagecontent.File{Path: sourceFile.Path, Bytes: contents})
 	}
 	if selectedIndex < 0 {
 		return ExactSource{}, fmt.Errorf("resolve exact workspace source: source path is absent")
