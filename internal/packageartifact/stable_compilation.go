@@ -71,6 +71,12 @@ func EncodeStableCompilationArtifact(artifact StableCompilationArtifact, maxByte
 	if err := ValidateStableCompilationArtifact(artifact); err != nil {
 		return nil, err
 	}
+	return marshalStableCompilationArtifact(artifact, maxBytes)
+}
+
+// marshalStableCompilationArtifact requires semantic validation and a positive
+// byte limit from its caller; decoding has already performed both checks.
+func marshalStableCompilationArtifact(artifact StableCompilationArtifact, maxBytes uint64) ([]byte, error) {
 	encoded, err := json.Marshal(stableCompilationEnvelope{
 		Schema: StableCompilationSchema, Version: StableCompilationVersion, Compilation: artifact,
 	})
@@ -114,7 +120,7 @@ func DecodeStableCompilationArtifact(encoded []byte, maxBytes uint64) (StableCom
 	if err := ValidateStableCompilationArtifact(envelope.Compilation); err != nil {
 		return StableCompilationArtifact{}, fmt.Errorf("verify decoded stable package compilation artifact: %w", err)
 	}
-	canonical, err := EncodeStableCompilationArtifact(envelope.Compilation, maxBytes)
+	canonical, err := marshalStableCompilationArtifact(envelope.Compilation, maxBytes)
 	if err != nil {
 		return StableCompilationArtifact{}, err
 	}
