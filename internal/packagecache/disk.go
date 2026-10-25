@@ -323,7 +323,7 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 	if err != nil {
 		return false
 	}
-	actual, readErr := io.ReadAll(io.LimitReader(file, int64(store.limits.MaxRecordBytes)+1))
+	actual, readErr := io.ReadAll(io.LimitReader(file, diskReadLimit(store.limits.MaxRecordBytes)))
 	closeErr := file.Close()
 	if readErr != nil || closeErr != nil || !bytes.Equal(actual, encoded) {
 		return false
@@ -408,7 +408,7 @@ func (store *DiskStore) readGeneration(path, name string, expected Key) (Record,
 		return Record{}, err
 	}
 	defer file.Close()
-	encoded, err := io.ReadAll(io.LimitReader(file, int64(store.limits.MaxRecordBytes)+1))
+	encoded, err := io.ReadAll(io.LimitReader(file, diskReadLimit(store.limits.MaxRecordBytes)))
 	if err != nil {
 		return Record{}, err
 	}
