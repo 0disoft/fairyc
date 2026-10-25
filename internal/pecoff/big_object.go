@@ -2,8 +2,10 @@ package pecoff
 
 import (
 	"bytes"
+	"cmp"
 	"encoding/binary"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -165,20 +167,9 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 			}
 		}
 		for _, relocation := range relocations {
-			if !validAMD64RelocationType(relocation.Type) {
-				return ObjectReport{}, fmt.Errorf("COFF bigobj section %q has unknown AMD64 relocation type %#x", name, relocation.Type)
-			}
-			symbolPosition, found := primaryByIndex[relocation.SymbolTableIndex]
-			if !found {
-				if uint64(relocation.SymbolTableIndex) >= symbolCount {
-					return ObjectReport{}, fmt.Errorf("COFF bigobj section %q relocation references missing symbol %d", name, relocation.SymbolTableIndex)
-				}
-				return ObjectReport{}, fmt.Errorf("COFF bigobj section %q relocation references auxiliary symbol %d", name, relocation.SymbolTableIndex)
-			}
-			symbol := report.SymbolRecords[symbolPosition]
 			report.RelocationRecords = append(report.RelocationRecords, ObjectRelocation{
 				SectionIndex: index + 1, Section: name, VirtualAddress: relocation.VirtualAddress,
-				SymbolIndex: relocation.SymbolTableIndex, Symbol: symbol.Name, Type: relocation.Type,
+				SymbolIndex: relocation.SymbolTableIndex, Type: relocation.Type,
 			})
 		}
 		containsCode := characteristics&sectionContainsCode != 0
@@ -196,6 +187,24 @@ func inspectBigCOFFObject(object []byte) (ObjectReport, error) {
 			Relocations: len(relocations), Characteristics: characteristics,
 		})
 	}
+	if err := verifyBigCOFFFileRanges(fileRanges); err != nil {
+		return ObjectReport{}, err
+	}
+	for index := range report.RelocationRecords {
+		relocation := &report.RelocationRecords[index]
+		name := relocation.Section
+		if !validAMD64RelocationType(relocation.Type) {
+			return ObjectReport{}, fmt.Errorf("COFF bigobj section %q has unknown AMD64 relocation type %#x", name, relocation.Type)
+		}
+		symbolPosition, found := primaryByIndex[relocation.SymbolIndex]
+		if !found {
+			if uint64(relocation.SymbolIndex) >= symbolCount {
+				return ObjectReport{}, fmt.Errorf("COFF bigobj section %q relocation references missing symbol %d", name, relocation.SymbolIndex)
+			}
+			return ObjectReport{}, fmt.Errorf("COFF bigobj section %q relocation references auxiliary symbol %d", name, relocation.SymbolIndex)
+		}
+		relocation.Symbol = report.SymbolRecords[symbolPosition].Name
+	}
 	if !textSectionFound {
 		return ObjectReport{}, fmt.Errorf("COFF bigobj has no .text or .text$ code section")
 	}
@@ -206,12 +215,28 @@ func addBigCOFFFileRange(ranges *[]bigCOFFFileRange, candidate bigCOFFFileRange)
 	if candidate.start >= candidate.end {
 		return fmt.Errorf("COFF bigobj %s has an empty or reversed range", candidate.kind)
 	}
-	for _, existing := range *ranges {
-		if candidate.start < existing.end && existing.start < candidate.end {
-			return fmt.Errorf("COFF bigobj %s overlaps %s", candidate.kind, existing.kind)
+	*ranges = append(*ranges, candidate)
+	return nil
+}
+
+// Sort only a private index list: section numbers and receipt ordering stay
+// intact. Resolve relocations only after all stored ranges are disjoint.
+func verifyBigCOFFFileRanges(ranges []bigCOFFFileRange) error {
+	indices := make([]int, len(ranges))
+	for index := range indices {
+		indices[index] = index
+	}
+	slices.SortFunc(indices, func(left, right int) int {
+		return cmp.Compare(ranges[left].start, ranges[right].start)
+	})
+	for position := 1; position < len(indices); position++ {
+		left, right := indices[position-1], indices[position]
+		if ranges[right].start < ranges[left].end {
+			// Preserve the diagnostic's later-input/earlier-input order.
+			later, earlier := max(left, right), min(left, right)
+			return fmt.Errorf("COFF bigobj %s overlaps %s", ranges[later].kind, ranges[earlier].kind)
 		}
 	}
-	*ranges = append(*ranges, candidate)
 	return nil
 }
 
