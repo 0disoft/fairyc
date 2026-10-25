@@ -203,12 +203,16 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		// Targets are sorted and unique, and cycle rejection above excludes self.
 		// Preserve self-first lookup order without another quadratic deduplication.
 		visible := append([]int{classIndex}, outgoing[classIndex]...)
-		// Provider indexes are consumed by this lookup only, so reuse one
-		// scratch buffer for the class instead of allocating for every import.
-		providers := make([]int, 0, len(visible))
+		// Visibility is fixed for this instance. Resolve each distinct path
+		// once, while still emitting an independent lookup for every import.
+		providersByPath := make(map[string][]int)
 		for _, module := range representative.Modules {
 			for _, importPath := range module.Imports {
-				providers = providerClasses(graph, classes, visible, importPath, providers[:0])
+				providers, found := providersByPath[importPath]
+				if !found {
+					providers = providerClasses(graph, classes, visible, importPath, nil)
+					providersByPath[importPath] = providers
+				}
 				switch len(providers) {
 				case 0:
 					subjects := slices.Clone(class.members)
