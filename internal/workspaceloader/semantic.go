@@ -176,36 +176,63 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 		}
 	}
 
+	// Build per-call indexes: Workspace exposes mutable slices, so retaining these
+	// between calls could return stale metadata. Preserve first-match lookup order.
+	instances := make(map[string]*Instance, len(workspace.Instances))
+	for index := range workspace.Instances {
+		instance := &workspace.Instances[index]
+		if instances[instance.NodeID] == nil {
+			instances[instance.NodeID] = instance
+		}
+	}
+	packages := make(map[string]*Package, len(workspace.Packages))
+	for index := range workspace.Packages {
+		loaded := &workspace.Packages[index]
+		if packages[loaded.Path] == nil {
+			packages[loaded.Path] = loaded
+		}
+	}
+	nodes := make(map[string]*packagegraph.Node, len(workspace.Graph.Nodes))
+	for index := range workspace.Graph.Nodes {
+		node := &workspace.Graph.Nodes[index]
+		if nodes[node.ID] == nil {
+			nodes[node.ID] = node
+		}
+	}
+	dependenciesByOwner := make(map[hir.PackageID][]string)
+	for _, dependency := range workspace.Graph.Dependencies {
+		if owner, found := nodePackages[dependency.Owner]; found {
+			dependenciesByOwner[owner] = append(dependenciesByOwner[owner], dependency.Target)
+		}
+	}
+
 	result := make([]SemanticPackage, 0, len(workspace.Resolution.InstanceClasses))
 	for index, class := range workspace.Resolution.InstanceClasses {
 		packageID := hir.PackageID(index + 1)
-		mapping, found := workspace.instance(class.Members[0])
-		if !found {
+		mapping := instances[class.Members[0]]
+		if mapping == nil {
 			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
 		}
-		loaded, found := workspace.Package(mapping.PackagePath)
-		if !found {
+		loaded := packages[mapping.PackagePath]
+		if loaded == nil {
 			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
-		node, found := workspace.graphNode(class.Members[0])
-		if !found {
+		node := nodes[class.Members[0]]
+		if node == nil {
 			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
 		}
 		for _, member := range class.Members[1:] {
-			other, mapped := workspace.instance(member)
-			if !mapped || other.PackagePath != mapping.PackagePath || !slices.Equal(other.Features, mapping.Features) {
+			other := instances[member]
+			if other == nil || other.PackagePath != mapping.PackagePath || !slices.Equal(other.Features, mapping.Features) {
 				return nil, fmt.Errorf("workspace instance class %s has inconsistent package mappings", class.ID)
 			}
 		}
 
 		dependencySet := make(map[hir.PackageID]struct{})
-		for _, dependency := range workspace.Graph.Dependencies {
-			if nodePackages[dependency.Owner] != packageID {
-				continue
-			}
-			target, found := nodePackages[dependency.Target]
+		for _, targetNode := range dependenciesByOwner[packageID] {
+			target, found := nodePackages[targetNode]
 			if !found {
-				return nil, fmt.Errorf("workspace dependency target %q has no package id", dependency.Target)
+				return nil, fmt.Errorf("workspace dependency target %q has no package id", targetNode)
 			}
 			if target == packageID {
 				return nil, fmt.Errorf("workspace package %d depends on itself", packageID)
