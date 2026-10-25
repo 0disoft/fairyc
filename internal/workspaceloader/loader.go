@@ -287,18 +287,39 @@ func resolveDirectory(base, relative string) (string, error) {
 	return current, nil
 }
 
+type memberPathNode struct {
+	children map[string]*memberPathNode
+	member   int // -1 unless a previously accepted path ends here.
+	first    int // Earliest source-order member at or below this node.
+}
+
 func rejectOverlappingMembers(members []string) error {
+	root := memberPathNode{member: -1}
 	for index, member := range members {
-		folded := strings.ToLower(member)
-		for previous := 0; previous < index; previous++ {
-			other := strings.ToLower(members[previous])
-			if folded == other {
-				return &LoadError{Reason: ReasonPathCase, Path: member, Detail: fmt.Sprintf("collides with member %q", members[previous])}
+		node := &root
+		for _, component := range strings.Split(strings.ToLower(member), "/") {
+			if node.member >= 0 {
+				return &LoadError{Reason: ReasonOverlappingMember, Path: member, Detail: fmt.Sprintf("overlaps member %q", members[node.member])}
 			}
-			if strings.HasPrefix(folded, other+"/") || strings.HasPrefix(other, folded+"/") {
-				return &LoadError{Reason: ReasonOverlappingMember, Path: member, Detail: fmt.Sprintf("overlaps member %q", members[previous])}
+			if node.children == nil {
+				node.children = make(map[string]*memberPathNode)
 			}
+			child := node.children[component]
+			if child == nil {
+				child = &memberPathNode{member: -1, first: index}
+				node.children[component] = child
+			}
+			node = child
 		}
+		if node.first < index {
+			// Accepted paths cannot overlap each other. The earliest descendant
+			// therefore reproduces the original pairwise diagnostic order.
+			if node.member >= 0 {
+				return &LoadError{Reason: ReasonPathCase, Path: member, Detail: fmt.Sprintf("collides with member %q", members[node.member])}
+			}
+			return &LoadError{Reason: ReasonOverlappingMember, Path: member, Detail: fmt.Sprintf("overlaps member %q", members[node.first])}
+		}
+		node.member = index
 	}
 	return nil
 }
