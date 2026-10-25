@@ -74,6 +74,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		}
 		program.EnumTypes = append(program.EnumTypes, enumeration)
 	}
+	bindings := make(map[hir.SymbolID]FunctionID, len(descriptor.Resources))
 	for _, item := range descriptor.Resources {
 		typeRef, err := rebindStableType(item.Type, coordinates)
 		if err != nil {
@@ -104,6 +105,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 				return mir.Program{}, fmt.Errorf("stable resource %q drop target %s is unresolved", item.Type, item.DropFunctionID)
 			}
 			resource.DropSymbol = symbol
+			bindings[symbol] = item.DropFunctionID
 		}
 		program.ResourceTypes = append(program.ResourceTypes, resource)
 	}
@@ -138,22 +140,6 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		program.ForeignFunctions = append(program.ForeignFunctions, foreign)
 	}
 
-	bindings := make(map[hir.SymbolID]FunctionID, len(descriptor.Resources))
-	for _, resource := range program.ResourceTypes {
-		if resource.DropSymbol == hir.NoSymbol {
-			continue
-		}
-		stableTypeName, err := stableType(resource.Type, coordinates)
-		if err != nil {
-			return mir.Program{}, err
-		}
-		for _, item := range descriptor.Resources {
-			if item.Type == stableTypeName {
-				bindings[resource.DropSymbol] = item.DropFunctionID
-				break
-			}
-		}
-	}
 	roundTrip, err := DescribeContext(program, coordinates, bindings)
 	if err != nil {
 		return mir.Program{}, fmt.Errorf("describe rebound stable type context: %w", err)
