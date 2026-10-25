@@ -457,25 +457,29 @@ func inspectCOFFCOMDAT(file *pe.File, symbols inspectedCOFFSymbols, relocationsB
 			return nil, fmt.Errorf("COFF object COMDAT section %q has no following COMDAT symbol", section.Name)
 		}
 	}
+	if len(result) == 0 {
+		return result, nil
+	}
+	associationState := make([]uint8, len(file.Sections)+1)
 	for sectionNumber := range result {
-		if err := validateCOMDATAssociation(file, result, sectionNumber); err != nil {
+		if err := validateCOMDATAssociation(file, result, sectionNumber, associationState); err != nil {
 			return nil, err
 		}
 	}
 	return result, nil
 }
 
-func validateCOMDATAssociation(file *pe.File, definitions map[int]pe.COFFSymbolAuxFormat5, start int) error {
-	seen := make(map[int]struct{})
+func validateCOMDATAssociation(file *pe.File, definitions map[int]pe.COFFSymbolAuxFormat5, start int, state []uint8) error {
+	const visiting, validated = 1, 2
 	current := start
-	for {
-		if _, duplicate := seen[current]; duplicate {
+	for state[current] != validated {
+		if state[current] == visiting {
 			return fmt.Errorf("COFF object COMDAT association from section %q contains a cycle", file.Sections[start-1].Name)
 		}
-		seen[current] = struct{}{}
+		state[current] = visiting
 		definition := definitions[current]
 		if definition.Selection != coffCOMDATAssociative {
-			return nil
+			break
 		}
 		parent := int(definition.SecNum)
 		if parent <= 0 || parent > len(file.Sections) || parent == current {
@@ -489,6 +493,17 @@ func validateCOMDATAssociation(file *pe.File, definitions map[int]pe.COFFSymbolA
 		}
 		current = parent
 	}
+	// Every visiting node belongs to this path. Mark it complete without a
+	// recursive walk or a per-root map; later roots stop at validated nodes.
+	for current = start; state[current] == visiting; {
+		state[current] = validated
+		definition := definitions[current]
+		if definition.Selection != coffCOMDATAssociative {
+			break
+		}
+		current = int(definition.SecNum)
+	}
+	return nil
 }
 
 func isCOFFTextSection(name string) bool {
