@@ -121,11 +121,20 @@ func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.Pac
 	if _, found := coordinates[packageID]; !found {
 		return Descriptor{}, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
 	}
-	publicTypes := make(map[hir.Type]bool)
-	for _, module := range value.Modules {
-		if module.Package != packageID {
-			continue
+	var modules []*hir.Module
+	for index := range value.Modules {
+		if value.Modules[index].Package == packageID {
+			modules = append(modules, &value.Modules[index])
 		}
+	}
+	return extractModules(modules, value.StateLayouts, packageID, coordinates)
+}
+
+// extractModules reads only one owner's modules. Pointers borrow the typed HIR
+// for this call; descriptors never retain them or mutate the source declarations.
+func extractModules(modules []*hir.Module, layouts []hir.StateLayout, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Descriptor, error) {
+	publicTypes := make(map[hir.Type]bool)
+	for _, module := range modules {
 		for _, structure := range module.Structs {
 			publicTypes[structure.Type] = structure.Public
 		}
@@ -137,7 +146,7 @@ func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.Pac
 		}
 	}
 
-	loweredLayout, hasStateLayout, err := contractstatemir.LowerHIRLayoutForPackage(value, packageID)
+	loweredLayout, hasStateLayout, err := contractstatemir.LowerHIRLayoutForPackage(hir.Package{StateLayouts: layouts}, packageID)
 	if err != nil {
 		return Descriptor{}, fmt.Errorf("lower contract state layouts: %w", err)
 	}
@@ -149,10 +158,7 @@ func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.Pac
 		})
 	}
 	seenModules := make(map[string]struct{})
-	for _, sourceModule := range value.Modules {
-		if sourceModule.Package != packageID {
-			continue
-		}
+	for _, sourceModule := range modules {
 		if sourceModule.Path == "" {
 			return Descriptor{}, fmt.Errorf("package %d contains an empty module path", packageID)
 		}
@@ -160,7 +166,7 @@ func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.Pac
 			return Descriptor{}, fmt.Errorf("package %d contains duplicate module %q", packageID, sourceModule.Path)
 		}
 		seenModules[sourceModule.Path] = struct{}{}
-		module, err := extractModule(sourceModule, packageID, coordinates, publicTypes)
+		module, err := extractModule(*sourceModule, packageID, coordinates, publicTypes)
 		if err != nil {
 			return Descriptor{}, fmt.Errorf("module %q: %w", sourceModule.Path, err)
 		}
@@ -498,9 +504,31 @@ func ComputePackages(value hir.Package, packageIDs []hir.PackageID, coordinates 
 			return nil, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
 		}
 	}
+	type interfaceSources struct {
+		modules []*hir.Module
+		layouts []hir.StateLayout
+	}
+	// Partition once instead of rescanning every module and layout per package.
+	// Keep source order within each owner so validation failures remain identical.
+	byPackage := make(map[hir.PackageID]*interfaceSources, len(ordered))
+	for _, packageID := range ordered {
+		byPackage[packageID] = &interfaceSources{}
+	}
+	for index := range value.Modules {
+		module := &value.Modules[index]
+		if selected := byPackage[module.Package]; selected != nil {
+			selected.modules = append(selected.modules, module)
+		}
+	}
+	for _, layout := range value.StateLayouts {
+		if selected := byPackage[layout.Package]; selected != nil {
+			selected.layouts = append(selected.layouts, layout)
+		}
+	}
 	result := make(map[hir.PackageID]Hash, len(ordered))
 	for _, packageID := range ordered {
-		descriptor, err := Extract(value, packageID, coordinates)
+		selected := byPackage[packageID]
+		descriptor, err := extractModules(selected.modules, selected.layouts, packageID, coordinates)
 		if err != nil {
 			return nil, fmt.Errorf("extract public interface for package %d: %w", packageID, err)
 		}
