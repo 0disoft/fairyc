@@ -416,17 +416,33 @@ func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) 
 // unambiguous resolved instance to the current production graph. Paths are ordered by stable
 // manifest package UID so callers do not inherit loader or graph traversal order.
 func (workspace Workspace) RootReachableLocalPackagePaths() ([]string, error) {
+	// Resolve catalogs once instead of scanning them for every class and every
+	// sort comparison. Preserve first matches and rebuild after Workspace edits.
+	instances := make(map[string]*Instance, len(workspace.Instances))
+	for index := range workspace.Instances {
+		instance := &workspace.Instances[index]
+		if instances[instance.NodeID] == nil {
+			instances[instance.NodeID] = instance
+		}
+	}
+	packages := make(map[string]*Package, len(workspace.Packages))
+	for index := range workspace.Packages {
+		loaded := &workspace.Packages[index]
+		if packages[loaded.Path] == nil {
+			packages[loaded.Path] = loaded
+		}
+	}
 	counts := make(map[string]int)
 	for _, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		mapping, found := workspace.instance(class.Members[0])
-		if !found {
+		mapping := instances[class.Members[0]]
+		if mapping == nil {
 			return nil, fmt.Errorf("workspace instance class %q has no package mapping", class.ID)
 		}
-		loaded, found := workspace.Package(mapping.PackagePath)
-		if !found {
+		loaded := packages[mapping.PackagePath]
+		if loaded == nil {
 			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
 		if loaded.SourceKind == SourceKindLocal {
@@ -441,11 +457,8 @@ func (workspace Workspace) RootReachableLocalPackagePaths() ([]string, error) {
 		paths = append(paths, packagePath)
 	}
 	slices.SortFunc(paths, func(left, right string) int {
-		leftPackage, leftFound := workspace.Package(left)
-		rightPackage, rightFound := workspace.Package(right)
-		if !leftFound || !rightFound {
-			return strings.Compare(left, right)
-		}
+		leftPackage := packages[left]
+		rightPackage := packages[right]
 		if compared := strings.Compare(leftPackage.Manifest.Package.UID, rightPackage.Manifest.Package.UID); compared != 0 {
 			return compared
 		}
