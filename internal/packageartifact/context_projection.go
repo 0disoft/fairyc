@@ -47,8 +47,13 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 		}
 	}
 
-	foreignBySymbol := make(map[hir.SymbolID]ContextForeignFunction, len(artifact.Context.ForeignFunctions))
+	// Public projection verifies all declarations before reaching this step.
+	// Only called declarations need another conversion for the projected context.
+	foreignBySymbol := make(map[hir.SymbolID]ContextForeignFunction, len(usedForeign))
 	for _, foreign := range artifact.Context.ForeignFunctions {
+		if _, used := usedForeign[foreign.Symbol]; !used {
+			continue
+		}
 		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, artifact.PackageCoordinates, nil)
 		if err != nil {
 			return ContextDescriptor{}, nil, fmt.Errorf("describe foreign function %q for package context: %w", foreign.Name, err)
