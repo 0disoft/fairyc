@@ -350,10 +350,17 @@ func reassemble(artifacts []Artifact, verifyMIR func(mir.Program) []mir.Verifica
 		}
 		originalToID[record.Body.Symbol] = id
 	}
+	// Every body from one validated artifact shares the same symbol bindings.
+	// Keep the index local to this reassembly so later calls see fresh artifacts.
+	bindingsByArtifact := make([]map[hir.SymbolID]FunctionID, len(artifacts))
 	for _, id := range ids {
 		record := owned[id]
-		artifact := artifacts[owners[id]]
-		bindings := artifactBindings(artifact)
+		artifactIndex := owners[id]
+		bindings := bindingsByArtifact[artifactIndex]
+		if bindings == nil {
+			bindings = artifactBindings(artifacts[artifactIndex])
+			bindingsByArtifact[artifactIndex] = bindings
+		}
 		function := cloneFunction(record.Body)
 		function.Symbol = fresh[id]
 		for blockIndex := range function.Blocks {
