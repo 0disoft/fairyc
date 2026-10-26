@@ -72,8 +72,9 @@ func extractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 	}
 	slices.Sort(packageIDs)
 	artifacts := make([]Artifact, 0, len(packageIDs))
+	index := &extractionIndex{}
 	for _, packageID := range packageIDs {
-		artifact, err := extractVerified(program, packageID, identities, coordinates, verifyMIR)
+		artifact, err := extractVerified(program, packageID, identities, coordinates, verifyMIR, index)
 		if err != nil {
 			return nil, err
 		}
@@ -88,10 +89,10 @@ func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.Pa
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Artifact{}, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
-	return extractVerified(program, packageID, identities, coordinates, mir.Verify)
+	return extractVerified(program, packageID, identities, coordinates, mir.Verify, &extractionIndex{})
 }
 
-func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, verifyMIR func(mir.Program) []mir.VerificationError) (Artifact, error) {
+func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, verifyMIR func(mir.Program) []mir.VerificationError, index *extractionIndex) (Artifact, error) {
 	packageIdentity, found := identities[packageID]
 	if !found {
 		return Artifact{}, fmt.Errorf("package %d has no PackageInstanceId", packageID)
@@ -101,28 +102,9 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 		return Artifact{}, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
 	}
 
-	type functionMetadata struct {
-		id         FunctionID
-		descriptor FunctionDescriptor
-		signature  FunctionSignature
-		body       mir.Function
-	}
-	bySymbol := make(map[hir.SymbolID]functionMetadata, len(program.Functions))
-	for _, function := range program.Functions {
-		descriptor, err := DescribeFunction(function, coordinates)
-		if err != nil {
-			return Artifact{}, err
-		}
-		id, err := ComputeFunctionID(descriptor)
-		if err != nil {
-			return Artifact{}, fmt.Errorf("compute FunctionID for %q: %w", function.Name, err)
-		}
-		if _, duplicate := bySymbol[function.Symbol]; duplicate {
-			return Artifact{}, fmt.Errorf("whole program function symbol %d is duplicated", function.Symbol)
-		}
-		bySymbol[function.Symbol] = functionMetadata{
-			id: id, descriptor: cloneDescriptor(descriptor), signature: signatureOf(function), body: function,
-		}
+	bySymbol, err := index.load(program, coordinates)
+	if err != nil {
+		return Artifact{}, err
 	}
 
 	artifact := Artifact{
