@@ -66,8 +66,29 @@ func collectStaticStorage(functions []mir.Function, spec staticStorageSpec) (map
 }
 
 func staticStorageSymbol(prefix, value string) string {
-	digest := sha256.Sum256([]byte(value))
+	var digest [sha256.Size]byte
+	if len(value) <= 32 {
+		// Keep the compiler's small, stack-backed []byte conversion fast path.
+		digest = sha256.Sum256([]byte(value))
+	} else {
+		digest = chunkedStaticStorageDigest(value)
+	}
 	return fmt.Sprintf("%s%x", prefix, digest)
+}
+
+// Bound temporary storage instead of copying the entire literal to []byte.
+// Keep this frame separate so short literals do not need the scratch buffer.
+func chunkedStaticStorageDigest(value string) [sha256.Size]byte {
+	hasher := sha256.New()
+	var buffer [4096]byte
+	for len(value) != 0 {
+		count := copy(buffer[:], value)
+		hasher.Write(buffer[:count])
+		value = value[count:]
+	}
+	var digest [sha256.Size]byte
+	hasher.Sum(digest[:0])
+	return digest
 }
 
 func emitStaticStorage(output *strings.Builder, storage map[string]string, emptySentinel bool) {
