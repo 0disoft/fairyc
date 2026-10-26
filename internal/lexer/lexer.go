@@ -30,6 +30,17 @@ var symbols = []string{
 	"+", "-", "*", "/", "%", "!", "~", "&", "|", "^", "<", ">",
 }
 
+// Keep the vocabulary's longest-first order within each first-byte bucket.
+// The index is built once and adds no allocations to an individual lex.
+var symbolsByFirstByte = func() [256][]string {
+	var result [256][]string
+	for _, symbol := range symbols {
+		first := symbol[0]
+		result[first] = append(result[first], symbol)
+	}
+	return result
+}()
+
 // Lex performs one bounded, batch lex over the file's original bytes.
 func Lex(file source.File, budget *source.Budget) Result {
 	return lex(file, budget, false)
@@ -143,7 +154,7 @@ func (s *scanner) scanOne() {
 		s.scanNumber()
 		return
 	}
-	for _, symbol := range symbols {
+	for _, symbol := range symbolsByFirstByte[current] {
 		if s.matchAt(s.position, symbol) {
 			start := s.position
 			if len(symbol) > 1 && !s.advanceCharged(len(symbol)-1) {
