@@ -221,12 +221,14 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 				predecessors[int(next)] = append(predecessors[int(next)], b.ID)
 			}
 		}
+		// Cached snapshots are read-only. Clone only when a successor inherits
+		// one for mutation, not when storing or inspecting an existing result.
 		states := map[mir.BlockID]assertionState{}
 		visiting := map[mir.BlockID]bool{}
 		var analyze func(mir.BlockID) assertionState
 		analyze = func(id mir.BlockID) assertionState {
 			if s, ok := states[id]; ok {
-				return s.clone()
+				return s
 			}
 			if visiting[id] {
 				return newAssertionState()
@@ -240,7 +242,7 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 				}
 			} else if pred := predecessors[int(id)]; len(pred) == 1 {
 				previous := pred[0]
-				s = analyze(previous)
+				s = analyze(previous).clone()
 				term := f.Blocks[int(previous)].Terminator
 				if term.UnwindSuccessor == id {
 					s = newAssertionState()
@@ -278,7 +280,7 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 					s = newAssertionState()
 				}
 			}
-			states[id] = s.clone()
+			states[id] = s
 			delete(visiting, id)
 			return s
 		}
