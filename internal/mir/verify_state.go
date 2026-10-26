@@ -153,11 +153,17 @@ func blockEntityFor(function *Function, id BlockID) string {
 }
 
 func operationEntity(block BlockID, index int, operation Operation) string {
-	return fallbackEntity(operation.Entity, fmt.Sprintf("block:%d.operation:%d", block, index))
+	if operation.Entity != "" {
+		return operation.Entity
+	}
+	return fmt.Sprintf("block:%d.operation:%d", block, index)
 }
 
 func terminatorEntity(block BlockID, terminator Terminator) string {
-	return fallbackEntity(terminator.Entity, fmt.Sprintf("block:%d.terminator", block))
+	if terminator.Entity != "" {
+		return terminator.Entity
+	}
+	return fmt.Sprintf("block:%d.terminator", block)
 }
 
 func resourceEntity(resource ResourceLocal, fallback string) string {
