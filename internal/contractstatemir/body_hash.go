@@ -104,13 +104,14 @@ func describeHIRStateBodyParts(input hir.Package, packageIDs []hir.PackageID, co
 	for _, item := range layouts {
 		layoutByPackage[item.Package] = item.Layout
 	}
-	lowered, err := LowerHIRTransactions(input)
+	owners := &transactionOwnerIndex{}
+	lowered, err := lowerHIRTransactions(input, owners)
 	if err != nil {
 		return nil, err
 	}
 	transactions := make(map[hir.PackageID][]stableStateTransaction)
 	for _, item := range lowered {
-		module, function, err := findHIRFunctionOwner(input, item.Package, item.Function)
+		module, function, err := owners.find(input, item.Package, item.Function)
 		if err != nil {
 			return nil, err
 		}
@@ -491,30 +492,6 @@ func stateBodyBuiltinType(value hir.Type) bool {
 	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 ||
 		value == hir.TypeU32 || value == hir.TypeUSize || integerSlice || value == hir.TypeStr ||
 		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
-}
-
-func findHIRFunctionOwner(input hir.Package, packageID hir.PackageID, symbol hir.SymbolID) (hir.Module, hir.Function, error) {
-	var owner hir.Module
-	var result hir.Function
-	found := false
-	for _, module := range input.Modules {
-		if module.Package != packageID {
-			continue
-		}
-		for _, function := range module.Functions {
-			if function.Symbol != symbol {
-				continue
-			}
-			if found {
-				return hir.Module{}, hir.Function{}, fmt.Errorf("package %d function symbol %d is duplicated", packageID, symbol)
-			}
-			owner, result, found = module, function, true
-		}
-	}
-	if !found {
-		return hir.Module{}, hir.Function{}, fmt.Errorf("package %d state transaction names missing function %d", packageID, symbol)
-	}
-	return owner, result, nil
 }
 
 type stateBodyWriter interface {

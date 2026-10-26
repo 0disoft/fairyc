@@ -137,7 +137,7 @@ func TestHIRStateBodyHashRejectsUnverifiedOrAmbiguousInput(t *testing.T) {
 	}
 }
 
-func stateBodyPackage(t *testing.T, packageID hir.PackageID, symbol hir.SymbolID) hir.Package {
+func stateBodyPackage(t testing.TB, packageID hir.PackageID, symbol hir.SymbolID) hir.Package {
 	t.Helper()
 	return hir.Package{
 		Modules: []hir.Module{{Package: packageID, Path: "ledger", Functions: []hir.Function{{
@@ -158,7 +158,7 @@ func stateBodyPackage(t *testing.T, packageID hir.PackageID, symbol hir.SymbolID
 	}
 }
 
-func stateBodyU64(t *testing.T, value uint64) hir.StateValue {
+func stateBodyU64(t testing.TB, value uint64) hir.StateValue {
 	t.Helper()
 	encoded, err := contractstate.U64.Encode(value)
 	if err != nil {

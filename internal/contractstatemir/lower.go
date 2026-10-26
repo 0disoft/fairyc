@@ -84,6 +84,10 @@ func LowerHIRLayouts(input hir.Package) ([]PackageLayout, error) {
 // package/function order. The owning HIR function supplies the effect set, and
 // every result passes the transaction-MIR verifier before publication.
 func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
+	return lowerHIRTransactions(input, &transactionOwnerIndex{})
+}
+
+func lowerHIRTransactions(input hir.Package, owners *transactionOwnerIndex) ([]LoweredTransaction, error) {
 	layouts, err := LowerHIRLayouts(input)
 	if err != nil {
 		return nil, err
@@ -112,7 +116,7 @@ func LowerHIRTransactions(input hir.Package) ([]LoweredTransaction, error) {
 		if index > 0 && transactions[index-1].Package == transaction.Package && transactions[index-1].Function == transaction.Function {
 			return nil, fmt.Errorf("package %d function %d declares multiple state transactions", transaction.Package, transaction.Function)
 		}
-		module, function, err := findHIRFunctionOwner(input, transaction.Package, transaction.Function)
+		module, function, err := owners.find(input, transaction.Package, transaction.Function)
 		if err != nil {
 			return nil, err
 		}
