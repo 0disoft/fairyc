@@ -131,13 +131,11 @@ func (e *Engine) Of(value Type) (Result, error) {
 	if e == nil {
 		return Result{}, Error{Code: ErrorInvalidType, Detail: "layout engine is nil"}
 	}
-	return e.layout(value, 0)
+	calculation := layoutComputation{Engine: e}
+	return calculation.layout(value, 0)
 }
 
-func (e *Engine) layout(value Type, depth int) (Result, error) {
-	if depth >= maxLayoutDepth {
-		return Result{}, Error{Code: ErrorDepthLimit, Detail: fmt.Sprintf("layout nesting exceeds %d levels", maxLayoutDepth)}
-	}
+func (e *layoutComputation) compute(value Type, depth int) (Result, error) {
 	switch value.Kind {
 	case KindLanguageScalar:
 		if err := requireLeaf(value, true); err != nil {
@@ -201,7 +199,7 @@ func (e *Engine) layout(value Type, depth int) (Result, error) {
 	}
 }
 
-func (e *Engine) layoutUnion(fields []Field, depth int) (Result, error) {
+func (e *layoutComputation) layoutUnion(fields []Field, depth int) (Result, error) {
 	result := emptyResult(0, 1)
 	result.Fields = make([]FieldResult, 0, len(fields))
 	seen := make(map[string]struct{}, len(fields))
@@ -235,7 +233,7 @@ func (e *Engine) layoutUnion(fields []Field, depth int) (Result, error) {
 	return result, nil
 }
 
-func (e *Engine) layoutStruct(fields []Field, depth int) (Result, error) {
+func (e *layoutComputation) layoutStruct(fields []Field, depth int) (Result, error) {
 	result := emptyResult(0, 1)
 	result.Fields = make([]FieldResult, 0, len(fields))
 	seen := make(map[string]struct{}, len(fields))
