@@ -167,7 +167,7 @@ func hirExpressionUsesOwnedResource(input hir.Package, expression *hir.Expressio
 	return false
 }
 
-func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting map[hir.Type]bool) bool {
+func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visited map[hir.Type]bool) bool {
 	if value == hir.ParseType("") || value == hir.TypeInvalid {
 		return false
 	}
@@ -181,20 +181,21 @@ func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting ma
 			}
 		}
 	}
-	if visiting[value] {
+	if visited[value] {
 		return false
 	}
-	visiting[value] = true
-	defer delete(visiting, value)
+	// Keep visited types for this entire root search, including completed
+	// branches. Removing them would expand shared subgraphs exponentially.
+	visited[value] = true
 
 	if element, _, array := hir.FixedArrayParts(value); array {
-		return hirTypeContainsOwnedResource(input, element, visiting)
+		return hirTypeContainsOwnedResource(input, element, visited)
 	}
 	if element, option := hir.OptionElement(value); option {
-		return hirTypeContainsOwnedResource(input, element, visiting)
+		return hirTypeContainsOwnedResource(input, element, visited)
 	}
 	if success, failure, result := hir.ResultElements(value); result {
-		return hirTypeContainsOwnedResource(input, success, visiting) || hirTypeContainsOwnedResource(input, failure, visiting)
+		return hirTypeContainsOwnedResource(input, success, visited) || hirTypeContainsOwnedResource(input, failure, visited)
 	}
 	for _, module := range input.Modules {
 		for _, structure := range module.Structs {
@@ -202,7 +203,7 @@ func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting ma
 				continue
 			}
 			for _, field := range structure.Fields {
-				if hirTypeContainsOwnedResource(input, field.Type, visiting) {
+				if hirTypeContainsOwnedResource(input, field.Type, visited) {
 					return true
 				}
 			}
@@ -213,7 +214,7 @@ func hirTypeContainsOwnedResource(input hir.Package, value hir.Type, visiting ma
 			}
 			for _, variant := range enum.Variants {
 				for _, field := range variant.Fields {
-					if hirTypeContainsOwnedResource(input, field.Type, visiting) {
+					if hirTypeContainsOwnedResource(input, field.Type, visited) {
 						return true
 					}
 				}
@@ -483,30 +484,30 @@ func hirExpressionUsesRawPointer(input hir.Package, expression *hir.Expression) 
 	return false
 }
 
-func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visiting map[hir.Type]bool) bool {
+func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visited map[hir.Type]bool) bool {
 	if value == hir.ParseType("") || value == hir.TypeInvalid {
 		return false
 	}
 	if _, _, pointer := hir.RawPointerElement(value); pointer {
 		return true
 	}
-	if visiting[value] {
+	if visited[value] {
 		return false
 	}
-	visiting[value] = true
-	defer delete(visiting, value)
+	// As with owned resources, a root search must retain completed branches.
+	visited[value] = true
 
 	if element, _, borrow := hir.BorrowElement(value); borrow {
-		return hirTypeContainsRawPointer(input, element, visiting)
+		return hirTypeContainsRawPointer(input, element, visited)
 	}
 	if element, _, array := hir.FixedArrayParts(value); array {
-		return hirTypeContainsRawPointer(input, element, visiting)
+		return hirTypeContainsRawPointer(input, element, visited)
 	}
 	if element, option := hir.OptionElement(value); option {
-		return hirTypeContainsRawPointer(input, element, visiting)
+		return hirTypeContainsRawPointer(input, element, visited)
 	}
 	if success, failure, result := hir.ResultElements(value); result {
-		return hirTypeContainsRawPointer(input, success, visiting) || hirTypeContainsRawPointer(input, failure, visiting)
+		return hirTypeContainsRawPointer(input, success, visited) || hirTypeContainsRawPointer(input, failure, visited)
 	}
 	for _, module := range input.Modules {
 		for _, structure := range module.Structs {
@@ -514,7 +515,7 @@ func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visiting map[h
 				continue
 			}
 			for _, field := range structure.Fields {
-				if hirTypeContainsRawPointer(input, field.Type, visiting) {
+				if hirTypeContainsRawPointer(input, field.Type, visited) {
 					return true
 				}
 			}
@@ -525,7 +526,7 @@ func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visiting map[h
 			}
 			for _, variant := range enum.Variants {
 				for _, field := range variant.Fields {
-					if hirTypeContainsRawPointer(input, field.Type, visiting) {
+					if hirTypeContainsRawPointer(input, field.Type, visited) {
 						return true
 					}
 				}
@@ -536,7 +537,7 @@ func hirTypeContainsRawPointer(input hir.Package, value hir.Type, visiting map[h
 				continue
 			}
 			for _, field := range resource.Fields {
-				if hirTypeContainsRawPointer(input, field.Type, visiting) {
+				if hirTypeContainsRawPointer(input, field.Type, visited) {
 					return true
 				}
 			}
