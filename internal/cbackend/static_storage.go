@@ -7,6 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -88,16 +89,37 @@ func emitStaticStorage(output *strings.Builder, storage map[string]string, empty
 		if len(value) == 0 {
 			output.WriteString("UINT8_C(0)")
 		} else {
-			for index := 0; index < len(value); index++ {
-				if index != 0 {
-					output.WriteString(", ")
-				}
-				fmt.Fprintf(output, "UINT8_C(%d)", value[index])
-			}
+			emitStaticStorageBytes(output, value)
 		}
 		output.WriteString(" };\n")
 	}
 	output.WriteByte('\n')
+}
+
+// Batch decimal byte literals without invoking the general formatter per byte.
+// The fixed scratch buffer bounds temporary storage independently of the input.
+func emitStaticStorageBytes(output *strings.Builder, value string) {
+	const maxLiteral = len(", UINT8_C(255)")
+	const suffix = len(" };\n\n")
+	// Reserve the byte literals and closing syntax without integer overflow.
+	if len(value) <= (int(^uint(0)>>1)-output.Len()-suffix)/maxLiteral {
+		output.Grow(len(value)*maxLiteral + suffix)
+	}
+	var scratch [4096]byte
+	buffer := scratch[:0]
+	for index := 0; index < len(value); index++ {
+		if cap(buffer)-len(buffer) < maxLiteral {
+			output.Write(buffer)
+			buffer = buffer[:0]
+		}
+		if index != 0 {
+			buffer = append(buffer, ',', ' ')
+		}
+		buffer = append(buffer, "UINT8_C("...)
+		buffer = strconv.AppendUint(buffer, uint64(value[index]), 10)
+		buffer = append(buffer, ')')
+	}
+	output.Write(buffer)
 }
 
 func collectStringStorage(functions []mir.Function) (map[string]string, error) {
