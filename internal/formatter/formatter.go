@@ -213,20 +213,33 @@ func trimHorizontalSuffix(output *[]byte) {
 }
 
 func equivalentSignificantTokens(left, right *syntax.Tree) bool {
-	leftTokens := significantTokens(left)
-	rightTokens := significantTokens(right)
-	return slices.Equal(leftTokens, rightTokens)
+	leftIndex, rightIndex := 0, 0
+	for {
+		leftToken, nextLeft := nextSignificantToken(left.Tokens, leftIndex)
+		rightToken, nextRight := nextSignificantToken(right.Tokens, rightIndex)
+		if leftToken.Kind == lexer.EOF || rightToken.Kind == lexer.EOF {
+			return leftToken.Kind == rightToken.Kind
+		}
+		if leftToken.Kind != rightToken.Kind || leftToken.Cooked != rightToken.Cooked ||
+			leftToken.Text(left.Source) != rightToken.Text(right.Source) {
+			return false
+		}
+		leftIndex, rightIndex = nextLeft, nextRight
+	}
 }
 
-func significantTokens(tree *syntax.Tree) []GreenToken {
-	result := make([]GreenToken, 0, len(tree.Tokens))
-	for _, token := range tree.Tokens {
+// Return an EOF sentinel only after skipping all trivia and EOF tokens, preserving
+// the original comparison's behavior even for a detached or malformed token stream.
+func nextSignificantToken(tokens []lexer.Token, index int) (lexer.Token, int) {
+	for index < len(tokens) {
+		token := tokens[index]
+		index++
 		if token.Kind == lexer.EOF || token.Kind == lexer.Trivia {
 			continue
 		}
-		result = append(result, GreenToken{Kind: token.Kind, Text: token.Text(tree.Source), Cooked: token.Cooked})
+		return token, index
 	}
-	return result
+	return lexer.Token{Kind: lexer.EOF}, index
 }
 
 func syntaxShape(tree *syntax.Tree) [sha256.Size]byte {
