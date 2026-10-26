@@ -245,12 +245,13 @@ func nextSignificantToken(tokens []lexer.Token, index int) (lexer.Token, int) {
 func syntaxShape(tree *syntax.Tree) [sha256.Size]byte {
 	hash := sha256.New()
 	var scratch [8]byte
+	var textScratch [256]byte
 	binary.LittleEndian.PutUint64(scratch[:], uint64(tree.Root))
 	_, _ = hash.Write(scratch[:])
 	for _, node := range tree.Nodes {
-		writeString(hash, string(node.Kind))
-		writeString(hash, node.Text)
-		writeString(hash, node.Cooked)
+		writeString(hash, string(node.Kind), &textScratch)
+		writeString(hash, node.Text, &textScratch)
+		writeString(hash, node.Cooked, &textScratch)
 		binary.LittleEndian.PutUint64(scratch[:], uint64(len(node.Children)))
 		_, _ = hash.Write(scratch[:])
 		for _, child := range node.Children {
@@ -265,13 +266,14 @@ func syntaxShape(tree *syntax.Tree) [sha256.Size]byte {
 
 func greenIdentity(tree GreenTree) [sha256.Size]byte {
 	hash := sha256.New()
+	var textScratch [256]byte
 	_, _ = hash.Write([]byte("fairyc-green-tree/v0\x00"))
 	_, _ = hash.Write(tree.sourceHash[:])
 	_, _ = hash.Write(tree.shape[:])
 	for _, token := range tree.tokens {
 		_, _ = hash.Write([]byte{byte(token.Kind), byte(token.Trivia)})
-		writeString(hash, token.Text)
-		writeString(hash, token.Cooked)
+		writeString(hash, token.Text, &textScratch)
+		writeString(hash, token.Cooked, &textScratch)
 	}
 	var result [sha256.Size]byte
 	copy(result[:], hash.Sum(nil))
@@ -280,9 +282,14 @@ func greenIdentity(tree GreenTree) [sha256.Size]byte {
 
 type byteWriter interface{ Write([]byte) (int, error) }
 
-func writeString(writer byteWriter, value string) {
-	var length [8]byte
-	binary.LittleEndian.PutUint64(length[:], uint64(len(value)))
-	_, _ = writer.Write(length[:])
-	_, _ = writer.Write([]byte(value))
+// Each hash pass owns one buffer. Hash writers consume bytes synchronously,
+// so length framing and arbitrarily long string bodies can share its storage.
+func writeString(writer byteWriter, value string, scratch *[256]byte) {
+	binary.LittleEndian.PutUint64(scratch[:8], uint64(len(value)))
+	_, _ = writer.Write(scratch[:8])
+	for len(value) != 0 {
+		n := copy(scratch[:], value)
+		_, _ = writer.Write(scratch[:n])
+		value = value[n:]
+	}
 }
