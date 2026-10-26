@@ -11,8 +11,9 @@ import (
 )
 
 func writeDiagnostics(writer io.Writer, relativePath string, sourceBytes []byte, values []diagnostic.Diagnostic) error {
+	positions := diagnosticPositionIndex{source: sourceBytes}
 	for _, value := range values {
-		line, column := bytePosition(sourceBytes, value.Span.StartByte)
+		line, column := positions.position(value.Span.StartByte)
 		if _, err := fmt.Fprintf(
 			writer,
 			"%s:%d:%d: %s: %s [bytes %d..%d, repair=%s]\n",
@@ -32,9 +33,17 @@ func writeDiagnostics(writer io.Writer, relativePath string, sourceBytes []byte,
 }
 
 func writeSemanticDiagnostics(writer io.Writer, sources map[string][]byte, values []semantic.Diagnostic) error {
+	positions := make(map[string]*diagnosticPositionIndex)
+	position := func(path string, offset int) (int, int) {
+		index := positions[path]
+		if index == nil {
+			index = &diagnosticPositionIndex{source: sources[path]}
+			positions[path] = index
+		}
+		return index.position(offset)
+	}
 	for _, value := range values {
-		contents := sources[value.Primary.Source]
-		line, column := bytePosition(contents, value.Primary.StartByte)
+		line, column := position(value.Primary.Source, value.Primary.StartByte)
 		if _, err := fmt.Fprintf(
 			writer,
 			"%s:%d:%d: %s: %s [bytes %d..%d]\n",
@@ -49,8 +58,7 @@ func writeSemanticDiagnostics(writer io.Writer, sources map[string][]byte, value
 			return err
 		}
 		for _, related := range value.Related {
-			relatedContents := sources[related.Span.Source]
-			relatedLine, relatedColumn := bytePosition(relatedContents, related.Span.StartByte)
+			relatedLine, relatedColumn := position(related.Span.Source, related.Span.StartByte)
 			if _, err := fmt.Fprintf(
 				writer,
 				"  %s: %s:%d:%d [bytes %d..%d]\n",

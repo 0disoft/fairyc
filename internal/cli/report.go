@@ -87,8 +87,9 @@ func buildParseReport(relativePath string, tree *syntax.Tree, astLowered bool) p
 			Children:  children,
 		})
 	}
+	positions := diagnosticPositionIndex{source: tree.Source}
 	for _, value := range tree.Diagnostics {
-		report.Diagnostics = append(report.Diagnostics, newDiagnosticReport(tree.Source, value))
+		report.Diagnostics = append(report.Diagnostics, newDiagnosticReport(&positions, value))
 	}
 	return report
 }
@@ -119,8 +120,8 @@ func writeParseReport(writer io.Writer, report parseReport) error {
 	return encoder.Encode(report)
 }
 
-func newDiagnosticReport(sourceBytes []byte, value diagnostic.Diagnostic) diagnosticReport {
-	line, column := bytePosition(sourceBytes, value.Span.StartByte)
+func newDiagnosticReport(positions *diagnosticPositionIndex, value diagnostic.Diagnostic) diagnosticReport {
+	line, column := positions.position(value.Span.StartByte)
 	report := diagnosticReport{
 		Code:       value.Code,
 		StartByte:  value.Span.StartByte,

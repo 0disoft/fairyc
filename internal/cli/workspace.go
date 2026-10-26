@@ -7,6 +7,7 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
@@ -131,22 +132,44 @@ func loadWorkspaceWithLock(sourceRoot string, locked bool) (workspaceloader.Work
 }
 
 func writeWorkspaceDiagnostics(writer io.Writer, workspace workspaceloader.Workspace, diagnostics []semantic.Diagnostic) error {
+	type sourceKey struct {
+		packageID hir.PackageID
+		path      string
+	}
+	type sourcePositions struct {
+		display string
+		index   diagnosticPositionIndex
+	}
+	sources := make(map[sourceKey]*sourcePositions)
+	resolve := func(span hir.Span) (*sourcePositions, bool) {
+		key := sourceKey{span.Package, span.Source}
+		if positions := sources[key]; positions != nil {
+			return positions, true
+		}
+		display, contents, found := workspace.DiagnosticSource(span.Package, span.Source)
+		if !found {
+			return nil, false
+		}
+		positions := &sourcePositions{display: display, index: diagnosticPositionIndex{source: contents}}
+		sources[key] = positions
+		return positions, true
+	}
 	for _, value := range diagnostics {
-		display, contents, found := workspace.DiagnosticSource(value.Primary.Package, value.Primary.Source)
+		primary, found := resolve(value.Primary)
 		if !found {
 			return fmt.Errorf("resolve workspace diagnostic source")
 		}
-		line, column := bytePosition(contents, value.Primary.StartByte)
-		if _, err := fmt.Fprintf(writer, "%s:%d:%d: %s: %s [bytes %d..%d]\n", safeDisplayPath(display), line, column, value.Code, semanticDiagnosticMessage(value), value.Primary.StartByte, value.Primary.EndByte); err != nil {
+		line, column := primary.index.position(value.Primary.StartByte)
+		if _, err := fmt.Fprintf(writer, "%s:%d:%d: %s: %s [bytes %d..%d]\n", safeDisplayPath(primary.display), line, column, value.Code, semanticDiagnosticMessage(value), value.Primary.StartByte, value.Primary.EndByte); err != nil {
 			return err
 		}
 		for _, related := range value.Related {
-			relatedDisplay, relatedContents, found := workspace.DiagnosticSource(related.Span.Package, related.Span.Source)
+			relatedSource, found := resolve(related.Span)
 			if !found {
 				return fmt.Errorf("resolve related workspace diagnostic source")
 			}
-			relatedLine, relatedColumn := bytePosition(relatedContents, related.Span.StartByte)
-			if _, err := fmt.Fprintf(writer, "  %s: %s:%d:%d [bytes %d..%d]\n", related.Role, safeDisplayPath(relatedDisplay), relatedLine, relatedColumn, related.Span.StartByte, related.Span.EndByte); err != nil {
+			relatedLine, relatedColumn := relatedSource.index.position(related.Span.StartByte)
+			if _, err := fmt.Fprintf(writer, "  %s: %s:%d:%d [bytes %d..%d]\n", related.Role, safeDisplayPath(relatedSource.display), relatedLine, relatedColumn, related.Span.StartByte, related.Span.EndByte); err != nil {
 				return err
 			}
 		}
