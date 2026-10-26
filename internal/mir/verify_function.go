@@ -93,7 +93,9 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			}
 			item.state = merged
 		}
-		seen[item.id] = cloneVerificationState(item.state)
+		// Queued states already own their maps, and a changed merge also returns
+		// owned maps. Retain that snapshot directly; execution below uses a clone.
+		seen[item.id] = item.state
 		if int(item.id) < 0 || int(item.id) >= len(function.Blocks) {
 			failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "successor block is missing"})
 			continue
