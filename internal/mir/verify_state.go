@@ -87,6 +87,8 @@ func cloneVerificationState(input verificationState) verificationState {
 	return result
 }
 
+// An unchanged result borrows previous; callers discard it when changed is false.
+// Changed results own their maps so later verification cannot mutate snapshots.
 func mergeVerificationState(previous, incoming verificationState, resources map[hir.SymbolID]ResourceLocal) (verificationState, bool, bool) {
 	if len(previous.flags) != len(incoming.flags) || len(previous.regions) != len(incoming.regions) {
 		return verificationState{}, false, true
@@ -101,17 +103,9 @@ func mergeVerificationState(previous, incoming verificationState, resources map[
 			return verificationState{}, false, true
 		}
 	}
-	merged := cloneVerificationState(previous)
+	merged := previous
 	changed := false
-	keys := make(map[hir.SymbolID]struct{}, len(previous.live)+len(incoming.live))
-	for symbol := range previous.live {
-		keys[symbol] = struct{}{}
-	}
-	for symbol := range incoming.live {
-		keys[symbol] = struct{}{}
-	}
-	for symbol := range keys {
-		left := previous.live[symbol]
+	for symbol, left := range previous.live {
 		right := incoming.live[symbol]
 		if _, resource := resources[symbol]; resource {
 			if left != right {
@@ -119,10 +113,19 @@ func mergeVerificationState(previous, incoming verificationState, resources map[
 			}
 			continue
 		}
-		value := left && right
-		if merged.live[symbol] != value {
-			merged.live[symbol] = value
-			changed = true
+		if left && !right {
+			if !changed {
+				merged = cloneVerificationState(previous)
+				changed = true
+			}
+			merged.live[symbol] = false
+		}
+	}
+	// Incoming-only scalars are not definitely initialized on both paths. Live
+	// resources, however, must match even when absent from the previous map.
+	for symbol, right := range incoming.live {
+		if _, resource := resources[symbol]; resource && right && !previous.live[symbol] {
+			return verificationState{}, false, true
 		}
 	}
 	return merged, changed, false
