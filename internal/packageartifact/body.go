@@ -597,16 +597,28 @@ func rebindStableContextFunctionSymbols(processContext mir.Program, stable Conte
 }
 
 func mapFunctionTypes(function *mir.Function, transform func(hir.Type) (hir.Type, error)) error {
-	mapType := func(value *hir.Type) error {
-		if *value == hir.ParseType("") {
-			return nil
-		}
+	return walkFunctionTypes(function, func(value *hir.Type) error {
 		mapped, err := transform(*value)
 		if err != nil {
 			return err
 		}
 		*value = mapped
 		return nil
+	})
+}
+
+// visitFunctionTypes observes the same type slots as rewriting, without exposing
+// writable fields or cloning the function's control-flow graph.
+func visitFunctionTypes(function *mir.Function, visit func(hir.Type) error) error {
+	return walkFunctionTypes(function, func(value *hir.Type) error { return visit(*value) })
+}
+
+func walkFunctionTypes(function *mir.Function, visit func(*hir.Type) error) error {
+	mapType := func(value *hir.Type) error {
+		if *value == hir.ParseType("") {
+			return nil
+		}
+		return visit(value)
 	}
 	for index := range function.ParameterTypes {
 		if err := mapType(&function.ParameterTypes[index]); err != nil {

@@ -25,18 +25,18 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 		usedTypes[name] = struct{}{}
 		pending = append(pending, name)
 	}
-	collectType := func(value hir.Type) (hir.Type, error) {
+	collectType := func(value hir.Type) error {
 		stable, err := stableType(value, artifact.PackageCoordinates)
 		if err != nil {
-			return hir.TypeInvalid, err
+			return err
 		}
 		collectStableNominalTypes(stable, enqueue)
-		return value, nil
+		return nil
 	}
 	usedForeign := make(map[hir.SymbolID]struct{})
-	for _, record := range artifact.Functions {
-		function := cloneFunction(record.Body)
-		if err := mapFunctionTypes(&function, collectType); err != nil {
+	for index := range artifact.Functions {
+		record := &artifact.Functions[index]
+		if err := visitFunctionTypes(&record.Body, collectType); err != nil {
 			return ContextDescriptor{}, nil, fmt.Errorf("collect stable function types for %q: %w", record.Body.Name, err)
 		}
 		for _, block := range record.Body.Blocks {
