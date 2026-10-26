@@ -311,6 +311,7 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 	}
 	owned := make(map[FunctionID]ownedBody)
 	contexts := make([]ContextDescriptor, 0, len(artifacts))
+	resolvePackage := indexedPackageResolver(coordinates)
 	for index, artifact := range artifacts {
 		if err := validateStableArtifact(artifact, transfers); err != nil {
 			return StableReassembly{}, fmt.Errorf("stable artifact %d: %w", index, err)
@@ -324,7 +325,7 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 			return StableReassembly{}, fmt.Errorf("stable package MIR coordinate %s is duplicated", artifact.Coordinate)
 		}
 		seenCoordinates[artifact.Coordinate] = struct{}{}
-		rebinding := &bodyContext{descriptor: artifact.Context, maxBytes: ^uint64(0)}
+		rebinding := &bodyContext{descriptor: artifact.Context, maxBytes: ^uint64(0), packages: resolvePackage}
 		for _, body := range artifact.Functions {
 			if _, duplicate := owned[body.ID]; duplicate {
 				return StableReassembly{}, fmt.Errorf("stable owned FunctionID %s is duplicated", body.ID)
@@ -356,7 +357,7 @@ func rebindStableArtifactsWithBindings(artifacts []StableArtifact, coordinates m
 	if err != nil {
 		return StableReassembly{}, err
 	}
-	program, err := RebindContextDescriptor(mergedContext, coordinates, functionSymbols, firstForeignSymbol)
+	program, err := rebindContextDescriptor(mergedContext, coordinates, functionSymbols, firstForeignSymbol, resolvePackage)
 	if err != nil {
 		return StableReassembly{}, err
 	}

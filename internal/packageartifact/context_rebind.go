@@ -14,6 +14,10 @@ import (
 // from a stable descriptor. Internal drop functions and foreign declarations receive explicit,
 // collision-free caller-owned symbols; no source span or entity is invented as semantic truth.
 func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, firstForeignSymbol hir.SymbolID) (mir.Program, error) {
+	return rebindContextDescriptor(descriptor, coordinates, functionSymbols, firstForeignSymbol, indexedPackageResolver(coordinates))
+}
+
+func rebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, firstForeignSymbol hir.SymbolID, resolvePackage packageResolver) (mir.Program, error) {
 	if err := ValidateContextDescriptor(descriptor); err != nil {
 		return mir.Program{}, err
 	}
@@ -31,7 +35,6 @@ func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		usedSymbols[symbol] = id.String()
 	}
 
-	resolvePackage := indexedPackageResolver(coordinates)
 	program := mir.Program{}
 	for _, item := range descriptor.Structs {
 		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)

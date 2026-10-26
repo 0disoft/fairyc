@@ -238,7 +238,15 @@ func rebindValidatedStableBodyInContext(body StableBodyArtifact, context *bodyCo
 	if !found || functionSymbol == hir.NoSymbol {
 		return mir.Function{}, fmt.Errorf("stable function body requires a fresh function symbol")
 	}
-	owner, err := packageForCoordinate(body.Package, coordinates)
+	resolvePackage := context.packages
+	if resolvePackage == nil {
+		// Standalone rebinding retains the scan path instead of constructing a
+		// workspace-sized index for one body.
+		resolvePackage = func(coordinate packagegraph.CoordinateID) (packageCoordinateBinding, bool) {
+			return scanPackageCoordinate(coordinate, coordinates)
+		}
+	}
+	owner, err := packageForCoordinateWithResolver(body.Package, resolvePackage)
 	if err != nil {
 		return mir.Function{}, err
 	}
@@ -297,7 +305,7 @@ func rebindValidatedStableBodyInContext(body StableBodyArtifact, context *bodyCo
 		}
 	}
 	if err := mapFunctionTypes(&function, func(value hir.Type) (hir.Type, error) {
-		return rebindStableType(value.String(), coordinates)
+		return rebindStableTypeWithResolver(value.String(), resolvePackage)
 	}); err != nil {
 		return mir.Function{}, fmt.Errorf("rebind function body types: %w", err)
 	}
