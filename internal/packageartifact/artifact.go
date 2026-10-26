@@ -473,6 +473,8 @@ func (signature FunctionSignature) stub() mir.Function {
 }
 
 func contextOf(program mir.Program) mir.Program {
+	// Exclude executable bodies before cloning the workspace declarations.
+	program.Functions = nil
 	context := mir.Clone(program)
 	context.Functions = nil
 	return context
