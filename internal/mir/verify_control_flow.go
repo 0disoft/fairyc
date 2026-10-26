@@ -7,10 +7,7 @@ import (
 )
 
 func verifyAssertEdges(function *Function) []VerificationError {
-	blocks := make(map[BlockID]*Block, len(function.Blocks))
-	for index := range function.Blocks {
-		blocks[function.Blocks[index].ID] = &function.Blocks[index]
-	}
+	var blocks map[BlockID]*Block
 	var failures []VerificationError
 	for index := range function.Blocks {
 		block := &function.Blocks[index]
@@ -22,6 +19,14 @@ func verifyAssertEdges(function *Function) []VerificationError {
 		if len(terminator.Successors) != 2 || terminator.Successors[0] == terminator.Successors[1] {
 			failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion is missing distinct success and failure edges"})
 			continue
+		}
+		// Only assertions with two distinct edges need target lookup. Functions
+		// without assertions, or with only malformed edge lists, need no index.
+		if blocks == nil {
+			blocks = make(map[BlockID]*Block, len(function.Blocks))
+			for blockIndex := range function.Blocks {
+				blocks[function.Blocks[blockIndex].ID] = &function.Blocks[blockIndex]
+			}
 		}
 		trap := blocks[terminator.Successors[1]]
 		if trap == nil || trap.Terminator.Kind != TerminatorTrap || !slices.Equal(trap.Terminator.TrapCategories, []string{"assertion-failed"}) {
