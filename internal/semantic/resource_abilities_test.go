@@ -107,6 +107,32 @@ fn void lose(Vault vault) {}
 	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", start, start+len("@abilities(store, key)"))
 }
 
+func TestAnalyzeSharedNoDropOwnersKeepDistinctDiagnostics(t *testing.T) {
+	text := `module main;
+@abilities(store, key)
+resource Coin { i32 amount; cleanup {} }
+@abilities(store)
+resource Token { i32 amount; cleanup {} }
+@abilities(drop)
+resource Branch { Coin coin; cleanup {} }
+@abilities(drop)
+resource Root { Branch left; Branch right; Token token; cleanup {} }
+fn void lose(Root root) {}
+`
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) != 2 {
+		t.Fatalf("expected one diagnostic per distinct no-drop declaration: %+v", result)
+	}
+	for i, attribute := range []string{"@abilities(store, key)", "@abilities(store)"} {
+		got := result.Diagnostics[i]
+		if got.Code != "E1108" || len(got.Related) != 1 || got.Related[0].Role != "ability-declaration" {
+			t.Fatalf("unexpected diagnostic: %+v", got)
+		}
+		start := strings.Index(text, attribute)
+		assertSpan(t, got.Related[0].Span, "main.fy", start, start+len(attribute))
+	}
+}
+
 func TestAnalyzeRejectsMalformedResourceAbilities(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {

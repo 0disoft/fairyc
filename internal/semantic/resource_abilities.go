@@ -178,28 +178,29 @@ func (a *analyzer) resourceAllowsImplicitDrop(owner *symbol) (bool, diagnostic.S
 // nonDroppableResourceOwners follows compiler-owned aggregate cleanup recursively. This prevents a
 // droppable wrapper resource from becoming a laundering path that implicitly destroys an inner
 // linear asset whose own declaration omits drop.
-func (a *analyzer) nonDroppableResourceOwners(value hir.Type, visiting map[hir.Type]struct{}) []*symbol {
+func (a *analyzer) nonDroppableResourceOwners(value hir.Type, visited map[hir.Type]struct{}) []*symbol {
+	if _, seen := visited[value]; seen {
+		return nil
+	}
+	// Callers consume distinct owners, not one result per ownership path. Keep
+	// completed branches and terminal owners for this entire root search.
+	visited[value] = struct{}{}
 	if info := a.resourceTypes[value]; info != nil {
 		if allowed, _ := a.resourceAllowsImplicitDrop(info.symbol); !allowed {
 			return []*symbol{info.symbol}
 		}
-		if _, cycle := visiting[value]; cycle {
-			return nil
-		}
-		visiting[value] = struct{}{}
 		var owners []*symbol
 		for _, field := range info.orderedFields {
-			owners = append(owners, a.nonDroppableResourceOwners(field.typ, visiting)...)
+			owners = append(owners, a.nonDroppableResourceOwners(field.typ, visited)...)
 		}
-		delete(visiting, value)
 		return owners
 	}
 	if element, option := hir.OptionElement(value); option {
-		return a.nonDroppableResourceOwners(element, visiting)
+		return a.nonDroppableResourceOwners(element, visited)
 	}
 	if success, failure, result := hir.ResultElements(value); result {
-		owners := a.nonDroppableResourceOwners(success, visiting)
-		return append(owners, a.nonDroppableResourceOwners(failure, visiting)...)
+		owners := a.nonDroppableResourceOwners(success, visited)
+		return append(owners, a.nonDroppableResourceOwners(failure, visited)...)
 	}
 	return nil
 }
