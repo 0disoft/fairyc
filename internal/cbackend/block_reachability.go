@@ -41,29 +41,46 @@ func reachableBlocksForC(function mir.Function, nonReturning map[hir.SymbolID]bo
 // calls remain unknown, and unwind edges are retained conservatively.
 func nonReturningFunctionsForC(functions []mir.Function, proofs checkedFailureProofs) map[hir.SymbolID]bool {
 	known := make(map[hir.SymbolID]bool)
-	for {
-		changed := false
-		for _, function := range functions {
-			if known[function.Symbol] {
-				continue
+	callers := make(map[hir.SymbolID][]int)
+	pending := make([]int, len(functions))
+	queued := make([]bool, len(functions))
+	for index, function := range functions {
+		pending[index], queued[index] = index, true
+		for _, block := range function.Blocks {
+			if term := block.Terminator; term.Kind == mir.TerminatorCall {
+				callers[term.Callee] = append(callers[term.Callee], index)
 			}
-			reachable := reachableBlocksForC(function, known, proofs[function.Symbol])
-			returns := false
-			for index, block := range function.Blocks {
-				if reachable[index] && block.Terminator.Kind == mir.TerminatorReturn {
-					returns = true
-					break
-				}
-			}
-			if !returns {
-				known[function.Symbol] = true
-				changed = true
-			}
-		}
-		if !changed {
-			return known
 		}
 	}
+	// Only callers can lose a returning path when a callee becomes known.
+	// Include dead call sites conservatively; CFG analysis still owns reachability.
+	for head := 0; head < len(pending); head++ {
+		index := pending[head]
+		queued[index] = false
+		function := &functions[index]
+		if known[function.Symbol] {
+			continue
+		}
+		reachable := reachableBlocksForC(*function, known, proofs[function.Symbol])
+		returns := false
+		for index, block := range function.Blocks {
+			if reachable[index] && block.Terminator.Kind == mir.TerminatorReturn {
+				returns = true
+				break
+			}
+		}
+		if returns {
+			continue
+		}
+		known[function.Symbol] = true
+		for _, caller := range callers[function.Symbol] {
+			if !known[functions[caller].Symbol] && !queued[caller] {
+				pending = append(pending, caller)
+				queued[caller] = true
+			}
+		}
+	}
+	return known
 }
 
 // Literal bool edges must agree in reachability and C output. Otherwise MSVC
