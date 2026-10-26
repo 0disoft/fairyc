@@ -29,6 +29,25 @@ Ordinary development builds keep that data. The receipt records build flags and 
 bytes. At `3679d2a3` with Go 1.27.1, the compiler shrank from 17,849,344 to 13,094,400 bytes
 (26.6%); these are executable sizes, not ZIP sizes or native-program size changes.
 
+### Recheck a retained candidate
+
+Before transfer or publication, recheck the exact retained candidate without rebuilding:
+
+```text
+node tools/windows-preview/verify.mjs --receipt <.cache/starter-smoke-.../receipt.json> --revision <full-approved-source-commit>
+```
+
+The command requires all twelve successful starter steps, clean Windows/AMD64 build identity,
+release build flags, the receipt-owned ZIP and its checksum sidecar, the exact extracted file
+set, and compiler and license-file hashes. Packaging now pins `SHA256SUMS.txt` in the smoke
+receipt; older receipts without that identity remain historical and cannot pass this recheck.
+Use a freshly packaged candidate rather than editing an old receipt to add the field.
+
+The checker streams file hashes and changes no artifacts. Its JSON reports only a local
+artifact recheck, with clean-machine evidence and publication approval both false. It does not
+authenticate a publisher or replace the exact-commit CI, security-reporting, or separate-host
+gates below. Regression command: `node --test tools/windows-preview/verify.test.mjs`.
+
 ## Portability fixture
 
 Use the extracted preview compiler to prepare a separate transfer fixture:

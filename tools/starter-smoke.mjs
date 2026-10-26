@@ -48,7 +48,7 @@ const goVersion = buildMetadata.match(/\bgo1\.\d+(?:\.\d+)?\b/u)?.[0];
 const vcsRevision = buildMetadata.match(/\bvcs\.revision=([0-9a-f]{40})\b/u)?.[1];
 const vcsModified = buildMetadata.match(/\bvcs\.modified=(true|false)\b/u)?.[1];
 assert.ok(goVersion && vcsRevision && vcsModified, 'missing Go build identity');
-let archive;
+let archive, previewChecksumsHash;
 if (packageLocal) {
   assert.equal(vcsModified, 'false', 'package a clean commit so the candidate has an exact source identity');
   const notice = readFileSync(join(repo, 'THIRD_PARTY_NOTICES.md'), 'utf8');
@@ -68,6 +68,7 @@ if (packageLocal) {
   const hashes = entries.map(name => sha(join(stage, name)));
   writeFileSync(join(stage, 'SHA256SUMS.txt'), entries.map((name, i) => `${hashes[i]}  ${name}`).join('\n') + '\n', { flag: 'wx' });
   const checksumHash = sha(join(stage, 'SHA256SUMS.txt'));
+  previewChecksumsHash = checksumHash;
   const archiveName = 'fairyc-windows-amd64-preview-candidate.zip';
   archive = join(root, archiveName);
   // Paths originate exclusively from this run's unique cache directory. Avoid
@@ -120,6 +121,7 @@ const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: ex
   lock_sha256: lockHash, node: process.version, go_version: goVersion,
   vcs_revision: vcsRevision, vcs_modified: vcsModified === 'true',
   platform: `${process.platform}/${process.arch}`, steps,
-  ...(archive ? { preview_candidate_archive: relative(repo, archive), archive_sha256: sha(archive), archive_bytes: statSync(archive).size } : {}) };
+  ...(archive ? { preview_candidate_archive: relative(repo, archive), archive_sha256: sha(archive), archive_bytes: statSync(archive).size,
+    preview_checksums_sha256: previewChecksumsHash } : {}) };
 writeFileSync(join(root, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify({ receipt: relative(repo, join(root, 'receipt.json')), executable_sha256: executableHash }));
