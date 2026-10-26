@@ -85,11 +85,13 @@ func Format(relativePath string, input []byte, limits source.Limits) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
-	green, err := BuildGreen(before.Tree)
-	if err != nil {
-		return Result{}, err
-	}
 	if !before.Tree.ErrorFree() {
+		// Only malformed input returns the original snapshot. Successful
+		// formatting publishes the checked output tree built below instead.
+		green, err := BuildGreen(before.Tree)
+		if err != nil {
+			return Result{}, err
+		}
 		return Result{Bytes: slices.Clone(input), Tree: green, Malformed: true}, ErrMalformedSource
 	}
 
