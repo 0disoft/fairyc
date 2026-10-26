@@ -97,8 +97,18 @@ func cookNumber(raw string, kind Kind, budget *source.Budget) (string, bool) {
 		if !validSeparatedDigits(digits, validDigit) {
 			return "", false
 		}
+		digits = strings.ReplaceAll(digits, "_", "")
+		// Decimal spelling is already the output radix. Normalize it directly
+		// instead of parsing and formatting an arbitrary-precision integer.
+		if base == 10 {
+			digits = strings.TrimLeft(digits, "0")
+			if digits == "" {
+				return "0", true
+			}
+			return digits, true
+		}
 		value := new(big.Int)
-		if _, ok := value.SetString(strings.ReplaceAll(digits, "_", ""), base); !ok {
+		if _, ok := value.SetString(digits, base); !ok {
 			return "", false
 		}
 		return value.String(), true
