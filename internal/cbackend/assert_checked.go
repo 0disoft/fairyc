@@ -200,6 +200,18 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 	for _, f := range functions {
 		selected := map[mir.BlockID]mir.BlockID{}
 		proofs[f.Symbol] = selected
+		// The analysis below can only select two-successor switch blocks.
+		// Avoid retaining per-block fact snapshots when no proof is possible.
+		hasCandidate := false
+		for _, block := range f.Blocks {
+			if block.Terminator.Kind == mir.TerminatorSwitch && len(block.Terminator.Successors) == 2 {
+				hasCandidate = true
+				break
+			}
+		}
+		if !hasCandidate {
+			continue
+		}
 		predecessors := make([][]mir.BlockID, len(f.Blocks))
 		for _, b := range f.Blocks {
 			for _, next := range b.Terminator.Successors {
