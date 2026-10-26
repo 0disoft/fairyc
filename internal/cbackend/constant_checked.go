@@ -6,13 +6,27 @@ import (
 	"math"
 )
 
+// checkedFailureCandidate admits only switch kinds that literalCheckedFailure
+// can prove. Ordinary control-flow branches need no copy-fact analysis.
+func checkedFailureCandidate(term mir.Terminator) bool {
+	if term.Kind != mir.TerminatorSwitch || len(term.Successors) != 2 {
+		return false
+	}
+	switch term.SwitchKind {
+	case "checked-unary", "checked-arithmetic", "checked-view-index", "checked-view-slice":
+		return true
+	default:
+		return false
+	}
+}
+
 // constantCheckedFailure proves checked integer and static byte-view failures. Copy facts are
 // local to this straight-line block; unknown operations discard all facts so
 // indirect writes, calls and predecessor state cannot silently preserve them.
 // MIR verification remains mandatory before this C-only reachability decision.
 func constantCheckedFailure(block mir.Block) (mir.BlockID, bool) {
 	term := block.Terminator
-	if term.Kind != mir.TerminatorSwitch || len(term.Successors) != 2 {
+	if !checkedFailureCandidate(term) {
 		return mir.NoBlock, false
 	}
 	known := map[mir.LocalID]mir.Operand{}
