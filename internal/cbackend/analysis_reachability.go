@@ -67,19 +67,24 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 	for index := range program.ResourceTypes {
 		resourceTypes[program.ResourceTypes[index].Type] = program.ResourceTypes[index]
 	}
-	visited := make(map[int]struct{})
+	visited := map[int]struct{}{entryIndex: {}}
 	reachableForeign := make(map[hir.SymbolID]struct{})
 	// Resource definitions are fixed for this pass. Each dropped type contributes
 	// the same glue edges regardless of which local or function drops it.
 	expandedDrops := make(map[hir.Type]struct{})
 	pending := []int{entryIndex}
+	// Mark on discovery so shared callees occupy the pending stack only once.
+	// The returned set is unchanged after all scheduled functions are expanded.
+	enqueue := func(index int) {
+		if _, seen := visited[index]; seen {
+			return
+		}
+		visited[index] = struct{}{}
+		pending = append(pending, index)
+	}
 	for len(pending) != 0 {
 		index := pending[len(pending)-1]
 		pending = pending[:len(pending)-1]
-		if _, seen := visited[index]; seen {
-			continue
-		}
-		visited[index] = struct{}{}
 		function := &functions[index]
 		locals := make(map[hir.SymbolID]hir.Type, len(function.Resources))
 		for _, resource := range function.Resources {
@@ -92,7 +97,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 					if !found {
 						return nil, nil, fmt.Errorf("missing callback target %d", operation.Symbol)
 					}
-					pending = append(pending, target)
+					enqueue(target)
 				}
 				if operation.Kind != mir.OperationDrop {
 					continue
@@ -113,7 +118,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 					if !found {
 						return nil, nil, fmt.Errorf("resource %q names missing drop symbol %d", resourceType, dropSymbol)
 					}
-					pending = append(pending, target)
+					enqueue(target)
 				}
 			}
 			terminator := block.Terminator
@@ -128,7 +133,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 			if !found {
 				return nil, nil, fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
 			}
-			pending = append(pending, target)
+			enqueue(target)
 		}
 	}
 	return visited, reachableForeign, nil
