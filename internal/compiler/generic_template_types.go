@@ -23,24 +23,44 @@ func (value GenericProvenance) TemplateTypes() []GenericTemplateType {
 	return slices.Clone(value.templateTypes)
 }
 
+type genericTemplateScope struct {
+	packageID hir.PackageID
+	module    string
+}
+
 func genericTemplateTypes(input semantic.PackageInput, declarations []GenericDeclaration) []GenericTemplateType {
+	// Keep only positions in the call-local indexes, not copies of signatures.
+	local := make(map[genericTemplateScope][]int)
+	public := make(map[genericTemplateScope][]int)
+	for position, declaration := range declarations {
+		if declaration.Kind != genericsource.OriginStruct && declaration.Kind != genericsource.OriginResource {
+			continue
+		}
+		scope := genericTemplateScope{declaration.Package, declaration.Module}
+		local[scope] = append(local[scope], position)
+		if declaration.Public {
+			public[scope] = append(public[scope], position)
+		}
+	}
+	if len(local) == 0 {
+		return nil
+	}
+	providers := make(map[genericTemplateScope][]hir.PackageID)
+	for _, binding := range input.Imports {
+		scope := genericTemplateScope{binding.FromPackage, binding.ImportPath}
+		providers[scope] = append(providers[scope], binding.ToPackage)
+	}
 	var result []GenericTemplateType
 	for _, file := range input.Files {
-		for _, declaration := range declarations {
-			if declaration.Kind != genericsource.OriginStruct && declaration.Kind != genericsource.OriginResource {
-				continue
-			}
-			if declaration.Package == file.Package && declaration.Module == file.Module.Path {
-				result = append(result, GenericTemplateType{file.Package, file.Module.Path, declaration.Name, declaration.ID})
-			}
-			if !declaration.Public {
-				continue
-			}
-			for _, imported := range file.Module.Imports {
-				for _, binding := range input.Imports {
-					if binding.FromPackage == file.Package && binding.ImportPath == imported.Path && binding.ToPackage == declaration.Package && imported.Path == declaration.Module {
-						result = append(result, GenericTemplateType{file.Package, file.Module.Path, imported.Alias + "::" + declaration.Name, declaration.ID})
-					}
+		for _, position := range local[genericTemplateScope{file.Package, file.Module.Path}] {
+			declaration := declarations[position]
+			result = append(result, GenericTemplateType{file.Package, file.Module.Path, declaration.Name, declaration.ID})
+		}
+		for _, imported := range file.Module.Imports {
+			for _, provider := range providers[genericTemplateScope{file.Package, imported.Path}] {
+				for _, position := range public[genericTemplateScope{provider, imported.Path}] {
+					declaration := declarations[position]
+					result = append(result, GenericTemplateType{file.Package, file.Module.Path, imported.Alias + "::" + declaration.Name, declaration.ID})
 				}
 			}
 		}
