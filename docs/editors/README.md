@@ -8,11 +8,14 @@ the user's theme controls colors.
 
 ## VS Code
 
-The extension source is in `editors/vscode`. Copy it into a VS Code development
-extension directory or launch VS Code with `--extensionDevelopmentPath` pointing
-to that absolute directory. Syntax highlighting, nested block comments, comment
-toggling, bracket pairs, indentation and snippets work without a compiler.
-The extension is not yet published to the Marketplace.
+Version 0.1.2 is packaged as a local VSIX from `editors/vscode`; see the
+[VS Code README](../../editors/vscode/README.md) for packaging, installation and
+verification commands. The VSIX contains the syntax assets and JavaScript
+language client, but not the compiler or language server executable. Syntax and
+editor configuration work without a server. Set `fairyc.server.path` to the
+absolute `fairyc-lsp` executable path to enable diagnostics, definition
+navigation and completion in a trusted workspace. No Marketplace publication is
+claimed.
 
 The shared `fairyc-lsp` server adds diagnostics, definition navigation and
 completion. See [the LSP preview contract](lsp-preview.md) for build/setup,
@@ -22,11 +25,12 @@ supported capabilities and explicit limitations.
 
 `editors/tree-sitter-fairyc` supplies the grammar, nested-comment scanner,
 generated ABI-14 parser, node types and shared queries. `editors/zed` supplies
-the language adapter. See its README for local development installation before
-these commits are published. The syntax preview includes `i64`, repeated arrays,
-shared and mutable partial views, function calls, constants and documentation
-comments. It uses theme token names instead of hardcoded colors. Native
-parser/query tests do not establish a successful Zed/WASM installation.
+the language adapter. These preview packages remain at version 0.1.1; see their
+READMEs for local build and installation steps. The syntax preview includes
+`i64`, repeated arrays, shared and mutable partial views, function calls,
+constants and documentation comments. It uses theme token names instead of
+hardcoded colors. Native parser/query tests do not establish a successful
+Zed/WASM installation.
 
 ## Maintaining syntax assets
 
@@ -36,7 +40,7 @@ directly from the compiler lexer. Contextual words remain distinct; the EBNF has
 forces review whenever the grammar changes. Review Tree-sitter syntax separately
 rather than treating a regex highlighter as the compiler parser.
 
-The editor packages have their own preview version `0.1.1`. They do not
-change the Fairy C language, SDK, runtime ABI, or compiler release version.
-Atom is not a supported target. Extension publishing and automatic tool downloads
-are separate release work.
+The VS Code package is version 0.1.2; the Tree-sitter and Zed preview packages
+are version 0.1.1. These preview versions do not change the Fairy C language,
+SDK, runtime ABI or compiler release version. Atom is not a supported target.
+Extension publishing and automatic tool downloads are separate release work.

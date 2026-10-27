@@ -1,0 +1,89 @@
+<#
+.SYNOPSIS
+Verify a packaged VSIX in an isolated Windows VS Code profile.
+.EXAMPLE
+./tools/test-vscode-install.ps1 -CodeRoot 'C:\Program Files\Microsoft VS Code'
+Requires the packaged VSIX and .cache/editor-release/fairyc-lsp.exe.
+#>
+param([Parameter(Mandatory = $true)][string]$CodeRoot)
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+$repoRoot = Split-Path $PSScriptRoot -Parent
+$releaseRoot = Join-Path $repoRoot '.cache/editor-release'
+$manifest = Get-Content -LiteralPath (Join-Path $repoRoot 'editors/vscode/package.json') -Raw | ConvertFrom-Json
+$vsix = Join-Path $releaseRoot ($manifest.name + '-' + $manifest.version + '.vsix')
+$server = Join-Path $releaseRoot 'fairyc-lsp.exe'
+$codeCLI = Join-Path $CodeRoot 'bin/code.cmd'
+$codeEXE = Join-Path $CodeRoot 'Code.exe'
+foreach ($required in @($vsix, "$vsix.sha256", $server, $codeCLI, $codeEXE)) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Required file missing: $required" }
+}
+$digest = (Get-FileHash -LiteralPath $vsix -Algorithm SHA256).Hash.ToLowerInvariant()
+$expected = ((Get-Content -LiteralPath "$vsix.sha256" -Raw).Trim() -split '\s+')[0]
+if ($digest -ne $expected) { throw 'VSIX checksum mismatch' }
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [System.IO.Compression.ZipFile]::OpenRead($vsix)
+try {
+    $names = @($archive.Entries | ForEach-Object FullName)
+    foreach ($required in @('extension/package.json', 'extension/extension.js', 'extension/readme.md', 'extension/LICENSE.txt',
+        'extension/syntaxes/fairyc.tmLanguage.json', 'extension/snippets/fairyc.json',
+        'extension/node_modules/vscode-languageclient/lib/node/main.js',
+        'extension/node_modules/vscode-jsonrpc/lib/node/main.js')) {
+        if ($names -cnotcontains $required) { throw "VSIX missing: $required" }
+    }
+    if ($names -match '^extension/node_modules/(?:@vscode/vsce|vscode-textmate|vscode-oniguruma)/') {
+        throw 'Development dependencies leaked into VSIX'
+    }
+    $licenseStream = [System.IO.StreamReader]::new($archive.GetEntry('extension/LICENSE.txt').Open())
+    try { $licenseText = $licenseStream.ReadToEnd() } finally { $licenseStream.Dispose() }
+    if ($licenseText -cne [System.IO.File]::ReadAllText((Join-Path $repoRoot 'LICENSE'))) { throw 'Packaged Apache license differs from repository license' }
+    $dependencyLicenses = @($names | Where-Object { $_ -match '^extension/node_modules/.+/(?:LICENSE|LICENCE)(?:\.[^/]+)?$' })
+    $dependencyRoots = @($names | Where-Object { $_ -match '^extension/node_modules/(?:@[^/]+/)?[^/]+/package.json$' } | ForEach-Object { $_ -replace 'package.json$', '' })
+    foreach ($dependency in $dependencyRoots) {
+        if (-not ($dependencyLicenses | Where-Object { $_ -match ('^' + [regex]::Escape($dependency) + '(?:LICENSE|LICENCE)(?:\.[^/]+)?$') })) {
+            throw "Dependency license missing: $dependency"
+        }
+    }
+} finally { $archive.Dispose() }
+
+$runRoot = Join-Path $releaseRoot ('install-' + [guid]::NewGuid().ToString('N'))
+$userData = Join-Path $runRoot 'user-data'
+$extensions = Join-Path $runRoot 'extensions'
+$workspace = Join-Path $runRoot 'workspace'
+$harness = Join-Path $runRoot 'harness'
+foreach ($directory in @((Join-Path $userData 'User'), $extensions, $workspace, $harness)) {
+    New-Item -ItemType Directory -Path $directory -Force | Out-Null
+}
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+$settings = @{ 'fairyc.server.path' = $server; 'telemetry.telemetryLevel' = 'off'; 'update.mode' = 'none'; 'extensions.autoUpdate' = $false }
+[System.IO.File]::WriteAllText((Join-Path $userData 'User/settings.json'), ($settings | ConvertTo-Json), $utf8)
+[System.IO.File]::WriteAllText((Join-Path $workspace 'main.fy'), "module main;`nfn i32 helper() { return 7; }`nfn i32 main() { return helper(); }`n", $utf8)
+[System.IO.File]::WriteAllText((Join-Path $harness 'package.json'), '{"name":"fairyc-install-smoke","publisher":"fairyc-local-test","version":"0.0.0","engines":{"vscode":"^1.90.0"}}', $utf8)
+
+$installation = & $codeCLI --user-data-dir $userData --extensions-dir $extensions --install-extension $vsix --force 2>&1
+if ($LASTEXITCODE -ne 0) { throw ($installation -join "`n") }
+$installed = & $codeCLI --user-data-dir $userData --extensions-dir $extensions --list-extensions --show-versions 2>&1
+if ($LASTEXITCODE -ne 0 -or $installed -notcontains ('0disoft.fairyc@' + $manifest.version)) { throw "Installed version not found: $installed" }
+$arguments = @('--user-data-dir', $userData, '--extensions-dir', $extensions,
+    '--extensionDevelopmentPath', $harness, '--extensionTestsPath', (Join-Path $PSScriptRoot 'test-vscode-installed.cjs'),
+    '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', $workspace)
+$quotedArguments = @($arguments | ForEach-Object { '"' + $_ + '"' })
+$hostProcess = Start-Process -FilePath $codeEXE -ArgumentList $quotedArguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $runRoot 'host.stdout.log') -RedirectStandardError (Join-Path $runRoot 'host.stderr.log')
+if (-not $hostProcess.WaitForExit(60000)) {
+    Stop-Process -Id $hostProcess.Id -Force
+    throw "VS Code host timed out; see $runRoot"
+}
+$hostProcess.Refresh()
+if ($hostProcess.ExitCode -ne 0) { throw "VS Code host exited $($hostProcess.ExitCode); see $runRoot" }
+$hostReceiptPath = Join-Path $runRoot 'host-receipt.json'
+if (-not (Test-Path -LiteralPath $hostReceiptPath)) { throw "Extension host produced no receipt; see $runRoot" }
+$hostReceipt = Get-Content -LiteralPath $hostReceiptPath -Raw | ConvertFrom-Json
+if (-not $hostReceipt.passed) { throw $hostReceipt.error }
+$receipt = @{ schema = 'fairyc.vscode-install/v1'; vsix = $vsix; sha256 = $digest;
+    archiveFiles = $names.Count; dependencyLicenseFiles = $dependencyLicenses.Count;
+    installationOutput = @($installation | ForEach-Object { "$_" }); installed = @($installed | ForEach-Object { "$_" }); host = $hostReceipt }
+$receiptPath = Join-Path $runRoot 'receipt.json'
+[System.IO.File]::WriteAllText($receiptPath, ($receipt | ConvertTo-Json -Depth 6), $utf8)
+Write-Output "Installed VSIX and extension host verification passed: $receiptPath"

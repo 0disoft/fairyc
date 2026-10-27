@@ -4,10 +4,16 @@
   "description": "Fairy C syntax and language tools",
   "version": "0.1.2",
   "publisher": "0disoft",
-
   "main": "./extension.js",
-  "activationEvents": ["onLanguage:fairyc"],
-  "capabilities": {"untrustedWorkspaces": {"supported": "limited", "description": "Syntax support works; the language server runs only in a trusted workspace."}},
+  "activationEvents": [
+    "onLanguage:fairyc"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Syntax support works; the language server runs only in a trusted workspace."
+    }
+  },
   "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.90.0"
@@ -23,7 +29,12 @@
     "configuration": {
       "title": "Fairy C",
       "properties": {
-        "fairyc.server.path": {"type": "string", "default": "fairyc-lsp", "scope": "machine", "description": "Path to the Fairy C language server executable."}
+        "fairyc.server.path": {
+          "type": "string",
+          "default": "fairyc-lsp",
+          "scope": "machine",
+          "description": "Path to the Fairy C language server executable."
+        }
       }
     },
     "languages": [
@@ -53,9 +64,16 @@
       }
     ]
   },
-  "dependencies": {"vscode-languageclient": "^9"},
+  "dependencies": {
+    "vscode-languageclient": "^9"
+  },
   "devDependencies": {
-    "vscode-textmate": "^9",
-    "vscode-oniguruma": "^2"
+    "@vscode/vsce": "4",
+    "vscode-oniguruma": "^2",
+    "vscode-textmate": "^9"
+  },
+  "scripts": {
+    "package:vsix": "node ../../tools/package-vscode.mjs",
+    "test:syntax": "node ../../tools/test-editor-assets.mjs"
   }
 }
