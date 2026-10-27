@@ -472,23 +472,8 @@ func rebindStableTypeBase(value string, resolve packageResolver) (hir.Type, erro
 	if builtinType(parsed) {
 		return parsed, nil
 	}
-	if element, ok := hir.OptionElement(parsed); ok {
-		rebound, err := rebindValidatedStableType(element.String(), resolve)
-		if err != nil {
-			return hir.TypeInvalid, err
-		}
-		return hir.Option(rebound), nil
-	}
-	if success, failure, ok := hir.ResultElements(parsed); ok {
-		reboundSuccess, err := rebindValidatedStableType(success.String(), resolve)
-		if err != nil {
-			return hir.TypeInvalid, err
-		}
-		reboundFailure, err := rebindValidatedStableType(failure.String(), resolve)
-		if err != nil {
-			return hir.TypeInvalid, err
-		}
-		return hir.Result(reboundSuccess, reboundFailure), nil
+	if kind := parsed.Descriptor().Kind; kind == hir.TypeKindOption || kind == hir.TypeKindResult {
+		return rebindStableCompound(parsed, resolve)
 	}
 	if strings.HasSuffix(value, "[]") {
 		element, err := rebindValidatedStableType(strings.TrimSuffix(value, "[]"), resolve)
