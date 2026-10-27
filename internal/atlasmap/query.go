@@ -500,18 +500,21 @@ func (index *QueryIndex) Show(symbolID string, request RelationRequest) (ShowRes
 		Context: context, Subject: subject, Direction: request.Direction, RelationKinds: relations,
 		Budget: request.Budget, Omissions: filterOmissions(relations),
 	}
-	candidates := index.relationIDs(index.nodes[position].symbol.Visible, request.Direction, filter)
-	for candidateIndex, relationIndex := range candidates {
+	symbol := index.nodes[position].symbol.Visible
+	candidateCount := index.countRelationIDs(symbol, request.Direction, filter)
+	candidateIndex := 0
+	for relationIndex := range index.relationIDs(symbol, request.Direction, filter) {
 		relation := cloneQueryRelation(index.relations[relationIndex])
 		accepted, code, reserveErr := selection.reserveRelation(relation)
 		if reserveErr != nil {
 			return ShowResult{}, reserveErr
 		}
 		if !accepted {
-			result.Omissions = append(result.Omissions, knownOmission(code, "relations", len(candidates)-candidateIndex))
+			result.Omissions = append(result.Omissions, knownOmission(code, "relations", candidateCount-candidateIndex))
 			break
 		}
 		result.Relations = append(result.Relations, relation)
+		candidateIndex++
 	}
 	result.Omissions = appendJoinOmissions(result.Omissions, result.Relations, request.Direction, filter)
 	result.Usage = selection.usage

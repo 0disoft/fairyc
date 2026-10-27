@@ -2,7 +2,6 @@ package atlasmap
 
 import (
 	"fmt"
-	"reflect"
 	"slices"
 	"testing"
 )
@@ -40,9 +39,19 @@ func TestRelationIDsMatchCanonicalFactsAndDetachResults(t *testing.T) {
 						}
 					}
 					beforeOutgoing, beforeIncoming := slices.Clone(index.outgoing[symbol]), slices.Clone(index.incoming[symbol])
-					got := index.relationIDs(symbol, direction, filter)
-					if !reflect.DeepEqual(got, want) {
+					sequence := index.relationIDs(symbol, direction, filter)
+					for first := range sequence {
+						if len(want) == 0 || first != want[0] {
+							t.Fatalf("first relation = %d, want %v", first, want)
+						}
+						break
+					}
+					got := slices.Collect(sequence)
+					if !slices.Equal(got, want) {
 						t.Fatalf("relation IDs = %v, want %v", got, want)
+					}
+					if count := index.countRelationIDs(symbol, direction, filter); count != len(want) {
+						t.Fatalf("relation count = %d, want %d", count, len(want))
 					}
 					if len(got) != 0 {
 						got[0] = -1

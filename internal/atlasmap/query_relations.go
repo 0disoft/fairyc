@@ -1,38 +1,62 @@
 package atlasmap
 
 import (
+	"iter"
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
-// relationIDs merges only the requested sorted adjacency lists. A self-call
-// occurs in both lists; consume it once, preserving canonical relation order.
-// The result owns its storage, so callers cannot mutate the immutable index.
-func (index *QueryIndex) relationIDs(symbol string, direction QueryDirection, filter map[RelationKind]struct{}) []int {
-	var outgoing, incoming []int
+// Show needs an exact omission count even when it selects no relations. Count
+// directly, without materializing IDs or invoking the iterator for every edge.
+func (index *QueryIndex) countRelationIDs(symbol string, direction QueryDirection, filter map[RelationKind]struct{}) int {
+	count := 0
 	if direction == DirectionOutgoing || direction == DirectionBoth {
-		outgoing = index.outgoing[symbol]
+		for _, position := range index.outgoing[symbol] {
+			if _, included := filter[index.relations[position].Kind]; included {
+				count++
+			}
+		}
 	}
 	if direction == DirectionIncoming || direction == DirectionBoth {
-		incoming = index.incoming[symbol]
-	}
-	result := make([]int, 0, len(outgoing)+len(incoming))
-	for len(outgoing) != 0 || len(incoming) != 0 {
-		var position int
-		if len(incoming) == 0 || len(outgoing) != 0 && outgoing[0] <= incoming[0] {
-			position, outgoing = outgoing[0], outgoing[1:]
-			if len(incoming) != 0 && incoming[0] == position {
-				incoming = incoming[1:]
+		for _, position := range index.incoming[symbol] {
+			if direction == DirectionBoth && index.relations[position].Source == symbol {
+				continue // A self-call was already counted in the outgoing list.
 			}
-		} else {
-			position, incoming = incoming[0], incoming[1:]
-		}
-		if _, included := filter[index.relations[position].Kind]; included {
-			result = append(result, position)
+			if _, included := filter[index.relations[position].Kind]; included {
+				count++
+			}
 		}
 	}
-	return result
+	return count
+}
+
+// relationIDs streams the requested sorted adjacency lists without copying
+// them. A self-call occurs in both lists; consume it once in canonical order.
+func (index *QueryIndex) relationIDs(symbol string, direction QueryDirection, filter map[RelationKind]struct{}) iter.Seq[int] {
+	return func(yield func(int) bool) {
+		var outgoing, incoming []int
+		if direction == DirectionOutgoing || direction == DirectionBoth {
+			outgoing = index.outgoing[symbol]
+		}
+		if direction == DirectionIncoming || direction == DirectionBoth {
+			incoming = index.incoming[symbol]
+		}
+		for len(outgoing) != 0 || len(incoming) != 0 {
+			var position int
+			if len(incoming) == 0 || len(outgoing) != 0 && outgoing[0] <= incoming[0] {
+				position, outgoing = outgoing[0], outgoing[1:]
+				if len(incoming) != 0 && incoming[0] == position {
+					incoming = incoming[1:]
+				}
+			} else {
+				position, incoming = incoming[0], incoming[1:]
+			}
+			if _, included := filter[index.relations[position].Kind]; included && !yield(position) {
+				return
+			}
+		}
+	}
 }
 
 func (index *QueryIndex) buildRelations(functions []semanticsnapshot.FunctionSummary) []QueryRelation {
