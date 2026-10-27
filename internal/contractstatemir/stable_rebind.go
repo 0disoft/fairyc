@@ -67,6 +67,7 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		Transactions: make([]LoweredTransaction, 0, len(body.Transactions)),
 	}
 	boundSymbols := make(map[hir.SymbolID]string, len(body.Transactions))
+	var helpers currentHelperHIRIndex
 	for index, transaction := range body.Transactions {
 		descriptor, err := decodeStableStateFunctionDescriptor(transaction.Function)
 		if err != nil {
@@ -113,7 +114,7 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 		if err != nil {
 			return ReboundStateBody{}, fmt.Errorf("rebind stable transaction %d: %w", index, err)
 		}
-		if err := validateCurrentHelperHIR(input, packageID, function, program); err != nil {
+		if err := helpers.validate(input, packageID, function, program); err != nil {
 			return ReboundStateBody{}, fmt.Errorf("rebind stable transaction %d helpers: %w", index, err)
 		}
 		result.Transactions = append(result.Transactions, LoweredTransaction{

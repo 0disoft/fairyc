@@ -156,21 +156,9 @@ func cloneStateBlocks(values []Block) []Block {
 	return result
 }
 
-func validateCurrentHelperHIR(input hir.Package, packageID hir.PackageID, root hir.Function, program Program) error {
-	bySymbol := make(map[hir.SymbolID]string)
-	byName := make(map[string]hir.Function)
-	functions := make(map[hir.SymbolID]hir.Function)
-	for _, module := range input.Modules {
-		if module.Package != packageID {
-			continue
-		}
-		for _, function := range module.Functions {
-			name := module.Path + "::" + function.Name
-			bySymbol[function.Symbol] = name
-			byName[name] = function
-			functions[function.Symbol] = function
-		}
-	}
+func (index *currentHelperHIRIndex) validate(input hir.Package, packageID hir.PackageID, root hir.Function, program Program) error {
+	index.prepare(input, packageID)
+	bySymbol, byName, functions := index.bySymbol, index.byName, index.functions
 	validate := func(function hir.Function, operations []Operation, blocks []Block) error {
 		calls, err := hirStaticStateCalls(function.Body)
 		if err != nil {
