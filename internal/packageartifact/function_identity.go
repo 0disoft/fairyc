@@ -203,40 +203,59 @@ func validStableType(value string) bool {
 	if value == "" || !utf8.ValidString(value) || strings.Contains(value, "$p") {
 		return false
 	}
-	// Substrings and HIR child spellings preserve the checked UTF-8 and cannot
-	// introduce a build-local prefix. Visit each child without recursive calls.
-	pending := []string{value}
-	for len(pending) != 0 {
-		value = stripStableIndirection(pending[len(pending)-1])
-		pending = pending[:len(pending)-1]
-		if value == "" {
-			return false
+	// Reuse parsed children instead of rendering and reparsing every subtree.
+	// Opaque children at the HIR parser's depth limit still need text admission.
+	type candidate struct {
+		text   string
+		parsed hir.Type
+	}
+	pending := []candidate{{text: value}}
+	push := func(parsed hir.Type) {
+		if parsed.Descriptor().Kind == hir.TypeKindOpaque {
+			pending = append(pending, candidate{text: parsed.String()})
+		} else {
+			pending = append(pending, candidate{parsed: parsed})
 		}
-		parsed := hir.ParseType(value)
+	}
+	for len(pending) != 0 {
+		item := pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		value, parsed := item.text, item.parsed
+		if parsed == (hir.Type{}) {
+			value = stripStableIndirection(value)
+			if value == "" {
+				return false
+			}
+			parsed = hir.ParseType(value)
+		}
 		if builtinType(parsed) {
 			continue
 		}
 		if element, ok := hir.OptionElement(parsed); ok {
-			pending = append(pending, element.String())
+			push(element)
 			continue
 		}
 		if success, failure, ok := hir.ResultElements(parsed); ok {
-			pending = append(pending, failure.String(), success.String())
+			push(failure)
+			push(success)
 			continue
+		}
+		if value == "" {
+			value = parsed.String()
 		}
 		if strings.HasSuffix(value, "[]") {
 			element := strings.TrimSuffix(value, "[]")
 			if !strings.HasPrefix(element, "pkg[") || strings.HasSuffix(element, "]") {
 				return false
 			}
-			pending = append(pending, element)
+			pending = append(pending, candidate{text: element})
 			continue
 		}
 		if strings.HasSuffix(value, "]") {
 			if separator := strings.LastIndexByte(value, '['); separator > 0 {
 				length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
 				if err == nil && length > 0 {
-					pending = append(pending, value[:separator])
+					pending = append(pending, candidate{text: value[:separator]})
 					continue
 				}
 			}
