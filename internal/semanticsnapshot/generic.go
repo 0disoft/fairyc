@@ -79,7 +79,12 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		if !ok || original.Span.Package != original.Package {
 			return nil, fmt.Errorf("generic declaration has no matching package metadata")
 		}
-		if !slices.ContainsFunc(info.input.Files, func(file FileInput) bool { return file.Path == original.Span.Source }) {
+		// normalizePackages validates and sorts this package's file identities.
+		// Keep exact package-local membership without a full scan per declaration.
+		_, found := slices.BinarySearchFunc(info.input.Files, original.Span.Source, func(file FileInput, path string) int {
+			return strings.Compare(file.Path, path)
+		})
+		if !found {
 			return nil, fmt.Errorf("generic declaration has no exact source file identity")
 		}
 		module := hir.Module{Package: original.Package, Path: original.Module, SourcePath: original.Span.Source}
