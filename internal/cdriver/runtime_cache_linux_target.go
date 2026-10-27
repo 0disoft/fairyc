@@ -58,7 +58,7 @@ func buildLinuxRuntimeCached(toolchain Toolchain, profile Profile, unitSource, r
 	key := (runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
 		CompilerDigest: sha256.Sum256(compiler), Target: string(toolchain.Target), Libc: toolchain.Libc,
 		Mode: C11ConsumerMode, Profile: profile, Flags: snapshotFlags, Environment: environment,
-		Source: sha256.Sum256([]byte(runtimeSource)), Preprocessed: sha256.Sum256([]byte(preprocessed))}).key()
+		Source: sourceDigest(runtimeSource), Preprocessed: sourceDigest(preprocessed)}).key()
 	store, _ := open()
 	if store != nil {
 		defer store.Close()

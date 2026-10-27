@@ -1,7 +1,6 @@
 package cdriver
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -42,8 +41,8 @@ func buildWindowsUnitCached(toolchain WindowsHostToolchain, profile Profile, sou
 	if err := os.WriteFile(path, []byte(snapshot), 0o600); err != nil {
 		return uncached()
 	}
-	identity.Source = sha256.Sum256([]byte(source))
-	identity.Preprocessed = sha256.Sum256([]byte(snapshot))
+	identity.Source = sourceDigest(source)
+	identity.Preprocessed = sourceDigest(snapshot)
 	var artifact WindowsHostArtifact
 	status, err := useRuntimeObject(store, identity.unitKey(), func() ([]byte, error) {
 		args := append(append([]string{}, flags...), "/c", "unit.c", "/Fo:unit.obj")

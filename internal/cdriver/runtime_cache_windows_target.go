@@ -71,8 +71,8 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 	}
 	identity := runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
 		CompilerDigest: sha256.Sum256(compiler), Target: "x86_64-windows-msvc", Mode: C11ConsumerMode,
-		Profile: profile, Flags: flags, Environment: toolchain.Environment, Source: sha256.Sum256([]byte(runtimeSource)),
-		Preprocessed: sha256.Sum256([]byte(preprocessed))}
+		Profile: profile, Flags: flags, Environment: toolchain.Environment, Source: sourceDigest(runtimeSource),
+		Preprocessed: sourceDigest(preprocessed)}
 	key := identity.key()
 	store, _ := open()
 	if store != nil {
