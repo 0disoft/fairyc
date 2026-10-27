@@ -247,6 +247,8 @@ func validateCurrentPackage(value CurrentPackage) error {
 		return fmt.Errorf("current package references do not cover self and direct dependencies")
 	}
 	selfFound := false
+	// Dependencies are already validated as sorted and unique above. Search
+	// that list without rescanning all dependencies for every namespace reference.
 	for index, reference := range value.PackageReferences {
 		if index > 0 && value.PackageReferences[index-1].Instance >= reference.Instance {
 			return fmt.Errorf("current package references are not canonical")
@@ -261,7 +263,7 @@ func validateCurrentPackage(value CurrentPackage) error {
 		}
 		if reference.Instance == value.Instance.String() {
 			selfFound = reference.UID == value.UID && reference.Coordinate == value.Coordinate.String()
-		} else if !slices.Contains(value.Dependencies, reference.Instance) {
+		} else if _, found := slices.BinarySearch(value.Dependencies, reference.Instance); !found {
 			return fmt.Errorf("current package reference is not a direct dependency")
 		}
 	}
