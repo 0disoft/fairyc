@@ -552,7 +552,7 @@ func (index *QueryIndex) Around(symbolID string, request RelationRequest) (Aroun
 		candidateRelations := index.frontierRelations(frontier, request.Direction, filter, seenRelations)
 		nextSet := make(map[int]struct{})
 		var frontierSymbols map[string]struct{}
-		for _, relationIndex := range candidateRelations {
+		for relationIndex := range candidateRelations {
 			relation := cloneQueryRelation(index.relations[relationIndex])
 			accepted, code, reserveErr := selection.reserveRelation(relation)
 			if reserveErr != nil {
@@ -867,28 +867,6 @@ func selectionRecordCost(value any) (uint64, error) {
 		return 0, fmt.Errorf("measure Atlas query record: %w", err)
 	}
 	return uint64(len(encoded)) + 1, nil
-}
-
-func (index *QueryIndex) frontierRelations(
-	frontier []int,
-	direction QueryDirection,
-	filter map[RelationKind]struct{},
-	seen map[int]struct{},
-) []int {
-	set := make(map[int]struct{})
-	for _, position := range frontier {
-		for _, relation := range index.relationIDs(index.nodes[position].symbol.Visible, direction, filter) {
-			if _, already := seen[relation]; !already {
-				set[relation] = struct{}{}
-			}
-		}
-	}
-	result := make([]int, 0, len(set))
-	for relation := range set {
-		result = append(result, relation)
-	}
-	slices.Sort(result)
-	return result
 }
 
 func (index *QueryIndex) adjacentNodes(frontierSymbols map[string]struct{}, relation QueryRelation, direction QueryDirection) []int {
