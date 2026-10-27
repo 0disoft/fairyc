@@ -38,6 +38,7 @@ type analysis struct {
 	imports     map[sourceKey]hir.PackageID
 	diagnostics map[string][]lspDiagnostic
 	positions   map[string]*positionIndex
+	definitions map[string][]definitionSpan
 	clean       bool
 }
 

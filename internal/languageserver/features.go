@@ -22,11 +22,9 @@ func (s *server) definition(d *document, offset int) []Location {
 	if d.View == nil {
 		return locations
 	}
-	for _, r := range d.View.result.Resolutions {
-		use, ok := d.View.file(r.Use)
-		if !ok || use.Path != d.Path || offset < r.Use.StartByte || offset >= r.Use.EndByte {
-			continue
-		}
+	var scratch [8]int
+	for _, index := range d.View.definitionCandidates(d.Path, offset, scratch[:0]) {
+		r := d.View.result.Resolutions[index]
 		target, ok := d.View.file(r.Target.Declaration)
 		if !ok || target.Path == "" {
 			continue
