@@ -597,10 +597,19 @@ func rebindStableContextFunctionSymbols(processContext mir.Program, stable Conte
 }
 
 func mapFunctionTypes(function *mir.Function, transform func(hir.Type) (hir.Type, error)) error {
+	// All callers transform types using fixed bindings. Keep the memo local to
+	// this walk so another function/package conversion cannot reuse stale types.
+	mappedTypes := make(map[hir.Type]hir.Type)
 	return walkFunctionTypes(function, func(value *hir.Type) error {
-		mapped, err := transform(*value)
-		if err != nil {
-			return err
+		original := *value
+		mapped, found := mappedTypes[original]
+		if !found {
+			var err error
+			mapped, err = transform(original)
+			if err != nil {
+				return err
+			}
+			mappedTypes[original] = mapped
 		}
 		*value = mapped
 		return nil
