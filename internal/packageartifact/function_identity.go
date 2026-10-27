@@ -407,42 +407,60 @@ func rebindStableTypeWithResolver(value string, resolve packageResolver) (hir.Ty
 }
 
 func rebindValidatedStableType(value string, resolve packageResolver) (hir.Type, error) {
-	if builtinType(hir.ParseType(value)) {
-		return hir.ParseType(value), nil
+	type indirection struct{ mutable, raw bool }
+	var pending []indirection
+	// Stable ref/ptr spellings are not HIR syntax. Strip them before parsing so
+	// each suffix is neither interned as an opaque type nor visited recursively.
+strip:
+	for {
+		for _, prefix := range [...]struct {
+			stable  string
+			mutable bool
+			raw     bool
+		}{
+			{stable: "ref mut ", mutable: true},
+			{stable: "ref "},
+			{stable: "ptr mut ", mutable: true, raw: true},
+			{stable: "ptr ", raw: true},
+		} {
+			if strings.HasPrefix(value, prefix.stable) {
+				pending = append(pending, indirection{prefix.mutable, prefix.raw})
+				value = value[len(prefix.stable):]
+				continue strip
+			}
+		}
+		break
 	}
-	for _, prefix := range []struct {
-		stable  string
-		mutable bool
-		raw     bool
-	}{
-		{stable: "ref mut ", mutable: true},
-		{stable: "ref "},
-		{stable: "ptr mut ", mutable: true, raw: true},
-		{stable: "ptr ", raw: true},
-	} {
-		if !strings.HasPrefix(value, prefix.stable) {
-			continue
-		}
-		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), resolve)
-		if err != nil {
-			return hir.TypeInvalid, err
-		}
+	element, err := rebindStableTypeBase(value, resolve)
+	if err != nil {
+		return hir.TypeInvalid, err
+	}
+	for i := len(pending) - 1; i >= 0; i-- {
+		prefix := pending[i]
 		if prefix.raw {
-			return hir.RawPointer(element, prefix.mutable), nil
+			element = hir.RawPointer(element, prefix.mutable)
+		} else if prefix.mutable {
+			element = hir.MutableBorrow(element)
+		} else {
+			element = hir.SharedBorrow(element)
 		}
-		if prefix.mutable {
-			return hir.MutableBorrow(element), nil
-		}
-		return hir.SharedBorrow(element), nil
 	}
-	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
+	return element, nil
+}
+
+func rebindStableTypeBase(value string, resolve packageResolver) (hir.Type, error) {
+	parsed := hir.ParseType(value)
+	if builtinType(parsed) {
+		return parsed, nil
+	}
+	if element, ok := hir.OptionElement(parsed); ok {
 		rebound, err := rebindValidatedStableType(element.String(), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
 		return hir.Option(rebound), nil
 	}
-	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
+	if success, failure, ok := hir.ResultElements(parsed); ok {
 		reboundSuccess, err := rebindValidatedStableType(success.String(), resolve)
 		if err != nil {
 			return hir.TypeInvalid, err
