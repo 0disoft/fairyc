@@ -22,7 +22,19 @@ func (p typeProperties) plainStructFields(value hir.Type) ([]hir.Type, bool) {
 	return fields, true
 }
 
-func (p typeProperties) validStructViewType(value hir.Type) bool {
+// Cache child identities as well as roots: Result<T,T> shares an interned child
+// and must not double the work at every nesting level. The caller owns the cache
+// for one immutable verification pass, including unsuccessful results.
+func (p typeProperties) validStructViewType(value hir.Type, checked map[hir.Type]bool) bool {
+	if valid, found := checked[value]; found {
+		return valid
+	}
+	valid := p.computeStructViewType(value, checked)
+	checked[value] = valid
+	return valid
+}
+
+func (p typeProperties) computeStructViewType(value hir.Type, checked map[hir.Type]bool) bool {
 	if element, length, array := hir.FixedArrayParts(value); array {
 		return p.transportOnlyArray(value) || hir.FixedArrayScalarElement(element) || hir.ExecutableFixedArrayShape(element, length) && p.plainViewStruct(element)
 	}
@@ -30,16 +42,16 @@ func (p typeProperties) validStructViewType(value hir.Type) bool {
 		if element, nominal := hir.StructSliceElement(slice); nominal {
 			return p.plainViewStruct(element)
 		}
-		return p.validStructViewType(slice)
+		return p.validStructViewType(slice, checked)
 	}
 	if element, ok := hir.OptionElement(value); ok {
-		return p.validStructViewType(element)
+		return p.validStructViewType(element, checked)
 	}
 	if success, failure, ok := hir.ResultElements(value); ok {
-		return p.validStructViewType(success) && p.validStructViewType(failure)
+		return p.validStructViewType(success, checked) && p.validStructViewType(failure, checked)
 	}
 	if element, _, ok := hir.RawPointerElement(value); ok {
-		return p.validStructViewType(element)
+		return p.validStructViewType(element, checked)
 	}
 	_, slice := hir.StructSliceElement(value)
 	return !slice
@@ -56,15 +68,10 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 			// These leaves contain no compound view shape to validate.
 			return
 		}
-		valid, checked := checkedTypes[value]
-		if !checked {
-			valid = p.validStructViewType(value)
-			if checkedTypes == nil {
-				checkedTypes = make(map[hir.Type]bool)
-			}
-			checkedTypes[value] = valid
+		if checkedTypes == nil {
+			checkedTypes = make(map[hir.Type]bool)
 		}
-		if !valid {
+		if !p.validStructViewType(value, checkedTypes) {
 			failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
 		}
 	}
