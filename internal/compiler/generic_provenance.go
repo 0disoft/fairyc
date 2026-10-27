@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/genericsource"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -58,6 +59,7 @@ func (value GenericProvenance) Specializations() []genericsource.SpecializationO
 
 func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]genericplan.PackageID, expansion genericsource.PackageExpansion, nominalTypes []semantic.NominalTypeFact) (GenericProvenance, error) {
 	result := GenericProvenance{nominalTypes: slices.Clone(nominalTypes)}
+	headers := make(map[*ast.Module]*genericHeaderIndex)
 	for _, declaration := range expansion.Declarations {
 		var file *semantic.File
 		for i := range input.Files {
@@ -72,7 +74,12 @@ func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]gen
 		if file == nil || file.Path == "" || !declaration.Span.Valid(file.Module.SourceSize) || !declaration.NameSpan.Valid(file.Module.SourceSize) {
 			return GenericProvenance{}, fmt.Errorf("generic declaration has no exact source")
 		}
-		original, err := originalGenericHeader(file.Module, declaration)
+		index := headers[file.Module]
+		if index == nil {
+			index = indexGenericHeaders(file.Module)
+			headers[file.Module] = index
+		}
+		original, err := index.original(declaration)
 		if err != nil {
 			return GenericProvenance{}, err
 		}
