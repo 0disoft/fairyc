@@ -215,15 +215,15 @@ type preparedAttributedTextWorkspace struct {
 	expectations map[string]atlasmap.LoadExpectation
 }
 
-func loadAttributedTextFixture(t *testing.T, sourceBytes []byte) attributedTextFixture {
+func loadAttributedTextFixture(t testing.TB, sourceBytes []byte) attributedTextFixture {
 	return loadAttributedTextFixtureForSymbol(t, sourceBytes, "middle")
 }
 
-func loadAttributedTextFixtureForSymbol(t *testing.T, sourceBytes []byte, name string) attributedTextFixture {
+func loadAttributedTextFixtureForSymbol(t testing.TB, sourceBytes []byte, name string) attributedTextFixture {
 	return loadAttributedTextFixtureVersion(t, sourceBytes, name, false)
 }
 
-func loadAttributedTextFixtureVersion(t *testing.T, sourceBytes []byte, name string, generic bool) attributedTextFixture {
+func loadAttributedTextFixtureVersion(t testing.TB, sourceBytes []byte, name string, generic bool) attributedTextFixture {
 	version := byte(1)
 	if generic {
 		version = 2
@@ -231,7 +231,7 @@ func loadAttributedTextFixtureVersion(t *testing.T, sourceBytes []byte, name str
 	return loadAttributedTextFixtureSchema(t, sourceBytes, name, version)
 }
 
-func loadAttributedTextFixtureSchema(t *testing.T, sourceBytes []byte, name string, version byte) attributedTextFixture {
+func loadAttributedTextFixtureSchema(t testing.TB, sourceBytes []byte, name string, version byte) attributedTextFixture {
 	t.Helper()
 	prepared := prepareAttributedTextWorkspaceSchema(t, sourceBytes, version)
 	for _, partition := range prepared.partitions {
@@ -261,11 +261,11 @@ func loadAttributedTextFixtureSchema(t *testing.T, sourceBytes []byte, name stri
 	return attributedTextFixture{}
 }
 
-func prepareAttributedTextWorkspace(t *testing.T, sourceBytes []byte) preparedAttributedTextWorkspace {
+func prepareAttributedTextWorkspace(t testing.TB, sourceBytes []byte) preparedAttributedTextWorkspace {
 	return prepareAttributedTextWorkspaceVersion(t, sourceBytes, false)
 }
 
-func prepareAttributedTextWorkspaceVersion(t *testing.T, sourceBytes []byte, generic bool) preparedAttributedTextWorkspace {
+func prepareAttributedTextWorkspaceVersion(t testing.TB, sourceBytes []byte, generic bool) preparedAttributedTextWorkspace {
 	version := byte(1)
 	if generic {
 		version = 2
@@ -273,7 +273,7 @@ func prepareAttributedTextWorkspaceVersion(t *testing.T, sourceBytes []byte, gen
 	return prepareAttributedTextWorkspaceSchema(t, sourceBytes, version)
 }
 
-func prepareAttributedTextWorkspaceSchema(t *testing.T, sourceBytes []byte, version byte) preparedAttributedTextWorkspace {
+func prepareAttributedTextWorkspaceSchema(t testing.TB, sourceBytes []byte, version byte) preparedAttributedTextWorkspace {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -335,7 +335,7 @@ source = "src"
 	}
 }
 
-func writeAttributedTextFixture(t *testing.T, path string, contents []byte) {
+func writeAttributedTextFixture(t testing.TB, path string, contents []byte) {
 	t.Helper()
 	if err := os.WriteFile(path, contents, 0o600); err != nil {
 		t.Fatal(err)

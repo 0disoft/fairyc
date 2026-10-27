@@ -129,42 +129,11 @@ func exactDocumentationSpan(
 	subject atlasmap.AttributionSubject,
 ) (semanticsnapshot.Span, bool, error) {
 	wanted := subject.Subject.Declaration
-	declarationMatches := 0
-	for _, candidate := range snapshot.Declarations() {
-		if candidate.Key != wanted.Key {
-			continue
-		}
-		declarationMatches++
-		if candidate.Span != wanted.Span {
-			return semanticsnapshot.Span{}, false, fmt.Errorf("Atlas attributed documentation snapshot declaration does not match the exact query subject")
-		}
+	span, found, err := snapshot.LookupDeclarationDocumentation(wanted.Key, wanted.Span)
+	if err != nil {
+		return semanticsnapshot.Span{}, false, fmt.Errorf("Atlas attributed documentation %w", err)
 	}
-	if declarationMatches != 1 {
-		return semanticsnapshot.Span{}, false, fmt.Errorf("Atlas attributed documentation snapshot does not contain exactly one query declaration")
-	}
-	var selected semanticsnapshot.DeclarationDocumentation
-	found := false
-	for _, candidate := range snapshot.DocumentationSpans() {
-		if candidate.Declaration != wanted.Key {
-			continue
-		}
-		if found {
-			return semanticsnapshot.Span{}, false, fmt.Errorf("Atlas attributed documentation snapshot repeats the query declaration")
-		}
-		selected, found = candidate, true
-	}
-	if !found {
-		return semanticsnapshot.Span{}, false, nil
-	}
-	if selected.DeclarationSpan != wanted.Span ||
-		selected.Documentation.PackageInstance != wanted.Span.PackageInstance ||
-		selected.Documentation.Source != wanted.Span.Source ||
-		selected.Documentation.StartByte < 0 ||
-		selected.Documentation.EndByte <= selected.Documentation.StartByte ||
-		selected.Documentation.EndByte > wanted.Span.StartByte {
-		return semanticsnapshot.Span{}, false, fmt.Errorf("Atlas attributed documentation does not match the exact query declaration")
-	}
-	return selected.Documentation, true, nil
+	return span, found, nil
 }
 
 func subjectFromExactSource(

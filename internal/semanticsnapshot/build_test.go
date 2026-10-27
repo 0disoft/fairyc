@@ -135,6 +135,15 @@ fn i32 run() { return 0; }
 			text[item.Documentation.StartByte:item.Documentation.EndByte] != want {
 			t.Fatalf("documentation sidecar = %+v, want %q", item, want)
 		}
+		span, found, err := snapshot.LookupDeclarationDocumentation(item.Declaration, item.DeclarationSpan)
+		if err != nil || !found || span != item.Documentation {
+			t.Fatalf("exact documentation lookup = %+v, %t, %v", span, found, err)
+		}
+		span.Source = "changed.fy"
+		again, _, _ := snapshot.LookupDeclarationDocumentation(item.Declaration, item.DeclarationSpan)
+		if again != item.Documentation {
+			t.Fatal("lookup result mutation escaped into immutable snapshot")
+		}
 	}
 	documentation[0].Documentation.Source = "corrupted.fy"
 	if snapshot.DocumentationSpans()[0].Documentation.Source == "corrupted.fy" {
