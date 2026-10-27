@@ -12,14 +12,24 @@ func (b *Builder) Build() (*Catalog, error) {
 		return nil, fail(CodeInvalidDeclaration, "catalog builder is nil")
 	}
 
-	orderedImplementations := slices.Clone(b.implementations)
-	slices.SortFunc(orderedImplementations, func(left, right Implementation) int {
-		leftKey := implementationKey(left.Capability, left.Arguments) + "=" + string(left.Provider)
-		rightKey := implementationKey(right.Capability, right.Arguments) + "=" + string(right.Provider)
-		return cmp.Compare(leftKey, rightKey)
+	// Keys belong to this Build only. Preserve the exact encoded-key/provider
+	// order, without rebuilding argument strings on every sort comparison.
+	type keyedImplementation struct {
+		key, order string
+		value      *Implementation
+	}
+	orderedImplementations := make([]keyedImplementation, len(b.implementations))
+	for index := range b.implementations {
+		value := &b.implementations[index]
+		key := implementationKey(value.Capability, value.Arguments)
+		orderedImplementations[index] = keyedImplementation{key: key, order: key + "=" + string(value.Provider), value: value}
+	}
+	slices.SortFunc(orderedImplementations, func(left, right keyedImplementation) int {
+		return cmp.Compare(left.order, right.order)
 	})
 	implementationMap := make(map[string]Implementation, len(orderedImplementations))
-	for _, implementation := range orderedImplementations {
+	for _, entry := range orderedImplementations {
+		implementation := *entry.value
 		capability, found := b.capabilities[implementation.Capability]
 		if !found {
 			return nil, fail(CodeUnknownCatalogItem, "implementation references unknown capability %q", implementation.Capability)
@@ -38,7 +48,7 @@ func (b *Builder) Build() (*Catalog, error) {
 		if capability.Owner != implementation.Owner && !ownsArgument {
 			return nil, fail(CodeCoherenceViolation, "implementation owner %q owns neither capability %q nor an argument type", implementation.Owner, implementation.Capability)
 		}
-		key := implementationKey(implementation.Capability, implementation.Arguments)
+		key := entry.key
 		if previous, duplicate := implementationMap[key]; duplicate {
 			return nil, fail(CodeDuplicateCatalogItem, "implementations %q and %q overlap for %s", previous.Provider, implementation.Provider, key)
 		}
