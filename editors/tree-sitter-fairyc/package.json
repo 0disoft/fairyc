@@ -1,7 +1,7 @@
 {
   "name": "tree-sitter-fairyc",
   "version": "0.1.1",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "description": "Fairy C Tree-sitter grammar",
   "main": "grammar.js"
 }

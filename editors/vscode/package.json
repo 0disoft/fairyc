@@ -8,7 +8,7 @@
   "main": "./extension.js",
   "activationEvents": ["onLanguage:fairyc"],
   "capabilities": {"untrustedWorkspaces": {"supported": "limited", "description": "Syntax support works; the language server runs only in a trusted workspace."}},
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "vscode": "^1.90.0"
   },

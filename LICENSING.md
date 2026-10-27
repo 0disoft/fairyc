@@ -11,6 +11,16 @@ and attribution remain with their respective holders; this declaration does not
 claim ownership of third-party or contributor material beyond rights available
 to the project. Third-party terms take precedence for their own material.
 
+## Editor integrations
+
+The project-owned editor adapters, TextMate grammar and generated editor
+vocabulary, and Tree-sitter grammar live under `editors/` and follow the
+repository's Apache-2.0 policy. Their package manifests are being corrected from
+MIT to Apache-2.0; this does not change the licenses of third-party dependencies.
+VS Code packages carry a copy of the license at `editors/vscode/LICENSE`, and
+dependencies retain their own license files. Nothing in this section claims
+copyright in third-party generated parser support or runtime files.
+
 ## Third-party components
 
 Preserve [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and
