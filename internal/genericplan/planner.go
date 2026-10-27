@@ -72,11 +72,7 @@ func (c *Catalog) PlanContext(ctx context.Context, requests []Request, limits Pl
 		return Plan{CatalogDigest: c.digest}, nil
 	}
 
-	roots := cloneRequests(requests)
-	slices.SortFunc(roots, compareRequest)
-	roots = slices.CompactFunc(roots, func(left, right Request) bool {
-		return compareRequest(left, right) == 0
-	})
+	roots := sortUniqueRequests(cloneRequests(requests))
 	value := &planner{ctx: ctx,
 		catalog: c,
 		limits:  limits,
@@ -189,10 +185,7 @@ func (p *planner) expand(request Request, depth int) (SpecializationID, error) {
 		}
 		dependencyRequests = append(dependencyRequests, Request{Declaration: dependency.Declaration, Arguments: arguments})
 	}
-	slices.SortFunc(dependencyRequests, compareRequest)
-	dependencyRequests = slices.CompactFunc(dependencyRequests, func(left, right Request) bool {
-		return compareRequest(left, right) == 0
-	})
+	dependencyRequests = sortUniqueRequests(dependencyRequests)
 	dependencyIDs := make([]SpecializationID, 0, len(dependencyRequests))
 	for _, dependency := range dependencyRequests {
 		id, err := p.expand(dependency, depth+1)

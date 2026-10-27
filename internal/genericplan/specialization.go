@@ -72,8 +72,34 @@ func requestKey(value Request) string {
 	return string(value.Declaration) + "<" + strings.Join(arguments, ",") + ">"
 }
 
-func compareRequest(left, right Request) int {
-	return cmp.Compare(requestKey(left), requestKey(right))
+// Sort only caller-owned working slices. Keep the exact encoded-key order,
+// including prefixes and malformed requests: validation still belongs to expand.
+// Keys are built once per request rather than twice per sort/compact comparison.
+func sortUniqueRequests(values []Request) []Request {
+	if len(values) < 2 {
+		return values
+	}
+	type keyedRequest struct {
+		key   string
+		value Request
+	}
+	keyed := make([]keyedRequest, len(values))
+	for index, value := range values {
+		keyed[index] = keyedRequest{key: requestKey(value), value: value}
+	}
+	slices.SortFunc(keyed, func(left, right keyedRequest) int {
+		return cmp.Compare(left.key, right.key)
+	})
+	count := 0
+	for index, value := range keyed {
+		if index > 0 && value.key == keyed[index-1].key {
+			continue
+		}
+		values[count] = value.value
+		count++
+	}
+	clear(values[count:])
+	return values[:count]
 }
 
 func compareResolvedConstraint(left, right ResolvedConstraint) int {
