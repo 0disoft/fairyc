@@ -6,6 +6,35 @@ import (
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
+// relationIDs merges only the requested sorted adjacency lists. A self-call
+// occurs in both lists; consume it once, preserving canonical relation order.
+// The result owns its storage, so callers cannot mutate the immutable index.
+func (index *QueryIndex) relationIDs(symbol string, direction QueryDirection, filter map[RelationKind]struct{}) []int {
+	var outgoing, incoming []int
+	if direction == DirectionOutgoing || direction == DirectionBoth {
+		outgoing = index.outgoing[symbol]
+	}
+	if direction == DirectionIncoming || direction == DirectionBoth {
+		incoming = index.incoming[symbol]
+	}
+	result := make([]int, 0, len(outgoing)+len(incoming))
+	for len(outgoing) != 0 || len(incoming) != 0 {
+		var position int
+		if len(incoming) == 0 || len(outgoing) != 0 && outgoing[0] <= incoming[0] {
+			position, outgoing = outgoing[0], outgoing[1:]
+			if len(incoming) != 0 && incoming[0] == position {
+				incoming = incoming[1:]
+			}
+		} else {
+			position, incoming = incoming[0], incoming[1:]
+		}
+		if _, included := filter[index.relations[position].Kind]; included {
+			result = append(result, position)
+		}
+	}
+	return result
+}
+
 func (index *QueryIndex) buildRelations(functions []semanticsnapshot.FunctionSummary) []QueryRelation {
 	result := make([]QueryRelation, 0, countRelations(functions))
 	for _, function := range functions {

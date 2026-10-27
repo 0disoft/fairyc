@@ -346,6 +346,8 @@ func newQueryIndex(partition Partition, expectation LoadExpectation, schema stri
 	if len(index.relations) != index.header.Counts.Relations {
 		return nil, fmt.Errorf("build Atlas query index: relation expansion count differs from map header")
 	}
+	// Appending in canonical relation order keeps both adjacency lists sorted
+	// and unique, ready for query-local merging without another sort.
 	for relationIndex, relation := range index.relations {
 		index.outgoing[relation.Source] = append(index.outgoing[relation.Source], relationIndex)
 		if relation.Target != nil && relation.Target.Symbol != "" {
@@ -865,22 +867,6 @@ func selectionRecordCost(value any) (uint64, error) {
 		return 0, fmt.Errorf("measure Atlas query record: %w", err)
 	}
 	return uint64(len(encoded)) + 1, nil
-}
-
-func (index *QueryIndex) relationIDs(symbol string, direction QueryDirection, filter map[RelationKind]struct{}) []int {
-	result := make([]int, 0, len(index.outgoing[symbol])+len(index.incoming[symbol]))
-	if direction == DirectionOutgoing || direction == DirectionBoth {
-		result = append(result, index.outgoing[symbol]...)
-	}
-	if direction == DirectionIncoming || direction == DirectionBoth {
-		result = append(result, index.incoming[symbol]...)
-	}
-	slices.Sort(result)
-	result = slices.Compact(result)
-	return slices.DeleteFunc(result, func(position int) bool {
-		_, found := filter[index.relations[position].Kind]
-		return !found
-	})
 }
 
 func (index *QueryIndex) frontierRelations(
