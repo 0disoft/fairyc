@@ -155,12 +155,24 @@ func (workspace Workspace) PackageIdentities() (map[hir.PackageID]packagegraph.I
 // package coordinates. Coordinates are public-link namespaces, never exact source identities.
 func (workspace Workspace) PackageCoordinates() (map[hir.PackageID]packagegraph.CoordinateID, error) {
 	coordinates := make(map[hir.PackageID]packagegraph.CoordinateID, len(workspace.Resolution.InstanceClasses))
+	if len(workspace.Resolution.InstanceClasses) == 0 {
+		return coordinates, nil
+	}
+	// Workspace slices can change between calls. Index this snapshot only, keeping
+	// the first matching node just as the previous linear lookup did.
+	nodes := make(map[string]*packagegraph.Node, len(workspace.Graph.Nodes))
+	for index := range workspace.Graph.Nodes {
+		node := &workspace.Graph.Nodes[index]
+		if nodes[node.ID] == nil {
+			nodes[node.ID] = node
+		}
+	}
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		node, found := workspace.graphNode(class.Members[0])
-		if !found {
+		node := nodes[class.Members[0]]
+		if node == nil {
 			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
 		}
 		coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.CoordinateOf(node.Identity))
@@ -354,15 +366,6 @@ func (workspace Workspace) instance(nodeID string) (Instance, bool) {
 		}
 	}
 	return Instance{}, false
-}
-
-func (workspace Workspace) graphNode(nodeID string) (packagegraph.Node, bool) {
-	for _, node := range workspace.Graph.Nodes {
-		if node.ID == nodeID {
-			return node, true
-		}
-	}
-	return packagegraph.Node{}, false
 }
 
 // RootPackageID returns the disposable semantic package number assigned to the one root graph
