@@ -47,6 +47,7 @@ func ComputeGeneric(ordinary Descriptor, templates []GenericTemplate) (GenericHa
 	writeString(&encoded, HashEncoding)
 	encoded.Write(base[:])
 	writeUint64(&encoded, uint64(len(templates)))
+	var ordinaryNames map[string]struct{}
 	for i, template := range templates {
 		module, exists := modules[template.Module]
 		if !exists || template.Name == "" || template.Closure.IsZero() {
@@ -55,10 +56,31 @@ func ComputeGeneric(ordinary Descriptor, templates []GenericTemplate) (GenericHa
 		if i > 0 && template.Module == templates[i-1].Module && template.Name == templates[i-1].Name {
 			return GenericHash{}, fmt.Errorf("duplicate public generic template")
 		}
-		for _, item := range module.Items {
-			if item.Name == template.Name {
-				return GenericHash{}, fmt.Errorf("generic template conflicts with ordinary public item")
+		// Sorted templates visit each module contiguously. Small groups keep a
+		// bounded scan; larger groups share one name index for this module only.
+		if i == 0 || template.Module != templates[i-1].Module {
+			ordinaryNames = nil
+			const indexMin = 64
+			if len(module.Items) >= indexMin && i+indexMin-1 < len(templates) && templates[i+indexMin-1].Module == template.Module {
+				ordinaryNames = make(map[string]struct{}, len(module.Items))
+				for _, item := range module.Items {
+					ordinaryNames[item.Name] = struct{}{}
+				}
 			}
+		}
+		conflict := false
+		if ordinaryNames != nil {
+			_, conflict = ordinaryNames[template.Name]
+		} else {
+			for _, item := range module.Items {
+				if item.Name == template.Name {
+					conflict = true
+					break
+				}
+			}
+		}
+		if conflict {
+			return GenericHash{}, fmt.Errorf("generic template conflicts with ordinary public item")
 		}
 		writeString(&encoded, template.Module)
 		writeString(&encoded, template.Name)
