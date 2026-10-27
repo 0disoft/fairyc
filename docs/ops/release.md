@@ -79,6 +79,34 @@ Verifier regression check, using an already prepared bundle:
 node tools/windows-portability/test.mjs --bundle <extracted-bundle>
 ```
 
+### Reported GRAM13 validation (2026-10-27)
+
+The user reported successful validation on a separate physical laptop, GRAM13.
+The original receiving-host JSON files are not present on the build host, so this
+entry records the user's report rather than an independently inspected remote receipt.
+
+- Candidate source revision: `1acc298e99182f530e8f1ba480c701dd8873e033`.
+- Compiler SHA-256: `65c9c80834d9d858f3c34a95e76fb90e3ed651e83b54390e497992755bbd5e9a`.
+  The reported pre/post-run hashes match the retained build-host candidate receipt.
+- Transfer-fixture ZIP SHA-256: `24ef3776ba42b7164e1f6d0a6769379f4db6e14ba094ea930c9148df0a00403b`
+  (build-host preparation identity; distinct from the compiler preview ZIP).
+- Host: Windows 11 Pro 24H2, build `26100.9711`, x64; MSVC tools `14.51.36231`
+  (`cl.exe 19.51.36248.0`) and Windows SDK `10.0.26100.0` installed.
+- Transfer execution: ZIP checksum and nine internal file hashes/sizes matched;
+  all seven verifier steps passed, with exit code 0 and an empty child PATH.
+  This covers starter creation/checks/semantic tests and both prebuilt native probes.
+- Fresh native compilation: all eleven commands returned 0. Both development and
+  release passed native tests (one test each), built and linked new executables,
+  directly executed those executables, and passed `fairyc run`.
+- Receiving-host evidence: `fairyc-portability-verify-20261027-175035-results/portability-receipt.json`
+  and `fairyc-native-verify-20261027-181502/results.json` under the laptop's Downloads;
+  each directory also retains `REPORT.ko.txt`, and the native directory retains executables.
+
+These are separate-host execution and fresh-compilation results with development tools
+installed. They do not establish execution on a machine without MSVC/SDK, change
+`cleanMachineEvidence`, or approve publication. Exact-candidate CI and public download
+and private security-report route checks remain required before the next publication.
+
 ## Owners
 
 - Primary owner: the `0disoft/fairyc` repository administrator performing the release
@@ -100,9 +128,10 @@ node tools/windows-portability/test.mjs --bundle <extracted-bundle>
   report route. Public issues are for nonsensitive bugs only.
 - Release blocker status: any failed user-path step, relevant exact-commit CI
   failure, artifact hash mismatch, or unavailable private security-report route.
-- Remaining operational risk: no clean user-machine installation proof yet;
-  the first preview requires the user's separate MSVC installation and offers
-  no compatibility or response-time promise.
+- Remaining operational risk: separate-host execution and fresh native compilation
+  on GRAM13 are user-reported above; execution without development tools remains
+  unverified. The first preview requires the user's separate MSVC installation and
+  offers no compatibility or response-time promise.
 
 Only publish after the gates above have been checked. After publication,
 download the ZIP from the public page, compare its hash with the approved
