@@ -546,6 +546,7 @@ func (index *QueryIndex) Around(symbolID string, request RelationRequest) (Aroun
 	for depth := 0; depth < request.Budget.MaxDepth && len(frontier) != 0 && !exhausted; depth++ {
 		candidateRelations := index.frontierRelations(frontier, request.Direction, filter, seenRelations)
 		nextSet := make(map[int]struct{})
+		var frontierSymbols map[string]struct{}
 		for _, relationIndex := range candidateRelations {
 			relation := cloneQueryRelation(index.relations[relationIndex])
 			accepted, code, reserveErr := selection.reserveRelation(relation)
@@ -559,7 +560,15 @@ func (index *QueryIndex) Around(symbolID string, request RelationRequest) (Aroun
 			}
 			result.Relations = append(result.Relations, relation)
 			seenRelations[relationIndex] = struct{}{}
-			neighbors := index.adjacentNodes(frontier, relation, request.Direction)
+			// Membership is unchanged within this depth. Build it once, only
+			// after a relation fits the budget, and discard it at the next depth.
+			if frontierSymbols == nil {
+				frontierSymbols = make(map[string]struct{}, len(frontier))
+				for _, position := range frontier {
+					frontierSymbols[index.nodes[position].symbol.Visible] = struct{}{}
+				}
+			}
+			neighbors := index.adjacentNodes(frontierSymbols, relation, request.Direction)
 			for _, neighbor := range neighbors {
 				if _, seen := seenNodes[neighbor]; seen {
 					continue
@@ -889,11 +898,7 @@ func (index *QueryIndex) frontierRelations(
 	return result
 }
 
-func (index *QueryIndex) adjacentNodes(frontier []int, relation QueryRelation, direction QueryDirection) []int {
-	frontierSymbols := make(map[string]struct{}, len(frontier))
-	for _, position := range frontier {
-		frontierSymbols[index.nodes[position].symbol.Visible] = struct{}{}
-	}
+func (index *QueryIndex) adjacentNodes(frontierSymbols map[string]struct{}, relation QueryRelation, direction QueryDirection) []int {
 	set := make(map[int]struct{}, 2)
 	if (direction == DirectionOutgoing || direction == DirectionBoth) && relation.Target != nil && relation.Target.Symbol != "" {
 		if _, found := frontierSymbols[relation.Source]; found {
