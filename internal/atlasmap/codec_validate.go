@@ -28,17 +28,20 @@ func validatePartitionVersion(partition Partition, schema string) error {
 	if !generic && len(partition.data.specializations) != 0 {
 		return fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}
-	header := partition.Header()
+	// Validation only reads the partition's private, immutable records. Public
+	// getters detach these records for callers; cloning them here adds a full
+	// payload copy to every encode, decode, and query-index validation.
+	header := partition.data.header
 	instanceUIDs, coordinateUIDs, err := validateTransportHeader(header, schema)
 	if err != nil {
 		return err
 	}
-	files := partition.Files()
-	modules := partition.Modules()
-	symbols := partition.Symbols()
-	declarations := partition.Declarations()
-	functions := partition.Functions()
-	completeness := partition.Completeness()
+	files := partition.data.files
+	modules := partition.data.modules
+	symbols := partition.data.symbols
+	declarations := partition.data.declarations
+	functions := partition.data.functions
+	completeness := partition.data.completeness
 	relations := countRelations(functions)
 	for _, item := range partition.data.specializations {
 		relations += relationCount(item.Function)
