@@ -3,7 +3,6 @@ package languageserver
 import (
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/lexer"
-	"sort"
 	"strings"
 )
 
@@ -49,10 +48,10 @@ func (s *server) completion(d *document, offset int) []Completion {
 	if start > 0 && d.Text[start-1] == '.' {
 		return out
 	}
-	symbols := map[string]Completion{}
+	symbols := completionCandidates{}
 	add := func(label string, kind int, detail string) {
 		if strings.HasPrefix(label, prefix) {
-			symbols[label] = Completion{label, kind, detail}
+			symbols.add(Completion{label, kind, detail})
 		}
 	}
 	words, _ := lexer.EditorVocabulary()
@@ -90,7 +89,7 @@ func (s *server) completion(d *document, offset int) []Completion {
 				aliasStart--
 			}
 			alias := string(d.Text[aliasStart:aliasEnd])
-			symbols = map[string]Completion{}
+			symbols = completionCandidates{}
 			if local != nil {
 				for _, imported := range local.Imports {
 					if imported.Alias == alias {
@@ -118,14 +117,7 @@ func (s *server) completion(d *document, offset int) []Completion {
 			}
 		}
 	}
-	for _, item := range symbols {
-		out = append(out, item)
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Label < out[j].Label })
-	if len(out) > 256 {
-		out = out[:256]
-	}
-	return out
+	return symbols.sorted()
 }
 func moduleSymbols(m *ast.Module, publicOnly bool, add func(string, int, string)) {
 	for _, f := range m.Functions {
