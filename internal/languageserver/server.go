@@ -18,6 +18,7 @@ type document struct {
 	View            *analysis
 	LastClean       *analysis
 	completionIndex *completionContextIndex
+	positionIndex   *positionIndex
 }
 type server struct {
 	ctx                   context.Context
@@ -142,6 +143,7 @@ func (s *server) handle(m message) error {
 		d.Text = []byte(p.ContentChanges[0].Text)
 		d.Version = p.TextDocument.Version
 		d.completionIndex = nil
+		d.positionIndex = nil
 		return s.recheck()
 	case "textDocument/didSave":
 		return s.recheck()
@@ -166,7 +168,7 @@ func (s *server) handle(m message) error {
 		if d == nil {
 			return bad("document is not open")
 		}
-		offset, ok := positionByte(d.Text, p.Position)
+		offset, ok := d.positionByte(p.Position)
 		if !ok {
 			return bad("invalid UTF-16 position")
 		}

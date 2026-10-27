@@ -13,7 +13,7 @@ type positionCheckpoint struct {
 	position Position
 }
 
-// A positionIndex belongs to one immutable source in one analysis snapshot.
+// A positionIndex belongs to one immutable source in an analysis or document snapshot.
 // It extends only as far as requested, so a diagnostic at byte zero is cheap.
 type positionIndex struct {
 	text        []byte
@@ -61,6 +61,34 @@ func (index *positionIndex) bytePosition(offset int) Position {
 	}
 	position.Line += checkpoint.position.Line
 	return position
+}
+
+// positionByte reuses sparse checkpoints for incoming UTF-16 request positions.
+// Start before the requested line: positionByte's column admission stops at the
+// first CR, even when it is not followed by LF, unlike bytePosition's accounting.
+func (index *positionIndex) positionByte(p Position) (int, bool) {
+	if p.Line < 0 || p.Character < 0 {
+		return 0, false
+	}
+	for index.scanned < len(index.text) && index.position.Line < p.Line {
+		index.bytePosition(min(len(index.text), index.scanned+positionCheckpointBytes))
+	}
+	point := max(0, sort.Search(len(index.checkpoints), func(i int) bool {
+		return index.checkpoints[i].position.Line >= p.Line
+	})-1)
+	checkpoint := index.checkpoints[point]
+	offset, ok := positionByte(index.text[checkpoint.offset:], Position{Line: p.Line - checkpoint.position.Line, Character: p.Character})
+	if !ok {
+		return 0, false
+	}
+	return checkpoint.offset + offset, true
+}
+
+func (d *document) positionByte(p Position) (int, bool) {
+	if d.positionIndex == nil {
+		d.positionIndex = newPositionIndex(d.Text)
+	}
+	return d.positionIndex.positionByte(p)
 }
 
 func (a *analysis) sourceRange(filename string, text []byte, start, end int) Range {
