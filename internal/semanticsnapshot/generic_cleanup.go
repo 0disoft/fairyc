@@ -15,11 +15,10 @@ func buildGenericCleanupSummaries(result compiler.Result, implementations map[De
 		if implementation.Aggregate == nil || key.Kind != DeclarationResource {
 			continue
 		}
-		for _, info := range metadata {
-			if info.instance == key.PackageInstance {
-				owners[genericNominalKey(TypeRef{PackageCoordinate: info.coord, Name: key.Module + "::" + key.Name})] = key
-			}
-		}
+		// joinGenericImplementations verified this nominal type, including its
+		// owning coordinate, against the original declaration's signature.
+		coordinate := implementation.Aggregate.Type.PackageCoordinate
+		owners[genericNominalKey(TypeRef{PackageCoordinate: coordinate, Name: key.Module + "::" + key.Name})] = key
 	}
 	program := result.MIR
 	program.Functions = nil
