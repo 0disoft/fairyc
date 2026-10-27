@@ -460,32 +460,51 @@ func Encode(value Descriptor) ([]byte, error) {
 		return nil, err
 	}
 	var encoded bytes.Buffer
+	writeDescriptor(&encoded, value, nil)
+	return encoded.Bytes(), nil
+}
+
+// Both consumers write the same canonical bytes. Hashing drains at module/item
+// boundaries, reusing storage sized to the largest chunk rather than the package.
+func writeDescriptor(encoded *bytes.Buffer, value Descriptor, drain func()) {
 	encoded.WriteString(interfaceDomain)
 	encoded.WriteByte(0)
 	encoded.WriteByte(5)
-	writeUint64(&encoded, uint64(len(value.StateLayouts)))
+	writeUint64(encoded, uint64(len(value.StateLayouts)))
 	for _, layout := range value.StateLayouts {
-		writeString(&encoded, layout.ContractUID)
+		writeString(encoded, layout.ContractUID)
 		encoded.Write(layout.Hash[:])
 	}
-	writeUint64(&encoded, uint64(len(value.Modules)))
+	writeUint64(encoded, uint64(len(value.Modules)))
 	for _, module := range value.Modules {
-		writeString(&encoded, module.Path)
-		writeUint64(&encoded, uint64(len(module.Items)))
+		writeString(encoded, module.Path)
+		writeUint64(encoded, uint64(len(module.Items)))
+		if drain != nil {
+			drain()
+		}
 		for _, item := range module.Items {
-			writeItem(&encoded, item)
+			writeItem(encoded, item)
+			if drain != nil {
+				drain()
+			}
 		}
 	}
-	return encoded.Bytes(), nil
 }
 
 // Compute validates and hashes one canonical descriptor.
 func Compute(value Descriptor) (Hash, error) {
-	encoded, err := Encode(value)
-	if err != nil {
+	if err := validateDescriptor(value); err != nil {
 		return Hash{}, err
 	}
-	return sha256.Sum256(encoded), nil
+	var encoded bytes.Buffer
+	digest := sha256.New()
+	writeDescriptor(&encoded, value, func() {
+		_, _ = digest.Write(encoded.Bytes())
+		encoded.Reset()
+	})
+	var result Hash
+	digest.Sum(result[:0])
+	return result, nil
 }
 
 // ComputePackages extracts and hashes one exact public interface per requested build-local package.
