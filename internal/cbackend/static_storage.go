@@ -22,11 +22,21 @@ type staticStorageSpec struct {
 
 func collectStaticStorage(functions []mir.Function, spec staticStorageSpec) (map[string]string, error) {
 	result := make(map[string]string)
+	// Literal contents can recur across operands and functions, including in
+	// separately decoded strings. Cache only within this collection; still check
+	// each operand's type before reusing content validation and its digest.
+	seen := make(map[string]struct{})
 	record := func(function string, operand mir.Operand) error {
 		if operand.Kind != spec.operandKind {
 			return nil
 		}
-		if operand.Type != spec.valueType || spec.valid != nil && !spec.valid(operand.StaticData) {
+		if operand.Type != spec.valueType {
+			return fmt.Errorf("collect %s storage in %s: operand has invalid static storage", spec.label, function)
+		}
+		if _, found := seen[operand.StaticData]; found {
+			return nil
+		}
+		if spec.valid != nil && !spec.valid(operand.StaticData) {
 			return fmt.Errorf("collect %s storage in %s: operand has invalid static storage", spec.label, function)
 		}
 		symbol := staticStorageSymbol(spec.symbolPrefix, operand.StaticData)
@@ -34,6 +44,7 @@ func collectStaticStorage(functions []mir.Function, spec staticStorageSpec) (map
 			return fmt.Errorf("collect %s storage in %s: digest collision for %s", spec.label, function, symbol)
 		}
 		result[symbol] = operand.StaticData
+		seen[operand.StaticData] = struct{}{}
 		return nil
 	}
 	recordAll := func(function string, operands []mir.Operand) error {
