@@ -107,6 +107,28 @@ installed. They do not establish execution on a machine without MSVC/SDK, change
 `cleanMachineEvidence`, or approve publication. Exact-candidate CI and public download
 and private security-report route checks remain required before the next publication.
 
+### Public distribution check (2026-10-27)
+
+The build host checked GitHub without changing repository settings or publishing artifacts:
+
+- The repository is public; the authenticated private-vulnerability-reporting API returns
+  `enabled: true`. The unauthenticated [security overview](https://github.com/0disoft/fairyc/security)
+  exposes the private report link. Following it anonymously reaches GitHub's login page
+  with HTTP 200; no report was submitted and the authenticated submission form was not tested.
+- The published [v0.1.0-preview.1](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)
+  targets `682d6591d8db136e11e52ec5c01bdba454d9600e`. Anonymous downloads of its ZIP
+  and checksum sidecar both return HTTP 200. The 4,648,779-byte ZIP matches its sidecar
+  and GitHub asset digest: `d1dd38621691a92f99091f8b98d044cdf46739f0842a3264f9b9ff1ebe3fa73c`.
+  These checks concern that older published artifact, not the GRAM13-tested candidate.
+- Remote `main` is `c7355d733adb609f894db16b268b69da9e11d31f`. The commit API
+  reports no commit for candidate `1acc298e99182f530e8f1ba480c701dd8873e033` (HTTP 422),
+  and its workflow-run query returns no runs. The candidate has not been pushed or published;
+  its exact-commit Windows CI gate remains pending.
+
+Run CI on the candidate revision itself before publishing its retained ZIP. A push whose
+tip includes later documentation commits runs CI on that newer tip and does not by itself
+supply an exact-candidate workflow result. No workflow was dispatched during this check.
+
 ## Owners
 
 - Primary owner: the `0disoft/fairyc` repository administrator performing the release
