@@ -549,6 +549,7 @@ func contextForeignIndices(processContext mir.Program, stable ContextDescriptor,
 
 func bindingsForStableContext(processContext mir.Program, stable ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.SymbolID]FunctionID, error) {
 	bindings := make(map[hir.SymbolID]FunctionID)
+	var resourceIndices map[string]int
 	for _, resource := range processContext.ResourceTypes {
 		if resource.DropSymbol == hir.NoSymbol {
 			continue
@@ -557,8 +558,18 @@ func bindingsForStableContext(processContext mir.Program, stable ContextDescript
 		if err != nil {
 			return nil, err
 		}
-		index := slices.IndexFunc(stable.Resources, func(candidate ContextResource) bool { return candidate.Type == stableTypeName })
-		if index < 0 || stable.Resources[index].DropFunctionID == (FunctionID{}) {
+		if resourceIndices == nil {
+			resourceIndices = make(map[string]int, len(stable.Resources))
+			for index, candidate := range stable.Resources {
+				// The descriptor has not yet been validated here. Preserve the
+				// scan's first match even for reordered or duplicate entries.
+				if _, found := resourceIndices[candidate.Type]; !found {
+					resourceIndices[candidate.Type] = index
+				}
+			}
+		}
+		index, found := resourceIndices[stableTypeName]
+		if !found || stable.Resources[index].DropFunctionID == (FunctionID{}) {
 			return nil, fmt.Errorf("resource %q has no stable drop-function binding", resource.Type)
 		}
 		bindings[resource.DropSymbol] = stable.Resources[index].DropFunctionID
