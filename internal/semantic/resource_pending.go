@@ -15,13 +15,13 @@ func (a *analyzer) retainResourcePending(typ hir.Type, mode resourceUse) {
 	}
 }
 
-func (a *analyzer) checkResourcePendingEffects(at hir.Span, scopeDepth int, seen map[*symbol]struct{}) {
+func (a *analyzer) checkResourcePendingEffects(at hir.Span, scopeDepth int, seen map[*symbol]struct{}, checkedTypes map[hir.Type]struct{}) {
 	if scopeDepth < 0 {
 		return
 	}
 	for _, value := range a.resourcePending {
 		if value.scopeDepth >= scopeDepth {
-			a.checkResourceValueEffectsOnce(&symbol{typ: value.typ}, at, seen)
+			a.checkResourceValueEffectsOnce(&symbol{typ: value.typ}, at, seen, checkedTypes)
 		}
 	}
 }

@@ -758,20 +758,27 @@ func (a *analyzer) checkResourceCleanupEffects(environment resourceEnvironment, 
 		return compareSpan(span(left.source, left.declaration), span(right.source, right.declaration))
 	})
 	seen := make(map[*symbol]struct{})
+	checkedTypes := make(map[hir.Type]struct{})
 	for _, value := range values {
-		a.checkResourceValueEffectsOnce(value, at, seen)
+		a.checkResourceValueEffectsOnce(value, at, seen, checkedTypes)
 	}
-	a.checkResourcePendingEffects(at, pendingScope, seen)
+	a.checkResourcePendingEffects(at, pendingScope, seen, checkedTypes)
 }
 
 func (a *analyzer) checkResourceValueEffects(value *symbol, at hir.Span) {
-	a.checkResourceValueEffectsOnce(value, at, make(map[*symbol]struct{}))
+	a.checkResourceValueEffectsOnce(value, at, make(map[*symbol]struct{}), make(map[hir.Type]struct{}))
 }
 
-func (a *analyzer) checkResourceValueEffectsOnce(value *symbol, at hir.Span, seen map[*symbol]struct{}) {
+func (a *analyzer) checkResourceValueEffectsOnce(value *symbol, at hir.Span, seen map[*symbol]struct{}, checkedTypes map[hir.Type]struct{}) {
 	if value == nil {
 		return
 	}
+	// A cleanup batch has one source span and caller authority. Requirements
+	// depend on type, and owner diagnostics are already unique within the batch.
+	if _, checked := checkedTypes[value.typ]; checked {
+		return
+	}
+	checkedTypes[value.typ] = struct{}{}
 	blockers := a.nonDroppableResourceOwners(value.typ, make(map[hir.Type]struct{}))
 	if len(blockers) > 0 {
 		for _, owner := range blockers {
