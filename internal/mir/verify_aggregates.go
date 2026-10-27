@@ -178,30 +178,9 @@ func containsDefinedResource(value hir.Type, definitions map[hir.Type]*ResourceT
 	if len(definitions) == 0 {
 		return false
 	}
-	// Compound identities can share children. Visit each identity once, with an
-	// explicit stack so both shared graphs and deep chains stay bounded. Keep this
-	// search local: resource definitions may change before the next verification.
-	// Keep the usual shallow tagged shapes on the stack; deeper graphs can grow.
-	inline := [16]hir.Type{value}
-	pending := inline[:1]
-	seen := make(map[hir.Type]struct{})
-	for len(pending) > 0 {
-		current := pending[len(pending)-1]
-		pending = pending[:len(pending)-1]
-		if definitions[current] != nil {
-			return true
-		}
-		if _, duplicate := seen[current]; duplicate {
-			continue
-		}
-		seen[current] = struct{}{}
-		if element, option := hir.OptionElement(current); option {
-			pending = append(pending, element)
-		} else if success, failure, result := hir.ResultElements(current); result {
-			pending = append(pending, failure, success)
-		}
-	}
-	return false
+	return hir.ContainsTaggedType(value, func(current hir.Type) bool {
+		return definitions[current] != nil
+	})
 }
 
 func resourceFieldNames(fields []ResourceField) []string {

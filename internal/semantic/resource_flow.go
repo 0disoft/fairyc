@@ -698,11 +698,18 @@ func (a *analyzer) isResource(value hir.Type) bool {
 	if _, found := a.resourceTypes[value]; found {
 		return true
 	}
-	if element, option := hir.OptionElement(value); option {
-		return a.isResource(element)
+	if len(a.resourceTypes) == 0 {
+		return false
 	}
-	success, failure, result := hir.ResultElements(value)
-	return result && (a.isResource(success) || a.isResource(failure))
+	switch value.Descriptor().Kind {
+	case hir.TypeKindOption, hir.TypeKindResult:
+		return hir.ContainsTaggedType(value, func(current hir.Type) bool {
+			_, found := a.resourceTypes[current]
+			return found
+		})
+	default:
+		return false
+	}
 }
 
 func (a *analyzer) beginResourceEffects(caller, exempt *symbol) {
