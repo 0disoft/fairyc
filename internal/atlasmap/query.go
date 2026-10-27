@@ -928,7 +928,29 @@ func (index *QueryIndex) hasUnselectedExpansion(
 	filter map[RelationKind]struct{},
 	seen map[int]struct{},
 ) bool {
-	return len(index.frontierRelations(frontier, direction, filter, seen)) != 0
+	// This probe only decides whether to report a depth-limit omission. Unlike
+	// traversal, it needs neither a sorted candidate list nor deduplication.
+	unselected := func(relations []int) bool {
+		for _, relation := range relations {
+			if _, selected := seen[relation]; selected {
+				continue
+			}
+			if _, included := filter[index.relations[relation].Kind]; included {
+				return true
+			}
+		}
+		return false
+	}
+	for _, position := range frontier {
+		symbol := index.nodes[position].symbol.Visible
+		if (direction == DirectionOutgoing || direction == DirectionBoth) && unselected(index.outgoing[symbol]) {
+			return true
+		}
+		if (direction == DirectionIncoming || direction == DirectionBoth) && unselected(index.incoming[symbol]) {
+			return true
+		}
+	}
+	return false
 }
 
 func filterOmissions(included []RelationKind) []QueryOmission {
