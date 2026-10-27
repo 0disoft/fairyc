@@ -4,6 +4,7 @@ import "github.com/0disoft/fairyc/internal/admission"
 
 func verifyStorageOperations(function *Function, properties typeProperties, capabilities admission.Capabilities) []VerificationError {
 	var failures []VerificationError
+	var provenance map[UnsafeOperation]uint8
 	for _, block := range function.Blocks {
 		for index, operation := range block.Operations {
 			var admitted, valid, transfer bool
@@ -36,8 +37,13 @@ func verifyStorageOperations(function *Function, properties typeProperties, capa
 			if !valid {
 				failures = append(failures, VerificationError{Code: CodeStorageShape, Entity: entity, Detail: "private " + operation.Kind.String() + " has an invalid shape or element type"})
 			}
-			if transfer && !validStorageTransferProvenance(function, operation) {
-				failures = append(failures, VerificationError{Code: CodeStorageProvenance, Entity: entity, Detail: "private " + operation.Kind.String() + " lacks matching unsafe provenance"})
+			if transfer {
+				if provenance == nil {
+					provenance = indexStorageTransferProvenance(function)
+				}
+				if !validStorageTransferProvenance(provenance, operation) {
+					failures = append(failures, VerificationError{Code: CodeStorageProvenance, Entity: entity, Detail: "private " + operation.Kind.String() + " lacks matching unsafe provenance"})
+				}
 			}
 		}
 	}

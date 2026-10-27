@@ -21,20 +21,26 @@ func validStorageTakeShape(op Operation) bool {
 		!op.MovePayload && !op.FlagClearedFirst && op.SourceForm == "" && op.ExitKind == ""
 }
 
-func validStorageTransferProvenance(function *Function, op Operation) bool {
+// Index exact provenance tuples, retaining duplicate rejection without allowing
+// a count to wrap back to one. The index belongs to one verification call.
+func indexStorageTransferProvenance(function *Function) map[UnsafeOperation]uint8 {
+	index := make(map[UnsafeOperation]uint8, len(function.UnsafeOperations))
+	for _, entry := range function.UnsafeOperations {
+		if index[entry] < 2 {
+			index[entry]++
+		}
+	}
+	return index
+}
+
+func validStorageTransferProvenance(index map[UnsafeOperation]uint8, op Operation) bool {
 	if op.Entity != sourceEntity(op.Kind.String(), op.Span) || op.UnsafeScope.Source == "" ||
 		!sameSpanSource(op.UnsafeScope, op.Span) || op.UnsafeScope.StartByte > op.Span.StartByte ||
 		op.UnsafeScope.EndByte < op.Span.EndByte {
 		return false
 	}
-	count := 0
-	for _, entry := range function.UnsafeOperations {
-		if entry.Entity == op.Entity && entry.SourceSpanEntity == sourceEntity("span", op.Span) &&
-			entry.ScopeEntity == sourceEntity("unsafe-scope", op.UnsafeScope) {
-			count++
-		}
-	}
-	return count == 1
+	return index[UnsafeOperation{Entity: op.Entity, SourceSpanEntity: sourceEntity("span", op.Span),
+		ScopeEntity: sourceEntity("unsafe-scope", op.UnsafeScope)}] == 1
 }
 
 func (l *functionLowerer) lowerStorageTake(expression *hir.Expression) (Operand, error) {
