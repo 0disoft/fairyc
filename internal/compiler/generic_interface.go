@@ -100,6 +100,28 @@ func publishGenericAnalysis(input semantic.PackageInput, coordinates map[hir.Pac
 	for _, name := range expansion.GeneratedNames {
 		generated[name] = true
 	}
+	// Group source facts once; Extract still owns validation and detached descriptors.
+	// Keep order within each owner and publish in input.Files order as before.
+	sources := make(map[hir.PackageID]*hir.Package)
+	for _, file := range input.Files {
+		if sources[file.Package] == nil {
+			sources[file.Package] = &hir.Package{}
+		}
+	}
+	for _, module := range checked.HIR.Modules {
+		if selected := sources[module.Package]; selected != nil {
+			selected.Modules = append(selected.Modules, module)
+		}
+	}
+	for _, layout := range checked.HIR.StateLayouts {
+		if selected := sources[layout.Package]; selected != nil {
+			selected.StateLayouts = append(selected.StateLayouts, layout)
+		}
+	}
+	templatesByOwner := make(map[genericplan.PackageID][]moduleinterface.GenericTemplate)
+	for _, template := range expansion.Templates {
+		templatesByOwner[template.Owner] = append(templatesByOwner[template.Owner], moduleinterface.GenericTemplate{Module: template.Module, Name: template.Name, Closure: template.Closure})
+	}
 	interfaces := map[hir.PackageID]moduleinterface.GenericHash{}
 	ordinary := map[hir.PackageID]moduleinterface.Hash{}
 	specializations := map[hir.PackageID][]genericplan.SpecializationID{}
@@ -107,21 +129,15 @@ func publishGenericAnalysis(input semantic.PackageInput, coordinates map[hir.Pac
 		if _, done := interfaces[file.Package]; done {
 			continue
 		}
-		descriptor, err := moduleinterface.Extract(checked.HIR, file.Package, coordinates)
+		descriptor, err := moduleinterface.Extract(*sources[file.Package], file.Package, coordinates)
 		if err != nil {
 			return GenericAnalysis{}, err
 		}
 		for i := range descriptor.Modules {
 			descriptor.Modules[i].Items = slices.DeleteFunc(descriptor.Modules[i].Items, func(item moduleinterface.Item) bool { return generated[item.Name] })
 		}
-		var templates []moduleinterface.GenericTemplate
 		owner := genericPackageOwner(coordinates[file.Package])
-		for _, template := range expansion.Templates {
-			if template.Owner == owner {
-				templates = append(templates, moduleinterface.GenericTemplate{Module: template.Module, Name: template.Name, Closure: template.Closure})
-			}
-		}
-		hash, err := moduleinterface.ComputeGeneric(descriptor, templates)
+		hash, err := moduleinterface.ComputeGeneric(descriptor, templatesByOwner[owner])
 		if err != nil {
 			return GenericAnalysis{}, err
 		}
