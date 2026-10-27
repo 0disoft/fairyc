@@ -292,6 +292,25 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 // cost. Feature instances reuse identities only within this call, never across source edits.
 func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 	result := make([]SemanticFile, 0)
+	if len(workspace.Resolution.InstanceClasses) == 0 {
+		return result, nil
+	}
+	// Index only this call's mutable catalogs, preserving first-match behavior.
+	// File identity reuse below still revalidates source bytes on every call.
+	instances := make(map[string]*Instance, len(workspace.Instances))
+	for index := range workspace.Instances {
+		instance := &workspace.Instances[index]
+		if instances[instance.NodeID] == nil {
+			instances[instance.NodeID] = instance
+		}
+	}
+	packages := make(map[string]*Package, len(workspace.Packages))
+	for index := range workspace.Packages {
+		loaded := &workspace.Packages[index]
+		if packages[loaded.Path] == nil {
+			packages[loaded.Path] = loaded
+		}
+	}
 	fileRanges := make(map[string][2]int)
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
@@ -301,8 +320,8 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 		if packageID == hir.DefaultPackage {
 			return nil, fmt.Errorf("workspace package id overflow")
 		}
-		mapping, found := workspace.instance(class.Members[0])
-		if !found {
+		mapping := instances[class.Members[0]]
+		if mapping == nil {
 			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
 		}
 		if span, found := fileRanges[mapping.PackagePath]; found {
@@ -313,8 +332,8 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 			}
 			continue
 		}
-		loaded, found := workspace.Package(mapping.PackagePath)
-		if !found {
+		loaded := packages[mapping.PackagePath]
+		if loaded == nil {
 			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
 		digestFiles := make([]packagecontent.File, 0, len(loaded.Sources))
