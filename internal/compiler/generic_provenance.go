@@ -60,17 +60,16 @@ func (value GenericProvenance) Specializations() []genericsource.SpecializationO
 func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]genericplan.PackageID, expansion genericsource.PackageExpansion, nominalTypes []semantic.NominalTypeFact) (GenericProvenance, error) {
 	result := GenericProvenance{nominalTypes: slices.Clone(nominalTypes)}
 	headers := make(map[*ast.Module]*genericHeaderIndex)
+	var sources map[genericSourceKey]genericSourceEntry
+	if len(expansion.Declarations) != 0 {
+		sources = indexGenericSources(input.Files, owners)
+	}
 	for _, declaration := range expansion.Declarations {
-		var file *semantic.File
-		for i := range input.Files {
-			candidate := &input.Files[i]
-			if owners[candidate.Package] == declaration.Owner && candidate.Module != nil && candidate.Module.Path == declaration.Module {
-				if file != nil {
-					return GenericProvenance{}, fmt.Errorf("ambiguous generic declaration source")
-				}
-				file = candidate
-			}
+		source := sources[genericSourceKey{declaration.Owner, declaration.Module}]
+		if source.ambiguous {
+			return GenericProvenance{}, fmt.Errorf("ambiguous generic declaration source")
 		}
+		file := source.file
 		if file == nil || file.Path == "" || !declaration.Span.Valid(file.Module.SourceSize) || !declaration.NameSpan.Valid(file.Module.SourceSize) {
 			return GenericProvenance{}, fmt.Errorf("generic declaration has no exact source")
 		}
