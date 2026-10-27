@@ -56,12 +56,16 @@ func prepareTaggedTypes(
 	engine *layout.Engine,
 ) ([]taggedCType, map[hir.Type]int, error) {
 	candidates := make(map[hir.Type]taggedCType)
+	// Payload support is fixed for this preparation pass. Remember rejected types
+	// too: shared Result branches must not repeatedly expand an unsupported graph.
+	considered := make(map[hir.Type]struct{})
 	var consider func(hir.Type)
 	consider = func(value hir.Type) {
 		value = canonicalCValueType(value)
-		if _, found := candidates[value]; found {
+		if _, found := considered[value]; found {
 			return
 		}
+		considered[value] = struct{}{}
 		if element, option := hir.OptionElement(value); option {
 			if isOptionI32(value) {
 				return
