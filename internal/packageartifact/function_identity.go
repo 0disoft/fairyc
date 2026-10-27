@@ -296,61 +296,89 @@ func logicalFunctionName(name string, owner hir.PackageID) (string, error) {
 }
 
 func stableType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {
-	if element, nominal := hir.StructSliceElement(value); nominal {
-		stable, err := stableType(element, coordinates)
-		if err != nil {
-			return "", err
-		}
-		return stable + "[]", nil
-	}
+	// Preserve the allocation-free path for the common scalar and builtin types.
 	if builtinType(value) {
 		return value.String(), nil
 	}
+	if value.Descriptor().Kind == hir.TypeKindNominal {
+		return stableNominalType(value, coordinates)
+	}
+	var output strings.Builder
+	if err := writeStableType(&output, value, coordinates); err != nil {
+		return "", err
+	}
+	return output.String(), nil
+}
+
+// Write children directly to one buffer. Returning a fresh child string at each
+// nesting level copies the same suffix repeatedly and makes deep types quadratic.
+func writeStableType(output *strings.Builder, value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) error {
+	if element, nominal := hir.StructSliceElement(value); nominal {
+		if err := writeStableType(output, element, coordinates); err != nil {
+			return err
+		}
+		output.WriteString("[]")
+		return nil
+	}
+	if builtinType(value) {
+		output.WriteString(value.String())
+		return nil
+	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
-		stable, err := stableType(element, coordinates)
-		if err != nil {
-			return "", err
-		}
 		if mutable {
-			return "ref mut " + stable, nil
+			output.WriteString("ref mut ")
+		} else {
+			output.WriteString("ref ")
 		}
-		return "ref " + stable, nil
+		return writeStableType(output, element, coordinates)
 	}
 	if element, mutable, ok := hir.RawPointerElement(value); ok {
-		stable, err := stableType(element, coordinates)
-		if err != nil {
-			return "", err
-		}
 		if mutable {
-			return "ptr mut " + stable, nil
+			output.WriteString("ptr mut ")
+		} else {
+			output.WriteString("ptr ")
 		}
-		return "ptr " + stable, nil
+		return writeStableType(output, element, coordinates)
 	}
 	if element, length, ok := hir.FixedArrayParts(value); ok {
-		stable, err := stableType(element, coordinates)
-		if err != nil {
-			return "", err
+		if err := writeStableType(output, element, coordinates); err != nil {
+			return err
 		}
-		return stable + "[" + strconv.FormatUint(length, 10) + "]", nil
+		output.WriteByte('[')
+		output.WriteString(strconv.FormatUint(length, 10))
+		output.WriteByte(']')
+		return nil
 	}
 	if element, ok := hir.OptionElement(value); ok {
-		stable, err := stableType(element, coordinates)
-		if err != nil {
-			return "", err
+		output.WriteString("Option<")
+		if err := writeStableType(output, element, coordinates); err != nil {
+			return err
 		}
-		return "Option<" + stable + ">", nil
+		output.WriteByte('>')
+		return nil
 	}
 	if success, failure, ok := hir.ResultElements(value); ok {
-		stableSuccess, err := stableType(success, coordinates)
-		if err != nil {
-			return "", err
+		output.WriteString("Result<")
+		if err := writeStableType(output, success, coordinates); err != nil {
+			return err
 		}
-		stableFailure, err := stableType(failure, coordinates)
-		if err != nil {
-			return "", err
+		output.WriteString(", ")
+		if err := writeStableType(output, failure, coordinates); err != nil {
+			return err
 		}
-		return "Result<" + stableSuccess + ", " + stableFailure + ">", nil
+		output.WriteByte('>')
+		return nil
 	}
+	stable, err := stableNominalType(value, coordinates)
+	if err != nil {
+		return err
+	}
+	output.WriteString(stable)
+	return nil
+}
+
+// Leaf nominal types keep the original direct projection without a builder.
+func stableNominalType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {
 	packageID, logicalName, ok := nominalTypeParts(value)
 	if !ok {
 		return "", fmt.Errorf("unsupported canonical type %q", value)
