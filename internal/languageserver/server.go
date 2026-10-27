@@ -12,11 +12,12 @@ import (
 )
 
 type document struct {
-	URI, Path string
-	Text      []byte
-	Version   int
-	View      *analysis
-	LastClean *analysis
+	URI, Path       string
+	Text            []byte
+	Version         int
+	View            *analysis
+	LastClean       *analysis
+	completionIndex *completionContextIndex
 }
 type server struct {
 	ctx                   context.Context
@@ -140,6 +141,7 @@ func (s *server) handle(m message) error {
 		}
 		d.Text = []byte(p.ContentChanges[0].Text)
 		d.Version = p.TextDocument.Version
+		d.completionIndex = nil
 		return s.recheck()
 	case "textDocument/didSave":
 		return s.recheck()

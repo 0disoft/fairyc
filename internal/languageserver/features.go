@@ -3,7 +3,6 @@ package languageserver
 import (
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/lexer"
-	"github.com/0disoft/fairyc/internal/source"
 	"sort"
 	"strings"
 )
@@ -41,11 +40,8 @@ func identifierByte(c byte) bool {
 }
 func (s *server) completion(d *document, offset int) []Completion {
 	out := []Completion{}
-	scanned := lexer.Lex(source.NewFile("main.fy", d.Text), source.NewBudget(source.DefaultLimits(), len(d.Text)))
-	for _, token := range scanned.Tokens {
-		if token.Span.StartByte < offset && offset < token.Span.EndByte && (token.Kind == lexer.String || token.Kind == lexer.ByteString || token.Kind == lexer.CString || token.Trivia == lexer.TriviaLineComment || token.Trivia == lexer.TriviaDocumentationLine || token.Trivia == lexer.TriviaBlockComment) {
-			return out
-		}
+	if d.blocksCompletion(offset) {
+		return out
 	}
 	start := offset
 	for start > 0 && identifierByte(d.Text[start-1]) {
