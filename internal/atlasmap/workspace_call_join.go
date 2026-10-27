@@ -177,14 +177,7 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 			}
 			targetNode := targetIndex.nodes[targetPosition]
 			if relation.Target.Specialization != "" {
-				found := false
-				for _, implementation := range targetNode.specializations {
-					if implementation.ID == relation.Target.Specialization {
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !targetNode.hasSpecialization(relation.Target.Specialization) {
 					return nil, fmt.Errorf("%w: call target implementation is absent from its exact declaration", ErrWorkspaceJoinIncomplete)
 				}
 			} else if len(targetNode.declaration.TypeParameters) != 0 {

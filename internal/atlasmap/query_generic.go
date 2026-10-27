@@ -1,6 +1,7 @@
 package atlasmap
 
 import (
+	"cmp"
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -40,6 +41,15 @@ func (index *QueryIndex) addSpecializations(values []semanticsnapshot.Specializa
 		node.specializations = append(node.specializations, facts)
 		index.relations = append(index.relations, relations...)
 	}
+}
+
+func (node *indexedQueryNode) hasSpecialization(id string) bool {
+	// newQueryIndex validates globally sorted, unique IDs before addSpecializations
+	// partitions them by declaration, preserving each node's sorted subsequence.
+	_, found := slices.BinarySearchFunc(node.specializations, id, func(value QuerySpecializationFacts, target string) int {
+		return cmp.Compare(value.ID, target)
+	})
+	return found
 }
 
 func (index *QueryIndex) specializationBodyFacts(summary semanticsnapshot.FunctionSummary, id, body string) (*QueryFunctionFacts, []QueryRelation) {
