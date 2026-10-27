@@ -108,9 +108,8 @@ func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 	if artifact.Coordinate == (packagegraph.CoordinateID{}) {
 		return fmt.Errorf("stable package MIR artifact has an empty PackageCoordinateId")
 	}
-	if err := ValidateContextDescriptor(artifact.Context); err != nil {
-		return err
-	}
+	// ComputeContextID validates the descriptor before hashing its canonical bytes.
+	// Keep that single trust boundary ahead of all body and import checks.
 	contextID, err := ComputeContextID(artifact.Context, ^uint64(0))
 	if err != nil {
 		return err
