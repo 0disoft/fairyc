@@ -197,7 +197,9 @@ type transportCompleteness struct {
 }
 
 func documentFromPartition(partition Partition) transportDocument {
-	header := partition.Header()
+	// Read owned records directly; the converters allocate detached transport data.
+	data := &partition.data
+	header := data.header
 	result := transportDocument{
 		Header: transportHeader{
 			LogicalSchema: header.LogicalSchema, SnapshotModel: header.SnapshotModel,
@@ -222,29 +224,32 @@ func documentFromPartition(partition Partition) transportDocument {
 				Completeness: uint64(header.Counts.Completeness),
 			},
 		},
-		Files: make([]transportFile, 0), Modules: make([]transportModule, 0), Symbols: make([]transportSymbol, 0),
-		Declarations: make([]transportDeclaration, 0), Functions: make([]transportFunctionSummary, 0),
-		Completeness: make([]transportCompleteness, 0),
+		Files: make([]transportFile, 0, len(data.files)), Modules: make([]transportModule, 0, len(data.modules)),
+		Symbols: make([]transportSymbol, 0, len(data.symbols)), Declarations: make([]transportDeclaration, 0, len(data.declarations)),
+		Functions: make([]transportFunctionSummary, 0, len(data.functions)), Completeness: make([]transportCompleteness, 0, len(data.completeness)),
 	}
-	for _, value := range partition.Files() {
+	if len(data.specializations) != 0 {
+		result.Specializations = make([]transportSpecialization, 0, len(data.specializations))
+	}
+	for _, value := range data.files {
 		result.Files = append(result.Files, transportFile{PackageInstance: value.PackageInstance, Path: value.Path, Digest: value.Digest, LineMap: value.LineMap, Kind: string(value.Kind)})
 	}
-	for _, value := range partition.Modules() {
+	for _, value := range data.modules {
 		result.Modules = append(result.Modules, transportModule{PackageInstance: value.PackageInstance, Path: value.Path, Source: value.Source})
 	}
-	for _, value := range partition.Symbols() {
+	for _, value := range data.symbols {
 		result.Symbols = append(result.Symbols, transportSymbol{Declaration: keyToTransport(value.Declaration), Visible: value.Visible, Full: value.Full})
 	}
-	for _, value := range partition.Declarations() {
+	for _, value := range data.declarations {
 		result.Declarations = append(result.Declarations, declarationToTransport(value))
 	}
-	for _, value := range partition.Functions() {
+	for _, value := range data.functions {
 		result.Functions = append(result.Functions, functionToTransport(value))
 	}
-	for _, value := range partition.Specializations() {
+	for _, value := range data.specializations {
 		result.Specializations = append(result.Specializations, specializationToTransport(value))
 	}
-	for _, value := range partition.Completeness() {
+	for _, value := range data.completeness {
 		result.Completeness = append(result.Completeness, transportCompleteness{
 			Relation: value.Relation, Status: string(value.Status), Resolved: uint64(value.Resolved),
 			External: uint64(value.External), Unknown: uint64(value.Unknown), Reasons: nonNilStrings(value.Reasons),
