@@ -68,12 +68,16 @@ func RebindStableStateBodyWithSymbols(body StableStateBodyArtifact, expected Sta
 	}
 	boundSymbols := make(map[hir.SymbolID]string, len(body.Transactions))
 	var helpers currentHelperHIRIndex
+	var owners *currentStableFunctionIndex
+	if len(body.Transactions) > 1 {
+		owners = &currentStableFunctionIndex{}
+	}
 	for index, transaction := range body.Transactions {
 		descriptor, err := decodeStableStateFunctionDescriptor(transaction.Function)
 		if err != nil {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d function: %w", index, err)
 		}
-		function, err := bindStableStateFunction(input, packageID, descriptor, transaction.Function, coordinates)
+		function, err := bindStableStateFunction(input, packageID, descriptor, transaction.Function, coordinates, owners)
 		if err != nil {
 			return ReboundStateBody{}, fmt.Errorf("stable transaction %d: %w", index, err)
 		}
@@ -142,33 +146,21 @@ func equalStateBodyLayouts(left, right Layout) bool {
 	return left.ContractUID == right.ContractUID && left.Hash == right.Hash && slices.Equal(left.Fields, right.Fields)
 }
 
-func bindStableStateFunction(input hir.Package, packageID hir.PackageID, descriptor stableStateFunctionDescriptor, encoded []byte, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Function, error) {
+func bindStableStateFunction(input hir.Package, packageID hir.PackageID, descriptor stableStateFunctionDescriptor, encoded []byte, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners *currentStableFunctionIndex) (hir.Function, error) {
 	separator := strings.LastIndex(descriptor.name, "::")
 	if separator <= 0 || separator+2 >= len(descriptor.name) {
 		return hir.Function{}, fmt.Errorf("stable function has an invalid logical name")
 	}
 	modulePath, functionName := descriptor.name[:separator], descriptor.name[separator+2:]
-	var owner hir.Module
-	var function hir.Function
-	found := false
-	for _, module := range input.Modules {
-		if module.Package != packageID || module.Path != modulePath {
-			continue
-		}
-		for _, candidate := range module.Functions {
-			if candidate.Name != functionName {
-				continue
-			}
-			if found {
-				return hir.Function{}, fmt.Errorf("current package has multiple functions named %q", descriptor.name)
-			}
-			owner, function, found = module, candidate, true
-		}
+	owner := owners.find(input, packageID, stableFunctionKey{modulePath, functionName})
+	if owner.ambiguous {
+		return hir.Function{}, fmt.Errorf("current package has multiple functions named %q", descriptor.name)
 	}
-	if !found {
+	if owner.function == nil {
 		return hir.Function{}, fmt.Errorf("current package is missing stable function %q", descriptor.name)
 	}
-	current, err := describeStateBodyFunction(owner, function, coordinates)
+	function := *owner.function
+	current, err := describeStateBodyFunction(*owner.module, function, coordinates)
 	if err != nil {
 		return hir.Function{}, fmt.Errorf("describe current function %q: %w", descriptor.name, err)
 	}
