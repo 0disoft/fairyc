@@ -105,43 +105,25 @@ func executeEntry(program mir.Program, entry string, resultType hir.Type, option
 	if err := options.Context.Err(); err != nil {
 		return Outcome{Kind: OutcomeCanceled}, err
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
-		return Outcome{}, fmt.Errorf("verify MIR before interpretation: %v", failures)
+	prepared, err := prepareProgram(program)
+	if err != nil {
+		return Outcome{}, err
 	}
+	return prepared.executeEntry(entry, resultType, options)
+}
+
+func (prepared *PreparedProgram) executeEntry(entry string, resultType hir.Type, options Options) (Outcome, error) {
 	engine := executionState{
-		byName:         make(map[string]*mir.Function, len(program.Functions)),
-		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
-		structTypes:    make(map[hir.Type]*mir.StructType, len(program.StructTypes)),
-		enumTypes:      make(map[hir.Type]*mir.EnumType, len(program.EnumTypes)),
-		resourceTypes:  make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes)),
+		byName:         prepared.byName,
+		bySymbol:       prepared.bySymbol,
+		structTypes:    prepared.structTypes,
+		enumTypes:      prepared.enumTypes,
+		resourceTypes:  prepared.resourceTypes,
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
 		steps:          options.MaxSteps,
 		callDepthLimit: options.MaxCallDepth,
 		context:        options.Context,
-	}
-	for index := range program.StructTypes {
-		definition := &program.StructTypes[index]
-		engine.structTypes[definition.Type] = definition
-	}
-	for index := range program.EnumTypes {
-		definition := &program.EnumTypes[index]
-		engine.enumTypes[definition.Type] = definition
-	}
-	for index := range program.ResourceTypes {
-		definition := &program.ResourceTypes[index]
-		engine.resourceTypes[definition.Type] = definition
-	}
-	for index := range program.Functions {
-		function := &program.Functions[index]
-		if _, duplicate := engine.byName[function.Name]; duplicate {
-			return Outcome{}, fmt.Errorf("duplicate MIR function name %q", function.Name)
-		}
-		if _, duplicate := engine.bySymbol[function.Symbol]; duplicate {
-			return Outcome{}, fmt.Errorf("duplicate MIR function symbol %d", function.Symbol)
-		}
-		engine.byName[function.Name] = function
-		engine.bySymbol[function.Symbol] = function
 	}
 	function := engine.byName[entry]
 	if function == nil {

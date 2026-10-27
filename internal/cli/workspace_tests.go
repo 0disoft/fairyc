@@ -269,12 +269,22 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 
 func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, options interpreter.Options, stderr io.Writer) ([]workspaceTestOutcome, int) {
 	outcomes := make([]workspaceTestOutcome, 0, len(tests))
+	if len(tests) == 0 {
+		return outcomes, ExitSuccess
+	}
+	prepared, err := interpreter.Prepare(program)
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	voidEntries := make(map[string]bool, len(program.Functions))
+	for _, function := range program.Functions {
+		voidEntries[function.Name] = len(function.Parameters) == 0 && function.ResultType == hir.TypeVoid
+	}
 	for _, test := range tests {
-		entry, found := programEntry(program, test.entry)
-		if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeVoid {
+		if !voidEntries[test.entry] {
 			return nil, internalError(stderr)
 		}
-		outcome, err := interpreter.ExecuteVoidWithOptions(program, test.entry, options)
+		outcome, err := prepared.ExecuteVoidWithOptions(test.entry, options)
 		if err != nil {
 			var capability interpreter.CapabilityError
 			if errors.As(err, &capability) {
