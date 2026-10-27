@@ -80,6 +80,13 @@ func encodeVersion(partition Partition, maxBytes uint64, schema, encoding, logic
 	if err := validatePartitionVersion(partition, logical); err != nil {
 		return nil, fmt.Errorf("validate .fymap partition: %w", err)
 	}
+	return encodeValidatedPartition(partition, maxBytes, schema, encoding)
+}
+
+// encodeValidatedPartition requires a positive limit and a partition already validated
+// for the selected version. Decode uses it to compare canonical bytes without
+// repeating semantic validation and SymbolId derivation.
+func encodeValidatedPartition(partition Partition, maxBytes uint64, schema, encoding string) ([]byte, error) {
 	document := documentFromPartition(partition)
 	checksum, err := computeVersionChecksum(document, schema, encoding)
 	if err != nil {
@@ -165,7 +172,7 @@ func decodeVersion(encoded []byte, maxBytes uint64, schema, encoding, logical st
 	if err := validatePartitionVersion(partition, logical); err != nil {
 		return Partition{}, fmt.Errorf("validate decoded .fymap: %w", err)
 	}
-	canonical, err := encodeVersion(partition, maxBytes, schema, encoding, logical)
+	canonical, err := encodeValidatedPartition(partition, maxBytes, schema, encoding)
 	if err != nil {
 		return Partition{}, err
 	}
