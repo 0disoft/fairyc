@@ -166,12 +166,16 @@ func BuildPlanV3(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, 
 }
 
 func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) ([]Partition, error) {
-	for _, declaration := range snapshot.Declarations() {
+	// Snapshot accessors deep-copy their nested records. Detach once for this
+	// plan, then reuse those copies for compatibility checks and partitioning.
+	declarations := snapshot.Declarations()
+	for _, declaration := range declarations {
 		if schema != LogicalSchemaV3 && len(declaration.TypeParameters) != 0 && declaration.Key.Kind != semanticsnapshot.DeclarationFunction {
 			return nil, fmt.Errorf("Atlas map requires aggregate specialization transport support")
 		}
 	}
-	if schema == LogicalSchema && len(snapshot.Specializations()) != 0 {
+	specializations := snapshot.Specializations()
+	if schema == LogicalSchema && len(specializations) != 0 {
 		return nil, fmt.Errorf("Atlas map v1 cannot preserve generic specializations")
 	}
 	if snapshot.Version() != semanticsnapshot.ModelVersion {
@@ -187,8 +191,8 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 	if len(input.Interfaces) != len(packages) {
 		return nil, fmt.Errorf("Atlas map plan requires one public-interface hash per package")
 	}
-	hasGeneric := len(snapshot.Specializations()) != 0
-	for _, declaration := range snapshot.Declarations() {
+	hasGeneric := len(specializations) != 0
+	for _, declaration := range declarations {
 		hasGeneric = hasGeneric || len(declaration.TypeParameters) != 0
 	}
 	if schema == LogicalSchema && len(input.GenericInterfaces) != 0 {
@@ -283,7 +287,7 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 		}
 		symbolsByDeclaration[value.Declaration] = symbol
 	}
-	for _, declaration := range snapshot.Declarations() {
+	for _, declaration := range declarations {
 		if schema == LogicalSchema && len(declaration.TypeParameters) != 0 {
 			return nil, fmt.Errorf("Atlas map v1 cannot preserve a generic declaration")
 		}
@@ -310,7 +314,7 @@ func buildPlan(snapshot semanticsnapshot.Snapshot, input Input, schema string) (
 		builder.data.functions = append(builder.data.functions, function)
 		builder.data.header.Counts.Relations += relationCount(function)
 	}
-	for _, specialization := range snapshot.Specializations() {
+	for _, specialization := range specializations {
 		builder, found := builders[specialization.Declaration.PackageInstance]
 		if !found {
 			return nil, fmt.Errorf("specialization %q references an unknown package", specialization.ID)
