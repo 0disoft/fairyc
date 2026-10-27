@@ -95,7 +95,9 @@ func (cache *StableCache) Put(key packagecache.Key, publicInterface moduleinterf
 	if err != nil {
 		return err
 	}
-	encoded, err := EncodeStableCompilationArtifact(compilation, cache.maxArtifactBytes)
+	// Projection validated both payloads and their owner; the local result has
+	// not escaped or changed. Marshal directly under the checked positive limit.
+	encoded, err := marshalStableCompilationArtifact(compilation, cache.maxArtifactBytes)
 	if err != nil {
 		return err
 	}

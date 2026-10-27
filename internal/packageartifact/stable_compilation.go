@@ -41,7 +41,9 @@ func DescribeStableCompilationArtifact(artifact Artifact, stateBody contractstat
 		return StableCompilationArtifact{}, err
 	}
 	result := StableCompilationArtifact{MIR: mirArtifact, StateBody: stateBody}
-	if err := ValidateStableCompilationArtifact(result); err != nil {
+	// DescribeStableArtifact has already validated MIR. Only the independent
+	// state body and the shared coordinate remain unchecked at this boundary.
+	if err := validateStableCompilationStateBody(result); err != nil {
 		return StableCompilationArtifact{}, err
 	}
 	return result, nil
@@ -53,6 +55,10 @@ func ValidateStableCompilationArtifact(artifact StableCompilationArtifact) error
 	if err := ValidateStableArtifact(artifact.MIR); err != nil {
 		return fmt.Errorf("stable compilation MIR: %w", err)
 	}
+	return validateStableCompilationStateBody(artifact)
+}
+
+func validateStableCompilationStateBody(artifact StableCompilationArtifact) error {
 	if err := contractstatemir.ValidateStableStateBody(artifact.StateBody); err != nil {
 		return fmt.Errorf("stable compilation contract-state body: %w", err)
 	}
@@ -75,7 +81,8 @@ func EncodeStableCompilationArtifact(artifact StableCompilationArtifact, maxByte
 }
 
 // marshalStableCompilationArtifact requires semantic validation and a positive
-// byte limit from its caller; decoding has already performed both checks.
+// byte limit from its caller. Decoding and cache projection perform both checks
+// before calling it; public encoding validates arbitrary caller-owned artifacts.
 func marshalStableCompilationArtifact(artifact StableCompilationArtifact, maxBytes uint64) ([]byte, error) {
 	encoded, err := json.Marshal(stableCompilationEnvelope{
 		Schema: StableCompilationSchema, Version: StableCompilationVersion, Compilation: artifact,
