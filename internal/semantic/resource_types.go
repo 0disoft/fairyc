@@ -119,6 +119,9 @@ func (a *analyzer) prepareEnumTypes() {
 		}
 	}
 
+	// All payload definitions are complete. Share both successful and failed
+	// copyability results across fields, but never beyond this validation pass.
+	copyability := make(map[hir.Type]uint8)
 	for _, info := range a.enumTypes {
 		for _, variant := range info.orderedVariants {
 			for _, field := range variant.orderedFields {
@@ -132,7 +135,7 @@ func (a *analyzer) prepareEnumTypes() {
 				if _, _, array := hir.FixedArrayParts(field.typ); array {
 					continue
 				}
-				if !a.inertCopyable(field.typ, make(map[hir.Type]uint8)) {
+				if !a.inertCopyable(field.typ, copyability) {
 					a.addDiagnostic("E1004", field.typeSpan, RelatedSpan{Role: "variant", Span: variant.declaration})
 				}
 			}
@@ -140,7 +143,13 @@ func (a *analyzer) prepareEnumTypes() {
 	}
 }
 
-func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool {
+const (
+	copyabilityChecking uint8 = iota + 1
+	copyabilityAccepted
+	copyabilityRejected
+)
+
+func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) (copyable bool) {
 	if hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) {
 		return true
 	}
@@ -156,23 +165,30 @@ func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool 
 	if _, _, borrow := hir.BorrowElement(value); borrow {
 		return false
 	}
-	if a.isResource(value) {
+	// Tagged payloads are checked below, so only the current identity needs a
+	// resource lookup here; a second transitive resource search repeats that work.
+	if _, resource := a.resourceTypes[value]; resource {
 		return false
 	}
+	switch state[value] {
+	case copyabilityChecking, copyabilityRejected:
+		return false
+	case copyabilityAccepted:
+		return true
+	}
+	state[value] = copyabilityChecking
+	defer func() {
+		state[value] = copyabilityRejected
+		if copyable {
+			state[value] = copyabilityAccepted
+		}
+	}()
 	if element, option := hir.OptionElement(value); option {
 		return a.inertCopyable(element, state)
 	}
 	if success, failure, result := hir.ResultElements(value); result {
 		return a.inertCopyable(success, state) && a.inertCopyable(failure, state)
 	}
-	if state[value] == 1 {
-		return false
-	}
-	if state[value] == 2 {
-		return true
-	}
-	state[value] = 1
-	defer func() { state[value] = 2 }()
 	if info := a.structTypes[value]; info != nil {
 		for _, field := range info.orderedFields {
 			if !a.inertCopyable(field.typ, state) {
