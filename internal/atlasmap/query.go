@@ -413,8 +413,11 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 	candidates := index.catalogCandidates(request.Module, request.Name, filter)
 	start := 0
 	if request.After != "" {
-		start = slices.IndexFunc(candidates, func(position int) bool { return index.nodes[position].symbol.Full == request.After })
-		if start < 0 {
+		position, found := index.byFull[request.After]
+		if found {
+			start, found = candidates.cursor(position)
+		}
+		if !found {
 			return SymbolCatalogResult{}, fmt.Errorf("Atlas symbol catalog cursor is not present in the filtered current package")
 		}
 		start++
@@ -429,7 +432,7 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 		Total   int                                `json:"total"`
 	}{
 		Context: context, Module: request.Module, Name: request.Name,
-		Kinds: kinds, After: request.After, Total: len(candidates),
+		Kinds: kinds, After: request.After, Total: candidates.count,
 	}
 	mandatoryBytes, err := selectionRecordCost(mandatory)
 	if err != nil {
@@ -440,11 +443,11 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 	}
 	result := SymbolCatalogResult{
 		Context: context, Module: request.Module, Name: request.Name, Kinds: kinds, After: request.After,
-		Total: len(candidates), Budget: request.Budget,
+		Total: candidates.count, Budget: request.Budget,
 		Usage: SymbolCatalogUsage{SelectionBytes: mandatoryBytes},
 	}
-	for position := start; position < len(candidates); position++ {
-		entry := index.catalogEntry(candidates[position])
+	for position := start; position < candidates.count; position++ {
+		entry := index.catalogEntry(candidates.at(position))
 		cost, costErr := selectionRecordCost(entry)
 		if costErr != nil {
 			return SymbolCatalogResult{}, costErr
@@ -459,7 +462,7 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 				code = OmissionBudgetBytes
 			}
 			result.NextAfter = result.Symbols[len(result.Symbols)-1].Symbol.Full
-			result.Omissions = append(result.Omissions, knownOmission(code, "symbols", len(candidates)-position))
+			result.Omissions = append(result.Omissions, knownOmission(code, "symbols", candidates.count-position))
 			return result, nil
 		}
 		result.Symbols = append(result.Symbols, entry)
@@ -694,7 +697,13 @@ func (index *QueryIndex) catalogCandidates(
 	module string,
 	name string,
 	kinds map[semanticsnapshot.DeclarationKind]struct{},
-) []int {
+) catalogSelection {
+	// Only validated, supported kinds reach this helper, so this size denotes
+	// the full filter. Admission already guarantees full-SymbolId node order;
+	// an implicit range needs no per-page or retained position array.
+	if module == "" && name == "" && len(kinds) == len(AllDeclarationKinds()) {
+		return catalogSelection{count: len(index.nodes)}
+	}
 	result := make([]int, 0, len(index.nodes))
 	for position, node := range index.nodes {
 		if module != "" && node.declaration.Key.Module != module {
@@ -708,10 +717,8 @@ func (index *QueryIndex) catalogCandidates(
 		}
 		result = append(result, position)
 	}
-	slices.SortFunc(result, func(left, right int) int {
-		return cmp.Compare(index.nodes[left].symbol.Full, index.nodes[right].symbol.Full)
-	})
-	return result
+	// Filtering an admitted full-ID-ordered node stream preserves that order.
+	return catalogSelection{positions: result, count: len(result)}
 }
 
 func (index *QueryIndex) catalogEntry(position int) SymbolCatalogEntry {
