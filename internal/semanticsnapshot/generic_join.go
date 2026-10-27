@@ -11,13 +11,13 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
-func joinGenericImplementations(provenance compiler.GenericProvenance, originals, concrete []Declaration, metadata map[hir.PackageID]packageMetadata) ([]Declaration, map[DeclarationKey]SpecializationSummary, error) {
+func joinGenericImplementations(provenance compiler.GenericProvenance, origins []compiler.GenericDeclaration, originals, concrete []Declaration, metadata map[hir.PackageID]packageMetadata) ([]Declaration, map[DeclarationKey]SpecializationSummary, error) {
 	byKey := map[DeclarationKey]Declaration{}
 	byID := map[genericplan.DeclarationID]Declaration{}
 	for _, declaration := range originals {
 		byKey[declaration.Key] = declaration
 	}
-	for _, origin := range provenance.Declarations() {
+	for _, origin := range origins {
 		key := DeclarationKey{PackageInstance: metadata[origin.Package].instance, Module: origin.Module, Kind: DeclarationKind(origin.Kind), Name: origin.Name}
 		declaration, ok := byKey[key]
 		if !ok {

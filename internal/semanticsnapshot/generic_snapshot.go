@@ -39,11 +39,15 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 	if err := validatePackageCoverage(stablePackages, files, modules); err != nil {
 		return Snapshot{}, err
 	}
-	generic, err := GenericDeclarations(result.GenericProvenance, packages)
+	byID, err := indexGenericDeclarations(originals)
 	if err != nil {
 		return Snapshot{}, err
 	}
-	declarations, implementations, err := joinGenericImplementations(result.GenericProvenance, generic, concrete, metadata)
+	generic, err := buildGenericDeclarations(result.GenericProvenance, originals, byID, metadata)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	declarations, implementations, err := joinGenericImplementations(result.GenericProvenance, originals, generic, concrete, metadata)
 	if err != nil {
 		return Snapshot{}, err
 	}

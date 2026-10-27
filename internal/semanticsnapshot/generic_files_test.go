@@ -17,7 +17,8 @@ import (
 )
 
 func TestGenericDeclarationsMatchExactPackageFileAfterCanonicalization(t *testing.T) {
-	provenance, input := genericFilesFixture(t, 3)
+	compiled, input := genericFilesFixture(t, 3)
+	provenance := compiled.GenericProvenance
 	want, err := semanticsnapshot.GenericDeclarations(provenance, []semanticsnapshot.PackageInput{input})
 	if err != nil || len(want) != 3 {
 		t.Fatalf("source declarations: count=%d, error=%v", len(want), err)
@@ -51,9 +52,35 @@ func TestGenericDeclarationsMatchExactPackageFileAfterCanonicalization(t *testin
 	}
 }
 
+func TestBuildCompilerKeepsGenericInputsDetached(t *testing.T) {
+	compiled, input := genericFilesFixture(t, 3)
+	packages := []semanticsnapshot.PackageInput{input}
+	snapshot, err := semanticsnapshot.BuildCompiler(compiled, packages)
+	if err != nil {
+		t.Fatal(err)
+	}
+	slices.Reverse(input.Files)
+	filesBefore := slices.Clone(input.Files)
+	originsBefore := compiled.GenericProvenance.Declarations()
+	again, err := semanticsnapshot.BuildCompiler(compiled, packages)
+	if err != nil || !reflect.DeepEqual(snapshot, again) {
+		t.Fatalf("reordering caller-owned files changed the snapshot: %v", err)
+	}
+	if !reflect.DeepEqual(input.Files, filesBefore) || !reflect.DeepEqual(compiled.GenericProvenance.Declarations(), originsBefore) {
+		t.Fatal("compiler snapshot mutated caller-owned files or compiler provenance")
+	}
+	declarationsBefore, snapshotFilesBefore := snapshot.Declarations(), snapshot.Files()
+	// Neither compiler accessors nor package inputs may alias the published snapshot.
+	originsBefore[0].Parameters[0] = "corrupted"
+	input.Files[0].Path = "corrupted.fy"
+	if !reflect.DeepEqual(snapshot.Declarations(), declarationsBefore) || !reflect.DeepEqual(snapshot.Files(), snapshotFilesBefore) {
+		t.Fatal("compiler or package input mutation changed the published snapshot")
+	}
+}
+
 // Parse and compile every file, then derive its real content and package identities.
 // Fixture setup is outside the timed source-declaration adapter calls.
-func genericFilesFixture(tb testing.TB, count int) (compiler.GenericProvenance, semanticsnapshot.PackageInput) {
+func genericFilesFixture(tb testing.TB, count int) (compiler.Result, semanticsnapshot.PackageInput) {
 	tb.Helper()
 	files := make([]semantic.File, 0, count)
 	contents := make([]packagecontent.File, 0, count)
@@ -91,13 +118,14 @@ func genericFilesFixture(tb testing.TB, count int) (compiler.GenericProvenance, 
 	if err != nil {
 		tb.Fatal(err)
 	}
-	return result.GenericProvenance, input
+	return result, input
 }
 
 func BenchmarkGenericDeclarationFiles(b *testing.B) {
 	for _, count := range []int{32, 1024, 4096} {
 		b.Run(fmt.Sprint(count), func(b *testing.B) {
-			provenance, input := genericFilesFixture(b, count)
+			compiled, input := genericFilesFixture(b, count)
+			provenance := compiled.GenericProvenance
 			packages := []semanticsnapshot.PackageInput{input}
 			b.ReportAllocs()
 			b.ResetTimer()
@@ -105,6 +133,22 @@ func BenchmarkGenericDeclarationFiles(b *testing.B) {
 				declarations, err := semanticsnapshot.GenericDeclarations(provenance, packages)
 				if err != nil || len(declarations) != count {
 					b.Fatalf("source declarations: count=%d, error=%v", len(declarations), err)
+				}
+			}
+		})
+	}
+}
+
+func BenchmarkBuildCompilerGenericFiles(b *testing.B) {
+	for _, count := range []int{32, 1024, 4096} {
+		b.Run(fmt.Sprint(count), func(b *testing.B) {
+			compiled, input := genericFilesFixture(b, count)
+			packages := []semanticsnapshot.PackageInput{input}
+			b.ReportAllocs()
+			b.ResetTimer()
+			for b.Loop() {
+				if _, err := semanticsnapshot.BuildCompiler(compiled, packages); err != nil {
+					b.Fatal(err)
 				}
 			}
 		})

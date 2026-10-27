@@ -19,6 +19,18 @@ import (
 // use compiler-published visible scope facts, never a guessed specialization.
 func GenericDeclarations(provenance compiler.GenericProvenance, packages []PackageInput) ([]Declaration, error) {
 	originals := provenance.Declarations()
+	byID, err := indexGenericDeclarations(originals)
+	if err != nil {
+		return nil, err
+	}
+	metadata, _, _, err := normalizePackages(packages)
+	if err != nil {
+		return nil, err
+	}
+	return buildGenericDeclarations(provenance, originals, byID, metadata)
+}
+
+func indexGenericDeclarations(originals []compiler.GenericDeclaration) (map[genericplan.DeclarationID]compiler.GenericDeclaration, error) {
 	byID := map[genericplan.DeclarationID]compiler.GenericDeclaration{}
 	for _, original := range originals {
 		if original.Kind != string(DeclarationFunction) && original.Kind != string(DeclarationStruct) && original.Kind != string(DeclarationResource) {
@@ -26,10 +38,11 @@ func GenericDeclarations(provenance compiler.GenericProvenance, packages []Packa
 		}
 		byID[original.ID] = original
 	}
-	metadata, _, _, err := normalizePackages(packages)
-	if err != nil {
-		return nil, err
-	}
+	return byID, nil
+}
+
+// Inputs are detached once by the caller; metadata must come from normalizePackages.
+func buildGenericDeclarations(provenance compiler.GenericProvenance, originals []compiler.GenericDeclaration, byID map[genericplan.DeclarationID]compiler.GenericDeclaration, metadata map[hir.PackageID]packageMetadata) ([]Declaration, error) {
 	type scopeKey struct {
 		packageID hir.PackageID
 		module    string
