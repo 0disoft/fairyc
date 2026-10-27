@@ -9,10 +9,10 @@ import (
 )
 
 func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
-	return verifyFunctionContext(context.Background(), function, structTypes, enumTypes, resourceTypes, foreignFunctions, functions)
+	return verifyFunctionContext(context.Background(), function, structTypes, enumTypes, resourceTypes, foreignFunctions, functions, make(map[hir.Type][]hir.Effect))
 }
 
-func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
+func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function, dropEffects map[hir.Type][]hir.Effect) []VerificationError {
 	storeTypes, err := fieldStoreLocalTypes(function, functions, foreignFunctions)
 	if err != nil {
 		return []VerificationError{{Code: CodeOperationType, Entity: function.Name, Detail: err.Error()}}
@@ -22,7 +22,6 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 	}
 	var failures []VerificationError
 	resources := make(map[hir.SymbolID]ResourceLocal, len(function.Resources))
-	dropEffects := make(map[hir.Type][]hir.Effect)
 	initial := verificationState{
 		live:    make(map[hir.SymbolID]bool, len(function.Resources)),
 		flags:   make(map[string]flagState, len(function.DropFlags)),

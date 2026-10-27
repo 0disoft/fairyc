@@ -3,6 +3,7 @@ package mir
 import (
 	"context"
 	"github.com/0disoft/fairyc/internal/admission"
+	"github.com/0disoft/fairyc/internal/hir"
 )
 
 // Verify checks the executable invariants required before MIR handoff.
@@ -64,13 +65,16 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions, functions)...)
 	failures = append(failures, verifyBoundedCallbacks(program, functions, foreignFunctions)...)
 	properties := newTypeProperties(program.ResourceTypes, program.StructTypes, program.EnumTypes)
+	// Resource definitions are immutable within this verification. Reuse required
+	// cleanup effects across functions; each caller still checks its own authority.
+	dropEffects := make(map[hir.Type][]hir.Effect)
 	for index := range program.Functions {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
 		failures = append(failures, verifyStorageOperations(&program.Functions[index], properties, capabilities)...)
 		failures = append(failures, verifyStructViewTypes(&program.Functions[index], properties)...)
-		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
+		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions, dropEffects)...)
 	}
 	return canonicalVerificationErrors(failures), nil
 }
