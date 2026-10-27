@@ -414,13 +414,23 @@ func (workspace Workspace) RootPackageID() (hir.PackageID, error) {
 // PackageID returns the disposable semantic package number for one exact local package path. A
 // package used through multiple resolved feature instances is intentionally ambiguous.
 func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) {
+	matchingNodes := make(map[string]struct{})
+	// Only retain nodes for this path. Walking backwards lets earlier catalog
+	// entries override later duplicates, matching instance's first-match rule.
+	for index := len(workspace.Instances) - 1; index >= 0; index-- {
+		mapping := &workspace.Instances[index]
+		if mapping.PackagePath == packagePath {
+			matchingNodes[mapping.NodeID] = struct{}{}
+		} else {
+			delete(matchingNodes, mapping.NodeID)
+		}
+	}
 	var result hir.PackageID
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return hir.DefaultPackage, fmt.Errorf("workspace has an empty package instance class")
 		}
-		mapping, found := workspace.instance(class.Members[0])
-		if !found || mapping.PackagePath != packagePath {
+		if _, found := matchingNodes[class.Members[0]]; !found {
 			continue
 		}
 		if result != hir.DefaultPackage {
