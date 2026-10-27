@@ -47,8 +47,24 @@ func (p typeProperties) validStructViewType(value hir.Type) bool {
 
 func verifyStructViewTypes(function *Function, p typeProperties) []VerificationError {
 	var failures []VerificationError
+	// Definitions are immutable during this pass. Keep both successful and failed
+	// results local so a later verification cannot reuse stale type information.
+	var checkedTypes map[hir.Type]bool
 	check := func(value hir.Type) {
-		if !p.validStructViewType(value) {
+		switch value.Descriptor().Kind {
+		case hir.TypeKindUnset, hir.TypeKindBuiltin, hir.TypeKindNominal, hir.TypeKindOpaque:
+			// These leaves contain no compound view shape to validate.
+			return
+		}
+		valid, checked := checkedTypes[value]
+		if !checked {
+			valid = p.validStructViewType(value)
+			if checkedTypes == nil {
+				checkedTypes = make(map[hir.Type]bool)
+			}
+			checkedTypes[value] = valid
+		}
+		if !valid {
 			failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
 		}
 	}
