@@ -69,9 +69,9 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 	}
 	visited := map[int]struct{}{entryIndex: {}}
 	reachableForeign := make(map[hir.SymbolID]struct{})
-	// Resource definitions are fixed for this pass. Each dropped type contributes
-	// the same glue edges regardless of which local or function drops it.
-	expandedDrops := make(map[hir.Type]struct{})
+	// Resource definitions are fixed for this pass. Share visitation across drop
+	// roots too, so overlapping nested payloads contribute their glue edges once.
+	expandedDrops := make(map[hir.Type]bool)
 	pending := []int{entryIndex}
 	// Mark on discovery so shared callees occupy the pending stack only once.
 	// The returned set is unchanged after all scheduled functions are expanded.
@@ -106,11 +106,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 				if !found {
 					return nil, nil, fmt.Errorf("drop in %s names undeclared resource local %d", function.Name, operation.Symbol)
 				}
-				if _, expanded := expandedDrops[resourceType]; expanded {
-					continue
-				}
-				expandedDrops[resourceType] = struct{}{}
-				for _, dropSymbol := range dischargeDropSymbols(resourceType, resourceTypes) {
+				for _, dropSymbol := range dischargeDropSymbols(resourceType, resourceTypes, expandedDrops) {
 					if dropSymbol == hir.NoSymbol {
 						continue
 					}
@@ -139,13 +135,11 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 	return visited, reachableForeign, nil
 }
 
-// dischargeDropSymbols returns the executable drop glue symbols a dropped local
-// can reach: the direct resource type, or the direct resource payloads of an
-// Option/Result discharge. Empty drops and non-resource discharges return no
-// symbols.
-func dischargeDropSymbols(resourceType hir.Type, resourceTypes map[hir.Type]mir.ResourceType) []hir.SymbolID {
+// dischargeDropSymbols returns executable drop glue symbols from types not yet
+// seen in this reachability pass, including nested resources and Option/Result
+// payloads. Callers must share seen only while resource definitions stay fixed.
+func dischargeDropSymbols(resourceType hir.Type, resourceTypes map[hir.Type]mir.ResourceType, seen map[hir.Type]bool) []hir.SymbolID {
 	var symbols []hir.SymbolID
-	seen := map[hir.Type]bool{}
 	var visit func(hir.Type)
 	visit = func(value hir.Type) {
 		if seen[value] {

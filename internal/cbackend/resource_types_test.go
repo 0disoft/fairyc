@@ -44,8 +44,29 @@ func TestNestedResourceDropSymbols(t *testing.T) {
 		hir.ParseType("Leaf"): {Type: hir.ParseType("Leaf"), DropSymbol: 22},
 	}
 	for _, typ := range []hir.Type{hir.ParseType("Box"), hir.Option(hir.ParseType("Box")), hir.Result(hir.ParseType("Box"), hir.TypeI32)} {
-		if actual := dischargeDropSymbols(typ, definitions); !slices.Equal(actual, []hir.SymbolID{11, 22}) {
+		if actual := dischargeDropSymbols(typ, definitions, make(map[hir.Type]bool)); !slices.Equal(actual, []hir.SymbolID{11, 22}) {
 			t.Fatalf("cleanup reachability for %s: %v", typ, actual)
+		}
+	}
+}
+
+func TestSharedDropTraversalStillVisitsNewResultBranch(t *testing.T) {
+	leaf, other := hir.ParseType("Leaf"), hir.ParseType("Other")
+	definitions := map[hir.Type]mir.ResourceType{
+		leaf:  {Type: leaf, DropSymbol: 11},
+		other: {Type: other, DropSymbol: 22},
+	}
+	seen := make(map[hir.Type]bool)
+	for _, test := range []struct {
+		typ  hir.Type
+		want []hir.SymbolID
+	}{
+		{hir.Option(leaf), []hir.SymbolID{11}},
+		{hir.Result(leaf, other), []hir.SymbolID{22}},
+		{hir.Option(other), nil},
+	} {
+		if got := dischargeDropSymbols(test.typ, definitions, seen); !slices.Equal(got, test.want) {
+			t.Fatalf("new glue for %s: %v, want %v", test.typ, got, test.want)
 		}
 	}
 }
