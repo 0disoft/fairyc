@@ -47,13 +47,30 @@ source, dependency files, and workflows, retain the full compiler checks.
 
 The check reads the complete push diff or PR merge-base diff, including removed paths. Empty
 diffs, new branches, tags, missing history, and failed path classification run compiler checks.
-Manual Frontend runs also execute the full checks. The scheduled/manual Measurements workflow
+Manual Frontend runs without `candidate_sha` also execute the full checks. The scheduled/manual Measurements workflow
 keeps its existing triggers.
 
 The Windows core job allows 20 minutes, with a 15-minute Go test timeout per package, because
 it includes native compile/run regressions. The separate lexer proof allows 12 minutes so its
 native tests and job setup/cleanup fit within the limit. Linux and the separate native/parser jobs
 retain their 10-minute limits. The test selection and runner count are unchanged.
+
+`workflow_dispatch` also accepts an optional `candidate_sha`. An empty value keeps the full route
+above. A nonempty value must be a full 40-character lowercase hexadecimal commit SHA other than
+40 zeroes. That dispatch skips changed-path classification, the Go matrix, the separate Windows
+parser groups and the Linux C differential job; only the existing `Windows native target smoke`
+job runs, with its 10-minute limit. The job checks the input before checkout, checks out the
+requested SHA, and fails if `git rev-parse HEAD` differs from it. This path is available only
+after the workflow version and target commit are on the remote repository.
+
+Each Windows-native attempt whose revision check succeeds writes a
+`fairyc.windows-native-ci/v1` JSON receipt to the job log and step summary. It records
+`sourceRevision`, `requestedRevision`, `workflowRevision`, `runId`, `runAttempt`,
+`smokeOutcome` and `passed`; `passed` is true only when `smokeOutcome` is `success`.
+The concurrency key includes the candidate SHA, so dispatches for different candidates do not
+cancel each other. Push, pull-request and empty-input manual runs keep the existing full path.
+An exact-candidate dispatch is not a replacement for full CI and does not establish the complete
+Go and Linux validation results.
 
 The existing `native-c` job uses `ubuntu-24.04` and provisions the
 [reference Linux toolchain](docs/abi/linux-toolchain-v0.md) with

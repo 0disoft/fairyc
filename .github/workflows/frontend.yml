@@ -3,7 +3,13 @@ name: Frontend
 on:
   push: {}
   pull_request: {}
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: 'Full lowercase commit SHA: run only Windows native smoke; empty runs all checks'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -13,12 +19,13 @@ env:
   CGO_ENABLED: "0"
 
 concurrency:
-  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  group: frontend-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || 'full' }}
   cancel-in-progress: true
 
 jobs:
   changes:
     name: Classify changed paths
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:
@@ -39,7 +46,7 @@ jobs:
   validate:
     name: Go frontend (${{ matrix.os }})
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: ${{ matrix.os }}
     # Windows core includes native compile/run regressions as well as Go tests.
     timeout-minutes: ${{ matrix.os == 'windows-latest' && 20 || 10 }}
@@ -87,25 +94,71 @@ jobs:
   windows-native:
     name: Windows native target smoke
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') || needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: windows-latest
+    env:
+      CANDIDATE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || '' }}
     # Keep native proof independent of the full Go suite's timeout budget.
     timeout-minutes: 10
     steps:
+      - name: Validate candidate SHA before checkout
+        id: candidate-input
+        if: env.CANDIDATE_SHA != ''
+        run: |
+          if ($env:CANDIDATE_SHA -cnotmatch '\A[0-9a-f]{40}\z' -or $env:CANDIDATE_SHA -ceq ('0' * 40)) {
+            throw 'candidate_sha must be a full lowercase, nonzero 40-character commit SHA'
+          }
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.CANDIDATE_SHA || github.sha }}
+      - name: Verify checked-out revision
+        id: revision
+        run: |
+          $actual = git rev-parse --verify HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot resolve checked-out source revision' }
+          $actual = $actual.Trim()
+          if ($env:CANDIDATE_SHA -and $actual -cne $env:CANDIDATE_SHA) {
+            throw "Checked-out revision $actual differs from requested candidate $env:CANDIDATE_SHA"
+          }
+          "source_sha=$actual" >> $env:GITHUB_OUTPUT
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version-file: go.mod
           cache: false
       - name: Run Windows native target smoke
+        id: smoke
         run: go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke
+      - name: Record Windows native verification identity
+        id: receipt
+        if: ${{ always() && steps.revision.outcome == 'success' }}
+        env:
+          SOURCE_SHA: ${{ steps.revision.outputs.source_sha }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          $receipt = [ordered]@{
+            schema = 'fairyc.windows-native-ci/v1'
+            sourceRevision = $env:SOURCE_SHA
+            requestedRevision = $env:CANDIDATE_SHA
+            workflowRevision = $env:WORKFLOW_SHA
+            runId = $env:GITHUB_RUN_ID
+            runAttempt = $env:GITHUB_RUN_ATTEMPT
+            smokeOutcome = $env:SMOKE_OUTCOME
+            passed = $env:SMOKE_OUTCOME -ceq 'success'
+          }
+          $json = $receipt | ConvertTo-Json
+          Write-Output $json
+          '### Windows native verification' >> $env:GITHUB_STEP_SUMMARY
+          '```json' >> $env:GITHUB_STEP_SUMMARY
+          $json >> $env:GITHUB_STEP_SUMMARY
+          '```' >> $env:GITHUB_STEP_SUMMARY
 
   windows-parser:
     name: Windows candidate proof (${{ matrix.group }})
     needs: changes
-    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: windows-latest
     # The lexer proof approaches ten minutes before checkout/setup/cleanup.
     timeout-minutes: ${{ matrix.group == 'lexer' && 12 || 10 }}
@@ -136,6 +189,7 @@ jobs:
 
   native-c:
     name: C differential (Linux)
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') }}
     needs: [validate, windows-native, windows-parser]
     runs-on: ubuntu-24.04
     timeout-minutes: 10

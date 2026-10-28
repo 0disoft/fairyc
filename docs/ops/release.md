@@ -145,6 +145,24 @@ Run CI on the candidate revision itself before publishing its retained ZIP. A pu
 tip includes later documentation commits runs CI on that newer tip and does not by itself
 supply an exact-candidate workflow result. No workflow was dispatched during this check.
 
+## Exact-candidate dispatch
+
+`frontend.yml` now has an optional `workflow_dispatch` input, `candidate_sha`. Use a full
+lowercase hexadecimal 40-character commit SHA other than 40 zeroes. An empty value keeps the
+existing full validation. A nonempty value runs only the existing 10-minute `Windows native target
+smoke` job against that revision; changed-path classification, the Go matrix, the Windows parser
+groups and the C differential job do not run. This is not a replacement for full CI or evidence
+that all Go and Linux checks passed.
+
+The workflow change and the candidate commit are still local and must both be pushed with separate
+approval before dispatch. After that approval, the current candidate command is:
+
+```text
+gh workflow run frontend.yml --ref main -f candidate_sha=315ef56991d20fa0716927e4fcecb464231db6a8
+```
+
+The exact-candidate CI result remains unconfirmed until that run completes.
+
 ## Owners
 
 - Primary owner: the `0disoft/fairyc` repository administrator performing the release
