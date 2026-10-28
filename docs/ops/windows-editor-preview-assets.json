@@ -25,18 +25,26 @@
     {
       "name": "fairyc-0.1.2.vsix",
       "kind": "vscode-extension",
-      "localPath": ".cache/editor-release/fairyc-0.1.2.vsix",
-      "bytes": 477873,
-      "sha256": "bef1f0f232d9cb3320497e812e9bfb91a364f4f1a257e55b52ea160c00d7d93b",
-      "sourceRevision": null
+      "localPath": ".cache/editor-release/candidate-DXoj4J/fairyc-0.1.2.vsix",
+      "bytes": 480180,
+      "sha256": "5da6b9240c829834ba578f8a334ed9c6d3105335a4555f6e3836e81766232612",
+      "sourceRevision": "25d4dfbfecaa0ed4ab40cc9064713864f6aa86a1"
     },
     {
       "name": "fairyc-0.1.2.vsix.sha256",
       "kind": "vscode-extension-checksum",
-      "localPath": ".cache/editor-release/fairyc-0.1.2.vsix.sha256",
+      "localPath": ".cache/editor-release/candidate-DXoj4J/fairyc-0.1.2.vsix.sha256",
       "bytes": 84,
-      "sha256": "ccaaa3cb080fd7ad218f17efece5ad31a4bf1cb823d0a93a6b3530de55b130c2",
-      "sourceRevision": null
+      "sha256": "460b46ddcee0eaa5bb37362b3b99edd076907d9ef1e03b486eaec68b6ebe3a1a",
+      "sourceRevision": "25d4dfbfecaa0ed4ab40cc9064713864f6aa86a1"
+    },
+    {
+      "name": "fairyc-0.1.2.vsix.build.json",
+      "kind": "vscode-build-provenance",
+      "localPath": ".cache/editor-release/candidate-DXoj4J/fairyc-0.1.2.vsix.build.json",
+      "bytes": 732,
+      "sha256": "637186cb4ade9ab583674fe8e97d396840f16c1ef4116d8712b34f43b30c0dce",
+      "sourceRevision": "25d4dfbfecaa0ed4ab40cc9064713864f6aa86a1"
     }
   ],
   "bundledExecutables": [
@@ -66,10 +74,12 @@
   "extension": {
     "id": "0disoft.fairyc",
     "version": "0.1.2",
-    "sourceRevision": null,
-    "sourceRevisionStatus": "not-embedded-or-recorded",
-    "packagingImplementationCommit": "6001b489e5aac5295476064507d3683681f85b4d",
-    "packagingImplementationIsBuildProvenance": false
+    "sourceRevision": "25d4dfbfecaa0ed4ab40cc9064713864f6aa86a1",
+    "sourceRevisionStatus": "recorded-in-build-sidecar",
+    "sourceModified": false,
+    "provenanceEmbedded": false,
+    "buildReceipt": ".cache/editor-release/candidate-DXoj4J/fairyc-0.1.2.vsix.build.json",
+    "buildReceiptSHA256": "637186cb4ade9ab583674fe8e97d396840f16c1ef4116d8712b34f43b30c0dce"
   },
   "evidence": [
     {
@@ -83,6 +93,10 @@
     {
       "localPath": ".cache/windows-editor-B3iiFY/local-results/receipt.json",
       "sha256": "aac127e41a48012352e8b1be518a2471fd47f55ed48fb75c758d18c11724b61b"
+    },
+    {
+      "localPath": ".cache/editor-release/candidate-DXoj4J/install-6bdfbb6868af4a41b062a9fb679eaefd/receipt.json",
+      "sha256": "d46fb8692bd5c8b15de8470f660170541e68acec4e06f13aefceecc778ae3a0b"
     }
   ],
   "validation": {
@@ -96,7 +110,10 @@
       "bun.exe"
     ],
     "cleanMachineEvidence": false,
-    "additionalGRAM13EditorValidation": "skipped-by-user"
+    "additionalGRAM13EditorValidation": "skipped-by-user",
+    "candidateInstallReceipt": ".cache/editor-release/candidate-DXoj4J/install-6bdfbb6868af4a41b062a9fb679eaefd/receipt.json",
+    "portableHarnessVSIXSHA256": "bef1f0f232d9cb3320497e812e9bfb91a364f4f1a257e55b52ea160c00d7d93b",
+    "newVSIXPortableHarness": "not-repeated"
   },
   "pending": {
     "candidateWindowsNativeCI": {
@@ -106,7 +123,6 @@
       "workflow": ".github/workflows/frontend.yml"
     },
     "releaseIdentity": "undecided",
-    "extensionBuildProvenance": "unrecorded-label-must-be-retained",
     "publicDownloadAndSecurityRoute": "refresh-required-before-publication",
     "publication": "requires-separate-authorization"
   },
@@ -114,6 +130,30 @@
     "localPath": ".cache/windows-editor-B3iiFY/fairyc-windows-editor-verify.zip",
     "sha256": "80234672961ed51a54cd0948b789bba9f58fc5e38180091f1ef75846cb27f538",
     "role": "retained-local-verification-only",
-    "includedInPublishedAssets": false
+    "includedInPublishedAssets": false,
+    "inputVSIXSHA256": "bef1f0f232d9cb3320497e812e9bfb91a364f4f1a257e55b52ea160c00d7d93b"
+  },
+  "retainedLegacyExtension": {
+    "artifacts": [
+      {
+        "name": "fairyc-0.1.2.vsix",
+        "kind": "vscode-extension",
+        "localPath": ".cache/editor-release/fairyc-0.1.2.vsix",
+        "bytes": 477873,
+        "sha256": "bef1f0f232d9cb3320497e812e9bfb91a364f4f1a257e55b52ea160c00d7d93b",
+        "sourceRevision": null
+      },
+      {
+        "name": "fairyc-0.1.2.vsix.sha256",
+        "kind": "vscode-extension-checksum",
+        "localPath": ".cache/editor-release/fairyc-0.1.2.vsix.sha256",
+        "bytes": 84,
+        "sha256": "ccaaa3cb080fd7ad218f17efece5ad31a4bf1cb823d0a93a6b3530de55b130c2",
+        "sourceRevision": null
+      }
+    ],
+    "sourceRevision": null,
+    "sourceRevisionStatus": "not-embedded-or-recorded",
+    "role": "historical-validation-preserved-not-selected-for-publication"
   }
 }
