@@ -137,8 +137,9 @@ func Parse(contents []byte) (Document, error) {
 	if err := decoder.Decode(&document); err != nil {
 		return Document{}, fmt.Errorf("decode lockfile: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); err != io.EOF {
+	// The decoder can read ahead. Check the original suffix at the value
+	// offset instead of allocating an object tree for data we must reject.
+	if len(bytes.TrimLeft(contents[decoder.InputOffset():], " \t\r\n")) != 0 {
 		return Document{}, fmt.Errorf("decode lockfile: trailing JSON value")
 	}
 	if err := Validate(document); err != nil {
