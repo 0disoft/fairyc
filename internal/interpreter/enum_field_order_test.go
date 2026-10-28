@@ -1,10 +1,37 @@
 package interpreter_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/interpreter"
 )
+
+func TestWideEnumInitializersPreserveSideEffectOrder(t *testing.T) {
+	const fields = 64
+	var text strings.Builder
+	text.WriteString("module main; enum Packet { Data {")
+	for i := range fields {
+		fmt.Fprintf(&text, "i32 f%d;", i)
+	}
+	text.WriteString(`}; }
+fn i32 next(ref mut i32 n) { *n += 1; return *n; }
+fn i32 main() { var i32 n = 0; let Packet packet = .Data {`)
+	for i := fields - 1; i >= 0; i-- {
+		fmt.Fprintf(&text, ".f%d = next(ref mut n),", i)
+	}
+	text.WriteString("}; return switch(packet) { case .Data {")
+	for i := range fields {
+		fmt.Fprintf(&text, ".f%d = v%d,", i, i)
+	}
+	text.WriteString("}: { v0 * 1000 + v63 } }; }")
+	program := lowerSource(t, text.String())
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 64001 {
+		t.Fatalf("wide enum execution order: %+v, %v", outcome, err)
+	}
+}
 
 func TestEnumNamedInitializersPreserveEvaluationAndPayloadOrder(t *testing.T) {
 	t.Parallel()

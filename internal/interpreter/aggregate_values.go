@@ -22,16 +22,38 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		return runtimeValue{}, fmt.Errorf("enum %q has no matching variant %q", definition.Type, variantName)
 	}
 	state := &enumState{definition: definition, variant: variantName, fields: make([]runtimeValue, len(values))}
+	// Small payloads keep a bounded scan without a temporary map. Larger ones
+	// index written initializer positions once, including duplicate names.
+	var sources map[string]int
+	if len(fieldNames) > 8 {
+		sources = make(map[string]int, len(fieldNames))
+		for position, name := range fieldNames {
+			if _, duplicate := sources[name]; duplicate {
+				sources[name] = -1
+			} else {
+				sources[name] = position
+			}
+		}
+	}
 	for index, field := range variant.Fields {
 		// Enum MIR preserves written initializer order. Store the already evaluated
 		// values in declaration slots without changing their evaluation order.
 		source := -1
-		for position, name := range fieldNames {
-			if name == field.Name {
-				if source >= 0 {
-					return runtimeValue{}, fmt.Errorf("enum %q variant %q has duplicate field %q", definition.Type, variantName, name)
+		if sources != nil {
+			if position, found := sources[field.Name]; found {
+				if position < 0 {
+					return runtimeValue{}, fmt.Errorf("enum %q variant %q has duplicate field %q", definition.Type, variantName, field.Name)
 				}
 				source = position
+			}
+		} else {
+			for position, name := range fieldNames {
+				if name == field.Name {
+					if source >= 0 {
+						return runtimeValue{}, fmt.Errorf("enum %q variant %q has duplicate field %q", definition.Type, variantName, name)
+					}
+					source = position
+				}
 			}
 		}
 		if field.Name == "" || source < 0 {
