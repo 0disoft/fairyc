@@ -32,6 +32,11 @@ transport facts, exact compiler executable identity, public-interface hash, pack
 source digest, and every source-file content and line-map identity. Construction reads no source,
 map store, directory, environment, process, network, or caller text.
 
+After checking package-set membership, construction counts non-foreign calls directly from ordinary,
+specialized-function, and aggregate-cleanup summaries before building package-local query indexes.
+The count stops on the first excess call. Over-budget inputs can therefore fail before semantic and
+currentness validation; only a successful join certifies those validations.
+
 The partition set must close every direct dependency named by every package header. Extra
 expectations, duplicate packages, missing dependency partitions, and any stale or incompatible map
 reject the complete join.

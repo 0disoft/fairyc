@@ -105,6 +105,22 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 	slices.SortFunc(ordered, func(left, right Partition) int {
 		return cmp.Compare(left.data.header.PackageInstance, right.data.header.PackageInstance)
 	})
+	for position, partition := range ordered {
+		header := partition.data.header
+		if position > 0 && ordered[position-1].data.header.PackageInstance == header.PackageInstance {
+			return nil, fmt.Errorf("%w: duplicate package partition %q", ErrWorkspaceJoinIncomplete, header.PackageInstance)
+		}
+		_, found := expectations[header.PackageInstance]
+		if !found {
+			return nil, fmt.Errorf("%w: package %q has no load expectation", ErrWorkspaceJoinIncomplete, header.PackageInstance)
+		}
+	}
+	if len(expectations) != len(ordered) {
+		return nil, fmt.Errorf("%w: expectation and partition package sets differ", ErrWorkspaceJoinIncomplete)
+	}
+	if workspaceCallBudgetExceeded(ordered, budget.MaxCalls) {
+		return nil, fmt.Errorf("%w: calls exceed %d", ErrWorkspaceJoinBudget, budget.MaxCalls)
+	}
 	index := &WorkspaceCallIndex{
 		budget:   budget,
 		usage:    WorkspaceCallUsage{Packages: len(ordered)},
@@ -112,29 +128,15 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 		packages: make(map[string]workspaceCallPackage, len(ordered)),
 	}
 	packageIndexes := make(map[string]*QueryIndex, len(ordered))
-	for position, partition := range ordered {
+	for _, partition := range ordered {
 		header := partition.data.header
-		if position > 0 && ordered[position-1].data.header.PackageInstance == header.PackageInstance {
-			return nil, fmt.Errorf("%w: duplicate package partition %q", ErrWorkspaceJoinIncomplete, header.PackageInstance)
-		}
-		expectation, found := expectations[header.PackageInstance]
-		if !found {
-			return nil, fmt.Errorf("%w: package %q has no load expectation", ErrWorkspaceJoinIncomplete, header.PackageInstance)
-		}
+		expectation := expectations[header.PackageInstance]
 		packageIndex, err := newQueryIndex(partition, expectation, schema)
 		if err != nil {
 			return nil, fmt.Errorf("build Atlas workspace call join package %q: %w", header.PackageInstance, err)
 		}
 		packageIndexes[header.PackageInstance] = packageIndex
 		index.packages[header.PackageInstance] = compactWorkspaceCallPackage(packageIndex)
-	}
-	if len(expectations) != len(index.packages) {
-		return nil, fmt.Errorf("%w: expectation and partition package sets differ", ErrWorkspaceJoinIncomplete)
-	}
-	for packageInstance := range expectations {
-		if _, found := index.packages[packageInstance]; !found {
-			return nil, fmt.Errorf("%w: expectation names unknown package %q", ErrWorkspaceJoinIncomplete, packageInstance)
-		}
 	}
 	for _, partition := range ordered {
 		header := partition.data.header
