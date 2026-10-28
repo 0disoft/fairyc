@@ -2,6 +2,7 @@
 package cdriver
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -282,14 +283,21 @@ func readArtifact(path string) ([]byte, error) {
 	if !info.Mode().IsRegular() || info.Size() <= 0 || info.Size() > maxArtifactBytes {
 		return nil, fmt.Errorf("linked executable has invalid size %d", info.Size())
 	}
-	contents, err := io.ReadAll(io.LimitReader(file, maxArtifactBytes+1))
-	if err != nil {
+	return readArtifactContents(file, info.Size())
+}
+
+// The opened file's size is only a capacity hint: the file can change after
+// Stat. Keep the independent read limit and room for ReadFrom's EOF probe.
+func readArtifactContents(reader io.Reader, sizeHint int64) ([]byte, error) {
+	var buffer bytes.Buffer
+	buffer.Grow(int(max(0, min(sizeHint, maxArtifactBytes))) + bytes.MinRead)
+	if _, err := buffer.ReadFrom(io.LimitReader(reader, maxArtifactBytes+1)); err != nil {
 		return nil, fmt.Errorf("read linked executable: %w", err)
 	}
-	if len(contents) == 0 || len(contents) > maxArtifactBytes {
-		return nil, fmt.Errorf("linked executable has invalid size %d", len(contents))
+	if buffer.Len() == 0 || buffer.Len() > maxArtifactBytes {
+		return nil, fmt.Errorf("linked executable has invalid size %d", buffer.Len())
 	}
-	return contents, nil
+	return buffer.Bytes(), nil
 }
 
 func runBounded(name string, arguments ...string) (string, error) {
