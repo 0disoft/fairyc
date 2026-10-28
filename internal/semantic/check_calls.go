@@ -195,19 +195,34 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 }
 
 func (a *analyzer) methodSymbol(ownerType hir.Type, name string) *symbol {
+	// Calls are checked after aggregate identities are prepared. Build only when
+	// needed and keep the index local to this analysis, including missing lookups.
+	if a.methodSymbols == nil {
+		a.prepareMethodSymbols()
+	}
+	return a.methodSymbols[methodKey{owner: ownerType, name: name}]
+}
+
+func (a *analyzer) prepareMethodSymbols() {
+	a.methodSymbols = make(map[methodKey]*symbol)
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]
-			if function.Owner == "" || function.Name != name || len(function.Parameters) == 0 || function.Parameters[0].Name != "this" {
+			if function.Owner == "" || len(function.Parameters) == 0 || function.Parameters[0].Name != "this" {
 				continue
 			}
 			owner := a.ownerSymbol(module, function.Owner)
-			if owner != nil && owner.typ == ownerType {
-				return a.functions[function]
+			if owner == nil {
+				continue
+			}
+			key := methodKey{owner: owner.typ, name: function.Name}
+			// Preserve the first declaration selected by the previous ordered scan,
+			// even if that declaration has no resolved symbol.
+			if _, exists := a.methodSymbols[key]; !exists {
+				a.methodSymbols[key] = a.functions[function]
 			}
 		}
 	}
-	return nil
 }
 
 func (a *analyzer) callableForCall(expression *ast.Expression) *symbol {

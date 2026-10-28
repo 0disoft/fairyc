@@ -61,6 +61,11 @@ type lexicalScope struct {
 	names  map[string]*symbol
 }
 
+type methodKey struct {
+	owner hir.Type
+	name  string
+}
+
 type analyzer struct {
 	ctx                   context.Context
 	nominalBindings       map[string]NominalTypeBinding
@@ -108,6 +113,7 @@ type analyzer struct {
 	dropFunctions         map[*ast.Resource]*ast.Function
 	dropOwners            map[*ast.Function]*ast.Resource
 	methodCalls           map[*ast.Expression]*symbol
+	methodSymbols         map[methodKey]*symbol
 	constantFacts         []ConstantFact
 	constantValues        map[*symbol]compileTimeValue
 	constEvalFunctions    map[*symbol]bool
