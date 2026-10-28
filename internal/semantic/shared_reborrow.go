@@ -1,6 +1,9 @@
 package semantic
 
 import (
+	"slices"
+	"strings"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
@@ -28,14 +31,58 @@ type borrowCallAccess struct {
 }
 
 func borrowValuesOverlap(left, right borrowValueState) bool {
-	for _, a := range left.origins {
-		for _, b := range right.origins {
-			if sameFlowOrigin(a, b) {
+	if len(left.origins) > len(right.origins) {
+		left, right = right, left
+	}
+	// Small origin sets stay allocation-free, including the common singleton.
+	if len(left.origins) <= 8 {
+		for _, a := range left.origins {
+			for _, b := range right.origins {
+				if sameFlowOrigin(a, b) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	// Copies of the same reference commonly share their first origin.
+	if sameFlowOrigin(left.origins[0], right.origins[0]) {
+		return true
+	}
+	// Branch joins normally canonicalize origins. Check the ordering rather
+	// than requiring all producers to maintain it, then merge without a map.
+	if slices.IsSortedFunc(left.origins, compareOverlapOrigin) && slices.IsSortedFunc(right.origins, compareOverlapOrigin) {
+		for i, j := 0, 0; i < len(left.origins) && j < len(right.origins); {
+			switch order := compareOverlapOrigin(left.origins[i], right.origins[j]); {
+			case order < 0:
+				i++
+			case order > 0:
+				j++
+			default:
 				return true
 			}
 		}
+		return false
+	}
+	// Match sameFlowOrigin exactly: an allocation-site pointer does not alter
+	// lexical identity. Index the smaller set without sorting/mutating either.
+	origins := make(map[flowOriginKey]struct{}, len(left.origins))
+	for _, origin := range left.origins {
+		origins[flowOriginKey{name: origin.name, declaration: origin.declaration}] = struct{}{}
+	}
+	for _, origin := range right.origins {
+		if _, found := origins[flowOriginKey{name: origin.name, declaration: origin.declaration}]; found {
+			return true
+		}
 	}
 	return false
+}
+
+func compareOverlapOrigin(left, right flowOrigin) int {
+	if order := compareSpan(left.declaration, right.declaration); order != 0 {
+		return order
+	}
+	return strings.Compare(left.name, right.name)
 }
 
 // Shared children preserve root loans and also freeze their named reference
