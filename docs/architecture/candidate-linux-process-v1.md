@@ -1,9 +1,9 @@
 # Private Fairy Linux process transport v1
 
-`examples/lexer_candidate/src/linux_process.fy` implements a private blocking
-runner for one Linux amd64 child. Fairy owns input preparation, start/wait
+`examples/lexer_candidate/src/linux_process.fy` implements private blocking and
+timed runners for one Linux amd64 child. Fairy owns input preparation, start/wait
 sequencing and the `Running` resource; `internal/candidatehost/linux_process.c`
-provides the three private start, wait and discard ABI functions.
+provides the private start, wait, wait-for and discard ABI functions.
 
 ## Launch and ownership
 
@@ -43,7 +43,8 @@ command encoder's argument index and byte offset.
 
 `Outcome` retains the PID, kind and value. Kind 1 means ordinary exit 0..255,
 including a genuine exit 127; kind 2 means termination by signal (accepted values
-1..64). Start errors remain distinct from exit status. Wait first observes exit
+1..64); kind 3 with value 0 means timeout and is accepted only by `run_for`.
+Start errors remain distinct from exit status. Blocking wait first observes exit
 with `waitid(P_PID, pid, ..., WEXITED | WNOWAIT)`, leaving the leader unreaped.
 It then sends `SIGKILL` to the original group (`-pid`) and separately to the
 leader (`pid`), which may have left that group, before `waitpid(pid, ..., 0)`
@@ -69,6 +70,34 @@ reaping are not guaranteed when cleanup fails. Descendants that escape the
 original process group or session are not contained. This is same-group cleanup,
 not an arbitrary process-tree guarantee, and only the direct child is reaped.
 
+## Timed exit observation
+
+`run` remains blocking. `run_for(program, arguments, directory, timeout_ms)`
+accepts 1..86,400,000 ms and rejects other budgets as input problems before
+allocation or launch. It uses `fairyc_private_linux_process_wait_for_v1` after
+spawn returns. The budget covers post-start exit observation; launch, cleanup,
+final reaping and scheduling delays are not bounded by it. This is not a hard
+deadline for the entire call.
+
+The adapter computes one absolute nanosecond deadline from `CLOCK_MONOTONIC`.
+Each poll queries `waitid` with `WEXITED | WNOHANG | WNOWAIT`, reserving the
+leader until cleanup. Completion observed at a poll wins even at the deadline
+and preserves ordinary exit/signal results. If that poll still finds a running
+child at the deadline, the adapter kills the original group and the leader,
+reaps the direct child, and returns timeout kind 3/value 0 on success.
+Between polls, absolute `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, ...)`
+targets advance by at most 10 ms, capped at the deadline. `EINTR` retries do not
+reset that deadline. See
+[clock_nanosleep(2)](https://man7.org/linux/man-pages/man2/clock_nanosleep.2.html).
+
+Clock, sleep, query, kill and reap failures become wait problems (kind 5) with
+the native code in `os_code`; `clock_nanosleep` supplies its return code directly,
+not `errno`. Clock overflow is `EOVERFLOW`; a reading before the start is `EIO`.
+During continuous `waitid` interruptions, each iteration checks the clock and
+returns `EINTR` at the deadline rather than signaling without a successful
+ownership query. Resource cleanup can then take additional time and still has
+the same failure and escaped-descendant limits.
+
 ## Platform and verification boundary
 
 The GNU/glibc extensions use the unchanged [Linux toolchain baseline](../abi/linux-toolchain-v0.md):
@@ -76,21 +105,31 @@ Ubuntu 24.04 amd64, glibc >= 2.39, GCC >= 13 or Clang >= 18. When combining C
 sources, `_GNU_SOURCE` must precede every system header; the private source
 selector returns process C before path C to preserve that ordering.
 
-Current Windows checks pass MSVC low/optimized adapter execution with updated
-POSIX substitutes: spawn-attribute failure cases 17–19, exact
-`WNOWAIT` -> negative group kill -> positive leader kill -> reap ordering,
-`ECHILD` without signaling, and PID 1 rejection. CLI process-policy tests with
-ABI stubs and argv tests pass in both profiles, as do Linux and Windows C
-emission. Candidate `check` and `check --locked` pass with 542 files and 6,924
-MIR functions; `go vet`, `gofmt` and diff checks also pass.
+Process-group ownership was committed in `cadce568`, with low/optimized POSIX
+substitute checks for attribute failures, observe/signal/reap ordering, `ECHILD`
+without signaling and PID 1 rejection. Current timed-wait POSIX substitutes pass
+in both profiles: 25 ms across a second boundary, interrupted sleeps without
+budget reset, early exit, initial/mid-wait clock failures, preserved sleep errors,
+`ECHILD` without signaling, interrupt-storm budget, invalid budget/PID,
+clock overflow/backward readings and kill `EPERM`.
+
+`TestLinuxCommandTransport` and `TestLinuxProcessPolicy` pass in low/optimized
+profiles with both-target C emission. Policy checks cover timeout kind 3,
+native-error/ABI classification, invalid budgets without start, ordinary exit 127,
+signal 9 and rejection of fabricated timeout kind 3 from unlimited `run` as ABI
+problem kind 6. Candidate `check` and `check --locked` pass with 542 files and
+6,926 MIR functions; the lock is updated and verified. `go vet -mod=readonly`
+also passes. The timed POSIX adapter checks pass in both profiles;
+this does not establish native Linux execution.
 
 The authored native Linux GCC/Clang probe also uses a subreaper to observe a
 leader exiting normally with status 17 while leaving a grandchild. It expects
 the grandchild to terminate by `SIGKILL` and reaps it, with a three-second alarm
-guarding failure. This probe is skipped on this Windows host; Windows substitutes
+guarding failure. The timed probe adds a slow process tree, waits for grandchild
+readiness before the 25 ms timed wait, then expects `SIGKILL` and reaps the
+grandchild. Native probes are skipped on this Windows host; Windows substitutes
 do not prove native Linux process behavior. This slice adds no new
 `_GNU_SOURCE` requirement: its existing placement before system headers remains.
-No public SDK, CLI dispatch or default compiler changes are included. Deadlines
-are a separate next slice; bounded I/O and the filesystem/CLI bridge remain
-future work. Containment of descendants that escape the group remains outside
-this runner's guarantee.
+No public SDK, CLI dispatch or default compiler changes are included. Bounded I/O,
+the filesystem/CLI bridge and native Linux proof remain future work. Containment
+of descendants that escape the group remains outside this runner's guarantee.

@@ -10,6 +10,40 @@ fn void add(ref mut v::Vec<bytes::Buffer> args,ref u8[] value) {
 }
 
 @test @effects(filesystem,environment,console)
+fn void validates_wait_budget_and_keeps_timeout_distinct() {
+    var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>(); add(ref mut args,b""); add(ref mut args,b"a b");
+    unsafe { mode(0); }
+    assert(!process::run_for(b"app",ref args,b"/tmp",0).is_ok);
+    assert(!process::run_for(b"app",ref args,b"/tmp",86400001).is_ok);
+    assert(unsafe { counts() }==0);
+    unsafe { mode(15); }
+    switch(process::run(b"app",ref args,b"/tmp")) {
+        case .ok(_): { assert(false); } case .err(e): { assert(e.kind==6); }
+    };
+    assert(unsafe { counts() }==110);
+    var u32 scenario=9;
+    while(scenario<=14) {
+        unsafe { mode(scenario); }
+        switch(process::run_for(b"app",ref args,b"/tmp",25)) {
+            case .ok(value): {
+                assert(scenario==9 || scenario==12 || scenario==13);
+                assert(value.kind==if(scenario==9){3}else if(scenario==12){1}else{2});
+                assert(value.value==if(scenario==9){0}else if(scenario==12){127}else{9});
+                assert(unsafe { counts() }==110);
+            }
+            case .err(e): {
+                assert(scenario==10 || scenario==11 || scenario==14);
+                assert(e.kind==if(scenario==11){5}else{6});
+                if(scenario==11) { assert(e.os_code==5); }
+                assert(unsafe { counts() }==if(scenario==11){111}else{110});
+            }
+        };
+        assert(v::len<bytes::Buffer>(ref args)==2);
+        scenario+=1;
+    }
+}
+
+@test @effects(filesystem,environment,console)
 fn void separates_launch_failures_exit_status_signals_and_cleanup() {
     var v::Vec<bytes::Buffer> args=v::empty<bytes::Buffer>(); add(ref mut args,b""); add(ref mut args,b"a b");
     var u32 scenario=0;

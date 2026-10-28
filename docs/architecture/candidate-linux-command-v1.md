@@ -64,7 +64,8 @@ hosts use GCC; Windows hosts use MSVC.
 Windows native execution validates the portable encoder, not Linux process
 execution or kernel argument limits. Native Linux execution and injected allocator
 failure remain unverified from this Windows host. No CI job or workflow is added.
-The private adapter now covers start, cwd and exit/signal collection as documented
-in [Private Fairy Linux process transport v1](candidate-linux-process-v1.md).
-Bounded I/O, deadlines, process-tree cleanup and the candidate CLI bridge remain
-future work.
+The private adapter now covers start, cwd, exit/signal collection, post-start
+timed wait and same-group cleanup as documented in
+[Private Fairy Linux process transport v1](candidate-linux-process-v1.md).
+Escaping descendants are not contained. Bounded I/O, the filesystem/CLI dispatch
+bridge and native Linux proof remain future work.

@@ -5,7 +5,8 @@ import "testing"
 func TestLinuxProcessPolicy(t *testing.T) {
 	runLinuxCandidateFixture(t, []string{"linux_command", "linux_process"}, "linux_process", `
 @effects(filesystem,environment,console) fn i32 main() {
-    separates_launch_failures_exit_status_signals_and_cleanup(); return 0;
+    separates_launch_failures_exit_status_signals_and_cleanup();
+    validates_wait_budget_and_keeps_timeout_distinct(); return 0;
 }
 `, linuxProcessPolicyStub)
 }
@@ -29,7 +30,18 @@ uint32_t fairyc_private_linux_process_wait_v1(uint32_t pid,uint32_t *kind,uint32
     assert(pid==4321); ++waits;
     if(scenario==5) { return 22; }
     *kind=scenario==2 ? 2 : 1; *value=scenario==0 ? 127 : scenario==1 ? 41 : 15;
-    if(scenario==7) { *kind=2; *value=0; } if(scenario==8) { *value=256; } return 0;
+    if(scenario==7) { *kind=2; *value=0; } if(scenario==8) { *value=256; }
+    if(scenario==15) { *kind=3; *value=0; } return 0;
+}
+uint32_t fairyc_private_linux_process_wait_for_v1(uint32_t pid,uint32_t timeout_ms,uint32_t *kind,uint32_t *value) {
+    assert(timeout_ms==25);
+    uint32_t code=fairyc_private_linux_process_wait_v1(pid,kind,value); assert(code==0);
+    if(scenario==9 || scenario==10) { *kind=3; *value=scenario==9 ? 0 : 1; }
+    if(scenario==11) { return 5; }
+    if(scenario==12) { *kind=1; *value=127; }
+    if(scenario==13) { *kind=2; *value=9; }
+    if(scenario==14) { *kind=0; *value=0; }
+    return 0;
 }
 uint32_t fairyc_private_linux_process_discard_v1(uint32_t pid) {
     if(pid!=0) { assert(pid==4321); ++discards; } return 0;

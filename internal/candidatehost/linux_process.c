@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 extern char **environ;
@@ -99,4 +100,55 @@ uint32_t fairyc_private_linux_process_discard_v1(uint32_t pid) {
     uint32_t code = fy_linux_process_observe(pid, WNOHANG);
     if (code != 0) { return code == ECHILD ? 0 : code; }
     return fy_linux_process_finish(pid, &status);
+}
+
+static uint32_t fy_linux_process_now(uint64_t *value) {
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) { return (uint32_t)errno; }
+    if (now.tv_sec < 0 || now.tv_nsec < 0 || now.tv_nsec >= 1000000000L ||
+        (uint64_t)now.tv_sec > (UINT64_MAX - UINT64_C(86401000000000)) / UINT64_C(1000000000)) {
+        return EOVERFLOW;
+    }
+    *value = (uint64_t)now.tv_sec * UINT64_C(1000000000) + (uint64_t)now.tv_nsec;
+    return 0;
+}
+
+/* This bounds exit observation, not posix_spawn, scheduling or the final reap. */
+uint32_t fairyc_private_linux_process_wait_for_v1(uint32_t pid, uint32_t timeout_ms,
+        uint32_t *kind, uint32_t *value) {
+    if (kind == NULL || value == NULL) { return EINVAL; }
+    *kind = 0; *value = 0;
+    if (pid <= 1 || pid > INT_MAX || timeout_ms == 0 || timeout_ms > 86400000) { return EINVAL; }
+    uint64_t started = 0;
+    uint32_t code = fy_linux_process_now(&started);
+    if (code != 0) { return code; }
+    const uint64_t deadline = started + (uint64_t)timeout_ms * UINT64_C(1000000);
+    for (;;) {
+        uint64_t now = 0;
+        code = fy_linux_process_now(&now);
+        if (code != 0) { return code; }
+        if (now < started) { return EIO; }
+        siginfo_t info;
+        memset(&info, 0, sizeof info);
+        if (waitid(P_PID, (id_t)pid, &info, WEXITED | WNOWAIT | WNOHANG) != 0) {
+            code = (uint32_t)errno;
+            /* An interrupt storm must not reset or bypass the wait budget. */
+            if (code == EINTR && now < deadline) { continue; }
+            return code;
+        }
+        if (info.si_pid != 0) { return fairyc_private_linux_process_wait_v1(pid, kind, value); }
+        if (now >= deadline) {
+            int status = 0;
+            code = fy_linux_process_finish(pid, &status);
+            if (code != 0) { return code; }
+            *kind = 3; /* Deadline observed while the leader was still running. */
+            return 0;
+        }
+        uint64_t wake = deadline - now > UINT64_C(10000000) ? now + UINT64_C(10000000) : deadline;
+        struct timespec until;
+        until.tv_sec = (time_t)(wake / UINT64_C(1000000000));
+        until.tv_nsec = (long)(wake % UINT64_C(1000000000));
+        int slept = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &until, NULL);
+        if (slept != 0 && slept != EINTR) { return (uint32_t)slept; }
+    }
 }

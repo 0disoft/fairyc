@@ -24,7 +24,7 @@ func LinuxSource(header string) (string, error) {
 		switch match[1] {
 		case "fairyc_private_linux_host_path_v1":
 			paths = true
-		case "fairyc_private_linux_process_start_v1", "fairyc_private_linux_process_wait_v1", "fairyc_private_linux_process_discard_v1":
+		case "fairyc_private_linux_process_start_v1", "fairyc_private_linux_process_wait_v1", "fairyc_private_linux_process_discard_v1", "fairyc_private_linux_process_wait_for_v1":
 			process = true
 		default:
 			return "", fmt.Errorf("unknown private Linux host symbol %s", match[1])
