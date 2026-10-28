@@ -1,8 +1,6 @@
 package semantic
 
 import (
-	"slices"
-
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
@@ -24,7 +22,9 @@ type resultUse struct {
 }
 
 type resultObligation struct {
-	pending   bool
+	pending bool
+	// Evidence is immutable after construction. Forks may share it; producing
+	// or joining obligations creates a new list, and handling replaces fields.
 	producers []hir.Span
 }
 
@@ -443,7 +443,6 @@ func pendingResult(producer hir.Span) resultObligation {
 func cloneResultEnvironment(input resultEnvironment) resultEnvironment {
 	result := make(resultEnvironment, len(input))
 	for value, obligation := range input {
-		obligation.producers = slices.Clone(obligation.producers)
 		result[value] = obligation
 	}
 	return result
