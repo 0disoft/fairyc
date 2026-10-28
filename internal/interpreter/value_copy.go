@@ -5,6 +5,12 @@ import "github.com/0disoft/fairyc/internal/hir"
 // Value copies detach inert storage. Borrowed values and resource ownership
 // retain their referents; copying an aggregate must never manufacture ownership.
 func (v runtimeValue) cloneForValueCopy() runtimeValue {
+	return v.cloneWithInertProof(false)
+}
+
+// knownInert is a traversal-local proof, never a cache on mutable runtime state.
+// Once a tagged subtree passes inertDropValue, its descendants need no rescan.
+func (v runtimeValue) cloneWithInertProof(knownInert bool) runtimeValue {
 	if _, _, borrowed := hir.BorrowElement(v.typ); borrowed {
 		return v
 	}
@@ -14,25 +20,25 @@ func (v runtimeValue) cloneForValueCopy() runtimeValue {
 		if v.array() != nil {
 			elements := make([]runtimeValue, len(v.array().elements))
 			for index, element := range v.array().elements {
-				elements[index] = element.cloneForValueCopy()
+				elements[index] = element.cloneWithInertProof(knownInert)
 			}
 			copy.payload = &arrayState{elements: elements}
 		}
 	case valueStruct:
 		if v.structure() != nil {
-			copy.payload = &structState{definition: v.structure().definition, fields: copyValueFields(v.structure().fields)}
+			copy.payload = &structState{definition: v.structure().definition, fields: copyFieldsWithInertProof(v.structure().fields, knownInert)}
 		}
 	case valueEnum:
 		if v.enum() != nil {
-			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyValueFields(v.enum().fields), fieldSlots: v.enum().fieldSlots}
+			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyFieldsWithInertProof(v.enum().fields, knownInert), fieldSlots: v.enum().fieldSlots}
 		}
 	case valueOption, valueResult:
 		// An owned resource payload uses the existing linear tagged state. Only
 		// inert wrappers may acquire an independent copy of that state.
-		if v.tagged() != nil && inertDropValue(v, 0) {
+		if v.tagged() != nil && (knownInert || inertDropValue(v, 0)) {
 			state := *v.tagged()
 			if state.payload != nil {
-				payload := state.payload.cloneForValueCopy()
+				payload := state.payload.cloneWithInertProof(true)
 				state.payload = &payload
 			}
 			copy.payload = &state
@@ -42,9 +48,13 @@ func (v runtimeValue) cloneForValueCopy() runtimeValue {
 }
 
 func copyValueFields(fields []runtimeValue) []runtimeValue {
+	return copyFieldsWithInertProof(fields, false)
+}
+
+func copyFieldsWithInertProof(fields []runtimeValue, knownInert bool) []runtimeValue {
 	copy := make([]runtimeValue, len(fields))
 	for index, value := range fields {
-		copy[index] = value.cloneForValueCopy()
+		copy[index] = value.cloneWithInertProof(knownInert)
 	}
 	return copy
 }
