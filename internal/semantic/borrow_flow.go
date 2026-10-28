@@ -47,6 +47,9 @@ type borrowLoanKey struct {
 	originPlace hir.Span
 }
 
+// Values stored in environments are immutable. Evaluation and materialization
+// clone values before modifying their evidence, and joins build new evidence.
+// Forks and replacements therefore copy map entries while sharing the slices.
 type borrowEnvironment map[*symbol]borrowValueState
 
 // Liveness traversal shares immutable maps with snapshots and sibling branches.
@@ -1357,7 +1360,7 @@ func cloneBorrowValue(value borrowValueState) borrowValueState {
 func cloneBorrowEnvironment(value borrowEnvironment) borrowEnvironment {
 	result := make(borrowEnvironment, len(value))
 	for symbol, state := range value {
-		result[symbol] = cloneBorrowValue(state)
+		result[symbol] = state
 	}
 	return result
 }
@@ -1365,7 +1368,7 @@ func cloneBorrowEnvironment(value borrowEnvironment) borrowEnvironment {
 func replaceBorrowEnvironment(target, source borrowEnvironment) {
 	clear(target)
 	for symbol, state := range source {
-		target[symbol] = cloneBorrowValue(state)
+		target[symbol] = state
 	}
 }
 
