@@ -173,6 +173,7 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 	uidPaths := make(map[string]string, len(packagePaths))
 	pathIndexes := make(map[string]int, len(packagePaths))
 	budget := limits{ctx: ctx}
+	directories := newDirectoryResolver()
 	for _, packagePath := range packagePaths {
 		if err := ctx.Err(); err != nil {
 			return Workspace{}, err
@@ -180,7 +181,7 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 		directory := workspaceRoot
 		manifest := rootManifest
 		if packagePath != "." {
-			directory, err = resolveDirectory(workspaceRoot, packagePath)
+			directory, err = directories.resolve(workspaceRoot, packagePath)
 			if err != nil {
 				return Workspace{}, err
 			}
@@ -196,7 +197,7 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 			return Workspace{}, &LoadError{Reason: ReasonDuplicatePackageUID, Path: packagePath, Detail: fmt.Sprintf("package UID %q is also declared by %q", manifest.Package.UID, previous)}
 		}
 		uidPaths[manifest.Package.UID] = packagePath
-		sourceRoot, err := resolveDirectory(directory, manifest.Package.Source)
+		sourceRoot, err := directories.resolve(directory, manifest.Package.Source)
 		if err != nil {
 			return Workspace{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath + "/" + manifest.Package.Source, Cause: err, Detail: err.Error()}
 		}
@@ -254,37 +255,6 @@ func readManifest(directory, packagePath string) (projectmanifest.Manifest, erro
 		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Cause: err, Detail: err.Error()}
 	}
 	return manifest, nil
-}
-
-func resolveDirectory(base, relative string) (string, error) {
-	current := base
-	for _, segment := range strings.Split(relative, "/") {
-		entries, err := os.ReadDir(current)
-		if err != nil {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
-		}
-		folded := make([]string, 0, 1)
-		for _, entry := range entries {
-			if strings.EqualFold(entry.Name(), segment) {
-				folded = append(folded, entry.Name())
-			}
-		}
-		if len(folded) != 1 || folded[0] != segment {
-			return "", &LoadError{Reason: ReasonPathCase, Path: relative, Detail: fmt.Sprintf("segment %q does not have one exact on-disk spelling", segment)}
-		}
-		current = filepath.Join(current, segment)
-		info, err := os.Lstat(current)
-		if err != nil {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
-		}
-		if info.Mode()&os.ModeSymlink != 0 {
-			return "", &LoadError{Reason: ReasonSymlink, Path: relative, Detail: "directory path contains a symlink"}
-		}
-		if !info.IsDir() {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Detail: "path is not a directory"}
-		}
-	}
-	return current, nil
 }
 
 type memberPathNode struct {
