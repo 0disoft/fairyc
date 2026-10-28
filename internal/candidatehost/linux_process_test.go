@@ -76,13 +76,20 @@ const linuxProcessPOSIXStub = `
 #include <string.h>
 typedef int pid_t;
 typedef struct { int active; } posix_spawn_file_actions_t;
+typedef struct { int active,group,flags; } posix_spawnattr_t;
+typedef unsigned int id_t;
+typedef struct { pid_t si_pid; } siginfo_t;
+#define P_PID 1
+#define WEXITED 4
+#define WNOWAIT 8
+#define POSIX_SPAWN_SETPGROUP 2
 #define WNOHANG 1
 #define SIGKILL 9
 #define WIFEXITED(s) (((s)&127)==0)
 #define WEXITSTATUS(s) (((s)>>8)&255)
 #define WIFSIGNALED(s) (((s)&127)!=0 && ((s)&127)!=127)
 #define WTERMSIG(s) ((s)&127)
-static int scenario, allocations, actions_live, spawn_calls, wait_calls, kills;
+static int scenario, allocations, actions_live, attrs_live, spawn_calls, wait_calls, queries, kills, group_kills, phase;
 static char **probe_environ;
 static void *probe_calloc(size_t n,size_t size) {
     if(scenario==1) { return NULL; }
@@ -99,17 +106,36 @@ static int probe_closefrom(posix_spawn_file_actions_t *p,int low) {
     assert(p->active && low==3); return scenario==4 ? EINVAL : 0;
 }
 static int probe_destroy(posix_spawn_file_actions_t *p) { assert(p->active); p->active=0; --actions_live; return 0; }
+static int probe_attr_init(posix_spawnattr_t *p) {
+    if(scenario==17) { return ENOMEM; }
+    memset(p,0,sizeof *p); p->active=1; ++attrs_live; return 0;
+}
+static int probe_attr_group(posix_spawnattr_t *p,pid_t group) {
+    assert(p->active && group==0); p->group=1; return scenario==18 ? EINVAL : 0;
+}
+static int probe_attr_flags(posix_spawnattr_t *p,short flags) {
+    assert(p->active && p->group && flags==POSIX_SPAWN_SETPGROUP); p->flags=flags;
+    return scenario==19 ? EINVAL : 0;
+}
+static int probe_attr_destroy(posix_spawnattr_t *p) { assert(p->active); p->active=0; --attrs_live; return 0; }
 static int probe_spawn(pid_t *pid,const char *path,const posix_spawn_file_actions_t *p,
-        const void *attributes,char *const argv[],char *const env[]) {
-    assert(p->active && attributes==NULL && env==probe_environ);
+        const posix_spawnattr_t *attributes,char *const argv[],char *const env[]) {
+    assert(p->active && attributes->active && attributes->group && attributes->flags==POSIX_SPAWN_SETPGROUP && env==probe_environ);
     assert(strcmp(path,"x")==0 && strcmp(argv[0],"x")==0 && strcmp(argv[1],"")==0 && strcmp(argv[2],"a b")==0 && argv[3]==NULL);
     ++spawn_calls; if(scenario==5) { return ENOENT; } if(scenario==6) { return EACCES; }
     *pid=4321; return 0;
 }
+static int probe_waitid(int type,id_t pid,siginfo_t *info,int flags) {
+    assert(type==P_PID && pid==4321 && (flags & (WEXITED|WNOWAIT))==(WEXITED|WNOWAIT));
+    ++queries;
+    if(scenario==11 && queries==1 || scenario==15) { errno=EINVAL; return -1; }
+    if(scenario==12) { errno=ECHILD; return -1; }
+    if(scenario==20 && queries==1) { errno=EINTR; return -1; }
+    info->si_pid=4321; phase=1; return 0;
+}
 static pid_t probe_waitpid(pid_t pid,int *status,int flags) {
-    assert(pid==4321); ++wait_calls;
+    assert(pid==4321 && phase==3); ++wait_calls;
     if(scenario==10 && wait_calls==1) { errno=EINTR; return -1; }
-    if(scenario==11 && wait_calls==1) { errno=EINVAL; return -1; }
     if(scenario==12 || scenario==14 && flags==0) { errno=ECHILD; return -1; }
     if(scenario==15) { errno=EINVAL; return -1; }
     if(flags==WNOHANG && scenario!=13) { return 0; }
@@ -117,7 +143,9 @@ static pid_t probe_waitpid(pid_t pid,int *status,int flags) {
     return pid;
 }
 static int probe_kill(pid_t pid,int sig) {
-    assert(pid==4321 && sig==SIGKILL); ++kills;
+    assert((pid==4321 || pid==-4321) && sig==SIGKILL);
+    if(pid<0) { assert(phase==1); phase=2; ++group_kills; }
+    else { assert(phase==2); phase=3; ++kills; }
     if(scenario==14) { errno=ESRCH; return -1; }
     if(scenario==16) { errno=EPERM; return -1; } return 0;
 }
@@ -129,7 +157,12 @@ static int probe_kill(pid_t pid,int sig) {
 #define posix_spawn_file_actions_addchdir_np probe_chdir
 #define posix_spawn_file_actions_addclosefrom_np probe_closefrom
 #define posix_spawn_file_actions_destroy probe_destroy
+#define posix_spawnattr_init probe_attr_init
+#define posix_spawnattr_setpgroup probe_attr_group
+#define posix_spawnattr_setflags probe_attr_flags
+#define posix_spawnattr_destroy probe_attr_destroy
 #define posix_spawn probe_spawn
+#define waitid probe_waitid
 #define waitpid probe_waitpid
 #define kill probe_kill
 `
@@ -137,11 +170,15 @@ static int probe_kill(pid_t pid,int sig) {
 const linuxProcessBoundaryProbe = `
 int main(void) {
     const uint8_t data[]="x\0\0a b",cwd[]="/tmp"; uint32_t pid=99,kind=99,value=99;
-    assert(fairyc_private_linux_process_start_v1(data,sizeof data,3,cwd,sizeof cwd,&pid)==0 && pid==4321 && allocations==0 && actions_live==0);
+    assert(fairyc_private_linux_process_start_v1(data,sizeof data,3,cwd,sizeof cwd,&pid)==0 && pid==4321 && allocations==0 && actions_live==0 && attrs_live==0);
     const uint32_t errors[]={0,ENOMEM,ENOMEM,ENOENT,EINVAL,ENOENT,EACCES};
     for(scenario=1;scenario<=6;++scenario) {
         assert(fairyc_private_linux_process_start_v1(data,sizeof data,3,cwd,sizeof cwd,&pid)==errors[scenario]);
-        assert(pid==0 && allocations==0 && actions_live==0);
+        assert(pid==0 && allocations==0 && actions_live==0 && attrs_live==0);
+    }
+    for(scenario=17;scenario<=19;++scenario) {
+        assert(fairyc_private_linux_process_start_v1(data,sizeof data,3,cwd,sizeof cwd,&pid)==(uint32_t)(scenario==17 ? ENOMEM : EINVAL));
+        assert(pid==0 && allocations==0 && actions_live==0 && attrs_live==0);
     }
     scenario=0; int before=spawn_calls;
     assert(fairyc_private_linux_process_start_v1(data,sizeof data,2,cwd,sizeof cwd,&pid)==EINVAL && pid==0);
@@ -162,14 +199,18 @@ int main(void) {
         assert(wait_calls==(scenario==10 ? 2 : 1));
     }
     assert(fairyc_private_linux_process_wait_v1(0,&kind,&value)==EINVAL && kind==0 && value==0);
-    scenario=11;wait_calls=0;kills=0;
+    assert(fairyc_private_linux_process_wait_v1(1,&kind,&value)==EINVAL);
+    scenario=11;wait_calls=0;queries=0;kills=0;group_kills=0;
     assert(fairyc_private_linux_process_wait_v1(4321,&kind,&value)==EINVAL);
-    assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==1);
-    scenario=12;kills=0; assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==0);
-    scenario=13; assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==0);
-    scenario=14; assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==1);
+    assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==1 && group_kills==1);
+    scenario=12;kills=0;group_kills=0; assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==0 && group_kills==0);
+    scenario=13; assert(fairyc_private_linux_process_discard_v1(4321)==0 && kills==1 && group_kills==1);
+    scenario=14;kills=0;group_kills=0; assert(fairyc_private_linux_process_discard_v1(4321)==ECHILD && kills==1 && group_kills==1);
     scenario=15;kills=0; assert(fairyc_private_linux_process_discard_v1(4321)==EINVAL && kills==0);
-    scenario=16; assert(fairyc_private_linux_process_discard_v1(4321)==EPERM && kills==1);
+    scenario=16; assert(fairyc_private_linux_process_discard_v1(4321)==EPERM && kills==0);
+    scenario=20;queries=0;wait_calls=0;
+    assert(fairyc_private_linux_process_wait_v1(4321,&kind,&value)==0 && queries==2);
+    assert(fairyc_private_linux_process_discard_v1(1)==EINVAL);
     assert(fairyc_private_linux_process_discard_v1(0)==0);
     return 0;
 }
@@ -179,10 +220,19 @@ const linuxProcessNativeProbe = `
 #include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <sys/prctl.h>
 int main(int argc,char **argv) {
     if(argc>1) {
         if(strcmp(argv[1],"127")==0) { return 127; }
         if(strcmp(argv[1],"signal")==0) { raise(SIGTERM); return 1; }
+        if(strcmp(argv[1],"tree")==0) {
+            assert(getpgrp()==getpid());
+            pid_t descendant=fork(); assert(descendant>=0);
+            if(descendant==0) { alarm(3); for(;;) { pause(); } }
+            FILE *receipt=fopen(argv[2],"w"); assert(receipt!=NULL);
+            assert(fprintf(receipt,"%d",(int)descendant)>0 && fclose(receipt)==0);
+            return 17;
+        }
         char current[4096]; assert(getcwd(current,sizeof current)!=NULL && strcmp(current,argv[2])==0);
         assert(argc==6 && strcmp(argv[3],"")==0 && strcmp(argv[4],"a b\"\\")==0);
         errno=0; assert(fcntl(atoi(argv[5]),F_GETFD)==-1 && errno==EBADF); return 41;
@@ -210,7 +260,17 @@ int main(int argc,char **argv) {
     char denied[4096]; assert(snprintf(denied,sizeof denied,"%s/denied",directory)>0);
     int file=open(denied,O_WRONLY|O_CREAT|O_EXCL,0600); assert(file>=0 && close(file)==0);
     assert(fairyc_private_linux_process_start_v1((uint8_t *)denied,strlen(denied)+1,1,(uint8_t *)directory,strlen(directory)+1,&pid)==EACCES && pid==0);
-    assert(unlink(denied)==0 && rmdir(directory)==0);
+    assert(unlink(denied)==0);
+    assert(prctl(PR_SET_CHILD_SUBREAPER,1,0,0,0)==0);
+    char receipt[4096]; assert(snprintf(receipt,sizeof receipt,"%s/child",directory)>0);
+    used=0; const char *tree[]={image,"tree",receipt};
+    for(size_t i=0;i<3;++i) { size_t n=strlen(tree[i])+1; assert(used+n<=sizeof packed); memcpy(packed+used,tree[i],n); used+=n; }
+    assert(fairyc_private_linux_process_start_v1((uint8_t *)packed,used,3,(uint8_t *)directory,strlen(directory)+1,&pid)==0);
+    assert(fairyc_private_linux_process_wait_v1(pid,&kind,&value)==0 && kind==1 && value==17);
+    FILE *input=fopen(receipt,"r"); int descendant=0;
+    assert(input!=NULL && fscanf(input,"%d",&descendant)==1 && descendant>1 && fclose(input)==0);
+    assert(waitpid((pid_t)descendant,&status,0)==descendant && WIFSIGNALED(status) && WTERMSIG(status)==SIGKILL);
+    assert(unlink(receipt)==0 && rmdir(directory)==0);
     char after[4096]; assert(getcwd(after,sizeof after)!=NULL && strcmp(original,after)==0);
     assert(waitpid(-1,&status,WNOHANG)==-1 && errno==ECHILD);
     return 0;

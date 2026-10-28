@@ -19,7 +19,7 @@ fn Problem fail(u32 kind,u32 os_code,usize argument,usize offset) { return Probl
 fn Problem encoded(command::Problem value) { return fail(value.kind,0,value.argument,value.offset); }
 
 // Internal blocking primitive: inherits environment and standard streams.
-// Deadline/process-tree policy and public CLI dispatch are separate slices.
+// Each child owns a process group. Deadlines and public CLI dispatch are separate.
 @effects(filesystem,environment,console)
 pub fn Result<Outcome,Problem> run(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory) {
     let argv=switch(command::build(program,arguments)) { case .ok(p): { p } case .err(e): { return .err(encoded(e)); } };
@@ -27,7 +27,7 @@ pub fn Result<Outcome,Problem> run(ref u8[] program,ref v::Vec<bytes::Buffer> ar
     var u32 pid=0;
     let status=unsafe { start(command::view(ref argv) as ptr u8,command::view(ref argv).len,command::count(ref argv),bytes::view(ref cwd) as ptr u8,bytes::len(ref cwd),ref mut pid as ptr mut u32) };
     if(status!=0) { return .err(fail(4,status,0,0)); }
-    if(pid==0 || pid>2147483647) { return .err(fail(6,0,0,0)); }
+    if(pid<=1 || pid>2147483647) { return .err(fail(6,0,0,0)); }
     var Running child=Running{.pid};
     var u32 kind=0; var u32 value=0;
     let collected=unsafe { wait(pid,ref mut kind as ptr mut u32,ref mut value as ptr mut u32) };
