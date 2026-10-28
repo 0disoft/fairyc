@@ -1,0 +1,119 @@
+{
+  "schema": "fairyc.windows-editor-release-draft/v1",
+  "status": "local-draft",
+  "asOf": "2026-10-28",
+  "releaseTag": null,
+  "publicationApproved": false,
+  "compilerSourceRevision": "315ef56991d20fa0716927e4fcecb464231db6a8",
+  "artifacts": [
+    {
+      "name": "fairyc-windows-amd64-preview-candidate.zip",
+      "kind": "compiler-and-language-server",
+      "localPath": ".cache/starter-smoke-hcotc1/fairyc-windows-amd64-preview-candidate.zip",
+      "bytes": 7733751,
+      "sha256": "6c6f7babb7d49035794051e71026c6916919ce06b591c0c5011a022fd322fcdf",
+      "sourceRevision": "315ef56991d20fa0716927e4fcecb464231db6a8"
+    },
+    {
+      "name": "fairyc-windows-amd64-preview-candidate.zip.sha256",
+      "kind": "compiler-archive-checksum",
+      "localPath": ".cache/starter-smoke-hcotc1/fairyc-windows-amd64-preview-candidate.zip.sha256",
+      "bytes": 109,
+      "sha256": "f17183bc08a52237c628e13d84ed38c10cc55afacfb2ab2a1501299117a7f354",
+      "sourceRevision": "315ef56991d20fa0716927e4fcecb464231db6a8"
+    },
+    {
+      "name": "fairyc-0.1.2.vsix",
+      "kind": "vscode-extension",
+      "localPath": ".cache/editor-release/fairyc-0.1.2.vsix",
+      "bytes": 477873,
+      "sha256": "bef1f0f232d9cb3320497e812e9bfb91a364f4f1a257e55b52ea160c00d7d93b",
+      "sourceRevision": null
+    },
+    {
+      "name": "fairyc-0.1.2.vsix.sha256",
+      "kind": "vscode-extension-checksum",
+      "localPath": ".cache/editor-release/fairyc-0.1.2.vsix.sha256",
+      "bytes": 84,
+      "sha256": "ccaaa3cb080fd7ad218f17efece5ad31a4bf1cb823d0a93a6b3530de55b130c2",
+      "sourceRevision": null
+    }
+  ],
+  "bundledExecutables": [
+    {
+      "name": "fairyc.exe",
+      "bytes": 13264896,
+      "sha256": "960e4439f1f59eb40fece6a8bf905cdef4980af8de3a9848054205ac96bf47b9",
+      "sourceRevision": "315ef56991d20fa0716927e4fcecb464231db6a8"
+    },
+    {
+      "name": "fairyc-lsp.exe",
+      "bytes": 8210432,
+      "sha256": "6ab141d972848b6027dbbfd045808290320026c39293e5f134a70265d47b1a82",
+      "sourceRevision": "315ef56991d20fa0716927e4fcecb464231db6a8"
+    }
+  ],
+  "compilerBuild": {
+    "go": "go1.27.1",
+    "flags": [
+      "-trimpath",
+      "-ldflags=-s -w"
+    ],
+    "modified": false,
+    "sdk": "fairyc-sdk-stdlib/0 0.0.0-stage0.87",
+    "language": "fairyc-language/20"
+  },
+  "extension": {
+    "id": "0disoft.fairyc",
+    "version": "0.1.2",
+    "sourceRevision": null,
+    "sourceRevisionStatus": "not-embedded-or-recorded",
+    "packagingImplementationCommit": "6001b489e5aac5295476064507d3683681f85b4d",
+    "packagingImplementationIsBuildProvenance": false
+  },
+  "evidence": [
+    {
+      "localPath": ".cache/starter-smoke-hcotc1/receipt.json",
+      "sha256": "6a855544ad49528602dff44a76db15ed3996f575501c8aea7b9c048bd695b45f"
+    },
+    {
+      "localPath": ".cache/editor-release/install-d7396fc46b704e0c957a8763d42a38cd/receipt.json",
+      "sha256": "37299322e4e3220f44fd032f860363664cd3155a7807864dc42d57d37d5da732"
+    },
+    {
+      "localPath": ".cache/windows-editor-B3iiFY/local-results/receipt.json",
+      "sha256": "aac127e41a48012352e8b1be518a2471fd47f55ed48fb75c758d18c11724b61b"
+    }
+  ],
+  "validation": {
+    "candidateStarterSteps": 16,
+    "installedVSCode": "1.143.1",
+    "editorHost": "HP15",
+    "portableHarnessPowerShell": "5.1.26100.9711",
+    "externalToolsAbsentFromChildPATH": [
+      "go.exe",
+      "node.exe",
+      "bun.exe"
+    ],
+    "cleanMachineEvidence": false,
+    "additionalGRAM13EditorValidation": "skipped-by-user"
+  },
+  "pending": {
+    "candidateWindowsNativeCI": {
+      "revision": "315ef56991d20fa0716927e4fcecb464231db6a8",
+      "status": "not-verified",
+      "job": "Windows native target smoke",
+      "workflow": ".github/workflows/frontend.yml"
+    },
+    "releaseIdentity": "undecided",
+    "extensionBuildProvenance": "unrecorded-label-must-be-retained",
+    "publicDownloadAndSecurityRoute": "refresh-required-before-publication",
+    "publication": "requires-separate-authorization"
+  },
+  "transferBundle": {
+    "localPath": ".cache/windows-editor-B3iiFY/fairyc-windows-editor-verify.zip",
+    "sha256": "80234672961ed51a54cd0948b789bba9f58fc5e38180091f1ef75846cb27f538",
+    "role": "retained-local-verification-only",
+    "includedInPublishedAssets": false
+  }
+}

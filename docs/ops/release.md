@@ -2,6 +2,12 @@
 
 - Status: Experimental Windows preview published: [v0.1.0-preview.1](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)
 
+## Windows editor preview draft (2026-10-28)
+
+Local-only Korean draft: [windows-editor-preview-release-draft.ko.md](windows-editor-preview-release-draft.ko.md).
+Exact file identities: [windows-editor-preview-assets.json](windows-editor-preview-assets.json).
+The draft does not change the published status or release gates below.
+
 ## Operational Contract
 
 New Windows/AMD64 preview candidates are experimental compiler and
