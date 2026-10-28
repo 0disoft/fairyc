@@ -24,7 +24,7 @@ func (v runtimeValue) cloneForValueCopy() runtimeValue {
 		}
 	case valueEnum:
 		if v.enum() != nil {
-			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyValueFields(v.enum().fields)}
+			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyValueFields(v.enum().fields), fieldSlots: v.enum().fieldSlots}
 		}
 	case valueOption, valueResult:
 		// An owned resource payload uses the existing linear tagged state. Only

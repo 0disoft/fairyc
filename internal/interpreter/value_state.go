@@ -33,6 +33,8 @@ type enumState struct {
 	definition *mir.EnumType
 	variant    string
 	fields     []runtimeValue
+	// Immutable declaration slots, shared by value copies of the same layout.
+	fieldSlots map[string]int
 }
 
 type resourceState struct {

@@ -61,6 +61,15 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		}
 		state.fields[index] = values[source].cloneForValueCopy()
 	}
+	if sources != nil {
+		// Reuse the construction index instead of allocating a second lookup table.
+		// Publish only declaration names; reverse insertion preserves first-field lookup.
+		clear(sources)
+		for index := len(variant.Fields) - 1; index >= 0; index-- {
+			sources[variant.Fields[index].Name] = index
+		}
+		state.fieldSlots = sources
+	}
 	return runtimeValue{kind: valueEnum, typ: definition.Type, payload: state}, nil
 }
 
@@ -146,6 +155,16 @@ func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field strin
 	}
 	if definition == nil || v.enum().definition.Type != definition.Type || v.enum().variant != variant {
 		return runtimeValue{}, fmt.Errorf("enum payload definition or active variant does not match")
+	}
+	// Prepared MIR definitions stay immutable. A different definition pointer
+	// retains the original declaration scan, even if its nominal type is equal.
+	if v.enum().definition == definition && v.enum().fieldSlots != nil {
+		if index, found := v.enum().fieldSlots[field]; found {
+			if value, found := indexedField(v.enum().fields, index); found {
+				return value, nil
+			}
+		}
+		return runtimeValue{}, fmt.Errorf("enum %q variant %q has no active field %q", definition.Type, variant, field)
 	}
 	for _, declared := range definition.Variants {
 		if declared.Name != variant {
