@@ -32,6 +32,12 @@ func storeScalarDeref(locals map[mir.LocalID]runtimeValue, op mir.Operation) err
 
 func (r *scalarReference) load() (runtimeValue, bool) {
 	if r.array != nil {
+		if backing := r.array.byteElements; backing != nil {
+			if r.index >= uint64(len(backing)) {
+				return runtimeValue{}, false
+			}
+			return runtimeValue{kind: valueU8, typ: hir.TypeU8, scalar: uint64(backing[r.index])}, true
+		}
 		if r.index >= uint64(len(r.array.elements)) {
 			return runtimeValue{}, false
 		}
@@ -51,6 +57,10 @@ func (r *scalarReference) load() (runtimeValue, bool) {
 }
 func (r *scalarReference) store(v runtimeValue) {
 	if r.array != nil {
+		if r.array.byteElements != nil {
+			r.array.byteElements[r.index] = byte(v.u64())
+			return
+		}
 		r.array.elements[r.index] = v
 		return
 	}

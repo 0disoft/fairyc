@@ -14,6 +14,12 @@ func (v runtimeValue) byteAt(index uint64) (byte, error) {
 	}
 	absolute := v.view().offset + index
 	if v.view().array != nil {
+		if backing := v.view().array.byteElements; backing != nil {
+			if absolute >= uint64(len(backing)) {
+				return 0, capabilityError("byte-view read exceeds its array backing")
+			}
+			return backing[absolute], nil
+		}
 		if absolute >= uint64(len(v.view().array.elements)) {
 			return 0, capabilityError("byte-view read exceeds its array backing")
 		}
@@ -53,6 +59,13 @@ func (v runtimeValue) storeIndexed(index uint64, value runtimeValue) error {
 		return capabilityError("mutable byte-view store received an invalid runtime value")
 	}
 	absolute := v.view().offset + index
+	if backing := v.view().array.byteElements; backing != nil {
+		if element != hir.TypeU8 || absolute >= uint64(len(backing)) {
+			return capabilityError("mutable byte-view store exceeds its byte backing or has a non-u8 type")
+		}
+		backing[absolute] = byte(value.u64())
+		return nil
+	}
 	if absolute >= uint64(len(v.view().array.elements)) {
 		return capabilityError("mutable byte-view store exceeds its array backing")
 	}

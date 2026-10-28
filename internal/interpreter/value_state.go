@@ -44,6 +44,8 @@ type resourceState struct {
 
 type arrayState struct {
 	elements []runtimeValue
+	// Region byte views use packed backing; owned fixed arrays retain typed elements.
+	byteElements []byte
 }
 
 type indexedViewState struct {

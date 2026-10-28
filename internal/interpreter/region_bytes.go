@@ -18,17 +18,15 @@ func (r *executionState) regionBytes(input runtimeValue, copyInput bool) (runtim
 		return runtimeValue{}, err
 	}
 	r.steps -= int(length)
-	backing := &arrayState{elements: make([]runtimeValue, int(length))}
-	for i := range backing.elements {
-		var value byte
-		if copyInput {
-			var err error
-			value, err = input.byteAt(uint64(i))
+	backing := &arrayState{byteElements: make([]byte, int(length))}
+	if copyInput {
+		for i := range backing.byteElements {
+			value, err := input.byteAt(uint64(i))
 			if err != nil {
 				return runtimeValue{}, err
 			}
+			backing.byteElements[i] = value
 		}
-		backing.elements[i] = runtimeValue{kind: valueU8, typ: hir.TypeU8, scalar: uint64(value)}
 	}
 	return runtimeValue{kind: valueView, typ: hir.MutableBorrow(hir.TypeByteSlice), payload: &indexedViewState{array: backing, length: length, mutable: true}}, nil
 }
