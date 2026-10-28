@@ -83,16 +83,39 @@ func (f *borrowFlowAnalyzer) checkSubviewPathAccess(expression *ast.Expression, 
 		}
 		f.analyzer.addDiagnostic("E2101", primary, RelatedSpan{Role: "loan", Span: loan}, RelatedSpan{Role: "last-use", Span: lastUse})
 	}
+	var accessLoansSorted, accessLoansChecked bool
 	check := func(retained borrowValueState, lastUse hir.Span) {
 		if !borrowValuesOverlap(access, retained) {
 			return
 		}
+		// Materialized IDs are sorted. Walk both lists once, preserving retained
+		// order; check lazily and retain linear search for noncanonical inputs.
+		ordered := false
+		if len(access.loans) > 1 && len(retained.loans) > 1 {
+			if !accessLoansChecked {
+				accessLoansSorted = slices.IsSorted(access.loans)
+				accessLoansChecked = true
+			}
+			ordered = accessLoansSorted && slices.IsSorted(retained.loans)
+		}
+		accessIndex := 0
 		for _, id := range retained.loans {
-			if id >= 0 && id < len(f.loans) && !slices.Contains(access.loans, id) {
-				loan := f.loans[id]
-				if loan.subview || ordinaryRead && loan.owner == owner && loan.fact.Kind == "mutable" {
-					report(loan.fact.Borrow, lastUse)
+			if id < 0 || id >= len(f.loans) {
+				continue
+			}
+			if ordered {
+				for accessIndex < len(access.loans) && access.loans[accessIndex] < id {
+					accessIndex++
 				}
+				if accessIndex < len(access.loans) && access.loans[accessIndex] == id {
+					continue
+				}
+			} else if slices.Contains(access.loans, id) {
+				continue
+			}
+			loan := f.loans[id]
+			if loan.subview || ordinaryRead && loan.owner == owner && loan.fact.Kind == "mutable" {
+				report(loan.fact.Borrow, lastUse)
 			}
 		}
 		for _, pending := range retained.pending {
