@@ -4,8 +4,13 @@ Verify a packaged VSIX in an isolated Windows VS Code profile.
 .EXAMPLE
 ./tools/test-vscode-install.ps1 -CodeRoot 'C:\Program Files\Microsoft VS Code'
 Requires the packaged VSIX and .cache/editor-release/fairyc-lsp.exe.
+Use -PreviewReceipt and -PreviewRevision together to verify and extract a retained preview ZIP instead.
 #>
-param([Parameter(Mandatory = $true)][string]$CodeRoot)
+param(
+    [Parameter(Mandatory = $true)][string]$CodeRoot,
+    [string]$PreviewReceipt,
+    [string]$PreviewRevision
+)
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -14,9 +19,18 @@ $releaseRoot = Join-Path $repoRoot '.cache/editor-release'
 $manifest = Get-Content -LiteralPath (Join-Path $repoRoot 'editors/vscode/package.json') -Raw | ConvertFrom-Json
 $vsix = Join-Path $releaseRoot ($manifest.name + '-' + $manifest.version + '.vsix')
 $server = Join-Path $releaseRoot 'fairyc-lsp.exe'
+$preview = $null
+if ([bool]$PreviewReceipt -ne [bool]$PreviewRevision) { throw 'PreviewReceipt and PreviewRevision must be provided together' }
+if ($PreviewReceipt) {
+    $PreviewReceipt = (Resolve-Path -LiteralPath $PreviewReceipt).Path
+    $recheck = @(& node (Join-Path $PSScriptRoot 'windows-preview/verify.mjs') --receipt $PreviewReceipt --revision $PreviewRevision 2>&1)
+    if ($LASTEXITCODE -ne 0) { throw "Preview verification failed: $($recheck -join "`n")" }
+    $preview = ($recheck -join "`n") | ConvertFrom-Json
+    if (-not $preview.passed -or -not $preview.PSObject.Properties['lspSHA256']) { throw 'Preview receipt must describe a verified compiler and LSP ZIP' }
+}
 $codeCLI = Join-Path $CodeRoot 'bin/code.cmd'
 $codeEXE = Join-Path $CodeRoot 'Code.exe'
-foreach ($required in @($vsix, "$vsix.sha256", $server, $codeCLI, $codeEXE)) {
+foreach ($required in @($vsix, "$vsix.sha256", $codeCLI, $codeEXE)) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Required file missing: $required" }
 }
 $digest = (Get-FileHash -LiteralPath $vsix -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -56,6 +70,15 @@ $harness = Join-Path $runRoot 'harness'
 foreach ($directory in @((Join-Path $userData 'User'), $extensions, $workspace, $harness)) {
     New-Item -ItemType Directory -Path $directory -Force | Out-Null
 }
+if ($preview) {
+    $previewDirectory = Join-Path $runRoot 'preview'
+    Expand-Archive -LiteralPath $preview.archive -DestinationPath $previewDirectory
+    $server = Join-Path $previewDirectory 'fairyc-lsp.exe'
+}
+$server = (Resolve-Path -LiteralPath $server).Path
+$serverDigest = (Get-FileHash -LiteralPath $server -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($preview -and $serverDigest -cne $preview.lspSHA256) { throw 'Extracted LSP hash differs from the verified preview' }
+$serverBytes = (Get-Item -LiteralPath $server).Length
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 $settings = @{ 'fairyc.server.path' = $server; 'telemetry.telemetryLevel' = 'off'; 'update.mode' = 'none'; 'extensions.autoUpdate' = $false }
 [System.IO.File]::WriteAllText((Join-Path $userData 'User/settings.json'), ($settings | ConvertTo-Json), $utf8)
@@ -81,7 +104,14 @@ $hostReceiptPath = Join-Path $runRoot 'host-receipt.json'
 if (-not (Test-Path -LiteralPath $hostReceiptPath)) { throw "Extension host produced no receipt; see $runRoot" }
 $hostReceipt = Get-Content -LiteralPath $hostReceiptPath -Raw | ConvertFrom-Json
 if (-not $hostReceipt.passed) { throw $hostReceipt.error }
-$receipt = @{ schema = 'fairyc.vscode-install/v1'; vsix = $vsix; sha256 = $digest;
+if ($hostReceipt.serverPath -cne $server -or $hostReceipt.serverSHA256 -cne $serverDigest) { throw 'Extension host used a different configured LSP' }
+if ((Get-FileHash -LiteralPath $server -Algorithm SHA256).Hash.ToLowerInvariant() -cne $serverDigest) { throw 'LSP changed during verification' }
+if ((Get-FileHash -LiteralPath $vsix -Algorithm SHA256).Hash.ToLowerInvariant() -cne $digest) { throw 'VSIX changed during verification' }
+if ($preview -and (Get-FileHash -LiteralPath $preview.archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne $preview.archiveSHA256) { throw 'Preview ZIP changed during verification' }
+$receipt = @{ schema = 'fairyc.vscode-install/v2'; vsix = $vsix; sha256 = $digest;
+    server = @{ path = $server; sha256 = $serverDigest; bytes = $serverBytes };
+    preview = $(if ($preview) { @{ receipt = $PreviewReceipt; revision = $preview.sourceRevision; archive = $preview.archive; sha256 = $preview.archiveSHA256 } } else { $null });
+    cleanMachineEvidence = $false; publicationApproved = $false;
     archiveFiles = $names.Count; dependencyLicenseFiles = $dependencyLicenses.Count;
     installationOutput = @($installation | ForEach-Object { "$_" }); installed = @($installed | ForEach-Object { "$_" }); host = $hostReceipt }
 $receiptPath = Join-Path $runRoot 'receipt.json'

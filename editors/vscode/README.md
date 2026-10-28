@@ -64,6 +64,41 @@ go build -o .cache/fairyc-lsp.exe ./cmd/fairyc-lsp
 
 Set `fairyc.server.path` to the absolute path of that source-built executable.
 
+## Maintainer install validation
+
+`tools/test-vscode-install.ps1` validates the existing local VSIX and can reuse a
+retained Windows preview candidate without building or repackaging either artifact.
+Run it from the repository root with the absolute path to a VS Code installation:
+Use the receipt and full source revision of your retained candidate; the values
+below identify the locally tested pair.
+
+```powershell
+./tools/test-vscode-install.ps1 `
+  -CodeRoot 'C:/Users/cherr/AppData/Local/Programs/Microsoft VS Code' `
+  -PreviewReceipt '.cache/starter-smoke-hcotc1/receipt.json' `
+  -PreviewRevision '315ef56991d20fa0716927e4fcecb464231db6a8'
+```
+
+`-CodeRoot` is mandatory. `-PreviewReceipt` and `-PreviewRevision` are optional
+and must be supplied together. The Node.js verifier rechecks the v2 starter-smoke
+receipt, full source revision, candidate archive, and recorded compiler and LSP
+hashes. The harness then extracts the retained ZIP into a fresh isolated test
+directory, sets the absolute server path, and installs
+`.cache/editor-release/fairyc-0.1.2.vsix` into an isolated VS Code profile. It
+checks `.fy` association, activation, definition, completion, unsaved
+diagnostics, and recovery, then writes schema `fairyc.vscode-install/v2` to
+`.cache/editor-release/install-*/receipt.json` with the VSIX, ZIP, and LSP hashes.
+
+Without the paired preview arguments, the harness uses
+`.cache/editor-release/fairyc-lsp.exe`. It does not modify the user's VS Code
+profile. The disposable test workspace is trusted (the workspace-trust prompt is
+disabled), so this check does not prove untrusted-workspace behavior.
+
+The maintainer harness needs Windows PowerShell and VS Code; its preview verifier
+also needs Node.js 22 or newer. End users need no standalone Go, Node.js, or Bun
+installation for the prebuilt VSIX and ZIP. Record separate-host verification
+independently; this harness establishes local integration only.
+
 ## License
 
 Project-owned extension files are Apache-2.0; the package includes `LICENSE`.

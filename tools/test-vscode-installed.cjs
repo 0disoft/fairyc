@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const vscode = require('vscode');
 
 async function eventually(read, accept, label) {
@@ -26,6 +27,9 @@ exports.run = async function () {
     const document = await vscode.workspace.openTextDocument(uri);
     assert.equal(document.languageId, 'fairyc');
     assert.equal(vscode.workspace.isTrusted, true);
+    const serverPath = vscode.workspace.getConfiguration('fairyc').get('server.path');
+    assert(path.isAbsolute(serverPath), 'Language server path must be absolute');
+    const serverSHA256 = createHash('sha256').update(fs.readFileSync(serverPath)).digest('hex');
     await vscode.window.showTextDocument(document);
     await extension.activate();
     assert.equal(extension.isActive, true);
@@ -50,6 +54,7 @@ exports.run = async function () {
     assert.equal(fs.readFileSync(uri.fsPath, 'utf8'), original);
     fs.writeFileSync(receiptPath, JSON.stringify({passed: true, vscode: vscode.version,
       extension: extension.id, version: extension.packageJSON.version, extensionPath: extension.extensionPath,
+      serverPath, serverSHA256, trustedWorkspace: vscode.workspace.isTrusted,
       languageId: document.languageId, definitionCount: definitions.length,
       completionCount: completion.items.length, unsavedDiagnosticsAndRecovery: true}, null, 2));
     console.log('Installed Fairy C: .fy association, activation, definition, completion, unsaved diagnostics and recovery passed');
