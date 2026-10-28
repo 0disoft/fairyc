@@ -333,6 +333,9 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 			receiver := assignmentRootPath(statement.Target.Children[0])
 			if binding := f.analyzer.resolved[receiver]; isSafeBorrowSymbol(binding) {
 				retained := cloneBorrowLive(previous)
+				if retained == nil {
+					retained = make(borrowLiveMap)
+				}
 				retained[binding] = span(f.module.file.Path, statement.Target.Span)
 				f.liveAfter[statement] = retained
 			}
@@ -1434,6 +1437,11 @@ func uniqueInts(values []int) []int {
 }
 
 func cloneBorrowLive(value borrowLiveMap) borrowLiveMap {
+	// Empty snapshots are read-only until a live borrow is added. Keep them nil
+	// so scalar expressions and statement snapshots do not each allocate a map.
+	if len(value) == 0 {
+		return nil
+	}
 	result := make(borrowLiveMap, len(value))
 	for symbol, use := range value {
 		result[symbol] = use
@@ -1563,6 +1571,9 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 		if isSafeBorrowSymbol(value) {
 			use := span(f.module.file.Path, expression.Span)
 			if previous, found := live[value]; !found || use.EndByte > previous.EndByte {
+				if live == nil {
+					live = make(borrowLiveMap)
+				}
 				live[value] = use
 			}
 		}
