@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"hash"
-	"io"
 	"strings"
 )
 
@@ -138,12 +137,10 @@ func decodeVersion(encoded []byte, maxBytes uint64, schema, encoding, logical st
 	if err := decoder.Decode(&envelope); err != nil {
 		return Partition{}, fmt.Errorf("decode .fymap: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return Partition{}, fmt.Errorf("decode .fymap: trailing JSON value")
-		}
-		return Partition{}, fmt.Errorf("decode .fymap trailing data: %w", err)
+	// The decoder may have buffered bytes beyond the first value. Inspect the
+	// original suffix without allocating an object tree for rejected input.
+	if len(bytes.TrimLeft(encoded[decoder.InputOffset():], " \t\r\n")) != 0 {
+		return Partition{}, fmt.Errorf("decode .fymap: trailing JSON value or invalid data")
 	}
 	if envelope.Schema != schema {
 		return Partition{}, fmt.Errorf(".fymap schema %q is incompatible with %q", envelope.Schema, schema)
