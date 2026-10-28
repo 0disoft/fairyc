@@ -379,7 +379,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				}
 				locals[operation.DestinationLocal] = constructed
 			case mir.OperationFieldStore:
-				if err := storeField(locals, operation, r.structTypes); err != nil {
+				if err := storeField(locals, operation, r.structTypes, &r.fieldSlots); err != nil {
 					return callCompletion{}, fmt.Errorf("field store in %q: %w", function.Name, err)
 				}
 			case mir.OperationDerefStore:

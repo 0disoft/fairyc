@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType) error {
+func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType, fieldSlots *aggregateFieldIndex) error {
 	if len(op.Operands) != 2 {
 		return fmt.Errorf("invalid field store operand count")
 	}
@@ -56,7 +56,7 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 			if current.structure() == nil || current.structure().definition == nil {
 				return fmt.Errorf("missing live nested field store owner")
 			}
-			child, found := indexedField(current.structure().fields, structFieldIndex(current.structure().definition, name))
+			child, found := indexedField(current.structure().fields, fieldSlots.structField(current.structure().definition, name))
 			if !found || child.structure() == nil {
 				return fmt.Errorf("invalid live nested field store path")
 			}
@@ -65,7 +65,15 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		if current.structure() == nil || current.structure().definition == nil {
 			return fmt.Errorf("missing nested leaf owner")
 		}
-		for index, field := range current.structure().definition.Fields {
+		definition := current.structure().definition
+		// Start at the first name match. Continuing on a type mismatch preserves
+		// the old first-name-and-type behavior even for malformed duplicates.
+		start := 0
+		if len(definition.Fields) > linearFieldLookupLimit {
+			start = fieldSlots.structField(definition, op.Field)
+		}
+		for index := start; index >= 0 && index < len(definition.Fields); index++ {
+			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
 				current.structure().fields[index] = value.cloneForValueCopy()
 				return nil
@@ -75,14 +83,26 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 	}
 	aggregate := fieldAggregateType(op.OwnerType)
 	if receiver.structure() != nil && receiver.structure().definition != nil && receiver.structure().definition.Type == aggregate {
-		for index, field := range receiver.structure().definition.Fields {
+		definition := receiver.structure().definition
+		start := 0
+		if len(definition.Fields) > linearFieldLookupLimit {
+			start = fieldSlots.structField(definition, op.Field)
+		}
+		for index := start; index >= 0 && index < len(definition.Fields); index++ {
+			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
 				receiver.structure().fields[index] = value.cloneForValueCopy()
 				return nil
 			}
 		}
 	} else if receiver.resource() != nil && receiver.resource().definition != nil && receiver.resource().definition.Type == aggregate && !receiver.resource().dropped {
-		for index, field := range receiver.resource().definition.Fields {
+		definition := receiver.resource().definition
+		start := 0
+		if len(definition.Fields) > linearFieldLookupLimit {
+			start = fieldSlots.resourceField(definition, op.Field)
+		}
+		for index := start; index >= 0 && index < len(definition.Fields); index++ {
+			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
 				receiver.resource().fields[index] = value.cloneForValueCopy()
 				return nil
