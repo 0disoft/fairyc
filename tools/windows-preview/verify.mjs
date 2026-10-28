@@ -3,10 +3,11 @@ import { createHash } from 'node:crypto';
 import { createReadStream, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { verifyLspProbe } from './lsp-probe.mjs';
 
-const steps = ['build', 'build-metadata', 'go-root', 'zip-roundtrip', 'new', 'check',
+const legacySteps = ['build', 'build-metadata', 'go-root', 'zip-roundtrip', 'new', 'check',
   'check-locked', 'test', 'native-test', 'native-test-release', 'run', 'run-release'];
-const files = ['fairyc.exe', 'README.txt', 'LICENSE', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'GO-LICENSE.txt'];
+const legacyFiles = ['fairyc.exe', 'README.txt', 'LICENSE', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'GO-LICENSE.txt'];
 const archiveName = 'fairyc-windows-amd64-preview-candidate.zip';
 
 async function sha(path) {
@@ -30,13 +31,25 @@ export async function verifyCandidate({ repo, receipt, revision }) {
   assert.ok(receipt.startsWith(cache + sep), 'receipt must be inside the repository cache');
   assert.ok(regular(receipt).size <= 64 * 1024, 'oversized receipt');
   const input = JSON.parse(readFileSync(receipt, 'utf8'));
-  assert.equal(input.schema, 'fairyc.local-starter-smoke/v1');
+  assert.ok(['fairyc.local-starter-smoke/v1', 'fairyc.local-starter-smoke/v2'].includes(input.schema), 'unsupported smoke schema');
+  const hasLsp = input.schema === 'fairyc.local-starter-smoke/v2';
+  const files = hasLsp ? [...legacyFiles, 'fairyc-lsp.exe'] : legacyFiles;
+  const steps = hasLsp ? [...legacySteps.slice(0, 2), 'lsp-build', 'lsp-build-metadata',
+    ...legacySteps.slice(2, 4), 'lsp-version', 'lsp-protocol', ...legacySteps.slice(4)] : legacySteps;
   assert.equal(input.platform, 'win32/x64');
   assert.equal(input.vcs_modified, false, 'candidate was built from modified source');
   assert.equal(input.vcs_revision, revision, 'candidate source revision differs');
   assert.deepEqual(input.build_flags, ['-trimpath', '-ldflags=-s -w']);
   assert.deepEqual(input.steps.map(step => step.name), steps, 'incomplete or reordered starter checks');
   assert.ok(input.steps.every(step => step.exit === 0), 'starter check failed');
+  if (hasLsp) {
+    const metadata = input.steps.find(step => step.name === 'lsp-build-metadata').stdout;
+    for (const identity of [input.go_version, `vcs.revision=${revision}`, 'vcs.modified=false', 'CGO_ENABLED=0']) {
+      assert.ok(typeof identity === 'string' && typeof metadata === 'string' && metadata.includes(identity), 'LSP build identity differs');
+    }
+    assert.match(input.steps.find(step => step.name === 'lsp-version').stdout, /^fairyc-lsp \d+\.\d+\.\d+\r?\n$/u);
+    verifyLspProbe(input.steps.find(step => step.name === 'lsp-protocol').stdout);
+  }
   const root = dirname(receipt);
   const archive = resolve(repo, input.preview_candidate_archive);
   assert.equal(archive, join(root, archiveName), 'archive is not the receipt-owned candidate');
@@ -63,8 +76,14 @@ export async function verifyCandidate({ repo, receipt, revision }) {
   const executable = join(extracted, 'fairyc.exe');
   assert.equal(regular(executable).size, input.executable_bytes, 'compiler size differs');
   assert.equal(await sha(executable), input.executable_sha256, 'compiler hash differs from the smoke receipt');
+  if (hasLsp) {
+    const server = join(extracted, 'fairyc-lsp.exe');
+    assert.equal(regular(server).size, input.lsp_bytes, 'LSP size differs');
+    assert.equal(await sha(server), input.lsp_sha256, 'LSP hash differs from the smoke receipt');
+  }
   return { schema: 'fairyc.windows-preview-recheck/v1', passed: true, sourceRevision: revision,
     archive, archiveSHA256: input.archive_sha256, executableSHA256: input.executable_sha256,
+    ...(hasLsp ? { lspSHA256: input.lsp_sha256 } : {}),
     starterSteps: steps.length, verifiedFiles: checked.size, cleanMachineEvidence: false, publicationApproved: false };
 }
 

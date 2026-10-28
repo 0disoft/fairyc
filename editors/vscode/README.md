@@ -1,11 +1,12 @@
 # Fairy C for VS Code
 
-Fairy C editor support for `.fy` files. The extension registers the `fairyc`
-language ID and `source.fairyc` TextMate scope, with syntax highlighting,
-snippets, comment toggling, bracket pairs and indentation.
+Fairy C editor support for `.fy` files. The extension
+registers the `fairyc` language ID and `source.fairyc` TextMate scope, with
+syntax highlighting, snippets, comment toggling, bracket pairs and indentation.
 
-The VSIX contains the syntax assets and JavaScript language client. It does not
-include the Fairy C compiler or the `fairyc-lsp` executable.
+The VSIX contains the syntax assets and JavaScript language client. The Windows
+preview ZIP includes the prebuilt `fairyc-lsp.exe` beside `fairyc.exe` and the
+existing notices. The VSIX is distributed separately and is not in that ZIP.
 
 ## Install a local VSIX
 
@@ -39,23 +40,29 @@ Reload VS Code after installation.
 ## Language server
 
 Syntax features work without a compiler or language server. Diagnostics,
-definition navigation and completion use a separately built `fairyc-lsp`
-executable. From the repository root:
+definition navigation and completion use `fairyc-lsp`. After installing the
+local VSIX, extract the Windows preview ZIP and set `fairyc.server.path` to the
+absolute path of the extracted executable:
+
+```json
+{
+  "fairyc.server.path": "C:\\path\\to\\fairyc-preview\\fairyc-lsp.exe"
+}
+```
+
+Using the prebuilt compiler and language server requires no Go, Node.js or Bun.
+Native Fairy C builds still require the local x64 MSVC toolchain and Windows SDK.
+The language client starts in trusted workspaces. Grant workspace trust to
+enable the server; syntax support continues to work without it.
+
+Building the language server from source remains a developer alternative. From
+the repository root:
 
 ```powershell
 go build -o .cache/fairyc-lsp.exe ./cmd/fairyc-lsp
 ```
 
-Set `fairyc.server.path` to the absolute executable path:
-
-```json
-{
-  "fairyc.server.path": "C:\\path\\to\\fairyc\\.cache\\fairyc-lsp.exe"
-}
-```
-
-The language client starts in trusted workspaces. Grant workspace trust to
-enable the server; syntax support continues to work without it.
+Set `fairyc.server.path` to the absolute path of that source-built executable.
 
 ## License
 

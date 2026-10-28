@@ -3,6 +3,8 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
+import { lspProbeInput, verifyLspProbe } from './windows-preview/lsp-probe.mjs';
 
 // Fixed local workflow; only a local packaging mode, no arbitrary paths,
 // network, installation or publication.
@@ -19,14 +21,14 @@ const scratch = join(root, 'scratch');
 mkdirSync(scratch);
 assert.deepEqual(readdirSync(scratch), []);
 let exe = join(root, 'fairyc.exe');
-const deadline = Date.now() + 150_000;
+const deadline = Date.now() + 210_000;
 const steps = [];
-function command(name, binary, args, cwd, timeout = 45_000) {
+function command(name, binary, args, cwd, timeout = 45_000, input = '') {
   const remaining = Math.min(timeout, deadline - Date.now());
   assert.ok(remaining > 0, 'workflow deadline exceeded');
   const started = Date.now();
   const result = spawnSync(binary, args, {
-    cwd, shell: false, windowsHide: true, input: '', encoding: 'utf8',
+    cwd, shell: false, windowsHide: true, input, encoding: 'utf8',
     timeout: remaining, maxBuffer: 1024 * 1024,
     env: { ...process.env, TEMP: root, TMP: root },
   });
@@ -48,9 +50,17 @@ const goVersion = buildMetadata.match(/\bgo1\.\d+(?:\.\d+)?\b/u)?.[0];
 const vcsRevision = buildMetadata.match(/\bvcs\.revision=([0-9a-f]{40})\b/u)?.[1];
 const vcsModified = buildMetadata.match(/\bvcs\.modified=(true|false)\b/u)?.[1];
 assert.ok(goVersion && vcsRevision && vcsModified, 'missing Go build identity');
-let archive, previewChecksumsHash;
+let archive, previewChecksumsHash, lsp, lspHash, lspBytes;
 if (packageLocal) {
   assert.equal(vcsModified, 'false', 'package a clean commit so the candidate has an exact source identity');
+  lsp = join(root, 'fairyc-lsp.exe');
+  command('lsp-build', 'bun', ['tools/run-go.ts', 'build', '-mod=readonly', ...buildFlags, '-o', lsp, './cmd/fairyc-lsp'], repo, 60_000);
+  const lspMetadata = command('lsp-build-metadata', 'bun', ['tools/run-go.ts', 'version', '-m', lsp], repo);
+  for (const identity of [goVersion, `vcs.revision=${vcsRevision}`, 'vcs.modified=false', 'CGO_ENABLED=0']) {
+    assert.ok(lspMetadata.includes(identity), `LSP build identity differs: ${identity}`);
+  }
+  lspHash = sha(lsp);
+  lspBytes = statSync(lsp).size;
   const notice = readFileSync(join(repo, 'THIRD_PARTY_NOTICES.md'), 'utf8');
   assert.ok(notice.includes(`- Toolchain inspected: Go ${goVersion.slice(2)} (Windows AMD64, CGO disabled)`),
     'Go notice does not match the compiler build');
@@ -61,10 +71,11 @@ if (packageLocal) {
   const extracted = join(root, 'extracted');
   mkdirSync(stage);
   copyFileSync(exe, join(stage, 'fairyc.exe'));
+  copyFileSync(lsp, join(stage, 'fairyc-lsp.exe'));
   copyFileSync(join(repo, 'docs/ops/windows-preview-README.txt'), join(stage, 'README.txt'));
   const notices = ['LICENSE', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'GO-LICENSE.txt'];
   for (const name of notices) copyFileSync(join(repo, name), join(stage, name));
-  const entries = ['README.txt', 'fairyc.exe', ...notices];
+  const entries = ['README.txt', 'fairyc.exe', 'fairyc-lsp.exe', ...notices];
   const hashes = entries.map(name => sha(join(stage, name)));
   writeFileSync(join(stage, 'SHA256SUMS.txt'), entries.map((name, i) => `${hashes[i]}  ${name}`).join('\n') + '\n', { flag: 'wx' });
   const checksumHash = sha(join(stage, 'SHA256SUMS.txt'));
@@ -77,7 +88,7 @@ if (packageLocal) {
   process.env.FAIRYC_PREVIEW_ZIP = archive;
   process.env.FAIRYC_PREVIEW_EXTRACTED = extracted;
   command('zip-roundtrip', 'powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-    "$ErrorActionPreference='Stop'; $names=@('fairyc.exe','README.txt','LICENSE','LICENSING.md','THIRD_PARTY_NOTICES.md','GO-LICENSE.txt','SHA256SUMS.txt'); $paths=@($names | ForEach-Object { Join-Path $env:FAIRYC_PREVIEW_STAGE $_ }); Compress-Archive -LiteralPath $paths -DestinationPath $env:FAIRYC_PREVIEW_ZIP; Expand-Archive -LiteralPath $env:FAIRYC_PREVIEW_ZIP -DestinationPath $env:FAIRYC_PREVIEW_EXTRACTED"], repo);
+    "$ErrorActionPreference='Stop'; $names=@('fairyc.exe','fairyc-lsp.exe','README.txt','LICENSE','LICENSING.md','THIRD_PARTY_NOTICES.md','GO-LICENSE.txt','SHA256SUMS.txt'); $paths=@($names | ForEach-Object { Join-Path $env:FAIRYC_PREVIEW_STAGE $_ }); Compress-Archive -LiteralPath $paths -DestinationPath $env:FAIRYC_PREVIEW_ZIP; Expand-Archive -LiteralPath $env:FAIRYC_PREVIEW_ZIP -DestinationPath $env:FAIRYC_PREVIEW_EXTRACTED"], repo);
   delete process.env.FAIRYC_PREVIEW_STAGE;
   delete process.env.FAIRYC_PREVIEW_ZIP;
   delete process.env.FAIRYC_PREVIEW_EXTRACTED;
@@ -86,6 +97,9 @@ if (packageLocal) {
   assert.equal(sha(join(extracted, 'SHA256SUMS.txt')), checksumHash);
   writeFileSync(archive + '.sha256', `${sha(archive)}  ${archiveName}\n`, { flag: 'wx' });
   exe = join(extracted, 'fairyc.exe');
+  lsp = join(extracted, 'fairyc-lsp.exe');
+  assert.match(command('lsp-version', lsp, ['--version'], scratch), /^fairyc-lsp \d+\.\d+\.\d+\r?\n$/u);
+  verifyLspProbe(command('lsp-protocol', lsp, [], scratch, 15_000, lspProbeInput(pathToFileURL(scratch).href)));
 }
 assert.match(command('new', exe, ['new', 'hello-fairy', '--uid', 'example.hello-fairy'], scratch), /created Fairy C package/);
 const workspace = join(scratch, 'hello-fairy');
@@ -116,12 +130,13 @@ unchanged();
 assert.equal(command('run-release', exe, ['run', '--release', '--locked'], workspace), '');
 unchanged();
 assert.equal(sha(exe), executableHash, 'compiler executable changed');
-const receipt = { schema: 'fairyc.local-starter-smoke/v1', executable_sha256: executableHash,
+if (lsp) assert.equal(sha(lsp), lspHash, 'LSP executable changed');
+const receipt = { schema: `fairyc.local-starter-smoke/${packageLocal ? 'v2' : 'v1'}`, executable_sha256: executableHash,
   executable_bytes: statSync(exe).size, build_flags: buildFlags,
   lock_sha256: lockHash, node: process.version, go_version: goVersion,
   vcs_revision: vcsRevision, vcs_modified: vcsModified === 'true',
   platform: `${process.platform}/${process.arch}`, steps,
   ...(archive ? { preview_candidate_archive: relative(repo, archive), archive_sha256: sha(archive), archive_bytes: statSync(archive).size,
-    preview_checksums_sha256: previewChecksumsHash } : {}) };
+    preview_checksums_sha256: previewChecksumsHash, lsp_sha256: lspHash, lsp_bytes: lspBytes } : {}) };
 writeFileSync(join(root, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify({ receipt: relative(repo, join(root, 'receipt.json')), executable_sha256: executableHash }));

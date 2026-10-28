@@ -4,11 +4,15 @@
 
 ## Operational Contract
 
-The first user-facing distribution is a Windows/AMD64 experimental compiler ZIP
-for developers with local x64 MSVC and the Windows SDK. It contains the Go Stage 0
-compiler and its notices, not the Fairy-written parser candidate. Checking and
-semantic tests need no C toolchain; native tests and execution do. Linux target
-promotion, self-hosting and C-relative performance budgets are separate work.
+New Windows/AMD64 preview candidates are experimental compiler and
+language-server ZIPs for Windows/AMD64 developers. They contain the Go Stage 0
+compiler, `fairyc-lsp.exe`, and their notices, not the Fairy-written parser
+candidate. Both executables share the same clean source revision, Go toolchain
+and `-trimpath -ldflags="-s -w"` flags. The VS Code VSIX remains a separate
+package and is not in the ZIP. Checking and semantic tests need no C toolchain;
+native tests and execution require a local x64 MSVC toolchain and Windows SDK.
+Linux target promotion, self-hosting and C-relative performance budgets are
+separate work.
 
 Source-built Linux GNU amd64 compilers also implement ordinary `build/run/test --native` with
 GCC or Clang and the production SDK. This does not add a Linux binary release
@@ -16,14 +20,15 @@ or promote target conformance. Linux native results for this change are still pe
 see [ADR 0426](../adr/0426-linux-native-workspace-tests.md).
 
 Build one candidate from a clean `main` commit with
-`node tools/starter-smoke.mjs --package-local`. Record its commit, ZIP SHA-256, executable
-SHA-256, Go toolchain and smoke receipt. Choose a SemVer prerelease tag only
-after the candidate is fixed; the SDK version and language revision are separate
-identities and must not be used as the compiler release number. Publish the
-exact verified ZIP and its `.zip.sha256` file together. Do not rebuild after
-approving an artifact and then reuse the earlier validation receipt.
+`node tools/starter-smoke.mjs --package-local`. Record its commit, ZIP SHA-256,
+both executable hashes and sizes, Go toolchain and smoke receipt. Choose a
+SemVer prerelease tag only after the candidate is fixed; the SDK version and
+language revision are separate identities and must not be used as the compiler
+release number. Publish the exact verified ZIP and its `.zip.sha256` file
+together. Do not rebuild after approving an artifact and then reuse the earlier
+validation receipt.
 
-The packaging command uses `-trimpath -ldflags="-s -w"` for the Go compiler executable.
+The packaging command uses `-trimpath -ldflags="-s -w"` for both Go executables.
 It preserves version metadata and Go stack traces but omits native compiler debugging data.
 Ordinary development builds keep that data. The receipt records build flags and executable/ZIP
 bytes. At `3679d2a3` with Go 1.27.1, the compiler shrank from 17,849,344 to 13,094,400 bytes
@@ -37,11 +42,16 @@ Before transfer or publication, recheck the exact retained candidate without reb
 node tools/windows-preview/verify.mjs --receipt <.cache/starter-smoke-.../receipt.json> --revision <full-approved-source-commit>
 ```
 
-The command requires all twelve successful starter steps, clean Windows/AMD64 build identity,
-release build flags, the receipt-owned ZIP and its checksum sidecar, the exact extracted file
-set, and compiler and license-file hashes. Packaging now pins `SHA256SUMS.txt` in the smoke
-receipt; older receipts without that identity remain historical and cannot pass this recheck.
-Use a freshly packaged candidate rather than editing an old receipt to add the field.
+The command requires all sixteen successful starter steps (the original twelve
+plus `lsp-build`, `lsp-build-metadata`, `lsp-version` and `lsp-protocol`), clean
+Windows/AMD64 build identity, release build flags, the receipt-owned ZIP and its
+checksum sidecar, the exact extracted file set, and compiler, language-server
+and license-file hashes. A v2 receipt records both executable hashes and sizes.
+The verifier still accepts historical v1 receipts with twelve compiler-only
+steps; only v2 receipts establish the LSP build identity. Packaging now pins
+`SHA256SUMS.txt` in the smoke receipt; older receipts without that identity
+remain historical and cannot pass this recheck. Use a freshly packaged candidate
+rather than editing an old receipt to add the field.
 
 The checker streams file hashes and changes no artifacts. Its JSON reports only a local
 artifact recheck, with clean-machine evidence and publication approval both false. It does not
