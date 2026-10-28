@@ -21,16 +21,28 @@ npm run package:vsix
 Use Node.js 22 or newer. `npm ci` is required; the packaging script uses the
 repository-local `@vscode/vsce` 4.x dependency.
 
-The script writes the artifact and checksum under the repository cache:
+The script creates a fresh candidate directory under the repository cache on
+every run and prints its absolute path. Existing artifacts are never overwritten:
 
-- `.cache/editor-release/fairyc-0.1.2.vsix`
-- `.cache/editor-release/fairyc-0.1.2.vsix.sha256`
+- `.cache/editor-release/candidate-<random>/fairyc-0.1.2.vsix`
+- `.cache/editor-release/candidate-<random>/fairyc-0.1.2.vsix.sha256`
+- `.cache/editor-release/candidate-<random>/fairyc-0.1.2.vsix.build.json`
+
+The build receipt (`fairyc.vsix-build/v1`) binds the package size and SHA-256 to
+the source commit, repository dirty state, tracked diff digest, untracked file
+digests, dependency lockfile digest, Node.js version and local vsce version.
+It is a sidecar, not embedded metadata or a publisher signature. Package from a
+clean commit for a release candidate: a dirty build cannot be attributed solely
+to its recorded commit. Packaging rejects source changes detected between its
+before/after snapshots and writes no checksum or build receipt for that failure.
+Ignored files (including installed dependencies) are outside those Git snapshots;
+install from the lockfile first and keep the dependency directory unchanged.
 
 The filename version comes from `editors/vscode/package.json`. Install the
 absolute artifact path and verify the installed version:
 
 ```powershell
-code --install-extension <absolute path to .cache/editor-release/fairyc-0.1.2.vsix>
+code --install-extension <absolute path printed by package:vsix>
 code --list-extensions --show-versions
 ```
 
@@ -75,19 +87,25 @@ below identify the locally tested pair.
 ```powershell
 ./tools/test-vscode-install.ps1 `
   -CodeRoot 'C:/Users/cherr/AppData/Local/Programs/Microsoft VS Code' `
+  -VSIXPath '<absolute path printed by package:vsix>' `
   -PreviewReceipt '.cache/starter-smoke-hcotc1/receipt.json' `
   -PreviewRevision '315ef56991d20fa0716927e4fcecb464231db6a8'
 ```
 
-`-CodeRoot` is mandatory. `-PreviewReceipt` and `-PreviewRevision` are optional
+`-CodeRoot` is mandatory. `-VSIXPath` selects the new candidate; omitting it
+retains the legacy `.cache/editor-release/fairyc-0.1.2.vsix` input. A build
+sidecar, when present, must match the VSIX hash, size, name, extension ID and version
+before installation. Its digest and source identity are linked in the install
+receipt, and the sidecar must remain unchanged during verification.
+`-PreviewReceipt` and `-PreviewRevision` are optional
 and must be supplied together. The Node.js verifier rechecks the v2 starter-smoke
 receipt, full source revision, candidate archive, and recorded compiler and LSP
 hashes. The harness then extracts the retained ZIP into a fresh isolated test
 directory, sets the absolute server path, and installs
-`.cache/editor-release/fairyc-0.1.2.vsix` into an isolated VS Code profile. It
+the selected VSIX into an isolated VS Code profile. It
 checks `.fy` association, activation, definition, completion, unsaved
 diagnostics, and recovery, then writes schema `fairyc.vscode-install/v2` to
-`.cache/editor-release/install-*/receipt.json` with the VSIX, ZIP, and LSP hashes.
+`install-*/receipt.json` beside the selected VSIX with the VSIX, ZIP, and LSP hashes.
 
 Without the paired preview arguments, the harness uses
 `.cache/editor-release/fairyc-lsp.exe`. It does not modify the user's VS Code
@@ -99,10 +117,20 @@ also needs Node.js 22 or newer. End users need no standalone Go, Node.js, or Bun
 installation for the prebuilt VSIX and ZIP. Record separate-host verification
 independently; this harness establishes local integration only.
 
+Packaging provenance regression checks (from the repository root):
+
+```text
+node --test tools/vsix-source.test.mjs
+```
+
 ## Transfer bundle for another Windows host
 
 To prepare a self-contained receiver bundle, run this from the repository root on
 Windows AMD64 after packaging the local VSIX:
+
+This transfer command currently consumes the retained legacy VSIX path below;
+it does not automatically select a new `candidate-*` package. Use `-VSIXPath`
+above for local validation of a new candidate.
 
 ```powershell
 node tools/windows-editor/prepare.mjs `

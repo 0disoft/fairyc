@@ -5,12 +5,14 @@ Verify a packaged VSIX in an isolated Windows VS Code profile.
 ./tools/test-vscode-install.ps1 -CodeRoot 'C:\Program Files\Microsoft VS Code'
 Requires the packaged VSIX and .cache/editor-release/fairyc-lsp.exe.
 Use -PreviewReceipt and -PreviewRevision together to verify and extract a retained preview ZIP instead.
+Use -VSIXPath to select a newly packaged candidate without replacing retained artifacts.
 #>
 param(
     [Parameter(Mandatory = $true)][string]$CodeRoot,
     [string]$PreviewReceipt,
     [string]$PreviewRevision,
-    [string]$ArtifactsRoot
+    [string]$ArtifactsRoot,
+    [string]$VSIXPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,6 +22,7 @@ $releaseRoot = Join-Path $repoRoot '.cache/editor-release'
 $manifestPath = Join-Path $repoRoot 'editors/vscode/package.json'
 $licensePath = Join-Path $repoRoot 'LICENSE'
 if ($ArtifactsRoot) {
+    if ($VSIXPath) { throw 'VSIXPath cannot be combined with ArtifactsRoot' }
     if ($PreviewReceipt -or $PreviewRevision) { throw 'ArtifactsRoot cannot be combined with preview receipt arguments' }
     $releaseRoot = (Resolve-Path -LiteralPath $ArtifactsRoot).Path
     $manifestPath = Join-Path $releaseRoot 'extension.json'
@@ -27,6 +30,7 @@ if ($ArtifactsRoot) {
 }
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 $vsix = Join-Path $releaseRoot ($manifest.name + '-' + $manifest.version + '.vsix')
+if ($VSIXPath) { $vsix = (Resolve-Path -LiteralPath $VSIXPath).Path }
 $server = Join-Path $releaseRoot 'fairyc-lsp.exe'
 if ($ArtifactsRoot) { $server = Join-Path $releaseRoot 'preview/fairyc-lsp.exe' }
 $preview = $null
@@ -46,6 +50,17 @@ foreach ($required in @($vsix, "$vsix.sha256", $codeCLI, $codeEXE)) {
 $digest = (Get-FileHash -LiteralPath $vsix -Algorithm SHA256).Hash.ToLowerInvariant()
 $expected = ((Get-Content -LiteralPath "$vsix.sha256" -Raw).Trim() -split '\s+')[0]
 if ($digest -ne $expected) { throw 'VSIX checksum mismatch' }
+$build = $null
+$buildPath = "$vsix.build.json"
+if (Test-Path -LiteralPath $buildPath -PathType Leaf) {
+    $buildDigest = (Get-FileHash -LiteralPath $buildPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $build = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
+    if ($build.schema -cne 'fairyc.vsix-build/v1' -or
+        $build.artifact.sha256 -cne $digest -or $build.artifact.bytes -ne (Get-Item -LiteralPath $vsix).Length -or
+        $build.artifact.name -cne (Split-Path $vsix -Leaf) -or
+        $build.extension.id -cne ($manifest.publisher + '.' + $manifest.name) -or
+        $build.extension.version -cne $manifest.version) { throw 'VSIX build receipt does not match package' }
+}
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $archive = [System.IO.Compression.ZipFile]::OpenRead($vsix)
@@ -72,7 +87,7 @@ try {
     }
 } finally { $archive.Dispose() }
 
-$runRoot = Join-Path $releaseRoot ('install-' + [guid]::NewGuid().ToString('N'))
+$runRoot = Join-Path (Split-Path $vsix -Parent) ('install-' + [guid]::NewGuid().ToString('N'))
 $userData = Join-Path $runRoot 'user-data'
 $extensions = Join-Path $runRoot 'extensions'
 $workspace = Join-Path $runRoot 'workspace'
@@ -130,8 +145,10 @@ if (-not $hostReceipt.passed) { throw $hostReceipt.error }
 if ($hostReceipt.serverPath -cne $server -or $hostReceipt.serverSHA256 -cne $serverDigest) { throw 'Extension host used a different configured LSP' }
 if ((Get-FileHash -LiteralPath $server -Algorithm SHA256).Hash.ToLowerInvariant() -cne $serverDigest) { throw 'LSP changed during verification' }
 if ((Get-FileHash -LiteralPath $vsix -Algorithm SHA256).Hash.ToLowerInvariant() -cne $digest) { throw 'VSIX changed during verification' }
+if ($build -and (Get-FileHash -LiteralPath $buildPath -Algorithm SHA256).Hash.ToLowerInvariant() -cne $buildDigest) { throw 'VSIX build receipt changed during verification' }
 if ($preview -and (Get-FileHash -LiteralPath $preview.archive -Algorithm SHA256).Hash.ToLowerInvariant() -cne $preview.archiveSHA256) { throw 'Preview ZIP changed during verification' }
 $receipt = @{ schema = 'fairyc.vscode-install/v2'; vsix = $vsix; sha256 = $digest;
+    build = $(if ($build) { @{ receipt = $buildPath; sha256 = $buildDigest; sourceRevision = $build.source.revision; modified = $build.source.modified } } else { $null });
     server = @{ path = $server; sha256 = $serverDigest; bytes = $serverBytes };
     preview = $(if ($preview) { @{ receipt = $PreviewReceipt; revision = $preview.sourceRevision; archive = $preview.archive; sha256 = $preview.archiveSHA256 } } else { $null });
     cleanMachineEvidence = $false; publicationApproved = $false;
