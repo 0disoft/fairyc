@@ -202,14 +202,13 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 		proofs[f.Symbol] = selected
 		// Only supported checked-failure switches can produce a proof.
 		// Avoid retaining per-block fact snapshots when no proof is possible.
-		hasCandidate := false
-		for _, block := range f.Blocks {
+		lastCandidate := -1
+		for index, block := range f.Blocks {
 			if checkedFailureCandidate(block.Terminator) {
-				hasCandidate = true
-				break
+				lastCandidate = index
 			}
 		}
-		if !hasCandidate {
+		if lastCandidate < 0 {
 			continue
 		}
 		predecessors := make([][]mir.BlockID, len(f.Blocks))
@@ -284,9 +283,11 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 			delete(visiting, id)
 			return s
 		}
-		// Start at entry; remaining roots have no incoming proof. Cycles are cut.
+		// Preserve the existing root order, but stop after the final proof site.
+		// Recursive predecessor analysis still visits any required later blocks.
+		// Tail snapshots cannot contribute a proof and may grow quadratically.
 		analyze(f.Entry)
-		for _, b := range f.Blocks {
+		for _, b := range f.Blocks[:lastCandidate+1] {
 			analyze(b.ID)
 		}
 	}
