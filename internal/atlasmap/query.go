@@ -667,7 +667,10 @@ func validateSymbolCatalogRequest(
 		return nil, nil, fmt.Errorf("Atlas symbol catalog requires positive symbol and selection-byte limits")
 	}
 	if request.Module != "" {
-		if !slices.ContainsFunc(index.modules, func(module semanticsnapshot.Module) bool { return module.Path == request.Module }) {
+		_, found := slices.BinarySearchFunc(index.modules, request.Module, func(module semanticsnapshot.Module, path string) int {
+			return cmp.Compare(module.Path, path)
+		})
+		if !found {
 			return nil, nil, fmt.Errorf("%w: %s", ErrModuleNotFound, request.Module)
 		}
 	}
@@ -703,6 +706,20 @@ func (index *QueryIndex) catalogCandidates(
 	name string,
 	kinds map[semanticsnapshot.DeclarationKind]struct{},
 ) catalogSelection {
+	if module != "" && name != "" {
+		// Exact identity already has an admission-built lookup. Probe each selected
+		// kind, then restore full-ID order independently of map iteration order.
+		result := make([]int, 0, len(kinds))
+		key := semanticsnapshot.DeclarationKey{PackageInstance: index.header.PackageInstance, Module: module, Name: name}
+		for kind := range kinds {
+			key.Kind = kind
+			if position, found := index.byKey[key]; found {
+				result = append(result, position)
+			}
+		}
+		slices.Sort(result)
+		return catalogSelection{positions: result, count: len(result)}
+	}
 	// Only validated, supported kinds reach this helper, so this size denotes
 	// the full filter. Admission already guarantees full-SymbolId node order;
 	// an implicit range needs no per-page or retained position array.
