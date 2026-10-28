@@ -48,6 +48,9 @@ func (a *analyzer) resultFlowFunction(module *moduleScope, function *ast.Functio
 	if function.Body == nil {
 		return
 	}
+	// Joins run synchronously. Reuse their temporary membership index only for
+	// this function; no environment or diagnostic retains it.
+	defer func() { a.resultProducerIndex = nil }()
 	environment := make(resultEnvironment)
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]
@@ -201,7 +204,7 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 			baseline := cloneResultEnvironment(environment)
 			right := cloneResultEnvironment(baseline)
 			rightReachable := a.resultFlowExpression(module, expression.Children[1], right, resultUse{kind: resultUseIgnore})
-			return mergeResultBranches(environment, baseline, []resultBranch{
+			return a.mergeResultBranches(environment, baseline, []resultBranch{
 				{environment: baseline, reachable: true},
 				{environment: right, reachable: rightReachable},
 			})
@@ -283,7 +286,7 @@ func (a *analyzer) resultFlowIf(module *moduleScope, expression *ast.Expression,
 			reachable:   a.resultFlowExpression(module, expression.Children[2], elseEnvironment, branchUse),
 		})
 	}
-	return mergeResultBranches(environment, baseline, branches)
+	return a.mergeResultBranches(environment, baseline, branches)
 }
 
 func (a *analyzer) resultFlowMatch(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) bool {
@@ -330,7 +333,7 @@ func (a *analyzer) resultFlowMatch(module *moduleScope, expression *ast.Expressi
 		}
 		branches = append(branches, resultBranch{environment: branchEnvironment, reachable: reachable})
 	}
-	return mergeResultBranches(environment, baseline, branches)
+	return a.mergeResultBranches(environment, baseline, branches)
 }
 
 func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expression, environment resultEnvironment) bool {
@@ -362,7 +365,7 @@ func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expressi
 	}
 	if len(backBranches) > 0 && !a.canSkipScalarResultBackEdge(expression, baseline) {
 		backEnvironment := cloneResultEnvironment(baseline)
-		mergeResultBranches(backEnvironment, baseline, backBranches)
+		a.mergeResultBranches(backEnvironment, baseline, backBranches)
 		secondEnvironment := cloneResultEnvironment(backEnvironment)
 		a.resultLoops = append(a.resultLoops, resultLoopFrame{})
 		secondReachable := a.resultFlowExpression(module, expression.Children[1], secondEnvironment, resultUse{kind: resultUseIgnore})
@@ -375,7 +378,7 @@ func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expressi
 			exitBranches = append(exitBranches, resultBranch{environment: edge.environment, reachable: true})
 		}
 	}
-	mergeResultBranches(environment, baseline, exitBranches)
+	a.mergeResultBranches(environment, baseline, exitBranches)
 	return true
 }
 
@@ -446,13 +449,14 @@ func cloneResultEnvironment(input resultEnvironment) resultEnvironment {
 	return result
 }
 
-func mergeResultBranches(target, baseline resultEnvironment, branches []resultBranch) bool {
+func (a *analyzer) mergeResultBranches(target, baseline resultEnvironment, branches []resultBranch) bool {
 	reachable := false
 	for _, branch := range branches {
 		reachable = reachable || branch.reachable
 	}
 	for value, before := range baseline {
 		merged := resultObligation{}
+		producers := resultProducerSet{seen: a.resultProducerIndex}
 		for _, branch := range branches {
 			if !branch.reachable {
 				continue
@@ -463,28 +467,14 @@ func mergeResultBranches(target, baseline resultEnvironment, branches []resultBr
 			}
 			if actual.pending {
 				merged.pending = true
-				merged.producers = appendUniqueResultProducers(merged.producers, actual.producers...)
+				producers.add(actual.producers...)
 			}
 		}
+		merged.producers = producers.values
+		a.resultProducerIndex = producers.seen
 		target[value] = merged
 	}
 	return reachable
-}
-
-func appendUniqueResultProducers(target []hir.Span, values ...hir.Span) []hir.Span {
-	for _, value := range values {
-		duplicate := false
-		for _, existing := range target {
-			if compareSpan(existing, value) == 0 {
-				duplicate = true
-				break
-			}
-		}
-		if !duplicate {
-			target = append(target, value)
-		}
-	}
-	return target
 }
 
 func isResultType(value hir.Type) bool {

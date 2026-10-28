@@ -109,6 +109,7 @@ type analyzer struct {
 	resourceCleanupExempt *symbol
 	resourcePending       []resourcePendingValue
 	resultLoops           []resultLoopFrame
+	resultProducerIndex   map[hir.Span]struct{}
 	resultNeutralScalars  map[*ast.Expression]bool
 	borrowReturns         map[*symbol]borrowReturnSummary
 	dropFunctions         map[*ast.Resource]*ast.Function
