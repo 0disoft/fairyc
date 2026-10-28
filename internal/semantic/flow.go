@@ -173,6 +173,7 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 }
 
 func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flowInventory, origins map[*symbol]flowOrigin) {
+	var index regionOriginIndex
 	for _, expression := range inventory.expressions {
 		if !a.isRegionAllocationCall(expression) {
 			continue
@@ -181,18 +182,17 @@ func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flow
 		if len(candidates) != 1 {
 			continue
 		}
+		if index.lastUses == nil {
+			index = a.indexRegionOrigins(module, inventory, origins)
+		}
 		origin := candidates[0]
 		fact := RegionOriginFact{Operation: strings.ReplaceAll(expression.Children[0].Text, "_", "-"), Allocation: span(module.file.Path, expression.Span), Origin: origin.name}
 		if binding := a.bindingForExpression(expression); binding != nil {
-			fact.LastUse = lastUseOf(inventory.expressions, a.resolved, binding, expression.Span.EndByte)
-		}
-		for _, returned := range inventory.returns {
-			for _, returnedOrigin := range a.expressionOrigins(module, returned, origins) {
-				if sameFlowOrigin(origin, returnedOrigin) {
-					fact.Escapes = true
-				}
+			if last, found := index.lastUses[binding]; found {
+				fact.LastUse = &last
 			}
 		}
+		_, fact.Escapes = index.escaping[flowOriginKey{name: origin.name, declaration: origin.declaration}]
 		a.regionOrigins = append(a.regionOrigins, fact)
 		argument := expression.Children[1]
 		argumentType := a.expressionTypes[argument]
@@ -203,12 +203,13 @@ func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flow
 }
 
 func (a *analyzer) bindingForExpression(expression *ast.Expression) *symbol {
-	for binding, value := range a.bindingSymbols {
-		if binding.Expression == expression {
-			return value
+	if a.bindingsByExpression == nil {
+		a.bindingsByExpression = make(map[*ast.Expression]*symbol, len(a.bindingSymbols))
+		for binding, value := range a.bindingSymbols {
+			a.bindingsByExpression[binding.Expression] = value
 		}
 	}
-	return nil
+	return a.bindingsByExpression[expression]
 }
 
 func sameFlowOrigin(left, right flowOrigin) bool {
@@ -272,21 +273,6 @@ func (inventory *flowInventory) collectExpression(expression *ast.Expression) {
 	for _, child := range expression.Children {
 		inventory.collectExpression(child)
 	}
-}
-
-func lastUseOf(expressions []*ast.Expression, resolved map[*ast.Expression]*symbol, target *symbol, after int) *hir.Span {
-	var last *hir.Span
-	for _, expression := range expressions {
-		if resolved[expression] != target || expression.Span.StartByte < after {
-			continue
-		}
-		candidate := span(target.source, expression.Span)
-		if last == nil || candidate.EndByte > last.EndByte {
-			copy := candidate
-			last = &copy
-		}
-	}
-	return last
 }
 
 func compactOrigins(values []flowOrigin) []flowOrigin {

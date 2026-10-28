@@ -77,6 +77,7 @@ type analyzer struct {
 	nextSymbol            hir.SymbolID
 	resolved              map[*ast.Expression]*symbol
 	bindingSymbols        map[*ast.Binding]*symbol
+	bindingsByExpression  map[*ast.Expression]*symbol
 	parameter             map[*ast.Parameter]*symbol
 	parameterIndex        map[*symbol]int
 	functions             map[*ast.Function]*symbol
