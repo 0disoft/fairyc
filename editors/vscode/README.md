@@ -99,6 +99,52 @@ also needs Node.js 22 or newer. End users need no standalone Go, Node.js, or Bun
 installation for the prebuilt VSIX and ZIP. Record separate-host verification
 independently; this harness establishes local integration only.
 
+## Transfer bundle for another Windows host
+
+To prepare a self-contained receiver bundle, run this from the repository root on
+Windows AMD64 after packaging the local VSIX:
+
+```powershell
+node tools/windows-editor/prepare.mjs `
+  --receipt .cache/starter-smoke-hcotc1/receipt.json `
+  --revision 315ef56991d20fa0716927e4fcecb464231db6a8 `
+  --code-root 'C:/Users/cherr/AppData/Local/Programs/Microsoft VS Code'
+```
+
+The maintainer step needs Node.js 22 or newer. It uses the installed VS Code for
+the local isolation check.
+
+The command rechecks the retained v2 starter-smoke receipt, full source revision,
+preview ZIP, compiler and LSP hashes, and the checksum of the existing
+`.cache/editor-release/fairyc-0.1.2.vsix`. It does not rebuild the VSIX or compiler.
+It writes the new bundle and checksum as:
+
+```text
+.cache/windows-editor-<random>/fairyc-windows-editor-verify.zip
+.cache/windows-editor-<random>/fairyc-windows-editor-verify.zip.sha256
+```
+
+The exact repository-relative archive path is printed in the `archive` field of
+`preparation.json`, which is written beside the ZIP. That file also records the
+archive size and digest, source revision, manifest digest, and local test receipt
+digest. Preparation extracts the finished ZIP, runs its verifier against the
+requested VS Code installation with an external-tool-free child PATH, and requires
+a passing isolated installation receipt before writing the final checksum.
+
+Transfer only the ZIP and its `.sha256` sidecar. `README.txt` inside the bundle is
+the receiver guide; it covers checksum verification, extraction, VS Code discovery,
+results locations, retained evidence, and scope limits. The receiver needs Windows
+AMD64, Windows PowerShell 5.1 or newer, and locally installed VS Code, with no
+checkout, Go, standalone Node.js, Bun, or MSVC for the editor test.
+
+The harness disables the workspace-trust prompt for a trusted disposable workspace
+and does not verify untrusted-workspace behavior. A preparation receipt is local
+evidence only: it is not clean-PC evidence, does not alter the user's normal VS Code
+profile, does not publish remotely, and does not claim that GRAM13 has passed. The
+preview compiler ZIP remains experimental and unsigned; SHA-256 detects modification
+but does not establish publisher identity. The bundle retains the repository license
+and third-party notices.
+
 ## License
 
 Project-owned extension files are Apache-2.0; the package includes `LICENSE`.

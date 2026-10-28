@@ -9,16 +9,26 @@ Use -PreviewReceipt and -PreviewRevision together to verify and extract a retain
 param(
     [Parameter(Mandatory = $true)][string]$CodeRoot,
     [string]$PreviewReceipt,
-    [string]$PreviewRevision
+    [string]$PreviewRevision,
+    [string]$ArtifactsRoot
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $repoRoot = Split-Path $PSScriptRoot -Parent
 $releaseRoot = Join-Path $repoRoot '.cache/editor-release'
-$manifest = Get-Content -LiteralPath (Join-Path $repoRoot 'editors/vscode/package.json') -Raw | ConvertFrom-Json
+$manifestPath = Join-Path $repoRoot 'editors/vscode/package.json'
+$licensePath = Join-Path $repoRoot 'LICENSE'
+if ($ArtifactsRoot) {
+    if ($PreviewReceipt -or $PreviewRevision) { throw 'ArtifactsRoot cannot be combined with preview receipt arguments' }
+    $releaseRoot = (Resolve-Path -LiteralPath $ArtifactsRoot).Path
+    $manifestPath = Join-Path $releaseRoot 'extension.json'
+    $licensePath = Join-Path $releaseRoot 'preview/LICENSE'
+}
+$manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 $vsix = Join-Path $releaseRoot ($manifest.name + '-' + $manifest.version + '.vsix')
 $server = Join-Path $releaseRoot 'fairyc-lsp.exe'
+if ($ArtifactsRoot) { $server = Join-Path $releaseRoot 'preview/fairyc-lsp.exe' }
 $preview = $null
 if ([bool]$PreviewReceipt -ne [bool]$PreviewRevision) { throw 'PreviewReceipt and PreviewRevision must be provided together' }
 if ($PreviewReceipt) {
@@ -52,7 +62,7 @@ try {
     }
     $licenseStream = [System.IO.StreamReader]::new($archive.GetEntry('extension/LICENSE.txt').Open())
     try { $licenseText = $licenseStream.ReadToEnd() } finally { $licenseStream.Dispose() }
-    if ($licenseText -cne [System.IO.File]::ReadAllText((Join-Path $repoRoot 'LICENSE'))) { throw 'Packaged Apache license differs from repository license' }
+    if ($licenseText -cne [System.IO.File]::ReadAllText($licensePath)) { throw 'Packaged Apache license differs from supplied license' }
     $dependencyLicenses = @($names | Where-Object { $_ -match '^extension/node_modules/.+/(?:LICENSE|LICENCE)(?:\.[^/]+)?$' })
     $dependencyRoots = @($names | Where-Object { $_ -match '^extension/node_modules/(?:@[^/]+/)?[^/]+/package.json$' } | ForEach-Object { $_ -replace 'package.json$', '' })
     foreach ($dependency in $dependencyRoots) {
@@ -85,15 +95,28 @@ $settings = @{ 'fairyc.server.path' = $server; 'telemetry.telemetryLevel' = 'off
 [System.IO.File]::WriteAllText((Join-Path $workspace 'main.fy'), "module main;`nfn i32 helper() { return 7; }`nfn i32 main() { return helper(); }`n", $utf8)
 [System.IO.File]::WriteAllText((Join-Path $harness 'package.json'), '{"name":"fairyc-install-smoke","publisher":"fairyc-local-test","version":"0.0.0","engines":{"vscode":"^1.90.0"}}', $utf8)
 
-$installation = & $codeCLI --user-data-dir $userData --extensions-dir $extensions --install-extension $vsix --force 2>&1
-if ($LASTEXITCODE -ne 0) { throw ($installation -join "`n") }
-$installed = & $codeCLI --user-data-dir $userData --extensions-dir $extensions --list-extensions --show-versions 2>&1
-if ($LASTEXITCODE -ne 0 -or $installed -notcontains ('0disoft.fairyc@' + $manifest.version)) { throw "Installed version not found: $installed" }
+function Invoke-CodeCLI([string[]]$Arguments) {
+    # Windows PowerShell wraps native stderr as ErrorRecords even on exit 0.
+    # Retain warnings in the receipt and judge the CLI by its exit code.
+    $previousPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = @(& $codeCLI @Arguments 2>&1)
+        $exitCode = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $previousPreference }
+    if ($exitCode -ne 0) { throw ($output -join "`n") }
+    return $output
+}
+$installation = @(Invoke-CodeCLI -Arguments @('--user-data-dir', $userData, '--extensions-dir', $extensions, '--install-extension', $vsix, '--force'))
+$installed = @(Invoke-CodeCLI -Arguments @('--user-data-dir', $userData, '--extensions-dir', $extensions, '--list-extensions', '--show-versions'))
+if ($installed -notcontains ('0disoft.fairyc@' + $manifest.version)) { throw "Installed version not found: $installed" }
 $arguments = @('--user-data-dir', $userData, '--extensions-dir', $extensions,
     '--extensionDevelopmentPath', $harness, '--extensionTestsPath', (Join-Path $PSScriptRoot 'test-vscode-installed.cjs'),
     '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes', $workspace)
 $quotedArguments = @($arguments | ForEach-Object { '"' + $_ + '"' })
 $hostProcess = Start-Process -FilePath $codeEXE -ArgumentList $quotedArguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $runRoot 'host.stdout.log') -RedirectStandardError (Join-Path $runRoot 'host.stderr.log')
+# Retain a handle before waiting; Windows PowerShell 5.1 can otherwise lose ExitCode.
+$null = $hostProcess.Handle
 if (-not $hostProcess.WaitForExit(60000)) {
     Stop-Process -Id $hostProcess.Id -Force
     throw "VS Code host timed out; see $runRoot"
