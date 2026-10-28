@@ -37,52 +37,22 @@ func WithWorkspaceTests(workspace Workspace) (Workspace, error) {
 	if err != nil {
 		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Cause: err, Detail: err.Error()}
 	}
-	withTests := workspace
-	for _, packagePath := range packagePaths {
-		withTests, err = WithPackageTests(withTests, packagePath)
-		if err != nil {
-			return Workspace{}, err
-		}
-	}
-	return withTests, nil
+	return withPackageTests(workspace, packagePaths)
 }
 
 // WithPackageTests returns an ephemeral workspace whose selected local package additionally owns
 // its contained tests/ source tree. The production workspace is not mutated, and its canonical
 // lock remains based only on manifest-owned production sources.
 func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error) {
-	selectedPackage, found := workspace.Package(packagePath)
-	if !found || selectedPackage.SourceKind != SourceKindLocal {
-		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Path: packagePath, Detail: "selected local package is missing"}
-	}
-	if portableDirectoriesOverlap(selectedPackage.Manifest.Package.Source, TestSourceDirectory) {
-		return Workspace{}, &LoadError{
-			Reason: ReasonTestSourceRoot,
-			Path:   TestSourceDirectory,
-			Detail: "test sources must not overlap the production source root",
-		}
-	}
-	if packagePath == "." {
-		for _, member := range selectedPackage.Manifest.Workspace.Members {
-			if portableDirectoriesOverlap(member, TestSourceDirectory) {
-				return Workspace{}, &LoadError{
-					Reason: ReasonTestSourceRoot,
-					Path:   TestSourceDirectory,
-					Detail: fmt.Sprintf("test sources must not overlap workspace member %q", member),
-				}
-			}
-		}
-	}
+	return withPackageTests(workspace, []string{packagePath})
+}
 
-	testRoot, present, err := optionalExactDirectory(selectedPackage.Directory, TestSourceDirectory)
-	if err != nil {
-		return Workspace{}, err
-	}
-	if !present {
-		return workspace, nil
-	}
-
+// Accumulate test sources under one budget, then resolve the complete graph once.
+// All mutable source/module slices are detached before tests are appended.
+func withPackageTests(workspace Workspace, packagePaths []string) (Workspace, error) {
 	budget := limits{}
+	packages := make([]Package, 0, len(workspace.Packages))
+	pathIndexes := make(map[string]int)
 	for _, loaded := range workspace.Packages {
 		if loaded.SourceKind != SourceKindLocal {
 			continue
@@ -91,36 +61,31 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 		for _, file := range loaded.Sources {
 			budget.bytes += int64(len(file.Bytes))
 		}
-	}
-	testSources, testModules, err := loadTestSources(testRoot, &budget)
-	if err != nil {
-		return Workspace{}, err
-	}
-	if len(testSources) == 0 {
-		return workspace, nil
-	}
-
-	packages := make([]Package, 0, len(workspace.Packages))
-	pathIndexes := make(map[string]int)
-	for _, loaded := range workspace.Packages {
-		if loaded.SourceKind != SourceKindLocal {
-			continue
-		}
 		loaded.Sources = slices.Clone(loaded.Sources)
 		loaded.Modules = slices.Clone(loaded.Modules)
-		if loaded.Path == packagePath {
-			if err := appendTestSources(&loaded, testSources, testModules); err != nil {
-				return Workspace{}, err
-			}
-		}
 		pathIndexes[loaded.Path] = len(packages)
 		packages = append(packages, loaded)
+	}
+	changed := false
+	for _, packagePath := range packagePaths {
+		index, found := pathIndexes[packagePath]
+		if !found {
+			return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Path: packagePath, Detail: "selected local package is missing"}
+		}
+		added, err := appendPackageTests(&packages[index], &budget)
+		if err != nil {
+			return Workspace{}, err
+		}
+		changed = changed || added
+	}
+	if !changed {
+		return workspace, nil
 	}
 	if err := validateDependencyDeclarations(packages, pathIndexes); err != nil {
 		return Workspace{}, err
 	}
 	graph, instances := buildGraph(packages, pathIndexes)
-	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances, workspace.vectorCandidate)
+	packages, graph, instances, err := injectStandardLibrary(packages, graph, instances, workspace.vectorCandidate)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -134,6 +99,46 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 	return Workspace{
 		Root: workspace.Root, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution, vectorCandidate: workspace.vectorCandidate,
 	}, nil
+}
+
+func appendPackageTests(selectedPackage *Package, budget *limits) (bool, error) {
+	if portableDirectoriesOverlap(selectedPackage.Manifest.Package.Source, TestSourceDirectory) {
+		return false, &LoadError{
+			Reason: ReasonTestSourceRoot,
+			Path:   TestSourceDirectory,
+			Detail: "test sources must not overlap the production source root",
+		}
+	}
+	if selectedPackage.Path == "." {
+		for _, member := range selectedPackage.Manifest.Workspace.Members {
+			if portableDirectoriesOverlap(member, TestSourceDirectory) {
+				return false, &LoadError{
+					Reason: ReasonTestSourceRoot,
+					Path:   TestSourceDirectory,
+					Detail: fmt.Sprintf("test sources must not overlap workspace member %q", member),
+				}
+			}
+		}
+	}
+
+	testRoot, present, err := optionalExactDirectory(selectedPackage.Directory, TestSourceDirectory)
+	if err != nil {
+		return false, err
+	}
+	if !present {
+		return false, nil
+	}
+	testSources, testModules, err := loadTestSources(testRoot, budget)
+	if err != nil {
+		return false, err
+	}
+	if len(testSources) == 0 {
+		return false, nil
+	}
+	if err := appendTestSources(selectedPackage, testSources, testModules); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func optionalExactDirectory(parent, name string) (string, bool, error) {
