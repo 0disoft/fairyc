@@ -49,6 +49,8 @@ type borrowLoanKey struct {
 
 type borrowEnvironment map[*symbol]borrowValueState
 
+// Liveness traversal shares immutable maps with snapshots and sibling branches.
+// Clone before adding, advancing, or removing a fact; readers may retain a map.
 type borrowLiveMap map[*symbol]hir.Span
 
 type borrowLiveContext struct {
@@ -1449,6 +1451,15 @@ func cloneBorrowLive(value borrowLiveMap) borrowLiveMap {
 	return result
 }
 
+func withoutBorrowLive(live borrowLiveMap, binding *symbol) borrowLiveMap {
+	if _, found := live[binding]; !found {
+		return live
+	}
+	result := cloneBorrowLive(live)
+	delete(result, binding)
+	return result
+}
+
 func mergeBorrowLive(values ...borrowLiveMap) borrowLiveMap {
 	result := make(borrowLiveMap)
 	for _, value := range values {
@@ -1478,7 +1489,7 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 	if f.analyzer.canceled() {
 		return liveOut
 	}
-	live := cloneBorrowLive(liveOut)
+	live := liveOut
 	if block == nil {
 		return live
 	}
@@ -1487,22 +1498,22 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 	}
 	for index := len(block.Statements) - 1; index >= 0; index-- {
 		statement := &block.Statements[index]
-		f.liveAfter[statement] = cloneBorrowLive(live)
+		f.liveAfter[statement] = live
 		switch {
 		case statement.Binding != nil:
 			if binding := f.analyzer.bindingSymbols[statement.Binding]; isSafeBorrowSymbol(binding) {
-				delete(live, binding)
+				live = withoutBorrowLive(live, binding)
 			}
 			live = f.liveExpression(statement.Binding.Expression, live, context)
 		case statement.Kind == syntax.KindReturn:
 			live = f.liveExpression(statement.Expression, make(borrowLiveMap), context)
 		case statement.Kind == syntax.KindBreak:
-			live = cloneBorrowLive(context.breakLive)
+			live = context.breakLive
 		case statement.Kind == syntax.KindContinue:
-			live = cloneBorrowLive(context.continueLive)
+			live = context.continueLive
 		case statement.Kind == syntax.KindAssignment:
 			if target := f.analyzer.resolved[statement.Target]; isSafeBorrowSymbol(target) {
-				delete(live, target)
+				live = withoutBorrowLive(live, target)
 			}
 			live = f.liveExpression(statement.Expression, live, context)
 			if indexedAssignmentTarget(statement.Target) || derefAssignmentTarget(statement.Target) || statement.Target != nil && statement.Target.Kind == syntax.KindFieldExpr {
@@ -1519,13 +1530,13 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 
 func (f *borrowFlowAnalyzer) liveFor(loop *ast.ForLoop, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
 	if loop == nil {
-		return cloneBorrowLive(liveOut)
+		return liveOut
 	}
 	live := f.liveWhile(forAsWhile(loop), liveOut, context)
 	if initializer := loop.Initializer; initializer != nil {
 		if initializer.Binding != nil {
 			if binding := f.analyzer.bindingSymbols[initializer.Binding]; isSafeBorrowSymbol(binding) {
-				delete(live, binding)
+				live = withoutBorrowLive(live, binding)
 			}
 			live = f.liveExpression(initializer.Binding.Expression, live, context)
 		} else {
@@ -1559,18 +1570,19 @@ func indexedArrayOwner(analyzer *analyzer, target *ast.Expression) *symbol {
 
 func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
 	if expression == nil {
-		return cloneBorrowLive(liveOut)
+		return liveOut
 	}
 	if f.liveAfterExpression != nil && (isBorrowExpression(expression) || expression.Kind == syntax.KindPath || expression.Kind == ast.PrivateSharedReborrow) {
-		f.liveAfterExpression[expression] = cloneBorrowLive(liveOut)
+		f.liveAfterExpression[expression] = liveOut
 	}
 	switch expression.Kind {
 	case syntax.KindPath:
-		live := cloneBorrowLive(liveOut)
+		live := liveOut
 		value := f.analyzer.resolved[expression]
 		if isSafeBorrowSymbol(value) {
 			use := span(f.module.file.Path, expression.Span)
 			if previous, found := live[value]; !found || use.EndByte > previous.EndByte {
+				live = cloneBorrowLive(live)
 				if live == nil {
 					live = make(borrowLiveMap)
 				}
@@ -1589,7 +1601,7 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 			branchLive = append(branchLive, f.liveExpression(branch, liveOut, context))
 		}
 		if len(expression.Children) == 2 {
-			branchLive = append(branchLive, cloneBorrowLive(liveOut))
+			branchLive = append(branchLive, liveOut)
 		}
 		return f.liveExpression(expression.Children[0], mergeBorrowLive(branchLive...), context)
 	case syntax.KindSwitch:
@@ -1604,7 +1616,7 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 				if pattern != nil {
 					for _, bindingExpression := range pattern.Children[1:] {
 						if binding := f.analyzer.resolved[bindingExpression]; isSafeBorrowSymbol(binding) {
-							delete(live, binding)
+							live = withoutBorrowLive(live, binding)
 						}
 					}
 				}
@@ -1624,7 +1636,7 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 }
 
 func (f *borrowFlowAnalyzer) liveChildren(children []*ast.Expression, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
-	live := cloneBorrowLive(liveOut)
+	live := liveOut
 	for index := len(children) - 1; index >= 0; index-- {
 		live = f.liveExpression(children[index], live, context)
 	}
@@ -1635,13 +1647,13 @@ func (f *borrowFlowAnalyzer) liveWhile(expression *ast.Expression, liveOut borro
 	if len(expression.Children) != 2 {
 		return f.liveChildren(expression.Children, liveOut, outer)
 	}
-	header := cloneBorrowLive(liveOut)
+	header := liveOut
 	// Each iteration can only add or advance a fact to one of the function's
 	// finitely many typed source expressions. This bound follows that lattice
 	// instead of using a magic retry count.
 	limit := len(f.analyzer.expressionTypes) + 1
 	for iteration := 0; iteration < limit; iteration++ {
-		loopContext := borrowLiveContext{breakLive: cloneBorrowLive(liveOut), continueLive: cloneBorrowLive(header)}
+		loopContext := borrowLiveContext{breakLive: liveOut, continueLive: header}
 		body := f.liveExpression(expression.Children[1], header, loopContext)
 		conditionOut := mergeBorrowLive(liveOut, body)
 		next := f.liveExpression(expression.Children[0], conditionOut, outer)
