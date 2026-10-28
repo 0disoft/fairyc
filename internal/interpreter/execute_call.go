@@ -394,9 +394,9 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				var value runtimeValue
 				aggregateType := fieldAggregateType(operation.OwnerType)
 				if definition := r.structTypes[aggregateType]; definition != nil {
-					value, err = receiver.structField(definition, operation.Field)
+					value, err = receiver.structField(definition, operation.Field, &r.fieldSlots)
 				} else {
-					value, err = receiver.field(r.resourceTypes[aggregateType], operation.Field)
+					value, err = receiver.field(r.resourceTypes[aggregateType], operation.Field, &r.fieldSlots)
 				}
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
@@ -407,10 +407,10 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 						fieldIndex := -1
 						if receiver.structure() != nil {
 							fields = &receiver.structure().fields
-							fieldIndex = structFieldIndex(receiver.structure().definition, operation.Field)
+							fieldIndex = r.fieldSlots.structField(receiver.structure().definition, operation.Field)
 						} else if receiver.resource() != nil {
 							fields = &receiver.resource().fields
-							fieldIndex = resourceFieldIndex(receiver.resource().definition, operation.Field)
+							fieldIndex = r.fieldSlots.resourceField(receiver.resource().definition, operation.Field)
 						}
 						value.payload = &scalarReference{fields: fields, field: fieldIndex}
 					}

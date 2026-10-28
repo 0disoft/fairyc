@@ -15,6 +15,7 @@ type executionState struct {
 	structTypes       map[hir.Type]*mir.StructType
 	enumTypes         map[hir.Type]*mir.EnumType
 	resourceTypes     map[hir.Type]*mir.ResourceType
+	fieldSlots        aggregateFieldIndex
 	arenaConstructors map[hir.SymbolID]*mir.ResourceType
 	abstractArenas    map[*resourceState]bool
 	testIntrinsics    map[hir.SymbolID]TestIntrinsicKind

@@ -14,7 +14,7 @@ func TestAggregateFieldsRetainDeclarationOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	for name, expected := range map[string]int32{"z": 10, "a": 20} {
-		field, err := value.structField(definition, name)
+		field, err := value.structField(definition, name, nil)
 		if err != nil || field.i32() != expected {
 			t.Fatalf("field %s: %+v %v", name, field, err)
 		}

@@ -118,7 +118,7 @@ func indexedField(fields []runtimeValue, index int) (runtimeValue, bool) {
 	return fields[index], true
 }
 
-func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeValue, error) {
+func (v runtimeValue) field(definition *mir.ResourceType, name string, index *aggregateFieldIndex) (runtimeValue, error) {
 	if v.kind != valueResource || v.resource() == nil {
 		return runtimeValue{}, capabilityError("field read received a non-resource value")
 	}
@@ -128,21 +128,21 @@ func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeV
 	if v.resource().dropped {
 		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource().definition.Type)
 	}
-	value, found := indexedField(v.resource().fields, resourceFieldIndex(definition, name))
+	value, found := indexedField(v.resource().fields, index.resourceField(definition, name))
 	if !found {
 		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", definition.Type, name)
 	}
 	return value, nil
 }
 
-func (v runtimeValue) structField(definition *mir.StructType, name string) (runtimeValue, error) {
+func (v runtimeValue) structField(definition *mir.StructType, name string, index *aggregateFieldIndex) (runtimeValue, error) {
 	if v.kind != valueStruct || v.structure() == nil {
 		return runtimeValue{}, capabilityError("field read received a non-struct value")
 	}
 	if definition == nil || v.structure().definition == nil || v.structure().definition.Type != definition.Type {
 		return runtimeValue{}, fmt.Errorf("field read struct definition does not match the runtime value")
 	}
-	value, found := indexedField(v.structure().fields, structFieldIndex(definition, name))
+	value, found := indexedField(v.structure().fields, index.structField(definition, name))
 	if !found {
 		return runtimeValue{}, fmt.Errorf("struct %q has no field %q", definition.Type, name)
 	}
