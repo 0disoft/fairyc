@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 )
@@ -114,12 +113,8 @@ func DecodeStableCompilationArtifact(encoded []byte, maxBytes uint64) (StableCom
 	if err := decoder.Decode(&envelope); err != nil {
 		return StableCompilationArtifact{}, fmt.Errorf("decode stable package compilation artifact: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return StableCompilationArtifact{}, fmt.Errorf("decode stable package compilation artifact: trailing JSON value")
-		}
-		return StableCompilationArtifact{}, fmt.Errorf("decode stable package compilation artifact trailing data: %w", err)
+	if hasTrailingJSON(encoded, decoder) {
+		return StableCompilationArtifact{}, fmt.Errorf("decode stable package compilation artifact: trailing JSON value or invalid data")
 	}
 	if envelope.Schema != StableCompilationSchema || envelope.Version != StableCompilationVersion {
 		return StableCompilationArtifact{}, fmt.Errorf("stable package compilation artifact schema or version is incompatible")

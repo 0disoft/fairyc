@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -257,12 +256,8 @@ func DecodeContextDescriptor(encoded []byte, maxBytes uint64) (ContextDescriptor
 	if err := decoder.Decode(&envelope); err != nil {
 		return ContextDescriptor{}, fmt.Errorf("decode stable type-context artifact: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return ContextDescriptor{}, fmt.Errorf("decode stable type-context artifact: trailing JSON value")
-		}
-		return ContextDescriptor{}, fmt.Errorf("decode stable type-context artifact trailing data: %w", err)
+	if hasTrailingJSON(encoded, decoder) {
+		return ContextDescriptor{}, fmt.Errorf("decode stable type-context artifact: trailing JSON value or invalid data")
 	}
 	if envelope.Schema != ContextSchema {
 		return ContextDescriptor{}, fmt.Errorf("stable type-context schema %q is incompatible with %q", envelope.Schema, ContextSchema)

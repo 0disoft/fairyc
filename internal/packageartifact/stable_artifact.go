@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"reflect"
 	"slices"
 	"strings"
@@ -261,12 +260,8 @@ func decodeStableArtifact(encoded []byte, maxBytes uint64, transfers bool) (Stab
 	if err := decoder.Decode(&envelope); err != nil {
 		return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact: trailing JSON value")
-		}
-		return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact trailing data: %w", err)
+	if hasTrailingJSON(encoded, decoder) {
+		return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact: trailing JSON value or invalid data")
 	}
 	schema, version := stableArtifactContract(transfers)
 	if envelope.Schema != schema || envelope.Version != version {

@@ -118,12 +118,8 @@ func (codec *ProcessCodec) Decode(encoded []byte) (Artifact, error) {
 	if err := decoder.Decode(&envelope); err != nil {
 		return Artifact{}, fmt.Errorf("decode process-local package artifact: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return Artifact{}, fmt.Errorf("decode process-local package artifact: trailing JSON value")
-		}
-		return Artifact{}, fmt.Errorf("decode process-local package artifact trailing data: %w", err)
+	if hasTrailingJSON(encoded, decoder) {
+		return Artifact{}, fmt.Errorf("decode process-local package artifact: trailing JSON value or invalid data")
 	}
 	schema, version, verify := codec.contract()
 	if envelope.Schema != schema {

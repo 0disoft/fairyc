@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"reflect"
 	"slices"
 	"strconv"
@@ -373,12 +372,8 @@ func DecodeStableBody(encoded []byte, maxBytes uint64) (StableBodyArtifact, erro
 	if err := decoder.Decode(&envelope); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("decode stable function-body artifact: %w", err)
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
-		if err == nil {
-			return StableBodyArtifact{}, fmt.Errorf("decode stable function-body artifact: trailing JSON value")
-		}
-		return StableBodyArtifact{}, fmt.Errorf("decode stable function-body artifact trailing data: %w", err)
+	if hasTrailingJSON(encoded, decoder) {
+		return StableBodyArtifact{}, fmt.Errorf("decode stable function-body artifact: trailing JSON value or invalid data")
 	}
 	if envelope.Schema != BodySchema || envelope.Version != BodyVersion {
 		return StableBodyArtifact{}, fmt.Errorf("stable function-body schema or version is incompatible")
