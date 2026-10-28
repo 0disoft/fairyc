@@ -68,13 +68,14 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 	// Resource definitions are immutable within this verification. Reuse required
 	// cleanup effects across functions; each caller still checks its own authority.
 	dropEffects := make(map[hir.Type][]hir.Effect)
+	var fields aggregateFieldIndex
 	for index := range program.Functions {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
 		failures = append(failures, verifyStorageOperations(&program.Functions[index], properties, capabilities)...)
 		failures = append(failures, verifyStructViewTypes(&program.Functions[index], properties)...)
-		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions, dropEffects)...)
+		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions, dropEffects, &fields)...)
 	}
 	return canonicalVerificationErrors(failures), nil
 }

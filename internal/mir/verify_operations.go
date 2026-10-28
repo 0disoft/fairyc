@@ -19,6 +19,7 @@ type operationVerifier struct {
 	flags          map[string]DropFlag
 	unsafeByEntity map[string]UnsafeOperation
 	storeTypes     map[LocalID]hir.Type
+	fields         *aggregateFieldIndex
 }
 
 func (v *operationVerifier) verifyOperation(state verificationState, operation Operation, entity string) []VerificationError {
@@ -340,11 +341,11 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 			_, found := ResolveNestedFieldStore(operation, func(typ hir.Type) *StructType { return structTypes[typ] })
 			valid = valid && found
 		} else if definition := structTypes[aggregate]; definition != nil {
-			field, found := structField(definition.Fields, operation.Field)
-			valid = valid && found && field.Type == operation.Type
+			declared, found := v.fields.structField(definition, operation.Field)
+			valid = valid && found && declared == operation.Type
 		} else if definition := resourceTypes[aggregate]; definition != nil {
-			field, found := resourceField(definition.Fields, operation.Field)
-			valid = valid && found && field.Type == operation.Type
+			declared, found := v.fields.resourceField(definition, operation.Field)
+			valid = valid && found && declared == operation.Type
 		} else {
 			valid = false
 		}
@@ -380,14 +381,14 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 			failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "field read shape is invalid"})
 		}
 		if resourceDefinition != nil {
-			field, found := resourceField(resourceDefinition.Fields, operation.Field)
-			if !found || field.Type != fieldType {
+			declared, found := v.fields.resourceField(resourceDefinition, operation.Field)
+			if !found || declared != fieldType {
 				failures = append(failures, VerificationError{Code: CodeAggregateUse, Entity: entity, Detail: "field read does not match the resource definition"})
 			}
 		}
 		if structDefinition != nil {
-			field, found := structField(structDefinition.Fields, operation.Field)
-			if !found || field.Type != fieldType {
+			declared, found := v.fields.structField(structDefinition, operation.Field)
+			if !found || declared != fieldType {
 				failures = append(failures, VerificationError{Code: CodeAggregateUse, Entity: entity, Detail: "field read does not match the struct definition"})
 			}
 		}

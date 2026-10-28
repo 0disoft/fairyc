@@ -9,10 +9,10 @@ import (
 )
 
 func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
-	return verifyFunctionContext(context.Background(), function, structTypes, enumTypes, resourceTypes, foreignFunctions, functions, make(map[hir.Type][]hir.Effect))
+	return verifyFunctionContext(context.Background(), function, structTypes, enumTypes, resourceTypes, foreignFunctions, functions, make(map[hir.Type][]hir.Effect), &aggregateFieldIndex{})
 }
 
-func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function, dropEffects map[hir.Type][]hir.Effect) []VerificationError {
+func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function, dropEffects map[hir.Type][]hir.Effect, fields *aggregateFieldIndex) []VerificationError {
 	storeTypes, err := fieldStoreLocalTypes(function, functions, foreignFunctions)
 	if err != nil {
 		return []VerificationError{{Code: CodeOperationType, Entity: function.Name, Detail: err.Error()}}
@@ -68,6 +68,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		flags:          flags,
 		unsafeByEntity: unsafeByEntity,
 		storeTypes:     storeTypes,
+		fields:         fields,
 	}
 	type pendingBlock struct {
 		id    BlockID
