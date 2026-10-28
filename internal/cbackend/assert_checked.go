@@ -220,8 +220,15 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 				predecessors[int(next)] = append(predecessors[int(next)], b.ID)
 			}
 		}
-		// Cached snapshots are read-only. Clone only when a successor inherits
-		// one for mutation, not when storing or inspecting an existing result.
+		users := make([]int, len(f.Blocks))
+		for _, b := range f.Blocks {
+			if incoming := predecessors[int(b.ID)]; b.ID != f.Entry && len(incoming) == 1 {
+				users[int(incoming[0])]++
+			}
+		}
+		// Only single-predecessor blocks inherit a state. A sole user can consume
+		// its maps; shared snapshots must be cloned before mutation. Later root
+		// visits discard cached return values, and completed users never inherit twice.
 		states := map[mir.BlockID]assertionState{}
 		visiting := map[mir.BlockID]bool{}
 		var analyze func(mir.BlockID) assertionState
@@ -233,15 +240,19 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 				return newAssertionState()
 			}
 			visiting[id] = true
-			s := newAssertionState()
+			var s assertionState
 			if id == f.Entry {
+				s = newAssertionState()
 				for i, p := range f.Parameters {
 					_, _, borrowed := hir.BorrowElement(f.ParameterTypes[i])
 					s.locals[p] = assertionValue{place: fmt.Sprintf("v%d", p), reference: borrowed}
 				}
 			} else if pred := predecessors[int(id)]; len(pred) == 1 {
 				previous := pred[0]
-				s = analyze(previous).clone()
+				s = analyze(previous)
+				if users[int(previous)] != 1 {
+					s = s.clone()
+				}
 				term := f.Blocks[int(previous)].Terminator
 				if term.UnwindSuccessor == id {
 					s = newAssertionState()
@@ -251,6 +262,8 @@ func assertedCheckedFailuresForC(functions []mir.Function) checkedFailureProofs 
 						s.facts[eq.place] = eq.literal
 					}
 				}
+			} else {
+				s = newAssertionState()
 			}
 			for _, op := range f.Blocks[int(id)].Operations {
 				s.operation(op)
