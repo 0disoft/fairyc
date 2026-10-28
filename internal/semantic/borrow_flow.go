@@ -1415,6 +1415,9 @@ func mergeBorrowValues(values []borrowValueState) borrowValueState {
 	if len(values) == 0 {
 		return borrowValueState{known: false}
 	}
+	if result, ok := cloneUnchangedBorrowJoin(values); ok {
+		return result
+	}
 	result := borrowValueState{known: true}
 	for _, value := range values {
 		result.known = result.known && value.known
