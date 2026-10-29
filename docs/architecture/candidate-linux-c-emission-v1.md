@@ -26,6 +26,11 @@ The workspace packet uses the same `FYCPARTS1` framing consumed by the
 units are length-delimited; stdout contains no success summary. This packet is
 not byte-identical to the Go reference's single C unit.
 
+For packets selecting the Linux process-argument runtime, the native consumer
+must initialize that runtime from OS `argc`/`argv` before calling the Fairy entry.
+The bootstrap backend supplies a separate startup unit and uses the existing
+`FY_CANDIDATE_NO_MAIN` opt-out rather than rewriting the emitted packet.
+
 Single-file input retains the 65,536-byte limit, UTF-8/nofollow path admission,
 regular-file identity observations and close checks of the Linux file loader.
 Workspace input uses the existing rooted workspace reader selection. An unlocked

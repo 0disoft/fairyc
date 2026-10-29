@@ -163,7 +163,7 @@ func checkLinuxCEmission(t *testing.T, tc cdriver.NativeToolchain, artifact cdri
 		if err := os.Chmod(stage, 0700); err != nil {
 			t.Fatal(err)
 		}
-		built, err := cdriver.BuildLinuxTargetParts(stage, "gcc", cdriver.LowProfile, packet.Header, packet.Literals, packet.Units, support, time.Minute)
+		built, err := cdriver.BuildLinuxTargetParts(stage, "gcc", cdriver.LowProfile, packet.Header, packet.Literals, packet.Units, support, false, time.Minute)
 		if err != nil {
 			t.Fatal(err)
 		}

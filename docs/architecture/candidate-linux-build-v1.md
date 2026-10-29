@@ -11,6 +11,14 @@ It does not invoke MSVC, another Fairy compiler, cached packets or source discov
 toolchain admission applies: native Linux amd64/glibc, GCC >=13 or Clang >=18.
 Windows runtime symbols and unknown SDK/vector/host symbols fail selection.
 
+When the closed header selects `fy_std_process_arg_count_v0` or
+`fy_std_process_arg_v0`, the native backend adds a separate Linux startup unit.
+It suppresses the packet's generic entry with `FY_CANDIDATE_NO_MAIN`, initializes
+`fy_std_process_set_args_v0(argc, argv)`, then calls `fy_candidate_entry`.
+The admitted packet bytes and target-neutral entry remain unchanged. This applies
+to normal builds, private run images and native test images; empty arguments and
+arguments containing spaces retain their original byte boundaries.
+
 The caller supplies a new private staging directory containing only `packet.bin`.
 Sources use exclusive creation; objects are bounded and inspected as ELF64 x86-64
 relocatables. A response file lists only generated ASCII object basenames. The linked

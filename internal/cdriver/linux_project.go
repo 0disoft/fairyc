@@ -18,7 +18,7 @@ import (
 // BuildLinuxTargetParts builds bounded, already-emitted C in a caller-owned
 // private staging directory. Children inherit the companion's captured process
 // group, so cancellation by the Fairy owner also kills compiler descendants.
-func BuildLinuxTargetParts(directory, compiler string, profile Profile, header, literals string, units []string, support string, timeout time.Duration) (Artifact, error) {
+func BuildLinuxTargetParts(directory, compiler string, profile Profile, header, literals string, units []string, support string, processArguments bool, timeout time.Duration) (Artifact, error) {
 	if timeout <= 0 || timeout > 10*time.Minute {
 		return Artifact{}, fmt.Errorf("Linux project compile timeout must be in (0,10m]")
 	}
@@ -79,6 +79,9 @@ func BuildLinuxTargetParts(directory, compiler string, profile Profile, header, 
 	sources := []string{literals}
 	sources = append(sources, units...)
 	sources = append(sources, support)
+	if processArguments {
+		sources = append(sources, linuxProcessArgumentsEntry)
+	}
 	objects := make([]string, 0, len(sources))
 	for index, source := range sources {
 		name := fmt.Sprintf("fy_part_%d.c", index)
@@ -89,6 +92,9 @@ func BuildLinuxTargetParts(directory, compiler string, profile Profile, header, 
 		// The transport has header-owned static helpers. Preserve the candidate
 		// partitions' warning policy rather than applying single-unit -Werror.
 		args := []string{"-std=c11", "-fno-common", profile.optimizationFlag, "-pipe", "-c", name, "-o", object}
+		if processArguments {
+			args = append(args, "-DFY_CANDIDATE_NO_MAIN")
+		}
 		if err := runLinuxProjectCommand(toolchain.Path, directory, timeout, args...); err != nil {
 			return Artifact{}, fmt.Errorf("compile %s: %w", name, err)
 		}
@@ -164,3 +170,14 @@ func inspectLinuxProjectELF(data []byte, kinds ...elf.Type) error {
 	}
 	return fmt.Errorf("unexpected Linux ELF type %s", file.Type)
 }
+
+// A separate native startup keeps the admitted packet bytes unchanged. Its
+// target-neutral main is suppressed by the packet's existing opt-out macro.
+const linuxProcessArgumentsEntry = `#include <stdint.h>
+extern int32_t fy_candidate_entry(void);
+extern void fy_std_process_set_args_v0(int, char **);
+int main(int argc, char **argv) {
+    fy_std_process_set_args_v0(argc, argv);
+    return (int)fy_candidate_entry();
+}
+`

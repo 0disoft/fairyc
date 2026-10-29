@@ -8,7 +8,7 @@ import (
 
 func TestLinuxProjectAdmission(t *testing.T) {
 	for _, timeout := range []time.Duration{0, -1, 10*time.Minute + 1} {
-		if _, err := BuildLinuxTargetParts("must-not-open", "", LowProfile, "header", "literals", []string{"body"}, "runtime", timeout); err == nil {
+		if _, err := BuildLinuxTargetParts("must-not-open", "", LowProfile, "header", "literals", []string{"body"}, "runtime", false, timeout); err == nil {
 			t.Fatal("invalid deadline admitted")
 		}
 	}

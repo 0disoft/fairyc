@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -92,6 +93,60 @@ func TestLinuxPacketBuildAndPublication(t *testing.T) {
 					t.Fatalf("%s damaged previous output: %v", mode, err)
 				}
 			}
+		}
+	}
+}
+
+// Linux packet entries are target-neutral. The native backend must bind OS argv
+// before entering Fairy code that selects the closed process-argument runtime.
+func TestLinuxPacketProcessArguments(t *testing.T) {
+	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+		t.Skip("native Linux argv requires Linux amd64")
+	}
+	header := "#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n" + LinuxPacketMarker + `
+#define FY_CANDIDATE_PROJECT_HEADER_V1
+#include <stdint.h>
+#include <stddef.h>
+struct fy_std_process_args_result_v0 { uint32_t status; size_t needed; };
+extern size_t fy_std_process_arg_count_v0(void);
+extern struct fy_std_process_args_result_v0 fy_std_process_arg_v0(size_t, uint8_t *, size_t);
+#endif
+`
+	literals := "/* fairyc.candidate-project-literals-c/v1 */\n#include \"fy_project.h\"\n"
+	unit := `/* fairyc.candidate-project-unit-c/v1 */
+#include "fy_project.h"
+extern int32_t fy_fn_1(void){
+    if (fy_std_process_arg_count_v0() != 3) return 11;
+    uint8_t data[4] = {0};
+    struct fy_std_process_args_result_v0 first = fy_std_process_arg_v0(1, data, sizeof data);
+    if (first.status != 0 || first.needed != 0) return 12;
+    struct fy_std_process_args_result_v0 second = fy_std_process_arg_v0(2, data, sizeof data);
+    if (second.status != 0 || second.needed != 3 || data[0] != 'a' || data[1] != ' ' || data[2] != 'b') return 13;
+    return 0;
+}
+int32_t fy_candidate_entry(void){return fy_fn_1();}
+#ifndef FY_CANDIDATE_NO_MAIN
+int main(void) { return (int)fy_candidate_entry(); }
+#endif
+`
+	for _, release := range []bool{false, true} {
+		stage := t.TempDir()
+		if err := os.Chmod(stage, 0700); err != nil {
+			t.Fatal(err)
+		}
+		var data bytes.Buffer
+		fmt.Fprintf(&data, "FYCPARTS1\n%d\n%s%d\n%s1\n%d\n%s", len(header), header, len(literals), literals, len(unit), unit)
+		input := filepath.Join(stage, "packet.bin")
+		if err := os.WriteFile(input, data.Bytes(), 0600); err != nil {
+			t.Fatal(err)
+		}
+		_, err := BuildLinuxInput(Options{OutputRoot: stage, Output: "program", Release: release, RunTrapControl: true}, input, stage, "gcc")
+		if err != nil {
+			t.Fatal(err)
+		}
+		output, err := exec.Command(filepath.Join(stage, "program"), "", "a b").CombinedOutput()
+		if err != nil {
+			t.Fatalf("Linux argv release=%t: %v: %s", release, err, output)
 		}
 	}
 }

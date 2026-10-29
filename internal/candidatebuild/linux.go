@@ -73,7 +73,7 @@ func BuildLinuxInput(options Options, input, stage, compiler string) (Result, er
 	if options.Release {
 		profile = cdriver.OptimizedProfile
 	}
-	artifact, err := cdriver.BuildLinuxTargetParts(stage, compiler, profile, packet.Header, packet.Literals, packet.Units, support, timeout)
+	artifact, err := cdriver.BuildLinuxTargetParts(stage, compiler, profile, packet.Header, packet.Literals, packet.Units, support, linuxProcessArguments(packet.Header), timeout)
 	if err != nil {
 		return Result{}, err
 	}
@@ -81,4 +81,15 @@ func BuildLinuxInput(options Options, input, stage, compiler string) (Result, er
 		return Result{}, err
 	}
 	return result(data, len(packet.Units), len(artifact.Bytes), profile.Name), nil
+}
+
+// The same closed symbol scan that selects process storage also selects its
+// native startup. Generic packet main(void) cannot initialize Linux OS argv.
+func linuxProcessArguments(header string) bool {
+	for _, match := range linuxRuntimeSymbols.FindAllStringSubmatch(header, -1) {
+		if match[1] == "fy_std_process_arg_count_v0" || match[1] == "fy_std_process_arg_v0" {
+			return true
+		}
+	}
+	return false
 }
