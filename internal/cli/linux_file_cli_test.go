@@ -22,6 +22,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	copyLexerFileCLIExample(t, root)
 	selectLinuxWorkspaceReaders(t, root)
 	selectLinuxCEmission(t, root)
+	selectLinuxTestExecutor(t, root)
 	entryPath := filepath.Join(root, "src", "main.fy")
 	entry, err := os.ReadFile(entryPath)
 	if err != nil {
@@ -38,7 +39,7 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"--tokens-file",3)==4 && file_cli::command(b"--mir-file",3)==4);
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
     assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
-    assert(file_cli::command(b"test",2)==5 && file_cli::command(b"new",3)==5);
+    assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==5);
     assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
     assert(file_cli::source_mode(b"--bindings-file") && file_cli::source_mode(b"--check-types-file") && file_cli::source_mode(b"--hir-file"));
@@ -159,7 +160,8 @@ fn i32 cli_probe() {
 				{[]string{"build", "--release", "--release"}, 2, ""},
 				{[]string{"build", "--cache-root", "ignored"}, 2, "accepts only optional --release and --locked"},
 				{[]string{"run", "--help"}, 0, "run [--release] [--locked]"},
-				{[]string{"test"}, 3, "Linux workspace CLI is not connected"},
+				{[]string{"test", "--help"}, 0, "test --native"},
+				{[]string{"new", "unused"}, 3, "Linux workspace CLI is not connected"},
 			}
 			for _, tc := range cases {
 				result, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: tc.args, WorkingDirectory: root, Timeout: 30 * time.Second})
@@ -170,6 +172,7 @@ fn i32 cli_probe() {
 			checkLinuxWorkspace(t, toolchain, artifact)
 			checkLinuxBuild(t, artifact, backend)
 			checkLinuxRun(t, artifact, backend)
+			checkLinuxTest(t, artifact, backend)
 		})
 	}
 }
@@ -282,4 +285,18 @@ source = "src"
 	}
 	writeTestSource(t, root, "src/MAIN.fy", "module extra;\n")
 	run([]string{"check"}, 7)
+}
+
+func selectLinuxTestExecutor(t *testing.T, root string) {
+	t.Helper()
+	path := filepath.Join(root, "src", "project_test_cli.fy")
+	source, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := "import native_cli as native;"
+	if strings.Count(string(source), old) != 1 {
+		t.Fatal("test executor boundary changed")
+	}
+	writeTestSource(t, root, "src/project_test_cli.fy", strings.Replace(string(source), old, "import linux_test_cli as native;", 1))
 }

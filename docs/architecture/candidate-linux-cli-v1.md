@@ -1,7 +1,7 @@
 # Private Linux candidate file CLI v1
 
 `linux_file_cli.fy` is the Linux command dispatcher. The preparation tool selects the dispatcher and
-[workspace filesystem boundary](candidate-linux-workspace-check-v1.md) in an isolated copy of the authored sources. The original
+[workspace filesystem boundary](candidate-linux-workspace-check-v1.md) and test executor in an isolated copy of the authored sources. The original
 Windows entry and no-argument binary stdin protocol remain available.
 
 ## Connected commands
@@ -12,8 +12,9 @@ Windows entry and no-argument binary stdin protocol remain available.
 - `check`, `check --locked`, and `check --help` use the shared workspace checker. Cache options remain unsupported.
 - `build [--release] [--locked]` and build help use the [Linux bootstrap backend](candidate-linux-build-v1.md).
 - `run [--release] [--locked] [-- <program args>]` uses the [Linux run path](candidate-linux-run-v1.md).
+- `test` reuses shared discovery, listing and interpreter execution; `--native` uses the [Linux test path](candidate-linux-test-v1.md), including stdin modes and JSON capture.
 - Unknown commands or invalid arity for connected commands return 2. Unconnected workspace commands
-  `test` and `new` return 3 with an explicit capability diagnostic.
+  `new` return 3 with an explicit capability diagnostic.
   Dispatcher output failures return 4; shared frontend exit codes remain unchanged.
   The help lists this boundary; the shared target registry is
   target metadata, not a claim that this dispatcher can build either target.
@@ -78,5 +79,5 @@ execution is skipped, not passed. The owning source workspace passes `check` and
 
 Linux [workspace check](candidate-linux-workspace-check-v1.md) and
 [workspace build](candidate-linux-build-v1.md) share frontend logic and private Linux
-adapters. Build requires the matching Go bootstrap backend companion. Workspace test/new/cache
+adapters. Build requires the matching Go bootstrap backend companion. Workspace new/cache
 integration and actual Linux execution remain separate; Go stays the default compiler.

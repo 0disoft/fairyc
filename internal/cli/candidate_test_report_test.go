@@ -85,6 +85,11 @@ pub fn Input test_empty(){return Input{.sources=v::empty<syntax::Parsed>(),.owne
 			if i == 1 {
 				wantTarget = "x86_64-windows-msvc"
 			}
+
+			want := strings.ReplaceAll(`{"schemaVersion":"fairyc.test-report/v4","engine":"native","target":"TARGET","profile":"development","tests":[{"identity":"tests::a::fails","outcome":"failed","trapCategory":"assertion-failed","stdoutBase64":"AP8=","stderrBase64":""},{"identity":"tests::a::passes","outcome":"passed","trapCategory":null,"stdoutBase64":"","stderrBase64":"ZQ=="}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}`, "TARGET", wantTarget)
+			if line != want {
+				t.Fatalf("native report bytes differ: %s", line)
+			}
 			if report.Target == nil || *report.Target != wantTarget || report.Count != 2 || report.Failed != 1 || report.Passed != 1 || report.Engine != "native" || report.Lock != "verified" {
 				t.Fatalf("report %s", line)
 			}
@@ -117,6 +122,10 @@ fn bytes::Buffer copied(ref u8[] data){return switch(bytes::copy(data)){case .ok
  let passed=switch(result::copy(0,b"",b"e")){case .ok(p):{p}case .err(_):{return 3;}};
  assert(v::push<result::Captured>(ref mut results,failed).is_ok);assert(v::push<result::Captured>(ref mut results,passed).is_ok);
  assert(options::test_native_report(ref selected,ref tests,ref chosen,ref projected,ref results,3,b"x86_64-linux-gnu")==5);
- assert(options::test_report(ref selected,ref tests,ref chosen,ref projected,ref results,3)==5);return 0;
+ assert(options::test_report(ref selected,ref tests,ref chosen,ref projected,ref results,3)==5);
+ var bytes::Buffer message=bytes::empty();
+ assert(options::test_timeout_diagnostic(b"tests::a::fails",60000,ref mut message) && bytes::equal(bytes::view(ref message),b"fairyc: build failed: execute native test tests::a::fails: MSVC target executable exceeded 1m0s\n"));
+ assert(bytes::truncate(ref mut message,0).is_ok);
+ assert(options::test_timeout_diagnostic_for(b"tests::a::fails",1000,b"Linux GNU",ref mut message) && bytes::equal(bytes::view(ref message),b"fairyc: build failed: execute native test tests::a::fails: Linux GNU target executable exceeded 1s\n"));return 0;
 }
 `

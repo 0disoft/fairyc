@@ -74,3 +74,6 @@ trap source locations, locked loads, invalid flags, frontend/companion failure,
 private TMPDIR cleanup and preservation of a prior published image. They are
 skipped on the Windows development host; no Linux-native success is claimed.
 Distribution and Linux self-host evidence remain separate. Go stays the default.
+
+Native [workspace tests](candidate-linux-test-v1.md) reuse the run collector and
+trap protocol, adding explicit EOF/inherited/replay stdin and per-test reporting.

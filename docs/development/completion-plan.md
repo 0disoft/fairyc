@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | SDK 0.87 preview at clean `890b3da4` passes all twelve packaging/starter steps and seven local portability executions; its hashed transfer ZIP and standalone verifier are ready. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and remaining workspace test/new/cache integration remain open. Go stays the default. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and remaining workspace new/cache integration remain open. Go stays the default. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 The private Linux [rooted file adapter](../architecture/candidate-linux-rooted-files-v1.md)
@@ -85,6 +85,18 @@ cleanup. Normal Linux status preserves only eight bits; validated traps return
 shared receipt checks pass. Native Linux CLI/GNU execution remains unverified.
 Workspace test/new/cache integration, the Fairy GNU backend, distribution and
 self-host evidence remain open; Go stays the default.
+
+Linux [workspace test](../architecture/candidate-linux-test-v1.md) now connects
+shared discovery/listing/semantic execution and isolated native GNU test execution.
+Existing selectors, workspace/package scope, locations, JSON and lock behavior
+are retained. Native tests support release, exact args, caller stdin, bounded file
+replay, EOF by default, per-test deadlines and binary base64 capture. Valid traps
+are reported without stopping later tests; infrastructure failures abort and owned
+stages are cleaned. Portable reporting and Windows low/optimized adapter/wrapper
+checks pass, as do full-entry both-target emission and no-Windows-symbol selection.
+Source and prepared Linux workspaces pass both check modes. Native Linux/reference
+integration cases are authored but skipped on Windows. Workspace new/cache,
+Fairy GNU backend and distribution/self-host evidence remain open; Go stays default.
 
 ## Scope and evidence
 

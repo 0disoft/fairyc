@@ -52,6 +52,15 @@ def select_linux_emission(output):
     path.write_text(source.replace(old, old+'/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\\n'), encoding='utf-8', newline='\n')
 
 
+def select_linux_tests(output):
+    path = output / 'src/project_test_cli.fy'
+    source = path.read_text(encoding='utf-8')
+    old = 'import native_cli as native;'
+    if source.count(old) != 1:
+        raise ValueError('test executor selection changed')
+    path.write_text(source.replace(old, 'import linux_test_cli as native;'), encoding='utf-8', newline='\n')
+
+
 def prepare(output):
     output = output.resolve()
     if not output.is_relative_to((ROOT / '.cache').resolve()):
@@ -69,6 +78,7 @@ def prepare(output):
                     encoding='utf-8', newline='\n')
     select_workspace_io(output)
     select_linux_emission(output)
+    select_linux_tests(output)
     return output
 
 

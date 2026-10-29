@@ -80,7 +80,7 @@ Linux-native tests cover private nested-tree cleanup and outside-link preservati
 GNU object/ELF publication, low/release SDK File-reader builds and execution, locked
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
-Workspace `test/new`, caches and a Fairy-authored GNU backend remain separate work.
+Workspace `new`, caches and a Fairy-authored GNU backend remain separate work.
 
 ## Private run-image backend
 
@@ -98,3 +98,6 @@ channel. Receipts admit 276 bytes; overflow fails capture. Only fully drained
 collection exposes receipt bytes. Ordinary capture continues closing from fd 3.
 Windows low/optimized POSIX substitutes cover receipt bounds and descriptor
 cleanup; Linux-native probes are authored and skipped on Windows.
+
+The [Linux test caller](candidate-linux-test-v1.md) also uses the private run-image
+backend for one separately harnessed test per stage.
