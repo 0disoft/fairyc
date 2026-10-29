@@ -1,12 +1,14 @@
 # Private Linux candidate workspace check v1
 
 The Linux dispatcher connects `check`, `check --locked`, and `check --help` to the
-existing `project_check_cli.run` path. It performs the same manifest/dependency/source,
+existing `project_check_cli` path. It performs the same manifest/dependency/source,
 SDK authentication, lock policy, visibility, semantic/IR processing and report rendering
 as the original candidate. It does not spawn the Go compiler or another frontend.
-Unknown or duplicate options, extra arguments and cache options return 2 before workspace
-access. [Workspace build](candidate-linux-build-v1.md) now uses a separate bootstrap
-companion; `run/test/new` and public C emission remain separate implementation work.
+Unknown or duplicate options and extra arguments return 2 before workspace access.
+The opt-in [Linux workspace cache](candidate-linux-cache-v1.md) accepts
+`--cache-root <existing directory>` and `--cache-status` through the shared parser.
+[Workspace build](candidate-linux-build-v1.md) uses a separate bootstrap companion;
+cache wiring for `build/run/test` and public C emission remain separate work.
 
 ## Platform selection
 
@@ -79,4 +81,4 @@ Build from the isolated snapshot using the [Linux CLI bootstrap procedure](candi
 then run `build/lexer-candidate-linux check [--locked]` from a client workspace. Source
 workspace `check`/`check --locked`, affected native policy tests, native support selection,
 `go vet` and diff checks are the local verification boundary. Linux native execution and
-workspace `run`/cache integration remain open; Go stays the default compiler.
+cache wiring for the other commands remain open; Go stays the default compiler.

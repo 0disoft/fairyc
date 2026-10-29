@@ -12,7 +12,6 @@ import module_program_artifact_wire as wire;
 import candidate_artifact_wire as payload;
 import project_cache_disk as disk;
 import project_cache_lookup as lookup;
-import windows_rooted_file as rooted;
 
 // A candidate is reusable only after fresh complete source admission and exact
 // current v4/v0 key preimages. No cached hashes or partial result confer authority.
@@ -25,8 +24,7 @@ pub struct DiskWork{usize lookup;usize scan;usize io;usize projection;usize sour
 pub fn DiskWork empty_disk_work(){return DiskWork{.lookup=0,.scan=0,.io=0,.projection=0,.source=0,.artifact=0,.link=0,.key=0};}
 // 1 routing, 2 disk lookup, 3 verified admission, 4 encoding, 5 publication.
 pub struct DiskProblem{u32 phase;u32 code;Problem artifact;disk::Problem storage;}
-fn DiskProblem disk_failure(u32 phase,u32 code){return DiskProblem{.phase,.code,.artifact=fail(0,0),.storage=disk::Problem{.kind=0,.stage=0,.os_code=0,.completed=0,.observed=empty_metadata()}};}
-fn rooted::Metadata empty_metadata(){return rooted::Metadata{.identity=0,.modified=0,.size=0,.attributes=0};}
+fn DiskProblem disk_failure(u32 phase,u32 code){return DiskProblem{.phase,.code,.artifact=fail(0,0),.storage=disk::empty_problem()};}
 fn DiskProblem storage_failure(u32 phase,disk::Problem e){var p=disk_failure(phase,e.kind);p.storage=e;return p;}
 fn DiskProblem artifact_failure(u32 phase,Problem e){var p=disk_failure(phase,e.code);p.artifact=e;return p;}
 fn bool temporary_failure(Problem p){return p.code==10 || p.code==11 || p.code==1002 || p.code==1003;}

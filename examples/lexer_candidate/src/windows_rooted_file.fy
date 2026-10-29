@@ -52,6 +52,11 @@ fn Result<bytes::Buffer,Problem> wide(ref u8[] input,bool leaf){if(leaf && !vali
 @effects(filesystem) pub fn Result<bool,Problem> close(File input){var File file=input;var Problem problem=fail(0,0,0);if(file.staged && unsafe{file_delete(file.raw)}==0){problem=native(10,0);}let raw=file.raw;file.raw=0;if(unsafe{close_handle(raw)}==0){let code=unsafe{last_error()};if(problem.stage==0){problem=fail(11,code,0);}else{problem.close_code=code;}}return if(problem.stage==0){.ok(true)}else{.err(problem)};}
 
 @repr(C) pub struct Metadata{usize identity;usize modified;usize size;u32 attributes;}
+pub fn Metadata empty_metadata(){return Metadata{.identity=0,.modified=0,.size=0,.attributes=0};}
+pub fn bool earlier(Metadata a,Metadata b){return a.modified<b.modified;}
+pub fn bool same_time(Metadata a,Metadata b){return a.modified==b.modified;}
+@effects(clock) pub fn bool expired(Metadata p,usize age){let time=now();return p.modified<=time && time-p.modified>=age;}
+pub fn bool publication_collision(Problem p){return p.os_code==80 || p.os_code==183;}
 
 pub resource Entries{v::Vec<bytes::Buffer> names;v::Vec<usize> facts;cleanup{}}
 pub fn usize count(ref Entries p){return v::len<bytes::Buffer>(ref p.names);}

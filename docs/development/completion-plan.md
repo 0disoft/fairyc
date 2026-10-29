@@ -109,6 +109,15 @@ creation and generated check/test/run/build integration are authored but skipped
 on Windows. Cache/C-emission wiring, the Fairy GNU backend and distribution/self-host
 proof remain open; Go stays default.
 
+Linux [workspace check cache](../architecture/candidate-linux-cache-v1.md) now
+connects `check --cache-root <existing directory> [--cache-status]`, including
+`--locked`, to the shared verified IR cache. The isolated source selection uses
+Linux compiler-image reads, target/ABI keys, descriptor-owned storage and
+anonymous staging. Windows cache transport keeps its existing behavior. Whole-entry
+both-target emission, closed Linux support selection and Windows low/optimized
+wrapper checks pass. Linux-native cold/warm/invalidation cases remain pending;
+cache wiring for build/run/test and public C emission remain open.
+
 ## Scope and evidence
 
 - Phase 1, verified-MIR cache Phase 3, and the admitted Atlas Phase 4 scope already have exit

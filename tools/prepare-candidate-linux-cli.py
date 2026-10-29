@@ -7,7 +7,8 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'examples/lexer_candidate'
 WORKSPACE_READERS = ('project_directory', 'project_source_catalog',
-                     'project_source_file', 'project_source_set')
+                     'project_source_file', 'project_source_set',
+                     'project_compiler_image_hash')
 
 
 def select_workspace_io(output):
@@ -61,6 +62,28 @@ def select_linux_tests(output):
     path.write_text(source.replace(old, 'import linux_test_cli as native;'), encoding='utf-8', newline='\n')
 
 
+def select_linux_cache(output):
+    selections = {
+        'project_cache_disk': ('import windows_rooted_file as rooted;\nimport windows_rooted_file as handles;',
+                               'import linux_cache_file as rooted;\nimport linux_rooted_file as handles;'),
+        'project_cache_environment': ('import windows_host_paths as paths;',
+                                      'import linux_host_paths as paths;'),
+        'project_cache_profile': ('x86_64-windows-msvc', 'x86_64-linux-gnu'),
+    }
+    for name, (old, new) in selections.items():
+        path = output / 'src' / (name + '.fy')
+        source = path.read_text(encoding='utf-8')
+        if source.count(old) != (2 if name == 'project_cache_profile' else 1):
+            raise ValueError(f'{name} cache platform boundary changed')
+        source = source.replace(old, new)
+        if name == 'project_cache_profile':
+            old_abi = ';llp64;microsoft-x64;msvc-x64-llp64;microsoft-x64;coff-x86-64;windows-x64-pdata-xdata'
+            if source.count(old_abi) != 1:
+                raise ValueError('cache ABI profile boundary changed')
+            source = source.replace(old_abi, ';lp64;sysv-amd64;sysv-amd64-lp64;sysv-amd64;elf64;dwarf-cfi')
+        path.write_text(source, encoding='utf-8', newline='\n')
+
+
 def prepare(output):
     output = output.resolve()
     if not output.is_relative_to((ROOT / '.cache').resolve()):
@@ -79,6 +102,7 @@ def prepare(output):
     select_workspace_io(output)
     select_linux_emission(output)
     select_linux_tests(output)
+    select_linux_cache(output)
     return output
 
 

@@ -23,6 +23,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	selectLinuxWorkspaceReaders(t, root)
 	selectLinuxCEmission(t, root)
 	selectLinuxTestExecutor(t, root)
+	selectLinuxCache(t, root)
 	entryPath := filepath.Join(root, "src", "main.fy")
 	entry, err := os.ReadFile(entryPath)
 	if err != nil {
@@ -31,7 +32,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	if strings.Count(string(entry), "import file_cli as file_cli;") != 1 {
 		t.Fatal("candidate dispatcher import changed")
 	}
-	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;\nimport linux_run_cli as linux_run;", 1)+`
+	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;\nimport linux_run_cli as linux_run;\nimport project_cache_profile as cache_profile;", 1)+`
 fn i32 cli_probe() {
     assert(file_cli::command(b"--help",2)==1 && file_cli::command(b"help",2)==1 && file_cli::command(b"-h",2)==1);
     assert(file_cli::command(b"--version",2)==2 && file_cli::command(b"targets",2)==3);
@@ -52,6 +53,8 @@ fn i32 cli_probe() {
     let run_output=switch(linux_build::output_for(true,b"client")){case .ok(p):{p}case .err(_):{assert(false);return 1;}};
     assert(bytes::equal(bytes::view(ref run_output),b"program"));
     assert(linux_run::exit_code(0)==0 && linux_run::exit_code(133)==133 && linux_run::exit_code(255)==255);
+    assert(bytes::equal(cache_profile::target(),b"x86_64-linux-gnu"));
+    assert(bytes::equal(cache_profile::abi_profile(),b"fairyc.target-abi-profile/0;x86_64-linux-gnu;lp64;sysv-amd64;sysv-amd64-lp64;sysv-amd64;elf64;dwarf-cfi"));
     return 0;
 }
 `)
@@ -154,7 +157,9 @@ fn i32 cli_probe() {
 				{[]string{"--tokens-file"}, 2, "usage:"},
 				{[]string{"unknown"}, 2, "usage:"},
 				{[]string{"check", "--help"}, 0, "check [--locked]"},
-				{[]string{"check", "--cache-root", "ignored"}, 2, "accepts only optional --locked"},
+				{[]string{"check", "--cache-root"}, 2, "requires a nonempty directory path"},
+				{[]string{"check", "--cache-status"}, 2, "requires --cache-root"},
+				{[]string{"check", "--cache-root", "ignored", "--cache-root", "other"}, 2, "more than once"},
 				{[]string{"check", "--unknown"}, 2, "accepts only optional --locked"},
 				{[]string{"build", "--help"}, 0, "build [--release] [--locked]"},
 				{[]string{"build", "--release", "--release"}, 2, ""},
@@ -170,6 +175,7 @@ fn i32 cli_probe() {
 				}
 			}
 			checkLinuxWorkspace(t, toolchain, artifact)
+			checkLinuxCache(t, toolchain, artifact)
 			checkLinuxBuild(t, artifact, backend)
 			checkLinuxRun(t, artifact, backend)
 			checkLinuxTest(t, artifact, backend)
@@ -199,7 +205,7 @@ func selectLinuxCEmission(t *testing.T, root string) {
 func selectLinuxWorkspaceReaders(t *testing.T, root string) {
 	t.Helper()
 	types := regexp.MustCompile(`\bfs::(FileError|FileKind|FileId|File|ReadDir|DirEntry|PathKind)\b`)
-	for _, name := range []string{"project_directory", "project_source_catalog", "project_source_file", "project_source_set", "project_lock_write"} {
+	for _, name := range []string{"project_directory", "project_source_catalog", "project_source_file", "project_source_set", "project_compiler_image_hash", "project_lock_write"} {
 		path := filepath.Join(root, "src", name+".fy")
 		data, err := os.ReadFile(path)
 		if err != nil {

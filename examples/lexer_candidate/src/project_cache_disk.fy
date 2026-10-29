@@ -1,5 +1,6 @@
 module project_cache_disk;
 import windows_rooted_file as rooted;
+import windows_rooted_file as handles;
 import sha256 as blocks;
 import std::bytes as bytes;
 import std::vec as v;
@@ -12,8 +13,9 @@ pub struct Stats{usize entries;usize bytes;usize evicted;}
 pub struct Problem{u32 kind;u32 stage;u32 os_code;usize completed;rooted::Metadata observed;}
 // 1 policy/name, 2 missing, 3 inventory, 4 read, 5 publication,
 // 6 retention, 7 malformed/digest, 8 allocation, 9 work/record bound.
-fn rooted::Metadata no_metadata(){return rooted::Metadata{.identity=0,.modified=0,.size=0,.attributes=0};}
+fn rooted::Metadata no_metadata(){return rooted::empty_metadata();}
 fn Problem fail(u32 kind){return Problem{.kind,.stage=0,.os_code=0,.completed=0,.observed=no_metadata()};}
+pub fn Problem empty_problem(){return fail(0);}
 fn Problem malformed(rooted::Metadata observed){return Problem{.kind=7,.stage=0,.os_code=0,.completed=0,.observed};}
 fn Problem io(u32 kind,rooted::Problem p){return Problem{.kind,.stage=p.stage,.os_code=p.os_code,.completed=p.completed,.observed=no_metadata()};}
 pub fn usize record_limit(){return 268435456;}
@@ -27,7 +29,7 @@ pub fn bool valid_route(ref u8[] p){return p.len==81 && bytes::equal(p[..17],b"f
 fn bool generation_name(ref u8[] p){return p.len==144 && bytes::equal(p[..11],b"fyproject0-") && p[75]==45 && bytes::equal(p[140..],b".fyc") && hex(p[11..75]) && hex(p[76..140]);}
 // Exclusive staging names contain only a full generation name and 0..15.
 fn bool temporary_name(ref u8[] p){if(p.len<152 || p.len>153 || !bytes::equal(p[..6],b".stage") || p[150]!=45 || !generation_name(p[6..150])){return false;}return if(p.len==152){p[151]>=48 && p[151]<=57}else{p[151]==49 && p[152]>=48 && p[152]<=53};}
-pub resource Store{rooted::Directory root;Limits limits;cleanup{}}
+pub resource Store{handles::Directory root;Limits limits;cleanup{}}
 // Cursor and candidate are detached owners. The caller keeps Store alive and
 // uses them only with that same store. A candidate can still fail IR admission.
 pub resource Candidates{rooted::Entries entries;v::Vec<usize> order;bytes::Buffer route;cleanup{}}
@@ -51,7 +53,7 @@ fn bool envelope(ref u8[] raw){return raw.len>=8 && bytes::equal(raw[..8],b"FYCA
 fn void set(ref mut v::Vec<usize> order,usize at,usize value){let slot=v::at_mut<usize>(order,at);*slot=value;}
 fn bool before(ref u8[] a,ref u8[] b){var usize i=0;while(i<a.len && i<b.len){if(a[i]!=b[i]){return a[i]<b[i];}i+=1;}return a.len<b.len;}
 fn Result<v::Vec<usize>,Problem> ordered(ref rooted::Entries entries,ref mut usize work){var v::Vec<usize> order=v::empty<usize>();var usize i=0;
-    while(i<rooted::count(entries)){if(!scan_charge(work,1)){return .err(fail(9));}let name=rooted::name(entries,i);if(rooted::regular(rooted::metadata(entries,i)) && (generation_name(name) || temporary_name(name))){if(!v::push<usize>(ref mut order,i).is_ok){return .err(fail(8));}let current=rooted::metadata(entries,i);var usize at=v::len<usize>(ref order)-1;while(at>0){if(!scan_charge(work,1)){return .err(fail(9));}let previous=*v::at<usize>(ref order,at-1);let other=rooted::metadata(entries,previous);var bool precedes=current.modified<other.modified;if(current.modified==other.modified){let b=rooted::name(entries,previous);if(!scan_charge(work,name.len+b.len+1)){return .err(fail(9));}precedes=before(name,b);}if(!precedes){break;}set(ref mut order,at,previous);at-=1;}set(ref mut order,at,i);}i+=1;
+    while(i<rooted::count(entries)){if(!scan_charge(work,1)){return .err(fail(9));}let name=rooted::name(entries,i);if(rooted::regular(rooted::metadata(entries,i)) && (generation_name(name) || temporary_name(name))){if(!v::push<usize>(ref mut order,i).is_ok){return .err(fail(8));}let current=rooted::metadata(entries,i);var usize at=v::len<usize>(ref order)-1;while(at>0){if(!scan_charge(work,1)){return .err(fail(9));}let previous=*v::at<usize>(ref order,at-1);let other=rooted::metadata(entries,previous);var bool precedes=rooted::earlier(current,other);if(rooted::same_time(current,other)){let b=rooted::name(entries,previous);if(!scan_charge(work,name.len+b.len+1)){return .err(fail(9));}precedes=before(name,b);}if(!precedes){break;}set(ref mut order,at,previous);at-=1;}set(ref mut order,at,i);}i+=1;
     }return .ok(order);
 }
 @effects(filesystem) fn Result<bytes::Buffer,Problem> read_generation(ref Store store,ref u8[] name,ref mut usize work,ref mut rooted::Metadata snapshot){
@@ -87,15 +89,15 @@ fn Result<v::Vec<usize>,Problem> ordered(ref rooted::Entries entries,ref mut usi
 // Successful sweep establishes bounds for this observed retained set. Active
 // staged writers deny the delete-enabled open. Concurrent stores may change
 // the directory after observation; no lock or global instantaneous bound exists.
-@effects(filesystem,clock) pub fn Result<Stats,Problem> sweep(ref Store store,ref u8[] preserve,ref mut usize work){if(!valid_limits(store.limits) || preserve.len!=0 && !generation_name(preserve)){return .err(fail(1));}let entries=switch(rooted::scan(ref store.root,4096,work)){case .ok(p):{p}case .err(e):{return .err(io(3,e));}};let order=switch(ordered(ref entries,work)){case .ok(p):{p}case .err(e):{return .err(e);}};let now=rooted::now();var usize count=0;var usize size=0;var usize evicted=0;var v::Vec<usize> retained=v::empty<usize>();var usize i=0;
-    while(i<v::len<usize>(ref order)){let at=*v::at<usize>(ref order,i);let name=rooted::name(ref entries,at);let info=rooted::metadata(ref entries,at);let temporary=temporary_name(name);let old=temporary && info.modified<=now && now-info.modified>=store.limits.temporary_age;let oversize=info.size>store.limits.record;
+@effects(filesystem,clock) pub fn Result<Stats,Problem> sweep(ref Store store,ref u8[] preserve,ref mut usize work){if(!valid_limits(store.limits) || preserve.len!=0 && !generation_name(preserve)){return .err(fail(1));}let entries=switch(rooted::scan(ref store.root,4096,work)){case .ok(p):{p}case .err(e):{return .err(io(3,e));}};let order=switch(ordered(ref entries,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var usize count=0;var usize size=0;var usize evicted=0;var v::Vec<usize> retained=v::empty<usize>();var usize i=0;
+    while(i<v::len<usize>(ref order)){let at=*v::at<usize>(ref order,i);let name=rooted::name(ref entries,at);let info=rooted::metadata(ref entries,at);let temporary=temporary_name(name);let old=temporary && rooted::expired(info,store.limits.temporary_age);let oversize=info.size>store.limits.record;
         if((old || oversize) && !bytes::equal(name,preserve)){switch(rooted::erase_if(ref store.root,name,info)){case .ok(done):{if(done){evicted+=1;i+=1;continue;}}case .err(_):{}};}
         if(oversize){return .err(fail(6));}if(!v::push<usize>(ref mut retained,at).is_ok){return .err(fail(8));}count+=1;size+=info.size;i+=1;
     }
-    i=0;while((count>store.limits.entries || size>store.limits.bytes) && i<v::len<usize>(ref retained)){let at=*v::at<usize>(ref retained,i);let name=rooted::name(ref entries,at);let info=rooted::metadata(ref entries,at);i+=1;if(bytes::equal(name,preserve) || temporary_name(name) && (info.modified>now || now-info.modified<store.limits.temporary_age)){continue;}switch(rooted::erase_if(ref store.root,name,info)){case .ok(done):{if(done){count-=1;size-=info.size;evicted+=1;}}case .err(_):{}};}
+    i=0;while((count>store.limits.entries || size>store.limits.bytes) && i<v::len<usize>(ref retained)){let at=*v::at<usize>(ref retained,i);let name=rooted::name(ref entries,at);let info=rooted::metadata(ref entries,at);i+=1;if(bytes::equal(name,preserve) || temporary_name(name) && !rooted::expired(info,store.limits.temporary_age)){continue;}switch(rooted::erase_if(ref store.root,name,info)){case .ok(done):{if(done){count-=1;size-=info.size;evicted+=1;}}case .err(_):{}};}
     if(count>store.limits.entries || size>store.limits.bytes){return .err(fail(6));}return .ok(Stats{.entries=count,.bytes=size,.evicted});
 }
-@effects(filesystem) fn Result<rooted::File,Problem> stage(ref Store store,ref u8[] generation,ref mut usize work){var usize attempt=0;while(attempt<16){if(!charge(work,160)){return .err(fail(9));}var name=bytes::empty();if(!bytes::append(ref mut name,b".stage").is_ok || !bytes::append(ref mut name,generation).is_ok || !bytes::append_byte(ref mut name,45).is_ok || !bytes::append_usize(ref mut name,attempt).is_ok){return .err(fail(8));}switch(rooted::create_new(ref store.root,bytes::view(ref name))){case .ok(p):{return .ok(p);}case .err(e):{if(!rooted::collision(e)){return .err(io(5,e));}}};attempt+=1;}return .err(fail(5));}
+@effects(filesystem) fn Result<handles::File,Problem> stage(ref Store store,ref u8[] generation,ref mut usize work){var usize attempt=0;while(attempt<16){if(!charge(work,160)){return .err(fail(9));}var name=bytes::empty();if(!bytes::append(ref mut name,b".stage").is_ok || !bytes::append(ref mut name,generation).is_ok || !bytes::append_byte(ref mut name,45).is_ok || !bytes::append_usize(ref mut name,attempt).is_ok){return .err(fail(8));}switch(rooted::create_new(ref store.root,bytes::view(ref name))){case .ok(p):{return .ok(p);}case .err(e):{if(!rooted::collision(e)){return .err(io(5,e));}}};attempt+=1;}return .err(fail(5));}
 // No-replace publication makes digest-named generations immutable. Collisions
 // succeed after exact existing-byte comparison. A corrupt collision can be
 // removed only against metadata retained by that failed read; publication then
@@ -104,7 +106,7 @@ fn Result<v::Vec<usize>,Problem> ordered(ref rooted::Entries entries,ref mut usi
     switch(rooted::publish_new(ref store.root,ref mut file,bytes::view(ref name))){
         case .ok(_):{switch(rooted::sync(ref mut file)){case .ok(_):{}case .err(e):{return .err(io(5,e));}};}
         case .err(e):{
-            if(e.os_code!=80 && e.os_code!=183){return .err(io(5,e));}
+            if(!rooted::publication_collision(e)){return .err(io(5,e));}
             var snapshot=no_metadata();switch(read_generation(store,bytes::view(ref name),work,ref mut snapshot)){
                 case .ok(old):{if(!charge(work,raw.len+1)){return .err(fail(9));}if(!bytes::equal(bytes::view(ref old),raw)){return .err(fail(7));}}
                 case .err(e):{

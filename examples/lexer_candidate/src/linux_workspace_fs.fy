@@ -19,6 +19,8 @@ struct Row { usize start; usize length; usize size; u32 mode; }
 pub resource WorkspaceReadDir { bytes::Buffer names; v::Vec<Row> rows; usize index; cleanup{} }
 pub struct WorkspaceDirEntry { bool has_entry; usize name_length; WorkspacePathKind kind; usize size; bool is_reparse; }
 fn WorkspaceFileError fail(u32 status,u32 os_code) { return WorkspaceFileError{.status,.os_code,.completed=0}; }
+pub fn u32 error_status(WorkspaceFileError p) { return p.status; }
+pub fn u32 error_os_code(WorkspaceFileError p) { return p.os_code; }
 fn WorkspaceFileError problem(rooted::Problem p) { return fail(if(p.stage==2){3}else{1},p.os_code); }
 pub fn bool path_kind_is_file(WorkspacePathKind p) { return switch(p){case .File:{true} case .Directory:{false} case .Other:{false}}; }
 pub fn bool path_kind_is_directory(WorkspacePathKind p) { return switch(p){case .File:{false} case .Directory:{true} case .Other:{false}}; }
