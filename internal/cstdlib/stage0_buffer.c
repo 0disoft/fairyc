@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_buffer_v0 {
     struct fy_std_system_heap_block_v0 block;
     size_t length;

@@ -1,3 +1,5 @@
+//go:build ignore
+
 int fy_std_windows_file_directory_probe_v0(void) {
     static const uint8_t non_ascii_path[] = {UINT8_C(0x80), UINT8_C(0)};
     static const uint8_t directory_path[] = "fairyc-windows-directory-probe";

@@ -1,3 +1,5 @@
+//go:build ignore
+
 #include <winioctl.h>
 
 struct fy_std_windows_mount_point_buffer_v0 {

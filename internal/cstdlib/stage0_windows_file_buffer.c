@@ -1,3 +1,5 @@
+//go:build ignore
+
 static struct fy_std_file_buffer_result_v0 fy_std_file_buffer_read_v0(
     void *file_storage, uint8_t *data, size_t length
 ) {

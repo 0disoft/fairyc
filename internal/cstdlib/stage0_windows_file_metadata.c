@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_windows_file_attribute_result_v0 {
     uint32_t status;
     uint32_t os_code;

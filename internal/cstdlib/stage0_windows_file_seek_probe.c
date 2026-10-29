@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_current_v0(
     void *,
     int32_t

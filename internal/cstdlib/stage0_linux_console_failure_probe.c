@@ -1,3 +1,5 @@
+//go:build ignore
+
 #define _POSIX_C_SOURCE 200809L
 #ifdef NDEBUG
 #undef NDEBUG

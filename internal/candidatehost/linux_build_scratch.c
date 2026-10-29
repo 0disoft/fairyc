@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after rooted Linux I/O. Only the new private tree is cleanup-owned. */
 #include <dirent.h>
 #include <stdlib.h>

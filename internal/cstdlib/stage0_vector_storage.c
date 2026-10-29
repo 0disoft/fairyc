@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Compiler-private storage transport. The caller owns element lifetimes and
  * supplies a live descriptor of this exact layout; mutation requires exclusive
  * access and read-only slot access requires a retained shared owner.

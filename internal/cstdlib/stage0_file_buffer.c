@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_file_buffer_result_v0 {
     uint32_t file_status;
     uint32_t os_code;

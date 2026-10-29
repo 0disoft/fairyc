@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Private GNU/Linux rooted I/O. Fairy owns path admission and resource lifetime. */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1

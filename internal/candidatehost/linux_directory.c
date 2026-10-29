@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after linux_rooted_file.c; private DIR ownership and one-row transport. */
 #include <dirent.h>
 

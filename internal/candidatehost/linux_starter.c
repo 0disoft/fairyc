@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after rooted I/O. Fixed five-file starter; never recursive deletion. */
 struct fy_linux_starter_entry { int fd, created, known; struct stat info; };
 static int fy_linux_starter_parent(struct fy_linux_starter_entry *entries, unsigned slot, int root) {

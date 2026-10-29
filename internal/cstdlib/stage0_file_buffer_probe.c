@@ -1,3 +1,5 @@
+//go:build ignore
+
 #ifdef NDEBUG
 #undef NDEBUG
 #endif

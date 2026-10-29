@@ -1,3 +1,5 @@
+//go:build ignore
+
 @TRAP_RECEIPT_INCLUDE@#include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>

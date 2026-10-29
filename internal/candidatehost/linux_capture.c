@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after linux_process.c; private helpers and feature macros are shared. */
 #include <fcntl.h>
 #include <poll.h>

@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Private ABI adapters only. Command construction, flags, sequencing, deadlines
  * and handle ownership are implemented by windows_process.fy. */
 #include <windows.h>

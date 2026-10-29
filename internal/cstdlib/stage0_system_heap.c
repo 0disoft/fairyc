@@ -1,3 +1,5 @@
+//go:build ignore
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>

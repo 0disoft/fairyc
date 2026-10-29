@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after linux_capture.c. Only the caller-owned replay file is opened. */
 #include <sys/stat.h>
 

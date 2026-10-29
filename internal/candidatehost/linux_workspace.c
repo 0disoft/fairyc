@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after rooted Linux I/O; this observation never authorizes mutation. */
 uint32_t fairyc_private_linux_workspace_path_kind_v1(const uint8_t *path, uint32_t *kind) {
     if (kind == NULL) { return EINVAL; }

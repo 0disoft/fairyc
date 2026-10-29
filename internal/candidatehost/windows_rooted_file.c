@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Private handle-relative file ABI only. Fairy owns cache keys, byte limits,
  * I/O loops, flush/publication order, miss policy and resource cleanup. */
 #include <windows.h>

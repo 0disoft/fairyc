@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Private Linux path queries. UTF-8 validation and path ownership live in Fairy. */
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L

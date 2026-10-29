@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_arena_node_v0 {
     struct fy_std_system_heap_block_v0 storage;
     struct fy_std_arena_node_v0 *next;

@@ -1,3 +1,5 @@
+//go:build ignore
+
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>

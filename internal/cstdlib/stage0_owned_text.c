@@ -1,3 +1,5 @@
+//go:build ignore
+
 enum fy_std_owned_text_status_v0 {
     FY_STD_OWNED_TEXT_OK_V0 = 0,
     FY_STD_OWNED_TEXT_ALLOCATION_FAILED_V0 = 1,

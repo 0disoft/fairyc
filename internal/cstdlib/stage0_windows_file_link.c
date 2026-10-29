@@ -1,3 +1,5 @@
+//go:build ignore
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_hard_link_v0(
     const uint8_t *source,
     const uint8_t *destination

@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Private GNU/Linux ABI adapters. Fairy owns start/wait/result sequencing. */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE 1

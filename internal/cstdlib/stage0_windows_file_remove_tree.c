@@ -1,3 +1,5 @@
+//go:build ignore
+
 static int fy_std_windows_directory_entry_name_v0(const WCHAR *name) {
     return name != NULL &&
            !((name[0] == L'.' && name[1] == L'\0') ||

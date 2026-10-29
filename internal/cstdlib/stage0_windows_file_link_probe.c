@@ -1,3 +1,5 @@
+//go:build ignore
+
 int fy_std_windows_file_link_probe_v0(void) {
     static const uint8_t source[] = "fairyc-windows-file-link-source-probe.tmp";
     static const uint8_t destination[] = "fairyc-windows-file-link-destination-probe.tmp";

@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* Appended after linux_rooted_file.c. Requires cooperating private publishers;
  * flock is advisory, not protection against arbitrary external namespace edits. */
 uint32_t fairyc_private_linux_root_file_erase_if_v1(uint32_t root, const uint8_t *leaf,
