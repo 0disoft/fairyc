@@ -37,7 +37,9 @@ func LinuxSource(header string) (string, error) {
 			process = true
 		case "fairyc_private_linux_directory_open_v1", "fairyc_private_linux_root_directory_open_v1",
 			"fairyc_private_linux_root_file_open_v1", "fairyc_private_linux_root_file_info_v1",
-			"fairyc_private_linux_root_file_read_v1", "fairyc_private_linux_root_file_close_v1":
+			"fairyc_private_linux_root_file_read_v1", "fairyc_private_linux_root_file_close_v1",
+			"fairyc_private_linux_root_file_create_v1", "fairyc_private_linux_root_file_write_v1",
+			"fairyc_private_linux_root_file_sync_v1", "fairyc_private_linux_root_file_publish_new_v1":
 			rooted = true
 		default:
 			return "", fmt.Errorf("unknown private Linux host symbol %s", match[1])
