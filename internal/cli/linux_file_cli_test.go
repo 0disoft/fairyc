@@ -41,7 +41,9 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
     assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
     assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==10);
-    assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
+    assert(file_cli::command(b"--c-file",3)==4 && file_cli::command(b"unknown",2)==0);
+    assert(file_cli::command(b"--c-file",2)==0 && file_cli::command(b"--c-file",4)==0);
+    assert(file_cli::command(b"--c-workspace",3)==5 && file_cli::command(b"--c-workspace",4)==5);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
     assert(file_cli::source_mode(b"--bindings-file") && file_cli::source_mode(b"--check-types-file") && file_cli::source_mode(b"--hir-file"));
     assert(bytes::equal(linux_wire::wire_name(6),b"fy_std_file_result_v0") && linux_wire::field_type(6,1)==1);
@@ -153,6 +155,13 @@ fn i32 cli_probe() {
 				{[]string{"--tokens-file", "link.fy"}, 2, "input file read failed"},
 				{[]string{"--tokens-file", "absent.fy"}, 2, "input file read failed"},
 				{[]string{"--tokens-file", "src"}, 2, "input file read failed"},
+				{[]string{"--c-file", "input.fy"}, 0, "fy_candidate_entry"},
+				{[]string{"--c-file", "absent.fy"}, 2, "input file read failed"},
+				{[]string{"--c-file", "link.fy"}, 2, "input file read failed"},
+				{[]string{"--c-file", "large.fy"}, 2, "source limit"},
+				{[]string{"--c-file"}, 2, "usage:"},
+				{[]string{"--c-workspace"}, 2, "usage:"},
+				{[]string{"--c-workspace", ".", "--target"}, 2, "usage:"},
 				{[]string{"--version", "extra"}, 2, "usage:"},
 				{[]string{"--tokens-file"}, 2, "usage:"},
 				{[]string{"unknown"}, 2, "usage:"},
@@ -182,6 +191,7 @@ fn i32 cli_probe() {
 			checkLinuxRun(t, artifact, backend)
 			checkLinuxTest(t, artifact, backend)
 			checkLinuxNew(t, artifact, backend)
+			checkLinuxCEmission(t, toolchain, artifact)
 		})
 	}
 }

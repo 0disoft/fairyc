@@ -16,6 +16,9 @@ Windows entry and no-argument binary stdin protocol remain available.
 - `run [--release] [--locked] [-- <program args>]` uses the [Linux run path](candidate-linux-run-v1.md), with the same optional cache flags before `--`.
 - `test` reuses shared discovery, listing and interpreter execution; `--native` uses the [Linux test path](candidate-linux-test-v1.md), including stdin modes and JSON capture. Both support opt-in `--cache-root <existing directory>` and `--cache-status` before any program delimiter.
 - `new <package-name> --uid <package-uid>` uses the [Linux starter path](candidate-linux-new-v1.md).
+- `--c-file <path>` emits the shared scalar/nominal C11 transport after Linux source loading.
+- `--c-workspace <root> [--locked]` emits a Linux-targeted private
+  [partitioned C packet](candidate-linux-c-emission-v1.md).
 - Unknown commands or invalid arity for connected commands return 2.
   Dispatcher output failures return 4; shared frontend exit codes remain unchanged.
   The help lists this boundary; the shared target registry is
@@ -23,8 +26,9 @@ Windows entry and no-argument binary stdin protocol remain available.
 
 `file_frontend_cli.fy` shares the existing scanner/name/type/HIR/MIR dispatch with the
 Windows CLI after host-owned input loading. It does not select a host or link MSVC.
-The shared C mode stays available to its existing caller; the Linux dispatcher rejects
-C emission until the target-specific candidate emission path is connected.
+The shared C mode also serves the Linux single-file command. Workspace C uses the
+same Linux SDK wire selection and target marker as workspace build. These private
+debugging commands do not add a stable product `emit` command.
 
 ## Input and native support
 

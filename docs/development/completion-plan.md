@@ -135,7 +135,23 @@ the new flags. Windows real-storage low-profile coverage exercises cold/warm
 failure reexecution, test-source edits, corrupt records and missing-root
 fallback. MSVC optimized integration exceeded the one-minute compiler budget
 and remains unverified. Linux-native cached development/release/reference comparison remains
-pending; target-specific public C emission is the next CLI wiring slice.
+pending; target-specific private C emission is connected below.
+
+Linux [private C emission](../architecture/candidate-linux-c-emission-v1.md) now
+connects `--c-file <path>` and `--c-workspace <root> [--locked]`. The single-file
+route retains the shared C11 transport; workspace packets reuse Linux SDK wire
+selection and the explicit GNU target marker. Failed admission emits no C;
+locked output preserves the lock and packet bytes. Native Linux execution and
+Go-reference comparison remain pending, along with the Fairy GNU backend and
+distribution/self-host evidence. No stable public `emit` command is added.
+Both-target full-entry emission, closed Linux support selection, Windows
+low/optimized dispatch and single-file emission/program execution pass. Windows
+workspace emission passes in low with a 64 MiB compiler-host test stack, including
+Linux SDK File wire selection. Its MSVC optimized build exceeded the one-minute
+budget. Source/prepared `check` and `check --locked` pass with 564 sources
+(7,141/7,142 MIR functions); the source lock is refreshed. Vet and diff checks pass.
+The next slice is actual Linux GNU CLI/reference execution, including the
+connected cache cold/warm/invalidation paths.
 
 ## Scope and evidence
 

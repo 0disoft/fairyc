@@ -6,17 +6,18 @@ import project_check_cli as checking;
 import project_test_cli as testing;
 import linux_build_cli as building;
 import linux_new_cli as creating;
+import project_emit_cli as workspace_c;
 import std::bytes as bytes;
 import std::io as io;
 import std::process as process;
 
-pub fn ref str help() { return "usage: lexer-candidate-linux --help | --version | targets\n       lexer-candidate-linux new <package-name> --uid <package-uid>\n       lexer-candidate-linux check [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux build [--release] [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux run [--release] [--locked] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux test [--list] [--json] [--locations] [--workspace | --package <uid>] [--dir <path> | --file <path> | --exact <identity>]... [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux test --native [--release] [--stdin | --stdin-file <path>] [--timeout-seconds <1..60>] [--json --capture-output] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux --tokens-file <path>\n       lexer-candidate-linux --declarations-file <path>\n       lexer-candidate-linux --check-names-file <path>\n       lexer-candidate-linux --bindings-file <path>\n       lexer-candidate-linux --check-types-file <path>\n       lexer-candidate-linux --hir-file <path>\n       lexer-candidate-linux --mir-file <path>\nNo arguments: private binary stdin protocol.\nC emission is not connected yet.\n"; }
+pub fn ref str help() { return "usage: lexer-candidate-linux --help | --version | targets\n       lexer-candidate-linux new <package-name> --uid <package-uid>\n       lexer-candidate-linux check [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux build [--release] [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux run [--release] [--locked] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux test [--list] [--json] [--locations] [--workspace | --package <uid>] [--dir <path> | --file <path> | --exact <identity>]... [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux test --native [--release] [--stdin | --stdin-file <path>] [--timeout-seconds <1..60>] [--json --capture-output] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux --tokens-file <path>\n       lexer-candidate-linux --declarations-file <path>\n       lexer-candidate-linux --check-names-file <path>\n       lexer-candidate-linux --bindings-file <path>\n       lexer-candidate-linux --check-types-file <path>\n       lexer-candidate-linux --hir-file <path>\n       lexer-candidate-linux --mir-file <path>\n       lexer-candidate-linux --c-file <path>\n       lexer-candidate-linux --c-workspace <root> [--locked]\nNo arguments: private binary stdin protocol.\nC output is private compiler-debug transport. Workspace packets target x86_64-linux-gnu.\n"; }
 pub fn bool source_mode(ref u8[] flag) {
     return bytes::equal(flag,b"--tokens-file") || bytes::equal(flag,b"--declarations-file") ||
         bytes::equal(flag,b"--check-names-file") || bytes::equal(flag,b"--bindings-file") ||
-        bytes::equal(flag,b"--check-types-file") || bytes::equal(flag,b"--hir-file") || bytes::equal(flag,b"--mir-file");
+        bytes::equal(flag,b"--check-types-file") || bytes::equal(flag,b"--hir-file") || bytes::equal(flag,b"--mir-file") || bytes::equal(flag,b"--c-file");
 }
-// 1 help, 2 version, 3 target registry, 4 source, 6 check, 7 build, 8 run, 9 test, 10 new, 0 invocation.
+// 1 help, 2 version, 3 target registry, 4 source, 5 workspace C, 6 check, 7 build, 8 run, 9 test, 10 new, 0 invocation.
 pub fn u32 command(ref u8[] flag,usize argc) {
     if(argc==2) {
         if(bytes::equal(flag,b"--help") || bytes::equal(flag,b"-h") || bytes::equal(flag,b"help")) { return 1; }
@@ -24,6 +25,7 @@ pub fn u32 command(ref u8[] flag,usize argc) {
         if(bytes::equal(flag,b"targets")) { return 3; }
     }
     if(argc==3 && source_mode(flag)) { return 4; }
+    if(bytes::equal(flag,b"--c-workspace")) { return 5; }
     if(bytes::equal(flag,b"check")) { return 6; }
     if(bytes::equal(flag,b"build")) { return 7; }
     if(bytes::equal(flag,b"run")) { return 8; }
@@ -39,6 +41,7 @@ pub fn i32 run() {
     let ref u8[] data=ref raw;
     let mode=command(data[..n],process::arg_count());
     if(mode==0) { return failure(help(),2); }
+    if(mode==5) { return workspace_c::arguments(); }
     if(mode==6) { return check_arguments(); }
     if(mode==7) { return build_arguments(false); }
     if(mode==8) { return build_arguments(true); }
