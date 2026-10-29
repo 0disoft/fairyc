@@ -38,7 +38,7 @@ func TestLinuxRootedFileAdapterBoundaries(t *testing.T) {
 		t.Fatal(err)
 	}
 	source := linuxRootedFile
-	for _, header := range []string{"fcntl.h", "sys/stat.h", "unistd.h"} {
+	for _, header := range []string{"fcntl.h", "sys/stat.h", "sys/file.h", "unistd.h"} {
 		source = strings.ReplaceAll(source, "#include <"+header+">\n", "")
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
@@ -93,19 +93,24 @@ const linuxRootedPOSIXStub = `
 #define O_RDWR 2
 #define AT_EMPTY_PATH 4096
 #define AT_SYMLINK_FOLLOW 1024
+#define LOCK_EX 2
+#define LOCK_NB 4
 #define S_ISDIR(x) (((x)&61440)==16384)
 #define S_ISREG(x) (((x)&61440)==32768)
 typedef intptr_t ssize_t;
 struct stat {uint64_t st_dev,st_ino,st_nlink;int64_t st_size;uint32_t st_mode;struct {int64_t tv_sec,tv_nsec;} st_mtim;};
 static int scenario,opened,closed,reads,stats,last_flags,last_parent,writes,syncs,links;
 static int root_openat(int parent,const char *path,int flags,int mode) {
-    assert(path && mode==0600);++opened;last_flags=flags;last_parent=parent;
+    assert(path && mode==0600);++opened;last_parent=parent;
+    if(strcmp(path,".")==0 && (flags&O_DIRECTORY) && !(flags&O_RDWR)) {return 1;}
+    last_flags=flags;
     if(scenario==1 && opened==1) {errno=EINTR;return -1;}
     if(scenario==2) {errno=2;return -1;}
     return 0;
 }
 static int root_fstat(int fd,struct stat *info) {
-    assert(fd==0);++stats;
+    assert(fd==0 || fd==1);++stats;
+    if(fd==1) {memset(info,0,sizeof *info);info->st_mode=16384;return 0;}
     if(scenario==3) {errno=5;return -1;}
     if(scenario==8 && stats==1) {errno=EINTR;return -1;}
     memset(info,0,sizeof *info);info->st_dev=71;info->st_ino=123;info->st_size=3;
@@ -115,7 +120,8 @@ static int root_fstat(int fd,struct stat *info) {
     if(scenario==10) {info->st_size=-1;}
     return 0;
 }
-static int root_close(int fd) {assert(fd==0);++closed;if(scenario==5) {errno=EINTR;return -1;}return 0;}
+static int root_close(int fd) {assert(fd==0 || fd==1);++closed;if(scenario==5) {errno=EINTR;return -1;}return 0;}
+static int root_flock(int fd,int flags) {assert(fd==1 && flags==(LOCK_EX|LOCK_NB));if(scenario==30) {errno=EWOULDBLOCK;return -1;}return 0;}
 static ssize_t root_read(int fd,void *data,size_t size) {
     assert(fd==0 && size>0 && size<=65536);++reads;
     if(scenario==6 && reads==1) {errno=EINTR;return -1;}
@@ -137,7 +143,7 @@ static int root_fsync(int fd) {
     if(scenario==17) {errno=EIO;return -1;}return 0;
 }
 static int root_linkat(int old,const char *from,int parent,const char *leaf,int flags) {
-    ++links;assert(parent==0 && strcmp(leaf,"new")==0);
+    ++links;assert(parent==1 && strcmp(leaf,"new")==0);
     if(flags==AT_EMPTY_PATH) {assert(old==0 && strcmp(from,"")==0);}
     else {assert(flags==AT_SYMLINK_FOLLOW && old==AT_FDCWD && strcmp(from,"/proc/self/fd/0")==0);}
     if(scenario==18) {errno=17;return -1;}
@@ -151,6 +157,7 @@ static int root_linkat(int old,const char *from,int parent,const char *leaf,int 
 #define write root_write
 #define fsync root_fsync
 #define linkat root_linkat
+#define flock root_flock
 `
 
 const linuxRootedBoundaryProbe = `

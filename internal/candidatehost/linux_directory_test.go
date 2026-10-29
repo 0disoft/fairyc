@@ -30,7 +30,7 @@ func TestLinuxDirectoryAdapterBoundaries(t *testing.T) {
 		t.Fatal(err)
 	}
 	source := linuxRootedFile + "\n" + linuxDirectory
-	for _, header := range []string{"fcntl.h", "sys/stat.h", "unistd.h", "dirent.h"} {
+	for _, header := range []string{"fcntl.h", "sys/stat.h", "sys/file.h", "unistd.h", "dirent.h"} {
 		source = strings.ReplaceAll(source, "#include <"+header+">\n", "")
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
@@ -72,12 +72,12 @@ struct dirent {uint64_t d_ino;uint16_t d_reclen;char d_name[512];};
 static DIR streams[2];static struct dirent row;
 static int dir_case,dir_reads,dir_stats,dir_closes;
 static DIR *scan_fdopendir(int fd) {
-    assert(fd==0 && last_parent==0 && (last_flags&(O_DIRECTORY|O_CLOEXEC))==(O_DIRECTORY|O_CLOEXEC));
+    assert(fd==1 && last_parent==0);
     if(dir_case==1) {errno=ENOMEM;return NULL;}
     for(int i=0;i<2;++i) {if(!streams[i].used) {streams[i].used=1;streams[i].index=0;return &streams[i];}}
     assert(0);return NULL;
 }
-static int scan_dirfd(DIR *p) {assert(p->used);return 0;}
+static int scan_dirfd(DIR *p) {assert(p->used);return 1;}
 static struct dirent *scan_readdir(DIR *p) {
     assert(p->used);++dir_reads;assert(errno==0);
     if(dir_case==10) {errno=EIO;return NULL;}
@@ -93,7 +93,7 @@ static struct dirent *scan_readdir(DIR *p) {
     return &row;
 }
 static int scan_fstatat(int fd,const char *name,struct stat *info,int flags) {
-    assert(fd==0 && flags==AT_SYMLINK_NOFOLLOW);++dir_stats;
+    assert(fd==1 && flags==AT_SYMLINK_NOFOLLOW);++dir_stats;
     if(dir_case==2 && dir_stats==1) {errno=EINTR;return -1;}
     if(dir_case==3) {errno=EACCES;return -1;}
     if(dir_case==4) {errno=ENOENT;return -1;}

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <unistd.h>
 
 /* Handles encode fd+1: zero is empty, and an OS descriptor of zero is owned. */
@@ -126,7 +127,18 @@ uint32_t fairyc_private_linux_root_file_sync_v1(uint32_t handle) {
     do { result = fsync(fd); } while (result < 0 && errno == EINTR);
     return result == 0 ? 0 : (uint32_t)errno;
 }
-uint32_t fairyc_private_linux_root_file_publish_new_v1(uint32_t handle, uint32_t root, const uint8_t *leaf, size_t size) {
+/* Independent open descriptions serialize cooperating publishers and evictors,
+ * including two calls using the same retained Directory. Never wait for a lock. */
+static uint32_t fy_linux_root_lock(uint32_t root, uint32_t *owned) {
+    *owned = 0;
+    int parent = fy_linux_root_fd(root);
+    if (parent < 0) { return EINVAL; }
+    uint32_t code = fy_linux_root_open(parent, ".", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC, 1, owned);
+    if (code != 0) { return code; }
+    if (flock(fy_linux_root_fd(*owned), LOCK_EX | LOCK_NB) == 0) { return 0; }
+    code = (uint32_t)errno; (void)close(fy_linux_root_fd(*owned)); *owned = 0; return code;
+}
+static uint32_t fy_linux_root_publish_new(uint32_t handle, uint32_t root, const uint8_t *leaf, size_t size) {
     int fd = fy_linux_root_fd(handle), parent = fy_linux_root_fd(root);
     if (fd < 0 || parent < 0 || !fy_linux_root_path(leaf, size, 1)) { return EINVAL; }
     struct stat info;
@@ -142,4 +154,14 @@ uint32_t fairyc_private_linux_root_file_publish_new_v1(uint32_t handle, uint32_t
     int length = snprintf(path, sizeof path, "/proc/self/fd/%d", fd);
     if (length < 0 || (size_t)length >= sizeof path) { return EINVAL; }
     return linkat(AT_FDCWD, path, parent, (const char *)leaf, AT_SYMLINK_FOLLOW) == 0 ? 0 : (uint32_t)errno;
+}
+uint32_t fairyc_private_linux_root_file_publish_new_v1(uint32_t handle, uint32_t root, const uint8_t *leaf, size_t size) {
+    if (fy_linux_root_fd(handle) < 0 || !fy_linux_root_path(leaf, size, 1)) { return EINVAL; }
+    uint32_t owned = 0;
+    uint32_t code = fy_linux_root_lock(root, &owned);
+    if (code != 0) { return code; }
+    code = fy_linux_root_publish_new(handle, owned, leaf, size);
+    /* close releases this private lock even on Linux EINTR. A successful link
+     * stays successful: the Fairy caller must freeze the now-published file. */
+    (void)close(fy_linux_root_fd(owned)); return code;
 }
