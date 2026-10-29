@@ -39,8 +39,16 @@ pub fn Result<Captured,Problem> run_for(ref u8[] program,ref v::Vec<bytes::Buffe
     if(!bytes::resize_zeroed(ref mut out,output_limit).is_ok || !bytes::resize_zeroed(ref mut err,error_limit).is_ok) { return .err(fail(3,0)); }
     var ptr mut void raw=null;
     let opened=unsafe { open(command::view(ref argv) as ptr u8,command::view(ref argv).len,command::count(ref argv),bytes::view(ref cwd) as ptr u8,bytes::len(ref cwd),ref mut raw as ptr mut ptr mut void) };
-    var Session session=Session{.raw};
-    if(opened!=0) { return .err(fail(4,opened)); }
+    if(opened!=0){unsafe{discard drop(raw);};return .err(fail(4,opened));}
+    return collect_owned(raw,timeout_ms,out,err);
+}
+
+// Takes exclusive ownership even on validation/allocation failures.
+@effects(filesystem,clock)
+pub fn Result<Captured,Problem> collect_owned(ptr mut void raw,u32 timeout_ms,bytes::Buffer output,bytes::Buffer error){
+    var Session session=Session{.raw};var out=output;var err=error;
+    let output_limit=bytes::len(ref out);let error_limit=bytes::len(ref err);
+    if(timeout_ms==0 || timeout_ms>86400000 || output_limit>1048576 || error_limit>1048576-output_limit){return .err(fail(1,0));}
     if(session.raw==null) { return .err(fail(6,0)); }
     var usize out_len=0; var usize err_len=0;
     var u32 kind=0; var u32 value=0; var u32 pid=0;

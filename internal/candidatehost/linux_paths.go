@@ -16,6 +16,9 @@ var linuxProcess string
 //go:embed linux_capture.c
 var linuxCapture string
 
+//go:embed linux_test_input.c
+var linuxTestInput string
+
 //go:embed linux_rooted_file.c
 var linuxRootedFile string
 
@@ -41,8 +44,11 @@ func LinuxSource(header string) (string, error) {
 	paths, process, capture, rooted, directory, retention := false, false, false, false, false, false
 	workspace := false
 	buildScratch := false
+	testInput := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_test_capture_open_v1":
+			testInput, capture, process = true, true, true
 		case "fairyc_private_linux_build_scratch_open_v1", "fairyc_private_linux_build_scratch_drop_v1":
 			rooted, buildScratch = true, true
 		case "fairyc_private_linux_workspace_path_kind_v1":
@@ -77,6 +83,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if capture {
 		source += "\n" + linuxCapture
+	}
+	if testInput {
+		source += "\n" + linuxTestInput
 	}
 	if paths {
 		if source != "" {

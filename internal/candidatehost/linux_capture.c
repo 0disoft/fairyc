@@ -36,7 +36,7 @@ static uint32_t fy_linux_capture_pipe(int pair[2], int minimum) {
 }
 
 static uint32_t fy_linux_capture_open(const uint8_t *data, size_t size,
-        size_t argc, const uint8_t *cwd, size_t cwd_size, int run, void **output) {
+        size_t argc, const uint8_t *cwd, size_t cwd_size, int run, int input_fd, void **output) {
     if (output == NULL) { return EINVAL; }
     *output = NULL;
     fy_linux_capture *capture = calloc(1, sizeof *capture);
@@ -46,7 +46,7 @@ static uint32_t fy_linux_capture_open(const uint8_t *data, size_t size,
     uint32_t code = fy_linux_capture_pipe(out, run ? 4 : 3);
     if (code == 0) { code = fy_linux_capture_pipe(err, run ? 4 : 3); }
     if (code == 0 && run) { code = fy_linux_capture_pipe(control, 4); }
-    if (code == 0) { code = fy_linux_process_spawn(data, size, argc, cwd, cwd_size, out[1], err[1], control[1], &capture->pid); }
+    if (code == 0) { code = fy_linux_process_spawn_input(data, size, argc, cwd, cwd_size, input_fd, out[1], err[1], control[1], &capture->pid); }
     uint32_t out_closed = fy_linux_capture_close(&out[1]);
     uint32_t err_closed = fy_linux_capture_close(&err[1]);
     uint32_t control_closed = fy_linux_capture_close(&control[1]);
@@ -66,12 +66,12 @@ static uint32_t fy_linux_capture_open(const uint8_t *data, size_t size,
 
 uint32_t fairyc_private_linux_capture_open_v1(const uint8_t *data, size_t size,
         size_t argc, const uint8_t *cwd, size_t cwd_size, void **output) {
-    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 0, output);
+    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 0, -1, output);
 }
 
 uint32_t fairyc_private_linux_run_capture_open_v1(const uint8_t *data, size_t size,
         size_t argc, const uint8_t *cwd, size_t cwd_size, void **output) {
-    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 1, output);
+    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 1, -1, output);
 }
 
 /* Only a fully drained collection may expose the bounded control record. */
