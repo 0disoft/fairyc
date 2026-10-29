@@ -3,6 +3,7 @@ import file_frontend_cli as frontend;
 import project_test_cli as testing;
 import project_manifest_values as sc_values;
 import project_sdk_bundle as sc_sdk;
+import project_starter as starter;
 import windows_host_paths as sc_host;
 import windows_command as sc_command;
 import std::fs as sc_fs;
@@ -160,6 +161,7 @@ fn bool scaffold_help(ref u8[] value){return bytes::equal(value,b"--help") || by
 fn ref u8[] scaffold_leaf(usize slot){
     if(slot==1){return b"src";}if(slot==2){return b"tests";}if(slot==3){return b".gitignore";}if(slot==4){return b"README.md";}if(slot==5){return b"fairy.toml";}if(slot==6){return b"src/main.fy";}if(slot==7){return b"tests/main.fy";}return b"";
 }
+
 fn bool scaffold_append(ref mut bytes::Buffer out,ref u8[] data){return bytes::append(out,data).is_ok;}
 fn Result<bytes::Buffer,ScaffoldProblem> scaffold_cstr(ref u8[] path,usize slot){
     var extended=switch(scaffold_extended(path)){case .ok(p):{p}case .err(e):{return .err(e);}};
@@ -173,15 +175,8 @@ fn Result<bytes::Buffer,ScaffoldProblem> scaffold_cstr(ref u8[] path,usize slot)
     }
     if(!bytes::append_byte(ref mut extended,0).is_ok){return .err(scaffold_problem(8,slot));}return .ok(extended);
 }
-fn Result<bytes::Buffer,ScaffoldProblem> scaffold_body(usize index,ref u8[] name,ref u8[] uid){
-    var bytes::Buffer out=bytes::empty();var bool ok=false;
-    if(index==0){ok=scaffold_append(ref mut out,b"/build/\n");}
-    if(index==1){ok=scaffold_append(ref mut out,b"# ") && scaffold_append(ref mut out,name) && scaffold_append(ref mut out,b"\n\nA Fairy C starter package.\n\n## Check and test\n\nRun these commands manually from this directory. The first check validates the workspace and\ncreates `fairy.lock`.\n\n```text\nfairyc check\nfairyc test --locked\n```\n\nThe default test command uses the fast semantic interpreter.\n\n## Run on Windows\n\nWith x64 MSVC and a Windows SDK installed:\n\n```text\nfairyc test --native --locked\nfairyc run --locked\nfairyc build --release --locked\n.\\build\\") && scaffold_append(ref mut out,name) && scaffold_append(ref mut out,b".exe\n```\n\n`fairyc test --native` compiles every test into a separate temporary Windows image.\n`fairyc run` forwards program output and returns `main`'s `i32` as the process status.\nThe generated starter returns zero after checking that `answer()` is 42.\n\n## Run on Linux\n\nWith Linux GNU amd64, glibc and GCC or Clang on PATH:\n\n```sh\nfairyc test --native --locked\nfairyc run --locked\nfairyc build --release --locked\n```\n\nRun the executable under `build/` with this package's name and no extension.\nLinux process status preserves the low eight bits of `main`'s return.\nUse default semantic tests for fast checks or `test --native` for isolated ELF execution.\n\n## Write to standard output\n\nReplace `src/main.fy` with:\n\n```fairyc\nmodule main;\n\nimport std::io as io;\n\n@effects(console)\nfn i32 main() {\n    let ref str message = \"Fairy C says hi\\n\";\n    return switch (io::write(message)) {\n        case .ok(written) : {\n            if (written == message.len) {\n                0\n            } else {\n                1\n            }\n        }\n        case .err(error) : {\n            if (error.status != 0 && error.written <= message.len) {\n                2\n            } else {\n                3\n            }\n        }\n    };\n}\n```\n\nThen refresh the lock and run the program directly:\n\n```text\nfairyc check\nfairyc run --release --locked\n```\n");}
-    if(index==2){ok=scaffold_append(ref mut out,b"schema = \"fairyc.manifest/v1\"\n\n[package]\nuid = \"") && scaffold_append(ref mut out,uid) && scaffold_append(ref mut out,b"\"\nname = \"") && scaffold_append(ref mut out,name) && scaffold_append(ref mut out,b"\"\nversion = \"0.1.0\"\nlanguage = \"") && scaffold_append(ref mut out,sc_sdk::language()) && scaffold_append(ref mut out,b"\"\nsource = \"src\"\n");}
-    if(index==3){ok=scaffold_append(ref mut out,b"module main;\n\npub fn i32 answer() {\n    return 42;\n}\n\nfn i32 main() {\n    return answer() - 42;\n}\n");}
-    if(index==4){ok=scaffold_append(ref mut out,b"module tests::main;\n\nimport main as app;\n\n@test\nfn void answer_is_42() {\n    assert(app::answer() == 42);\n}\n");}
-    if(!ok){return .err(scaffold_problem(8,index+3));}return .ok(out);
-}
+fn Result<bytes::Buffer,ScaffoldProblem> scaffold_body(usize index,ref u8[] name,ref u8[] uid){return switch(starter::body(index,name,uid,sc_sdk::language())){case .ok(p):{.ok(p)}case .err(_):{.err(scaffold_problem(8,index+3))}};}
+
 @effects(console) fn i32 scaffold_diagnostic(ScaffoldProblem problem,ref u8[] name){
     var bytes::Buffer out=bytes::empty();if(!scaffold_append(ref mut out,b"fairyc: project creation failed: ")){return 4;}
     if(problem.kind==1){if(!scaffold_append(ref mut out,b"project parent directory is unavailable\n")){return 4;}}
