@@ -21,7 +21,12 @@ func TestLinuxPacketRuntimeSelection(t *testing.T) {
 	if err != nil || !strings.Contains(source, "struct fy_std_file_result_v0") || strings.Contains(source, "windows.h") {
 		t.Fatalf("Linux runtime closure: %v", err)
 	}
-	for _, options := range []Options{{Candidate: "no"}, {RunTrapControl: true}, {StackReserveBytes: 65536}, {CompileTimeout: -time.Second}} {
+	runSource, err := linuxRuntimeSourceForRun(LinuxPacketMarker, true)
+	if err != nil || !strings.Contains(runSource, "write(3,") || strings.Contains(source, "write(3,") {
+		t.Fatalf("private Linux run receipt selection: %v", err)
+	}
+
+	for _, options := range []Options{{Candidate: "no"}, {RunTrapControl: true, Output: "build/program", OutputRoot: "elsewhere"}, {StackReserveBytes: 65536}, {CompileTimeout: -time.Second}} {
 		if _, err := BuildLinuxInput(options, "must-not-read", "", ""); err == nil {
 			t.Fatal("invalid Linux build options admitted")
 		}
@@ -62,6 +67,19 @@ func TestLinuxPacketBuildAndPublication(t *testing.T) {
 				if err != nil || info.Mode().Perm()&0100 == 0 {
 					t.Fatal("published image is not executable", err)
 				}
+				private := t.TempDir()
+				packetPath := filepath.Join(private, "packet.bin")
+				if err := os.WriteFile(packetPath, data.Bytes(), 0600); err != nil {
+					t.Fatal(err)
+				}
+				_, err = BuildLinuxInput(Options{OutputRoot: private, Output: "program", RunTrapControl: true, Release: release}, packetPath, private, "")
+				if err != nil {
+					t.Fatalf("private run image: %v", err)
+				}
+				if info, err := os.Stat(filepath.Join(private, "program")); err != nil || info.Mode().Perm()&0100 == 0 {
+					t.Fatal("private run image missing", err)
+				}
+
 			} else {
 				actual, _ := os.ReadFile(output)
 				if err == nil || !bytes.Equal(previous, actual) {

@@ -4,7 +4,9 @@
 
 typedef struct {
     uint32_t pid;
-    int readers[2];
+    int readers[3];
+    uint8_t receipt[276];
+    size_t receipt_length;
     int collected;
 } fy_linux_capture;
 
@@ -16,12 +18,12 @@ static uint32_t fy_linux_capture_close(int *fd) {
     return close(value) == 0 ? 0 : (uint32_t)errno;
 }
 
-static uint32_t fy_linux_capture_pipe(int pair[2]) {
+static uint32_t fy_linux_capture_pipe(int pair[2], int minimum) {
     if (pipe2(pair, O_CLOEXEC) != 0) { return (uint32_t)errno; }
     for (int i = 0; i < 2; ++i) {
         /* Keep dup2 sources away from stdin/stdout/stderr even if those are closed. */
-        if (pair[i] <= 2) {
-            int moved = fcntl(pair[i], F_DUPFD_CLOEXEC, 3);
+        if (pair[i] < minimum) {
+            int moved = fcntl(pair[i], F_DUPFD_CLOEXEC, minimum);
             if (moved < 0) { return (uint32_t)errno; }
             uint32_t code = fy_linux_capture_close(&pair[i]);
             pair[i] = moved;
@@ -33,29 +35,56 @@ static uint32_t fy_linux_capture_pipe(int pair[2]) {
     return 0;
 }
 
-uint32_t fairyc_private_linux_capture_open_v1(const uint8_t *data, size_t size,
-        size_t argc, const uint8_t *cwd, size_t cwd_size, void **output) {
+static uint32_t fy_linux_capture_open(const uint8_t *data, size_t size,
+        size_t argc, const uint8_t *cwd, size_t cwd_size, int run, void **output) {
     if (output == NULL) { return EINVAL; }
     *output = NULL;
     fy_linux_capture *capture = calloc(1, sizeof *capture);
     if (capture == NULL) { return ENOMEM; }
-    capture->readers[0] = -1; capture->readers[1] = -1;
-    int out[2] = {-1, -1}, err[2] = {-1, -1};
-    uint32_t code = fy_linux_capture_pipe(out);
-    if (code == 0) { code = fy_linux_capture_pipe(err); }
-    if (code == 0) { code = fy_linux_process_spawn(data, size, argc, cwd, cwd_size, out[1], err[1], &capture->pid); }
+    capture->readers[0] = -1; capture->readers[1] = -1; capture->readers[2] = -1;
+    int out[2] = {-1, -1}, err[2] = {-1, -1}, control[2] = {-1, -1};
+    uint32_t code = fy_linux_capture_pipe(out, run ? 4 : 3);
+    if (code == 0) { code = fy_linux_capture_pipe(err, run ? 4 : 3); }
+    if (code == 0 && run) { code = fy_linux_capture_pipe(control, 4); }
+    if (code == 0) { code = fy_linux_process_spawn(data, size, argc, cwd, cwd_size, out[1], err[1], control[1], &capture->pid); }
     uint32_t out_closed = fy_linux_capture_close(&out[1]);
     uint32_t err_closed = fy_linux_capture_close(&err[1]);
-    if (code == 0) { code = out_closed != 0 ? out_closed : err_closed; }
+    uint32_t control_closed = fy_linux_capture_close(&control[1]);
+    if (code == 0) { code = out_closed != 0 ? out_closed : err_closed != 0 ? err_closed : control_closed; }
     if (code != 0) {
         if (capture->pid != 0) { (void)fairyc_private_linux_process_discard_v1(capture->pid); }
         (void)fy_linux_capture_close(&out[0]);
         (void)fy_linux_capture_close(&err[0]);
+        (void)fy_linux_capture_close(&control[0]);
         free(capture);
         return code;
     }
-    capture->readers[0] = out[0]; capture->readers[1] = err[0];
+    capture->readers[0] = out[0]; capture->readers[1] = err[0]; capture->readers[2] = control[0];
     *output = capture;
+    return 0;
+}
+
+uint32_t fairyc_private_linux_capture_open_v1(const uint8_t *data, size_t size,
+        size_t argc, const uint8_t *cwd, size_t cwd_size, void **output) {
+    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 0, output);
+}
+
+uint32_t fairyc_private_linux_run_capture_open_v1(const uint8_t *data, size_t size,
+        size_t argc, const uint8_t *cwd, size_t cwd_size, void **output) {
+    return fy_linux_capture_open(data, size, argc, cwd, cwd_size, 1, output);
+}
+
+/* Only a fully drained collection may expose the bounded control record. */
+uint32_t fairyc_private_linux_run_capture_receipt_v1(void *raw, uint8_t *data,
+        size_t capacity, size_t *length) {
+    if (length == NULL) { return EINVAL; }
+    *length = 0;
+    if (raw == NULL || data == NULL) { return EINVAL; }
+    fy_linux_capture *capture = raw;
+    if (!capture->collected || capture->pid != 0 || capture->readers[2] >= 0 ||
+        capture->receipt_length > capacity) { return EINVAL; }
+    memcpy(data, capture->receipt, capture->receipt_length);
+    *length = capture->receipt_length;
     return 0;
 }
 
@@ -65,8 +94,9 @@ uint32_t fairyc_private_linux_capture_drop_v1(void *raw) {
     uint32_t code = fairyc_private_linux_process_discard_v1(capture->pid);
     uint32_t a = fy_linux_capture_close(&capture->readers[0]);
     uint32_t b = fy_linux_capture_close(&capture->readers[1]);
+    uint32_t c = fy_linux_capture_close(&capture->readers[2]);
     free(capture);
-    return code != 0 ? code : a != 0 ? a : b;
+    return code != 0 ? code : a != 0 ? a : b != 0 ? b : c;
 }
 
 /* One bounded read per stream per round keeps the other stream and clock live. */
@@ -125,6 +155,11 @@ uint32_t fairyc_private_linux_capture_collect_v1(void *raw, uint32_t timeout_ms,
             code = fy_linux_capture_read(&capture->readers[1], err, err_capacity, err_length, &exceeded);
             stream = 2;
         }
+        if (code == 0 && !exceeded && capture->readers[2] >= 0) {
+            code = fy_linux_capture_read(&capture->readers[2], capture->receipt,
+                sizeof capture->receipt, &capture->receipt_length, &exceeded);
+            if (exceeded) { return EOVERFLOW; }
+        }
         if (code != 0) { return code; }
         if (exceeded) {
             code = fy_linux_capture_stop(capture);
@@ -150,7 +185,7 @@ uint32_t fairyc_private_linux_capture_collect_v1(void *raw, uint32_t timeout_ms,
                 else { return EIO; }
             }
         }
-        if (capture->pid == 0 && capture->readers[0] < 0 && capture->readers[1] < 0) {
+        if (capture->pid == 0 && capture->readers[0] < 0 && capture->readers[1] < 0 && capture->readers[2] < 0) {
             *kind = completed_kind; *value = completed_value;
             return 0;
         }
@@ -160,10 +195,10 @@ uint32_t fairyc_private_linux_capture_collect_v1(void *raw, uint32_t timeout_ms,
             *kind = 3;
             return 0;
         }
-        struct pollfd fds[2] = {{capture->readers[0], POLLIN, 0}, {capture->readers[1], POLLIN, 0}};
+        struct pollfd fds[3] = {{capture->readers[0], POLLIN, 0}, {capture->readers[1], POLLIN, 0}, {capture->readers[2], POLLIN, 0}};
         uint64_t remaining_ms = (deadline - now + UINT64_C(999999)) / UINT64_C(1000000);
-        int waited = poll(fds, 2, remaining_ms > 10 ? 10 : (int)remaining_ms);
+        int waited = poll(fds, capture->readers[2] >= 0 ? 3 : 2, remaining_ms > 10 ? 10 : (int)remaining_ms);
         if (waited < 0 && errno != EINTR) { return (uint32_t)errno; }
-        if (waited >= 0 && ((fds[0].revents | fds[1].revents) & POLLNVAL)) { return EBADF; }
+        if (waited >= 0 && ((fds[0].revents | fds[1].revents | fds[2].revents) & POLLNVAL)) { return EBADF; }
     }
 }

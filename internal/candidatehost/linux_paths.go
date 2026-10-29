@@ -51,7 +51,7 @@ func LinuxSource(header string) (string, error) {
 			paths = true
 		case "fairyc_private_linux_process_start_v1", "fairyc_private_linux_process_wait_v1", "fairyc_private_linux_process_discard_v1", "fairyc_private_linux_process_wait_for_v1":
 			process = true
-		case "fairyc_private_linux_capture_open_v1", "fairyc_private_linux_capture_drop_v1", "fairyc_private_linux_capture_collect_v1":
+		case "fairyc_private_linux_run_capture_open_v1", "fairyc_private_linux_run_capture_receipt_v1", "fairyc_private_linux_capture_open_v1", "fairyc_private_linux_capture_drop_v1", "fairyc_private_linux_capture_collect_v1":
 			capture = true
 			process = true
 		case "fairyc_private_linux_directory_open_v1", "fairyc_private_linux_root_directory_open_v1",

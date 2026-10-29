@@ -17,6 +17,10 @@ const LinuxPacketMarker = "/* fairyc.candidate-target/x86_64-linux-gnu/v1 */"
 var linuxRuntimeSymbols = regexp.MustCompile(`\b((?:fy_std_|fy_private_vector_|fairyc_private_)[A-Za-z0-9_]+)\s*\(`)
 
 func linuxRuntimeSource(header string) (string, error) {
+	return linuxRuntimeSourceForRun(header, false)
+}
+
+func linuxRuntimeSourceForRun(header string, run bool) (string, error) {
 	if !strings.Contains(header, LinuxPacketMarker) {
 		return "", fmt.Errorf("Linux candidate packet target marker is required")
 	}
@@ -27,15 +31,15 @@ func linuxRuntimeSource(header string) (string, error) {
 		}
 		symbols = append(symbols, match[1])
 	}
-	return nativesupport.Source(target.X8664LinuxGNU, symbols, nativesupport.Options{SDKStorage: true, CandidateHost: true})
+	return nativesupport.Source(target.X8664LinuxGNU, symbols, nativesupport.Options{SDKStorage: true, CandidateHost: true, TrapReceipt: run})
 }
 
 // BuildLinuxInput consumes only a fresh, bounded, target-marked C packet. Its
 // caller owns the private stage directory and process-group cleanup. No Fairy
 // parser/frontend, source discovery, cached artifact or MSVC fallback runs here.
 func BuildLinuxInput(options Options, input, stage, compiler string) (Result, error) {
-	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked || options.RunTrapControl || options.StackReserveBytes != 0 {
-		return Result{}, fmt.Errorf("Linux packet build cannot select frontend, cache, run control or Windows stack options")
+	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked || options.StackReserveBytes != 0 {
+		return Result{}, fmt.Errorf("Linux packet build cannot select frontend, cache or Windows stack options")
 	}
 	timeout := options.CompileTimeout
 	if timeout == 0 {
@@ -43,6 +47,9 @@ func BuildLinuxInput(options Options, input, stage, compiler string) (Result, er
 	}
 	if timeout <= 0 || timeout > 10*time.Minute {
 		return Result{}, fmt.Errorf("Linux compile timeout must be in (0,10m]")
+	}
+	if options.RunTrapControl && (options.Output != "program" || options.OutputRoot != stage) {
+		return Result{}, fmt.Errorf("Linux run image must be private stage/program")
 	}
 	if options.Output == "" || options.OutputRoot == "" || stage == "" {
 		return Result{}, fmt.Errorf("Linux packet build requires stage, output and publication root")
@@ -58,7 +65,7 @@ func BuildLinuxInput(options Options, input, stage, compiler string) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
-	support, err := linuxRuntimeSource(packet.Header)
+	support, err := linuxRuntimeSourceForRun(packet.Header, options.RunTrapControl)
 	if err != nil {
 		return Result{}, fmt.Errorf("select Linux runtime: %w", err)
 	}

@@ -81,3 +81,20 @@ GNU object/ELF publication, low/release SDK File-reader builds and execution, lo
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
 Workspace `run/test/new`, caches and a Fairy-authored GNU backend remain separate work.
+
+## Private run-image backend
+
+`--run-trap-control` selects the existing Linux runtime's bounded trap receipt
+writer on fd 3. This mode requires output root equal to the caller-owned stage
+and output leaf exactly `program`; it cannot publish into the client workspace.
+The Fairy caller remains responsible for program launch and stage lifetime.
+Ordinary builds retain their runtime and publication behavior.
+
+The private capture adapter has a separate run opener which redirects a third
+pipe to child fd 3 and closes inherited descriptors from fd 4 upward. All pipe
+sources are above fd 3, including when standard descriptors were closed. The
+existing process-group/deadline cleanup and fair stream polling also drain this
+channel. Receipts admit 276 bytes; overflow fails capture. Only fully drained
+collection exposes receipt bytes. Ordinary capture continues closing from fd 3.
+Windows low/optimized POSIX substitutes cover receipt bounds and descriptor
+cleanup; Linux-native probes are authored and skipped on Windows.

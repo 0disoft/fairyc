@@ -16,7 +16,7 @@
 extern char **environ;
 
 static uint32_t fy_linux_process_spawn(const uint8_t *data, size_t size,
-        size_t argc, const uint8_t *cwd, size_t cwd_size, int out_fd, int err_fd, uint32_t *output) {
+        size_t argc, const uint8_t *cwd, size_t cwd_size, int out_fd, int err_fd, int control_fd, uint32_t *output) {
     if (output == NULL) { return EINVAL; }
     *output = 0;
     if (data == NULL || cwd == NULL || argc == 0 || argc > 131071 ||
@@ -48,7 +48,8 @@ static uint32_t fy_linux_process_spawn(const uint8_t *data, size_t size,
     if (code == 0) { code = posix_spawn_file_actions_addchdir_np(&actions, (const char *)cwd); }
     if (code == 0 && out_fd >= 0) { code = posix_spawn_file_actions_adddup2(&actions, out_fd, 1); }
     if (code == 0 && err_fd >= 0) { code = posix_spawn_file_actions_adddup2(&actions, err_fd, 2); }
-    if (code == 0) { code = posix_spawn_file_actions_addclosefrom_np(&actions, 3); }
+    if (code == 0 && control_fd >= 0) { code = posix_spawn_file_actions_adddup2(&actions, control_fd, 3); }
+    if (code == 0) { code = posix_spawn_file_actions_addclosefrom_np(&actions, control_fd >= 0 ? 4 : 3); }
     pid_t pid = 0;
     if (code == 0) { code = posix_spawn(&pid, argv[0], &actions, &attributes, argv, environ); }
     posix_spawnattr_destroy(&attributes);
@@ -60,7 +61,7 @@ static uint32_t fy_linux_process_spawn(const uint8_t *data, size_t size,
 
 uint32_t fairyc_private_linux_process_start_v1(const uint8_t *data, size_t size,
         size_t argc, const uint8_t *cwd, size_t cwd_size, uint32_t *output) {
-    return fy_linux_process_spawn(data, size, argc, cwd, cwd_size, -1, -1, output);
+    return fy_linux_process_spawn(data, size, argc, cwd, cwd_size, -1, -1, -1, output);
 }
 
 /* Exclusive child ownership is required: keep the leader unreaped until after
