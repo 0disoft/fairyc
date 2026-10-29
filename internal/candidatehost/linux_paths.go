@@ -19,13 +19,16 @@ var linuxCapture string
 //go:embed linux_rooted_file.c
 var linuxRootedFile string
 
+//go:embed linux_directory.c
+var linuxDirectory string
+
 var linuxSymbols = regexp.MustCompile(`\b(fairyc_private_linux_[A-Za-z0-9_]+)\s*\(`)
 
 // LinuxSource selects the admitted private path/process/filesystem adapters. The Linux
 // candidate CLI/build bridge is not connected by these internal host slices.
 func LinuxSource(header string) (string, error) {
 	matches := linuxSymbols.FindAllStringSubmatch(header, -1)
-	paths, process, capture, rooted := false, false, false, false
+	paths, process, capture, rooted, directory := false, false, false, false, false
 	for _, match := range matches {
 		switch match[1] {
 		case "fairyc_private_linux_host_path_v1":
@@ -41,6 +44,8 @@ func LinuxSource(header string) (string, error) {
 			"fairyc_private_linux_root_file_create_v1", "fairyc_private_linux_root_file_write_v1",
 			"fairyc_private_linux_root_file_sync_v1", "fairyc_private_linux_root_file_publish_new_v1":
 			rooted = true
+		case "fairyc_private_linux_directory_scan_open_v1", "fairyc_private_linux_directory_scan_next_v1", "fairyc_private_linux_directory_scan_close_v1":
+			rooted, directory = true, true
 		default:
 			return "", fmt.Errorf("unknown private Linux host symbol %s", match[1])
 		}
@@ -68,6 +73,9 @@ func LinuxSource(header string) (string, error) {
 		} else {
 			source = linuxRootedFile
 		}
+	}
+	if directory {
+		source += "\n" + linuxDirectory
 	}
 	return source, nil
 }
