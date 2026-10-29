@@ -30,6 +30,7 @@ pub fn Result<Plan,u32> build(ref ir::Program p,ref v::Vec<cfg::Graph> graphs,re
     }return .ok(Plan{.frames,.drops,.count=v::len<usize>(ref pending_frames)});
 }
 pub fn bool frame(ref Plan p,usize id){assert(id!=0 && id<=v::len<u8>(ref p.frames));return *v::at<u8>(ref p.frames,id-1)!=0;}
+pub fn ref v::Vec<u8> frames(ref Plan p){return ref p.frames;}
 pub fn ref v::Vec<u8> drops(ref Plan p){return ref p.drops;}
 pub fn usize count(ref Plan p){return p.count;}
 pub fn Result<Plan,u32> all(ref ir::Program p,ref mut usize work){var frames=switch(empty(ir::count(p),work)){case .ok(m):{m}case .err(e):{return .err(e);}};var usize i=0;while(i<v::len<u8>(ref frames)){let cell=v::at_mut<u8>(ref mut frames,i);*cell=2;i+=1;}return .ok(Plan{.frames,.drops=v::empty<u8>(),.count=ir::count(p)});}

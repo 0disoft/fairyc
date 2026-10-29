@@ -202,6 +202,9 @@ import std::fs as fs;
 	if err != nil || !fileWire || !signedError || !strings.Contains(sdkPacket.Header, candidatebuild.LinuxPacketMarker) {
 		t.Fatalf("Linux SDK packet: %v, File wire=%t, signed errno=%t", err, fileWire, signedError)
 	}
+	if strings.Contains(sdkPacket.Header, "fy_std_windows_read_dir_drop_v0(") {
+		t.Fatal("unreachable Windows directory cleanup leaked into Linux File packet")
+	}
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
 	failed := run(args, 3)
 	if failed.Stdout != "" || !strings.Contains(failed.Stderr, "E1009") {
