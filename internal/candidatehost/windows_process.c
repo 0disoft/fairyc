@@ -16,7 +16,7 @@ int32_t fairyc_private_windows_create_v1(const uint8_t *app, uint8_t *line, cons
 int32_t fairyc_private_windows_assign_v1(void *job, void *process) { return AssignProcessToJobObject(job, process); }
 uint32_t fairyc_private_windows_resume_v1(void *thread) { return ResumeThread(thread); }
 uint32_t fairyc_private_windows_wait_v1(void *process, uint32_t timeout) { return WaitForSingleObject(process, timeout); }
-int32_t fairyc_private_windows_exit_v1(void *process, uint32_t *exit) { return GetExitCodeProcess(process, exit); }
+int32_t fairyc_private_windows_exit_v1(void *process, uint32_t *exit) { return GetExitCodeProcess(process, (LPDWORD)exit); }
 int32_t fairyc_private_windows_kill_job_v1(void *job, uint32_t code) { return TerminateJobObject(job, code); }
 int32_t fairyc_private_windows_kill_process_v1(void *process, uint32_t code) { return TerminateProcess(process, code); }
 int32_t fairyc_private_windows_close_v1(void *handle) { return CloseHandle(handle); }
@@ -58,7 +58,7 @@ int32_t fairyc_private_windows_compare_name_v1(const uint8_t *left, size_t left_
     return CompareStringOrdinal((LPCWCH)left, (int)left_size, (LPCWCH)right, (int)right_size, TRUE);
 }
 void *fairyc_private_windows_open_v1(uint32_t access, int32_t inherit, uint32_t pid) { return OpenProcess(access, inherit, pid); }
-int32_t fairyc_private_windows_handle_count_v1(uint32_t *count) { return GetProcessHandleCount(GetCurrentProcess(), count); }
+int32_t fairyc_private_windows_handle_count_v1(uint32_t *count) { return GetProcessHandleCount(GetCurrentProcess(), (PDWORD)count); }
 uint32_t fairyc_private_windows_current_path_v1(uint8_t *data, uint32_t capacity) { return GetCurrentDirectoryW(capacity, (LPWSTR)data); }
 uint32_t fairyc_private_windows_temp_path_v1(uint8_t *data, uint32_t capacity) { return GetTempPathW(capacity, (LPWSTR)data); }
 uint32_t fairyc_private_windows_image_path_v1(uint8_t *data, uint32_t capacity) { return GetModuleFileNameW(NULL, (LPWSTR)data, capacity); }
