@@ -50,9 +50,20 @@ Input uses the rooted Linux adapter, with a 65,536-byte bound and before/after m
 checks. Shared frontend dispatch retains the Windows caller. Both-target full-entry
 emission and closed Linux runtime selection pass; portable argument classification runs
 on Windows in low/optimized profiles. Full Linux execution is skipped on Windows.
-Workspace `check/build/run/test/new`, target-specific candidate C emission, native GNU
+Workspace `build/run/test/new`, target-specific candidate C emission, native GNU
 companion and cache-profile wiring remain open; the Linux help reports that boundary.
-The source workspace checks pass with 549 sources and 6,993 MIR functions; lock refreshed.
+The earlier file-CLI slice checked 549 sources and 6,993 MIR functions.
+
+Linux [workspace check](../architecture/candidate-linux-workspace-check-v1.md) now connects
+`check` and `check --locked` to the shared checker. The isolated platform selection replaces
+workspace reader I/O with rooted Linux traversal, bounded directory snapshots and regular-file
+identity reads. Portable SDK lock publication remains shared; SDK authentication is unchanged.
+The prepared workspace and ordinary source workspace check successfully. Full Linux-entry
+both-target emission has no Windows foreign symbols; closed Linux support selection and
+Windows low/optimized facade substitutes pass. The ordinary source workspace passes both
+check modes with 550 sources and 7,025 MIR functions; lock refreshed. Linux-native full CLI/reference comparisons
+are authored but skipped on Windows. Workspace build/run and cache wiring remain open.
+
 
 ## Scope and evidence
 

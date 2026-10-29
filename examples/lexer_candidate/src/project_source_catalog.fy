@@ -47,7 +47,7 @@ pub fn Result<Catalog,Error> collect_optional(ref u8[] root,bool optional,ref mu
         if(prefix.end>prefix.start && (!bytes::append_byte(ref mut absolute,47).is_ok || !bytes::append(ref mut absolute,bytes::view(ref names)[prefix.start..prefix.end]).is_ok)){return .err(fail(7,0,root));}
         if(bytes::len(ref absolute)>4095 || !paths::charge(work,bytes::len(ref absolute)+32)){return .err(fail(6,0,bytes::view(ref absolute)));}
         let ref str directory_path=switch(text::validate_utf8(bytes::view(ref absolute))){case .ok(value):{value}case .err(_):{return .err(fail(8,0,bytes::view(ref absolute)));}};
-        var fs::ReadDir stream=switch(fs::read_dir_utf8(directory_path)){case .ok(value):{value}case .err(e):{return .err(fail(if(e.os_code==1920){2}else{1},e.os_code,bytes::view(ref absolute)));}};
+        var fs::ReadDir stream=switch(fs::read_dir_utf8(directory_path)){case .ok(value):{value}case .err(e):{return .err(fail(if((e.os_code==1920 || e.os_code==40)){2}else{1},e.os_code,bytes::view(ref absolute)));}};
         var u8[4096] name=[0;4096];
         while(true){
             let fs::DirEntry entry=switch(fs::next_dir(ref mut stream,ref mut name)){case .ok(value):{value}case .err(e):{return .err(fail(1,e.os_code,bytes::view(ref absolute)));}};if(!entry.has_entry){break;}

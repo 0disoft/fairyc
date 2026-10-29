@@ -1,7 +1,7 @@
 # Private Linux candidate file CLI v1
 
-`linux_file_cli.fy` is the Linux command dispatcher. The preparation tool changes only
-the `file_cli` import in an isolated copy of the authored candidate entry. The original
+`linux_file_cli.fy` is the Linux command dispatcher. The preparation tool selects the dispatcher and
+[workspace filesystem boundary](candidate-linux-workspace-check-v1.md) in an isolated copy of the authored sources. The original
 Windows entry and no-argument binary stdin protocol remain available.
 
 ## Connected commands
@@ -9,8 +9,9 @@ Windows entry and no-argument binary stdin protocol remain available.
 - `--help`, `-h`, `help`, `--version`, and `targets` take no extra arguments.
 - `--tokens-file`, `--declarations-file`, `--check-names-file`, `--bindings-file`,
   `--check-types-file`, `--hir-file`, and `--mir-file` take exactly one source path.
+- `check`, `check --locked`, and `check --help` use the shared workspace checker. Cache options remain unsupported.
 - Unknown commands or invalid arity for connected commands return 2. Unconnected workspace commands
-  `check`, `build`, `run`, `test`, and `new` return 3 with an explicit capability diagnostic.
+  `build`, `run`, `test`, and `new` return 3 with an explicit capability diagnostic.
   Dispatcher output failures return 4; shared frontend exit codes remain unchanged.
   The help lists this boundary; the shared target registry is
   target metadata, not a claim that this dispatcher can build either target.
@@ -73,8 +74,7 @@ selection pass; portable dispatch execution passes with MSVC low/optimized. Full
 execution is skipped, not passed. The owning source workspace passes `check` and
 `check --locked`; its lock is refreshed. No hosted runner or distribution is changed.
 
-The next slice is Linux workspace input: shared `project_directory`,
-`project_source_catalog`, `project_source_file`, lock-file I/O and SDK-bundle access still
-reach Windows-only SDK directory/metadata operations. Native workspace build/run then
-need GNU runtime/toolchain/publication and cache-profile integration. This file CLI does
-not complete those obligations or promote the candidate over the Go bootstrap.
+Linux [workspace check](candidate-linux-workspace-check-v1.md) is now connected through
+shared workspace readers and a private Linux filesystem facade. Native workspace build/run
+still need GNU runtime/toolchain/publication and cache-profile integration. Linux execution
+remains unverified; this does not promote the candidate over the Go bootstrap.

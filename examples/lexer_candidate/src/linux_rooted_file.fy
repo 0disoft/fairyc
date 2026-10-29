@@ -65,6 +65,10 @@ fn Result<bytes::Buffer,Problem> path(ref u8[] value,bool leaf) {
     var File file=input;
     let raw=file.raw; file.raw=0; let code=unsafe { close_handle(raw) }; return if(code==0){.ok(true)}else{.err(fail(7,code,0))};
 }
+// Explicit ownership transfer to another private Linux file facade.
+@effects(filesystem) pub fn u32 into_handle(File input) {
+    var File file=input; let raw=file.raw; file.raw=0; return raw;
+}
 @effects(filesystem) pub fn Result<bool,Problem> close_directory(Directory input) {
     var Directory root=input;
     let raw=root.raw; root.raw=0; let code=unsafe { close_handle(raw) }; return if(code==0){.ok(true)}else{.err(fail(7,code,0))};

@@ -2,9 +2,39 @@
 import argparse
 from pathlib import Path
 import shutil
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'examples/lexer_candidate'
+WORKSPACE_READERS = ('project_directory', 'project_source_catalog',
+                     'project_source_file', 'project_source_set')
+
+
+def select_workspace_io(output):
+    for name in WORKSPACE_READERS:
+        path = output / 'src' / (name + '.fy')
+        source = path.read_text(encoding='utf-8')
+        old = 'import std::fs as fs;'
+        if source.count(old) != 1:
+            raise ValueError(f'{name} filesystem import changed')
+        source = source.replace(old, 'import linux_workspace_fs as fs;')
+        source = re.sub(r'\bfs::(FileError|FileKind|FileId|File|ReadDir|DirEntry|PathKind)\b',
+                        r'fs::Workspace\1', source)
+        path.write_text(source,
+                        encoding='utf-8', newline='\n')
+    path = output / 'src/project_lock_write.fy'
+    source = path.read_text(encoding='utf-8')
+    if source.count('import std::fs as fs;') != 1 or source.count('return .err(io(4,error));') != 2:
+        raise ValueError('lock writer filesystem boundary changed')
+    source = source.replace('import std::fs as fs;',
+                            'import std::fs as fs;\nimport linux_workspace_fs as directory;')
+    for operation in ('read_dir_utf8', 'close_dir', 'path_kind'):
+        if source.count('fs::' + operation + '(') != 1:
+            raise ValueError(f'lock writer {operation} boundary changed')
+        source = source.replace('fs::' + operation + '(', 'directory::' + operation + '(')
+    source = source.replace('return .err(io(4,error));', 'return .err(directory_io(4,error));')
+    source += '\nfn Problem directory_io(u32 stage,directory::WorkspaceFileError error){var Problem p=fail(stage,error.status);p.os_code=error.os_code;p.completed=error.completed;return p;}\n'
+    path.write_text(source, encoding='utf-8', newline='\n')
 
 
 def prepare(output):
@@ -22,6 +52,7 @@ def prepare(output):
         raise ValueError('candidate main dispatcher import changed')
     main.write_text(source.replace(old, 'import linux_file_cli as file_cli;'),
                     encoding='utf-8', newline='\n')
+    select_workspace_io(output)
     return output
 
 

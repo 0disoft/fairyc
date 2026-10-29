@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -19,6 +20,7 @@ import (
 func TestLinuxFileCLI(t *testing.T) {
 	root := t.TempDir()
 	copyLexerFileCLIExample(t, root)
+	selectLinuxWorkspaceReaders(t, root)
 	entryPath := filepath.Join(root, "src", "main.fy")
 	entry, err := os.ReadFile(entryPath)
 	if err != nil {
@@ -34,7 +36,7 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"--version",3)==0 && file_cli::command(b"targets",3)==0);
     assert(file_cli::command(b"--tokens-file",3)==4 && file_cli::command(b"--mir-file",3)==4);
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
-    assert(file_cli::command(b"check",2)==5 && file_cli::command(b"build",3)==5 && file_cli::command(b"run",4)==5);
+    assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==5 && file_cli::command(b"run",4)==5);
     assert(file_cli::command(b"test",2)==5 && file_cli::command(b"new",3)==5);
     assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
@@ -139,7 +141,9 @@ fn i32 cli_probe() {
 				{[]string{"--version", "extra"}, 2, "usage:"},
 				{[]string{"--tokens-file"}, 2, "usage:"},
 				{[]string{"unknown"}, 2, "usage:"},
-				{[]string{"check"}, 3, "Linux workspace CLI is not connected"},
+				{[]string{"check", "--help"}, 0, "check [--locked]"},
+				{[]string{"check", "--cache-root", "ignored"}, 2, "accepts only optional --locked"},
+				{[]string{"check", "--unknown"}, 2, "accepts only optional --locked"},
 				{[]string{"build"}, 3, "Linux workspace CLI is not connected"},
 				{[]string{"run"}, 3, "Linux workspace CLI is not connected"},
 			}
@@ -149,6 +153,99 @@ fn i32 cli_probe() {
 					t.Fatalf("%v: %+v %v", tc.args, result, err)
 				}
 			}
+			checkLinuxWorkspace(t, toolchain, artifact)
 		})
 	}
+}
+
+func selectLinuxWorkspaceReaders(t *testing.T, root string) {
+	t.Helper()
+	types := regexp.MustCompile(`\bfs::(FileError|FileKind|FileId|File|ReadDir|DirEntry|PathKind)\b`)
+	for _, name := range []string{"project_directory", "project_source_catalog", "project_source_file", "project_source_set", "project_lock_write"} {
+		path := filepath.Join(root, "src", name+".fy")
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		source := string(data)
+		if name != "project_lock_write" {
+			source = strings.Replace(source, "import std::fs as fs;", "import linux_workspace_fs as fs;", 1)
+			source = types.ReplaceAllString(source, "fs::Workspace${1}")
+		} else {
+			source = strings.Replace(source, "import std::fs as fs;", "import std::fs as fs;\nimport linux_workspace_fs as directory;", 1)
+			for _, operation := range []string{"read_dir_utf8", "close_dir", "path_kind"} {
+				source = strings.ReplaceAll(source, "fs::"+operation+"(", "directory::"+operation+"(")
+			}
+			source = strings.ReplaceAll(source, "return .err(io(4,error));", "return .err(directory_io(4,error));")
+			source += "\nfn Problem directory_io(u32 stage,directory::WorkspaceFileError error){var Problem p=fail(stage,error.status);p.os_code=error.os_code;p.completed=error.completed;return p;}\n"
+		}
+		writeTestSource(t, root, "src/"+name+".fy", source)
+	}
+}
+
+func checkLinuxWorkspace(t *testing.T, toolchain cdriver.NativeToolchain, artifact cdriver.NativeArtifact) {
+	t.Helper()
+	root := t.TempDir()
+	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "test.linux-workspace-check"
+name = "client"
+version = "1.0.0"
+language = "fairyc-language/20"
+source = "src"
+`)
+	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return 0;}\n")
+	run := func(args []string, want int32) string {
+		t.Helper()
+		result, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: args, WorkingDirectory: root, Timeout: time.Minute})
+		if err != nil || result.ExitCode != want {
+			t.Fatalf("workspace %v: %+v %v", args, result, err)
+		}
+		if len(args) == 2 && args[1] == "--locked" && want == 0 {
+			code, stdout, stderr := runForTest(args, root)
+			if code != 0 || result.Stdout != stdout || result.Stderr != stderr {
+				t.Fatalf("locked check differs from Go: %+v vs (%d, %q, %q)", result, code, stdout, stderr)
+			}
+		}
+		return result.Stdout + result.Stderr
+	}
+	run([]string{"check", "--locked"}, 7)
+	if text := run([]string{"check"}, 0); !strings.Contains(text, "check ok:") {
+		t.Fatal(text)
+	}
+	lock, err := os.ReadFile(filepath.Join(root, "fairy.lock"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	run([]string{"check", "--locked"}, 0)
+	after, err := os.ReadFile(filepath.Join(root, "fairy.lock"))
+	if err != nil || !bytes.Equal(lock, after) {
+		t.Fatal("locked check changed lock", err)
+	}
+	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
+	run([]string{"check", "--locked"}, 7)
+	if text := run([]string{"check"}, 3); !strings.Contains(text, "E1006") {
+		t.Fatal(text)
+	}
+	writeTestSource(t, root, "src/main.fy", "module main; import std::bytes as bytes; fn i32 main(){return 0;}\n")
+	run([]string{"check"}, 0)
+	run([]string{"check", "--locked"}, 0)
+	for _, name := range []string{"fairy.toml", "src/main.fy", "tests/answer.fy", "libs/answer/fairy.toml", "libs/answer/src/answer.fy", "libs/answer/tests/answer.fy"} {
+		data, err := os.ReadFile(filepath.Join("..", "..", "examples", "workspace_quickstart", filepath.FromSlash(name)))
+		if err != nil {
+			t.Fatal(err)
+		}
+		writeTestSource(t, root, name, string(data))
+	}
+	run([]string{"check"}, 0)
+	run([]string{"check", "--locked"}, 0)
+	if err := os.Symlink("main.fy", filepath.Join(root, "src", "link.fy")); err != nil {
+		t.Fatal(err)
+	}
+	run([]string{"check"}, 7)
+	if err := os.Remove(filepath.Join(root, "src", "link.fy")); err != nil {
+		t.Fatal(err)
+	}
+	writeTestSource(t, root, "src/MAIN.fy", "module extra;\n")
+	run([]string{"check"}, 7)
 }

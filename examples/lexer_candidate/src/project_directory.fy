@@ -9,8 +9,8 @@ import std::fs as fs;
 // 5 non-directory, 6 I/O, 7 allocation, 8 bound, 9 UTF-8.
 pub struct Problem{u32 code;u32 os_code;usize start;usize end;}
 fn Problem fail(u32 code,u32 os_code,usize start,usize end){return Problem{.code,.os_code,.start,.end};}
-// These codes originate in the Windows SDK directory adapter's prefix check.
-fn u32 open_code(fs::FileError error){if(error.os_code==1920){return 4;}if(error.os_code==8 || error.os_code==14){return 7;}if(error.status==6){return 8;}if(error.status==5){return 9;}if(error.os_code==267){return 5;}return 1;}
+// Preserve Windows SDK classifications and Linux errno for the private host facade.
+fn u32 open_code(fs::FileError error){if((error.os_code==1920 || error.os_code==40)){return 4;}if(error.os_code==8 || error.os_code==14 || error.os_code==12){return 7;}if(error.status==6){return 8;}if(error.status==5){return 9;}if((error.os_code==267 || error.os_code==20)){return 5;}return 1;}
 pub fn ref str reason(u32 code){if(code==3){return "noncanonical-path-case";}if(code==4){return "symlink-not-supported";}if(code==8){return "source-limit-exceeded";}if(code==7){return "allocation-failed";}return "invalid-workspace-path";}
 @effects(filesystem)
 fn Result<bytes::Buffer,Problem> walk(ref u8[] root,ref u8[] relative,bool source,ref mut usize work){

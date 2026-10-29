@@ -100,8 +100,8 @@ source = "src"
 			if err != nil {
 				t.Fatal(err)
 			}
-			outcome, err := tc.Execute(artifact, cdriver.NativeExecutionOptions{Timeout: 20 * time.Second, RejectOutput: true})
-			if err != nil || outcome.ExitCode != 0 || outcome.TrapCategory != "" {
+			outcome, err := tc.Execute(artifact, cdriver.NativeExecutionOptions{Timeout: 20 * time.Second})
+			if err != nil || outcome.ExitCode != 0 || outcome.TrapCategory != "" || outcome.Stdout != "" || outcome.Stderr != "" {
 				t.Fatalf("native argv transport: %+v %v", outcome, err)
 			}
 		})
