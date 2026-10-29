@@ -101,6 +101,7 @@ const linuxTestInputNativeProbe = `
 #include <assert.h>
 #include <stdio.h>
 int main(int argc,char **argv){
+ (void)argv;
  if(argc>1){uint8_t data[8];ssize_t n=read(0,data,sizeof data);assert(n>=0);if(n>0){assert(write(1,data,(size_t)n)==n);}return 0;}
  char image[4096];ssize_t n=readlink("/proc/self/exe",image,sizeof image-1);assert(n>0);image[n]=0;
  char packed[8192];size_t a=strlen(image)+1;memcpy(packed,image,a);memcpy(packed+a,"child",6);
