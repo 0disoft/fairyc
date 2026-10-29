@@ -20,6 +20,13 @@ valid execution records are reused instead of reopening completed work.
 | 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md) and [bounded binary capture](../architecture/candidate-linux-capture-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 543 sources and 6,935 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and the filesystem/CLI dispatch bridge remain open. Go stays the default. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
+The private Linux [rooted read adapter](../architecture/candidate-linux-rooted-files-v1.md)
+now retains directory descriptors, opens flat child leaves without following symlinks, reads
+binary bytes and reports inode/device/time/size metadata. Windows substitute and wrapper
+low/optimized checks pass; candidate `check`/`check --locked` pass with 544 sources and 6,949
+MIR functions. Anonymous writes/publication, directory scans and CLI dispatch remain open;
+native Linux proof remains pending.
+
 ## Scope and evidence
 
 - Phase 1, verified-MIR cache Phase 3, and the admitted Atlas Phase 4 scope already have exit
