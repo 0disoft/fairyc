@@ -41,7 +41,7 @@ int main(void){
 }
 `
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		artifact, err := tc.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: probe, RuntimeSource: "\n"})
+		artifact, err := tc.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: probe, RuntimeSource: "typedef int fy_build_scratch_runtime;\n"})
 		if err != nil {
 			t.Fatal(err)
 		}
