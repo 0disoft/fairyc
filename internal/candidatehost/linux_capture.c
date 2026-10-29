@@ -1,5 +1,6 @@
 /* Appended after linux_process.c; private helpers and feature macros are shared. */
 #include <fcntl.h>
+#include <poll.h>
 
 typedef struct {
     uint32_t pid;
@@ -66,4 +67,103 @@ uint32_t fairyc_private_linux_capture_drop_v1(void *raw) {
     uint32_t b = fy_linux_capture_close(&capture->readers[1]);
     free(capture);
     return code != 0 ? code : a != 0 ? a : b;
+}
+
+/* One bounded read per stream per round keeps the other stream and clock live. */
+static uint32_t fy_linux_capture_read(int *fd, uint8_t *data, size_t capacity,
+        size_t *length, int *exceeded) {
+    if (*fd < 0) { return 0; }
+    size_t room = capacity - *length;
+    uint8_t extra = 0;
+    size_t request = room == 0 ? 1 : room > 4096 ? 4096 : room;
+    ssize_t count = read(*fd, room == 0 ? &extra : data + *length, request);
+    if (count < 0) { return errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR ? 0 : (uint32_t)errno; }
+    if (count == 0) { return fy_linux_capture_close(fd); }
+    if ((size_t)count > request) { return EIO; }
+    if (room == 0) { *exceeded = 1; }
+    else { *length += (size_t)count; }
+    return 0;
+}
+
+static uint32_t fy_linux_capture_stop(fy_linux_capture *capture) {
+    if (capture->pid == 0) { return 0; }
+    uint32_t code = fy_linux_process_observe(capture->pid, WNOHANG);
+    if (code != 0) { return code; }
+    int status = 0;
+    code = fy_linux_process_finish(capture->pid, &status);
+    if (code == 0) { capture->pid = 0; }
+    return code;
+}
+
+uint32_t fairyc_private_linux_capture_collect_v1(void *raw, uint32_t timeout_ms,
+        uint8_t *out, size_t out_capacity, size_t *out_length,
+        uint8_t *err, size_t err_capacity, size_t *err_length,
+        uint32_t *kind, uint32_t *value, uint32_t *pid) {
+    if (kind == NULL || value == NULL || pid == NULL || out_length == NULL || err_length == NULL) { return EINVAL; }
+    *kind = 0; *value = 0; *pid = 0; *out_length = 0; *err_length = 0;
+    if (raw == NULL || timeout_ms == 0 || timeout_ms > 86400000 || out_capacity > 1048576 ||
+        err_capacity > 1048576 - out_capacity || (out_capacity != 0 && out == NULL) ||
+        (err_capacity != 0 && err == NULL)) { return EINVAL; }
+    fy_linux_capture *capture = raw;
+    if (capture->collected || capture->pid <= 1 || capture->pid > INT_MAX) { return EINVAL; }
+    capture->collected = 1;
+    *pid = capture->pid;
+    uint64_t started = 0;
+    uint32_t code = fy_linux_process_now(&started);
+    if (code != 0) { return code; }
+    uint64_t deadline = started + (uint64_t)timeout_ms * UINT64_C(1000000);
+    uint32_t completed_kind = 0, completed_value = 0;
+    for (;;) {
+        uint64_t now = 0;
+        code = fy_linux_process_now(&now);
+        if (code != 0) { return code; }
+        if (now < started) { return EIO; }
+        int exceeded = 0;
+        code = fy_linux_capture_read(&capture->readers[0], out, out_capacity, out_length, &exceeded);
+        uint32_t stream = 1;
+        if (code == 0 && !exceeded) {
+            code = fy_linux_capture_read(&capture->readers[1], err, err_capacity, err_length, &exceeded);
+            stream = 2;
+        }
+        if (code != 0) { return code; }
+        if (exceeded) {
+            code = fy_linux_capture_stop(capture);
+            if (code != 0) { return code; }
+            *kind = 4; *value = stream;
+            return 0;
+        }
+        if (capture->pid != 0) {
+            siginfo_t info;
+            memset(&info, 0, sizeof info);
+            if (waitid(P_PID, (id_t)capture->pid, &info, WEXITED | WNOWAIT | WNOHANG) != 0) {
+                code = (uint32_t)errno;
+                if (code == EINTR && now < deadline) { continue; }
+                return code;
+            }
+            if (info.si_pid != 0) {
+                int status = 0;
+                code = fy_linux_process_finish(capture->pid, &status);
+                if (code != 0) { return code; }
+                capture->pid = 0;
+                if (WIFEXITED(status)) { completed_kind = 1; completed_value = (uint32_t)WEXITSTATUS(status); }
+                else if (WIFSIGNALED(status)) { completed_kind = 2; completed_value = (uint32_t)WTERMSIG(status); }
+                else { return EIO; }
+            }
+        }
+        if (capture->pid == 0 && capture->readers[0] < 0 && capture->readers[1] < 0) {
+            *kind = completed_kind; *value = completed_value;
+            return 0;
+        }
+        if (now >= deadline) {
+            code = fy_linux_capture_stop(capture);
+            if (code != 0) { return code; }
+            *kind = 3;
+            return 0;
+        }
+        struct pollfd fds[2] = {{capture->readers[0], POLLIN, 0}, {capture->readers[1], POLLIN, 0}};
+        uint64_t remaining_ms = (deadline - now + UINT64_C(999999)) / UINT64_C(1000000);
+        int waited = poll(fds, 2, remaining_ms > 10 ? 10 : (int)remaining_ms);
+        if (waited < 0 && errno != EINTR) { return (uint32_t)errno; }
+        if (waited >= 0 && ((fds[0].revents | fds[1].revents) & POLLNVAL)) { return EBADF; }
+    }
 }

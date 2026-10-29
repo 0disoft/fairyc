@@ -25,10 +25,10 @@ and initialized file actions and spawn attributes on every return path.
 the environment and standard streams. No shell, quoting or PATH search is used;
 relative paths remain relative and are resolved by the native launch.
 
-The [private capture first slice](candidate-linux-capture-v1.md) reuses the spawn
-helper with stdout/stderr pipe redirection and an opaque owned token. Normal
-start still inherits standard streams. Capture collection and its Fairy wrapper
-remain pending.
+The [private bounded capture runner](candidate-linux-capture-v1.md) reuses the
+spawn helper with stdout/stderr pipe redirection and an opaque owned session.
+Its separate Fairy wrapper adds binary output limits and a post-open observation/
+drain budget. This process module's `run`/`run_for` still inherit standard streams.
 
 `posix_spawnattr_setpgroup(..., 0)` with `POSIX_SPAWN_SETPGROUP` gives each
 child its own process group, initially `pgid == pid`; see
@@ -123,10 +123,12 @@ clock overflow/backward readings and kill `EPERM`.
 profiles with both-target C emission. Policy checks cover timeout kind 3,
 native-error/ABI classification, invalid budgets without start, ordinary exit 127,
 signal 9 and rejection of fabricated timeout kind 3 from unlimited `run` as ABI
-problem kind 6. Candidate `check` and `check --locked` pass with 542 files and
-6,926 MIR functions; the lock is updated and verified. `go vet -mod=readonly`
-also passes. The timed POSIX adapter checks pass in both profiles;
-this does not establish native Linux execution.
+problem kind 6. The earlier process-only snapshot passed candidate `check` and
+`check --locked` with 542 files and 6,926 MIR functions. The current capture
+integration passes both checks with 543 sources and 6,935 MIR functions; the lock
+is updated and verified, and `go vet -mod=readonly` passes with exit 0. Final
+capture/process C adapter and CLI capture/process/argv checks pass in low/optimized
+profiles with both-target emission. This does not establish native Linux execution.
 
 The authored native Linux GCC/Clang probe also uses a subreaper to observe a
 leader exiting normally with status 17 while leaving a grandchild. It expects
@@ -136,6 +138,7 @@ readiness before the 25 ms timed wait, then expects `SIGKILL` and reaps the
 grandchild. Native probes are skipped on this Windows host; Windows substitutes
 do not prove native Linux process behavior. This slice adds no new
 `_GNU_SOURCE` requirement: its existing placement before system headers remains.
-No public SDK, CLI dispatch or default compiler changes are included. Bounded I/O,
-the filesystem/CLI bridge and native Linux proof remain future work. Containment
+No public SDK, CLI dispatch or default compiler changes are included. The
+[bounded I/O primitive](candidate-linux-capture-v1.md) is implemented separately;
+the filesystem/CLI bridge and native Linux proof remain open. Containment
 of descendants that escape the group remains outside this runner's guarantee.
