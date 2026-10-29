@@ -53,6 +53,9 @@ func TestLinuxPacketBuildAndPublication(t *testing.T) {
 				fmt.Fprintf(&data, "%d\n%s", len(unit), unit)
 			}
 			stage := t.TempDir()
+			if err := os.Chmod(stage, 0700); err != nil {
+				t.Fatal(err)
+			}
 			input := filepath.Join(stage, "packet.bin")
 			if err := os.WriteFile(input, data.Bytes(), 0600); err != nil {
 				t.Fatal(err)
@@ -68,6 +71,9 @@ func TestLinuxPacketBuildAndPublication(t *testing.T) {
 					t.Fatal("published image is not executable", err)
 				}
 				private := t.TempDir()
+				if err := os.Chmod(private, 0700); err != nil {
+					t.Fatal(err)
+				}
 				packetPath := filepath.Join(private, "packet.bin")
 				if err := os.WriteFile(packetPath, data.Bytes(), 0600); err != nil {
 					t.Fatal(err)
