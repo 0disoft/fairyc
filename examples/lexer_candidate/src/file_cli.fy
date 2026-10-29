@@ -1,4 +1,5 @@
 module file_cli;
+import file_frontend_cli as frontend;
 import project_test_cli as testing;
 import project_manifest_values as sc_values;
 import project_sdk_bundle as sc_sdk;
@@ -7,24 +8,16 @@ import windows_command as sc_command;
 import std::fs as sc_fs;
 import std::text as sc_text;
 import std::vec as sc_vec;
-import candidate_limits as limits;
 import public_cli_data as public;
 import project_json_string as quoted;
 import file_source as files;
 import file_tokens as tokens;
-import scanner as scanner;
-import declaration_output as declarations;
-import name_cli as names;
-import type_cli as typing;
 import module_cli as modules;
 import module_project_cli as projects;
 import project_check_cli as checking;
 import project_emit_cli as workspace_c;
 import native_cli as native;
-import hir_cli as hir;
-import mir_cli as mir;
 import c_cli as c;
-import token_output as output;
 import std::bytes as bytes;
 import std::io as io;
 import std::process as process;
@@ -92,6 +85,7 @@ pub fn i32 run() {
     let bool name_mode = bytes::equal(flag, b"--check-names-file");
     let bool declaration_mode = bytes::equal(flag, b"--declarations-file");
     if (argc != 3 || (!bytes::equal(flag, b"--tokens-file") && !declaration_mode && !name_mode && !binding_mode && !type_mode && !module_mode && !origin_mode && !program_mode && !project_mode && !hir_mode && !mir_mode && !c_mode)) { return quoted_error("unknown command ",flag,""); }
+    let source_mode=frontend::mode(flag);
     let usize length = switch(process::arg(2, bytes::view_mut(ref mut argument))) {
         case .ok(value): { value } case .err(_): { return error("error: file path limit (4095 UTF-8 bytes)\n"); }
     };
@@ -107,19 +101,7 @@ pub fn i32 run() {
         case .err(code): { return error(if (code == 4) { "error: source limit (65536 bytes)\n" }
             else if (code == 3) { "error: buffer allocation failed\n" } else { "error: input file read failed\n" }); }
     };
-    let scanner::Stream stream = switch(scanner::collect(input, false, limits::source_bytes(), 1048576, 256, 16777216)) {
-        case .ok(value): { value }
-        case .err(code): { return error(if (code == 4) { "error: lexer storage limit\n" }
-            else if (code == 2) { "error: unsupported lexer input\n" } else { "error: buffer allocation failed\n" }); }
-    };
-    if (scanner::diagnostic_count(ref stream) > 0) { return output::errors(ref stream, path); }
-    if (hir_mode) { return hir::run(stream,path); }
-    if (mir_mode) { return mir::run(stream,path); }
-    if (c_mode) { return c::run(stream,path); }
-    if (type_mode) { return typing::run(stream,path); }
-    if (name_mode || binding_mode) { return names::run(stream, path, binding_mode); }
-    if (declaration_mode) { return declarations::run(stream, path); }
-    return error("error: invalid file mode\n");
+    return frontend::run(input,path,source_mode);
 }
 
 // Pin each directory prefix without delete sharing. The SDK path APIs below

@@ -42,7 +42,17 @@ oldest observed records to satisfy count/byte limits. Publication and snapshot-c
 share a nonblocking advisory directory lock. Noncooperating writers are outside that protocol;
 stale metadata, lock contention and partial failures are reported without claiming bounds.
 Windows C substitutes, both-target Fairy emission, wrapper execution, whole candidate checks
-and vet pass. Native Linux remains unverified; CLI wiring is still open.
+and vet pass. Native Linux remains unverified; workspace CLI wiring is still open.
+
+Linux [file CLI dispatch](../architecture/candidate-linux-cli-v1.md) now connects help,
+version, targets and seven file frontend commands through an isolated Linux entry.
+Input uses the rooted Linux adapter, with a 65,536-byte bound and before/after metadata
+checks. Shared frontend dispatch retains the Windows caller. Both-target full-entry
+emission and closed Linux runtime selection pass; portable argument classification runs
+on Windows in low/optimized profiles. Full Linux execution is skipped on Windows.
+Workspace `check/build/run/test/new`, target-specific candidate C emission, native GNU
+companion and cache-profile wiring remain open; the Linux help reports that boundary.
+The source workspace checks pass with 549 sources and 6,993 MIR functions; lock refreshed.
 
 ## Scope and evidence
 

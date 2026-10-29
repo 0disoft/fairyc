@@ -17,6 +17,11 @@ pub fn i32 run(ref u8[] path) {
         case .err(code): { return error(if (code == 4) { "error: source limit (65536 bytes)\n" }
             else if (code == 3) { "error: buffer allocation failed\n" } else { "error: input file read failed\n" }); }
     };
+    return run_input(input,path);
+}
+
+@effects(console)
+pub fn i32 run_input(bytes::Buffer input,ref u8[] path) {
     let scanner::Stream stream = switch(scanner::collect(input, false, limits::source_bytes(), 1048576, 256, 16777216)) {
         case .ok(value): { value }
         case .err(code): { return error(if (code == 4) { "error: lexer storage limit\n" }

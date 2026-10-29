@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/candidatehost"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/target"
@@ -14,6 +15,8 @@ import (
 type Options struct {
 	SDKStorage  bool
 	TrapReceipt bool
+	// CandidateHost admits the closed compiler-private Linux host adapters.
+	CandidateHost bool
 }
 
 type provider struct {
@@ -70,9 +73,24 @@ func Source(id target.ID, symbols []string, options Options) (string, error) {
 		return "", err
 	}
 	if support == "" {
-		return runtimeSource, nil
+		support = runtimeSource
+	} else {
+		support += "\n" + runtimeSource
 	}
-	return support + "\n" + runtimeSource, nil
+	if options.CandidateHost && id == target.X8664LinuxGNU {
+		// LinuxSource selects declarations, not bare symbol spellings.
+		header := strings.Join(symbols, "(\n") + "("
+		host, err := candidatehost.LinuxSource(header)
+		if err != nil {
+			return "", err
+		}
+		if host != "" {
+			// GNU/POSIX feature selection must precede every libc header,
+			// including headers selected by the standard runtime components.
+			support = host + "\n" + support
+		}
+	}
+	return support, nil
 }
 
 func splitVectorRuntimeSymbols(symbols []string) ([]string, bool, error) {

@@ -37,7 +37,7 @@ func compileNativeProgram(program mir.Program, entry string, options workspaceTa
 	if unit.Target != string(options.targetID) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
 		return nativeCompilation{}, internalError(stderr)
 	}
-	support, err := nativesupport.Source(options.targetID, unit.ForeignSymbols, nativesupport.Options{SDKStorage: sdkStorage, TrapReceipt: policy.runTrapReceipt})
+	support, err := nativesupport.Source(options.targetID, unit.ForeignSymbols, nativesupport.Options{SDKStorage: sdkStorage, TrapReceipt: policy.runTrapReceipt, CandidateHost: true})
 	if err != nil {
 		return nativeCompilation{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" support linkage", err)
 	}

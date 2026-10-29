@@ -27,8 +27,9 @@ var linuxRetention string
 
 var linuxSymbols = regexp.MustCompile(`\b(fairyc_private_linux_[A-Za-z0-9_]+)\s*\(`)
 
-// LinuxSource selects the admitted private path/process/filesystem adapters. The Linux
-// candidate CLI/build bridge is not connected by these internal host slices.
+// LinuxSource selects the admitted private path/process/filesystem adapters.
+// The native support linker opts into these for the Linux candidate file CLI;
+// workspace check/build/run still require their separate host integration.
 func LinuxSource(header string) (string, error) {
 	matches := linuxSymbols.FindAllStringSubmatch(header, -1)
 	paths, process, capture, rooted, directory, retention := false, false, false, false, false, false
