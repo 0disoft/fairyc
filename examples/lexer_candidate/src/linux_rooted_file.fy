@@ -17,6 +17,8 @@ import std::text as text;
 // raw is fd+1; zero means no owned descriptor, including after consuming close.
 @effects(filesystem) pub resource Directory { u32 raw; cleanup { unsafe { discard close_handle(this.raw); }; } }
 @effects(filesystem) pub resource File { u32 raw; bool staged; cleanup { unsafe { discard close_handle(this.raw); }; } }
+// Borrowed transport for other private host modules; ownership stays with Directory.
+pub fn u32 directory_handle(ref Directory root) { return root.raw; }
 // Stages: 1 input/bound, 2 allocation, 3 directory, 4 file, 5 metadata, 6 read, 7 close, 8 native ABI.
 // 9 anonymous creation, 10 write (completed prefix), 11 sync, 12 publication.
 pub struct Problem { u32 stage; u32 os_code; usize completed; }

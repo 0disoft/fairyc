@@ -96,7 +96,8 @@ file remains named after close.
 
 The sequence does not sync the parent directory and does not establish physical power-loss
 retention. A crash or device failure can lose or change a directory entry or data after success.
-No CLI connection, directory scan, retention decision, or retention erase is implemented.
+Directory enumeration is implemented in the separate [scan adapter](candidate-linux-directory-v1.md).
+CLI connection, retention decisions and retention erase remain open.
 
 Authoritative verification is complete. Candidate check and `check --locked` pass with 544
 sources and 6954 MIR functions; all `go vet ./...`, related C adapter, process, capture, argv,
