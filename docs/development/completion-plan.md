@@ -116,7 +116,7 @@ Linux compiler-image reads, target/ABI keys, descriptor-owned storage and
 anonymous staging. Windows cache transport keeps its existing behavior. Whole-entry
 both-target emission, closed Linux support selection and Windows low/optimized
 wrapper checks pass. Linux-native cold/warm/invalidation cases remain pending;
-cache wiring for test and public C emission remain open.
+public C emission remains open.
 
 Linux [build/run cache](../architecture/candidate-linux-cache-v1.md) now connects
 the same opt-in cache flags to shared verified IR reuse and fresh C emission.
@@ -124,7 +124,18 @@ Run retains current source snapshots for trap locations on hits; native
 compilation, linking, private run staging and publication still follow the
 existing backend. Linux-native cold/warm development/release, binary-stream,
 warm trap-location and companion-failure cases are authored but require a
-Linux host. Test cache wiring and public C emission remain separate work.
+Linux host. Public C emission remains separate work.
+
+Linux [test cache](../architecture/candidate-linux-cache-v1.md) now connects
+listing, interpreter and native test execution to per-package verified unit
+reuse. The test-specific projection retains fresh semantic admission and
+whole-project linking; ordinary whole-project cache envelopes are not reused.
+All selected tests execute again. The authored Windows parser still rejects
+the new flags. Windows real-storage low-profile coverage exercises cold/warm
+failure reexecution, test-source edits, corrupt records and missing-root
+fallback. MSVC optimized integration exceeded the one-minute compiler budget
+and remains unverified. Linux-native cached development/release/reference comparison remains
+pending; target-specific public C emission is the next CLI wiring slice.
 
 ## Scope and evidence
 

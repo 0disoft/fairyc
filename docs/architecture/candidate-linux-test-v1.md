@@ -41,13 +41,18 @@ skipped on Windows. The dispatcher selects this adapter for native test input.
 production lock maintenance/verification, canonical test discovery, interpreter
 execution, listing, JSON, source anchors, exact/file/directory selection and
 root-reachable package/workspace selection. Invalid combinations retain the
-existing argument diagnostics. Cache flags remain unsupported.
+existing argument diagnostics. Linux-only `--cache-root <existing directory>`
+and `--cache-status` select the [verified unit cache](candidate-linux-cache-v1.md)
+for listing, semantic and native execution. Tests execute again on cache hits;
+native compilation and result reporting retain their existing behavior.
 
 The isolated preparation tool additionally changes the one native-executor
 import in `project_test_cli` from `native_cli` to `linux_test_cli`. It asserts the
 expected original import exactly once and never changes the authored Windows
-entry. Together with existing path/SDK/emitter choices this modifies exactly nine
-source modules. The complete prepared entry has no Windows foreign dependencies.
+entry. The authored Linux dispatcher selects the cache-enabled argument parser;
+the original Windows parser keeps its existing flags. Together with the current
+path/SDK/emitter/cache choices preparation modifies thirteen source modules.
+The complete prepared entry has no Windows foreign dependencies.
 The shared native reporter and timeout formatter take explicit target/platform
 labels; the Windows report wrapper retains its target/output bytes and the timeout
 wrapper retains its signature.

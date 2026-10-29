@@ -5,8 +5,9 @@ and optional `--cache-status`, together with each command's `--locked` and
 build/run `--release` flags. The shared option parser rejects missing roots,
 duplicates, unknown options and status without a root before workspace access.
 Caching remains opt-in; it does not create the caller's cache directory. Cache
-options for Linux `test` remain separate work. For `run`, cache flags after `--`
-belong to the program and do not select compiler cache behavior.
+options are also accepted by Linux `test`, including listing, semantic execution
+and native execution. For `run` and native `test`, cache flags after `--` belong
+to the program and do not select compiler cache behavior.
 
 ## Platform selection and admission
 
@@ -41,6 +42,31 @@ Run retains the current compilation source snapshot on cold and warm paths for
 trap locations. The native output remains a private stage image; published
 `build/<name>` contents, program argument/stream handling and exit codes retain
 their existing behavior. Cache status is emitted before collected program stderr.
+
+## Test projection and unit reuse
+
+`project_test_cache` uses the existing per-package unit cache because test
+projection uses `project_tests/copy_tests`, unlike ordinary whole-project cache
+projection. Each candidate unit is admitted against the freshly projected test
+sources, bindings, signatures and source plan. Whole-project linking and public
+interfaces are rebuilt before any newly compiled units are published. This path
+does not load or publish ordinary whole-project program envelopes.
+
+Discovery, selection, attribute checks and production lock policy still run on
+every invocation. Listing, interpreter execution and native execution share the
+unit cache for the same complete overlay. Selection does not exclude other
+overlay sources from semantic admission. A warm test reports `cache: units hit`
+or `cache: mixed`, rather than the whole-project `cache: hit`. Test results,
+native packets/images and stdin are never cached. Every selected test executes
+again; native development/release still use fresh harnesses and compilation.
+
+The shared parser's original entry keeps rejecting cache flags for the authored
+Windows CLI. Only `linux_file_cli` selects `arguments_cached`, which enables the
+new parsing mode. Missing/empty/NUL roots, duplicate cache flags and status
+without a root fail before workspace access. Status is written once to stderr
+after test processing, including a skipped status after earlier admission
+failures. JSON stdout retains its existing schema and bytes; status write failure
+returns 4. Missing/unusable cache roots fall back without creating directories.
 
 ## Filesystem policy
 
@@ -90,8 +116,20 @@ Windows substitute execution does not establish Linux execution proof.
 `TestLinuxBuildCacheArguments` executes the existing shared cache-option fixtures
 in low/optimized host profiles, covering compiler/program flag separation,
 duplicates, missing roots/status dependencies and NUL error precedence.
+`TestCandidateTestCacheWindows` uses actual Windows cache storage to exercise
+the shared test projection path in the low profile: cold/warm failure
+reexecution, listing, test-source invalidation, corrupt unit recovery, semantic
+failure and missing-root fallback. It also checks the gated parser mode and
+program flag forwarding. This does not establish native Linux cache execution.
+Its Windows probe exercises interpreter/listing and replaces only the unused
+native executor with a test-only failure result. MSVC optimized compilation
+exceeded the one-minute command budget both with and without that substitution;
+optimized full-test-cache execution remains unverified and is not added to CI.
+Linux-only CLI integration compares cached native reports with the Go reference
+in development/release profiles and reuses units across listing/semantic/native
+execution while keeping the published-image and temporary-directory checks.
 
 No public language/SDK API, database, dependency, repository hygiene rule,
 workflow job, runner or target maturity flag changes in this slice. Linux native
-execution, test cache wiring, target-specific public C emission,
+execution, target-specific public C emission,
 self-build and distribution evidence remain open. Go stays the default compiler.

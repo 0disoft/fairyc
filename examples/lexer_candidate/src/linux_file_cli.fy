@@ -10,7 +10,7 @@ import std::bytes as bytes;
 import std::io as io;
 import std::process as process;
 
-pub fn ref str help() { return "usage: lexer-candidate-linux --help | --version | targets\n       lexer-candidate-linux new <package-name> --uid <package-uid>\n       lexer-candidate-linux check [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux build [--release] [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux run [--release] [--locked] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux test [--list] [--json] [--locations] [--workspace | --package <uid>] [--dir <path> | --file <path> | --exact <identity>]... [--locked]\n       lexer-candidate-linux test --native [--release] [--stdin | --stdin-file <path>] [--timeout-seconds <1..60>] [--json --capture-output] [-- <program args>]\n       lexer-candidate-linux --tokens-file <path>\n       lexer-candidate-linux --declarations-file <path>\n       lexer-candidate-linux --check-names-file <path>\n       lexer-candidate-linux --bindings-file <path>\n       lexer-candidate-linux --check-types-file <path>\n       lexer-candidate-linux --hir-file <path>\n       lexer-candidate-linux --mir-file <path>\nNo arguments: private binary stdin protocol.\nCache options for test and C emission are not connected yet.\n"; }
+pub fn ref str help() { return "usage: lexer-candidate-linux --help | --version | targets\n       lexer-candidate-linux new <package-name> --uid <package-uid>\n       lexer-candidate-linux check [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux build [--release] [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux run [--release] [--locked] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux test [--list] [--json] [--locations] [--workspace | --package <uid>] [--dir <path> | --file <path> | --exact <identity>]... [--locked] [--cache-root <existing directory>] [--cache-status]\n       lexer-candidate-linux test --native [--release] [--stdin | --stdin-file <path>] [--timeout-seconds <1..60>] [--json --capture-output] [--cache-root <existing directory>] [--cache-status] [-- <program args>]\n       lexer-candidate-linux --tokens-file <path>\n       lexer-candidate-linux --declarations-file <path>\n       lexer-candidate-linux --check-names-file <path>\n       lexer-candidate-linux --bindings-file <path>\n       lexer-candidate-linux --check-types-file <path>\n       lexer-candidate-linux --hir-file <path>\n       lexer-candidate-linux --mir-file <path>\nNo arguments: private binary stdin protocol.\nC emission is not connected yet.\n"; }
 pub fn bool source_mode(ref u8[] flag) {
     return bytes::equal(flag,b"--tokens-file") || bytes::equal(flag,b"--declarations-file") ||
         bytes::equal(flag,b"--check-names-file") || bytes::equal(flag,b"--bindings-file") ||
@@ -67,7 +67,7 @@ fn i32 check_arguments() {
 
 @effects(filesystem,console,environment,clock) fn i32 test_arguments(){
     if(process::arg_count()==3){var u8[64] raw=[0;64];let n=switch(process::arg(2,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref raw;if(bytes::equal(value[..n],b"--help") || bytes::equal(value[..n],b"-h")){return if(io::write(help()).is_ok){0}else{4};}}
-    return testing::arguments();
+    return testing::arguments_cached();
 }
 
 @effects(filesystem,console) fn i32 new_arguments(){

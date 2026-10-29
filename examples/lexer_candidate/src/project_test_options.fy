@@ -11,7 +11,7 @@ import sha256_stream as sha;
 import native_test_result as capture;
 import native_run_control as control;
 pub struct TestFlags{bool list;bool json;bool locations;bool workspace;bool locked;bool native;bool release;bool stdin;bool capture;bool timeout;}
-pub resource TestOptions{TestFlags flags;usize timeout_ms;bytes::Buffer package;bytes::Buffer stdin_file;v::Vec<bytes::Buffer> arguments;v::Vec<bytes::Buffer> files;v::Vec<bytes::Buffer> dirs;v::Vec<bytes::Buffer> exact;cleanup{}}
+pub resource TestOptions{TestFlags flags;bool cache_status;bytes::Buffer cache_root;usize timeout_ms;bytes::Buffer package;bytes::Buffer stdin_file;v::Vec<bytes::Buffer> arguments;v::Vec<bytes::Buffer> files;v::Vec<bytes::Buffer> dirs;v::Vec<bytes::Buffer> exact;cleanup{}}
 pub resource TestOptionError{bytes::Buffer text;cleanup{}}
 pub fn bool test_append(ref mut bytes::Buffer out,ref u8[] data){return bytes::len(out)<=8388608 && data.len<=8388608-bytes::len(out) && bytes::append(out,data).is_ok;}
 pub fn bool test_text(ref mut bytes::Buffer out,ref str data){return test_append(out,text::as_bytes(data));}
@@ -23,10 +23,21 @@ pub fn bool test_add(ref mut v::Vec<bytes::Buffer> values,ref u8[] value){let p=
 pub fn bool test_contains(ref v::Vec<bytes::Buffer> values,ref u8[] value){var usize i=0;while(i<v::len<bytes::Buffer>(values)){if(bytes::equal(bytes::view(v::at<bytes::Buffer>(values,i)),value)){return true;}i+=1;}return false;}
 pub fn bool test_starts(ref u8[] value,ref u8[] prefix){return value.len>=prefix.len && bytes::equal(value[..prefix.len],prefix);}
 pub fn bool test_bool_flag(ref u8[] flag){return bytes::equal(flag,b"--list") || bytes::equal(flag,b"--json") || bytes::equal(flag,b"--locations") || bytes::equal(flag,b"--workspace") || bytes::equal(flag,b"--locked") || bytes::equal(flag,b"--native") || bytes::equal(flag,b"--release") || bytes::equal(flag,b"--stdin") || bytes::equal(flag,b"--capture-output");}
-pub fn Result<TestOptions,TestOptionError> parse_test_options(ref v::Vec<bytes::Buffer> argv){
+pub fn Result<TestOptions,TestOptionError> parse_test_options(ref v::Vec<bytes::Buffer> argv){return parse_mode(argv,false);}
+pub fn Result<TestOptions,TestOptionError> parse_test_options_cached(ref v::Vec<bytes::Buffer> argv){return parse_mode(argv,true);}
+fn Result<TestOptions,TestOptionError> parse_mode(ref v::Vec<bytes::Buffer> argv,bool cache_enabled){
+    var bytes::Buffer cache_root=bytes::empty();var bool cache_status=false;
     var TestFlags flags=TestFlags{.list=false,.json=false,.locations=false,.workspace=false,.locked=false,.native=false,.release=false,.stdin=false,.capture=false,.timeout=false};var bytes::Buffer package_name=bytes::empty();var bytes::Buffer input_file=bytes::empty();var v::Vec<bytes::Buffer> file_values=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> dir_values=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> exact_values=v::empty<bytes::Buffer>();
     var v::Vec<bytes::Buffer> seen=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> arguments=v::empty<bytes::Buffer>();var usize timeout_ms=60000;var usize i=0;var bool delimiter=false;
     while(i<v::len<bytes::Buffer>(argv)){let flag=bytes::view(v::at<bytes::Buffer>(argv,i));if(bytes::equal(flag,b"--")){delimiter=true;break;}
+        if(cache_enabled && bytes::equal(flag,b"--cache-root")){
+            if(bytes::len(ref cache_root)!=0){return test_option_error("command \"test\" received --cache-root more than once");}
+            if(i+1>=v::len<bytes::Buffer>(argv)){return test_option_error("--cache-root requires a nonempty directory path");}
+            let value=bytes::view(v::at<bytes::Buffer>(argv,i+1));if(value.len==0 || value[0]==45){return test_option_error("--cache-root requires a nonempty directory path");}
+            var usize k=0;while(k<value.len){if(value[k]==0){return test_option_error("--cache-root requires a nonempty directory path");}k+=1;}
+            if(!bytes::append(ref mut cache_root,value).is_ok){return test_option_error("internal allocation failed");}i+=2;continue;
+        }
+        if(cache_enabled && bytes::equal(flag,b"--cache-status")){if(cache_status){return test_option_error("command \"test\" received --cache-status more than once");}cache_status=true;i+=1;continue;}
         let package=bytes::equal(flag,b"--package");let file=bytes::equal(flag,b"--file");let dir=bytes::equal(flag,b"--dir");let exact=bytes::equal(flag,b"--exact");let input=bytes::equal(flag,b"--stdin-file");let timeout=bytes::equal(flag,b"--timeout-seconds");
         if(package || file || dir || exact || input || timeout){
             if(i+1>=v::len<bytes::Buffer>(argv) || test_starts(bytes::view(v::at<bytes::Buffer>(argv,i+1)),b"--")){return test_option_error(if(package){"command \"test\" requires a package UID after --package"}else if(file){"command \"test\" requires a test path after --file"}else if(dir){"command \"test\" requires a test directory after --dir"}else if(exact){"command \"test\" requires a test identity after --exact"}else if(input){"command \"test\" requires a portable workspace file after --stdin-file"}else{"command \"test\" requires canonical seconds after --timeout-seconds"});}
@@ -46,6 +57,7 @@ pub fn Result<TestOptions,TestOptionError> parse_test_options(ref v::Vec<bytes::
         if(test_contains(ref seen,flag)){return test_option_named("command \"test\" received ",flag," more than once",false);}if(!test_add(ref mut seen,flag)){return test_option_error("internal allocation failed");}
         if(bytes::equal(flag,b"--list")){flags.list=true;}else if(bytes::equal(flag,b"--json")){flags.json=true;}else if(bytes::equal(flag,b"--locations")){flags.locations=true;}else if(bytes::equal(flag,b"--workspace")){flags.workspace=true;}else if(bytes::equal(flag,b"--locked")){flags.locked=true;}else if(bytes::equal(flag,b"--native")){flags.native=true;}else if(bytes::equal(flag,b"--release")){flags.release=true;}else if(bytes::equal(flag,b"--stdin")){flags.stdin=true;}else{flags.capture=true;}i+=1;
     }
+    if(cache_status && bytes::len(ref cache_root)==0){return test_option_error("--cache-status requires --cache-root");}
     if(flags.workspace && bytes::len(ref package_name)!=0){return test_option_error("command \"test\" does not combine --workspace with --package");}
     if(v::len<bytes::Buffer>(ref file_values)!=0 && v::len<bytes::Buffer>(ref exact_values)!=0){return test_option_error("command \"test\" does not combine --file with --exact");}
     if(v::len<bytes::Buffer>(ref dir_values)!=0 && (v::len<bytes::Buffer>(ref file_values)!=0 || v::len<bytes::Buffer>(ref exact_values)!=0)){return test_option_error("command \"test\" does not combine --dir with --file or --exact");}
@@ -57,9 +69,11 @@ pub fn Result<TestOptions,TestOptionError> parse_test_options(ref v::Vec<bytes::
     if(flags.stdin && bytes::len(ref input_file)!=0){return test_option_error("command \"test\" does not combine --stdin with --stdin-file");}
     if(flags.capture && !flags.native){return test_option_error("command \"test\" requires --native when --capture-output is supplied");}
     if(flags.capture && !flags.json){return test_option_error("command \"test\" requires --json when --capture-output is supplied");}
-    if(delimiter && !flags.native){return test_option_error("command \"test\" requires --native before --");}if(delimiter){i+=1;while(i<v::len<bytes::Buffer>(argv)){if(!test_add(ref mut arguments,bytes::view(v::at<bytes::Buffer>(argv,i)))){return test_option_error("internal allocation failed");}i+=1;}}return .ok(TestOptions{.flags,.timeout_ms,.package=package_name,.stdin_file=input_file,.arguments,.files=file_values,.dirs=dir_values,.exact=exact_values});
+    if(delimiter && !flags.native){return test_option_error("command \"test\" requires --native before --");}if(delimiter){i+=1;while(i<v::len<bytes::Buffer>(argv)){if(!test_add(ref mut arguments,bytes::view(v::at<bytes::Buffer>(argv,i)))){return test_option_error("internal allocation failed");}i+=1;}}return .ok(TestOptions{.flags,.cache_status,.cache_root,.timeout_ms,.package=package_name,.stdin_file=input_file,.arguments,.files=file_values,.dirs=dir_values,.exact=exact_values});
 }
 
+pub fn bool cache_status(ref TestOptions o){return o.cache_status;}
+pub fn ref u8[] cache_root(ref TestOptions o){return bytes::view(ref o.cache_root);}
 pub fn TestFlags flags(ref TestOptions o){return o.flags;}
 pub fn ref u8[] package(ref TestOptions o){return bytes::view(ref o.package);}
 pub fn usize timeout_ms(ref TestOptions o){return o.timeout_ms;}

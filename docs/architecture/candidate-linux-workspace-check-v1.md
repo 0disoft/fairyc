@@ -8,7 +8,7 @@ Unknown or duplicate options and extra arguments return 2 before workspace acces
 The opt-in [Linux workspace cache](candidate-linux-cache-v1.md) accepts
 `--cache-root <existing directory>` and `--cache-status` through the shared parser.
 [Workspace build](candidate-linux-build-v1.md) uses a separate bootstrap companion;
-cache wiring for `test` and public C emission remain separate work.
+public C emission remains separate work.
 
 ## Platform selection
 
@@ -81,4 +81,4 @@ Build from the isolated snapshot using the [Linux CLI bootstrap procedure](candi
 then run `build/lexer-candidate-linux check [--locked]` from a client workspace. Source
 workspace `check`/`check --locked`, affected native policy tests, native support selection,
 `go vet` and diff checks are the local verification boundary. Linux native execution and
-test cache wiring remains open; Go stays the default compiler.
+target-specific public C emission remains open; Go stays the default compiler.

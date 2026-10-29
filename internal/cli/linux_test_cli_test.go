@@ -35,6 +35,9 @@ source = "src"
 `)
 	writeTestSource(t, root, "tests/nested/empty.fy", "module tests::nested::empty;\n")
 	writeTestSource(t, root, "build/client", "published sentinel")
+	if err := os.Mkdir(filepath.Join(root, "cache"), 0700); err != nil {
+		t.Fatal(err)
+	}
 	run := func(args []string, input string, want int) (string, string) {
 		t.Helper()
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -95,14 +98,25 @@ source = "src"
 	run([]string{"test", "--file", "tests/missing.fy", "--locked"}, "", 2)
 	run([]string{"test", "--release"}, "", 2)
 	run([]string{"test", "--list", "--native"}, "", 2)
-	run([]string{"test", "--native", "--cache-root", "ignored"}, "", 2)
+	run([]string{"test", "--native", "--cache-root"}, "", 2)
+	run([]string{"test", "--cache-status"}, "", 2)
+	run([]string{"test", "--cache-root", "cache", "--cache-status", "--cache-status"}, "", 2)
+	_, status := run([]string{"test", "--list", "--cache-root", "cache", "--cache-status"}, "", 0)
+	if status != "cache: cold stored\n" {
+		t.Fatal(status)
+	}
+	_, status = run([]string{"test", "--json", "--locked", "--cache-root", "cache", "--cache-status"}, "", 5)
+	if status != "cache: units hit\n" {
+		t.Fatal(status)
+	}
 	if err := os.WriteFile(companion, backend, 0700); err != nil {
 		t.Fatal(err)
 	}
 	for _, args := range [][]string{{"test", "--native", "--json", "--locked"}, {"test", "--native", "--release", "--json", "--locked"}} {
-		out, err := run(args, "", 5)
+		cachedArgs := append(append([]string{}, args...), "--cache-root", "cache", "--cache-status")
+		out, err := run(cachedArgs, "", 5)
 		code, refOut, refErr := runForTest(args, root)
-		if code != 5 || out != refOut || err != refErr {
+		if code != 5 || out != refOut || err != refErr+"cache: units hit\n" {
 			t.Fatalf("native reference %v: %q %q vs (%d,%q,%q)", args, out, err, code, refOut, refErr)
 		}
 	}

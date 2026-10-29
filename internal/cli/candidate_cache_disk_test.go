@@ -38,6 +38,28 @@ func TestCandidateCacheDiskWindows(t *testing.T) {
 }
 `
 	writeTestSource(t, root, "src/main.fy", client)
+	unit, support, tc := windowsCandidateProbe(t, root)
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			artifact, err := tc.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: unit.Source, RuntimeSource: support})
+			if err != nil {
+				t.Fatal(err)
+			}
+			data := t.TempDir()
+			manifest := filepath.Join(data, "cache-root.txt")
+			if err := os.WriteFile(manifest, []byte(filepath.ToSlash(data)), 0600); err != nil {
+				t.Fatal(err)
+			}
+			result, err := tc.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: []string{manifest}, Timeout: 30 * time.Second, RejectOutput: true})
+			if err != nil || result.ExitCode != 0 || result.TrapCategory != "" {
+				t.Fatalf("cache: %+v %v", result, err)
+			}
+		})
+	}
+}
+
+func windowsCandidateProbe(t *testing.T, root string) (cbackend.Unit, string, cdriver.NativeToolchain) {
+	t.Helper()
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
 		t.Fatal(err)
@@ -69,21 +91,5 @@ func TestCandidateCacheDiskWindows(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		t.Run(profile.Name, func(t *testing.T) {
-			artifact, err := tc.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: unit.Source, RuntimeSource: support + "\n" + host})
-			if err != nil {
-				t.Fatal(err)
-			}
-			data := t.TempDir()
-			manifest := filepath.Join(data, "cache-root.txt")
-			if err := os.WriteFile(manifest, []byte(filepath.ToSlash(data)), 0600); err != nil {
-				t.Fatal(err)
-			}
-			result, err := tc.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: []string{manifest}, Timeout: 30 * time.Second, RejectOutput: true})
-			if err != nil || result.ExitCode != 0 || result.TrapCategory != "" {
-				t.Fatalf("cache: %+v %v", result, err)
-			}
-		})
-	}
+	return unit, support + "\n" + host, tc
 }

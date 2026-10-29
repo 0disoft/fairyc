@@ -26,6 +26,8 @@ import project_check_cli as checking;
 import project_test_options as test_options;
 import native_cli as native;
 import module_unit_interpreter as interpreter;
+import project_test_cache as cache;
+import project_compiler_cached as cached;
 struct TestAttributeError{usize start;usize end;}
 
 @effects(console) fn i32 failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
@@ -79,6 +81,11 @@ fn i32 test_declarations(ref syntax::Parsed parsed,ref test_options::TestOptions
 
 @effects(filesystem,console,environment,clock)
 pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
+    var observed=cached::empty();let result=evaluate_test_list(root,options,ref mut observed);
+    if(test_options::cache_status(options) && !io::write_stderr(cache::status(observed.path,observed.stored)).is_ok){return 4;}return result;
+}
+@effects(filesystem,console,environment,clock)
+fn i32 evaluate_test_list(ref u8[] root,ref test_options::TestOptions options,ref mut cached::Observation observed){
     var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
     let production=switch(loader::load(root,test_options::flags(options).locked,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(e):{return test_error(check::load_failure(e));}};
     let lock=loader::state(ref production);let selected=switch(test_select_packages(ref production,options)){case .ok(p):{p}case .err(code):{return code;}};
@@ -102,7 +109,8 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
     var v::Vec<bytes::Buffer> identities=v::empty<bytes::Buffer>();var usize exact_i=0;while(exact_i<v::len<test_options::TestIdentity>(ref tests)){if(!test_options::test_add(ref mut identities,test_options::test_name(v::at<test_options::TestIdentity>(ref tests,exact_i)))){return 4;}exact_i+=1;}
     let missing_exact=test_missing_exact(test_options::exact(options),ref identities);if(missing_exact!=0){return missing_exact;}
     var usize source_work=0;var usize link_work=0;var v::Vec<signatures::Reports> reports=v::empty<signatures::Reports>();
-    let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
+    let compiled=if(test_options::cache_root(options).len==0){compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)}else{cache::build(test_options::cache_root(options),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)};
+    let complete=switch(compiled){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
     if(test_options::flags(options).stdin && v::len<usize>(ref chosen)!=1){return test_invocation(b"command \"test\" requires exactly one selected test when --stdin is supplied");}
     if(!test_options::flags(options).list && !test_options::flags(options).native){return interpreter::tests(ref complete,options,ref tests,ref chosen,ref projected,locks::state_code(lock));}
     if(!test_options::flags(options).list){return native::tests(complete,ref projected,options,ref tests,ref chosen,root,locks::state_code(lock));}discard complete;
@@ -113,4 +121,8 @@ pub fn i32 run_test_list(ref u8[] root,ref test_options::TestOptions options){
 @effects(filesystem,console,environment,clock)
 pub fn i32 run(ref u8[] root,ref v::Vec<bytes::Buffer> argv){let selected=switch(test_options::parse_test_options(argv)){case .ok(p):{p}case .err(e):{return test_invocation(test_options::error_text(ref e));}};return run_test_list(root,ref selected);}
 @effects(filesystem,console,environment,clock)
-pub fn i32 arguments(){var v::Vec<bytes::Buffer> argv=v::empty<bytes::Buffer>();var usize i=2;while(i<process::arg_count()){var bytes::Buffer data=bytes::empty();if(!bytes::resize_zeroed(ref mut data,4096).is_ok){return 4;}let n=switch(process::arg(i,bytes::view_mut(ref mut data))){case .ok(p):{p}case .err(_):{return failure("fairyc: argument exceeds the supported byte limit\n",2);}};if(!test_options::test_add(ref mut argv,bytes::view(ref data)[..n])){return 4;}i+=1;}return run(b".",ref argv);}
+pub fn i32 arguments(){return arguments_mode(false);}
+@effects(filesystem,console,environment,clock)
+pub fn i32 arguments_cached(){return arguments_mode(true);}
+@effects(filesystem,console,environment,clock)
+fn i32 arguments_mode(bool enable_cache){var v::Vec<bytes::Buffer> argv=v::empty<bytes::Buffer>();var usize i=2;while(i<process::arg_count()){var bytes::Buffer data=bytes::empty();if(!bytes::resize_zeroed(ref mut data,4096).is_ok){return 4;}let n=switch(process::arg(i,bytes::view_mut(ref mut data))){case .ok(p):{p}case .err(_):{return failure("fairyc: argument exceeds the supported byte limit\n",2);}};if(!test_options::test_add(ref mut argv,bytes::view(ref data)[..n])){return 4;}i+=1;}if(!enable_cache){return run(b".",ref argv);}let selected=switch(test_options::parse_test_options_cached(ref argv)){case .ok(p):{p}case .err(e):{return test_invocation(test_options::error_text(ref e));}};return run_test_list(b".",ref selected);}
