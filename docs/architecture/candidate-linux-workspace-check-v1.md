@@ -5,7 +5,8 @@ existing `project_check_cli.run` path. It performs the same manifest/dependency/
 SDK authentication, lock policy, visibility, semantic/IR processing and report rendering
 as the original candidate. It does not spawn the Go compiler or another frontend.
 Unknown or duplicate options, extra arguments and cache options return 2 before workspace
-access. `build/run/test/new` and candidate C emission remain separate implementation work.
+access. [Workspace build](candidate-linux-build-v1.md) now uses a separate bootstrap
+companion; `run/test/new` and public C emission remain separate implementation work.
 
 ## Platform selection
 
@@ -78,4 +79,4 @@ Build from the isolated snapshot using the [Linux CLI bootstrap procedure](candi
 then run `build/lexer-candidate-linux check [--locked]` from a client workspace. Source
 workspace `check`/`check --locked`, affected native policy tests, native support selection,
 `go vet` and diff checks are the local verification boundary. Linux native execution and
-workspace `build/run`/cache integration remain open; Go stays the default compiler.
+workspace `run`/cache integration remain open; Go stays the default compiler.

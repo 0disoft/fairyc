@@ -21,6 +21,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	root := t.TempDir()
 	copyLexerFileCLIExample(t, root)
 	selectLinuxWorkspaceReaders(t, root)
+	selectLinuxCEmission(t, root)
 	entryPath := filepath.Join(root, "src", "main.fy")
 	entry, err := os.ReadFile(entryPath)
 	if err != nil {
@@ -29,18 +30,24 @@ func TestLinuxFileCLI(t *testing.T) {
 	if strings.Count(string(entry), "import file_cli as file_cli;") != 1 {
 		t.Fatal("candidate dispatcher import changed")
 	}
-	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;", 1)+`
+	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;", 1)+`
 fn i32 cli_probe() {
     assert(file_cli::command(b"--help",2)==1 && file_cli::command(b"help",2)==1 && file_cli::command(b"-h",2)==1);
     assert(file_cli::command(b"--version",2)==2 && file_cli::command(b"targets",2)==3);
     assert(file_cli::command(b"--version",3)==0 && file_cli::command(b"targets",3)==0);
     assert(file_cli::command(b"--tokens-file",3)==4 && file_cli::command(b"--mir-file",3)==4);
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
-    assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==5 && file_cli::command(b"run",4)==5);
+    assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==5);
     assert(file_cli::command(b"test",2)==5 && file_cli::command(b"new",3)==5);
     assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
     assert(file_cli::source_mode(b"--bindings-file") && file_cli::source_mode(b"--check-types-file") && file_cli::source_mode(b"--hir-file"));
+    assert(bytes::equal(linux_wire::wire_name(6),b"fy_std_file_result_v0") && linux_wire::field_type(6,1)==1);
+    assert(bytes::equal(linux_wire::field_name(6,1),b"error_number") && bytes::equal(linux_wire::field_name(7,1),b"os_code"));
+    let output=switch(linux_build::output(b"client")){case .ok(p):{p}case .err(_):{assert(false);return 1;}};
+    assert(bytes::equal(bytes::view(ref output),b"build/client"));
+    let driver=switch(linux_build::companion(b"/opt/bin/fairyc")){case .ok(p):{p}case .err(_):{assert(false);return 1;}};
+    assert(bytes::equal(bytes::view(ref driver),b"/opt/bin/fairyc-candidate-linux-build"));
     return 0;
 }
 `)
@@ -118,6 +125,7 @@ fn i32 cli_probe() {
 	if err := os.Symlink("input.fy", filepath.Join(root, "link.fy")); err != nil {
 		t.Fatal(err)
 	}
+	backend := buildLinuxCompanion(t)
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
 			artifact, err := toolchain.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: linux.Source, RuntimeSource: support})
@@ -144,7 +152,9 @@ fn i32 cli_probe() {
 				{[]string{"check", "--help"}, 0, "check [--locked]"},
 				{[]string{"check", "--cache-root", "ignored"}, 2, "accepts only optional --locked"},
 				{[]string{"check", "--unknown"}, 2, "accepts only optional --locked"},
-				{[]string{"build"}, 3, "Linux workspace CLI is not connected"},
+				{[]string{"build", "--help"}, 0, "build [--release] [--locked]"},
+				{[]string{"build", "--release", "--release"}, 2, ""},
+				{[]string{"build", "--cache-root", "ignored"}, 2, "accepts only optional --release and --locked"},
 				{[]string{"run"}, 3, "Linux workspace CLI is not connected"},
 			}
 			for _, tc := range cases {
@@ -154,7 +164,26 @@ fn i32 cli_probe() {
 				}
 			}
 			checkLinuxWorkspace(t, toolchain, artifact)
+			checkLinuxBuild(t, artifact, backend)
 		})
+	}
+}
+
+func selectLinuxCEmission(t *testing.T, root string) {
+	t.Helper()
+	for name, change := range map[string][2]string{
+		"module_unit_c_sdk":  {"import module_unit_c_file as file_storage;", "import linux_c_file as file_storage;"},
+		"module_unit_c_emit": {`#define FY_CANDIDATE_PROJECT_HEADER_V1\n`, `#define FY_CANDIDATE_PROJECT_HEADER_V1\n/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\n`},
+	} {
+		path := filepath.Join(root, "src", name+".fy")
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Count(string(data), change[0]) != 1 {
+			t.Fatalf("Linux emitter boundary changed: %s", name)
+		}
+		writeTestSource(t, root, "src/"+name+".fy", strings.Replace(string(data), change[0], change[1], 1))
 	}
 }
 

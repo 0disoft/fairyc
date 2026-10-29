@@ -10,8 +10,9 @@ Windows entry and no-argument binary stdin protocol remain available.
 - `--tokens-file`, `--declarations-file`, `--check-names-file`, `--bindings-file`,
   `--check-types-file`, `--hir-file`, and `--mir-file` take exactly one source path.
 - `check`, `check --locked`, and `check --help` use the shared workspace checker. Cache options remain unsupported.
+- `build [--release] [--locked]` and build help use the [Linux bootstrap backend](candidate-linux-build-v1.md).
 - Unknown commands or invalid arity for connected commands return 2. Unconnected workspace commands
-  `build`, `run`, `test`, and `new` return 3 with an explicit capability diagnostic.
+  `run`, `test`, and `new` return 3 with an explicit capability diagnostic.
   Dispatcher output failures return 4; shared frontend exit codes remain unchanged.
   The help lists this boundary; the shared target registry is
   target metadata, not a claim that this dispatcher can build either target.
@@ -74,7 +75,7 @@ selection pass; portable dispatch execution passes with MSVC low/optimized. Full
 execution is skipped, not passed. The owning source workspace passes `check` and
 `check --locked`; its lock is refreshed. No hosted runner or distribution is changed.
 
-Linux [workspace check](candidate-linux-workspace-check-v1.md) is now connected through
-shared workspace readers and a private Linux filesystem facade. Native workspace build/run
-still need GNU runtime/toolchain/publication and cache-profile integration. Linux execution
-remains unverified; this does not promote the candidate over the Go bootstrap.
+Linux [workspace check](candidate-linux-workspace-check-v1.md) and
+[workspace build](candidate-linux-build-v1.md) share frontend logic and private Linux
+adapters. Build requires the matching Go bootstrap backend companion. Workspace run/cache
+integration and actual Linux execution remain separate; Go stays the default compiler.

@@ -37,6 +37,21 @@ def select_workspace_io(output):
     path.write_text(source, encoding='utf-8', newline='\n')
 
 
+def select_linux_emission(output):
+    path = output / 'src/module_unit_c_sdk.fy'
+    source = path.read_text(encoding='utf-8')
+    old = 'import module_unit_c_file as file_storage;'
+    if source.count(old) != 1:
+        raise ValueError('SDK file wire selection changed')
+    path.write_text(source.replace(old, 'import linux_c_file as file_storage;'), encoding='utf-8', newline='\n')
+    path = output / 'src/module_unit_c_emit.fy'
+    source = path.read_text(encoding='utf-8')
+    old = '#define FY_CANDIDATE_PROJECT_HEADER_V1\\n'
+    if source.count(old) != 1:
+        raise ValueError('candidate project header marker changed')
+    path.write_text(source.replace(old, old+'/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\\n'), encoding='utf-8', newline='\n')
+
+
 def prepare(output):
     output = output.resolve()
     if not output.is_relative_to((ROOT / '.cache').resolve()):
@@ -53,6 +68,7 @@ def prepare(output):
     main.write_text(source.replace(old, 'import linux_file_cli as file_cli;'),
                     encoding='utf-8', newline='\n')
     select_workspace_io(output)
+    select_linux_emission(output)
     return output
 
 

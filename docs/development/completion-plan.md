@@ -62,7 +62,18 @@ The prepared workspace and ordinary source workspace check successfully. Full Li
 both-target emission has no Windows foreign symbols; closed Linux support selection and
 Windows low/optimized facade substitutes pass. The ordinary source workspace passes both
 check modes with 550 sources and 7,025 MIR functions; lock refreshed. Linux-native full CLI/reference comparisons
-are authored but skipped on Windows. Workspace build/run and cache wiring remain open.
+are authored but skipped on Windows. Workspace run and cache wiring remain open.
+
+Linux [workspace build](../architecture/candidate-linux-build-v1.md) now connects
+`build [--release] [--locked]` to shared C emission and a Go bootstrap GNU companion.
+The prepared source selects Linux File wire tags/signed errno transport and a target
+marker. The backend compiles separate objects, inspects ELF64 and atomically publishes
+an executable without `.exe`. Private staging is bounded and descriptor-relative;
+cleanup follows no symlinks. Both-target entry emission, Linux support selection and
+Windows low/optimized dispatch/wire/scratch substitutes pass. Native GNU builds and
+CLI execution are skipped on Windows. Run/cache wiring, a Fairy-authored GNU backend
+and distribution/self-host evidence remain open; Go stays the default.
+
 
 
 ## Scope and evidence

@@ -29,7 +29,7 @@ fn ref u8[] wire_name(usize record){if(file_storage::fields(record)!=0){return f
 fn usize record_id(ref u8[] name,usize sdk_id){if(sdk_id==3){var usize record=6;while(record<=14){if(file_storage::fields(record)!=0 && bytes::equal(name,source_name(record))){return record;}record+=1;}return 0;}var usize i=1;while(i<=5){if(sdk_id==if(i==1){6}else if(i<=3){7}else{4} && bytes::equal(name,source_name(i))){return i;}i+=1;}return 0;}
 fn usize field_count(usize record){return if(record<=5){2}else{file_storage::fields(record)};}
 fn ref u8[] field_name(usize record,usize index){if(record>=6){return file_storage::field_name(record,index);}let pool=b"status\0needed\0allocation_status\0data\0length\0written\0read\0";let usize at=if(record==3){if(index==0){4}else{5}}else if(index==0){1}else if(record==1){2}else if(record==2){3}else if(record==4){6}else{7};return slot(pool,at,7);}
-fn u32 field_type(usize record,usize index){if(record>=6){return file_rules::field_type(record,index);}return if(record==3 && index==0){pointers::make(3,false)}else if(index==0 || record==2){4}else{5};}
+fn u32 field_type(usize record,usize index){if(record>=6){return file_storage::field_type(record,index);}return if(record==3 && index==0){pointers::make(3,false)}else if(index==0 || record==2){4}else{5};}
 pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p.rules));return *v::at<usize>(ref p.rules,callable);}
 pub fn usize arena_type(ref Plan p){return p.arena;}
 pub fn usize byte_equal_frame(ref Plan p){return p.byte_equal;}

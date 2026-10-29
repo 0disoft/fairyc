@@ -28,6 +28,9 @@ var linuxRetention string
 //go:embed linux_workspace.c
 var linuxWorkspace string
 
+//go:embed linux_build_scratch.c
+var linuxBuildScratch string
+
 var linuxSymbols = regexp.MustCompile(`\b(fairyc_private_linux_[A-Za-z0-9_]+)\s*\(`)
 
 // LinuxSource selects the admitted private path/process/filesystem adapters.
@@ -37,8 +40,11 @@ func LinuxSource(header string) (string, error) {
 	matches := linuxSymbols.FindAllStringSubmatch(header, -1)
 	paths, process, capture, rooted, directory, retention := false, false, false, false, false, false
 	workspace := false
+	buildScratch := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_build_scratch_open_v1", "fairyc_private_linux_build_scratch_drop_v1":
+			rooted, buildScratch = true, true
 		case "fairyc_private_linux_workspace_path_kind_v1":
 			rooted, workspace = true, true
 		case "fairyc_private_linux_host_path_v1":
@@ -94,6 +100,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if workspace {
 		source += "\n" + linuxWorkspace
+	}
+	if buildScratch {
+		source += "\n" + linuxBuildScratch
 	}
 	return source, nil
 }
