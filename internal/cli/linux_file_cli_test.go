@@ -280,7 +280,7 @@ source = "src"
 	}
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
 	run([]string{"check", "--locked"}, 7)
-	if text := run([]string{"check"}, 3); !strings.Contains(text, "E1006") {
+	if text := run([]string{"check"}, 3); !strings.Contains(text, "E1009") {
 		t.Fatal(text)
 	}
 	writeTestSource(t, root, "src/main.fy", "module main; import std::bytes as bytes; fn i32 main(){return 0;}\n")

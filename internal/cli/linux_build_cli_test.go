@@ -126,7 +126,7 @@ import std::fs as fs;
 	run([]string{"build", "--cache-status"}, 2)
 	run([]string{"build", "--cache-root", "cache", "--cache-status", "--cache-status"}, 2)
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
-	if data := run([]string{"build", "--cache-root", "cache", "--cache-status"}, 3); !strings.Contains(data, "cache: cold uncached\n") || !strings.Contains(data, "E1006") {
+	if data := run([]string{"build", "--cache-root", "cache", "--cache-status"}, 3); !strings.Contains(data, "cache: cold uncached\n") || !strings.Contains(data, "E1009") {
 		t.Fatal(data)
 	}
 	writeTestSource(t, root, "src/main.fy", source)
