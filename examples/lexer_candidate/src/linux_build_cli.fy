@@ -8,6 +8,8 @@ import linux_host_paths as host;
 import linux_build_scratch as scratch;
 import linux_capture as capture;
 import linux_run_cli as running;
+import project_compiler_cached as cached;
+import project_compiler_cache_path as cache_path;
 import std::bytes as bytes;
 import std::vec as v;
 import std::io as io;
@@ -25,8 +27,10 @@ pub fn Result<bytes::Buffer,u32> output_for(bool execute,ref u8[] name){if(!exec
 }
 @effects(filesystem,console,environment,clock) pub fn i32 run(bool execute){
     let selected=switch(options::from_process(execute)){case .ok(p):{p}case .err(e):{var bytes::Buffer message=bytes::empty();if(!options::diagnostic(execute,e,ref mut message)){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){options::exit_code(e)}else{4};}};
-    if(options::cache_root(ref selected).len!=0 || options::cache_status(ref selected)){return failure(if(execute){"fairyc: Linux run accepts only optional --release and --locked before --\n"}else{"fairyc: Linux build accepts only optional --release and --locked\n"},2);}
-    let plan=switch(emit::evaluate_run(b".",options::locked(ref selected),execute)){case .ok(p):{p}case .err(e):{var bytes::Buffer message=bytes::empty();if(!diagnostics::error(ref e,ref mut message)){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){diagnostics::exit_code(ref e)}else{4};}};
+    var observed=cached::empty();
+    let evaluated=if(options::cache_root(ref selected).len==0){emit::evaluate_run(b".",options::locked(ref selected),execute)}else{emit::evaluate_cached_run(b".",options::locked(ref selected),options::cache_root(ref selected),cache_path::command_limits(),ref mut observed,execute)};
+    if(options::cache_status(ref selected)){let ref str text=if(observed.path==2){"cache: hit\n"}else if(observed.path==3){"cache: mixed\n"}else if(observed.path==4){"cache: units hit\n"}else if(observed.path==1 && observed.stored){"cache: cold stored\n"}else if(observed.path==1){"cache: cold uncached\n"}else{"cache: skipped\n"};if(!io::write_stderr(text).is_ok){discard evaluated;return 4;}}
+    let plan=switch(evaluated){case .ok(p):{p}case .err(e):{var bytes::Buffer message=bytes::empty();if(!diagnostics::error(ref e,ref mut message)){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){diagnostics::exit_code(ref e)}else{4};}};
     let root=switch(host::current()){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: current directory query failed\n",6);}};
     let image=switch(host::executable()){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: executable path query failed\n",6);}};
     let driver=switch(companion(bytes::view(ref image))){case .ok(p):{p}case .err(_):{return failure("fairyc: build failed: companion path query failed\n",6);}};

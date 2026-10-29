@@ -31,6 +31,9 @@ source = "src"
 `)
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return 0;}\n")
 	writeTestSource(t, root, "build/client", "previous published image")
+	if err := os.Mkdir(filepath.Join(root, "cache"), 0700); err != nil {
+		t.Fatal(err)
+	}
 	run := func(args []string, want int) (string, string) {
 		t.Helper()
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
@@ -65,10 +68,10 @@ source = "src"
 		return stdout.String(), stderr.String()
 	}
 	run([]string{"run", "--locked"}, 7)
-	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
+	for i, args := range [][]string{{"run", "--cache-root", "cache", "--cache-status"}, {"run", "--release", "--locked", "--cache-root", "cache", "--cache-status"}} {
 		out, err := run(args, 0)
-		if out != "" || err != "" {
-			t.Fatalf("silent run: %q %q", out, err)
+		if out != "" || err != []string{"cache: cold stored\n", "cache: hit\n"}[i] {
+			t.Fatalf("silent cached run: %q %q", out, err)
 		}
 	}
 	for _, test := range []struct {
@@ -86,7 +89,7 @@ import std::io as io;
 import std::process as process;
 import std::fs as fs;
 @effects(console,environment,filesystem) fn i32 main(){
- if(process::arg_count()!=4){return 10;}
+ if(process::arg_count()!=6){return 10;}
  var u8[32] raw=[0;32];let n=switch(process::arg(1,ref mut raw)){case .ok(p):{p}case .err(_):{return 11;}};
  if(n!=0){return 12;}
  let m=switch(process::arg(2,ref mut raw)){case .ok(p):{p}case .err(_):{return 13;}};
@@ -97,27 +100,31 @@ import std::fs as fs;
 }
 `)
 	writeTestSource(t, root, "input.txt", "workspace cwd")
-	for _, profile := range [][]string{{"run", "--", "", "a b", "--release"}, {"run", "--release", "--locked", "--", "", "a b", "--release"}} {
+	for i, profile := range [][]string{{"run", "--cache-root", "cache", "--cache-status", "--", "", "a b", "--release", "--cache-root", "--cache-status"}, {"run", "--release", "--locked", "--cache-root", "cache", "--cache-status", "--", "", "a b", "--release", "--cache-root", "--cache-status"}} {
 		// The first call creates the lock for this exact SDK/source closure.
 		out, err := run(profile, 0)
-		if out != "a b\x00\xff" || err != "err\x00\xff" {
+		if out != "a b\x00\xff" || err != []string{"cache: cold stored\n", "cache: hit\n"}[i]+"err\x00\xff" {
 			t.Fatalf("run streams/args: %q %q", out, err)
 		}
 	}
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){assert(false);return 0;}\n")
-	out, err := run([]string{"run"}, 5)
-	if out != "" || !strings.Contains(err, "trap: assertion-failed\n  at src/main.fy:1:") {
-		t.Fatalf("trap receipt/location: %q %q", out, err)
+	for i, args := range [][]string{{"run", "--cache-root", "cache", "--cache-status"}, {"run", "--locked", "--cache-root", "cache", "--cache-status"}} {
+		out, err := run(args, 5)
+		if out != "" || !strings.HasPrefix(err, []string{"cache: cold stored\n", "cache: hit\n"}[i]) || !strings.Contains(err, "trap: assertion-failed\n  at src/main.fy:1:") {
+			t.Fatalf("cached trap receipt/location: %q %q", out, err)
+		}
 	}
 	writeTestSource(t, root, "src/main.fy", `module main; import std::io as io;
 @effects(console) fn i32 main(){var usize i=0;while(i<65537){if(!io::write("x").is_ok){return 1;}i+=1;}return 0;}
 `)
-	out, err = run([]string{"run"}, 6)
+	out, err := run([]string{"run"}, 6)
 	if len(out) != 65536 || !strings.Contains(err, "program output exceeds 65536 bytes per stream") {
 		t.Fatalf("run output limit: bytes=%d %q", len(out), err)
 	}
 	run([]string{"run", "--release", "--release"}, 2)
-	run([]string{"run", "--cache-root", "ignored"}, 2)
+	run([]string{"run", "--cache-root"}, 2)
+	run([]string{"run", "--cache-status"}, 2)
+	run([]string{"run", "--cache-root", "cache", "--cache-root", "cache"}, 2)
 	run([]string{"run", "program-arg-without-separator"}, 2)
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
 	run([]string{"run"}, 3)
@@ -125,5 +132,11 @@ import std::fs as fs;
 	if err := os.Remove(companion); err != nil {
 		t.Fatal(err)
 	}
-	run([]string{"run"}, 6)
+	_, detail := run([]string{"run", "--cache-root", "absent-cache", "--cache-status"}, 6)
+	if !strings.HasPrefix(detail, "cache: cold uncached\n") {
+		t.Fatal(detail)
+	}
+	if _, err := os.Stat(filepath.Join(root, "absent-cache")); !os.IsNotExist(err) {
+		t.Fatal("cache directory created", err)
+	}
 }

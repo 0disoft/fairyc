@@ -11,6 +11,12 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
 
+func TestLinuxBuildCacheArguments(t *testing.T) {
+	runLinuxCandidateFixture(t, []string{"native_cli_options"}, "native_cli_options", `
+fn i32 main(){admits_explicit_cache_flags_and_keeps_program_flags_after_delimiter();rejects_invalid_cache_configuration_with_existing_nul_precedence();return 0;}
+`, "")
+}
+
 func selectLinuxCache(t *testing.T, root string) {
 	t.Helper()
 	for name, changes := range map[string][][2]string{

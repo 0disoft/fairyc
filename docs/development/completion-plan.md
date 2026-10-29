@@ -116,7 +116,15 @@ Linux compiler-image reads, target/ABI keys, descriptor-owned storage and
 anonymous staging. Windows cache transport keeps its existing behavior. Whole-entry
 both-target emission, closed Linux support selection and Windows low/optimized
 wrapper checks pass. Linux-native cold/warm/invalidation cases remain pending;
-cache wiring for build/run/test and public C emission remain open.
+cache wiring for test and public C emission remain open.
+
+Linux [build/run cache](../architecture/candidate-linux-cache-v1.md) now connects
+the same opt-in cache flags to shared verified IR reuse and fresh C emission.
+Run retains current source snapshots for trap locations on hits; native
+compilation, linking, private run staging and publication still follow the
+existing backend. Linux-native cold/warm development/release, binary-stream,
+warm trap-location and companion-failure cases are authored but require a
+Linux host. Test cache wiring and public C emission remain separate work.
 
 ## Scope and evidence
 

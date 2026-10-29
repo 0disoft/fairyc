@@ -2,15 +2,18 @@
 
 `linux_file_cli` connects `run [--release] [--locked] [-- <program args>]`.
 The shared native option parser owns duplicate flags, the argument separator,
-UTF-8 argument transport and NUL rejection. Cache options remain unsupported.
+UTF-8 argument transport and NUL rejection. Optional `--cache-root <existing directory>`
+and `--cache-status` select the [verified IR cache](candidate-linux-cache-v1.md)
+before `--`; all arguments after it belong to the program.
 Run help is available without loading a workspace. This is the private Linux
 candidate path; the reference compiler's default host policy is unchanged.
 
 ## Compilation and ownership
 
 `linux_build_cli.run(true)` uses the same authenticated workspace load, entry,
-lock and C packet as build. `project_emit.evaluate_run` retains the compilation
-snapshot for trap locations. Only the sibling `fairyc-candidate-linux-build`
+lock and C packet as build. Ordinary and cached `project_emit` evaluation retain
+the current compilation snapshot for trap locations, including cache hits.
+Only the sibling `fairyc-candidate-linux-build`
 companion is invoked; no shell, PATH search or Go frontend fallback is used.
 The companion's `--run-trap-control` mode selects the existing Linux trap writer
 and restricts publication to the private stage's `program` leaf. It retains the
@@ -73,6 +76,9 @@ CLI cases cover arguments, binary streams, workspace cwd, low-eight-bit exits,
 trap source locations, locked loads, invalid flags, frontend/companion failure,
 private TMPDIR cleanup and preservation of a prior published image. They are
 skipped on the Windows development host; no Linux-native success is claimed.
+Cached cases also cover cold/warm development-to-release reuse, binary stderr
+after the requested cache status, cache-looking program arguments, warm trap
+locations and uncached fallback when the selected directory is missing.
 Distribution and Linux self-host evidence remain separate. Go stays the default.
 
 Native [workspace tests](candidate-linux-test-v1.md) reuse the run collector and

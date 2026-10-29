@@ -12,8 +12,8 @@ Windows entry and no-argument binary stdin protocol remain available.
 - `check`, `check --locked`, and `check --help` use the shared workspace checker.
   `--cache-root <existing directory>` and `--cache-status` select the
   [Linux workspace cache](candidate-linux-cache-v1.md).
-- `build [--release] [--locked]` and build help use the [Linux bootstrap backend](candidate-linux-build-v1.md).
-- `run [--release] [--locked] [-- <program args>]` uses the [Linux run path](candidate-linux-run-v1.md).
+- `build [--release] [--locked]` and build help use the [Linux bootstrap backend](candidate-linux-build-v1.md), with optional `--cache-root <existing directory>` and `--cache-status`.
+- `run [--release] [--locked] [-- <program args>]` uses the [Linux run path](candidate-linux-run-v1.md), with the same optional cache flags before `--`.
 - `test` reuses shared discovery, listing and interpreter execution; `--native` uses the [Linux test path](candidate-linux-test-v1.md), including stdin modes and JSON capture.
 - `new <package-name> --uid <package-uid>` uses the [Linux starter path](candidate-linux-new-v1.md).
 - Unknown commands or invalid arity for connected commands return 2.

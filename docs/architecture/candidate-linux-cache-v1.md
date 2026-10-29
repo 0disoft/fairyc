@@ -1,10 +1,12 @@
 # Private Linux candidate workspace cache v1
 
-The Linux dispatcher accepts `check [--locked] --cache-root <existing directory>`
-and optional `--cache-status`. The shared option parser rejects missing roots,
+The Linux dispatcher accepts `check/build/run --cache-root <existing directory>`
+and optional `--cache-status`, together with each command's `--locked` and
+build/run `--release` flags. The shared option parser rejects missing roots,
 duplicates, unknown options and status without a root before workspace access.
 Caching remains opt-in; it does not create the caller's cache directory. Cache
-options for Linux `build/run/test` remain separate work.
+options for Linux `test` remain separate work. For `run`, cache flags after `--`
+belong to the program and do not select compiler cache behavior.
 
 ## Platform selection and admission
 
@@ -26,6 +28,19 @@ cold compilation fallback remain shared. No cached native object is reused.
 Storage/initialization failures are disposable misses; invalid source and lock
 failures retain their diagnostics and exit codes. `--cache-status` writes the
 existing hit/mixed/units-hit/cold-stored/cold-uncached/skipped status to stderr.
+
+`linux_build_cli` selects `project_emit.evaluate_cached_run` when an explicit
+cache root is present, and the ordinary evaluation path otherwise. Both paths
+finish with the same entry selection, fresh C packet emission and native
+companion invocation. Development and release share verified IR; their native
+compile/link profiles still differ. A hit never reuses a native image or bypasses
+the sibling companion. Frontend/lock failures are reported after any requested
+cache status; status-output failure returns 4 before native staging.
+
+Run retains the current compilation source snapshot on cold and warm paths for
+trap locations. The native output remains a private stage image; published
+`build/<name>` contents, program argument/stream handling and exit codes retain
+their existing behavior. Cache status is emitted before collected program stderr.
 
 ## Filesystem policy
 
@@ -65,12 +80,18 @@ corruption recovery, immutable collisions, retention and live-stage preservation
 
 `TestLinuxFileCLI` checks whole-entry both-target emission, absence of Windows
 foreign symbols, closed Linux support selection and the selected target/ABI
-profile. Its Linux-only integration includes cold/warm locked check, corruption
-recovery, source/lock invalidation, missing-root fallback and symlink-root
-rejection. Those Linux-native cases require Linux amd64 and a GNU toolchain;
+profile. Its Linux-only integration includes cold/warm locked check/build/run,
+development-to-release IR reuse, warm trap source locations, binary program
+streams, cache-looking arguments after `--`, corruption recovery, source/lock
+invalidation, missing-root fallback and symlink-root rejection. Cached build
+also verifies that companion failure preserves the previous published image.
+Those Linux-native cases require Linux amd64 and a GNU toolchain;
 Windows substitute execution does not establish Linux execution proof.
+`TestLinuxBuildCacheArguments` executes the existing shared cache-option fixtures
+in low/optimized host profiles, covering compiler/program flag separation,
+duplicates, missing roots/status dependencies and NUL error precedence.
 
 No public language/SDK API, database, dependency, repository hygiene rule,
 workflow job, runner or target maturity flag changes in this slice. Linux native
-execution, other command cache wiring, target-specific public C emission,
+execution, test cache wiring, target-specific public C emission,
 self-build and distribution evidence remain open. Go stays the default compiler.

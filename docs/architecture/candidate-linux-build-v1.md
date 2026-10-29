@@ -31,8 +31,10 @@ compile/link failure preservation tests are authored and skipped on Windows.
 ## CLI connection
 
 `linux_file_cli` connects `build [--release] [--locked]` and build help to
-`linux_build_cli`. Duplicate/unknown flags and cache options fail before compilation.
-Shared `project_emit.evaluate` owns loading, locks, SDK authentication, entry selection
+`linux_build_cli`. Duplicate/unknown flags fail before compilation. Optional
+`--cache-root <existing directory>` and `--cache-status` select the shared
+[verified IR cache](candidate-linux-cache-v1.md).
+Shared `project_emit` owns loading, locks, SDK authentication, entry selection
 and C emission. Output is `build/<package-name>` with no `.exe`; the success report
 names `x86_64-linux-gnu`, the selected profile and the exact load's lock state.
 
@@ -80,7 +82,9 @@ Linux-native tests cover private nested-tree cleanup and outside-link preservati
 GNU object/ELF publication, low/release SDK File-reader builds and execution, locked
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
-Workspace caches and a Fairy-authored GNU backend remain separate work.
+Cold/warm cache integration cases are authored, including development-to-release
+IR reuse and companion failure after a hit. Linux-native execution and a
+Fairy-authored GNU backend remain separate work.
 
 ## Private run-image backend
 

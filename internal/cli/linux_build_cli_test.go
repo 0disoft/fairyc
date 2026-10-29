@@ -52,15 +52,19 @@ version = "1.0.0"
 language = "fairyc-language/20"
 source = "src"
 `)
-	writeTestSource(t, root, "src/main.fy", `module main;
+	source := `module main;
 import std::fs as fs;
 @effects(filesystem) fn i32 main(){
     var file=switch(fs::open_read_utf8("input.txt")){case .ok(p):{p}case .err(_):{return 1;}};
     var u8[3] data=[0;3];let count=switch(fs::read(ref mut file,ref mut data)){case .ok(p):{p}case .err(_):{return 2;}};
     if(!fs::close(file).is_ok){return 3;}return if(count==3 && data[0]==97){0}else{4};
 }
-`)
+`
+	writeTestSource(t, root, "src/main.fy", source)
 	writeTestSource(t, root, "input.txt", "abc")
+	if err := os.Mkdir(filepath.Join(root, "cache"), 0700); err != nil {
+		t.Fatal(err)
+	}
 	run := func(args []string, want int) string {
 		t.Helper()
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
@@ -87,9 +91,12 @@ import std::fs as fs;
 		}
 		return string(data)
 	}
-	run([]string{"build", "--locked"}, 7)
-	for _, args := range [][]string{{"build"}, {"build", "--release", "--locked"}} {
-		if data := run(args, 0); !strings.Contains(data, "built: build/client (x86_64-linux-gnu,") {
+	if data := run([]string{"build", "--locked", "--cache-root", "cache", "--cache-status"}, 7); !strings.Contains(data, "cache: skipped\n") {
+		t.Fatal(data)
+	}
+	for i, args := range [][]string{{"build", "--cache-root", "cache", "--cache-status"}, {"build", "--release", "--locked", "--cache-root", "cache", "--cache-status"}} {
+		status := []string{"cache: cold stored\n", "cache: hit\n"}[i]
+		if data := run(args, 0); !strings.Contains(data, "built: build/client (x86_64-linux-gnu,") || !strings.Contains(data, status) {
 			t.Fatal(data)
 		}
 		path := filepath.Join(root, "build", "client")
@@ -115,14 +122,20 @@ import std::fs as fs;
 		t.Fatal(err)
 	}
 	run([]string{"build", "--release", "--release"}, 2)
-	run([]string{"build", "--cache-root", "ignored"}, 2)
+	run([]string{"build", "--cache-root"}, 2)
+	run([]string{"build", "--cache-status"}, 2)
+	run([]string{"build", "--cache-root", "cache", "--cache-status", "--cache-status"}, 2)
 	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return true;}\n")
-	run([]string{"build"}, 3)
-	writeTestSource(t, root, "src/main.fy", "module main; fn i32 main(){return 0;}\n")
+	if data := run([]string{"build", "--cache-root", "cache", "--cache-status"}, 3); !strings.Contains(data, "cache: cold uncached\n") || !strings.Contains(data, "E1006") {
+		t.Fatal(data)
+	}
+	writeTestSource(t, root, "src/main.fy", source)
 	if err := os.Remove(companion); err != nil {
 		t.Fatal(err)
 	}
-	run([]string{"build"}, 6)
+	if data := run([]string{"build", "--cache-root", "cache", "--cache-status"}, 6); !strings.Contains(data, "cache: hit\n") {
+		t.Fatal(data)
+	}
 	after, err := os.ReadFile(filepath.Join(root, "build", "client"))
 	if err != nil || !bytes.Equal(previous, after) {
 		t.Fatal("failed build replaced the previous executable", err)
