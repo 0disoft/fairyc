@@ -39,7 +39,7 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"--tokens-file",3)==4 && file_cli::command(b"--mir-file",3)==4);
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
     assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
-    assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==5);
+    assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==10);
     assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
     assert(file_cli::source_mode(b"--bindings-file") && file_cli::source_mode(b"--check-types-file") && file_cli::source_mode(b"--hir-file"));
@@ -161,7 +161,7 @@ fn i32 cli_probe() {
 				{[]string{"build", "--cache-root", "ignored"}, 2, "accepts only optional --release and --locked"},
 				{[]string{"run", "--help"}, 0, "run [--release] [--locked]"},
 				{[]string{"test", "--help"}, 0, "test --native"},
-				{[]string{"new", "unused"}, 3, "Linux workspace CLI is not connected"},
+				{[]string{"new", "--help"}, 0, "new <package-name> --uid <package-uid>"},
 			}
 			for _, tc := range cases {
 				result, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: tc.args, WorkingDirectory: root, Timeout: 30 * time.Second})
@@ -173,6 +173,7 @@ fn i32 cli_probe() {
 			checkLinuxBuild(t, artifact, backend)
 			checkLinuxRun(t, artifact, backend)
 			checkLinuxTest(t, artifact, backend)
+			checkLinuxNew(t, artifact, backend)
 		})
 	}
 }

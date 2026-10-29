@@ -80,7 +80,7 @@ Linux-native tests cover private nested-tree cleanup and outside-link preservati
 GNU object/ELF publication, low/release SDK File-reader builds and execution, locked
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
-Workspace `new`, caches and a Fairy-authored GNU backend remain separate work.
+Workspace caches and a Fairy-authored GNU backend remain separate work.
 
 ## Private run-image backend
 

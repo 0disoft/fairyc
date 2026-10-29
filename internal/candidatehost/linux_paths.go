@@ -31,6 +31,9 @@ var linuxRetention string
 //go:embed linux_workspace.c
 var linuxWorkspace string
 
+//go:embed linux_starter.c
+var linuxStarter string
+
 //go:embed linux_build_scratch.c
 var linuxBuildScratch string
 
@@ -45,8 +48,11 @@ func LinuxSource(header string) (string, error) {
 	workspace := false
 	buildScratch := false
 	testInput := false
+	starter := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_starter_create_v1":
+			rooted, starter = true, true
 		case "fairyc_private_linux_test_capture_open_v1":
 			testInput, capture, process = true, true, true
 		case "fairyc_private_linux_build_scratch_open_v1", "fairyc_private_linux_build_scratch_drop_v1":
@@ -112,6 +118,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if buildScratch {
 		source += "\n" + linuxBuildScratch
+	}
+	if starter {
+		source += "\n" + linuxStarter
 	}
 	return source, nil
 }

@@ -106,5 +106,5 @@ stdin, input bounds/symlinks, timeout/output overflow, invalid test attributes,
 missing companion, prior-image preservation and private TMPDIR cleanup. Native
 adapter probes cover actual binary stdin, EOF, replay and symlink rejection with
 GCC/Clang. These cases are skipped on the Windows development host; Linux-native
-success and distribution/self-host readiness are not claimed. Workspace new/cache
+success and distribution/self-host readiness are not claimed. Workspace cache
 integration and a Fairy-authored GNU backend remain open; Go stays the default.
