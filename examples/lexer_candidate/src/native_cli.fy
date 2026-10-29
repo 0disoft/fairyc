@@ -21,6 +21,7 @@ import native_scratch as scratch;
 import windows_host_paths as paths;
 import windows_run_capture as capture;
 import windows_run_control as control;
+import native_test_result as test_result;
 import std::bytes as bytes;
 import std::vec as v;
 import std::io as io;
@@ -76,12 +77,12 @@ fn usize test_entry(ref compiler::Complete complete,ref test_options::TestIdenti
 }
 @effects(filesystem,console,environment,clock) pub fn i32 tests(compiler::Complete initial,ref input::Input projected,ref test_options::TestOptions selected,ref v::Vec<test_options::TestIdentity> tests,ref v::Vec<usize> chosen,ref u8[] root,u32 lock_code){
     var bytes::Buffer input=bytes::empty();if(test_options::stdin_file(selected).len!=0){let path=test_options::stdin_file(selected);if(!portable::source_relative(path)){return test_input_error(path,2);}var usize work=0;input=switch(source_file::read(root,path,65536,ref mut work)){case .ok(p):{p}case .err(e):{return test_input_error(path,if(e.code==3 || e.code==4){3}else if(e.code==8 || e.code==9){4}else{1});}};}
-    var v::Vec<capture::Captured> results=v::empty<capture::Captured>();if(v::len<usize>(chosen)==0){return test_options::test_report(selected,tests,chosen,projected,ref results,lock_code);}
+    var v::Vec<test_result::Captured> results=v::empty<test_result::Captured>();if(v::len<usize>(chosen)==0){return test_options::test_report(selected,tests,chosen,projected,ref results,lock_code);}
     let session=switch(complete_c::prepare_tests(initial)){case .ok(p):{p}case .err(_):{return failure("fairyc: unsupported subset capability: native test C emission\n",3);}};var usize i=0;while(i<v::len<usize>(chosen)){let test=v::at<test_options::TestIdentity>(tests,*v::at<usize>(chosen,i));
         let outcome=test_one(ref session,test,selected,root,bytes::view(ref input));
         let result=switch(outcome){case .ok(p):{p}case .err(e):{return e;}};
         if(!test_options::flags(selected).capture && (capture::stdout(ref result).len!=0 || capture::stderr(ref result).len!=0)){var bytes::Buffer message=bytes::empty();if(!test_options::test_append(ref mut message,b"fairyc: requested workspace is outside the native test subset: ") || !test_options::test_append(ref mut message,test_options::test_name(test)) || !test_options::test_append(ref mut message,b" produced program output\n")){return 4;}return if(io::write_stderr_bytes(bytes::view(ref message)).is_ok){2}else{4};}
-        if(capture::trap(ref result)==0 && capture::status(ref result)!=0){return failure("fairyc: build failed: native test exited without valid trap control\n",6);}if(!v::push<capture::Captured>(ref mut results,result).is_ok){return 4;}
+        if(capture::trap(ref result)==0 && capture::status(ref result)!=0){return failure("fairyc: build failed: native test exited without valid trap control\n",6);}let retained=switch(test_result::copy(capture::trap(ref result),capture::stdout(ref result),capture::stderr(ref result))){case .ok(p):{p}case .err(_):{return 4;}};if(!v::push<test_result::Captured>(ref mut results,retained).is_ok){return 4;}
         i+=1;
     }
     return test_options::test_report(selected,tests,chosen,projected,ref results,lock_code);
