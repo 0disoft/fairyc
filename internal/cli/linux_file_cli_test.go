@@ -30,14 +30,14 @@ func TestLinuxFileCLI(t *testing.T) {
 	if strings.Count(string(entry), "import file_cli as file_cli;") != 1 {
 		t.Fatal("candidate dispatcher import changed")
 	}
-	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;", 1)+`
+	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;\nimport linux_run_cli as linux_run;", 1)+`
 fn i32 cli_probe() {
     assert(file_cli::command(b"--help",2)==1 && file_cli::command(b"help",2)==1 && file_cli::command(b"-h",2)==1);
     assert(file_cli::command(b"--version",2)==2 && file_cli::command(b"targets",2)==3);
     assert(file_cli::command(b"--version",3)==0 && file_cli::command(b"targets",3)==0);
     assert(file_cli::command(b"--tokens-file",3)==4 && file_cli::command(b"--mir-file",3)==4);
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
-    assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==5);
+    assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
     assert(file_cli::command(b"test",2)==5 && file_cli::command(b"new",3)==5);
     assert(file_cli::command(b"--c-file",3)==0 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::source_mode(b"--declarations-file") && file_cli::source_mode(b"--check-names-file"));
@@ -48,6 +48,9 @@ fn i32 cli_probe() {
     assert(bytes::equal(bytes::view(ref output),b"build/client"));
     let driver=switch(linux_build::companion(b"/opt/bin/fairyc")){case .ok(p):{p}case .err(_):{assert(false);return 1;}};
     assert(bytes::equal(bytes::view(ref driver),b"/opt/bin/fairyc-candidate-linux-build"));
+    let run_output=switch(linux_build::output_for(true,b"client")){case .ok(p):{p}case .err(_):{assert(false);return 1;}};
+    assert(bytes::equal(bytes::view(ref run_output),b"program"));
+    assert(linux_run::exit_code(0)==0 && linux_run::exit_code(133)==133 && linux_run::exit_code(255)==255);
     return 0;
 }
 `)
@@ -155,7 +158,8 @@ fn i32 cli_probe() {
 				{[]string{"build", "--help"}, 0, "build [--release] [--locked]"},
 				{[]string{"build", "--release", "--release"}, 2, ""},
 				{[]string{"build", "--cache-root", "ignored"}, 2, "accepts only optional --release and --locked"},
-				{[]string{"run"}, 3, "Linux workspace CLI is not connected"},
+				{[]string{"run", "--help"}, 0, "run [--release] [--locked]"},
+				{[]string{"test"}, 3, "Linux workspace CLI is not connected"},
 			}
 			for _, tc := range cases {
 				result, err := toolchain.Execute(artifact, cdriver.NativeExecutionOptions{Arguments: tc.args, WorkingDirectory: root, Timeout: 30 * time.Second})
@@ -165,6 +169,7 @@ fn i32 cli_probe() {
 			}
 			checkLinuxWorkspace(t, toolchain, artifact)
 			checkLinuxBuild(t, artifact, backend)
+			checkLinuxRun(t, artifact, backend)
 		})
 	}
 }

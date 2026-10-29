@@ -80,14 +80,14 @@ Linux-native tests cover private nested-tree cleanup and outside-link preservati
 GNU object/ELF publication, low/release SDK File-reader builds and execution, locked
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
-Workspace `run/test/new`, caches and a Fairy-authored GNU backend remain separate work.
+Workspace `test/new`, caches and a Fairy-authored GNU backend remain separate work.
 
 ## Private run-image backend
 
 `--run-trap-control` selects the existing Linux runtime's bounded trap receipt
 writer on fd 3. This mode requires output root equal to the caller-owned stage
 and output leaf exactly `program`; it cannot publish into the client workspace.
-The Fairy caller remains responsible for program launch and stage lifetime.
+The [Fairy run caller](candidate-linux-run-v1.md) owns program launch and stage lifetime.
 Ordinary builds retain their runtime and publication behavior.
 
 The private capture adapter has a separate run opener which redirects a third

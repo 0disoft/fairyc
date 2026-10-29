@@ -103,15 +103,19 @@ int main(void) {
 const linuxRunCaptureNativeProbe = `
 #include <assert.h>
 int main(int argc,char **argv) {
- if(argc>1) { uint8_t data[277];memset(data,5,sizeof data);size_t n=(size_t)atoi(argv[1]);assert(write(3,data,n)==(ssize_t)n);return 133; }
+ if(argc>1) { if(strcmp(argv[1],"signal")==0){raise(SIGTERM);return 1;} if(strcmp(argv[1],"timeout")==0){for(;;){pause();}} if(strcmp(argv[1],"output")==0){assert(write(1,"x",1)==1);return 0;} uint8_t data[277];memset(data,5,sizeof data);size_t n=(size_t)atoi(argv[1]);assert(write(3,data,n)==(ssize_t)n);return 133; }
  char image[4096];ssize_t n=readlink("/proc/self/exe",image,sizeof image-1);assert(n>0);image[n]=0;
- for(int mode=0;mode<3;++mode) {
-  const char *arg=mode==0 ? "0" : mode==1 ? "276" : "277";
+ for(int mode=0;mode<6;++mode) {
+  const char *arg=mode==0 ? "0" : mode==1 ? "276" : mode==2 ? "277" : mode==3 ? "signal" : mode==4 ? "timeout" : "output";
   char packed[8192];size_t a=strlen(image)+1,b=strlen(arg)+1;memcpy(packed,image,a);memcpy(packed+a,arg,b);
   void *raw=NULL;assert(fairyc_private_linux_run_capture_open_v1((uint8_t *)packed,a+b,2,(const uint8_t *)"/tmp",5,&raw)==0);
   size_t out=0,err=0,length=0;uint32_t kind=0,value=0,pid=0;uint8_t receipt[276];
-  uint32_t code=fairyc_private_linux_capture_collect_v1(raw,1000,NULL,0,&out,NULL,0,&err,&kind,&value,&pid);
-  if(mode==2) {assert(code==EOVERFLOW);} else {
+  uint32_t code=fairyc_private_linux_capture_collect_v1(raw,mode==4 ? 50 : 1000,NULL,0,&out,NULL,0,&err,&kind,&value,&pid);
+  if(mode==2) {assert(code==EOVERFLOW);}
+  else if(mode==3){assert(code==0 && kind==2 && value==SIGTERM);assert(fairyc_private_linux_run_capture_receipt_v1(raw,receipt,sizeof receipt,&length)==0 && length==0);}
+  else if(mode==4){assert(code==0 && kind==3 && value==0);}
+  else if(mode==5){assert(code==0 && kind==4 && value==1);}
+  else {
    assert(code==0 && kind==1 && value==133);
    assert(fairyc_private_linux_run_capture_receipt_v1(raw,receipt,sizeof receipt,&length)==0 && length==(mode==0 ? 0u : 276u));
   }
