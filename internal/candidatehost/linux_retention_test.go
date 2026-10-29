@@ -14,6 +14,10 @@ func TestPrivateLinuxRetentionSelection(t *testing.T) {
 	if err != nil || source != linuxRootedFile+"\n"+linuxRetention {
 		t.Fatalf("erase selection: %v", err)
 	}
+	source, err = LinuxSource("fairyc_private_linux_root_file_erase_if_v1( fairyc_private_linux_directory_scan_open_v1(")
+	if err != nil || source != linuxRootedFile+"\n"+linuxDirectory+"\n"+linuxRetention {
+		t.Fatalf("scan/erase dependency order: %v", err)
+	}
 	if _, err := LinuxSource("fairyc_private_linux_root_file_erase_unknown_v1("); err == nil {
 		t.Fatal("unknown deletion admitted")
 	}
@@ -102,6 +106,7 @@ int main(void) {
     links=0;assert(fairyc_private_linux_root_file_publish_new_v1(1,1,(const uint8_t *)"new",4)==EWOULDBLOCK && links==0);
     scenario=5;erase_case=0;closed=erases=0;
     assert(fairyc_private_linux_root_file_erase_if_v1(1,(const uint8_t *)"new",4,&expected,&removed,&cleanup)==0 && removed==1 && cleanup==EINTR && closed==1 && erases==1);
+    links=closed=0;assert(fairyc_private_linux_root_file_publish_new_v1(1,1,(const uint8_t *)"new",4)==0 && links==1 && closed==1);
     scenario=0;opened=0;expected.identity=0;
     assert(fairyc_private_linux_root_file_erase_if_v1(1,(const uint8_t *)"new",4,&expected,&removed,&cleanup)==EINVAL && opened==0);
     expected.identity=123;assert(fairyc_private_linux_root_file_erase_if_v1(1,(const uint8_t *)"../new",7,&expected,&removed,&cleanup)==EINVAL && opened==0);

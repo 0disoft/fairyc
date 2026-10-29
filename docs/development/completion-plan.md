@@ -17,7 +17,7 @@ valid execution records are reused instead of reopening completed work.
 | 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | SDK 0.87 preview at clean `890b3da4` passes all twelve packaging/starter steps and seven local portability executions; its hashed transfer ZIP and standalone verifier are ready. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 545 sources and 6,971 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and retention removal and CLI dispatch remain open. Go stays the default. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and CLI dispatch remain open. Go stays the default. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 The private Linux [rooted file adapter](../architecture/candidate-linux-rooted-files-v1.md)
@@ -26,15 +26,23 @@ bytes and reports inode/device/time/size metadata. Anonymous creation, partial-w
 file sync and exclusive publication are implemented; unsupported `O_TMPFILE` filesystems fail
 without a named staging fallback. Windows substitute and wrapper low/optimized checks,
 both-target emission, related path/process/capture/argv regressions and `go vet ./...` pass.
-Candidate `check`/`check --locked` pass with 545 sources and 6,971 MIR functions. Retention
-removal and CLI dispatch remain open; native Linux proof remains pending.
+Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions. CLI dispatch
+remains open; native Linux proof remains pending.
 
 The private Linux [directory enumerator](../architecture/candidate-linux-directory-v1.md) now
 collects owned UTF-8 names and nofollow metadata using independent cursors on the retained
 directory. Scans admit at most 4,096 entries and charge a shared cumulative work budget,
 including dot and vanished records. Windows native-adapter substitutes, both-target Fairy
 emission and Windows wrapper execution pass in low/optimized profiles. Native Linux remains
-unverified; retention removal and CLI dispatch remain separate.
+unverified; CLI dispatch remains separate.
+
+Linux [retention removal](../architecture/candidate-linux-retention-v1.md) now selects only
+regular exact generation names, preserves the selected generation, and evicts oversize or
+oldest observed records to satisfy count/byte limits. Publication and snapshot-checked removal
+share a nonblocking advisory directory lock. Noncooperating writers are outside that protocol;
+stale metadata, lock contention and partial failures are reported without claiming bounds.
+Windows C substitutes, both-target Fairy emission, wrapper execution, whole candidate checks
+and vet pass. Native Linux remains unverified; CLI wiring is still open.
 
 ## Scope and evidence
 

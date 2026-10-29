@@ -21,7 +21,7 @@ uint32_t fairyc_private_linux_root_file_erase_if_v1(uint32_t root, const uint8_t
     } else if (S_ISREG(actual.st_mode) && actual.st_nlink == 1 && actual.st_size >= 0 &&
         (size_t)actual.st_dev == observed.device && (size_t)actual.st_ino == observed.identity &&
         (size_t)actual.st_size == observed.size && (int64_t)actual.st_mtim.tv_sec == observed.modified_seconds &&
-        actual.st_mtim.tv_nsec >= 0 && (uint32_t)actual.st_mtim.tv_nsec == observed.modified_nanos &&
+        actual.st_mtim.tv_nsec >= 0 && actual.st_mtim.tv_nsec < 1000000000 && (uint32_t)actual.st_mtim.tv_nsec == observed.modified_nanos &&
         (uint32_t)actual.st_mode == observed.mode) {
         /* No automatic retry after an uncertain namespace mutation. */
         if (unlinkat(fd, (const char *)leaf, 0) == 0) { *removed = 1; }

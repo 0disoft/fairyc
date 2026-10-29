@@ -3,6 +3,7 @@
 `internal/candidatehost/linux_directory.c` owns the implemented native cursor from commit
 `3fb7c48f`. The private `linux_directory.fy` module implements the bounded, ownership-safe scan.
 This enumeration contract excludes deletion, retention, CLI, and public SDK surfaces.
+The separate [retention adapter](candidate-linux-retention-v1.md) consumes this inventory.
 
 ## Native cursor (implemented)
 
