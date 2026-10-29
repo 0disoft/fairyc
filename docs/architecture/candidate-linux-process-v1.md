@@ -25,6 +25,11 @@ and initialized file actions and spawn attributes on every return path.
 the environment and standard streams. No shell, quoting or PATH search is used;
 relative paths remain relative and are resolved by the native launch.
 
+The [private capture first slice](candidate-linux-capture-v1.md) reuses the spawn
+helper with stdout/stderr pipe redirection and an opaque owned token. Normal
+start still inherits standard streams. Capture collection and its Fairy wrapper
+remain pending.
+
 `posix_spawnattr_setpgroup(..., 0)` with `POSIX_SPAWN_SETPGROUP` gives each
 child its own process group, initially `pgid == pid`; see
 [posix_spawn(3)](https://man7.org/linux/man-pages/man3/posix_spawn.3.html).
@@ -103,7 +108,8 @@ the same failure and escaped-descendant limits.
 The GNU/glibc extensions use the unchanged [Linux toolchain baseline](../abi/linux-toolchain-v0.md):
 Ubuntu 24.04 amd64, glibc >= 2.39, GCC >= 13 or Clang >= 18. When combining C
 sources, `_GNU_SOURCE` must precede every system header; the private source
-selector returns process C before path C to preserve that ordering.
+selector returns process C, then capture C when selected, then optional path C
+to preserve that ordering and share the process static helpers.
 
 Process-group ownership was committed in `cadce568`, with low/optimized POSIX
 substitute checks for attribute failures, observe/signal/reap ordering, `ECHILD`

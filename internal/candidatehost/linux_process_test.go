@@ -129,6 +129,9 @@ static int probe_chdir(posix_spawn_file_actions_t *p,const char *cwd) {
 static int probe_closefrom(posix_spawn_file_actions_t *p,int low) {
     assert(p->active && low==3); return scenario==4 ? EINVAL : 0;
 }
+static int probe_dup2(posix_spawn_file_actions_t *p,int from,int to) {
+    assert(p->active && from>=3 && (to==1 || to==2)); return 0;
+}
 static int probe_destroy(posix_spawn_file_actions_t *p) { assert(p->active); p->active=0; --actions_live; return 0; }
 static int probe_attr_init(posix_spawnattr_t *p) {
     if(scenario==17) { return ENOMEM; }
@@ -184,6 +187,7 @@ static int probe_kill(pid_t pid,int sig) {
 #define posix_spawn_file_actions_init probe_init
 #define posix_spawn_file_actions_addchdir_np probe_chdir
 #define posix_spawn_file_actions_addclosefrom_np probe_closefrom
+#define posix_spawn_file_actions_adddup2 probe_dup2
 #define posix_spawn_file_actions_destroy probe_destroy
 #define posix_spawnattr_init probe_attr_init
 #define posix_spawnattr_setpgroup probe_attr_group
