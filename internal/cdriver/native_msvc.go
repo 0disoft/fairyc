@@ -31,6 +31,9 @@ func resolveWindowsNative(name string) (result NativeToolchain, err error) {
 
 func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (result NativeArtifact, err error) {
 	defer func() { err = driverError(ErrorBuild, "Build", err) }()
+	if options.Partitions != nil {
+		return NativeArtifact{}, fmt.Errorf("partitioned native builds require the Linux target")
+	}
 	artifact, err := BuildWindowsMSVCTargetCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
 	if err != nil {
 		return NativeArtifact{}, err

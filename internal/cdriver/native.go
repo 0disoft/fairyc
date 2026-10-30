@@ -81,6 +81,7 @@ type NativeBuildOptions struct {
 	Profile                   Profile
 	UnitSource, RuntimeSource string
 	TrapControl               bool
+	Partitions                *CPartitions
 }
 
 type NativeArtifact struct {

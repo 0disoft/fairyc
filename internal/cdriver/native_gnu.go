@@ -1,6 +1,7 @@
 package cdriver
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/target"
@@ -23,6 +24,13 @@ func resolveLinuxNative(name string) (result NativeToolchain, err error) {
 
 func (toolchain linuxNativeToolchain) Build(options NativeBuildOptions) (result NativeArtifact, err error) {
 	defer func() { err = driverError(ErrorBuild, "Build", err) }()
+	if options.Partitions != nil {
+		if options.UnitSource != "" {
+			return NativeArtifact{}, fmt.Errorf("ambiguous single-unit and partitioned C inputs")
+		}
+		artifact, err := BuildLinuxPartitions(toolchain.toolchain, options.Profile, *options.Partitions, options.RuntimeSource)
+		return NativeArtifact{Artifact: artifact, TrapControl: options.TrapControl}, err
+	}
 	artifact, err := BuildCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
 	return NativeArtifact{Artifact: artifact, TrapControl: options.TrapControl}, err
 }
