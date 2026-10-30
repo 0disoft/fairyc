@@ -24,6 +24,17 @@ func (e *emitter) emitCallbackType(output *strings.Builder) error {
 
 // Adapters keep the C callback contract separate from private Fairy functions.
 func (e *emitter) emitCallbackAdapters(output *strings.Builder) {
+	for _, index := range e.callbackTargets() {
+		function := e.analysis.functions[index]
+		if e.analysis.nonReturning[function.Symbol] {
+			fmt.Fprintf(output, "%s_Noreturn int32_t fy_cb_%d(int32_t value, void *data) { fy_fn_%d(value, data); }\n", e.functionLinkage(), index, index)
+		} else {
+			fmt.Fprintf(output, "%sint32_t fy_cb_%d(int32_t value, void *data) { return fy_fn_%d(value, data); }\n", e.functionLinkage(), index, index)
+		}
+	}
+}
+
+func (e *emitter) callbackTargets() []int {
 	targets := make(map[int]bool)
 	for fi, function := range e.analysis.functions {
 		for bi, block := range function.Blocks {
@@ -37,14 +48,12 @@ func (e *emitter) emitCallbackAdapters(output *strings.Builder) {
 			}
 		}
 	}
-	for index, function := range e.analysis.functions {
+	var result []int
+	for index := range e.analysis.functions {
 		if !targets[index] {
 			continue
 		}
-		if e.analysis.nonReturning[function.Symbol] {
-			fmt.Fprintf(output, "static _Noreturn int32_t fy_cb_%d(int32_t value, void *data) { fy_fn_%d(value, data); }\n", index, index)
-		} else {
-			fmt.Fprintf(output, "static int32_t fy_cb_%d(int32_t value, void *data) { return fy_fn_%d(value, data); }\n", index, index)
-		}
+		result = append(result, index)
 	}
+	return result
 }

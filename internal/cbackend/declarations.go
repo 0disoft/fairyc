@@ -22,7 +22,7 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 	if err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
-	output.WriteString("static ")
+	output.WriteString(e.functionLinkage())
 	if e.analysis.nonReturning[function.Symbol] {
 		output.WriteString("_Noreturn ")
 	}

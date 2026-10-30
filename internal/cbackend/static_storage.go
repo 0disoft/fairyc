@@ -103,6 +103,10 @@ func chunkedStaticStorageDigest(value string) [sha256.Size]byte {
 }
 
 func emitStaticStorage(output *strings.Builder, storage map[string]string, emptySentinel bool) {
+	emitStaticStorageLinkage(output, storage, emptySentinel, "static ")
+}
+
+func emitStaticStorageLinkage(output *strings.Builder, storage map[string]string, emptySentinel bool, linkage string) {
 	if len(storage) == 0 {
 		return
 	}
@@ -117,7 +121,7 @@ func emitStaticStorage(output *strings.Builder, storage map[string]string, empty
 		if emptySentinel && storageLength == 0 {
 			storageLength = 1
 		}
-		fmt.Fprintf(output, "static const uint8_t %s[%d] = { ", symbol, storageLength)
+		fmt.Fprintf(output, "%sconst uint8_t %s[%d] = { ", linkage, symbol, storageLength)
 		if len(value) == 0 {
 			output.WriteString("UINT8_C(0)")
 		} else {

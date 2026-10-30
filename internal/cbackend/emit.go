@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
@@ -43,10 +44,8 @@ func emitContext(ctx context.Context, program mir.Program, entry string, profile
 }
 
 func (value *emitter) emitUnit() (Unit, error) {
-	profile := value.analysis.profile
 	functions := value.analysis.functions
 	foreignFunctions := value.analysis.foreignFunctions
-	entry := functions[value.analysis.entryIndex].Name
 
 	output := &value.output
 	if err := value.emitPreamble(output); err != nil {
@@ -84,6 +83,15 @@ func (value *emitter) emitUnit() (Unit, error) {
 			return Unit{}, err
 		}
 	}
+	if err := value.emitEntry(output); err != nil {
+		return Unit{}, err
+	}
+	return value.unitMetadata(output.String())
+}
+
+func (value *emitter) emitEntry(output *strings.Builder) error {
+	profile := value.analysis.profile
+	functions := value.analysis.functions
 	_, usesArgCount := value.analysis.usedForeignSymbols["fy_std_process_arg_count_v0"]
 	_, usesArg := value.analysis.usedForeignSymbols["fy_std_process_arg_v0"]
 	if profile.Target == target.X8664LinuxGNU && (usesArgCount || usesArg) {
@@ -93,7 +101,7 @@ func (value *emitter) emitUnit() (Unit, error) {
 	}
 	for index := range functions {
 		if err := value.contextError(); err != nil {
-			return Unit{}, err
+			return err
 		}
 		if index != value.analysis.entryIndex {
 			fmt.Fprintf(output, "    (void)&fy_fn_%d;\n", index)
@@ -104,6 +112,14 @@ func (value *emitter) emitUnit() (Unit, error) {
 	} else {
 		fmt.Fprintf(output, "    return (int)fy_fn_%d();\n}\n", value.analysis.entryIndex)
 	}
+
+	return nil
+}
+
+func (value *emitter) unitMetadata(source string) (Unit, error) {
+	profile := value.analysis.profile
+	functions := value.analysis.functions
+	entry := functions[value.analysis.entryIndex].Name
 
 	names := make([]string, len(functions))
 	for index := range functions {
@@ -125,6 +141,6 @@ func (value *emitter) emitUnit() (Unit, error) {
 	return Unit{
 		Target: string(profile.Target), Dialect: profile.Dialect, Instrumentation: profile.Instrumentation,
 		Entry: entry, Functions: names, ForeignSymbols: foreignSymbols, Features: features,
-		DropSites: slices.Clone(value.analysis.dropSites), Source: output.String(),
+		DropSites: slices.Clone(value.analysis.dropSites), Source: source,
 	}, nil
 }

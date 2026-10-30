@@ -179,11 +179,19 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("struct fy_runtime_location_v0 { const char *source; uint32_t length; uint64_t start, end; };\n\n")
 	}
 	if e.analysis.needsBitcast {
-		output.WriteString("static int32_t fy_bits_to_i32(uint32_t bits) {\n")
+		output.WriteString("static ")
+		if e.partitioned {
+			output.WriteString("inline ")
+		}
+		output.WriteString("int32_t fy_bits_to_i32(uint32_t bits) {\n")
 		output.WriteString("    int32_t value;\n    memcpy(&value, &bits, sizeof value);\n    return value;\n}\n\n")
 	}
 	if e.analysis.needsShift {
-		output.WriteString("static int32_t fy_sar_i32(int32_t value, int32_t amount) {\n")
+		output.WriteString("static ")
+		if e.partitioned {
+			output.WriteString("inline ")
+		}
+		output.WriteString("int32_t fy_sar_i32(int32_t value, int32_t amount) {\n")
 		output.WriteString("    uint32_t bits = (uint32_t)value;\n")
 		output.WriteString("    if (amount == 0 || value >= 0) {\n        return fy_bits_to_i32(bits >> (uint32_t)amount);\n    }\n")
 		output.WriteString("    return fy_bits_to_i32((bits >> (uint32_t)amount) | (UINT32_MAX << (32u - (uint32_t)amount)));\n}\n\n")
