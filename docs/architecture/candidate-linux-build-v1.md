@@ -80,6 +80,27 @@ Keep the matching companion beside the CLI. Runtime C is embedded in the compani
 invocation needs neither an external asset pack nor an installed Go toolchain. This is
 an explicit bootstrap pair, not clean-machine distribution or self-host proof.
 
+## Go bootstrap compilation
+
+Linux native `build`, `run`, `test`, and bootstrap use `cbackend.EmitBuild`.
+When function bodies total more than 2 MiB, it emits roughly 2 MiB function-boundary
+groups plus a private shared header; full-entry header measured 1,869,589 bytes.
+Literal storage is defined once; callback adapters live in the entry source. Small
+programs, Windows, and experimental `emit-workspace-c` keep single-output behavior.
+All C files use the same strict flags:
+`-std=c11 -pedantic-errors -Wall -Wextra -Werror -fno-common`. Object linking
+omits C-only flags, avoiding Clang's unused-argument diagnostic.
+
+At most two workers compile, bounded by `GOMAXPROCS` and available memory:
+256 MiB reserved, 512 MiB per worker. Runtime C, all parts, and final link share one
+60-second context. Failure cancels sibling process groups and joins workers before
+temp cleanup. Large splits use fresh objects/runtime C with no runtime-object cache;
+small builds retain it. The companion's sequential `FYCPARTS1` route keeps its
+per-invocation 60-second limits.
+
+Windows low/optimized split-literal and callback-address identity runs pass. Linux
+acceptance, optimized timing, and 60-second completion remain unverified.
+
 ## Local evidence
 
 Full-entry Linux GNU/Windows MSVC C emission has no Windows foreign dependencies.

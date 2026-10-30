@@ -74,7 +74,9 @@ func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartition
 	if err := write("objects.rsp", strings.Join(objects, "\n")+"\n"); err != nil {
 		return Artifact{}, err
 	}
-	args := append(append([]string(nil), flags...), "@objects.rsp", "-o", "program")
+	// These are already strict-compiled objects. C-only flags at link time can
+	// trigger Clang's unused-command-line-argument diagnostic.
+	args := []string{"@objects.rsp", "-o", "program"}
 	if err := runPartitionCommand(ctx, toolchain.Path, directory, args...); err != nil {
 		return Artifact{}, fmt.Errorf("link partitions: %w", err)
 	}
@@ -117,7 +119,7 @@ func runPartitionCommand(ctx context.Context, compiler, directory string, args .
 	output := &boundedBuffer{}
 	cmd.Stdout, cmd.Stderr = output, output
 	err := cmd.Run()
-	if err != nil && cmd.Cancel != nil {
+	if err != nil && cmd.Process != nil && cmd.Cancel != nil {
 		_ = cmd.Cancel()
 	}
 	if ctx.Err() != nil {

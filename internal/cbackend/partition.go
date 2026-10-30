@@ -18,7 +18,7 @@ type BuildUnit struct {
 	Sources []string
 }
 
-const DefaultPartitionBytes = 1 << 20
+const DefaultPartitionBytes = 2 << 20
 
 func EmitBuild(program mir.Program, entry string, profile Profile, storageTransfers bool) (BuildUnit, error) {
 	return emitBuild(context.Background(), program, entry, profile, storageTransfers, DefaultPartitionBytes)

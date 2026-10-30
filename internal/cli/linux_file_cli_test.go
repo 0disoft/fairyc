@@ -69,22 +69,26 @@ fn i32 cli_probe() {
 	if code != ExitSuccess {
 		t.Fatalf("lower Linux CLI: %d %s", code, &diagnostics)
 	}
-	var linux cbackend.Unit
+	var linux cbackend.BuildUnit
 	for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
-		unit, err := cbackend.EmitStorageTransfers(lowered.program, lowered.entryName, profile)
+		build, err := emitNativeBuildUnit(lowered.program, lowered.entryName, profile, true)
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, symbol := range unit.ForeignSymbols {
+		for _, symbol := range build.Unit.ForeignSymbols {
 			if strings.Contains(symbol, "windows_") {
 				t.Fatalf("Windows dependency leaked into Linux entry: %s", symbol)
 			}
 		}
 		if profile.Target == target.X8664LinuxGNU {
-			linux = unit
+			linux = build
 		}
 	}
-	support, err := nativesupport.Source(target.X8664LinuxGNU, linux.ForeignSymbols, nativesupport.Options{SDKStorage: true, CandidateHost: true})
+	if len(linux.Sources) < 3 || linux.Header == "" || linux.Unit.Source != "" {
+		t.Fatal("full Linux bootstrap did not select partitioned C emission")
+	}
+	t.Logf("Linux bootstrap partitions: %d, header bytes: %d", len(linux.Sources), len(linux.Header))
+	support, err := nativesupport.Source(target.X8664LinuxGNU, linux.Unit.ForeignSymbols, nativesupport.Options{SDKStorage: true, CandidateHost: true})
 	if err != nil || !strings.Contains(support, "fairyc_private_linux_root_file_read_v1") {
 		t.Fatalf("Linux CLI runtime selection: %v", err)
 	}
@@ -137,7 +141,7 @@ fn i32 cli_probe() {
 	backend := buildLinuxCompanion(t)
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
-			artifact, err := toolchain.Build(cdriver.NativeBuildOptions{Profile: profile, UnitSource: linux.Source, RuntimeSource: support})
+			artifact, err := toolchain.Build(nativeBuildOptions(linux, profile, support, false))
 			if err != nil {
 				t.Fatal(err)
 			}
