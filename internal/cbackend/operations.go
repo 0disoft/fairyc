@@ -287,6 +287,10 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return CapabilityError{Function: function, Feature: "fixed-array construction type " + strconv.Quote(operation.Type.String())}
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = { ", operation.DestinationLocal, e.analysis.arrayCTypeName(arrayIndex))
+		if zeroIntegerArray(operation.Operands) {
+			output.WriteString("0 } };\n")
+			return nil
+		}
 		for index, operand := range operation.Operands {
 			if index != 0 {
 				output.WriteString(", ")

@@ -19,6 +19,34 @@ type arrayCType struct {
 	length  uint64
 }
 
+// C11 implicitly initializes the remaining elements to zero. Only immediate
+// integer operands qualify: local reads and aggregate or floating values must
+// retain their existing initialization and evaluation behavior.
+func zeroIntegerArray(operands []mir.Operand) bool {
+	if len(operands) < 2 {
+		return false
+	}
+	for _, operand := range operands {
+		switch operand.Kind {
+		case mir.OperandI32:
+			if operand.I32 != 0 {
+				return false
+			}
+		case mir.OperandI64:
+			if operand.I64 != 0 {
+				return false
+			}
+		case mir.OperandU8, mir.OperandU32, mir.OperandUSize:
+			if operand.U64 != 0 {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return true
+}
+
 func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCType) ([]arrayCType, map[hir.Type]int, error) {
 	seen := make(map[hir.Type]arrayCType)
 	var record func(hir.Type) error
