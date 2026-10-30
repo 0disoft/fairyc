@@ -145,6 +145,7 @@ fn i32 cli_probe() {
 			if err != nil {
 				t.Fatal(err)
 			}
+			t.Logf("Linux bootstrap resources: %+v", artifact.PartitionBuild)
 			cases := []struct {
 				args []string
 				code int32

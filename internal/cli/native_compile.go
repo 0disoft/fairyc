@@ -18,36 +18,57 @@ type nativeCompilation struct {
 	target    cdriver.NativeTarget
 }
 
+// A plan retains only C inputs and target facts, never frontend/MIR state.
+type nativeBuildPlan struct {
+	options   cdriver.NativeBuildOptions
+	toolchain cdriver.NativeToolchain
+	target    cdriver.NativeTarget
+}
+
 func compileNativeProgram(program mir.Program, entry string, options workspaceTargetOptions, policy workspaceCompilePolicy, sdkStorage bool, stderr io.Writer) (nativeCompilation, int) {
+	plan, code := prepareNativeProgram(program, entry, options, policy, sdkStorage, stderr)
+	if code != ExitSuccess {
+		return nativeCompilation{}, code
+	}
+	return plan.compile(stderr)
+}
+
+func prepareNativeProgram(program mir.Program, entry string, options workspaceTargetOptions, policy workspaceCompilePolicy, sdkStorage bool, stderr io.Writer) (nativeBuildPlan, int) {
 	native, found := cdriver.LookupNativeTarget(options.targetID)
 	if !found {
-		return nativeCompilation{}, invocationError(stderr, fmt.Sprintf("unsupported native target %q", options.targetID))
+		return nativeBuildPlan{}, invocationError(stderr, fmt.Sprintf("unsupported native target %q", options.targetID))
 	}
 	build, err := emitNativeBuildUnit(program, entry, cbackend.Profile{Target: options.targetID, Dialect: cbackend.DialectC11, PackageTrapSources: policy.packageTrapSources}, sdkStorage)
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {
-			return nativeCompilation{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" C-emission", capability)
+			return nativeBuildPlan{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" C-emission", capability)
 		}
-		return nativeCompilation{}, internalError(stderr)
+		return nativeBuildPlan{}, internalError(stderr)
 	}
 	unit := build.Unit
 	if unit.Target != string(options.targetID) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
-		return nativeCompilation{}, internalError(stderr)
+		return nativeBuildPlan{}, internalError(stderr)
 	}
 	support, err := nativesupport.Source(options.targetID, unit.ForeignSymbols, nativesupport.Options{SDKStorage: sdkStorage, TrapReceipt: policy.runTrapReceipt, CandidateHost: true})
 	if err != nil {
-		return nativeCompilation{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" support linkage", err)
+		return nativeBuildPlan{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" support linkage", err)
 	}
 	toolchain, err := cdriver.ResolveNativeToolchain(options.targetID, options.compilerName)
 	if err != nil {
-		return nativeCompilation{}, buildFailure(stderr, err)
+		return nativeBuildPlan{}, buildFailure(stderr, err)
 	}
-	artifact, err := toolchain.Build(nativeBuildOptions(build, options.profile, support, policy.runTrapReceipt))
+	return nativeBuildPlan{options: nativeBuildOptions(build, options.profile, support, policy.runTrapReceipt), toolchain: toolchain, target: native}, ExitSuccess
+}
+
+func (plan nativeBuildPlan) compile(stderr io.Writer) (nativeCompilation, int) {
+	compiled := nativeCompilation{toolchain: plan.toolchain, target: plan.target}
+	artifact, err := plan.toolchain.Build(plan.options)
 	if err != nil {
 		return nativeCompilation{}, buildFailure(stderr, err)
 	}
-	return nativeCompilation{artifact: artifact, toolchain: toolchain, target: native}, ExitSuccess
+	compiled.artifact = artifact
+	return compiled, ExitSuccess
 }
 
 func emitNativeBuildUnit(program mir.Program, entry string, profile cbackend.Profile, sdkStorage bool) (cbackend.BuildUnit, error) {

@@ -88,6 +88,7 @@ func TestCompileWorkerResourceCaps(t *testing.T) {
 		want   int
 	}{
 		{8, 0, 1}, {8, 256 << 20, 1}, {8, 1 << 30, 1}, {8, 4 << 30, 2}, {1, 4 << 30, 1},
+		{4, (1280 << 20) - 1, 1}, {4, 1280 << 20, 2}, {0, 4 << 30, 1},
 	} {
 		if got := linuxCompileWorkers(test.cpu, test.memory); got != test.want {
 			t.Fatalf("cpu=%d memory=%d: %d want %d", test.cpu, test.memory, got, test.want)

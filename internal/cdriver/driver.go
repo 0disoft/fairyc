@@ -63,11 +63,12 @@ type Toolchain struct {
 
 // Artifact is one bounded linked executable image and its build identity.
 type Artifact struct {
-	RuntimeCache RuntimeObjectCacheStatus
-	Bytes        []byte
-	Toolchain    Toolchain
-	Profile      Profile
-	ConsumerMode ConsumerMode
+	RuntimeCache   RuntimeObjectCacheStatus
+	PartitionBuild *PartitionBuildStats
+	Bytes          []byte
+	Toolchain      Toolchain
+	Profile        Profile
+	ConsumerMode   ConsumerMode
 }
 
 // CrossArtifact is one executable whose caller and callee objects came from different compilers.

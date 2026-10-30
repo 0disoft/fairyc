@@ -292,17 +292,29 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 }
 
 func compileWorkspace(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (compiledNativeWorkspace, int) {
-	native, found := cdriver.LookupNativeTarget(options.targetID)
-	if !found {
-		return compiledNativeWorkspace{}, invocationError(stderr, fmt.Sprintf("unsupported native target %q", options.targetID))
-	}
-	lowered, code := lowerWorkspaceExecutable(sourceRoot, options.locked, policy, native.Platform+" workspace C-emission", stderr)
+	plan, workspace, code := prepareWorkspaceNativeBuild(sourceRoot, options, policy, stderr)
 	if code != ExitSuccess {
 		return compiledNativeWorkspace{}, code
 	}
+	workspace.nativeCompilation, code = plan.compile(stderr)
+	return workspace, code
+}
+
+// Return from the frontend frame before starting C compilation. In particular,
+// keeping loweredWorkspace around to read lock/trap metadata after Build would
+// also keep its MIR backing allocations live during worker admission.
+func prepareWorkspaceNativeBuild(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (nativeBuildPlan, compiledNativeWorkspace, int) {
+	native, found := cdriver.LookupNativeTarget(options.targetID)
+	if !found {
+		return nativeBuildPlan{}, compiledNativeWorkspace{}, invocationError(stderr, fmt.Sprintf("unsupported native target %q", options.targetID))
+	}
+	lowered, code := lowerWorkspaceExecutable(sourceRoot, options.locked, policy, native.Platform+" workspace C-emission", stderr)
+	if code != ExitSuccess {
+		return nativeBuildPlan{}, compiledNativeWorkspace{}, code
+	}
 	policy.packageTrapSources = policy.runTrapReceipt
-	compiled, code := compileNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
-	return compiledNativeWorkspace{nativeCompilation: compiled, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName, trapSources: lowered.trapSources}, code
+	plan, code := prepareNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
+	return plan, compiledNativeWorkspace{lockState: lowered.lockState, rootPackageName: lowered.rootPackageName, trapSources: lowered.trapSources}, code
 }
 
 func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {

@@ -21,7 +21,7 @@ type CPartitions struct {
 	Sources []string
 }
 
-func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartitions, support string) (Artifact, error) {
+func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartitions, support string) (artifact Artifact, err error) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		return Artifact{}, fmt.Errorf("partitioned C build requires linux/amd64")
 	}
@@ -31,6 +31,7 @@ func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartition
 	if err := validateCPartitions(parts, support); err != nil {
 		return Artifact{}, err
 	}
+	stats := preparePartitionMemory(partitionSourceBytes(parts, support))
 	directory, err := os.MkdirTemp("", "fairyc-bootstrap-parts-")
 	if err != nil {
 		return Artifact{}, err
@@ -57,7 +58,15 @@ func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartition
 		objects[index] = fmt.Sprintf("part_%d.o", index)
 	}
 	flags := compilerArguments(profile, nil)
-	err = compileParallel(ctx, linuxCompileWorkers(runtime.GOMAXPROCS(0), availableCompileMemory()), len(sources), func(ctx context.Context, index int) error {
+	stats.GOMAXPROCS = runtime.GOMAXPROCS(0)
+	stats.AvailableMemoryBytes = availableCompileMemory()
+	stats.Workers = linuxCompileWorkers(stats.GOMAXPROCS, stats.AvailableMemoryBytes)
+	defer func() {
+		if err != nil {
+			err = &PartitionBuildError{Stats: stats, Err: err}
+		}
+	}()
+	err = compileParallel(ctx, stats.Workers, len(sources), func(ctx context.Context, index int) error {
 		args := append(append([]string(nil), flags...), "-c", fmt.Sprintf("part_%d.c", index), "-o", objects[index])
 		if err := runPartitionCommand(ctx, toolchain.Path, directory, args...); err != nil {
 			return fmt.Errorf("compile part_%d.c: %w", index, err)
@@ -87,7 +96,15 @@ func BuildLinuxPartitions(toolchain Toolchain, profile Profile, parts CPartition
 	if err := inspectLinuxProjectELF(image, elf.ET_EXEC, elf.ET_DYN); err != nil {
 		return Artifact{}, err
 	}
-	return Artifact{Bytes: image, Toolchain: toolchain, Profile: profile, ConsumerMode: C11ConsumerMode, RuntimeCache: RuntimeCacheBypass}, nil
+	return Artifact{Bytes: image, Toolchain: toolchain, Profile: profile, ConsumerMode: C11ConsumerMode, RuntimeCache: RuntimeCacheBypass, PartitionBuild: &stats}, nil
+}
+
+func partitionSourceBytes(parts CPartitions, support string) int {
+	total := len(parts.Header) + len(support)
+	for _, source := range parts.Sources {
+		total += len(source)
+	}
+	return total
 }
 
 func validateCPartitions(parts CPartitions, support string) error {

@@ -98,8 +98,25 @@ temp cleanup. Large splits use fresh objects/runtime C with no runtime-object ca
 small builds retain it. The companion's sequential `FYCPARTS1` route keeps its
 per-invocation 60-second limits.
 
-Windows low/optimized split-literal and callback-address identity runs pass. Linux
-acceptance, optimized timing, and 60-second completion remain unverified.
+The workspace frontend returns a C-only build plan before invoking the native
+driver, keeping MIR out of the frame that needs lock/trap metadata after building.
+For partition inputs larger than 2 MiB, the driver collects unreachable Go objects
+and returns idle heap pages to the OS before creating the shared C deadline.
+This preparation time is separate from the unchanged 60-second C context and is
+included in whole-bootstrap elapsed time. Available memory is sampled after C
+files are written, immediately before worker selection; budgets remain unchanged.
+Successful artifacts carry `PartitionBuildStats`, also logged by the native CLI
+test. Post-admission failures include those facts through `PartitionBuildError`
+and its error text, retaining the underlying cause. Go heap counters are not RSS.
+No new CLI flags, environment switches, or success output are introduced.
+
+External Debian 13 validation at `c4721fec` passed all four GCC/Clang low/optimized
+full CLI test-input builds within the shared deadline. Manual bootstrap passed
+three combinations; GCC optimized selected one worker and timed out. The same
+manual C input built in a separate two-worker diagnostic in 34.826 seconds;
+that diagnostic does not establish default acceptance. The Clang split probe
+needed a trailing-newline fixture fix. Native Linux timing and memory impact of
+the subsequent frontend lifetime/reclamation change still require revalidation.
 
 ## Local evidence
 
