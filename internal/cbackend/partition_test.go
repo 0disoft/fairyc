@@ -134,7 +134,7 @@ func compileSplitForTest(t *testing.T, parts cbackend.BuildUnit, profile, extra 
 	write("runtime.c", support)
 	sources = append(sources, "runtime.c")
 	if extra != "" {
-		write("probe.c", "#include \"fy_bootstrap.h\"\n"+extra)
+		write("probe.c", "#include \"fy_bootstrap.h\"\n"+extra+"\n")
 		sources = append(sources, "probe.c")
 	}
 	var compiler string
