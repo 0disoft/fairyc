@@ -142,9 +142,9 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 				return fmt.Errorf("enum switch in %s names missing variant %q", function.Name, variant)
 			}
 			if enumeration.definition.CBase != "" {
-				fmt.Fprintf(output, "    if ((%s) == (fy_enum_%d)UINT64_C(%d)) goto fy_b_%d;\n", value, enumIndex, variantIndex, terminator.Successors[branchIndex])
+				fmt.Fprintf(output, "    if ((%s) == (fy_enum_%d)UINT64_C(%d)) { goto fy_b_%d; }\n", value, enumIndex, variantIndex, terminator.Successors[branchIndex])
 			} else {
-				fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) goto fy_b_%d;\n", value, variantIndex, terminator.Successors[branchIndex])
+				fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) { goto fy_b_%d; }\n", value, variantIndex, terminator.Successors[branchIndex])
 			}
 		}
 		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
@@ -164,7 +164,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("bool switch in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s != INT32_C(0)) goto fy_b_%d;\n", value, success)
+		fmt.Fprintf(output, "    if (%s != INT32_C(0)) { goto fy_b_%d; }\n", value, success)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", failure)
 	case "assert":
 		operand, err := oneOperand(terminator.SwitchOperands)
@@ -191,12 +191,12 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 			return fmt.Errorf("Option switch in %s: %w", function.Name, err)
 		}
 		if sharedBorrowOptionNiche(valueType, e.analysis.structByType, e.analysis.resourceByType, e.analysis.arrayByType) {
-			fmt.Fprintf(output, "    if ((%s).p_0 != ((void *)0)) goto fy_b_%d;\n", value, success)
+			fmt.Fprintf(output, "    if ((%s).p_0 != ((void *)0)) { goto fy_b_%d; }\n", value, success)
 			fmt.Fprintf(output, "    goto fy_b_%d;\n", failure)
 			break
 		}
-		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_SOME) goto fy_b_%d;\n", value, success)
-		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_NONE) goto fy_b_%d;\n", value, failure)
+		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_SOME) { goto fy_b_%d; }\n", value, success)
+		fmt.Fprintf(output, "    if ((%s).tag == FY_OPTION_NONE) { goto fy_b_%d; }\n", value, failure)
 		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	case "result":
 		operand, err := oneOperand(terminator.SwitchOperands)
@@ -207,8 +207,8 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("Result switch in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_OK) goto fy_b_%d;\n", value, success)
-		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_ERR) goto fy_b_%d;\n", value, failure)
+		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_OK) { goto fy_b_%d; }\n", value, success)
+		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_ERR) { goto fy_b_%d; }\n", value, failure)
 		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	case "checked-unary":
 		operand, err := oneOperand(terminator.SwitchOperands)

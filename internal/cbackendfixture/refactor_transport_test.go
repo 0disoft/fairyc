@@ -31,10 +31,10 @@ func TestEmissionTransportAcrossResponsibilitySplit(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Include source bytes and Unit metadata for production and drop-trace profiles
-	// of 52 cases. Refreshed at 03008309 for intentional trap-location emission;
-	// the original pre-split snapshot at b49cfbfb predates that runtime payload.
-	const wantHash = "bf5799da6db22b0fb2cfb25b2b86fb90e503852d017253ee65fb9655ab7043b6"
-	if len(units) != 104 || len(encoded) != 446318 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
+	// of 52 cases. Refreshed for intentional conditional-branch braces; the
+	// generated C formatting changes without changing MIR or runtime behavior.
+	const wantHash = "7bd6f790248d811337150509279df30cadd6759cf213c06b924a284ee12e9c08"
+	if len(units) != 104 || len(encoded) != 447846 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
 		t.Fatalf("transport changed: units=%d bytes=%d sha256=%x", len(units), len(encoded), sha256.Sum256(encoded))
 	}
 }
