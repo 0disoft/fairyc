@@ -8,22 +8,31 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"syscall"
 	"unsafe"
+
+	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
 var getSystemDirectoryW = syscall.NewLazyDLL("kernel32.dll").NewProc("GetSystemDirectoryW")
+var symbolicationMu sync.Mutex
 
 const (
-	symOptUndname   = 0x00000002
-	symOptLoadLines = 0x00000010
-	maxSymbolName   = 1024
+	symOptUndname            = 0x00000002
+	symOptLoadLines          = 0x00000010
+	symOptExactSymbols       = 0x00000400
+	symOptIgnoreNTPath       = 0x00001000
+	symOptNoPrompts          = 0x00080000
+	symOptFailCriticalErrors = 0x00000200
+	maxSymbolName            = 1024
 )
 
 type dbgHelpAPI struct {
 	symInitializeW        *syscall.LazyProc
 	symCleanup            *syscall.LazyProc
 	symSetOptions         *syscall.LazyProc
+	symGetOptions         *syscall.LazyProc
 	symLoadModuleExW      *syscall.LazyProc
 	symFromAddr           *syscall.LazyProc
 	symGetLineFromAddrW64 *syscall.LazyProc
@@ -62,6 +71,24 @@ func symbolicateWindowsProgram(image, pdb []byte, rva uint32) (receipt windowsSy
 	if len(image) == 0 || len(pdb) == 0 || rva == 0 {
 		return windowsSymbolicationReceipt{}, fmt.Errorf("Windows symbolication inputs are empty")
 	}
+	if _, err := pecoff.InspectProgramDatabaseAssociation(image, pdb); err != nil {
+		return receipt, fmt.Errorf("symbolication PE/PDB identity: %w", err)
+	}
+	imageReport, err := pecoff.InspectExecutable(image)
+	if err != nil {
+		return receipt, err
+	}
+	executable := false
+	for _, section := range imageReport.Sections {
+		if section.Characteristics&0x20000000 != 0 && rva >= section.VirtualAddress && uint64(rva) < uint64(section.VirtualAddress)+uint64(section.RawSize) {
+			executable = true
+		}
+	}
+	if !executable {
+		return receipt, fmt.Errorf("symbolication RVA is not file-backed executable code")
+	}
+	symbolicationMu.Lock()
+	defer symbolicationMu.Unlock()
 	api, err := loadSystemDbgHelp()
 	if err != nil {
 		return windowsSymbolicationReceipt{}, err
@@ -91,7 +118,13 @@ func symbolicateWindowsProgram(image, pdb []byte, rva uint32) (receipt windowsSy
 	if err != nil {
 		return windowsSymbolicationReceipt{}, fmt.Errorf("encode symbol image path: %w", err)
 	}
-	process := syscall.Handle(^uintptr(0))
+	// A private nonzero session key avoids sharing GetCurrentProcess with other consumers.
+	session := new(byte)
+	defer runtime.KeepAlive(session)
+	process := syscall.Handle(uintptr(unsafe.Pointer(session)))
+	previousOptions, _, _ := api.symGetOptions.Call()
+	api.symSetOptions.Call(symOptUndname | symOptLoadLines | symOptExactSymbols | symOptIgnoreNTPath | symOptNoPrompts | symOptFailCriticalErrors)
+	defer api.symSetOptions.Call(previousOptions)
 	initialized, _, initializeErr := api.symInitializeW.Call(uintptr(process), uintptr(unsafe.Pointer(searchPath)), 0)
 	if initialized == 0 {
 		return windowsSymbolicationReceipt{}, fmt.Errorf("initialize DbgHelp symbols: %w", initializeErr)
@@ -102,7 +135,6 @@ func symbolicateWindowsProgram(image, pdb []byte, rva uint32) (receipt windowsSy
 			resultErr = errors.Join(resultErr, windowsCallError("clean up DbgHelp symbols", cleanupErr))
 		}
 	}()
-	api.symSetOptions.Call(symOptUndname | symOptLoadLines)
 	moduleBase, _, loadErr := api.symLoadModuleExW.Call(
 		uintptr(process), 0, uintptr(unsafe.Pointer(imagePathW)), 0, 0, 0, 0, 0,
 	)
@@ -163,7 +195,8 @@ func loadSystemDbgHelp() (dbgHelpAPI, error) {
 	return dbgHelpAPI{
 		symInitializeW: dll.NewProc("SymInitializeW"), symCleanup: dll.NewProc("SymCleanup"),
 		symSetOptions: dll.NewProc("SymSetOptions"), symLoadModuleExW: dll.NewProc("SymLoadModuleExW"),
-		symFromAddr: dll.NewProc("SymFromAddr"), symGetLineFromAddrW64: dll.NewProc("SymGetLineFromAddrW64"),
+		symGetOptions: dll.NewProc("SymGetOptions"),
+		symFromAddr:   dll.NewProc("SymFromAddr"), symGetLineFromAddrW64: dll.NewProc("SymGetLineFromAddrW64"),
 	}, nil
 }
 

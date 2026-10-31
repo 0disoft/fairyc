@@ -626,6 +626,20 @@ run/attempt without another native invocation. Windows local validation passes; 
 pass remains pending. This does not admit retained/asynchronous callbacks, transfer of foreign
 exceptions through Fairy, new handler grammars, binary/PDB retention or target promotion.
 
+The later [Windows debug retention/lookup evidence](../ops/windows-debug-retention-20261101.md)
+implements a private local store for the exact PE/PDB, Fairy input, generated C, runtime C,
+independent objects and map. The named generated-C debugging scope resolves `main` and
+`fairyc_debug_boundary` to exact function starts and retained C lines in both MSVC profiles,
+in four fresh processes after build-directory cleanup. Image/source/object/PDB hashes and
+RSDS/PDB/manifest GUID/age are checked before lookup. Source snapshots permit line-text retrieval
+without the original temporary directory. The CodeView pair checker also admits an exact
+code-section-end COFF LABEL with no type/auxiliary records or addends, separately recording
+that boundary instead of treating it as an instruction address. Other bounds remain intact.
+This supersedes the earlier no-retention statement only for this private developer path.
+Fairy-source stepping, variables/types, arbitrary optimized/inline/folded function attribution,
+complete CodeView/PDB semantics, product debug flags, hosted symbol retention, signed provenance
+and target conformance remain outside the verified scope.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 retains the missing complete-runtime and complete-standard-library gates. ADR 0214 records the first

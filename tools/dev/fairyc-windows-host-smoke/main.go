@@ -23,6 +23,9 @@ func main() {
 }
 
 func run(arguments []string) error {
+	if len(arguments) > 0 && arguments[0] == "--debug-lookup" {
+		return runRetainedDebugLookup(arguments[1:], os.Stdout)
+	}
 	mode, err := parseHostSmokeMode(arguments)
 	if err != nil {
 		return err
