@@ -552,6 +552,17 @@ generated/runtime workspaces and the C controls provide sixteen native execution
 expected link failures. This bounded Go-builder evidence does not admit other CRT modes,
 general archive/COMDAT competition, clean-machine distribution or a new target maturity state.
 
+The later [production archive/COMDAT receipt](../ops/windows-archive-comdat-20261101.md), sources
+`e9ca8758` and `4f300ea1`, binds five actual CRT objects to both archive indexes and final owners.
+It checks the named generated/runtime corpus's 226 COMDAT parents and 462 direct associative
+unwind children through retention/discard records and final bytes/fields. Ordinary sections,
+NODUPLICATES, ANY and ASSOCIATIVE are observed; duplicate actual startup objects fail with
+LNK2005. Existing controlled archive probes verify unrequested-member non-extraction, ANY
+competition and the losing parent's absent unwind payload under reversed input order. Twenty
+native executions and two expected failures pass. Unobserved selection policies, arbitrary
+CRT members, chained/non-unwind associations, runtime unwinding, full debug semantics and
+target promotion remain outside this bounded record.
+
 The executable-image path now follows the Microsoft x64 exception directory as well. It requires a
 readable non-executable `.pdata` table of sorted nonoverlapping 12-byte `RUNTIME_FUNCTION` entries,
 maps every function range to executable code, and maps every DWORD-aligned unwind RVA to readable

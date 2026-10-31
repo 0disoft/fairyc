@@ -10,7 +10,8 @@ This is the current ordered queue. Item 1 is complete and the list below is the 
 record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
 item 4 has Windows evidence for the named production-object corpus; item 5 has bounded Windows
 weak-chain and CRT selection evidence; item 6 has bounded Windows default-library and CRT
-failure evidence; items 7 through 22 are queued. Existing bounded evidence is
+failure evidence; item 7 has bounded production archive/COMDAT evidence; items 8 through 22
+are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -35,7 +36,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 4 | COFF relocation coverage | **Windows verified for named corpus** | Code `07fd28a9` inventories actual `unit.obj`/`runtime.obj` from five SDK workspaces under ordinary C11 low/optimized flags, with map/library-log capture. It checks every retained REL32 and ADDR32NB field against its owned source/target positions and final PE bytes. | Ten native executions and twenty objects account for 3,133 fields: 2,404 linked-value checks and 729 explicitly discarded fields. Object addend, final-field, map-owner and discard-evidence mutations fail. This is the named corpus, not every possible Fairy program or CRT archive member; unobserved relocation kinds retain their earlier separate evidence. |
 | 5 | Weak linking: chains, cycles and replacement | **Windows verified for named cases** | Code `cbd3b26a` inventories actual generated/runtime objects, distinguishes class-105 records from linker directives, and binds explicit-object chains, strong replacements and strong cuts of cycles to map owners and final PE fields. Actual CRT startup and SDK data alternatives are exercised separately. | Forty controlled selections, four SDK data cases, two CRT startup cases and ten corpus images pass; four unresolved cycles fail in both the inspection planner and real LINK with LNK2019/LNK1120. This does not add Fairy weak syntax, reverify all archive search modes or establish general COMDAT removal. |
 | 6 | Default libraries and CRT archive | **Windows verified for named cases** | Code `53d7ed5f` records actual /MT object defaults, absolute searched archive paths and hashes, loaded CRT members, owned final symbols and PE entry at low/optimized. It verifies the five production workspaces and a C control relinked with absolute inputs and no default search. | Sixteen native executions and twenty expected link failures cover missing archives, suppressed defaults, removed demanded members and absent-but-unused OLDNAMES. Ordinary selection uses recorded toolchain directories; explicit relinks have empty LIB/LIBPATH. Broader archive/COMDAT policy, other CRT modes, clean-machine transfer and target promotion remain separate. |
-| 7 | Archives and COMDAT | Queued | Define the production archive, associative and any-COMDAT shapes to cover, including parent/child retention, discard and interaction with library inputs. | Each contracted production shape has exact retention/removal, relocation and executed-image evidence for the declared profile. |
+| 7 | Archives and COMDAT | **Windows verified for named forms** | Code `e9ca8758` binds five selected CRT objects to both archive indexes. Matrix `4f300ea1` checks ordinary, NODUPLICATES, ANY and direct associative unwind forms in actual generated/runtime objects and selected CRT members, plus existing controlled archive/direct competition. | Twenty native executions and two expected LNK2005 failures pass. The production corpus accounts for 226 parents and 462 unwind children; exact archive selection, retained fields, discarded payloads and input-order behavior have bounded receipts. Unobserved policies, arbitrary CRT members, chained/non-unwind associations, runtime unwinding and target promotion remain separate. |
 | 8 | Unwind v2, handlers and chained frames | Queued | Fix the version-2 record, handler-payload and chained-tail forms that the emitted target can produce, then name the exact Fairy/foreign frame boundaries to execute. | Version-2, handler and chain cases are inspected and executed through their exact frames, including chained-tail relocations and failure cases. |
 | 9 | Same-commit mixed-stack, callback and trap CI | Queued | Retain the live mixed-stack walk, C boundary catch and Fairy trap outcomes as one source-addressed receipt. Keep callback retention and asynchronous delivery outside the contract. | The authorized hosted lane runs the cases on the same commit and records stacks, handler addresses, trampoline results, trap mapping and artifact identity. A push is separately authorized work and is not performed by this documentation update. |
 | 10 | CodeView, PDB and DbgHelp retention and lookup | Queued | Bound the object records, PE/PDB association, retained artifact lookup and DbgHelp symbol result required by the proposed debug contract. | Corrupt or mismatched identities fail closed; a retained PE/PDB pair resolves the named functions and lines on a declared profile. Full CodeView syntax is not implied. |
@@ -158,6 +159,23 @@ An isolated directory missing unused OLDNAMES still fails default lookup with LN
 suppressing that unused default succeeds. Sixteen positive executions and twenty expected
 link failures pass, alongside PE/COFF unit checks, scoped Go vet and diff checks. Installed
 archives remain unchanged. Broader archive/COMDAT forms are next; Linux remains deferred below.
+
+## Item 7 progress: production archive and COMDAT forms
+
+Code `e9ca8758`, matrix `4f300ea1` and the
+[Windows receipt](../ops/windows-archive-comdat-20261101.md) cover the actual observed policies:
+ordinary sections, NODUPLICATES, ANY and direct associative unwind sections. Five selected CRT
+objects agree with both archive indexes, loaded-member logs and owned map symbols. Three named
+CRT functions bind direct pdata/xdata fields at both profiles; two small roots without those
+children are recorded separately. Duplicate selected startup objects fail with LNK2005.
+
+The five-workspace generated corpus accounts for 226 parents (76 retained, 150 discarded) and
+462 unwind children (194 retained, 268 discarded), with 402 child RVA fields, 97 final pdata
+entries and 1,572 xdata bytes checked. Existing controlled archive probes additionally prove
+unused-member non-extraction, competing ANY values and removal of the losing parent's distinct
+unwind payload under both input orders. Twenty native executions and two expected failures,
+PE/COFF unit checks, scoped Go vet and diff checks pass. Broader unobserved forms and runtime
+unwind semantics remain outside this receipt; Linux stays in the unchanged deferred queue.
 
 ## Batched native Linux validation, 2026-11-01
 
