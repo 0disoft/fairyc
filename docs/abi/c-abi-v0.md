@@ -471,6 +471,19 @@ handler-tail relocation. This is executable-image and
 bounded unwind-structure evidence only, not complete COFF symbol/relocation, CodeView/PDB, or
 distribution conformance.
 
+The [2026-11-01 generated-object receipt](../ops/windows-coff-relocations-20261101.md), code
+`07fd28a9`, adds final-link evidence over five actual SDK workspaces and both ordinary Windows
+profiles: twenty `unit.obj`/`runtime.obj` inputs and ten native executions. The observed families
+are REL32 and ADDR32NB. All 2,404 retained fields match independently recomputed target/addend/site
+formulas and final PE bytes; 729 discarded fields have exact COMDAT selection/log evidence.
+The checker records object section indices, symbol targets and linked RVAs and rejects missing
+ownership, unknown relocation kinds, overlapping fields and final-byte disagreement. Its bound
+is 65,536 relocation fields per object. It captures map/log evidence without adding debug,
+no-ICF or other nonproduction compilation flags. This is a measured SDK corpus, not an exhaustive
+claim over all programs, compiler CLI objects or CRT archive members. ADDR64, REL32 variants,
+SECTION and SECREL are not newly observed live-object evidence here; their existing separate
+probes retain their original limits. Linux execution remains deferred.
+
 Before returning any linked Windows artifact, the shared C driver now parses every intermediate
 MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image flags; requires
 bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid primary

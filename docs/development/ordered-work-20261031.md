@@ -8,7 +8,7 @@
 
 This is the current ordered queue. Item 1 is complete and the list below is the resulting work
 record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
-items 4 through 22 are queued. Existing bounded evidence is
+item 4 has Windows evidence for the named production-object corpus; items 5 through 22 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -30,7 +30,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 1 | Reconcile the current work list | **Complete** | Make this document the current queue, link it from `completion-plan.md`, preserve older records as history, and make later completion evidence supersede an earlier pending statement. | This queue and its status vocabulary are recorded in the two documentation files. |
 | 2 | Fairy-authored GNU companion | **Next / in progress** | Define and implement one private companion boundary for an already prepared Linux packet: compiler discovery, argv/stdin/environment handoff, stream capture, diagnostics, deadlines and process cleanup. Failure is explicit; the existing contract has no automatic frontend fallback to Go. Do not admit distribution or replace the default compiler. | The companion executes the named Linux build path from Fairy, preserves bounded cleanup and exact diagnostics, and has Linux-native plus Windows-development evidence. Go remains the default until a separate promotion decision. |
 | 3 | Aggregate transport in both directions | **Windows verified / Linux deferred** | Code `d558eb1f` checks 116 portable record shapes in separate generated-Fairy/C objects under MSVC C11/C17 low/optimized, plus two C-to-Fairy assertion-trap executions. The reverse entry is a fixture-only C bridge, not a public export or aggregate callback. | The bounded Windows matrix and six unsupported-shape checks pass. The 122-shape POSIX matrix emits locally; native cross-compiler execution is in the batched queue below. Full public-export and target conformance claims remain closed. |
-| 4 | COFF relocation coverage | Queued | Enumerate each relocation family emitted by current Fairy and runtime objects. Pair the object-level record with its linked-image result instead of treating a parse as link proof. | Each mandatory family has an exact object record, target resolution and final linked-image assertion in the declared Windows profile. Existing partial probes remain partial evidence. |
+| 4 | COFF relocation coverage | **Windows verified for named corpus** | Code `07fd28a9` inventories actual `unit.obj`/`runtime.obj` from five SDK workspaces under ordinary C11 low/optimized flags, with map/library-log capture. It checks every retained REL32 and ADDR32NB field against its owned source/target positions and final PE bytes. | Ten native executions and twenty objects account for 3,133 fields: 2,404 linked-value checks and 729 explicitly discarded fields. Object addend, final-field, map-owner and discard-evidence mutations fail. This is the named corpus, not every possible Fairy program or CRT archive member; unobserved relocation kinds retain their earlier separate evidence. |
 | 5 | Weak linking: chains, cycles and replacement | Queued | Define bounded weak-external chain, cycle and replacement cases, including selected and discarded targets and the observable failure mode. | Exact synthetic and live-object cases show deterministic selection, fallback or rejection through the real linker path. |
 | 6 | Default libraries and CRT archive | Queued | Record the exact default-library and CRT archive inputs used by each supported Windows build profile, including the expected selection or failure when a member is unavailable. | The inputs, archive search mode, selected member and final symbols are attributable to a same-source receipt; relying on a developer machine's implicit library path is insufficient. |
 | 7 | Archives and COMDAT | Queued | Define the production archive, associative and any-COMDAT shapes to cover, including parent/child retention, discard and interaction with library inputs. | Each contracted production shape has exact retention/removal, relocation and executed-image evidence for the declared profile. |
@@ -103,6 +103,25 @@ Six unsupported aggregate forms fail explicitly. Both target emission and focuse
 scoped Go vet and diff checks pass. The [receipt](../ops/windows-aggregate-crossings-20261101.md)
 states the exact boundary: no public exports, aggregate callback signatures, retained pointers,
 ownership transfer, foreign exception unwinding, hosted CI or target promotion.
+
+## Item 4 progress: generated and runtime COFF relocations
+
+Code `07fd28a9` adds `InspectGeneratedRelocations` and the native
+`TestGeneratedRelocationCoverage`. The corpus is `std_bytes_quickstart`,
+`std_alloc_quickstart`, `std_text_from_buffer_quickstart`, `std_vec_quickstart` and
+`process_args_quickstart`. Each is checked/lowered/emitted from Fairy source; native support is
+selected from its actual foreign-symbol set. No handwritten object replaces generated output.
+MSVC 14.51.36231 passes low/optimized builds, final-value assertions and exact native outcomes.
+
+REL32 accounts for 1,510 object fields (1,322 linked, 188 discarded); ADDR32NB accounts for 1,623
+(1,082 linked, 541 discarded). Source section identity, object addend, target resolution and final
+image bytes are recorded for every retained field. Pdata is matched by unique begin/end pairs;
+code/data section bases use owned map symbols. COMDAT omission requires the existing exact
+selection/discard proof. Unknown kinds and unresolved ownership fail rather than disappearing
+from the counts. The [receipt](../ops/windows-coff-relocations-20261101.md) records commands,
+source/object/image hashing, negative controls and the bounded scope. Full PE/COFF unit checks,
+scoped Go vet and diff checks pass. This Windows-only slice does not add a Linux job or change
+the deferred Linux queue.
 
 ## Batched native Linux validation, 2026-11-01
 
