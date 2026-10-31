@@ -529,6 +529,18 @@ non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`
 content, complete CodeView/PDB record semantics or broader symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 
+The later [Windows weak-linking receipt](../ops/windows-weak-aliases-20261101.md), code `cbd3b26a`,
+adds bounded explicit-object chain/cycle/replacement evidence for class-105 ALIAS records and
+C `/alternatename` directives. Both roots' selected owners and final REL32 fields are checked
+under reversed input order at low/optimized profiles. Cycles without a strong definition fail
+in the inspection planner and independently in LINK with LNK2019/LNK1120. Actual CRT startup
+selects strong UCRT/VCRuntime initialization definitions; a real SDK data alternative separately
+selects its fallback value 0 or a strong C provider's value 7 through checked REL32_1 fields.
+The measured Fairy/runtime corpus has no class-105 weak externals, and its one SDK directive
+has no root relocation or final map symbol. This evidence adds no Fairy weak syntax or public
+ABI, does not reverify historical archive search modes, and does not establish arbitrary
+archive/COMDAT removal or change the target's missing-fixture status.
+
 The executable-image path now follows the Microsoft x64 exception directory as well. It requires a
 readable non-executable `.pdata` table of sorted nonoverlapping 12-byte `RUNTIME_FUNCTION` entries,
 maps every function range to executable code, and maps every DWORD-aligned unwind RVA to readable

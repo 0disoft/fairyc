@@ -8,7 +8,8 @@
 
 This is the current ordered queue. Item 1 is complete and the list below is the resulting work
 record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
-item 4 has Windows evidence for the named production-object corpus; items 5 through 22 are queued. Existing bounded evidence is
+item 4 has Windows evidence for the named production-object corpus; item 5 has bounded Windows
+weak-chain and CRT selection evidence; items 6 through 22 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -31,7 +32,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 2 | Fairy-authored GNU companion | **Next / in progress** | Define and implement one private companion boundary for an already prepared Linux packet: compiler discovery, argv/stdin/environment handoff, stream capture, diagnostics, deadlines and process cleanup. Failure is explicit; the existing contract has no automatic frontend fallback to Go. Do not admit distribution or replace the default compiler. | The companion executes the named Linux build path from Fairy, preserves bounded cleanup and exact diagnostics, and has Linux-native plus Windows-development evidence. Go remains the default until a separate promotion decision. |
 | 3 | Aggregate transport in both directions | **Windows verified / Linux deferred** | Code `d558eb1f` checks 116 portable record shapes in separate generated-Fairy/C objects under MSVC C11/C17 low/optimized, plus two C-to-Fairy assertion-trap executions. The reverse entry is a fixture-only C bridge, not a public export or aggregate callback. | The bounded Windows matrix and six unsupported-shape checks pass. The 122-shape POSIX matrix emits locally; native cross-compiler execution is in the batched queue below. Full public-export and target conformance claims remain closed. |
 | 4 | COFF relocation coverage | **Windows verified for named corpus** | Code `07fd28a9` inventories actual `unit.obj`/`runtime.obj` from five SDK workspaces under ordinary C11 low/optimized flags, with map/library-log capture. It checks every retained REL32 and ADDR32NB field against its owned source/target positions and final PE bytes. | Ten native executions and twenty objects account for 3,133 fields: 2,404 linked-value checks and 729 explicitly discarded fields. Object addend, final-field, map-owner and discard-evidence mutations fail. This is the named corpus, not every possible Fairy program or CRT archive member; unobserved relocation kinds retain their earlier separate evidence. |
-| 5 | Weak linking: chains, cycles and replacement | Queued | Define bounded weak-external chain, cycle and replacement cases, including selected and discarded targets and the observable failure mode. | Exact synthetic and live-object cases show deterministic selection, fallback or rejection through the real linker path. |
+| 5 | Weak linking: chains, cycles and replacement | **Windows verified for named cases** | Code `cbd3b26a` inventories actual generated/runtime objects, distinguishes class-105 records from linker directives, and binds explicit-object chains, strong replacements and strong cuts of cycles to map owners and final PE fields. Actual CRT startup and SDK data alternatives are exercised separately. | Forty controlled selections, four SDK data cases, two CRT startup cases and ten corpus images pass; four unresolved cycles fail in both the inspection planner and real LINK with LNK2019/LNK1120. This does not add Fairy weak syntax, reverify all archive search modes or establish general COMDAT removal. |
 | 6 | Default libraries and CRT archive | Queued | Record the exact default-library and CRT archive inputs used by each supported Windows build profile, including the expected selection or failure when a member is unavailable. | The inputs, archive search mode, selected member and final symbols are attributable to a same-source receipt; relying on a developer machine's implicit library path is insufficient. |
 | 7 | Archives and COMDAT | Queued | Define the production archive, associative and any-COMDAT shapes to cover, including parent/child retention, discard and interaction with library inputs. | Each contracted production shape has exact retention/removal, relocation and executed-image evidence for the declared profile. |
 | 8 | Unwind v2, handlers and chained frames | Queued | Fix the version-2 record, handler-payload and chained-tail forms that the emitted target can produce, then name the exact Fairy/foreign frame boundaries to execute. | Version-2, handler and chain cases are inspected and executed through their exact frames, including chained-tail relocations and failure cases. |
@@ -122,6 +123,24 @@ from the counts. The [receipt](../ops/windows-coff-relocations-20261101.md) reco
 source/object/image hashing, negative controls and the bounded scope. Full PE/COFF unit checks,
 scoped Go vet and diff checks pass. This Windows-only slice does not add a Linux job or change
 the deferred Linux queue.
+
+## Item 5 progress: weak chains and actual alternatives
+
+Code `cbd3b26a` and the [Windows receipt](../ops/windows-weak-aliases-20261101.md) cover
+class-105 ALIAS records and C linker directives in low/optimized profiles, with forward/reversed
+object order. Fallback, root/middle strong replacement and strong cuts of a two-node cycle bind
+both call sites to exact selected owners and final displacement bytes. An unresolved cycle
+fails in the bounded inspection planner and independently in LINK, with two unresolved symbols.
+The inspection helper does not add a new production driver policy.
+
+The production corpus has no class-105 weak records. The process-argument runtime offers one
+SDK data alternative, but it has no root references and neither name is in its final map.
+Separate real-header C probes prove fallback value 0 and strong provider value 7 at both
+profiles. Actual `libcmt.lib(initializers.obj)` metadata and startup map/library logs establish
+strong UCRT/VCRuntime initialization selection in two more executions. The named suites pass
+56 native executions and four expected LINK failures, plus PE/COFF unit checks, scoped Go vet
+and diff checks. Archive search/absence, broader COMDAT removal, hosted CI and target promotion
+remain separate. Linux work stays in the unchanged deferred queue below.
 
 ## Batched native Linux validation, 2026-11-01
 
