@@ -110,13 +110,24 @@ test. Post-admission failures include those facts through `PartitionBuildError`
 and its error text, retaining the underlying cause. Go heap counters are not RSS.
 No new CLI flags, environment switches, or success output are introduced.
 
-External Debian 13 validation at `c4721fec` passed all four GCC/Clang low/optimized
-full CLI test-input builds within the shared deadline. Manual bootstrap passed
-three combinations; GCC optimized selected one worker and timed out. The same
-manual C input built in a separate two-worker diagnostic in 34.826 seconds;
-that diagnostic does not establish default acceptance. The Clang split probe
-needed a trailing-newline fixture fix. Native Linux timing and memory impact of
-the subsequent frontend lifetime/reclamation change still require revalidation.
+External Debian 13 validation at `62f2a006` passed unchanged manual bootstrap with
+GCC/Clang low/optimized under the shared 60-second C deadline. GCC optimized also
+passed a second fresh-object build with identical ELF bytes. Whole-bootstrap
+times were 70.88/68.64 seconds for GCC optimized, 41.81 for GCC low, 29.95 for Clang
+low, and 54.79 for Clang optimized; these include frontend and memory preparation
+and are not C-only times. No 600-second diagnostic was needed.
+
+A separate instrumented GCC optimized run observed Go RSS falling from 1,081.71
+to 99.88 MiB during 0.096795 seconds of memory preparation. Available memory at
+admission was 1,668.23 MiB, selecting two workers with observed overlapping
+compiler calls. Its C interval was 56.176 seconds, leaving about 3.8 seconds to
+the deadline; it is not a measurement of either unchanged acceptance run.
+The four default manual images passed 576 CLI calls, 60 Go reference comparisons
+and 12 generated-C executions. Full CLI test-input builds also passed all four
+combinations. See the [external validation record](../ops/linux-bootstrap-revalidation-62f2a006.md)
+for provenance, measurements, commands and remaining limits. Other host/load
+conditions, Ubuntu, clean-machine distribution and self-host acceptance remain
+outside this evidence.
 
 ## Local evidence
 
@@ -129,8 +140,9 @@ GNU object/ELF publication, low/release SDK File-reader builds and execution, lo
 build, invalid flags, old-image preservation on compiler/link/frontend/companion failure,
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
 Cold/warm cache integration cases are authored, including development-to-release
-IR reuse and companion failure after a hit. Linux-native execution and a
-Fairy-authored GNU backend remain separate work.
+IR reuse and companion failure after a hit. The external Debian execution record
+above complements these Windows development checks; a Fairy-authored GNU backend
+remains separate work.
 
 ## Private run-image backend
 
