@@ -57,13 +57,23 @@ their authored tests, and the two Go harnesses. `TestLinuxGNUCompanionPolicy` an
 subtests in total. `go vet ./internal/cli` and the commit's diff check pass.
 
 The ELF admission does not handle extended section numbering and is bounded to 64 MiB with a
-4 MiB name scan. Kernel/native Linux GNU launch, runtime-pack selection, compile/link/publication,
-and CLI wiring remain unfinished. A fresh Go bootstrap passes the original workspace's `check`
-and `check --locked` with 566 sources and 7,162 MIR functions; the source lock is refreshed.
+4 MiB name scan.
+
+The Linux runtime-selection slice adds authored `linux_runtime.fy`, its generator, and
+`linux_runtime_contract.fy`, with `TestLinuxGNUCompanionRuntime` as the Go oracle. The oracle
+checks 99 plans derived from the authoritative Go standard-library and host sources. Both Windows
+MSVC low/optimized and both-target emission pass. Admission rejects missing target markers,
+unknown standard-library/vector/Linux-host symbols, and Windows dependencies.
+
+Runtime symbol/dependency planning is implemented. Pinned raw-asset loading/assembly,
+kernel/native Linux GNU launch, compile/link/publication, and CLI wiring remain unfinished.
+The final original-workspace `check` and `check --locked` pass with 568 sources and 7,171 MIR
+functions; the source lock is refreshed. The three focused Go tests pass six Windows native
+low/optimized subtests, along with both-target emission, the generated-contract consistency
+check, `go vet -mod=readonly ./internal/cli` and `git diff --check`.
 Native Linux execution is unavailable on this host: `wsl --list --quiet` returns
 `Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`. No Linux execution is claimed for these new modules.
-These slices advance item 2, which remains **Next / in progress**; they
-do not complete the broader item.
+These slices advance item 2, which remains **Next / in progress** and is not complete.
 
 ## Completed Linux baseline
 
