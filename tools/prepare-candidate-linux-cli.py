@@ -84,7 +84,7 @@ def select_linux_cache(output):
         path.write_text(source, encoding='utf-8', newline='\n')
 
 
-def prepare(output):
+def prepare(output, companion=False):
     output = output.resolve()
     if not output.is_relative_to((ROOT / '.cache').resolve()):
         raise ValueError('output must be inside the repository .cache directory')
@@ -97,20 +97,27 @@ def prepare(output):
     old = 'import file_cli as file_cli;'
     if source.count(old) != 1:
         raise ValueError('candidate main dispatcher import changed')
-    main.write_text(source.replace(old, 'import linux_file_cli as file_cli;'),
-                    encoding='utf-8', newline='\n')
-    select_workspace_io(output)
-    select_linux_emission(output)
-    select_linux_tests(output)
-    select_linux_cache(output)
+    if companion:
+        source = ('module main;\nimport linux_gnu_companion as companion;\n'
+                  '@effects(filesystem,console,environment,clock) '
+                  'fn i32 main(){return companion::run();}\n')
+    else:
+        source = source.replace(old, 'import linux_file_cli as file_cli;')
+    main.write_text(source, encoding='utf-8', newline='\n')
+    if not companion:
+        select_workspace_io(output)
+        select_linux_emission(output)
+        select_linux_tests(output)
+        select_linux_cache(output)
     return output
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--companion', action='store_true', help='select the Fairy-authored GNU companion entry')
     args = parser.parse_args()
-    print(prepare(args.output))
+    print(prepare(args.output, companion=args.companion))
 
 
 if __name__ == '__main__':

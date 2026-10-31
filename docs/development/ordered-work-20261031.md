@@ -49,31 +49,45 @@ remain `UNDECIDED` until an explicit owner decision.
 | 21 | Atlas impact, MCP and structural edits | Queued | Gate each capability separately on current `.fymap` identity and incompleteness behavior. MCP needs its own permission and untrusted-data boundary; structural editing needs an atomic source transform contract. | Impact and semantic diff report bounded uncertainty, MCP exposes only admitted facts with explicit permissions, and structural edits round-trip through parse and semantic validation. Heuristic source rewriting is insufficient. |
 | 22 | Chain execution and persistence | Queued | Keep the chain target **UNDECIDED**. Define the transaction execution subset, storage port, ownership, reentrancy, conflict and failure-atomicity rules before native or durable integration. | The named execution and persistence adapter passes deterministic local oracle and native evidence with restart/conflict/failure tests. Production chain deployment and consensus remain outside this queue. |
 
-## Item 2 progress: authored GNU policy and ELF admission
+## Item 2 progress: authored GNU companion implementation
 
-Code commit `11b781f3` adds the authored `linux_gnu_policy.fy` and `linux_elf.fy` sources,
-their authored tests, and the two Go harnesses. `TestLinuxGNUCompanionPolicy` and
-`TestLinuxGNUCompanionELF` pass both-target emission and Windows MSVC low/optimized, four
-subtests in total. `go vet ./internal/cli` and the commit's diff check pass.
+Commit `11b781f3` adds authored toolchain policy and ELF64 admission. The reported focused
+tests pass both-target emission and Windows MSVC low/optimized. ELF inspection is bounded to
+64 MiB with a 4 MiB name scan; extended section numbering remains unsupported.
 
-The ELF admission does not handle extended section numbering and is bounded to 64 MiB with a
-4 MiB name scan.
+Commit `53840962` adds `linux_runtime.fy` and `linux_runtime_contract.fy` with
+`TestLinuxGNUCompanionRuntime` as the Go oracle. The current comparison covers 105 plans from
+the authoritative Go standard-library and host sources, with both-target emission and Windows
+low/optimized passing. Unknown standard-library, vector, Linux-host, and Windows-dependency
+markers are rejected.
 
-The Linux runtime-selection slice adds authored `linux_runtime.fy`, its generator, and
-`linux_runtime_contract.fy`, with `TestLinuxGNUCompanionRuntime` as the Go oracle. The oracle
-checks 99 plans derived from the authoritative Go standard-library and host sources. Both Windows
-MSVC low/optimized and both-target emission pass. Admission rejects missing target markers,
-unknown standard-library/vector/Linux-host symbols, and Windows dependencies.
+Commit `13243c0d` adds `linux_runtime_assets.fy` and a generator that pins 25 source-owned raw
+C files in a 138,102-byte runtime pack. The loader verifies the exact source count, size and
+SHA-256 pin. The reported Linux runtime checks compare 48 complete C outputs in low/optimized
+profiles. The GNU build workflow and POSIX-only C bridge now cover toolchain admission,
+separate compilation and linking, bounded stage I/O, ELF admission, descendant-aware process
+capture and replacement publication. Windows MSVC low/optimized policy tests exercise real
+Fairy compile/link/publish code; the C bridge only runs there through POSIX substitutes, so no
+Linux-native execution is claimed.
 
-Runtime symbol/dependency planning is implemented. Pinned raw-asset loading/assembly,
-kernel/native Linux GNU launch, compile/link/publication, and CLI wiring remain unfinished.
-The final original-workspace `check` and `check --locked` pass with 568 sources and 7,171 MIR
-functions; the source lock is refreshed. The three focused Go tests pass six Windows native
-low/optimized subtests, along with both-target emission, the generated-contract consistency
-check, `go vet -mod=readonly ./internal/cli` and `git diff --check`.
-Native Linux execution is unavailable on this host: `wsl --list --quiet` returns
-`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`. No Linux execution is claimed for these new modules.
-These slices advance item 2, which remains **Next / in progress** and is not complete.
+The `linux_gnu_companion.fy` entry matches the private CLI flags and
+loads the fixed sibling `fairyc-linux-runtime-assets.pack` through the Linux rooted reader.
+`tools/prepare-candidate-linux-cli.py --companion` selects it in an isolated main. The matching
+companion and pack require explicit opt-in installation; the original Go backend remains the
+default and has no automatic replacement. Option checks pass under MSVC low/optimized;
+complete entry emission passes for both targets with closed Linux support and no Windows
+foreign symbols. The companion preparation mode only selects the entry; frontend/cache
+platform rewrites stay with the ordinary CLI preparation mode.
+
+Fresh original-workspace `check`/`check --locked` pass with 574 sources and 7,232 MIR
+functions; the isolated companion workspace passes with 574 sources and 7,230 functions.
+The focused companion suite and GNU adapter boundary checks pass, as do runtime-pack pin
+verification, Python syntax checks, scoped Go vet and diff checks. Native adapter and complete
+companion tests are authored but skipped on Windows; WSL reports
+`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`. Earlier Debian evidence covers the Go backend. Native
+Linux GNU launch, fixed-point reproduction and distribution remain unverified. Item 2 remains
+**Next / in progress** and the target maturity state is unchanged. This progress introduces no
+new owner approval gate and does not trigger push, CI, release or deployment.
 
 ## Completed Linux baseline
 
@@ -88,7 +102,7 @@ double-counted.
 | Completed scope | Status | Evidence | Limit attached to the evidence |
 | --- | --- | --- | --- |
 | Linux bootstrap and candidate command path | **Complete within this record** | [Evidence and scope](../ops/linux-bootstrap-revalidation-62f2a006.md#evidence-and-scope), [default acceptance](../ops/linux-bootstrap-revalidation-62f2a006.md#unchanged-default-acceptance), [regression results](../ops/linux-bootstrap-revalidation-62f2a006.md#regression-results) | Transcribed external results on Debian 13.3 amd64, Linux 6.18.57, glibc 2.41, Go 1.26.10, GCC 14.2.0 and Clang 18.1.8, with a four-core/4 GiB cgroup. It was not a new local execution or hosted-CI receipt, and the raw-results ZIP was not supplied. |
-| Linux `check/build/run/test/new` and cache behavior | **Complete as covered by the record** | [Matching bootstrap pair](../architecture/candidate-linux-build-v1.md#matching-bootstrap-pair), cited regression results | Coverage includes ordinary/prepared checks, cache cold/hit/corruption/invalidation, stale locks, replay, stdin/EOF/timeouts, traps, binary output and argument boundaries. It does not establish every possible host, load or input. |
+| Linux `check/build/run/test/new` and cache behavior | **Complete as covered by the record** | [Historical Go bootstrap pair](../architecture/candidate-linux-build-v1.md#historical-go-bootstrap-pair), cited regression results | Coverage includes ordinary/prepared checks, cache cold/hit/corruption/invalidation, stale locks, replay, stdin/EOF/timeouts, traps, binary output and argument boundaries. It does not establish every possible host, load or input. |
 
 The record explicitly leaves a full `go test ./...`, the complete fixture/sanitizer/ABI sweep,
 Ubuntu execution, native Windows execution, clean-machine distribution, self-host acceptance,

@@ -1,5 +1,138 @@
 # Private Linux candidate workspace build v1
 
+## Authored GNU companion
+
+This section describes the Fairy-authored GNU companion introduced by code commit
+`13243c0d`. It is implementation evidence, not a completed target or distribution claim.
+The existing Go bootstrap companion remains the default and retains its original owners.
+
+### Source ownership
+
+- `examples/lexer_candidate/src/linux_gnu_build.fy` owns toolchain admission, source and
+  object planning, compiler invocations, ELF admission and publication orchestration.
+- `linux_gnu_policy.fy`, `linux_gnu_host.fy`, `linux_elf.fy`, `linux_runtime.fy` and
+  `linux_runtime_contract.fy` own their named policy, host boundary, object inspection,
+  runtime selection and target-marker checks.
+- `linux_runtime_assets.fy` validates and selects the pinned runtime asset pack. Its
+  generated `linux_runtime_asset_pin.fy` records the exact source count, size and digest.
+- `internal/candidatehost/linux_gnu.c` is the Linux OS adapter. It performs POSIX
+  marshalling only; Fairy owns source selection, compiler flags, invocation order and
+  artifact admission.
+- `linux_gnu_companion.fy` owns the private CLI entry, argument admission, packet and
+  runtime-pack loading, and build/publication dispatch. `linux_companion_input.fy`
+  supplies bounded reads through the retained Linux directory chain.
+
+### Runtime assets and plan selection
+
+`tools/package-candidate-linux-runtime.py` reads 25 authoritative raw C sources from the
+repository and verifies their exact bytes while producing a 138,102-byte asset pack. The
+loader accepts at most 1 MiB, checks the generated pin, and assembles at most 8 MiB of
+runtime C. Windows dependencies and unknown target markers fail admission.
+
+The authored selector is compared with the live Go standard-library contract and Linux
+host-source inventory by `TestLinuxGNUCompanionRuntime`. The reported focused checks cover
+105 plans and 48 complete runtime C outputs in low/optimized profiles. Both-target emission
+and Windows MSVC checks pass. These are Windows-development observations, not Linux-native
+execution.
+
+### Toolchain and build contract
+
+Admission requires native Linux amd64 with glibc >= 2.39 and GCC >= 13 or Clang >= 18.
+Compiler `auto` tries an admitted GCC and then an admitted Clang. A requested
+`--cc gcc|clang` is exact. The companion never invokes or falls back to the Go frontend.
+
+The input limits are 96 MiB for the packet and supplied sources, 8 MiB for assembled
+runtime C and 64 MiB for a published output. Each compiler invocation and the link have a
+separate 60-second deadline. Generated sources use `-std=c11 -fno-common`,
+`-O0`/`-O2`, `-pipe` and `-c`. Every object is inspected as ELF64 x86-64 before link.
+Linking passes only `@fy_objects.rsp -o fy_program`; C compilation flags are not repeated
+at link time.
+
+When process arguments are selected, a separate startup object initializes the actual
+process `argc`/`argv` before calling the candidate entry. The packet and target-neutral
+entry bytes are not rewritten for other programs.
+
+### Stage, process and publication boundary
+
+The caller supplies an absolute mode-0700 stage containing only `packet.bin`. The stage
+descriptor is read-only. Writes are descriptor-relative and exclusive; reads use
+`O_NOFOLLOW` and bounded size checks. Compiler children inherit the caller-owned process
+group and do not create a nested group. They receive EOF on stdin and an environment with
+`TMPDIR` set to the stage and `LC_ALL=C`/`LANG=C`; the parent environment is unchanged.
+Combined child output is limited to 64 KiB.
+
+Each compile or link invocation kills and reaps its leader on a fault. The outer capture
+owns descendant cleanup, the ten-minute overall build deadline and stage cleanup.
+
+Publication opens the rooted parent with `O_NOFOLLOW`, rejects `..` and symlink segments,
+creates a cryptographically nonce-named mode-0700 temporary file, writes, fsyncs, closes,
+and renames into place. Failure preserves the previous image. The contract does not fsync
+the parent directory and does not claim crash durability beyond that operation order.
+
+### Entry and explicit CLI selection
+
+The private entry matches the existing companion protocol:
+`--packet-input <stage/packet.bin>`, `--stage-root <stage>`,
+`--output-root <root>` and `--output <relative>`, with optional `--release`,
+`--run-trap-control` and `--cc gcc|clang`. Trap mode requires the stage as output root and
+`program` as the output.
+The runtime pack is read fresh from the fixed sibling
+`fairyc-linux-runtime-assets.pack` through the Linux rooted reader, avoiding Windows
+`FileKind` selection.
+
+`tools/prepare-candidate-linux-cli.py --companion` writes an isolated `main.fy` that selects
+`linux_gnu_companion`, without applying the unrelated frontend/cache platform rewrites.
+Installation of the matching companion and runtime pack beside a
+Linux CLI is an explicit opt-in operation. Nothing automatically replaces the Go backend.
+
+From the repository root on a supported Linux host:
+
+```sh
+go build -o .cache/fairyc-bootstrap ./cmd/fairyc
+python3 tools/prepare-candidate-linux-cli.py --output .cache/linux-gnu-companion --companion
+(cd .cache/linux-gnu-companion && ../fairyc-bootstrap experimental build-workspace \
+  --target x86_64-linux-gnu --cc gcc --profile low \
+  --output build/fairyc-candidate-linux-build)
+python3 tools/package-candidate-linux-runtime.py \
+  --output .cache/linux-gnu-companion/build/fairyc-linux-runtime-assets.pack
+```
+
+Place both generated files beside the prepared Linux CLI for an explicit opt-in install.
+
+### Evidence and remaining gates
+
+Real Fairy policy tests exercise compile, link and publication plus failure-stage reporting
+under Windows MSVC low/optimized. The C bridge is exercised through MSVC POSIX substitutes
+in both profiles; this is not Linux execution. The native Linux adapter tests are authored
+and skipped on Windows.
+
+`TestLinuxGNUCompanionOptions` passes under Windows MSVC low/optimized, checking private
+build/run flags, explicit compiler choice, duplicate/unknown flags and trap-output bounds.
+`TestLinuxGNUCompanionEntryEmission` emits the complete companion for both targets and
+closes the Linux native support set without Windows foreign symbols. The original workspace
+passes `check` and `check --locked` with 574 source files and 7,232 MIR functions. The
+isolated companion workspace passes those commands with 574 files and 7,230 functions.
+
+`TestLinuxGNUCompanionNative` is authored for GCC/Clang low/optimized. It builds the actual
+Fairy entry and exercises runtime-pack loading, compile/link/publication, argument startup,
+private run-image output, old-image preservation on compile/link failure and pack corruption.
+The harness uses the production outer capture to own compiler descendants. It is skipped
+on Windows along with `TestLinuxGNUAdapterNative`; the local WSL query fails with
+`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`. These native cases have not run here.
+
+The complete focused `TestLinuxGNUCompanion` suite and `TestLinuxGNUAdapterBoundaries`
+pass locally, with the native cases explicitly skipped. Runtime-pack pin verification,
+Python syntax checks, `go vet -mod=readonly ./internal/candidatehost ./internal/cli` and
+`git diff --check` also pass. Earlier Debian results below apply to the Go bootstrap path.
+Native Linux GNU launch, fixed-point reproduction and distribution remain unverified.
+`x86_64-linux-gnu` maturity is unchanged. Item 2 work introduces no new owner approval gate;
+this implementation and documentation imply no push, CI dispatch, release or deployment.
+
+## Historical Go bootstrap backend (retained default)
+
+The following Go-only claims document the original bootstrap path. They remain accurate for
+that path and its source owners; they do not describe the Fairy-authored companion above.
+
 The initial Linux backend is `tools/candidate/fairyc-candidate-linux-build`, a Go
 bootstrap companion. It contains no Fairy frontend. It consumes a fresh bounded
 `FYCPARTS1` packet, requires the `x86_64-linux-gnu` target marker, selects the closed
@@ -62,7 +195,7 @@ handle first. Cleanup may fail or leave a partial tree under filesystem failures
 noncooperating same-user writers and mount changes are outside this private protocol.
 If publication succeeded before final cleanup failed, status 6 does not roll it back.
 
-## Matching bootstrap pair
+## Historical Go bootstrap pair
 
 On the supported Linux host, from the repository root:
 
@@ -80,7 +213,7 @@ Keep the matching companion beside the CLI. Runtime C is embedded in the compani
 invocation needs neither an external asset pack nor an installed Go toolchain. This is
 an explicit bootstrap pair, not clean-machine distribution or self-host proof.
 
-## Go bootstrap compilation
+## Historical Go bootstrap compilation
 
 Linux native `build`, `run`, `test`, and bootstrap use `cbackend.EmitBuild`.
 When function bodies total more than 2 MiB, it emits roughly 2 MiB function-boundary
@@ -129,7 +262,7 @@ for provenance, measurements, commands and remaining limits. Other host/load
 conditions, Ubuntu, clean-machine distribution and self-host acceptance remain
 outside this evidence.
 
-## Local evidence
+## Historical Go bootstrap local evidence
 
 Full-entry Linux GNU/Windows MSVC C emission has no Windows foreign dependencies.
 Windows low/optimized substitutes check dispatch, unsuffixed output, companion paths,
@@ -141,8 +274,9 @@ build, invalid flags, old-image preservation on compiler/link/frontend/companion
 and empty private TMPDIR after CLI calls. Native Linux cases are skipped on Windows.
 Cold/warm cache integration cases are authored, including development-to-release
 IR reuse and companion failure after a hit. The external Debian execution record
-above complements these Windows development checks; a Fairy-authored GNU backend
-remains separate work.
+above complements these Windows development checks. The current Fairy-authored GNU
+companion is documented at the top of this page; this section remains evidence for the
+retained Go bootstrap path.
 
 ## Private run-image backend
 
