@@ -89,8 +89,10 @@ func TestProductSupportSourceLinksOnlyCalledStandardLibraryClosure(t *testing.T)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if test.prefix != "" && !strings.HasPrefix(source, test.prefix) {
-				t.Errorf("support source does not start with %q", test.prefix)
+			// Go's embed-only marker is a C comment, not a preprocessor directive.
+			cSource := strings.TrimPrefix(source, "//go:build ignore\n\n")
+			if test.prefix != "" && !strings.HasPrefix(cSource, test.prefix) {
+				t.Errorf("support source's first C directive is not %q", test.prefix)
 			}
 			for _, required := range test.required {
 				if !strings.Contains(source, required) {
