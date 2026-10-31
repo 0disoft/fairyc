@@ -67,6 +67,7 @@ func TestGeneratedRelocationCoverage(t *testing.T) {
 						t.Fatal("missing production objects")
 					}
 					recordGeneratedDefaultLibraries(t, a)
+					recordGeneratedArchiveCOMDAT(t, a)
 					for _, obj := range a.Objects {
 						inventory, err := pecoff.InspectWeakAliases(obj.Bytes)
 						if err != nil {
