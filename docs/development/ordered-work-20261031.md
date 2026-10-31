@@ -10,7 +10,8 @@ This is the current ordered queue. Item 1 is complete and the list below is the 
 record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
 item 4 has Windows evidence for the named production-object corpus; item 5 has bounded Windows
 weak-chain and CRT selection evidence; item 6 has bounded Windows default-library and CRT
-failure evidence; item 7 has bounded production archive/COMDAT evidence; items 8 through 22
+failure evidence; item 7 has bounded production archive/COMDAT evidence; item 8 has bounded
+unwind/handler-data evidence; items 9 through 22
 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
@@ -37,7 +38,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 5 | Weak linking: chains, cycles and replacement | **Windows verified for named cases** | Code `cbd3b26a` inventories actual generated/runtime objects, distinguishes class-105 records from linker directives, and binds explicit-object chains, strong replacements and strong cuts of cycles to map owners and final PE fields. Actual CRT startup and SDK data alternatives are exercised separately. | Forty controlled selections, four SDK data cases, two CRT startup cases and ten corpus images pass; four unresolved cycles fail in both the inspection planner and real LINK with LNK2019/LNK1120. This does not add Fairy weak syntax, reverify all archive search modes or establish general COMDAT removal. |
 | 6 | Default libraries and CRT archive | **Windows verified for named cases** | Code `53d7ed5f` records actual /MT object defaults, absolute searched archive paths and hashes, loaded CRT members, owned final symbols and PE entry at low/optimized. It verifies the five production workspaces and a C control relinked with absolute inputs and no default search. | Sixteen native executions and twenty expected link failures cover missing archives, suppressed defaults, removed demanded members and absent-but-unused OLDNAMES. Ordinary selection uses recorded toolchain directories; explicit relinks have empty LIB/LIBPATH. Broader archive/COMDAT policy, other CRT modes, clean-machine transfer and target promotion remain separate. |
 | 7 | Archives and COMDAT | **Windows verified for named forms** | Code `e9ca8758` binds five selected CRT objects to both archive indexes. Matrix `4f300ea1` checks ordinary, NODUPLICATES, ANY and direct associative unwind forms in actual generated/runtime objects and selected CRT members, plus existing controlled archive/direct competition. | Twenty native executions and two expected LNK2005 failures pass. The production corpus accounts for 226 parents and 462 unwind children; exact archive selection, retained fields, discarded payloads and input-order behavior have bounded receipts. Unobserved policies, arbitrary CRT members, chained/non-unwind associations, runtime unwinding and target promotion remain separate. |
-| 8 | Unwind v2, handlers and chained frames | Queued | Fix the version-2 record, handler-payload and chained-tail forms that the emitted target can produce, then name the exact Fairy/foreign frame boundaries to execute. | Version-2, handler and chain cases are inspected and executed through their exact frames, including chained-tail relocations and failure cases. |
+| 8 | Unwind v2, handlers and chained frames | **Windows verified for named states** | Code `4ae0abbe` binds C/GS scope payloads to object relocations, final bytes and live C dispatch; `a025545d` accounts for remaining CRT fragment entries; `01d30ff6` checks fixed RBP/XMM6 chained states and exact tails. Existing v2 and mixed-frame probes are rerun. | Twenty native executions, including eight expected traps, pass; controlled unwind contexts total 204. Scope payload mutations, incorrect saved/frame states and changed metadata fail. Extra CRT fragments have entry-only evidence. Arbitrary handler grammars, frame/opcode families, production chain emission, full conformance and hosted CI remain separate. |
 | 9 | Same-commit mixed-stack, callback and trap CI | Queued | Retain the live mixed-stack walk, C boundary catch and Fairy trap outcomes as one source-addressed receipt. Keep callback retention and asynchronous delivery outside the contract. | The authorized hosted lane runs the cases on the same commit and records stacks, handler addresses, trampoline results, trap mapping and artifact identity. A push is separately authorized work and is not performed by this documentation update. |
 | 10 | CodeView, PDB and DbgHelp retention and lookup | Queued | Bound the object records, PE/PDB association, retained artifact lookup and DbgHelp symbol result required by the proposed debug contract. | Corrupt or mismatched identities fail closed; a retained PE/PDB pair resolves the named functions and lines on a declared profile. Full CodeView syntax is not implied. |
 | 11 | UCRT, VCRuntime and dynamic DLL dependencies | Queued | Enumerate static imports and declared runtime-loaded DLL dependencies for development and release outputs, with a bounded manifest and execution check. | Each declared dependency is present, resolvable and exercised without relying on an unrecorded developer PATH; absent or mismatched files fail with the declared error. Clean-machine transfer remains a separate evidence gate. |
@@ -176,6 +177,22 @@ unused-member non-extraction, competing ANY values and removal of the losing par
 unwind payload under both input orders. Twenty native executions and two expected failures,
 PE/COFF unit checks, scoped Go vet and diff checks pass. Broader unobserved forms and runtime
 unwind semantics remain outside this receipt; Linux stays in the unchanged deferred queue.
+
+## Item 8 progress: bounded unwind behavior and handler data
+
+The [Windows receipt](../ops/windows-unwind-completion-20261101.md) records sources `4ae0abbe`,
+`a025545d` and `01d30ff6`. Six C/GS scope tables bind eight records and 29 relocated scope fields
+to final bytes; the body tables also match live handler/data pointers. Normal return, inner catch and outer
+catch prove exact filter/finally order, application payload and abnormal status; 57 payload
+mutations are rejected. The optimized constant handler uses literal sentinel 1.
+
+The CRT chain partition now accounts for 37/41 fragments, including 12/14 additional entry-only
+contexts. A closed RBP/XMM6 chain fixture adds twenty contexts across both profiles, with exact
+tail fields, partial prolog/epilog state and wrong-frame/vector controls. Existing v2 epilogs,
+original chain tails and mixed Fairy/C walks/traps pass again. Twenty native executions and
+204 controlled unwind contexts pass, as do PE/COFF and probe unit checks, scoped Go vet and diff
+checks. Arbitrary handler/opcode/frame forms, production chain emission and full target
+conformance remain unverified. Hosted same-commit CI stays item 9; Linux remains deferred below.
 
 ## Batched native Linux validation, 2026-11-01
 

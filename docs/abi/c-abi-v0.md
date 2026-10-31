@@ -595,16 +595,28 @@ establisher frame, integer restoration and XMM preservation. The later
 [zero-prolog record](../ops/evidence/windows-chained-zero-prolog-20261024.json) checks nine
 add/pop/ret epilogs and 36 instruction-derived contexts per profile, including registers already
 restored before the selected PC. It counts unadmitted CALL/INT3 and other instruction sequences
-separately. General frame-register forms and XMM save operations remain untested. The final-image inspector follows
+separately. Those historical records did not test general frame-register forms or XMM save operations. The final-image inspector follows
 each chain to a valid primary record, rejecting cycles, excessive inspector depth, mismatched frame
 fields and secondary stack changes. A [closed COFF fixture](../ops/evidence/windows-chained-link-20261024.json)
 binds both chain tails' six ADDR32NB fields, including nonzero addends, to exact owned map symbols
 and final-image values at both MSVC profiles. The fixture executes normally and passes three native
 controlled unwind contexts; structurally valid wrong-parent tuples are rejected. It does not prove
 compiler emission or archive/COMDAT selection of such chains. Live CRT capture, other epilog
-instruction shapes, language-specific handler payload parsing, complete chain equivalence,
+instruction shapes, arbitrary language-specific handler payloads, complete chain equivalence,
 production chained-tail relocation and complete hosted fixtures remain unproven; `windows-x64-unwind-fixtures` therefore
 remains missing. No runtime feature or dependency is added.
+
+The [2026-11-01 unwind/handler-data receipt](../ops/windows-unwind-completion-20261101.md), sources
+`4ae0abbe`, `a025545d` and `01d30ff6`, adds a closed C-specific/simple-GS scope-table proof:
+count, relocated ranges/filters/jumps, sentinel 1, GS trailer and live HandlerData agree with
+the source object and final PE. Normal, inner-catch and outer-catch paths have exact filter/
+finally order; 57 payload mutations fail. Previously unclassified CRT chain fragments now
+have entry-only controlled contexts, while decoded epilogs retain instruction-derived states.
+A separate fixed RBP/XMM6 platform fixture checks partial prologs, two chain tails, save/restore
+and already-restored epilogs. The refreshed v2/chain/mixed matrix passes twenty native runs
+(eight expected traps) and 204 controlled contexts. General frame registers, arbitrary handler
+grammars/opcodes, production chain emission, live CRT capture and complete hosted conformance
+remain unproven; the missing-fixture gate and target maturity are unchanged.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
