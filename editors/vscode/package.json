@@ -72,8 +72,17 @@
     "vscode-oniguruma": "^2",
     "vscode-textmate": "^9"
   },
+  "overrides": {
+    "@vscode/vsce": {
+      "minimatch": "^11"
+    },
+    "vscode-languageclient": {
+      "minimatch": "^11"
+    }
+  },
   "scripts": {
     "package:vsix": "node ../../tools/package-vscode.mjs",
+    "test:globs": "node --test ../../tools/editor-globs.test.mjs",
     "test:syntax": "node ../../tools/test-editor-assets.mjs"
   }
 }

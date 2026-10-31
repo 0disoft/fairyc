@@ -1,4 +1,5 @@
 const vscode = require('vscode');
+require('./minimatch-validation').prepareLanguageClientPatterns();
 const { LanguageClient } = require('vscode-languageclient/node');
 let client;
 async function activate(context) {

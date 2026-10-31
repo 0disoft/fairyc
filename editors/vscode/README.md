@@ -21,6 +21,16 @@ npm run package:vsix
 Use Node.js 22 or newer. `npm ci` is required; the packaging script uses the
 repository-local `@vscode/vsce` 4.x dependency.
 
+The language client and packager have scoped `minimatch` 11.x overrides for
+[GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
+Language client 9 uses the removed `makeRe()` only to check pattern validity;
+`minimatch-validation.js` supplies that boolean check from the parsed pattern
+set for the client's copy, while matching stays on minimatch 11's non-regex
+implementation. It is not a general replacement for the old RegExp API.
+Reassess the adapter and overrides when upgrading the language client. Validate
+both dependency consumers with `npm run test:globs`; the isolated install harness
+also exercises the client's actual file-operation and notebook filters.
+
 The script creates a fresh candidate directory under the repository cache on
 every run and prints its absolute path. Existing artifacts are never overwritten:
 

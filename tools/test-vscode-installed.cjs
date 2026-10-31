@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
+const { createRequire } = require('node:module');
 const vscode = require('vscode');
 
 async function eventually(read, accept, label) {
@@ -34,6 +35,46 @@ exports.run = async function () {
     await extension.activate();
     assert.equal(extension.isActive, true);
 
+    // Exercise real client consumers, including their legacy makeRe guards.
+    // Ordinary definition/completion alone would miss the overridden API break.
+    const requireExtension = createRequire(path.join(extension.extensionPath, 'package.json'));
+    // The test loader has a separate module cache from VS Code's extension
+    // loader. Apply the same installed startup adapter to this test copy too.
+    requireExtension('./minimatch-validation').prepareLanguageClientPatterns();
+    const requireClient = createRequire(requireExtension.resolve('vscode-languageclient/package.json'));
+    const { DidCreateFilesFeature } = requireClient('./lib/common/fileOperations');
+    const feature = new DidCreateFilesFeature({code2ProtocolConverter: {asDidCreateFilesParams() {}}});
+    try {
+      feature.register({id: 'glob-compat', registerOptions: {
+        filters: [{scheme: 'file', pattern: {glob: '**/*.fy'}}]
+      }});
+      const ignored = vscode.Uri.file(path.join(workspace, 'notes.txt'));
+      const filtered = await feature.filter({files: [uri, ignored]}, item => item);
+      assert.deepEqual(filtered.files, [uri]);
+    } finally {
+      feature.clear();
+    }
+    const { NotebookDocumentSyncFeature } = requireClient('./lib/common/notebook');
+    const notebooks = new NotebookDocumentSyncFeature({
+      clientOptions: {}, protocol2CodeConverter: {asDocumentSelector() { return []; }}
+    });
+    try {
+      notebooks.register({id: 'glob-compat', registerOptions: {
+        notebookSelector: [{notebook: {pattern: '**/*.fy'}}]
+      }});
+      const provider = notebooks.registrations.get('glob-compat');
+      const cells = [{document: {languageId: 'fairyc'}}];
+      // Notebook filters keep dot=false; the harness itself lives in .cache.
+      // These synthetic notebook URIs need no backing notebook editor or file.
+      const notebookURI = vscode.Uri.file(path.join(path.parse(workspace).root, 'fairyc-glob-smoke', 'main.fy'));
+      assert.deepEqual(provider.getMatchingCells({uri: notebookURI, getCells: () => cells}), cells);
+      assert.equal(provider.getMatchingCells({uri, getCells: () => cells}), undefined);
+      const ignored = vscode.Uri.file(path.join(path.dirname(notebookURI.fsPath), 'notes.txt'));
+      assert.equal(provider.getMatchingCells({uri: ignored, getCells: () => cells}), undefined);
+    } finally {
+      notebooks.clear();
+    }
+
     const character = document.lineAt(2).text.indexOf('helper');
     const definitions = await eventually(
       () => vscode.commands.executeCommand('vscode.executeDefinitionProvider', uri, new vscode.Position(2, character + 1)),
@@ -56,7 +97,8 @@ exports.run = async function () {
       extension: extension.id, version: extension.packageJSON.version, extensionPath: extension.extensionPath,
       serverPath, serverSHA256, trustedWorkspace: vscode.workspace.isTrusted,
       languageId: document.languageId, definitionCount: definitions.length,
-      completionCount: completion.items.length, unsavedDiagnosticsAndRecovery: true}, null, 2));
+      completionCount: completion.items.length, unsavedDiagnosticsAndRecovery: true,
+      clientGlobCompatibility: true}, null, 2));
     console.log('Installed Fairy C: .fy association, activation, definition, completion, unsaved diagnostics and recovery passed');
   } catch (error) {
     fs.writeFileSync(receiptPath, JSON.stringify({passed: false, error: String(error.stack || error)}, null, 2));
