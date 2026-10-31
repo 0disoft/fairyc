@@ -66,6 +66,47 @@ func TestGeneratedRelocationCoverage(t *testing.T) {
 					if len(a.Objects) != 2 {
 						t.Fatal("missing production objects")
 					}
+					for _, obj := range a.Objects {
+						inventory, err := pecoff.InspectWeakAliases(obj.Bytes)
+						if err != nil {
+							t.Fatal(err)
+						}
+						maxDirectives := 0
+						if sample.name == "process_args_quickstart" && obj.Name == "runtime.obj" {
+							maxDirectives = 1
+						}
+						// Older SDK headers may omit this alternative entirely.
+						if len(inventory.WeakExternals) != 0 || len(inventory.Directives) > maxDirectives {
+							t.Fatalf("new project weak use needs review: %s %+v", obj.Name, inventory)
+						}
+						for _, alias := range inventory.Directives {
+							if alias.Name != "_Avx2WmemEnabled" || alias.Fallback != "_Avx2WmemEnabledWeakValue" {
+								t.Fatalf("unmeasured runtime alias %+v", alias)
+							}
+							r, err := pecoff.InspectObject(obj.Bytes)
+							if err != nil {
+								t.Fatal(err)
+							}
+							refs := 0
+							for _, rel := range r.RelocationRecords {
+								if rel.Symbol == alias.Name {
+									refs++
+								}
+							}
+							if refs != 0 {
+								t.Fatalf("new live SDK alias references need review: %s count %d", alias.Name, refs)
+							}
+							var linked []string
+							for _, line := range strings.Split(string(a.LinkMap), "\n") {
+								fields := strings.Fields(line)
+								if len(fields) >= 4 && (fields[1] == alias.Name || fields[1] == alias.Fallback) {
+									linked = append(linked, strings.TrimSpace(line))
+								}
+							}
+							t.Logf("SDK alias %s: object references=%d map=%v", alias.Name, refs, linked)
+						}
+						t.Logf("%s project weak externals=0 alternate directives=%v", obj.Name, inventory.Directives)
+					}
 					coverage, err := pecoff.InspectGeneratedRelocations(a.Objects[0].Bytes, a.Objects[1].Bytes, a.Bytes, a.LinkMap, a.LinkerVerbose)
 					if err != nil {
 						t.Fatal(err)
