@@ -322,10 +322,10 @@ func (a *analyzer) prepareStructTypes() {
 				field := info.fields[declared.Name]
 				allowed := a.inlineArrayField(field.typ)
 				if info.reprC {
-					allowed = hir.ReprCArrayField(field.typ) || hir.CEnumArray(field.typ, a.cEnumBase)
+					allowed = hir.ReprCArrayField(field.typ) || hir.CEnumArray(field.typ, a.cEnumBase) || a.cRecordArray(field.typ)
 				}
 				if _, _, array := hir.FixedArrayParts(field.typ); array && !allowed {
-					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded C-compatible scalar/enum elements for repr(C), or scalar/plain-struct elements for a private struct")
+					a.addUnsupported(module.file.Path, declared.Type.Span, "fixed-array struct field requires bounded C-compatible scalar/enum/record elements for repr(C), or scalar/plain-struct elements for a private struct")
 				}
 			}
 		}

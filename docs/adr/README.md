@@ -389,6 +389,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0485-repr-c-enum-array-transport.md](0485-repr-c-enum-array-transport.md): carries explicitly based nominal enum arrays through C records without element operations or new runtime machinery.
 - [0486-bounded-windows-generated-unit-reuse.md](0486-bounded-windows-generated-unit-reuse.md): reuses two exact-input generated C objects for Windows release builds while keeping fresh source checks and linking.
 - [0487-bounded-windows-long-path-loading.md](0487-bounded-windows-long-path-loading.md): shares stack-only Windows path normalization between file open and directory enumeration within a 4,096-WCHAR cap.
+- [0488-repr-c-record-array-transport.md](0488-repr-c-record-array-transport.md): admits bounded arrays of actual acyclic nonempty repr(C) records with target-owned element layout and value-copy transport while keeping new nonplain element operations and bare foreign arrays closed.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

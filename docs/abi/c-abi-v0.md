@@ -35,8 +35,9 @@ The current Go prototype can emit deterministic C11 for a verified scalar, inert
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
 includes nonempty source `@repr(C)` records whose fields may use `i8`, `i16`, `i32`, `i64`, `isize`,
 `u8`, `u16`, `u32`, `u64`, `usize`, `f32`, `f64`, all
-sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer, floating and C-scalar arrays, and
-acyclic nested `@repr(C)` records. It preserves the public C tag and field names, emits dependencies
+sixteen exact TargetSpec C scalars, admitted raw pointers, bounded integer, floating, C-scalar and
+explicit C-enum arrays, target-admitted arrays of `@repr(C)` records, and acyclic nested `@repr(C)`
+records. It preserves the public C tag and field names, emits dependencies
 before their users, and emits target-
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
 all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
@@ -121,7 +122,7 @@ pure interpreter execution without a foreign call. C scalars otherwise have no s
 arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
 implementation of public exports. Bounded callbacks have the separate admission below.
-Integer-array, floating-array and explicit C enum admissions are described below. By-value record
+Integer-array, floating-array, explicit C-enum and record-array admissions are described below. By-value record
 arguments are admitted only for the existing record shapes described below. The interpreter remains
 fail-closed on every foreign call.
 
@@ -174,7 +175,8 @@ families. Inferred and typed locals, internal value arguments/results, nested re
 copies, reconstruction and direct referenced replacement are admitted. Floating literals,
 arithmetic, comparisons, casts, indexing, element stores, iteration and views; bare foreign arrays;
 pointer elements or pointer-based array transport; direct private arrays;
-resource, enum, `Option` or `Result` payload arrays; and record-element arrays remain closed.
+resource, enum, `Option` or `Result` payload arrays remain closed. Record-element arrays have the
+separate admission in ADR 0488 below.
 
 [ADR 0484](../adr/0484-repr-c-scalar-array-transport.md) extends the same bounded whole-array
 transport to all sixteen exact `c::*` identities when the selected target supplies them.
@@ -294,6 +296,32 @@ views/iteration, field borrowing, nested field stores, bare foreign arrays and d
 resource/tagged payload arrays remain closed. Local source/MIR/interface and both target-emission
 checks pass; MSVC C11/C17 low/optimized native execution passes. Native Linux proof is pending.
 
+[ADR 0488](../adr/0488-repr-c-record-array-transport.md) adds `Element[N]` fields where both the
+containing record and `Element` are actual acyclic nonempty `@repr(C)` records and `N` is in
+`1..=4096`. Elements may use the existing ABI leaves, nested `@repr(C)` records, admitted bounded
+integer, floating, exact C-scalar and explicit C-enum arrays, or further record-array fields.
+Direct array-of-array element types, empty or cyclic records, and new pointer forms remain closed.
+Target layout and the existing pointer-target checks apply recursively.
+
+The C member is an actual generated C structure array, such as `Element field[3]`, not a pointer or
+private transport structure. Whole C-produced field reads, inferred and typed locals, internal
+by-value array arguments/results, record copies and reconstruction, direct whole-field replacement
+through a mutable record or record reference, and nested record reads/copies are admitted. Private
+assignable wrappers copy each C structure element by assignment; raw storage is not reinterpreted
+as a wrapper and transport does not rely on `memcpy` reinterpretation. Nominal element identity,
+fields and length cross HIR, MIR, the MIR codec, public interfaces and cache identity.
+
+Plain-scalar-field record arrays retain their existing literals, indexing, length, views and
+iteration. Newly admitted nonplain elements are transport-only: element literals, indexing, length,
+stores, views/iteration and other element operations remain closed, with source checks and forged
+MIR checks enforcing the boundary. Bare foreign arrays, new direct private/resource/tagged arrays
+of these nonplain record elements, and nested stores for the new shape remain closed. Existing
+integer, floating, exact C-scalar and C-enum array admissions are unchanged. ADR 0488 changes no
+format, opcode, runtime, grammar, dependency, SDK, CLI or CI surface. Its focused HIR, semantic,
+MIR, MIR-codec, module-interface, package-artifact and C-backend checks pass. MSVC 14.51.36231
+passes C11/C17 low/optimized record-array crossings through four separate caller/callee object
+links with expected exit 42 and empty streams. Native Linux execution remains deferred.
+
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 
 ### Windows aggregate crossings, 2026-11-01
@@ -317,9 +345,10 @@ force an assertion inside that C-to-Fairy path and observe status 134 and trap-c
 The bridge is appended by the fixture using emitted function metadata; generated definitions
 and linkage are preserved. It is not a source export, an aggregate callback admission, or an
 independent-compiler/register oracle. The ordinary callback signature and public export limits
-below remain unchanged. Negative checks reject empty records, Fairy `bool` fields, safe-borrow
-and owning-tag fields, record-element arrays and bare foreign array results. This work fixes
-the backend's accidental conversion of a repr(C) Fairy `bool` field to private integer storage
+below remain unchanged. The baseline checks reject empty records, Fairy `bool` fields, safe-borrow
+and owning-tag fields and bare foreign array results. They predate ADR 0488's separate
+record-element-array admission; that slice has independent Windows native evidence in the ADR.
+This work fixes the backend's accidental conversion of a repr(C) Fairy `bool` field to private integer storage
 before admission; use exact `c::bool` for the supported C field.
 
 Both target emission checks pass locally. The POSIX matrix has 122 shapes, adding `ssize_t`

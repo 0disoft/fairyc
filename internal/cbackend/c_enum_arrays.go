@@ -20,7 +20,7 @@ func (e *emissionAnalysis) cEnumBase(value hir.Type) string {
 }
 
 func (e *emissionAnalysis) reprCArrayField(value hir.Type) bool {
-	return hir.ReprCArrayField(value) || hir.CEnumArray(value, e.cEnumBase)
+	return hir.ReprCArrayField(value) || hir.CEnumArray(value, e.cEnumBase) || e.cRecordArray(value)
 }
 
 func (r *aggregateLayoutResolver) cEnumBase(value hir.Type) string {

@@ -54,5 +54,6 @@ func (a *analyzer) cEnumBase(value hir.Type) string {
 }
 
 func (a *analyzer) transportOnlyArray(value hir.Type) bool {
-	return hir.TransportOnlyArray(value) || hir.CEnumArray(value, a.cEnumBase)
+	element, _, _ := hir.FixedArrayParts(value)
+	return hir.TransportOnlyArray(value) || hir.CEnumArray(value, a.cEnumBase) || a.cRecordArray(value) && !a.plainViewStruct(element)
 }

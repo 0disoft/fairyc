@@ -87,6 +87,13 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 				if hir.CEnumArray(op.Type, p.cEnumBase) || hir.CEnumArray(op.OwnerType, p.cEnumBase) {
 					failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C enum arrays support whole-value transport only"})
 				}
+				for _, typ := range []hir.Type{op.Type, op.OwnerType} {
+					element, _, _ := hir.FixedArrayParts(typ)
+					if p.cRecordArray(typ) && !p.plainViewStruct(element) {
+						failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C record arrays outside the plain executable subset support whole-value transport only"})
+						break
+					}
+				}
 			}
 			check(op.Type)
 			check(op.OwnerType)

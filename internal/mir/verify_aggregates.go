@@ -96,7 +96,7 @@ func verifyStructTypes(definitions []StructType, enums map[hir.Type]*EnumType) (
 		for _, field := range definition.Fields {
 			allowed := properties.inlineArrayField(field.Type)
 			if definition.ReprC {
-				allowed = hir.ReprCArrayField(field.Type) || hir.CEnumArray(field.Type, properties.cEnumBase)
+				allowed = hir.ReprCArrayField(field.Type) || hir.CEnumArray(field.Type, properties.cEnumBase) || properties.cRecordArray(field.Type)
 			}
 			if _, _, array := hir.FixedArrayParts(field.Type); array && !allowed {
 				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})

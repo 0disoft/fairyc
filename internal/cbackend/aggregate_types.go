@@ -179,7 +179,7 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		return layout.Type{}, fmt.Errorf("Fairy bool is not a repr(C) field; use c::bool")
 	}
 	value = canonicalCValueType(value)
-	if reprC && hir.CEnumArray(value, r.cEnumBase) {
+	if reprC && (hir.CEnumArray(value, r.cEnumBase) || r.cRecordArray(value)) {
 		element, length, _ := hir.FixedArrayParts(value)
 		resolved, err := r.resolve(element)
 		if err != nil {

@@ -102,7 +102,8 @@ func (l *functionLowerer) lowerFieldStore(statement hir.Statement) error {
 		Operands: []Operand{receiver, value}}
 	if !ValidFieldStoreShape(op) && !ValidOneWordStructFieldStoreShape(op, l.properties.Struct(target.Type)) &&
 		!ValidPlainStructFieldStoreShape(op, l.properties.Struct) && !ValidCEnumFieldStoreShape(op, l.properties.Enum(target.Type)) &&
-		!ValidCEnumArrayFieldStoreShape(op, l.properties.Struct, l.properties.Enum) {
+		!ValidCEnumArrayFieldStoreShape(op, l.properties.Struct, l.properties.Enum) &&
+		!ValidCRecordArrayFieldStoreShape(op, l.properties.Struct, l.properties.Enum) {
 		return unsupported
 	}
 	l.appendOperation(op)

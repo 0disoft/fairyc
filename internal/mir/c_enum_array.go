@@ -10,7 +10,8 @@ func (p typeProperties) cEnumBase(value hir.Type) string {
 }
 
 func (p typeProperties) transportOnlyArray(value hir.Type) bool {
-	return hir.TransportOnlyArray(value) || hir.CEnumArray(value, p.cEnumBase)
+	element, _, _ := hir.FixedArrayParts(value)
+	return hir.TransportOnlyArray(value) || hir.CEnumArray(value, p.cEnumBase) || p.cRecordArray(value) && !p.plainViewStruct(element)
 }
 
 // ValidCEnumArrayFieldStoreShape admits only direct whole-field replacement in C records.

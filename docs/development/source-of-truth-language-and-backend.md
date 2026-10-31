@@ -153,6 +153,12 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 
 - **Constrained C emitter**
   - `internal/cbackend/`
+- **Bounded `@repr(C)` record-array transport**
+  - `internal/hir/c_record_arrays.go`
+  - `internal/semantic/c_record_arrays.go`
+  - `internal/mir/c_record_arrays.go`
+  - `internal/cbackend/c_record_arrays.go`
+  - `docs/adr/0488-repr-c-record-array-transport.md`
 - **Constrained C emission fixtures**
   - `spec/fixtures/c-emission/manifest-v0.json`
 - **Constrained C emission fixture runner**
