@@ -73,6 +73,13 @@ static int fy_mixed_handler(const CONTEXT *before, const CONTEXT *after,
         &context, &data, &frame, NULL);
     DWORD64 expected_handler = base + *tail + FY_MIXED_HANDLER_SHIFT;
     const BYTE *expected_data = (const BYTE *)(tail + 1) + FY_MIXED_DATA_SHIFT;
+    printf("FY_MIXED handler %llu %llu %llu %llu %llu %llu %llu %llu %llu\n",
+        (unsigned long long)(uintptr_t)handler, (unsigned long long)expected_handler,
+        (unsigned long long)(uintptr_t)data, (unsigned long long)(uintptr_t)expected_data,
+        (unsigned long long)context.Rip, (unsigned long long)fy_mixed_main_pc,
+        (unsigned long long)context.Rsp, (unsigned long long)(fy_mixed_main_sp + FY_MIXED_STACK_SHIFT),
+        (unsigned long long)frame);
+    fflush(stdout);
     return (DWORD64)(uintptr_t)handler == expected_handler &&
         data == (const void *)expected_data && frame == walked_frame && frame != 0 &&
         context.Rip == after->Rip && context.Rsp == after->Rsp &&
@@ -96,6 +103,9 @@ static int fy_mixed_walk(const CONTEXT *initial, DWORD64 callback_pc) {
     for (unsigned int depth = 0; depth < 64 && context.Rip && context.Rsp; ++depth) {
         int outer_frame = stage == 2 && fy_mixed_contains(context.Rip, anchors[stage]);
         if (fy_mixed_contains(context.Rip, anchors[stage])) {
+            printf("FY_MIXED frame %u %llu %llu\n", stage,
+                (unsigned long long)context.Rip, (unsigned long long)context.Rsp);
+            fflush(stdout);
             if (++stage == 4) { return 1; }
         }
         DWORD64 base = 0;
@@ -147,6 +157,9 @@ __declspec(noinline) int32_t fairyc_fixture_mixed_inspect(int32_t value, void *d
 __declspec(noinline) int32_t fairyc_fixture_mixed_outer(int32_t value, fy_mixed_callback callback, void *data) {
     fy_mixed_main_pc = (DWORD64)(uintptr_t)_ReturnAddress();
     fy_mixed_main_sp = (DWORD64)(uintptr_t)_AddressOfReturnAddress() + sizeof(DWORD64);
+    printf("FY_MIXED callback %llu %d %d\n", (unsigned long long)(uintptr_t)callback,
+        (int)value, data == NULL);
+    fflush(stdout);
     int32_t result = 0;
     __try { result = callback(value, data); }
     __finally {
@@ -156,6 +169,9 @@ __declspec(noinline) int32_t fairyc_fixture_mixed_outer(int32_t value, fy_mixed_
         }
         ++fy_mixed_returned;
     }
+    printf("FY_MIXED result %d %d %d %d\n", (int)result,
+        fy_mixed_caught, fy_mixed_abnormal, fy_mixed_returned);
+    fflush(stdout);
     return result + 1;
 }
 

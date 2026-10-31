@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"strings"
 
@@ -17,18 +18,21 @@ import (
 )
 
 type mixedStackObservation struct {
-	Case              string `json:"case"`
-	Profile           string `json:"profile"`
-	Toolchain         string `json:"toolchain"`
-	FairySourceSHA256 string `json:"fairySourceSHA256"`
-	GeneratedCSHA256  string `json:"generatedCSHA256"`
-	CompanionSHA256   string `json:"companionSourceSHA256"`
-	ImageSHA256       string `json:"imageSHA256"`
-	CallerSHA256      string `json:"callerSHA256"`
-	CalleeSHA256      string `json:"calleeSHA256"`
-	RuntimeFunctions  int    `json:"runtimeFunctions"`
-	Exit              int32  `json:"exit"`
-	TrapCode          uint8  `json:"trapCode"`
+	Case              string            `json:"case"`
+	Profile           string            `json:"profile"`
+	Toolchain         string            `json:"toolchain"`
+	FairySourceSHA256 string            `json:"fairySourceSHA256"`
+	GeneratedCSHA256  string            `json:"generatedCSHA256"`
+	CompanionSHA256   string            `json:"companionSourceSHA256"`
+	ImageSHA256       string            `json:"imageSHA256"`
+	CallerSHA256      string            `json:"callerSHA256"`
+	CalleeSHA256      string            `json:"calleeSHA256"`
+	RuntimeFunctions  int               `json:"runtimeFunctions"`
+	Exit              int32             `json:"exit"`
+	TrapCode          uint8             `json:"trapCode"`
+	TrapCategory      string            `json:"trapCategory"`
+	TrapControlHex    string            `json:"trapControlHex"`
+	Trace             []mixedStackEvent `json:"trace"`
 }
 
 func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedStackObservation, error) {
@@ -90,8 +94,16 @@ func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedS
 			if item.trap {
 				controlOK = len(outcome.TrapControl) > 0 && outcome.TrapControl[0] == code
 			}
-			if err != nil || outcome.ExitCode != wantExit || outcome.Stdout != "" || outcome.Stderr != "" || !controlOK {
+			if err != nil || outcome.ExitCode != wantExit || outcome.Stderr != "" || !controlOK {
 				return nil, fmt.Errorf("mixed stack %s/%s result: %+v, %v", item.name, profile.Name, outcome, err)
+			}
+			trace, err := parseMixedStackTrace(outcome.Stdout)
+			if err != nil {
+				return nil, fmt.Errorf("mixed stack %s/%s trace: %w", item.name, profile.Name, err)
+			}
+			category := ""
+			if item.trap {
+				category = "assertion-failed"
 			}
 			observations = append(observations, mixedStackObservation{
 				Case: item.name, Profile: profile.Name, Toolchain: toolchain.Version,
@@ -102,7 +114,11 @@ func runWindowsMixedStackProbe(toolchain cdriver.WindowsHostToolchain) ([]mixedS
 				CallerSHA256:      fmt.Sprintf("%x", sha256.Sum256(artifact.Objects[0].Bytes)),
 				CalleeSHA256:      fmt.Sprintf("%x", sha256.Sum256(artifact.Objects[1].Bytes)),
 				RuntimeFunctions:  unwind.RuntimeFunctions, Exit: outcome.ExitCode, TrapCode: code,
+				TrapCategory: category, TrapControlHex: hex.EncodeToString([]byte(outcome.TrapControl)), Trace: trace,
 			})
+			if err := validateMixedStackObservation(observations[len(observations)-1]); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return observations, nil
