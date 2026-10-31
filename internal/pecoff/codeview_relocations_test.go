@@ -28,6 +28,37 @@ func TestInspectCodeViewRelocationsComputesClosedSectionOffsetPair(t *testing.T)
 	}
 }
 
+func TestInspectCodeViewRelocationsAcceptsOnlyExactCodeEndLabel(t *testing.T) {
+	object := testCodeViewObject()
+	// A no-type COFF LABEL at the exact end of the eight-byte code section.
+	binary.LittleEndian.PutUint32(object[testCodeViewSymbols+8:], 8)
+	binary.LittleEndian.PutUint16(object[testCodeViewSymbols+14:], 0)
+	object[testCodeViewSymbols+16] = 6
+	binary.LittleEndian.PutUint32(object[testCodeViewDebugRaw:], 0)
+	report, err := InspectCodeViewRelocations(object)
+	if err != nil || len(report.Pairs) != 1 || !report.Pairs[0].SectionEndLabel || report.Pairs[0].ResolvedOffset != 8 {
+		t.Fatalf("section-end label: %+v %v", report, err)
+	}
+	for _, mutate := range []func([]byte){
+		func(b []byte) { b[testCodeViewSymbols+16] = 2 },
+		func(b []byte) { binary.LittleEndian.PutUint16(b[testCodeViewSymbols+14:], coffSymbolTypeFunction) },
+		func(b []byte) { binary.LittleEndian.PutUint32(b[testCodeViewSymbols+8:], 9) },
+		func(b []byte) {
+			binary.LittleEndian.PutUint32(b[testCodeViewSymbols+8:], 7)
+			binary.LittleEndian.PutUint32(b[testCodeViewDebugRaw:], 1)
+		},
+		func(b []byte) {
+			binary.LittleEndian.PutUint32(b[testCodeViewSectionTable+36:], sectionInitializedData|sectionReadable)
+		},
+	} {
+		bad := append([]byte(nil), object...)
+		mutate(bad)
+		if _, err := InspectCodeViewRelocations(bad); err == nil {
+			t.Fatal("non-label, non-code or inexact end boundary accepted")
+		}
+	}
+}
+
 func TestInspectCodeViewRelocationsRejectsPairMutations(t *testing.T) {
 	tests := []struct {
 		name string

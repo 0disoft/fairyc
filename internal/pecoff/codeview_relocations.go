@@ -20,6 +20,7 @@ type CodeViewSectionOffsetPair struct {
 	SectionAddend   uint16
 	ResolvedOffset  uint32
 	ResolvedSection uint16
+	SectionEndLabel bool
 }
 
 // CodeViewRelocationReport records every closed `.debug$S` SECREL/SECTION pair in one object.
@@ -104,7 +105,12 @@ func InspectCodeViewRelocations(object []byte) (CodeViewRelocationReport, error)
 			return CodeViewRelocationReport{}, fmt.Errorf("CodeView pair for %q resolves to section %d outside the object", relocation.Symbol, resolvedSection)
 		}
 		resolvedTarget := file.Sections[resolvedSection-1]
-		if resolvedOffset >= uint64(resolvedTarget.Size) {
+		// MSVC /O2 /Z7 emits COFF LABEL (class 6, no type) end markers.
+		// The exact section-end label is a boundary, not a function/code byte.
+		sectionEndLabel := resolvedOffset == uint64(resolvedTarget.Size) &&
+			symbol.StorageClass == 6 && symbol.Type == 0 && symbol.AuxiliaryRecords == 0 &&
+			secrelAddend == 0 && sectionAddend == 0 && resolvedTarget.Characteristics&sectionExecutable != 0
+		if resolvedOffset >= uint64(resolvedTarget.Size) && !sectionEndLabel {
 			return CodeViewRelocationReport{}, fmt.Errorf("CodeView pair for %q resolves to offset %#x outside section %q", relocation.Symbol, resolvedOffset, resolvedTarget.Name)
 		}
 		pairs = append(pairs, CodeViewSectionOffsetPair{
@@ -112,6 +118,7 @@ func InspectCodeViewRelocations(object []byte) (CodeViewRelocationReport, error)
 			SecRelSite: relocation.VirtualAddress, SectionSite: relocation.VirtualAddress + 4,
 			SecRelAddend: secrelAddend, SectionAddend: sectionAddend,
 			ResolvedOffset: uint32(resolvedOffset), ResolvedSection: uint16(resolvedSection),
+			SectionEndLabel: sectionEndLabel,
 		})
 	}
 	if len(usedSections) != sectionCount {
