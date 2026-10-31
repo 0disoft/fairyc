@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"syscall"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 const processMemoryAccess = 0x0400 | 0x0010 // PROCESS_QUERY_INFORMATION | PROCESS_VM_READ
 
-var getProcessMemoryInfo = syscall.NewLazyDLL("psapi.dll").NewProc("GetProcessMemoryInfo")
+var getProcessMemoryInfo = windows.NewLazySystemDLL("psapi.dll").NewProc("GetProcessMemoryInfo")
 
 type processMemoryCounters struct {
 	Size                     uint32
