@@ -37,6 +37,9 @@ var linuxStarter string
 //go:embed linux_build_scratch.c
 var linuxBuildScratch string
 
+//go:embed linux_gnu.c
+var linuxGNU string
+
 var linuxSymbols = regexp.MustCompile(`\b(fairyc_private_linux_[A-Za-z0-9_]+)\s*\(`)
 
 // LinuxSource selects the admitted private path/process/filesystem adapters.
@@ -49,8 +52,12 @@ func LinuxSource(header string) (string, error) {
 	buildScratch := false
 	testInput := false
 	starter := false
+	gnu := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_gnu_stage_v1", "fairyc_private_linux_gnu_write_v1", "fairyc_private_linux_gnu_read_v1",
+			"fairyc_private_linux_gnu_find_v1", "fairyc_private_linux_gnu_run_v1", "fairyc_private_linux_gnu_publish_v1":
+			rooted, process, capture, gnu = true, true, true, true
 		case "fairyc_private_linux_starter_create_v1":
 			rooted, starter = true, true
 		case "fairyc_private_linux_test_capture_open_v1":
@@ -121,6 +128,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if starter {
 		source += "\n" + linuxStarter
+	}
+	if gnu {
+		source += "\n" + linuxGNU
 	}
 	return source, nil
 }

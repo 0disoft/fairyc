@@ -16,6 +16,7 @@ pub fn bool contains(ref Plan p,u32 id){return id>=1 && id<=10 && (p.components 
 // Host mask order for assembly: rooted, process, capture, input, paths,
 // directory, retention, workspace, build scratch, starter.
 pub fn u32 host(ref u8[] name){
+    if(bytes::equal(name,b"fairyc_private_linux_gnu_stage_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_write_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_read_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_find_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_run_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_publish_v1")){return 1031;}
     if(bytes::equal(name,b"fairyc_private_linux_host_path_v1")){return 16;}
     if(bytes::equal(name,b"fairyc_private_linux_process_start_v1") || bytes::equal(name,b"fairyc_private_linux_process_wait_v1") || bytes::equal(name,b"fairyc_private_linux_process_discard_v1") || bytes::equal(name,b"fairyc_private_linux_process_wait_for_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_linux_capture_open_v1") || bytes::equal(name,b"fairyc_private_linux_run_capture_open_v1") || bytes::equal(name,b"fairyc_private_linux_run_capture_receipt_v1") || bytes::equal(name,b"fairyc_private_linux_capture_drop_v1") || bytes::equal(name,b"fairyc_private_linux_capture_collect_v1")){return 6;}
