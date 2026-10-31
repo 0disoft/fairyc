@@ -18,22 +18,27 @@ PWSH = shutil.which("pwsh")
 
 
 def diagnostic_text(output):
-    # PowerShell's error view can color and wrap one message across lines.
-    # Keep the words intact while ignoring terminal presentation in assertions.
-    return " ".join(re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", output).split())
+    # PowerShell's error view adds ANSI colors, line numbers and | gutters.
+    # Strip only line-leading gutters, preserving pipes inside the message.
+    plain = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", output)
+    plain = re.sub(r"(?m)^[ \t]*(?:[0-9]+[ \t]+)?\|[ \t]?", "", plain)
+    return " ".join(plain.split())
 
 
 class PowerShellDiagnostics(unittest.TestCase):
     def test_colored_wrapped_revision_error_keeps_the_expected_message(self):
-        # The Linux runner wrapped between "differs" and "from" in this error.
+        # Retain the numbered excerpt and continuation gutters from the CI log.
         output = ("\x1b[31;1mException: \x1b[0m/tmp/revision.ps1:6\n"
-                  "\x1b[31;1mChecked-out revision " + "4" * 40 + " differs\x1b[0m\n"
-                  "\x1b[31;1mfrom requested candidate " + "a" * 40 + "\x1b[0m\n")
+                  "\x1b[36;1mLine |\x1b[0m\n"
+                  "\x1b[36;1m   6 | \x1b[0mthrow \"Checked-out revision $actual differs ...\"\n"
+                  "\x1b[36;1m     | \x1b[31;1mChecked-out revision " + "4" * 40 + " differs\x1b[0m\n"
+                  "\x1b[36;1m     | \x1b[31;1mfrom requested candidate " + "a" * 40 + "\x1b[0m\n")
         expected = "differs from requested candidate"
         self.assertNotIn(expected, output)
         self.assertIn(expected, diagnostic_text(output))
         self.assertEqual(diagnostic_text("candidate_sha must be\r\n  a full SHA"),
                          "candidate_sha must be a full SHA")
+        self.assertEqual(diagnostic_text("message retains a | b"), "message retains a | b")
         self.assertNotIn(expected, diagnostic_text("Cannot resolve checked-out source revision"))
 
 
