@@ -11,7 +11,8 @@ fn i32 main() {
 // ChainCompanionC inverts the linked metadata onto a bounded controlled stack,
 // then asks the real OS unwinder to recover independent caller sentinels. These
 // are not live CRT captures. Zero-prolog epilog contexts instead come from a
-// closed instruction decoder; other forms are explicitly counted as untested.
+// closed instruction decoder; other zero-prolog fragments have entry-only
+// metadata-derived contexts, without claiming arbitrary instruction coverage.
 const ChainCompanionC = chainContextC + chainEpilogC + chainRunnerC
 
 const chainContextC = `
@@ -133,7 +134,7 @@ int32_t fairyc_fixture_chained_unwind(void) {
     unsigned int functions = 0, untested = 0, contexts = 0, max_depth = 0, integer_saves = 0, vector_saves = 0;
     unsigned int chained_functions = 0, zero_functions = 0, zero_frames = 0, zero_operations = 0, zero_calls = 0, zero_other = 0;
     unsigned int zero_epilogs = 0, zero_contexts = 0, zero_pops = 0, zero_wide_adds = 0;
-    unsigned int rejected_epilogs = 0, rejected_contexts = 0;
+    unsigned int rejected_epilogs = 0, rejected_contexts = 0, zero_entries = 0;
     for (DWORD index = 0; index < directory.Size / sizeof(RUNTIME_FUNCTION); ++index) {
         PRUNTIME_FUNCTION entry = &entries[index];
         const BYTE *record = image + entry->UnwindData, *records[65];
@@ -171,7 +172,12 @@ int32_t fairyc_fixture_chained_unwind(void) {
             if (!fy_chain_decode_epilog(code, size, &plan)) {
                 if (size == 6 && code[0] == 0xe8 && code[5] == 0xcc) { ++zero_calls; }
                 else { ++zero_other; }
-                ++untested;
+                // Entry-only evidence for non-decoded fragments. The full
+                // parent metadata describes the still-active fixed frame;
+                // no arbitrary body/epilog instruction is claimed as decoded.
+                int entry_result = fy_chain_context(image, entry, records, links, 0, &integer_saves, &vector_saves);
+                if (entry_result) { fprintf(stderr, "zero-entry RVA=%lx result=%d\n", entry->BeginAddress, entry_result); return entry_result; }
+                ++zero_entries;
                 continue;
             }
             int result = fy_chain_epilog_context(image, entry, &plan, &zero_contexts);
@@ -204,10 +210,10 @@ int32_t fairyc_fixture_chained_unwind(void) {
     printf("{\"functions\":%u,\"untestedFunctions\":%u,\"contexts\":%u,\"maximumDepth\":%u,\"integerRestores\":%u,\"vectorRestores\":%u,"
         "\"zeroPrologFunctions\":%u,\"zeroPrologEpilogs\":%u,\"zeroPrologContexts\":%u,\"zeroPrologPops\":%u,\"zeroPrologWideAdds\":%u,"
         "\"chainedFunctions\":%u,\"zeroPrologUnsupportedFrames\":%u,\"zeroPrologUnsupportedOperations\":%u,\"zeroPrologCallTails\":%u,\"zeroPrologOtherInstructions\":%u,"
-        "\"rejectedEpilogMutations\":%u,\"rejectedEpilogContexts\":%u}\n",
+        "\"rejectedEpilogMutations\":%u,\"rejectedEpilogContexts\":%u,\"zeroPrologEntryFunctions\":%u,\"zeroPrologEntryContexts\":%u}\n",
         functions, untested, contexts, max_depth, integer_saves, vector_saves,
         zero_functions, zero_epilogs, zero_contexts, zero_pops, zero_wide_adds, chained_functions, zero_frames, zero_operations, zero_calls, zero_other,
-        rejected_epilogs, rejected_contexts);
+        rejected_epilogs, rejected_contexts, zero_entries, zero_entries);
     return 42;
 }
 `

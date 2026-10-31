@@ -21,31 +21,71 @@ import (
 )
 
 type chainedUnwindObservation struct {
-	Profile                         string `json:"profile"`
-	Toolchain                       string `json:"toolchain"`
-	FairySHA256                     string `json:"fairySourceSHA256"`
-	GeneratedSHA256                 string `json:"generatedCSHA256"`
-	CompanionSHA256                 string `json:"companionSourceSHA256"`
-	ImageSHA256                     string `json:"imageSHA256"`
-	Functions                       int    `json:"functions"`
-	UntestedFunctions               int    `json:"untestedFunctions"`
-	Contexts                        int    `json:"contexts"`
-	MaximumDepth                    int    `json:"maximumDepth"`
-	IntegerRestores                 int    `json:"integerRestores"`
-	VectorRestores                  int    `json:"vectorRestores"`
-	RejectedMutations               int    `json:"rejectedMutations"`
-	ZeroPrologFunctions             int    `json:"zeroPrologFunctions"`
-	ChainedFunctions                int    `json:"chainedFunctions"`
-	ZeroPrologEpilogs               int    `json:"zeroPrologEpilogs"`
-	ZeroPrologContexts              int    `json:"zeroPrologContexts"`
-	ZeroPrologPops                  int    `json:"zeroPrologPops"`
-	ZeroPrologWideAdds              int    `json:"zeroPrologWideAdds"`
-	ZeroPrologUnsupportedFrames     int    `json:"zeroPrologUnsupportedFrames"`
-	ZeroPrologUnsupportedOperations int    `json:"zeroPrologUnsupportedOperations"`
-	ZeroPrologCallTails             int    `json:"zeroPrologCallTails"`
-	ZeroPrologOtherInstructions     int    `json:"zeroPrologOtherInstructions"`
-	RejectedEpilogMutations         int    `json:"rejectedEpilogMutations"`
-	RejectedEpilogContexts          int    `json:"rejectedEpilogContexts"`
+	ZeroPrologEntryFunctions        int                      `json:"zeroPrologEntryFunctions"`
+	ZeroPrologEntryContexts         int                      `json:"zeroPrologEntryContexts"`
+	ZeroPrologCode                  []chainedCodeObservation `json:"zeroPrologCode"`
+	Profile                         string                   `json:"profile"`
+	Toolchain                       string                   `json:"toolchain"`
+	FairySHA256                     string                   `json:"fairySourceSHA256"`
+	GeneratedSHA256                 string                   `json:"generatedCSHA256"`
+	CompanionSHA256                 string                   `json:"companionSourceSHA256"`
+	ImageSHA256                     string                   `json:"imageSHA256"`
+	Functions                       int                      `json:"functions"`
+	UntestedFunctions               int                      `json:"untestedFunctions"`
+	Contexts                        int                      `json:"contexts"`
+	MaximumDepth                    int                      `json:"maximumDepth"`
+	IntegerRestores                 int                      `json:"integerRestores"`
+	VectorRestores                  int                      `json:"vectorRestores"`
+	RejectedMutations               int                      `json:"rejectedMutations"`
+	ZeroPrologFunctions             int                      `json:"zeroPrologFunctions"`
+	ChainedFunctions                int                      `json:"chainedFunctions"`
+	ZeroPrologEpilogs               int                      `json:"zeroPrologEpilogs"`
+	ZeroPrologContexts              int                      `json:"zeroPrologContexts"`
+	ZeroPrologPops                  int                      `json:"zeroPrologPops"`
+	ZeroPrologWideAdds              int                      `json:"zeroPrologWideAdds"`
+	ZeroPrologUnsupportedFrames     int                      `json:"zeroPrologUnsupportedFrames"`
+	ZeroPrologUnsupportedOperations int                      `json:"zeroPrologUnsupportedOperations"`
+	ZeroPrologCallTails             int                      `json:"zeroPrologCallTails"`
+	ZeroPrologOtherInstructions     int                      `json:"zeroPrologOtherInstructions"`
+	RejectedEpilogMutations         int                      `json:"rejectedEpilogMutations"`
+	RejectedEpilogContexts          int                      `json:"rejectedEpilogContexts"`
+}
+
+type chainedCodeObservation struct {
+	RVA  uint32 `json:"rva"`
+	Code string `json:"code"`
+	Size uint32 `json:"size"`
+}
+
+func chainedCodeObservations(image []byte, report pecoff.UnwindReport) ([]chainedCodeObservation, error) {
+	f, err := pe.NewFile(bytes.NewReader(image))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var result []chainedCodeObservation
+	for _, fn := range report.Functions {
+		zero := false
+		for _, s := range f.Sections {
+			if fn.UnwindInfoRVA >= s.VirtualAddress && uint64(fn.UnwindInfoRVA-s.VirtualAddress)+4 <= uint64(s.Size) {
+				at := s.Offset + fn.UnwindInfoRVA - s.VirtualAddress
+				zero = image[at]>>3&4 != 0 && image[at+1] == 0
+				break
+			}
+		}
+		if !zero {
+			continue
+		}
+		for _, s := range f.Sections {
+			if fn.BeginRVA >= s.VirtualAddress && uint64(fn.EndRVA-s.VirtualAddress) <= uint64(s.Size) {
+				at := s.Offset + fn.BeginRVA - s.VirtualAddress
+				size := fn.EndRVA - fn.BeginRVA
+				result = append(result, chainedCodeObservation{RVA: fn.BeginRVA, Size: size, Code: fmt.Sprintf("%x", image[at:at+min(size, 128)])})
+				break
+			}
+		}
+	}
+	return result, nil
 }
 
 func runWindowsChainedUnwindProbe(toolchain cdriver.WindowsHostToolchain) ([]chainedUnwindObservation, error) {
@@ -99,6 +139,10 @@ func runWindowsChainedUnwindProbe(toolchain cdriver.WindowsHostToolchain) ([]cha
 			row.RejectedEpilogMutations != 6 || row.RejectedEpilogContexts != 2 {
 			return nil, fmt.Errorf("zero-prolog incomplete observation: %+v", row)
 		}
+		row.ZeroPrologCode, err = chainedCodeObservations(artifact.Bytes, unwind)
+		if err != nil {
+			return nil, err
+		}
 		if err := verifyChainedUnwindCoverage(artifact.Bytes, unwind, row); err != nil {
 			return nil, err
 		}
@@ -144,7 +188,7 @@ func verifyChainedUnwindCoverage(image []byte, report pecoff.UnwindReport, row c
 			return fmt.Errorf("unmapped chain coverage record %#x", fn.UnwindInfoRVA)
 		}
 	}
-	if row.ChainedFunctions != chained || row.ZeroPrologFunctions != zero || row.Functions+row.ZeroPrologEpilogs+row.UntestedFunctions != chained {
+	if row.UntestedFunctions != 0 || row.ChainedFunctions != chained || row.ZeroPrologFunctions != zero || row.Functions+row.ZeroPrologEpilogs+row.ZeroPrologEntryFunctions+row.UntestedFunctions != chained || row.ZeroPrologEntryContexts != row.ZeroPrologEntryFunctions || row.ZeroPrologEntryFunctions != row.ZeroPrologCallTails+row.ZeroPrologOtherInstructions || len(row.ZeroPrologCode) != zero {
 		return fmt.Errorf("chain receipt does not partition %d fragments (%d zero-prolog): %+v", chained, zero, row)
 	}
 	return nil
