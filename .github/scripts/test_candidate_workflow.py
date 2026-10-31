@@ -17,6 +17,26 @@ WORKFLOW = (ROOT / ".github/workflows/frontend.yml").read_text(encoding="utf-8")
 PWSH = shutil.which("pwsh")
 
 
+def diagnostic_text(output):
+    # PowerShell's error view can color and wrap one message across lines.
+    # Keep the words intact while ignoring terminal presentation in assertions.
+    return " ".join(re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", output).split())
+
+
+class PowerShellDiagnostics(unittest.TestCase):
+    def test_colored_wrapped_revision_error_keeps_the_expected_message(self):
+        # The Linux runner wrapped between "differs" and "from" in this error.
+        output = ("\x1b[31;1mException: \x1b[0m/tmp/revision.ps1:6\n"
+                  "\x1b[31;1mChecked-out revision " + "4" * 40 + " differs\x1b[0m\n"
+                  "\x1b[31;1mfrom requested candidate " + "a" * 40 + "\x1b[0m\n")
+        expected = "differs from requested candidate"
+        self.assertNotIn(expected, output)
+        self.assertIn(expected, diagnostic_text(output))
+        self.assertEqual(diagnostic_text("candidate_sha must be\r\n  a full SHA"),
+                         "candidate_sha must be a full SHA")
+        self.assertNotIn(expected, diagnostic_text("Cannot resolve checked-out source revision"))
+
+
 def job_block(name):
     return re.search(rf"^  {re.escape(name)}:\n(.*?)(?=^  [\w-]+:|\Z)",
                      WORKFLOW, re.M | re.S).group(1)
@@ -84,7 +104,7 @@ class CandidateIdentity(unittest.TestCase):
             with self.subTest(candidate=invalid):
                 result = self.execute("candidate-input", CANDIDATE_SHA=invalid)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("candidate_sha must be", result.stderr)
+                self.assertIn("candidate_sha must be", diagnostic_text(result.stderr))
 
     def test_actual_checkout_must_match_and_is_written_to_output(self):
         actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
@@ -96,7 +116,7 @@ class CandidateIdentity(unittest.TestCase):
         mismatch = ("a" if actual[0] != "a" else "b") + actual[1:]
         result = self.execute("revision", CANDIDATE_SHA=mismatch)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("differs from requested candidate", result.stderr)
+        self.assertIn("differs from requested candidate", diagnostic_text(result.stderr))
         self.assertFalse(output.exists())
 
     def test_receipt_distinguishes_source_workflow_and_failed_or_skipped_smoke(self):
