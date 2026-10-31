@@ -129,6 +129,7 @@ class CandidateIdentity(unittest.TestCase):
             with self.subTest(outcome=outcome):
                 result = self.execute("receipt", CANDIDATE_SHA="1" * 40, SOURCE_SHA="1" * 40,
                                       WORKFLOW_SHA="2" * 40, SMOKE_OUTCOME=outcome,
+                                      MIXED_STACK_OUTCOME="success",
                                       GITHUB_RUN_ID="123", GITHUB_RUN_ATTEMPT="2")
                 self.assertEqual(result.returncode, 0, result.stderr)
                 receipt = json.loads(result.stdout)
@@ -137,9 +138,21 @@ class CandidateIdentity(unittest.TestCase):
                 self.assertEqual(receipt["requestedRevision"], receipt["sourceRevision"])
                 self.assertEqual(receipt["runAttempt"], "2")
                 self.assertEqual(receipt["smokeOutcome"], outcome)
+                self.assertEqual(receipt["schema"], "fairyc.windows-native-ci/v2")
+                self.assertEqual(receipt["mixedStackOutcome"], "success")
                 self.assertEqual(receipt["passed"], outcome == "success")
                 self.assertIn(json.dumps(receipt["sourceRevision"]),
                               (self.directory / "summary").read_text(encoding="utf-8"))
+
+    def test_successful_smoke_cannot_hide_failed_or_missing_mixed_stack_evidence(self):
+        for outcome in ("failure", "skipped", "cancelled", ""):
+            with self.subTest(outcome=outcome):
+                result = self.execute("receipt", SOURCE_SHA="1" * 40,
+                                      WORKFLOW_SHA="2" * 40, SMOKE_OUTCOME="success",
+                                      MIXED_STACK_OUTCOME=outcome,
+                                      GITHUB_RUN_ID="123", GITHUB_RUN_ATTEMPT="2")
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertFalse(json.loads(result.stdout)["passed"])
 
 
 if __name__ == "__main__":

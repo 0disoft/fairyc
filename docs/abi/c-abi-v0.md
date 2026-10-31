@@ -618,6 +618,14 @@ and already-restored epilogs. The refreshed v2/chain/mixed matrix passes twenty 
 grammars/opcodes, production chain emission, live CRT capture and complete hosted conformance
 remain unproven; the missing-fixture gate and target maturity are unchanged.
 
+The [same-commit CI wiring](../ops/windows-mixed-stack-ci-20261101.md) retains the existing
+mixed-stack suite's ten native observations with live ordered PCs/SPs, handler/data and caller
+expectations, synchronous callback results and the private trap receipt. Source/object/image
+digests are joined to the verified checkout SHA, requested candidate, workflow revision and
+run/attempt without another native invocation. Windows local validation passes; a fresh hosted
+pass remains pending. This does not admit retained/asynchronous callbacks, transfer of foreign
+exceptions through Fairy, new handler grammars, binary/PDB retention or target promotion.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 retains the missing complete-runtime and complete-standard-library gates. ADR 0214 records the first

@@ -709,6 +709,9 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	if err := writeMixedStackEvidence(mixedStack); err != nil {
+		return err
+	}
 	version2Epilogs, err := runWindowsVersion2EpilogProbe(toolchain)
 	if err != nil {
 		return err

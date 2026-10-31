@@ -31,6 +31,15 @@ pin a runner image or toolchain baseline and does not promote either target.
   retained-heap measurements are not part of the push or pull-request gate.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.
+- The existing Windows native job also binds its mixed-stack/callback/trap observations to the
+  verified checkout SHA, requested candidate, workflow revision and run/attempt. It reuses the
+  smoke's ten executions, checks the complete low/optimized matrix and emits native stack,
+  handler/data, callback-result, trap-channel and source/object/image identity in the job log.
+  The compact step summary includes the receipt digest; no executable or PDB is uploaded.
+  `fairyc.windows-native-ci/v2` requires both smoke and detailed receipt validation to succeed.
+  [Local validation and limits](windows-mixed-stack-ci-20261101.md) are recorded separately;
+  hosted evidence for this wiring remains pending an authorized push/dispatch. Runner counts,
+  job deadlines and Linux selection are unchanged.
 - The four Windows lexer/parser proof groups target `./internal/cli`, where their selected tests
   live. The full frontend suite still covers product and developer-tool packages through `./...`;
   moving tools does not exclude them from that coverage.

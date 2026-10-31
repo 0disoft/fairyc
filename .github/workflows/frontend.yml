@@ -129,7 +129,22 @@ jobs:
           cache: false
       - name: Run Windows native target smoke
         id: smoke
-        run: go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke
+        env:
+          FAIRYC_SOURCE_REVISION: ${{ steps.revision.outputs.source_sha }}
+          FAIRYC_MIXED_STACK_EVIDENCE: ${{ runner.temp }}/fairyc-mixed-stack.json
+        run: |
+          if (Test-Path -LiteralPath $env:FAIRYC_MIXED_STACK_EVIDENCE) {
+            Remove-Item -LiteralPath $env:FAIRYC_MIXED_STACK_EVIDENCE
+          }
+          go run -mod=readonly ./tools/dev/fairyc-windows-host-smoke
+      - name: Bind mixed-stack callback and trap evidence to this revision
+        id: mixed-stack
+        if: ${{ always() && steps.revision.outcome == 'success' }}
+        env:
+          SOURCE_SHA: ${{ steps.revision.outputs.source_sha }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: python -B .github/scripts/windows_mixed_stack_evidence.py "$env:RUNNER_TEMP/fairyc-mixed-stack.json"
       - name: Record Windows native verification identity
         id: receipt
         if: ${{ always() && steps.revision.outcome == 'success' }}
@@ -137,16 +152,18 @@ jobs:
           SOURCE_SHA: ${{ steps.revision.outputs.source_sha }}
           WORKFLOW_SHA: ${{ github.workflow_sha }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+          MIXED_STACK_OUTCOME: ${{ steps.mixed-stack.outcome }}
         run: |
           $receipt = [ordered]@{
-            schema = 'fairyc.windows-native-ci/v1'
+            schema = 'fairyc.windows-native-ci/v2'
             sourceRevision = $env:SOURCE_SHA
             requestedRevision = $env:CANDIDATE_SHA
             workflowRevision = $env:WORKFLOW_SHA
             runId = $env:GITHUB_RUN_ID
             runAttempt = $env:GITHUB_RUN_ATTEMPT
             smokeOutcome = $env:SMOKE_OUTCOME
-            passed = $env:SMOKE_OUTCOME -ceq 'success'
+            mixedStackOutcome = $env:MIXED_STACK_OUTCOME
+            passed = ($env:SMOKE_OUTCOME -ceq 'success') -and ($env:MIXED_STACK_OUTCOME -ceq 'success')
           }
           $json = $receipt | ConvertTo-Json
           Write-Output $json

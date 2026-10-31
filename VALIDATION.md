@@ -64,9 +64,21 @@ requested SHA, and fails if `git rev-parse HEAD` differs from it. This path is a
 after the workflow version and target commit are on the remote repository.
 
 Each Windows-native attempt whose revision check succeeds writes a
-`fairyc.windows-native-ci/v1` JSON receipt to the job log and step summary. It records
+`fairyc.windows-native-ci/v2` JSON receipt to the job log and step summary. It records
 `sourceRevision`, `requestedRevision`, `workflowRevision`, `runId`, `runAttempt`,
-`smokeOutcome` and `passed`; `passed` is true only when `smokeOutcome` is `success`.
+`smokeOutcome`, `mixedStackOutcome` and `passed`; `passed` requires both outcomes to be `success`.
+The same smoke execution writes `fairyc.windows-mixed-stack/v1` with ten low/optimized native
+observations. The existing job removes stale output before the run and supplies its verified
+checkout SHA. `windows_mixed_stack_evidence.py` requires that receipt SHA, current HEAD and
+`source_sha` to agree, and the requested candidate to match when specified. It validates the
+complete case/profile set, source/object/image hashes, ordered live frames, handler/data/caller
+addresses, callback result, C-contained catch/finally and private assertion-trap mapping.
+Missing, duplicate, skipped or inconsistent evidence fails the job. Its
+`fairyc.windows-mixed-stack-ci/v1` receipt retains all observations and the raw receipt SHA-256
+in the job log, with revision/run identity and a compact digest summary in the step summary.
+This adds no runner, native invocation, binary upload or Linux job. Configuration and local
+validation do not constitute a hosted same-commit pass; that still requires an authorized push
+or exact-candidate dispatch after the workflow and commit are available remotely.
 The concurrency key includes the candidate SHA, so dispatches for different candidates do not
 cancel each other. Push, pull-request and empty-input manual runs keep the existing full path.
 An exact-candidate dispatch is not a replacement for full CI and does not establish the complete
