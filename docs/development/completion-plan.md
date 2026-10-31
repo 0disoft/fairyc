@@ -1,23 +1,42 @@
 # Completion plan
 
+**Current queue:** [Ordered work - 2026-10-31](ordered-work-20261031.md)
+
+> **History rule:** the sections below this queue link are historical execution records. This page
+> is not a cumulative-status table. A later completion record supersedes an earlier pending or
+> open statement for the same owned slice, even when older prose remains in place for provenance.
+> Follow the current queue for ordered status and the cited owner evidence for completion.
+
+## Completed Linux baseline
+
+The Linux candidate bootstrap and its covered command/cache path are complete for the external
+execution scope in [the 2026-10-31 Debian record](../ops/linux-bootstrap-revalidation-62f2a006.md).
+Do not reopen that implementation merely because Linux probes are skipped on this Windows host.
+
+| Scope | Status | Evidence | Limit |
+| --- | --- | --- | --- |
+| Linux bootstrap and candidate CLI acceptance at `62f2a006` | **Complete within the external record** | [Evidence and scope](../ops/linux-bootstrap-revalidation-62f2a006.md#evidence-and-scope), [default acceptance](../ops/linux-bootstrap-revalidation-62f2a006.md#unchanged-default-acceptance), [regression results](../ops/linux-bootstrap-revalidation-62f2a006.md#regression-results) | Maintainer-supplied Debian 13.3 amd64 execution, not a local run or hosted CI. The raw ZIP was not supplied. |
+| Linux `check/build/run/test/new`, CLI/reference and cache regressions | **Complete as covered by the record** | The cited record reports 576 CLI calls, 60 Go-reference comparisons, 12 generated-C executions, cache invalidation and the focused native tests. | No full `go test ./...`, complete fixture/sanitizer/ABI sweep, Ubuntu run, clean-machine distribution, self-host acceptance, repeated-load distribution or throughput claim. |
+
 - Started: 2026-10-23, from clean `31ce0891`
 - Priority: a small compiler, fast builds, and bounded retained build files
 - Execution: small local commits; publication and other owner decisions remain separate
 
-This is the current work queue, not a new language revision or a claim that later candidates are
-accepted. The roadmap's Phases 0–4 retain their existing meanings. Implemented functionality and
-valid execution records are reused instead of reopening completed work.
+The table below is the historical 2026-10-23 queue. Its unresolved rows were replaced by the
+approved follow-up implementation queue on 2026-10-31. The roadmap's Phases 0-4 retain their existing
+meanings. Implemented functionality and valid execution records are reused instead of reopening
+completed work.
 
-## Ordered work
+## Historical ordered work (superseded 2026-10-31)
 
 | Order | Work and completion condition | Status |
 | --- | --- | --- |
 | 1 | Establish a current native-build time/footprint baseline with the existing runner, and keep one finite list of unfinished work. | Complete: six cases and 42 verified builds at clean `31ce0891`. |
-| 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays committed with Windows proof. Scope assessment below retains the other deferrals; native Linux is pending. |
-| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Hosted execution, remaining unwind obligations, Linux execution and clean-machine evidence remain open. |
+| 2 | Finish the selected C interoperability slices: exact C-scalar array members, then explicitly based C enum array members. Assess record-element arrays and pointer extensions against actual users and the declared target scope. Preserve target-specific layout and separate-object value crossings. | C-scalar and C enum arrays are committed with Windows proof. The external Debian record establishes the Linux host path for its stated acceptance scope; detailed records outside that scope remain separate. Subsequent work is tracked by the current queue. |
+| 3 | Close missing implementation and execution in the declared Windows/Linux runtime, SDK and ABI profiles. Reconcile actual generated-object requirements with the Windows maturity matrix. Promote no target on incomplete evidence. | Windows full correctness smoke and four mixed-stack executions pass in the [current record](../ops/evidence/candidate-region-workspace-gaps-20261023.json). Linux bootstrap acceptance is recorded separately below. Remaining hosted and Windows maturity evidence remains open. |
 | 4 | Improve measured no-op/edit build bottlenecks, SDK reuse, cache retention and failed-build cleanup. Repeated edits must remain bounded; a cache must justify its retained bytes with saved work. | Local Windows improvements implemented: smaller preview, bounded release object reuse and empty-directory collection. Measured costs below; Linux retains its existing path. |
 | 5 | Prepare a Windows preview ZIP, extracted starter path, explicit runtime dependencies and separate editor tools. Validate clean-environment compiler/program use where an environment is available. Public release and repository visibility remain owner decisions. | SDK 0.87 preview at clean `890b3da4` passes all twelve packaging/starter steps and seven local portability executions; its hashed transfer ZIP and standalone verifier are ready. Clean-machine proof and publication remain open. LSP stays separate. |
-| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions; lock updated and verified. Linked documents record cleanup/budget limits and probe coverage. Native Linux proof (probes skipped on Windows) and remaining workspace cache integration remains open. Go stays the default. |
+| 6 | Renew latest-source candidate/reference comparison and consecutive self-build equality. Finish Region diagnostic parity, then implement the Linux host path. Measure before selecting a new default compiler; keep the reference bootstrap available. | SDK 0.87 dispatcher and companion consecutive generations pass, with 1,306 exact command comparisons and 53 native-pipeline executions. Private Linux [path queries](../architecture/candidate-linux-host-paths-v1.md), [argv encoding](../architecture/candidate-linux-command-v1.md), [process runners](../architecture/candidate-linux-process-v1.md), [bounded binary capture](../architecture/candidate-linux-capture-v1.md) and [rooted file I/O](../architecture/candidate-linux-rooted-files-v1.md) are implemented. Capture includes owned pipe/session cleanup, output limits, post-open observation/drain timeout and a Fairy wrapper. Final Windows MSVC low/optimized C adapter and CLI capture/process/argv checks, both-target emission and vet pass. Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions; lock updated and verified. The external Debian record supplies native Linux acceptance for its stated scope; Windows skips Linux probes. Go stays the default. |
 | 7 | Add a small opt-in public-interface/effects comparison if the completed compiler needs it. Large-source notices belong in lightweight tooling. | Pending |
 
 The private Linux [rooted file adapter](../architecture/candidate-linux-rooted-files-v1.md)
@@ -27,7 +46,8 @@ file sync and exclusive publication are implemented; unsupported `O_TMPFILE` fil
 without a named staging fallback. Windows substitute and wrapper low/optimized checks,
 both-target emission, related path/process/capture/argv regressions and `go vet ./...` pass.
 Candidate `check`/`check --locked` pass with 546 sources and 6,983 MIR functions. CLI dispatch
-remains open; native Linux proof remains pending.
+remains open. Linux-native probes are skipped locally on Windows; the [external Debian record](../ops/linux-bootstrap-revalidation-62f2a006.md)
+is the completed host-path evidence for its stated scope.
 
 The private Linux [directory enumerator](../architecture/candidate-linux-directory-v1.md) now
 collects owned UTF-8 names and nofollow metadata using independent cursors on the retained
@@ -42,7 +62,8 @@ oldest observed records to satisfy count/byte limits. Publication and snapshot-c
 share a nonblocking advisory directory lock. Noncooperating writers are outside that protocol;
 stale metadata, lock contention and partial failures are reported without claiming bounds.
 Windows C substitutes, both-target Fairy emission, wrapper execution, whole candidate checks
-and vet pass. Native Linux remains unverified; workspace CLI wiring is still open.
+and vet pass. Native Linux is recorded by the [external Debian acceptance](../ops/linux-bootstrap-revalidation-62f2a006.md)
+within its stated scope; workspace CLI wiring is still open.
 
 Linux [file CLI dispatch](../architecture/candidate-linux-cli-v1.md) now connects help,
 version, targets and seven file frontend commands through an isolated Linux entry.
@@ -115,7 +136,8 @@ connects `check --cache-root <existing directory> [--cache-status]`, including
 Linux compiler-image reads, target/ABI keys, descriptor-owned storage and
 anonymous staging. Windows cache transport keeps its existing behavior. Whole-entry
 both-target emission, closed Linux support selection and Windows low/optimized
-wrapper checks pass. Linux-native cold/warm/invalidation cases remain pending;
+wrapper checks pass. Linux-native cold/warm/invalidation cases are covered by the
+[external Debian regression record](../ops/linux-bootstrap-revalidation-62f2a006.md#regression-results);
 public C emission remains open.
 
 Linux [build/run cache](../architecture/candidate-linux-cache-v1.md) now connects
@@ -345,21 +367,26 @@ native subset and source-check the others. Development compiler invocations can
 take minutes for SDK-dependent examples; these concurrent observations are not
 benchmarks and do not justify changing the default compiler.
 
-Go remains the default. Linux execution, required Linux implementation, remaining
-Windows maturity obligations and clean-machine distribution remain open. Correctness
+Go remains the default. The Linux bootstrap and covered command path are complete within the
+[external Debian scope](../ops/linux-bootstrap-revalidation-62f2a006.md); remaining Windows maturity
+obligations and clean-machine distribution remain open. Correctness
 receipts do not establish acceptable build speed; measured time/storage improvements
 remain a separate requirement before compiler promotion.
 
-## Feature proposals
+## Approved follow-up implementation queue (2026-10-31)
 
-Keep existing effects. Consider only the narrow public-interface comparison and source-size
-notices after the compiler/user path is ready. Data trust and state protocols first use ordinary
-types, resources and APIs in real applications. Change Fence, Task Tree and SMT-based invariants
-are not current implementation tasks.
+The previous Feature proposals parking list is superseded. The maintainer approved the numbered
+[follow-up implementation queue](ordered-work-20261031.md), including the narrow
+public-interface/effects comparison and large-source notice, broader language work, backend
+comparison, remote packages, Atlas capabilities and chain execution/persistence. Approval
+authorizes the named sequence and routine bounded-contract plus implementation work. It does not
+admit grammar or API surface, select a backend or target, promote a target, or approve a registry
+or production chain. Those changes require their owning contract, source and fixtures; only a
+scope-changing owner technology decision needs another owner confirmation.
 
-Broader generics/interfaces/closures, QBE or LLVM, additional targets, remote package management,
-Atlas impact/MCP/structural edits, and chain-specific execution/persistence remain later candidates.
-They need a demonstrated user or measured benefit before becoming work in this queue.
+QBE, LLVM and additional targets remain **UNDECIDED**. Data and state protocols still begin with
+ordinary types, resources and APIs. Change Fence, Task Tree and SMT-based invariants remain outside
+the current queue.
 
 ## Completed slices
 
@@ -367,23 +394,25 @@ They need a demonstrated user or measured benefit before becoming work in this q
   SDK 0.87 links the shared reserve/read/commit implementation and Linux adapter.
   Windows emission/execution and allocator-failure observations pass; runtime packaging
   passes 249 exact comparisons. The pack has 22 assets and 150,925 bytes. See the
-  [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json);
-  native Linux execution remains pending.
+  [SDK transition record](../ops/evidence/candidate-sdk-bootstrap-refresh-20261024.json). The
+  external Debian acceptance is the completed Linux host-path record for its stated scope.
 - Exact C-scalar array fields: [ADR 0484](../adr/0484-repr-c-scalar-array-transport.md).
   All sixteen identities retain target layout and internal value transport. Local compiler,
   MIR/interface and Linux/Windows emission checks pass; MSVC C11/C17 low/optimized native
-  execution passes for all fifteen portable providers. Native Linux execution remains pending.
+  execution passes for all fifteen portable providers. Local Windows probes skip Linux; the
+  [external Debian record](../ops/linux-bootstrap-revalidation-62f2a006.md) owns the separately
+  bounded Linux host evidence.
 - Explicit C enum array fields: [ADR 0485](../adr/0485-repr-c-enum-array-transport.md).
   All thirteen bases preserve nominal identity and target-owned representation through whole-array
   copies. Source/MIR/interface and both target-emission checks pass; four MSVC combinations each
-  execute 36 enum-array cases, including undeclared foreign ordinals. Native Linux is pending.
-  The caller assessment above retains record-element arrays and further pointer forms as deferrals.
+  execute 36 enum-array cases, including undeclared foreign ordinals. The Linux host path is
+  recorded externally for its stated scope. The caller assessment above retains record-element
+  arrays and further pointer forms as deferrals; those continue in the current queue.
 
-Local Linux execution remains unverified. The earlier WSL query returned
-`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`; the 2026-10-24 refresh of
-`wsl --list --quiet` timed out after 15 seconds. Neither Docker nor Windows Sandbox
-was found on PATH. Continue local implementation and Windows execution, keeping
-Linux-native and clean-machine checks pending without installing host services.
+The completed Linux host evidence is the maintainer-supplied external Debian record at source
+`62f2a006436e3ef054955b1681d7041fa87892aa`, with its stated host, load, missing-archive and
+full-suite limits. The earlier WSL and local-container failures remain provenance for why this
+Windows host did not repeat the run. Clean-machine transfer remains separate and open.
 
 ## Working rules
 
