@@ -9,7 +9,8 @@
 This is the current ordered queue. Item 1 is complete and the list below is the resulting work
 record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
 item 4 has Windows evidence for the named production-object corpus; item 5 has bounded Windows
-weak-chain and CRT selection evidence; items 6 through 22 are queued. Existing bounded evidence is
+weak-chain and CRT selection evidence; item 6 has bounded Windows default-library and CRT
+failure evidence; items 7 through 22 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -33,7 +34,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 3 | Aggregate transport in both directions | **Windows verified / Linux deferred** | Code `d558eb1f` checks 116 portable record shapes in separate generated-Fairy/C objects under MSVC C11/C17 low/optimized, plus two C-to-Fairy assertion-trap executions. The reverse entry is a fixture-only C bridge, not a public export or aggregate callback. | The bounded Windows matrix and six unsupported-shape checks pass. The 122-shape POSIX matrix emits locally; native cross-compiler execution is in the batched queue below. Full public-export and target conformance claims remain closed. |
 | 4 | COFF relocation coverage | **Windows verified for named corpus** | Code `07fd28a9` inventories actual `unit.obj`/`runtime.obj` from five SDK workspaces under ordinary C11 low/optimized flags, with map/library-log capture. It checks every retained REL32 and ADDR32NB field against its owned source/target positions and final PE bytes. | Ten native executions and twenty objects account for 3,133 fields: 2,404 linked-value checks and 729 explicitly discarded fields. Object addend, final-field, map-owner and discard-evidence mutations fail. This is the named corpus, not every possible Fairy program or CRT archive member; unobserved relocation kinds retain their earlier separate evidence. |
 | 5 | Weak linking: chains, cycles and replacement | **Windows verified for named cases** | Code `cbd3b26a` inventories actual generated/runtime objects, distinguishes class-105 records from linker directives, and binds explicit-object chains, strong replacements and strong cuts of cycles to map owners and final PE fields. Actual CRT startup and SDK data alternatives are exercised separately. | Forty controlled selections, four SDK data cases, two CRT startup cases and ten corpus images pass; four unresolved cycles fail in both the inspection planner and real LINK with LNK2019/LNK1120. This does not add Fairy weak syntax, reverify all archive search modes or establish general COMDAT removal. |
-| 6 | Default libraries and CRT archive | Queued | Record the exact default-library and CRT archive inputs used by each supported Windows build profile, including the expected selection or failure when a member is unavailable. | The inputs, archive search mode, selected member and final symbols are attributable to a same-source receipt; relying on a developer machine's implicit library path is insufficient. |
+| 6 | Default libraries and CRT archive | **Windows verified for named cases** | Code `53d7ed5f` records actual /MT object defaults, absolute searched archive paths and hashes, loaded CRT members, owned final symbols and PE entry at low/optimized. It verifies the five production workspaces and a C control relinked with absolute inputs and no default search. | Sixteen native executions and twenty expected link failures cover missing archives, suppressed defaults, removed demanded members and absent-but-unused OLDNAMES. Ordinary selection uses recorded toolchain directories; explicit relinks have empty LIB/LIBPATH. Broader archive/COMDAT policy, other CRT modes, clean-machine transfer and target promotion remain separate. |
 | 7 | Archives and COMDAT | Queued | Define the production archive, associative and any-COMDAT shapes to cover, including parent/child retention, discard and interaction with library inputs. | Each contracted production shape has exact retention/removal, relocation and executed-image evidence for the declared profile. |
 | 8 | Unwind v2, handlers and chained frames | Queued | Fix the version-2 record, handler-payload and chained-tail forms that the emitted target can produce, then name the exact Fairy/foreign frame boundaries to execute. | Version-2, handler and chain cases are inspected and executed through their exact frames, including chained-tail relocations and failure cases. |
 | 9 | Same-commit mixed-stack, callback and trap CI | Queued | Retain the live mixed-stack walk, C boundary catch and Fairy trap outcomes as one source-addressed receipt. Keep callback retention and asynchronous delivery outside the contract. | The authorized hosted lane runs the cases on the same commit and records stacks, handler addresses, trampoline results, trap mapping and artifact identity. A push is separately authorized work and is not performed by this documentation update. |
@@ -141,6 +142,22 @@ strong UCRT/VCRuntime initialization selection in two more executions. The named
 56 native executions and four expected LINK failures, plus PE/COFF unit checks, scoped Go vet
 and diff checks. Archive search/absence, broader COMDAT removal, hosted CI and target promotion
 remain separate. Linux work stays in the unchanged deferred queue below.
+
+## Item 6 progress: default libraries and CRT archive failures
+
+Code `53d7ed5f` and the [Windows receipt](../ops/windows-default-libraries-20261101.md) bind
+ordinary `/MT` low/optimized object defaults to exact searched archive paths/hashes and loaded
+CRT owners. Startup must be `LIBCMT:exe_main.obj` at the final PE entry; UCRT/VCRuntime
+initialization must have their expected strong archive owners and executable final addresses.
+All five generated/runtime workspaces pass again with source/object/image and library receipts.
+
+The C control also links and runs from the same objects with default search disabled, absolute
+library inputs and empty `LIB`/`LIBPATH`. Missing explicit CRT archives fail with LNK1181;
+suppressing required defaults or removing their demanded actual members fails with LNK1120.
+An isolated directory missing unused OLDNAMES still fails default lookup with LNK1104, while
+suppressing that unused default succeeds. Sixteen positive executions and twenty expected
+link failures pass, alongside PE/COFF unit checks, scoped Go vet and diff checks. Installed
+archives remain unchanged. Broader archive/COMDAT forms are next; Linux remains deferred below.
 
 ## Batched native Linux validation, 2026-11-01
 

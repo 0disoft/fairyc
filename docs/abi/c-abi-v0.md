@@ -541,6 +541,17 @@ has no root relocation or final map symbol. This evidence adds no Fairy weak syn
 ABI, does not reverify historical archive search modes, and does not establish arbitrary
 archive/COMDAT removal or change the target's missing-fixture status.
 
+The [default-library and CRT archive receipt](../ops/windows-default-libraries-20261101.md),
+code `53d7ed5f`, additionally attributes ordinary `/MT` low/optimized object defaults, searched
+absolute archive paths/hashes, loaded startup members and executable final symbol addresses.
+The same objects execute with default search disabled and absolute library inputs; absent
+required files, suppressed CRT defaults and reduced archives with demanded members removed
+produce the recorded LINK failures. Missing OLDNAMES fails default lookup even when it has no
+loaded member; explicitly suppressing that unused default succeeds in the control. The five
+generated/runtime workspaces and the C controls provide sixteen native executions and twenty
+expected link failures. This bounded Go-builder evidence does not admit other CRT modes,
+general archive/COMDAT competition, clean-machine distribution or a new target maturity state.
+
 The executable-image path now follows the Microsoft x64 exception directory as well. It requires a
 readable non-executable `.pdata` table of sorted nonoverlapping 12-byte `RUNTIME_FUNCTION` entries,
 maps every function range to executable code, and maps every DWORD-aligned unwind RVA to readable
