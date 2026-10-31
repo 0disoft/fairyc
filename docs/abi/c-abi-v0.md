@@ -296,6 +296,38 @@ checks pass; MSVC C11/C17 low/optimized native execution passes. Native Linux pr
 
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 
+### Windows aggregate crossings, 2026-11-01
+
+Code `d558eb1f` adds the shared [bidirectional aggregate probe](../../internal/foreignstructprobe/bidirectional.go)
+and its [execution tests](../../internal/foreignstructprobe/bidirectional_test.go). The matrix
+contains 116 portable record shapes: existing small/large and nested records, all ten Fairy
+integer field families, Fairy/C floating fields, all fifteen Windows C scalar field families,
+integer/floating/C-scalar/explicit-enum arrays, raw-pointer fields and a 4096-element array.
+Each record uses three independent C-produced value sets with field/element variation. Pointer
+targets have static C lifetime; only identity and copy transport are checked, not dereference or
+ownership transfer. Existing forward probes retain their copy-isolation observations.
+
+Local MSVC 14.51.36231 passes C11/C17 low/optimized: four native executions with expected
+status 42 and empty streams. Each run links two independently compiled objects and checks
+their receipts plus the final PE and unwind structures. A C observer calls a test-only bridge
+to the actual generated Fairy reconstruction function and checks every returned leaf field and
+array element. A marker confirms the Fairy body ran. Two additional low/optimized executions
+force an assertion inside that C-to-Fairy path and observe status 134 and trap-channel category 6.
+
+The bridge is appended by the fixture using emitted function metadata; generated definitions
+and linkage are preserved. It is not a source export, an aggregate callback admission, or an
+independent-compiler/register oracle. The ordinary callback signature and public export limits
+below remain unchanged. Negative checks reject empty records, Fairy `bool` fields, safe-borrow
+and owning-tag fields, record-element arrays and bare foreign array results. This work fixes
+the backend's accidental conversion of a repr(C) Fairy `bool` field to private integer storage
+before admission; use exact `c::bool` for the supported C field.
+
+Both target emission checks pass locally. The POSIX matrix has 122 shapes, adding `ssize_t`
+array/enum-array families and the direct C scalar field. Native Linux execution is deferred
+by maintainer request, along with the GNU companion checks, to the [batched validation queue](../development/ordered-work-20261031.md#batched-native-linux-validation-2026-11-01).
+See the [bounded Windows receipt](../ops/windows-aggregate-crossings-20261101.md) for commands,
+scope and omissions. No target maturity flag or public ABI support claim is promoted.
+
 ## Functions and callbacks
 
 C variadics are rejected and require a fixed-signature shim.

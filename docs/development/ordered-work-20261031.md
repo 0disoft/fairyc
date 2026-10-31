@@ -1,13 +1,14 @@
 # Ordered work - 2026-10-31
 
 - Status: Approved follow-up implementation queue
-- Updated: 2026-10-31
+- Updated: 2026-11-01
 - Supersedes: current-status claims in the [2026-10-23 ordered work](completion-plan.md#historical-ordered-work-superseded-2026-10-31)
-- Change boundary: documentation and contract planning only in this revision
+- Change boundary: ordered planning and bounded implementation evidence
 - Authorization: named sequence implementation; no implicit syntax, API or target support
 
 This is the current ordered queue. Item 1 is complete and the list below is the resulting work
-record. Item 2 is next / in progress. Items 3 through 22 are queued. Existing bounded evidence is
+record. Item 2 awaits native Linux evidence. Item 3 has Windows evidence with Linux deferred;
+items 4 through 22 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -28,7 +29,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | --- | --- | --- | --- | --- |
 | 1 | Reconcile the current work list | **Complete** | Make this document the current queue, link it from `completion-plan.md`, preserve older records as history, and make later completion evidence supersede an earlier pending statement. | This queue and its status vocabulary are recorded in the two documentation files. |
 | 2 | Fairy-authored GNU companion | **Next / in progress** | Define and implement one private companion boundary for an already prepared Linux packet: compiler discovery, argv/stdin/environment handoff, stream capture, diagnostics, deadlines and process cleanup. Failure is explicit; the existing contract has no automatic frontend fallback to Go. Do not admit distribution or replace the default compiler. | The companion executes the named Linux build path from Fairy, preserves bounded cleanup and exact diagnostics, and has Linux-native plus Windows-development evidence. Go remains the default until a separate promotion decision. |
-| 3 | Aggregate transport in both directions | Queued | Name the first incomplete aggregate family and prove by-value arguments and results in separate Fairy/C translation units in both directions. Keep each added shape narrow and preserve target-owned layout. | Every shape in the contract crosses C to Fairy and Fairy to C with exact values, traps, ownership and profile checks; unsupported shapes fail explicitly. |
+| 3 | Aggregate transport in both directions | **Windows verified / Linux deferred** | Code `d558eb1f` checks 116 portable record shapes in separate generated-Fairy/C objects under MSVC C11/C17 low/optimized, plus two C-to-Fairy assertion-trap executions. The reverse entry is a fixture-only C bridge, not a public export or aggregate callback. | The bounded Windows matrix and six unsupported-shape checks pass. The 122-shape POSIX matrix emits locally; native cross-compiler execution is in the batched queue below. Full public-export and target conformance claims remain closed. |
 | 4 | COFF relocation coverage | Queued | Enumerate each relocation family emitted by current Fairy and runtime objects. Pair the object-level record with its linked-image result instead of treating a parse as link proof. | Each mandatory family has an exact object record, target resolution and final linked-image assertion in the declared Windows profile. Existing partial probes remain partial evidence. |
 | 5 | Weak linking: chains, cycles and replacement | Queued | Define bounded weak-external chain, cycle and replacement cases, including selected and discarded targets and the observable failure mode. | Exact synthetic and live-object cases show deterministic selection, fallback or rejection through the real linker path. |
 | 6 | Default libraries and CRT archive | Queued | Record the exact default-library and CRT archive inputs used by each supported Windows build profile, including the expected selection or failure when a member is unavailable. | The inputs, archive search mode, selected member and final symbols are attributable to a same-source receipt; relying on a developer machine's implicit library path is insufficient. |
@@ -89,6 +90,36 @@ Linux GNU launch, fixed-point reproduction and distribution remain unverified. I
 **Next / in progress** and the target maturity state is unchanged. This progress introduces no
 new owner approval gate and does not trigger push, CI, release or deployment.
 
+## Item 3 progress: aggregate call transport
+
+Code `d558eb1f` introduces the shared bidirectional probe and fixes accidental backend admission
+of Fairy `bool` as a repr(C) field; exact `c::bool` remains supported. Windows MSVC 14.51.36231
+passes 116 record shapes with three field/element-varied C value sets in C11/C17 low/optimized.
+Each execution retains two object receipts and checks final PE/unwind structure, status 42 and
+empty output. A fixture-only bridge enters actual generated Fairy reconstruction bodies from C;
+the marker and independent C observer check their execution and every result leaf. Two additional
+low/optimized executions prove assertion-trap delivery on the private channel inside that path.
+Six unsupported aggregate forms fail explicitly. Both target emission and focused backend tests,
+scoped Go vet and diff checks pass. The [receipt](../ops/windows-aggregate-crossings-20261101.md)
+states the exact boundary: no public exports, aggregate callback signatures, retained pointers,
+ownership transfer, foreign exception unwinding, hosted CI or target promotion.
+
+## Batched native Linux validation, 2026-11-01
+
+The maintainer requested deferred, combined Linux validation because this laptop has no usable
+WSL environment. Continue bounded Windows work without repeating WSL discovery or provisioning.
+Unexecuted Linux cases remain unexecuted and do not block the next Windows work item.
+
+| Pending slice | Native command from the repository root | Current evidence |
+| --- | --- | --- |
+| Fairy-authored GNU companion entry, runtime pack and publication | `go test -mod=readonly ./internal/cli -run '^TestLinuxGNUCompanionNative$' -count=1 -v` | Windows-development and entry emission checks pass; no native execution for this companion. |
+| GNU POSIX adapter | `go test -mod=readonly ./internal/candidatehost -run '^TestLinuxGNUAdapterNative$' -count=1 -v` | Windows POSIX substitutes pass; native test remains unexecuted. |
+| Aggregate calls in both directions | `go test -mod=readonly ./internal/foreignstructprobe -run '^TestBidirectionalAggregateLinux$' -count=1 -v` | POSIX 122-record emission passes on Windows. The authored native test links Clang/GCC in both compiler directions and low/optimized profiles; it has not run. |
+
+Use one later source snapshot and record compiler versions, exact source commit, commands, exit
+codes and omissions for these slices together. This queue neither launches Linux work now nor
+relabels earlier Go-bootstrap evidence as proof of the new Fairy companion or aggregate matrix.
+
 ## Completed Linux baseline
 
 The Linux candidate implementation is not a pending item in this queue. The maintainer-supplied
@@ -122,7 +153,7 @@ No excluded action was performed while updating this document.
 
 ## Status and evidence rules
 
-- Execute the rows in order. A bounded contract may be prepared for the next row while the current
+- Execute the rows in order, with the explicit batched-Linux exception above. A bounded contract may be prepared for the next row while the current
   row is being completed, but implementation evidence does not skip ahead.
 - A passing focused probe is evidence for its named slice. It does not complete a broader row,
   promote a target or turn a documented gap into a reproducer.
