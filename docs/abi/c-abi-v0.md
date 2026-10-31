@@ -640,6 +640,19 @@ Fairy-source stepping, variables/types, arbitrary optimized/inline/folded functi
 complete CodeView/PDB semantics, product debug flags, hosted symbol retention, signed provenance
 and target conformance remain outside the verified scope.
 
+The [Windows CRT/DLL dependency receipt](../ops/windows-runtime-dependencies-20261101.md)
+adds ordinary import-name/ordinal/IAT inventory, actual child DLL load/unload traces and verified
+system-file identities. Five generated-Fairy workspaces at low/optimized select static
+`libcmt.lib`, `libucrt.lib` and `libvcruntime.lib` with named startup/initialization map owners;
+none directly imports a UCRT/VCRuntime DLL. Runtime resolution of the original rooted adapter's
+three `ntdll` functions, the developer tool's seven DbgHelp functions and its PSAPI memory probe
+is separately exercised. Twenty-one named executions pass without a developer PATH; two altered
+images fail at the loader with missing-DLL/missing-entrypoint statuses, and six changed-copy
+runtime controls return `ERROR_PROC_NOT_FOUND`. Every observed DLL path/hash is recorded; system
+`msvcrt.dll` and, in the Go/tool paths, `ucrtbase.dll` are still observed indirectly. These facts
+do not imply `/MD`, an application-local redistributable, complete path coverage or clean-machine
+deployment. Bound/delay imports remain explicit unsupported cases in the private inspector.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 retains the missing complete-runtime and complete-standard-library gates. ADR 0214 records the first

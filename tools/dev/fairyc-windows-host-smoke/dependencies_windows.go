@@ -30,18 +30,27 @@ type dependencyResolution struct {
 }
 
 type windowsDependencyReceipt struct {
-	Case         string                     `json:"case"`
-	Profile      string                     `json:"profile"`
-	ImageSHA256  string                     `json:"imageSHA256"`
-	Imports      pecoff.DependencyReport    `json:"imports"`
-	Resolutions  []dependencyResolution     `json:"systemLoaderResolutions"`
-	Modules      []dependencyModule         `json:"loadEvents"`
-	Unloads      []uint64                   `json:"unloadEvents"`
-	Exit         int32                      `json:"exit"`
-	StdoutSHA256 string                     `json:"stdoutSHA256"`
-	StderrSHA256 string                     `json:"stderrSHA256"`
-	StaticCRT    []pecoff.MSVCLibrarySymbol `json:"staticCRT,omitempty"`
-	Dynamic      []dependencyResolution     `json:"declaredDynamic,omitempty"`
+	UnitSHA256    string                     `json:"unitSHA256,omitempty"`
+	RuntimeSHA256 string                     `json:"runtimeSHA256,omitempty"`
+	CRTArchives   []dependencyArchive        `json:"crtArchives,omitempty"`
+	Case          string                     `json:"case"`
+	Profile       string                     `json:"profile"`
+	ImageSHA256   string                     `json:"imageSHA256"`
+	Imports       pecoff.DependencyReport    `json:"imports"`
+	Resolutions   []dependencyResolution     `json:"systemLoaderResolutions"`
+	Modules       []dependencyModule         `json:"loadEvents"`
+	Unloads       []uint64                   `json:"unloadEvents"`
+	Exit          int32                      `json:"exit"`
+	StdoutSHA256  string                     `json:"stdoutSHA256"`
+	StderrSHA256  string                     `json:"stderrSHA256"`
+	StaticCRT     []pecoff.MSVCLibrarySymbol `json:"staticCRT,omitempty"`
+	Dynamic       []dependencyResolution     `json:"declaredDynamic,omitempty"`
+}
+
+type dependencyArchive struct {
+	Name   string `json:"name"`
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
 }
 
 func dependencySystemFile(path string) (dependencyModule, error) {
@@ -186,6 +195,11 @@ func traceDependencyProcess(tracer, imagePath string, args []string) (windowsDep
 }
 
 func validateDependencyResolutions(receipt *windowsDependencyReceipt) error {
+	for _, module := range receipt.Modules {
+		if err := recheckDependencyModule(module); err != nil {
+			return err
+		}
+	}
 	for _, library := range receipt.Imports.Libraries {
 		resolution, err := resolveDependencyLibrary(library)
 		if err != nil {
@@ -201,6 +215,17 @@ func validateDependencyResolutions(receipt *windowsDependencyReceipt) error {
 			return fmt.Errorf("import resolution %s was not observed in the child process", library.Name)
 		}
 		receipt.Resolutions = append(receipt.Resolutions, resolution)
+	}
+	return nil
+}
+
+func recheckDependencyModule(module dependencyModule) error {
+	current, err := dependencySystemFile(module.Path)
+	if err != nil {
+		return err
+	}
+	if module.SHA256 != current.SHA256 {
+		return fmt.Errorf("DLL file hash mismatch: %s", module.Path)
 	}
 	return nil
 }
