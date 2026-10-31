@@ -49,6 +49,22 @@ remain `UNDECIDED` until an explicit owner decision.
 | 21 | Atlas impact, MCP and structural edits | Queued | Gate each capability separately on current `.fymap` identity and incompleteness behavior. MCP needs its own permission and untrusted-data boundary; structural editing needs an atomic source transform contract. | Impact and semantic diff report bounded uncertainty, MCP exposes only admitted facts with explicit permissions, and structural edits round-trip through parse and semantic validation. Heuristic source rewriting is insufficient. |
 | 22 | Chain execution and persistence | Queued | Keep the chain target **UNDECIDED**. Define the transaction execution subset, storage port, ownership, reentrancy, conflict and failure-atomicity rules before native or durable integration. | The named execution and persistence adapter passes deterministic local oracle and native evidence with restart/conflict/failure tests. Production chain deployment and consensus remain outside this queue. |
 
+## Item 2 progress: authored GNU policy and ELF admission
+
+Code commit `11b781f3` adds the authored `linux_gnu_policy.fy` and `linux_elf.fy` sources,
+their authored tests, and the two Go harnesses. `TestLinuxGNUCompanionPolicy` and
+`TestLinuxGNUCompanionELF` pass both-target emission and Windows MSVC low/optimized, four
+subtests in total. `go vet ./internal/cli` and the commit's diff check pass.
+
+The ELF admission does not handle extended section numbering and is bounded to 64 MiB with a
+4 MiB name scan. Kernel/native Linux GNU launch, runtime-pack selection, compile/link/publication,
+and CLI wiring remain unfinished. A fresh Go bootstrap passes the original workspace's `check`
+and `check --locked` with 566 sources and 7,162 MIR functions; the source lock is refreshed.
+Native Linux execution is unavailable on this host: `wsl --list --quiet` returns
+`Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG`. No Linux execution is claimed for these new modules.
+These slices advance item 2, which remains **Next / in progress**; they
+do not complete the broader item.
+
 ## Completed Linux baseline
 
 The Linux candidate implementation is not a pending item in this queue. The maintainer-supplied
