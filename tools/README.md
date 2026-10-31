@@ -47,8 +47,23 @@ go run -mod=readonly ./tools/dev/fairyc-native-fixtures spec/fixtures/c-emission
 go test -mod=readonly ./internal/cli
 ```
 
-## Native and candidate commands
+## Read-only interface and source-size review
 
+`fairyc-review` is an opt-in developer command, separate from the product CLI. It compares the
+root package's verified ordinary public interface and declared effects, or reports large source
+files from metadata only. It never builds/runs reviewed programs or writes workspace locks/caches.
+
+```text
+go run -mod=readonly ./tools/dev/fairyc-review diff --before C:/work/before --after C:/work/after --format json
+go run -mod=readonly ./tools/dev/fairyc-review notice --root . --threshold-bytes 40000
+```
+
+Changes return zero unless `diff --fail-on-change` is requested; incomplete comparison/scan
+returns 2, including partial generic coverage. For exact process exit codes in automation, build
+the executable first because `go run` wraps a nonzero child exit. Large-file findings are advisory.
+See the [bounded review contract and Windows evidence](../docs/ops/interface-source-review-20261101.md).
+
+## Native and candidate commands
 Run tools from the repository root. Native commands require their supported host C toolchain;
 the native fixture runner requires Linux/amd64. Candidate generators support read-only checks:
 

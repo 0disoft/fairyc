@@ -25,6 +25,11 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - **Public-interface extraction, hashing, and fixture runner**
   - `internal/moduleinterface/`
   - `internal/moduleinterfacefixture/`
+- **Opt-in ordinary public-interface/effects review and metadata-only large-source notice**
+  - `internal/interfacereview/`
+  - `internal/sourcenotice/`
+  - `tools/dev/fairyc-review/`
+  - `docs/ops/interface-source-review-20261101.md`
 - **Package-source digest v1 fixtures**
   - `spec/fixtures/package-source/manifest-v1.json`
 - **Package-source digest and fixture runner**
