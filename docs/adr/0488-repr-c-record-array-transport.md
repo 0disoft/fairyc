@@ -51,19 +51,34 @@ CLI option, CI workflow or target-maturity promotion.
 
 ## Evidence
 
-Local Windows validation passes. The focused native command is:
+The implementation is local commit `e5b03f3f`; the final 4,096-element probe and this evidence
+change are prepared for the following local commit. The current
+[Windows receipt](../ops/windows-record-array-transport-20261101.md) records the complete command
+and rerun history.
 
-```text
-go test -mod=readonly ./tools/dev/fairyc-windows-host-smoke -run '^TestReprCRecordFieldNativeCrossing$' -count=1 -v
-```
+The entire `internal/foreignstructprobe` package passes in 19.670s with only the user-deferred
+Linux-native test skipped. Windows and POSIX emission inventories are 133 and 139 record shapes,
+with 428 and 448 generated functions. Four MSVC 14.51.36231 C11/C17 low/optimized executions pass
+through separate `caller.obj`/`callee.obj` links, each carrying 133 records x 3 value sets = 399
+record-case entries. The fixture C bridge enters actual generated Fairy bodies, and two C-to-Fairy
+assertion-trap executions pass with status 134, trap-channel control byte 6 and empty streams.
 
-MSVC 14.51.36231 passes C11/C17 at low and optimized profiles in four separate
-`caller.obj`/`callee.obj` links. Every execution exits 42 with empty stdout and stderr. Nine probe
-cases run per profile and optimization combination: three record families with three rotations
-each. The cases cover a four-byte record result; a mixed `c::long`, `f64` and nested-leaf record;
-and a record-array element containing `c::int[2]`, `f32[2]`, an explicit C enum array with
-`UINT_MAX` outside the declared variants, and a nested `@repr(C)` leaf array.
+The forward record-array test passes in 5.524s. Four executions each run 12 record-array cases per
+compilation profile, including lengths 1, 3 and 4,096. The four families cover small, mixed
+`c::long`/`f64`/nested-leaf, exact C-scalar/float/C-enum/nested-array fields, and the 4,096-element
+case. The large case exercises native structure-array stack transport and copies. It adds no source
+export or general aggregate callback.
 
-Focused HIR, semantic, MIR, MIR-codec, module-interface, package-artifact and C-backend tests pass.
-Compiler tests selected by the `(Array|Struct|CEnum|Transport)` filter also pass. Native Linux
-execution remains deferred and is not attested by this Windows result.
+Full tests pass for the seven HIR, semantic, MIR, MIR-codec, module-interface, package-artifact and
+C-backend packages. Compiler-package coverage is limited to the
+`(Array|Struct|CEnum|Transport)|^TestCRecordArray` filter. MIR mutations reject `non-repr(C)`
+elements, empty elements, cycles and element operations. Interface hashes distinguish nominal
+element type, length and field shape; the cache-context rebind changes package identity from 3 to
+19. Scoped `go vet` and `git diff --check` pass.
+
+The first inventory run after implementation failed because stale tests rejected record arrays and
+expected 116/122 shapes. Changing the rejection to a `non-repr(C)` element, admitting `@repr(C)`
+element/container records, and setting the interim count to 129/135 made the limited rerun pass;
+the 4,096-element family then produced the final 133/139 inventory and clean full package pass.
+Native Linux execution, WSL, a full `go test ./...`, hosted CI, push and publication remain
+deferred or unexecuted.

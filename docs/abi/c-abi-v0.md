@@ -317,10 +317,16 @@ stores, views/iteration and other element operations remain closed, with source 
 MIR checks enforcing the boundary. Bare foreign arrays, new direct private/resource/tagged arrays
 of these nonplain record elements, and nested stores for the new shape remain closed. Existing
 integer, floating, exact C-scalar and C-enum array admissions are unchanged. ADR 0488 changes no
-format, opcode, runtime, grammar, dependency, SDK, CLI or CI surface. Its focused HIR, semantic,
-MIR, MIR-codec, module-interface, package-artifact and C-backend checks pass. MSVC 14.51.36231
-passes C11/C17 low/optimized record-array crossings through four separate caller/callee object
-links with expected exit 42 and empty streams. Native Linux execution remains deferred.
+format, opcode, runtime, grammar, dependency, SDK, CLI or CI surface. The
+[Windows receipt](../ops/windows-record-array-transport-20261101.md) records the final evidence:
+the full foreign-struct package passes with 133 portable/139 POSIX shapes and 428/448 generated
+functions, skipping only the Linux-native test. Four MSVC 14.51.36231 C11/C17 low/optimized
+forward executions each run 12 record-array cases, including length 4,096; four reverse executions
+each carry 133 records x 3 value sets through separate caller/callee objects. The C bridge enters
+generated Fairy bodies, and two assertion-trap executions pass with status 134, control byte 6 and
+empty streams. Full tests pass for the seven HIR, semantic, MIR, MIR-codec, module-interface,
+package-artifact and C-backend packages; compiler coverage is limited to its record-array/aggregate
+filter. Scoped `go vet` passes. Native Linux execution remains deferred.
 
 By-value `@repr(C)` struct arguments and returns are included. The target layout engine must agree with the C compiler's actual ABI classification.
 

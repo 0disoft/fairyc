@@ -61,9 +61,9 @@ func TestBidirectionalAggregateEmission(t *testing.T) {
 		}
 		t.Run(name, func(t *testing.T) {
 			p, u, bound := emitBidirectional(t, posix)
-			want := 116
+			want := 133
 			if posix {
-				want = 122
+				want = 139
 			}
 			if len(p.Records) != want {
 				t.Fatalf("aggregate inventory changed: %d, want %d; review the documented matrix", len(p.Records), want)
@@ -95,12 +95,12 @@ func TestBidirectionalAggregateEmission(t *testing.T) {
 
 func TestBidirectionalAggregateRejectsClosedShapes(t *testing.T) {
 	for name, body := range map[string]string{
-		"empty":        "@repr(C) struct Bad{}",
-		"fairy-bool":   "@repr(C) struct Bad{bool value;}",
-		"safe-borrow":  "@repr(C) struct Bad{ref u8 value;}",
-		"owning-tag":   "@repr(C) struct Bad{Option<i32> value;}",
-		"record-array": "@repr(C) struct Element{u8 value;} @repr(C) struct Bad{Element[2] values;}",
-		"bare-array":   "unsafe extern C fn u8[2] bad();",
+		"empty":                "@repr(C) struct Bad{}",
+		"fairy-bool":           "@repr(C) struct Bad{bool value;}",
+		"safe-borrow":          "@repr(C) struct Bad{ref u8 value;}",
+		"owning-tag":           "@repr(C) struct Bad{Option<i32> value;}",
+		"private-record-array": "struct Element{u8 value;} @repr(C) struct Bad{Element[2] values;}",
+		"bare-array":           "unsafe extern C fn u8[2] bad();",
 	} {
 		t.Run(name, func(t *testing.T) {
 			use := "unsafe extern C fn Bad make_bad();fn i32 main(){let Bad value=unsafe{make_bad()};return 0;}"
