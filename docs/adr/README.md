@@ -417,3 +417,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0497: Retain C and measure backend/target alternatives](0497-backend-and-target-review.md)
 
 - [0498: Explicit pinned remote source preparation](0498-explicit-pinned-remote-package-sources.md)
+
+- [0499: Bounded Atlas impact, MCP and checked body edits](0499-bounded-atlas-impact-mcp-and-body-edits.md)
