@@ -264,6 +264,11 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 		return pathID
 	}
 	switch text {
+	case "fn":
+		if p.isPreviousRevision() {
+			return p.unexpected()
+		}
+		return p.parseClosure()
 	case "(":
 		p.advance()
 		expression := p.parseExpression(0, true)
@@ -463,7 +468,7 @@ func canStartExpression(token lexer.Token, text string) bool {
 		return true
 	}
 	switch text {
-	case "true", "false", "null", "self", ".", "(", "[", "{", "if", "match", "switch", "unsafe", "-", "+", "!", "~", "&", "*", "ref":
+	case "fn", "true", "false", "null", "self", ".", "(", "[", "{", "if", "match", "switch", "unsafe", "-", "+", "!", "~", "&", "*", "ref":
 		return true
 	default:
 		return false

@@ -35,6 +35,8 @@ const (
 )
 
 const (
+	KindClosure        Kind = "closure"
+	KindCapture        Kind = "capture"
 	KindSource         Kind = "source"
 	KindModule         Kind = "module"
 	KindImport         Kind = "import"

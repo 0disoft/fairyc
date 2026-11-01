@@ -258,6 +258,7 @@ type Literal struct {
 
 // Expression is a structural AST expression used before name resolution and typing.
 type Expression struct {
+	Closure       *Closure            `json:",omitempty"`
 	CallLabels    *CallArgumentLabels `json:",omitempty"`
 	TypeArguments []TypeReference
 	Kind          syntax.Kind
@@ -780,6 +781,9 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		Span:   node.Span,
 		Text:   node.Text,
 		Cooked: node.Cooked,
+	}
+	if node.Kind == syntax.KindClosure {
+		return lowerClosure(tree, node)
 	}
 	if node.Kind == syntax.KindBlock {
 		expression.Block = lowerBlock(tree, node)

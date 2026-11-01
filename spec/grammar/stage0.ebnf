@@ -244,7 +244,12 @@ call_argument = ("." IDENT "=")? expression ;
 index_suffix = "[" (expression ".." expression? | ".." expression? | expression) "]" ;
 field_suffix = "." IDENT ;
 
-primary_expression = literal
+(* Copied local closure syntax; execution admission is separately bounded. *)
+closure_expression = "fn" "[" ordinary_parameter_list? "]" type
+                     "(" ordinary_parameter_list? ")" block ;
+
+primary_expression = closure_expression
+                   | literal
                    | path_expression
                    | contextual_variant_expression
                    | grouped_expression
