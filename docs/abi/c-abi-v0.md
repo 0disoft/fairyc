@@ -83,14 +83,18 @@ The current executable source subset implements `unsafe extern C fn` imports wit
 single nonempty `@link_name("symbol")`, using
 `i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to
 the previously admitted Fairy scalar set (`u8`, `i32`, `i64`, `u32`, `usize`) or opaque `void`, and raw pointers to an
-admitted nonempty `@repr(C)` struct. One pointer-to-opaque-pointer output-slot shape is additionally
-admitted for exact `void **` calls; it does not open arbitrary pointer nesting. AST, typed HIR, MIR, unsafe provenance, deterministic C
+admitted nonempty `@repr(C)` struct, plus the exact C-scalar pointer forms in ADR 0489 below. The
+admitted nested output slots are exact `ptr mut ptr mut void` (`void **`) and
+`ptr mut ptr mut c::T` (`<C T> **`) for an admitted C scalar; no other nesting is open. AST,
+typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `ref T -> ptr T`, `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast may take the address of a direct
-local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other raw-pointer casts remain unsupported. ADR 0286
+local place without inventing alias promises. The exact C-scalar pointees and the separate mutable
+pointer-slot borrow are defined in ADR 0489. Raw dereference, pointer arithmetic, pointer retyping,
+integer-pointer conversion, mutability strengthening, safe-reference construction from a raw
+pointer, and other raw-pointer casts remain unsupported. ADR 0286
 adds only explicit `i32 <-> c::int` conversion when the selected target declares signed 32-bit
 `c.int`; it does not add implicit promotion or broaden any other C-scalar conversion. The exact source-to-C
 mapping is closed:
@@ -119,12 +123,44 @@ signed and unsigned integer families. Target-specific `c::ssize_t` also defines
 `_POSIX_C_SOURCE 200809L`. Every C scalar supports foreign return to typed local to matching foreign
 argument. Exact `c::int` additionally supports explicit bidirectional conversion with `i32` and
 pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
-arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
-`@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
+arithmetic, comparison, cast, or interpreter behavior. Exact C-scalar fields may appear directly or
+through admitted nested `@repr(C)` records. Exact C-scalar pointers preserve the C-scalar identity
+and target availability under ADR 0489; they are not converted to Fairy scalar pointers. This is not
 implementation of public exports. Bounded callbacks have the separate admission below.
 Integer-array, floating-array, explicit C-enum and record-array admissions are described below. By-value record
 arguments are admitted only for the existing record shapes described below. The interpreter remains
 fail-closed on every foreign call.
+
+### Exact C-scalar raw pointers
+
+[ADR 0489](../adr/0489-c-scalar-pointer-output-slots.md) admits exact
+`ptr c::T -> const <C T> *` and `ptr mut c::T -> <C T> *` for each of the sixteen existing
+`CScalarType` identities that the selected target supplies. Windows MSVC admits fifteen because it
+has no `c::ssize_t`; `c::long` follows the selected LP64 or LLP64 target layout.
+Representation-equal Fairy and C scalars remain distinct pointer targets.
+
+The only nested pointer shape added is `ptr mut ptr mut c::T -> <C T> * *` for an admitted C
+scalar. The existing exact `ptr mut ptr mut void -> void * *` output slot remains. Other
+qualifiers, depth-three pointers, and nested pointers to records, arrays or Fairy scalars remain
+closed.
+
+Admitted values support typed null, pointer-value copy, internal and foreign arguments/results,
+`@repr(C)` fields, and equality only between operands of the same exact pointer type. Existing
+unsafe same-element `ref T -> ptr T`, `ref mut T -> ptr T` and `ref mut T -> ptr mut T` casts
+apply to these C-scalar pointees for direct local places and borrowed C-scalar parameters. One
+mutable slot borrow is added: `ref mut ptr mut c::T -> ptr mut ptr mut c::T`. Readonly nested
+borrow variants remain closed.
+
+Borrow and local-address casts lend existing storage only for a synchronous C call. They do not
+extend lifetime, transfer ownership, or guarantee retention; the C provider owns the validity
+contract for any pointer it writes or returns. Raw dereference, pointer arithmetic, pointer
+retyping, integer-pointer conversion, mutability strengthening, safe-reference construction from a
+raw pointer, and new C-scalar literals or arithmetic remain closed.
+
+Local Windows evidence is recorded in the [2026-11-01
+receipt](../ops/windows-c-scalar-pointers-20261101.md): 15 portable and 16 POSIX emission targets,
+four MSVC C11/C17 low/optimized executions and 45 cases per execution. Native Linux execution
+remains deferred.
 
 ## C-representable types
 
@@ -139,7 +175,8 @@ aggregate rejection.
 The implemented source/backend slice is deliberately smaller than that language contract: it
 accepts only acyclic nonempty structs over `i8`, `i16`, `i32`, `i64`, `isize`, `u8`, `u16`, `u32`,
 `u64`, `usize`, `f32`, `f64`, all sixteen exact TargetSpec
-C scalars, admitted raw pointers including opaque `void`, bounded integer, floating and C-scalar arrays, and
+C scalars, admitted raw pointers including opaque `void` and exact C-scalar pointers, bounded
+integer, floating and C-scalar arrays, and
 nested structs that are themselves `@repr(C)`. C-scalar fields use the same exact transport table and provider
 assertions as foreign scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
 the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
@@ -300,8 +337,9 @@ checks pass; MSVC C11/C17 low/optimized native execution passes. Native Linux pr
 containing record and `Element` are actual acyclic nonempty `@repr(C)` records and `N` is in
 `1..=4096`. Elements may use the existing ABI leaves, nested `@repr(C)` records, admitted bounded
 integer, floating, exact C-scalar and explicit C-enum arrays, or further record-array fields.
-Direct array-of-array element types, empty or cyclic records, and new pointer forms remain closed.
-Target layout and the existing pointer-target checks apply recursively.
+Direct array-of-array element types, empty or cyclic records, and pointer forms outside the
+separate ADR 0489 C-scalar subset remain closed. Target layout and the existing pointer-target
+checks apply recursively.
 
 The C member is an actual generated C structure array, such as `Element field[3]`, not a pointer or
 private transport structure. Whole C-produced field reads, inferred and typed locals, internal

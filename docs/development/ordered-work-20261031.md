@@ -14,8 +14,8 @@ failure evidence; item 7 has bounded production archive/COMDAT evidence; item 8 
 unwind/handler-data evidence; item 9 has locally verified CI wiring with hosted execution pending;
 item 10 has bounded Windows debug retention/lookup evidence; item 11 has named Windows CRT/DLL
 dependency evidence; item 12 has a bounded Windows-verified opt-in review tool;
-item 13 has bounded Windows record-array evidence with Linux deferred; items 14 through 22 are
-queued. Existing bounded evidence is
+item 13 has bounded Windows record-array evidence with Linux deferred; item 14 has exact C-scalar
+pointer evidence with Linux deferred; items 15 through 22 are queued. Existing bounded evidence is
 retained, but a row remains queued until its stated completion condition is met.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
@@ -47,7 +47,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 11 | UCRT, VCRuntime and dynamic DLL dependencies | **Windows verified for named paths** | `00a82403` inventories ordinary PE imports; `6b906918` records actual child LOAD_DLL/UNLOAD_DLL events with an empty PATH; `f34827f3` restricts PSAPI to the system loader path. See the [CRT/DLL contract and receipt](../ops/windows-runtime-dependencies-20261101.md). | Twenty-one named traces cover five SDK workspaces in both profiles, original rooted adapter operations and six missing-export controls, two retained-PDB developer lookups and Go CLI startup. Two further loader mutations fail with DLL-not-found/entrypoint-not-found. Import functions, system paths/hashes and static CRT owners are verified; PSAPI memory queries pass separately. Arbitrary execution paths, other CRT modes and clean-machine transfer remain separate gates. |
 | 12 | Interface/effects diff and large-source notice | **Windows verified for bounded tool** | `03195a2e` compares verified root-package ordinary v5 interface facts and effects; `586ecba4` adds a metadata-only source-size scan. `fairyc-review diff/notice` exposes text/JSON with explicit exact/bounded/partial/unknown evidence. See the [contract and Windows validation](../ops/interface-source-review-20261101.md). | Deterministic signature/layout/effects and add/remove facts pass; generic-module or unavailable-input gaps cannot become unchanged/removed declarations. A built Windows executable verifies advisory and 0/1/2 behavior, including read-only workspaces. Strict >40,000-byte notices preserve source and skip declared output/vendor directories and symlinks. No product/compiler/CI admission change; behavior/ABI compatibility and broader generic review remain unknown. |
 | 13 | `@repr(C)` record-element arrays and additional arrays | **Windows verified / Linux deferred** | Code `e5b03f3f` and the final probe admit nonempty acyclic `@repr(C)` record fields `Element[N]` for `N=1..4096`. Elements retain existing ABI leaves and admitted scalar, enum, nested-record and record-array fields. Actual C struct arrays and per-element assignment carry values; bare arrays, direct array-of-array elements, new nonplain element operations and nested stores for the new shape stay closed. See the [Windows receipt](../ops/windows-record-array-transport-20261101.md). | The final clean package pass covers 133 portable/139 POSIX emission shapes, 428/448 functions, four forward native profiles with 12 record-array cases each, four reverse profiles at 133 records x 3 sets, and two assertion traps. Seven focused packages have full tests; compiler coverage is filtered and scoped vet passes. Native Linux execution remains in the batched queue. |
-| 14 | Raw-pointer targets, operations and nesting | Queued | Name the first pointer target or operation to add, such as a new scalar pointee, a specific dereference/arithmetic/cast rule, or one nested pointer shape. Define provenance, null and lifetime boundaries. | The exact admitted operation and target cross the foreign boundary with matching layout and behavior; every other target, operation and nesting remains an explicit rejection. |
+| 14 | Raw-pointer targets, operations and nesting | **Windows verified / Linux deferred** | Code `3ea7a217` adds exact `ptr c::T` and `ptr mut c::T` for the sixteen existing C scalars when the target supplies them, plus one mutable `ptr mut ptr mut c::T` output slot. The old `void **` shape remains; other qualifiers, depth-three pointers, record/array/Fairy-scalar nesting and every raw operation outside the listed borrow casts stay closed. See [ADR 0489](../adr/0489-c-scalar-pointer-output-slots.md) and the [Windows receipt](../ops/windows-c-scalar-pointers-20261101.md). | Focused compiler, full C backend, interface/package identity and Windows probe pass. Windows emits 15 portable targets and POSIX 16; four MSVC C11/C17 low/optimized executions cover 15 types x 3 rotations = 45 cases each. Native Linux remains pending; scoped vet passes. |
 | 15 | Ordinary callbacks | Queued | Broaden the existing bounded synchronous callback slice through a separately named ordinary callback contract. Keep retained callbacks, asynchronous delivery, unwinding through Fairy and `longjmp` across Fairy excluded unless a later decision reopens them. | The admitted signature and user-data lifetime are checked end to end, invoked synchronously with exact results, and bounded across C to Fairy and Fairy to C call paths. |
 | 16 | Zero-field resources and nested owning tags | Queued | Define storage, construction, move and recursive cleanup for one zero-field resource case and one nested owning-tag case. Keep compiler-owned conditional root flags separate. | Both positive cases execute with exact drop order and active-payload observations; malformed and unsupported nesting fails closed. Direct nested-resource evidence does not stand in for arbitrary tagged nesting. |
 | 17 | Cross-package inline and cache | Queued | Reopen the Phase 3 gate in [the current phase decision](phase-status.md#phase-3-scope-decision-2026-10-21), then define the inline contract, visibility, body identity and cache invalidation rule before reuse. | Inline bodies have versioned identity, owner/dependent invalidation, deterministic reassembly and mismatch rejection. Existing package cache v4 behavior remains intact until an explicit successor is accepted. |
@@ -123,6 +123,41 @@ objects, and both assertion traps pass with status 134 and control byte 6. Lengt
 target LLP64/LP64 layout, MIR mutation, nominal interface identity and cache-context rebinding
 checks pass. Seven packages have full tests; compiler coverage is limited to the record-array and
 aggregate filter. Native Linux execution remains deferred.
+
+## Item 14 progress: exact C-scalar pointers and output slots
+
+Code `3ea7a217` and the [Windows receipt](../ops/windows-c-scalar-pointers-20261101.md) admit
+exact `ptr c::T`, `ptr mut c::T` and one `ptr mut ptr mut c::T` output slot for the sixteen
+existing C scalars subject to target availability. Windows has 15 because it lacks `c::ssize_t`;
+`c::long` follows LLP64 there and LP64 on the POSIX target. The old exact `void **` slot
+remains. Other qualifiers, depth-three pointers, nested record/array/Fairy-scalar pointers and all
+raw dereference, arithmetic, retyping, integer cast, mutability strengthening and safe-reference
+construction stay closed.
+
+The implementation and core tests are local commit `3ea7a217`. The native probe and receipt are
+in the commit containing `docs/ops/windows-c-scalar-pointers-20261101.md`. The fixture-only C
+bridge calls actual generated Fairy identity functions for const, mutable and `T **` shapes; it
+is not a public export or callback surface.
+
+Focused compiler tests pass all 16 identities and MIR codec round trips, reject Windows
+`c::ssize_t`, test the local-only POSIX pointer provider header/size assertion, reject ten
+unsafe/type negatives, and reject forged raw-address/raw-borrow MIR provenance, pointee and
+strengthening mutations. The full C backend package passes in 30.217s; full module-interface and
+package-artifact packages pass with exact target/qualifier/depth identity and all 16 x 3 pointer
+shapes surviving context-descriptor rebind. The filtered foreign-struct probe passes in 3.770s,
+including 15 Windows/16 POSIX emission inventories and four MSVC 14.51.36231 C11/C17
+low/optimized executions with 45 cases each. Separate caller/callee objects, PE/AMD64 unwind
+inspection, exit 42 and empty streams pass.
+
+Native Linux execution is deferred: the guarded `TestCScalarPointersLinux` Clang/GCC
+cross-helper compiles and skips correctly under Windows, and its native run has not happened.
+Scoped `go vet` passes with exit 0, and the broader compiler filter
+`(CScalarPointer|RawPointer|RawAddress|Opaque|Borrow.*Pointer|IntegerTransportEmissionBoundaries)`
+passes in 0.517s. A full compiler-package run, full `go test ./...`, hosted CI, push and
+publication remain unexecuted. The language and C ABI subset extend; grammar, MIR opcodes and
+codec format, runtime, SDK, serialized formats, dependencies, CLI and CI are unchanged. ADR
+0488's historical proof is untouched; only its blanket new-pointer closure is superseded for
+this named subset.
 
 ## Item 4 progress: generated and runtime COFF relocations
 
@@ -221,6 +256,7 @@ Unexecuted Linux cases remain unexecuted and do not block the next Windows work 
 | Fairy-authored GNU companion entry, runtime pack and publication | `go test -mod=readonly ./internal/cli -run '^TestLinuxGNUCompanionNative$' -count=1 -v` | Windows-development and entry emission checks pass; no native execution for this companion. |
 | GNU POSIX adapter | `go test -mod=readonly ./internal/candidatehost -run '^TestLinuxGNUAdapterNative$' -count=1 -v` | Windows POSIX substitutes pass; native test remains unexecuted. |
 | Aggregate calls and record arrays in both directions | `go test -mod=readonly ./internal/foreignstructprobe -run '^TestBidirectionalAggregateLinux$' -count=1 -v` | POSIX 139-record emission with 448 generated functions passes on Windows, including the 4,096-element record-array family. The authored native test links Clang/GCC in both compiler directions and low/optimized profiles; it has not run. |
+| Exact C-scalar pointers and `T **` output slots | `go test -mod=readonly ./internal/foreignstructprobe -run '^TestCScalarPointersLinux$' -count=1 -v` | Windows emission covers 15 portable/16 POSIX targets x 3 shapes. The guarded helper compiles and skips under Windows and links Clang/GCC in both directions at low/optimized; its native run has not happened. |
 
 Use one later source snapshot and record compiler versions, exact source commit, commands, exit
 codes and omissions for these slices together. This queue neither launches Linux work now nor

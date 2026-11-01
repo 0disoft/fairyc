@@ -390,6 +390,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - [0486-bounded-windows-generated-unit-reuse.md](0486-bounded-windows-generated-unit-reuse.md): reuses two exact-input generated C objects for Windows release builds while keeping fresh source checks and linking.
 - [0487-bounded-windows-long-path-loading.md](0487-bounded-windows-long-path-loading.md): shares stack-only Windows path normalization between file open and directory enumeration within a 4,096-WCHAR cap.
 - [0488-repr-c-record-array-transport.md](0488-repr-c-record-array-transport.md): admits bounded arrays of actual acyclic nonempty repr(C) records with target-owned element layout and value-copy transport while keeping new nonplain element operations and bare foreign arrays closed.
+- [0489-c-scalar-pointer-output-slots.md](0489-c-scalar-pointer-output-slots.md): admits exact `ptr c::T` and `ptr mut c::T` C-scalar pointers plus the mutable `T **` output slot, with target-owned availability, same-type equality and borrow-only synchronous C storage.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
