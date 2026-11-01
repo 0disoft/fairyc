@@ -37,9 +37,9 @@ func run() error {
 		}
 	}
 	var output bytes.Buffer
-	binary.Write(&output, binary.BigEndian, uint32(20))
+	binary.Write(&output, binary.BigEndian, uint32(24))
 	var rows []map[string]any
-	for mode := 0; mode < 20; mode++ {
+	for mode := 0; mode < 24; mode++ {
 		e := environment
 		if mode >= 1 && mode <= 8 {
 			e[mode-1] += "!"
@@ -82,6 +82,21 @@ func run() error {
 		if mode == 17 {
 			for j := range p.Dependencies[0].Interface {
 				p.Dependencies[0].Interface[j] = 8
+			}
+		}
+		if mode == 20 || mode == 23 {
+			for j := range p.InlineBodies {
+				p.InlineBodies[j] = 6
+			}
+		}
+		if mode == 21 || mode == 23 {
+			for j := range p.Dependencies[0].InlineBodies {
+				p.Dependencies[0].InlineBodies[j] = 7
+			}
+		}
+		if mode == 22 || mode == 23 {
+			for j := range p.Dependencies[1].InlineBodies {
+				p.Dependencies[1].InlineBodies[j] = 8
 			}
 		}
 		encoded, err := packagecache.Encode(p)

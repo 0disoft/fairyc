@@ -38,3 +38,23 @@ EncodeLegacyV4 is for frozen compatibility evidence only and rejects inline fact
 original v4 golden digest remains tested; new v5 baselines are recorded independently.
 No automatic cache enablement, shared remote cache, executable/native object cache or
 trust boundary expansion is introduced.
+
+## Fairy candidate encoder parity, 2026-11-02
+
+The authored `project_cache_key.fy` now encodes the complete v5 tuple and accepts
+only v5 key text. Its explicit owner/dependency inline members allow zero classes
+and nonzero classes, exactly like the Go encoder; the generic envelope includes
+the same base bytes. `TestCandidateCacheKeyV5Parity` compares all canonical bytes
+and digest text against independent Go oracles for 24 ordinary and 11 generic
+cases, including separate owner/dependency inline mutations. Both Windows native
+profiles pass, together with malformed inputs, exact work budgets and v4 text
+rejection. The old Go `EncodeLegacyV4` remains frozen; no legacy Fairy cache key
+is used to authorize v5 reuse.
+
+This is encoder parity, not inline source admission. The candidate's complete
+source factory still rejects `@inline` function attributes through its signature
+authority. Its owner-derived key producer supplies the exact zero inline class
+for that admitted no-inline subset. Enabling inline exports later requires the
+actual class derivation, typed body identity, artifact validation and backend
+handling before this producer can admit such a source. Linux native execution
+remains in the combined queue. No cache default or target promotion changes.

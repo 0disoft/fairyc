@@ -12,12 +12,12 @@ fn u8[32] digest(usize seed,bool changed){var u8[32] result=[0;32];let table=b"\
 fn void push(ref mut v::Vec<bytes::Buffer> values,ref u8[] value){assert(v::push<bytes::Buffer>(values,copied(value)).is_ok);}
 fn key::Inputs input(usize mode){
     let environment=key::environment_of(env(mode,0),env(mode,1),env(mode,2),env(mode,3),env(mode,4),env(mode,5),env(mode,6),env(mode,7));
-    let facts=key::Facts{.standard_library=digest(if(mode==40){0}else{1},mode==9),.package=digest(if(mode==41){0}else{2},mode==10),.source=digest(if(mode==42){0}else{3},mode==11),.current_interface=digest(if(mode==43){0}else{4},mode==12),.current_body=digest(if(mode==44){0}else{5},mode==13)};
+    let facts=key::Facts{.standard_library=digest(if(mode==40){0}else{1},mode==9),.package=digest(if(mode==41){0}else{2},mode==10),.source=digest(if(mode==42){0}else{3},mode==11),.current_interface=digest(if(mode==43){0}else{4},mode==12),.current_body=digest(if(mode==44){0}else{5},mode==13),.inline_bodies=digest(if(mode==20 || mode==23){6}else{0},false)};
     var v::Vec<bytes::Buffer> profile_flags=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> features=v::empty<bytes::Buffer>();var v::Vec<key::Dependency> dependencies=v::empty<key::Dependency>();
-    if(mode!=18){push(ref mut profile_flags,b"-O2");push(ref mut features,b"a");assert(v::push<key::Dependency>(ref mut dependencies,key::Dependency{.coordinate=digest(if(mode==16){2}else{1},false),.interface_hash=digest(if(mode==17){8}else{2},false)}).is_ok);assert(v::push<key::Dependency>(ref mut dependencies,key::Dependency{.coordinate=digest(3,false),.interface_hash=digest(4,false)}).is_ok);}
+    if(mode!=18){push(ref mut profile_flags,b"-O2");push(ref mut features,b"a");assert(v::push<key::Dependency>(ref mut dependencies,key::Dependency{.coordinate=digest(if(mode==16){2}else{1},false),.interface_hash=digest(if(mode==17){8}else{2},false),.inline_bodies=digest(if(mode==21 || mode==23){7}else{0},false)}).is_ok);assert(v::push<key::Dependency>(ref mut dependencies,key::Dependency{.coordinate=digest(3,false),.interface_hash=digest(4,false),.inline_bodies=digest(if(mode==22 || mode==23){8}else{0},false)}).is_ok);}
     if(mode==14){push(ref mut profile_flags,b"-g");}if(mode==15){push(ref mut features,b"z");}
     if(mode>=60 && mode<63){push(ref mut profile_flags,if(mode==60){b"-O2"}else if(mode==61){b"-A"}else{b""});}if(mode>=63 && mode<66){push(ref mut features,if(mode==63){b"a"}else if(mode==64){b"A"}else{b"\xff"});}
-    if(mode>=70 && mode<74){let first=key::Dependency{.coordinate=digest(if(mode==70){0}else if(mode==72){3}else if(mode==73){4}else{1},false),.interface_hash=digest(if(mode==71){0}else{2},false)};let slot=v::at_mut<key::Dependency>(ref mut dependencies,0);*slot=first;}
+    if(mode>=70 && mode<74){let first=key::Dependency{.coordinate=digest(if(mode==70){0}else if(mode==72){3}else if(mode==73){4}else{1},false),.interface_hash=digest(if(mode==71){0}else{2},false),.inline_bodies=[0;32]};let slot=v::at_mut<key::Dependency>(ref mut dependencies,0);*slot=first;}
     return key::assemble(environment,profile_flags,facts,dependencies,features);
 }
 fn key::Identity compute(ref key::Inputs p,ref mut usize work){return switch(key::compute(p,work)){case .ok(id):{id}case .err(_):{assert(false);return compute(p,work);}};}
@@ -25,11 +25,11 @@ fn bool rejected(ref key::Inputs p,u32 code){var usize work=0;return switch(key:
 fn usize number(ref u8[] data,ref mut usize at){assert(*at<=data.len && data.len-*at>=4);var usize value=0;var usize i=0;while(i<4){value=value*256+data[*at] as usize;*at+=1;i+=1;}return value;}
 @test
 @effects(filesystem,environment)
-fn void matches_actual_go_v4_bytes_and_all_invalidation_members(){
+fn void matches_actual_go_v5_bytes_and_all_invalidation_members(){
     var u8[4096] path=[0;4096];let length=switch(process::arg(1,ref mut path)){case .ok(n):{n}case .err(_):{assert(false);return;}};let ref u8[] view=ref path;
-    let fixture=switch(files::load(view[..length])){case .ok(b):{b}case .err(_):{assert(false);return;}};let data=bytes::view(ref fixture);var usize at=0;assert(number(data,ref mut at)==20);var usize mode=0;
+    let fixture=switch(files::load(view[..length])){case .ok(b):{b}case .err(_):{assert(false);return;}};let data=bytes::view(ref fixture);var usize at=0;assert(number(data,ref mut at)==24);var usize mode=0;
     let baseline=input(0);var usize baseline_work=0;let base=compute(ref baseline,ref mut baseline_work);
-    while(mode<20){let n=number(data,ref mut at);assert(at<=data.len && n<=data.len-at);let p=input(mode);var usize work=0;let id=compute(ref p,ref mut work);assert(bytes::equal(key::canonical(ref id),data[at..at+n]));at+=n;assert(at<=data.len && 80<=data.len-at);assert(bytes::equal(key::digest(ref id),data[at..at+80]) && key::valid_text(key::digest(ref id)));at+=80;if(mode!=0){assert(!bytes::equal(key::digest(ref base),key::digest(ref id)));}mode+=1;}assert(at==data.len);
+    while(mode<24){let n=number(data,ref mut at);assert(at<=data.len && n<=data.len-at);let p=input(mode);var usize work=0;let id=compute(ref p,ref mut work);assert(bytes::equal(key::canonical(ref id),data[at..at+n]));at+=n;assert(at<=data.len && 80<=data.len-at);assert(bytes::equal(key::digest(ref id),data[at..at+80]) && key::valid_text(key::digest(ref id)));at+=80;if(mode!=0){assert(!bytes::equal(key::digest(ref base),key::digest(ref id)));}mode+=1;}assert(at==data.len);
 }
 @test
 fn void rejects_missing_environment_and_body_or_package_facts(){
@@ -45,5 +45,8 @@ fn void rejects_unsorted_duplicate_empty_and_malformed_sets(){
 @test
 fn void retains_detached_key_and_obeys_exact_phase_budget(){
     var usize cost=0;let id={let p=input(19);compute(ref p,ref mut cost)};assert(key::valid_text(key::digest(ref id)) && cost>0 && cost<16777216);let p=input(19);var usize work=16777216-cost;let fit=compute(ref p,ref mut work);assert(work==16777216 && bytes::equal(key::canonical(ref id),key::canonical(ref fit)) && bytes::equal(key::digest(ref id),key::digest(ref fit)));work=16777216-cost+1;assert(switch(key::compute(ref p,ref mut work)){case .ok(_):{false}case .err(code):{code==5}});assert(work<=16777216);work=16777217;assert(switch(key::compute(ref p,ref mut work)){case .ok(_):{false}case .err(code):{code==5}});
-    assert(!key::valid_text(key::digest(ref id)[..78]) && !key::valid_text(b"fycache4-sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") && !key::valid_text(b"fycache4-sha256-gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"));
+    assert(!key::valid_text(key::digest(ref id)[..78]) && !key::valid_text(b"fycache5-sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") && !key::valid_text(b"fycache5-sha256-gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"));
 }
+
+@test
+fn void rejects_old_v4_key_namespace(){assert(!key::valid_text(b"fycache4-sha256-51508c63893427d1cdc799f8d478c25102ea28d3ce93e0bd6b918d817ccef96f"));}

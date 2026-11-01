@@ -57,9 +57,9 @@ func run() error {
 		specializations = append(specializations, genericplan.SpecializationID(value))
 	}
 	var fixture bytes.Buffer
-	binary.Write(&fixture, binary.BigEndian, uint32(8))
+	binary.Write(&fixture, binary.BigEndian, uint32(11))
 	var rows []map[string]any
-	for mode := 0; mode < 8; mode++ {
+	for mode := 0; mode < 11; mode++ {
 		b := packagecache.Inputs{CompilerBuild: env, LanguageRevision: env, MIRVersion: env, TargetSchema: env, ABIProfile: env, ToolchainFingerprint: env, Backend: env, RuntimeABI: env, ProfileFlags: []string{"-O2"}}
 		if mode == 7 {
 			b.CompilerBuild = changed
@@ -79,6 +79,16 @@ func run() error {
 			for j := 0; j < 32; j++ {
 				b.Dependencies[0].Coordinate[j] = 1
 				b.Dependencies[0].Interface[j] = 2
+			}
+		}
+		if mode == 8 || mode == 10 {
+			for j := range b.InlineBodies {
+				b.InlineBodies[j] = 8
+			}
+		}
+		if mode == 9 || mode == 10 {
+			for j := range b.Dependencies[0].InlineBodies {
+				b.Dependencies[0].InlineBodies[j] = 9
 			}
 		}
 		p := packagecache.GenericInputs{Base: b}
