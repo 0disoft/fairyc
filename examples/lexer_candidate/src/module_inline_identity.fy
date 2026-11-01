@@ -1,0 +1,16 @@
+module module_inline_identity;
+import generic_source_json as json;
+import sha256 as sha;
+import std::bytes as bytes;
+
+// Shared by source admission and detached typed-IR verification. JSON field
+// spelling/order and null leaves match hir.InlineFunctionID exactly.
+pub fn bool zero(u32[8] hash){var usize i=0;while(i<8){if(hash[i]!=0){return false;}i+=1;}return true;}
+pub fn bool equal(u32[8] a,u32[8] b){var usize i=0;while(i<8){if(a[i]!=b[i]){return false;}i+=1;}return true;}
+pub fn bool header(ref mut bytes::Buffer out,usize arity,ref mut json::Ledger work){return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v1\",\"Arity\":",work) && json::number(out,arity,work) && json::raw(out,b",\"Root\":",work);}
+pub fn bool leaf(ref mut bytes::Buffer out,ref u8[] op,usize value,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":",work) && json::quoted(out,op,work) && json::raw(out,b",\"Value\":\"",work) && json::number(out,value,work) && json::raw(out,b"\",\"Children\":null}",work);}
+pub fn bool operator(ref u8[] op,bool binary){return bytes::equal(op,b"+") || bytes::equal(op,b"-") || binary && (bytes::equal(op,b"*") || bytes::equal(op,b"/") || bytes::equal(op,b"%"));}
+pub fn bool branch(ref mut bytes::Buffer out,ref u8[] op,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":",work) && json::quoted(out,op,work) && json::raw(out,b",\"Value\":\"\",\"Children\":[",work);}
+pub fn bool minimum(ref mut bytes::Buffer out,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":\"literal\",\"Value\":\"-2147483648\",\"Children\":null}",work);}
+pub fn Result<usize,u32> integer(ref u8[] raw){var usize at=0;var usize base=10;if(raw.len>=2 && raw[0]==48){if(raw[1]==120 || raw[1]==88){base=16;at=2;}else if(raw[1]==98 || raw[1]==66){base=2;at=2;}}var usize n=0;var usize digits=0;while(at<raw.len){let c=raw[at];at+=1;if(c==95){continue;}let d=if(c>=48 && c<=57){(c-48) as usize}else if(c>=97 && c<=102){(c-97+10) as usize}else if(c>=65 && c<=70){(c-65+10) as usize}else{base};if(d>=base || n>(2147483648-d)/base){return .err(9);}n=n*base+d;digits+=1;}return if(digits==0){.err(9)}else{.ok(n)};}
+pub fn Result<u32[8],u32> finish(ref mut bytes::Buffer out,ref mut json::Ledger work){if(!json::raw(out,b"}",work)){return .err(work.code);}return .ok(sha::digest(bytes::view(out)));}
