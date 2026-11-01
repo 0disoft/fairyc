@@ -187,3 +187,25 @@ func compileSplitForTest(t *testing.T, parts cbackend.BuildUnit, profile, extra 
 		t.Fatalf("split program: %v %q", err, output)
 	}
 }
+
+func TestPartitionedOrdinaryCallback(t *testing.T) {
+	program := lowerSource(t, `module main;
+unsafe extern C fn i32 ordinary_visit(unsafe extern C fn i32(i32,i32,ptr mut void) cb,ptr mut void data);
+unsafe fn i32 ordinary_handle(i32 a,i32 b,ptr mut void data){return a+b;}
+fn i32 first(){return unsafe{ordinary_visit(ordinary_handle,null)};}
+fn i32 second(){return unsafe{ordinary_visit(ordinary_handle,null)};}
+fn i32 main(){return first()+second();}`)
+	profile := cbackend.Stage0Profile()
+	if runtime.GOOS == "windows" {
+		profile = cbackend.Stage0WindowsMSVCProfile()
+	}
+	parts, err := cbackend.EmitBuildContext(context.Background(), program, "main::main", profile, false, 128)
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe := `static int32_t (*previous)(int32_t,int32_t,void *);
+int32_t ordinary_visit(int32_t (*cb)(int32_t,int32_t,void *),void *data){if(previous&&previous!=cb){return -100;}previous=cb;return cb(10,11,data);}`
+	for _, opt := range []string{"low", "optimized"} {
+		t.Run(opt, func(t *testing.T) { compileSplitForTest(t, parts, opt, probe, 42) })
+	}
+}
