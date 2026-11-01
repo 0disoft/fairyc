@@ -71,3 +71,26 @@ limits, version exhaustion and symlink rejection. MIR lifecycle tests cover comm
 reject, trap, verifier failure, backend errors and conflict without retries. Linux
 replays belong to the combined queue, not to Windows evidence. No target flag, default
 CLI, Fairy source grammar, generated-C persistence or production chain is admitted here.
+
+## Developer command
+
+`go run -mod=readonly ./tools/dev/fairyc-state <init|execute|snapshot>
+<existing-store-directory> <source.fy>` accepts one bounded explicit source file with
+exactly one verified experimental state transaction. It uses the existing
+`CheckExperimentalState` admission, not a new parser or unverified MIR constructor.
+The command basename/module relationship follows the ordinary explicit-source rules.
+Creation never replaces a store; snapshot does not execute the transaction body.
+
+The named developer policy is 16 MiB full-state bytes, 65,536 entries and 64 KiB per
+value; the execution overlay allows 1,024 writes, 1 MiB write bytes, 64 KiB per value
+and 1,024 encoded map-key bytes. These fixed prototype limits are printed by `--help`.
+JSON reports identify `fairyc.local-state-run/v1` and the exact layout hash. Successful
+execute reports the receipt and reads; init/snapshot report committed state. An
+execution report is its attempt's observation, not a later snapshot of concurrent state.
+
+Exit codes are 0 success, 2 invalid invocation, 3 source/admission rejection, 4 local
+I/O/backend/output failure, 6 transaction rejection, 7 conflict/layout drift/busy and
+8 language trap. The command converts only the named language trap panic to a trap
+report; unexpected implementation panics remain panics. A report-output failure after
+publication is explicitly described as possibly committed and must not trigger an
+automatic retry. There is no default compiler CLI integration or target flag.
