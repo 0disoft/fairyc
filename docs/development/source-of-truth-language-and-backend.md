@@ -299,3 +299,6 @@ Part 1 of 3 of the [source index](source-of-truth.md).
   - `internal/cdriver/`
   - `tools/dev/fairyc-windows-host-smoke/`
   - `docs/adr/0236-discarded-associative-comdat-elimination-proof.md`
+
+- Ordinary synchronous callback signatures and nonescape: `docs/adr/0490-ordinary-synchronous-callbacks.md`
+- Windows callback crossing evidence: `docs/ops/windows-ordinary-callbacks-20261101.md`

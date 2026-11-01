@@ -21,7 +21,7 @@ func callbackVerificationProgram(count int) (Program, map[hir.SymbolID]*Function
 		// Sparse IDs also exercise cached/forged MIR without dense allocation.
 		local := LocalID(1000000 + i*7)
 		caller.Blocks[i] = Block{
-			ID: BlockID(i), Operations: []Operation{{Kind: OperationCCallback, Symbol: 2, DestinationLocal: local}},
+			ID: BlockID(i), Operations: []Operation{{Kind: OperationCCallback, Symbol: 2, Type: hir.TypeCCallbackI32UserData, DestinationLocal: local}},
 			Terminator: Terminator{Kind: TerminatorCall, Callee: 1, ForeignABI: "C", DestinationLocal: NoLocal,
 				Arguments: []Operand{{Kind: OperandLocal, Local: local}, {Kind: OperandNull, Type: pointer}}},
 		}

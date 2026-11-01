@@ -19,9 +19,9 @@ func TestBoundedCallbackCacheColdWarm(t *testing.T) {
 			if storage == StorageDisk {
 				session = newGenericPersistentFixture(t, configuration)
 			}
-			writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), `module answer; pub unsafe fn i32 handle(i32 value,ptr mut void data){return value+1;}`)
+			writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), `module answer; pub unsafe fn i32 handle(i32 value,i32 extra,ptr mut void data){return value+1;}`)
 			writeFile(t, filepath.Join(root, "src", "main.fy"), `module main; import answer as a;
-unsafe extern C fn i32 visit(i32 value,unsafe extern C fn i32(i32,ptr mut void) cb,ptr mut void data);
+unsafe extern C fn i32 visit(i32 value,unsafe extern C fn i32(i32,i32,ptr mut void) cb,ptr mut void data);
 fn i32 main(){return unsafe{visit(41,a::handle,null)};}`)
 			workspace := loadCacheWorkspace(t, root)
 			cold, err := session.Check(workspace)

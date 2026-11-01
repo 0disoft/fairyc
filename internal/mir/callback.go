@@ -1,6 +1,9 @@
 package mir
 
-import "github.com/0disoft/fairyc/internal/hir"
+import (
+	"github.com/0disoft/fairyc/internal/hir"
+	"slices"
+)
 
 // verifyBoundedCallbacks limits callback addresses to one designated foreign-call
 // argument. They cannot become general function values through forged/cached MIR.
@@ -10,17 +13,17 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 		failures = append(failures, VerificationError{Code: CodeForeignDeclaration, Entity: entity, Detail: detail})
 	}
 	for _, declaration := range program.ForeignFunctions {
-		if declaration.ResultType == hir.TypeCCallbackI32UserData || !hir.ValidBoundedCallbackParameters(declaration.ParameterTypes) {
+		if hir.IsCCallback(declaration.ResultType) || !hir.ValidBoundedCallbackParameters(declaration.ParameterTypes) {
 			reject(declaration.Entity, "callback requires the final callback/user-data pair and cannot be returned")
 		}
 	}
 	for _, function := range program.Functions {
 		var usage map[LocalID]callbackLocalUsage
-		if function.ResultType == hir.TypeCCallbackI32UserData {
+		if hir.IsCCallback(function.ResultType) {
 			reject(function.Name, "callback result is not admitted")
 		}
 		for _, typ := range function.ParameterTypes {
-			if typ == hir.TypeCCallbackI32UserData {
+			if hir.IsCCallback(typ) {
 				reject(function.Name, "internal callback parameter is not admitted")
 			}
 		}
@@ -28,7 +31,7 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 			term := block.Terminator
 			if callee := foreign[term.Callee]; term.Kind == TerminatorCall && callee != nil {
 				for index, typ := range callee.ParameterTypes {
-					if typ != hir.TypeCCallbackI32UserData {
+					if !hir.IsCCallback(typ) {
 						continue
 					}
 					origins := 0
@@ -49,15 +52,15 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 					continue
 				}
 				target := functions[op.Symbol]
-				if target == nil || target.ResultType != hir.TypeI32 || len(target.ParameterTypes) != 2 ||
-					target.ParameterTypes[0] != hir.TypeI32 || target.ParameterTypes[1] != hir.RawPointer(hir.TypeVoid, true) || len(target.Effects) != 0 {
+				result, parameters, valid := hir.CallbackSignature(op.Type)
+				if !valid || target == nil || target.ResultType != result || !slices.Equal(target.ParameterTypes, parameters) || len(target.Effects) != 0 {
 					reject(function.Name, "callback target has no matching internal signature")
 				}
 				term := block.Terminator
 				callee := foreign[term.Callee]
 				if term.Kind != TerminatorCall || term.ForeignABI != "C" || callee == nil || len(term.Arguments) < 2 ||
 					len(callee.ParameterTypes) != len(term.Arguments) || !hir.ValidBoundedCallbackParameters(callee.ParameterTypes) ||
-					callee.ParameterTypes[len(term.Arguments)-2] != hir.TypeCCallbackI32UserData ||
+					callee.ParameterTypes[len(term.Arguments)-2] != op.Type ||
 					term.Arguments[len(term.Arguments)-2].Kind != OperandLocal || term.Arguments[len(term.Arguments)-2].Local != op.DestinationLocal {
 					reject(function.Name, "callback is not consumed by its call-bounded foreign argument")
 				}

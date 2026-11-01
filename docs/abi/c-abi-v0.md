@@ -416,13 +416,21 @@ unsafe fn i32 handle(i32 value, ptr mut void data) { return value + 1; }
 fn i32 main() { return unsafe { visit(41, handle, null) }; }
 ```
 
-The callback is the penultimate import parameter, followed by final `ptr mut void` user data.
-The argument must name a non-capturing unsafe Fairy function with the exact `i32(i32, ptr mut void)`
-signature and no declared effects. An internal C adapter supplies the function-pointer ABI;
-it does not publish the Fairy function as a C symbol. The generated pointer size and alignment
-are checked against TargetSpec. Null user data is allowed if the handler does not dereference it;
-the callback itself cannot be null. Other signatures, callback locals/fields/arrays/results,
-casts and indirect calls remain closed.
+[ADR 0490](../adr/0490-ordinary-synchronous-callbacks.md) extends that signature to
+zero through eight scalar/raw-pointer value parameters plus a final user-data pointer,
+with scalar/raw-pointer or `void` result. Values include the existing Fairy integer and
+floating transport types and target-available exact `c::*` identities. Pointer depth,
+pointees and qualifiers remain the closed set defined in ADR 0490; by-value records,
+arrays, enums and resources are not callback values. Standalone foreign declarations
+for the newer Fairy scalar types remain unchanged.
+
+The callback is the penultimate import parameter. The final user-data pointer must
+exactly match its last parameter, including pointee and mutability. The argument names
+a non-capturing unsafe Fairy function with the exact signature and no declared effects.
+An internal C adapter supplies the C function-pointer ABI; it creates no public export.
+Pointer size/alignment are checked against TargetSpec. Null user data is allowed when
+unused; the callback cannot be null. Callback locals/fields/arrays/results, casts and
+indirect calls remain closed. The original signature and typedef remain compatible.
 
 The unsafe import promises same-thread synchronous invocation before returning and no retention
 of the callback or call-bounded data. C must not unwind or `longjmp` across Fairy frames. The
@@ -431,7 +439,8 @@ it cannot prove a C implementation honors those promises. Raw user-data validity
 caller's responsibility, with existing borrow-to-pointer checks retained. The pure interpreter
 rejects this integration. The [F3 update](../development/phase2-target-scope.md#f3-bounded-c-callbacks)
 records the local checks; the [current hosted F2-6
-receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers hosted execution.
+receipt](../development/phase2-target-scope.md#hosted-f2-6-receipt-2026-10-23) covers hosted execution of the original signature only. Ordinary callback Windows evidence is
+[recorded separately](../ops/windows-ordinary-callbacks-20261101.md); its Linux execution is deferred.
 
 Fairy source TLS, C TLS symbol import or export, C++ ABI, and foreign unwinding are excluded.
 

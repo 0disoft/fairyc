@@ -89,7 +89,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		}
 	case hir.ExpressionCCallback:
 		destination := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationCCallback, Symbol: expression.Symbol, Type: hir.TypeCCallbackI32UserData,
+		l.appendOperation(Operation{Kind: OperationCCallback, Symbol: expression.Symbol, Type: expression.Type,
 			DestinationLocal: destination, Span: expression.Span})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case hir.ExpressionPath:

@@ -33,7 +33,7 @@ func validExternalCIdentifier(value string, targetID target.ID) bool {
 }
 
 func validCIdentifier(value string, scope cIdentifierScope) bool {
-	if value == "" || reservedCImplementationIdentifier(value, scope) || strings.HasPrefix(value, "FY_") {
+	if value == "" || reservedCImplementationIdentifier(value, scope) || strings.HasPrefix(value, "FY_") || strings.HasPrefix(value, "fy_c_callback_") {
 		return false
 	}
 	if _, reserved := generatedCNames[value]; reserved {

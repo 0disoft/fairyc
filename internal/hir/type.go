@@ -181,6 +181,12 @@ func parseType(text string, depth int) Type {
 	child := func(s string) Type { return parseType(s, depth+1) }
 	var t Type
 	switch {
+	case strings.HasPrefix(text, callbackPrefix):
+		result, parameters, ok := parseCallbackSignature(text, depth)
+		if !ok {
+			return opaque()
+		}
+		t = CCallback(result, parameters)
 	case strings.HasPrefix(text, "&mut ") && len(text) > 5:
 		t = MutableBorrow(child(text[5:]))
 	case strings.HasPrefix(text, "&") && len(text) > 1:

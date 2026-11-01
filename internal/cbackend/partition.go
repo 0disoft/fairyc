@@ -73,10 +73,11 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		}
 	}
 	for _, index := range e.callbackTargets() {
-		if plan.nonReturning[plan.functions[index].Symbol] {
-			header.WriteString("_Noreturn ")
+		prototype, err := e.callbackPrototype(index)
+		if err != nil {
+			return BuildUnit{}, err
 		}
-		fmt.Fprintf(&header, "int32_t fy_cb_%d(int32_t, void *);\n", index)
+		header.WriteString(prototype + ";\n")
 	}
 	var literals []string
 	for _, storage := range []map[string]string{plan.byteStringStorage, plan.stringStorage, plan.cStringStorage} {
@@ -113,7 +114,9 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 	appendGroups(bodies)
 	appendGroups(literals)
 	var entrySource strings.Builder
-	e.emitCallbackAdapters(&entrySource)
+	if err := e.emitCallbackAdapters(&entrySource); err != nil {
+		return BuildUnit{}, err
+	}
 	if err := e.emitEntry(&entrySource); err != nil {
 		return BuildUnit{}, err
 	}

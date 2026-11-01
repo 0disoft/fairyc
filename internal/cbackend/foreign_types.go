@@ -28,8 +28,8 @@ func (e *emissionAnalysis) enumPayloadCType(value hir.Type) (string, error) {
 }
 
 func (e *emissionAnalysis) foreignCType(value hir.Type, result bool) (string, error) {
-	if value == hir.TypeCCallbackI32UserData && !result {
-		return "fy_c_callback_i32_userdata", nil
+	if hir.IsCCallback(value) && !result {
+		return callbackTypeName(value), nil
 	}
 	if result && value == hir.TypeVoid {
 		return "void", nil

@@ -1,12 +1,48 @@
 package cbackend
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
 )
+
+func callbackTypeName(typ hir.Type) string {
+	if typ == hir.TypeCCallbackI32UserData {
+		return "fy_c_callback_i32_userdata"
+	}
+	return fmt.Sprintf("fy_c_callback_%x", sha256.Sum256([]byte(typ.String())))
+}
+
+func (e *emissionAnalysis) callbackCSignature(typ hir.Type, named bool) (string, []string, error) {
+	result, parameters, ok := hir.CallbackSignature(typ)
+	if !ok {
+		return "", nil, fmt.Errorf("invalid callback signature %q", typ)
+	}
+	resultC := "void"
+	var err error
+	if result != hir.TypeVoid {
+		resultC, err = e.cValueType(result)
+		if err != nil {
+			return "", nil, err
+		}
+	}
+	args := make([]string, len(parameters))
+	for i, parameter := range parameters {
+		args[i], err = e.cValueType(parameter)
+		if err != nil {
+			return "", nil, err
+		}
+		if named {
+			args[i] += fmt.Sprintf(" fy_a_%d", i)
+		}
+	}
+	return resultC, args, nil
+}
 
 func (e *emitter) emitCallbackType(output *strings.Builder) error {
 	if _, callbacks := e.analysis.features["bounded-c-callback"]; !callbacks {
@@ -16,22 +52,63 @@ func (e *emitter) emitCallbackType(output *strings.Builder) error {
 	if !found {
 		return fmt.Errorf("missing callback target layout %q", e.analysis.targetID)
 	}
-	output.WriteString("typedef int32_t (*fy_c_callback_i32_userdata)(int32_t, void *);\n")
-	fmt.Fprintf(output, "_Static_assert(sizeof(fy_c_callback_i32_userdata) == UINT64_C(%d), \"fairyc callback pointer size\");\n", spec.FunctionPointer.SizeBytes)
-	fmt.Fprintf(output, "_Static_assert(_Alignof(fy_c_callback_i32_userdata) == UINT64_C(%d), \"fairyc callback pointer alignment\");\n\n", spec.FunctionPointer.AlignmentBytes)
+	seen := map[hir.Type]bool{}
+	var types []hir.Type
+	for _, function := range e.analysis.foreignFunctions {
+		for _, typ := range function.ParameterTypes {
+			if hir.IsCCallback(typ) && !seen[typ] {
+				seen[typ] = true
+				types = append(types, typ)
+			}
+		}
+	}
+	slices.SortFunc(types, func(a, b hir.Type) int { return strings.Compare(a.String(), b.String()) })
+	for _, typ := range types {
+		result, args, err := e.analysis.callbackCSignature(typ, false)
+		if err != nil {
+			return err
+		}
+		name := callbackTypeName(typ)
+		fmt.Fprintf(output, "typedef %s (*%s)(%s);\n", result, name, strings.Join(args, ", "))
+		fmt.Fprintf(output, "_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc callback pointer size\");\n", name, spec.FunctionPointer.SizeBytes)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc callback pointer alignment\");\n\n", name, spec.FunctionPointer.AlignmentBytes)
+	}
 	return nil
 }
 
-// Adapters keep the C callback contract separate from private Fairy functions.
-func (e *emitter) emitCallbackAdapters(output *strings.Builder) {
+func (e *emitter) callbackPrototype(index int) (string, error) {
+	function := e.analysis.functions[index]
+	typ := hir.CCallback(function.ResultType, function.ParameterTypes)
+	result, args, err := e.analysis.callbackCSignature(typ, true)
+	if err != nil {
+		return "", err
+	}
+	prefix := ""
+	if e.analysis.nonReturning[function.Symbol] {
+		prefix = "_Noreturn "
+	}
+	return fmt.Sprintf("%s%s fy_cb_%d(%s)", prefix, result, index, strings.Join(args, ", ")), nil
+}
+
+// Adapters keep the exact C callback contract separate from private Fairy functions.
+func (e *emitter) emitCallbackAdapters(output *strings.Builder) error {
 	for _, index := range e.callbackTargets() {
 		function := e.analysis.functions[index]
-		if e.analysis.nonReturning[function.Symbol] {
-			fmt.Fprintf(output, "%s_Noreturn int32_t fy_cb_%d(int32_t value, void *data) { fy_fn_%d(value, data); }\n", e.functionLinkage(), index, index)
-		} else {
-			fmt.Fprintf(output, "%sint32_t fy_cb_%d(int32_t value, void *data) { return fy_fn_%d(value, data); }\n", e.functionLinkage(), index, index)
+		prototype, err := e.callbackPrototype(index)
+		if err != nil {
+			return err
 		}
+		args := make([]string, len(function.ParameterTypes))
+		for i := range args {
+			args[i] = fmt.Sprintf("fy_a_%d", i)
+		}
+		result := ""
+		if function.ResultType != hir.TypeVoid && !e.analysis.nonReturning[function.Symbol] {
+			result = "return "
+		}
+		fmt.Fprintf(output, "%s%s { %sfy_fn_%d(%s); }\n", e.functionLinkage(), prototype, result, index, strings.Join(args, ", "))
 	}
+	return nil
 }
 
 func (e *emitter) callbackTargets() []int {

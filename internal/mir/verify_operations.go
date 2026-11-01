@@ -52,7 +52,7 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 	}
 	switch operation.Kind {
 	case OperationCCallback:
-		if operation.DestinationLocal < 0 || operation.Symbol == hir.NoSymbol || operation.Type != hir.TypeCCallbackI32UserData || len(operation.Operands) != 0 || operation.Variant != "" {
+		if operation.DestinationLocal < 0 || operation.Symbol == hir.NoSymbol || !hir.IsCCallback(operation.Type) || len(operation.Operands) != 0 || operation.Variant != "" {
 			failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "invalid bounded callback construction"})
 		}
 		state.live[hir.SymbolID(operation.DestinationLocal)] = true

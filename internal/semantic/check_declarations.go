@@ -107,7 +107,7 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 		parameterTypes[index] = parameter.Type
 	}
 	if !hir.ValidBoundedCallbackParameters(parameterTypes) {
-		a.addUnsupported(module.file.Path, function.Span, "callback must precede the final ptr mut void user-data parameter")
+		a.addUnsupported(module.file.Path, function.Span, "callback must precede the final user-data pointer of exactly the callback's last parameter type")
 	}
 	if result.ResultType != hir.TypeInvalid {
 		a.types = append(a.types, TypeFact{Expression: span(module.file.Path, function.ResultType.Span), CanonicalType: result.ResultType})

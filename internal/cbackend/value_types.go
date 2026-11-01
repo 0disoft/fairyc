@@ -39,7 +39,7 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 	if _, borrow := e.safeBorrowCType(value); borrow {
 		return true
 	}
-	if value == hir.TypeCCallbackI32UserData || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
+	if hir.IsCCallback(value) || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if _, array := e.arrayByType[value]; array {
@@ -70,8 +70,8 @@ func (e *emissionAnalysis) cValueType(value hir.Type) (string, error) {
 		// deliberately absent from supportedCValueType for ordinary value storage.
 		return "fy_region *", nil
 	}
-	if value == hir.TypeCCallbackI32UserData {
-		return "fy_c_callback_i32_userdata", nil
+	if hir.IsCCallback(value) {
+		return callbackTypeName(value), nil
 	}
 	if cType, ok := integerTransportCType(value); ok {
 		return cType, nil

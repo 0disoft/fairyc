@@ -283,8 +283,8 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 		}
 		var child *hir.Expression
 		var actual hir.Type
-		if expected == hir.TypeCCallbackI32UserData {
-			child, actual = c.checkCallbackArgument(argument)
+		if hir.IsCCallback(expected) {
+			child, actual = c.checkCallbackArgument(argument, expected)
 		} else {
 			child, actual = c.checkExpression(argument, expected)
 		}
