@@ -54,3 +54,15 @@ func TestMCPReadOnlyLifecycleAndBounds(t *testing.T) {
 		t.Fatal("message budget ignored")
 	}
 }
+
+func TestMCPVersionNegotiationAndOversizedID(t *testing.T) {
+	var out bytes.Buffer
+	input := strings.Replace(initialize, "2025-11-25", "2099-01-01", 1) + "\n" + `{"jsonrpc":"2.0","id":"` + strings.Repeat("a", 600) + `","method":"ping"}`
+	if err := Serve(strings.NewReader(input), &out, 2, 2048, func(string, string) (json.RawMessage, error) { t.Fatal("unexpected tool call"); return nil, nil }); err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
+	if !strings.Contains(lines[0], ProtocolVersion) || !strings.Contains(lines[1], `"id":null`) || len(lines[1]) > 2048 {
+		t.Fatal(out.String())
+	}
+}

@@ -47,13 +47,16 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 			return fmt.Errorf("MCP message budget exhausted")
 		}
 		line := scanner.Bytes()
+		if len(line) > MaxInput {
+			return fmt.Errorf("MCP input byte limit exceeded")
+		}
 		var req request
 		id := json.RawMessage("null")
 		var result any
 		var failure *rpcError
-		if !utf8.Valid(line) || strictJSON(line) != nil || json.Unmarshal(line, &req) != nil {
+		if !utf8.Valid(line) || strictJSON(line) != nil {
 			failure = &rpcError{-32700, "invalid JSON message"}
-		} else if req.Version != "2.0" || req.Method == "" || !validID(req.ID) {
+		} else if json.Unmarshal(line, &req) != nil || req.Version != "2.0" || req.Method == "" || !validID(req.ID) {
 			failure = &rpcError{-32600, "invalid JSON-RPC request"}
 		} else if len(req.ID) == 0 {
 			if req.Method == "notifications/initialized" && initialized && emptyParams(req.Params) {
@@ -71,7 +74,7 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 					Capabilities map[string]json.RawMessage     `json:"capabilities"`
 					ClientInfo   struct{ Name, Version string } `json:"clientInfo"`
 				}
-				if initialized || json.Unmarshal(req.Params, &p) != nil || p.Version != ProtocolVersion || p.Capabilities == nil || p.ClientInfo.Name == "" || p.ClientInfo.Version == "" {
+				if initialized || json.Unmarshal(req.Params, &p) != nil || p.Version == "" || p.Capabilities == nil || p.ClientInfo.Name == "" || p.ClientInfo.Version == "" {
 					failure = &rpcError{-32602, "invalid or unsupported initialization"}
 					break
 				}
@@ -137,6 +140,9 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 }
 
 func validID(id json.RawMessage) bool {
+	if len(id) > 512 {
+		return false
+	}
 	if len(id) == 0 {
 		return true
 	}
@@ -144,7 +150,18 @@ func validID(id json.RawMessage) bool {
 	return (json.Unmarshal(id, &s) == nil && len(id) > 0 && id[0] == '"') || (len(id) <= 20 && integerID.Match(id))
 }
 func emptyParams(p json.RawMessage) bool {
-	return len(p) == 0 || bytes.Equal(bytes.TrimSpace(p), []byte("{}"))
+	if len(p) == 0 {
+		return true
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(p, &fields) != nil || fields == nil {
+		return false
+	}
+	if len(fields) == 0 {
+		return true
+	}
+	var meta map[string]json.RawMessage
+	return len(fields) == 1 && json.Unmarshal(fields["_meta"], &meta) == nil && meta != nil
 }
 
 // Reject duplicate keys and excessive nesting before any capability dispatch.
