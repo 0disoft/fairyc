@@ -1,7 +1,7 @@
 # Ordered work - 2026-10-31
 
 - Status: Approved follow-up implementation queue
-- Updated: 2026-11-01
+- Updated: 2026-11-02
 - Supersedes: current-status claims in the [2026-10-23 ordered work](completion-plan.md#historical-ordered-work-superseded-2026-10-31)
 - Change boundary: ordered planning and bounded implementation evidence
 - Authorization: named sequence implementation; no implicit syntax, API or target support
@@ -17,8 +17,10 @@ dependency evidence; item 12 has a bounded Windows-verified opt-in review tool;
 item 13 has bounded Windows record-array evidence with Linux deferred; item 14 has exact C-scalar
 pointer evidence with Linux deferred; item 15 has ordinary synchronous callback evidence with
 Linux deferred; item 16 has zero-field and bounded nested owning-tag evidence with Linux deferred;
-items 17 through 22 are queued. Existing bounded evidence is
-retained, but a row remains queued until its stated completion condition is met.
+items 17 and 18 have bounded Windows language evidence with Linux deferred; item 19
+has a backend decision and Windows C baseline; items 20 and 21 have bounded Windows
+tool evidence with Linux deferred. Item 22 now has a Windows-verified Go source runner
+and local persistence prototype; chain selection and generated-C persistence remain open.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
 It is not a request for a fresh approval of the same task.
@@ -57,7 +59,7 @@ remain `UNDECIDED` until an explicit owner decision.
 | 19 | QBE, LLVM or additional targets | **Review and Windows C baseline complete / challengers deferred** | [ADR 0497](../adr/0497-backend-and-target-review.md) retains the C backend, prioritizes external textual LLVM IR only as a future measured challenger, and defers QBE adoption. [Target comparison](backend-target-review-20261101.md) keeps additional target selection UNDECIDED. | [Windows baseline receipt](../ops/windows-backend-study-20261101.md), harness `769d5835`: seven workloads, two profiles and three samples yield 42 passing native executions plus interpreter/C observers and structural PE/unwind checks. LLVM/QBE remain unmeasured. New backend/target adoption requires representative paired benefit and semantic/runtime/ABI/debug evidence; Linux execution remains deferred. |
 | 20 | Remote packages | **Pinned HTTPS preparation verified on Windows / Linux deferred** | [ADR 0498](../adr/0498-explicit-pinned-remote-package-sources.md) admits [exact source plans](../package/remote-sources-v1.md), bounded TLS ZIP retrieval, SHA-256 and manifest identity validation, explicit local member publication and verified offline cache. Registry selection remains UNDECIDED. | [Windows receipt](../ops/windows-remote-packages-20261101.md): cold/warm/offline restoration, rejected unsafe archives/cache/conflicts, unchanged graph lock, stale dependency detection and native low/optimized package calls pass. Range solving, registry services, Git, signing, automatic upgrades and Fairy-authored candidate parity remain separate; native Linux is queued below. |
 | 21 | Atlas impact, MCP and structural edits | **Bounded Go tools verified on Windows / Linux deferred** | [ADR 0499](../adr/0499-bounded-atlas-impact-mcp-and-body-edits.md) admits [current resolved-call impact, explicitly permitted read-only MCP stdio, and private single-body preview/apply](../atlas/impact-mcp-edit-v1.md). Each retains current identities and bounded/partial uncertainty. | [Windows receipt](../ops/windows-atlas-tools-20261102.md): reverse traversal/cutoffs, stale/unknown data, protocol permissions, body verification, injection/drift/link rejection and two edited native profiles pass. A standalone MCP subprocess negotiates and lists only the read tool. Full semantic diff, inferred rename, multi-file edits, MCP writes and candidate parity remain separate; Linux is queued below. |
-| 22 | Chain execution and persistence | Queued | Keep the chain target **UNDECIDED**. Define the transaction execution subset, storage port, ownership, reentrancy, conflict and failure-atomicity rules before native or durable integration. | The named execution and persistence adapter passes deterministic local oracle and native evidence with restart/conflict/failure tests. Production chain deployment and consensus remain outside this queue. |
+| 22 | Chain execution and persistence | **Bounded Go local execution verified on Windows / chain integration open / Linux deferred** | [ADR 0500](../adr/0500-local-contract-state-execution-and-persistence.md) connects verified source state MIR to one caller-visible persistence attempt and a bounded rooted local store. `fairyc-state init/execute/snapshot` exposes the existing experimental source subset. Chain/VM selection stays **UNDECIDED**. | [Windows receipt](../ops/windows-local-state-20261102.md): commit/reject/trap, no automatic retry, restart, independent-process locking, forced exits before/after publication, stale writers, exact layout guards, corruption and symlink rejection pass. Six built-Windows-executable calls persist u64 42 and preserve committed bytes across reject/trap. This is Go MIR execution; generated-C durable integration, power-loss certification and chain runtime/deployment remain separate. |
 
 ## Item 2 progress: authored GNU companion implementation
 
@@ -268,6 +270,7 @@ Unexecuted Linux cases remain unexecuted and do not block the next Windows work 
 | Backend review C reference measurements | `go run -mod=readonly ./tools/dev/fairyc-backend-study --cc gcc --samples 3 --output .cache/backend-study-linux-gcc.json`, then repeat with `--cc clang` and `.cache/backend-study-linux-clang.json` | Windows C baseline and both-target emission pass. Each native run covers low/optimized; Linux execution remains unexecuted. LLVM/QBE adapters and new-target execution are not included. |
 | Pinned HTTPS remote package preparation | `go test -mod=readonly ./internal/packagesource -count=1 -v` and `go test -mod=readonly ./internal/cli -run '^TestRemotePackageCLI' -count=1 -v` | Windows TLS/cache/publication/lock checks and two native MSVC profiles pass. The authored native CLI test selects GCC/Clang x low/optimized on Linux; that execution and Linux filesystem behavior remain unexecuted. |
 | Atlas impact, read-only MCP and body edits | `go test -mod=readonly ./internal/atlasmap ./internal/atlasmcp -count=1` and `go test -mod=readonly ./internal/cli -run '^TestAtlas' -count=1 -v` | Windows graph/protocol/atomic-edit checks and two native profiles pass. The native edit helper selects GCC/Clang low/optimized on Linux; Linux rooted rename and execution remain unexecuted. |
+| Local state execution and persistence | `go test -mod=readonly ./internal/contractstate ./internal/contractstatemir ./tools/dev/fairyc-state -count=1 -v` | Windows source-to-Go-MIR execution, separate-process lock/restart/forced-exit tests and six standalone executable calls pass. Linux `flock`, rooted rename and process behavior remain unexecuted; this replay does not certify generated-C persistence or a chain VM. |
 
 Use one later source snapshot and record compiler versions, exact source commit, commands, exit
 codes and omissions for these slices together. This queue neither launches Linux work now nor

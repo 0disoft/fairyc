@@ -118,6 +118,14 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Contract state
 
+- **Bounded local state execution and persistence prototype; chain target UNDECIDED**
+  - `docs/adr/0500-local-contract-state-execution-and-persistence.md`
+  - `internal/contractstate/persistent_execute.go`, `local_persistence.go`, `local_codec.go`, `local_lock_windows.go`, `local_lock_linux.go`
+  - `internal/contractstatemir/execute.go`
+  - `tools/dev/fairyc-state/`
+  - `docs/ops/windows-local-state-20261102.md`
+  - This later local Go admission does not promote earlier oracle/native-C records into production durability or chain execution evidence.
+
 
 - **Experimental typed contract-state layout, failure-atomic transaction oracle, owner-bound encoded borrow semantics and verified compiler transport
   bounded read-only Merkle commitments, and compiler-published versioned transaction execution fixtures, with declaration-only source layout but no source state access, runtime
