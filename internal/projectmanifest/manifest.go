@@ -55,6 +55,9 @@ func ValidPackageUID(value string) bool {
 	return uidPattern.MatchString(value)
 }
 
+// ValidExactVersion reports whether value is an exact manifest SemVer, without a range.
+func ValidExactVersion(value string) bool { return validSemver(value) }
+
 // ValidationError exposes fixture-stable categories without freezing final user diagnostics.
 type ValidationError struct {
 	Reason string
