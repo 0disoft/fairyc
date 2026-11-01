@@ -413,3 +413,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0495: Explicit static operation interfaces](0495-explicit-static-operation-interfaces.md)
 
 - [0496: Explicit copied local closures](0496-explicit-copied-local-closures.md)
+
+- [0497: Retain C and measure backend/target alternatives](0497-backend-and-target-review.md)
