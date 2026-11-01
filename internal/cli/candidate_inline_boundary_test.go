@@ -13,8 +13,8 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// Zero inline classes in the current candidate producer must describe an
-// admitted no-inline source, never a silently discarded source annotation.
+// Bounded inline sources must now pass the actual signature authority.
+// The identity and execution probes separately verify bodies and cache facts.
 func TestCandidateInlineAdmissionBoundary(t *testing.T) {
 	if (runtime.GOOS != "windows" && runtime.GOOS != "linux") || runtime.GOARCH != "amd64" {
 		t.Skip("requires native Windows/Linux AMD64")
@@ -40,8 +40,8 @@ func TestCandidateInlineAdmissionBoundary(t *testing.T) {
 		if err != nil || !checked.Verified {
 			t.Fatalf("Go inline control rejected: %v", err)
 		}
-		start := strings.Index(input, "@inline")
-		fmt.Fprintf(&program, `{let parsed=switch(make(b%s)){case .ok(p):{p}case .err(_):{assert(false);return 1;}};var sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed).is_ok);assert(switch(signatures::build(ref sources)){case .ok(_):{false}case .err(e):{e.code==3 && e.module_index==0 && e.start==%d && e.end==%d}});}`+"\n", strconv.Quote(input), start, start+len("@inline"))
+
+		fmt.Fprintf(&program, `{let parsed=switch(make(b%s)){case .ok(p):{p}case .err(_):{assert(false);return 1;}};var sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed).is_ok);assert(switch(signatures::build(ref sources)){case .ok(_):{true}case .err(_):{false}});}`+"\n", strconv.Quote(input))
 	}
 	input := "module sample; pub fn i32 add(i32 x){return x+1;} fn i32 main(){return add(41);}"
 	fmt.Fprintf(&program, `{let parsed=switch(make(b%s)){case .ok(p):{p}case .err(_):{assert(false);return 1;}};var sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed).is_ok);assert(switch(signatures::build(ref sources)){case .ok(_):{true}case .err(_):{false}});}`+"\n", strconv.Quote(input))

@@ -33,9 +33,8 @@ fn Result<v::Vec<Dependency>,u32> dependencies(ref workspace::Facts facts,ref in
         let coordinate=switch(digest(workspace::coordinate(workspace::at(facts,target)),b"fypc1-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};
         let ordinary_hash=switch(digest(interfaces::ordinary_hash(r),b"fyif5-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};
         let generic_hash=switch(digest(interfaces::source_hash(r),b"fygif0-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};
-        // Complete source admission still rejects @inline functions. Zero is
-        // the exact no-inline class, not a placeholder for an admitted body.
-        if(!v::push<Dependency>(ref mut out,Dependency{.ordinary=ordinary::Dependency{.coordinate,.interface_hash=ordinary_hash,.inline_bodies=[0;32]},.generic=generic::Dependency{.coordinate,.interface_hash=generic_hash}}).is_ok){return .err(11);}i+=1;
+        let inline_hash=switch(binary::words(interfaces::inline_hash(r),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var u8[32] inline_bytes=[0;32];var usize j=0;while(j<32){inline_bytes[j]=bytes::view(ref inline_hash)[j];j+=1;}
+        if(!v::push<Dependency>(ref mut out,Dependency{.ordinary=ordinary::Dependency{.coordinate,.interface_hash=ordinary_hash,.inline_bodies=inline_bytes},.generic=generic::Dependency{.coordinate,.interface_hash=generic_hash}}).is_ok){return .err(11);}i+=1;
     }let code=sort(ref mut out,work);if(code!=0){return .err(code);}return .ok(out);
 }
 fn Result<Record,u32> package(ref workspace::Facts facts,ref core::Complete complete,ref environment::Environment env,u8[32] standard_library,usize owner,ref mut usize work){
@@ -50,7 +49,8 @@ fn Result<Record,u32> package(ref workspace::Facts facts,ref core::Complete comp
     while(i<v::len<Dependency>(ref deps)){if(!budget::charge(work,1)){return .err(10);}let d=*v::at<Dependency>(ref deps,i);if(!v::push<ordinary::Dependency>(ref mut ordinary_deps,d.ordinary).is_ok || !v::push<generic::Dependency>(ref mut generic_deps,d.generic).is_ok){return .err(11);}i+=1;}
     var v::Vec<bytes::Buffer> features=v::empty<bytes::Buffer>();i=0;while(i<workspace::feature_count(p)){let value=switch(copy(workspace::feature(p,i),work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<bytes::Buffer>(ref mut features,value).is_ok){return .err(11);}i+=1;}
     let e=switch(environment::key_environment(env,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
-    let base=ordinary::assemble(e,v::empty<bytes::Buffer>(),ordinary::Facts{.standard_library,.package=package_id,.source,.current_interface,.current_body,.inline_bodies=[0;32]},ordinary_deps,features);
+    let inline_hash=switch(binary::words(interfaces::inline_hash(r),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var u8[32] inline_bytes=[0;32];i=0;while(i<32){inline_bytes[i]=bytes::view(ref inline_hash)[i];i+=1;}
+    let base=ordinary::assemble(e,v::empty<bytes::Buffer>(),ordinary::Facts{.standard_library,.package=package_id,.source,.current_interface,.current_body,.inline_bodies=inline_bytes},ordinary_deps,features);
     let ordinary_key=switch(ordinary::compute(ref base,work)){case .ok(p):{p}case .err(code):{return .err(mapped(code));}};
     let selected=switch(specializations::collect(complete,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(specializations::copy_ids(ref selected,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let source_input=generic::assemble(base,current_generic,generic_deps,ids);let generic_key=switch(generic::compute(ref source_input,work)){case .ok(p):{p}case .err(code):{return .err(mapped(code));}};

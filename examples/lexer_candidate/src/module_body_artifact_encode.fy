@@ -1,5 +1,6 @@
 module module_body_artifact_encode;
 import module_unit_body_ir_model as ir;
+import module_inline_identity as inline;
 import module_unit_body_ir_verify as proof;
 import module_unit_cleanup_mir_model as clean;
 import module_body_artifact_wire as wire;
@@ -157,5 +158,5 @@ pub fn Result<common::Payload,u32> encode(ref ir::Program p,usize frame,ref mut 
         wire::number(ref mut out,row.start,ref mut status,work);
         wire::number(ref mut out,row.end,ref mut status,work);
         if(wire::output_status(ref status)!=0){return .err(wire::output_status(ref status));}i+=1;}
-    wire::blob(ref mut out,ir::text_view(b),ref mut status,work);return wire::finish(out,status);
+    wire::blob(ref mut out,ir::text_view(b),ref mut status,work);let hash=ir::inline_hash(b);if(!inline::zero(hash)){i=0;while(i<8){wire::number(ref mut out,hash[i] as usize,ref mut status,work);i+=1;}}return wire::finish(out,status);
 }

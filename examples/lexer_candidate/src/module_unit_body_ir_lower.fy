@@ -10,6 +10,7 @@ import module_unit_region_model as regions;
 import module_unit_moves as moves;
 import module_unit_sdk_sources as sdk_sources;
 import syntax as syntax;
+import module_inline_declarations as inline;
 import module_signatures as signatures;
 import literal_types as literals;
 import std::bytes as bytes;
@@ -27,7 +28,7 @@ fn Result<ir::Body,clean_ir::Problem> body(ref syntax::Parsed source,ref m::Valu
     i=0;while(i<m::region_count(typed)){if(!m::charge(work,1)){return .err(fail(1002,f.module_index,d.start,d.end));}if(!v::push<regions::Scope>(ref mut regions,m::region_at(typed,i)).is_ok){return .err(fail(1003,f.module_index,d.start,d.end));}i+=1;}
     i=0;while(i<m::placement_count(typed)){if(!m::charge(work,1)){return .err(fail(1002,f.module_index,d.start,d.end));}if(!v::push<regions::Placement>(ref mut placements,m::placement_at(typed,i)).is_ok){return .err(fail(1003,f.module_index,d.start,d.end));}i+=1;}
     i=0;while(i<m::region_exit_count(typed)){if(!m::charge(work,1)){return .err(fail(1002,f.module_index,d.start,d.end));}if(!v::push<regions::Exit>(ref mut resets,m::region_exit_at(typed,i)).is_ok){return .err(fail(1003,f.module_index,d.start,d.end));}i+=1;}
-    return .ok(ir::assemble_body_regions(root,syntax::source_view(source).len,start,end,nodes,statements,locals,calls,arguments,regions,placements,resets,text));
+    let inlined=inline::read(source,f.declaration-1);if(inlined.code!=0){return .err(fail(1001,f.module_index,start,end));}return .ok(ir::mark_inline(ir::assemble_body_regions(root,syntax::source_view(source).len,start,end,nodes,statements,locals,calls,arguments,regions,placements,resets,text),if(f.kind==3){inlined.hash}else{[0;8]}));
 }
 pub fn Result<ir::Program,clean_ir::Problem> lower(ref v::Vec<syntax::Parsed> sources,ref values::Plan typed,ref interfaces::Interfaces imported,ref moves::Plan moved){
     let cleaned=switch(cleaning::lower(sources,typed,imported,moved)){case .ok(p):{p}case .err(p):{return .err(p);}};return lower_body(sources,typed,imported,cleaned);

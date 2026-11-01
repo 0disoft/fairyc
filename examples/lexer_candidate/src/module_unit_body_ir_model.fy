@@ -14,7 +14,7 @@ pub struct Node {values::Expression value;syntax::Expression syntax;u32 literal_
 pub struct Statement {usize source_index;syntax::Statement value;usize operator_start;usize operator_end;}
 pub struct Layout {interfaces::Shape value;usize name_start;usize name_end;}
 pub resource Body {
-    usize body;usize source_bytes;usize start;usize end;
+    usize body;usize source_bytes;usize start;usize end;u32 inline_0;u32 inline_1;u32 inline_2;u32 inline_3;u32 inline_4;u32 inline_5;u32 inline_6;u32 inline_7;
     v::Vec<Node> nodes;v::Vec<Statement> statements;v::Vec<values::Local> locals;
     v::Vec<values::Invocation> calls;v::Vec<values::Argument> arguments;
     v::Vec<regions::Scope> regions;v::Vec<regions::Placement> placements;v::Vec<regions::Exit> resets;bytes::Buffer text;
@@ -29,13 +29,15 @@ pub resource Program {
 }
 // Private checked body/cleanup/layout model compatibility, separate from the
 // Go MIR codec and from any future independently versioned artifact envelope.
-pub fn ref u8[] cache_revision(){return b"fairyc.candidate-owned-body-ir/0";}
+pub fn ref u8[] cache_revision(){return b"fairyc.candidate-owned-body-ir/1";}
 pub fn ref clean_ir::Program cleanup_ir(ref Program p){return ref p.cleanup_ir;}
 pub fn ref state::Plan state_layouts(ref Program p){return ref p.states;}
 pub fn ref sdk_sources::Sources sdk_units(ref Program p){return ref p.sdk_sources;}
 pub fn usize count(ref Program p){return v::len<Body>(ref p.bodies);}
 pub fn ref Body at(ref Program p,usize frame){assert(frame!=0 && frame<=count(p));return v::at<Body>(ref p.bodies,frame-1);}
 pub fn usize body(ref Body p){return p.body;}
+pub fn u32[8] inline_hash(ref Body p){return [p.inline_0,p.inline_1,p.inline_2,p.inline_3,p.inline_4,p.inline_5,p.inline_6,p.inline_7];}
+pub fn Body mark_inline(Body p,u32[8] hash){var Body out=p;out.inline_0=hash[0];out.inline_1=hash[1];out.inline_2=hash[2];out.inline_3=hash[3];out.inline_4=hash[4];out.inline_5=hash[5];out.inline_6=hash[6];out.inline_7=hash[7];return out;}
 pub fn usize source_bytes(ref Body p){return p.source_bytes;}
 pub fn usize start(ref Body p){return p.start;}
 pub fn usize end(ref Body p){return p.end;}
@@ -74,7 +76,7 @@ pub fn ref u8[] linker_name(ref Program p,usize index){let s=callable_at(p,index
 pub fn usize parameter_count(ref Program p){return v::len<usize>(ref p.parameters);}
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}
 pub fn usize work(ref Program p){return p.work;}
-pub fn Body assemble_body_regions(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Placement> placements,v::Vec<regions::Exit> resets,bytes::Buffer text){return Body{.body,.source_bytes,.start,.end,.nodes,.statements,.locals,.calls,.arguments,.regions,.placements,.resets,.text};}
+pub fn Body assemble_body_regions(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Placement> placements,v::Vec<regions::Exit> resets,bytes::Buffer text){return Body{.body,.source_bytes,.start,.end,.inline_0=0,.inline_1=0,.inline_2=0,.inline_3=0,.inline_4=0,.inline_5=0,.inline_6=0,.inline_7=0,.nodes,.statements,.locals,.calls,.arguments,.regions,.placements,.resets,.text};}
 pub fn Body assemble_body(usize body,usize source_bytes,usize start,usize end,v::Vec<Node> nodes,v::Vec<Statement> statements,v::Vec<values::Local> locals,v::Vec<values::Invocation> calls,v::Vec<values::Argument> arguments,v::Vec<regions::Scope> regions,v::Vec<regions::Exit> resets,bytes::Buffer text){return assemble_body_regions(body,source_bytes,start,end,nodes,statements,locals,calls,arguments,regions,v::empty<regions::Placement>(),resets,text);}
 pub fn Result<Program,clean_ir::Problem> assemble_sdk(sdk_sources::Sources sdk_sources,clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,usize work){
     return assemble_sdk_states(state::empty(),sdk_sources,cleanup_ir,bodies,layouts,fields,callables,parameters,names,work);

@@ -1,5 +1,6 @@
 module module_unit_body_ir_verify;
 import module_unit_body_ir_model as ir;
+import module_inline_ir as inline;
 import candidate_limits as limits;
 import literal_types as literals;
 import module_unit_body_ir_enums as enums;
@@ -57,6 +58,7 @@ pub fn clean_ir::Problem check_body(ref ir::Body b,ref clean_ir::Program cleaned
     if(frame==0 || frame>clean_ir::frame_count(cleaned)){return fail(1001,0,0,0);}let f=clean_ir::frame_at(cleaned,frame);let nt=clean_ir::type_count(cleaned);
     if(ir::node_count(b)>limits::program_expressions() || ir::statement_count(b)>4096 || ir::text_bytes(b)>1048576 || ir::region_count(b)>4096 || ir::reset_count(b)>16384 || ir::placement_count(b)>16384){return fail(1002,f.module_index,0,0);}
     if(!span(ir::start(b),ir::end(b),ir::source_bytes(b)) || ir::body(b)==0 || ir::statement(b,ir::body(b))==0){return fail(1001,f.module_index,0,0);}
+    let inline_code=inline::check(b,cleaned,frame);if(inline_code!=0){return fail(inline_code,f.module_index,ir::start(b),ir::end(b));}
     let root=ir::statement_at(b,ir::statement(b,ir::body(b))-1).value;
     if(root.kind!=1 || root.start<ir::start(b) || root.end>ir::end(b)){return fail(1001,f.module_index,root.start,root.end);}
     var usize previous=0;var usize i=0;

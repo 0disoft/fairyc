@@ -1,6 +1,7 @@
 module module_project_body_equal;
 import candidate_limits as limits;
 import module_unit_body_ir_model as ir;
+import module_inline_identity as inline;
 import module_unit_value_model as m;
 import module_unit_region_model as regions;
 import syntax as syntax;
@@ -22,6 +23,7 @@ pub fn bool exit_same(regions::Exit a,regions::Exit b){return a.region_id==b.reg
 // Exact comparison after ID rebinding; lexical IDs and retained bytes stay
 // local to the original declaration. No digest substitutes for equality.
 pub fn bool same(ref ir::Body a,ref ir::Body b,ref mut usize work){
+    if(!inline::equal(ir::inline_hash(a),ir::inline_hash(b))){return false;}
     if(ir::body(a)!=ir::body(b) || ir::source_bytes(a)!=ir::source_bytes(b) || ir::start(a)!=ir::start(b) || ir::end(a)!=ir::end(b) || ir::node_count(a)!=ir::node_count(b) || ir::statement_count(a)!=ir::statement_count(b) || ir::local_count(a)!=ir::local_count(b) || ir::call_count(a)!=ir::call_count(b) || ir::argument_count(a)!=ir::argument_count(b) || ir::region_count(a)!=ir::region_count(b) || ir::placement_count(a)!=ir::placement_count(b) || ir::reset_count(a)!=ir::reset_count(b)){return false;}
     if(!limits::project_charge(work,ir::text_bytes(a)+1) || !bytes::equal(ir::text_view(a),ir::text_view(b))){return false;}
     var usize i=0;

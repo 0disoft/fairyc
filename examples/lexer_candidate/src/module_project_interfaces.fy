@@ -4,6 +4,7 @@ import module_project_artifact_admission as admitted;
 import module_project_public_view as view;
 import module_public_interface_extract as extract;
 import module_public_interface_model as model;
+import module_inline_packages as inline;
 import module_public_interface as ordinary;
 import module_generic_interface as generic;
 import module_public_templates as public;
@@ -21,11 +22,12 @@ import std::vec as v;
 
 // Detached package interfaces derived only after complete body/Flow checking.
 // No parser/planner owner, provisional Interfaces or caller-supplied hash survives.
-pub resource Record{usize owner;extract::Projection ordinary;generic::Templates templates;bytes::Buffer ordinary_hash;bytes::Buffer source_hash;v::Vec<bytes::Buffer> specializations;cleanup{}}
+pub resource Record{usize owner;u32 inline_0;u32 inline_1;u32 inline_2;u32 inline_3;u32 inline_4;u32 inline_5;u32 inline_6;u32 inline_7;extract::Projection ordinary;generic::Templates templates;bytes::Buffer ordinary_hash;bytes::Buffer source_hash;v::Vec<bytes::Buffer> specializations;cleanup{}}
 pub resource Records{v::Vec<Record> packages;cleanup{}}
 pub fn usize count(ref Records p){return v::len<Record>(ref p.packages);}
 pub fn ref Record at(ref Records p,usize index){assert(index<count(p));return v::at<Record>(ref p.packages,index);}
 pub fn usize owner(ref Record p){return p.owner;}
+pub fn u32[8] inline_hash(ref Record p){return [p.inline_0,p.inline_1,p.inline_2,p.inline_3,p.inline_4,p.inline_5,p.inline_6,p.inline_7];}
 pub fn ref model::Descriptor descriptor(ref Record p){return extract::descriptor(ref p.ordinary);}
 pub fn ref generic::Templates templates(ref Record p){return ref p.templates;}
 pub fn ref u8[] ordinary_hash(ref Record p){return bytes::view(ref p.ordinary_hash);}
@@ -38,7 +40,8 @@ fn Result<Record,u32> package(ref view::View facts,ref plans::Plan plan,ref v::V
     measured=0;let ordinary_hash=switch(ordinary::hash(signatures::state_layouts(metadata),owner,extract::descriptor(ref descriptor),ref mut measured)){case .ok(p):{p}case .err(e):{discard budget::charge(work,measured);return .err(e);}};if(!budget::charge(work,measured)){return .err(10);}
     measured=0;let source_hash=switch(generic::hash(signatures::state_layouts(metadata),owner,extract::descriptor(ref descriptor),ref templates,ref mut measured)){case .ok(p):{p}case .err(e):{discard budget::charge(work,measured);return .err(e);}};if(!budget::charge(work,measured)){return .err(10);}
     let selected=switch(specializations::collect(plan,owner,work)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return .ok(Record{.owner,.ordinary=descriptor,.templates,.ordinary_hash,.source_hash,.specializations=selected});
+    let inline_hash=switch(inline::derive(sources,metadata,table,owner,work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return .ok(Record{.owner,.inline_0=inline_hash[0],.inline_1=inline_hash[1],.inline_2=inline_hash[2],.inline_3=inline_hash[3],.inline_4=inline_hash[4],.inline_5=inline_hash[5],.inline_6=inline_hash[6],.inline_7=inline_hash[7],.ordinary=descriptor,.templates,.ordinary_hash,.source_hash,.specializations=selected});
 }
 // Authenticate the complete checked view and original plan once for all owners.
 // Independent descriptor/hash/closure histories fold into the 16MiB ledger.

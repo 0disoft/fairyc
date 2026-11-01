@@ -50,8 +50,8 @@ func TestCandidateCompleteCacheKeysV5(t *testing.T) {
     let base=root();let env=current();var bytes::Buffer output=bytes::empty();
     assert(bytes::append(ref mut output,b"FYCKOUT1").is_ok);var usize work=0;
     append(ref mut output,environment::compiler_build(ref env),ref mut work);
-    assert(wire::length(ref mut output,2,ref mut work)==0);
-    var usize i=0;while(i<2){let leaf=if(i==0){b"Plain"}else{b"Aliases"};
+    assert(wire::length(ref mut output,5,ref mut work)==0);
+    var usize i=0;while(i<5){let leaf=if(i==0){b"Plain"}else if(i==1){b"Aliases"}else if(i==2){b"Inline"}else if(i==3){b"InlineEdit"}else{b"InlineFormat"};
         let actual=detached(bytes::view(ref base),leaf,ref env);
         oracle(bytes::view(ref base),leaf,ref actual,environment::compiler_build(ref env),ref mut output);i+=1;}
     assert(switch(io::write_bytes(bytes::view(ref output))){case .ok(n):{n==bytes::len(ref output)}case .err(_):{false}});
@@ -169,11 +169,11 @@ func validateCandidateKeyLedger(t *testing.T, ledger string, image []byte) {
 	if string(field()) != expected {
 		t.Fatal("ledger is not bound to the executed image")
 	}
-	if cases := number(); cases != 2 {
+	if cases := number(); cases != 5 {
 		t.Fatalf("ledger cases=%d", cases)
 	}
 	packages := 0
-	for range 2 {
+	for range 5 {
 		_ = field() // exact case order/inputs are checked by the authored fixture
 		n := number()
 		if n < 1 || n > 512 {
@@ -195,5 +195,5 @@ func validateCandidateKeyLedger(t *testing.T, ledger string, image []byte) {
 	if reader.Len() != 0 {
 		t.Fatal("trailing key ledger bytes")
 	}
-	t.Logf("verified %d package ordinary/generic pairs across two source graphs; ledger=%d bytes", packages, len(ledger))
+	t.Logf("verified %d package ordinary/generic pairs across five source graphs; ledger=%d bytes", packages, len(ledger))
 }

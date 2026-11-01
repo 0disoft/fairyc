@@ -1,5 +1,6 @@
 module module_body_artifact_decode;
 import module_unit_body_ir_model as ir;
+import module_inline_identity as inline;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_body_ir_verify as proof;
 import module_unit_value_model as values;
@@ -29,5 +30,5 @@ pub fn Result<ir::Body,u32> decode(ref u8[] raw,ref clean::Program cleaned,usize
         if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!v::push<regions::Placement>(ref mut placements,row).is_ok){return .err(1003);}i+=1;}
     let resets_count=wire::count_from(raw,ref mut cursor,16384,56,work);if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}var v::Vec<regions::Exit> resets=v::empty<regions::Exit>();i=0;while(i<resets_count){let row=regions::Exit{.region_id=wire::number_from(raw,ref mut cursor,work),.kind=wire::word_from(raw,ref mut cursor,work),.group=wire::number_from(raw,ref mut cursor,work),.order=wire::number_from(raw,ref mut cursor,work),.loop=wire::number_from(raw,ref mut cursor,work),.start=wire::number_from(raw,ref mut cursor,work),.end=wire::number_from(raw,ref mut cursor,work)};
         if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!v::push<regions::Exit>(ref mut resets,row).is_ok){return .err(1003);}i+=1;}
-    let text=wire::blob_from(raw,ref mut cursor,1048576,work);let code=wire::end(raw,ref mut cursor,work);if(code!=0){return .err(code);}let restored=ir::assemble_body_regions(body,source_bytes,start,end,nodes,statements,locals,calls,arguments,regions,placements,resets,text);var usize measured=0;let checked=proof::check_body(ref restored,cleaned,frame,ref mut measured);if(!wire::charge(work,measured)){return .err(1002);}if(checked.code!=0){return .err(checked.code);}return .ok(restored);
+    let text=wire::blob_from(raw,ref mut cursor,1048576,work);var u32[8] inline_hash=[0;8];if(wire::status(ref cursor)==0 && cursor.offset<raw.len){i=0;while(i<8){inline_hash[i]=wire::word_from(raw,ref mut cursor,work);i+=1;}if(inline::zero(inline_hash)){return .err(1001);}}let code=wire::end(raw,ref mut cursor,work);if(code!=0){return .err(code);}let restored=ir::mark_inline(ir::assemble_body_regions(body,source_bytes,start,end,nodes,statements,locals,calls,arguments,regions,placements,resets,text),inline_hash);var usize measured=0;let checked=proof::check_body(ref restored,cleaned,frame,ref mut measured);if(!wire::charge(work,measured)){return .err(1002);}if(checked.code!=0){return .err(checked.code);}return .ok(restored);
 }

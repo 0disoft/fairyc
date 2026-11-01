@@ -21,6 +21,7 @@ import (
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
 	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -90,7 +91,7 @@ func run(root string) error {
 	if _, err := buildidentity.Parse(build); err != nil {
 		return err
 	}
-	names := []string{"Aliases", "PrivateEdit", "Reordered", "Vec", "State", "Plain"}
+	names := []string{"Aliases", "PrivateEdit", "Reordered", "Vec", "State", "Plain", "Inline", "InlineEdit", "InlineFormat"}
 	var observations []map[string]any
 	for _, name := range names {
 		a, b := dep("a", "left", "['fast']"), dep("r", "right", "[]")
@@ -112,6 +113,16 @@ func run(root string) error {
 			body = "let T result=x;return result;"
 		}
 		inputs := map[string]string{"fairy.toml": manifest("example.keys.root", "[workspace]\nmembers=['left','right']\n"+a+b+dep("alias-left", "left", "['fast']")), "src/main.fy": main, "left/fairy.toml": manifest("example.keys.left", ""), "left/src/left.fy": "module left;pub fn T id<T>(T x){return copy<T>(x);}fn T copy<T>(T x){" + body + "}\n", "right/fairy.toml": manifest("example.keys.right", ""), "right/src/right.fy": "module right;pub fn i32 value(){return 7;}\n"}
+		if strings.HasPrefix(name, "Inline") {
+			inputs["src/main.fy"] = "module main;import left as a;import right as r;fn i32 main(){return a::add(40);}"
+			inputs["left/src/left.fy"] = "module left;@inline pub fn i32 add(i32 x){return x+2;}"
+			if name == "InlineEdit" {
+				inputs["left/src/left.fy"] = strings.Replace(inputs["left/src/left.fy"], "x+2", "x+3", 1)
+			}
+			if name == "InlineFormat" {
+				inputs["left/src/left.fy"] = "module left;@inline pub fn i32 add(i32 renamed){return (renamed + 0x2);}"
+			}
+		}
 		dir := filepath.Join(root, name)
 		for path, data := range inputs {
 			if err := write(filepath.Join(dir, filepath.FromSlash(path)), []byte(data)); err != nil {
@@ -161,14 +172,18 @@ func run(root string) error {
 		if err != nil {
 			return err
 		}
+		inlines, err := inlinebody.HIR(checked.HIR, coords)
+		if err != nil {
+			return err
+		}
 		var out bytes.Buffer
 		out.WriteString("FYCKEYS1")
 		binary.Write(&out, binary.BigEndian, uint64(len(metadata)))
 		var rows []map[string]any
 		for _, p := range metadata {
-			ordinary := packagecache.Inputs{CompilerBuild: build, LanguageRevision: sdkstdlib.LanguageRevision, MIRVersion: "fairyc.candidate-owned-body-ir/0", TargetSchema: spec.SchemaVersion, ABIProfile: strings.Join([]string{"fairyc.target-abi-profile/0", string(spec.ID), spec.DataModel, spec.CallingConvention, spec.AggregateLayout, spec.ReturnClassifier, spec.ObjectFormat, spec.UnwindModel}, ";"), ToolchainFingerprint: "not-applicable:verified-candidate-owned-body-ir", Backend: "verified-candidate-owned-body-ir", RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: standard, Package: p.Instance, Source: p.Source, CurrentInterface: analyzed.OrdinaryInterfaces[p.ID], CurrentBody: bodies[p.ID], Features: slices.Clone(p.Features)}
+			ordinary := packagecache.Inputs{CompilerBuild: build, LanguageRevision: sdkstdlib.LanguageRevision, MIRVersion: "fairyc.candidate-owned-body-ir/1", TargetSchema: spec.SchemaVersion, ABIProfile: strings.Join([]string{"fairyc.target-abi-profile/0", string(spec.ID), spec.DataModel, spec.CallingConvention, spec.AggregateLayout, spec.ReturnClassifier, spec.ObjectFormat, spec.UnwindModel}, ";"), ToolchainFingerprint: "not-applicable:verified-candidate-owned-body-ir", Backend: "verified-candidate-owned-body-ir", RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: standard, Package: p.Instance, Source: p.Source, CurrentInterface: analyzed.OrdinaryInterfaces[p.ID], CurrentBody: bodies[p.ID], InlineBodies: inlines[p.ID], Features: slices.Clone(p.Features)}
 			for _, id := range p.Dependencies {
-				ordinary.Dependencies = append(ordinary.Dependencies, packagecache.Dependency{Coordinate: byID[id].Coordinate, Interface: analyzed.OrdinaryInterfaces[id]})
+				ordinary.Dependencies = append(ordinary.Dependencies, packagecache.Dependency{Coordinate: byID[id].Coordinate, Interface: analyzed.OrdinaryInterfaces[id], InlineBodies: inlines[id]})
 			}
 			ordinary.Dependencies, err = packagecache.CanonicalizeDependencies(ordinary.Dependencies)
 			if err != nil {
