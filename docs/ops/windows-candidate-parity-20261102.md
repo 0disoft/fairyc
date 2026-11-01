@@ -1,5 +1,9 @@
 # Windows Go/Fairy candidate cache parity, 2026-11-02
 
+The later [inline completion receipt](windows-candidate-inline-20261102.md)
+supersedes this record's pending inline-admission status. The results below
+remain the historical encoder/no-inline baseline for their named source commits.
+
 - Source: `3d916675` (v5 encoder and key producer), `07b5dad3` (source-derived
   key and inline-boundary regression probes).
 - Host: Windows amd64, Go 1.27.1, MSVC 14.51.36231; native C11 low and optimized.

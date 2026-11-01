@@ -51,10 +51,15 @@ profiles pass, together with malformed inputs, exact work budgets and v4 text
 rejection. The old Go `EncodeLegacyV4` remains frozen; no legacy Fairy cache key
 is used to authorize v5 reuse.
 
-This is encoder parity, not inline source admission. The candidate's complete
-source factory still rejects `@inline` function attributes through its signature
-authority. Its owner-derived key producer supplies the exact zero inline class
-for that admitted no-inline subset. Enabling inline exports later requires the
-actual class derivation, typed body identity, artifact validation and backend
-handling before this producer can admit such a source. Linux native execution
-remains in the combined queue. No cache default or target promotion changes.
+The initial encoder/no-inline baseline is now extended by
+[candidate inline v1](../architecture/candidate-inline-v1.md). The complete
+source factory admits the bounded public i32 arithmetic family, verifies the
+detached marker against current source during restoration, and derives the
+actual owner/dependency inline classes. The five-graph source-key comparison
+includes inline body edits and equivalent source spelling at both Windows
+profiles; [the receipt](../ops/windows-candidate-inline-20261102.md) also records
+shared-header C execution and missing/extra-marker rejection. Zero remains the
+exact class for packages without inline exports. The private candidate IR cache
+revision advances to `/1`; public-interface v5 and cache-key v5 stay unchanged.
+Linux native execution remains in the combined queue. No cache default or
+target promotion changes.
