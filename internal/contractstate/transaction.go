@@ -41,7 +41,7 @@ type TransactionStats struct {
 // contract execution should ordinarily use one goroutine.
 type Transaction struct {
 	mu          sync.Mutex
-	store       *MemoryStore
+	store       transactionStore
 	layout      Layout
 	baseVersion uint64
 	limits      Limits
@@ -97,6 +97,10 @@ func Execute(store *MemoryStore, layout Layout, limits Limits, body func(*Transa
 	if err != nil {
 		return CommitReceipt{}, err
 	}
+	return executeTransaction(transaction, body)
+}
+
+func executeTransaction(transaction *Transaction, body func(*Transaction) error) (receipt CommitReceipt, err error) {
 	transaction.managed = true
 	defer func() {
 		if recovered := recover(); recovered != nil {

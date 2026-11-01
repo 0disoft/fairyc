@@ -50,6 +50,24 @@ func Execute(store *contractstate.MemoryStore, program Program, limits contracts
 	if store == nil {
 		return Outcome{}, fmt.Errorf("contract state MIR store is nil")
 	}
+	return execute(program, func(layout contractstate.Layout, body func(*contractstate.Transaction) error) (contractstate.CommitReceipt, error) {
+		return contractstate.Execute(store, layout, limits, body)
+	})
+}
+
+// ExecutePersistent verifies before touching storage and submits one complete
+// overlay through the target-neutral persistence port. Trap panics retain the
+// existing rollback and propagation contract.
+func ExecutePersistent(port contractstate.PersistencePort, program Program, limits contractstate.Limits) (Outcome, error) {
+	if port == nil {
+		return Outcome{}, fmt.Errorf("contract state MIR persistence is nil")
+	}
+	return execute(program, func(layout contractstate.Layout, body func(*contractstate.Transaction) error) (contractstate.CommitReceipt, error) {
+		return contractstate.ExecutePersistent(port, layout, limits, body)
+	})
+}
+
+func execute(program Program, run func(contractstate.Layout, func(*contractstate.Transaction) error) (contractstate.CommitReceipt, error)) (Outcome, error) {
 	failures := Verify(program)
 	if len(failures) != 0 {
 		return Outcome{}, VerificationErrors{Failures: failures}
@@ -64,7 +82,7 @@ func Execute(store *contractstate.MemoryStore, program Program, limits contracts
 		helpers[helper.Name] = helper
 	}
 	operationIndex := 0
-	receipt, err := contractstate.Execute(store, bound.layout, limits, func(transaction *contractstate.Transaction) error {
+	receipt, err := run(bound.layout, func(transaction *contractstate.Transaction) error {
 		exit, err := executeProgramBody(transaction, bound, program, helpers, &outcome, &operationIndex)
 		outcome.Exit = exit
 		return err
