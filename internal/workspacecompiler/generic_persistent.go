@@ -16,6 +16,7 @@ import (
 
 func (session *GenericSession) checkGenericPersistent(ctx context.Context, analysis compiler.GenericAnalysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, owners []hir.PackageID, keys map[hir.PackageID]packagecache.GenericKey, report Report, capabilities admission.Capabilities) (Result, error) {
 	var artifacts []packageartifact.StableArtifact
+	var hits []packageartifact.GenericStableLookup
 	allHit := true
 	for _, id := range owners {
 		if err := ctx.Err(); err != nil {
@@ -26,6 +27,7 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 		case packageartifact.LookupHit:
 			report.Hits++
 			artifacts = append(artifacts, lookup.Artifact)
+			hits = append(hits, lookup)
 		case packageartifact.LookupMiss:
 			report.Misses++
 			allHit = false
@@ -48,6 +50,11 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 		program, err := session.artifacts.rebind(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
 		if err == nil {
 			err = inlinebody.VerifyProgram(analysis.Analysis.Semantic.HIR, program)
+			if err != nil {
+				for _, hit := range hits {
+					hit.Discard()
+				}
+			}
 		}
 		if err == nil {
 			report.Outcome = OutcomeAllHit

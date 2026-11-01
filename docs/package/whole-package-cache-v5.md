@@ -25,7 +25,11 @@ Public-interface v5 remains body-independent. No selective per-call import list 
 
 Ordinary process/disk and generic process/disk paths bind the same inline class into
 their base inputs. Reassembled inline markers must agree with freshly checked HIR before
-reuse is reported. A mismatch falls back to verified lowering. Stable canonical body
+reuse is reported. A mismatch falls back to verified lowering. For disk caches, the
+observed generations of the rejected reassembly are quarantined by exact record bytes
+before repaired artifacts are published. Other concurrently published generations are
+preserved; stale and repaired immutable payloads cannot cause a second conflict miss.
+Stable canonical body
 encoding retains its existing envelope and adds an optional omitted-when-empty inline
 identity; old strict readers fail closed on a new marked body. Compiler build identity
 and v5 keys isolate incompatible artifacts.

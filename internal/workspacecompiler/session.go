@@ -321,6 +321,7 @@ func (session *Session) PersistentStats() (packageartifact.StableCacheStats, err
 
 func (session *Session) checkPersistent(ctx context.Context, analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
 	compilations := make([]packageartifact.StableCompilationArtifact, 0, len(owners))
+	var hits []packageartifact.StableLookup
 	allHit := true
 	for _, packageID := range owners {
 		if err := ctx.Err(); err != nil {
@@ -339,6 +340,7 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		case packageartifact.LookupHit:
 			report.Hits++
 			compilations = append(compilations, lookup.Compilation)
+			hits = append(hits, lookup)
 		case packageartifact.LookupMiss:
 			report.Misses++
 			allHit = false
@@ -355,6 +357,13 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		)
 		if reassemblyErr == nil {
 			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
+			if reassemblyErr != nil {
+				// Remove exactly the observed rejected generations before publishing repairs.
+				// Otherwise old and repaired bytes conflict under the same immutable disk key.
+				for _, hit := range hits {
+					hit.Discard()
+				}
+			}
 		}
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit

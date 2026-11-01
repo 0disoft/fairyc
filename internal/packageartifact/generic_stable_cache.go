@@ -26,6 +26,7 @@ type GenericStableLookup struct {
 	Status   string
 	Artifact StableArtifact
 	Reason   string
+	discard  func() bool
 }
 
 // GenericStableCache stores exact-version stable MIR, not process-codec bytes.
@@ -161,7 +162,13 @@ func (cache *GenericStableCache) Get(key packagecache.GenericKey, hash moduleint
 	if artifact.Package != expectedPackage || artifact.Coordinate != expectedCoordinate {
 		return reject("generic stable cache package ownership differs")
 	}
-	return cache.genericResult(GenericStableLookup{Status: LookupHit, Artifact: artifact})
+	return cache.genericResult(GenericStableLookup{Status: LookupHit, Artifact: artifact, discard: func() bool {
+		if !cache.store.DeleteIfMatch(record) {
+			return false
+		}
+		cache.genericResult(GenericStableLookup{Status: LookupRejected})
+		return true
+	}})
 }
 
 func (cache *GenericStableCache) genericResult(result GenericStableLookup) GenericStableLookup {
@@ -189,4 +196,10 @@ func (cache *GenericStableCache) Stats() (StableCacheStats, error) {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	return StableCacheStats{Store: store, VerifiedHits: cache.hits, Misses: cache.misses, Rejected: cache.rejected}, nil
+}
+
+// Discard quarantines only the immutable generation observed by this lookup.
+// It preserves distinct concurrent generations and ignores caller mutations of Artifact.
+func (lookup GenericStableLookup) Discard() bool {
+	return lookup.Status == LookupHit && lookup.discard != nil && lookup.discard()
 }

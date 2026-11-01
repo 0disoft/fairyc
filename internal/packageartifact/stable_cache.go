@@ -21,6 +21,7 @@ type StableLookup struct {
 	Status      string
 	Compilation StableCompilationArtifact
 	Reason      string
+	discard     func() bool
 }
 
 // StableCacheStats separates reusable stable artifacts from lower-level disk-record observations.
@@ -145,7 +146,13 @@ func (cache *StableCache) Get(key packagecache.Key, expectedInterface moduleinte
 	cache.mu.Lock()
 	cache.verifiedHits++
 	cache.mu.Unlock()
-	return StableLookup{Status: LookupHit, Compilation: compilation}
+	return StableLookup{Status: LookupHit, Compilation: compilation, discard: func() bool {
+		if !cache.store.DeleteIfMatch(record) {
+			return false
+		}
+		cache.recordStableRejected()
+		return true
+	}}
 }
 
 // Stats returns current disk retention plus completed adapter outcomes.
@@ -179,4 +186,10 @@ func (cache *StableCache) recordStableMiss() {
 	cache.mu.Lock()
 	cache.misses++
 	cache.mu.Unlock()
+}
+
+// Discard quarantines only the immutable generation observed by this lookup.
+// It preserves distinct concurrent generations and ignores caller mutations of Compilation.
+func (lookup StableLookup) Discard() bool {
+	return lookup.Status == LookupHit && lookup.discard != nil && lookup.discard()
 }
