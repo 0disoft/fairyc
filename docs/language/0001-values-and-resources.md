@@ -99,6 +99,13 @@ including across return/parameter moves and direct resource nesting. The constra
 backend uses one initialized private byte rather than an empty C struct; this is not a
 source field, public layout or ownership flag. Empty cleanup does not grant copyability.
 
+[ADR 0492](../adr/0492-nested-owning-tag-cleanup.md) extends private C transport to nested
+`Option`/`Result` owners with at most eight tag layers on an owning path. Construction,
+whole-root moves, matching, return/parameter transfer and reassignment preserve recursive
+ownership. Only active payloads drop, with the existing parent-body then reverse-field
+order. There are no new source root flags. Owning tags in resource fields, owning user
+enums/arrays, unsupported payload leaves and public tagged ABI remain outside this slice.
+
 ## Fallible close
 
 A fallible close operation must make ownership unambiguous.

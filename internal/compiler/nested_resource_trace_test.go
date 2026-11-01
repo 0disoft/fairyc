@@ -16,10 +16,7 @@ import (
 )
 
 func TestPrivateVectorNestedResourceDropTrace(t *testing.T) {
-	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
-		t.Skip("requires Windows AMD64 MSVC")
-	}
-	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", `module main;
+	runResourceDropTraceNative(t, `module main;
 resource Leaf { i32 value; cleanup {} }
 resource Box {
     Leaf first; Leaf last;
@@ -28,13 +25,25 @@ resource Box {
 fn i32 main() {
     let Box value = Box { .first = Leaf { .value = 1 }, .last = Leaf { .value = 2 } };
     return 42;
-}`)
+}`, 4)
+}
+
+func TestNestedOwningResourceDropTrace(t *testing.T) {
+	runResourceDropTraceNative(t, nestedOwningPureSource, 8)
+}
+
+func runResourceDropTraceNative(t *testing.T, text string, wantDrops int) {
+	t.Helper()
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires Windows AMD64 MSVC")
+	}
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 	result, err := compiler.CheckExplicitFiles([]semantic.File{file})
 	if err != nil || !result.Verified {
 		t.Fatalf("compile: %v %+v", err, result.Semantic.Diagnostics)
 	}
 	oracle, err := interpreter.Execute(result.MIR, "main::main")
-	if err != nil || oracle.Kind != interpreter.OutcomeReturn || oracle.Value != 42 || len(oracle.DropTrace) != 4 {
+	if err != nil || oracle.Kind != interpreter.OutcomeReturn || oracle.Value != 42 || len(oracle.DropTrace) != wantDrops {
 		t.Fatalf("interpreter: %+v %v", oracle, err)
 	}
 	profile := cbackend.Stage0WindowsMSVCDropTraceProfile()

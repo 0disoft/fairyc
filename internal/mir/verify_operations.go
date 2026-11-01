@@ -10,16 +10,17 @@ import (
 // operationVerifier holds the definition context for one function. Worklist state
 // is passed separately; operation checks update its existing maps in evaluation order.
 type operationVerifier struct {
-	function       *Function
-	structTypes    map[hir.Type]*StructType
-	enumTypes      map[hir.Type]*EnumType
-	resourceTypes  map[hir.Type]*ResourceType
-	resources      map[hir.SymbolID]ResourceLocal
-	dropEffects    map[hir.Type][]hir.Effect
-	flags          map[string]DropFlag
-	unsafeByEntity map[string]UnsafeOperation
-	storeTypes     map[LocalID]hir.Type
-	fields         *aggregateFieldIndex
+	function         *Function
+	structTypes      map[hir.Type]*StructType
+	enumTypes        map[hir.Type]*EnumType
+	resourceTypes    map[hir.Type]*ResourceType
+	payloadOwnership map[hir.Type]bool
+	resources        map[hir.SymbolID]ResourceLocal
+	dropEffects      map[hir.Type][]hir.Effect
+	flags            map[string]DropFlag
+	unsafeByEntity   map[string]UnsafeOperation
+	storeTypes       map[LocalID]hir.Type
+	fields           *aggregateFieldIndex
 }
 
 func (v *operationVerifier) verifyOperation(state verificationState, operation Operation, entity string) []VerificationError {
@@ -50,6 +51,7 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 	if operation.MovePayload && operation.Kind != OperationResultPayload && operation.Kind != OperationOptionPayload {
 		failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "payload move is attached to a non-payload operation"})
 	}
+	failures = append(failures, v.verifyOwningPayload(operation, entity)...)
 	switch operation.Kind {
 	case OperationCCallback:
 		if operation.DestinationLocal < 0 || operation.Symbol == hir.NoSymbol || !hir.IsCCallback(operation.Type) || len(operation.Operands) != 0 || operation.Variant != "" {

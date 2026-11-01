@@ -16,11 +16,12 @@ const (
 )
 
 type taggedCType struct {
-	typ       hir.Type
-	kind      string
-	payloads  []hir.Type
-	layout    layout.Result
-	needsDrop bool
+	typ         hir.Type
+	kind        string
+	payloads    []hir.Type
+	layout      layout.Result
+	needsDrop   bool
+	owningDepth int
 }
 
 func sharedBorrowOptionNiche(value hir.Type, structByType, resourceByType, arrayByType map[hir.Type]int) bool {
@@ -76,17 +77,24 @@ func prepareTaggedTypes(
 			if !supported {
 				consider(element)
 				nested, found := candidates[element]
-				if !found || nested.needsDrop {
+				if !found {
 					return
 				}
 				supported = true
+				needsDrop = nested.needsDrop
 			}
 			if !supported {
 				return
 			}
-			candidates[value] = taggedCType{
-				typ: value, kind: taggedOption, payloads: []hir.Type{element}, needsDrop: needsDrop,
+
+			candidate := taggedCType{typ: value, kind: taggedOption, payloads: []hir.Type{element}, needsDrop: needsDrop}
+			if needsDrop {
+				candidate.owningDepth = 1 + candidates[element].owningDepth
+				if candidate.owningDepth > maxOwningTagDepth {
+					return
+				}
 			}
+			candidates[value] = candidate
 			return
 		}
 		success, failure, result := hir.ResultElements(value)
@@ -99,13 +107,13 @@ func prepareTaggedTypes(
 		failureSupported := supportedTaggedPayload(failure, true, structByType, enumByType, resourceByType, arrayByType)
 		if !successSupported {
 			consider(success)
-			nested, found := candidates[success]
-			successSupported = found && !nested.needsDrop
+			_, found := candidates[success]
+			successSupported = found
 		}
 		if !failureSupported {
 			consider(failure)
-			nested, found := candidates[failure]
-			failureSupported = found && !nested.needsDrop
+			_, found := candidates[failure]
+			failureSupported = found
 		}
 		if !successSupported || !failureSupported {
 			return
@@ -114,7 +122,16 @@ func prepareTaggedTypes(
 		_, failureNeedsDrop := resourceByType[failure]
 		candidates[value] = taggedCType{
 			typ: value, kind: taggedResult, payloads: []hir.Type{success, failure},
-			needsDrop: successNeedsDrop || failureNeedsDrop,
+			needsDrop: successNeedsDrop || failureNeedsDrop || candidates[success].needsDrop || candidates[failure].needsDrop,
+		}
+		candidate := candidates[value]
+		if candidate.needsDrop {
+			candidate.owningDepth = 1 + max(candidates[success].owningDepth, candidates[failure].owningDepth)
+			if candidate.owningDepth > maxOwningTagDepth {
+				delete(candidates, value)
+				return
+			}
+			candidates[value] = candidate
 		}
 	}
 	for _, function := range functions {
@@ -404,16 +421,31 @@ func (e *emissionAnalysis) resultCSpec(value hir.Type) (hir.Type, hir.Type, stri
 	return tagged.payloads[0], tagged.payloads[1], feature, true
 }
 
+// Definitions follow payload dependencies; stable numeric IDs retain their sorted order.
 func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool) error {
-	for index, tagged := range e.analysis.taggedTypes {
+	seen := make(map[int]bool)
+	var visit func(int) error
+	visit = func(index int) error {
+		if seen[index] {
+			return nil
+		}
+		seen[index] = true
+		tagged := e.analysis.taggedTypes[index]
 		_, direct := copyScalarTaggedAggregateLayout(tagged.typ)
-		if direct != directCopyScalar {
-			continue
+		if direct != directCopyScalar || !direct && e.analysis.taggedParticipatesInAggregateGraph(index) {
+			return nil
 		}
-		if !direct && e.analysis.taggedParticipatesInAggregateGraph(index) {
-			continue
+		for _, payload := range tagged.payloads {
+			if child, found := e.analysis.taggedByType[payload]; found {
+				if err := visit(child); err != nil {
+					return err
+				}
+			}
 		}
-		if err := e.emitTaggedType(output, index); err != nil {
+		return e.emitTaggedType(output, index)
+	}
+	for index := range e.analysis.taggedTypes {
+		if err := visit(index); err != nil {
 			return err
 		}
 	}

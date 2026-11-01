@@ -83,7 +83,7 @@ func runNestedResourceCleanupNative(t *testing.T, source, probe string) {
 					check(sanitized)
 					t.Log("nested cleanup ASan+UBSan passed")
 				}
-				t.Log("nested cleanup: 10,2,99 repeated three times; inactive payloads produced no cleanup")
+				t.Log("resource cleanup oracle passed; inactive payloads produced no cleanup")
 			})
 		}
 	}

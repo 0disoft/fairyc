@@ -2896,7 +2896,7 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsNestedResourceTag(t *testing.T) {
+func TestEmitNestedResourceTag(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
@@ -2908,11 +2908,11 @@ fn i32 main() {
     return 42;
 }
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "resource local type \"Option<Option<main::Token>>\"") {
-		t.Fatalf("Emit() error = %v", err)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil || !slices.Contains(unit.Features, "resource-option") {
+		t.Fatalf("nested owning emission: %v", err)
 	}
+
 }
 
 func TestEmitResourceBearingResultLayout(t *testing.T) {

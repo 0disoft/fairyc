@@ -92,9 +92,7 @@ func (e *emissionAnalysis) dropLeafTypes(value hir.Type) []hir.Type {
 	}
 	result := make([]hir.Type, 0, len(tagged.payloads))
 	for _, payload := range tagged.payloads {
-		if _, direct := e.resourceByType[payload]; direct {
-			result = append(result, e.dropLeafTypes(payload)...)
-		}
+		result = append(result, e.dropLeafTypes(payload)...)
 	}
 	return result
 }
@@ -104,39 +102,7 @@ func (e *emitter) emitDropTrace(output *strings.Builder, functionIndex int, oper
 	if !found {
 		return fmt.Errorf("drop trace names undeclared resource local %d", operation.Symbol)
 	}
-	if _, direct := e.analysis.resourceByType[resource.Type]; direct {
-		return e.emitDropTraceCall(output, resource.Type, operation.Span, "")
-	}
-	tagged, found := e.analysis.taggedType(resource.Type)
-	if !found {
-		return fmt.Errorf("drop trace has unsupported resource type %q", resource.Type)
-	}
-	switch tagged.kind {
-	case taggedOption:
-		payload := tagged.payloads[0]
-		if _, direct := e.analysis.resourceByType[payload]; !direct {
-			return nil
-		}
-		condition := fmt.Sprintf("fy_l_%d.tag == FY_OPTION_SOME", operation.Symbol)
-		return e.emitDropTraceCall(output, payload, operation.Span, condition)
-	case taggedResult:
-		for index, payload := range tagged.payloads {
-			if _, direct := e.analysis.resourceByType[payload]; !direct {
-				continue
-			}
-			tag := "FY_RESULT_OK"
-			if index == 1 {
-				tag = "FY_RESULT_ERR"
-			}
-			condition := fmt.Sprintf("fy_l_%d.tag == %s", operation.Symbol, tag)
-			if err := e.emitDropTraceCall(output, payload, operation.Span, condition); err != nil {
-				return err
-			}
-		}
-		return nil
-	default:
-		return fmt.Errorf("drop trace has unsupported tagged kind %q", tagged.kind)
-	}
+	return e.emitOwnedDropTrace(output, resource.Type, fmt.Sprintf("fy_l_%d", operation.Symbol), "", operation.Span)
 }
 
 func (e *emitter) emitDropTraceCall(output *strings.Builder, resourceType hir.Type, span hir.Span, condition string) error {

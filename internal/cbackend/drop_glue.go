@@ -14,31 +14,7 @@ func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, opera
 		return fmt.Errorf("drop glue names undeclared resource local %d", operation.Symbol)
 	}
 	expression := fmt.Sprintf("fy_l_%d", operation.Symbol)
-	if _, direct := e.analysis.resourceByType[resource.Type]; direct {
-		return e.emitDirectDropGlue(output, resource.Type, expression, "", operation.Span)
-	}
-	tagged, found := e.analysis.taggedType(resource.Type)
-	if !found {
-		return fmt.Errorf("drop glue has unsupported resource type %q", resource.Type)
-	}
-	switch tagged.kind {
-	case taggedOption:
-		if len(tagged.payloads) != 1 {
-			return fmt.Errorf("drop glue Option %q has %d payloads", resource.Type, len(tagged.payloads))
-		}
-		condition := expression + ".tag == FY_OPTION_SOME"
-		return e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", condition, operation.Span)
-	case taggedResult:
-		if len(tagged.payloads) != 2 {
-			return fmt.Errorf("drop glue Result %q has %d payloads", resource.Type, len(tagged.payloads))
-		}
-		if err := e.emitDirectDropGlue(output, tagged.payloads[0], expression+".p_0", expression+".tag == FY_RESULT_OK", operation.Span); err != nil {
-			return err
-		}
-		return e.emitDirectDropGlue(output, tagged.payloads[1], expression+".p_1", expression+".tag == FY_RESULT_ERR", operation.Span)
-	default:
-		return fmt.Errorf("drop glue has unsupported tagged kind %q", tagged.kind)
-	}
+	return e.emitOwnedDropGlue(output, resource.Type, expression, "", operation.Span)
 }
 
 func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.Type, expression, condition string, span hir.Span) error {

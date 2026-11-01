@@ -304,3 +304,6 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 - Windows callback crossing evidence: `docs/ops/windows-ordinary-callbacks-20261101.md`
 
 - Zero-field resource construction and private storage: `docs/adr/0491-zero-field-resources.md`
+
+- Nested owning tags and payload verification: `docs/adr/0492-nested-owning-tag-cleanup.md`
+- Windows zero-field/nested-tag observations: `docs/ops/windows-resource-forms-20261101.md`

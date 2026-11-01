@@ -519,3 +519,15 @@ generations and the temporary owner hold during index evaluation.
 Verifier results retain every distinct `(Code, Entity, Detail)` triple. See
 [verification error classification](verification-errors.md) for machine-readable categories;
 `Detail` supplies context and is never parsed to select a code.
+
+## Bounded resource form extensions, 2026-11-01
+
+[ADR 0491](../adr/0491-zero-field-resources.md) permits a resource construction with no
+operands/fields only when its program-level definition also has no fields. Definitions,
+cleanup kind, symbols and complete-root ownership remain required.
+[ADR 0492](../adr/0492-nested-owning-tag-cleanup.md) requires Option/Result payload
+extractions to agree with the inferred container's exact payload type and recursive
+MovePayload requirement, including an owned tag nested inside another tag. Retyping
+or clearing that transfer is invalid MIR. Opcode spelling and serialized envelope do
+not change. The C backend's eight-layer owning transport bound is a backend capability
+limit; it does not add source flags or make MaybeLive roots usable.

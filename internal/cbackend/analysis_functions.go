@@ -454,6 +454,14 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 }
 
 func (e *analysisBuilder) recordCValueTypeRequirements(value hir.Type) {
+	e.recordScalarTaggedFeature(value)
+	if tagged, found := e.taggedType(value); found {
+		prefix := "copy-"
+		if tagged.needsDrop {
+			prefix = "resource-"
+		}
+		e.features[prefix+tagged.kind] = struct{}{}
+	}
 	if payload, option := hir.OptionElement(value); option {
 		e.recordCValueTypeRequirements(payload)
 	} else if success, failure, result := hir.ResultElements(value); result {
