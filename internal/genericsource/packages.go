@@ -223,7 +223,7 @@ func expandAllContext(ctx context.Context, modules []*expander, limits genericpl
 	}
 	for _, module := range modules {
 		if err := module.declareStaticOperations(builder); err != nil {
-			return nil, genericplan.Plan{}, err
+			return nil, genericplan.Plan{}, module.at(module.module.Span, FailureDeclaration, err)
 		}
 	}
 	var requests []genericplan.Request

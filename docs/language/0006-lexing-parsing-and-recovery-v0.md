@@ -202,3 +202,10 @@ Exact input-size, token-count, node-count, nesting, repair, diagnostic, and work
 Syntax-pass means only that lexing, parsing, recovery, and module-path checks succeed. It does not
 claim name resolution, type checking, ownership checking, or execution success. The parser fixture
 runner compares every expectation against a fresh full parse and rejects unlisted diagnostics.
+
+## Later bounded prototype extension
+
+[ADR 0496](../adr/0496-explicit-copied-local-closures.md) adds explicit typed copied
+local closures to the Go Stage 0 parser and semantic preparation. It supersedes closure
+exclusion only for that bounded arithmetic/local-call family, without a first-class callable
+type or SDK/candidate promotion.

@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func broaderScalarProgram() (string, string) {
@@ -43,6 +44,11 @@ func runExpandedLanguageNative(t *testing.T, result compiler.Result, entry, extr
 			t.Fatal(err)
 		}
 	}
+	unitBytes, err := cbackend.Emit(result.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("generated MIR functions=%d, MSVC C bytes=%d", len(result.MIR.Functions), len(unitBytes.Source))
 	scalar, err := cruntime.ScalarSource(192)
 	if err != nil {
 		t.Fatal(err)
@@ -60,7 +66,9 @@ func runExpandedLanguageNative(t *testing.T, result compiler.Result, entry, extr
 		for _, mode := range []cdriver.ConsumerMode{cdriver.C11ConsumerMode, cdriver.C17ConsumerMode} {
 			for _, p := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 				t.Run(string(mode)+"/"+p.Name, func(t *testing.T) {
+					started := time.Now()
 					a, err := cdriver.BuildWindowsMSVCABIProbeWithConsumerMode(tc, p, mode, unit.Source, support)
+					buildElapsed := time.Since(started)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -68,7 +76,7 @@ func runExpandedLanguageNative(t *testing.T, result compiler.Result, entry, extr
 					if err != nil || out.ExitCode != 42 || out.Stdout != "" || out.Stderr != "" {
 						t.Fatalf("execute: %+v %v", out, err)
 					}
-					t.Logf("MSVC %s: exit42 empty streams", tc.Version)
+					t.Logf("MSVC %s: build=%s image=%d bytes; exit42 empty streams", tc.Version, buildElapsed, len(a.Bytes))
 				})
 			}
 		}

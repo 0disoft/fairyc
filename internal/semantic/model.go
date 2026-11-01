@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/closureprep"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -237,6 +238,20 @@ func analyzeContext(ctx context.Context, files []File, bindings map[packageImpor
 func analyzeWithContext(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) Result {
 
 	ordered := cloneResourceAbilityInputs(files)
+	for i := range ordered {
+		module, err := closureprep.Prepare(ordered[i].Module)
+		if err != nil {
+			var span hir.Span
+			span.Package = ordered[i].Package
+			span.Source = ordered[i].Path
+			if e, ok := err.(*closureprep.Error); ok {
+				span.StartByte = e.Span.StartByte
+				span.EndByte = e.Span.EndByte
+			}
+			return Result{Unsupported: []Unsupported{{Feature: err.Error(), Span: span}}}
+		}
+		ordered[i].Module = module
+	}
 	slices.SortFunc(ordered, func(a, b File) int {
 		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
 			return byPackage

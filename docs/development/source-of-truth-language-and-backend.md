@@ -53,6 +53,10 @@ Part 1 of 3 of the [source index](source-of-truth.md).
   - `internal/syntax/`
   - `internal/ast/`
   - `internal/frontend/`
+  - `internal/closureprep/`
+  - `docs/adr/0494-broader-scalar-generic-transport.md`
+  - `docs/adr/0495-explicit-static-operation-interfaces.md`
+  - `docs/adr/0496-explicit-copied-local-closures.md`
   - `internal/semantic/`
   - `internal/hir/`
   - `internal/compiler/`

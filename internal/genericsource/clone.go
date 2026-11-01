@@ -189,6 +189,19 @@ func (t transform) expr(v *ast.Expression) (*ast.Expression, error) {
 		return nil, nil
 	}
 	result := *v
+	if v.Closure != nil {
+		c := *v.Closure
+		c.Captures = slices.Clone(c.Captures)
+		for i := range c.Captures {
+			c.Captures[i].Type = t.typ(c.Captures[i].Type)
+		}
+		fn, err := t.function(c.Function)
+		if err != nil {
+			return nil, err
+		}
+		c.Function = fn
+		result.Closure = &c
+	}
 	result.Type = t.typePointer(v.Type)
 	if v.CallLabels != nil {
 		labels := *v.CallLabels

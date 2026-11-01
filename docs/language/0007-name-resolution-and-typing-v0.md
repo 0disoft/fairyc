@@ -227,3 +227,10 @@ Ownership, borrow, and effect diagnostics retain their `E11xx`, `E21xx`, and `E7
 ## Deferred rules
 
 Overloading, user generics, type classes or interfaces, implicit numeric promotion, user conversion protocols, trait lookup, extension methods, closure capture, separate type/value namespaces, public manifest-driven dependency resolution, and stable public symbol encoding remain outside this v0 contract.
+
+## Later bounded prototype extension
+
+[ADR 0496](../adr/0496-explicit-copied-local-closures.md) adds explicit typed copied
+local closures to the Go Stage 0 parser and semantic preparation. It supersedes closure
+exclusion only for that bounded arithmetic/local-call family, without a first-class callable
+type or SDK/candidate promotion.

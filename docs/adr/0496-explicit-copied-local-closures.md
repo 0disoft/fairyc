@@ -21,7 +21,8 @@ are the complete body family. Captures cannot be mutated or implicitly inferred.
 The initial execution path requires a direct untyped let binding in the function's outer
 body and direct positional calls within that local scope. Closure copying, passing, returning,
 assignment, storing, type annotations, nested closure declarations and resource cleanup bodies
-remain closed. Calls may occur in nested control-flow scopes; ordinary local shadowing applies.
+remain closed. Calls may occur in nested if/while/classic-for scopes; ordinary local shadowing applies.
+View/vector for-in combined with an active copied closure remains separately closed.
 Captured resources, borrows, raw pointers, asynchronous/retained calls and cross-thread delivery
 are excluded. A closure is not an extern-C callback or a public runtime/ABI value.
 
@@ -33,7 +34,8 @@ ordinary package artifacts retain authority. Generic preparation must detach and
 the new AST edges; source hashes include the written body/capture facts and public generic
 closure hashes include those facts before cached reuse.
 
-Parser syntax is delivered first; execution and Windows native receipts follow separately.
+Parser syntax was delivered in `8f3f3401`; execution and the Windows native receipt are
+delivered in the commit containing the [bounded expansion receipt](../ops/windows-language-expansion-20261101.md).
 Broader closures, SDK/candidate parity and stable language promotion remain outside this slice.
 No CLI flag, runtime ABI, dependency, DB or runner changes are made. Linux native checks stay
 in the maintainer's batched queue.
