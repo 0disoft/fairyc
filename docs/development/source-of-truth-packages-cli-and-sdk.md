@@ -368,6 +368,8 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 
 - Explicit inline export identity and cache successor: `docs/adr/0493-cross-package-inline-bodies-and-cache-v5.md`
 - Current whole-package key: `docs/package/whole-package-cache-v5.md`
+- Go/Fairy candidate v5 encoder, complete no-inline key and source-boundary evidence: `docs/ops/windows-candidate-parity-20261102.md`.
+- Candidate parity probes: `internal/cli/candidate_cache_key_parity_test.go`, `internal/cli/candidate_complete_keys_parity_test.go`, `internal/cli/candidate_inline_boundary_test.go`.
 
 
 ## Pinned experimental remote source preparation
