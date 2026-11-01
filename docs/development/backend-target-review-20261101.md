@@ -37,11 +37,13 @@ The official QBE remote was read with git ls-remote --heads: master
 `e786f06032fefa2e3790d6b1c9e31ed138f475a6`, plus dev and loopopt branches. No unseen
 branch/fork behavior is inferred. The main project page is the advertised support evidence.
 
-A manual harness will compile the same source into verified MIR, check interpreter outcomes,
-measure deterministic C emission and fresh native builds at low/optimized, and bind timings to
-source/runtime/compiler/image hashes. Expected traps and resource-drop/C-call observers must
-remain distinguishable from compilation failures. QBE/LLVM adapter absence is an explicit
-unmeasured result. Repeated measurement is opt-in; do not add a costly automatic CI matrix.
+The manual `tools/dev/fairyc-backend-study` harness compiles the same source into verified MIR,
+checks interpreter outcomes where foreign calls are absent, measures C emission and fresh native
+builds at low/optimized, and binds timings to source/runtime/compiler/image hashes. Its
+[Windows baseline receipt](../ops/windows-backend-study-20261101.md) records source `769d5835`
+and 42 successful native executions. Expected traps and resource-drop/C-call observers remain
+distinguishable from compilation failures. QBE/LLVM adapter absence is an explicit unmeasured
+result. Repeated measurement is opt-in; no automatic CI matrix was added.
 
 Only a representative compiler/parser or real application showing a useful paired benefit,
 with semantic/ABI parity, measured code size and a manageable toolchain/distribution cost, may
