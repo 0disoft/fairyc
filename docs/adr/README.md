@@ -407,3 +407,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0492: Nested owning Option and Result cleanup](0492-nested-owning-tag-cleanup.md)
 
 - [0493: Cross-package inline bodies and cache v5](0493-cross-package-inline-bodies-and-cache-v5.md)
+
+- [0494: Broader direct scalar generic transport](0494-broader-scalar-generic-transport.md)

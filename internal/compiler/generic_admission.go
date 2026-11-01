@@ -11,7 +11,8 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-// Transport-only C record scalars do not expand the executable generic subset.
+// Direct ordinary scalar transport now shares the generic executable subset.
+// Composite transport signatures retain their separate admission boundary.
 // Use authenticated expansion origins, never a generated-name prefix. Ordinary
 // functions keep their transport types, and unused type arguments remain valid.
 func restrictGenericSignatures(checked semantic.Result, files []semantic.File, expansion genericsource.PackageExpansion) semantic.Result {
@@ -55,23 +56,30 @@ func restrictGenericSignatures(checked semantic.Result, files []semantic.File, e
 }
 
 func unadmittedGenericScalar(reference ast.TypeReference) bool {
+	if reference.Kind == ast.TypeKindNamed && len(reference.Arguments) == 0 {
+		return false
+	}
+	return containsTransportScalar(reference)
+}
+
+func containsTransportScalar(reference ast.TypeReference) bool {
 	if reference.Kind == ast.TypeKindNamed {
 		switch reference.Path {
 		case "i8", "i16", "isize", "u16", "u64", "f32", "f64":
 			return true
 		}
 	}
-	if reference.Element != nil && unadmittedGenericScalar(*reference.Element) ||
-		reference.Result != nil && unadmittedGenericScalar(*reference.Result) {
+	if reference.Element != nil && containsTransportScalar(*reference.Element) ||
+		reference.Result != nil && containsTransportScalar(*reference.Result) {
 		return true
 	}
 	for _, argument := range reference.Arguments {
-		if unadmittedGenericScalar(argument) {
+		if containsTransportScalar(argument) {
 			return true
 		}
 	}
 	for _, parameter := range reference.Parameters {
-		if unadmittedGenericScalar(parameter) {
+		if containsTransportScalar(parameter) {
 			return true
 		}
 	}

@@ -116,3 +116,8 @@ provider requires a second package-owned implementation. It checks exact MIR/pro
 source immutability, package renumbering/order stability, independent provider budget rejection,
 interpreter results, and both native profiles. This is compiler-boundary evidence, not linker-level
 generic sharing or resource-element ownership admission.
+
+## Later prototype extension
+
+[ADR 0494](0494-broader-scalar-generic-transport.md) supersedes the direct scalar signature
+restriction for the Go Stage 0 prototype. Composite transport signatures remain closed.

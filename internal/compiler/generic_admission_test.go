@@ -12,24 +12,19 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-func TestGenericSignaturesKeepTransportScalarsUnadmitted(t *testing.T) {
+func TestGenericSignaturesAdmitDirectTransportScalars(t *testing.T) {
 	coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{PackageUID: "generic.admission", VersionIdentity: "1"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, scalar := range []string{"i8", "i16", "isize", "u16", "u64", "f32", "f64"} {
 		t.Run(scalar, func(t *testing.T) {
-			text := fmt.Sprintf("module main;fn T id<T>(T value){return value;}fn void main(){discard id<%s>(42);}", scalar)
+			text := fmt.Sprintf("module main;unsafe extern C fn %s seed();fn T id<T>(T value){return value;}fn void main(){discard id<%s>(unsafe{seed()});}", scalar, scalar)
 			file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 			check := func(t *testing.T, result compiler.Result, err error) {
 				t.Helper()
-				if err != nil || result.Verified || len(result.MIR.Functions) != 0 || len(result.Semantic.Diagnostics) != 0 || len(result.Semantic.Unsupported) != 2 {
-					t.Fatalf("signature admission: err=%v verified=%v semantic=%+v", err, result.Verified, result.Semantic)
-				}
-				for _, rejected := range result.Semantic.Unsupported {
-					if rejected.Feature != "type "+scalar || text[rejected.Span.StartByte:rejected.Span.EndByte] != "T" {
-						t.Fatalf("lost original signature span: %+v", rejected)
-					}
+				if err != nil || !result.Verified {
+					t.Fatalf("direct scalar signature: %v %+v", err, result.Semantic)
 				}
 			}
 			t.Run("private", func(t *testing.T) {
@@ -85,15 +80,9 @@ func TestGenericSignatureAdmissionPreservesCompositeSpellingAndResolution(t *tes
 
 func TestGenericSignatureAdmissionChecksForwardedPackageTypes(t *testing.T) {
 	input, coordinates := genericPackageInput(t)
-	input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main;import util as u;fn void main(){discard u::wrap<u16>(42);discard u::wrap<u16>(43);}")
+	input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main;import util as u;unsafe extern C fn u16 seed();fn void main(){discard u::wrap<u16>(unsafe{seed()});discard u::wrap<u16>(unsafe{seed()});}")
 	result, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
-	if err != nil || result.Verified || len(result.Semantic.Unsupported) != 4 || len(result.Semantic.Diagnostics) != 0 {
-		t.Fatalf("forwarded signature admission: %v %+v", err, result.Semantic)
-	}
-	for _, row := range result.Semantic.Unsupported {
-		owner, name := row.Span.Package, row.Span.Source
-		if row.Feature != "type u16" || (owner != 2 || name != "util.fy") && (owner != 3 || name != "core.fy") {
-			t.Fatalf("lost package-owned signature: %+v", row)
-		}
+	if err != nil || !result.Verified {
+		t.Fatalf("forwarded direct scalar: %v %+v", err, result.Semantic)
 	}
 }
