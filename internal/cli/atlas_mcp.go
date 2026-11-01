@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -66,6 +67,9 @@ func runAtlasMCP(arguments []string, root string, stdin io.Reader, stdout, stder
 		return data, nil
 	})
 	if err != nil {
+		if errors.Is(err, atlasmcp.ErrOutput) {
+			return outputError(stderr)
+		}
 		return invocationError(stderr, "MCP session failed its framing, I/O or resource policy")
 	}
 	return ExitSuccess

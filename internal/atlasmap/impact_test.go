@@ -49,6 +49,13 @@ func TestImpactCurrentReverseClosureAndBounds(t *testing.T) {
 	if !json.Valid(encoded) {
 		t.Fatal("invalid JSON")
 	}
+	state := i.packages[instance]
+	state.context.MapOmissions = []string{"controlled-unknown-coverage"}
+	i.packages[instance] = state
+	partial, err := i.Impact(instance, s.Visible, 4, 8)
+	if err != nil || partial.State != "partial" || len(partial.Contexts) == 0 {
+		t.Fatal("unknown coverage disappeared", err)
+	}
 	e[instance] = LoadExpectation{}
 	if _, err := NewWorkspaceCallIndex(p, e, WorkspaceCallBudget{MaxPackages: 8, MaxCalls: 32}); err == nil {
 		t.Fatal("stale map accepted")

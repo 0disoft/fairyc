@@ -22,6 +22,10 @@ func TestAtlasMCPCurrentLockedPermissionAndNoSource(t *testing.T) {
 	if strings.Contains(out.String(), workspaceSessionRootSource) {
 		t.Fatal("source leaked")
 	}
+	var outputFailure bytes.Buffer
+	if code := RunWithInput(args, root, strings.NewReader(init+"\n"), failingWriter{}, &outputFailure); code != ExitInternalFailure {
+		t.Fatal("MCP output failure hidden")
+	}
 	out.Reset()
 	err.Reset()
 	code = RunWithInput(append(args[:2], args[3:]...), root, strings.NewReader(input), &out, &err)

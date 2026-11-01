@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -13,6 +14,8 @@ import (
 
 const ProtocolVersion = "2025-11-25"
 const MaxInput = 64 << 10
+
+var ErrOutput = errors.New("MCP output failed")
 
 type Impact func(uid, symbol string) (json.RawMessage, error)
 type rpcError struct {
@@ -133,7 +136,7 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 		}
 		wire = append(wire, '\n')
 		if _, err := output.Write(wire); err != nil {
-			return err
+			return fmt.Errorf("%w: %v", ErrOutput, err)
 		}
 	}
 	return scanner.Err()

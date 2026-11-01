@@ -41,6 +41,7 @@ Usage:
   fairyc explain <diagnostic-code>
   fairyc targets
   fairyc experimental fetch-packages [--offline]
+  fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file <workspace-file> --expected-source-sha256 <hash> [--apply]
   fairyc experimental atlas-mcp --allow-impact --max-packages <n> --max-calls <n> --max-depth <n> --max-symbols <n> --max-output-bytes <n> --max-requests <n>
   fairyc experimental atlas-impact --package-uid <uid> --symbol <symbol-id> --max-packages <n> --max-calls <n> --max-depth <0..64> --max-symbols <n> --max-output-bytes <n> [--locked]
   fairyc experimental parse <file.fy>
@@ -222,6 +223,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return writeHelp(stdout, stderr)
 	}
 	switch command {
+	case "atlas-edit":
+		return runAtlasEdit(args[1:], sourceRoot, stdout, stderr)
 	case "atlas-mcp":
 		return runAtlasMCP(args[1:], sourceRoot, stdin, stdout, stderr)
 	case "atlas-impact":
