@@ -26,6 +26,7 @@ var (
 	literalDeclarations = regexp.MustCompile(`extern const uint8_t fy_unit_literal_([0-9a-f]{64})\[\];`)
 	literalDefinitions  = regexp.MustCompile(`(?m)^const uint8_t fy_unit_literal_([0-9a-f]{64})\[\]=\{([0-9,]+)\};$`)
 	frameDefinitions    = regexp.MustCompile(`(?m)^extern [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{`)
+	inlineDefinitions   = regexp.MustCompile(`(?m)^static inline [^\n]+ fy_fn_([0-9]+)\([^\n]*\)\{`)
 )
 
 func Decode(data []byte) (Packet, error) {
@@ -114,21 +115,30 @@ func Decode(data []byte) (Packet, error) {
 			return Packet{}, fmt.Errorf("literal identity mismatch")
 		}
 	}
+	inlineFrames := map[int]bool{}
+	lastInline := 0
+	for _, match := range inlineDefinitions.FindAllStringSubmatch(header, -1) {
+		id, err := strconv.Atoi(match[1])
+		if err != nil || id <= lastInline || id > maxProjectFrames {
+			return Packet{}, fmt.Errorf("duplicate or unordered inline frame")
+		}
+		inlineFrames[id], lastInline = true, id
+	}
 	lastFrame, entries := 0, 0
 	for _, unit := range units {
-		if !strings.HasPrefix(unit, "/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n") || strings.Contains(unit, "const uint8_t fy_unit_literal_") {
+		if !strings.HasPrefix(unit, "/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n") || strings.Contains(unit, "const uint8_t fy_unit_literal_") || inlineDefinitions.MatchString(unit) {
 			return Packet{}, fmt.Errorf("invalid project body marker or local literal storage")
 		}
 		for _, match := range frameDefinitions.FindAllStringSubmatch(unit, -1) {
 			id, err := strconv.Atoi(match[1])
-			if err != nil || id <= lastFrame || id > maxProjectFrames {
+			if err != nil || id <= lastFrame || id > maxProjectFrames || inlineFrames[id] {
 				return Packet{}, fmt.Errorf("duplicate or unordered original frame")
 			}
 			lastFrame = id
 		}
 		entries += strings.Count(unit, "int32_t fy_candidate_entry(void){")
 	}
-	if lastFrame == 0 || entries != 1 {
+	if lastFrame == 0 && lastInline == 0 || entries != 1 {
 		return Packet{}, fmt.Errorf("project packet requires one entry")
 	}
 	return Packet{header, literals, units}, nil

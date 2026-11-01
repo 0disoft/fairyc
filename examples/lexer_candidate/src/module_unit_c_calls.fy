@@ -1,5 +1,6 @@
 module module_unit_c_calls;
 import module_unit_body_ir_model as ir;
+import module_inline_identity as inline;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
 import module_unit_value_model as budget;
@@ -18,7 +19,7 @@ import std::vec as v;
 pub fn usize parameters(ref ir::Body b){var usize count=0;var usize i=1;while(i<=ir::local_count(b)){if(ir::local_at(b,i).kind==1){count+=1;}i+=1;}return count;}
 pub fn bool signature(ref ir::Program p,ref names::Table named,usize frame,ref mut bytes::Buffer out,ref mut w::State s,bool shared){
     let b=ir::at(p,frame);let f=clean::frame_at(ir::cleanup_ir(p),frame);let result=scalar::scalar(p,f.result);
-    if(!w::text(out,s,if(shared){b"extern "}else{b"static "}) || !aggregate::type(p,f.result,out,s) || !w::text(out,s,b" ") || !names::function(named,frame,out,s) || !w::text(out,s,b"(")){return false;}
+    if(!w::text(out,s,if(!inline::zero(ir::inline_hash(b))){b"static inline "}else if(shared){b"extern "}else{b"static "}) || !aggregate::type(p,f.result,out,s) || !w::text(out,s,b" ") || !names::function(named,frame,out,s) || !w::text(out,s,b"(")){return false;}
     if(f.kind==2){return aggregate::type(p,f.receiver_type,out,s) && w::text(out,s,b" *") && w::local(out,s,f.receiver) && w::text(out,s,b")");}
     var usize i=1;var usize count=0;while(i<=ir::local_count(b)){let l=ir::local_at(b,i);if(l.kind==1){if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(count!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i)){return false;}count+=1;}i+=1;}
     return (count!=0 || w::text(out,s,b"void")) && w::text(out,s,b")");

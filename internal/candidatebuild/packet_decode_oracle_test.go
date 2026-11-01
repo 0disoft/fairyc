@@ -36,6 +36,15 @@ func TestPacketDecodeOracle(t *testing.T) {
 	add := func(name string, data []byte, want bool) { cases = append(cases, record{name, data, want}) }
 	valid := encode(header, literals, unit)
 	add("minimal", valid, true)
+	inline := "static inline int32_t fy_fn_1(void){return 0;}\n"
+	inlineHeader := strings.Replace(header, "#endif\n", inline+"#endif\n", 1)
+	wrapper := strings.Replace(unit, "extern int32_t fy_fn_1(void){return 0;}\n", "", 1)
+	add("inline-only-entry", encode(inlineHeader, literals, wrapper), true)
+	add("inline-duplicate-header", encode(strings.Replace(inlineHeader, "#endif\n", inline+"#endif\n", 1), literals, wrapper), false)
+	add("inline-duplicate-unit", encode(inlineHeader, literals, unit), false)
+	add("inline-body-in-unit", encode(header, literals, strings.Replace(unit, "extern int32_t", "static inline int32_t", 1)), false)
+	add("inline-out-of-range", encode(strings.Replace(inlineHeader, "fy_fn_1", "fy_fn_16385", 1), literals, wrapper), false)
+
 	for i := range valid {
 		add(fmt.Sprintf("truncated-%d", i), valid[:i], false)
 	}

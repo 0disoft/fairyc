@@ -67,7 +67,7 @@ fn Result<usize,DecodeProblem> shared_literals(ref u8[] header,ref u8[] literals
     if(declaration(header,declaration_cursor)<header.len){return .err(invalid(8,header.len));}return .ok(count);
 }
 fn Result<usize,DecodeProblem> frame_line(ref u8[] line,usize last){
-    if(!at(line,0,b"extern ")){return .ok(last);}let ref u8[] prefix=b" fy_fn_";var usize cursor=8;var usize selected=line.len;var usize stop=line.len;var usize close=line.len;var usize i=0;
+    if(!at(line,0,b"extern ") && !at(line,0,b"static inline ")){return .ok(last);}let ref u8[] prefix=b" fy_fn_";var usize cursor=8;var usize selected=line.len;var usize stop=line.len;var usize close=line.len;var usize i=0;
     while(i+1<line.len){if(line[i]==41 && line[i+1]==123){close=i;}i+=1;}if(close==line.len){return .ok(last);}
     // Go's prefix is greedy: the last complete definition on the line wins.
     while(cursor<line.len){let usize found=find(line,cursor,prefix);if(found==line.len){break;}let usize first=found+prefix.len;i=first;while(i<line.len && line[i]>=48 && line[i]<=57){i+=1;}
@@ -76,9 +76,11 @@ fn Result<usize,DecodeProblem> frame_line(ref u8[] line,usize last){
     if(selected==line.len){return .ok(last);}var usize value=0;i=selected;while(i<stop){value=value*10+(line[i]-48) as usize;if(value>16384){return .err(invalid(11,i));}i+=1;}
     return if(value<=last){.err(invalid(11,selected))}else{.ok(value)};
 }
-fn Result<usize,DecodeProblem> body_frames(ref u8[] unit,ref mut usize last){
+fn bool inline_has(ref v::Vec<usize> rows,usize id){var usize low=0;var usize high=v::len<usize>(rows);while(low<high){let mid=low+(high-low)/2;if(*v::at<usize>(rows,mid)<id){low=mid+1;}else{high=mid;}}return low<v::len<usize>(rows) && *v::at<usize>(rows,low)==id;}
+fn Result<v::Vec<usize>,DecodeProblem> inline_frames(ref u8[] header){var v::Vec<usize> rows=v::empty<usize>();var usize cursor=0;var usize last=0;while(cursor<header.len){let first=cursor;while(cursor<header.len && header[cursor]!=10){cursor+=1;}let line=header[first..cursor];if(at(line,0,b"static inline ")){let next=frame_line(line,last)?;if(next!=last){if(!v::push<usize>(ref mut rows,next).is_ok){return .err(invalid(13,first));}last=next;}}if(cursor<header.len){cursor+=1;}}return .ok(rows);}
+fn Result<usize,DecodeProblem> body_frames(ref u8[] unit,ref v::Vec<usize> inlines,ref mut usize last){
     if(!at(unit,0,b"/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n") || find(unit,0,b"const uint8_t fy_unit_literal_")<unit.len){return .err(invalid(6,0));}
-    var usize cursor=0;var usize entries=0;while(cursor<unit.len){let usize first=cursor;while(cursor<unit.len && unit[cursor]!=10){cursor+=1;}*last=frame_line(unit[first..cursor],*last)?;if(cursor<unit.len){cursor+=1;}}
+    var usize cursor=0;var usize entries=0;while(cursor<unit.len){let usize first=cursor;while(cursor<unit.len && unit[cursor]!=10){cursor+=1;}let line=unit[first..cursor];if(at(line,0,b"static inline ") && find(line,0,b"){")<line.len){return .err(invalid(6,first));}let next=frame_line(line,*last)?;if(next!=*last && inline_has(inlines,next)){return .err(invalid(11,first));};*last=next;if(cursor<unit.len){cursor+=1;}}
     cursor=0;let ref u8[] entry=b"int32_t fy_candidate_entry(void){";while(cursor<unit.len){let usize found=find(unit,cursor,entry);if(found==unit.len){break;}entries+=1;cursor=found+entry.len;}return .ok(entries);
 }
 pub fn Result<Packet,DecodeProblem> decode(bytes::Buffer data){
@@ -88,9 +90,9 @@ pub fn Result<Packet,DecodeProblem> decode(bytes::Buffer data){
     while(i<count){let part=read_part(input,ref mut cursor)?;if(!v::push<Part>(ref mut units,part).is_ok){return .err(invalid(13,cursor));}i+=1;}
     if(cursor!=input.len){return .err(invalid(5,cursor));}let h=input[header.start..header.end];let l=input[literals.start..literals.end];
     if(!at(h,0,b"#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n") || h.len<7 || !at(h,h.len-7,b"#endif\n") || !at(l,0,b"/* fairyc.candidate-project-literals-c/v1 */\n#include \"fy_project.h\"\n")){return .err(invalid(6,header.start));}
-    let usize literal_count=shared_literals(h,l)?;var usize last=0;var usize entries=0;i=0;
-    while(i<count){let part=*v::at<Part>(ref units,i);entries+=body_frames(input[part.start..part.end],ref mut last)?;i+=1;}
-    if(last==0 || entries!=1){return .err(invalid(12,0));}return .ok(Packet{.data,.header,.literals,.units});
+    let usize literal_count=shared_literals(h,l)?;let inlines=inline_frames(h)?;var usize last=0;var usize entries=0;i=0;
+    while(i<count){let part=*v::at<Part>(ref units,i);entries+=body_frames(input[part.start..part.end],ref inlines,ref mut last)?;i+=1;}
+    if(last==0 && v::len<usize>(ref inlines)==0 || entries!=1){return .err(invalid(12,0));}return .ok(Packet{.data,.header,.literals,.units});
 }
 pub fn ref u8[] header(ref Packet packet){return bytes::view(ref packet.data)[packet.header.start..packet.header.end];}
 pub fn ref u8[] literals(ref Packet packet){return bytes::view(ref packet.data)[packet.literals.start..packet.literals.end];}

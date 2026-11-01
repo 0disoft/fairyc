@@ -1,6 +1,7 @@
 module module_unit_c_emit;
 import module_unit_c_function as function_emit;
 import module_unit_body_ir_model as ir;
+import module_inline_identity as inline;
 import module_unit_body_ir_verify as proof;
 import module_unit_cfg_model as cfg;
 import module_unit_cfg_lower as flow;
@@ -52,13 +53,15 @@ fn Result<Prepared,clean::Problem> prepare_project(ref ir::Program raw,ref v::Ve
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}work=0;
     if(!w::text(ref mut header,ref mut s,b"#include <stddef.h>\n") || !sdk::definitions(raw,sdk_plan,ref mut header,ref mut s,ref mut work) || !lifecycle::definitions(raw,sdk_plan,ref mut header,ref mut s,ref mut work) || !calls::foreign_signatures_selected(raw,sdk_plan,ref indexed,reachable::frames(ref selected),ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     i=1;while(i<=ir::count(raw)){if(reachable::frame(ref selected,i) && (!calls::signature(raw,ref named,i,ref mut header,ref mut s,true) || !w::text(ref mut header,ref mut s,b";\n"))){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,ir::start(ir::at(raw,i)),ir::end(ir::at(raw,i))));}i+=1;}
-    if(!aggregate::drops_named(raw,ref named,if(entry_only){reachable::drops(ref selected)}else{ref marks},ref mut header,ref mut s,ref mut work) || !w::text(ref mut header,ref mut s,b"#endif\n")){return .err(fail(error_code(s),0,0,0));}
+    if(!aggregate::drops_named(raw,ref named,if(entry_only){reachable::drops(ref selected)}else{ref marks},ref mut header,ref mut s,ref mut work)){return .err(fail(error_code(s),0,0,0));}
     if(!limits::project_charge(ref mut total,work)){return .err(fail(1002,0,0,0));}
+    work=0;i=1;while(i<=ir::count(raw)){if(reachable::frame(ref selected,i) && !inline::zero(ir::inline_hash(ir::at(raw,i)))){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref named,sdk_plan,ref indexed,ref body_index,v::at<cfg::Graph>(graphs,i-1),ref mut header,ref mut s,ref mut work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),0,start,end));}}i+=1;}
+    if(!w::text(ref mut header,ref mut s,b"#endif\n") || !limits::project_charge(ref mut total,work)){return .err(fail(if(s.code!=0){error_code(s)}else{1002},0,0,0));}
     return .ok(Prepared{.named,.indexed,.body_index,.selected,.header,.literal_source,.entry,.test_entry,.work=total});
 }
 fn Result<bytes::Buffer,clean::Problem> project_unit(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,ref Prepared p,usize first,usize stop,ref mut usize work){
     var bytes::Buffer text=bytes::empty();var w::State s=w::State{.code=0};if(!w::text(ref mut text,ref mut s,b"/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\n")){return .err(fail(error_code(s),0,0,0));}var usize i=first;
-    while(i<stop){if(reachable::frame(ref p.selected,i)){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref p.named,sdk_plan,ref p.indexed,ref p.body_index,v::at<cfg::Graph>(graphs,i-1),ref mut text,ref mut s,work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,start,end));}}i+=1;}
+    while(i<stop){if(reachable::frame(ref p.selected,i) && inline::zero(ir::inline_hash(ir::at(raw,i)))){var usize start=ir::start(ir::at(raw,i));var usize end=ir::end(ir::at(raw,i));if(!function_emit::render(raw,ref p.named,sdk_plan,ref p.indexed,ref p.body_index,v::at<cfg::Graph>(graphs,i-1),ref mut text,ref mut s,work,ref mut start,ref mut end,true)){return .err(fail(error_code(s),clean::frame_at(ir::cleanup_ir(raw),i).module_index,start,end));}}i+=1;}
     if(first<=p.entry && p.entry<stop && (!w::text(ref mut text,ref mut s,if(p.test_entry){b"int32_t fy_candidate_entry(void){"}else{b"int32_t fy_candidate_entry(void){return "}) || !names::function(ref p.named,p.entry,ref mut text,ref mut s) || !w::text(ref mut text,ref mut s,if(p.test_entry){b"();return 0;}\n"}else{b"();}\n"}) || !w::text(ref mut text,ref mut s,b"#ifndef FY_CANDIDATE_NO_MAIN\nint main(void){return (int)fy_candidate_entry();}\n#endif\n"))){return .err(fail(error_code(s),0,0,0));}return .ok(text);
 }
 fn clean::Problem append_project_units(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,ref Prepared p,usize first,usize stop,usize depth,ref mut v::Vec<Unit> units,ref mut usize total,ref mut usize retries){
