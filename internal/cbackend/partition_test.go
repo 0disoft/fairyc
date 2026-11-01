@@ -209,3 +209,25 @@ int32_t ordinary_visit(int32_t (*cb)(int32_t,int32_t,void *),void *data){if(prev
 		t.Run(opt, func(t *testing.T) { compileSplitForTest(t, parts, opt, probe, 42) })
 	}
 }
+
+func TestPartitionedInlineBody(t *testing.T) {
+	program := lowerSource(t, `module main;
+@inline pub fn i32 combine(i32 a,i32 b){return (a*3+b)/2;}
+fn i32 first(){return combine(10,12);}
+fn i32 second(){return combine(10,12);}
+fn i32 main(){return first()+second();}`)
+	profile := cbackend.Stage0Profile()
+	if runtime.GOOS == "windows" {
+		profile = cbackend.Stage0WindowsMSVCProfile()
+	}
+	parts, err := cbackend.EmitBuildContext(context.Background(), program, "main::main", profile, false, 128)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(parts.Sources) < 2 || !strings.Contains(parts.Header, "static inline int32_t") || strings.Contains(strings.Join(parts.Sources, ""), "static inline int32_t") {
+		t.Fatal("inline definition must be provided once in the shared header")
+	}
+	for _, opt := range []string{"low", "optimized"} {
+		t.Run(opt, func(t *testing.T) { compileSplitForTest(t, parts, opt, "", 42) })
+	}
+}
