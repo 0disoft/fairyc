@@ -1,0 +1,360 @@
+package contractstate
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"math"
+	"os"
+	"path/filepath"
+	"slices"
+	"sync"
+
+	"github.com/0disoft/fairyc/internal/durablefile"
+)
+
+var (
+	ErrPersistenceBusy   = errors.New("local state persistence is busy")
+	ErrPersistenceClosed = errors.New("local state persistence is closed")
+)
+
+const localStateName = "state-v1.bin"
+const localLockName = "state-v1.lock"
+
+// LocalPersistenceLimits bounds both decoding and complete-state publication.
+// These are separate from transaction-overlay limits and have no defaults.
+type LocalPersistenceLimits struct {
+	MaxStateBytes int64
+	MaxEntries    int
+	MaxValueBytes int
+}
+
+func (limits LocalPersistenceLimits) validate() error {
+	if limits.MaxStateBytes <= 0 || limits.MaxStateBytes > 16<<20 || limits.MaxEntries <= 0 || limits.MaxEntries > 65536 || limits.MaxValueBytes <= 0 || int64(limits.MaxValueBytes) > limits.MaxStateBytes {
+		return fmt.Errorf("local state limits require 1..16MiB bytes, 1..65536 entries and a positive bounded value size")
+	}
+	return nil
+}
+
+// LocalPersistence implements the port for a trusted, existing local directory.
+// Each operation takes a nonblocking OS file lock, rereads the exact state and
+// atomically replaces it after syncing a complete staging file. Success means
+// restart-visible publication, not certified power-loss durability. No fallible
+// flush is performed after rename, so known publication is never reported as a
+// generic failure. Network filesystems and hostile directory owners are excluded.
+type LocalPersistence struct {
+	mu            sync.Mutex
+	root          *os.Root
+	lock          *os.File
+	limits        LocalPersistenceLimits
+	closed        bool
+	beforePublish func() error // private pre-publication fault control for tests
+}
+
+var _ PersistencePort = (*LocalPersistence)(nil)
+
+// CreateLocalPersistence exclusively creates a new store. Existing state or lock
+// files are never overwritten, including remnants of an interrupted creation.
+func CreateLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits) (*LocalPersistence, error) {
+	return openLocalPersistence(directory, initial, limits, true)
+}
+
+// OpenLocalPersistence opens an existing store. Missing authority files fail
+// closed instead of silently resetting previously committed data.
+func OpenLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits) (*LocalPersistence, error) {
+	return openLocalPersistence(directory, initial, limits, false)
+}
+
+func openLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits, create bool) (*LocalPersistence, error) {
+	if err := validateLayout(initial); err != nil {
+		return nil, err
+	}
+	if err := limits.validate(); err != nil {
+		return nil, err
+	}
+	if directory == "" {
+		return nil, fmt.Errorf("local state directory is required")
+	}
+	absolute, err := filepath.Abs(directory)
+	if err != nil {
+		return nil, err
+	}
+	info, err := os.Lstat(absolute)
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("local state root must be a real directory")
+	}
+	root, err := os.OpenRoot(absolute)
+	if err != nil {
+		return nil, err
+	}
+	store := &LocalPersistence{root: root, limits: limits}
+	flags := os.O_RDWR
+	if create {
+		flags |= os.O_CREATE | os.O_EXCL
+	}
+	store.lock, err = store.openRegular(localLockName, flags)
+	if err != nil {
+		_ = root.Close()
+		return nil, err
+	}
+	err = store.withLock(func() error {
+		current, err := store.load()
+		if errors.Is(err, os.ErrNotExist) && create {
+			return store.publish(localState{layout: cloneLayout(initial)})
+		}
+		if err != nil {
+			return err
+		}
+		if create {
+			return os.ErrExist
+		}
+		if current.layout.Hash() != initial.Hash() {
+			return ErrLayoutMismatch
+		}
+		return nil
+	})
+	if err != nil {
+		_ = store.Close()
+		return nil, err
+	}
+	return store, nil
+}
+
+func (store *LocalPersistence) Close() error {
+	if store == nil {
+		return nil
+	}
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	if store.closed {
+		return nil
+	}
+	store.closed = true
+	return errors.Join(store.lock.Close(), store.root.Close())
+}
+
+func (store *LocalPersistence) withLock(body func() error) error {
+	if store == nil {
+		return ErrPersistenceClosed
+	}
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	if store.closed {
+		return ErrPersistenceClosed
+	}
+	pathInfo, err := store.root.Lstat(localLockName)
+	if err != nil {
+		return err
+	}
+	fileInfo, err := store.lock.Stat()
+	if err != nil {
+		return err
+	}
+	if !pathInfo.Mode().IsRegular() || !os.SameFile(pathInfo, fileInfo) {
+		return fmt.Errorf("local state lock identity changed")
+	}
+	if err := lockLocalState(store.lock); err != nil {
+		return err
+	}
+	defer unlockLocalState(store.lock)
+	return body()
+}
+
+func (store *LocalPersistence) Snapshot(hash LayoutHash) (snapshot PersistentSnapshot, err error) {
+	err = store.withLock(func() error {
+		current, loadErr := store.load()
+		if loadErr != nil {
+			return loadErr
+		}
+		if current.layout.Hash() != hash {
+			return ErrLayoutMismatch
+		}
+		snapshot = PersistentSnapshot{LayoutHash: hash, Version: current.version, Entries: current.entries}
+		return nil
+	})
+	return snapshot, err
+}
+
+func (store *LocalPersistence) CompareAndPublish(hash LayoutHash, version uint64, writes []PersistentWrite) (receipt PersistentReceipt, err error) {
+	if store == nil {
+		return receipt, ErrPersistenceClosed
+	}
+	if len(writes) > store.limits.MaxEntries {
+		return receipt, fmt.Errorf("local state mutation count limit exceeded")
+	}
+	var total int64
+	for _, write := range writes {
+		if len(write.Value) > store.limits.MaxValueBytes {
+			return receipt, ErrValueTooLarge
+		}
+		total += int64(len(write.Value))
+		if total > store.limits.MaxStateBytes {
+			return receipt, fmt.Errorf("local state mutation bytes exceed file size limit")
+		}
+	}
+	canonical, err := canonicalPersistentWrites(writes)
+	if err != nil {
+		return receipt, err
+	}
+	err = store.withLock(func() error {
+		current, err := store.load()
+		if err != nil {
+			return err
+		}
+		receipt = PersistentReceipt{LayoutHash: current.layout.Hash(), Version: current.version}
+		if hash != current.layout.Hash() {
+			return ErrLayoutMismatch
+		}
+		if version != current.version {
+			return ErrConflict
+		}
+		if len(canonical) == 0 {
+			return nil
+		}
+		if version == math.MaxUint64 {
+			return fmt.Errorf("local state version exhausted")
+		}
+		values := make(map[Key][]byte, len(current.entries))
+		for _, entry := range current.entries {
+			values[entry.Key] = entry.Value
+		}
+		for _, write := range canonical {
+			if write.Deleted {
+				delete(values, write.Key)
+			} else {
+				values[write.Key] = write.Value
+			}
+		}
+		current.entries = sortedPersistentEntries(values)
+		current.version++
+		if err := store.publish(current); err != nil {
+			return err
+		}
+		receipt.Version, receipt.Writes = current.version, len(canonical)
+		return nil
+	})
+	return receipt, err
+}
+
+func (store *LocalPersistence) PublishLayout(hash LayoutHash, version uint64, next Layout) (receipt PersistentReceipt, err error) {
+	if err := validateLayout(next); err != nil {
+		return receipt, err
+	}
+	err = store.withLock(func() error {
+		current, err := store.load()
+		if err != nil {
+			return err
+		}
+		receipt = PersistentReceipt{LayoutHash: current.layout.Hash(), Version: current.version}
+		if hash != current.layout.Hash() {
+			return ErrLayoutMismatch
+		}
+		if version != current.version {
+			return ErrConflict
+		}
+		if hash == next.Hash() {
+			return nil
+		}
+		if err := next.Extends(current.layout); err != nil {
+			return err
+		}
+		if version == math.MaxUint64 {
+			return fmt.Errorf("local state version exhausted")
+		}
+		current.layout, current.version = cloneLayout(next), version+1
+		if err := store.publish(current); err != nil {
+			return err
+		}
+		receipt.LayoutHash, receipt.Version = next.Hash(), current.version
+		return nil
+	})
+	return receipt, err
+}
+
+func (store *LocalPersistence) openRegular(name string, flags int) (*os.File, error) {
+	before, err := store.root.Lstat(name)
+	if err != nil && !(errors.Is(err, os.ErrNotExist) && flags&os.O_CREATE != 0) {
+		return nil, err
+	}
+	if err == nil && !before.Mode().IsRegular() {
+		return nil, fmt.Errorf("local state %s must be a regular file", name)
+	}
+	file, err := store.root.OpenFile(name, flags, 0o600)
+	if err != nil {
+		return nil, err
+	}
+	opened, statErr := file.Stat()
+	after, pathErr := store.root.Lstat(name)
+	if statErr != nil || pathErr != nil || !opened.Mode().IsRegular() || !after.Mode().IsRegular() || !os.SameFile(opened, after) || before != nil && !os.SameFile(before, opened) {
+		_ = file.Close()
+		return nil, fmt.Errorf("local state %s identity changed or is not regular", name)
+	}
+	return file, nil
+}
+
+func (store *LocalPersistence) load() (localState, error) {
+	file, err := store.openRegular(localStateName, os.O_RDONLY)
+	if err != nil {
+		return localState{}, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return localState{}, err
+	}
+	if info.Size() > store.limits.MaxStateBytes {
+		return localState{}, fmt.Errorf("local state exceeds file size limit")
+	}
+	encoded, err := io.ReadAll(io.LimitReader(file, store.limits.MaxStateBytes+1))
+	if err != nil {
+		return localState{}, err
+	}
+	return decodeLocalState(encoded, store.limits)
+}
+
+func (store *LocalPersistence) publish(current localState) error {
+	encoded, err := encodeLocalState(current, store.limits)
+	if err != nil {
+		return err
+	}
+	file, temporary, err := durablefile.CreateTemporary(store.root, ".")
+	if err != nil {
+		return err
+	}
+	defer store.root.Remove(temporary)
+	defer file.Close()
+	if _, err := file.Write(encoded); err != nil {
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		return err
+	}
+	if err := file.Close(); err != nil {
+		return err
+	}
+	if store.beforePublish != nil {
+		if err := store.beforePublish(); err != nil {
+			return err
+		}
+	}
+	if info, err := store.root.Lstat(localStateName); err == nil {
+		if !info.Mode().IsRegular() {
+			return fmt.Errorf("local state destination is not regular")
+		}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return store.root.Rename(temporary, localStateName)
+}
+
+// Keep snapshots independent from future callers even when entries are empty.
+func cloneLocalEntries(entries []Entry) []Entry {
+	result := make([]Entry, len(entries))
+	for i, entry := range entries {
+		result[i] = Entry{Key: entry.Key, Value: slices.Clone(entry.Value)}
+	}
+	return result
+}

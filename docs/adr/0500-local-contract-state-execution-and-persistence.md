@@ -1,0 +1,73 @@
+# ADR 0500: Bounded local contract-state execution and persistence
+
+## Status
+
+Accepted for an experimental Go developer path on Windows and Linux. Windows execution
+is verified; native Linux execution is deferred. Chain/VM selection remains **UNDECIDED**.
+This does not select a production database, a chain SDK, RPC, consensus or deployment.
+
+## Decision
+
+Verified contract-state MIR may execute one attempt through the existing
+[persistence port](0376-contract-state-persistence-port.md). Verification precedes even
+snapshot access. The existing transaction overlay retains limits, read-your-writes,
+borrow invalidation and managed lifecycle. Only a commit exit submits the complete
+sorted overlay. Rejection, trap, verifier failure and execution errors submit no writes.
+Trap panics propagate after rollback. Conflict/layout/backend errors remain explicit;
+the runner performs no retry. This is Go execution of verified state MIR, not generated
+C using a disk store or on-chain execution.
+
+`LocalPersistence` is an internal implementation of the port for one existing, trusted,
+local directory. Creation and reopening are separate explicit operations. Creation
+requires an exclusive new lock file. Reopening requires both authority files and never
+initializes missing/corrupt state. Interrupted creation requires explicit operator
+inspection; no automatic reset or repair is permitted.
+
+Every operation acquires a nonblocking exclusive OS lock on a stable opened lock-file
+identity, then rereads the complete current state. Windows uses `LockFileEx`; Linux uses
+`flock`. Contention returns `ErrPersistenceBusy` without retry. The layout/version guard
+and publication share the lock. A nonempty mutation or append-only upgrade increments
+the version once; no-op publication preserves it. Version exhaustion rejects.
+
+The private `fairyc.local-state/v1` record retains the exact ordered layout identity,
+version and sorted unique physical entries. Canonical JSON bytes followed by their
+SHA-256 digest reject damage, inconsistent layouts, duplicate/unordered entries,
+unknown fields and alternate encodings. The digest detects corruption, not malicious
+rewriting by someone who owns the directory. Full-state limits are mandatory, separate
+from execution limits: at most 16 MiB encoded state and 65,536 entries, plus an explicit
+per-value bound. Updates rewrite the complete bounded state; this is not an unbounded
+or high-throughput database design.
+
+All store files and temporary publication use an opened directory root and fixed flat
+authority names. Final-root and authority-file symlinks/nonregular files reject;
+opened file identities are checked. The caller must trust ancestors and directory
+ownership. Hostile directory replacement, hard-link attacks and network filesystems
+are outside this prototype's authority model.
+
+## Publication and failures
+
+A complete staging file is written, synced and closed before same-directory rooted
+rename. The rename is the publication decision. There is no fallible post-publication
+flush that could turn known success into a generic failure. Normal pre-publication
+errors preserve the old bytes and remove staging. A process killed before rename can
+leave an ignored `.tmp-*` file; a killed process after successful publication leaves
+the new complete state observable on reopen. These are process-restart guarantees.
+Directory-entry persistence after power loss, hardware retention, rollback attacks,
+backup/recovery and ambiguous remote commit handling are not certified. This prototype
+does not discharge the production durability requirements in ADR 0376.
+
+The local lock is released when each operation ends or the process exits. There is no
+transaction body or callback while holding that lock, no RPC and no user reentrancy
+inside publication. A separately invoked writer during execution may win; the original
+attempt then fails its version/layout guard. Caller-visible retries remain governed by
+[ADR 0372](0372-explicit-caller-visible-contract-state-retry.md).
+
+## Validation boundary
+
+Windows tests cover exact byte preservation on pre-publication fault, data corruption,
+missing-state failure, separate-process lock exclusion, forced exit immediately before
+and after rename, reopen, two-writer comparison, append-only layout changes, deletion,
+limits, version exhaustion and symlink rejection. MIR lifecycle tests cover commit,
+reject, trap, verifier failure, backend errors and conflict without retries. Linux
+replays belong to the combined queue, not to Windows evidence. No target flag, default
+CLI, Fairy source grammar, generated-C persistence or production chain is admitted here.
