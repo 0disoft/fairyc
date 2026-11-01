@@ -6,7 +6,7 @@
     "docs/adr/0345-hir-contract-state-interface-and-cache-identity.md",
     "docs/adr/0348-exact-contract-state-package-body-identity.md",
     "docs/adr/0349-contract-state-body-cache-key-v4.md",
-    "docs/package/whole-package-cache-v4.md",
+    "docs/package/whole-package-cache-v5.md",
     "docs/compatibility/versioning-v0.md",
     "docs/engineering/03-performance-budget.md"
   ],
@@ -32,7 +32,7 @@
     "features": ["base", "tls"]
   },
   "cases": [
-    { "id": "baseline", "override": {}, "relation": "baseline", "expectKey": "fycache4-sha256-b10956feae1e9f6cba7f0f74862974f32a0310e87ced0787b416f1d87d5407f6" },
+    { "id": "baseline", "override": {}, "relation": "baseline", "expectKey": "fycache5-sha256-5e96bfd261e05780235f1311864d6033012716ee4a9543d759625795b7fb4ff5" },
     { "id": "compiler-build", "override": { "compilerBuild": "compiler:b" }, "compareTo": "baseline", "relation": "different" },
     { "id": "language-revision", "override": { "languageRevision": "fairyc-language/11" }, "compareTo": "baseline", "relation": "different" },
     { "id": "source-digest", "override": { "source": "fysrc1-sha256-ed19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3" }, "compareTo": "baseline", "relation": "different" },

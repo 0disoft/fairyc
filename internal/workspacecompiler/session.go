@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/mircodec"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
@@ -215,7 +216,11 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 	if err != nil {
 		return Result{}, fmt.Errorf("compute package contract-state body identities: %w", err)
 	}
-	keys, err := session.packageKeys(metadata, interfaces, bodies, owners)
+	inline, err := inlinebody.HIR(analysis.Semantic.HIR, coordinates)
+	if err != nil {
+		return Result{}, err
+	}
+	keys, err := session.packageKeys(metadata, interfaces, bodies, owners, inline)
 	if err != nil {
 		return Result{}, err
 	}
@@ -246,6 +251,9 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 	}
 	if allHit {
 		program, reassemblyErr := packageartifact.Reassemble(artifacts)
+		if reassemblyErr == nil {
+			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
+		}
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
 			return resultWithCurrentState(analysis, compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, report)
@@ -345,6 +353,9 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		program, stateTransactions, reassemblyErr := rebindPersistentCompilations(
 			compilations, analysis.Semantic.HIR, coordinates, bodies, owners,
 		)
+		if reassemblyErr == nil {
+			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
+		}
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{
@@ -481,8 +492,8 @@ func resultWithCurrentState(analysis compiler.Analysis, compiled compiler.Result
 	return Result{Compiler: compiled, Cache: report}, nil
 }
 
-func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
-	inputs, err := session.packageInputs(metadata, interfaces, bodies, owners)
+func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, inline ...map[hir.PackageID]inlinebody.Hash) (map[hir.PackageID]packagecache.Key, error) {
+	inputs, err := session.packageInputs(metadata, interfaces, bodies, owners, inline...)
 	if err != nil {
 		return nil, err
 	}
@@ -497,7 +508,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 	return result, nil
 }
 
-func (session *Session) packageInputs(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Inputs, error) {
+func (session *Session) packageInputs(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, bodies map[hir.PackageID]contractstatemir.StateBodyHash, owners []hir.PackageID, inline ...map[hir.PackageID]inlinebody.Hash) (map[hir.PackageID]packagecache.Inputs, error) {
 	byID := make(map[hir.PackageID]workspaceloader.SemanticPackage, len(metadata))
 	for _, loaded := range metadata {
 		byID[loaded.ID] = loaded
@@ -526,7 +537,11 @@ func (session *Session) packageInputs(metadata []workspaceloader.SemanticPackage
 			if !found {
 				return nil, fmt.Errorf("package %d dependency %d has no public interface", packageID, dependencyID)
 			}
-			dependencies = append(dependencies, packagecache.Dependency{Coordinate: dependency.Coordinate, Interface: interfaceHash})
+			binding := packagecache.Dependency{Coordinate: dependency.Coordinate, Interface: interfaceHash}
+			if len(inline) != 0 {
+				binding.InlineBodies = inline[0][dependencyID]
+			}
+			dependencies = append(dependencies, binding)
 		}
 		dependencies, err := packagecache.CanonicalizeDependencies(dependencies)
 		if err != nil {
@@ -540,6 +555,11 @@ func (session *Session) packageInputs(metadata []workspaceloader.SemanticPackage
 			RuntimeABI: sdkstdlib.RuntimeABI, StandardLibrary: session.standardLibrary,
 			Package: loaded.Instance, Source: loaded.Source, CurrentInterface: currentInterface, CurrentBody: currentBody, Dependencies: dependencies,
 			Features: slices.Clone(loaded.Features),
+		}
+		if len(inline) != 0 {
+			input := result[packageID]
+			input.InlineBodies = inline[0][packageID]
+			result[packageID] = input
 		}
 	}
 	return result, nil

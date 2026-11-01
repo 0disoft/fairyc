@@ -457,6 +457,7 @@ type ResourceField struct {
 
 // Function is one typed function body.
 type Function struct {
+	InlineBody        string `json:",omitempty"`
 	Symbol            SymbolID
 	Name              string
 	Public            bool

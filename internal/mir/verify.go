@@ -73,6 +73,7 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
+		failures = append(failures, verifyInlineFunction(&program.Functions[index])...)
 		failures = append(failures, verifyStorageOperations(&program.Functions[index], properties, capabilities)...)
 		failures = append(failures, verifyStructViewTypes(&program.Functions[index], properties)...)
 		failures = append(failures, verifyFunctionContext(ctx, &program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions, dropEffects, &fields)...)

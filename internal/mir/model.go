@@ -164,6 +164,7 @@ type ResourceField struct {
 
 // Function is one mutable-local control-flow graph and its source-linked facts.
 type Function struct {
+	InlineBody         string `json:",omitempty"`
 	Symbol             hir.SymbolID
 	Name               string
 	Span               hir.Span

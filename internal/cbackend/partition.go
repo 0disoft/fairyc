@@ -38,6 +38,7 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 	}
 	e := &emitter{analysis: plan, partitioned: true}
 	var bodies []string
+	var inlineBodies []string
 	total := 0
 	for index := range plan.functions {
 		if err := ctx.Err(); err != nil {
@@ -47,7 +48,11 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		if err := e.emitFunction(&body, index); err != nil {
 			return BuildUnit{}, err
 		}
-		bodies = append(bodies, body.String())
+		if plan.functions[index].InlineBody != "" {
+			inlineBodies = append(inlineBodies, body.String())
+		} else {
+			bodies = append(bodies, body.String())
+		}
 		total += body.Len()
 	}
 	if total <= budget {
@@ -94,6 +99,9 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 			emitStaticStorageLinkage(&definition, map[string]string{symbol: value}, true, "")
 			literals = append(literals, definition.String())
 		}
+	}
+	for _, body := range inlineBodies {
+		header.WriteString(body)
 	}
 	header.WriteString("#endif\n")
 	const include = "#include \"fy_bootstrap.h\"\n"

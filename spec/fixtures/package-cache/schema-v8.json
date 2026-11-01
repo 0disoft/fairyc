@@ -22,7 +22,7 @@
           "override": { "$ref": "#/$defs/override" },
           "compareTo": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
           "relation": { "enum": ["baseline", "same", "different"] },
-          "expectKey": { "type": "string", "pattern": "^fycache4-sha256-[0-9a-f]{64}$" }
+          "expectKey": { "type": "string", "pattern": "^fycache5-sha256-[0-9a-f]{64}$" }
         }
       }
     }

@@ -365,3 +365,6 @@ Part 2 of 3 of the [source index](source-of-truth.md).
   - `examples/std_fs_quickstart/src/path_ops.fy`
   - `tools/dev/fairyc-windows-host-smoke/`
   - `docs/adr/0311-public-windows-recursive-directory-removal.md`
+
+- Explicit inline export identity and cache successor: `docs/adr/0493-cross-package-inline-bodies-and-cache-v5.md`
+- Current whole-package key: `docs/package/whole-package-cache-v5.md`

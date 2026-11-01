@@ -8,6 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -45,6 +46,9 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 			functionCount += uint64(len(artifact.Functions))
 		}
 		program, err := session.artifacts.rebind(artifacts, coordinates, 1, hir.SymbolID(functionCount)+1, 1)
+		if err == nil {
+			err = inlinebody.VerifyProgram(analysis.Analysis.Semantic.HIR, program)
+		}
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil

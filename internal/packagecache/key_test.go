@@ -17,7 +17,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache4-sha256-51508c63893427d1cdc799f8d478c25102ea28d3ce93e0bd6b918d817ccef96f"; got != want {
+	if got, want := key.String(), "fycache5-sha256-60fab9c4d5139cb6a2d5f855a056649a827a001029a1f8e9e3a3cdfd5c7f7240"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())

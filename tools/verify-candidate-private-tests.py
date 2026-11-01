@@ -61,7 +61,7 @@ def package_key_ledger(data, image):
             assert re.fullmatch(r'fypc1-sha256-[0-9a-f]{64}', coordinate)
             seen.add(instance)
             values = []
-            for prefix in (b'fycache4-sha256-', b'fycacheg0-sha256-'):
+            for prefix in (b'fycache5-sha256-', b'fycacheg0-sha256-'):
                 canonical = field(); key = field()
                 assert canonical.count(compiler) == 1, 'missing or duplicated compiler key member'
                 assert key == prefix + hashlib.sha256(canonical).hexdigest().encode(), 'key contradicts its full preimage'

@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/contractstatemir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -19,21 +20,23 @@ import (
 
 const (
 	KeyAlgorithm = "sha256"
-	KeyEncoding  = "fairyc.package-cache-key/v4"
-	KeyPrefix    = "fycache4-sha256-"
+	KeyEncoding  = "fairyc.package-cache-key/v5"
+	KeyPrefix    = "fycache5-sha256-"
 )
 
 const keyDomain = "fairyc.package-cache-key"
 
 // Dependency binds one source-independent dependency coordinate to the public interface consumed from it.
 type Dependency struct {
-	Coordinate packagegraph.CoordinateID
-	Interface  moduleinterface.Hash
+	InlineBodies inlinebody.Hash
+	Coordinate   packagegraph.CoordinateID
+	Interface    moduleinterface.Hash
 }
 
 // Inputs contains every compatibility and invalidation member needed for whole-package reuse.
 // Set-like slices must already be sorted and unique so producers cannot accidentally disagree.
 type Inputs struct {
+	InlineBodies         inlinebody.Hash
 	CompilerBuild        string
 	LanguageRevision     string
 	MIRVersion           string
@@ -72,7 +75,7 @@ func (key *Key) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// ParseKey accepts only the complete lowercase v4 representation.
+// ParseKey accepts only the complete lowercase v5 representation.
 func ParseKey(value string) (_ Key, err error) {
 	defer func() { err = cacheError(ErrorKey, err) }()
 	var result Key
@@ -101,7 +104,23 @@ func Compute(inputs Inputs) (Key, error) {
 }
 
 // Encode returns the versioned, platform-independent cache-key bytes.
-func Encode(inputs Inputs) (result []byte, err error) {
+func Encode(inputs Inputs) ([]byte, error) { return encodeKey(inputs, true) }
+
+// EncodeLegacyV4 freezes the previous no-inline tuple for compatibility tests.
+// Old keys remain unreadable by the active v5 parser and cannot authorize reuse.
+func EncodeLegacyV4(inputs Inputs) ([]byte, error) {
+	if inputs.InlineBodies != (inlinebody.Hash{}) {
+		return nil, fmt.Errorf("v4 cannot encode inline bodies")
+	}
+	for _, d := range inputs.Dependencies {
+		if d.InlineBodies != (inlinebody.Hash{}) {
+			return nil, fmt.Errorf("v4 cannot encode inline dependencies")
+		}
+	}
+	return encodeKey(inputs, false)
+}
+
+func encodeKey(inputs Inputs, inline bool) (result []byte, err error) {
 	defer func() { err = cacheError(ErrorKey, err) }()
 	if err := validateInputs(inputs); err != nil {
 		return nil, err
@@ -110,7 +129,12 @@ func Encode(inputs Inputs) (result []byte, err error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(keyDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(4)
+	if inline {
+		encoded.WriteByte(5)
+		writeString(&encoded, inlinebody.Encoding)
+	} else {
+		encoded.WriteByte(4)
+	}
 	writeString(&encoded, packagegraph.InstanceIDEncoding)
 	writeString(&encoded, packagegraph.InstanceIDAlgorithm)
 	writeString(&encoded, packagegraph.CoordinateIDEncoding)
@@ -135,10 +159,16 @@ func Encode(inputs Inputs) (result []byte, err error) {
 	encoded.Write(inputs.Source[:])
 	encoded.Write(inputs.CurrentInterface[:])
 	encoded.Write(inputs.CurrentBody[:])
+	if inline {
+		encoded.Write(inputs.InlineBodies[:])
+	}
 	writeUint64(&encoded, uint64(len(inputs.Dependencies)))
 	for _, dependency := range inputs.Dependencies {
 		encoded.Write(dependency.Coordinate[:])
 		encoded.Write(dependency.Interface[:])
+		if inline {
+			encoded.Write(dependency.InlineBodies[:])
+		}
 	}
 	writeStrings(&encoded, inputs.Features)
 	return encoded.Bytes(), nil

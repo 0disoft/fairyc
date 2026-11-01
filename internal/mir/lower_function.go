@@ -55,6 +55,7 @@ type functionLowerer struct {
 
 func newFunctionLowerer(module string, function *hir.Function, properties typeProperties) *functionLowerer {
 	result := Function{
+		InlineBody:  function.InlineBody,
 		Symbol:      function.Symbol,
 		Name:        module + "::" + function.Name,
 		Span:        function.Span,

@@ -265,3 +265,15 @@ recorded Windows native-test/example comparisons and the separate native CLI seq
 It also records the `cbe0bff1` Go fix preserving generic scalar admission after C field transport
 was added. Candidate sources and the existing fixed-point record are unchanged. Linux execution,
 remaining Windows target obligations and clean-machine distribution proof remain open.
+
+## Phase 3 inline reopening (2026-11-01)
+
+[ADR 0493](../adr/0493-cross-package-inline-bodies-and-cache-v5.md) reopens the
+2026-10-21 deferred inline gate for explicit bounded public i32 bodies. Its independent
+versioned export class, cache-key v5 owner/dependent inputs and fresh-HIR mismatch
+checks are required before reuse. Ordinary public-interface v5 body exclusion remains
+unchanged. Implementation and focused process/persistent invalidation evidence supersede
+the old no-inline scope statement only for this family; Windows native evidence is
+recorded separately in the ordered work receipt. Linux execution remains deferred.
+General inline functions, helper closures, generics and target promotion stay outside
+this reopening. Historical Phase 3 measurements are not inline performance evidence.

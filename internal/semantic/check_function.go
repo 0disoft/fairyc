@@ -7,7 +7,15 @@ import (
 
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
+	inlineRequested := false
 	for _, attribute := range c.function.Attributes {
+		if attribute.Name == "inline" {
+			if inlineRequested || len(attribute.Arguments) != 0 || len(c.function.TypeParameters) != 0 {
+				c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "@inline must occur once without arguments on a nongeneric function")
+			}
+			inlineRequested = true
+			continue
+		}
 		if attribute.Name == testAttribute && c.module.file.Test {
 			continue
 		}
@@ -92,6 +100,14 @@ func (c *typeChecker) checkFunction() hir.Function {
 		)
 	} else if resultType != hir.TypeVoid && !blockAlwaysTerminates(c.function.Body) {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.Body.Span, "non-void function without a checked return value")
+	}
+	if inlineRequested {
+		id, err := hir.InlineFunctionID(result)
+		if err != nil {
+			c.analyzer.addUnsupported(c.module.file.Path, c.function.Span, err.Error())
+		} else {
+			result.InlineBody = id
+		}
 	}
 	return result
 }

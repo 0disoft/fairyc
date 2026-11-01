@@ -1,6 +1,6 @@
 # Whole-package cache key v4
 
-- Status: Experimental executable contract
+- Status: Historical; superseded by [v5](whole-package-cache-v5.md)
 - Decision: `docs/adr/0349-contract-state-body-cache-key-v4.md`
 - Fixture source: `spec/fixtures/package-cache/manifest-v8.json`
 - Historical source: `docs/package/whole-package-cache-v3.md`

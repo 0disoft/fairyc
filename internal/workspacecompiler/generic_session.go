@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/contractstatemir"
 	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 	"github.com/0disoft/fairyc/internal/packagecache"
@@ -149,7 +150,11 @@ func (session *GenericSession) CheckContext(ctx context.Context, workspace works
 	if err != nil {
 		return Result{}, err
 	}
-	base, err := session.keys.packageInputs(metadata, analysis.OrdinaryInterfaces, bodies, owners)
+	inline, err := inlinebody.HIR(analysis.Analysis.Semantic.HIR, coordinates)
+	if err != nil {
+		return Result{}, err
+	}
+	base, err := session.keys.packageInputs(metadata, analysis.OrdinaryInterfaces, bodies, owners, inline)
 	if err != nil {
 		return Result{}, err
 	}
@@ -203,6 +208,9 @@ func (session *GenericSession) CheckContext(ctx context.Context, workspace works
 	}
 	if allHit {
 		program, err := session.artifacts.reassemble(artifacts)
+		if err == nil {
+			err = inlinebody.VerifyProgram(analysis.Analysis.Semantic.HIR, program)
+		}
 		if err == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Analysis.Semantic, MIR: program, Verified: true, GenericProvenance: analysis.Analysis.GenericProvenance}, Cache: report}, nil
