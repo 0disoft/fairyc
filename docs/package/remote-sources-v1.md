@@ -1,6 +1,6 @@
 # Explicit remote package sources v1
 
-- Status: Bounded Go Stage 0 experimental preparation contract, ADR 0498.
+- Status: Executable bounded Go Stage 0 experimental preparation contract, ADR 0498.
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
@@ -23,7 +23,25 @@ Commit a `fairy.sources.json` beside `fairy.toml`:
 }
 ```
 
-The placeholder digest is intentionally not accepted. All fields are required, exact lowercase
+Also declare the destination in the existing root manifest (retain its `[package]`):
+
+```toml
+[workspace]
+members = ["vendor/math"]
+[dependencies.math]
+path = "vendor/math"
+version = "1.0.0"
+features = []
+```
+
+Prepare an archive with `fairy.toml` and `src/` at ZIP root; a repository-name wrapper directory
+is not stripped. With PowerShell, an explicit `Compress-Archive -LiteralPath fairy.toml,src
+-DestinationPath math.zip` invocation from the package directory supplies that layout. Obtain the
+pin with `(Get-FileHash -LiteralPath math.zip -Algorithm SHA256).Hash.ToLowerInvariant()` and
+review the package before hosting/using it. A hash calculated from arbitrary untrusted downloaded
+bytes is not independent publisher authentication.
+
+The placeholder digest is intentionally not accepted. All fields are required, exact canonical
 spellings; duplicate/unknown fields and trailing JSON reject. The bounded plan admits 1-32 unique
 paths and UIDs, sorts by path, and requires exact manifest versions. Every path must be an explicit
 workspace member, root dependency versions must agree, and destinations/cache cannot overlap the
@@ -41,15 +59,15 @@ Archives contain `fairy.toml` at ZIP root and the declared source directory with
 `.fy` file. Manifest UID, exact version and language must match the pin/root; nested workspace
 declarations reject. Hooks/scripts are never executed. ZIP entry paths must use portable canonical
 relative components; absolute, dot/traversal, backslash, drive, reserved-device, duplicate,
-case-colliding, file/directory-conflicting and symlink/special entries reject. Explicit empty
+case-colliding, file/directory-conflicting, nested `.git`/`.hg`/`.svn` metadata and symlink/special entries reject. Explicit empty
 directories are ignored. Files are created as ordinary non-executable data.
 
 The cache is the contained workspace directory `build/package-sources`, with archive names
 `<sha256>.zip`. Always rehash before use, including warm/offline reads. Offline mode makes zero
 HTTP requests; missing/corrupt entries fail. Online corruption also fails; the caller may remove
 the named cache blob and retry. Downloads are limited to 30 seconds per request, 16 MiB/archive;
-one fetch is limited to 64 MiB compressed and 64 MiB expanded bytes, 4,096 files and 8 MiB/file.
-The operation has a two-minute context. Cache retention is manual, not an unbounded background job.
+one fetch is limited to 64 MiB compressed and 64 MiB expanded bytes, 4,096 files and 8 MiB/file. Each archive also limits explicit/implicit path entries to 8,192 and path depth to 32 components. Remaining operation budgets apply before reading/decompressing the next archive.
+The operation has a two-minute context. Cache retention is manual, not an unbounded background job. Immutable cache publication requires filesystem hard-link support; unsupported filesystems fail rather than falling back to replacement.
 
 Validate all entries and identity before caching an archive or publishing a directory. Write
 complete staged files beneath an opened contained root, then publish a new directory by rename
@@ -71,3 +89,27 @@ run fetch again. Restore an absent package from the cache with `--offline`.
 This experimental step admits a CLI surface, not a stable registry ecosystem. Registry selection,
 signing/trust delegation, range solving, automatic updates, Git/submodules/LFS, publisher services,
 cache migration/GC and Fairy-authored candidate parity remain outside v1.
+
+
+## Usage and command result
+
+```sh
+fairyc experimental fetch-packages
+fairyc check
+fairyc run --locked
+# Restore an absent vendor directory from the verified local archive cache:
+fairyc experimental fetch-packages --offline
+```
+
+No root/path/cache override, forced replacement, authentication, environment credential lookup or
+implicit dependency recursion is admitted. Success prints one line with package/download/cache/
+install/reuse counts. Codes are 0 on success, 2 on invocation errors, 7 on plan/network/cache/
+identity/filesystem failures, and 4 on output failure. Output failure may follow completed work.
+The exclusive root lock is `.fairyc-fetch.lock`; staged directory names are private and generated.
+Interrupted-operation leftovers must be inspected before manually removing them; automatic fetch
+never deletes an existing vendor directory, even when incomplete.
+
+Primary API references: [Go ZIP reader](https://pkg.go.dev/archive/zip#Reader),
+[HTTP client redirect/timeout policy](https://pkg.go.dev/net/http#Client), and
+[opened directory roots](https://pkg.go.dev/os#Root). Explicit portable entry and identity checks
+are Fairy policy in addition to the underlying APIs, not capabilities inferred from an archive.

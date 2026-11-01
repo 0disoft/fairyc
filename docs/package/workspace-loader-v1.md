@@ -79,3 +79,12 @@ This loader does not access a registry, solve ranges, fetch sources, link target
 objects, persist a cache, aggregate catalog-unreachable or feature-instance-ambiguous member test trees, or choose test declarations. The
 CLI harness owns `@test` validation. The separate lockfile library projects production local and SDK
 source origins, but absolute paths and test overlays remain unserialized.
+
+
+## Explicit remote source preparation
+
+ADR 0498 adds a separate [pinned HTTPS ZIP preparation command](remote-sources-v1.md).
+It writes only new, exact explicit local members before this loader is called. This loader's
+network-free input closure, local source identities, manifest schema and graph lock projection
+remain unchanged. An ordinary locked compile verifies current graph/source content; rechecking
+remote transport provenance and all vendored non-source bytes requires the explicit fetch step.

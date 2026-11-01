@@ -53,6 +53,16 @@ invocation or identity rejection, 4 for internal/output failure, and 7 for paren
 permission, filesystem, or rollback failure. Output failure occurs after creation and cannot undo
 the project. No absolute parent path or raw operating-system error is part of stable output.
 
+## Experimental explicit remote package preparation
+
+ADR 0498 admits `fairyc experimental fetch-packages [--offline]` in the Go Stage 0 CLI.
+[Remote sources v1](../package/remote-sources-v1.md) owns exact `fairy.sources.json` pins,
+HTTPS/hash/identity policy, bounded ZIP extraction, content-addressed archive cache, exclusive
+publication, existing-tree refusal, output counts and exit codes. This is an explicit preparation
+step for ordinary local manifest members. It never updates `fairy.lock` or implicitly downloads
+during stable check/build/run/test. Stable registry commands, range solving and Fairy-authored
+candidate parity are not admitted by this experimental command.
+
 ## Experimental explicit-file generics
 
 Experimental explicit-file check/semantic-check, interpreter, C-emission, and native lowering also

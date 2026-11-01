@@ -140,7 +140,7 @@ func Validate(plan Plan) error {
 
 func validateURL(value string) error {
 	u, err := url.Parse(value)
-	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Opaque != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.RawFragment != "" || !strings.HasPrefix(u.Path, "/") || strings.ContainsAny(value, "\\\r\n\t ") {
+	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Opaque != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.RawFragment != "" || !strings.HasPrefix(u.Path, "/") || strings.ContainsAny(value, "\\\r\n\t #") {
 		return fmt.Errorf("source URL must be absolute HTTPS without credentials, query or fragment")
 	}
 	if u.Port() != "" {
@@ -165,7 +165,7 @@ func Bind(plan Plan, root projectmanifest.Manifest) error {
 			return fmt.Errorf("source destination overlaps root source or cache")
 		}
 		for _, member := range root.Workspace.Members {
-			if member != pin.Path && strings.EqualFold(member, pin.Path) || member != pin.Path && overlaps(member, pin.Path) {
+			if member != pin.Path && overlaps(member, pin.Path) {
 				return fmt.Errorf("source destination overlaps another member")
 			}
 		}

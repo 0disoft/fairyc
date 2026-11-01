@@ -40,6 +40,7 @@ Usage:
   fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
+  fairyc experimental fetch-packages [--offline]
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
@@ -219,6 +220,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return writeHelp(stdout, stderr)
 	}
 	switch command {
+	case "fetch-packages":
+		return runPackageFetch(args[1:], sourceRoot, stdout, stderr)
 	case "parse":
 		if len(args) != 2 {
 			return invocationError(stderr, fmt.Sprintf("experimental command %q expects exactly one source file", command))

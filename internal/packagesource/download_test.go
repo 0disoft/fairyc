@@ -126,6 +126,9 @@ func TestRemoteSourcesRedirectTLSHashAndBounds(t *testing.T) {
 		t.Fatal("redirect followed")
 	}
 	pin.URL = server.URL + "/target"
+	if _, err := f.downloadWithin(context.Background(), pin, 8); err == nil {
+		t.Fatal("remaining compressed budget ignored")
+	}
 	if _, err := (Fetcher{}).download(context.Background(), pin); err == nil {
 		t.Fatal("untrusted TLS accepted")
 	}
@@ -151,6 +154,7 @@ func TestRemoteSourcesArchiveContainment(t *testing.T) {
 	for _, entry := range []zipEntry{
 		{"../escape", "x", 0644}, {"/absolute", "x", 0644}, {"C:/outside", "x", 0644}, {"src\\bad.fy", "x", 0644},
 		{"src/../bad.fy", "x", 0644}, {"src/NUL.fy", "x", 0644}, {"Src/other.fy", "x", 0644},
+		{".git/config", "x", 0644}, {"src/.GiT/hooks/data", "x", 0644},
 		{"src/math.fy", "duplicate", 0644}, {"src", "file over implicit directory", 0644}, {"src/link", "target", os.ModeSymlink | 0777},
 		{"src/link/", "", os.ModeSymlink | 0777}, {"src/too-big", strings.Repeat("x", MaxFileBytes+1), 0644},
 	} {
@@ -173,6 +177,12 @@ func TestRemoteSourcesArchiveContainment(t *testing.T) {
 	}
 	if _, err := unpack(context.Background(), data, testPin(), "fairyc-language/999"); err == nil {
 		t.Fatal("language mismatch accepted")
+	}
+	if _, err := unpackWithin(context.Background(), data, testPin(), "fairyc-language/20", 8, MaxFiles); err == nil {
+		t.Fatal("remaining expanded budget ignored")
+	}
+	if _, err := unpackWithin(context.Background(), data, testPin(), "fairyc-language/20", MaxTotalBytes, 1); err == nil {
+		t.Fatal("remaining file budget ignored")
 	}
 }
 

@@ -37,6 +37,10 @@ func portableEntry(name string) bool {
 		if part == "." || part == ".." {
 			return false
 		}
+		switch strings.ToLower(part) {
+		case ".git", ".hg", ".svn":
+			return false // Source archives cannot inject nested VCS configuration/hooks.
+		}
 		// Dotfiles are data too; never execute hooks. Retain the portable reserved-name checks.
 		if strings.HasPrefix(part, ".") {
 			part = "x" + part
@@ -49,6 +53,10 @@ func portableEntry(name string) bool {
 }
 
 func unpack(ctx context.Context, data []byte, pin Pin, language string) (bundle, error) {
+	return unpackWithin(ctx, data, pin, language, MaxTotalBytes, MaxFiles)
+}
+
+func unpackWithin(ctx context.Context, data []byte, pin Pin, language string, expandedLimit, fileLimit int) (bundle, error) {
 	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return bundle{}, fmt.Errorf("invalid source ZIP: %w", err)
@@ -88,24 +96,28 @@ func unpack(ctx context.Context, data []byte, pin Pin, language string) (bundle,
 				return bundle{}, fmt.Errorf("ZIP case or file/directory conflict")
 			}
 			seen[fold] = entry{part, isDir}
+			if len(seen) > MaxFiles*2 {
+				return bundle{}, fmt.Errorf("ZIP path entry limit exceeded")
+			}
 		}
 		if dir {
 			continue
 		}
-		if len(b.files) >= MaxFiles || f.UncompressedSize64 > MaxFileBytes {
+		remaining := min(MaxFileBytes, expandedLimit-b.bytes)
+		if len(b.files) >= fileLimit || remaining < 0 || f.UncompressedSize64 > uint64(remaining) {
 			return bundle{}, fmt.Errorf("ZIP file limit exceeded")
 		}
 		file, err := f.Open()
 		if err != nil {
 			return bundle{}, err
 		}
-		contents, readErr := io.ReadAll(io.LimitReader(file, MaxFileBytes+1))
+		contents, readErr := io.ReadAll(io.LimitReader(file, int64(remaining)+1))
 		closeErr := file.Close()
-		if readErr != nil || closeErr != nil || len(contents) > MaxFileBytes || uint64(len(contents)) != f.UncompressedSize64 {
+		if readErr != nil || closeErr != nil || len(contents) > remaining || uint64(len(contents)) != f.UncompressedSize64 {
 			return bundle{}, fmt.Errorf("ZIP entry integrity or byte limit failed")
 		}
 		b.bytes += len(contents)
-		if b.bytes > MaxTotalBytes {
+		if b.bytes > expandedLimit {
 			return bundle{}, fmt.Errorf("ZIP expanded byte limit exceeded")
 		}
 		b.files[name] = contents
