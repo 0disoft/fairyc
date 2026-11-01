@@ -302,3 +302,5 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 
 - Ordinary synchronous callback signatures and nonescape: `docs/adr/0490-ordinary-synchronous-callbacks.md`
 - Windows callback crossing evidence: `docs/ops/windows-ordinary-callbacks-20261101.md`
+
+- Zero-field resource construction and private storage: `docs/adr/0491-zero-field-resources.md`

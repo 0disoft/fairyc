@@ -74,7 +74,7 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 }
 
 func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) || definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) != len(values) || definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
 		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
 	}
 	state := &resourceState{definition: definition, fields: copyValueFields(values)}

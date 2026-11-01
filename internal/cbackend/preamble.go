@@ -143,6 +143,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	for index, resource := range e.analysis.resourceTypes {
 		output.WriteString("typedef struct {\n")
+		if len(resource.definition.Fields) == 0 {
+			output.WriteString("    uint8_t f_0;\n")
+		}
 		for fieldIndex, field := range resource.definition.Fields {
 			cType, err := e.analysis.cValueType(field.Type)
 			if err != nil {

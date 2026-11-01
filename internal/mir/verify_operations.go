@@ -318,7 +318,7 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 		if definition == nil {
 			failures = append(failures, VerificationError{Code: CodeAggregateUse, Entity: resourceTypeEntity(operation.Type), Detail: "resource construction type has no definition"})
 		}
-		if operation.DestinationLocal == NoLocal || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+		if operation.DestinationLocal == NoLocal || operation.Type == hir.ParseType("") || operation.Type == hir.TypeInvalid || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
 			failures = append(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "resource construction shape is invalid"})
 		}
 		if definition != nil && !slices.Equal(operation.Fields, resourceFieldNames(definition.Fields)) {

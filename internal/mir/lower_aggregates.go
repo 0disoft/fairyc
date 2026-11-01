@@ -13,9 +13,6 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 	}
 	isResource := l.properties.IsResource(expression.Type)
 	isStruct := l.properties.IsStruct(expression.Type)
-	if isResource && len(expression.Children) == 0 {
-		return Operand{}, fmt.Errorf("empty resource construction has no MIR support")
-	}
 	if !isResource && !isStruct {
 		return Operand{}, fmt.Errorf("aggregate construction type %q has no MIR definition", expression.Type)
 	}

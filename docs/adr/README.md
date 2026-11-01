@@ -401,3 +401,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - The change relies on generated, cache, or build output as source truth.
 
 - [0490: Ordinary synchronous C callbacks](0490-ordinary-synchronous-callbacks.md)
+
+- [0491: Zero-field resources](0491-zero-field-resources.md)

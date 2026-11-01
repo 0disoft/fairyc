@@ -20,9 +20,6 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 		if definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
 			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(definition.Type.String()) + " with unsupported drop behavior"}
 		}
-		if len(definition.Fields) == 0 {
-			return nil, nil, CapabilityError{Feature: "empty resource type " + strconv.Quote(definition.Type.String())}
-		}
 		fields := make([]layout.Field, 0, len(definition.Fields))
 		fieldIndex := make(map[string]int, len(definition.Fields))
 		allI32 := true
@@ -52,12 +49,18 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 				Type: fieldType,
 			})
 		}
+
+		// ISO C has no empty struct. This initialized private byte is not a source
+		// field or ownership flag; the ordinary resource root still owns cleanup.
+		if len(fields) == 0 {
+			fields = append(fields, layout.Field{Name: "f_0", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u8"}})
+		}
 		aggregateType := layout.Type{Kind: layout.KindStruct, Fields: fields}
 		computed, err := engine.Of(aggregateType)
 		if err != nil {
 			return nil, nil, fmt.Errorf("compute C transport layout for resource %q: %w", definition.Type, err)
 		}
-		if len(computed.Fields) != len(definition.Fields) {
+		if len(computed.Fields) != len(fields) {
 			return nil, nil, fmt.Errorf("resource %q layout returned %d fields for %d definitions", definition.Type, len(computed.Fields), len(definition.Fields))
 		}
 		if _, duplicate := byType[definition.Type]; duplicate {
@@ -67,6 +70,9 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 		feature := "flat-copy-resource"
 		if allI32 {
 			feature = "flat-i32-resource"
+		}
+		if len(definition.Fields) == 0 {
+			feature = "zero-field-resource"
 		}
 		if nestedCopy {
 			feature = "nested-copy-resource"

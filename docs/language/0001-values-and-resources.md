@@ -93,6 +93,12 @@ C backend calls the same verified glue. A nonempty resource may declare cleanup 
 glue carries that exact set, and Resource Flow requires it at normal and abrupt cleanup edges. A
 whole-root move transfers the obligation without charging the sender for effects it does not run.
 
+[ADR 0491](../adr/0491-zero-field-resources.md) admits resources with no source fields.
+`Token {}` constructs a complete move-only root and cleanup still executes exactly once,
+including across return/parameter moves and direct resource nesting. The constrained C
+backend uses one initialized private byte rather than an empty C struct; this is not a
+source field, public layout or ownership flag. Empty cleanup does not grant copyability.
+
 ## Fallible close
 
 A fallible close operation must make ownership unambiguous.
