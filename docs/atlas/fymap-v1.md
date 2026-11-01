@@ -1,5 +1,10 @@
 # `.fymap` v1 Logical Schema
 
+ADR 0499 adds separate [bounded impact, read-only MCP and checked private-body editing](impact-mcp-edit-v1.md)
+consumers. They rebuild exact-current logical-v3 maps without adding text, permissions or writes
+to this schema. Earlier deferrals still apply to full semantic diff, inferred renames, arbitrary
+refactoring and safe-change claims; only the specifically admitted consumers supersede them.
+
 - Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and exact-name SymbolId Catalog v1 output, experimental overview/catalog/show/around/text/evidence commands, separate exact retained-source attributed-text JSON, and output-only single-symbol Evidence Bundle implemented; no attributed-text or bundle decoder
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`

@@ -10,6 +10,16 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 machine-report, and hosted-runtime rules for the currently implemented stable surface. The sections
 below retain each command's exact behavior and historical admission evidence.
 
+## Experimental Atlas impact, read-only MCP and structural body edit
+
+ADR 0499 admits separately gated `atlas-impact`, `atlas-mcp --allow-impact`, and
+`atlas-edit replace-body [--apply]` Go commands. The
+[owning contract](../atlas/impact-mcp-edit-v1.md) defines current locked logical-v3 map identity,
+uncertainty/limits, MCP lifecycle/permissions and root-private AST body preview/application.
+No stable safe-change guarantee, arbitrary rename, new map schema or candidate parity is admitted.
+Impact/MCP never update source or lock; apply leaves the lock stale for the next ordinary check.
+Output failure can follow successful source replacement.
+
 ## Stable version inspection v1
 
 `fairyc --version` reports compiler module version, SDK identity/version, language

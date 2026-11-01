@@ -2,6 +2,14 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+## Bounded Atlas tools
+
+- Decision: `docs/adr/0499-bounded-atlas-impact-mcp-and-body-edits.md`.
+- Contract: `docs/atlas/impact-mcp-edit-v1.md`; CLI admission: `docs/cli/command-contract.md`.
+- Owners: `internal/atlasmap/impact.go`, `internal/atlasmcp/`, `internal/sourceedit/`, and `internal/cli/atlas_impact.go`, `atlas_mcp.go`, `atlas_edit.go`.
+- Receipt: `docs/ops/windows-atlas-tools-20261102.md`; Linux replay: `docs/development/ordered-work-20261031.md`.
+- Ordinary interface/effects comparison remains the separate `internal/interfacereview/` owner.
+
 ## C transport, aggregates, and native proofs
 
 
