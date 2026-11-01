@@ -253,6 +253,11 @@ func analyzeEmissionContext(ctx context.Context, program mir.Program, entry stri
 			return nil, err
 		}
 		value.localTypes[index] = localTypes
+		for _, typ := range localTypes {
+			if _, _, pointer := hir.RawPointerElement(typ); pointer {
+				value.recordCScalarFeature(typ)
+			}
+		}
 	}
 	for index := range functions {
 		if err := ctx.Err(); err != nil {

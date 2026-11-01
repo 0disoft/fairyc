@@ -35,6 +35,14 @@ func (e *analysisBuilder) inspectForeignFunctions() error {
 }
 
 func (e *analysisBuilder) recordCScalarFeature(value hir.Type) {
+	if element, _, pointer := hir.RawPointerElement(value); pointer {
+		e.recordCScalarFeature(element)
+		return
+	}
+	if element, _, borrow := hir.BorrowElement(value); borrow {
+		e.recordCScalarFeature(element)
+		return
+	}
 	if element, _, array := hir.FixedArrayParts(value); array {
 		e.recordCScalarFeature(element)
 		return

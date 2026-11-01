@@ -1210,16 +1210,18 @@ fn i32 main() { return unsafe { consume_%[1]s(make_%[1]s()) }; }
 	}
 }
 
-func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
+func TestEmitExactCScalarPointerTransport(t *testing.T) {
 	t.Parallel()
 	for _, cScalar := range hir.CScalarTypes() {
 		typeRef := cScalar.String()
 		t.Run(typeRef, func(t *testing.T) {
 			program := lowerSource(t, "module main;\nunsafe extern C fn i32 consume_pointer(ptr "+typeRef+" value);\nfn i32 main() { return unsafe { consume_pointer(null) }; }\n")
-			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-			var capability cbackend.CapabilityError
-			if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "foreign raw-pointer element type \""+typeRef+"\"") {
-				t.Fatalf("Emit() error = %v", err)
+			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(unit.Source, "consume_pointer(const ") {
+				t.Fatal("missing pointer-to-const declaration")
 			}
 		})
 	}

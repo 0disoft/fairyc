@@ -45,8 +45,8 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 	if _, array := e.arrayByType[value]; array {
 		return true
 	}
-	if element, _, pointer := hir.RawPointerElement(value); pointer {
-		_, err := e.foreignPointerElementCType(element)
+	if _, _, pointer := hir.RawPointerElement(value); pointer {
+		_, err := e.foreignCType(value, false)
 		return err == nil
 	}
 	_, resource := e.resourceByType[value]
@@ -140,7 +140,21 @@ func (e *emissionAnalysis) safeBorrowCType(value hir.Type) (string, bool) {
 	}
 	pointee := ""
 	canonical := canonicalCValueType(element)
-	if index, found := e.resourceByType[canonical]; found {
+	if hir.IsCScalar(canonical) {
+		var err error
+		pointee, err = e.foreignCType(canonical, false)
+		if err != nil {
+			return "", false
+		}
+	} else if leaf, innerMutable, pointer := hir.RawPointerElement(canonical); pointer && mutable && innerMutable && hir.IsCScalar(leaf) {
+		// Only a mutable slot containing an exact mutable C-scalar pointer.
+		// In particular, this is T **, never the unsound const T ** conversion.
+		var err error
+		pointee, err = e.foreignCType(canonical, false)
+		if err != nil {
+			return "", false
+		}
+	} else if index, found := e.resourceByType[canonical]; found {
 		pointee = fmt.Sprintf("fy_resource_%d", index)
 	} else if index, found := e.arrayByType[canonical]; found {
 		pointee = e.arrayCTypeName(index)

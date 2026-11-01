@@ -54,8 +54,12 @@ func (e *emissionAnalysis) foreignCType(value hir.Type, result bool) (string, er
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
 		if nestedElement, nestedMutable, nested := hir.RawPointerElement(element); nested {
-			if mutable && nestedMutable && nestedElement == hir.TypeVoid {
-				return "void * *", nil
+			if mutable && nestedMutable && (nestedElement == hir.TypeVoid || hir.IsCScalar(nestedElement)) {
+				pointee, err := e.foreignPointerElementCType(nestedElement)
+				if err != nil {
+					return "", err
+				}
+				return pointee + " * *", nil
 			}
 			return "", fmt.Errorf("foreign raw-pointer nesting type %q", value)
 		}
@@ -86,6 +90,11 @@ func (e *emissionAnalysis) foreignCType(value hir.Type, result bool) (string, er
 }
 
 func (e *emissionAnalysis) foreignPointerElementCType(value hir.Type) (string, error) {
+	if hir.IsCScalar(value) {
+		// Preserve the provider's exact type and target availability, even for a
+		// null pointer. Representation-equal Fairy scalars are not substituted.
+		return e.foreignCType(value, false)
+	}
 	switch value {
 	case hir.TypeVoid:
 		return "void", nil
