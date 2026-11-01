@@ -88,7 +88,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E4401` | The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. |
 | `E4402` | A `source_location()` call has no valid canonical source path or exact retained line geometry. |
 | `E4501` | Generic source preparation rejects a malformed, colliding, shadowing, or reserved declaration or binding. |
-| `E4502` | A generic call requires supported explicit scalar type arguments with the declared arity. |
+| `E4502` | A generic call requires supported explicit scalar type arguments with the declared arity and an exact implementation for any static operation. |
 | `E4503` | A generic declaration or concrete request exceeds a catalog or expansion limit, or triggers a specialization cycle. |
 | `E5101` | Raw-pointer or unchecked operation appears outside an unsafe boundary. |
 | `E5102` | Raw foreign signature contains a safe reference. |

@@ -39,6 +39,8 @@ func genericSourceDiagnosticOwned(err error, input semantic.PackageInput, owners
 		code = "E4502"
 	case genericsource.FailureExpansion:
 		switch genericplan.ErrorCode(err) {
+		case genericplan.CodeImplementationMissing:
+			code = "E4502"
 		case genericplan.CodeSpecializationCycle, genericplan.CodePlanningBudgetExceeded:
 			code = "E4503"
 		default:

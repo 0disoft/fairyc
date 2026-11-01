@@ -89,6 +89,7 @@ type expander struct {
 	imports               map[string]*expander
 	allowPublic           bool
 	requests              map[string]diagnostic.Span
+	operations            map[string]*staticOperation
 	allowNominal          bool
 	allowStorage          bool
 	allowStorageTransfers bool
@@ -206,6 +207,10 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				return nil, err
 			}
 			declaration.Definition = genericplan.DigestText("source-function-ast-v0", string(body))
+			if op := x.operations[fn.Name]; op != nil {
+				declaration.Definition = op.definition
+				declaration.Constraints = []genericplan.CapabilityConstraint{{Capability: op.capability, Arguments: []genericplan.TypeExpression{genericplan.ParameterType(fn.TypeParameters[0])}}}
+			}
 			if x.allowPublic {
 				// Ordinary calls also depend on exact import binding, even when
 				// they do not create an edge in the generic dependency graph.
@@ -219,6 +224,9 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 					return nil, err
 				}
 				declaration.Definition = genericplan.DigestText("source-package-function-v0", string(body)+"\n"+string(encoded))
+			}
+			if op := x.operations[fn.Name]; op != nil {
+				declaration.Definition = genericplan.DigestText("source-static-bound-operation-v1", declaration.Definition.String()+op.definition.String())
 			}
 			if err := b.AddDeclaration(declaration); err != nil {
 				return nil, x.at(fn.Span, FailureDeclaration, err)
@@ -353,6 +361,18 @@ func requestKey(declaration genericplan.DeclarationID, arguments []genericplan.T
 }
 
 func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeReference, names map[string]string) (ast.Function, error) {
+	var err error
+	fn, err = x.instantiateOperation(fn, bindings)
+	if err != nil {
+		return ast.Function{}, err
+	}
+	attrs := make([]ast.Attribute, 0, len(fn.Attributes))
+	for _, a := range fn.Attributes {
+		if a.Name != "interface" && a.Name != "implements" {
+			attrs = append(attrs, a)
+		}
+	}
+	fn.Attributes = attrs
 	var typeError error
 	t := transform{bindings: bindings, expression: func(e *ast.Expression) error {
 		return x.rewriteSpecialization(e, names)

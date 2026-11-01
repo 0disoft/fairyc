@@ -67,3 +67,9 @@ replaced by a speculative object model.
 This decision closes the current post-Stage 0 modern-concept queue. It does not reject user-defined
 generics forever; it requires generics to establish their own bounded value before constraints are
 designed around them.
+
+## Later bounded reopening
+
+The maintainer-requested [ADR 0495 prototype](0495-explicit-static-operation-interfaces.md)
+supersedes this deferral only for explicitly implemented single-operation scalar interfaces.
+The broader method-set and dynamic-interface families remain deferred.
