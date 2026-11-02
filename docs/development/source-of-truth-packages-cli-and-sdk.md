@@ -380,3 +380,10 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Contract: `docs/package/remote-sources-v1.md`; CLI admission: `docs/cli/command-contract.md`.
 - Implementation and focused acceptance: `internal/packagesource/`, `internal/cli/package_fetch.go`, `internal/cli/package_fetch_test.go`.
 - Windows receipt and deferred Linux replay: `docs/ops/windows-remote-packages-20261101.md` and `docs/development/ordered-work-20261031.md`.
+
+## Fairy candidate direct scalar generic transport
+
+- Owner: `docs/adr/0494-broader-scalar-generic-transport.md` and `docs/architecture/candidate-generic-transport-v1.md`.
+- Authored admission and scalar mapping: `examples/lexer_candidate/src/generic_transport_scalars.fy`, `module_types.fy`, `generic_concrete_types.fy`, `generic_signature_diagnostics.fy` and `module_unit_generics.fy` in the same directory.
+- Native replay: `internal/cli/candidate_generic_transport_test.go`, `internal/cli/candidate_generic_transport_pipeline_test.go`, and `examples/lexer_candidate/tests/module_generic_transport.fy`.
+- Windows evidence and deferred Linux/interpreter/cache limits: `docs/ops/windows-candidate-generics-20261102.md` and `docs/development/ordered-work-20261031.md`.

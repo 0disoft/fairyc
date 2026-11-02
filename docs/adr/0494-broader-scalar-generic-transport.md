@@ -1,6 +1,6 @@
 # ADR 0494: Broader direct scalar generic transport
 
-- Status: Accepted for Go Stage 0 prototype
+- Status: Accepted for Go Stage 0 and bounded Fairy candidate prototypes
 - Date: 2026-11-01
 - Extends ADR 0385's executable signature subset.
 
@@ -22,8 +22,17 @@ f32/f64 as direct extern-C scalar ABI types.
 Private, explicit-file and package-aware compilation pass; generic memory/fresh-session
 disk cold/warm and both emission profiles are checked. Windows MSVC 14.51.36231
 C11/C17 x low/optimized runs return 42 with empty streams. Native Linux remains in the
-maintainer's batched queue. SDK/candidate parity, language-version promotion, full-suite
+maintainer's batched queue. Broader SDK parity, language-version promotion, full-suite
 and hosted CI evidence are not claimed; API flags, ABI, dependencies and runners do not change.
 
 Reproduce with `go test -mod=readonly ./internal/compiler -run '^(TestGenericSignature|TestBroaderGenerics)' -count=1 -v`
 and `go test -mod=readonly ./internal/workspacecompiler -run '^TestBroaderGenericsScalarCache$' -count=1 -v`.
+
+The [Fairy candidate transport contract](../architecture/candidate-generic-transport-v1.md)
+and [Windows receipt](../ops/windows-candidate-generics-20261102.md) add direct
+value admission, thirteen concrete scalar identities, public type spelling,
+copy/reassignment/defer transport, current-source artifact restoration and C11
+low/optimized native execution. Its private C observers do not widen the extern-C
+scalar lane or establish candidate aggregate-by-value FFI parity. Native Linux,
+candidate interpreter transport and whole-package disk-cache acceptance remain
+outside that receipt. Static interfaces and copied closures are separate slices.
