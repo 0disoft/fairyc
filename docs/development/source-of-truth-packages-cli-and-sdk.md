@@ -394,3 +394,10 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Declaration, wrapper and digest owners: `examples/lexer_candidate/src/static_operation_declarations.fy`, `static_operation_syntax.fy`, `static_operation_identity.fy` and the generic source/module-unit consumers named by the architecture page.
 - Native admission, cross-package Go identity oracle and restored-artifact C replay: `internal/cli/candidate_static_operation*_test.go` and `examples/lexer_candidate/tests/static_operation*.fy`.
 - Windows evidence and deferred Linux/cache/CLI limits: `docs/ops/windows-candidate-static-operations-20261102.md` and `docs/development/ordered-work-20261031.md`.
+
+## Fairy candidate copied local closures
+
+- Owner: `docs/adr/0496-explicit-copied-local-closures.md` and `docs/architecture/candidate-copied-closures-v1.md`.
+- Syntax, admission, private lifting and ownership: `examples/lexer_candidate/src/body_copied_closure.fy`, `copied_closure_admission.fy`, `copied_closure_lower.fy`, `copied_closure_tables.fy` and `copied_closure_reach.fy`.
+- Native admission, Go identity oracle and restored-artifact C replay: `internal/cli/candidate_copied_closure*_test.go` and `examples/lexer_candidate/tests/copied_closure*.fy`.
+- Windows evidence and deferred Linux/interpreter/cache/CLI scope: `docs/ops/windows-candidate-copied-closures-20261102.md` and `docs/development/ordered-work-20261031.md`.
