@@ -393,7 +393,9 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Owner: `docs/adr/0494-broader-scalar-generic-transport.md` and `docs/architecture/candidate-generic-transport-v1.md`.
 - Authored admission and scalar mapping: `examples/lexer_candidate/src/generic_transport_scalars.fy`, `module_types.fy`, `generic_concrete_types.fy`, `generic_signature_diagnostics.fy` and `module_unit_generics.fy` in the same directory.
 - Native replay: `internal/cli/candidate_generic_transport_test.go`, `internal/cli/candidate_generic_transport_pipeline_test.go`, and `examples/lexer_candidate/tests/module_generic_transport.fy`.
-- Windows evidence and deferred Linux/interpreter/cache limits: `docs/ops/windows-candidate-generics-20261102.md` and `docs/development/ordered-work-20261031.md`.
+- Historical source/artifact evidence: `docs/ops/windows-candidate-generics-20261102.md`.
+- Full Windows CLI and cross-package fresh-process cache: `internal/cli/candidate_generic_cli_test.go`, `candidate_generic_cli_observer_test.go`, `candidate_generic_cli_cache_test.go` and `docs/ops/windows-candidate-generics-cli-cache-20261103.md`.
+- Deferred native Linux replay and remaining interpreter/ABI scope: `docs/development/ordered-work-20261031.md` and `docs/architecture/candidate-generic-transport-v1.md`.
 
 ## Fairy candidate static operation interfaces
 

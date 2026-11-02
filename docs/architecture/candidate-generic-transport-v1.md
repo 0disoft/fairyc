@@ -2,7 +2,8 @@
 
 - Owner: [ADR 0494](../adr/0494-broader-scalar-generic-transport.md).
 - Status: Bounded Windows prototype; native Linux remains deferred.
-- Evidence: [Windows receipt](../ops/windows-candidate-generics-20261102.md).
+- Evidence: [source and native receipt](../ops/windows-candidate-generics-20261102.md)
+  and [full CLI and persistent-cache receipt](../ops/windows-candidate-generics-cli-cache-20261103.md).
 
 The authored compiler admits direct `i8`, `i16`, `isize`, `u16`, `u64`, `f32`
 and `f64` generic parameters/results alongside the original six scalars. Explicit
@@ -22,14 +23,37 @@ Option/Result and storage generic forms containing the extension remain closed.
 type lookup, early signature diagnostics, detached cleanup type validation and
 public type spelling recognize the new direct values. Public interface hashes
 and whole-project source restoration retain their existing identities and wire
-format; the native fixture restores the complete artifact against current sources
-before emission. This does not claim a new whole-package disk-cache acceptance run.
+format. The [2026-11-03 Windows receipt](../ops/windows-candidate-generics-cli-cache-20261103.md)
+checks ten separate CLI processes per compiler profile through cold and locked
+checks, development/release build and run, JSON test listing, and interpreter and
+native tests. Its cross-package persistent-cache test runs a public `pick<T>` and
+private `sink<T>` through fourteen fresh processes per profile, and both compiler
+profiles passed. Built products and `run` return 42 with empty output, and each
+test invocation reports one passing test.
 
 The direct extern-C scalar lane stays unchanged. The native candidate probe uses
 private C helpers calling generated ordinary functions, with an independent C
 observer supplying signed boundaries, unsigned maxima and exact floating values.
 It does not establish candidate aggregate-by-value FFI parity. The owning Go
 fixture separately exercises its existing repr(C) observers.
+
+The CLI fixture keeps private typed observer entries reachable through
+literal-false guarded calls to recursive source-only seeds, which never execute.
+It extracts their exact unique C signatures from a captured fresh `--packet-input`
+rather than hard-coding function IDs or exporting public source symbols. A
+test-only capture proxy saves those bytes and forwards arguments and streams to
+the original C-only Go companion, then restores it during cleanup. A separate C
+observer supplies real scalar arguments, calls the seven captured entries and
+compares complete object bytes, including signed zero, `UINT64_MAX` and signed
+negative values. This observer is compiled with the low C consumer profile only;
+product builds continue to use development and release profiles. The seven
+extension types remain transport-only: this evidence adds no scalar literal or
+arithmetic admission.
+
+The new fixture compiles C11. It does not add C17 evidence; the earlier Go
+repr(C) C11/C17 receipt retains that separate result. Normal interpreter tests use
+the original scalar constructors and do not establish seven-type literal,
+arithmetic or complete interpreter-runtime execution.
 
 Implementation and acceptance owners:
 
@@ -44,3 +68,6 @@ Implementation and acceptance owners:
   `module_generic_transport.fy`.
 - `internal/cli/candidate_generic_transport_test.go` and
   `internal/cli/candidate_generic_transport_pipeline_test.go`.
+- `internal/cli/candidate_generic_cli_test.go`,
+  `internal/cli/candidate_generic_cli_observer_test.go` and
+  `internal/cli/candidate_generic_cli_cache_test.go`.

@@ -53,3 +53,13 @@ separate slices.
 No public CLI/API, SDK ABI, DB, dependency, version, runner or CI configuration
 changes. No push, deployment, publication or workflow dispatch. Changes are scoped
 source, tests, oracle and documentation; cache/build output remains ignored.
+
+## Later evidence
+
+This 2026-11-02 receipt remains the historical source and native evidence above.
+The [2026-11-03 full CLI and persistent-cache receipt](windows-candidate-generics-cli-cache-20261103.md)
+supersedes its private-harness-only CLI limitation with a full candidate CLI pass
+at both compiler profiles and a whole-package persistent-cache pass at both cache
+profiles. The C17, seven-type interpreter-operation, native Linux, full
+`go test ./...`, hosted CI, self-hosting and clean-machine limits in this
+historical receipt stand.
