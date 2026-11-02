@@ -69,6 +69,12 @@ The public signature, MIR, language semantics, ABI, cache wire format and C link
 the compiler may still inline the body. No warning is suppressed and no performance result is
 claimed.
 
+For marked zero-parameter inline i32 bodies, the Go backend instead reads the existing private
+volatile divisor in its division guards under `_MSC_VER`. This keeps constant division traps from
+making a caller continuation appear unreachable; the existing addition-overflow proof remains
+unchanged. The Fairy emitter passes the named zero-parameter cases without an additional barrier.
+See the [zero-parameter receipt](../ops/windows-candidate-inline-zero-traps-20261103.md).
+
 The Go and Fairy `FYCPARTS1` readers recognize ordered inline header definitions,
 reject duplicates between header/body units and reject inline definitions in
 body units. A program whose only function is inline may still have its separate
@@ -108,5 +114,7 @@ and [generic receipt](../ops/windows-candidate-generic-inline-cli-cache-20261103
 for results and reproduction. Windows `test` retains its non-cache entry.
 The [inline-trap receipt](../ops/windows-candidate-inline-traps-20261103.md) covers
 division-by-zero, signed-division-overflow and addition-overflow through nongeneric and generic
-bool-wrapper callers. Zero-parameter traps, the full operator matrix, C17, native Linux,
+bool-wrapper callers. The [zero-parameter follow-up](../ops/windows-candidate-inline-zero-traps-20261103.md)
+adds literal `10/0`, `-2147483648/-1` and `2147483647+1` through both caller families, plus a
+successful zero-parameter `40+2` test after the traps. The full operator matrix, C17, native Linux,
 full-suite/hosted CI and distribution remain outside this evidence.

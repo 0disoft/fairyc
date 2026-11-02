@@ -103,3 +103,10 @@ away. The [trap receipt](../ops/windows-candidate-inline-traps-20261103.md) boun
 division-by-zero, signed-division-overflow and addition-overflow. This adds no warning suppression,
 public contract, MIR, ABI or cache-wire change, and does not establish zero-parameter or full
 constant-call behavior.
+
+The [zero-parameter follow-up](../ops/windows-candidate-inline-zero-traps-20261103.md) extends the
+same three categories to literal-only bodies. Go commit `b80b01f8` reads the existing private
+volatile divisor in marked zero-parameter inline i32 division guards under `_MSC_VER`. Its
+addition-overflow non-returning proof stays unchanged. The Fairy emitter passes these named
+cases without a new production change. No warning suppression, public contract, MIR, ABI or
+cache-wire change is introduced; full constant-call behavior remains unproven.

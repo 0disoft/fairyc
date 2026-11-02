@@ -380,6 +380,7 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Full Windows inline CLI and cross-package fresh-process cache: `internal/cli/candidate_inline_cli_test.go`, `candidate_inline_cli_cache_test.go` and `docs/ops/windows-candidate-inline-cli-cache-20261103.md`.
 - Generic callers of nongeneric cross-package inline exports: `internal/cli/candidate_generic_inline_cli_test.go`, `candidate_generic_inline_cli_cache_test.go` and `docs/ops/windows-candidate-generic-inline-cli-cache-20261103.md`.
 - Inline arithmetic trap diagnostics, cached execution and native-test continuation: `internal/cli/candidate_inline_trap_fixture_test.go`, `candidate_inline_trap_cli_test.go` and `docs/ops/windows-candidate-inline-traps-20261103.md`; private MSVC parameter barriers live in `internal/cbackend/functions.go` and `examples/lexer_candidate/src/module_unit_c_calls.fy`.
+- Zero-parameter inline arithmetic traps and successful continuation: `internal/cbackend/inline_zero_trap_test.go`, the same CLI trap fixtures and `docs/ops/windows-candidate-inline-zero-traps-20261103.md`; the Go-only private MSVC divisor-guard correction lives in `internal/cbackend/terminators.go`.
 - Go/Fairy candidate v5 encoder, complete no-inline key and source-boundary evidence: `docs/ops/windows-candidate-parity-20261102.md`.
 - Candidate parity probes: `internal/cli/candidate_cache_key_parity_test.go`, `internal/cli/candidate_complete_keys_parity_test.go`, `internal/cli/candidate_inline_boundary_test.go`.
 

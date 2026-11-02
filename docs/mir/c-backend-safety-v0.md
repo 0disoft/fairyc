@@ -54,7 +54,11 @@ preprocessor removes it on other compilers. It prevents MSVC from folding consta
 always-trapping inline call and rejecting the caller's valid MIR continuation. It does not suppress
 warnings or change signatures, MIR, language behavior, ABI or cache transport. Evidence covers
 division by zero, signed division overflow and addition overflow; it is not a general proof for
-zero-parameter traps or every arithmetic form and target.
+every arithmetic form and target. The [zero-parameter follow-up](../ops/windows-candidate-inline-zero-traps-20261103.md)
+adds three named constant-expression traps. In the Go backend, marked zero-parameter inline i32
+division guards read the existing private volatile divisor under `_MSC_VER`; other C consumers
+retain the original guards. Constant addition overflow keeps the existing proven non-returning
+path. The Fairy emitter needs no additional correction for the named zero-parameter cases.
 
 Typed unary `~` and matching-type `&`, `^`, and `|` preserve the exact verified `i32`, `u8`, `u32`, or `usize` result.
 The signed path uses explicit bit-preserving `uint32_t` transport; unsigned paths use their exact

@@ -34,6 +34,10 @@ nongeneric inline dependency, with matching Go reference results.
 The [arithmetic-trap follow-up](../ops/windows-candidate-inline-traps-20261103.md)
 records the MSVC constant-argument regression correction and compares inline
 provider locations and canonical test failures across ordinary/generic callers.
+The [zero-parameter follow-up](../ops/windows-candidate-inline-zero-traps-20261103.md) adds
+literal-only division and addition traps, the Go MSVC divisor-guard correction, and a successful
+zero-parameter expression after the test failures. The Fairy emitter needs no new correction
+for these cases; Linux execution stays in the existing batched queue.
 Direct scalar generics now also have [Fairy candidate Windows evidence](../ops/windows-candidate-generics-20261102.md): seven new transport types, source/artifact restoration and four generated C executions. The [generic CLI/cache follow-up](../ops/windows-candidate-generics-cli-cache-20261103.md) adds full Windows commands, actual packet-value observations and cross-package fresh-process restoration. The [static operation candidate receipt](../ops/windows-candidate-static-operations-20261102.md) now records Windows call, identity and artifact/C parity. Its [full CLI/cache follow-up](../ops/windows-candidate-static-operations-cli-cache-20261103.md) covers Windows commands, actual scalar selection and cross-package fresh-process cache admission. The [copied local closure candidate receipt](../ops/windows-candidate-copied-closures-20261102.md) adds bounded syntax, snapshot calls, Go-matching source identities and restored-artifact C execution. Its [full CLI/cache follow-up](../ops/windows-candidate-copied-closures-cli-cache-20261103.md) tracks Windows command and fresh-process cache integration.
 
 `Next / in progress` includes the routine bounded-contract and implementation work for that row.
