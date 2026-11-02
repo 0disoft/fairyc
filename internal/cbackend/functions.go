@@ -33,6 +33,17 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		parameters[parameter] = struct{}{}
 		fmt.Fprintf(output, "    (void)fy_l_%d;\n", parameter)
 	}
+	if function.InlineBody != "" && len(function.Parameters) != 0 {
+		// MSVC can infer an always-trapping inline call from constant actuals
+		// and reject its caller's valid MIR continuation with C4702. Read each
+		// private parameter once through volatile storage before normal use;
+		// the function may still inline, but checked guards retain runtime input.
+		output.WriteString("#if defined(_MSC_VER)\n")
+		for _, parameter := range function.Parameters {
+			fmt.Fprintf(output, "    volatile int32_t fy_inline_arg_%d = fy_l_%d;\n    fy_l_%d = fy_inline_arg_%d;\n", parameter, parameter, parameter, parameter)
+		}
+		output.WriteString("#endif\n")
+	}
 	for _, local := range collectLocals(*function) {
 		if _, parameter := parameters[local]; parameter {
 			continue
