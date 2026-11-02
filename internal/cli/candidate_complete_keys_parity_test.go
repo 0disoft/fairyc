@@ -99,6 +99,12 @@ func TestCandidateCompleteCacheKeysV5(t *testing.T) {
 }
 
 func candidateParityBuildParts(t *testing.T, root string) (cbackend.BuildUnit, string) {
+	return candidateParityBuildPartsWithSystemImports(t, root, nil)
+}
+
+// Some authored CLI commands call a named kernel32 import directly. Keep those
+// in the emitted header and native link; they have no project runtime body.
+func candidateParityBuildPartsWithSystemImports(t *testing.T, root string, imports map[string]bool) (cbackend.BuildUnit, string) {
 	t.Helper()
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
@@ -125,7 +131,7 @@ func candidateParityBuildParts(t *testing.T, root string) (cbackend.BuildUnit, s
 	}
 	var standard []string
 	for _, symbol := range build.Unit.ForeignSymbols {
-		if !strings.HasPrefix(symbol, "fairyc_private_windows_") {
+		if !strings.HasPrefix(symbol, "fairyc_private_windows_") && !imports[symbol] {
 			standard = append(standard, symbol)
 		}
 	}
