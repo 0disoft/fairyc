@@ -11,9 +11,14 @@ import (
 )
 
 func TestCandidateInlineTrapCLI(t *testing.T) {
+	runCandidateInlineTrapCLI(t, inlineArithmeticTraps)
+}
+
+func runCandidateInlineTrapCLI(t *testing.T, fixture inlineTrapFixture) {
+	t.Helper()
 	t.Setenv("FAIRYC_CLOSURE_CLI_PROFILE", os.Getenv("FAIRYC_INLINE_CLI_PROFILE"))
 	profiles := copiedClosureCLIProfiles(t)
-	oracle := inlineTrapReference(t)
+	oracle := fixture.reference(t)
 	for _, profile := range profiles {
 		t.Run(profile.Name, func(t *testing.T) {
 			image := copiedClosureCLIHost(t, profile)
@@ -21,8 +26,8 @@ func TestCandidateInlineTrapCLI(t *testing.T) {
 			calls := 0
 			for family := 0; family < 2; family++ {
 				var last string
-				for i, item := range inlineTrapCases {
-					root := inlineTrapWorkspace(t, i, family == 1)
+				for i, item := range fixture.cases {
+					root := fixture.workspace(t, i, family == 1)
 					packet := filepath.Join(root, "observed.bin")
 					t.Setenv("FAIRYC_GENERIC_CLI_PACKET", packet)
 					command := copiedClosureCommand{t: t, image: image, root: root}
@@ -51,14 +56,14 @@ func TestCandidateInlineTrapCLI(t *testing.T) {
 				command := copiedClosureCommand{t: t, image: image, root: last}
 				for i, flags := range inlineTrapTestFlags {
 					out, diagnostic := command.run(ExitProgramTrap, append([]string{"test", "--json", "--locked"}, flags...)...)
-					checkInlineTrapReport(t, out, i != 0, i == 2)
+					fixture.checkReport(t, out, i != 0, i == 2)
 					if diagnostic != "" || out != oracle.reports[family][i] {
 						t.Fatalf("family=%d engine=%d: stdout=%s stderr=%q want=%s", family, i, out, diagnostic, oracle.reports[family][i])
 					}
 				}
 				calls += command.calls
 			}
-			t.Logf("%d independent CLI processes; %d cold/warm trap pairs and six exact Go-matching test reports", calls, 2*len(inlineTrapCases))
+			t.Logf("%d independent CLI processes; %d cold/warm trap pairs and six exact Go-matching test reports", calls, 2*len(fixture.cases))
 		})
 	}
 }

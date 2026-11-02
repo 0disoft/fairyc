@@ -8,16 +8,31 @@ import (
 	"testing"
 )
 
-var inlineTrapCases = [...]struct {
+type inlineTrapCase struct {
 	name, expression, category string
 	line                       int
-}{
-	{"divzero", "divide(10,0)", "division-by-zero", 5},
-	{"signed", "divide(-2147483648,-1)", "signed-division-overflow", 5},
-	{"overflow", "add(2147483647)", "integer-overflow", 3},
-	{"zero_divzero", "zero_divide()", "division-by-zero", 8},
-	{"zero_signed", "zero_signed()", "signed-division-overflow", 9},
-	{"zero_overflow", "zero_add()", "integer-overflow", 10},
+}
+
+type inlineTrapFixture struct {
+	cases                []inlineTrapCase
+	provider, assertions string
+}
+
+var inlineArithmeticTraps = inlineTrapFixture{
+	cases: []inlineTrapCase{
+		{"divzero", "divide(10,0)", "division-by-zero", 5},
+		{"signed", "divide(-2147483648,-1)", "signed-division-overflow", 5},
+		{"overflow", "add(2147483647)", "integer-overflow", 3},
+		{"zero_divzero", "zero_divide()", "division-by-zero", 8},
+		{"zero_signed", "zero_signed()", "signed-division-overflow", 9},
+		{"zero_overflow", "zero_add()", "integer-overflow", 10},
+	},
+	provider: inlineCLIProvider + `@inline pub fn i32 zero_divide(){return 10/0;}
+@inline pub fn i32 zero_signed(){return -2147483648/-1;}
+@inline pub fn i32 zero_add(){return 2147483647+1;}
+@inline pub fn i32 zero_value(){return 40+2;}
+`,
+	assertions: "assert(a::zero_value()==42);assert(a::add(40)==42);",
 }
 
 func inlineTrapCall(name, expression string, generic bool) (declaration, call string) {
@@ -27,25 +42,21 @@ func inlineTrapCall(name, expression string, generic bool) (declaration, call st
 	return "", "a::" + expression
 }
 
-func inlineTrapWorkspace(t *testing.T, index int, generic bool) string {
+func (fixture inlineTrapFixture) workspace(t *testing.T, index int, generic bool) string {
 	t.Helper()
 	root := inlineCLIWorkspace(t)
-	writeTestSource(t, root, "libs/answer/src/answer.fy", inlineCLIProvider+`@inline pub fn i32 zero_divide(){return 10/0;}
-@inline pub fn i32 zero_signed(){return -2147483648/-1;}
-@inline pub fn i32 zero_add(){return 2147483647+1;}
-@inline pub fn i32 zero_value(){return 40+2;}
-`)
-	item := inlineTrapCases[index]
+	writeTestSource(t, root, "libs/answer/src/answer.fy", fixture.provider)
+	item := fixture.cases[index]
 	decl, call := inlineTrapCall("invoke", item.expression, generic)
 	writeTestSource(t, root, "src/main.fy", "module main;import answer as a;"+decl+"fn i32 main(){return "+call+";}")
 	var tests strings.Builder
 	tests.WriteString("module tests::inline;import answer as a;")
-	for i, item := range inlineTrapCases {
+	for i, item := range fixture.cases {
 		decl, call := inlineTrapCall("invoke_"+item.name, item.expression, generic)
 		tests.WriteString(decl)
 		fmt.Fprintf(&tests, "@test fn void case_%d_%s(){discard %s;}", i, item.name, call)
 	}
-	fmt.Fprintf(&tests, "@test fn void case_%d_after(){assert(a::zero_value()==42);assert(a::add(40)==42);}", len(inlineTrapCases))
+	fmt.Fprintf(&tests, "@test fn void case_%d_after(){%s}", len(fixture.cases), fixture.assertions)
 	writeTestSource(t, root, "tests/inline.fy", tests.String())
 	return root
 }
@@ -61,7 +72,7 @@ func checkInlineTrapDiagnostic(t *testing.T, diagnostic, category string, wantLi
 	}
 }
 
-func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
+func (fixture inlineTrapFixture) checkReport(t *testing.T, output string, native, release bool) {
 	t.Helper()
 	var report stableTestExecutionReport
 	if err := json.Unmarshal([]byte(output), &report); err != nil {
@@ -71,7 +82,7 @@ func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
 	if native {
 		engine = "native"
 	}
-	count := len(inlineTrapCases)
+	count := len(fixture.cases)
 	if report.Engine != engine || report.SchemaVersion != "fairyc.test-report/v1" || report.Count != count+1 || report.Failed != count || report.Passed != 1 || report.Status != "failed" || report.Lock != "verified" || len(report.Tests) != count+1 {
 		t.Fatal(output)
 	}
@@ -86,7 +97,7 @@ func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
 	} else if report.Target != nil || report.Profile != nil {
 		t.Fatal(output)
 	}
-	for i, item := range inlineTrapCases {
+	for i, item := range fixture.cases {
 		row := report.Tests[i]
 		if row.Identity != fmt.Sprintf("tests::inline::case_%d_%s", i, item.name) || row.Outcome != "failed" || row.TrapCategory == nil || *row.TrapCategory != item.category {
 			t.Fatal(output)
@@ -99,19 +110,20 @@ func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
 }
 
 type inlineTrapOracle struct {
-	diagnostics [2][len(inlineTrapCases)]string
+	diagnostics [2][]string
 	reports     [2][3]string
 }
 
 var inlineTrapTestFlags = [][]string{nil, {"--native"}, {"--native", "--release"}}
 
-func inlineTrapReference(t *testing.T) inlineTrapOracle {
+func (fixture inlineTrapFixture) reference(t *testing.T) inlineTrapOracle {
 	t.Helper()
 	var oracle inlineTrapOracle
 	for family := 0; family < 2; family++ {
+		oracle.diagnostics[family] = make([]string, len(fixture.cases))
 		var last string
-		for i, item := range inlineTrapCases {
-			root := inlineTrapWorkspace(t, i, family == 1)
+		for i, item := range fixture.cases {
+			root := fixture.workspace(t, i, family == 1)
 			code, out, diagnostic := runForTest([]string{"run"}, root)
 			if code != ExitProgramTrap || out != "" {
 				t.Fatalf("Go inline trap: exit=%d stdout=%q stderr=%q", code, out, diagnostic)
@@ -125,7 +137,7 @@ func inlineTrapReference(t *testing.T) inlineTrapOracle {
 			if outCode != ExitProgramTrap || diagnostic != "" {
 				t.Fatalf("Go inline test traps: exit=%d stdout=%q stderr=%q", outCode, out, diagnostic)
 			}
-			checkInlineTrapReport(t, out, i != 0, i == 2)
+			fixture.checkReport(t, out, i != 0, i == 2)
 			oracle.reports[family][i] = out
 		}
 	}
@@ -136,5 +148,5 @@ func TestCandidateInlineTrapReference(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows MSVC inline trap reference; native Linux remains deferred")
 	}
-	inlineTrapReference(t)
+	inlineArithmeticTraps.reference(t)
 }
