@@ -79,7 +79,15 @@ and invalid-source rejection. Whole-project class invalidation permits separate
 [current-source rechecked caller IR reuse](../architecture/candidate-package-unit-cache-v0.md);
 it does not require zero reused units. Fresh C uses the current inline provider.
 
+The [generic-caller receipt](../ops/windows-candidate-generic-inline-cli-cache-20261103.md)
+extends command evidence to `evaluate<i32>` and `evaluate<bool>` callers of the same
+nongeneric exports. Both specializations execute the ordered four-argument call,
+i32 minimum and division, then agree on 42. Both persistent-cache profiles pass
+all 26 commands. Generic use of these
+exports is admitted without admitting generic inline declarations or changing the
+source contract.
+
 This evidence changes no admitted forms, public API, cache wire format, ABI,
 dependencies, repository policy or CI/runner configuration. Generic-wrapper
-CLI/cache acceptance, native Linux, full-suite/hosted CI and distribution remain
-separate. No push or promotion is implied.
+full-CLI and persistent-cache acceptance are covered; native Linux,
+full-suite/hosted CI and distribution remain separate. No push or promotion is implied.

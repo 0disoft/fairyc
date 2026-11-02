@@ -5,6 +5,10 @@ for the bounded [candidate inline family](../architecture/candidate-inline-v1.md
 It records whole-command and fresh-process cache evidence for Windows; it does
 not expand the admitted body contract, cache wire format or stable ABI.
 
+The generic-caller follow-up is recorded separately in the
+[generic CLI/cache receipt](windows-candidate-generic-inline-cli-cache-20261103.md).
+This page remains the nongeneric result and scope record.
+
 - Host: Windows amd64, Go 1.27.1, MSVC 14.51.36231.
 - Full CLI owner: `internal/cli/candidate_inline_cli_test.go`.
 - Persistent-cache owner: `internal/cli/candidate_inline_cli_cache_test.go`.
