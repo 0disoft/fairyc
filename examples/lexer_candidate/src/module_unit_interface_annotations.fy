@@ -3,6 +3,8 @@ import module_unit_bind as binding;
 import module_signatures as signatures;
 import module_types as types;
 import syntax as syntax;
+import copied_closure_tables as private;
+import std::bytes as bytes;
 import module_ast_join as join;
 import std::vec as v;
 import storage_intrinsics as storage;
@@ -11,6 +13,9 @@ import module_unit_interfaces as owner;
 import module_unit_interface_work as meter;
 
 fn void request(ref mut v::Vec<owner::Annotation> table,usize root){if(root!=0){let ref mut owner::Annotation slot=v::at_mut<owner::Annotation>(table,root-1);slot.required=true;}}
+// A lifted closure is ordinary even inside a generic source span. Its admitted
+// signature/body types are concrete i32 and must not inherit the parent's T.
+fn bool closure_type(ref syntax::Parsed p,usize root){if(!syntax::closure_prepared(p) || syntax::type_at(p,root).kind!=1 || !bytes::equal(syntax::type_text(p,root),b"i32")){return false;}let n=syntax::type_at(p,root);var usize i=1;while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if(private::name(syntax::private_names(p),i+1).len!=0 && n.start>=d.start && n.end<=d.end){return true;}i+=1;}return false;}
 pub fn Result<v::Vec<owner::Annotation>,join::Problem> annotations(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref mut v::Vec<types::Type> graph,ref mut meter::Budget work){
     let p=binding::parsed(bound);var v::Vec<bool> vectors=v::empty<bool>();var usize source_index=binding::first(bound);while(source_index<binding::stop(bound)){if(!meter::charge(work,1)){return .err(meter::fail(10,source_index,0,0));}if(!v::push<bool>(ref mut vectors,signatures::sdk_vector_source(metadata,source_index)).is_ok){return .err(meter::fail(11,source_index,0,0));}source_index+=1;}var v::Vec<owner::Annotation> table=v::empty<owner::Annotation>();var usize i=0;
     while(i<syntax::type_count(p)){if(!meter::charge(work,1)){return .err(meter::fail(10,binding::first(bound),0,0));}if(!v::push<owner::Annotation>(ref mut table,owner::Annotation{.type=0,.required=false,.deferred=false}).is_ok){return .err(meter::fail(11,binding::first(bound),0,0));}i+=1;}
@@ -23,7 +28,7 @@ pub fn Result<v::Vec<owner::Annotation>,join::Problem> annotations(ref v::Vec<sy
     while(module_index<binding::stop(bound)){let original=v::at<syntax::Parsed>(sources,module_index);var usize owner=0;var v::Vec<usize> queries=v::empty<usize>();i=1;
         while(i<=syntax::type_count(original)){let n=syntax::type_at(original,i);while(owner+1<syntax::declaration_count(original) && n.start>=syntax::declaration_at(original,owner).end){owner+=1;}
             var usize query=0;
-            if(v::at<owner::Annotation>(ref table,base+i-1).required){let d=syntax::declaration_at(original,owner);if(d.generic_parameters!=0){let ref mut owner::Annotation slot=v::at_mut<owner::Annotation>(ref mut table,base+i-1);slot.deferred=true;}
+            if(v::at<owner::Annotation>(ref table,base+i-1).required){let d=syntax::declaration_at(original,owner);if(d.generic_parameters!=0 && !closure_type(original,i)){let ref mut owner::Annotation slot=v::at_mut<owner::Annotation>(ref mut table,base+i-1);slot.deferred=true;}
                 else{query=i;}}
             if(!v::push<usize>(ref mut queries,query).is_ok){return .err(meter::fail(11,module_index,n.start,n.end));}
             i+=1;

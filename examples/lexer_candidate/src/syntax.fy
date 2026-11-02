@@ -43,6 +43,9 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
 // must check both diagnostic owners; the ordinary executable parse rejects
 // lexical failures before reaching this recovery-only entry.
 pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_items){var parsed=switch(driver::parse_diagnostics(input,max_items)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!operation_syntax::needed(ref parsed) && !closures::needed(ref parsed)){return .ok(parsed);}var usize work=0;return switch(copy_mode(ref parsed,false,true,ref mut work)){case .ok(p):{.ok(p)}case .err(code):{.err(if(code==11){3}else{4})}};}
+// Source identities use written declarations and sidecars, before private lifting.
+// Re-scan is unnecessary: duplicate the owned scanner and parse its original bytes.
+pub fn Result<Parsed,u32> written_copy(ref Parsed p,ref mut usize work){let stream=switch(copy_source(p,work)){case .ok(value):{value}case .err(code):{return .err(code);}};return switch(driver::parse_diagnostics(stream,512)){case .ok(value):{.ok(value)}case .err(_):{.err(9)}};}
 pub fn ref private::Table private_names(ref Parsed p){return ref p.private_names;}
 pub fn bool closure_prepared(ref Parsed p){return private::count(ref p.private_names)!=0;}
 pub fn ref u8[] written_function(ref Parsed p,usize declaration){return private::written(ref p.private_names,declaration);}
