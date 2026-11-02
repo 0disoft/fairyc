@@ -387,3 +387,10 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Authored admission and scalar mapping: `examples/lexer_candidate/src/generic_transport_scalars.fy`, `module_types.fy`, `generic_concrete_types.fy`, `generic_signature_diagnostics.fy` and `module_unit_generics.fy` in the same directory.
 - Native replay: `internal/cli/candidate_generic_transport_test.go`, `internal/cli/candidate_generic_transport_pipeline_test.go`, and `examples/lexer_candidate/tests/module_generic_transport.fy`.
 - Windows evidence and deferred Linux/interpreter/cache limits: `docs/ops/windows-candidate-generics-20261102.md` and `docs/development/ordered-work-20261031.md`.
+
+## Fairy candidate static operation interfaces
+
+- Owner: `docs/adr/0495-explicit-static-operation-interfaces.md` and `docs/architecture/candidate-static-operations-v1.md`.
+- Declaration, wrapper and digest owners: `examples/lexer_candidate/src/static_operation_declarations.fy`, `static_operation_syntax.fy`, `static_operation_identity.fy` and the generic source/module-unit consumers named by the architecture page.
+- Native admission, cross-package Go identity oracle and restored-artifact C replay: `internal/cli/candidate_static_operation*_test.go` and `examples/lexer_candidate/tests/static_operation*.fy`.
+- Windows evidence and deferred Linux/cache/CLI limits: `docs/ops/windows-candidate-static-operations-20261102.md` and `docs/development/ordered-work-20261031.md`.

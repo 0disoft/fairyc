@@ -1,6 +1,6 @@
 # ADR 0495: Explicit static operation interfaces
 
-- Status: Accepted for Go Stage 0 prototype
+- Status: Accepted for Go Stage 0 and bounded Fairy candidate Windows prototypes
 - Date: 2026-11-01
 - Supersedes ADR 0223's deferral for this user-requested bounded family only.
 
@@ -41,3 +41,12 @@ reject. `TestStaticInterfaceCacheInvalidation` crosses a package boundary throug
 operations/algorithms and verifies memory/fresh-session disk cold/warm, provider edits,
 unrelated private edits and missing-provider rejection. Existing generic source/planner tests
 and scoped vet pass. Native Linux uses the same GCC/Clang helper later; it remains unexecuted.
+
+Fairy candidate evidence is recorded in
+[the Windows static operation receipt](../ops/windows-candidate-static-operations-20261102.md)
+and [candidate static operations v1](../architecture/candidate-static-operations-v1.md).
+Native low/optimized compilers select all thirteen scalar families, restore whole
+project artifacts and produce four passing C11 executions. Independent Go root,
+specialization and public closure identities agree across selected/unused provider
+edits and unrelated private edits. Native Linux, candidate persistent-cache
+acceptance and candidate promotion remain deferred.
