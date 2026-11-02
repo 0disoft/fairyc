@@ -278,12 +278,26 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked division in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == 0) { %sgoto fy_b_%d; }\n", rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_DIVISION_BY_ZERO", terminator.Span), failure)
-		if terminator.SwitchType == hir.TypeI64 {
-			fmt.Fprintf(output, "    if (%s == INT64_MIN && %s == -INT64_C(1)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW", terminator.Span), failure)
+		emitGuards := func(divisor string) {
+			fmt.Fprintf(output, "    if (%s == 0) { %sgoto fy_b_%d; }\n", divisor, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_DIVISION_BY_ZERO", terminator.Span), failure)
+			if terminator.SwitchType == hir.TypeI64 {
+				fmt.Fprintf(output, "    if (%s == INT64_MIN && %s == -INT64_C(1)) { %sgoto fy_b_%d; }\n", leftValue, divisor, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW", terminator.Span), failure)
+			}
+			if terminator.SwitchType == hir.TypeI32 {
+				fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { %sgoto fy_b_%d; }\n", leftValue, divisor, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW", terminator.Span), failure)
+			}
 		}
-		if terminator.SwitchType == hir.TypeI32 {
-			fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { %sgoto fy_b_%d; }\n", leftValue, rightValue, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW", terminator.Span), failure)
+		if function.InlineBody != "" && len(function.Parameters) == 0 && terminator.SwitchType == hir.TypeI32 {
+			// With no parameter to read back, keep the inline division guards
+			// opaque to MSVC through the existing private volatile divisor.
+			output.WriteString("#if defined(_MSC_VER)\n")
+			fmt.Fprintf(output, "    fy_checked_divisor_i32 = %s;\n", rightValue)
+			emitGuards("fy_checked_divisor_i32")
+			output.WriteString("#else\n")
+			emitGuards(rightValue)
+			output.WriteString("#endif\n")
+		} else {
+			emitGuards(rightValue)
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-view-index":
