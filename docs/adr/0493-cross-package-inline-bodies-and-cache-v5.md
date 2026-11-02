@@ -110,3 +110,9 @@ volatile divisor in marked zero-parameter inline i32 division guards under `_MSC
 addition-overflow non-returning proof stays unchanged. The Fairy emitter passes these named
 cases without a new production change. No warning suppression, public contract, MIR, ABI or
 cache-wire change is introduced; full constant-call behavior remains unproven.
+
+The [remainder/multiplication receipt](../ops/windows-candidate-inline-remainder-multiply-20261103.md)
+extends the Windows observations to parameterized and zero-parameter `% 0`, signed-minimum
+remainder by negative one, and `46341*46341`, through ordinary and generic bool-marker callers.
+The existing Go/Fairy guards handle these cases without another production correction. This adds
+bounded regression evidence, not a new language, cache or ABI contract.

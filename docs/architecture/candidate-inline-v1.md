@@ -118,3 +118,9 @@ bool-wrapper callers. The [zero-parameter follow-up](../ops/windows-candidate-in
 adds literal `10/0`, `-2147483648/-1` and `2147483647+1` through both caller families, plus a
 successful zero-parameter `40+2` test after the traps. The full operator matrix, C17, native Linux,
 full-suite/hosted CI and distribution remain outside this evidence.
+
+The [remainder/multiplication follow-up](../ops/windows-candidate-inline-remainder-multiply-20261103.md)
+adds `% 0`, `INT32_MIN % -1` and `46341*46341` through parameterized and zero-parameter
+exports and both caller families. Its passing sentinels observe positive/negative remainders and
+successful products after the traps. This is evidence for named i32 expressions, not all operators,
+types or constant-call forms; it introduces no new compiler implementation or source admission.
