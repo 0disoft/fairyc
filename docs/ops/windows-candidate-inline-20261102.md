@@ -6,6 +6,11 @@
 - Scope: [candidate inline v1](../architecture/candidate-inline-v1.md), extending
   the earlier [encoder/no-inline baseline](windows-candidate-parity-20261102.md).
 
+Current command/cache follow-up:
+[full CLI and persistent cache, 2026-11-03](windows-candidate-inline-cli-cache-20261103.md).
+That receipt supersedes only the command/cache limits below; the results on this
+page remain the historical source, artifact, identity and native-C evidence.
+
 ## Executed and passed
 
 | Probe | Result |

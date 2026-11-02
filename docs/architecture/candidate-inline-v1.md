@@ -1,9 +1,11 @@
 # Fairy candidate inline bodies v1
 
-- Status: Implemented bounded prototype, Windows verified; native Linux deferred.
+- Status: Implemented bounded prototype with Windows full-CLI and persistent-cache
+  evidence under both compiler profiles; native Linux is deferred.
 - Owner: [ADR 0493](../adr/0493-cross-package-inline-bodies-and-cache-v5.md),
   [cache v5](../package/whole-package-cache-v5.md), and the existing Stage 0 grammar.
-- Evidence: [Windows receipt](../ops/windows-candidate-inline-20261102.md).
+- Evidence: [source/artifact and native-C receipt](../ops/windows-candidate-inline-20261102.md)
+  and [full CLI and persistent-cache receipt](../ops/windows-candidate-inline-cli-cache-20261103.md).
 
 ## Source and identity
 
@@ -63,3 +65,24 @@ body units. A program whose only function is inline may still have its separate
 entry wrapper. Literal, frame, packet and entry bounds remain in force.
 No public C export, retained callback, new backend, target promotion or cache
 default is introduced.
+
+## Windows command acceptance
+
+Both compiler profiles pass the full authored `check/build/run/test` path with
+nongeneric cross-package inline functions. Development/release products return
+42, and interpreter/native tests cover ordered once-only arguments, i32 minimum
+and division. Unmodified companion packets place four reachable inline definitions
+in the shared header and none in body units.
+
+Both fresh-process cache profiles pass 26 commands each. It covers cold/warm restoration, selected/unused inline edits,
+private/equivalent-spelling mixed reuse, annotation changes, corrupt generations
+and rejection of a private unselected annotation. Whole-project class invalidation
+is separate from [current-source rechecked unit reuse](candidate-package-unit-cache-v0.md):
+valid caller IR can be reused while fresh C emission uses the changed owner's
+current inline body. A class edit rejects complete and all-unit hits, while cold
+or mixed rebuilding is valid.
+
+See the [command/cache receipt](../ops/windows-candidate-inline-cli-cache-20261103.md)
+for final results and reproduction. Windows `test` retains its non-cache entry.
+Generic-wrapper CLI/cache acceptance, a native arithmetic-trap matrix, C17,
+native Linux, full-suite/hosted CI and distribution remain outside this receipt.

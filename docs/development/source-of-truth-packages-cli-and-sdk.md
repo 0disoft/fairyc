@@ -376,7 +376,8 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Explicit inline export identity and cache successor: `docs/adr/0493-cross-package-inline-bodies-and-cache-v5.md`
 - Current whole-package key: `docs/package/whole-package-cache-v5.md`
 - Fairy candidate inline source/identity/artifact/cache/emission contract: `docs/architecture/candidate-inline-v1.md`.
-- Windows candidate inline execution and source-admission evidence: `docs/ops/windows-candidate-inline-20261102.md`.
+- Historical Windows candidate inline execution and source-admission evidence: `docs/ops/windows-candidate-inline-20261102.md`.
+- Full Windows inline CLI and cross-package fresh-process cache: `internal/cli/candidate_inline_cli_test.go`, `candidate_inline_cli_cache_test.go` and `docs/ops/windows-candidate-inline-cli-cache-20261103.md`.
 - Go/Fairy candidate v5 encoder, complete no-inline key and source-boundary evidence: `docs/ops/windows-candidate-parity-20261102.md`.
 - Candidate parity probes: `internal/cli/candidate_cache_key_parity_test.go`, `internal/cli/candidate_complete_keys_parity_test.go`, `internal/cli/candidate_inline_boundary_test.go`.
 

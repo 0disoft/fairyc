@@ -2,6 +2,7 @@
 
 - Status: Accepted for prototype
 - Date: 2026-11-01
+- Windows command/cache update: 2026-11-03
 - Owners: [Cache key v5](../package/whole-package-cache-v5.md),
   [Phase 3 reopening](../development/phase-status.md#phase-3-inline-reopening-2026-11-01)
 - Extends: ADRs 0173 and 0349; supersedes the no-inline portion of the 2026-10-21 Phase 3 decision.
@@ -66,3 +67,19 @@ partition observations in a separate receipt. Reopen Phase 3 only for this bound
 Linux native runs remain in the maintainer's batched queue. No target promotion or default
 cache-policy change is implied. SDK/CLI API, DB, dependencies, runtime ABI, repository hygiene
 and CI/runner configuration are unchanged; no push or hosted dispatch is authorized here.
+
+## Windows command/cache update
+
+The [CLI/cache receipt](../ops/windows-candidate-inline-cli-cache-20261103.md)
+adds full authored Windows command acceptance and 26-command fresh-process
+cache replay under both compiler profiles.
+The nongeneric caller/dependency graph verifies current inline bodies after
+source and annotation changes, canonical-body mixed reuse, corruption repair
+and invalid-source rejection. Whole-project class invalidation permits separate
+[current-source rechecked caller IR reuse](../architecture/candidate-package-unit-cache-v0.md);
+it does not require zero reused units. Fresh C uses the current inline provider.
+
+This evidence changes no admitted forms, public API, cache wire format, ABI,
+dependencies, repository policy or CI/runner configuration. Generic-wrapper
+CLI/cache acceptance, native Linux, full-suite/hosted CI and distribution remain
+separate. No push or promotion is implied.
