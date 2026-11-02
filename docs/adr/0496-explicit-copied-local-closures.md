@@ -39,6 +39,8 @@ delivered in the commit containing the [bounded expansion receipt](../ops/window
 The Fairy-authored candidate now has bounded syntax, private typed lifting, written-source
 identity and restored-artifact C transport evidence in the [candidate closure architecture](../architecture/candidate-copied-closures-v1.md)
 and [Windows receipt](../ops/windows-candidate-copied-closures-20261102.md).
-Broader closures, full CLI/cache acceptance and stable language promotion remain outside this slice.
+The [full CLI/cache follow-up](../ops/windows-candidate-copied-closures-cli-cache-20261103.md)
+tracks bounded Windows command execution and ordinary/generic fresh-process cache replay.
+Broader closures and stable language promotion remain outside this slice.
 No CLI flag, runtime ABI, dependency, DB or runner changes are made. Linux native checks stay
 in the maintainer's batched queue.

@@ -6,6 +6,10 @@
 - Host: Windows amd64, Go 1.27.1, MSVC 14.51.36231.
 - Scope: [candidate copied closures v1](../architecture/candidate-copied-closures-v1.md).
 
+The [2026-11-03 full CLI/cache follow-up](windows-candidate-copied-closures-cli-cache-20261103.md)
+supersedes this receipt's Windows interpreter, full CLI and fresh-process cache
+deferrals. The results below remain the historical source/artifact evidence.
+
 ## Executed evidence
 
 | Probe | Result and scope |

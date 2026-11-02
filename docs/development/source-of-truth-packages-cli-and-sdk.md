@@ -400,4 +400,6 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Owner: `docs/adr/0496-explicit-copied-local-closures.md` and `docs/architecture/candidate-copied-closures-v1.md`.
 - Syntax, admission, private lifting and ownership: `examples/lexer_candidate/src/body_copied_closure.fy`, `copied_closure_admission.fy`, `copied_closure_lower.fy`, `copied_closure_tables.fy` and `copied_closure_reach.fy`.
 - Native admission, Go identity oracle and restored-artifact C replay: `internal/cli/candidate_copied_closure*_test.go` and `examples/lexer_candidate/tests/copied_closure*.fy`.
-- Windows evidence and deferred Linux/interpreter/cache/CLI scope: `docs/ops/windows-candidate-copied-closures-20261102.md` and `docs/development/ordered-work-20261031.md`.
+- Windows source/artifact evidence: `docs/ops/windows-candidate-copied-closures-20261102.md`.
+- Full Windows CLI and fresh-process persistent cache: `internal/cli/candidate_copied_closure_cli_host_test.go`, `candidate_copied_closure_cli_test.go`, `candidate_copied_closure_persistent_test.go` and `docs/ops/windows-candidate-copied-closures-cli-cache-20261103.md`.
+- Deferred native Linux replay: `docs/development/ordered-work-20261031.md`.

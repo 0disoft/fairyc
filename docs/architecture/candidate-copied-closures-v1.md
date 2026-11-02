@@ -2,7 +2,7 @@
 
 The Fairy-authored compiler host implements the bounded family in
 [ADR 0496](../adr/0496-explicit-copied-local-closures.md). This does not promote
-first-class closures, a public closure ABI, or full candidate CLI support.
+first-class closures or a public closure ABI.
 
 A unique, untyped outer-body `let` binds a closure with zero to four explicit i32
 captures, zero to four i32 parameters, an i32 result, and one pure arithmetic
@@ -38,7 +38,10 @@ bodies and view/vector for-in with an active closure remain closed. Retained,
 asynchronous and cross-thread closures remain excluded.
 
 [Windows evidence](../ops/windows-candidate-copied-closures-20261102.md) covers
-private C11 transport and artifact restoration. Candidate C17, interpreter,
-fresh-session persistent cache and full CLI acceptance remain separate. Native
-Linux is intentionally deferred in the maintainer's combined validation queue.
+private C11 transport and artifact restoration. The [full CLI/cache receipt](../ops/windows-candidate-copied-closures-cli-cache-20261103.md)
+tracks Windows `check/build/run/test`, interpreter/native execution and ordinary/
+generic cross-package fresh-process disk restoration, invalidation and repair.
+Windows `test` retains its non-cache entry; complete-cache reuse is exercised by
+`check/build/run`, without caching test results. Native Linux is intentionally
+deferred in the maintainer's combined validation queue.
 No new MIR opcode, allocator, runtime ABI, dependency or cache wire version.
