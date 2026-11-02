@@ -1,6 +1,7 @@
 module module_ast_join;
 import candidate_limits as limits;
 import syntax as syntax;
+import static_operation_syntax as operation_syntax;
 import scanner as scanner;
 import body_state as body;
 import bodies as bodies;
@@ -19,7 +20,7 @@ fn usize moved(usize value,usize offset){return value+offset;}
 fn usize present(usize value,usize offset){return if(value==0){0}else{value+offset};}
 fn usize linked(usize value,usize base){return if(value==0){0}else{value+base};}
 fn usize indexed(usize count,usize value,usize base){return if(count==0){0}else{value+base};}
-fn usize token_at(ref v::Vec<usize> tokens,usize id){assert(id<v::len<usize>(tokens));return *v::at<usize>(tokens,id);}
+fn usize token_at(ref v::Vec<usize> tokens,usize id){let virtual=id>=operation_syntax::token_flag();let actual=if(virtual){id-operation_syntax::token_flag()}else{id};assert(actual<v::len<usize>(tokens));return *v::at<usize>(tokens,actual)+if(virtual){operation_syntax::token_flag()}else{0};}
 
 fn syntax::Declaration declaration(syntax::Declaration d,usize offset,usize expressions,usize statements,usize type_base,usize entries,usize fields,usize attributes_base){
     return syntax::Declaration{

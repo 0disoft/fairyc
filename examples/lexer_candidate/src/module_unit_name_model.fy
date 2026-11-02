@@ -1,5 +1,6 @@
 module module_unit_name_model;
 import module_unit_body_ast as ast;
+import static_operation_syntax as operation_syntax;
 import module_signatures as signatures;
 import module_ast_join as join;
 import scanner as scanner;
@@ -19,7 +20,7 @@ pub resource Resolved {Frame frame;v::Vec<Symbol> symbols;v::Vec<Reference> refe
 pub fn join::Problem fail(ref Context c,u32 code,usize start,usize end){return join::Problem{.code,.module_index=c.frame.module_index,.start,.end};}
 pub fn bool charge(ref mut Context c,usize amount){if(c.work>1048576 || amount>1048576-c.work){return false;}c.work+=amount;return true;}
 pub fn Context context(Frame frame){return Context{.frame,.locals=[0;128],.active=0,.scope=1,.next_scope=2,.unsafe_depth=if(frame.unsafe_function){1}else{0},.work=0};}
-pub fn ref u8[] spelling(ref ast::Ast a,ref scanner::Stream source,usize id){let n=ast::expression_at(a,id);return scanner::source_view(source)[n.start..n.end];}
+pub fn ref u8[] spelling(ref ast::Ast a,ref scanner::Stream source,usize id){let n=ast::expression_at(a,id);if(n.kind==2 && n.token>=operation_syntax::token_flag()){return scanner::token_raw(source,n.token-operation_syntax::token_flag());}return scanner::source_view(source)[n.start..n.end];}
 pub fn bool simple(ref u8[] name){if(name.len==0){return false;}for(let u8 ch in name){if(!((ch>=65 && ch<=90) || (ch>=97 && ch<=122) || (ch>=48 && ch<=57) || ch==95)){return false;}}return true;}
 fn bool named(ref scanner::Stream source,Symbol s,ref u8[] name){return if(s.kind==10){bytes::equal(name,b"this")}else{bytes::equal(scanner::source_view(source)[s.start..s.end],name)};}
 pub fn Result<usize,join::Problem> add(ref scanner::Stream source,ref mut Context c,ref mut v::Vec<Symbol> symbols,Symbol item){

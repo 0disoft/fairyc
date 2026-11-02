@@ -1,5 +1,6 @@
 module syntax;
 import syntax_parse_driver as driver;
+import static_operation_syntax as operation_syntax;
 import scanner as scanner;
 import syntax_arena_copy as arenas;
 import std::vec as v;
@@ -37,7 +38,7 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
 // Diagnostic recovery retains lexical failures in source_stream. Consumers
 // must check both diagnostic owners; the ordinary executable parse rejects
 // lexical failures before reaching this recovery-only entry.
-pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_items){return driver::parse_diagnostics(input,max_items);}
+pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_items){var parsed=switch(driver::parse_diagnostics(input,max_items)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!operation_syntax::needed(ref parsed)){return .ok(parsed);}var usize work=0;return switch(copy_mode(ref parsed,false,true,ref mut work)){case .ok(p):{.ok(p)}case .err(code):{.err(if(code==11){3}else{4})}};}
 pub fn usize source_token_count(ref Parsed parsed) { return scanner::token_count(ref parsed.source); }
 pub fn usize declaration_count(ref Parsed parsed) { return v::len<Declaration>(ref parsed.declarations); }
 pub fn usize problem_count(ref Parsed parsed) { return v::len<Problem>(ref parsed.problems); }
@@ -113,6 +114,7 @@ pub fn Expression expression_at(ref Parsed parsed, usize id) {
 }
 pub fn ref u8[] expression_text(ref Parsed parsed, usize id) {
     let Expression node = expression_at(parsed, id);
+    if(node.kind==2 && node.token>=operation_syntax::token_flag()){return scanner::token_raw(ref parsed.source,node.token-operation_syntax::token_flag());}
     if (node.kind == 2) { return scanner::source_view(ref parsed.source)[node.start..node.end]; }
     return scanner::token_raw(ref parsed.source, node.token);
 }
@@ -255,19 +257,20 @@ pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v
 // Independently own the exact parser/scanner arenas; preserve physical entry
 // order, lexical IDs, cooked-token slots and original byte spans. No rescan or
 // reparse. The caller can close the original source set immediately afterward.
-pub fn Result<Parsed,u32> copy(ref Parsed original,ref mut usize work){return copy_mode(original,false,work);}
-pub fn Result<Parsed,u32> copy_tests(ref Parsed original,ref mut usize work){return copy_mode(original,true,work);}
-fn Result<Parsed,u32> copy_mode(ref Parsed original,bool tests,ref mut usize work){
+pub fn Result<Parsed,u32> copy(ref Parsed original,ref mut usize work){return copy_mode(original,false,false,work);}
+pub fn Result<Parsed,u32> copy_tests(ref Parsed original,ref mut usize work){return copy_mode(original,true,false,work);}
+fn Result<Parsed,u32> copy_mode(ref Parsed original,bool tests,bool lower_operations,ref mut usize work){
     let source=switch(scanner::copy(ref original.source,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     var declarations=switch(arenas::copy_declarations(ref original.declarations,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let problems=switch(arenas::copy_problems(ref original.problems,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    let expressions=switch(arenas::copy_expressions(ref original.expressions,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var expressions=switch(arenas::copy_expressions(ref original.expressions,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let entries=switch(arenas::copy_entries(ref original.entries,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    let statements=switch(arenas::copy_statements(ref original.statements,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var statements=switch(arenas::copy_statements(ref original.statements,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let types=switch(arenas::copy_types(ref original.types,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let fields=switch(arenas::copy_fields(ref original.fields,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     var attributes=switch(arenas::copy_attributes(ref original.attributes,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let attribute_arguments=switch(arenas::copy_attribute_arguments(ref original.attribute_arguments,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    if(lower_operations){let code=operation_syntax::prepare(original,ref mut declarations,ref mut expressions,ref mut statements);if(code!=0){return .err(code);}}
     if(tests){consume_test_metadata(source_view(original),ref mut declarations,ref mut attributes);}
     return .ok(Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments});
 }

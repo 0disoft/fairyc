@@ -7,6 +7,8 @@ import module_types as types;
 import module_ast_join as join;
 import module_units as units;
 import syntax as syntax;
+import static_operation_declarations as operations;
+import static_operation_syntax as operation_syntax;
 import scanner as scanner;
 import std::vec as v;
 import storage_intrinsics as storage;
@@ -48,7 +50,8 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
     let valid=generics::validate(instances,sources,metadata,ref graph);if(valid.code!=0){return .err(valid);}var v::Vec<Source> owned=v::empty<Source>();var v::Vec<Body> bodies=v::empty<Body>();var usize work=0;var usize cooked=0;var units::Usage usage=units::Usage{.bytes=0,.declarations=0,.expressions=0,.statements=0,.entries=0,.types=0,.fields=0,.attributes=0,.arguments=0};var usize id=1;
     while(id<=generics::count(instances)){var instance=generics::at(instances,id);let original=v::at<syntax::Parsed>(sources,instance.module_index);let d=syntax::declaration_at(original,instance.declaration-1);
         let source_index=switch(source(ref mut owned,original,instance.module_index,ref mut usage,ref mut cooked,ref mut work)){case .ok(i):{i}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
-        let body=switch(ast::build(original,instance.declaration,ref mut work)){case .ok(p):{p}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
+        var usize provider_token=0;if(operations::operation(original,instance.declaration).kind==1){let type=types::at(ref graph,instance.result);let provider=switch(operations::select(original,instance.declaration,type.scalar,ref mut work)){case .ok(n):{n}case .err(code):{return .err(fail(code,instance.module_index,d.start,d.end));}};provider_token=operation_syntax::provider_token(original,provider);}
+        let body=switch(if(provider_token==0){ast::build(original,instance.declaration,ref mut work)}else{ast::build_operation(original,instance.declaration,provider_token,ref mut work)}){case .ok(p):{p}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
         if(!measure(ref body,ref mut usage)){return .err(fail(10,instance.module_index,d.start,d.end));}
         var v::Vec<usize> arguments=v::empty<usize>();var v::Vec<usize> parameters=v::empty<usize>();var usize i=0;
         while(i<instance.argument_count){if(!v::push<usize>(ref mut arguments,generics::argument_at(instances,instance.argument_start+i)).is_ok){return .err(fail(11,instance.module_index,d.start,d.end));}i+=1;}

@@ -43,14 +43,14 @@ fn Result<Ast,u32> empty_cleanup(syntax::Declaration input,syntax::Statement blo
     var v::Vec<ast::Statement> statements=v::empty<ast::Statement>();if(!v::push<ast::Statement>(ref mut statements,ast::Statement{.kind=block.kind,.start=block.start,.end=block.end,.expression=0,.target=0,.first=0,.second=0,.entry=0,.operator=0}).is_ok){return .err(11);}
     return .ok(Ast{.declaration=d,.expressions=v::empty<ast::Node>(),.statements,.entries=v::empty<entries::Entry>(),.types=v::empty<types::Node>(),.original_entries=v::empty<usize>(),.original_types=v::empty<usize>(),.original_expressions=v::empty<usize>(),.attributes=v::empty<attrs::Attribute>(),.arguments=v::empty<attrs::Argument>()});
 }
-fn Result<Ast,u32> copy(ref syntax::Parsed file,usize declaration,bool cleaning,ref mut usize work){
+fn Result<Ast,u32> copy(ref syntax::Parsed file,usize declaration,bool cleaning,usize provider_token,ref mut usize work){
     if(syntax::problem_count(file)!=0 || declaration==0 || declaration>syntax::declaration_count(file)){return .err(9);}var syntax::Declaration d=syntax::declaration_at(file,declaration-1);
     if(cleaning){if(d.kind!=6 || d.cleanup_body==0 || d.cleanup_attribute_count!=0){return .err(9);}}else if(d.kind!=3 || d.body==0 || d.field_count!=0 || d.cleanup_body!=0 || d.cleanup_attribute_count!=0){return .err(9);}
     if(cleaning && d.attribute_count==0 && d.entry_count==0 && d.expression==0 && d.body==0 && d.result_type==0 && d.generic_parameters==0){let block=syntax::statement_at(file,d.cleanup_body);if(block.kind==1 && block.expression==0 && block.target==0 && block.first==0 && block.second==0 && block.entry==0 && block.operator==0){return empty_cleanup(d,block,work);}}
     var selection=d;if(cleaning){selection.start=d.cleanup_start;selection.end=d.cleanup_end;}
     let m=switch(maps(file,selection,work)){case .ok(m):{m}case .err(c):{return .err(c);}};var u32 code=0;
     var v::Vec<ast::Node> expressions=v::empty<ast::Node>();var v::Vec<ast::Statement> statements=v::empty<ast::Statement>();var v::Vec<entries::Entry> entries=v::empty<entries::Entry>();var v::Vec<types::Node> types=v::empty<types::Node>();var v::Vec<usize> original_entries=v::empty<usize>();var v::Vec<usize> original_types=v::empty<usize>();var v::Vec<usize> original_expressions=v::empty<usize>();var v::Vec<attrs::Attribute> attributes=v::empty<attrs::Attribute>();var v::Vec<attrs::Argument> arguments=v::empty<attrs::Argument>();
-    var usize i=1;while(i<=syntax::expression_count(file)){if(!charge(work,1)){return .err(10);}if(*v::at<usize>(ref m.expressions,i)!=0){if(!v::push<ast::Node>(ref mut expressions,expression(syntax::expression_at(file,i),ref m,ref mut code)).is_ok || !v::push<usize>(ref mut original_expressions,i).is_ok){return .err(11);}}i+=1;}
+    var usize i=1;while(i<=syntax::expression_count(file)){if(!charge(work,1)){return .err(10);}if(*v::at<usize>(ref m.expressions,i)!=0){var node=expression(syntax::expression_at(file,i),ref m,ref mut code);if(provider_token!=0 && node.kind==2 && node.token>=1048576){node.token=provider_token;}if(!v::push<ast::Node>(ref mut expressions,node).is_ok || !v::push<usize>(ref mut original_expressions,i).is_ok){return .err(11);}}i+=1;}
     i=1;while(i<=syntax::statement_count(file)){if(!charge(work,1)){return .err(10);}if(*v::at<usize>(ref m.statements,i)!=0 && !v::push<ast::Statement>(ref mut statements,statement(syntax::statement_at(file,i),ref m,ref mut code)).is_ok){return .err(11);}i+=1;}
     i=0;while(i<syntax::entry_count(file)){if(!charge(work,1)){return .err(10);}let usize id=*v::at<usize>(ref m.entries,i+1);if(id!=0){let n=syntax::entry_at(file,i);if(!v::push<entries::Entry>(ref mut entries,entries::Entry{.kind=n.kind,.start=n.start,.end=n.end,.name_start=n.name_start,.name_end=n.name_end,.type_start=n.type_start,.type_end=n.type_end,.type_root=linked(ref m.types,n.type_root,ref mut code),.expression=linked(ref m.expressions,n.expression,ref mut code),.id}).is_ok || !v::push<usize>(ref mut original_entries,i+1).is_ok){return .err(11);}}i+=1;}
     i=1;while(i<=syntax::type_count(file)){if(!charge(work,1)){return .err(10);}if(*v::at<usize>(ref m.types,i)!=0){let n=syntax::type_at(file,i);if(!v::push<types::Node>(ref mut types,types::Node{.kind=n.kind,.start=n.start,.end=n.end,.left=linked(ref m.types,n.left,ref mut code),.right=linked(ref m.types,n.right,ref mut code)}).is_ok || !v::push<usize>(ref mut original_types,i).is_ok){return .err(11);}}i+=1;}
@@ -58,8 +58,8 @@ fn Result<Ast,u32> copy(ref syntax::Parsed file,usize declaration,bool cleaning,
     d.expression=linked(ref m.expressions,d.expression,ref mut code);d.entry_start=indexed(ref m.entries,d.entry_start,d.entry_count,ref mut code);d.body=linked(ref m.statements,d.body,ref mut code);d.cleanup_body=linked(ref m.statements,d.cleanup_body,ref mut code);d.result_type=linked(ref m.types,d.result_type,ref mut code);d.generic_parameters=0;d.attribute_start=0;d.field_start=0;d.field_count=0;
     if(code!=0){return .err(code);}return .ok(Ast{.declaration=d,.expressions,.statements,.entries,.types,.original_entries,.original_types,.original_expressions,.attributes,.arguments});
 }
-pub fn Result<Ast,u32> build(ref syntax::Parsed file,usize declaration,ref mut usize work){return copy(file,declaration,false,work);}
-pub fn Result<Ast,u32> build_cleanup(ref syntax::Parsed file,usize declaration,ref mut usize work){return copy(file,declaration,true,work);}
+pub fn Result<Ast,u32> build(ref syntax::Parsed file,usize declaration,ref mut usize work){return copy(file,declaration,false,0,work);}
+pub fn Result<Ast,u32> build_cleanup(ref syntax::Parsed file,usize declaration,ref mut usize work){return copy(file,declaration,true,0,work);}
 pub fn syntax::Declaration declaration(ref Ast p){return p.declaration;}
 pub fn usize expression_count(ref Ast p){return v::len<ast::Node>(ref p.expressions);}
 pub fn ast::Node expression_at(ref Ast p,usize id){return *v::at<ast::Node>(ref p.expressions,id-1);}
@@ -76,3 +76,5 @@ pub fn usize attribute_count(ref Ast p){return v::len<attrs::Attribute>(ref p.at
 pub fn attrs::Attribute attribute_at(ref Ast p,usize index){return *v::at<attrs::Attribute>(ref p.attributes,index);}
 pub fn usize argument_count(ref Ast p){return v::len<attrs::Argument>(ref p.arguments);}
 pub fn attrs::Argument argument_at(ref Ast p,usize index){return *v::at<attrs::Argument>(ref p.arguments,index);}
+
+pub fn Result<Ast,u32> build_operation(ref syntax::Parsed file,usize declaration,usize provider_token,ref mut usize work){return copy(file,declaration,false,provider_token,work);}

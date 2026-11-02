@@ -28,6 +28,8 @@ pub fn Info read(ref syntax::Parsed p,usize declaration){
         // The module signature owner validates const_eval placement and shape.
         if(bytes::equal(name,b"const_eval") && d.kind==3){i+=1;continue;}
         if(bytes::equal(name,b"inline") && d.kind==3){i+=1;continue;}
+        // Shape and provider coherence are checked by static_operation_declarations.
+        if((bytes::equal(name,b"interface") || bytes::equal(name,b"implements")) && d.kind==3){i+=1;continue;}
         if(!bytes::equal(name,b"effects") && d.kind==6){i+=1;continue;}
         if(!bytes::equal(name,b"effects")){info.code=3;info.start=a.start;info.end=a.end;return info;}
         if(seen || a.argument_count==0){info.code=7101;info.start=a.start;info.end=a.end;return info;}seen=true;

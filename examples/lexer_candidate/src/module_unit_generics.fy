@@ -7,6 +7,7 @@ import module_signatures as signatures;
 import module_types as types;
 import module_ast_join as join;
 import syntax as syntax;
+import static_operation_declarations as operations;
 import effect_declarations as effects;
 import storage_intrinsics as storage;
 import std::bytes as bytes;
@@ -36,6 +37,7 @@ pub fn Result<usize,join::Problem> instantiate(ref v::Vec<syntax::Parsed> source
     i=0;var usize per=0;var usize generic=0;while(i<v::len<Instance>(instances)){if(!charge(work,count+1)){return .err(fail(4503,caller,start,end));}let old=*v::at<Instance>(instances,i);if(old.argument_count!=0){generic+=1;}if(old.module_index==module_index && old.declaration==declaration){per+=1;var bool same=old.argument_count==count;var usize j=0;while(j<count && same){same=*v::at<usize>(arguments,old.argument_start+j)==*v::at<usize>(args,j);j+=1;}if(same){return .ok(i+1);}}i+=1;}
     if(v::len<Instance>(instances)>=instance_limit() || generic>=64 || per>=16){return .err(fail(4503,caller,start,end));}
     let result=signatures::specialize_type(metadata,source,module_index,declaration,d.result_type,args,graph);if(result.problem.code!=0){return .err(fail(result.problem.code,module_index,result.problem.start,result.problem.end));}
+    if(operations::operation(source,declaration).kind==1){let t=types::at(graph,result.type);switch(operations::select(source,declaration,t.scalar,ref mut work.work)){case .ok(_):{}case .err(code):{return .err(fail(code,caller,start,end));}}}
     let contract=effects::read(source,declaration-1);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}
     let t=types::at(graph,result.type);if(contract.must_use && (t.kind==1 && t.scalar==7 || t.kind!=1 && t.kind!=2 && t.kind!=4 && t.kind!=12)){return .err(fail(4201,module_index,contract.must_start,contract.must_end));}
     let usize parameter_start=v::len<usize>(parameters);i=d.entry_start;while(i<d.entry_start+d.entry_count){if(!charge(work,1)){return .err(fail(4503,caller,start,end));}let e=syntax::entry_at(source,i);if(e.kind==1){let r=signatures::specialize_type(metadata,source,module_index,declaration,e.type_root,args,graph);if(r.problem.code!=0){return .err(fail(r.problem.code,module_index,r.problem.start,r.problem.end));}let t=types::at(graph,r.type);if(t.kind==1 && t.scalar==7){return .err(fail(9,module_index,e.type_start,e.type_end));}if(v::len<usize>(parameters)>=32768 || !v::push<usize>(parameters,r.type).is_ok){return .err(fail(if(v::len<usize>(parameters)>=32768){4503}else{11},caller,start,end));}}i+=1;}

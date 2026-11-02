@@ -1,5 +1,6 @@
 module static_operation_declarations;
 import syntax as syntax;
+import scanner as scanner;
 import generic_transport_scalars as transport;
 import std::bytes as bytes;
 
@@ -13,7 +14,7 @@ fn usize marker(ref syntax::Parsed p,usize declaration,ref u8[] name){let d=synt
 pub fn Info operation(ref syntax::Parsed p,usize declaration){
     var out=empty();if(declaration==0 || declaration>syntax::declaration_count(p)){return invalid(out);}let index=marker(p,declaration,b"interface");if(index==0){return out;}out.kind=1;out.operation=declaration;if(index==4097){return invalid(out);}let d=syntax::declaration_at(p,declaration-1);let a=syntax::attribute_at(p,index-1);
     if(d.kind!=3 || d.attribute_count!=1 || a.argument_count!=0 || d.unsafe_end!=0 || d.owner_end!=0 || syntax::generic_parameter_count(p,declaration-1)!=1 || d.body==0){return invalid(out);}
-    let parameter=syntax::generic_parameter_at(p,declaration-1,0);let name=syntax::source_view(p)[parameter.start..parameter.end];if(!direct(p,d.result_type,name)){return invalid(out);}let body=syntax::statement_at(p,d.body);if(body.kind!=1 || body.expression!=0 || syntax::block_statement_count(p,d.body)!=0){return invalid(out);}
+    let parameter=syntax::generic_parameter_at(p,declaration-1,0);let name=syntax::source_view(p)[parameter.start..parameter.end];if(!direct(p,d.result_type,name)){return invalid(out);}let body=syntax::statement_at(p,d.body);if(body.kind!=1){return invalid(out);}var usize tokens=0;var usize cursor=0;while(cursor<syntax::source_token_count(p)){let t=scanner::token_info(syntax::source_stream(p),cursor);if(t.kind!=2 && t.start>=body.start && t.end<=body.end && t.start<t.end){tokens+=1;}cursor+=1;}if(tokens!=2){return invalid(out);}
     var usize i=d.entry_start;while(i<d.entry_start+d.entry_count){let e=syntax::entry_at(p,i);if(e.kind==1){if(!direct(p,e.type_root,name)){return invalid(out);}out.parameters+=1;}else{return invalid(out);}i+=1;}if(out.parameters>4){return invalid(out);}return out;
 }
 pub fn Info provider(ref syntax::Parsed p,usize declaration){

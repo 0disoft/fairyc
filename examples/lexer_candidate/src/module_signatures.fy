@@ -9,6 +9,7 @@ import module_public_interface_model as public_model;
 import module_types as types;
 import sdk_vector_plan as vectors;
 import syntax as syntax;
+import static_operation_declarations as operations;
 import module_const_eval_declarations as const_eval;
 import module_inline_declarations as inline;
 import effect_declarations as effects;
@@ -64,7 +65,7 @@ pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed>
     var usize checked=0;while(checked<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,checked);if(!catalog::source_matches(ref c,checked,source)){return .err(fail(9,checked,0,0));}var usize declaration=0;while(declaration<syntax::declaration_count(source)){let inlined=inline::read(source,declaration);if(inlined.code!=0){return .err(fail(inlined.code,checked,inlined.start,inlined.end));}let admission=const_eval::read(source,declaration);if(admission.code!=0){return .err(fail(admission.code,checked,admission.start,admission.end));}declaration+=1;}checked+=1;}
     let states=switch(state_declarations::build(sources,ref c)){case .ok(p):{p}case .err(e):{return .err(e);}};
     var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
-    var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;
+    var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;var usize operation_work=0;let operation_valid=operations::validate(p,ref mut operation_work);if(operation_valid!=0){return .err(fail(operation_valid,module_index,0,syntax::source_view(p).len));}
         let bool vector_sdk=catalog::sdk_vector_source(ref c,module_index);if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
         while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if((d.kind==3 || d.kind==9) && d.generic_parameters==0){
             if(d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
