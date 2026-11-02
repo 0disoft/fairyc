@@ -41,7 +41,7 @@ func TestCandidateStaticOperationCalls(t *testing.T) {
 		t.Fatal(err)
 	}
 	program := strings.Replace(string(raw), "module tests::static_operation_calls;", "module main;", 1)
-	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console) fn i32 main(){selected_ordinary_calls_keep_exact_types();return 0;}\n"
+	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console) fn i32 main(){selected_ordinary_calls_keep_exact_types();provider_bodies_keep_ordinary_type_checks();return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
 	copyCandidateParityModules(t, root, "module_signatures", "module_unit_bind", "module_unit_call_closure", "module_unit_values", "module_unit_value_model", "scanner", "syntax")
 	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
@@ -65,7 +65,7 @@ func TestCandidateStaticOperationIdentity(t *testing.T) {
 	}
 	program := strings.Replace(string(raw), "module tests::static_operation_plan_fixture;", "module main;", 1) + "\n@effects(console,filesystem) fn i32 main(){verify();return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
-	copyCandidateParityModules(t, root, "generic_source_plan", "generic_source_plan_input", "generic_concrete_types", "generic_package_context", "generic_source_requests", "generic_source_dependencies", "generic_source_closure", "generic_source_dependency_model", "generic_source_dependency_json", "generic_source_catalog", "generic_package_bindings", "module_catalog", "module_public_type_text", "module_public_templates", "module_generic_interface", "syntax", "scanner")
+	copyCandidateParityModules(t, root, "project_source_plan", "project_diagnostic_codes", "generic_source_plan", "generic_source_plan_input", "generic_concrete_types", "generic_package_context", "generic_source_requests", "generic_source_dependencies", "generic_source_closure", "generic_source_dependency_model", "generic_source_dependency_json", "generic_source_catalog", "generic_package_bindings", "module_catalog", "module_public_type_text", "module_public_templates", "module_generic_interface", "syntax", "scanner")
 	for _, args := range [][]string{{"run", "--", oracle}, {"run", "--release", "--locked", "--", oracle}} {
 		code, out, diagnostics := runForTest(args, root)
 		if code != ExitSuccess || out != "" || diagnostics != "" {

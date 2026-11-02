@@ -42,7 +42,7 @@ func TestCandidateStaticOperationPipeline(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeTestSource(t, root, "src/static_operation_plan_fixture.fy", strings.Replace(string(fixture), "module tests::static_operation_plan_fixture;", "module static_operation_plan_fixture;", 1))
-	copyCandidateParityModules(t, root, "generic_source_plan", "generic_source_plan_input", "generic_concrete_types", "generic_package_context", "generic_source_requests", "generic_source_dependencies", "generic_source_closure", "generic_source_dependency_model", "generic_source_dependency_json", "generic_source_catalog", "generic_package_bindings", "module_public_templates", "module_generic_interface")
+	copyCandidateParityModules(t, root, "project_source_plan", "project_diagnostic_codes", "generic_source_plan", "generic_source_plan_input", "generic_concrete_types", "generic_package_context", "generic_source_requests", "generic_source_dependencies", "generic_source_closure", "generic_source_dependency_model", "generic_source_dependency_json", "generic_source_catalog", "generic_package_bindings", "module_public_templates", "module_generic_interface")
 	build, support := candidateParityBuildParts(t, root)
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {

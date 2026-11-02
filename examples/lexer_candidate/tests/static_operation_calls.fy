@@ -18,3 +18,9 @@ let ready=switch(closure::build(ref sources,ref metadata,ref bound)){case .ok(p)
 let checked=switch(values::build(ref sources,ref metadata,ref ready)){case .ok(p):{p}case .err(e):{discard io::write_stderr_u32(e.code);discard io::write_stderr_usize(e.start);assert(false);return;}};
 var usize operations=0;var usize i=0;while(i<values::count(ref checked)){let body=values::at(ref checked,i);let f=model::frame(body);if(f.declaration==2){assert(model::call_count(body)==1);let call=model::call_at(body,0);let scalar=values::type_at(ref checked,f.result).scalar;assert(call.target_declaration==if(scalar==1){3}else{4});operations+=1;}i+=1;}assert(operations==2);
 }
+
+@test fn void provider_bodies_keep_ordinary_type_checks(){
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(b"module root;@interface fn T op<T>(T x){}@implements(op,i32) fn i32 broken(i32 x){return true;}fn i32 main(){return op<i32>(1);}")).is_ok);
+    let metadata=switch(signatures::build(ref sources)){case .ok(p):{p}case .err(_):{assert(false);return;}};let bound=switch(binding::bind(ref sources,ref metadata,0,1)){case .ok(p):{p}case .err(_):{assert(false);return;}};let ready=switch(closure::build(ref sources,ref metadata,ref bound)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(switch(values::build(ref sources,ref metadata,ref ready)){case .ok(_):{false}case .err(e):{e.code==1009}});
+}
