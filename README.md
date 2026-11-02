@@ -15,9 +15,20 @@
 - License: [Apache-2.0](LICENSE) for project-owned components; see
   [licensing scope](LICENSING.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-Fairy C is an experimental systems programming language for new native software that needs C-like control and predictable costs, explicit C interoperability, and a safer default resource model without a garbage collector or a heavy runtime.
+Fairy C is an experimental Stage 0 systems programming language for native software that needs predictable control over memory and calling costs. It provides explicit resource ownership, compile-time borrow checking, and a narrow C interoperability boundary, without a garbage collector or a heavy runtime.
 
-Fairy C does not aim to outperform every hand-tuned C program, or to make every C ownership graph safe. Its intended advantage is narrower: ordinary Fairy C code carries enough ownership, aliasing, bounds, and effect information for the compiler to reject common failures and still generate competitive machine code, without relying on build-mode-dependent undefined behavior.
+Fairy C does not aim to outperform every hand-tuned C program or make every C ownership graph safe. Its narrower goal is to reject common ownership, aliasing, bounds, and effect mistakes in ordinary Fairy C code while keeping resource lifetimes and foreign-call costs visible to the programmer.
+
+## Experimental C interoperability
+
+The current boundary supports `unsafe extern C fn` imports and synchronous, call-bounded, non-capturing callbacks. The [C callback interop example](examples/c_interop_callback/README.md) connects checked-in `main.fy` and `legacy.c`: the C `legacy_filter` passes `[2, 12, 7, 20, 1]` to the Fairy predicate `keep_large`, which accepts values `>= 10` and updates an explicit visit counter. After five synchronous callbacks, C reports `accepted=2 callbacks=5`. From the repository root on Windows amd64 with Go and MSVC/SDK, run:
+
+```text
+go run ./tools/dev/fairyc-c-interop --profile low
+go run ./tools/dev/fairyc-c-interop --profile optimized
+```
+
+This is a development harness for synchronous callbacks, not a source-export or public object-library API. Generated C11 is a compiler-private bootstrap transport, and native Linux execution is deferred.
 
 <a id="human-quickstart"></a>
 ## Quickstart

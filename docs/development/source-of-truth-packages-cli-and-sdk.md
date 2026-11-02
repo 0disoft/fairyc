@@ -2,6 +2,13 @@
 
 Part 2 of 3 of the [source index](source-of-truth.md).
 
+## Runnable C interoperability example
+
+- Contract: `docs/abi/c-abi-v0.md` and `docs/adr/0490-ordinary-synchronous-callbacks.md`.
+- Checked-in Fairy policy and C filter/header: `examples/c_interop_callback/`.
+- Windows separate-object build/run harness: `tools/dev/fairyc-c-interop/`.
+- Scope and reproduction: `examples/c_interop_callback/README.md`; Linux execution is queued in `docs/development/ordered-work-20261031.md`.
+
 ## Package graph, interface identity, and digests
 
 
