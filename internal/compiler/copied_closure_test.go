@@ -126,3 +126,15 @@ func TestCopiedClosureGenericExpansionDetachesSyntax(t *testing.T) {
 		t.Fatal("generic closure syntax is absent or aliases original input")
 	}
 }
+
+func TestCopiedClosureShadowedViewIteration(t *testing.T) {
+	text := `module main;fn i32 main(){let c=fn [] i32(i32 x){return x;};if(true){let i32 c=7;let ref u8[] view=b"xx"[..];for(let u8 x in view){discard x;}assert(c==7);}return c(42);}`
+	result, err := compiler.CheckExplicitFiles([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)})
+	if err != nil || !result.Verified {
+		t.Fatalf("shadowed closure iteration: %v %+v", err, result.Semantic)
+	}
+	out, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || out.Value != int32(42) {
+		t.Fatalf("shadowed closure iteration: %+v %v", out, err)
+	}
+}

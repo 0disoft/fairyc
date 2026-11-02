@@ -96,6 +96,7 @@ return add(2);}`
 func candidateCopiedClosureAdmissionCalls() string {
 	var out strings.Builder
 	fmt.Fprintf(&out, "checked(b%s,5);", strconv.Quote(candidateCopiedClosureProgram()))
+	fmt.Fprintf(&out, "checked(b%s,2);", strconv.Quote("module main;fn i32 main(){let c=fn [] i32(i32 x){return x;};if(true){let i32 c=7;let ref u8[] view=b\"xx\"[..];for(let u8 x in view){discard x;}assert(c==7);}return c(42);}"))
 	fmt.Fprintf(&out, "checked(b%s,0);", strconv.Quote(candidateCopiedClosureSyntaxCases()[3]))
 	base := "module root;fn i32 main(){let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}"
 	for _, replacement := range [][2]string{
