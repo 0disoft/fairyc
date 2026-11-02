@@ -4,6 +4,7 @@ import std::vec as v;
 import types as types;
 import parse_tokens as tokens;
 import body_state as state;
+import body_copied_closure as closures;
 
 pub struct Entry { u32 kind; usize start; usize end; usize name_start; usize name_end; usize type_start; usize type_end; usize type_root; usize expression; usize id; }
 
@@ -13,7 +14,9 @@ fn usize expression_inner(ref scanner::Stream stream, ref mut state::Cursor curs
     let usize token_index = cursor.index;
     let scanner::TokenInfo token = state::current(stream, cursor);
     var usize left = 0;
-    if (tokens::atom(stream,cursor.index)) {
+    if (word(stream,cursor.index,b"fn")) {
+        left=closures::parse(stream,cursor,nodes,entries,statements,type_nodes);if(left==0){return 0;}
+    } else if (tokens::atom(stream,cursor.index)) {
         state::advance(stream, cursor);
         if (token.kind == 3) {
             while (state::take(stream, cursor, b"::")) {

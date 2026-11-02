@@ -6,6 +6,7 @@ import generic_source_expression_fields as fields;
 import generic_source_statement_fields as statements;
 import generic_source_view_loop_json as view_loops;
 import syntax as syntax;
+import generic_source_copied_closure_json as closures;
 import std::bytes as bytes;
 
 // Lists are reverse parser links, never source expressions. Walk and emit in
@@ -29,7 +30,7 @@ fn bool arguments(ref syntax::Parsed p,usize tail,usize depth,ref mut bytes::Buf
 fn bool child(ref syntax::Parsed p,usize parent,usize id,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){if(id==0 || id>=parent){return json::reject(work,9);}return value(p,id,depth+1,out,work);}
 fn bool children_list(ref syntax::Parsed p,usize parent,usize tail,u32 kind,usize depth,bool keep_entries,ref mut bytes::Buffer out,ref mut json::Ledger work){let count=list_count(p,tail,kind,work);if(work.code!=0){return false;}var usize index=0;while(index<count){let link=list_entry(p,tail,count,index,work);if(work.code!=0){return false;}if(index!=0 && !json::raw(out,b",",work)){return false;}if(!child(p,parent,if(keep_entries){link}else{syntax::expression_at(p,link).left},depth,out,work)){return false;}index+=1;}return true;}
 fn bool children(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){let n=syntax::expression_at(p,id);
-    if(n.kind==1 || n.kind==2 || n.kind==17 || n.kind==28 || n.kind==33 || n.kind==12 || n.kind==24 && n.right==0){return json::raw(out,b"null",work);}if(!json::raw(out,b"[",work)){return false;}
+    if(n.kind==1 || n.kind==2 || n.kind==17 || n.kind==28 || n.kind==33 || n.kind==12 || n.kind==34 || n.kind==24 && n.right==0){return json::raw(out,b"null",work);}if(!json::raw(out,b"[",work)){return false;}
     if(n.kind==24){if(!children_list(p,id,n.right,25,depth,false,out,work)){return false;}}
     else if(n.kind==31){if(!block_expression(p,n.left,depth+1,out,work)){return false;}}
     else if(n.kind==13){if(!child(p,id,n.left,depth,out,work) || n.right==0 || n.right>=id){return json::reject(work,9);}let branches=syntax::expression_at(p,n.right);if(branches.kind!=14){return json::reject(work,9);}
@@ -51,7 +52,7 @@ fn bool children(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffer
 pub fn bool value(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffer out,ref mut json::Ledger work){if(depth>=64){return json::reject(work,10);}if(!json::charge(work,1)){return false;}if(id==0 || id>syntax::expression_count(p)){return json::reject(work,9);}let n=syntax::expression_at(p,id);if(n.start>n.end || n.end>syntax::source_view(p).len){return json::reject(work,9);}
     if(fields::kind(n.kind).len==0){return json::reject(work,if(n.kind==12 || n.kind==13 || n.kind==15 || n.kind==31){4503}else{9});}
     var usize type_arguments=if(n.kind==20){n.right}else{0};if(n.kind==10 && n.left!=0 && n.left<id && syntax::expression_at(p,n.left).kind==20){type_arguments=syntax::expression_at(p,n.left).right;}
-    if(!json::raw(out,b"{",work) || !labels(p,n,out,work) || !json::raw(out,b"\"TypeArguments\":",work) || !arguments(p,type_arguments,depth,out,work) || !json::raw(out,b",",work) || !fields::prefix(p,id,out,work) || !json::raw(out,b",\"Type\":",work)){return false;}
+    if(!json::raw(out,b"{",work) || (n.kind==34 && !closures::value(p,n,depth,out,work)) || !labels(p,n,out,work) || !json::raw(out,b"\"TypeArguments\":",work) || !arguments(p,type_arguments,depth,out,work) || !json::raw(out,b",",work) || !fields::prefix(p,id,out,work) || !json::raw(out,b",\"Type\":",work)){return false;}
     if(n.kind==23){if(!types::value(p,n.right,depth+1,out,work)){return false;}}else if(!json::raw(out,b"null",work)){return false;}
     if(!json::raw(out,b",\"Children\":",work) || !children(p,id,depth,out,work) || !json::raw(out,b",\"Block\":",work)){return false;}
     if(n.kind==12){if(!block(p,n.left,depth+1,out,work)){return false;}}else if(!json::raw(out,b"null",work)){return false;}return json::raw(out,b"}",work);

@@ -5,7 +5,7 @@ import syntax as syntax;
 import std::bytes as bytes;
 
 pub fn ref u8[] kind(u32 code){
-    if(code==1){return b"literal";}if(code==2 || code==28){return b"path";}if(code==3){return b"group";}
+    if(code==34){return b"closure";}if(code==1){return b"literal";}if(code==2 || code==28){return b"path";}if(code==3){return b"group";}
     if(code==4 || code==21 || code==22){return b"prefix";}if(code==5){return b"binary";}if(code==6){return b"call";}
     if(code==8){return b"field-expression";}if(code==9){return b"index";}if(code==10){return b"record";}if(code==11){return b"field";}
     if(code==20){return b"specialize";}if(code==23){return b"cast";}if(code==24 || code==29){return b"array";}
