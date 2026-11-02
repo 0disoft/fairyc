@@ -59,14 +59,12 @@ def main():
             if match:
                 feature, module, start, end = match.groups()
                 diagnostics.append(dict(module=module, feature=feature, start=int(start), end=int(end)))
-        expected = {'Repeated': 4, 'Forward': 4, 'Pair': 3}.get(label,
-            2 if label in {'i8', 'i16', 'isize', 'u16', 'u64', 'f32', 'f64',
-                           'Reference', 'Pointer', 'Option', 'Array'} else 0)
+        expected = 2 if label in {'Reference', 'Pointer', 'Option', 'Array'} else 0
         assert len(diagnostics) == expected, (label, stderr)
         if expected:
             assert result.returncode == 3 and not result.stdout and len(stderr.splitlines()) == expected, (label, result)
         else:
-            assert result.returncode == (3 if label == 'bool' else 0), (label, result)
+            assert result.returncode == (3 if label in {'bool', 'i8', 'i16', 'isize', 'u16', 'u64', 'f32', 'f64', 'Repeated', 'Forward', 'Pair'} else 0), (label, result)
         # Supported instantiations can fail ordinary argument typing; these are
         # intentionally not relabeled as unsupported signature diagnostics.
         number(len(sources))

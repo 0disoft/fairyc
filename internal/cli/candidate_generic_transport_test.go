@@ -1,13 +1,15 @@
 package cli
 
 import (
-	"github.com/0disoft/fairyc/internal/frontend"
-	"github.com/0disoft/fairyc/internal/source"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/source"
 )
 
 func TestCandidateGenericTransportAdmission(t *testing.T) {
@@ -33,8 +35,33 @@ func TestCandidateGenericTransportAdmission(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			var input string
+			if fixture.name == "generic_signature_diagnostics" {
+				repo, err := filepath.Abs(filepath.Join("..", ".."))
+				if err != nil {
+					t.Fatal(err)
+				}
+				compiler := filepath.Join(root, "go-reference.exe")
+				command := exec.CommandContext(t.Context(), "go", "build", "-mod=readonly", "-o", compiler, "./cmd/fairyc")
+				command.Dir = repo
+				if output, err := command.CombinedOutput(); err != nil {
+					t.Fatalf("build Go oracle: %v %s", err, output)
+				}
+				directory := filepath.Join(root, "signature-oracle")
+				command = exec.CommandContext(t.Context(), "python", "-B", "tools/verify-candidate-unsupported-signatures.py", "--compiler", compiler, "--output", directory)
+				command.Dir = repo
+				if output, err := command.CombinedOutput(); err != nil {
+					t.Fatalf("signature oracle: %v %s", err, output)
+				}
+				input = filepath.Join(directory, "fixture.bin")
+				fixture.calls += "signature_reports_match_go_original_spans_and_features();"
+			}
 			program := strings.Replace(string(raw), "module tests::"+fixture.name+";", "module main;", 1)
-			program = strings.ReplaceAll(program, "@test", "") + "\nfn i32 main(){" + fixture.calls + "return 0;}\n"
+			effects := ""
+			if input != "" {
+				effects = "@effects(filesystem) "
+			}
+			program = strings.ReplaceAll(program, "@test", "") + "\n" + effects + "fn i32 main(){" + fixture.calls + "return 0;}\n"
 			writeTestSource(t, root, "src/main.fy", program)
 			parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(program)), source.DefaultLimits())
 			if err != nil || parsed.AST == nil {
@@ -45,6 +72,9 @@ func TestCandidateGenericTransportAdmission(t *testing.T) {
 			}
 			copyCandidateParityModules(t, root, fixture.modules...)
 			for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
+				if input != "" {
+					args = append(args, "--", input)
+				}
 				code, out, diagnostics := runForTest(args, root)
 				if code != ExitSuccess || out != "" || diagnostics != "" {
 					t.Fatalf("%v: %d %q %s", args, code, out, diagnostics)
