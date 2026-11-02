@@ -17,6 +17,16 @@ import std::vec as v;
 
 // Checked callable contracts, names and argument transport shared by C emitters.
 pub fn usize parameters(ref ir::Body b){var usize count=0;var usize i=1;while(i<=ir::local_count(b)){if(ir::local_at(b,i).kind==1){count+=1;}i+=1;}return count;}
+// Keep MSVC from diagnosing a caller continuation as unreachable after folding
+// constant actual arguments through an inline checked trap. These are private
+// by-value i32 parameters; the signature and source-level values do not change.
+pub fn bool inline_arguments(ref ir::Body b,ref mut bytes::Buffer out,ref mut w::State s){
+    if(inline::zero(ir::inline_hash(b)) || parameters(b)==0){return true;}
+    if(!w::text(out,s,b"#if defined(_MSC_VER)\n")){return false;}var usize i=1;
+    while(i<=ir::local_count(b)){let l=ir::local_at(b,i);if(l.kind==1){
+        if(!w::text(out,s,b"volatile int32_t fy_inline_arg_") || !w::number(out,s,i) || !w::text(out,s,b"=") || !w::local(out,s,i) || !w::text(out,s,b";\n") || !w::local(out,s,i) || !w::text(out,s,b"=fy_inline_arg_") || !w::number(out,s,i) || !w::text(out,s,b";\n")){return false;}
+    }i+=1;}return w::text(out,s,b"#endif\n");
+}
 pub fn bool signature(ref ir::Program p,ref names::Table named,usize frame,ref mut bytes::Buffer out,ref mut w::State s,bool shared){
     let b=ir::at(p,frame);let f=clean::frame_at(ir::cleanup_ir(p),frame);let result=scalar::scalar(p,f.result);
     if(!w::text(out,s,if(!inline::zero(ir::inline_hash(b))){b"static inline "}else if(shared){b"extern "}else{b"static "}) || !aggregate::type(p,f.result,out,s) || !w::text(out,s,b" ") || !names::function(named,frame,out,s) || !w::text(out,s,b"(")){return false;}

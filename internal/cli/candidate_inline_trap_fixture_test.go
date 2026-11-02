@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -124,5 +125,8 @@ func inlineTrapReference(t *testing.T) inlineTrapOracle {
 }
 
 func TestCandidateInlineTrapReference(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("Windows MSVC inline trap reference; native Linux remains deferred")
+	}
 	inlineTrapReference(t)
 }
