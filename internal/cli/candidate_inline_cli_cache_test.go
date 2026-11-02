@@ -11,12 +11,17 @@ import (
 )
 
 func TestCandidateInlinePersistentCache(t *testing.T) {
+	runCandidateInlinePersistentCache(t, inlineCLIWorkspace)
+}
+
+func runCandidateInlinePersistentCache(t *testing.T, workspace func(*testing.T) string) {
+	t.Helper()
 	t.Setenv("FAIRYC_CLOSURE_CLI_PROFILE", os.Getenv("FAIRYC_INLINE_CLI_PROFILE"))
 	for _, profile := range copiedClosureCLIProfiles(t) {
 		t.Run(profile.Name, func(t *testing.T) {
 			image := copiedClosureCLIHost(t, profile)
 			installGenericCLIPacketCapture(t, image)
-			root := inlineCLIWorkspace(t)
+			root := workspace(t)
 			packet := filepath.Join(root, "observed.bin")
 			t.Setenv("FAIRYC_GENERIC_CLI_PACKET", packet)
 			command := copiedClosureCommand{t: t, image: image, root: root}
