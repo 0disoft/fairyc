@@ -58,7 +58,7 @@ func TestCandidateInlineTrapCLI(t *testing.T) {
 				}
 				calls += command.calls
 			}
-			t.Logf("%d independent CLI processes; six cold/warm trap pairs and six exact Go-matching test reports", calls)
+			t.Logf("%d independent CLI processes; %d cold/warm trap pairs and six exact Go-matching test reports", calls, 2*len(inlineTrapCases))
 		})
 	}
 }

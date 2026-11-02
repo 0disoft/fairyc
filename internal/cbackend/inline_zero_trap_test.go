@@ -21,6 +21,7 @@ func TestPartitionedZeroParameterInlineTraps(t *testing.T) {
 		{"signed", "-2147483648/-1", int(cdriver.NativeTrapExitBase) + 4},
 		{"add", "2147483647+1", int(cdriver.NativeTrapExitBase) + 2},
 		{"success", "40+2", 42},
+		{"divide_success", "84/2", 42},
 	} {
 		t.Run(item.name, func(t *testing.T) {
 			program := lowerSource(t, "module main;@inline pub fn i32 value(){return "+item.expression+";}fn i32 main(){return value();}")

@@ -8,10 +8,16 @@ import (
 	"testing"
 )
 
-var inlineTrapCases = []struct{ name, expression, category string }{
-	{"divzero", "divide(10,0)", "division-by-zero"},
-	{"signed", "divide(-2147483648,-1)", "signed-division-overflow"},
-	{"overflow", "add(2147483647)", "integer-overflow"},
+var inlineTrapCases = [...]struct {
+	name, expression, category string
+	line                       int
+}{
+	{"divzero", "divide(10,0)", "division-by-zero", 5},
+	{"signed", "divide(-2147483648,-1)", "signed-division-overflow", 5},
+	{"overflow", "add(2147483647)", "integer-overflow", 3},
+	{"zero_divzero", "zero_divide()", "division-by-zero", 8},
+	{"zero_signed", "zero_signed()", "signed-division-overflow", 9},
+	{"zero_overflow", "zero_add()", "integer-overflow", 10},
 }
 
 func inlineTrapCall(name, expression string, generic bool) (declaration, call string) {
@@ -24,6 +30,11 @@ func inlineTrapCall(name, expression string, generic bool) (declaration, call st
 func inlineTrapWorkspace(t *testing.T, index int, generic bool) string {
 	t.Helper()
 	root := inlineCLIWorkspace(t)
+	writeTestSource(t, root, "libs/answer/src/answer.fy", inlineCLIProvider+`@inline pub fn i32 zero_divide(){return 10/0;}
+@inline pub fn i32 zero_signed(){return -2147483648/-1;}
+@inline pub fn i32 zero_add(){return 2147483647+1;}
+@inline pub fn i32 zero_value(){return 40+2;}
+`)
 	item := inlineTrapCases[index]
 	decl, call := inlineTrapCall("invoke", item.expression, generic)
 	writeTestSource(t, root, "src/main.fy", "module main;import answer as a;"+decl+"fn i32 main(){return "+call+";}")
@@ -34,20 +45,16 @@ func inlineTrapWorkspace(t *testing.T, index int, generic bool) string {
 		tests.WriteString(decl)
 		fmt.Fprintf(&tests, "@test fn void case_%d_%s(){discard %s;}", i, item.name, call)
 	}
-	tests.WriteString("@test fn void case_3_after(){assert(a::add(40)==42);}")
+	fmt.Fprintf(&tests, "@test fn void case_%d_after(){assert(a::zero_value()==42);assert(a::add(40)==42);}", len(inlineTrapCases))
 	writeTestSource(t, root, "tests/inline.fy", tests.String())
 	return root
 }
 
-func checkInlineTrapDiagnostic(t *testing.T, diagnostic, category string) {
+func checkInlineTrapDiagnostic(t *testing.T, diagnostic, category string, wantLine int) {
 	t.Helper()
 	var line, column int
 	prefix := "trap: " + category + "\n"
 	_, err := fmt.Sscanf(strings.TrimPrefix(diagnostic, prefix), "  at libs/answer/src/answer.fy:%d:%d\n", &line, &column)
-	wantLine := 5
-	if category == "integer-overflow" {
-		wantLine = 3
-	}
 	want := fmt.Sprintf("%s  at libs/answer/src/answer.fy:%d:%d\n", prefix, line, column)
 	if err != nil || line != wantLine || column <= 0 || diagnostic != want {
 		t.Fatalf("missing inline-provider trap category/location: %q", diagnostic)
@@ -64,7 +71,8 @@ func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
 	if native {
 		engine = "native"
 	}
-	if report.Engine != engine || report.SchemaVersion != "fairyc.test-report/v1" || report.Count != 4 || report.Failed != 3 || report.Passed != 1 || report.Status != "failed" || report.Lock != "verified" || len(report.Tests) != 4 {
+	count := len(inlineTrapCases)
+	if report.Engine != engine || report.SchemaVersion != "fairyc.test-report/v1" || report.Count != count+1 || report.Failed != count || report.Passed != 1 || report.Status != "failed" || report.Lock != "verified" || len(report.Tests) != count+1 {
 		t.Fatal(output)
 	}
 	if native {
@@ -84,14 +92,14 @@ func checkInlineTrapReport(t *testing.T, output string, native, release bool) {
 			t.Fatal(output)
 		}
 	}
-	last := report.Tests[3]
-	if last.Identity != "tests::inline::case_3_after" || last.Outcome != "passed" || last.TrapCategory != nil {
+	last := report.Tests[count]
+	if last.Identity != fmt.Sprintf("tests::inline::case_%d_after", count) || last.Outcome != "passed" || last.TrapCategory != nil {
 		t.Fatal("test after traps was not executed", output)
 	}
 }
 
 type inlineTrapOracle struct {
-	diagnostics [2][3]string
+	diagnostics [2][len(inlineTrapCases)]string
 	reports     [2][3]string
 }
 
@@ -108,7 +116,7 @@ func inlineTrapReference(t *testing.T) inlineTrapOracle {
 			if code != ExitProgramTrap || out != "" {
 				t.Fatalf("Go inline trap: exit=%d stdout=%q stderr=%q", code, out, diagnostic)
 			}
-			checkInlineTrapDiagnostic(t, diagnostic, item.category)
+			checkInlineTrapDiagnostic(t, diagnostic, item.category, item.line)
 			oracle.diagnostics[family][i] = diagnostic
 			last = root
 		}
