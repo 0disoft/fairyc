@@ -1,4 +1,5 @@
 module generic_signature_diagnostics;
+import generic_transport_scalars as transport;
 import generic_source_plan as plan;
 import generic_source_plan_input as input;
 import generic_source_catalog as catalog;
@@ -23,7 +24,7 @@ fn Result<usize,u32> parameter(ref catalog::Catalog templates,catalog::Template 
 fn Result<bool,u32> contains(ref plan::Plan original,plan::Node selected,ref syntax::Parsed p,usize root,usize depth,ref mut usize work){
     if(!budget::charge(work,1)){return .err(10);}if(root==0){return .ok(false);}if(root>syntax::type_count(p)){return .err(9);}if(depth>=64){return .err(10);}let n=syntax::type_at(p,root);
     if(n.kind==1){let templates=input::templates(plan::input(original));let row=catalog::template_at(templates,selected.template_index);let text=syntax::type_text(p,root);let param=switch(parameter(templates,row,text,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-        if(param!=0){if(param>selected.count){return .err(9);}let types=input::types(plan::input(original));let id=selected.arguments[param-1];if(id==0 || id>concrete::count(types)){return .err(9);}let t=concrete::at(types,id-1);return .ok(t.kind==1 && t.scalar==0);}return .ok(unsupported(text));
+        if(param!=0){if(param>selected.count){return .err(9);}let types=input::types(plan::input(original));let id=selected.arguments[param-1];if(id==0 || id>concrete::count(types)){return .err(9);}let t=concrete::at(types,id-1);return .ok(t.kind==1 && transport::extended(t.scalar) && depth!=0);}return .ok(unsupported(text) && depth!=0);
     }
     let left=switch(contains(original,selected,p,n.left,depth+1,work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(left){return .ok(true);}
     // Array lengths are expressions, not signature type arguments.

@@ -1,4 +1,5 @@
 module module_types;
+import generic_transport_scalars as transport;
 import scalar_views as views;
 import module_catalog as catalog;
 import syntax as syntax;
@@ -26,7 +27,7 @@ pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
         if(t.kind==13){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || !catalog::sdk_vector(c,t.module_index,t.declaration) || !element(types,t.first,0)){return 9;}}
         else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
-            if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
+            if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !transport::extended(t.scalar) && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==17 || t.kind==18){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || at(types,t.first).kind!=2){return 9;}}
             else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second)){return 9;}}
@@ -72,7 +73,8 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==1){let name=syntax::type_text(p,root);
         if(bytes::equal(name,b"Region")){return accepted(graph,node(19,0,0,0,0,0),module_index,n.start,n.end);}
-        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){if(depth!=0){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,transport::named(arguments::name(id)),0,0,0,0),module_index,n.start,n.end);}if(depth!=0 && at(graph,id).kind==1 && transport::extended(at(graph,id).scalar)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        let u32 added=transport::named(name);if(added!=0){if(depth!=0){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,added,0,0,0,0),module_index,n.start,n.end);}
         let u32 scalar=scalars::primitive(p,root);let u32 c_scalar=abi::resolve(p,root);
         if(scalar!=7 || bytes::equal(name,b"void")){return accepted(graph,node(1,scalar,0,0,0,0),module_index,n.start,n.end);}
         if(abi::valid(c_scalar)){return accepted(graph,node(1,c_scalar,0,0,0,0),module_index,n.start,n.end);}
@@ -127,7 +129,7 @@ fn u32 substitution_code(ref catalog::Catalog c,ref syntax::Parsed p,usize modul
     if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return 4501;}
     let d=syntax::declaration_at(p,declaration-1);let n=syntax::type_at(p,root);let usize size=v::len<usize>(substitutions);let bool vector=catalog::sdk_vector_source(c,module_index);let bool vector_cleanup=d.kind==6 && vector && bytes::equal(syntax::source_view(p)[d.name_start..d.name_end],b"Vec") && n.start>=d.cleanup_start && n.end<=d.cleanup_end;
     if((d.kind!=3 && !vector_cleanup) || d.generic_parameters==0 || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || n.start<d.start || n.end>d.end){return 4501;}
-    var usize i=0;while(i<size){let usize id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>count(graph)){return 4502;}let t=at(graph,id);if(!(t.kind==1 && t.scalar>=1 && t.scalar<=6) && !(vector && (t.kind==2 || t.kind==3))){return 4502;}i+=1;}return 0;
+    var usize i=0;while(i<size){let usize id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>count(graph)){return 4502;}let t=at(graph,id);if(!(t.kind==1 && transport::valid(t.scalar)) && !(vector && (t.kind==2 || t.kind==3))){return 4502;}i+=1;}return 0;
 }
 fn Resolution specialize_current(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
     if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}

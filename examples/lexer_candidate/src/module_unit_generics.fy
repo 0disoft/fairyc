@@ -1,4 +1,5 @@
 module module_unit_generics;
+import generic_transport_scalars as transport;
 import module_unit_bind as binding;
 import module_unit_generic_copy as copying;
 import module_unit_generic_cleanup as cleanup_requests;
@@ -31,7 +32,7 @@ pub fn Result<usize,join::Problem> instantiate(ref v::Vec<syntax::Parsed> source
     let source=v::at<syntax::Parsed>(sources,module_index);let d=syntax::declaration_at(source,declaration-1);let usize count=v::len<usize>(args);
     if(d.kind!=3 || d.generic_parameters==0 || d.owner_end!=0 || count==0 || count>8 || count!=syntax::generic_parameter_count(source,declaration-1)){return .err(fail(4501,caller,start,end));}
     var usize i=0;while(i<count){let a=syntax::generic_parameter_at(source,declaration-1,i);var usize j=0;while(j<i){let b=syntax::generic_parameter_at(source,declaration-1,j);if(bytes::equal(syntax::source_view(source)[a.start..a.end],syntax::source_view(source)[b.start..b.end])){return .err(fail(4501,module_index,a.start,a.end));}j+=1;}i+=1;}
-    let bool vector=signatures::sdk_vector_source(metadata,module_index);i=0;while(i<count){let id=*v::at<usize>(args,i);if(source_arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>types::count(graph)){return .err(fail(4502,caller,start,end));}let t=types::at(graph,id);if(!(t.kind==1 && t.scalar>=1 && t.scalar<=6) && !(vector && (t.kind==2 || t.kind==3))){return .err(fail(4502,caller,start,end));}i+=1;}
+    let bool vector=signatures::sdk_vector_source(metadata,module_index);i=0;while(i<count){let id=*v::at<usize>(args,i);if(source_arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>types::count(graph)){return .err(fail(4502,caller,start,end));}let t=types::at(graph,id);if(!(t.kind==1 && transport::valid(t.scalar)) && !(vector && (t.kind==2 || t.kind==3))){return .err(fail(4502,caller,start,end));}i+=1;}
     i=0;var usize per=0;var usize generic=0;while(i<v::len<Instance>(instances)){if(!charge(work,count+1)){return .err(fail(4503,caller,start,end));}let old=*v::at<Instance>(instances,i);if(old.argument_count!=0){generic+=1;}if(old.module_index==module_index && old.declaration==declaration){per+=1;var bool same=old.argument_count==count;var usize j=0;while(j<count && same){same=*v::at<usize>(arguments,old.argument_start+j)==*v::at<usize>(args,j);j+=1;}if(same){return .ok(i+1);}}i+=1;}
     if(v::len<Instance>(instances)>=instance_limit() || generic>=64 || per>=16){return .err(fail(4503,caller,start,end));}
     let result=signatures::specialize_type(metadata,source,module_index,declaration,d.result_type,args,graph);if(result.problem.code!=0){return .err(fail(result.problem.code,module_index,result.problem.start,result.problem.end));}
