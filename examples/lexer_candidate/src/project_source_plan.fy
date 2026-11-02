@@ -28,6 +28,6 @@ pub fn Result<source::Plan,Problem> build_sources(ref v::Vec<syntax::Parsed> sou
     var context::Budget scoped=context::empty();scoped.work=*work;
     let original=switch(prepared::build(roots,sources,ref mut scoped)){case .ok(p):{p}case .err(e):{*work=scoped.work;return .err(Problem{.stage=4,.code=e.source.code,.module_index=e.source.module_index,.start=e.source.start,.end=e.source.end});}};*work=scoped.work;
     let attempt=source::attempt(original,source::defaults(),work);let problem=source::problem(ref attempt);if(problem.code==0){return .ok(source::seal(attempt));}
-    if(problem.root!=0 && (problem.code==2003 || problem.code==2005 || problem.code==2006)){let located=locations::find(source::attempt_input(ref attempt),sources,problem.root,work);if(located.code==0){return .err(Problem{.stage=5,.code=problem.code,.module_index=located.module_index,.start=located.start,.end=located.end});}if(located.code==10 || located.code==11 || located.code==12){return .err(fail(sources,5,located.code,0,0));}}
+    if(problem.root!=0 && (problem.code==2003 || problem.code==2004 || problem.code==2005 || problem.code==2006)){let located=locations::find(source::attempt_input(ref attempt),sources,problem.root,work);if(located.code==0){return .err(Problem{.stage=5,.code=problem.code,.module_index=located.module_index,.start=located.start,.end=located.end});}if(located.code==10 || located.code==11 || located.code==12){return .err(fail(sources,5,located.code,0,0));}}
     return .err(fail(sources,5,problem.code,0,0));
 }

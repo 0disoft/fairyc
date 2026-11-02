@@ -6,6 +6,7 @@ import generic_source_view_loop_json as loops;
 import generic_source_json as json;
 import project_path as budget;
 import syntax as syntax;
+import static_operation_declarations as operations;
 import std::bytes as bytes;
 import std::vec as v;
 import generic_package_bindings as bindings;
@@ -86,7 +87,7 @@ fn u32 statement(ref catalog::Catalog c,ref syntax::Parsed p,Context context,usi
 fn model::Problem scan(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize declaration,Context context,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
     let p=v::at<syntax::Parsed>(sources,context.module_index);let d=syntax::declaration_at(p,declaration);var v::Vec<Task> pending=v::empty<Task>();var u32 code=0;
     var usize start=d.start;var usize end=d.end;
-    if(d.kind==3){code=push(ref mut pending,1,d.result_type,work);var usize i=d.entry_start;while(i<d.entry_start+d.entry_count && code==0){if(!budget::charge(work,1)){code=10;break;}let e=syntax::entry_at(p,i);if(e.kind==1){code=binding(c,context,syntax::source_view(p)[e.name_start..e.name_end],work);if(code==0){code=push(ref mut pending,1,e.type_root,work);}}i+=1;}if(code==0){code=push(ref mut pending,3,d.body,work);}}
+    if(d.kind==3){code=push(ref mut pending,1,d.result_type,work);var usize i=d.entry_start;while(i<d.entry_start+d.entry_count && code==0){if(!budget::charge(work,1)){code=10;break;}let e=syntax::entry_at(p,i);if(e.kind==1){code=binding(c,context,syntax::source_view(p)[e.name_start..e.name_end],work);if(code==0){code=push(ref mut pending,1,e.type_root,work);}}i+=1;}if(code==0 && operations::operation(p,declaration+1).kind!=1){code=push(ref mut pending,3,d.body,work);}}
     else{var usize i=d.field_start;while(i<d.field_start+d.field_count && code==0){if(!budget::charge(work,1)){code=10;break;}code=push(ref mut pending,1,syntax::field_at(p,i).type_root,work);i+=1;}if(code==0){code=push(ref mut pending,3,d.cleanup_body,work);}}
     while(v::len<Task>(ref pending)!=0 && code==0){if(!budget::charge(work,1)){code=10;break;}let task=*v::at<Task>(ref pending,v::len<Task>(ref pending)-1);discard v::pop<Task>(ref mut pending);
         code=if(task.kind==1){typ(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else if(task.kind==2){expression(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else{statement(c,p,context,task.node,ref mut pending,work)};

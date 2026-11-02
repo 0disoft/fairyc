@@ -3,6 +3,8 @@ import generic_package_bindings as bindings;
 import generic_identity as identity;
 import project_path as budget;
 import syntax as syntax;
+import static_operation_declarations as operations;
+import static_operation_identity as operation_identity;
 import scanner as scanner;
 import sdk_authority as sdk;
 import sha256 as hash;
@@ -13,8 +15,9 @@ import std::vec as v;
 // This catalog is not a genericplan.Declaration: dependencies are collected next.
 pub struct Text {usize start;usize end;}
 pub struct Parameter {Text name;bool scalar;}
-pub struct Template {usize module_index;usize declaration;u32 kind;bool public;Text name;Text id;Text definition;usize first;usize count;usize start;usize end;usize name_start;usize name_end;}
-pub resource Catalog {bindings::Bindings bindings;bytes::Buffer names;v::Vec<Template> templates;v::Vec<Parameter> parameters;bool scalar_constraints;cleanup{}}
+pub struct Template {usize module_index;usize declaration;u32 kind;bool public;Text name;Text id;Text definition;Text capability;Text operation_definition;usize provider_first;usize provider_count;usize first;usize count;usize start;usize end;usize name_start;usize name_end;}
+pub struct Provider{u32 scalar;Text id;Text definition;}
+pub resource Catalog {bindings::Bindings bindings;bytes::Buffer names;v::Vec<Template> templates;v::Vec<Parameter> parameters;v::Vec<Provider> providers;bool scalar_constraints;cleanup{}}
 pub struct Problem {u32 code;usize module_index;usize declaration;}
 // Private helper codes: 9 invalid input, 10 work/output, 11 allocation, 12 stale,
 // 13 inaccessible target, 4501 source template admission. No public diagnostics.
@@ -25,6 +28,8 @@ pub fn Parameter parameter_at(ref Catalog p,usize at){assert(at<v::len<Parameter
 pub fn ref u8[] text(ref Catalog p,Text t){assert(t.start<=t.end && t.end<=bytes::len(ref p.names));return bytes::view(ref p.names)[t.start..t.end];}
 pub fn ref bindings::Bindings packages(ref Catalog p){return ref p.bindings;}
 pub fn bool scalar_constraints(ref Catalog p){return p.scalar_constraints;}
+pub fn Provider provider_at(ref Catalog p,usize at){return *v::at<Provider>(ref p.providers,at);}
+pub fn usize selected_provider(ref Catalog p,Template row,u32 scalar){var usize i=0;while(i<row.provider_count){if(provider_at(p,row.provider_first+i).scalar==scalar){return row.provider_first+i+1;}i+=1;}return 0;}
 fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] data,ref mut usize work){
     if(data.len>1048576 || bytes::len(names)>1048576-data.len || !budget::charge(work,data.len+1)){return .err(10);}
     let start=bytes::len(names);if(!bytes::append(names,data).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});
@@ -53,7 +58,7 @@ fn u32 namespace_names(ref syntax::Parsed p,ref mut usize work){
         var usize j=1;while(j<i){if(!budget::charge(work,1)){return 10;}let old=syntax::declaration_at(p,j);if(old.kind==2 || old.kind==3 || old.kind==4 || old.kind==6 || old.kind==7 || old.kind==9 || old.kind==11){if(old.name_start>=old.name_end || old.name_end>raw.len){return 9;}if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,raw[old.name_start..old.name_end]) && ((d.owner_end==0 && old.owner_end==0) || (d.owner_end!=0 && old.owner_end!=0 && bytes::equal(raw[d.owner_start..d.owner_end],raw[old.owner_start..old.owner_end])))){return 4501;}}j+=1;}i+=1;
     }return 0;
 }
-fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize module_index,ref syntax::Parsed p,usize declaration,bool vector,ref mut bytes::Buffer names,ref mut v::Vec<Parameter> parameters,ref mut usize work){
+fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize module_index,ref syntax::Parsed p,usize declaration,bool vector,ref mut bytes::Buffer names,ref mut v::Vec<Parameter> parameters,ref mut v::Vec<Provider> providers,ref mut usize work){
     let d=syntax::declaration_at(p,declaration);let raw=syntax::source_view(p);let name=raw[d.name_start..d.name_end];
     if(d.owner_end!=0 || d.kind==3 && bytes::equal(name,b"source_location") || d.kind!=3 && (!vector || builtin(name) || bytes::equal(name,b"source_location"))){return .err(4501);}
     let count=syntax::generic_parameter_count(p,declaration);if(count==0 || count>8 || v::len<Parameter>(parameters)>32768-count){return .err(4501);}let first=v::len<Parameter>(parameters);var usize i=0;
@@ -65,24 +70,31 @@ fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize m
     if(!bytes::append(ref mut id,bindings::text(resolved,owned_module.namespace)).is_ok || !bytes::append(ref mut id,b"::").is_ok || !bytes::append(ref mut id,bindings::text(resolved,owned_module.path)).is_ok || !bytes::append(ref mut id,b"::").is_ok || !bytes::append(ref mut id,name).is_ok){return .err(11);}
     var usize definition_work=0;let digest=switch(bindings::definition(resolved,module_index,p,declaration,ref mut definition_work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     if(!budget::charge(work,definition_work)){return .err(10);}if(!identity::valid_hex(bytes::view(ref digest),true)){return .err(9);}
-    let saved_name=switch(retain(names,name,work)){case .ok(value):{value}case .err(code):{return .err(code);}};let saved_id=switch(retain(names,bytes::view(ref id),work)){case .ok(value):{value}case .err(code):{return .err(code);}};let definition=switch(retain(names,bytes::view(ref digest),work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    return .ok(Template{.module_index,.declaration,.kind=d.kind,.public=d.public,.name=saved_name,.id=saved_id,.definition,.first,.count,.start=d.start,.end=d.end,.name_start=d.name_start,.name_end=d.name_end});
+    let saved_name=switch(retain(names,name,work)){case .ok(value):{value}case .err(code):{return .err(code);}};let saved_id=switch(retain(names,bytes::view(ref id),work)){case .ok(value):{value}case .err(code):{return .err(code);}};var definition=switch(retain(names,bytes::view(ref digest),work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var Text capability=Text{.start=0,.end=0};var Text operation_definition=Text{.start=0,.end=0};let provider_first=v::len<Provider>(providers);
+    if(operations::operation(p,declaration+1).kind==1){var usize metadata_work=0;let op=switch(operation_identity::build(p,declaration+1,bytes::view(ref digest),ref mut metadata_work)){case .ok(p):{p}case .err(code):{discard budget::charge(work,metadata_work);return .err(code);}};if(!budget::charge(work,metadata_work)){return .err(10);}
+        var bytes::Buffer cap=bytes::empty();if(!bytes::append(ref mut cap,bytes::view(ref id)).is_ok || !bytes::append(ref mut cap,b"::operation").is_ok){return .err(11);}capability=switch(retain(names,bytes::view(ref cap),work)){case .ok(p):{p}case .err(code):{return .err(code);}};
+        operation_definition=switch(retain(names,operation_identity::definition(ref op),work)){case .ok(p):{p}case .err(code):{return .err(code);}};definition=switch(retain(names,operation_identity::bound_definition(ref op),work)){case .ok(p):{p}case .err(code):{return .err(code);}};i=0;
+        while(i<operation_identity::count(ref op)){let info=operation_identity::at(ref op,i);let d=syntax::declaration_at(p,info.declaration-1);var bytes::Buffer provider=bytes::empty();if(!bytes::append(ref mut provider,bindings::text(resolved,owned_module.namespace)).is_ok || !bytes::append(ref mut provider,b"::").is_ok || !bytes::append(ref mut provider,bindings::text(resolved,owned_module.path)).is_ok || !bytes::append(ref mut provider,b"::").is_ok || !bytes::append(ref mut provider,raw[d.name_start..d.name_end]).is_ok){return .err(11);}
+            let id=switch(retain(names,bytes::view(ref provider),work)){case .ok(p):{p}case .err(code):{return .err(code);}};let definition=switch(retain(names,operation_identity::provider_definition(ref op,i),work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<Provider>(providers,Provider{.scalar=info.scalar,.id,.definition}).is_ok){return .err(11);}i+=1;}
+    }let provider_count=v::len<Provider>(providers)-provider_first;
+    return .ok(Template{.module_index,.declaration,.kind=d.kind,.public=d.public,.name=saved_name,.id=saved_id,.definition,.capability,.operation_definition,.provider_first,.provider_count,.first,.count,.start=d.start,.end=d.end,.name_start=d.name_start,.name_end=d.name_end});
 }
 // Uses the current source language policy: user functions are scalar-only;
 // aggregate/nominal exceptions require the exact authenticated SDK Vec bytes.
 pub fn Result<Catalog,Problem> build(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
     if(bindings::count(ref resolved)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0));}var usize m=0;
     while(m<v::len<syntax::Parsed>(sources)){let code=current(ref resolved,m,v::at<syntax::Parsed>(sources,m),work);if(code!=0){return .err(fail(code,m,0));}m+=1;}
-    var bytes::Buffer names=bytes::empty();var v::Vec<Template> rows=v::empty<Template>();var v::Vec<Parameter> parameters=v::empty<Parameter>();m=0;
+    var bytes::Buffer names=bytes::empty();var v::Vec<Template> rows=v::empty<Template>();var v::Vec<Parameter> parameters=v::empty<Parameter>();var v::Vec<Provider> providers=v::empty<Provider>();m=0;
     while(m<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,m);let owned_module=bindings::module_at(ref resolved,m);let path=bindings::text(ref resolved,owned_module.path);let raw=syntax::source_view(p);
         if(!budget::charge(work,path.len+raw.len+1)){return .err(fail(10,m,0));}let authentic=sdk::authentic(path,raw);if(sdk::reserved(path) && !authentic){return .err(fail(4501,m,0));}let vector=authentic && bytes::equal(path,b"std::vec");
-        let valid=namespace_names(p,work);if(valid!=0){return .err(fail(valid,m,0));}var usize d_index=1;
+        var usize operation_work=0;let operation_code=operations::validate(p,ref mut operation_work);if(!budget::charge(work,operation_work)){return .err(fail(10,m,0));}if(operation_code!=0){return .err(fail(operation_code,m,0));}let valid=namespace_names(p,work);if(valid!=0){return .err(fail(valid,m,0));}var usize d_index=1;
         while(d_index<syntax::declaration_count(p)){if(!budget::charge(work,1)){return .err(fail(10,m,d_index));}let d=syntax::declaration_at(p,d_index);
             if(d.generic_parameters!=0){if((d.kind!=3 && d.kind!=4 && d.kind!=6) || v::len<Template>(ref rows)>=4096){return .err(fail(4501,m,d_index));}
-                let row=switch(collect_template(ref resolved,m,p,d_index,vector,ref mut names,ref mut parameters,work)){case .ok(value):{value}case .err(code):{return .err(fail(code,m,d_index));}};if(!v::push<Template>(ref mut rows,row).is_ok){return .err(fail(11,m,d_index));}
+                let row=switch(collect_template(ref resolved,m,p,d_index,vector,ref mut names,ref mut parameters,ref mut providers,work)){case .ok(value):{value}case .err(code):{return .err(fail(code,m,d_index));}};if(!v::push<Template>(ref mut rows,row).is_ok){return .err(fail(11,m,d_index));}
             }d_index+=1;
         }m+=1;
-    }let code=sorted(ref mut rows,ref names,work);if(code!=0){return .err(fail(code,0,0));}return .ok(Catalog{.bindings=resolved,.names,.templates=rows,.parameters,.scalar_constraints=true});
+    }let code=sorted(ref mut rows,ref names,work);if(code!=0){return .err(fail(code,0,0));}return .ok(Catalog{.bindings=resolved,.names,.templates=rows,.parameters,.providers,.scalar_constraints=true});
 }
 // Go's ordinary package preparation has no explicit parameter abilities;
 // its authenticated Vec lane adds scalar abilities to user templates. Keep

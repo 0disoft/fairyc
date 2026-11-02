@@ -3,6 +3,7 @@ module project_diagnostic_codes;
 // Catalog/name lookup codes overlap internal capacity and type statuses.
 // Translate them only at the phase that owns their resolution meaning.
 pub fn u32 code(u32 phase,u32 stage,u32 raw){
+    if(phase==5 && stage==5 && raw==2004){return 4502;}
     if(phase==5 && stage==5 && (raw==2005 || raw==2006)){return 4503;}
     if(phase==5 && stage==2 && raw==4501){return 4501;}
     if(phase==5 && (stage==3 || stage==4)){if(raw==13){return 103;}if(raw==101 || raw==4501 || raw==4502){return raw;}}
