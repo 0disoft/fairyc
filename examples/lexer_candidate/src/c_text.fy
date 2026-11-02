@@ -1,4 +1,5 @@
 module c_text;
+import generic_transport_scalars as transport;
 import scalar_views as views;
 import c_abi_types as c_types;
 import pointer_types as pointers;
@@ -21,6 +22,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
     if (!bytes::append_usize(out,value).is_ok) { s.code = 3; return false; } return true;
 }
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
+    if(transport::extended(code)){return text(out,s,transport::c_name(code));}
     if(c_types::valid(code)){return text(out,s,c_types::spelling(code));}
     if(pointers::valid(code)){return type(out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}
     if(refs::valid(code)){return type(out,s,refs::inner(code)) && text(out,s,if(refs::mutable(code)){b" *"}else{b" const *"});}

@@ -30,10 +30,11 @@ fn void invalid_argument_domains_stay_closed(){let raw=source(b"u16");let p=pars
 }
 
 @test fn void composite_substitution_rejects_without_publishing_partial_types(){
-    let raw=b"module root;fn Option<T> optional<T>(){return .none;}fn i32 main(){return 0;}";
-    let p=parsed(raw);let c=built_catalog(raw);var usize id=4097;
-    while(id<=4103){var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<usize> args=v::empty<usize>();assert(v::push<usize>(ref mut args,id).is_ok);
-        let root=syntax::declaration_at(ref p,1).result_type;let rejected=types::specialize(ref c,ref p,0,2,root,ref args,ref mut graph);assert(rejected.problem.code!=0 && rejected.type==0 && types::count(ref graph)==0);id+=1;
+    var usize shape=0;while(shape<6){var bytes::Buffer raw=bytes::empty();assert(bytes::append(ref mut raw,b"module root;fn ").is_ok);let spelling=if(shape==0){b"Option<T>"}else if(shape==1){b"Result<T,i32>"}else if(shape==2){b"ref T"}else if(shape==3){b"ref T[]"}else if(shape==4){b"ptr T"}else{b"T[2]"};assert(bytes::append(ref mut raw,spelling).is_ok && bytes::append(ref mut raw,b" bad<T>(){}fn i32 main(){return 0;}").is_ok);
+        let p=parsed(bytes::view(ref raw));let c=built_catalog(bytes::view(ref raw));var usize id=4097;
+        while(id<=4103){var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<usize> args=v::empty<usize>();assert(v::push<usize>(ref mut args,id).is_ok);
+            let root=syntax::declaration_at(ref p,1).result_type;let rejected=types::specialize(ref c,ref p,0,2,root,ref args,ref mut graph);assert(rejected.problem.code!=0 && rejected.type==0 && types::count(ref graph)==0);id+=1;
+        }shape+=1;
     }
     assert(!transport::valid(0) && !transport::valid(7) && !transport::valid(8) && !transport::valid(31) && !transport::valid(39) && !transport::valid(132));
 }

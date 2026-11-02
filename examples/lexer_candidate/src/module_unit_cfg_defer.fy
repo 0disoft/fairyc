@@ -1,4 +1,5 @@
 module module_unit_cfg_defer;
+import generic_transport_scalars as transport;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean_ir;
@@ -14,7 +15,7 @@ fn clean_ir::Problem target(ref ir::Program p,usize frame,usize invocation,ref m
     var bool found=false;var usize i=0;
     if(call.kind==1){while(i<ir::callable_count(p)){if(!m::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}let c=ir::callable_at(p,i);if(c.module_index==call.target_module && c.declaration==call.target_declaration){if(c.foreign || c.template || c.result!=e.type || c.parameter_count!=call.argument_count || (f.effects&c.effects)!=c.effects){return fail(1001,f.module_index,e.start,e.end);}found=true;break;}i+=1;}}
     else if(call.kind==2){i=1;while(i<=ir::count(p)){if(!m::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}let target=clean_ir::frame_at(ir::cleanup_ir(p),i);if(target.kind==1 && target.context==call.instance && target.module_index==call.target_module && target.declaration==call.target_declaration && target.result==e.type){if((f.effects&target.effects)!=target.effects){return fail(1001,f.module_index,e.start,e.end);}found=true;break;}i+=1;}}
-    if(!found){return fail(1001,f.module_index,e.start,e.end);}i=0;while(i<call.argument_count){if(!m::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}let a=ir::argument_at(b,call.argument_start+i);if(!a.checked || a.actual!=a.expected || a.actual==0){return fail(1001,f.module_index,a.start,a.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),a.actual);if(t.kind!=1 || t.scalar<1 || t.scalar>6){return fail(1001,f.module_index,a.start,a.end);}i+=1;}return fail(0,0,0,0);
+    if(!found){return fail(1001,f.module_index,e.start,e.end);}i=0;while(i<call.argument_count){if(!m::charge(work,1)){return fail(1002,f.module_index,e.start,e.end);}let a=ir::argument_at(b,call.argument_start+i);if(!a.checked || a.actual!=a.expected || a.actual==0){return fail(1001,f.module_index,a.start,a.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),a.actual);if(t.kind!=1 || !transport::valid(t.scalar)){return fail(1001,f.module_index,a.start,a.end);}i+=1;}return fail(0,0,0,0);
 }
 pub fn Result<usize,clean_ir::Problem> prepare(ref ir::Program p,usize frame,usize statement,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut usize work){
     let old=find(sites,statement);if(old!=0){return .ok(old);}let b=ir::at(p,frame);let f=clean_ir::frame_at(ir::cleanup_ir(p),frame);let s=ir::statement_at(b,statement-1).value;

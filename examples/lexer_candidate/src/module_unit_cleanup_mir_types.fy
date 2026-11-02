@@ -1,4 +1,5 @@
 module module_unit_cleanup_mir_types;
+import generic_transport_scalars as transport;
 import module_unit_cleanup_mir_model as ir;
 import module_types as types;
 import c_abi_types as abi;
@@ -18,7 +19,7 @@ pub fn bool valid(ref ir::Program p,usize id){
     if(t.kind==2 || t.kind==3 || t.kind==4){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first==0 && t.second==0;}
     if(t.kind==13){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first!=0 && t.first<id && t.second==0;}
     if(t.module_index!=0 || t.declaration!=0){return false;}
-    if(t.kind==1){return t.scalar!=0 && (t.scalar<=7 || abi::valid(t.scalar)) && t.first==0 && t.second==0;}
+    if(t.kind==1){return t.scalar!=0 && (t.scalar<=7 || transport::extended(t.scalar) || abi::valid(t.scalar)) && t.first==0 && t.second==0;}
     if(t.kind==15){return views::extended(t.scalar) && t.first==0 && t.second==0;}
     if(t.kind==17 || t.kind==18){return t.scalar==0 && t.first!=0 && t.first<id && t.second==0 && ir::type_at(p,t.first).kind==2;}
     if(t.kind==16){return t.scalar==0 && t.first!=0 && t.first<id && t.second<=4096;}
