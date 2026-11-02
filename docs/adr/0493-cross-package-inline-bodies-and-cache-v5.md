@@ -91,3 +91,15 @@ This evidence changes no admitted forms, public API, cache wire format, ABI,
 dependencies, repository policy or CI/runner configuration. Generic-wrapper
 full-CLI and persistent-cache acceptance are covered; native Linux,
 full-suite/hosted CI and distribution remain separate. No push or promotion is implied.
+
+## Windows inline trap follow-up
+
+Windows release compilation exposed an MSVC-only consequence of constant actuals reaching a
+parameterized inline checked operation: the compiler could treat the inline call as unconditionally
+trapping and reject the caller's valid continuation before execution. Go commit `f838dc5c` reads each
+private i32 parameter once through `volatile int32_t fy_inline_arg_N` and back, only for marked
+inline bodies with nonzero parameters and only under `_MSC_VER`. Other compilers preprocess the barrier
+away. The [trap receipt](../ops/windows-candidate-inline-traps-20261103.md) bounds evidence to
+division-by-zero, signed-division-overflow and addition-overflow. This adds no warning suppression,
+public contract, MIR, ABI or cache-wire change, and does not establish zero-parameter or full
+constant-call behavior.

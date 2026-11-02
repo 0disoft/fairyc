@@ -6,7 +6,8 @@
   [cache v5](../package/whole-package-cache-v5.md), and the existing Stage 0 grammar.
 - Evidence: [source/artifact and native-C receipt](../ops/windows-candidate-inline-20261102.md),
   [nongeneric CLI/cache receipt](../ops/windows-candidate-inline-cli-cache-20261103.md),
-  and [generic-caller CLI/cache receipt](../ops/windows-candidate-generic-inline-cli-cache-20261103.md).
+  [generic-caller CLI/cache receipt](../ops/windows-candidate-generic-inline-cli-cache-20261103.md),
+  and [MSVC inline-trap receipt](../ops/windows-candidate-inline-traps-20261103.md).
 
 ## Source and identity
 
@@ -60,6 +61,14 @@ and omits it from body units. Existing CFG evaluation and checked operations
 remain responsible for argument ordering, temporaries and arithmetic. C compiler
 inlining is optional; no forced substitution or performance guarantee is made.
 
+For an MSVC build, a parameterized inline body first reads each private i32 parameter through
+`volatile int32_t fy_inline_arg_N` and back before normal MIR emission. The preprocessor removes
+this implementation barrier on other compilers. It keeps constant actuals from making an existing
+checked trap appear unconditional to MSVC, which could otherwise reject a valid caller continuation.
+The public signature, MIR, language semantics, ABI, cache wire format and C linkage remain unchanged;
+the compiler may still inline the body. No warning is suppressed and no performance result is
+claimed.
+
 The Go and Fairy `FYCPARTS1` readers recognize ordered inline header definitions,
 reject duplicates between header/body units and reject inline definitions in
 body units. A program whose only function is inline may still have its separate
@@ -97,5 +106,7 @@ or mixed rebuilding is valid.
 See the [nongeneric receipt](../ops/windows-candidate-inline-cli-cache-20261103.md)
 and [generic receipt](../ops/windows-candidate-generic-inline-cli-cache-20261103.md)
 for results and reproduction. Windows `test` retains its non-cache entry.
-A native arithmetic-trap matrix, C17, native Linux,
+The [inline-trap receipt](../ops/windows-candidate-inline-traps-20261103.md) covers
+division-by-zero, signed-division-overflow and addition-overflow through nongeneric and generic
+bool-wrapper callers. Zero-parameter traps, the full operator matrix, C17, native Linux,
 full-suite/hosted CI and distribution remain outside this evidence.

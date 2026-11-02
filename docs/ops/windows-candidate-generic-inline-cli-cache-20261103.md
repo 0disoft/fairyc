@@ -6,6 +6,9 @@ public, safe, nongeneric i32 arithmetic; see the
 [ADR](../adr/0493-cross-package-inline-bodies-and-cache-v5.md) and
 [nongeneric receipt](windows-candidate-inline-cli-cache-20261103.md).
 
+The later [MSVC inline-trap receipt](windows-candidate-inline-traps-20261103.md) is separate
+regression evidence for parameterized inline checked arithmetic.
+
 - Host: Windows amd64, Go 1.27.1, MSVC 14.51.36231.
 - Full CLI: `internal/cli/candidate_generic_inline_cli_test.go`.
 - Persistent cache: `internal/cli/candidate_generic_inline_cli_cache_test.go`.

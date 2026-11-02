@@ -47,6 +47,15 @@ verified `i32`, `u8`, `u32`, or `usize` operand type. Every type checks zero bef
 only `i32` emits the signed-minimum/negative-one check. This prevents strict C compilers from
 diagnosing an unreachable constant-zero expression without erasing typed MIR semantics.
 
+Parameterized public inline i32 bodies add a Windows-only implementation barrier: each private
+parameter is read once through `volatile int32_t fy_inline_arg_N` and written back before ordinary
+MIR use. The guard applies only when the body has an inline marker and nonzero parameters, and the
+preprocessor removes it on other compilers. It prevents MSVC from folding constant actuals into an
+always-trapping inline call and rejecting the caller's valid MIR continuation. It does not suppress
+warnings or change signatures, MIR, language behavior, ABI or cache transport. Evidence covers
+division by zero, signed division overflow and addition overflow; it is not a general proof for
+zero-parameter traps or every arithmetic form and target.
+
 Typed unary `~` and matching-type `&`, `^`, and `|` preserve the exact verified `i32`, `u8`, `u32`, or `usize` result.
 The signed path uses explicit bit-preserving `uint32_t` transport; unsigned paths use their exact
 unsigned representation directly. Right shift first checks the amount against 32 for `i32`, 8 for
