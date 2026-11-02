@@ -17,6 +17,11 @@
 
 Fairy C is an experimental Stage 0 systems programming language for native software that needs predictable control over memory and calling costs. It provides explicit resource ownership, compile-time borrow checking, and a narrow C interoperability boundary, without a garbage collector or a heavy runtime.
 
+**Measured build outputs + cache: 140.5 KiB retained after 20 source edits**
+
+Windows/amd64 · `dev` · `many-modules` · configured `modules=16` · one sequence ·
+compiler and C toolchain excluded · [Fairy-only snapshot and raw receipt](docs/benchmarks/fairy-20261103/README.md)
+
 Fairy C does not aim to outperform every hand-tuned C program or make every C ownership graph safe. Its narrower goal is to reject common ownership, aliasing, bounds, and effect mistakes in ordinary Fairy C code while keeping resource lifetimes and foreign-call costs visible to the programmer.
 
 ## Experimental C interoperability
@@ -106,15 +111,21 @@ an authority on command behavior.
 
 ## Build footprint
 
-A local synthetic benchmark compares retained build outputs and cache growth for Fairy C, Zig,
-Rust, and C. Run configuration: commit `ec446d2d`, Windows/amd64, 20 source edits, one sequence per configuration.
+The current [Fairy-only snapshot](docs/benchmarks/fairy-20261103/README.md) records 22
+output-verified build/run pairs: one cold build, one no-op build, and edits 1–20.
 
-![Development build footprint](docs/benchmarks/latest/summary.svg)
+### Historical cross-language snapshot (`ec446d2d`)
+
+The chart and receipt below remain from commit `ec446d2d` and were not regenerated or overwritten.
+That run compared Fairy C, Zig, Rust, and C on Windows/amd64 over 20 source edits, one sequence per
+configuration. The current Fairy-only run did not repeat those comparisons.
+
+![Historical cross-language build footprint](docs/benchmarks/latest/summary.svg)
 
 [Methodology](docs/benchmarks/README.md) ·
-[Raw receipt](docs/benchmarks/latest/receipt.json) ·
-[Full footprint SVG](docs/benchmarks/latest/footprint.svg) ·
-[Download HTML report](docs/benchmarks/latest/report.html)
+[Historical raw receipt](docs/benchmarks/latest/receipt.json) ·
+[Historical full footprint SVG](docs/benchmarks/latest/footprint.svg) ·
+[Historical HTML report](docs/benchmarks/latest/report.html)
 
 [File-search CLI benchmark](docs/benchmarks/file-search/README.md): buffered file I/O with the same
 matching rules in all four languages, including Rust's default and `small-dev` profiles.

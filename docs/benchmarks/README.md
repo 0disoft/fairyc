@@ -9,6 +9,10 @@ inspecting build workflow cost; these synthetic workloads do not establish a uni
 
 ## Latest snapshot
 
+The newest receipt is the [Fairy-only 2026-11-03 snapshot](fairy-20261103/README.md), measured on
+Windows/amd64 with `dev`, `many-modules`, 16 configured modules, and one sequence. The files in
+`latest/` below remain the historical cross-language `ec446d2d` snapshot.
+
 [English](latest/report.html) · [한국어](latest/report.ko.html) · [中文](latest/report.zh.html) · [Español](latest/report.es.html) · [Français](latest/report.fr.html) · [हिन्दी](latest/report.hi.html)
 
 The [file-search CLI snapshot](file-search/README.md) adds buffered file I/O with the same

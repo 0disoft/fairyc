@@ -1,0 +1,1523 @@
+{
+  "schema": "fairyc.build-footprint/v1",
+  "started": "2026-11-02T15:41:07Z",
+  "finished": "2026-11-02T15:41:29Z",
+  "commit": "71d34364cfa1c1cfe33b8bdc262484332ba44535",
+  "dirty": false,
+  "host": {
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logicalCpus": 12,
+    "runnerGoVersion": "go1.27.1"
+  },
+  "method": "Build footprints sum logical file lengths after each command in disjoint output/cache roots. Toolchain installations are inventoried separately; transient peak disk usage is not measured. Cold means empty experiment caches, not OS page caches. Timings include driver startup. C directly rebuilds all sources, including no-op. Development profiles have different debug/safety defaults.",
+  "settings": {
+    "languages": [
+      "fairy"
+    ],
+    "profiles": [
+      "dev"
+    ],
+    "workloads": [
+      "many-modules"
+    ],
+    "edits": 20,
+    "modules": 16,
+    "repetitions": 1,
+    "commandTimeout": "3m0s"
+  },
+  "toolchains": [
+    {
+      "language": "fairy",
+      "version": "checkout 71d34364cfa1c1cfe33b8bdc262484332ba44535",
+      "executable": "fairyc.exe",
+      "executableSha256": "4cedb087d9907f1de895d7a15733f7b566e885f3678ac421049e658f6d42ab20",
+      "executableBytes": 24239104,
+      "backend": "MSVC 14.51.36231; Windows SDK 10.0.26100.0",
+      "status": "ready"
+    }
+  ],
+  "installations": [
+    {
+      "name": "Fairy C compiler",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "standalone executable; embedded SDK included; Go build environment excluded",
+      "bytes": 24239104,
+      "files": 1,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "MSVC 14.51.36231",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active MSVC version tree; includes installed architecture variants",
+      "bytes": 2585203456,
+      "files": 1752,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Include",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 361818190,
+      "files": 4771,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 Lib",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 805656732,
+      "files": 1454,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    },
+    {
+      "name": "Windows SDK 10.0.26100.0 bin",
+      "usedBy": [
+        "fairy"
+      ],
+      "scope": "active SDK version subtree",
+      "bytes": 248928991,
+      "files": 699,
+      "skippedSymlinks": 0,
+      "status": "measured"
+    }
+  ],
+  "cases": [
+    {
+      "id": "fairy-dev-many-modules-01",
+      "language": "fairy",
+      "profile": "dev",
+      "workload": "many-modules",
+      "repetition": 1,
+      "status": "passed",
+      "inputSha256": "e780da0d1fa7eecc5c157ea809a11f796bbcb4edf285c9314fe40485e660f523",
+      "samples": [
+        {
+          "stage": "cold",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "adfdba07de9f194c4138e6020a50cfaeed731bec96e8484b0a41b4da72da4861",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 1110.029,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 32.75
+            }
+          ],
+          "buildWallMs": 1110.029,
+          "expectedStdout": "tokens=6400 checksum=450703\n",
+          "actualStdout": "tokens=6400 checksum=450703\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "no-op",
+          "edit": 0,
+          "change": "none",
+          "sourceSha256": "adfdba07de9f194c4138e6020a50cfaeed731bec96e8484b0a41b4da72da4861",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 1034.027,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock unchanged)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 26.691
+            }
+          ],
+          "buildWallMs": 1034.027,
+          "expectedStdout": "tokens=6400 checksum=450703\n",
+          "actualStdout": "tokens=6400 checksum=450703\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 1,
+          "change": "private",
+          "sourceSha256": "b21c173fca47a62f792975ee6ae2f46844b7c98191a223b03a174ad878493924",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 1177.363,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 16.887
+            }
+          ],
+          "buildWallMs": 1177.363,
+          "expectedStdout": "tokens=6400 checksum=561454\n",
+          "actualStdout": "tokens=6400 checksum=561454\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 2,
+          "change": "private",
+          "sourceSha256": "111ec950e829fb816416059d6794e23c72852e27bec9ae855da17e30c3d3be3b",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 906.053,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 21.465
+            }
+          ],
+          "buildWallMs": 906.053,
+          "expectedStdout": "tokens=6400 checksum=672205\n",
+          "actualStdout": "tokens=6400 checksum=672205\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 3,
+          "change": "private",
+          "sourceSha256": "2649565dcab5dec3b06d9b5f32738a0892a56c4850f013e6ee045960ddcb92fc",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 1062.158,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 28.337
+            }
+          ],
+          "buildWallMs": 1062.158,
+          "expectedStdout": "tokens=6400 checksum=782956\n",
+          "actualStdout": "tokens=6400 checksum=782956\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 4,
+          "change": "private",
+          "sourceSha256": "d975e2fd8a56722128be166bbb1e44d40e312ecc6a89985b62bd2fe7e6d7b4ed",
+          "sourceBytes": 3391,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 958.77,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 23.014
+            }
+          ],
+          "buildWallMs": 958.77,
+          "expectedStdout": "tokens=6400 checksum=893707\n",
+          "actualStdout": "tokens=6400 checksum=893707\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 5,
+          "change": "public-interface",
+          "sourceSha256": "d74f96782d743d5ecf4bc0126ea82889b95a2b92b8192831ae3cd442f047e2ab",
+          "sourceBytes": 3411,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 901.043,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 21.799
+            }
+          ],
+          "buildWallMs": 901.043,
+          "expectedStdout": "tokens=6400 checksum=4455\n",
+          "actualStdout": "tokens=6400 checksum=4455\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 6,
+          "change": "private",
+          "sourceSha256": "b200994cae42c42874ba44eb1618d6337d35846c78c36d2f325eff61780363bd",
+          "sourceBytes": 3411,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 905.783,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 21.435
+            }
+          ],
+          "buildWallMs": 905.783,
+          "expectedStdout": "tokens=6400 checksum=115206\n",
+          "actualStdout": "tokens=6400 checksum=115206\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 7,
+          "change": "private",
+          "sourceSha256": "5daf51fa8675519a4306d6fdaeee7b79fffa2f25d306b417bea6435ee6aac701",
+          "sourceBytes": 3411,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 850.783,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 20.071
+            }
+          ],
+          "buildWallMs": 850.783,
+          "expectedStdout": "tokens=6400 checksum=225957\n",
+          "actualStdout": "tokens=6400 checksum=225957\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 8,
+          "change": "private",
+          "sourceSha256": "dd6468038290a2a17a5efeb1c449cdeea4354e30b7ac7bb1f3108172fd58d4ae",
+          "sourceBytes": 3411,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 867.177,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 19.957
+            }
+          ],
+          "buildWallMs": 867.177,
+          "expectedStdout": "tokens=6400 checksum=336708\n",
+          "actualStdout": "tokens=6400 checksum=336708\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 9,
+          "change": "private",
+          "sourceSha256": "9453ca2672f64ce80ad0237739e47ad590e27cb1fdf7cb6a9b8e342a428d82af",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 945.889,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 24.236
+            }
+          ],
+          "buildWallMs": 945.889,
+          "expectedStdout": "tokens=6400 checksum=447459\n",
+          "actualStdout": "tokens=6400 checksum=447459\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 10,
+          "change": "public-interface",
+          "sourceSha256": "5aa335773d6bbe6bcbc61c8e64ce062840f766dda9f599154113440f90eddf91",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 957.405,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 20.611
+            }
+          ],
+          "buildWallMs": 957.405,
+          "expectedStdout": "tokens=6400 checksum=558210\n",
+          "actualStdout": "tokens=6400 checksum=558210\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 11,
+          "change": "private",
+          "sourceSha256": "4478bc4ca4aaa0147a653f8110fb88f34b7022b1a4422a3b6220951e8ce84a68",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 857.29,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 23.316
+            }
+          ],
+          "buildWallMs": 857.29,
+          "expectedStdout": "tokens=6400 checksum=668961\n",
+          "actualStdout": "tokens=6400 checksum=668961\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 12,
+          "change": "private",
+          "sourceSha256": "73928d52dc344ce7443ea9b210705e29d5699f87e06641368a5be8ed337767d7",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 860.745,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 21.056
+            }
+          ],
+          "buildWallMs": 860.745,
+          "expectedStdout": "tokens=6400 checksum=779712\n",
+          "actualStdout": "tokens=6400 checksum=779712\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 13,
+          "change": "private",
+          "sourceSha256": "33e7d807347193dbda3fa3e1e5fe33323dc3e1d6e73170b520a30f670b432cd6",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 849.482,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 19.381
+            }
+          ],
+          "buildWallMs": 849.482,
+          "expectedStdout": "tokens=6400 checksum=890463\n",
+          "actualStdout": "tokens=6400 checksum=890463\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 14,
+          "change": "private",
+          "sourceSha256": "e3a5845a182027dd28d383f541df3b97f2c871d124e67419183af3d15cae5787",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 840.631,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 11.934
+            }
+          ],
+          "buildWallMs": 840.631,
+          "expectedStdout": "tokens=6400 checksum=1211\n",
+          "actualStdout": "tokens=6400 checksum=1211\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 15,
+          "change": "public-interface",
+          "sourceSha256": "39a33dc117e9377bd69e2518d82395199139ff2bf6ae65767b7532f8ac5b6438",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 543.105,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 10.846
+            }
+          ],
+          "buildWallMs": 543.105,
+          "expectedStdout": "tokens=6400 checksum=111962\n",
+          "actualStdout": "tokens=6400 checksum=111962\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 16,
+          "change": "private",
+          "sourceSha256": "cec127b7f20061ba519d40ee1f9a5e7ebf07969ab748849a347b24f20d9dc0ab",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 468.956,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 11.054
+            }
+          ],
+          "buildWallMs": 468.956,
+          "expectedStdout": "tokens=6400 checksum=222713\n",
+          "actualStdout": "tokens=6400 checksum=222713\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 17,
+          "change": "private",
+          "sourceSha256": "1fb1b6b51b35147b75c4d55a183d3218c9ffaf7475006b5cae70a0dbffa83bd7",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 477.045,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 11.009
+            }
+          ],
+          "buildWallMs": 477.045,
+          "expectedStdout": "tokens=6400 checksum=333464\n",
+          "actualStdout": "tokens=6400 checksum=333464\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 18,
+          "change": "private",
+          "sourceSha256": "195aab14a26066eb53c5fb638b2828d89de52765eb45f46f8329aa73df465ae2",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 460.713,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 11.082
+            }
+          ],
+          "buildWallMs": 460.713,
+          "expectedStdout": "tokens=6400 checksum=444215\n",
+          "actualStdout": "tokens=6400 checksum=444215\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 19,
+          "change": "private",
+          "sourceSha256": "979197d751fe5f9c2f2935bcceb24e8fcd1ca0ce8b4cafe48a945a769ee4a4d8",
+          "sourceBytes": 3412,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 447.857,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 11.612
+            }
+          ],
+          "buildWallMs": 447.857,
+          "expectedStdout": "tokens=6400 checksum=554966\n",
+          "actualStdout": "tokens=6400 checksum=554966\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 133120,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 144349
+          }
+        },
+        {
+          "stage": "edit",
+          "edit": 20,
+          "change": "public-interface",
+          "sourceSha256": "a93e12058ad724caacdfb2083c7f183d77c6b127e2fec2b0b788a6d502cae73e",
+          "sourceBytes": 3392,
+          "sourceFiles": 18,
+          "commands": [
+            {
+              "argv": [
+                "$RUN\\tooling\\fairyc.exe",
+                "build"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 443.842,
+              "log": "built: build/bench.exe (x86_64-windows-msvc, development, lock updated)\n"
+            },
+            {
+              "argv": [
+                "$RUN\\cases\\fairy-dev-many-modules-01\\project\\build\\bench.exe"
+              ],
+              "environmentOverrides": [
+                "LOCALAPPDATA=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "XDG_CACHE_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\shared",
+                "TMPDIR=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "TEMP=$RUN\\cases\\fairy-dev-many-modules-01\\state\\tmp",
+                "CARGO_HOME=$RUN\\cases\\fairy-dev-many-modules-01\\state\\cargo",
+                "CARGO_NET_OFFLINE=true",
+                "CARGO_TERM_COLOR=never",
+                "NO_COLOR=1"
+              ],
+              "exitCode": 0,
+              "wallMs": 45.291
+            }
+          ],
+          "buildWallMs": 443.842,
+          "expectedStdout": "tokens=6400 checksum=665717\n",
+          "actualStdout": "tokens=6400 checksum=665717\n",
+          "verified": true,
+          "footprint": {
+            "binaryBytes": 132608,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 2,
+            "totalBytes": 143837
+          }
+        },
+        {
+          "stage": "clean",
+          "edit": 20,
+          "change": "none",
+          "sourceSha256": "",
+          "sourceBytes": 0,
+          "sourceFiles": 0,
+          "action": "remove project build outputs; preserve experiment shared caches",
+          "commands": null,
+          "buildWallMs": 0,
+          "expectedStdout": "",
+          "actualStdout": "",
+          "verified": false,
+          "footprint": {
+            "binaryBytes": 0,
+            "separateDebugBytes": 0,
+            "incrementalBytes": 0,
+            "intermediateBytes": 0,
+            "localCacheBytes": 0,
+            "sharedCacheBytes": 11229,
+            "retainedTempBytes": 0,
+            "files": 1,
+            "totalBytes": 11229
+          },
+          "reclaimedBytes": 132608
+        }
+      ]
+    }
+  ]
+}
