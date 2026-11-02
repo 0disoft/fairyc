@@ -1,8 +1,10 @@
 # Fairy candidate static operation interfaces v1
 
 - Owner: [ADR 0495](../adr/0495-explicit-static-operation-interfaces.md).
-- Status: Bounded Windows prototype; native Linux remains deferred.
-- Evidence: [Windows receipt](../ops/windows-candidate-static-operations-20261102.md).
+- Status: Bounded Windows prototype with full-CLI and persistent-cache evidence
+  under both compiler profiles; native Linux remains deferred.
+- Evidence: [source/artifact and C receipt](../ops/windows-candidate-static-operations-20261102.md)
+  and [full CLI and persistent-cache receipt](../ops/windows-candidate-static-operations-cli-cache-20261103.md).
 
 The Fairy-authored compiler admits the same explicit single-operation family as
 Go: exactly one type parameter, a direct T result, zero through four immutable T
@@ -34,8 +36,21 @@ accumulated project work does not become a spurious local metadata limit.
 
 Whole-project artifact encode/decode and current-source restoration precede the
 native C replay. Cache wire versions and public CLI flags do not change. The
-proof covers identities and artifact restoration; it does not newly establish a
-candidate whole-package persistent cold/warm cache acceptance run.
+proof covers identities and artifact restoration. The full authored candidate
+CLI now exercises cold/locked checks, development/release builds and runs, JSON
+tests and interpreter/native tests under both compiler profiles. Both profiles'
+persistent-cache replay also passes generation and lock stability, provider and
+private-body invalidation, mixed-unit reuse, corrupt-generation repair and
+missing/wrong/duplicate provider rejection.
+Windows `test` remains a non-cache command, so no test result is cached.
+
+All thirteen provider tuples are admitted in the same package. The ordinary
+program/tests execute the original six scalar families and zero/four-argument
+operations. Seven extended wrappers are retained through a literal-false branch
+without execution; a separate test-only low C observer invokes those packet
+entries with boundary values and compares object bytes, including signed zero
+and `UINT64_MAX`. This adds no source literals or arithmetic and does not admit a
+full seven-scalar interpreter runtime path.
 
 Implementation owners are `static_operation_declarations.fy`,
 `static_operation_syntax.fy`, `static_operation_identity.fy`,
@@ -49,4 +64,5 @@ Implementation owners are `static_operation_declarations.fy`,
 Dynamic or multi-method interfaces, inference, nominal/aggregate providers,
 associated types, default/blanket/orphan implementations, boxing, allocation and
 retained/asynchronous callbacks remain outside this family. Copied local closure
-candidate parity remains a separate task.
+candidate parity remains a separate task. Native Linux, full `go test ./...`,
+hosted CI, self-hosting and clean-machine distribution remain deferred.

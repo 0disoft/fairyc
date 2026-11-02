@@ -43,10 +43,16 @@ unrelated private edits and missing-provider rejection. Existing generic source/
 and scoped vet pass. Native Linux uses the same GCC/Clang helper later; it remains unexecuted.
 
 Fairy candidate evidence is recorded in
-[the Windows static operation receipt](../ops/windows-candidate-static-operations-20261102.md)
+[the Windows source/artifact receipt](../ops/windows-candidate-static-operations-20261102.md),
+[the Windows CLI/cache follow-up](../ops/windows-candidate-static-operations-cli-cache-20261103.md)
 and [candidate static operations v1](../architecture/candidate-static-operations-v1.md).
 Native low/optimized compilers select all thirteen scalar families, restore whole
 project artifacts and produce four passing C11 executions. Independent Go root,
 specialization and public closure identities agree across selected/unused provider
-edits and unrelated private edits. Native Linux, candidate persistent-cache
-acceptance and candidate promotion remain deferred.
+edits and unrelated private edits. The full authored candidate CLI passes both
+profiles; cross-package persistent-cache replay under both profiles passes
+restoration, invalidation, mixed reuse, repair and missing/wrong/duplicate
+rejection. Native Linux, full `go test ./...`, hosted CI, self-hosting and
+clean-machine distribution remain deferred, and candidate promotion
+remains deferred. Test-only C observation does not broaden source admission or
+count test results as cached artifacts.

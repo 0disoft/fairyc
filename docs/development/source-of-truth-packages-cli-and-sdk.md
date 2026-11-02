@@ -402,7 +402,9 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Owner: `docs/adr/0495-explicit-static-operation-interfaces.md` and `docs/architecture/candidate-static-operations-v1.md`.
 - Declaration, wrapper and digest owners: `examples/lexer_candidate/src/static_operation_declarations.fy`, `static_operation_syntax.fy`, `static_operation_identity.fy` and the generic source/module-unit consumers named by the architecture page.
 - Native admission, cross-package Go identity oracle and restored-artifact C replay: `internal/cli/candidate_static_operation*_test.go` and `examples/lexer_candidate/tests/static_operation*.fy`.
-- Windows evidence and deferred Linux/cache/CLI limits: `docs/ops/windows-candidate-static-operations-20261102.md` and `docs/development/ordered-work-20261031.md`.
+- Historical source/artifact evidence: `docs/ops/windows-candidate-static-operations-20261102.md`.
+- Full Windows CLI and cross-package fresh-process cache: `internal/cli/candidate_static_operation_cli_test.go`, `candidate_static_operation_cli_cache_test.go` and `docs/ops/windows-candidate-static-operations-cli-cache-20261103.md`; scalar packet observers reuse `internal/cli/candidate_generic_cli_observer_test.go`.
+- Deferred native Linux replay: `docs/development/ordered-work-20261031.md`.
 
 ## Fairy candidate copied local closures
 

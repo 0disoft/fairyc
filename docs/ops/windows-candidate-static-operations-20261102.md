@@ -6,6 +6,11 @@
 - Host: Windows amd64, Go 1.27.1, MSVC 14.51.36231.
 - Scope: [candidate static operations v1](../architecture/candidate-static-operations-v1.md).
 
+Current command/cache follow-up:
+[full CLI and persistent cache, 2026-11-03](windows-candidate-static-operations-cli-cache-20261103.md).
+That receipt supersedes only the command/cache limits below; the results on this
+page remain the historical source, artifact, identity and native-C evidence.
+
 ## Executed and passed
 
 | Probe | Evidence |
