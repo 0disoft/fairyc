@@ -1,6 +1,7 @@
 module module_unit_name_model;
 import module_unit_body_ast as ast;
 import static_operation_syntax as operation_syntax;
+import copied_closure_tables as private;
 import module_signatures as signatures;
 import module_ast_join as join;
 import scanner as scanner;
@@ -20,17 +21,19 @@ pub resource Resolved {Frame frame;v::Vec<Symbol> symbols;v::Vec<Reference> refe
 pub fn join::Problem fail(ref Context c,u32 code,usize start,usize end){return join::Problem{.code,.module_index=c.frame.module_index,.start,.end};}
 pub fn bool charge(ref mut Context c,usize amount){if(c.work>1048576 || amount>1048576-c.work){return false;}c.work+=amount;return true;}
 pub fn Context context(Frame frame){return Context{.frame,.locals=[0;128],.active=0,.scope=1,.next_scope=2,.unsafe_depth=if(frame.unsafe_function){1}else{0},.work=0};}
-pub fn ref u8[] spelling(ref ast::Ast a,ref scanner::Stream source,usize id){let n=ast::expression_at(a,id);if(n.kind==2 && n.token>=operation_syntax::token_flag()){return scanner::token_raw(source,n.token-operation_syntax::token_flag());}return scanner::source_view(source)[n.start..n.end];}
+pub fn ref u8[] spelling(ref ast::Ast a,ref scanner::Stream source,usize id){let n=ast::expression_at(a,id);if(n.kind==2 && n.token>=private::helper_flag()){return scanner::source_view(source)[n.start..n.end];}if(n.kind==2 && n.token>=operation_syntax::token_flag()){return scanner::token_raw(source,n.token-operation_syntax::token_flag());}return scanner::source_view(source)[n.start..n.end];}
 pub fn bool simple(ref u8[] name){if(name.len==0){return false;}for(let u8 ch in name){if(!((ch>=65 && ch<=90) || (ch>=97 && ch<=122) || (ch>=48 && ch<=57) || ch==95)){return false;}}return true;}
-fn bool named(ref scanner::Stream source,Symbol s,ref u8[] name){return if(s.kind==10){bytes::equal(name,b"this")}else{bytes::equal(scanner::source_view(source)[s.start..s.end],name)};}
+fn bool named(ref scanner::Stream source,Symbol s,ref u8[] name){if(s.entry!=0 && s.pattern!=0){return false;}return if(s.kind==10){bytes::equal(name,b"this")}else{bytes::equal(scanner::source_view(source)[s.start..s.end],name)};}
 pub fn Result<usize,join::Problem> add(ref scanner::Stream source,ref mut Context c,ref mut v::Vec<Symbol> symbols,Symbol item){
     let name=scanner::source_view(source)[item.start..item.end];if(bytes::equal(name,b"source_location")){return .err(fail(c,4401,item.start,item.end));}if(item.kind!=10 && !simple(name)){return .err(fail(c,3,item.start,item.end));}var usize i=c.active;
-    while(i>0){i-=1;if(!charge(c,1)){return .err(fail(c,10,item.start,item.end));}let s=*v::at<Symbol>(symbols,c.locals[i]-1);if(s.scope==c.scope && (if(item.kind==10){s.kind==10}else{named(source,s,name)})){return .err(fail(c,2,item.start,item.end));}}
+    while(i>0){i-=1;if(!charge(c,1)){return .err(fail(c,10,item.start,item.end));}let s=*v::at<Symbol>(symbols,c.locals[i]-1);if(s.scope==c.scope && !(item.entry!=0 && item.pattern!=0) && !(s.entry!=0 && s.pattern!=0) && (if(item.kind==10){s.kind==10}else{named(source,s,name)})){return .err(fail(c,2,item.start,item.end));}}
     if(c.active>=128 || v::len<Symbol>(symbols)>=16384){return .err(fail(c,10,item.start,item.end));}if(!v::push<Symbol>(symbols,item).is_ok){return .err(fail(c,11,item.start,item.end));}let usize id=v::len<Symbol>(symbols);let usize slot=c.active;c.locals[slot]=id;c.active+=1;return .ok(id);
 }
 pub fn join::Problem reference(ref ast::Ast a,ref scanner::Stream source,ref signatures::Program metadata,usize expression,ref mut Context c,ref v::Vec<Symbol> symbols,ref mut v::Vec<Reference> references,ref mut v::Vec<usize> uses){
     let n=ast::expression_at(a,expression);let name=spelling(a,source,expression);var Reference r=Reference{.expression,.source_index=ast::expression_origin(a,expression),.kind=0,.symbol=0,.module_index=0,.declaration=0,.declaration_kind=0,.builtin=0,.start=n.start,.end=n.end,.unsafe_context=c.unsafe_depth!=0};var usize i=c.active;
-    if(simple(name)){while(i>0){i-=1;if(!charge(c,1)){return fail(c,10,n.start,n.end);}let s=*v::at<Symbol>(symbols,c.locals[i]-1);if(named(source,s,name)){r.kind=1;r.symbol=c.locals[i];break;}}}
+    if(n.token>=private::snapshot_flag()){let entry=n.token-private::snapshot_flag();var usize at=c.active;while(at>0){at-=1;let candidate=c.locals[at];let s=*v::at<Symbol>(symbols,candidate-1);if(s.entry!=0 && s.pattern==entry){r.kind=1;r.symbol=candidate;break;}}if(r.kind==0){return fail(c,1,n.start,n.end);}}
+    else if(n.token>=private::helper_flag()){let declaration=n.token-private::helper_flag();let id=signatures::identity(metadata,c.frame.module_index,declaration);if(id==0 || signatures::at(metadata,id).public){return fail(c,1,n.start,n.end);}r.kind=2;r.module_index=c.frame.module_index;r.declaration=declaration;r.declaration_kind=3;}
+    if(r.kind==0 && simple(name)){while(i>0){i-=1;if(!charge(c,1)){return fail(c,10,n.start,n.end);}let s=*v::at<Symbol>(symbols,c.locals[i]-1);if(named(source,s,name)){r.kind=1;r.symbol=c.locals[i];break;}}}
     if(r.kind==0){let u32 raw_kind=raw::named(name);let u32 storage_kind=if(c.frame.sdk_vector){storage::named(name)}else{0};
         if(raw_kind!=0 || storage_kind!=0 || bytes::equal(name,b"source_location")){if(bytes::equal(name,b"source_location")){var bool called=false;var usize parent=expression+1;while(parent<=ast::expression_count(a)){if(!charge(c,1)){return fail(c,10,n.start,n.end);}let candidate=ast::expression_at(a,parent);if(candidate.kind==6 && candidate.left==expression){called=true;break;}parent+=1;}if(!called){return fail(c,4401,n.start,n.end);}}r.kind=3;r.builtin=if(storage_kind!=0){100+storage_kind}else if(raw_kind!=0){raw_kind}else{200};}
         else{var usize probes=0;let found=signatures::declaration_lookup_measured(metadata,c.frame.module_index,name,ref mut probes);if(!charge(c,probes)){return fail(c,10,n.start,n.end);}if(found.code!=0){return fail(c,if(found.code==5){1}else{found.code},n.start,n.end);}let d=signatures::declaration_at(metadata,found.item);r.kind=2;r.module_index=d.module_index;r.declaration=d.declaration;r.declaration_kind=d.kind;}

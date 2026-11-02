@@ -1,5 +1,6 @@
 module module_unit_body_ast;
 import syntax as syntax;
+import copied_closure_reach as reach;
 import types as types;
 import body_state as ast;
 import bodies as entries;
@@ -13,20 +14,21 @@ pub fn bool charge(ref mut usize work,usize amount){if(*work>1048576 || amount>1
 fn bool inside(usize start,usize end,syntax::Declaration d){return start>=d.start && end<=d.end;}
 fn usize linked(ref v::Vec<usize> map,usize id,ref mut u32 code){if(id==0){return 0;}if(id>=v::len<usize>(map)){*code=9;return 0;}let usize result=*v::at<usize>(map,id);if(result==0){*code=9;}return result;}
 fn usize indexed(ref v::Vec<usize> map,usize start,usize count,ref mut u32 code){if(count==0){return 0;}let usize first=linked(map,start+1,code);if(first==0){return 0;}var usize i=1;while(i<count){if(linked(map,start+i+1,code)!=first+i){*code=9;return 0;}i+=1;}return first-1;}
-fn Result<v::Vec<usize>,u32> mapping(ref syntax::Parsed file,syntax::Declaration d,u32 kind,ref mut usize work){
+fn Result<v::Vec<usize>,u32> mapping(ref syntax::Parsed file,syntax::Declaration d,u32 kind,ref reach::Mask selected,ref mut usize work){
     var v::Vec<usize> map=v::empty<usize>();if(!v::push<usize>(ref mut map,0).is_ok){return .err(11);}var usize next=0;
     let usize count=if(kind==1){syntax::expression_count(file)}else if(kind==2){syntax::statement_count(file)}else if(kind==3){syntax::entry_count(file)}else{syntax::type_count(file)};
     var usize i=1;while(i<=count){if(!charge(work,1)){return .err(10);}var usize start=0;var usize end=0;
         if(kind==1){let n=syntax::expression_at(file,i);start=n.start;end=n.end;}else if(kind==2){let n=syntax::statement_at(file,i);start=n.start;end=n.end;}
         else if(kind==3){let n=syntax::entry_at(file,i-1);start=n.start;end=n.end;}else{let n=syntax::type_at(file,i);start=n.start;end=n.end;}
-        if(inside(start,end,d)){next+=1;}if(!v::push<usize>(ref mut map,if(inside(start,end,d)){next}else{0}).is_ok){return .err(11);}i+=1;
+        let keep=inside(start,end,d) && reach::selected(selected,kind,i);if(keep){next+=1;}if(!v::push<usize>(ref mut map,if(keep){next}else{0}).is_ok){return .err(11);}i+=1;
     }return .ok(map);
 }
 fn Result<Maps,u32> maps(ref syntax::Parsed file,syntax::Declaration d,ref mut usize work){
-    let expressions=switch(mapping(file,d,1,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
-    let statements=switch(mapping(file,d,2,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
-    let entries=switch(mapping(file,d,3,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
-    let types=switch(mapping(file,d,4,work)){case .ok(m):{m}case .err(c):{return .err(c);}};return .ok(Maps{.expressions,.statements,.entries,.types});
+    let selected=switch(reach::build(file,d,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
+    let expressions=switch(mapping(file,d,1,ref selected,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
+    let statements=switch(mapping(file,d,2,ref selected,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
+    let entries=switch(mapping(file,d,3,ref selected,work)){case .ok(m):{m}case .err(c):{return .err(c);}};
+    let types=switch(mapping(file,d,4,ref selected,work)){case .ok(m):{m}case .err(c):{return .err(c);}};return .ok(Maps{.expressions,.statements,.entries,.types});
 }
 fn ast::Node expression(syntax::Expression n,ref Maps m,ref mut u32 code){
     let usize left=if(n.kind==12 || n.kind==14 || n.kind==31){linked(ref m.statements,n.left,code)}else{linked(ref m.expressions,n.left,code)};
@@ -55,7 +57,7 @@ fn Result<Ast,u32> copy(ref syntax::Parsed file,usize declaration,bool cleaning,
     i=0;while(i<syntax::entry_count(file)){if(!charge(work,1)){return .err(10);}let usize id=*v::at<usize>(ref m.entries,i+1);if(id!=0){let n=syntax::entry_at(file,i);if(!v::push<entries::Entry>(ref mut entries,entries::Entry{.kind=n.kind,.start=n.start,.end=n.end,.name_start=n.name_start,.name_end=n.name_end,.type_start=n.type_start,.type_end=n.type_end,.type_root=linked(ref m.types,n.type_root,ref mut code),.expression=linked(ref m.expressions,n.expression,ref mut code),.id}).is_ok || !v::push<usize>(ref mut original_entries,i+1).is_ok){return .err(11);}}i+=1;}
     i=1;while(i<=syntax::type_count(file)){if(!charge(work,1)){return .err(10);}if(*v::at<usize>(ref m.types,i)!=0){let n=syntax::type_at(file,i);if(!v::push<types::Node>(ref mut types,types::Node{.kind=n.kind,.start=n.start,.end=n.end,.left=linked(ref m.types,n.left,ref mut code),.right=linked(ref m.types,n.right,ref mut code)}).is_ok || !v::push<usize>(ref mut original_types,i).is_ok){return .err(11);}}i+=1;}
     i=d.attribute_start;while(i<d.attribute_start+d.attribute_count){if(!charge(work,1)){return .err(10);}var a=syntax::attribute_at(file,i);let usize first=v::len<attrs::Argument>(ref arguments);var usize j=a.argument_start;while(j<a.argument_start+a.argument_count){if(!charge(work,1)){return .err(10);}if(!v::push<attrs::Argument>(ref mut arguments,syntax::attribute_argument_at(file,j)).is_ok){return .err(11);}j+=1;}a.argument_start=first;if(!v::push<attrs::Attribute>(ref mut attributes,a).is_ok){return .err(11);}i+=1;}
-    d.expression=linked(ref m.expressions,d.expression,ref mut code);d.entry_start=indexed(ref m.entries,d.entry_start,d.entry_count,ref mut code);d.body=linked(ref m.statements,d.body,ref mut code);d.cleanup_body=linked(ref m.statements,d.cleanup_body,ref mut code);d.result_type=linked(ref m.types,d.result_type,ref mut code);d.generic_parameters=0;d.attribute_start=0;d.field_start=0;d.field_count=0;
+    d.expression=linked(ref m.expressions,d.expression,ref mut code);if(syntax::closure_prepared(file)){var usize first=0;var usize count=0;var usize entry=d.entry_start;while(entry<d.entry_start+d.entry_count){if(syntax::entry_at(file,entry).kind==1){let id=linked(ref m.entries,entry+1,ref mut code);if(count==0){first=id-1;}count+=1;}entry+=1;}d.entry_start=first;d.entry_count=count;}else{d.entry_start=indexed(ref m.entries,d.entry_start,d.entry_count,ref mut code);}d.body=linked(ref m.statements,d.body,ref mut code);d.cleanup_body=linked(ref m.statements,d.cleanup_body,ref mut code);d.result_type=linked(ref m.types,d.result_type,ref mut code);d.generic_parameters=0;d.attribute_start=0;d.field_start=0;d.field_count=0;
     if(code!=0){return .err(code);}return .ok(Ast{.declaration=d,.expressions,.statements,.entries,.types,.original_entries,.original_types,.original_expressions,.attributes,.arguments});
 }
 pub fn Result<Ast,u32> build(ref syntax::Parsed file,usize declaration,ref mut usize work){return copy(file,declaration,false,0,work);}

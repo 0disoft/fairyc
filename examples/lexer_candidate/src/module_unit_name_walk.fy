@@ -8,7 +8,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 fn join::Problem local(ref ast::Ast a,ref scanner::Stream source,usize entry,ref v::Vec<usize> annotations,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> entries){
-    let e=ast::entry_at(a,entry-1);let usize type=if(e.type_root==0){0}else{*v::at<usize>(annotations,e.type_root-1)};let bound_symbol=m::Symbol{.kind=if(e.kind==1){1}else if(e.kind==2){2}else{3},.type,.entry,.pattern=0,.scope=c.scope,.start=e.name_start,.end=e.name_end};let id=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(entries,entry-1);*slot=id;return m::fail(c,0,0,0);
+    let e=ast::entry_at(a,entry-1);let usize type=if(e.type_root==0){0}else{*v::at<usize>(annotations,e.type_root-1)};let bound_symbol=m::Symbol{.kind=if(e.kind==1){1}else if(e.kind==2 || e.kind==102){2}else{3},.type,.entry,.pattern=if(e.kind==102){ast::entry_origin(a,entry)}else{0},.scope=c.scope,.start=e.name_start,.end=e.name_end};let id=switch(m::add(source,c,symbols,bound_symbol)){case .ok(id):{id}case .err(p):{return p;}};let slot=v::at_mut<usize>(entries,entry-1);*slot=id;return m::fail(c,0,0,0);
 }
 fn join::Problem pattern(ref ast::Ast a,ref scanner::Stream source,usize id,u32 kind,usize type,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<usize> patterns){
     let n=ast::expression_at(a,id);let name=m::spelling(a,source,id);let bound_symbol=m::Symbol{.kind,.type,.entry=0,.pattern=id,.scope=c.scope,.start=n.start,.end=n.end};var usize symbol=0;

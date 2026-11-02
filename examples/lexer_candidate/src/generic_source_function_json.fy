@@ -8,6 +8,7 @@ import static_operation_declarations as operations;
 import std::bytes as bytes;
 
 pub fn bool value(ref syntax::Parsed p,usize index,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    let original=syntax::written_function(p,index+1);if(original.len!=0){return json::raw(out,original,work);}
     if(!declarations::function_fields(p,index,out,work)){return false;}let d=syntax::declaration_at(p,index);
     if(operations::operation(p,index+1).kind==1){let b=syntax::statement_at(p,d.body);return json::raw(out,b",\"Body\":{\"Span\":",work) && json::span(out,b.start,b.end,work) && json::raw(out,b",\"Statements\":null,\"Tail\":null}}",work);}
     return json::raw(out,b",\"Body\":",work) && expressions::block(p,d.body,0,out,work) && json::raw(out,b"}",work);

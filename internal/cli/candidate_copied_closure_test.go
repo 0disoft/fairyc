@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,4 +59,66 @@ func TestCandidateCopiedClosureSyntax(t *testing.T) {
 			t.Fatalf("%v: closure AST differs from Go\nactual: %s\nexpected: %s", args, out, expected.String())
 		}
 	}
+}
+
+func TestCandidateCopiedClosureCalls(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("Windows native replay; Linux deferred")
+	}
+	root := t.TempDir()
+	copyLexerExample(t, root)
+	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "copied_closure_calls.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	program := strings.Replace(string(raw), "module tests::copied_closure_calls;", "module main;", 1) + "\n@effects(console) fn i32 main(){" + candidateCopiedClosureAdmissionCalls() + "return 0;}\n"
+	writeTestSource(t, root, "src/main.fy", program)
+	copyCandidateParityModules(t, root, "scanner", "syntax", "module_signatures", "module_unit_bind", "module_unit_call_closure", "module_unit_values")
+	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
+		code, out, diagnostics := runForTest(args, root)
+		if code != ExitSuccess || out != "" || diagnostics != "" {
+			t.Fatalf("%v: %d %q %s", args, code, out, diagnostics)
+		}
+	}
+}
+
+func candidateCopiedClosureProgram() string {
+	return `module root;fn i32 main(){
+var i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};offset=100;
+assert(add(1)==41);assert(add(2)==42);if(true){let i32 add=7;assert(add==7);}
+let second=fn [i32 offset] i32(i32 x){offset+x};assert(second(1)==101);
+let no_capture=fn [] i32(i32 x){return x*2;};assert(no_capture(21)==42);
+for(var i32 i=0;i<2;i+=1){assert(add(2)==42);}var i32 j=0;while(j<2){assert(add(j)==40+j);j+=1;}
+let i32 a=1;let i32 b=2;let i32 c=3;let i32 d=4;
+let full=fn [i32 a,i32 b,i32 c,i32 d] i32(i32 w,i32 x,i32 y,i32 z){return a+b+c+d+w+x+y+z;};assert(full(5,6,7,14)==42);
+return add(2);}`
+}
+func candidateCopiedClosureAdmissionCalls() string {
+	var out strings.Builder
+	fmt.Fprintf(&out, "checked(b%s,5);", strconv.Quote(candidateCopiedClosureProgram()))
+	base := "module root;fn i32 main(){let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}"
+	for _, replacement := range [][2]string{
+		{"return add(2);", "return add;"}, {"return add(2);", "let other=add;return other(2);"},
+		{"return offset+x;", "offset=1;return offset+x;"}, {"fn [i32 offset]", "fn []"}, {"fn [i32 offset]", "fn [ref i32 offset]"},
+		{"fn [i32 offset]", "fn [i32 offset,i32 offset]"}, {"let add=fn", "let i32 add=fn"},
+		{"let add=fn", "var add=fn"}, {"return add(2);", "return _fy_closure_main_1(40,2);"},
+		{"return add(2);", "return add(.x=2);"}, {"let add=fn", "let _fy_closure_bad=fn"},
+		{"return add(2);", "let add=42;return add;"}, {"return offset+x;", "return offset+missing;"},
+		{"fn [i32 offset]", "fn [u32 offset]"}, {"i32(i32 x)", "i32(i64 x)"},
+		{"i32(i32 x)", "i64(i32 x)"}, {"return offset+x;", "return add(x);"},
+		{"i32(i32 x)", "i32(i32 a,i32 b,i32 c,i32 d,i32 e)"},
+		{"fn [i32 offset]", "fn [i32 offset,i32 b,i32 c,i32 d,i32 e]"},
+		{"return offset+x;", "return " + strings.Repeat("x+", 33) + "x;"},
+	} {
+		fmt.Fprintf(&out, "reject(b%s);", strconv.Quote(strings.Replace(base, replacement[0], replacement[1], 1)))
+	}
+	for _, raw := range []string{
+		"module root;fn i32 main(){if(true){let c=fn [] i32(i32 x){return x;};return c(42);}return 0;}",
+		"module root;fn i32 run(i32 c){let c=fn [] i32(i32 x){return x;};return c(42);}fn i32 main(){return run(1);}",
+		"module root;fn i32 main(){let c=fn [] i32(){42};for(let u8 x in b\"x\"){discard x;}return c();}",
+		"module root;fn i32 _fy_closure_hidden(){return 42;}fn i32 main(){let c=fn [] i32(){42};return c();}",
+	} {
+		fmt.Fprintf(&out, "reject(b%s);", strconv.Quote(raw))
+	}
+	return out.String()
 }

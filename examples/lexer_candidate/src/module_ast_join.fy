@@ -2,6 +2,7 @@ module module_ast_join;
 import candidate_limits as limits;
 import syntax as syntax;
 import static_operation_syntax as operation_syntax;
+import copied_closure_tables as private;
 import scanner as scanner;
 import body_state as body;
 import bodies as bodies;
@@ -37,11 +38,12 @@ fn syntax::Declaration declaration(syntax::Declaration d,usize offset,usize expr
     };
 }
 
-fn body::Node expression(syntax::Expression n,usize offset,usize expressions,usize statements,usize type_base,ref v::Vec<usize> tokens){
-    let usize left=if(n.kind==12 || n.kind==14 || n.kind==31){linked(n.left,statements)}else{linked(n.left,expressions)};
+fn body::Node expression(syntax::Expression n,usize offset,usize expressions,usize statements,usize type_base,usize entry_base,usize declaration_base,ref v::Vec<usize> tokens){
+    if(n.kind==35){return body::Node{.kind=n.kind,.start=moved(n.start,offset),.end=moved(n.end,offset),.token=linked(n.token,type_base),.left=n.left+entry_base,.right=n.right};}
+    let usize left=if(n.kind==12 || n.kind==14 || n.kind==31 || n.kind==34){linked(n.left,statements)}else{linked(n.left,expressions)};
     var usize right=linked(n.right,expressions);
     if(n.kind==18){right=linked(n.right,statements);}else if(n.kind==20 || n.kind==23){right=linked(n.right,type_base);}
-    return body::Node{.kind=n.kind,.start=moved(n.start,offset),.end=moved(n.end,offset),.token=token_at(tokens,n.token),.left,.right};
+    return body::Node{.kind=n.kind,.start=moved(n.start,offset),.end=moved(n.end,offset),.token=if(n.kind==2 && n.token>=private::snapshot_flag()){n.token+entry_base}else if(n.kind==2 && n.token>=private::helper_flag()){n.token+declaration_base}else{token_at(tokens,n.token)},.left,.right};
 }
 
 fn body::Statement statement(syntax::Statement s,usize offset,usize expressions,usize statements,usize type_base,usize entries,ref v::Vec<usize> tokens){
@@ -117,6 +119,7 @@ pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sour
         case .err(code):{return .err(fail(if(code==3){11}else if(code==4){10}else{9},first,0,0));}
     };
     if(scanner::diagnostic_count(ref stream)!=0){return .err(fail(if(scanner::diagnostic_info(ref stream,0).code==10){10}else{9},first,0,0));}
+    var bytes::Buffer private_data=bytes::empty();var v::Vec<private::Row> private_rows=v::empty<private::Row>();
     var v::Vec<syntax::Declaration> declarations=v::empty<syntax::Declaration>();
     var v::Vec<syntax::Problem> problems=v::empty<syntax::Problem>();
     var v::Vec<body::Node> expressions=v::empty<body::Node>();
@@ -143,6 +146,7 @@ pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sour
             if(!v::push<usize>(ref mut tokens,mapped).is_ok){return .err(fail(11,first+index,0,0));}
             position_of+=1;
         }
+        let usize declaration_base=v::len<syntax::Declaration>(ref declarations);let private_code=private::append(ref mut private_data,ref mut private_rows,syntax::private_names(file),declaration_base);if(private_code!=0){return .err(fail(private_code,first+index,0,0));}
         let usize expression_base=v::len<body::Node>(ref expressions);
         let usize statement_base=v::len<body::Statement>(ref statements);
         let usize type_base=v::len<types::Node>(ref types_arena);
@@ -159,7 +163,7 @@ pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sour
             at+=1;}
         at=1;
         while(at<=syntax::expression_count(file)){
-            if(!v::push<body::Node>(ref mut expressions,expression(syntax::expression_at(file,at),offset,expression_base,statement_base,type_base,ref tokens)).is_ok){return .err(fail(11,first+index,0,0));}
+            if(!v::push<body::Node>(ref mut expressions,expression(syntax::expression_at(file,at),offset,expression_base,statement_base,type_base,entry_base,declaration_base,ref tokens)).is_ok){return .err(fail(11,first+index,0,0));}
             at+=1;}
         at=1;
         while(at<=syntax::statement_count(file)){
@@ -191,7 +195,7 @@ pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sour
         offset+=syntax::source_view(file).len+1;
         index+=1;
     }
-    return .ok(syntax::assemble(stream,declarations,problems,expressions,entries,statements,types_arena,fields,attributes_arena,arguments));
+    return .ok(syntax::assemble_private(stream,declarations,problems,expressions,entries,statements,types_arena,fields,attributes_arena,arguments,private::assemble(private_data,private_rows)));
 }
 
 pub fn Result<syntax::Parsed,Problem> join(ref v::Vec<syntax::Parsed> sources){return join_range(sources,0,v::len<syntax::Parsed>(sources));}

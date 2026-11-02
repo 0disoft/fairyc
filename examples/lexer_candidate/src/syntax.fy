@@ -1,6 +1,9 @@
 module syntax;
 import syntax_parse_driver as driver;
 import static_operation_syntax as operation_syntax;
+import copied_closure_admission as closures;
+import copied_closure_lower as closure_lower;
+import copied_closure_tables as private;
 import scanner as scanner;
 import syntax_arena_copy as arenas;
 import std::vec as v;
@@ -19,6 +22,7 @@ pub struct Problem { u32 code; usize start; usize end; u32 expected; usize token
 pub struct Statement { u32 kind; usize start; usize end; usize expression; usize target; usize first; usize second; usize entry; usize operator; }
 pub resource Parsed {
     scanner::Stream source;
+    private::Table private_names;
     v::Vec<Declaration> declarations;
     v::Vec<Problem> problems;
     v::Vec<state::Node> expressions;
@@ -38,7 +42,11 @@ pub fn Result<Parsed, i32> parse(scanner::Stream input, usize max_items) {
 // Diagnostic recovery retains lexical failures in source_stream. Consumers
 // must check both diagnostic owners; the ordinary executable parse rejects
 // lexical failures before reaching this recovery-only entry.
-pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_items){var parsed=switch(driver::parse_diagnostics(input,max_items)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!operation_syntax::needed(ref parsed)){return .ok(parsed);}var usize work=0;return switch(copy_mode(ref parsed,false,true,ref mut work)){case .ok(p):{.ok(p)}case .err(code):{.err(if(code==11){3}else{4})}};}
+pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_items){var parsed=switch(driver::parse_diagnostics(input,max_items)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!operation_syntax::needed(ref parsed) && !closures::needed(ref parsed)){return .ok(parsed);}var usize work=0;return switch(copy_mode(ref parsed,false,true,ref mut work)){case .ok(p):{.ok(p)}case .err(code):{.err(if(code==11){3}else{4})}};}
+pub fn ref private::Table private_names(ref Parsed p){return ref p.private_names;}
+pub fn bool closure_prepared(ref Parsed p){return private::count(ref p.private_names)!=0;}
+pub fn ref u8[] written_function(ref Parsed p,usize declaration){return private::written(ref p.private_names,declaration);}
+pub fn ref u8[] declaration_name(ref Parsed p,usize declaration){let generated=private::name(ref p.private_names,declaration);if(generated.len!=0){return generated;}let d=declaration_at(p,declaration-1);return source_view(p)[d.name_start..d.name_end];}
 pub fn usize source_token_count(ref Parsed parsed) { return scanner::token_count(ref parsed.source); }
 pub fn usize declaration_count(ref Parsed parsed) { return v::len<Declaration>(ref parsed.declarations); }
 pub fn usize problem_count(ref Parsed parsed) { return v::len<Problem>(ref parsed.problems); }
@@ -114,6 +122,8 @@ pub fn Expression expression_at(ref Parsed parsed, usize id) {
 }
 pub fn ref u8[] expression_text(ref Parsed parsed, usize id) {
     let Expression node = expression_at(parsed, id);
+    if(node.kind==2 && node.token>=private::snapshot_flag()){let e=entry_at(parsed,node.token-private::snapshot_flag()-1);return source_view(parsed)[e.name_start..e.name_end];}
+    if(node.kind==2 && node.token>=private::helper_flag()){return declaration_name(parsed,node.token-private::helper_flag());}
     if(node.kind==2 && node.token>=operation_syntax::token_flag()){return scanner::token_raw(ref parsed.source,node.token-operation_syntax::token_flag());}
     if (node.kind == 2) { return scanner::source_view(ref parsed.source)[node.start..node.end]; }
     return scanner::token_raw(ref parsed.source, node.token);
@@ -253,7 +263,8 @@ pub fn types::Node generic_parameter_at(ref Parsed parsed, usize declaration, us
 }
 
 // Compiler-private owner publication; source/arenas are transferred as whole values.
-pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v::Vec<Problem> problems,v::Vec<state::Node> expressions,v::Vec<bodies::Entry> entries,v::Vec<state::Statement> statements,v::Vec<types::Node> types,v::Vec<records::Field> fields,v::Vec<attributes::Attribute> attributes,v::Vec<attributes::Argument> attribute_arguments){return Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments};}
+pub fn Parsed assemble(scanner::Stream source,v::Vec<Declaration> declarations,v::Vec<Problem> problems,v::Vec<state::Node> expressions,v::Vec<bodies::Entry> entries,v::Vec<state::Statement> statements,v::Vec<types::Node> types,v::Vec<records::Field> fields,v::Vec<attributes::Attribute> attributes,v::Vec<attributes::Argument> attribute_arguments){return assemble_private(source,declarations,problems,expressions,entries,statements,types,fields,attributes,attribute_arguments,private::empty());}
+pub fn Parsed assemble_private(scanner::Stream source,v::Vec<Declaration> declarations,v::Vec<Problem> problems,v::Vec<state::Node> expressions,v::Vec<bodies::Entry> entries,v::Vec<state::Statement> statements,v::Vec<types::Node> types,v::Vec<records::Field> fields,v::Vec<attributes::Attribute> attributes,v::Vec<attributes::Argument> attribute_arguments,private::Table private_names){return Parsed{.source,.private_names,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments};}
 // Independently own the exact parser/scanner arenas; preserve physical entry
 // order, lexical IDs, cooked-token slots and original byte spans. No rescan or
 // reparse. The caller can close the original source set immediately afterward.
@@ -264,15 +275,17 @@ fn Result<Parsed,u32> copy_mode(ref Parsed original,bool tests,bool lower_operat
     var declarations=switch(arenas::copy_declarations(ref original.declarations,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let problems=switch(arenas::copy_problems(ref original.problems,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     var expressions=switch(arenas::copy_expressions(ref original.expressions,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
-    let entries=switch(arenas::copy_entries(ref original.entries,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var entries=switch(arenas::copy_entries(ref original.entries,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     var statements=switch(arenas::copy_statements(ref original.statements,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let types=switch(arenas::copy_types(ref original.types,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let fields=switch(arenas::copy_fields(ref original.fields,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     var attributes=switch(arenas::copy_attributes(ref original.attributes,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
     let attribute_arguments=switch(arenas::copy_attribute_arguments(ref original.attribute_arguments,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    var private_names=switch(private::copy(ref original.private_names)){case .ok(p):{p}case .err(code):{return .err(code);}};
     if(lower_operations){let code=operation_syntax::prepare(original,ref mut declarations,ref mut expressions,ref mut statements);if(code!=0){return .err(code);}}
+    if(lower_operations && closures::needed(original)){var bytes::Buffer private_data=bytes::empty();var v::Vec<private::Row> private_rows=v::empty<private::Row>();let code=closure_lower::prepare(original,ref mut declarations,ref mut expressions,ref mut entries,ref mut statements,ref mut private_data,ref mut private_rows);if(code!=0){return .err(code);}private_names=private::assemble(private_data,private_rows);}
     if(tests){consume_test_metadata(source_view(original),ref mut declarations,ref mut attributes);}
-    return .ok(Parsed{.source,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments});
+    return .ok(Parsed{.source,.private_names,.declarations,.problems,.expressions,.entries,.statements,.types,.fields,.attributes,.attribute_arguments});
 }
 
 
