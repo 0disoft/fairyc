@@ -14,6 +14,7 @@ type SpanMapper struct {
 	original     []byte
 	intermediate []byte
 	final        []byte
+	// Owned, ascending plans prepared once; Map only reads them.
 	declarations []edit
 	surface      []edit
 }
@@ -50,23 +51,24 @@ func BuildSpanMapper(path string, input []byte) ([]byte, SpanMapper, error) {
 	}
 	return final, SpanMapper{
 		original: slices.Clone(input), intermediate: intermediate, final: final,
-		declarations: declarations, surface: surface,
+		declarations: ascendingSpanEdits(declarations), surface: ascendingSpanEdits(surface),
 	}, nil
 }
 
 // Map maps one half-open source span through both migration passes.
 func (m SpanMapper) Map(start, end int) (int, int, error) {
-	start, end, err := mapSpan(m.original, m.intermediate, m.declarations, start, end)
+	start, end, err := mapAscendingSpan(m.original, m.intermediate, m.declarations, start, end)
 	if err != nil {
 		return 0, 0, err
 	}
-	return mapSpan(m.intermediate, m.final, m.surface, start, end)
+	return mapAscendingSpan(m.intermediate, m.final, m.surface, start, end)
 }
 
 func mapSpan(before, after []byte, edits []edit, start, end int) (int, int, error) {
-	if start < 0 || end < start || end > len(before) {
-		return 0, 0, fmt.Errorf("invalid source span %d..%d", start, end)
-	}
+	return mapAscendingSpan(before, after, ascendingSpanEdits(edits), start, end)
+}
+
+func ascendingSpanEdits(edits []edit) []edit {
 	ascending := slices.Clone(edits)
 	slices.SortFunc(ascending, func(left, right edit) int {
 		if left.start != right.start {
@@ -74,6 +76,14 @@ func mapSpan(before, after []byte, edits []edit, start, end int) (int, int, erro
 		}
 		return left.end - right.end
 	})
+	return ascending
+}
+
+// ascending must be an immutable plan from ascendingSpanEdits.
+func mapAscendingSpan(before, after []byte, ascending []edit, start, end int) (int, int, error) {
+	if start < 0 || end < start || end > len(before) {
+		return 0, 0, fmt.Errorf("invalid source span %d..%d", start, end)
+	}
 	for _, current := range ascending {
 		if start >= current.start && end <= current.end && start != end {
 			needle := before[start:end]
