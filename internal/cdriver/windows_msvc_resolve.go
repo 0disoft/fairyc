@@ -1,6 +1,7 @@
 package cdriver
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -81,20 +82,65 @@ func discoverWindowsHostMSVC() (WindowsHostToolchain, error) {
 	return WindowsHostToolchain{Name: "msvc", Path: compilerPath, Version: version, Environment: environment}, nil
 }
 
-func queryMSVCInstallation(budget time.Duration, query func(time.Duration) (string, error)) (string, error) {
-	deadline := time.Now().Add(budget)
-	output, err := query(budget)
-	if !errors.Is(err, exec.ErrWaitDelay) {
-		return output, err
+type msvcQueryOptions struct {
+	Now     func() time.Time
+	Context context.Context
+}
+
+// The query owns its synchronous I/O and must honor the supplied timeout. The
+// optional clock/context control admission, retry and acceptance of its result.
+func queryMSVCInstallation(budget time.Duration, query func(time.Duration) (string, error), options ...msvcQueryOptions) (string, error) {
+	if len(options) > 1 {
+		return "", fmt.Errorf("MSVC installation query accepts at most one options value")
 	}
-	// An inherited pipe may outlive the query process. Discard its incomplete
-	// output and repeat only this read-only lookup, once, within the same budget.
-	// Compiler commands retain their normal fail-closed WaitDelay handling.
-	remaining := time.Until(deadline)
-	if remaining <= 0 {
+	now := time.Now
+	ctx := context.Background()
+	if len(options) != 0 {
+		if options[0].Now != nil {
+			now = options[0].Now
+		}
+		if options[0].Context != nil {
+			ctx = options[0].Context
+		}
+	}
+	if err := ctx.Err(); err != nil {
 		return "", err
 	}
-	return query(remaining)
+	if budget <= 0 {
+		return "", context.DeadlineExceeded
+	}
+	deadline := now().Add(budget)
+	remaining := func() (time.Duration, error) {
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
+		left := deadline.Sub(now())
+		if left <= 0 {
+			return 0, context.DeadlineExceeded
+		}
+		// An injected clock must never increase a single query's timeout.
+		return min(left, budget), nil
+	}
+	var queryErr error
+	for attempt := 0; attempt < 2; attempt++ {
+		left, err := remaining()
+		if err != nil {
+			return "", errors.Join(queryErr, err)
+		}
+		output, err := query(left)
+		queryErr = err
+		// Reject late success as well as late failure, even if the underlying
+		// process exits before its timeout notification has been delivered.
+		if _, stop := remaining(); stop != nil {
+			return "", errors.Join(queryErr, stop)
+		}
+		if !errors.Is(queryErr, exec.ErrWaitDelay) {
+			return output, queryErr
+		}
+		// An inherited pipe may outlive the query process. Discard its incomplete
+		// output and repeat only this read-only lookup, once, in the same budget.
+	}
+	return "", queryErr
 }
 
 func resolveProgramFilesX86() (string, error) {
