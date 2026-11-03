@@ -76,10 +76,61 @@ stream that continues delivering chunks across the total request deadline.
 CLI metadata `--check`, runtime source-pack pin check and `git diff --check` pass.
 The expanded runtime packaging replay also includes the new hard-link symbol.
 
-The full authored CLI low/optimized replay is recorded separately below once
-finished; focused module results alone do not establish full CLI acceptance.
+The full authored CLI low/optimized replay also passed; its independent
+acceptance results follow.
 
 Updated source-of-truth owners: `docs/cli/command-contract.md`,
 `docs/package/remote-sources-v1.md`, ADR 0498,
 `docs/development/source-of-truth-packages-cli-and-sdk.md` and
 `docs/development/ordered-work-20261031.md`.
+
+## Full authored CLI acceptance
+
+Implementation source: `6845a16e` (transport predecessor `461e8e44`). Environment:
+Windows amd64, Go 1.27.1, MSVC 14.51.36231. No frontend or policy implementation
+was changed after this replay started.
+
+```powershell
+$env:FAIRYC_RUN_HTTPS_TRUST_TESTS='1'
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_CLOSURE_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/online-fetch-cli-20261104'
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestCandidateFetchOnlineCLI$'
+```
+
+| Execution | Result | Elapsed |
+| --- | --- | --- |
+| low, 172 generated C parts | Pass | 121.04 seconds |
+| optimized, 172 generated C parts | Pass | 286.24 seconds |
+| complete Go test command | Pass | 407.432 seconds |
+
+Each profile uses the complete authored dispatcher and removes its separately
+built Go companion before command replay. The fixture performs shared syntax/help
+and offline regression checks, the same online success/failure/tree comparisons
+as the focused command test, and an actual online installation followed by authored
+`check` and `check --locked`. The online output-failure fixture is also the
+workspace used for those check calls, proving completed work survives stdout
+failure. No candidate command invokes a Go frontend, external download command
+or fixture transport substitute. The Go Fetcher is an independent test oracle
+with the local server's verified trust configuration.
+
+The source/image digests below come from the harness's exact generated-source
+and binary identity receipt. They identify retained local artifacts, not a release
+or clean-machine distribution result.
+
+| Profile | Generated source identity | Executable SHA-256 |
+| --- | --- | --- |
+| low | `b8f6cb9eff88770a4695007abd459195973bb05eebc9ebfef7e6b13da1d4e3aa` | `6c04828331b6de5d83bd59e52c607775a2c07b66bc52d0870181526b30463e5b` |
+| optimized | `54fc7efd0ad7ac94ef3e8292cea82e1183735d523d4df178da1699c29bcda8a1` | `ba5e3cd322387096c1a9da2be2858a2911b159f8b2fb3bf5d8fb642d07a819f2` |
+
+The complete output is retained locally under
+`.cache/online-fetch-cli-20261104/validation.log`. The expanded six-combination
+runtime source comparison and unchanged Go offline CLI regression also pass
+(`TestCandidateHTTPSRuntimePackaging` and
+`TestRemotePackageCLIOfflineLockAndFailures`, 9.559 seconds total).
+
+All temporary loopback trust certificates were removed. Linux transport/facade
+selection and native execution remain on the combined deferred queue. Full
+`go test ./...`, clean-machine/distribution acceptance and hosted CI were not run.
+The public command grammar is unchanged; its existing online form is now
+implemented by Fairy on Windows. No public SDK ABI, database, dependency,
+repository hygiene or CI/runner configuration was changed. No push or release.
