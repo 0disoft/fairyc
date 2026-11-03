@@ -105,6 +105,10 @@ func candidateParityBuildParts(t *testing.T, root string) (cbackend.BuildUnit, s
 // Some authored CLI commands call a named kernel32 import directly. Keep those
 // in the emitted header and native link; they have no project runtime body.
 func candidateParityBuildPartsWithSystemImports(t *testing.T, root string, imports map[string]bool) (cbackend.BuildUnit, string) {
+	return candidateParityBuildPartsWithLimit(t, root, imports, 256<<10)
+}
+
+func candidateParityBuildPartsWithLimit(t *testing.T, root string, imports map[string]bool, partBytes int) (cbackend.BuildUnit, string) {
 	t.Helper()
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
@@ -115,7 +119,7 @@ func candidateParityBuildPartsWithSystemImports(t *testing.T, root string, impor
 	if code != ExitSuccess {
 		t.Fatalf("lower parity probe: %d %s", code, &diagnostics)
 	}
-	build, err := cbackend.EmitBuildContext(t.Context(), lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile(), true, 256<<10)
+	build, err := cbackend.EmitBuildContext(t.Context(), lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile(), true, partBytes)
 	if err != nil {
 		t.Fatal(err)
 	}
