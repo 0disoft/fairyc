@@ -131,3 +131,11 @@ with parameterized and zero-parameter providers. The Go C-only proof analysis no
 representable i32 literal negations so `INT32_MAX - (-1)` has no emitted normal continuation.
 Normal i32 endpoints, negation of 0, -42 and INT32_MAX remain observed successful controls.
 These are named expression cases, not a proof of all arithmetic boundaries or expression trees.
+
+The [nested-expression receipt](../ops/windows-candidate-inline-nested-traps-20261103.md) checks
+the existing left-to-right order in `(a+1)/b+(2147483647+1)`: inner overflow, division failure,
+then right-hand overflow as the inputs change. Independently source-counted columns distinguish
+the two overflow sites on the same provider line. Parameterized/zero-parameter providers and
+ordinary/generic callers share the same checks, followed by a successful nested-expression test.
+Go correction `2acd75c7` limits auxiliary checked storage to surviving C paths; source admission,
+MIR, ABI and cache format stay unchanged. Coverage remains a representative expression set.

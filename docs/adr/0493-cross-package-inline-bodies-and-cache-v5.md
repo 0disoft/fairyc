@@ -123,3 +123,9 @@ failure and non-returning proofs. This fixes MSVC caller-continuation C4702 for 
 `INT32_MAX - (-1)` body. Minimum negation is never retained as a successful literal result, and
 unknown/invalidated facts remain discarded. Verified MIR, source admission, ABI, cache format and
 warning policy are unchanged.
+
+The [nested-expression receipt](../ops/windows-candidate-inline-nested-traps-20261103.md) verifies
+the first failure and its exact source column under the existing operand evaluation order.
+Go correction `2acd75c7` omits divisor slots and pending trap state for pruned paths after full
+MIR capability validation. The motivating failure is strict MSVC compilation of an early constant
+overflow followed by unreachable division. This does not change source semantics or cache identity.

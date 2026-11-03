@@ -541,6 +541,12 @@ always traps, allowing the existing non-returning inference to remove impossible
 continuations. See the [Windows subtraction/negation receipt](../ops/windows-candidate-inline-subtract-negate-20261103.md).
 This introduces no runtime barrier, warning suppression or MIR/cache format change.
 
+After C-only reachability pruning, only live division/remainder operations contribute private
+divisor slots, and only reachable dynamic failure targets require pending trap state. Capability
+validation still inspects all verified MIR blocks. This avoids unused-local build failures when
+an earlier constant trap removes a later division; the original first-failure edge and span stay
+intact. See the [nested inline trap receipt](../ops/windows-candidate-inline-nested-traps-20261103.md).
+
 The same C-only failure analysis tracks exact static byte-string descriptors through copies.
 A literal `usize` index at or beyond the byte length, or a reversed/out-of-range literal slice,
 selects the existing `bounds` trap edge. Writes, unknown operations/calls and control-flow joins
