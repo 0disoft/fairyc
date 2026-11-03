@@ -47,6 +47,9 @@ func verifyCandidateAtlasCommand(t *testing.T, image string) {
 			}
 			for _, symbol := range []string{s.Visible, s.Full} {
 				args := append([]string{"experimental", "atlas-impact"}, impactArgs(p.Header().PackageUID, symbol)...)
+				if symbol == s.Full {
+					args = append(args, "--locked")
+				}
 				code, out, stderr := fetchCLIProcess(t, image, root, args, "")
 				if code != 0 || stderr != "" {
 					t.Fatalf("impact: %d %q %q", code, out, stderr)

@@ -168,3 +168,55 @@ access, stdout errors and exact workspace-tree/lock preservation.
 passed low/optimized after sharing SymbolId derivation (12.656 seconds overall).
 `go vet -mod=readonly ./internal/cli` also passed. Optimized full CLI acceptance is
 recorded separately below when executed; Linux remains deferred.
+
+## Authored CLI dispatch acceptance
+
+`project_experimental_cli` dispatches Atlas to `project_atlas_cli` and delegates
+existing fetch/experimental-help behavior to the unchanged fetch command owner.
+The real authored `main` and `file_cli` entrypoint are retained in the Windows
+acceptance image; there is no replacement test-only main in this acceptance.
+The CLI accepts the existing explicit selectors/limits and optional --locked,
+but always verifies the current existing lock. Diagnostics are bounded candidate
+classifications rather than raw host paths, source bodies or OS errors.
+
+Windows native execution records:
+
+- `FAIRYC_RUN_PARITY_INTEGRATION=1 go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$'`: pass, 248.04 seconds (213.89 seconds inside the low profile).
+- `FAIRYC_RUN_PARITY_INTEGRATION=1 FAIRYC_ATLAS_CLI_ARTIFACTS=<local ignored directory> go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/optimized$'`: pass, 203.02 seconds (157.32 seconds inside optimized). Additional coverage includes actual --locked queries, otherwise-valid aggregate/generic source rejection and root/experimental/fetch/Atlas help.
+- Repeated optimized acceptance with the same C/profile/MSVC version and verified image digests: pass, 30.97 seconds, including 2.48 seconds inside the reused optimized profile. Every query still freshly verifies its workspace/source; only the test compiler image is reused.
+- `go vet -mod=readonly ./internal/cli`: pass on the final test helpers.
+- `git diff --check` including staged new files: pass.
+
+Both successful full-profile runs execute with empty PATH and no Go/build
+companion next to the native image. Ordinary scalar parameters, nested calls,
+cycles and repeated call sites match Go's visible/full symbol selection, nodes,
+depths, traversal cutoffs and current source/ordinary+generic interface facts.
+The expected compiler identity is independently hashed from the actual native
+executable. Non-call completeness is conservatively unavailable with explicit
+omissions, so the complete JSON is not represented as byte-identical to Go's
+richer source snapshot.
+
+Queries leave the complete workspace tree and fairy.lock unchanged. Unknown
+selectors, package/call/output ceilings and invalid arguments reject without a
+result document. Missing/stale locks and unsupported source forms reject; stdout
+failure returns 4. The final helper preflights otherwise-valid unsupported source
+fixtures through Go before expensive C compilation. An earlier added generic
+fixture used the wrong call spelling and failed this Go precondition; correcting
+it to identity<i32>(1) changed only the test fixture, not product behavior. Earlier
+producer field omissions were corrected before the successful full-profile runs;
+failed/aborted development runs are not counted as passes.
+
+Optional FAIRYC_ATLAS_CLI_ARTIFACTS is test-only. It retains a compiler image and a
+source/image digest receipt outside Git tracking, reuses only matching generated
+C/profile/toolchain-version/image inputs, and does not alter product cache policy
+or attach any authority to cached workspace facts. Without it, test artifacts use
+temporary directories as before. No workflow or runner setting changed.
+
+Source-of-truth updates remain docs/atlas/impact-mcp-edit-v1.md,
+docs/development/ordered-work-20261031.md and
+docs/development/source-of-truth-capabilities-contracts-and-atlas.md. Linux
+GCC/Clang replay is still batched, including the new argument/source/command/full
+CLI probes; no Windows skip is counted as Linux evidence. Wider candidate source
+admission, generic maps, MCP/edit integration, distribution and hosted CI remain
+separate. No public CLI flag/schema, SDK ABI, dependency, DB, repository hygiene
+setting, runner, push, deployment or release change accompanies this slice.

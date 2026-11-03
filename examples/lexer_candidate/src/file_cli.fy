@@ -1,7 +1,7 @@
 module file_cli;
 import file_frontend_cli as frontend;
 import project_test_cli as testing;
-import project_fetch_cli as fetching;
+import project_experimental_cli as experimental;
 import project_manifest_values as sc_values;
 import project_sdk_bundle as sc_sdk;
 import project_starter as starter;
@@ -54,7 +54,7 @@ pub fn i32 run() {
     };
     let ref u8[] flag = bytes::view(ref argument)[..flag_length];
     if(bytes::equal(flag,b"new")){return scaffold();}
-    if(bytes::equal(flag,b"experimental")){return fetching::arguments();}
+    if(bytes::equal(flag,b"experimental")){return experimental::arguments();}
     if(argc==2 && is_help(flag)){return public_output(public::help());}
     if(argc==3){var u8[4096] other=[0;4096];let n=switch(process::arg(2,ref mut other)){case .ok(p):{p}case .err(_):{return invocation("argument exceeds the supported byte limit");}};let ref u8[] value=ref other;
         if(is_help(value[..n]) && (bytes::equal(flag,b"check") || bytes::equal(flag,b"build") || bytes::equal(flag,b"run") || bytes::equal(flag,b"new") || bytes::equal(flag,b"test") || bytes::equal(flag,b"explain") || bytes::equal(flag,b"targets") || bytes::equal(flag,b"experimental"))){return public_output(public::help());}

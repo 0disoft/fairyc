@@ -45,12 +45,38 @@ reader, identity checks, join, traversal and output. No source bodies or host pa
 are included, and neither an exact-current map nor a complete traversal proves a
 change safe.
 
-This private slice rejects generic/type-parameter/specialization records and v2;
-it does not silently discard them. It has no candidate CLI dispatch, current-source
-expectation producer, MCP or edit integration yet. Go experimental commands above
-retain their existing contracts. Windows MSVC low/optimized evidence and the
-batched Linux gap are recorded in
-[the native Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
+The reader rejects generic/type-parameter/specialization records and v2; it does
+not silently discard them. The Fairy CLI now dispatches `experimental atlas-impact`
+with the selectors and explicit limits above. Both with and without `--locked`,
+it freshly resolves the workspace and requires an existing current lock, completes
+Fairy semantic/body/Flow/IR and interface verification, hashes its own executable,
+and derives source/compiler/interface expectations independently of the produced map.
+It then encodes fresh v3 partitions in memory and re-enters the same reader/current
+checks, join and traversal. No persisted Atlas map, cached header, Go child or build
+companion supplies current facts. Neither locks nor caches are written by the query.
+
+This first command slice admits root-reachable local packages with ordinary safe
+free functions, no attributes, and builtin `void`, `bool`, `u8`, `i32`, `i64` or
+`usize` parameter/result types. Imports, ordinary nested/direct calls, recursion and
+cycles within that slice are checked through the full compiler. SDK packages,
+foreign/unsafe/aggregate declarations, generics, interfaces, closures, attributed
+functions and other signature forms currently reject with a bounded diagnostic.
+A package without any function declarations also rejects. These are candidate
+admission limits; they do not narrow the broader Go command or language contracts.
+
+Call reachability is exact within the admitted graph. Non-call summaries are not
+collected by this producer: its completeness/header omissions explicitly use
+`candidate-atlas-not-collected`. Generic template bodies retain the existing
+unavailable reason. Output remains partial, carries the independent current
+identities, and never implies exact safe-change evidence. The producer does not
+claim byte parity with Go's richer completeness coverage. The private reader still
+admits the broader previously tested record/resource map inputs separately.
+
+Syntax/selector/budget failures return 2, workspace/lock/source or unsupported
+candidate-source failures 7, and preparation/output I/O failures 4. Help succeeds
+without reading a workspace. The existing read-only MCP and edit integration
+remain Go-only. Windows native evidence and the batched Linux gap are recorded in
+[the Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
 
 ## Read-only MCP over stdio
 
