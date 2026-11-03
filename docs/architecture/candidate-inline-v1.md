@@ -124,3 +124,10 @@ adds `% 0`, `INT32_MIN % -1` and `46341*46341` through parameterized and zero-pa
 exports and both caller families. Its passing sentinels observe positive/negative remainders and
 successful products after the traps. This is evidence for named i32 expressions, not all operators,
 types or constant-call forms; it introduces no new compiler implementation or source admission.
+
+The [subtraction/negation follow-up](../ops/windows-candidate-inline-subtract-negate-20261103.md)
+adds lower/upper subtraction overflow and minimum negation through the same caller families,
+with parameterized and zero-parameter providers. The Go C-only proof analysis now tracks
+representable i32 literal negations so `INT32_MAX - (-1)` has no emitted normal continuation.
+Normal i32 endpoints, negation of 0, -42 and INT32_MAX remain observed successful controls.
+These are named expression cases, not a proof of all arithmetic boundaries or expression trees.

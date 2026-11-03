@@ -116,3 +116,10 @@ extends the Windows observations to parameterized and zero-parameter `% 0`, sign
 remainder by negative one, and `46341*46341`, through ordinary and generic bool-marker callers.
 The existing Go/Fairy guards handle these cases without another production correction. This adds
 bounded regression evidence, not a new language, cache or ABI contract.
+
+The [subtraction/negation receipt](../ops/windows-candidate-inline-subtract-negate-20261103.md)
+records Go correction `d544d328`: representable i32 literal negations feed existing C-only
+failure and non-returning proofs. This fixes MSVC caller-continuation C4702 for a zero-parameter
+`INT32_MAX - (-1)` body. Minimum negation is never retained as a successful literal result, and
+unknown/invalidated facts remain discarded. Verified MIR, source admission, ABI, cache format and
+warning policy are unchanged.

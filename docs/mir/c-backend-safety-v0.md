@@ -533,6 +533,14 @@ or calls, merges and unwind entries invalidate those facts. One failure map
 controls checked guard output, reachable blocks, non-returning inference and
 helper demand. Assertion trap ordering and original verified MIR remain intact.
 
+The same C-only analysis preserves exact, representable i32 literal negations, including
+MIR i32 operands with an implicit type. `-INT32_MIN` is never retained as a successful literal
+result; unknown inputs, bool/other types and invalidated facts are discarded. A derived `-1` can
+prove `INT32_MAX - (-1)`
+always traps, allowing the existing non-returning inference to remove impossible caller
+continuations. See the [Windows subtraction/negation receipt](../ops/windows-candidate-inline-subtract-negate-20261103.md).
+This introduces no runtime barrier, warning suppression or MIR/cache format change.
+
 The same C-only failure analysis tracks exact static byte-string descriptors through copies.
 A literal `usize` index at or beyond the byte length, or a reversed/out-of-range literal slice,
 selects the existing `bounds` trap edge. Writes, unknown operations/calls and control-flow joins
