@@ -205,9 +205,12 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		visible := append([]int{classIndex}, outgoing[classIndex]...)
 		// Visibility is fixed for this instance. Resolve each distinct path
 		// once, while still emitting an independent lookup for every import.
-		providersByPath := make(map[string][]int)
+		var providersByPath map[string][]int
 		for _, module := range representative.Modules {
 			for _, importPath := range module.Imports {
+				if providersByPath == nil {
+					providersByPath = prepareVisibleProviderLookup(graph, classes, visible, representative.Modules)
+				}
 				providers, found := providersByPath[importPath]
 				if !found {
 					providers = providerClasses(graph, classes, visible, importPath, nil)
