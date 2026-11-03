@@ -60,3 +60,57 @@ Current expectations are independently serialized from the verified Go compiler
 result; changes to ten identity fields, files, dependencies and unknown fields
 reject. These are native Fairy readers, without a Go child or native C parser.
 Current-source ingestion and graph joining remain separate from these APIs.
+
+## Joined reverse-call impact
+
+`project_atlas_join` consumes only independently current-checked Ready partitions.
+It requires one v1/v3 schema, unique package instances, the complete direct-dependency
+closure and agreement of reference UID/coordinate pairs. Every resolved call must
+resolve to an exact declaration, with public cross-package visibility. Foreign
+calls remain opaque and do not consume the resolved-call ceiling. Package/call
+ceilings are explicit, at most 65,536, and shared work exhaustion rejects the join.
+The immutable graph owns its retained partitions; owned resource fields are never
+partially moved or mutated to construct the index.
+
+`project_atlas_impact` canonicalizes visible/full selectors through the join and
+performs deterministic breadth-first reverse traversal. Cycles and duplicate call
+sites cannot duplicate symbols. The canonical call ledger orders capped selection
+independently of partition input order. Depth is capped at 64, returned symbols at
+4,096, with depth/symbol cutoffs reflected in partial state and traversalComplete.
+Contexts retain current identities, map omissions and relevant call/generic
+completeness. The existing three explanatory omissions always remain. The complete
+result is sorted by depth/instance/visible id.
+
+`project_atlas_impact_json` returns the existing fairyc.atlas-impact/v1 JSON,
+including its Go-compatible field spelling and null/empty conventions. Output is
+buffered and bounded to at most 4 MiB; failure returns no partial document. No
+source body or host path is emitted. These modules have no filesystem, network,
+process-execution or lock-update operation.
+
+Executed on Windows amd64 with MSVC 14.51.36231 and Go 1.27.1:
+
+- `go test -mod=readonly -count=1 -timeout 4m -v ./internal/cli -run '^TestCandidateAtlasImpact$'`: low and optimized pass, 50.54 seconds overall.
+- `go test -mod=readonly -count=1 -timeout 4m ./internal/atlasmap -run '^TestImpact'`: pass.
+- `go vet -mod=readonly ./internal/cli`: pass.
+- `git diff --check` (including staged new files): pass.
+
+Eight fixtures per native profile cover real v1/v3 maps from cyclic diamond and
+foreign-call source workspaces, plus controlled canonical coverage metadata for
+bounded/partial branches. Every visible/full declaration selector, five traversal
+limit pairs and both input orders match Go's typed result and exact JSON bytes.
+Cases also reject invalid limits/selectors, missing/duplicate partitions, mixed
+schemas, too-small package/call/output budgets, missing target declarations and
+private cross-package callees. Go decoding accepts the latter canonical mutations
+before the Go join independently rejects them; these are graph checks, not merely
+checksum failures. Exact resolved-call budgets pass with foreign calls excluded.
+
+Linux execution remains queued; the native probe helper explicitly skips it.
+A future Linux driver must run these same Fairy modules under GCC/Clang rather
+than count the skip as evidence. Full CLI replay, candidate dispatch, independent
+current-fact production, generic maps, MCP/edit integration, hosted CI and push
+remain unexecuted/separate. Public CLI/API, SDK ABI, dependencies, DB, repository
+hygiene settings and CI/runner settings did not change.
+
+Source-of-truth updates: `docs/atlas/impact-mcp-edit-v1.md`,
+`docs/development/ordered-work-20261031.md` and
+`docs/development/source-of-truth-capabilities-contracts-and-atlas.md`.

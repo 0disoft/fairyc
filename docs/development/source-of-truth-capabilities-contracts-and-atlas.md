@@ -8,6 +8,9 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 - Contract: `docs/atlas/impact-mcp-edit-v1.md`; CLI admission: `docs/cli/command-contract.md`.
 - Owners: `internal/atlasmap/impact.go`, `internal/atlasmcp/`, `internal/sourceedit/`, and `internal/cli/atlas_impact.go`, `atlas_mcp.go`, `atlas_edit.go`.
 - Receipt: `docs/ops/windows-atlas-tools-20261102.md`; Linux replay: `docs/development/ordered-work-20261031.md`.
+- Private Fairy reader/current-source gate: `examples/lexer_candidate/src/project_atlas_wire.fy`, `project_atlas_model.fy`, `project_atlas_symbols.fy`, `project_atlas_validate.fy`, `project_atlas_current.fy`.
+- Private Fairy join/traversal/output: `examples/lexer_candidate/src/project_atlas_join.fy`, `project_atlas_impact.fy`, `project_atlas_impact_json.fy`; Windows receipt: `docs/ops/windows-candidate-atlas-impact-20261104.md`. Candidate dispatch, current-fact production, generic map support, MCP and edits remain separate.
+
 - Ordinary interface/effects comparison remains the separate `internal/interfacereview/` owner.
 
 ## C transport, aggregates, and native proofs

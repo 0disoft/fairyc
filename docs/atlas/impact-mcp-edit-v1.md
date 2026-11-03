@@ -27,6 +27,31 @@ targets and callbacks are not inferred. Adding/removing a declaration does not i
 The existing interface/effects review remains the separate comparison tool for its documented
 ordinary-interface subset; none of its uncertainty becomes an unchanged declaration here.
 
+## Fairy reader and impact core
+
+The private Fairy implementation reads canonical v1/v3 envelopes, validates
+metadata and rederived SymbolIds, and admits a partition only after comparing an
+independent current compiler/source/interface expectation. `project_atlas_current`
+does not derive that expectation from the candidate map. `project_atlas_join`
+requires one schema, unique instances and a complete direct-dependency closure;
+reference UID/coordinate pairs and exact public cross-package targets must agree.
+Only resolved calls consume the explicit package/call join ceilings.
+
+`project_atlas_impact` performs the same bounded reverse-call traversal, visible/full
+selector normalization, canonical selection and cutoff reporting as the Go core.
+`project_atlas_impact_json` buffers the complete existing impact JSON document and
+checks its output ceiling before returning bytes. Shared work bounds apply to the
+reader, identity checks, join, traversal and output. No source bodies or host paths
+are included, and neither an exact-current map nor a complete traversal proves a
+change safe.
+
+This private slice rejects generic/type-parameter/specialization records and v2;
+it does not silently discard them. It has no candidate CLI dispatch, current-source
+expectation producer, MCP or edit integration yet. Go experimental commands above
+retain their existing contracts. Windows MSVC low/optimized evidence and the
+batched Linux gap are recorded in
+[the native Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
+
 ## Read-only MCP over stdio
 
 ```sh
