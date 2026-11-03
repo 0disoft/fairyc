@@ -218,13 +218,7 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 				}
 				switch len(providers) {
 				case 0:
-					subjects := slices.Clone(class.members)
-					for candidate := range classes {
-						if slices.Contains(visible, candidate) || !classProvides(graph, classes[candidate], importPath) {
-							continue
-						}
-						subjects = appendUnique(subjects, classes[candidate].members...)
-					}
+					subjects := missingProviderSubjects(graph, classes, classIndex, visible, importPath)
 					return result, &Rejection{Reason: ReasonMissingVisibleModule, Subjects: subjects, ImportPath: importPath}, nil
 				case 1:
 					provider := classes[providers[0]]
@@ -242,6 +236,26 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		}
 	}
 	return result, nil, nil
+}
+
+// Resolve has already rejected duplicate node IDs and assigned each node to
+// exactly one class. Member sets are therefore disjoint: append preserves the
+// diagnostic order without scanning the growing subject list for duplicates.
+func missingProviderSubjects(graph Graph, classes []resolvedClass, owner int, visible []int, importPath string) []string {
+	visibleSet := make(map[int]struct{}, len(visible))
+	for _, classIndex := range visible {
+		visibleSet[classIndex] = struct{}{}
+	}
+	subjects := slices.Clone(classes[owner].members)
+	for candidate, class := range classes {
+		if _, found := visibleSet[candidate]; found {
+			continue
+		}
+		if classProvides(graph, class, importPath) {
+			subjects = append(subjects, class.members...)
+		}
+	}
+	return subjects
 }
 
 // Keep provider/member encounter order while checking uniqueness once per
