@@ -35,10 +35,13 @@ fn Result<bytes::Buffer,u32> signature(ref json::Tree t,usize header,usize decl,
  let variants=model::rows(t,wire::field(t,decl,b"variants"),4096,meter)?;discard tag(ref mut out,118,meter)?;discard number(ref mut out,v::len<usize>(ref variants),meter)?;i=0;while(i<v::len<usize>(ref variants)){let row=*v::at<usize>(ref variants,i);discard text(ref mut out,110,wire::string(t,row,b"name"),meter)?;discard fields(t,header,wire::field(t,row,b"fields"),ref mut out,meter)?;i+=1;}
  discard text(ref mut out,120,wire::string(t,decl,b"drop_kind"),meter)?;discard strings(t,wire::field(t,decl,b"drop_effects"),ref mut out,121,meter)?;return .ok(out);
 }
+pub fn Result<bytes::Buffer,u32> derive(ref json::Tree t,usize header,usize decl,ref mut usize meter){
+ let sig=switch(signature(t,header,decl,meter)){case .ok(p):{p}case .err(code):{return .err(code);}};var bytes::Buffer data=bytes::empty();
+ if(!add(ref mut data,b"fairyc.symbol-identity\0\x01",meter).is_ok || !text(ref mut data,117,wire::string(t,header,b"package_uid"),meter).is_ok){return .err(3);}
+ let key=wire::field(t,decl,b"key");if(!text(ref mut data,109,wire::string(t,key,b"module"),meter).is_ok || !text(ref mut data,107,wire::string(t,key,b"kind"),meter).is_ok || !text(ref mut data,112,wire::string(t,key,b"name"),meter).is_ok || !tag(ref mut data,103,meter).is_ok || !number(ref mut data,0,meter).is_ok || !text(ref mut data,115,bytes::view(ref sig),meter).is_ok){return .err(3);}
+ var sha::State state=sha::empty();if(!sha::update(ref mut state,bytes::view(ref data))){return .err(3);}var bytes::Buffer full=bytes::empty();discard add(ref mut full,b"fysym1-sha256-256-",meter)?;if(!sha::append_hex(ref state,ref mut full)){return .err(2);}return .ok(full);
+}
 pub fn bool matches(ref json::Tree t,usize header,usize decl,usize symbol,ref mut usize meter){
- let sig=switch(signature(t,header,decl,meter)){case .ok(p):{p}case .err(_):{return false;}};var bytes::Buffer data=bytes::empty();
- if(!add(ref mut data,b"fairyc.symbol-identity\0\x01",meter).is_ok || !text(ref mut data,117,wire::string(t,header,b"package_uid"),meter).is_ok){return false;}
- let key=wire::field(t,decl,b"key");if(!text(ref mut data,109,wire::string(t,key,b"module"),meter).is_ok || !text(ref mut data,107,wire::string(t,key,b"kind"),meter).is_ok || !text(ref mut data,112,wire::string(t,key,b"name"),meter).is_ok || !tag(ref mut data,103,meter).is_ok || !number(ref mut data,0,meter).is_ok || !text(ref mut data,115,bytes::view(ref sig),meter).is_ok){return false;}
  let full=wire::string(t,symbol,b"full");let visible=wire::string(t,symbol,b"visible");if(!wire::hex(full,b"fysym1-sha256-256-",64,false) || !wire::hex(visible,b"fysym1-sha256-128-",32,false) || !bytes::equal(visible[18..],full[18..50])){return false;}
- var sha::State state=sha::empty();return sha::update(ref mut state,bytes::view(ref data)) && sha::matches(ref state,full[18..]);
+ let computed=switch(derive(t,header,decl,meter)){case .ok(p):{p}case .err(_):{return false;}};return bytes::equal(full,bytes::view(ref computed));
 }

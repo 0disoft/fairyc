@@ -124,3 +124,47 @@ syntax only; the later command must always verify the current existing lock.
 `TestCandidateAtlasOptions` compares the real native argument parser with Go's
 `parseImpact` under MSVC low/optimized. This first leaf does not dispatch a command
 or claim current-source/map production.
+
+## Verified-current source producer
+
+`project_atlas_source` freshly loads the locked workspace, completes ordinary
+Fairy semantic/body/Flow/IR and public-interface verification, and hashes the
+running native compiler through its host-owned executable path. It does not use
+argv[0], a cached Atlas map, a Go child or a build companion as authority.
+`project_atlas_facts` derives detached compiler/interface/package/feature/reference
+and exact source-file/line-map facts from those retained owners. The expected
+current JSON is built from those facts before a candidate map exists.
+
+`project_atlas_declarations`, `project_atlas_calls`, `project_atlas_header` and
+`project_atlas_produce` create bounded v3 partitions in memory, then re-enter the
+existing transport/semantic/current-source readers and join. Source SymbolId
+publication and validation share `project_atlas_symbols::derive`. Source parser
+entries are filtered to actual parameters, and the transport's explicit mutable
+parameter field is retained. Concrete compiler frame handles for ordinary
+nongeneric source functions are not exposed as specialization identities.
+
+This first producer admits local packages containing ordinary safe free functions
+with no attributes and builtin void/bool/u8/i32/i64/usize parameter/result types.
+SDK, foreign/unsafe/aggregate declarations, generics, interfaces, closures, other
+signature forms and packages with no functions reject. Checked ordinary calls,
+including nested calls and cycles, form the exact admitted reachability graph.
+Non-call observations are deliberately not collected: their completeness and
+header omissions explicitly retain candidate-atlas-not-collected. The generic
+body omission remains visible. These are bounded partial impact facts, not a Go
+completeness-parity claim or a new language-support restriction.
+
+Executed: `go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestCandidateAtlasCommand$/low$'`.
+The native MSVC command leaf passed in 119.07 seconds against Go's source-derived
+identities, interface hashes and cyclic reverse-call graph. After adding scalar
+parameter, nested-call and negative-command coverage, the actual main/dispatcher
+also passed: `FAIRYC_RUN_PARITY_INTEGRATION=1 go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$'`
+(248.04 seconds). The native process had empty PATH and no companion executable.
+This low result covers visible/full selectors, parameter SymbolIds and independent
+compiler/source/ordinary+generic interface identities, cutoffs, selector/package/
+call/output ceilings, missing/stale locks, argument rejection before filesystem
+access, stdout errors and exact workspace-tree/lock preservation.
+
+`go test -mod=readonly -count=1 -timeout 4m -v ./internal/cli -run '^TestCandidateAtlasValidation$'`
+passed low/optimized after sharing SymbolId derivation (12.656 seconds overall).
+`go vet -mod=readonly ./internal/cli` also passed. Optimized full CLI acceptance is
+recorded separately below when executed; Linux remains deferred.

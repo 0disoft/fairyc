@@ -1,0 +1,23 @@
+module project_atlas_produce;
+import project_atlas_write as w;
+import project_atlas_facts as facts;
+import project_atlas_declarations as declarations;
+import project_atlas_calls as calls;
+import project_atlas_header as header;
+import project_atlas_current as current;
+import project_atlas_model as model;
+import project_compiler_input as input;
+import project_path as work;
+import module_unit_body_ir_model as ir;
+import std::bytes as bytes;
+import std::vec as v;
+pub resource Package{facts::Facts facts;v::Vec<bytes::Buffer> declarations;v::Vec<bytes::Buffer> full;calls::Summaries summaries;cleanup{}}
+pub fn usize call_count(ref Package p){return calls::count(ref p.summaries);}
+pub fn ref u8[] uid(ref Package p){return facts::value(ref p.facts,b"package_uid");}
+pub fn ref u8[] instance(ref Package p){return facts::value(ref p.facts,b"package_instance");}
+pub fn Result<Package,u32> package(facts::Facts facts,ref input::Input source,ref ir::Program program,usize owner,ref mut usize meter){let rows=declarations::collect(source,owner,meter)?;if(v::len<declarations::Row>(ref rows)==0){return .err(104);}var v::Vec<bytes::Buffer> decl=v::empty<bytes::Buffer>();var v::Vec<bytes::Buffer> hashes=v::empty<bytes::Buffer>();var usize i=0;while(i<v::len<declarations::Row>(ref rows)){let declaration=declarations::declaration(source,*v::at<declarations::Row>(ref rows,i),meter)?;let hash=declarations::digest(ref facts,bytes::view(ref declaration),meter)?;if(!v::push<bytes::Buffer>(ref mut decl,declaration).is_ok){return .err(2);}if(!v::push<bytes::Buffer>(ref mut hashes,hash).is_ok){return .err(2);}i+=1;}let summaries=calls::summaries(source,program,ref rows,meter)?;return .ok(Package{.facts,.declarations=decl,.full=hashes,.summaries});}
+pub fn Result<current::Ready,u32> ready(ref Package p,usize total_calls,ref mut usize meter){let count=v::len<bytes::Buffer>(ref p.declarations);let h=header::header(ref p.facts,count,call_count(p),meter)?;let complete=header::completeness(total_calls,meter)?;var bytes::Buffer map=bytes::empty();discard w::raw(ref mut map,b"{\"header\":",meter)?;discard w::raw(ref mut map,bytes::view(ref h),meter)?;discard w::raw(ref mut map,b",\"files\":",meter)?;discard w::raw(ref mut map,facts::array(ref p.facts,b"files"),meter)?;discard w::raw(ref mut map,b",\"modules\":",meter)?;discard w::raw(ref mut map,facts::modules(ref p.facts),meter)?;discard w::raw(ref mut map,b",\"symbols\":[",meter)?;
+ var v::Vec<usize> ordered=v::empty<usize>();var usize i=0;while(i<count){if(!v::push<usize>(ref mut ordered,i).is_ok){return .err(2);}var usize at=i;while(at>0){let old=*v::at<usize>(ref ordered,at-1);let left=bytes::view(v::at<bytes::Buffer>(ref p.full,i));let right=bytes::view(v::at<bytes::Buffer>(ref p.full,old));if(!work::charge(meter,left.len+right.len+1)){return .err(3);}if(!model::before(left,right)){break;}{let slot=v::at_mut<usize>(ref mut ordered,at);*slot=old;}{let slot=v::at_mut<usize>(ref mut ordered,at-1);*slot=i;}at-=1;}i+=1;}
+ i=0;while(i<count){let at=*v::at<usize>(ref ordered,i);let declaration=bytes::view(v::at<bytes::Buffer>(ref p.declarations,at));let full=bytes::view(v::at<bytes::Buffer>(ref p.full,at));var usize key_end=7;while(key_end<declaration.len && declaration[key_end]!=125){key_end+=1;}if(key_end==declaration.len){return .err(9);}var bytes::Buffer visible=bytes::empty();discard w::raw(ref mut visible,b"fysym1-sha256-128-",meter)?;discard w::raw(ref mut visible,full[18..50],meter)?;if(i>0){discard w::raw(ref mut map,b",",meter)?;}discard w::raw(ref mut map,b"{\"declaration\":",meter)?;discard w::raw(ref mut map,declaration[7..key_end+1],meter)?;discard w::raw(ref mut map,b",",meter)?;discard w::pair(ref mut map,b"visible",bytes::view(ref visible),meter)?;discard w::raw(ref mut map,b",",meter)?;discard w::pair(ref mut map,b"full",full,meter)?;discard w::raw(ref mut map,b"}",meter)?;i+=1;}
+ discard w::raw(ref mut map,b"],\"declarations\":[",meter)?;i=0;while(i<count){if(i>0){discard w::raw(ref mut map,b",",meter)?;}discard w::raw(ref mut map,bytes::view(v::at<bytes::Buffer>(ref p.declarations,i)),meter)?;i+=1;}discard w::raw(ref mut map,b"],\"functions\":",meter)?;discard w::raw(ref mut map,calls::text(ref p.summaries),meter)?;discard w::raw(ref mut map,b",\"completeness\":",meter)?;discard w::raw(ref mut map,bytes::view(ref complete),meter)?;discard w::raw(ref mut map,b"}",meter)?;let encoded=w::envelope(bytes::view(ref map),meter)?;let expected=switch(bytes::copy(model::raw(facts::expected(ref p.facts),0))){case .ok(p):{p}case .err(_):{return .err(2);}};return current::read(encoded,expected,meter);
+}
