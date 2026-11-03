@@ -16,6 +16,7 @@ type inlineTrapCase struct {
 type inlineTrapFixture struct {
 	cases                []inlineTrapCase
 	provider, assertions string
+	columns              []int
 }
 
 var inlineArithmeticTraps = inlineTrapFixture{
@@ -118,6 +119,9 @@ var inlineTrapTestFlags = [][]string{nil, {"--native"}, {"--native", "--release"
 
 func (fixture inlineTrapFixture) reference(t *testing.T) inlineTrapOracle {
 	t.Helper()
+	if len(fixture.columns) != 0 && len(fixture.columns) != len(fixture.cases) {
+		t.Fatal("inline trap fixture column count differs from its case count")
+	}
 	var oracle inlineTrapOracle
 	for family := 0; family < 2; family++ {
 		oracle.diagnostics[family] = make([]string, len(fixture.cases))
@@ -129,6 +133,13 @@ func (fixture inlineTrapFixture) reference(t *testing.T) inlineTrapOracle {
 				t.Fatalf("Go inline trap: exit=%d stdout=%q stderr=%q", code, out, diagnostic)
 			}
 			checkInlineTrapDiagnostic(t, diagnostic, item.category, item.line)
+			if len(fixture.columns) != 0 {
+				column := fixture.columns[i]
+				want := fmt.Sprintf("trap: %s\n  at libs/answer/src/answer.fy:%d:%d\n", item.category, item.line, column)
+				if column <= 0 || diagnostic != want {
+					t.Fatalf("first nested trap: got %q want %q", diagnostic, want)
+				}
+			}
 			oracle.diagnostics[family][i] = diagnostic
 			last = root
 		}
