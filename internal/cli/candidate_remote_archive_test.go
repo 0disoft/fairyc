@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -71,6 +72,21 @@ func TestCandidateRemoteArchive(t *testing.T) {
 		bad  bool
 	}
 	fixtures := []fixture{{"stored", remoteArchiveValid(t, zip.Store), false}, {"deflated", remoteArchiveValid(t, zip.Deflate), false}, {"truncated", []byte("PK"), true}}
+	fixtures = append(fixtures, fixture{"zip64", remoteArchiveZIP64(t, fixtures[1].data), false})
+	badDescriptor := bytes.Clone(fixtures[1].data)
+	dd := bytes.Index(badDescriptor, []byte{'P', 'K', 7, 8})
+	if dd < 0 {
+		t.Fatal("descriptor missing")
+	}
+	badDescriptor[dd+4] ^= 1
+	fixtures = append(fixtures, fixture{"descriptor-crc", badDescriptor, true})
+	oversize := bytes.Clone(fixtures[1].data)
+	cd := bytes.Index(oversize, []byte{'P', 'K', 1, 2})
+	if cd < 0 {
+		t.Fatal("central directory missing")
+	}
+	binary.LittleEndian.PutUint32(oversize[cd+24:], 8388609)
+	fixtures = append(fixtures, fixture{"file-byte-bound", oversize, true})
 	base := []remoteArchiveEntry{{name: "fairy.toml", data: []byte(remoteLibraryManifest)}, {name: "src/math.fy", data: []byte("module math;")}}
 	for _, name := range []string{"../outside", "/outside", "src/../outside", "src\\evil", "src/con", ".git/config", ".HG/x", "src/A.fy", "src/math.fy"} {
 		entries := append([]remoteArchiveEntry(nil), base...)
@@ -153,4 +169,62 @@ func TestCandidateRemoteArchive(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Force small legal entries to use ZIP64 EOCD and per-entry sizes/offsets.
+// Go's reader independently checks this fixture before the native comparison.
+func remoteArchiveZIP64(t *testing.T, data []byte) []byte {
+	t.Helper()
+	end := len(data) - 22
+	cd := int(binary.LittleEndian.Uint32(data[end+16:]))
+	count := int(binary.LittleEndian.Uint16(data[end+10:]))
+	var directory bytes.Buffer
+	at := cd
+	for i := 0; i < count; i++ {
+		n := int(binary.LittleEndian.Uint16(data[at+28:]))
+		x := int(binary.LittleEndian.Uint16(data[at+30:]))
+		c := int(binary.LittleEndian.Uint16(data[at+32:]))
+		header := bytes.Clone(data[at : at+46])
+		extra := make([]byte, 28)
+		binary.LittleEndian.PutUint16(extra, 1)
+		binary.LittleEndian.PutUint16(extra[2:], 24)
+		binary.LittleEndian.PutUint64(extra[4:], uint64(binary.LittleEndian.Uint32(header[24:])))
+		binary.LittleEndian.PutUint64(extra[12:], uint64(binary.LittleEndian.Uint32(header[20:])))
+		binary.LittleEndian.PutUint64(extra[20:], uint64(binary.LittleEndian.Uint32(header[42:])))
+		binary.LittleEndian.PutUint16(header[30:], uint16(x+28))
+		for _, off := range []int{20, 24, 42} {
+			binary.LittleEndian.PutUint32(header[off:], 0xffffffff)
+		}
+		directory.Write(header)
+		directory.Write(data[at+46 : at+46+n+x])
+		directory.Write(extra)
+		directory.Write(data[at+46+n+x : at+46+n+x+c])
+		at += 46 + n + x + c
+	}
+	result := append(bytes.Clone(data[:cd]), directory.Bytes()...)
+	record := make([]byte, 56)
+	binary.LittleEndian.PutUint32(record, 0x06064b50)
+	binary.LittleEndian.PutUint64(record[4:], 44)
+	binary.LittleEndian.PutUint16(record[12:], 45)
+	binary.LittleEndian.PutUint16(record[14:], 45)
+	binary.LittleEndian.PutUint64(record[24:], uint64(count))
+	binary.LittleEndian.PutUint64(record[32:], uint64(count))
+	binary.LittleEndian.PutUint64(record[40:], uint64(directory.Len()))
+	binary.LittleEndian.PutUint64(record[48:], uint64(cd))
+	locator := make([]byte, 20)
+	binary.LittleEndian.PutUint32(locator, 0x07064b50)
+	binary.LittleEndian.PutUint64(locator[8:], uint64(len(result)))
+	binary.LittleEndian.PutUint32(locator[16:], 1)
+	result = append(result, record...)
+	result = append(result, locator...)
+	footer := bytes.Clone(data[end:])
+	binary.LittleEndian.PutUint16(footer[8:], 65535)
+	binary.LittleEndian.PutUint16(footer[10:], 65535)
+	binary.LittleEndian.PutUint32(footer[12:], 0xffffffff)
+	binary.LittleEndian.PutUint32(footer[16:], 0xffffffff)
+	result = append(result, footer...)
+	if _, err := zip.NewReader(bytes.NewReader(result), int64(len(result))); err != nil {
+		t.Fatal(err)
+	}
+	return result
 }

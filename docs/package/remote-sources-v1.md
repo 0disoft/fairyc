@@ -1,8 +1,8 @@
 # Explicit remote package sources v1
 
 - Status: Executable bounded Go Stage 0 experimental preparation contract, ADR 0498;
-  Fairy-authored source-plan parsing and workspace binding are verified on Windows
-  in both native profiles.
+  Fairy-authored source-plan parsing, workspace binding and private offline restoration
+  are verified on Windows in both native profiles.
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
@@ -102,7 +102,29 @@ The Windows low/optimized oracle compares acceptance and every returned field; s
 checks the already validated plan against the root manifest: explicit non-root membership,
 exact declared dependency versions and case-insensitive directory-boundary conflicts with
 source, cache and other members. Binding shares the work meter and reads no member files.
-Archive/cache restoration and candidate CLI wiring remain separate steps.
+
+The private Windows `project_remote_offline::restore` API now restores verified cached archives.
+It reads and binds the source plan/root manifest, acquires the exclusive fetch lock, reads only
+the exact contained cache names and recomputes SHA-256 on every attempt, including reuse. Missing
+or corrupt cache data fails without any transport fallback. `project_remote_archive` validates
+single-volume ZIP32/ZIP64 stored/DEFLATE entries, payload and descriptor CRCs, portable paths,
+case/type conflicts and package UID/version/language/source identity before publication.
+
+`project_remote_fs` retains directory handles, rejects reparse/case aliases, writes/syncs staged
+ordinary files and publishes the complete directory without replacement. Existing exact trees
+are reused; differing, incomplete, additional-file and linked trees are preserved and rejected.
+Ordinary failures clean only the owned current stage and fetch lock. Earlier complete packages
+may remain when a later package fails. Source plans, manifests, graph locks and cache bytes remain
+unchanged. No package hooks or subprocesses execute.
+
+The byte/file/depth limits above apply. This private implementation also bounds each directory
+scan to 8,192 rows and path-index work to 268,435,456 units; exceeding either fails closed. The
+two-minute deadline is cooperative, checked around archive processing and publication rather
+than interrupting a native I/O operation or a decoder mid-entry. Private staging names include
+the archive digest; a leftover collision fails without deleting the old stage and requires
+manual inspection. See the [Windows offline receipt](../ops/windows-candidate-remote-offline-20261103.md).
+Candidate command dispatch/online transport and native Linux adapter selection/replay remain
+separate work; this does not expose a new Fairy CLI command or change stable build networking.
 
 
 ## Usage and command result

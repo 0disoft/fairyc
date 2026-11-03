@@ -395,6 +395,8 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Implementation and focused acceptance: `internal/packagesource/`, `internal/cli/package_fetch.go`, `internal/cli/package_fetch_test.go`.
 - Fairy plan parser and URL policy: `examples/lexer_candidate/src/project_remote_plan.fy`, `project_source_url.fy`; native Go comparison: `internal/cli/candidate_source_plan_test.go`.
 - Fairy workspace binding: `examples/lexer_candidate/src/project_remote_bind.fy`; manifest/Go oracle and shared-budget controls: `internal/cli/candidate_remote_bind_test.go`.
+- Fairy private offline restoration: `examples/lexer_candidate/src/project_remote_offline.fy`, `project_remote_fs.fy`, `project_remote_archive.fy`, `project_inflate.fy`; native oracles: `internal/cli/candidate_remote_offline_test.go`, `candidate_remote_archive_test.go`, `candidate_inflate_test.go`.
+- Windows offline receipt and pending Linux/CLI integration: `docs/ops/windows-candidate-remote-offline-20261103.md`. Retained directory primitives belong to `internal/candidatehost/windows_rooted_file.c` and `examples/lexer_candidate/src/windows_rooted_file.fy`; the generated runtime asset pin must match the C sources.
 - Windows receipt and deferred Linux replay: `docs/ops/windows-remote-packages-20261101.md` and `docs/development/ordered-work-20261031.md`.
 
 ## Fairy candidate direct scalar generic transport

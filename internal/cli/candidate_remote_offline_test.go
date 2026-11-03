@@ -10,6 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/packagesource"
 	"io/fs"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -47,6 +48,20 @@ func TestCandidateRemoteOffline(t *testing.T) {
 		setup   func(string, string)
 	}
 	stored, deflated := remoteArchiveValid(t, zip.Store), remoteArchiveValid(t, zip.Deflate)
+	outside := t.TempDir()
+	if err := os.WriteFile(filepath.Join(outside, "keep"), []byte("outside stays unchanged"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	junction := func(link string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(link), 0700); err != nil {
+			t.Fatal(err)
+		}
+		cmd := exec.CommandContext(t.Context(), "cmd", "/c", "mklink", "/J", link, outside)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("create test junction: %v %s", err, out)
+		}
+	}
 	write := func(root, name string, data []byte) {
 		t.Helper()
 		path := filepath.Join(root, filepath.FromSlash(name))
@@ -64,6 +79,7 @@ func TestCandidateRemoteOffline(t *testing.T) {
 	}
 	fixtures := []fixture{
 		{name: "stored", archive: stored}, {name: "deflated", archive: deflated},
+		{name: "zip64", archive: remoteArchiveZIP64(t, deflated)},
 		{"exact-reuse", deflated, func(root, _ string) { library(root) }},
 		{"empty-extra-directory", deflated, func(root, _ string) {
 			library(root)
@@ -77,6 +93,26 @@ func TestCandidateRemoteOffline(t *testing.T) {
 			}
 		}},
 		{"corrupt-cache", deflated, func(root, cache string) { write(root, cache, []byte("broken")) }},
+		{"corrupt-warm-cache", deflated, func(root, cache string) { library(root); write(root, cache, []byte("broken")) }},
+		{"missing-cache-directory", deflated, func(root, cache string) {
+			if err := os.Remove(filepath.Join(root, cache)); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Remove(filepath.Join(root, "build/package-sources")); err != nil {
+				t.Fatal(err)
+			}
+		}},
+		{"member-junction", deflated, func(root, _ string) { junction(filepath.Join(root, "vendor/math")) }},
+		{"cache-junction", deflated, func(root, cache string) {
+			if err := os.Remove(filepath.Join(root, cache)); err != nil {
+				t.Fatal(err)
+			}
+			parent := filepath.Join(root, "build/package-sources")
+			if err := os.Remove(parent); err != nil {
+				t.Fatal(err)
+			}
+			junction(parent)
+		}},
 		{"changed-existing", deflated, func(root, _ string) { library(root); write(root, "vendor/math/src/math.fy", []byte("changed")) }},
 		{"extra-existing", deflated, func(root, _ string) { library(root); write(root, "vendor/math/extra", []byte("extra")) }},
 		{"incomplete-existing", deflated, func(root, _ string) { write(root, "vendor/math/fairy.toml", []byte(remoteLibraryManifest)) }},
@@ -100,7 +136,39 @@ func TestCandidateRemoteOffline(t *testing.T) {
 				t.Fatal(err)
 			}
 		}},
+		{"stale-stage", deflated, func(root, cache string) {
+			write(root, "vendor/.fairyc-source-"+strings.TrimSuffix(filepath.Base(cache), ".zip")+"/keep", []byte("preserve stale stage"))
+		}},
 	}
+	longPath := remoteArchiveBytes(t, zip.Deflate, remoteArchiveEntry{name: "fairy.toml", data: []byte(remoteLibraryManifest)}, remoteArchiveEntry{name: "src/math.fy", data: []byte("module math;")}, remoteArchiveEntry{name: "src/" + strings.Repeat("a", 260), data: []byte("cannot publish this component on Windows")})
+	fixtures = append(fixtures, fixture{name: "stage-write-failure-cleanup", archive: longPath})
+	secondArchive := remoteArchiveBytes(t, zip.Deflate, remoteArchiveEntry{name: "fairy.toml", data: []byte(strings.Replace(remoteLibraryManifest, "example.math", "example.answer", 1))}, remoteArchiveEntry{name: "src/math.fy", data: []byte("module math;")})
+	secondPackage := func(root string) {
+		manifestPath := filepath.Join(root, "fairy.toml")
+		data, err := os.ReadFile(manifestPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		write(root, "fairy.toml", []byte(strings.Replace(string(data), "members=['vendor/math']", "members=['vendor/answer','vendor/math']", 1)))
+		data, err = os.ReadFile(filepath.Join(root, "fairy.sources.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var plan packagesource.Plan
+		if err = json.Unmarshal(data, &plan); err != nil {
+			t.Fatal(err)
+		}
+		sum := sha256.Sum256(secondArchive)
+		digest := hex.EncodeToString(sum[:])
+		plan.Packages = append(plan.Packages, packagesource.Pin{Path: "vendor/answer", PackageUID: "example.answer", Version: "1.0.0", URL: "https://packages.invalid/answer.zip", SHA256: digest})
+		data, err = json.Marshal(plan)
+		if err != nil {
+			t.Fatal(err)
+		}
+		write(root, "fairy.sources.json", data)
+		write(root, "build/package-sources/"+digest+".zip", secondArchive)
+	}
+	fixtures = append(fixtures, fixture{"two-packages", deflated, func(root, _ string) { secondPackage(root) }}, fixture{"partial-success", deflated, func(root, cache string) { secondPackage(root); write(root, cache, []byte("corrupt second package")) }})
 	for _, name := range []string{"../escape", ".git/config", "src/con"} {
 		fixtures = append(fixtures, fixture{name: name, archive: remoteArchiveBytes(t, zip.Deflate, remoteArchiveEntry{name: "fairy.toml", data: []byte(remoteLibraryManifest)}, remoteArchiveEntry{name: "src/math.fy", data: []byte("module math;")}, remoteArchiveEntry{name: name, data: []byte("bad")})})
 	}
@@ -136,7 +204,21 @@ func TestCandidateRemoteOffline(t *testing.T) {
 					}
 					ctx, cancel := context.WithTimeout(t.Context(), time.Minute)
 					defer cancel()
-					goResult, goErr := (packagesource.Fetcher{}).Fetch(ctx, roots[0], true)
+					if f.name == "stale-stage" {
+						before := remoteTree(t, roots[1])
+						out, err := exec.CommandContext(ctx, path, roots[1]).CombinedOutput()
+						e, ok := err.(*exec.ExitError)
+						if !ok || e.ExitCode() != 7 || !reflect.DeepEqual(before, remoteTree(t, roots[1])) {
+							t.Fatalf("stale stage changed: err=%v output=%s", err, out)
+						}
+						return
+					}
+					requests := 0
+					fetcher := packagesource.Fetcher{Client: &http.Client{Transport: remoteOfflineTransport(func(*http.Request) (*http.Response, error) {
+						requests++
+						return nil, fmt.Errorf("offline transport invoked")
+					})}}
+					goResult, goErr := fetcher.Fetch(ctx, roots[0], true)
 					cmd := exec.CommandContext(ctx, path, roots[1])
 					out, nativeErr := cmd.CombinedOutput()
 					if (goErr == nil) != (nativeErr == nil) {
@@ -152,16 +234,41 @@ func TestCandidateRemoteOffline(t *testing.T) {
 						if !ok || e.ExitCode() != 7 {
 							t.Fatalf("candidate error=%v output=%s", nativeErr, out)
 						}
+						var stage, code, cleanup uint32
+						if _, err := fmt.Sscanf(string(out), "error %d %d %d\n", &stage, &code, &cleanup); err != nil || cleanup != 0 {
+							t.Fatalf("cleanup failed: %v output=%s", err, out)
+						}
 					}
 					a, b := remoteTree(t, roots[0]), remoteTree(t, roots[1])
 					if !reflect.DeepEqual(a, b) {
 						t.Fatalf("post-operation tree differs: Go=%v candidate=%v output=%s", a, b, out)
 					}
+					if goErr == nil {
+						again, err := fetcher.Fetch(ctx, roots[0], true)
+						if err != nil || again.Reused != again.Packages || again.Installed != 0 {
+							t.Fatalf("warm Go restore: %+v %v", again, err)
+						}
+						out, err := exec.CommandContext(ctx, path, roots[1]).CombinedOutput()
+						want := fmt.Sprintf("ok %d %d 0 %d\n", again.Packages, again.CacheHits, again.Reused)
+						if err != nil || string(out) != want || !reflect.DeepEqual(remoteTree(t, roots[0]), remoteTree(t, roots[1])) {
+							t.Fatalf("fresh-process reuse: %v output=%s", err, out)
+						}
+					}
+					if requests != 0 {
+						t.Fatalf("offline fetch made %d HTTP requests", requests)
+					}
 				})
 			}
 		})
 	}
+	if data, err := os.ReadFile(filepath.Join(outside, "keep")); err != nil || string(data) != "outside stays unchanged" {
+		t.Fatalf("junction target changed: %v %q", err, data)
+	}
 }
+
+type remoteOfflineTransport func(*http.Request) (*http.Response, error)
+
+func (f remoteOfflineTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func remoteTree(t *testing.T, root string) map[string]string {
 	t.Helper()
@@ -186,6 +293,10 @@ func remoteTree(t *testing.T, root string) map[string]string {
 			target, err := os.Readlink(path)
 			result[relative] = "link:" + target
 			return err
+		}
+		if !entry.Type().IsRegular() {
+			result[relative] = "special:" + entry.Type().String()
+			return nil
 		}
 		data, err := os.ReadFile(path)
 		if err != nil {
