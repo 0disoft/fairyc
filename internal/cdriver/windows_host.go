@@ -686,6 +686,8 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 	return executeWindowsMSVCArtifactWithOptions(artifact, label, stdin, programArgs, timeout, "")
 }
 
+const windowsExecutionPipeDrainTimeout = time.Second
+
 func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (WindowsHostOutcome, error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
@@ -702,6 +704,10 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 	contextValue, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
+	// Descendants can retain stdout/stderr after this process exits or is killed.
+	// WaitDelay closes the owned pipes and joins their copy goroutines; the
+	// process context alone cannot interrupt those reads.
+	command.WaitDelay = windowsExecutionPipeDrainTimeout
 	if len(programArgs) != 0 {
 		command.Args = append([]string{executablePath}, programArgs...)
 	}
