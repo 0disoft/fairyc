@@ -2,6 +2,10 @@
 
 - Status: Experimental Windows preview published: [v0.1.0-preview.1](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)
 
+Latest local preparation: [2026-11-04 Frontend regression recheck and Windows ZIP verification](windows-preview-readiness-20261104.md).
+It records candidate `9bc77723`, including fresh execution outside the checkout;
+it does not change the published release or establish hosted CI/clean-machine evidence.
+
 ## Windows editor preview draft (2026-10-28)
 
 Local-only Korean draft: [windows-editor-preview-release-draft.ko.md](windows-editor-preview-release-draft.ko.md).
