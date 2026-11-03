@@ -8,6 +8,8 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"reflect"
+	"slices"
 	"strconv"
 	"syscall"
 	"testing"
@@ -211,5 +213,100 @@ func TestWindowsTrapControlCanceledBeforeIO(t *testing.T) {
 	})
 	if out != "" || overflow || !errors.Is(err, context.Canceled) {
 		t.Fatalf("out=%q overflow=%v err=%v", out, overflow, err)
+	}
+}
+
+func TestWindowsTrapControlPreservesCallerConfiguration(t *testing.T) {
+	for _, failureAt := range []string{"none", "start", "wait"} {
+		t.Run(failureAt, func(t *testing.T) {
+			handles := []syscall.Handle{10, 20, 30}
+			originalHandles := slices.Clone(handles)
+			attributes := &syscall.SysProcAttr{HideWindow: true, AdditionalInheritedHandles: handles[:1]}
+			environment := []string{"KEEP=value", "FAIRYC_TRAP_TEST=caller"}
+			originalEnvironment := slices.Clone(environment)
+			command := &exec.Cmd{Env: environment, SysProcAttr: attributes}
+			failure := errors.New("process " + failureAt + " failed")
+			_, _, err := runWindowsProcessWithTrapControl(command, "FAIRYC_TRAP_TEST", windowsTrapControlOptions{
+				Start: func(prepared *exec.Cmd) error {
+					if prepared.SysProcAttr == attributes || !prepared.SysProcAttr.HideWindow || len(prepared.SysProcAttr.AdditionalInheritedHandles) != 2 {
+						t.Error("process must receive detached attributes with both handles")
+					}
+					if !slices.Equal(handles, originalHandles) || len(attributes.AdditionalInheritedHandles) != 1 {
+						t.Error("process setup modified shared attributes or spare slice capacity")
+					}
+					if failureAt == "start" {
+						return failure
+					}
+					return nil
+				},
+				Wait: func(*exec.Cmd) error {
+					if failureAt == "wait" {
+						return failure
+					}
+					return nil
+				},
+			})
+			if failureAt == "none" && err != nil || failureAt != "none" && !errors.Is(err, failure) {
+				t.Fatalf("unexpected execution result: %v", err)
+			}
+			if command.SysProcAttr != attributes || !slices.Equal(handles, originalHandles) || len(attributes.AdditionalInheritedHandles) != 1 {
+				t.Error("caller attributes changed after execution")
+			}
+			if !reflect.DeepEqual(command.Env, originalEnvironment) || &command.Env[0] != &environment[0] || !slices.Equal(environment, originalEnvironment) {
+				t.Error("caller environment changed after execution")
+			}
+		})
+	}
+}
+
+func TestWindowsTrapControlResultErrorPrecedence(t *testing.T) {
+	waitErr, closeErr, readErr := errors.New("wait failed"), errors.New("close failed"), errors.New("read failed")
+	for _, test := range []struct {
+		name              string
+		wait, close, read error
+		want              string
+	}{
+		{"success", nil, nil, nil, ""},
+		{"wait", waitErr, nil, nil, "wait failed"},
+		{"read", nil, nil, readErr, "read private trap control pipe: read failed"},
+		{"close", nil, closeErr, readErr, "close private trap control writer: close failed"},
+		{"all", waitErr, closeErr, readErr, "wait failed\nclose private trap control writer: close failed"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			out, overflow, err := windowsTrapControlResult(boundedTrapControl{bytes: []byte("receipt"), overflow: true}, test.wait, test.close, test.read)
+			message := ""
+			if err != nil {
+				message = err.Error()
+			}
+			if message != test.want {
+				t.Fatalf("error=%q, want %q", message, test.want)
+			}
+			if test.close == nil && test.read == nil {
+				if out != "receipt" || !overflow {
+					t.Fatalf("receipt changed: %q %v", out, overflow)
+				}
+			} else if out != "" || overflow {
+				t.Fatalf("receipt accepted after I/O failure: %q %v", out, overflow)
+			}
+			if test.wait != nil && !errors.Is(err, test.wait) {
+				t.Fatal("lost process error")
+			}
+			if test.close != nil && errors.Is(err, readErr) {
+				t.Fatal("read error took precedence over close error")
+			}
+		})
+	}
+}
+
+func TestWindowsTrapControlValidatesOptionsBeforeCancellationAndIO(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	option := windowsTrapControlOptions{Context: ctx, Pipe: func() (*os.File, *os.File, error) {
+		t.Fatal("validation failure performed I/O")
+		return nil, nil, os.ErrInvalid
+	}}
+	out, overflow, err := runWindowsProcessWithTrapControl(&exec.Cmd{}, "FAIRYC_TRAP_TEST", option, option)
+	if err == nil || err.Error() != "private trap control accepts at most one options value" || out != "" || overflow {
+		t.Fatalf("validation order changed: out=%q overflow=%v err=%v", out, overflow, err)
 	}
 }
