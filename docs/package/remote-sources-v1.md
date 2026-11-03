@@ -1,8 +1,8 @@
 # Explicit remote package sources v1
 
 - Status: Executable bounded Go Stage 0 experimental preparation contract, ADR 0498;
-  Fairy-authored source-plan parsing, workspace binding and private offline restoration
-  are verified on Windows in both native profiles.
+  Fairy-authored source-plan parsing, workspace binding and offline restoration are connected
+  through the bounded Windows CLI subset `experimental fetch-packages --offline`.
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
@@ -123,8 +123,14 @@ two-minute deadline is cooperative, checked around archive processing and public
 than interrupting a native I/O operation or a decoder mid-entry. Private staging names include
 the archive digest; a leftover collision fails without deleting the old stage and requires
 manual inspection. See the [Windows offline receipt](../ops/windows-candidate-remote-offline-20261103.md).
-Candidate command dispatch/online transport and native Linux adapter selection/replay remain
-separate work; this does not expose a new Fairy CLI command or change stable build networking.
+Windows candidate command dispatch now calls this API for exactly
+`experimental fetch-packages --offline`; see the
+[CLI receipt](../ops/windows-candidate-fetch-cli-20261104.md). Syntax/help are processed before
+workspace reads. The command uses the Go success line and invocation/help text, with exit
+codes 0/2/7/4. Preparation-error detail uses candidate stage/reason messages beneath the shared
+`package fetch failed:` prefix. Missing `--offline` explicitly rejects online preparation with
+code 2; online transport, native Linux adapter selection/replay and distribution acceptance
+remain separate work. Stable commands do not gain cache consultation or networking.
 
 
 ## Usage and command result

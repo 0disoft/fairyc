@@ -25,5 +25,11 @@ power-loss claim is made. Verified source preparation never overwrites `fairy.lo
 
 SHA-256 proves equality to maintainer-reviewed bytes, not publisher authenticity or source safety.
 Credentials, signatures, registries, semver range resolution, Git fetching, automatic upgrades,
-publication, implicit builds and Fairy-authored candidate parity are separate future slices.
+publication, implicit builds and full Fairy-authored online/Linux parity are separate future slices.
 Registry selection remains UNDECIDED. Linux native execution stays in the combined queue.
+
+The 2026-11-04 bounded extension connects the Windows Fairy-authored CLI's explicit
+`experimental fetch-packages --offline` to the authored cached-archive restoration path.
+This preserves the preparation contract and admits no online fallback. Shared success and
+invocation/help output and exit codes match Go; preparation-error detail is candidate-owned.
+See the [CLI contract](../cli/command-contract.md#experimental-explicit-remote-package-preparation).

@@ -70,8 +70,20 @@ ADR 0498 admits `fairyc experimental fetch-packages [--offline]` in the Go Stage
 HTTPS/hash/identity policy, bounded ZIP extraction, content-addressed archive cache, exclusive
 publication, existing-tree refusal, output counts and exit codes. This is an explicit preparation
 step for ordinary local manifest members. It never updates `fairy.lock` or implicitly downloads
-during stable check/build/run/test. Stable registry commands, range solving and Fairy-authored
-candidate parity are not admitted by this experimental command.
+during stable check/build/run/test. Stable registry commands and range solving are not admitted.
+
+The Windows Fairy-authored CLI admits the bounded offline subset
+`fairyc experimental fetch-packages --offline`. It uses the caller's working directory,
+validates syntax before filesystem work and calls the authored offline restoration API.
+Help aliases and invalid-argument diagnostics use the shared Go CLI metadata. Success prints
+the same counts line as Go with zero downloads; exit statuses are 0 success, 2 invocation,
+7 preparation failure and 4 output failure. Completed restoration may precede an output failure.
+
+Candidate preparation errors retain `package fetch failed:` and provide bounded stage/reason
+messages; their detail is not the Go/OS error string. A cleanup failure additionally directs
+the caller to inspect the leftover lock/stage. Online invocation without `--offline` is rejected
+with code 2 and an explicit offline requirement before reading the workspace. Native Linux
+selection/execution, online transport and distribution acceptance remain separate work.
 
 ## Experimental explicit-file generics
 
