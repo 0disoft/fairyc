@@ -32,6 +32,33 @@ go test -mod=readonly -count=1 -timeout 5m ./internal/cli -run '^TestCandidateSo
 The native comparison passed in 57.784 seconds. Initial local compile errors from C-style
 numeric cast syntax were corrected to Fairy `as` expressions before the successful run.
 
+Parser, URL validator and oracle: `4e31287f`.
+
+## Workspace binding
+
+`project_remote_bind.fy` consumes a parsed plan and the existing validated Fairy manifest.
+It requires each pin to be an explicit workspace member with a non-root UID, checks exact
+versions for dependencies on that path, rejects directory overlap with root source/other
+members, and reserves `build/package-sources` against root source and every member. Portable
+manifest paths are ASCII; case folding matches Go `Bind` for this admitted domain. Similar
+prefixes without a directory boundary remain distinct. No member or cache files are opened.
+
+`TestCandidateRemoteSourceBinding` feeds the same 24 TOML roots through Go and Fairy manifest
+parsers and compares binding with `packagesource.Bind`. Both low and optimized pass 7 accepted
+and 17 rejected roots, plus 24 already-exhausted shared-work-meter controls. Controls include
+missing/empty membership, optional dependencies, unrelated dependency versions, exact version
+mismatch, root UID, source/other-member/cache ancestry, case collisions and harmless prefixes.
+This is metadata parity within the existing bounded work policy, not filesystem admission.
+
+Executed and passed in 11.347 seconds:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m -v ./internal/cli -run '^TestCandidateRemoteSourceBinding$'
+```
+
+Also passed: `go test -mod=readonly -count=1 ./internal/packagesource`, scoped
+`go vet -mod=readonly ./internal/packagesource ./internal/cli`, Go formatting and Git diff checks.
+
 Skipped: Linux native execution (batched), full compiler CLI acceptance (no command is wired
 yet), network/cache/archive restoration (later work), full repository/release suites (outside
 this private parser slice). URL comparison uses the installed Go toolchain; no Linux/toolchain

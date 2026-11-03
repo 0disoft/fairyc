@@ -1,7 +1,8 @@
 # Explicit remote package sources v1
 
 - Status: Executable bounded Go Stage 0 experimental preparation contract, ADR 0498;
-  Fairy-authored source-plan parsing is verified on Windows in both native profiles.
+  Fairy-authored source-plan parsing and workspace binding are verified on Windows
+  in both native profiles.
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
@@ -94,11 +95,14 @@ cache migration/GC and full Fairy-authored fetch parity remain outside v1.
 The private Fairy `project_remote_plan` module parses the same source-plan JSON, validates
 decoded fields and returns pins sorted by path. It reuses the existing manifest name/UID/version
 rules and JSON duplicate-key checker, adds the 64 KiB and 1-32 pin limits, and shares the existing
-16 MiB work budget. `project_source_url` validates the HTTPS host, port, IPv6/zone and percent
+16,777,216-unit work budget. `project_source_url` validates the HTTPS host, port, IPv6/zone and percent
 escape forms against the Go source policy. It performs no network, archive or filesystem work.
 The Windows low/optimized oracle compares acceptance and every returned field; see the
-[source-plan receipt](../ops/windows-candidate-remote-plan-20261103.md). Workspace binding,
-archive/cache restoration and candidate CLI wiring remain separate steps.
+[source-plan receipt](../ops/windows-candidate-remote-plan-20261103.md). `project_remote_bind`
+checks the already validated plan against the root manifest: explicit non-root membership,
+exact declared dependency versions and case-insensitive directory-boundary conflicts with
+source, cache and other members. Binding shares the work meter and reads no member files.
+Archive/cache restoration and candidate CLI wiring remain separate steps.
 
 
 ## Usage and command result

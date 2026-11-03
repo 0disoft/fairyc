@@ -394,6 +394,7 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Contract: `docs/package/remote-sources-v1.md`; CLI admission: `docs/cli/command-contract.md`.
 - Implementation and focused acceptance: `internal/packagesource/`, `internal/cli/package_fetch.go`, `internal/cli/package_fetch_test.go`.
 - Fairy plan parser and URL policy: `examples/lexer_candidate/src/project_remote_plan.fy`, `project_source_url.fy`; native Go comparison: `internal/cli/candidate_source_plan_test.go`.
+- Fairy workspace binding: `examples/lexer_candidate/src/project_remote_bind.fy`; manifest/Go oracle and shared-budget controls: `internal/cli/candidate_remote_bind_test.go`.
 - Windows receipt and deferred Linux replay: `docs/ops/windows-remote-packages-20261101.md` and `docs/development/ordered-work-20261031.md`.
 
 ## Fairy candidate direct scalar generic transport
