@@ -142,6 +142,9 @@ func dependencyASCII(image []byte, report Report, rva uint32, limit uint32) (str
 	if rva == 0 {
 		return "", fmt.Errorf("zero import string RVA")
 	}
+	if name, found, err := dependencyASCIIInSection(image, report, rva, limit); found {
+		return name, err
+	}
 	var output []byte
 	for index := uint32(0); index < limit; index++ {
 		if uint64(rva)+uint64(index) > math.MaxUint32 {
@@ -163,4 +166,41 @@ func dependencyASCII(image []byte, report Report, rva uint32, limit uint32) (str
 		output = append(output, data[0])
 	}
 	return "", fmt.Errorf("unterminated import string")
+}
+
+// Import strings normally fit in one file-backed section. Borrow its validated
+// byte range for this synchronous read, then detach only the returned string.
+// Cross-section and malformed ranges retain the byte-wise reader's error order.
+// Other generatedImageBytes consumers still receive owned copies for masking.
+func dependencyASCIIInSection(image []byte, report Report, rva, limit uint32) (string, bool, error) {
+	for _, section := range report.Sections {
+		if rva < section.VirtualAddress {
+			continue
+		}
+		offset := uint64(rva - section.VirtualAddress)
+		span := uint64(min(section.RawSize, section.VirtualSize))
+		if offset >= span {
+			continue
+		}
+		start := uint64(section.RawOffset) + offset
+		count := min(span-offset, uint64(limit), uint64(math.MaxUint32)-uint64(rva)+1)
+		if start > uint64(len(image)) || count > uint64(len(image))-start {
+			return "", false, nil
+		}
+		data := image[start : start+count]
+		end := bytes.IndexByte(data, 0)
+		if end < 0 {
+			return "", false, nil
+		}
+		if end == 0 {
+			return "", true, fmt.Errorf("empty import string")
+		}
+		for _, value := range data[:end] {
+			if value < 33 || value > 126 {
+				return "", true, fmt.Errorf("non-ASCII import string")
+			}
+		}
+		return string(data[:end]), true, nil
+	}
+	return "", false, nil
 }
