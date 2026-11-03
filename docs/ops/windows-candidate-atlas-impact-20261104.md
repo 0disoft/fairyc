@@ -114,3 +114,13 @@ hygiene settings and CI/runner settings did not change.
 Source-of-truth updates: `docs/atlas/impact-mcp-edit-v1.md`,
 `docs/development/ordered-work-20261031.md` and
 `docs/development/source-of-truth-capabilities-contracts-and-atlas.md`.
+
+## CLI argument leaf
+
+`project_atlas_options` parses the existing impact selectors and explicit limits
+before touching any workspace. It rejects missing, duplicate, unknown, overlong,
+noncanonical, overflowing and out-of-range flags/values. `--locked` is optional
+syntax only; the later command must always verify the current existing lock.
+`TestCandidateAtlasOptions` compares the real native argument parser with Go's
+`parseImpact` under MSVC low/optimized. This first leaf does not dispatch a command
+or claim current-source/map production.
