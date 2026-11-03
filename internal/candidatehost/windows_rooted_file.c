@@ -180,6 +180,23 @@ int32_t fairyc_private_windows_root_file_rename_v1(size_t file, size_t root, con
 int32_t fairyc_private_windows_root_file_publish_new_v1(size_t file, size_t root, const uint8_t *leaf, size_t bytes) {
     return fy_root_file_rename(file, root, leaf, bytes, FALSE);
 }
+/* NT FileLinkInformation, relative to the retained directory, no replacement.
+ * The original private staging link stays owned by its handle until close. */
+int32_t fairyc_private_windows_root_file_link_new_v1(size_t file, size_t root, const uint8_t *leaf, size_t bytes) {
+    if (root == 0 || !fy_root_leaf(leaf, bytes)) { return 0; }
+    struct { BOOLEAN replace; HANDLE directory; ULONG length; WCHAR name[256]; } info;
+    memset(&info, 0, sizeof(info));
+    info.directory=(HANDLE)(uintptr_t)root; info.length=(ULONG)bytes; memcpy(info.name,leaf,bytes);
+    HMODULE module=GetModuleHandleW(L"ntdll.dll");
+    if (module==NULL) { return 0; }
+    fy_root_nt_set set=(fy_root_nt_set)GetProcAddress(module,"NtSetInformationFile");
+    fy_root_nt_error error=(fy_root_nt_error)GetProcAddress(module,"RtlNtStatusToDosError");
+    if (set==NULL || error==NULL) { SetLastError(ERROR_PROC_NOT_FOUND); return 0; }
+    IO_STATUS_BLOCK io;
+    NTSTATUS status=set((HANDLE)(uintptr_t)file,&io,&info,sizeof(info),(FILE_INFORMATION_CLASS)11);
+    if (status<0) { SetLastError(error(status)); return 0; }
+    return 1;
+}
 size_t fairyc_private_windows_root_file_time_v1(void) {
     FILETIME now;
     GetSystemTimeAsFileTime(&now);

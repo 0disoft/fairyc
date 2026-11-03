@@ -105,6 +105,16 @@ func TestCandidateRemoteHTTPS(t *testing.T) {
 		case "/truncated":
 			w.Header().Set("Content-Length", "12")
 			_, _ = w.Write([]byte("zip bytes"))
+		case "/dribble":
+			for i := 0; i < 30; i++ {
+				_, _ = w.Write([]byte("x"))
+				w.(http.Flusher).Flush()
+				select {
+				case <-r.Context().Done():
+					return
+				case <-time.After(40 * time.Millisecond):
+				}
+			}
 		case "/timeout":
 			select {
 			case <-r.Context().Done():
@@ -138,9 +148,9 @@ func TestCandidateRemoteHTTPS(t *testing.T) {
 			for _, test := range []struct {
 				path, want string
 				code       int
-			}{{"/ok", "zip bytes", 0}, {"/chunked", "zip bytes", 0}, {"/exact", strings.Repeat("x", 256), 0}, {"/redirect", "4", 7}, {"/auth", "4", 7}, {"/gzip", "4", 7}, {"/large", "5", 7}, {"/overflow", "5", 7}, {"/truncated", "4", 7}, {"/missing", "4", 7}, {"/timeout", "3", 7}} {
+			}{{"/ok", "zip bytes", 0}, {"/chunked", "zip bytes", 0}, {"/exact", strings.Repeat("x", 256), 0}, {"/redirect", "4", 7}, {"/auth", "4", 7}, {"/gzip", "4", 7}, {"/large", "5", 7}, {"/overflow", "5", 7}, {"/truncated", "4", 7}, {"/missing", "4", 7}, {"/timeout", "3", 7}, {"/dribble", "3", 7}} {
 				args := []string{server.URL + test.path}
-				if test.path == "/timeout" {
+				if test.path == "/timeout" || test.path == "/dribble" {
 					args = append(args, "short")
 				}
 				code, out, diagnostic := fetchCLIProcess(t, path, root, args, "")
@@ -202,7 +212,7 @@ func TestCandidateHTTPSRuntimePackaging(t *testing.T) {
 			if err = os.WriteFile(path, image.Bytes, 0700); err != nil {
 				t.Fatal(err)
 			}
-			for _, header := range []string{"fairyc_private_windows_ticks_v1(", "fairyc_private_windows_root_file_read_v1(", "fairyc_private_windows_https_read_v1(", "fairyc_private_windows_root_file_read_v1( fairyc_private_windows_https_open_v1(", "fairyc_private_windows_ticks_v1( fairyc_private_windows_https_close_v1("} {
+			for _, header := range []string{"fairyc_private_windows_root_file_link_new_v1(", "fairyc_private_windows_ticks_v1(", "fairyc_private_windows_root_file_read_v1(", "fairyc_private_windows_https_read_v1(", "fairyc_private_windows_root_file_read_v1( fairyc_private_windows_https_open_v1(", "fairyc_private_windows_ticks_v1( fairyc_private_windows_https_close_v1("} {
 				if err = os.WriteFile(filepath.Join(root, "header"), []byte(header), 0600); err != nil {
 					t.Fatal(err)
 				}

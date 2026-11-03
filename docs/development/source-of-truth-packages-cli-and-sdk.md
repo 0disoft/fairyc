@@ -398,7 +398,8 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Fairy Windows HTTPS transport: `examples/lexer_candidate/src/project_remote_https.fy`, `internal/candidatehost/windows_https.c`; opt-in real TLS acceptance: `internal/cli/candidate_https_windows_test.go`.
 - Fairy private offline restoration: `examples/lexer_candidate/src/project_remote_offline.fy`, `project_remote_fs.fy`, `project_remote_archive.fy`, `project_inflate.fy`; native oracles: `internal/cli/candidate_remote_offline_test.go`, `candidate_remote_archive_test.go`, `candidate_inflate_test.go`.
 - Windows offline API receipt: `docs/ops/windows-candidate-remote-offline-20261103.md`. Retained directory primitives belong to `internal/candidatehost/windows_rooted_file.c` and `examples/lexer_candidate/src/windows_rooted_file.fy`; the generated runtime asset pin must match the C sources.
-- Windows offline command: `examples/lexer_candidate/src/project_fetch_cli.fy`, dispatched by `file_cli.fy`; command-leaf/full CLI acceptance: `internal/cli/candidate_fetch_command_test.go`, `candidate_fetch_cli_test.go`; receipt and pending online/Linux scope: `docs/ops/windows-candidate-fetch-cli-20261104.md`.
+- Fairy online preparation/cache: `examples/lexer_candidate/src/project_remote_online.fy`, `project_remote_cache.fy`; real TLS command/full CLI comparisons: `internal/cli/candidate_fetch_online_windows_test.go`; receipt: `docs/ops/windows-candidate-remote-online-20261104.md`.
+- Windows online/offline command: `examples/lexer_candidate/src/project_fetch_cli.fy`, dispatched by `file_cli.fy`; command-leaf/full CLI acceptance: `internal/cli/candidate_fetch_command_test.go`, `candidate_fetch_cli_test.go`; historical offline receipt and pending Linux scope: `docs/ops/windows-candidate-fetch-cli-20261104.md`.
 - Windows receipt and deferred Linux replay: `docs/ops/windows-remote-packages-20261101.md` and `docs/development/ordered-work-20261031.md`.
 
 ## Fairy candidate direct scalar generic transport

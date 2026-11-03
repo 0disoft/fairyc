@@ -146,6 +146,7 @@ pub fn u32 host(ref u8[] name){
     if(bytes::equal(name,b"fairyc_private_windows_root_file_info_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_file_open_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_file_publish_new_v1")){return 2;}
+    if(bytes::equal(name,b"fairyc_private_windows_root_file_link_new_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_file_read_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_file_rename_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_file_size_v1")){return 2;}

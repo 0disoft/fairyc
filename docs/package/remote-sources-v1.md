@@ -1,8 +1,8 @@
 # Explicit remote package sources v1
 
 - Status: Executable bounded Go Stage 0 experimental preparation contract, ADR 0498;
-  Fairy-authored source-plan parsing, workspace binding and offline restoration are connected
-  through the bounded Windows CLI subset `experimental fetch-packages --offline`.
+  Fairy-authored source-plan parsing, workspace binding, HTTPS retrieval and offline restoration
+  are connected through the bounded Windows CLI `experimental fetch-packages [--offline]`.
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
@@ -90,7 +90,7 @@ run fetch again. Restore an absent package from the cache with `--offline`.
 
 This experimental step admits a CLI surface, not a stable registry ecosystem. Registry selection,
 signing/trust delegation, range solving, automatic updates, Git/submodules/LFS, publisher services,
-cache migration/GC and full Fairy-authored fetch parity remain outside v1.
+cache migration/GC and Linux Fairy-authored fetch parity remain outside v1.
 
 The private Fairy `project_remote_plan` module parses the same source-plan JSON, validates
 decoded fields and returns pins sorted by path. It reuses the existing manifest name/UID/version
@@ -123,14 +123,33 @@ two-minute deadline is cooperative, checked around archive processing and public
 than interrupting a native I/O operation or a decoder mid-entry. Private staging names include
 the archive digest; a leftover collision fails without deleting the old stage and requires
 manual inspection. See the [Windows offline receipt](../ops/windows-candidate-remote-offline-20261103.md).
-Windows candidate command dispatch now calls this API for exactly
-`experimental fetch-packages --offline`; see the
-[CLI receipt](../ops/windows-candidate-fetch-cli-20261104.md). Syntax/help are processed before
-workspace reads. The command uses the Go success line and invocation/help text, with exit
-codes 0/2/7/4. Preparation-error detail uses candidate stage/reason messages beneath the shared
-`package fetch failed:` prefix. Missing `--offline` explicitly rejects online preparation with
-code 2; online transport, native Linux adapter selection/replay and distribution acceptance
-remain separate work. Stable commands do not gain cache consultation or networking.
+Windows candidate dispatch calls this API for `experimental fetch-packages --offline`;
+see the [offline CLI receipt](../ops/windows-candidate-fetch-cli-20261104.md).
+The invocation without `--offline` now calls `project_remote_online`, which reuses
+the same plan/binding/archive/publication contracts and existing-tree verification.
+Only an absent cache blob triggers `project_remote_https`; malformed, linked or
+corrupt cache data fails without a network retry. HTTPS uses Windows system trust
+and no ambient proxy, authentication, cookies or redirects. WinHTTP is loaded from
+System32 only. Encoding is absent/identity, and declared/actual response bytes are
+bounded independently. The 30-second deadline covers headers and every body read;
+it is also capped by the remaining two-minute operation time. Native cancellation
+keeps callback/read storage alive until WinHTTP reports its final handle callback.
+
+After validating the archive digest, ZIP entries and manifest identity,
+`project_remote_cache` writes and syncs a new private file, then creates a retained-
+directory-relative hard link without replacing an existing cache object. Closing
+removes the owned staging name. Unsupported hard-link filesystems fail; matching
+concurrent cache bytes may be reused only after rehashing. The private stage name
+is digest-derived; an existing stage fails without deletion. Earlier complete
+cache/package publications survive a later failure. Stable commands gain no cache
+consultation or networking, and neither fetch mode changes `fairy.lock`.
+
+Both modes validate syntax/help before workspace reads, share the Go success and
+invocation/help output and exit codes 0/2/7/4, and use bounded candidate preparation
+reasons beneath `package fetch failed:`. The Windows source entry declares the
+`network` effect for explicit online dispatch; offline execution makes no HTTP
+request. Native Linux facade/transport selection, native replay and distribution
+acceptance remain separate. See the [online receipt](../ops/windows-candidate-remote-online-20261104.md).
 
 
 ## Usage and command result

@@ -25,7 +25,7 @@ power-loss claim is made. Verified source preparation never overwrites `fairy.lo
 
 SHA-256 proves equality to maintainer-reviewed bytes, not publisher authenticity or source safety.
 Credentials, signatures, registries, semver range resolution, Git fetching, automatic upgrades,
-publication, implicit builds and full Fairy-authored online/Linux parity are separate future slices.
+publication, implicit builds and Fairy-authored Linux parity are separate future slices.
 Registry selection remains UNDECIDED. Linux native execution stays in the combined queue.
 
 The 2026-11-04 bounded extension connects the Windows Fairy-authored CLI's explicit
@@ -33,3 +33,10 @@ The 2026-11-04 bounded extension connects the Windows Fairy-authored CLI's expli
 This preserves the preparation contract and admits no online fallback. Shared success and
 invocation/help output and exit codes match Go; preparation-error detail is candidate-owned.
 See the [CLI contract](../cli/command-contract.md#experimental-explicit-remote-package-preparation).
+
+The subsequent Windows extension connects the invocation without `--offline` to
+Fairy HTTPS orchestration and validated immutable cache publication. WinHTTP supplies
+system TLS/I/O; Fairy owns URL, size, archive, identity and publication policy. Native
+I/O waits obey the remaining request deadline, with final callback-aware cancellation.
+Offline execution and stable compilation gain no network fallback. See the
+[online receipt](../ops/windows-candidate-remote-online-20261104.md); Linux remains queued.

@@ -72,18 +72,23 @@ publication, existing-tree refusal, output counts and exit codes. This is an exp
 step for ordinary local manifest members. It never updates `fairy.lock` or implicitly downloads
 during stable check/build/run/test. Stable registry commands and range solving are not admitted.
 
-The Windows Fairy-authored CLI admits the bounded offline subset
-`fairyc experimental fetch-packages --offline`. It uses the caller's working directory,
-validates syntax before filesystem work and calls the authored offline restoration API.
-Help aliases and invalid-argument diagnostics use the shared Go CLI metadata. Success prints
-the same counts line as Go with zero downloads; exit statuses are 0 success, 2 invocation,
-7 preparation failure and 4 output failure. Completed restoration may precede an output failure.
+The Windows Fairy-authored CLI admits both
+`fairyc experimental fetch-packages` and its `--offline` variant. Both use the
+caller's working directory and validate syntax before workspace access. Online
+preparation downloads only absent cache blobs, with system-verified HTTPS, no
+redirects/automatic authentication/cookies/proxy discovery, a 30-second whole-request
+deadline and the remaining two-minute operation budget. SHA-256, ZIP and exact
+package identity are validated before immutable cache or package publication.
+Offline mode never falls back to transport; corrupt online cache blobs also fail.
 
-Candidate preparation errors retain `package fetch failed:` and provide bounded stage/reason
-messages; their detail is not the Go/OS error string. A cleanup failure additionally directs
-the caller to inspect the leftover lock/stage. Online invocation without `--offline` is rejected
-with code 2 and an explicit offline requirement before reading the workspace. Native Linux
-selection/execution, online transport and distribution acceptance remain separate work.
+Help aliases and invalid-argument diagnostics use shared Go CLI metadata. Success
+prints the same package/download/cache-hit/install/reuse counts line as Go; exit
+statuses are 0 success, 2 invocation, 7 preparation failure and 4 output failure.
+Completed restoration may precede output failure. Candidate preparation errors
+retain `package fetch failed:` and provide bounded stage/reason messages rather
+than Go/OS error strings. Cleanup failures direct the caller to inspect leftovers.
+See the [online Windows receipt](../ops/windows-candidate-remote-online-20261104.md).
+Native Linux adapter selection/execution and distribution acceptance remain separate.
 
 ## Experimental explicit-file generics
 

@@ -24,7 +24,7 @@ func TestCandidateFetchCommand(t *testing.T) {
 	root := t.TempDir()
 	copyLexerExample(t, root)
 	copyCandidateParityModules(t, root, "project_fetch_cli")
-	writeTestSource(t, root, "src/main.fy", `module main;import project_fetch_cli as fetch;@effects(filesystem,console,clock) fn i32 main(){return fetch::arguments();}`)
+	writeTestSource(t, root, "src/main.fy", `module main;import project_fetch_cli as fetch;@effects(filesystem,console,network,clock) fn i32 main(){return fetch::arguments();}`)
 	build, support := candidateParityBuildPartsWithLimit(t, root, nil, 128<<10)
 	tc, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
@@ -94,7 +94,7 @@ func verifyCandidateFetchCLI(t *testing.T, image string) {
 	}
 	noOnline := t.TempDir()
 	code, out, stderr := fetchCLIProcess(t, image, noOnline, []string{"experimental", "fetch-packages"}, "")
-	if code != 2 || out != "" || !strings.HasPrefix(stderr, "fairyc: experimental fetch-packages requires --offline in this compiler\n") {
+	if code != 7 || out != "" || !strings.HasPrefix(stderr, "package fetch failed: cannot read source plan or root manifest\n") {
 		t.Fatalf("online: %d %q %q", code, out, stderr)
 	}
 	entries, err := os.ReadDir(noOnline)

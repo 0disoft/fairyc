@@ -16,6 +16,7 @@ import windows_host_paths as paths;
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_delete_v1") unsafe extern C fn i32 file_delete(usize file);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_rename_v1") unsafe extern C fn i32 file_rename(usize file,usize root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_publish_new_v1") unsafe extern C fn i32 file_publish_new(usize file,usize root,ptr u8 leaf,usize size);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_link_new_v1") unsafe extern C fn i32 file_link_new(usize file,usize root,ptr u8 leaf,usize size);
 @effects(clock) @link_name("fairyc_private_windows_root_file_time_v1") unsafe extern C fn usize file_time();
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_close_v1") unsafe extern C fn i32 close_handle(usize handle);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_info_v1") unsafe extern C fn i32 file_info(usize handle,ptr mut void output);
@@ -56,6 +57,9 @@ pub fn void keep_in_stage(ref mut File file){file.staged=false;}
 @effects(filesystem) pub fn Result<bool,Problem> publish(ref Directory root,ref mut File file,ref u8[] leaf){if(!file.staged){return .err(fail(1,0,0));}let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};if(unsafe{file_rename(file.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}==0){return .err(native(9,0));}file.staged=false;return .ok(true);}
 // Consume and clear before close: an uncertain close is never retried by glue.
 @effects(filesystem) pub fn Result<bool,Problem> publish_new(ref Directory root,ref mut File file,ref u8[] leaf){if(!file.staged){return .err(fail(1,0,0));}let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};if(unsafe{file_publish_new(file.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}==0){return .err(native(9,0));}file.staged=false;return .ok(true);}
+// A hard link publishes without replacing. Closing still removes the owned
+// staging name; the complete immutable destination link survives.
+@effects(filesystem) pub fn Result<bool,Problem> link_new(ref Directory root,ref mut File file,ref u8[] leaf){if(!file.staged){return .err(fail(1,0,0));}let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(unsafe{file_link_new(file.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}!=0){.ok(true)}else{.err(native(9,0))};}
 // Windows absolute file-time units (100ns since 1601), for retention only.
 @effects(clock) pub fn usize now(){return unsafe{file_time()};}
 // Consume and clear before close: an uncertain close is never retried by glue.

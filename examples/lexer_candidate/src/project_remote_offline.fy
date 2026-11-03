@@ -9,7 +9,7 @@ import sha256_stream as sha;
 import std::bytes as bytes;
 
 @effects(clock) @link_name("fairyc_private_windows_ticks_v1") unsafe extern C fn usize ticks();
-pub struct Outcome{usize packages;usize cache_hits;usize installed;usize reused;}
+pub struct Outcome{usize packages;usize downloaded;usize cache_hits;usize installed;usize reused;}
 pub struct Problem{u32 stage;u32 code;u32 cleanup_code;}
 fn Problem fail(u32 stage,u32 code){return Problem{.stage,.code,.cleanup_code=0};}
 @effects(clock) fn bool expired(usize started){let usize now=unsafe{ticks()};return now<started || now-started>=120000;}
@@ -23,7 +23,7 @@ fn usize find(ref archive::Bundle b,ref u8[] name){var usize i=0;while(i<archive
     }return 0;
 }
 @effects(filesystem,clock) fn u32 write_stage(ref host::Directory stage,ref archive::Bundle b,usize started){var usize i=0;while(i<archive::count(b)){if(expired(started)){return 3;}if(!archive::directory(b,i)){let u32 code=fs::write(stage,archive::name(b,i),archive::contents(b,i));if(code!=0){return code;}}i+=1;}return 0;}
-@effects(filesystem,clock) fn Result<bool,Problem> publish(ref host::Directory root,ref plan::Plan sources,usize index,ref archive::Bundle b,usize started){
+@effects(filesystem,clock) pub fn Result<bool,Problem> publish(ref host::Directory root,ref plan::Plan sources,usize index,ref archive::Bundle b,usize started){
     let vendor=switch(fs::descend(root,b"vendor",true)){case .ok(value):{value}case .err(e):{return .err(fail(7,e));}};let parent=ref vendor;let ref u8[] leaf=plan::value(sources,index,0)[7..];
     let usize kind=switch(fs::kind(parent,leaf)){case .ok(value):{value}case .err(e):{return .err(fail(7,e));}};
     if(kind!=0){if(kind!=1){return .err(fail(7,4));}let existing=switch(host::directory(parent,leaf)){case .ok(value):{value}case .err(_):{return .err(fail(7,1));}};var usize remaining=8192;var usize files=0;let u32 code=verify(ref existing,b,b"",0,ref mut remaining,ref mut files,started);if(code!=0 || files!=archive::files(b)){return .err(fail(7,if(code==0){4}else{code}));}return .ok(false);}
@@ -33,7 +33,7 @@ fn usize find(ref archive::Bundle b,ref u8[] name){var usize i=0;while(i<archive
     if(code==0){return .ok(true);}var usize remaining=8192;var u32 cleanup_code=fs::clear(ref stage,0,ref mut remaining);if(cleanup_code==0){cleanup_code=fs::erase(ref stage);}return .err(Problem{.stage=7,.code,.cleanup_code});
 }
 @effects(filesystem,clock) fn Result<Outcome,Problem> restore_all(ref host::Directory root,ref plan::Plan sources,ref u8[] language,usize started){
-    var Outcome result=Outcome{.packages=0,.cache_hits=0,.installed=0,.reused=0};var usize compressed=0;var usize expanded=0;var usize files=0;var usize index=0;
+    var Outcome result=Outcome{.packages=0,.downloaded=0,.cache_hits=0,.installed=0,.reused=0};var usize compressed=0;var usize expanded=0;var usize files=0;var usize index=0;
     while(index<plan::count(sources)){if(expired(started)){return .err(fail(9,3));}if(compressed>=67108864 || expanded>=67108864 || files>=4096){return .err(fail(4,3));}
         var bytes::Buffer path=bytes::empty();if(!bytes::append(ref mut path,b"build/package-sources/").is_ok || !bytes::append(ref mut path,plan::value(sources,index,4)).is_ok || !bytes::append(ref mut path,b".zip").is_ok){return .err(fail(4,2));}
         let usize available=if(67108864-compressed<16777216){67108864-compressed}else{16777216};let data=switch(fs::read(root,bytes::view(ref path),available)){case .ok(value):{value}case .err(e):{return .err(fail(4,e));}};
@@ -43,7 +43,7 @@ fn usize find(ref archive::Bundle b,ref u8[] name){var usize i=0;while(i<archive
         compressed+=bytes::len(ref data);expanded+=archive::expanded(ref bundle);files+=archive::files(ref bundle);result.packages+=1;result.cache_hits+=1;if(installed){result.installed+=1;}else{result.reused+=1;}index+=1;
     }return .ok(result);
 }
-// Private Windows API for a future explicitly opted-in fetch CLI. No transport
+// Private Windows API for the explicitly opted-in offline fetch CLI. No transport
 // module is imported, and stable compilation never calls or reads this cache.
 @effects(filesystem,clock) pub fn Result<Outcome,Problem> restore(ref u8[] workspace){
     let usize started=unsafe{ticks()};let root=switch(host::open(workspace)){case .ok(value):{value}case .err(_):{return .err(fail(1,1));}};

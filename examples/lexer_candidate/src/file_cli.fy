@@ -43,7 +43,7 @@ pub fn Result<bytes::Buffer, u32> load(ref u8[] path_bytes) {
     return files::load(path_bytes);
 }
 
-@effects(filesystem, console, environment, clock)
+@effects(filesystem, console, environment, network, clock)
 pub fn i32 run() {
     let usize argc = process::arg_count();
     if (argc < 2) { return invocation("a command is required"); }

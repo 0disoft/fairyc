@@ -259,7 +259,7 @@ func copyLexerStdinCorpusExample(t *testing.T, root string) {
 	for _, edit := range []struct{ old, replacement string }{
 		{"import file_cli as file_cli;\n", ""},
 		{"import std::process as process;\n", ""},
-		{"@effects(filesystem, console, environment, clock)", "@effects(console)"},
+		{"@effects(filesystem, console, environment, network, clock)", "@effects(console)"},
 		{"    if (process::arg_count() != 1) { return file_cli::run(); }\n", ""},
 	} {
 		if strings.Count(text, edit.old) != 1 {
