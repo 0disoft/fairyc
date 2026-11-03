@@ -232,16 +232,33 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 						ModulePath:      importPath,
 					})
 				default:
-					var subjects []string
-					for _, provider := range providers {
-						subjects = appendUnique(subjects, classes[provider].members...)
-					}
+					subjects := ambiguousProviderSubjects(classes, providers)
 					return result, &Rejection{Reason: ReasonAmbiguousVisibleModule, Subjects: subjects, ImportPath: importPath}, nil
 				}
 			}
 		}
 	}
 	return result, nil, nil
+}
+
+// Keep provider/member encounter order while checking uniqueness once per
+// member. The diagnostic owns its slice; instance-class member slices stay intact.
+func ambiguousProviderSubjects(classes []resolvedClass, providers []int) []string {
+	if len(providers) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(providers))
+	var subjects []string
+	for _, provider := range providers {
+		for _, member := range classes[provider].members {
+			if _, duplicate := seen[member]; duplicate {
+				continue
+			}
+			seen[member] = struct{}{}
+			subjects = append(subjects, member)
+		}
+	}
+	return subjects
 }
 
 // findDependencyCycle returns the first deterministic simple cycle as unique class indexes. Class
