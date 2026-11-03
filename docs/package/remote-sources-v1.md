@@ -71,6 +71,16 @@ the named cache blob and retry. Downloads are limited to 30 seconds per request,
 one fetch is limited to 64 MiB compressed and 64 MiB expanded bytes, 4,096 files and 8 MiB/file. Each archive also limits explicit/implicit path entries to 8,192 and path depth to 32 components. Remaining operation budgets apply before reading/decompressing the next archive.
 The operation has a two-minute context. Cache retention is manual, not an unbounded background job. Immutable cache publication requires filesystem hard-link support; unsupported filesystems fail rather than falling back to replacement.
 
+The Go Stage 0 downloader shares one 30-second budget across GET attempts, backoff and body
+reading. Only bodyless GETs can retry, at most three attempts with 200 ms then 400 ms backoff,
+for temporary network failures or HTTP 502/503/504 without `Retry-After`. A `Retry-After` response
+fails with its HTTP status rather than retrying ahead of the server's requested delay. Cancellation,
+TLS trust errors, other HTTP statuses, partial-body errors, size/encoding rejection and hash or
+archive validation failures do not retry. Discarded response bodies close before backoff; original
+transport errors and cancellation causes remain inspectable. Cache and package publication are
+outside this retry wrapper and are never automatically replayed. This policy describes the Go
+downloader; it does not claim retry parity for the Fairy-authored Windows transport.
+
 Validate all entries and identity before caching an archive or publishing a directory. Write
 complete staged files beneath an opened contained root, then publish a new directory by rename
 under an exclusive fetch lock. Existing exact trees are reused; differing files or any extra

@@ -16,6 +16,8 @@ import (
 // The CLI always uses the default verified TLS client; redirects/time limits remain enforced here.
 type Fetcher struct{ Client *http.Client }
 
+const sourceDownloadTimeout = 30 * time.Second
+
 func (f Fetcher) download(ctx context.Context, pin Pin) ([]byte, error) {
 	return f.downloadWithin(ctx, pin, MaxArchiveBytes)
 }
@@ -27,11 +29,14 @@ func (f Fetcher) downloadWithin(ctx context.Context, pin Pin, limit int) ([]byte
 	if err := validateURL(pin.URL); err != nil {
 		return nil, err
 	}
+	// One budget covers every GET attempt, backoff and the final body read.
+	ctx, cancel := context.WithTimeout(ctx, sourceDownloadTimeout)
+	defer cancel()
 	client := http.Client{Transport: &http.Transport{DialContext: (&net.Dialer{Timeout: 10 * time.Second}).DialContext, ForceAttemptHTTP2: true, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 15 * time.Second, DisableCompression: true}}
 	if f.Client != nil {
 		client = *f.Client
 	}
-	client.Timeout = 30 * time.Second
+	client.Timeout = sourceDownloadTimeout
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	if f.Client == nil {
 		defer client.CloseIdleConnections()
@@ -41,17 +46,20 @@ func (f Fetcher) downloadWithin(ctx context.Context, pin Pin, limit int) ([]byte
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/zip")
-	response, err := client.Do(req)
+	response, err := requestSourceGET(&client, req, waitSourceRetry)
 	if err != nil {
 		return nil, fmt.Errorf("source HTTPS request failed: %w", err)
 	}
 	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK || response.ContentLength > int64(limit) || response.Uncompressed || (response.Header.Get("Content-Encoding") != "" && response.Header.Get("Content-Encoding") != "identity") {
+	if response.StatusCode != http.StatusOK {
+		return nil, &sourceHTTPStatusError{response.StatusCode}
+	}
+	if response.ContentLength > int64(limit) || response.Uncompressed || (response.Header.Get("Content-Encoding") != "" && response.Header.Get("Content-Encoding") != "identity") {
 		return nil, fmt.Errorf("source response status, encoding or size rejected")
 	}
 	data, err := io.ReadAll(io.LimitReader(response.Body, int64(limit)+1))
-	if err != nil {
-		return nil, err
+	if err != nil || ctx.Err() != nil {
+		return nil, fmt.Errorf("read source archive: %w", errors.Join(err, ctx.Err(), context.Cause(ctx)))
 	}
 	if len(data) > limit {
 		return nil, fmt.Errorf("source download byte limit exceeded")
