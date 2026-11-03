@@ -65,7 +65,7 @@ size_t fairyc_private_windows_directory_open_v1(const uint8_t *path, size_t byte
 }
 
 /* Retain the actual child directory. Reparse points are never followed. */
-size_t fairyc_private_windows_root_directory_open_v1(size_t root, const uint8_t *leaf, size_t bytes) {
+static size_t fy_root_directory(size_t root, const uint8_t *leaf, size_t bytes, int create_new) {
     if (root == 0) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
     if (!fy_root_leaf(leaf, bytes)) { return 0; }
     HMODULE module = GetModuleHandleW(L"ntdll.dll");
@@ -77,9 +77,9 @@ size_t fairyc_private_windows_root_directory_open_v1(size_t root, const uint8_t 
     OBJECT_ATTRIBUTES attributes = { sizeof(OBJECT_ATTRIBUTES), (HANDLE)root, &name, 0x40, NULL, NULL };
     IO_STATUS_BLOCK io;
     HANDLE directory = NULL;
-    NTSTATUS status = create(&directory, FILE_LIST_DIRECTORY | FILE_TRAVERSE | FILE_READ_ATTRIBUTES | SYNCHRONIZE,
+    NTSTATUS status = create(&directory, FILE_LIST_DIRECTORY | FILE_TRAVERSE | FILE_READ_ATTRIBUTES | SYNCHRONIZE | (create_new != 0 ? DELETE : 0),
         &attributes, &io, NULL, FILE_ATTRIBUTE_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        3u, 0x00000001u | 0x00000020u | 0x00200000u, NULL, 0);
+        create_new > 0 ? 2u : (create_new < 0 ? 1u : 3u), 0x00000001u | 0x00000020u | 0x00200000u, NULL, 0);
     if (status < 0) { SetLastError(error(status)); return 0; }
     BY_HANDLE_FILE_INFORMATION info;
     if (!GetFileInformationByHandle(directory, &info)) {
@@ -90,6 +90,16 @@ size_t fairyc_private_windows_root_directory_open_v1(size_t root, const uint8_t 
         CloseHandle(directory); SetLastError(ERROR_ACCESS_DENIED); return 0;
     }
     return (size_t)(uintptr_t)directory;
+}
+
+size_t fairyc_private_windows_root_directory_open_v1(size_t root, const uint8_t *leaf, size_t bytes) {
+    return fy_root_directory(root, leaf, bytes, 0);
+}
+size_t fairyc_private_windows_root_directory_create_v1(size_t root, const uint8_t *leaf, size_t bytes) {
+    return fy_root_directory(root, leaf, bytes, 1);
+}
+size_t fairyc_private_windows_root_directory_edit_v1(size_t root, const uint8_t *leaf, size_t bytes) {
+    return fy_root_directory(root, leaf, bytes, -1);
 }
 
 size_t fairyc_private_windows_root_file_open_v1(size_t root, const uint8_t *leaf, size_t bytes, uint32_t mode) {

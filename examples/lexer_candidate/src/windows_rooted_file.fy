@@ -6,6 +6,8 @@ import windows_host_paths as paths;
 
 @effects(filesystem) @link_name("fairyc_private_windows_directory_open_v1") unsafe extern C fn usize open_directory(ptr u8 path,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_directory_open_v1") unsafe extern C fn usize open_child_directory(usize root,ptr u8 leaf,usize size);
+@effects(filesystem) @link_name("fairyc_private_windows_root_directory_create_v1") unsafe extern C fn usize create_child_directory(usize root,ptr u8 leaf,usize size);
+@effects(filesystem) @link_name("fairyc_private_windows_root_directory_edit_v1") unsafe extern C fn usize edit_child_directory(usize root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_open_v1") unsafe extern C fn usize open_file(usize root,ptr u8 leaf,usize size,u32 mode);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_size_v1") unsafe extern C fn i32 file_size(usize file,ptr mut usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_read_v1") unsafe extern C fn i32 file_read(usize file,ptr mut u8 data,usize size,ptr mut usize copied);
@@ -36,6 +38,14 @@ pub fn bool valid_leaf(ref u8[] leaf){if(leaf.len==0 || leaf.len>1020 || bytes::
 fn Result<bytes::Buffer,Problem> wide(ref u8[] input,bool leaf){if(leaf && !valid_leaf(input)){return .err(fail(1,0,0));}let out=switch(command::path(input)){case .ok(p):{p}case .err(e):{return .err(fail(if(e.kind==3){2}else{1},0,e.offset));}};if(leaf && bytes::len(ref out)>512){return .err(fail(1,0,0));}return .ok(out);}
 @effects(filesystem) pub fn Result<Directory,Problem> open(ref u8[] path){let encoded=switch(wide(path,false)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_directory(bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded))};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
 @effects(filesystem) pub fn Result<Directory,Problem> directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
+// Exclusive directory stages are separate from the legacy cache ensure-open.
+@effects(filesystem) pub fn Result<Directory,Problem> create_directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{create_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
+@effects(filesystem) pub fn Result<Directory,Problem> edit_directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{edit_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
+@effects(filesystem) pub fn bool erase_directory(ref Directory root){return unsafe{file_delete(root.raw)}!=0;}
+@effects(filesystem) pub fn Result<bool,Problem> publish_directory(ref Directory source,ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(unsafe{file_publish_new(source.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}!=0){.ok(true)}else{.err(native(9,0))};}
+// Caller owns a newly created unpublished directory; its cleanup removes any
+// completed files on failure. This does not publish an ordinary cache file.
+pub fn void keep_in_stage(ref mut File file){file.staged=false;}
 @effects(filesystem) fn Result<File,Problem> child(ref Directory root,ref u8[] leaf,bool create){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_file(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2,if(create){2}else{1})};if(raw==0){return .err(native(4,0));}return .ok(File{.raw,.staged=create});}
 @effects(filesystem) pub fn Result<File,Problem> open_read(ref Directory root,ref u8[] leaf){return child(root,leaf,false);}
 @effects(filesystem) pub fn Result<File,Problem> create_new(ref Directory root,ref u8[] leaf){return child(root,leaf,true);}
@@ -82,7 +92,11 @@ fn Result<bool,Problem> batch(ref u8[] raw,ref mut v::Vec<bytes::Buffer> names,r
 pub fn Result<Entries,Problem> decode_batch(ref u8[] raw,usize maximum,ref mut usize work){if(raw.len>65536 || maximum==0 || maximum>4096 || !charge(work,1)){return .err(fail(14,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();switch(batch(raw,ref mut names,ref mut facts,maximum,work)){case .ok(_):{}case .err(e):{return .err(e);}};return .ok(Entries{.names,.facts});}
 // A separate bounded scan history restarts the same retained handle. No path
 // lookup, FindFirstFile or independent directory reopen occurs here.
-@effects(filesystem) pub fn Result<Entries,Problem> scan(ref Directory root,usize maximum,ref mut usize work){if(maximum==0 || maximum>4096 || !charge(work,65537)){return .err(fail(14,0,0));}var raw=bytes::empty();if(!bytes::resize_zeroed(ref mut raw,65536).is_ok){return .err(fail(2,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();var bool first=true;
+@effects(filesystem) pub fn Result<Entries,Problem> scan(ref Directory root,usize maximum,ref mut usize work){if(maximum==0 || maximum>4096){return .err(fail(14,0,0));}return scan_bounded(root,maximum,work);}
+// Package archives admit up to 8192 explicit/implicit path entries. Keep the
+// existing 4096-row cache/retention API unchanged.
+@effects(filesystem) pub fn Result<Entries,Problem> scan_packages(ref Directory root,ref mut usize work){return scan_bounded(root,8192,work);}
+@effects(filesystem) fn Result<Entries,Problem> scan_bounded(ref Directory root,usize maximum,ref mut usize work){if(!charge(work,65537)){return .err(fail(14,0,0));}var raw=bytes::empty();if(!bytes::resize_zeroed(ref mut raw,65536).is_ok){return .err(fail(2,0,0));}var v::Vec<bytes::Buffer> names=v::empty<bytes::Buffer>();var v::Vec<usize> facts=v::empty<usize>();var bool first=true;
     while(true){if(!charge(work,1)){return .err(fail(14,0,0));}if(unsafe{directory_query(root.raw,bytes::view_mut(ref mut raw) as ptr mut u8,65536,if(first){1}else{0})}==0){let code=unsafe{last_error()};if(code==18){return .ok(Entries{.names,.facts});}return .err(fail(12,code,0));}first=false;
         switch(batch(bytes::view(ref raw),ref mut names,ref mut facts,maximum,work)){case .ok(_):{}case .err(e):{return .err(e);}};
     }return .err(fail(12,0,0));

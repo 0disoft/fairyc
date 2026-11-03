@@ -110,6 +110,8 @@ pub fn u32 classify(ref u8[] name){
 }
 // 0 unknown, 1 process host, 2 process plus rooted-file host.
 pub fn u32 host(ref u8[] name){
+    if(bytes::equal(name,b"fairyc_private_windows_root_directory_create_v1")){return 2;}
+    if(bytes::equal(name,b"fairyc_private_windows_root_directory_edit_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_root_directory_open_v1")){return 2;}
     if(bytes::equal(name,b"fairyc_private_windows_assign_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_close_v1")){return 1;}

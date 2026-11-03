@@ -31,7 +31,7 @@ func copyCandidateParityModules(t *testing.T, root string, names ...string) {
 		}
 		parsed, err := frontend.AnalyzeSyntax(source.NewFile(name+".fy", data), source.DefaultLimits())
 		if err != nil || parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
-			t.Fatalf("parse authored module %s: %v", name, err)
+			t.Fatalf("parse authored module %s: %v; diagnostics=%+v", name, err, parsed.Tree.Diagnostics)
 		}
 		for _, imported := range parsed.AST.Imports {
 			names = append(names, imported.Path)
