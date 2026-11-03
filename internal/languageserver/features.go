@@ -63,23 +63,9 @@ func (s *server) completion(d *document, offset int) []Completion {
 	}
 	view := d.View
 	if view != nil {
-		var local *ast.Module
-		var localKey sourceKey
-		for key, file := range view.files {
-			if file.Path == d.Path {
-				local = file.Module
-				localKey = key
-				break
-			}
-		}
+		local, localKey := view.completionLocal(d.Path)
 		if local == nil && d.LastClean != nil {
-			for key, file := range d.LastClean.files {
-				if file.Path == d.Path {
-					local = file.Module
-					localKey = key
-					break
-				}
-			}
+			local, localKey = d.LastClean.completionLocal(d.Path)
 		}
 		if start >= 2 && string(d.Text[start-2:start]) == "::" {
 			// Only exact source import aliases are offered; no guessed member/type completion.
@@ -94,9 +80,9 @@ func (s *server) completion(d *document, offset int) []Completion {
 				for _, imported := range local.Imports {
 					if imported.Alias == alias {
 						provider, exact := view.imports[sourceKey{localKey.Package, imported.Path}]
-						for key, file := range view.files {
-							if exact && key.Package == provider && file.Module != nil && file.Module.Path == imported.Path {
-								moduleSymbols(file.Module, true, add)
+						if exact {
+							for _, module := range view.importedCompletionModules(sourceKey{provider, imported.Path}) {
+								moduleSymbols(module, true, add)
 							}
 						}
 					}

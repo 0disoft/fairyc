@@ -39,6 +39,7 @@ type analysis struct {
 	diagnostics map[string][]lspDiagnostic
 	positions   map[string]*positionIndex
 	definitions map[string][]definitionSpan
+	completion  completionSourceIndex
 	clean       bool
 }
 
