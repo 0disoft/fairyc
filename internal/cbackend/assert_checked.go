@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
+	"math"
 )
 
 // Facts are transient C-emission proofs, never changes to verified MIR. Only
@@ -110,6 +111,14 @@ func (s *assertionState) operation(op mir.Operation) {
 		s.locals[op.DestinationLocal] = v
 	case mir.OperationUnary:
 		switch op.Operator {
+		case "-":
+			// Preserve only an exact, representable i32 literal. In particular,
+			// do not wrap -INT32_MIN or infer values from unknown locals.
+			if op.OwnerType != hir.TypeI32 || v.literal.Kind != mir.OperandI32 || v.literal.Type != (hir.Type{}) && v.literal.Type != hir.TypeI32 || v.literal.I32 == math.MinInt32 {
+				*s = newAssertionState()
+				return
+			}
+			v = assertionValue{literal: mir.Operand{Kind: mir.OperandI32, Type: hir.TypeI32, I32: -v.literal.I32}}
 		case "*":
 			if !v.reference {
 				v = assertionValue{}
