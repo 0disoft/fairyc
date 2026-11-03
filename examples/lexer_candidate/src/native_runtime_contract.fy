@@ -157,6 +157,7 @@ pub fn u32 host(ref u8[] name){
     if(bytes::equal(name,b"fairyc_private_windows_temp_path_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_ticks_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_wait_v1")){return 1;}
+    if(bytes::equal(name,b"fairyc_private_windows_https_open_v1") || bytes::equal(name,b"fairyc_private_windows_https_headers_v1") || bytes::equal(name,b"fairyc_private_windows_https_read_v1") || bytes::equal(name,b"fairyc_private_windows_https_close_v1")){return 4;}
     return 0;
 }
 pub fn ref u8[] component_name(u32 id){

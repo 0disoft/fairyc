@@ -4,7 +4,7 @@ import std::bytes as bytes;
 
 // Allocation-free selection; the packet owner retains the diagnostic span.
 // Component IDs and order belong to native_runtime_contract. Host: 0 none,
-// 1 process, 2 process followed by rooted file. No C asset bytes live here.
+// bit 1 process, bit 2 rooted file, bit 4 HTTPS. No C asset bytes live here.
 pub struct Plan {u32 components;bool vectors;u32 scalar_exit;u32 host;}
 // 101 target-specific, 102 unknown std, 104 unknown private Windows host.
 pub struct Problem {u32 kind;usize start;usize end;}
@@ -38,7 +38,7 @@ pub fn Result<Plan,Problem> select(ref u8[] header,bool trap_control){
             if(end>i+23 && call<header.len && header[call]==40){
                 // WindowsSource trims SP/TAB/CR/LF, but not form feed.
                 var usize trimmed=call;while(trimmed>end && (header[trimmed-1]==32 || header[trimmed-1]==9 || header[trimmed-1]==10 || header[trimmed-1]==13)){trimmed-=1;}
-                let u32 host=contract::host(header[i..trimmed]);if(host==0){return .err(Problem{.kind=104,.start=i,.end=trimmed});}if(host>plan.host){plan.host=host;}
+                let u32 host=contract::host(header[i..trimmed]);if(host==0){return .err(Problem{.kind=104,.start=i,.end=trimmed});}plan.host=plan.host|1|host;
                 i=call;
             }
         }i+=1;

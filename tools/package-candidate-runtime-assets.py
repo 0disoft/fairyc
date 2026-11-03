@@ -32,6 +32,7 @@ SOURCES = [
     'internal/candidatehost/windows_rooted_file.c',
     'internal/cstdlib/stage0_windows_path.inc',
     'internal/cstdlib/stage0_file_buffer.c',
+    'internal/candidatehost/windows_https.c',
 ]
 PIN = ROOT / 'examples/lexer_candidate/src/native_runtime_asset_pin.fy'
 

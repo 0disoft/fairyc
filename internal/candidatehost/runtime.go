@@ -15,8 +15,13 @@ var windowsProcess string
 //go:embed windows_rooted_file.c
 var windowsRootedFile string
 
+//go:embed windows_https.c
+var windowsHTTPS string
+
 var symbols = regexp.MustCompile(`\bfairyc_private_windows_[A-Za-z0-9_]+\s*\(`)
 var admitted = map[string]bool{
+	"fairyc_private_windows_https_open_v1": true, "fairyc_private_windows_https_headers_v1": true,
+	"fairyc_private_windows_https_read_v1": true, "fairyc_private_windows_https_close_v1": true,
 	"fairyc_private_windows_input_file_v1":   true,
 	"fairyc_private_windows_current_path_v1": true,
 	"fairyc_private_windows_temp_path_v1":    true,
@@ -54,7 +59,7 @@ func WindowsSource(header string) (string, error) {
 	if len(matches) == 0 {
 		return "", nil
 	}
-	rooted := false
+	rooted, https := false, false
 	for _, match := range matches {
 		name := match[:len(match)-1]
 		for len(name) > 0 && (name[len(name)-1] == ' ' || name[len(name)-1] == '\t' || name[len(name)-1] == '\n' || name[len(name)-1] == '\r') {
@@ -63,12 +68,19 @@ func WindowsSource(header string) (string, error) {
 		if !admitted[name] {
 			return "", fmt.Errorf("unknown private Windows host symbol %s", name)
 		}
+		if strings.HasPrefix(name, "fairyc_private_windows_https_") {
+			https = true
+		}
 		if name == "fairyc_private_windows_directory_open_v1" || strings.HasPrefix(name, "fairyc_private_windows_root_file_") || strings.HasPrefix(name, "fairyc_private_windows_root_directory_") {
 			rooted = true
 		}
 	}
+	result := windowsProcess
 	if rooted {
-		return windowsProcess + "\n" + windowsRootedFile, nil
+		result += "\n" + windowsRootedFile
 	}
-	return windowsProcess, nil
+	if https {
+		result += "\n" + windowsHTTPS
+	}
+	return result, nil
 }

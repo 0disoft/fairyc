@@ -65,7 +65,7 @@ func TestCandidateRuntimeSelectionOracle(t *testing.T) {
 			cases = append(cases, input{value: "extern void " + name + gap + "(void);", trap: len(gap)%2 == 1})
 		}
 	}
-	for _, prefix := range []string{"", " ", "!", "_", "0", "a", "é", "\x00"} {
+	for _, prefix := range []string{"", " ", "!", "_", "0", "a", "챕", "\x00"} {
 		for _, gap := range []string{"", " ", "\t", "\r\n", "\f", "\v", "/*x*/"} {
 			for _, name := range []string{"fy_std_buffer_drop_v0", "fy_std_unknown_v0", "fairyc_private_windows_ticks_v1", "fairyc_private_windows_unknown_v1"} {
 				cases = append(cases, input{value: prefix + name + gap + "()"})
@@ -196,7 +196,10 @@ func TestCandidateRuntimeSelectionOracle(t *testing.T) {
 					hostKind = 1
 				}
 				if strings.Contains(host, "NtCreateFile") {
-					hostKind = 2
+					hostKind |= 2
+				}
+				if strings.Contains(host, "WinHttpOpen") {
+					hostKind |= 4
 				}
 				want += fmt.Sprintf("host:%d\n", hostKind)
 			}

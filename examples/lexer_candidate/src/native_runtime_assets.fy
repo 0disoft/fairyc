@@ -50,6 +50,7 @@ pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bo
         else{return .err(fail(1));}
     }id+=1;}
     if(plan.vectors){let usize n=part(bundle,18,ref mut output,ref mut written)?;}
-    if(plan.host>0){let usize n=append(ref mut output,b"\n")?;let usize host=append(ref mut output,raw(bundle,19))?;if(plan.host==2){let usize gap=append(ref mut output,b"\n")?;let usize rooted=append(ref mut output,raw(bundle,20))?;}}
+    if(plan.host>0){let usize n=append(ref mut output,b"\n")?;let usize host=append(ref mut output,raw(bundle,19))?;if((plan.host&2)!=0){let usize gap=append(ref mut output,b"\n")?;let usize rooted=append(ref mut output,raw(bundle,20))?;}}
+    if((plan.host&4)!=0){let usize gap=append(ref mut output,b"\n")?;let usize https=append(ref mut output,raw(bundle,23))?;}
     return .ok(output);
 }

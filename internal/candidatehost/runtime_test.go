@@ -37,3 +37,19 @@ func TestPrivateWindowsRootFileSymbolSelection(t *testing.T) {
 		}
 	}
 }
+
+func TestPrivateWindowsHTTPSSymbolSelection(t *testing.T) {
+	for _, name := range []string{"open", "headers", "read", "close"} {
+		selected, err := WindowsSource("fairyc_private_windows_https_" + name + "_v1(")
+		if err != nil || selected != windowsProcess+"\n"+windowsHTTPS {
+			t.Fatalf("HTTPS %s: %v", name, err)
+		}
+	}
+	selected, err := WindowsSource("fairyc_private_windows_https_read_v1( fairyc_private_windows_directory_open_v1(")
+	if err != nil || selected != windowsProcess+"\n"+windowsRootedFile+"\n"+windowsHTTPS {
+		t.Fatal("combined runtime", err)
+	}
+	if _, err = WindowsSource("fairyc_private_windows_https_unknown_v1("); err == nil {
+		t.Fatal("unknown HTTPS symbol accepted")
+	}
+}
