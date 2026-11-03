@@ -292,9 +292,12 @@ func functionRegionSymbols(function mir.Function) []hir.SymbolID {
 	return result
 }
 
-func functionCheckedDivisorTypes(function mir.Function) []hir.Type {
+func functionCheckedDivisorTypes(function mir.Function, reachable []bool) []hir.Type {
 	found := make(map[hir.Type]bool)
 	for _, block := range function.Blocks {
+		if !reachable[int(block.ID)] {
+			continue
+		}
 		for _, operation := range block.Operations {
 			if operation.Kind == mir.OperationBinary && (operation.Operator == "/" || operation.Operator == "%") && !directUnsignedDivisor(operation) {
 				found[operation.OwnerType] = true

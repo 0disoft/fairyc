@@ -14,6 +14,13 @@ func (e *analysisBuilder) prepareExecutableRequirements() {
 	for functionIndex, fn := range e.functions {
 		reachable := reachableBlocksForC(fn, e.nonReturning, e.checkedFailures[fn.Symbol])
 		e.reachableBlocks[functionIndex] = reachable
+		// Capability analysis covers every verified block. Runtime trap state
+		// is needed only for failure targets that survive C-only pruning.
+		for id := range e.dynamicTrapTargets[functionIndex] {
+			if !reachable[int(id)] {
+				delete(e.dynamicTrapTargets[functionIndex], id)
+			}
+		}
 		for i, block := range fn.Blocks {
 			if !reachable[i] {
 				continue

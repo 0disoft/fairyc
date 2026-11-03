@@ -63,7 +63,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		fmt.Fprintf(output, "    fy_region fy_region_%d = {0};\n", symbol)
 		fmt.Fprintf(output, "    (void)&fy_region_%d;\n", symbol)
 	}
-	for _, divisorType := range functionCheckedDivisorTypes(*function) {
+	for _, divisorType := range functionCheckedDivisorTypes(*function, e.analysis.reachableBlocks[functionIndex]) {
 		cType, err := e.analysis.cValueType(divisorType)
 		if err != nil {
 			return fmt.Errorf("function %s checked divisor type: %w", function.Name, err)
