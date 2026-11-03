@@ -67,7 +67,12 @@ func InspectGeneratedCOMDATSelection(unit, runtime, image, linkMap, linkLog []by
 		if err != nil {
 			return result, err
 		}
+		relocationOffset := 0
 		for index, section := range object.Sections {
+			// InspectObject emits contiguous relocation records in section order,
+			// including non-COMDAT, associative and discarded sections.
+			relocations := object.RelocationRecords[relocationOffset : relocationOffset+section.Relocations]
+			relocationOffset += section.Relocations
 			if section.COMDATSelection == 0 {
 				continue
 			}
@@ -100,8 +105,8 @@ func InspectGeneratedCOMDATSelection(unit, runtime, image, linkMap, linkLog []by
 				expected := slices.Clone(input.raw[section.RawOffset : uint64(section.RawOffset)+uint64(section.RawSize)])
 				type interval struct{ start, end uint32 }
 				var masked []interval
-				for _, relocation := range object.RelocationRecords {
-					if relocation.SectionIndex != index+1 || relocation.Type == ObjectRelocationAMD64Absolute {
+				for _, relocation := range relocations {
+					if relocation.Type == ObjectRelocationAMD64Absolute {
 						continue
 					}
 					width := uint32(4)
