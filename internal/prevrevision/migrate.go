@@ -584,14 +584,18 @@ func commentsBetween(tree *syntax.Tree, start, end int) bool {
 }
 
 func applyEdits(input []byte, edits []edit) ([]byte, error) {
+	if len(edits) == 0 {
+		return slices.Clone(input), nil
+	}
 	slices.SortFunc(edits, func(left, right edit) int {
 		if left.start != right.start {
 			return right.start - left.start
 		}
 		return right.end - left.end
 	})
-	output := slices.Clone(input)
-	previousStart := len(input) + 1
+	// Validate in the same descending order before allocating the final buffer.
+	outputSize := len(input)
+	previousStart := len(input)
 	for _, current := range edits {
 		if current.start < 0 || current.end < current.start || current.end > len(input) {
 			return nil, fmt.Errorf("invalid migration edit %d..%d", current.start, current.end)
@@ -599,8 +603,28 @@ func applyEdits(input []byte, edits []edit) ([]byte, error) {
 		if current.end > previousStart {
 			return nil, fmt.Errorf("overlapping migration edit %d..%d", current.start, current.end)
 		}
-		output = append(output[:current.start], append([]byte(current.replacement), output[current.end:]...)...)
+		outputSize -= current.end - current.start
+		if len(current.replacement) > int(^uint(0)>>1)-outputSize {
+			return nil, fmt.Errorf("migration output size overflows int")
+		}
+		outputSize += len(current.replacement)
 		previousStart = current.start
 	}
+	if input == nil && outputSize == 0 {
+		return nil, nil
+	}
+	output := make([]byte, outputSize)
+	readEnd, writeEnd := len(input), outputSize
+	// Fill backwards to preserve descending edit order, including multiple
+	// insertions at the same offset. Each unchanged byte is copied only once.
+	for _, current := range edits {
+		unchanged := input[current.end:readEnd]
+		writeEnd -= len(unchanged)
+		copy(output[writeEnd:], unchanged)
+		writeEnd -= len(current.replacement)
+		copy(output[writeEnd:], current.replacement)
+		readEnd = current.start
+	}
+	copy(output[:writeEnd], input[:readEnd])
 	return output, nil
 }
