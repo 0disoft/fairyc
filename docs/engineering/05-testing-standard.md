@@ -398,6 +398,15 @@ Region v1 resolves its lexical escape source through the explicit standard-libra
 
 MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. MIR-verifier fixtures separately require each named baseline to verify, apply one typed mutation, and return the complete one-code result; arbitrary malformed graph input remains deferred.
 
+Direct Go MIR verification admits at most 256 failure facts before canonical sorting and
+deduplication. A 257th fact yields one `V1004` marker and stops the affected traversal;
+truncation cannot certify a program. Child reports and parent merges share this bound.
+Unit regressions cover 255/256/257 and 4,096 failures, nested merges, operand and
+aggregate/declaration helpers, per-program limits across functions, deterministic
+truncation of unordered state, ordinary error ordering/deduplication, and cancellation.
+The bound limits diagnostic storage; graph metadata and existing verification work
+budgets remain separate. The independently implemented Fairy verifier is unchanged.
+
 The MIR, interpreter, C-emission, and native source-probe fixture producers obtain executable MIR
 through `internal/compiler`. A compiler-boundary architecture test parses those runner sources and
 fails if they call semantic analysis, MIR lowering, or MIR verification directly. Direct verifier

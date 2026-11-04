@@ -10,6 +10,9 @@ func verifyAssertEdges(function *Function) []VerificationError {
 	var blocks map[BlockID]*Block
 	var failures []VerificationError
 	for index := range function.Blocks {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		block := &function.Blocks[index]
 		terminator := block.Terminator
 		if terminator.Kind != TerminatorSwitch || terminator.SwitchKind != "assert" {
@@ -17,7 +20,7 @@ func verifyAssertEdges(function *Function) []VerificationError {
 		}
 		entity := terminatorEntity(block.ID, terminator)
 		if len(terminator.Successors) != 2 || terminator.Successors[0] == terminator.Successors[1] {
-			failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion is missing distinct success and failure edges"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion is missing distinct success and failure edges"})
 			continue
 		}
 		// Only assertions with two distinct edges need target lookup. Functions
@@ -25,12 +28,15 @@ func verifyAssertEdges(function *Function) []VerificationError {
 		if blocks == nil {
 			blocks = make(map[BlockID]*Block, len(function.Blocks))
 			for blockIndex := range function.Blocks {
+				if verificationReportsFull(failures) {
+					return failures
+				}
 				blocks[function.Blocks[blockIndex].ID] = &function.Blocks[blockIndex]
 			}
 		}
 		trap := blocks[terminator.Successors[1]]
 		if trap == nil || trap.Terminator.Kind != TerminatorTrap || !slices.Equal(trap.Terminator.TrapCategories, []string{"assertion-failed"}) {
-			failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion failure edge does not trap as assertion-failed"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion failure edge does not trap as assertion-failed"})
 		}
 	}
 	return failures
@@ -42,8 +48,14 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 	var markers checkedMarkerIndex
 	var failures []VerificationError
 	for blockIndex := range function.Blocks {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		block := &function.Blocks[blockIndex]
 		for operationIndex, operation := range block.Operations {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			switchKind, markerKind, categories, trapping := trappingOperationSpec(operation)
 			if !trapping {
 				continue
@@ -69,7 +81,7 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 					failureEntity = invalidMarker
 					detail = "trapping operation is missing its complete check marker"
 				}
-				failures = append(failures, VerificationError{Code: "V1501", Entity: failureEntity, Detail: detail})
+				failures = appendVerificationErrors(failures, VerificationError{Code: "V1501", Entity: failureEntity, Detail: detail})
 			}
 		}
 	}

@@ -24,6 +24,7 @@ The MIR verifier defines twenty-three isolated `Vxxxx` compiler-defect recipes. 
 
 - Phase 1 can require one negative recipe per verifier invariant without freezing the graph representation.
 - A new verifier code requires a seed and typed mutation capable of isolating it, or an explicit schema-versioned extension.
+- Entry-policy and reporting-budget controls (`V1003` and `V1004`) are not executable MIR invariants: direct unit tests own capability rejection and inclusive 256/257-fact report boundaries, so they do not require arbitrary-graph mutation recipes.
 - A verifier crash, extra code, ignored mutation, or invalid baseline fails the harness.
 - The current Go runner proves only the listed isolated recipes; it does not prove arbitrary malformed graphs or any backend.
 

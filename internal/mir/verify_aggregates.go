@@ -10,47 +10,59 @@ func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []Verifica
 	enums := make(map[hir.Type]*EnumType, len(definitions))
 	var failures []VerificationError
 	for index := range definitions {
+		if verificationReportsFull(failures) {
+			return nil, failures
+		}
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, enumTypeEntity(definition.Type))
 		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid || definition.Name == "" {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "enum definition has no concrete identity"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "enum definition has no concrete identity"})
 			continue
 		}
 		if _, duplicate := enums[definition.Type]; duplicate {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "enum definition is duplicated"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "enum definition is duplicated"})
 			continue
 		}
 		enums[definition.Type] = definition
 		if definition.CBase != "" {
 			capacity := hir.CEnumVariantCapacity(definition.CBase)
 			if capacity == 0 || len(definition.Variants) == 0 || uint64(len(definition.Variants)) > capacity {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "invalid C enum base or discriminant range"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "invalid C enum base or discriminant range"})
 			}
 			for _, variant := range definition.Variants {
+				if verificationReportsFull(failures) {
+					return nil, failures
+				}
 				if len(variant.Fields) != 0 {
-					failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "C enum has payload fields"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "C enum has payload fields"})
 				}
 			}
 		}
 		variantNames := make(map[string]struct{}, len(definition.Variants))
 		for _, variant := range definition.Variants {
+			if verificationReportsFull(failures) {
+				return nil, failures
+			}
 			if variant.Name == "" {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has an empty variant"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has an empty variant"})
 				continue
 			}
 			if _, duplicate := variantNames[variant.Name]; duplicate {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has a duplicate variant"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has a duplicate variant"})
 				continue
 			}
 			variantNames[variant.Name] = struct{}{}
 			fieldNames := make(map[string]struct{}, len(variant.Fields))
 			for _, field := range variant.Fields {
+				if verificationReportsFull(failures) {
+					return nil, failures
+				}
 				if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
-					failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has an invalid payload field"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has an invalid payload field"})
 					continue
 				}
 				if _, duplicate := fieldNames[field.Name]; duplicate {
-					failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has a duplicate payload field"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "enum definition has a duplicate payload field"})
 					continue
 				}
 				fieldNames[field.Name] = struct{}{}
@@ -64,28 +76,34 @@ func verifyStructTypes(definitions []StructType, enums map[hir.Type]*EnumType) (
 	structs := make(map[hir.Type]*StructType, len(definitions))
 	var failures []VerificationError
 	for index := range definitions {
+		if verificationReportsFull(failures) {
+			return nil, failures
+		}
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, structTypeEntity(definition.Type))
 		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid || definition.Name == "" {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "struct definition has no concrete identity"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "struct definition has no concrete identity"})
 			continue
 		}
 		if _, duplicate := structs[definition.Type]; duplicate {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "struct definition is duplicated"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "struct definition is duplicated"})
 			continue
 		}
 		structs[definition.Type] = definition
 		if definition.ReprC && len(definition.Fields) == 0 {
-			failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "repr(C) struct definition is empty"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "repr(C) struct definition is empty"})
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
 		for _, field := range definition.Fields {
+			if verificationReportsFull(failures) {
+				return nil, failures
+			}
 			if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "struct definition has an invalid field"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "struct definition has an invalid field"})
 				continue
 			}
 			if _, duplicate := fieldNames[field.Name]; duplicate {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "struct definition has a duplicate field"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "struct definition has a duplicate field"})
 				continue
 			}
 			fieldNames[field.Name] = struct{}{}
@@ -93,13 +111,19 @@ func verifyStructTypes(definitions []StructType, enums map[hir.Type]*EnumType) (
 	}
 	properties := typeProperties{structs: structs, enums: enums}
 	for _, definition := range definitions {
+		if verificationReportsFull(failures) {
+			return nil, failures
+		}
 		for _, field := range definition.Fields {
+			if verificationReportsFull(failures) {
+				return nil, failures
+			}
 			allowed := properties.inlineArrayField(field.Type)
 			if definition.ReprC {
 				allowed = hir.ReprCArrayField(field.Type) || hir.CEnumArray(field.Type, properties.cEnumBase) || properties.cRecordArray(field.Type)
 			}
 			if _, _, array := hir.FixedArrayParts(field.Type); array && !allowed {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: fallbackEntity(definition.Entity, definition.Type.String()), Detail: "invalid inline array struct field"})
 			}
 		}
 	}
@@ -110,37 +134,46 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	resources := make(map[hir.Type]*ResourceType, len(definitions))
 	var failures []VerificationError
 	for index := range definitions {
+		if verificationReportsFull(failures) {
+			return nil, failures
+		}
 		definition := &definitions[index]
 		entity := fallbackEntity(definition.Entity, resourceTypeEntity(definition.Type))
 		if definition.Type == hir.ParseType("") || definition.Type == hir.TypeInvalid {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "resource definition has no concrete type"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "resource definition has no concrete type"})
 			continue
 		}
 		if !slices.Equal(definition.DropEffects, hir.CanonicalEffects(definition.DropEffects)) {
-			failures = append(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "drop effects are not canonical"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "drop effects are not canonical"})
 		}
 		for _, effect := range definition.DropEffects {
+			if verificationReportsFull(failures) {
+				return nil, failures
+			}
 			if _, valid := hir.ParseEffect(string(effect)); !valid {
-				failures = append(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "drop effect is outside the Stage 0 vocabulary"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "drop effect is outside the Stage 0 vocabulary"})
 				break
 			}
 		}
 		if _, duplicate := resources[definition.Type]; duplicate {
-			failures = append(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "resource definition is duplicated"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateIdentity, Entity: entity, Detail: "resource definition is duplicated"})
 			continue
 		}
 		resources[definition.Type] = definition
 		if definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
-			failures = append(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "resource definition has unsupported drop behavior"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeDropGlue, Entity: entity, Detail: "resource definition has unsupported drop behavior"})
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
 		for _, field := range definition.Fields {
+			if verificationReportsFull(failures) {
+				return nil, failures
+			}
 			if field.Name == "" || field.Type == hir.ParseType("") || field.Type == hir.TypeInvalid {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "resource definition has an invalid field"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "resource definition has an invalid field"})
 				continue
 			}
 			if _, duplicate := fieldNames[field.Name]; duplicate {
-				failures = append(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "resource definition has a duplicate field"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateFields, Entity: entity, Detail: "resource definition has a duplicate field"})
 				continue
 			}
 			fieldNames[field.Name] = struct{}{}

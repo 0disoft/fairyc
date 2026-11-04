@@ -10,33 +10,51 @@ import (
 func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction) []VerificationError {
 	var failures []VerificationError
 	reject := func(entity, detail string) {
-		failures = append(failures, VerificationError{Code: CodeForeignDeclaration, Entity: entity, Detail: detail})
+		failures = appendVerificationErrors(failures, VerificationError{Code: CodeForeignDeclaration, Entity: entity, Detail: detail})
 	}
 	for _, declaration := range program.ForeignFunctions {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if hir.IsCCallback(declaration.ResultType) || !hir.ValidBoundedCallbackParameters(declaration.ParameterTypes) {
 			reject(declaration.Entity, "callback requires the final callback/user-data pair and cannot be returned")
 		}
 	}
 	for _, function := range program.Functions {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		var usage map[LocalID]callbackLocalUsage
 		if hir.IsCCallback(function.ResultType) {
 			reject(function.Name, "callback result is not admitted")
 		}
 		for _, typ := range function.ParameterTypes {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			if hir.IsCCallback(typ) {
 				reject(function.Name, "internal callback parameter is not admitted")
 			}
 		}
 		for _, block := range function.Blocks {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			term := block.Terminator
 			if callee := foreign[term.Callee]; term.Kind == TerminatorCall && callee != nil {
 				for index, typ := range callee.ParameterTypes {
+					if verificationReportsFull(failures) {
+						return failures
+					}
 					if !hir.IsCCallback(typ) {
 						continue
 					}
 					origins := 0
 					if index < len(term.Arguments) && term.Arguments[index].Kind == OperandLocal {
 						for _, op := range block.Operations {
+							if verificationReportsFull(failures) {
+								return failures
+							}
 							if op.Kind == OperationCCallback && op.DestinationLocal == term.Arguments[index].Local {
 								origins++
 							}
@@ -48,6 +66,9 @@ func verifyBoundedCallbacks(program Program, functions map[hir.SymbolID]*Functio
 				}
 			}
 			for _, op := range block.Operations {
+				if verificationReportsFull(failures) {
+					return failures
+				}
 				if op.Kind != OperationCCallback {
 					continue
 				}

@@ -72,25 +72,37 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 			checkedTypes = make(map[hir.Type]bool)
 		}
 		if !p.validStructViewType(value, checkedTypes) {
-			failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "struct view requires an actual nonempty plain scalar-field struct"})
 		}
 	}
 	check(function.ResultType)
 	for _, value := range function.ParameterTypes {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		check(value)
 	}
 	for _, block := range function.Blocks {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		for _, op := range block.Operations {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			switch op.Kind {
 			case OperationArrayConstruct, OperationArrayBorrowView, OperationArrayLength,
 				OperationArrayIndexCheck, OperationArrayIndex, OperationArrayIndexStore:
 				if hir.CEnumArray(op.Type, p.cEnumBase) || hir.CEnumArray(op.OwnerType, p.cEnumBase) {
-					failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C enum arrays support whole-value transport only"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C enum arrays support whole-value transport only"})
 				}
 				for _, typ := range []hir.Type{op.Type, op.OwnerType} {
+					if verificationReportsFull(failures) {
+						return failures
+					}
 					element, _, _ := hir.FixedArrayParts(typ)
 					if p.cRecordArray(typ) && !p.plainViewStruct(element) {
-						failures = append(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C record arrays outside the plain executable subset support whole-value transport only"})
+						failures = appendVerificationErrors(failures, VerificationError{Code: CodeOperationType, Entity: function.Name, Detail: "C record arrays outside the plain executable subset support whole-value transport only"})
 						break
 					}
 				}
@@ -99,6 +111,9 @@ func verifyStructViewTypes(function *Function, p typeProperties) []VerificationE
 			check(op.OwnerType)
 			check(op.IndexType)
 			for _, operand := range op.Operands {
+				if verificationReportsFull(failures) {
+					return failures
+				}
 				check(operand.Type)
 			}
 		}

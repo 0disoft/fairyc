@@ -233,3 +233,21 @@ verification-before-size precedence and bounded canonical decode re-encoding.
 A 16 MiB field rejected at 1 KiB allocates under 1 MiB at the marshal boundary;
 artifact verification has separate graph-copy costs. Linux: rerun packageartifact,
 workspacecompiler and workspace cache/session CLI tests in the combined validation.
+
+## 20. MIR verification report bound (2026-11-05)
+
+Go MIR verification admits at most 256 failure facts before canonical sorting and
+deduplication, retaining one V1004 marker when later failures are omitted. Children
+and parent merges use bounded append, and report-producing loops stop on overflow;
+truncation cannot produce a completed proof. Source-ordered aggregate/resource
+diagnostics and a bounded canonical region prefix keep overflow independent of map
+iteration without copying every region key. Graph metadata is outside this report
+storage bound. Windows boundaries cover 255/256/257 and 4,096 failures, multiple
+functions, inner helpers, marker propagation, stable truncation, ordinary canonical
+errors and cancellation. Linux: rerun mir, mirfixture, mirverifyfixture, mircodec,
+packageartifact and workspacecompiler in the combined validation. Native Linux
+execution remains deferred; no push or CI dispatch is part of this work.
+
+Windows mir, mirfixture, mirverifyfixture, mircodec, packageartifact and
+workspacecompiler suites pass, together with mir/packageartifact/workspacecompiler
+vet, gofmt and diff checks. No full-repository suite was run for this bounded work.

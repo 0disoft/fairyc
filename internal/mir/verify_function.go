@@ -28,13 +28,19 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		regions: make(map[hir.SymbolID]string),
 	}
 	for _, resource := range function.Resources {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		resources[resource.Symbol] = resource
 		initial.live[resource.Symbol] = resource.Parameter
 		if !containsDefinedResource(resource.Type, resourceTypes) {
-			failures = append(failures, VerificationError{Code: CodeAggregateUse, Entity: resourceTypeEntity(resource.Type), Detail: "resource local type has no definition"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeAggregateUse, Entity: resourceTypeEntity(resource.Type), Detail: "resource local type has no definition"})
 		}
 	}
 	for index, parameter := range function.Parameters {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		initial.live[hir.SymbolID(parameter)] = true
 		if index < len(function.ParameterTypes) && function.ParameterTypes[index] == hir.TypeRegion {
 			// Empty entity marks a caller-owned capability: active, but not ours to reset.
@@ -43,17 +49,23 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 	}
 	flags := make(map[string]DropFlag, len(function.DropFlags))
 	for _, flag := range function.DropFlags {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		flags[flag.Entity] = flag
 		initial.flags[flag.Entity] = flagState{}
 	}
 	unsafeByEntity := make(map[string]UnsafeOperation, len(function.UnsafeOperations))
 	for _, operation := range function.UnsafeOperations {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if operation.Entity == "" {
-			failures = append(failures, VerificationError{Code: "V1701", Entity: function.Name, Detail: "unsafe instruction has no entity identity"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1701", Entity: function.Name, Detail: "unsafe instruction has no entity identity"})
 			continue
 		}
 		if _, duplicate := unsafeByEntity[operation.Entity]; duplicate {
-			failures = append(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction entity is duplicated"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction entity is duplicated"})
 			continue
 		}
 		unsafeByEntity[operation.Entity] = operation
@@ -79,6 +91,9 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 	queue := []pendingBlock{{id: function.Entry, state: initial}}
 	seen := make(map[BlockID]verificationState)
 	for len(queue) > 0 {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if ctx.Err() != nil {
 			return nil
 		}
@@ -87,7 +102,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		if previous, found := seen[item.id]; found {
 			merged, changed, incompatible := mergeVerificationState(previous, item.state, resources)
 			if incompatible {
-				failures = append(failures, VerificationError{Code: "V1002", Entity: blockEntityFor(function, item.id), Detail: "incoming initialization states disagree"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: "V1002", Entity: blockEntityFor(function, item.id), Detail: "incoming initialization states disagree"})
 				continue
 			}
 			if !changed {
@@ -96,7 +111,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			item.state = merged
 		}
 		if int(item.id) < 0 || int(item.id) >= len(function.Blocks) {
-			failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "successor block is missing"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "successor block is missing"})
 			continue
 		}
 		block := function.Blocks[item.id]
@@ -108,27 +123,33 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			var ok bool
 			state, ok = cloneVerificationSnapshot(item.state, &remainingSnapshots)
 			if !ok {
-				return append(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
+				return appendVerificationErrors(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
 			}
 		}
 		for operationIndex, operation := range block.Operations {
-			failures = append(failures, verifier.verifyOperation(state, operation, operationEntity(item.id, operationIndex, operation))...)
+			if verificationReportsFull(failures) {
+				return failures
+			}
+			failures = appendVerificationErrors(failures, verifier.verifyOperation(state, operation, operationEntity(item.id, operationIndex, operation))...)
+		}
+		if verificationReportsFull(failures) {
+			return failures
 		}
 
 		terminator := block.Terminator
 		if terminator.Kind == "" {
-			failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "reachable block has no terminator"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "reachable block has no terminator"})
 			continue
 		}
 		if terminator.Kind == TerminatorCall && terminator.UnwindSuccessor != NoBlock {
-			failures = append(failures, VerificationError{Code: "V1502", Entity: terminatorEntity(item.id, terminator), Detail: "Stage 0 call has an unwind successor"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1502", Entity: terminatorEntity(item.id, terminator), Detail: "Stage 0 call has an unwind successor"})
 		}
 		if terminator.Kind == TerminatorCall {
 			entity := terminatorEntity(item.id, terminator)
-			failures = append(failures, verifyOperands(state, terminator.Arguments, entity)...)
+			failures = appendVerificationErrors(failures, verifyOperands(state, terminator.Arguments, entity)...)
 			foreign := foreignFunctions[terminator.Callee]
 			internal := functions[terminator.Callee]
-			failures = append(failures, verifyRegionCall(state, terminator, internal, entity)...)
+			failures = appendVerificationErrors(failures, verifyRegionCall(state, terminator, internal, entity)...)
 			if terminator.ForeignABI != "" {
 				provenance, hasProvenance := unsafeByEntity[entity]
 				callEntity := sourceEntity("call", terminator.Span)
@@ -138,19 +159,19 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 					terminator.UnsafeScope.StartByte <= terminator.Span.StartByte && terminator.UnsafeScope.EndByte >= terminator.Span.EndByte
 				if foreign == nil || terminator.ForeignABI != "C" || terminator.Entity != callEntity || !scopeContainsCall ||
 					!hasProvenance || provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
-					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call lacks a matching declaration or unsafe provenance"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call lacks a matching declaration or unsafe provenance"})
 				}
 			} else if foreign != nil {
-				failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call is missing its ABI and unsafe provenance"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call is missing its ABI and unsafe provenance"})
 			} else if internal == nil {
-				failures = append(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call names a missing function"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call names a missing function"})
 			} else {
 				if len(terminator.Arguments) != len(internal.ParameterTypes) {
-					failures = append(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call argument count does not match the callee signature"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call argument count does not match the callee signature"})
 				}
 				if (internal.ResultType == hir.TypeVoid && terminator.DestinationLocal != NoLocal) ||
 					(internal.ResultType != hir.TypeVoid && terminator.DestinationLocal == NoLocal) {
-					failures = append(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call destination does not match the callee result"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: "internal call destination does not match the callee result"})
 				}
 			}
 			if terminator.DestinationLocal != NoLocal {
@@ -158,88 +179,115 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			}
 		}
 		if terminator.Kind == TerminatorSwitch {
-			failures = append(failures, verifyOperands(state, terminator.SwitchOperands, terminatorEntity(item.id, terminator))...)
+			failures = appendVerificationErrors(failures, verifyOperands(state, terminator.SwitchOperands, terminatorEntity(item.id, terminator))...)
 			if !validSwitchShape(terminator) {
-				failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: terminatorEntity(item.id, terminator), Detail: "switch shape does not match its kind"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeControlFlow, Entity: terminatorEntity(item.id, terminator), Detail: "switch shape does not match its kind"})
 			}
 			if terminator.SwitchKind == "enum" {
 				definition := enumTypes[terminator.SwitchType]
 				if definition == nil || !slices.Equal(terminator.SwitchVariants, enumVariantNames(definition.Variants)) {
-					failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: terminatorEntity(item.id, terminator), Detail: "enum switch variants do not match the enum definition"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeControlFlow, Entity: terminatorEntity(item.id, terminator), Detail: "enum switch variants do not match the enum definition"})
 				}
 			}
 		}
 		if terminator.Kind == TerminatorReturn {
 			if function.ResultType == hir.TypeRegion || terminator.ReturnValue.Kind == OperandRegion || fieldStoreOperandType(terminator.ReturnValue, storeTypes) == hir.TypeRegion {
-				failures = append(failures, VerificationError{Code: "V1403", Entity: function.Name, Detail: "Region capability cannot be returned"})
+				failures = appendVerificationErrors(failures, VerificationError{Code: "V1403", Entity: function.Name, Detail: "Region capability cannot be returned"})
 			}
 			if function.ResultType == hir.TypeVoid {
 				if terminator.ReturnValue.Kind != OperandInvalid {
-					failures = append(failures, VerificationError{Code: CodeReturnShape, Entity: terminatorEntity(item.id, terminator), Detail: "void return carries a value"})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeReturnShape, Entity: terminatorEntity(item.id, terminator), Detail: "void return carries a value"})
 				}
 			} else {
-				failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
+				failures = appendVerificationErrors(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
 				if detail := verifyStorageViewReturn(function, terminator.ReturnValue, storeTypes); detail != "" {
-					failures = append(failures, VerificationError{Code: CodeStorageReturn, Entity: terminatorEntity(item.id, terminator), Detail: detail})
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeStorageReturn, Entity: terminatorEntity(item.id, terminator), Detail: detail})
 				}
 			}
-			for symbol, resource := range resources {
-				if state.live[symbol] {
-					failures = append(failures, VerificationError{Code: "V1102", Entity: blockEntityFor(function, item.id), Detail: "resource " + resourceEntity(resource, fmt.Sprintf("local:%d", symbol)) + " exits without cleanup"})
+			var reportedResources map[hir.SymbolID]struct{}
+			for _, resource := range function.Resources {
+				if verificationReportsFull(failures) {
+					return failures
 				}
-			}
-			for _, entity := range state.regions {
-				if entity != "" {
-					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "normal return exits an active region without reset"})
+				symbol := resource.Symbol
+				if !state.live[symbol] || resources[symbol] != resource {
+					continue
 				}
+				if _, reported := reportedResources[symbol]; reported {
+					continue
+				}
+				if reportedResources == nil {
+					reportedResources = make(map[hir.SymbolID]struct{})
+				}
+				reportedResources[symbol] = struct{}{}
+				failures = appendVerificationErrors(failures, VerificationError{Code: "V1102", Entity: blockEntityFor(function, item.id), Detail: "resource " + resourceEntity(resource, fmt.Sprintf("local:%d", symbol)) + " exits without cleanup"})
 			}
+			failures = appendVerificationErrors(failures, verifyRegionExits(state.regions)...)
 			continue
 		}
 		if terminator.Kind == TerminatorTrap || terminator.Kind == TerminatorUnreachable {
 			continue
 		}
 		for index, successor := range terminator.Successors {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			outgoing := state
 			if index+1 < len(terminator.Successors) {
 				var ok bool
 				outgoing, ok = cloneVerificationSnapshot(state, &remainingSnapshots)
 				if !ok {
-					return append(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
+					return appendVerificationErrors(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
 				}
 			}
 			queue = append(queue, pendingBlock{id: successor, state: outgoing})
 		}
 	}
-	failures = append(failures, verifyTrapCheckEdges(function)...)
-	failures = append(failures, verifyAssertEdges(function)...)
+	failures = appendVerificationErrors(failures, verifyTrapCheckEdges(function)...)
+	if verificationReportsFull(failures) {
+		return failures
+	}
+	failures = appendVerificationErrors(failures, verifyAssertEdges(function)...)
 
 	for _, loan := range function.Loans {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if loan.OutlivesOrigin {
-			failures = append(failures, VerificationError{Code: "V1301", Entity: loan.Entity, Detail: "safe borrow outlives its origin"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1301", Entity: loan.Entity, Detail: "safe borrow outlives its origin"})
 		}
 	}
 	if len(function.ReturnOrigins) > 0 {
 		returned := 0
 		for _, origin := range function.ReturnOrigins {
+			if verificationReportsFull(failures) {
+				return failures
+			}
 			if origin.Returned {
 				returned++
 			}
 		}
 		if returned != 1 {
-			failures = append(failures, VerificationError{Code: "V1302", Entity: fallbackEntity(function.ReturnEntity, "terminator:return"), Detail: "safe-borrow return does not have exactly one origin"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1302", Entity: fallbackEntity(function.ReturnEntity, "terminator:return"), Detail: "safe-borrow return does not have exactly one origin"})
 		}
 	}
 	for _, value := range function.RegionValues {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if value.Escapes {
-			failures = append(failures, VerificationError{Code: "V1401", Entity: value.Entity, Detail: "region-derived value escapes its region"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1401", Entity: value.Entity, Detail: "region-derived value escapes its region"})
 		}
 		if value.NeedsDrop {
-			failures = append(failures, VerificationError{Code: "V1402", Entity: value.OperationEntity, Detail: "plain region receives a NeedsDrop value"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1402", Entity: value.OperationEntity, Detail: "plain region receives a NeedsDrop value"})
 		}
 	}
 	for _, operation := range function.UnsafeOperations {
+		if verificationReportsFull(failures) {
+			return failures
+		}
 		if operation.SourceSpanEntity == "" || operation.ScopeEntity == "" {
-			failures = append(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction lacks source provenance"})
+			failures = appendVerificationErrors(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction lacks source provenance"})
 		}
 	}
 	return failures

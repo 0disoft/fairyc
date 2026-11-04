@@ -25,6 +25,13 @@ while `verify_storage.go` owns private storage admission. Shape predicates,
 checked-control-flow proofs, and worklist state have separate files. Each operation
 updates the same path-local state maps as before the split.
 
+Go verifier diagnostics admit at most 256 failure facts per program before canonical
+sorting and deduplication. Omitted failures add one `V1004` report-limit marker;
+children and parent merges cannot accumulate an unbounded error slice. Truncation
+always fails verification and leaves ordinary under-limit results unchanged. This
+is a reporting resource bound, separate from executable MIR invariants, graph
+metadata, worklist budgets and the independently implemented Fairy verifier.
+
 ADR 0414 adds `shared-reborrow`: one local of exact `ref mut T` OwnerType
 produces `ref T` with operator `share`, preserving referent identity. The
 verifier derives the operand type from definitions and rejects mismatched
