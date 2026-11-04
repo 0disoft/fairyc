@@ -80,6 +80,15 @@ remain Go-only. Windows native evidence and the batched Linux gap are recorded i
 
 ## Read-only MCP over stdio
 
+The private Fairy `project_mcp_protocol` core now implements the same bounded
+JSON-RPC lifecycle, explicit query selection and response envelopes. Its pure
+`step` returns either a response, no response for a notification, or an owned
+pending selector; `finish` accepts one validated host document or an unavailable
+result. It opens no workspace and owns no stdin/stdout. The protocol-only Windows
+oracle is recorded in [the candidate MCP receipt](../ops/windows-candidate-mcp-20261105.md).
+Actual Fairy command/session and current-source query wiring remain the next slice;
+the existing Go command continues to own the integrated session below.
+
 ```sh
 fairyc experimental atlas-mcp --allow-impact --max-packages 32 --max-calls 8192 --max-depth 8 --max-symbols 256 --max-output-bytes 262144 --max-requests 100
 ```

@@ -50,4 +50,9 @@ authorized by this queue.
 
 - Baseline: clean `main` at `fdf7e6bb`; all five implementation families and the
   deferred-design/acceptance families above remain in scope.
-- Active: Fairy MCP protocol core, followed by actual command/session wiring.
+- Go MCP fallback error bounds are fixed in `e72b5564`; escaped IDs cannot exceed
+  the response allowance even when the original raw ID was admitted.
+- Fairy MCP protocol core passes Windows low/optimized Go-oracle replay. Its
+  pure transition module, owned selectors and response validation are complete.
+  Active: actual command/session and current-source query wiring; the MCP item
+  remains open until the real CLI and negative/native acceptance pass.
