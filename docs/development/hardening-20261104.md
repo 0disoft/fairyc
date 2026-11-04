@@ -8,3 +8,12 @@ queued for one combined validation; no Linux pass is implied.
 Reject more than 256 compound levels before long prefix suffixes reach type
 interning. Boundary and 64 KiB prefix-bomb tests run on Windows. Linux: rerun
 `go test -mod=readonly ./internal/contractstatemir ./internal/packageartifact`.
+
+## 2. Windows execution ownership
+
+Owned target processes start suspended, enter a kill-on-close Job, then resume.
+Normal completion and timeout terminate/wait for descendants before temporary
+image removal. Transient image-release/sharing failures receive bounded cleanup
+retries; permanent cleanup failures are returned. Windows subprocess tests cover
+stdout inheritance, trap receipts and descendants holding the owned image.
+Linux: no Windows Job execution claim; rerun the common cdriver suite later.

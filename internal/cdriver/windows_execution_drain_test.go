@@ -44,6 +44,16 @@ func TestWindowsExecutionDrainHelper(t *testing.T) {
 	if err := child.Start(); err != nil {
 		os.Exit(2)
 	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		if _, err := os.Stat(os.Getenv("FAIRYC_EXECUTION_DRAIN_PID")); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			os.Exit(2)
+		}
+		time.Sleep(time.Millisecond)
+	}
 	if mode == "timeout" {
 		time.Sleep(30 * time.Second)
 	}

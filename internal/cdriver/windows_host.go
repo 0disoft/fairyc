@@ -688,7 +688,7 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 
 const windowsExecutionPipeDrainTimeout = time.Second
 
-func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (WindowsHostOutcome, error) {
+func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (outcome WindowsHostOutcome, err error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
@@ -696,7 +696,11 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 	if err != nil {
 		return WindowsHostOutcome{}, fmt.Errorf("create %s execution temp root: %w", label, err)
 	}
-	defer os.RemoveAll(temporaryRoot)
+	defer func() {
+		if cleanup := removeOwnedWindowsDirectory(temporaryRoot); cleanup != nil {
+			err = errors.Join(err, fmt.Errorf("remove owned execution directory: %w", cleanup))
+		}
+	}()
 	executablePath := filepath.Join(temporaryRoot, "program.exe")
 	if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
 		return WindowsHostOutcome{}, fmt.Errorf("materialize MSVC host executable: %w", err)
@@ -721,11 +725,11 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 	command.Stderr = output.stderrWriter()
 	trapControl := ""
 	trapControlOverflow := false
+	trapEnvironment := ""
 	if artifact.TrapControl {
-		trapControl, trapControlOverflow, err = runWindowsProcessWithTrapControl(command, cruntime.RunTrapControlEnvironment)
-	} else {
-		err = command.Run()
+		trapEnvironment = cruntime.RunTrapControlEnvironment
 	}
+	trapControl, trapControlOverflow, err = runOwnedWindowsProcess(command, trapEnvironment)
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, timeout)
 	}
