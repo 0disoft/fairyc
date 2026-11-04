@@ -79,3 +79,14 @@ Elapsed timings are not used: concurrent unrelated machine builds varied CPU loa
 After extending batching to generic/storage-transfer publication, focused generic,
 storage-transfer and persistent tests in packageartifact/workspacecompiler passed,
 and vet for all affected cache packages passed again.
+
+## 8. Resource observation residency
+
+Only the resource fixture entry point collects exhaustive state observations.
+Ordinary ownership checking skips observation-map scans, fact allocation and
+sorting. A 256-resource/4,096-expression before/after regression asserts zero
+observation allocations instead of 2,097,152 facts. Observed and ordinary analyses
+have identical remaining results for valid, use-after-move and branch-join cases.
+Windows semantic/resource/semantic-fixture/Region/Result suites and focused vet
+pass. Linux: rerun semantic, resourcefixture, compiler and workspacecompiler in
+the combined validation.

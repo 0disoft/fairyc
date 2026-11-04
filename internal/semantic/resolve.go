@@ -99,6 +99,7 @@ type analyzer struct {
 	structTypes           map[hir.Type]*structInfo
 	enumTypes             map[hir.Type]*enumInfo
 	resourceStates        []ResourceStateFact
+	observeResourceStates bool
 	expressionTypes       map[*ast.Expression]hir.Type
 	integerTrees          map[*ast.Expression]bool
 	regionOrigins         []RegionOriginFact

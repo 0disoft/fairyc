@@ -68,7 +68,7 @@ type Result struct {
 	RegionOrigins             []RegionOriginFact
 	ResultHandling            []ResultHandlingFact
 	Effects                   []EffectFact
-	ResourceStates            []ResourceStateFact
+	ResourceStates            []ResourceStateFact // Populated only by AnalyzeWithResourceStates.
 	Constants                 []ConstantFact
 	Unsupported               []Unsupported
 }
@@ -190,6 +190,14 @@ func Analyze(files []File) Result {
 	return result
 }
 
+// AnalyzeWithResourceStates enables exhaustive before/after observations for
+// the resource fixture harness. Ordinary compilation performs the same ownership
+// checks without retaining the resources-times-expressions observation stream.
+func AnalyzeWithResourceStates(files []File) Result {
+	result, _ := analyzeContextWithOptions(context.Background(), files, nil, nil, nil, analysisOptions{resourceStates: true})
+	return result
+}
+
 func AnalyzeContext(ctx context.Context, files []File) (Result, error) {
 	return analyzeContext(ctx, files, nil, nil, nil)
 }
@@ -272,6 +280,7 @@ func analyzeWithContextOptions(ctx context.Context, files []File, bindings map[p
 	}
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.ctx = ctx
+	analyzer.observeResourceStates = options.resourceStates
 	if options.reportLimit > 0 {
 		analyzer.diagnosticBudget = newDiagnosticBudget(options.reportLimit)
 	}

@@ -675,6 +675,9 @@ func (a *analyzer) mergeResourceBranches(at hir.Span, environment, baseline reso
 }
 
 func (a *analyzer) recordResourceStates(environment resourceEnvironment, at hir.Span, observation string) {
+	if !a.observeResourceStates {
+		return
+	}
 	for _, value := range environment {
 		fact := ResourceStateFact{
 			Binding:     value.declaration,

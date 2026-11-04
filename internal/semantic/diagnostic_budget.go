@@ -11,7 +11,8 @@ const DefaultSemanticReportLimit = 256
 const SemanticReportExhaustedCode = "E0011"
 
 type analysisOptions struct {
-	reportLimit int
+	reportLimit    int
+	resourceStates bool
 }
 
 // diagnosticBudget admits diagnostics and unsupported facts as one bounded

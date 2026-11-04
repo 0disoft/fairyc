@@ -99,7 +99,7 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		}
 		files = append(files, semantic.File{Path: relativePath, Module: result.AST})
 	}
-	actual := semantic.Analyze(files)
+	actual := semantic.AnalyzeWithResourceStates(files)
 	if len(actual.Unsupported) != 0 {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("fixture setup uses unsupported semantics: %+v", actual.Unsupported)}}
 	}
