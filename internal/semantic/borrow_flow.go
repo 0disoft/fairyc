@@ -112,6 +112,7 @@ type borrowFlowAnalyzer struct {
 	assignmentBorrow    *borrowValueState
 	assignmentLastUse   hir.Span
 	loanByKey           map[borrowLoanKey]int
+	ownerBindings       borrowOwnerBindingIndex
 	loops               []borrowLoopFrame
 	probeDepth          int
 	neutralScalars      map[*ast.Expression]bool
@@ -1016,6 +1017,7 @@ func (f *borrowFlowAnalyzer) regionBorrowValue(expression *ast.Expression) borro
 
 func (f *borrowFlowAnalyzer) materialize(value borrowValueState, binding *symbol) borrowValueState {
 	value = cloneBorrowValue(value)
+	f.ownerBindings.addValue(value, binding, f.loans)
 	for _, pending := range value.pending {
 		key := borrowLoanKey{
 			subview: pending.subview,
@@ -1060,11 +1062,7 @@ func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owne
 	live := f.liveAfter[statement]
 	f.checkHeldOwnerWrite(statement, owner)
 	seen := make(map[int]struct{})
-	for binding, lastUse := range live {
-		value, found := environment[binding]
-		if !found {
-			continue
-		}
+	f.visitLiveOwnerBindings(owner, live, environment, func(value borrowValueState, lastUse hir.Span) {
 		for _, loanID := range value.loans {
 			if loanID < 0 || loanID >= len(f.loans) || f.loans[loanID].owner != owner {
 				continue
@@ -1075,7 +1073,7 @@ func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owne
 			seen[loanID] = struct{}{}
 			f.reportOwnerWrite(statement, f.loans[loanID].fact.Borrow, lastUse)
 		}
-	}
+	})
 }
 
 func (f *borrowFlowAnalyzer) checkCallOwnerMoves(statement *ast.Statement, expression *ast.Expression, environment borrowEnvironment) {
@@ -1163,11 +1161,7 @@ func (f *borrowFlowAnalyzer) checkOwnerMove(statement *ast.Statement, owner *sym
 			}
 		}
 	}
-	for binding, lastUse := range live {
-		if value, found := environment[binding]; found {
-			check(value, lastUse)
-		}
-	}
+	f.visitLiveOwnerBindings(owner, live, environment, check)
 	// Loop-held and call-bounded loans survive paths with no later lexical use,
 	// such as consuming the owner just before return or error propagation.
 	for _, held := range f.callBorrows {
