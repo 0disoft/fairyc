@@ -18,6 +18,25 @@ func (e *emitter) emitDropGlue(output *strings.Builder, functionIndex int, opera
 }
 
 func (e *emitter) emitDirectDropGlue(output *strings.Builder, resourceType hir.Type, expression, condition string, span hir.Span) error {
+	if e.analysis.resourceHasNestedFields(resourceType) {
+		key := e.dropHelperKey(resourceType, span)
+		index, found := e.dropHelperIDs[key]
+		if !found {
+			return fmt.Errorf("nested drop helper missing for %q", resourceType)
+		}
+		if condition != "" {
+			fmt.Fprintf(output, "    if (%s) {\n", condition)
+		}
+		fmt.Fprintf(output, "    fy_drop_%d(&(%s));\n", index, expression)
+		if condition != "" {
+			output.WriteString("    }\n")
+		}
+		return nil
+	}
+	return e.emitDirectDropBody(output, resourceType, expression, condition, span)
+}
+
+func (e *emitter) emitDirectDropBody(output *strings.Builder, resourceType hir.Type, expression, condition string, span hir.Span) error {
 	resourceIndex, found := e.analysis.resourceByType[resourceType]
 	if !found {
 		return nil

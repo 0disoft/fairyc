@@ -37,9 +37,20 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		return BuildUnit{}, err
 	}
 	e := &emitter{analysis: plan, partitioned: true}
+	if err := e.prepareDropHelpers(); err != nil {
+		return BuildUnit{}, err
+	}
 	var bodies []string
 	var inlineBodies []string
 	total := 0
+	for index := range e.dropHelpers {
+		var body strings.Builder
+		if err := e.emitDropHelper(&body, index); err != nil {
+			return BuildUnit{}, err
+		}
+		bodies = append(bodies, body.String())
+		total += body.Len()
+	}
 	for index := range plan.functions {
 		if err := ctx.Err(); err != nil {
 			return BuildUnit{}, err
@@ -84,6 +95,7 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		}
 		header.WriteString(prototype + ";\n")
 	}
+	e.emitDropHelperPrototypes(&header)
 	var literals []string
 	for _, storage := range []map[string]string{plan.byteStringStorage, plan.stringStorage, plan.cStringStorage} {
 		symbols := make([]string, 0, len(storage))

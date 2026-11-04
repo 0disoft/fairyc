@@ -44,6 +44,9 @@ func emitContext(ctx context.Context, program mir.Program, entry string, profile
 }
 
 func (value *emitter) emitUnit() (Unit, error) {
+	if err := value.prepareDropHelpers(); err != nil {
+		return Unit{}, err
+	}
 	functions := value.analysis.functions
 	foreignFunctions := value.analysis.foreignFunctions
 
@@ -74,6 +77,12 @@ func (value *emitter) emitUnit() (Unit, error) {
 		}
 	}
 	output.WriteByte('\n')
+	value.emitDropHelperPrototypes(output)
+	for index := range value.dropHelpers {
+		if err := value.emitDropHelper(output, index); err != nil {
+			return Unit{}, err
+		}
+	}
 	if err := value.emitCallbackAdapters(output); err != nil {
 		return Unit{}, err
 	}
@@ -100,6 +109,11 @@ func (value *emitter) emitEntry(output *strings.Builder) error {
 		output.WriteString("extern void fy_std_process_set_args_v0(int, char **);\nint main(int argc, char **argv) {\n    fy_std_process_set_args_v0(argc, argv);\n")
 	} else {
 		output.WriteString("int main(void) {\n")
+	}
+	// The plan can include a drop in an unreachable MIR block. Keep its private
+	// helper warning-clean just as the ordinary function prototypes are below.
+	for index := range value.dropHelpers {
+		fmt.Fprintf(output, "    (void)&fy_drop_%d;\n", index)
 	}
 	for index := range functions {
 		if err := value.contextError(); err != nil {

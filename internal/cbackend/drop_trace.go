@@ -78,21 +78,29 @@ func compareDropSiteKey(left, right dropSiteKey) int {
 }
 
 func (e *emissionAnalysis) dropLeafTypes(value hir.Type) []hir.Type {
-	if index, direct := e.resourceByType[value]; direct {
-		result := []hir.Type{value}
-		fields := e.resourceTypes[index].definition.Fields
-		for index := len(fields) - 1; index >= 0; index-- {
-			result = append(result, e.dropLeafTypes(fields[index].Type)...)
+	// Sites identify a type/span, not individual owning field paths. Visit a
+	// shared resource subtree once rather than expanding its by-value fanout.
+	var result []hir.Type
+	seen := make(map[hir.Type]bool)
+	pending := []hir.Type{value}
+	for len(pending) != 0 {
+		last := len(pending) - 1
+		value := pending[last]
+		pending = pending[:last]
+		if seen[value] {
+			continue
 		}
-		return result
-	}
-	tagged, found := e.taggedType(value)
-	if !found {
-		return nil
-	}
-	result := make([]hir.Type, 0, len(tagged.payloads))
-	for _, payload := range tagged.payloads {
-		result = append(result, e.dropLeafTypes(payload)...)
+		seen[value] = true
+		if index, direct := e.resourceByType[value]; direct {
+			result = append(result, value)
+			for _, field := range e.resourceTypes[index].definition.Fields {
+				pending = append(pending, field.Type)
+			}
+		} else if tagged, found := e.taggedType(value); found {
+			for i := len(tagged.payloads) - 1; i >= 0; i-- {
+				pending = append(pending, tagged.payloads[i])
+			}
+		}
 	}
 	return result
 }

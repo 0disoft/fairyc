@@ -5,9 +5,11 @@ import "strings"
 // emitter owns only output state and a read-only analyzed plan.
 // Each emission gets its own builder, so a completed plan can be emitted again.
 type emitter struct {
-	analysis    *emissionAnalysis
-	output      strings.Builder
-	partitioned bool
+	analysis      *emissionAnalysis
+	output        strings.Builder
+	partitioned   bool
+	dropHelpers   []dropSiteKey
+	dropHelperIDs map[dropSiteKey]int
 }
 
 func (e *emitter) functionLinkage() string {

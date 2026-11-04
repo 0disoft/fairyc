@@ -220,6 +220,14 @@ reset rejection is an internal-invariant trap; ordinary placement failure remain
 current Region C subset admits canonical scalar, supported inert-struct, and scalar fixed-array
 placement.
 
+Nested resource cleanup uses private pointer-receiver helpers shared by resource type,
+retaining the parent's post-cleanup storage before visiting fields in reverse declaration
+order. Repeated owning field paths do not expand into repeated C cleanup bodies. The
+drop-trace profile additionally scopes helpers by the original drop span, preserving exact
+source-linked IDs and runtime event order; trace metadata visits each type once per site.
+Single-unit and partitioned output each define a helper once. This changes no source/MIR
+cleanup signature, foreign ABI, or runtime helper contract.
+
 ADR 0392 additionally admits acyclic directly nested resource fields, with dependency-first
 target layouts, owner cleanup followed by reverse field cleanup, and retention of nested drop
 symbols. A nested owner's private C cleanup returns its post-cleanup receiver so field destruction
