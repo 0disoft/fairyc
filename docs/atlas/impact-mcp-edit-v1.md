@@ -101,6 +101,10 @@ contains only protocol frames. EOF ends the session. Every query revalidates loc
 source; unavailable/stale input becomes `isError` without raw diagnostics. Session policy failures
 return 2, output failure 4; tool failure can leave the session usable.
 
+The output bound also applies to fallback errors. If HTML escaping expands an admitted
+request ID so that even the fallback cannot fit, the bounded `-32603` response uses
+`id:null`. An ID that fits is preserved; no over-limit response is emitted.
+
 The Go MCP host retains one prepared workspace and one bounded reverse-call index
 within the sequential session. Every call compares all local catalog manifests,
 source names and exact bytes, and lock presence/bytes against the retained inputs;

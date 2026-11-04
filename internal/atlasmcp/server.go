@@ -133,6 +133,11 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 		}
 		if len(wire) > maxOutput {
 			wire, _ = json.Marshal(response{Version: "2.0", ID: id, Error: &rpcError{-32603, "response exceeds output byte limit"}})
+			if len(wire) > maxOutput {
+				// HTML escaping can expand a valid 512-byte ID past the entire
+				// response allowance. The fallback must obey that allowance too.
+				wire, _ = json.Marshal(response{Version: "2.0", ID: json.RawMessage("null"), Error: &rpcError{-32603, "response exceeds output byte limit"}})
+			}
 		}
 		wire = append(wire, '\n')
 		if _, err := output.Write(wire); err != nil {
