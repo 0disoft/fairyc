@@ -52,6 +52,9 @@ func TestEncodeWorkspaceSourceIsCanonicalChecksummedBoundedAndExact(t *testing.T
 	if err := json.Unmarshal(first, &envelope); err != nil {
 		t.Fatal(err)
 	}
+	if reference, err := json.Marshal(envelope); err != nil || !bytes.Equal(first, reference) {
+		t.Fatal("single-serialization envelope changed canonical bytes")
+	}
 	if envelope.TextVersion != DocumentVersion || envelope.Encoding != DocumentEncoding ||
 		envelope.ChecksumAlgorithm != DocumentChecksumAlgorithm || envelope.Text.Authority != AuthorityNone ||
 		len(envelope.Text.Records) != 1 || len(envelope.Text.Omissions) != 0 ||

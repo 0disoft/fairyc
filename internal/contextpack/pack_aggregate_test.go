@@ -45,6 +45,9 @@ func TestContextPackV3PreservesAggregateFieldsAndCleanup(t *testing.T) {
 		if err := json.Unmarshal(data, &pack); err != nil {
 			t.Fatal(err)
 		}
+		if reference, err := json.Marshal(pack); err != nil || !bytes.Equal(data, reference) {
+			t.Fatal("v3 single-serialization envelope changed canonical bytes")
+		}
 		if pack.PackVersion != PackVersionV3 || pack.Encoding != PackEncodingV3 || pack.ChecksumAlgorithm != ChecksumAlgorithmV3 || pack.Pack.MapVersion != atlasmap.LogicalSchemaV3 {
 			t.Fatal("version identity lost")
 		}

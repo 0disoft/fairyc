@@ -41,6 +41,9 @@ func TestContextPackEncodersAreDeterministicBoundedAndTextFree(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertEnvelopeIntegrity(t, overview)
+	if reference, err := json.Marshal(overview); err != nil || !bytes.Equal(first, reference) {
+		t.Fatal("single-serialization envelope changed canonical bytes")
+	}
 	if overview.Pack.Query.Kind != QueryOverview || overview.Pack.Facts.Overview == nil ||
 		overview.Pack.Facts.Show != nil || overview.Pack.Facts.Around != nil ||
 		len(overview.Pack.Documentation) != 0 || len(overview.Pack.SourceExcerpts) != 0 || len(overview.Pack.Warnings) != 0 {

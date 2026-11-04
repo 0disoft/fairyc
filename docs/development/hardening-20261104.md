@@ -112,3 +112,23 @@ packagesource vet pass. A 73,728-header baseline accepted by archive/zip allocat
 19,381,032 B and 221,234 objects in a single benchmark iteration; admission rejects
 the same input with 0 B and 0 allocations. Timings are not used as performance
 claims. Linux: rerun packagesource and remote-fetch CLI tests in the combined pass.
+
+## 11. Atlas canonical body reuse
+
+Context Pack v1/v2/v3 and attributed-text v0 encode each logical body once for
+both the checksum and final envelope. A shared header/body join checks exact
+encoded length (including escaping and header overhead) before final allocation;
+the initial body encoding is still O(D) memory. Tests compare whole-struct
+canonical bytes, retain the frozen attributed-text checksum, and cover one byte
+below/at/above the limit, maximum uint64, escaped/control text and input isolation.
+Windows jsonenvelope/contextpack/attributedtext/evidencebundle/architecturecontract
+suites, focused Atlas pack/text/evidence CLI tests and vet pass. The synthetic
+three-iteration envelope benchmark observed accepted allocation at 4,395,160 to
+2,640,272 B/op and rejected allocation at 4,390,864 to 1,320,234 B/op; these are
+serialization-only measurements, not whole-CLI or peak-RSS claims.
+
+The full workspacecompiler package and focused ordinary compiler Check cases
+also pass after resource observation separation; the remote-package offline CLI
+regression passes after ZIP admission. No full compiler/native suite or Linux
+execution was repeated. Linux: rerun jsonenvelope, contextpack, attributedtext,
+evidencebundle and the same focused CLI tests in the combined validation.

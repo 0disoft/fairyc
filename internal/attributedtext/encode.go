@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
+	"github.com/0disoft/fairyc/internal/jsonenvelope"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
@@ -55,11 +56,15 @@ func ParseDocumentChecksum(value string) (DocumentChecksum, error) {
 }
 
 type encodedEnvelope struct {
-	TextVersion       string          `json:"text_version"`
-	Encoding          string          `json:"encoding"`
-	ChecksumAlgorithm string          `json:"checksum_algorithm"`
-	Checksum          string          `json:"checksum"`
-	Text              encodedDocument `json:"text"`
+	encodedHeader
+	Text encodedDocument `json:"text"`
+}
+
+type encodedHeader struct {
+	TextVersion       string `json:"text_version"`
+	Encoding          string `json:"encoding"`
+	ChecksumAlgorithm string `json:"checksum_algorithm"`
+	Checksum          string `json:"checksum"`
 }
 
 type encodedDocument struct {
@@ -114,19 +119,23 @@ func encodeResult(result Result, maxBytes uint64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	checksum, err := computeDocumentChecksum(document)
+	payload, err := json.Marshal(document)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("encode Atlas attributed-text checksum payload: %w", err)
 	}
-	encoded, err := json.Marshal(encodedEnvelope{
+	if uint64(len(payload)) > maxBytes {
+		return nil, ErrDocumentTooLarge
+	}
+	checksum := computeDocumentChecksum(payload)
+	encoded, err := jsonenvelope.Marshal(encodedHeader{
 		TextVersion: DocumentVersion, Encoding: DocumentEncoding,
-		ChecksumAlgorithm: DocumentChecksumAlgorithm, Checksum: checksum.String(), Text: document,
-	})
+		ChecksumAlgorithm: DocumentChecksumAlgorithm, Checksum: checksum.String(),
+	}, "text", payload, maxBytes)
+	if errors.Is(err, jsonenvelope.ErrTooLarge) {
+		return nil, ErrDocumentTooLarge
+	}
 	if err != nil {
 		return nil, fmt.Errorf("encode Atlas attributed-text document: %w", err)
-	}
-	if uint64(len(encoded)) > maxBytes {
-		return nil, ErrDocumentTooLarge
 	}
 	return encoded, nil
 }
@@ -265,11 +274,7 @@ func validOmissionCode(code OmissionCode) bool {
 		code == OmissionDisallowedControl || code == OmissionFragmentByteLimit
 }
 
-func computeDocumentChecksum(document encodedDocument) (DocumentChecksum, error) {
-	payload, err := json.Marshal(document)
-	if err != nil {
-		return DocumentChecksum{}, fmt.Errorf("encode Atlas attributed-text checksum payload: %w", err)
-	}
+func computeDocumentChecksum(payload []byte) DocumentChecksum {
 	digest := sha256.New()
 	_, _ = digest.Write([]byte(documentChecksumDomain))
 	_, _ = digest.Write([]byte{0, 0})
@@ -278,5 +283,5 @@ func computeDocumentChecksum(document encodedDocument) (DocumentChecksum, error)
 	writeChecksumBytes(digest, payload)
 	var result DocumentChecksum
 	copy(result[:], digest.Sum(nil))
-	return result, nil
+	return result
 }

@@ -61,6 +61,9 @@ func TestContextPackV2PreservesGenericFactsAndVersionBoundaries(t *testing.T) {
 		if err := json.Unmarshal(data, &pack); err != nil {
 			t.Fatal(err)
 		}
+		if reference, err := json.Marshal(pack); err != nil || !bytes.Equal(data, reference) {
+			t.Fatal("v2 single-serialization envelope changed canonical bytes")
+		}
 		if pack.PackVersion != PackVersionV2 || pack.Encoding != PackEncodingV2 || pack.ChecksumAlgorithm != ChecksumAlgorithmV2 || pack.Pack.MapVersion != atlasmap.LogicalSchemaV2 || pack.Pack.Compatibility.GenericInterfaceHash == "" {
 			t.Fatal("generic compatibility identity lost")
 		}

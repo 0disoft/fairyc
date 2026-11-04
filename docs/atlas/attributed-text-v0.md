@@ -176,6 +176,11 @@ The output builder runs exact extraction itself and accepts no caller-authored r
 bytes. It requires a separate positive final-output byte limit and rejects the complete envelope
 atomically when it does not fit. No decoder or untrusted encoded input is accepted.
 
+The logical `text` document is serialized once; its exact canonical bytes feed
+both the checksum and the final envelope. The separately encoded fixed header
+permits an exact byte-size check before the final output allocation. The initial
+body-encoding allocation remains proportional to the encoded document size.
+
 ## Text safety validation
 
 A successful source compilation does not make prose safe for display or a model. Each selected

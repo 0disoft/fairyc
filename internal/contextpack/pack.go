@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
+	"github.com/0disoft/fairyc/internal/jsonenvelope"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
@@ -159,11 +160,15 @@ func encodeAround(index *atlasmap.QueryIndex, symbolID string, request atlasmap.
 }
 
 type packEnvelope struct {
-	PackVersion       string       `json:"pack_version"`
-	Encoding          string       `json:"encoding"`
-	ChecksumAlgorithm string       `json:"checksum_algorithm"`
-	Checksum          string       `json:"checksum"`
-	Pack              packDocument `json:"pack"`
+	packHeader
+	Pack packDocument `json:"pack"`
+}
+
+type packHeader struct {
+	PackVersion       string `json:"pack_version"`
+	Encoding          string `json:"encoding"`
+	ChecksumAlgorithm string `json:"checksum_algorithm"`
+	Checksum          string `json:"checksum"`
 }
 
 type packDocument struct {
@@ -290,19 +295,23 @@ func encode(document packDocument, maxBytes uint64, packVersion byte) ([]byte, e
 	if document.MapVersion != schema {
 		return nil, fmt.Errorf("Atlas Context Pack requires %s maps", schema)
 	}
-	checksum, err := computeChecksum(document, version, encoding, checksumVersion)
+	payload, err := json.Marshal(document)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("encode Context Pack checksum payload: %w", err)
 	}
-	encoded, err := json.Marshal(packEnvelope{
+	if uint64(len(payload)) > maxBytes {
+		return nil, ErrPackTooLarge
+	}
+	checksum := computeChecksum(payload, version, encoding, checksumVersion)
+	encoded, err := jsonenvelope.Marshal(packHeader{
 		PackVersion: version, Encoding: encoding,
-		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]), Pack: document,
-	})
+		ChecksumAlgorithm: algorithm, Checksum: prefix + hex.EncodeToString(checksum[:]),
+	}, "pack", payload, maxBytes)
+	if errors.Is(err, jsonenvelope.ErrTooLarge) {
+		return nil, ErrPackTooLarge
+	}
 	if err != nil {
 		return nil, fmt.Errorf("encode Atlas Context Pack: %w", err)
-	}
-	if uint64(len(encoded)) > maxBytes {
-		return nil, ErrPackTooLarge
 	}
 	return encoded, nil
 }
@@ -314,11 +323,7 @@ func validateMaxBytes(maxBytes uint64) error {
 	return nil
 }
 
-func computeChecksum(document packDocument, version, encoding string, checksumVersion byte) (Checksum, error) {
-	payload, err := json.Marshal(document)
-	if err != nil {
-		return Checksum{}, fmt.Errorf("encode Context Pack checksum payload: %w", err)
-	}
+func computeChecksum(payload []byte, version, encoding string, checksumVersion byte) Checksum {
 	digest := sha256.New()
 	_, _ = digest.Write([]byte(checksumDomain))
 	_, _ = digest.Write([]byte{0, checksumVersion})
@@ -327,7 +332,7 @@ func computeChecksum(document packDocument, version, encoding string, checksumVe
 	writeChecksumBytes(digest, payload)
 	var result Checksum
 	copy(result[:], digest.Sum(nil))
-	return result, nil
+	return result
 }
 
 func writeChecksumBytes(destination hash.Hash, value []byte) {

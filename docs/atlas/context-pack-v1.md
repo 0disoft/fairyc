@@ -80,6 +80,12 @@ Two independent bounds apply:
 2. the pack encoder rejects the complete canonical envelope when it exceeds the caller's positive
    final byte limit.
 
+All three pack versions serialize the logical body once and reuse those exact
+bytes for the checksum and final `pack` field. The fixed header is encoded
+separately; the complete byte length is checked before allocating the final
+envelope. This preserves canonical field order and escaping. The output limit
+does not bound the initial body-encoding allocation.
+
 Selection bytes are not final envelope bytes and neither value claims model-token equivalence.
 Budget stops, relation filters, depth stops, unjoined dependency targets, and unavailable incoming
 package maps remain machine-readable omissions with known counts only where proven.
