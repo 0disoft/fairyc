@@ -91,10 +91,14 @@ func encodeValidatedPartition(partition Partition, maxBytes uint64, schema, enco
 	if err != nil {
 		return nil, err
 	}
-	encoded, err := json.Marshal(transportEnvelope{
+	return marshalTransportEnvelope(transportEnvelope{
 		Schema: schema, Encoding: encoding,
 		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Map: document,
-	})
+	}, maxBytes)
+}
+
+func marshalTransportEnvelope(envelope transportEnvelope, maxBytes uint64) ([]byte, error) {
+	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode .fymap: %w", err)
 	}
@@ -169,7 +173,15 @@ func decodeVersion(encoded []byte, maxBytes uint64, schema, encoding, logical st
 	if err := validatePartitionVersion(partition, logical); err != nil {
 		return Partition{}, fmt.Errorf("validate decoded .fymap: %w", err)
 	}
-	canonical, err := encodeValidatedPartition(partition, maxBytes, schema, encoding)
+	// Reuse the verified digest only for this byte comparison. Rebuild the map
+	// from the validated partition so null/omitted collections still normalize.
+	// If normalization changes the map, the full-byte comparison rejects it
+	// regardless of this digest; no rewritten envelope is returned to callers.
+	canonical, err := marshalTransportEnvelope(transportEnvelope{
+		Schema: schema, Encoding: encoding,
+		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: computedChecksum.String(),
+		Map: documentFromPartition(partition),
+	}, maxBytes)
 	if err != nil {
 		return Partition{}, err
 	}
