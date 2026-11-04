@@ -36,6 +36,28 @@ host are not established by this protocol fixture.
 
 ## Remaining acceptance
 
+## Streaming input and invocation policy
+
+`project_mcp_stream` owns a 4 KiB fixed read window and constructs one bounded
+line at a time. It preserves CRLF and final EOF handling, rejects the first
+over-limit frame, and checks complete writes. Native tests leave stdin open
+while reading two separate responses, proving that processing does not wait
+for EOF. No owning resource field borrow or per-byte external read is required.
+
+`project_mcp_options` requires every invocation capability and numeric limit,
+rejects aliases/duplicates/noncanonical numbers, and returns the six exact
+configured values. Its native acceptance and field values are compared with
+the Go command, including zero-depth and all minimum/maximum boundaries.
+
+Both Windows profiles pass:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateMCPStream$'
+go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateMCPOptions$'
+```
+
+## Remaining acceptance
+
 Connect explicit command limits, actual streaming stdin/stdout, fresh locked
 source verification and full Fairy CLI dispatch. Then replay unavailable/stale
 workspaces, continued requests, message/output limits and stream failures through

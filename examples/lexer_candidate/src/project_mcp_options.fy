@@ -1,0 +1,10 @@
+module project_mcp_options;
+import std::bytes as bytes;
+import std::process as process;
+
+pub struct Policy{usize packages;usize calls;usize depth;usize symbols;usize output;usize requests;}
+fn usize flag(ref u8[] s){if(bytes::equal(s,b"--allow-impact")){return 0;}if(bytes::equal(s,b"--max-packages")){return 1;}if(bytes::equal(s,b"--max-calls")){return 2;}if(bytes::equal(s,b"--max-depth")){return 3;}if(bytes::equal(s,b"--max-symbols")){return 4;}if(bytes::equal(s,b"--max-output-bytes")){return 5;}if(bytes::equal(s,b"--max-requests")){return 6;}return 7;}
+fn Result<usize,u32> number(ref u8[] s,usize maximum,bool zero){if(s.len==0 || s.len>1 && s[0]==48){return .err(2);}var usize n=0;var usize i=0;while(i<s.len){if(s[i]<48 || s[i]>57){return .err(2);}let digit=(s[i]-48) as usize;if(n>maximum/10 || n==maximum/10 && digit>maximum%10){return .err(2);}n=n*10+digit;i+=1;}if(n==0 && !zero){return .err(2);}return .ok(n);}
+// The process invocation grants each capability/limit. Request parameters
+// cannot enlarge these values or choose another workspace or tool.
+pub fn Result<Policy,u32> arguments(){var bool[7] seen=[false;7];var usize[6] limits=[0;6];var usize at=3;let argc=process::arg_count();if(argc!=16){return .err(2);}while(at<argc){var u8[4096] key=[0;4096];let n=switch(process::arg(at,ref mut key)){case .ok(p):{p}case .err(_):{return .err(2);}};let ref u8[] raw=ref key;let index=flag(raw[..n]);if(index==7 || seen[index]){return .err(2);}seen[index]=true;at+=1;if(index==0){continue;}if(at==argc){return .err(2);}var u8[4096] value=[0;4096];let size=switch(process::arg(at,ref mut value)){case .ok(p):{p}case .err(_):{return .err(2);}};let ref u8[] input=ref value;limits[index-1]=number(input[..size],if(index==3){64}else if(index==4){4096}else if(index==5){4194304}else if(index==6){1024}else{65536},index==3)?;at+=1;}var usize i=0;while(i<7){if(!seen[i]){return .err(2);}i+=1;}if(limits[4]<2048){return .err(2);}return .ok(Policy{.packages=limits[0],.calls=limits[1],.depth=limits[2],.symbols=limits[3],.output=limits[4],.requests=limits[5]});}
