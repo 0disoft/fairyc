@@ -73,6 +73,23 @@ func TestNoticeReportsIncompleteScanInsteadOfCleanResult(t *testing.T) {
 	}
 }
 
+func TestNoticeSharesBoundedBudgetAcrossManyDirectories(t *testing.T) {
+	root := t.TempDir()
+	noticeFile(t, root, "00-root.fy", strings.Repeat("x", 20))
+	for _, name := range []string{"a/one.fy", "a/two.fy", "b/one.fy", "b/two.fy", "c/one.fy"} {
+		noticeFile(t, root, name, strings.Repeat("x", 20))
+	}
+	r := scan(context.Background(), root, 10, 8)
+	if r.State != "partial" || r.VisitedEntries != 8 || r.SourceFiles != 4 || len(r.Files) != 4 || len(r.Issues) != 1 || r.Issues[0].Reason != "scan-limit" {
+		t.Fatalf("multi-directory bounded scan = %+v", r)
+	}
+	for index := 1; index < len(r.Files); index++ {
+		if r.Files[index-1].Path >= r.Files[index].Path {
+			t.Fatalf("partial findings are not sorted: %+v", r.Files)
+		}
+	}
+}
+
 func TestNoticeSkipsSymlinkWithoutFollowingIt(t *testing.T) {
 	root, outside := t.TempDir(), t.TempDir()
 	noticeFile(t, outside, "outside.fy", strings.Repeat("x", 50000))

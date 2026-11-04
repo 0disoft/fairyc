@@ -85,12 +85,17 @@ Supported extensions are `.c`, `.cc`, `.cpp`, `.css`, `.fy`, `.go`, `.h`, `.hpp`
 case. Named excluded subdirectories are `.cache`, `.git`, `.venv`, `build`, `coverage`, `dist`,
 `node_modules`, `target`, `vendor` and `venv`. Their children are not traversed.
 
-The scan stops at 100,000 visited entries. Cancellation, unreadable metadata or other scan errors
-retain partial findings with non-success status. Invalid roots/policies are unknown. No finding
-claims every possible source extension, an atomic filesystem snapshot or a required refactor.
-Generated source remains visible when it matches the extension policy; the tool does not guess
-whether it is authored or whether manual splitting is appropriate. No watch process, editor hook,
-default build warning or workflow invocation is installed.
+The rooted scan shares one 100,000-entry budget across all directories and charges the root before
+reading its children. Directories are read in batches of at most 128 entries with one overflow
+probe, and each directory handle closes before recursive descent. Admitted entries are sorted, but
+an over-limit result is an incomplete subset and is never described as a canonical global prefix.
+Known findings from admitted entries are retained with a `scan-limit` or cancellation issue.
+Cancellation, unreadable metadata or other scan errors retain partial findings with non-success
+status. Invalid roots/policies are unknown. No finding claims every possible source extension, an
+atomic filesystem snapshot or a required refactor. Generated source remains visible when it
+matches the extension policy; the tool does not guess whether it is authored or whether manual
+splitting is appropriate. No watch process, editor hook, default build warning or workflow
+invocation is installed.
 
 ## Windows verification
 

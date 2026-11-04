@@ -80,3 +80,36 @@ func TestDirectorySpellingEnumerationSharesEntryGuard(t *testing.T) {
 		t.Fatalf("spelling scan bypassed entry guard: %v", err)
 	}
 }
+
+func TestOptionalExactDirectorySharesSourceEntryGuard(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"other", "tests"} {
+		if err := os.Mkdir(filepath.Join(root, name), 0o700); err != nil {
+			t.Fatal(err)
+		}
+	}
+	budget := &limits{entries: MaxSourceEntries - 1}
+	_, _, err := optionalExactDirectory(budget, root, TestSourceDirectory)
+	var load *LoadError
+	if !errors.As(err, &load) || load.Reason != ReasonSourceLimit || budget.entries != MaxSourceEntries {
+		t.Fatalf("optional directory scan bypassed shared guard: entries=%d error=%v", budget.entries, err)
+	}
+
+	budget = &limits{entries: MaxSourceEntries - 2}
+	directory, present, err := optionalExactDirectory(budget, root, TestSourceDirectory)
+	if err != nil || !present || directory != filepath.Join(root, TestSourceDirectory) || budget.entries != MaxSourceEntries {
+		t.Fatalf("bounded exact directory = %q, %t, entries=%d, %v", directory, present, budget.entries, err)
+	}
+}
+
+func TestOptionalExactDirectoryPreservesSymlinkDiagnostic(t *testing.T) {
+	root, outside := t.TempDir(), t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(root, TestSourceDirectory)); err != nil {
+		t.Skipf("host cannot create directory symlink: %v", err)
+	}
+	_, _, err := optionalExactDirectory(&limits{}, root, TestSourceDirectory)
+	var load *LoadError
+	if !errors.As(err, &load) || load.Reason != ReasonSymlink {
+		t.Fatalf("optional symlink diagnostic = %#v", err)
+	}
+}

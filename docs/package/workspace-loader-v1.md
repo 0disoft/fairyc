@@ -39,7 +39,10 @@ prototype and do not define stable language limits.
 Directory-spelling checks and source discovery share a 100,000-entry enumeration guard, counting
 ignored files and directories as well as `.fy` files. Test-tree discovery has the same guard.
 Directories are read in batches of at most 128 entries and sorted only
-within that bounded catalog, preserving lexical traversal for admitted inputs.
+within that bounded catalog, preserving lexical traversal for admitted inputs. Optional
+test-directory discovery also charges the opened parent listing to that shared entry budget. It
+sorts only admitted entries; exhaustion rejects the load rather than treating the incomplete
+listing as an absent or differently-cased tree. Directory handles close before recursive descent.
 
 ## Deterministic output
 

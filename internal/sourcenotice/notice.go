@@ -3,12 +3,16 @@ package sourcenotice
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/0disoft/fairyc/internal/directoryscan"
+	"github.com/0disoft/fairyc/internal/durablefile"
 )
 
 const DefaultThresholdBytes int64 = 40000
@@ -47,8 +51,8 @@ func Scan(ctx context.Context, root string, threshold int64) Report {
 	return scan(ctx, root, threshold, MaxEntries)
 }
 
-func scan(ctx context.Context, root string, threshold int64, budget int) Report {
-	result := Report{Schema: "fairyc.large-source-notice/v1", State: "unknown", ThresholdBytes: threshold, MaxEntries: budget, Extensions: slices.Clone(extensions), ExcludedDirectories: slices.Clone(excluded), Files: []Notice{}, SkippedSymlinks: []string{}, Issues: []Issue{}}
+func scan(ctx context.Context, root string, threshold int64, budget int) (result Report) {
+	result = Report{Schema: "fairyc.large-source-notice/v1", State: "unknown", ThresholdBytes: threshold, MaxEntries: budget, Extensions: slices.Clone(extensions), ExcludedDirectories: slices.Clone(excluded), Files: []Notice{}, SkippedSymlinks: []string{}, Issues: []Issue{}}
 	if threshold <= 0 || budget <= 0 {
 		result.Issues = append(result.Issues, Issue{Reason: "invalid-policy", Detail: "threshold and scan budget must be positive"})
 		return result
@@ -57,66 +61,123 @@ func scan(ctx context.Context, root string, threshold int64, budget int) Report 
 		result.Issues = append(result.Issues, Issue{Reason: "canceled", Detail: err.Error()})
 		return result
 	}
-	info, err := os.Lstat(root)
-	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+	before, err := os.Lstat(root)
+	if err != nil || before.Mode()&os.ModeSymlink != 0 || !before.IsDir() {
 		result.Issues = append(result.Issues, Issue{Reason: "invalid-root", Detail: fmt.Sprint(err)})
 		return result
 	}
-	result.State = "bounded"
-	err = filepath.WalkDir(root, func(path string, entry fs.DirEntry, walkErr error) error {
-		relative, err := filepath.Rel(root, path)
-		if err != nil {
-			return err
-		}
-		relative = filepath.ToSlash(relative)
-		if err := ctx.Err(); err != nil {
-			result.Issues = append(result.Issues, Issue{Path: relative, Reason: "canceled", Detail: err.Error()})
-			return filepath.SkipAll
-		}
-		if result.VisitedEntries >= budget {
-			result.Issues = append(result.Issues, Issue{Path: relative, Reason: "scan-limit", Detail: fmt.Sprintf("scan exceeds %d entries", budget)})
-			return filepath.SkipAll
-		}
-		result.VisitedEntries++
-		if walkErr != nil {
-			result.Issues = append(result.Issues, Issue{Path: relative, Reason: "unreadable-entry", Detail: walkErr.Error()})
-			return nil
-		}
-		if entry.Type()&os.ModeSymlink != 0 {
-			result.SkippedSymlinks = append(result.SkippedSymlinks, relative)
-			return nil
-		}
-		if entry.IsDir() {
-			if path != root && slices.Contains(excluded, entry.Name()) {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if !slices.Contains(extensions, strings.ToLower(filepath.Ext(entry.Name()))) {
-			return nil
-		}
-		info, err := entry.Info()
-		if err != nil {
-			result.Issues = append(result.Issues, Issue{Path: relative, Reason: "unreadable-metadata", Detail: err.Error()})
-			return nil
-		}
-		if !info.Mode().IsRegular() {
-			result.Issues = append(result.Issues, Issue{Path: relative, Reason: "nonregular-source"})
-			return nil
-		}
-		result.SourceFiles++
-		if info.Size() > threshold {
-			result.Files = append(result.Files, Notice{Path: relative, Bytes: info.Size()})
-		}
-		return nil
-	})
+	opened, err := os.OpenRoot(root)
 	if err != nil {
-		result.Issues = append(result.Issues, Issue{Reason: "scan-failed", Detail: err.Error()})
+		result.Issues = append(result.Issues, Issue{Reason: "invalid-root", Detail: err.Error()})
+		return result
 	}
+	defer func() {
+		if closeErr := opened.Close(); closeErr != nil {
+			result.Issues = append(result.Issues, Issue{Reason: "scan-failed", Detail: closeErr.Error()})
+			result.State = "partial"
+		}
+	}()
+	openedInfo, statErr := opened.Stat(".")
+	after, pathErr := os.Lstat(root)
+	if statErr != nil || pathErr != nil || after.Mode()&os.ModeSymlink != 0 || !os.SameFile(before, openedInfo) || !os.SameFile(before, after) {
+		result.Issues = append(result.Issues, Issue{Reason: "invalid-root", Detail: "scan root changed while opening"})
+		return result
+	}
+	result.State = "bounded"
+	scanBudget := &directoryscan.Budget{Context: ctx, Remaining: budget}
+	scanBudget.Remaining--
+	result.VisitedEntries++
+	noticeScan{root: opened, budget: scanBudget, result: &result}.walk("")
 	if len(result.Issues) != 0 {
 		result.State = "partial"
 	}
 	slices.SortFunc(result.Files, func(a, b Notice) int { return strings.Compare(a.Path, b.Path) })
 	slices.Sort(result.SkippedSymlinks)
 	return result
+}
+
+type noticeScan struct {
+	root   *os.Root
+	budget *directoryscan.Budget
+	result *Report
+}
+
+func (scan noticeScan) walk(relative string) bool {
+	display := relative
+	if display == "" {
+		display = "."
+	}
+	if err := scan.budget.Context.Err(); err != nil {
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "canceled", Detail: err.Error()})
+		return false
+	}
+	native := filepath.FromSlash(relative)
+	if native == "" {
+		native = "."
+	}
+	directory, err := durablefile.OpenDirectory(scan.root, native)
+	if err != nil {
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "unreadable-entry", Detail: err.Error()})
+		return true
+	}
+	entries, readErr := directoryscan.ReadSorted(directory, scan.budget)
+	closeErr := directory.Close()
+	scan.result.VisitedEntries += len(entries)
+	for _, entry := range entries {
+		if err := scan.budget.Context.Err(); err != nil {
+			scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "canceled", Detail: err.Error()})
+			return false
+		}
+		child := entry.Name()
+		if relative != "" {
+			child = path.Join(relative, child)
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			scan.result.SkippedSymlinks = append(scan.result.SkippedSymlinks, child)
+			continue
+		}
+		if entry.IsDir() {
+			if slices.Contains(excluded, entry.Name()) {
+				continue
+			}
+			if !scan.walk(child) {
+				return false
+			}
+			continue
+		}
+		if !slices.Contains(extensions, strings.ToLower(filepath.Ext(entry.Name()))) {
+			continue
+		}
+		info, err := scan.root.Lstat(filepath.FromSlash(child))
+		if err != nil {
+			scan.result.Issues = append(scan.result.Issues, Issue{Path: child, Reason: "unreadable-metadata", Detail: err.Error()})
+			continue
+		}
+		if !info.Mode().IsRegular() {
+			scan.result.Issues = append(scan.result.Issues, Issue{Path: child, Reason: "nonregular-source"})
+			continue
+		}
+		scan.result.SourceFiles++
+		if info.Size() > scan.result.ThresholdBytes {
+			scan.result.Files = append(scan.result.Files, Notice{Path: child, Bytes: info.Size()})
+		}
+	}
+	if closeErr != nil {
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "scan-failed", Detail: closeErr.Error()})
+		return false
+	}
+	if readErr == nil {
+		return true
+	}
+	switch {
+	case errors.Is(readErr, context.Canceled), errors.Is(readErr, context.DeadlineExceeded):
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "canceled", Detail: readErr.Error()})
+		return false
+	case errors.Is(readErr, directoryscan.ErrLimit):
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "scan-limit", Detail: fmt.Sprintf("scan exceeds %d entries", scan.result.MaxEntries)})
+		return false
+	default:
+		scan.result.Issues = append(scan.result.Issues, Issue{Path: display, Reason: "unreadable-entry", Detail: readErr.Error()})
+		return true
+	}
 }

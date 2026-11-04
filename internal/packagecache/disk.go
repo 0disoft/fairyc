@@ -2,6 +2,7 @@ package packagecache
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/directoryscan"
 	"github.com/0disoft/fairyc/internal/durablefile"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 )
@@ -24,6 +26,12 @@ const (
 )
 
 const diskLayoutDirectory = "v1"
+
+// MaxDiskScanEntries bounds one complete retention/statistics scan independently of MaxEntries.
+const MaxDiskScanEntries = directoryscan.DefaultMaxEntries
+
+// ErrDiskScanLimit reports an incomplete retention or statistics scan.
+var ErrDiskScanLimit = errors.New("package cache disk scan limit exceeded")
 
 // DiskLimits are mandatory caller policy. MaxEntries counts immutable generations across all
 // supported namespaces, MaxBytes counts their combined encoded bytes, MaxRecordBytes bounds each
@@ -49,15 +57,16 @@ type DiskStats struct {
 // DiskStore persists immutable content-addressed record generations. It uses no lock file and no
 // mutable index; concurrent processes can only publish identical names or independent generations.
 type DiskStore struct {
-	root          *os.Root
-	retentionRoot *os.Root
-	rootName      string
-	limits        DiskLimits
-	mu            sync.Mutex
-	hits          uint64
-	misses        uint64
-	rejected      uint64
-	evicted       uint64
+	root           *os.Root
+	retentionRoot  *os.Root
+	rootName       string
+	limits         DiskLimits
+	scanEntryLimit int
+	mu             sync.Mutex
+	hits           uint64
+	misses         uint64
+	rejected       uint64
+	evicted        uint64
 }
 
 type diskArtifact struct {
@@ -159,7 +168,7 @@ func NewNamespacedDiskStoreInRoot(boundary *os.Root, root, namespace string, lim
 		opened.Close()
 		return nil, fmt.Errorf("open shared cache retention root: %w", err)
 	}
-	store := &DiskStore{root: opened, retentionRoot: retentionRoot, rootName: opened.Name(), limits: limits}
+	store := &DiskStore{root: opened, retentionRoot: retentionRoot, rootName: opened.Name(), limits: limits, scanEntryLimit: MaxDiskScanEntries}
 	if err := store.Sweep(); err != nil {
 		store.Close()
 		return nil, fmt.Errorf("collect retained cache on open: %w", err)
@@ -259,7 +268,7 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 		return Record{}, false
 	}
 	keyDirectory := store.keyDirectoryName(key)
-	entries, err := readCacheDirectory(store.root, keyDirectory)
+	entries, err := readCacheDirectoryWithBudget(store.root, keyDirectory, store.newScanBudget())
 	if err != nil {
 		store.recordMiss()
 		return Record{}, false
@@ -273,7 +282,7 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 		}
 		path := filepath.Join(keyDirectory, entry.Name())
 		var sizeHint int64
-		if info, err := entry.Info(); err == nil {
+		if info, err := store.root.Lstat(path); err == nil {
 			sizeHint = info.Size()
 		}
 		record, readErr := store.readGeneration(path, entry.Name(), key, sizeHint)
@@ -347,10 +356,19 @@ func (store *DiskStore) Sweep() (err error) {
 	}
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	generations, err := store.scan(true)
+	scanResult, err := store.scan(true)
 	if err != nil {
-		return err
+		return store.scanError(err)
 	}
+	for _, path := range scanResult.expiredTemps {
+		if err := store.retentionRoot.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("remove expired cache temporary file: %w", err)
+		}
+	}
+	for _, directory := range scanResult.cleanupDirectories {
+		removeEmptyKeyDirectory(store.retentionRoot, directory)
+	}
+	generations := scanResult.generations
 	slices.SortFunc(generations, func(left, right diskGeneration) int {
 		if byTime := left.modTime.Compare(right.modTime); byTime != 0 {
 			return byTime
@@ -390,10 +408,11 @@ func (store *DiskStore) Stats() (result DiskStats, err error) {
 	}
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	generations, err := store.scan(false)
+	scanResult, err := store.scan(false)
 	if err != nil {
-		return DiskStats{}, err
+		return DiskStats{}, store.scanError(err)
 	}
+	generations := scanResult.generations
 	stats := DiskStats{Entries: len(generations), Hits: store.hits, Misses: store.misses, Rejected: store.rejected, Evictions: store.evicted}
 	for _, generation := range generations {
 		if ^uint64(0)-stats.Bytes < generation.size {
@@ -442,16 +461,35 @@ func (store *DiskStore) absolutePath(relative string) string {
 }
 
 func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
+	return readCacheDirectoryWithBudget(root, name, &directoryscan.Budget{Context: context.Background(), Remaining: MaxDiskScanEntries})
+}
+
+func readCacheDirectoryWithBudget(root *os.Root, name string, budget *directoryscan.Budget) ([]os.DirEntry, error) {
 	directory, err := durablefile.OpenDirectory(root, name)
 	if err != nil {
 		return nil, err
 	}
-	entries, readErr := directory.ReadDir(-1)
+	entries, readErr := directoryscan.ReadSorted(directory, budget)
 	closeErr := directory.Close()
 	if readErr != nil || closeErr != nil {
-		return nil, errors.Join(readErr, closeErr)
+		return entries, errors.Join(readErr, closeErr)
 	}
 	return entries, nil
+}
+
+func (store *DiskStore) newScanBudget() *directoryscan.Budget {
+	limit := store.scanEntryLimit
+	if limit <= 0 {
+		limit = MaxDiskScanEntries
+	}
+	return &directoryscan.Budget{Context: context.Background(), Remaining: limit}
+}
+
+func (store *DiskStore) scanError(err error) error {
+	if errors.Is(err, directoryscan.ErrLimit) {
+		return fmt.Errorf("%w (%d entries)", ErrDiskScanLimit, store.newScanBudget().Remaining)
+	}
+	return err
 }
 
 func encodeDiskRecord(record Record, maxBytes uint64) (result []byte, err error) {

@@ -32,6 +32,15 @@ deleted and counted as rejected. Collection removes caller-expired temporary fil
 oldest immutable generations until entry and byte bounds both hold. Eviction time is a disposable
 hint, never correctness or source truth.
 
+Directory materialization has a separate default guard of 100,000 entries, independent of
+`MaxEntries` retention. One `Sweep` or `Stats` scan shares that budget across every supported
+namespace and key directory. Directories are read in batches of at most 128 entries with one
+additional overflow probe; only admitted entries are retained and sorted. A single-key `Get` uses
+the same bounded reader and becomes a safe miss if its directory is incomplete. Over-limit
+`Sweep` and `Stats` return the explicit disk-scan-limit error. Temporary cleanup, empty-directory
+cleanup and generation eviction wait for a complete scan, so a partial catalog can never trigger
+cache pruning.
+
 Collection also removes empty digest-key directories, including empty directories left by older
 writers. Eviction, rejected-record cleanup and failed publication attempt the same cleanup.
 Removal is nonrecursive and best-effort: unknown files, live temporary files and concurrently
@@ -48,7 +57,9 @@ process exits after leaving an unpublished temporary, which caller-aged collecti
 Deterministic real-`Put` crash checkpoints additionally kill a subprocess after its synced temporary
 closes and after publication: a fresh reader must observe respectively a miss with no immutable
 generation or one canonical hit. Tests also inject corruption, enforce entry bounds, and prove
-oversized rejection preserves an existing hit.
+oversized rejection preserves an existing hit. Small injected scan budgets prove cumulative
+namespace accounting, fail-closed lookup and stats, and that over-limit collection leaves every
+generation and unowned file untouched.
 
 ## Consequences and limits
 

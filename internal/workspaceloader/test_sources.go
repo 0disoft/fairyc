@@ -1,6 +1,7 @@
 package workspaceloader
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -9,6 +10,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/directoryscan"
+	"github.com/0disoft/fairyc/internal/durablefile"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -126,7 +129,7 @@ func appendPackageTests(selectedPackage *Package, budget *limits) (bool, error) 
 		}
 	}
 
-	testRoot, present, err := optionalExactDirectory(selectedPackage.Directory, TestSourceDirectory)
+	testRoot, present, err := optionalExactDirectory(budget, selectedPackage.Directory, TestSourceDirectory)
 	if err != nil {
 		return false, err
 	}
@@ -146,10 +149,37 @@ func appendPackageTests(selectedPackage *Package, budget *limits) (bool, error) 
 	return true, nil
 }
 
-func optionalExactDirectory(parent, name string) (string, bool, error) {
-	entries, err := os.ReadDir(parent)
+func optionalExactDirectory(budget *limits, parent, name string) (result string, present bool, err error) {
+	root, err := openSourceBoundary(budget, parent)
 	if err != nil {
 		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: err, Detail: err.Error()}
+	}
+	defer func() {
+		if closeErr := root.Close(); closeErr != nil {
+			err = errors.Join(err, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: closeErr, Detail: closeErr.Error()})
+		}
+	}()
+	directory, err := durablefile.OpenDirectory(root, ".")
+	if err != nil {
+		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: err, Detail: err.Error()}
+	}
+	remaining := MaxSourceEntries - budget.entries
+	if remaining < 0 {
+		remaining = 0
+	}
+	entries, readErr := directoryscan.ReadSorted(directory, &directoryscan.Budget{Context: budget.ctx, Remaining: remaining})
+	closeErr := directory.Close()
+	if err := chargeSourceEntries(budget, MaxSourceEntries, len(entries)); err != nil {
+		return "", false, err
+	}
+	if closeErr != nil {
+		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: errors.Join(readErr, closeErr), Detail: closeErr.Error()}
+	}
+	if errors.Is(readErr, directoryscan.ErrLimit) {
+		return "", false, &LoadError{Reason: ReasonSourceLimit, Detail: fmt.Sprintf("workspace exceeds %d filesystem entries", MaxSourceEntries)}
+	}
+	if readErr != nil {
+		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: readErr, Detail: readErr.Error()}
 	}
 	var matches []string
 	for _, entry := range entries {
@@ -164,7 +194,7 @@ func optionalExactDirectory(parent, name string) (string, bool, error) {
 		return "", false, &LoadError{Reason: ReasonPathCase, Path: name, Detail: "test source directory does not have one exact on-disk spelling"}
 	}
 	absolute := filepath.Join(parent, name)
-	info, err := os.Lstat(absolute)
+	info, err := root.Lstat(name)
 	if err != nil {
 		return "", false, &LoadError{Reason: ReasonTestSourceRoot, Path: name, Cause: err, Detail: err.Error()}
 	}

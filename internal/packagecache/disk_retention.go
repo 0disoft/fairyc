@@ -7,12 +7,21 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/0disoft/fairyc/internal/directoryscan"
 )
+
+type diskScanResult struct {
+	generations        []diskGeneration
+	expiredTemps       []string
+	cleanupDirectories []string
+}
 
 // Collection visits only compiler-owned, current-format namespaces. Unknown
 // versions and unrelated files are preserved; this is not recursive cleanup.
-func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
-	var result []diskGeneration
+func (store *DiskStore) scan(clean bool) (diskScanResult, error) {
+	budget := store.newScanBudget()
+	var result diskScanResult
 	for _, namespace := range []string{".", "generic-v0", "storage-transfer-v0"} {
 		if namespace != "." {
 			info, err := store.retentionRoot.Lstat(namespace)
@@ -20,7 +29,7 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 				continue
 			}
 			if err != nil {
-				return nil, fmt.Errorf("inspect cache namespace: %w", err)
+				return diskScanResult{}, fmt.Errorf("inspect cache namespace: %w", err)
 			}
 			if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 				continue
@@ -32,56 +41,56 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 			continue
 		}
 		if err != nil {
-			return nil, fmt.Errorf("inspect cache format directory: %w", err)
+			return diskScanResult{}, fmt.Errorf("inspect cache format directory: %w", err)
 		}
 		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 			continue
 		}
-		generations, err := store.scanNamespace(versionPath, clean)
+		namespaceResult, err := store.scanNamespace(versionPath, clean, budget)
 		if err != nil {
-			return nil, err
+			return diskScanResult{}, err
 		}
-		result = append(result, generations...)
+		result.generations = append(result.generations, namespaceResult.generations...)
+		result.expiredTemps = append(result.expiredTemps, namespaceResult.expiredTemps...)
+		result.cleanupDirectories = append(result.cleanupDirectories, namespaceResult.cleanupDirectories...)
 	}
 	return result, nil
 }
 
-func (store *DiskStore) scanNamespace(versionPath string, clean bool) ([]diskGeneration, error) {
-	keyDirectories, err := readCacheDirectory(store.retentionRoot, versionPath)
+func (store *DiskStore) scanNamespace(versionPath string, clean bool, budget *directoryscan.Budget) (diskScanResult, error) {
+	keyDirectories, err := readCacheDirectoryWithBudget(store.retentionRoot, versionPath, budget)
 	if err != nil {
-		return nil, fmt.Errorf("scan package cache root: %w", err)
+		return diskScanResult{}, fmt.Errorf("scan package cache root: %w", err)
 	}
 	now := time.Now()
-	var result []diskGeneration
+	var result diskScanResult
 	for _, keyDirectory := range keyDirectories {
 		if !keyDirectory.IsDir() || !validDigestDirectory(keyDirectory.Name()) {
 			continue
 		}
 		directoryPath := filepath.Join(versionPath, keyDirectory.Name())
-		entries, err := readCacheDirectory(store.retentionRoot, directoryPath)
+		entries, err := readCacheDirectoryWithBudget(store.retentionRoot, directoryPath, budget)
 		if errors.Is(err, os.ErrNotExist) {
 			continue // Another collector removed this empty key directory.
 		}
 		if err != nil {
-			return nil, fmt.Errorf("scan package cache key directory: %w", err)
+			return diskScanResult{}, fmt.Errorf("scan package cache key directory: %w", err)
 		}
 		for _, entry := range entries {
-			info, err := entry.Info()
+			path := filepath.Join(directoryPath, entry.Name())
+			info, err := store.retentionRoot.Lstat(path)
 			if errors.Is(err, os.ErrNotExist) {
 				continue
 			}
 			if err != nil {
-				return nil, fmt.Errorf("inspect package cache file: %w", err)
+				return diskScanResult{}, fmt.Errorf("inspect package cache file: %w", err)
 			}
 			if !info.Mode().IsRegular() {
 				continue
 			}
-			path := filepath.Join(directoryPath, entry.Name())
 			if strings.HasPrefix(entry.Name(), ".tmp-") {
 				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
-					if err := store.retentionRoot.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
-						return nil, fmt.Errorf("remove expired cache temporary file: %w", err)
-					}
+					result.expiredTemps = append(result.expiredTemps, path)
 				}
 				continue
 			}
@@ -90,12 +99,10 @@ func (store *DiskStore) scanNamespace(versionPath string, clean bool) ([]diskGen
 			}
 			// MaxRecordBytes is a reader bound, not a reason to erase a sibling
 			// store's larger record. Every generation still counts toward retention.
-			result = append(result, diskGeneration{path: path, name: entry.Name(), size: uint64(info.Size()), modTime: info.ModTime()})
+			result.generations = append(result.generations, diskGeneration{path: path, name: entry.Name(), size: uint64(info.Size()), modTime: info.ModTime()})
 		}
 		if clean {
-			// Never recurse: unknown files, live temporaries and concurrent
-			// publications keep their directory. Failure is harmless.
-			removeEmptyKeyDirectory(store.retentionRoot, directoryPath)
+			result.cleanupDirectories = append(result.cleanupDirectories, directoryPath)
 		}
 	}
 	return result, nil
