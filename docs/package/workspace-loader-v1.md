@@ -27,6 +27,11 @@ The implementation guards one load to 1,024 catalog packages, 4,096 `.fy` files,
 exact source bytes. Per-file frontend limits still apply. These are denial-of-service guards for the
 prototype and do not define stable language limits.
 
+Directory-spelling checks and source discovery share a 100,000-entry enumeration guard, counting
+ignored files and directories as well as `.fy` files. Test-tree discovery has the same guard.
+Directories are read in batches of at most 128 entries and sorted only
+within that bounded catalog, preserving lexical traversal for admitted inputs.
+
 ## Deterministic output
 
 Each local package retains:

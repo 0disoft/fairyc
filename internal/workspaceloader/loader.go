@@ -122,9 +122,10 @@ func (workspace Workspace) Package(path string) (Package, bool) {
 }
 
 type limits struct {
-	ctx   context.Context
-	files int
-	bytes int64
+	ctx     context.Context
+	files   int
+	bytes   int64
+	entries int
 }
 
 // Load reads only the named root manifest, its explicit members, and their explicit source roots.
@@ -174,6 +175,7 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 	pathIndexes := make(map[string]int, len(packagePaths))
 	budget := limits{ctx: ctx}
 	directories := newDirectoryResolver()
+	directories.budget = &budget
 	for _, packagePath := range packagePaths {
 		if err := ctx.Err(); err != nil {
 			return Workspace{}, err
@@ -306,7 +308,8 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 	}
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
-	err := filepath.WalkDir(sourceRoot, func(path string, entry fs.DirEntry, walkErr error) error {
+	err := walkSourceTree(os.DirFS(sourceRoot), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
+		path := filepath.Join(sourceRoot, filepath.FromSlash(relativeName))
 		if budget.ctx != nil {
 			if err := budget.ctx.Err(); err != nil {
 				return err

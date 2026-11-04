@@ -175,7 +175,8 @@ func optionalExactDirectory(parent, name string) (string, bool, error) {
 func loadTestSources(testRoot string, budget *limits) ([]SourceFile, []packagegraph.Module, error) {
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
-	err := filepath.WalkDir(testRoot, func(absolute string, entry fs.DirEntry, walkErr error) error {
+	err := walkSourceTree(os.DirFS(testRoot), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
+		absolute := filepath.Join(testRoot, filepath.FromSlash(relativeName))
 		if walkErr != nil {
 			return walkErr
 		}

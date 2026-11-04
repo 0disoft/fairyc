@@ -1,6 +1,7 @@
 package workspaceloader
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,13 +19,18 @@ type directorySpelling struct {
 type directoryResolver struct {
 	listings map[string]map[string]directorySpelling
 	readDir  func(string) ([]os.DirEntry, error)
+	budget   *limits
 }
 
 func newDirectoryResolver() *directoryResolver {
-	return &directoryResolver{
+	resolver := &directoryResolver{
 		listings: make(map[string]map[string]directorySpelling),
-		readDir:  os.ReadDir,
+		budget:   &limits{},
 	}
+	resolver.readDir = func(directory string) ([]os.DirEntry, error) {
+		return readSourceEntries(os.DirFS(directory), ".", resolver.budget, MaxSourceEntries)
+	}
+	return resolver
 }
 
 func (r *directoryResolver) listing(directory string) (map[string]directorySpelling, error) {
@@ -66,7 +72,11 @@ func (r *directoryResolver) resolve(base, relative string) (string, error) {
 	for _, segment := range strings.Split(relative, "/") {
 		names, err := r.listing(current)
 		if err != nil {
-			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
+			var load *LoadError
+			if errors.As(err, &load) {
+				return "", err
+			}
+			return "", normalizeLoadError(ReasonPath, relative, err)
 		}
 		spelling := names[foldDirectoryName(segment)]
 		if spelling.count != 1 || spelling.name != segment {
