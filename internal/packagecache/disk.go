@@ -322,7 +322,7 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 	}
 	digest := sha256.Sum256(encoded)
 	path := filepath.Join(store.keyDirectoryName(expected.Key), hex.EncodeToString(digest[:])+".json")
-	file, err := store.root.Open(path)
+	file, err := durablefile.OpenRegular(store.root, path)
 	if err != nil {
 		return false
 	}
@@ -406,7 +406,7 @@ func (store *DiskStore) Stats() (result DiskStats, err error) {
 }
 
 func (store *DiskStore) readGeneration(path, name string, expected Key, sizeHint int64) (Record, error) {
-	file, err := store.root.Open(path)
+	file, err := durablefile.OpenRegular(store.root, path)
 	if err != nil {
 		return Record{}, err
 	}

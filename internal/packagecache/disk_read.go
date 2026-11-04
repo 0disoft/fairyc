@@ -2,6 +2,7 @@ package packagecache
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 )
@@ -14,6 +15,9 @@ func readDiskRecordBytes(file *os.File, maxBytes uint64) ([]byte, error) {
 	info, err := file.Stat()
 	if err != nil {
 		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("package cache record is not a regular file")
 	}
 	return readDiskBytes(file, info.Size(), maxBytes)
 }
