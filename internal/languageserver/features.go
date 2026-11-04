@@ -21,6 +21,7 @@ func (s *server) definition(d *document, offset int) []Location {
 	if d.View == nil {
 		return locations
 	}
+	s.touchAnalysis(d.View)
 	var scratch [8]int
 	for _, index := range d.View.definitionCandidates(d.Path, offset, scratch[:0]) {
 		r := d.View.result.Resolutions[index]
@@ -63,6 +64,7 @@ func (s *server) completion(d *document, offset int) []Completion {
 	}
 	view := d.View
 	if view != nil {
+		s.touchAnalysis(view)
 		local, localKey := view.completionLocal(d.Path)
 		if local == nil && d.LastClean != nil {
 			local, localKey = d.LastClean.completionLocal(d.Path)

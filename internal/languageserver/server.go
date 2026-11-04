@@ -17,6 +17,7 @@ type document struct {
 	Version         int
 	View            *analysis
 	LastClean       *analysis
+	analysisEvicted bool
 	completionIndex *completionContextIndex
 	positionIndex   *positionIndex
 }
@@ -26,6 +27,9 @@ type server struct {
 	root                  string
 	initialized, shutdown bool
 	analysisPending       bool
+	analysisBudget        int64
+	analysisClock         uint64
+	analysisProtect       map[*analysis]struct{}
 	docs                  map[string]*document
 }
 type documentID struct {
@@ -178,7 +182,11 @@ func (s *server) handle(m message) error {
 			return bad("invalid UTF-16 position")
 		}
 		if s.analysisPending {
-			if err := s.recheck(); err != nil {
+			if err := s.recheckFocused(d.URI, false); err != nil {
+				return err
+			}
+		} else if d.analysisEvicted || d.View == nil {
+			if err := s.recheckFocused(d.URI, true); err != nil {
 				return err
 			}
 		}
@@ -203,6 +211,10 @@ func (s *server) fits(uri, text string) bool {
 	return total <= 32<<20
 }
 func (s *server) recheck() error {
+	return s.recheckFocused("", false)
+}
+
+func (s *server) recheckFocused(focusURI string, onlyFocus bool) error {
 	// A newer notification can cancel this analysis and then fail validation.
 	// Queries must recover it before reading views of older document contents.
 	s.analysisPending = true
@@ -218,7 +230,13 @@ func (s *server) recheck() error {
 		keys = append(keys, uri)
 	}
 	sort.Strings(keys)
-	views := map[string]*analysis{}
+	type analysisGroup struct {
+		key, root string
+		documents []*document
+	}
+	groups := make(map[string]*analysisGroup)
+	groupKeys := make([]string, 0)
+	focusGroup := ""
 	for _, uri := range keys {
 		d := s.docs[uri]
 		root := s.projectRoot(d.Path)
@@ -226,31 +244,73 @@ func (s *server) recheck() error {
 		if key == "" {
 			key = d.Path
 		}
-		view := views[key]
-		if view == nil {
-			var err error
-			view, err = s.analyzeContext(ctx, d, root)
-			if err != nil {
-				return err
+		group := groups[key]
+		if group == nil {
+			group = &analysisGroup{key: key, root: root}
+			groups[key] = group
+			groupKeys = append(groupKeys, key)
+		}
+		group.documents = append(group.documents, d)
+		if uri == focusURI {
+			focusGroup = key
+		}
+	}
+	sort.Strings(groupKeys)
+	if focusGroup != "" {
+		for index, key := range groupKeys {
+			if key == focusGroup {
+				copy(groupKeys[1:index+1], groupKeys[:index])
+				groupKeys[0] = focusGroup
+				break
 			}
-			views[key] = view
+		}
+	}
+	if onlyFocus && focusGroup != "" {
+		groupKeys = groupKeys[:1]
+	}
+	s.analysisProtect = map[*analysis]struct{}{}
+	defer func() { s.analysisProtect = nil }()
+	for _, key := range groupKeys {
+		group := groups[key]
+		view, err := s.analyzeContext(ctx, group.documents[0], group.root)
+		if err != nil {
+			return err
 		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		d.View = view
-		if view.clean {
-			d.LastClean = view
+		s.touchAnalysis(view)
+		if key == focusGroup {
+			s.analysisProtect[view] = struct{}{}
 		}
-		diagnostics := view.diagnostics[d.Path]
-		if diagnostics == nil {
-			diagnostics = []lspDiagnostic{}
+		for _, d := range group.documents {
+			s.setDocumentView(d, view)
+			diagnostics := view.diagnostics[d.Path]
+			if diagnostics == nil {
+				diagnostics = []lspDiagnostic{}
+			}
+			if err := s.notify("textDocument/publishDiagnostics", map[string]any{"uri": d.URI, "version": d.Version, "diagnostics": diagnostics}); err != nil {
+				return err
+			}
 		}
-		if err := s.notify("textDocument/publishDiagnostics", map[string]any{"uri": uri, "version": d.Version, "diagnostics": diagnostics}); err != nil {
-			return err
-		}
+	}
+	if retained, err := s.reserveAnalysisSource(0); err != nil {
+		return err
+	} else if !retained {
+		return fmt.Errorf("editor analysis source budget cannot retire enough analyses")
 	}
 	s.analysisPending = false
 	return nil
+}
+
+func (s *server) setDocumentView(d *document, view *analysis) {
+	if d.LastClean != nil && d.LastClean.root != view.root {
+		d.LastClean = nil
+	}
+	d.View = view
+	if view.clean {
+		d.LastClean = view
+	}
+	d.analysisEvicted = view.budgetExceeded
 }
 func internalDiagnostic(err error) string { return fmt.Sprintf("editor analysis: %v", err) }

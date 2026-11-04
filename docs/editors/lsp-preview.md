@@ -58,9 +58,20 @@ adapter launches the same server; it does not download tools.
 
 One workspace folder per session, 32 open documents, 8 MiB per source document,
 32 MiB total open text, 9 MiB per framed message, and the compiler's existing
-workspace/source guards. Work is synchronous; cancellation and incremental
-analysis are deferred. Saved external changes are refreshed on watched-file
-notifications; no watcher runs inside the server.
+workspace/source guards. A session retains at most 128 MiB of analyzed source in
+unique `View` and last-clean analyses. The charge covers each loaded workspace
+catalog, including declared members outside the root-reachable closure, and
+closed source files retained by diagnostic positions after failed loads, and
+counts shared analysis pointers once. This is a source-byte retention proxy,
+not an AST/HIR heap measurement. When it is exceeded, the least recently used
+analysis is evicted; affected open files receive an unavailable diagnostic and
+reload their project on the next definition or completion request. One incoming
+workspace is still loaded and parsed under the existing 64 MiB workspace guard
+before retention admission; the 128 MiB figure limits retained source, not
+transient project-load working memory. Work is synchronous with cooperative
+cancellation of superseded requests and edits; incremental reparsing is
+deferred. Saved external changes are refreshed on watched-file notifications;
+no watcher runs inside the server.
 
 Rename, references, semantic tokens, hover, member completion, embedded-SDK
 virtual source navigation, formatting and code actions are not advertised.

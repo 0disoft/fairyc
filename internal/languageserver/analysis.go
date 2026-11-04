@@ -49,6 +49,10 @@ type analysis struct {
 	snapshot        *workspaceloader.FileSnapshot
 	standalone      [sha256.Size]byte
 	standaloneValid bool
+	lastUsed        uint64
+	budgetExceeded  bool
+	sourceCharge    int64
+	sourceCharged   bool
 }
 
 func (s *server) projectRoot(filename string) string {
@@ -193,7 +197,19 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 					a.add(filename, text, 0, 0, "workspace-analysis-unavailable", internalDiagnostic(err))
 				}
 			}
+			a.sourceCharge, a.sourceCharged = analysisSourceBytes(a), true
+			if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+				return nil, err
+			} else if !retained {
+				return s.analysisBudgetUnavailable(d, root, overlays), nil
+			}
 			return a, nil
+		}
+		a.sourceCharge, a.sourceCharged = workspaceSourceBytes(workspace), true
+		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+			return nil, err
+		} else if !retained {
+			return s.analysisBudgetUnavailable(d, root, overlays), nil
 		}
 		input, err := workspace.SemanticInput()
 		if err != nil {
@@ -251,6 +267,12 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			a.add(d.Path, d.Text, diag.Span.StartByte, diag.Span.EndByte, diag.Code, diag.Code)
 		}
 		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{d.Path, d.Text, parsed.AST}
+		a.sourceCharge, a.sourceCharged = int64(len(d.Text)), true
+		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+			return nil, err
+		} else if !retained {
+			return s.analysisBudgetUnavailable(d, root, nil), nil
+		}
 		if parsed.AST == nil {
 			return a, nil
 		}
@@ -302,5 +324,9 @@ func (a *analysis) add(filename string, text []byte, start, end int, code, messa
 	if strings.TrimSpace(message) == "" {
 		message = code
 	}
-	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{a.sourceRange(filename, text, start, end), 1, code, "fairyc", message})
+	var location Range
+	if start != 0 || end != 0 {
+		location = a.sourceRange(filename, text, start, end)
+	}
+	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{location, 1, code, "fairyc", message})
 }
