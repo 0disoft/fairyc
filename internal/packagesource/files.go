@@ -179,10 +179,29 @@ func storeArchive(root *os.Root, pin Pin, data []byte) error {
 		if !errors.Is(err, os.ErrExist) {
 			return err
 		}
-		existing, err := readRegular(root, name, MaxArchiveBytes)
-		if err != nil || hash(existing) != pin.SHA256 {
+		existing, err := readRegularHash(root, name, MaxArchiveBytes)
+		if err != nil || existing != pin.SHA256 {
 			return fmt.Errorf("source cache publication conflict")
 		}
 	}
 	return nil
+}
+
+// A concurrent publication only needs the existing archive's digest, not a
+// second archive-sized byte slice. Keep the same regular-file and size checks.
+func readRegularHash(root *os.Root, name string, max int64) (string, error) {
+	f, err := openRegular(root, name, max)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	digest := sha256.New()
+	n, err := io.CopyBuffer(digest, io.LimitReader(f, max+1), make([]byte, sourceCompareBufferBytes))
+	if err != nil {
+		return "", err
+	}
+	if n > max {
+		return "", fmt.Errorf("source file byte limit exceeded")
+	}
+	return hex.EncodeToString(digest.Sum(nil)), nil
 }
