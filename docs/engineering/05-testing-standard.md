@@ -376,6 +376,13 @@ Semantic fail fixtures list every independent diagnostic after cascade suppressi
 
 Resource fixtures sample complete-root state immediately before or after a source span. They assert that `Live` owns one cleanup obligation, `Dead` owns zero, and a source-visible `MaybeLive` join is rejected. MIR drop flags and executable drop order remain separate fixture contracts.
 
+Safe-borrow liveness, return-summary inference and observable flow share an
+inclusive 1,048,576-unit allowance per function (one per expression visit and
+one plus incoming binding count per block visit). Exhaustion reports unsupported
+analysis once and cannot admit an incomplete proof to later flow/MIR stages.
+Closed scalar loops preserve incoming parameter borrow states without duplicate
+probes; existing loan/call/summary and non-scalar guards remain conservative.
+
 The resource runner explicitly requests exhaustive observations through
 `semantic.AnalyzeWithResourceStates`. Ordinary semantic/compiler entry points
 perform identical ownership and cleanup checks without collecting or sorting

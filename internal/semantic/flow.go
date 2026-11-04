@@ -38,14 +38,16 @@ func (a *analyzer) flowCheck() {
 			resource := &module.file.Module.Resources[index]
 			if function := a.dropFunctions[resource]; function != nil {
 				a.borrowFlowFunction(module, function)
-				a.resourceFlowDropFunction(module, function)
+				if !a.borrowWorkExhausted(function) {
+					a.resourceFlowDropFunction(module, function)
+				}
 			}
 		}
 	}
 }
 
 func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
-	if a.canceled() {
+	if a.canceled() || a.borrowWorkExhausted(function) {
 		return
 	}
 	if function.Body == nil {
@@ -70,6 +72,9 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 
 	a.collectFlowOrigins(module, function.Body, origins)
 	a.borrowFlowFunction(module, function)
+	if a.borrowWorkExhausted(function) {
+		return // Incomplete borrow proofs cannot proceed to other flow passes.
+	}
 	a.collectRegionOriginFacts(module, &inventory, origins)
 	a.resourceFlowFunction(module, function)
 	a.resultFlowFunction(module, function)

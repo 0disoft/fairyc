@@ -7,10 +7,10 @@ import (
 )
 
 // The closed scalar subset cannot create loans, modify borrow environments or
-// capture loop exits. With no incoming borrow state its fixed point is empty.
+// capture loop exits. Its fixed point preserves an incoming parameter state too.
 // Only the probe is skipped: the ordinary observable pass still visits the body.
 func (f *borrowFlowAnalyzer) canSkipScalarLoopProbe(e *ast.Expression, environment borrowEnvironment) bool {
-	return !f.summarizing && len(environment) == 0 && len(f.loans) == 0 && len(f.callBorrows) == 0 && f.borrowNeutralScalar(e)
+	return !f.summarizing && len(f.loans) == 0 && len(f.callBorrows) == 0 && f.borrowNeutralScalar(e)
 }
 
 func (f *borrowFlowAnalyzer) borrowNeutralScalar(e *ast.Expression) bool {

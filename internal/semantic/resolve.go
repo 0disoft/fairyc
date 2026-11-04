@@ -114,6 +114,8 @@ type analyzer struct {
 	resultProducerIndex   map[hir.Span]struct{}
 	resultNeutralScalars  map[*ast.Expression]bool
 	borrowReturns         map[*symbol]borrowReturnSummary
+	borrowWork            map[*ast.Function]*borrowWorkBudget
+	borrowWorkLimit       int
 	dropFunctions         map[*ast.Resource]*ast.Function
 	dropOwners            map[*ast.Function]*ast.Resource
 	methodCalls           map[*ast.Expression]*symbol

@@ -99,8 +99,8 @@ func TestScalarLoopBorrowProbeGuards(t *testing.T) {
 		t.Fatal("loan guard")
 	}
 	f.loans = nil
-	if f.canSkipScalarLoopProbe(loop, borrowEnvironment{nil: {}}) {
-		t.Fatal("environment guard")
+	if !f.canSkipScalarLoopProbe(loop, borrowEnvironment{nil: {}}) {
+		t.Fatal("closed scalar loop needlessly rechecks an unchanged incoming state")
 	}
 	for _, body := range []string{"break;", "continue;", "return 1;", "if(true){}", "let ref i32 p=ref x;", "x+=1;"} {
 		g, _ := scalarLoopFlow(t, "module main;fn i32 f(){var i32 x=0;while(true){"+body+"}return x;}")

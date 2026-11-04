@@ -281,6 +281,7 @@ func analyzeWithContextOptions(ctx context.Context, files []File, bindings map[p
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.ctx = ctx
 	analyzer.observeResourceStates = options.resourceStates
+	analyzer.borrowWorkLimit = options.borrowWorkLimit
 	if options.reportLimit > 0 {
 		analyzer.diagnosticBudget = newDiagnosticBudget(options.reportLimit)
 	}

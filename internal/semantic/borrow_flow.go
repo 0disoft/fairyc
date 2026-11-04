@@ -215,7 +215,7 @@ func (a *analyzer) inferBorrowReturnSummary(module *moduleScope, function *ast.F
 	}
 	environment := flow.parameterEnvironment()
 	flow.evaluateBlock(function.Body, environment, true)
-	if !flow.returnSeen || !flow.returnKnown {
+	if a.borrowWorkExhausted(function) || !flow.returnSeen || !flow.returnKnown {
 		return borrowReturnSummary{}
 	}
 	return borrowReturnSummary{
@@ -269,6 +269,9 @@ func (f *borrowFlowAnalyzer) evaluateBlock(block *ast.Block, environment borrowE
 	}
 	if block == nil {
 		return borrowValueState{}, true
+	}
+	if !f.consumeBorrowWork(block.Span, 1+len(environment)) {
+		return borrowValueState{}, false
 	}
 	outer := make(map[*symbol]struct{}, len(environment))
 	for value := range environment {
@@ -427,6 +430,9 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	}
 	if expression == nil {
 		return borrowValueState{}, true
+	}
+	if !f.consumeBorrowWork(expression.Span, 1) {
+		return borrowValueState{}, false
 	}
 	switch expression.Kind {
 	case ast.PrivateSharedReborrow:
@@ -1493,10 +1499,16 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 	if block == nil {
 		return live
 	}
+	if !f.consumeBorrowWork(block.Span, 1+len(liveOut)) {
+		return liveOut
+	}
 	if block.Tail != nil {
 		live = f.liveExpression(block.Tail, live, context)
 	}
 	for index := len(block.Statements) - 1; index >= 0; index-- {
+		if f.analyzer.borrowWorkExhausted(f.function) || f.analyzer.canceled() {
+			return live
+		}
 		statement := &block.Statements[index]
 		f.liveAfter[statement] = live
 		switch {
@@ -1570,6 +1582,9 @@ func indexedArrayOwner(analyzer *analyzer, target *ast.Expression) *symbol {
 
 func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
 	if expression == nil {
+		return liveOut
+	}
+	if !f.consumeBorrowWork(expression.Span, 1) {
 		return liveOut
 	}
 	if f.liveAfterExpression != nil && (isBorrowExpression(expression) || expression.Kind == syntax.KindPath || expression.Kind == ast.PrivateSharedReborrow) {

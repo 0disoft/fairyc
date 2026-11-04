@@ -132,3 +132,15 @@ also pass after resource observation separation; the remote-package offline CLI
 regression passes after ZIP admission. No full compiler/native suite or Linux
 execution was repeated. Linux: rerun jsonenvelope, contextpack, attributedtext,
 evidencebundle and the same focused CLI tests in the combined validation.
+
+## 12. Nested borrow-flow work
+
+Closed scalar loops retain unchanged borrowed-parameter environments without
+duplicate probes. Non-neutral loops share a bounded per-function work allowance
+across liveness, summary inference and observable analysis; incomplete proofs
+report unsupported analysis and stop that function's remaining flow stages.
+Windows tests cover 20 nested parameter-borrow loops under 512 work units,
+inclusive/shared limits, non-neutral rejection, cancellation and existing borrow
+diagnostic equivalence. Semantic and all semantic/resource/Region/Result fixture
+suites pass. Linux: rerun semantic, compiler and workspacecompiler in the combined
+validation; no Linux execution is claimed.
