@@ -1,6 +1,8 @@
 package packagesource
 
 import (
+	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -13,6 +15,8 @@ import (
 
 	"github.com/0disoft/fairyc/internal/durablefile"
 )
+
+const sourceCompareBufferBytes = 32 << 10
 
 func hash(data []byte) string { sum := sha256.Sum256(data); return hex.EncodeToString(sum[:]) }
 
@@ -74,6 +78,24 @@ func exactName(root *os.Root, parent, name string) error {
 }
 
 func readRegular(root *os.Root, name string, max int64) ([]byte, error) {
+	f, err := openRegular(root, name, max)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	data, err := io.ReadAll(io.LimitReader(f, max+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) > max {
+		return nil, fmt.Errorf("source file byte limit exceeded")
+	}
+	return data, nil
+}
+
+// openRegular preserves the same path, file kind, size and identity checks for
+// readers and comparisons. The caller owns the returned file.
+func openRegular(root *os.Root, name string, max int64) (*os.File, error) {
 	if err := directory(root, path.Dir(name), false); err != nil {
 		return nil, err
 	}
@@ -91,19 +113,49 @@ func readRegular(root *os.Root, name string, max int64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
 	opened, err := f.Stat()
 	if err != nil || !os.SameFile(info, opened) {
+		f.Close()
 		return nil, fmt.Errorf("source file changed during open")
 	}
-	data, err := io.ReadAll(io.LimitReader(f, max+1))
+	return f, nil
+}
+
+func readRegularMatches(ctx context.Context, root *os.Root, name string, max int64, expected []byte) (bool, error) {
+	f, err := openRegular(root, name, max)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	if int64(len(data)) > max {
-		return nil, fmt.Errorf("source file byte limit exceeded")
+	defer f.Close()
+	// Small pinned files need no full-sized buffer. If the installed file has
+	// grown, expand only up to the fixed cap while preserving bounded reads.
+	buffer := make([]byte, min(sourceCompareBufferBytes-1, len(expected))+1)
+	reader := io.LimitReader(f, max+1)
+	offset, matches := 0, true
+	for {
+		if err := ctx.Err(); err != nil {
+			return false, err
+		}
+		n, err := reader.Read(buffer[:])
+		if offset > len(expected) || n > len(expected)-offset || !bytes.Equal(buffer[:n], expected[offset:offset+n]) {
+			matches = false
+		}
+		offset += n
+		if err != nil {
+			if err != io.EOF {
+				return false, err
+			}
+			break
+		}
+		if n == len(buffer) && len(buffer) < sourceCompareBufferBytes {
+			buffer = make([]byte, min(len(buffer)*2, sourceCompareBufferBytes))
+		}
 	}
-	return data, nil
+	// Keep reading after a mismatch so later I/O/size errors retain precedence.
+	if int64(offset) > max {
+		return false, fmt.Errorf("source file byte limit exceeded")
+	}
+	return matches && offset == len(expected), nil
 }
 
 func storeArchive(root *os.Root, pin Pin, data []byte) error {

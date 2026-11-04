@@ -1,7 +1,6 @@
 package packagesource
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -47,11 +46,11 @@ func verifyTree(ctx context.Context, root *os.Root, name string, b bundle) error
 		if !found {
 			return fmt.Errorf("existing package contains additional file")
 		}
-		actual, err := readRegular(child, name, MaxFileBytes)
+		matches, err := readRegularMatches(ctx, child, name, MaxFileBytes, expected)
 		if err != nil {
 			return err
 		}
-		if !bytes.Equal(actual, expected) {
+		if !matches {
 			return fmt.Errorf("existing package differs from pinned archive")
 		}
 		files++
