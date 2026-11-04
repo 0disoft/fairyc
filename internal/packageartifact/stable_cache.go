@@ -89,6 +89,10 @@ func (cache *StableCache) Close() error {
 // Put verifies a process-local MIR artifact and independently described state body, binds them to
 // one package coordinate, canonically encodes the result, and publishes one immutable record.
 func (cache *StableCache) Put(key packagecache.Key, publicInterface moduleinterface.Hash, artifact Artifact, stateBody contractstatemir.StableStateBodyArtifact) error {
+	return cache.put(key, publicInterface, artifact, stateBody, nil)
+}
+
+func (cache *StableCache) put(key packagecache.Key, publicInterface moduleinterface.Hash, artifact Artifact, stateBody contractstatemir.StableStateBodyArtifact, publish func(packagecache.Record) error) error {
 	if cache == nil || cache.store == nil || cache.maxArtifactBytes == 0 {
 		return fmt.Errorf("stable package artifact cache is not initialized")
 	}
@@ -102,7 +106,10 @@ func (cache *StableCache) Put(key packagecache.Key, publicInterface moduleinterf
 	if err != nil {
 		return err
 	}
-	if err := cache.store.Put(packagecache.Record{
+	if publish == nil {
+		publish = cache.store.Put
+	}
+	if err := publish(packagecache.Record{
 		Key: key, PublicInterface: publicInterface,
 		Artifacts: []packagecache.Artifact{{Kind: packagecache.ArtifactCompilation, Data: encoded}},
 	}); err != nil {

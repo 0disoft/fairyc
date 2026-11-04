@@ -48,3 +48,34 @@ One lowering operation shares an inclusive 1,048,576-operand allowance across
 functions. Reservation precedes array slice allocation; repeat evaluation remains
 single-shot. Windows MIR tests cover exact/cumulative limits, overflow, malformed
 shape precedence and cancellation. Linux: rerun MIR/compiler/backend suites.
+
+## 7. Streaming cache publication
+
+Ordinary/generic/storage-transfer persistent workspace miss paths use scoped batches; single Put keeps
+its immediate collection. Checkpoints cap pending publications at 256 entries or
+16 MiB (or smaller caller bounds); closing/error paths collect remaining records.
+No encoded-record collection or mutable cross-process index is introduced.
+Windows packagecache/packageartifact tests pass. A 32-record batch asserts exactly
+one full collection; boundary, byte/entry retention, failed collection, idempotent
+close and borrowed-handle lifetime tests pass. Linux: rerun packagecache,
+packageartifact and workspacecompiler suites in the combined pass.
+
+## Validation scope
+
+Windows focused C-driver subprocess/Job/trap tests, MSVC project equivalence,
+candidatebuild, contractstatemir, MIR, genericsource, packagecache and packageartifact
+checks passed. The expanded `internal/compiler` suite reached its local five-minute
+package timeout during native cases, so that attempt is incomplete, not a pass.
+The exact active nominal-generics native case and core Check cases are rerun separately.
+No full `go test ./...`, Linux execution, hosted CI dispatch, push or release is claimed.
+
+The separated nominal-generics native case and six core Check cases passed on
+Windows. The current ordinary workspacecompiler suite and focused eight-package
+vet also passed. The 256-block/256-local MIR allocation benchmark compared the
+baseline verifier through a Go overlay against the changed verifier (three iterations
+per measurement): 4,964,394 to 28,360 B/op, and 2,599 to 283 allocations/op.
+Elapsed timings are not used: concurrent unrelated machine builds varied CPU load.
+
+After extending batching to generic/storage-transfer publication, focused generic,
+storage-transfer and persistent tests in packageartifact/workspacecompiler passed,
+and vet for all affected cache packages passed again.

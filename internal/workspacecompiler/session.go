@@ -401,6 +401,8 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 	if err != nil {
 		return Result{}, fmt.Errorf("describe stable package contract-state bodies: %w", err)
 	}
+	batch := session.stableCache.BeginBatch()
+	defer batch.Close() // Early errors/cancellation still collect published generations.
 	for _, packageID := range owners {
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
@@ -413,7 +415,7 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		if !found || stateBody.Hash != bodies[packageID] {
 			return Result{}, fmt.Errorf("stable contract-state body for package %d does not match the cache-key identity", packageID)
 		}
-		if err := session.stableCache.Put(keys[packageID], interfaces[packageID], artifact, stateBody); err != nil {
+		if err := batch.Put(keys[packageID], interfaces[packageID], artifact, stateBody); err != nil {
 			if errors.Is(err, packageartifact.ErrStableCompilationTooLarge) || errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, contractstatemir.ErrStableStateBodyTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
 				continue
@@ -425,6 +427,12 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 			return Result{}, fmt.Errorf("store package %d stable compilation artifact: %w", packageID, err)
 		}
 		report.Stored++
+	}
+	if err := batch.Close(); err != nil {
+		// Publication may have succeeded, but uncollected records are not a
+		// successful cache store. Compilation remains independent of the cache.
+		report.StoreFailed += report.Stored
+		report.Stored = 0
 	}
 	return Result{Compiler: compiled, Cache: report}, nil
 }

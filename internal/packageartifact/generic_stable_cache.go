@@ -90,6 +90,10 @@ func stableDiskInterface(schema string, hash moduleinterface.GenericHash) module
 }
 
 func (cache *GenericStableCache) Put(key packagecache.GenericKey, hash moduleinterface.GenericHash, artifact Artifact) error {
+	return cache.put(key, hash, artifact, nil)
+}
+
+func (cache *GenericStableCache) put(key packagecache.GenericKey, hash moduleinterface.GenericHash, artifact Artifact, publish func(packagecache.Record) error) error {
 	if cache == nil || cache.store == nil {
 		return fmt.Errorf("generic stable cache is not initialized")
 	}
@@ -112,7 +116,10 @@ func (cache *GenericStableCache) Put(key packagecache.GenericKey, hash moduleint
 	if uint64(len(encoded)) > cache.maxArtifactBytes {
 		return ErrStableArtifactTooLarge
 	}
-	if err := cache.store.Put(packagecache.Record{
+	if publish == nil {
+		publish = cache.store.Put
+	}
+	if err := publish(packagecache.Record{
 		Key: stableDiskAddress(schema, key), PublicInterface: stableDiskInterface(schema, hash),
 		Artifacts: []packagecache.Artifact{{Kind: packagecache.ArtifactMIR, Data: encoded}},
 	}); err != nil {

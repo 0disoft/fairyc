@@ -74,6 +74,8 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 	if err != nil {
 		return Result{}, err
 	}
+	batch := session.stableCache.BeginBatch()
+	defer batch.Close()
 	for _, artifact := range extracted {
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
@@ -82,7 +84,7 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 		if !found {
 			return Result{}, fmt.Errorf("generic persistent artifact has no current key")
 		}
-		if err := session.stableCache.Put(key, analysis.Interfaces[artifact.PackageID], artifact); err != nil {
+		if err := batch.Put(key, analysis.Interfaces[artifact.PackageID], artifact); err != nil {
 			if errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrContextArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
 				continue
@@ -94,6 +96,10 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 			return Result{}, err
 		}
 		report.Stored++
+	}
+	if err := batch.Close(); err != nil {
+		report.StoreFailed += report.Stored
+		report.Stored = 0
 	}
 	return Result{Compiler: compiled, Cache: report}, nil
 }

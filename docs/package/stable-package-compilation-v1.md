@@ -85,3 +85,20 @@ ADR 0381 additionally rechecks v4 block-confined state-borrow provenance and vie
 cached execution. Source syntax, general call or
 conditional-state admission, raw-pointer exposure, backend, runtime, production persistence, and
 target admission remain closed.
+
+## Bounded streaming disk publication
+
+Ordinary `DiskStore.Put` still runs retention before returning. The Go ordinary/generic/storage-transfer workspace
+stable-cache miss paths streams its publications through a scoped batch, without
+retaining encoded records or a mutable disk index. Collection runs at 256 records
+or 16 MiB of encoded publication, with checkpoints further reduced to caller
+entry/byte limits, and on batch Close. A larger single admitted record collects
+immediately. Each completed batch/checkpoint enforces the same namespace-wide
+retention limits. While a batch is open its bounded pending cohort may be visible
+alongside existing generations; this is not an atomic multi-record transaction.
+
+Every early error or cancellation closes the batch. Collection failures remain
+observable; a final collection failure records StoreFailed rather than Stored,
+without invalidating verified compiler output. A batch borrows the cache handles
+and cannot close the cache. Immutable publication, cross-process conflict handling,
+record admission and cache keys are unchanged.

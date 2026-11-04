@@ -94,6 +94,8 @@ type diskGeneration struct {
 }
 
 type diskPutHooks struct {
+	beforeEncodedPublish  func(int) error
+	afterEncodedPublish   func(int) error
 	beforeTemporaryCreate func(string)
 	afterTemporaryClosed  func(string)
 	afterPublished        func(string)
@@ -218,6 +220,11 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	if uint64(len(encoded)) > store.limits.MaxBytes {
 		return ErrRecordTooLarge
 	}
+	if hooks.beforeEncodedPublish != nil {
+		if err := hooks.beforeEncodedPublish(len(encoded)); err != nil {
+			return err
+		}
+	}
 	keyDirectory := store.keyDirectoryName(record.Key)
 	digest := sha256.Sum256(encoded)
 	finalPath := filepath.Join(keyDirectory, hex.EncodeToString(digest[:])+".json")
@@ -255,7 +262,11 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	if hooks.afterPublished != nil {
 		hooks.afterPublished(store.absolutePath(finalPath))
 	}
-	if err := store.Sweep(); err != nil {
+	collect := store.Sweep
+	if hooks.afterEncodedPublish != nil {
+		collect = func() error { return hooks.afterEncodedPublish(len(encoded)) }
+	}
+	if err := collect(); err != nil {
 		return fmt.Errorf("collect package cache after put: %w", err)
 	}
 	return nil
