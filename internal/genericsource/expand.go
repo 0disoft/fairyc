@@ -170,6 +170,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 	var requests []genericplan.Request
 	for _, fn := range x.module.Functions {
 		declaration := genericplan.Declaration{ID: x.id(fn.Name), Owner: x.owner}
+		dependencies := sourceDependencies{x: x, span: fn.Span}
 		for _, parameter := range fn.TypeParameters {
 			value := genericplan.TypeParameter{Name: parameter}
 			if x.scalarTemplatesOnly {
@@ -186,13 +187,13 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				return err
 			}
 			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
-				return x.registerAggregateRecord(e, fn.TypeParameters, &declaration, &requests)
+				return x.registerAggregateRecord(e, fn.TypeParameters, &declaration, &dependencies, &requests)
 			}
-			return x.registerFunctionCall(e, fn.TypeParameters, &declaration, &requests)
+			return x.registerFunctionCall(e, fn.TypeParameters, &declaration, &dependencies, &requests)
 		}}
 		t.typeReference = func(ref *ast.TypeReference) {
 			if typeError == nil {
-				typeError = x.registerAggregateType(*ref, fn.TypeParameters, &declaration, &requests)
+				typeError = x.registerAggregateType(*ref, fn.TypeParameters, &declaration, &dependencies, &requests)
 			}
 		}
 		if err := t.function(fn); err != nil {

@@ -164,3 +164,14 @@ Windows completion-order/error tests pass, as do Linux-amd64 test cross-compilat
 and Windows/Linux-target cdriver vet. Native GCC/Clang cases are authored for
 inherited/closed pipes, exit 23 and trap receipt 3; execution remains queued with
 the existing timeout and binary-input/trap tests. This is not a Linux runtime pass.
+
+## 15. Source generic dependency collection
+
+Function calls, aggregate type references and cleanup calls share one local
+exact dependency index per declaration. First-use order is retained; duplicates
+do not use the existing 32-entry allowance, and the 33rd unique edge reports the
+existing catalog-budget code at the declaration before template serialization.
+Windows genericsource/genericplan suites pass, including 32/33/4,000 dependencies
+for functions and aggregates, 10,000 duplicate additions, exact tuple identity,
+source immutability and failure provenance. Linux: rerun genericsource,
+genericplan, compiler and workspacecompiler in the combined validation.

@@ -10,7 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, declaration *genericplan.Declaration, requests *[]genericplan.Request) error {
+func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, declaration *genericplan.Declaration, dependencies *sourceDependencies, requests *[]genericplan.Request) error {
 	if e.Kind != syntax.KindSpecialize {
 		return nil
 	}
@@ -52,11 +52,7 @@ func (x *expander) registerFunctionCall(e *ast.Expression, parameters []string, 
 		}
 	}
 	if len(parameters) != 0 {
-		if !slices.ContainsFunc(declaration.Dependencies, func(existing genericplan.Dependency) bool {
-			return existing.Declaration == dependency.Declaration && slices.Equal(existing.Arguments, dependency.Arguments)
-		}) {
-			declaration.Dependencies = append(declaration.Dependencies, dependency)
-		}
+		return dependencies.add(declaration, dependency)
 	} else {
 		*requests = append(*requests, request)
 		if x.requests == nil {

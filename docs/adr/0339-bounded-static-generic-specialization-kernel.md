@@ -165,6 +165,12 @@ visible in specialization counts rather than hidden behind runtime machinery.
 
 ## Validation
 
+Source preparation uses a declaration-local exact dependency index in first-use
+order and enforces the existing 32-dependency default while collecting calls and
+aggregate types. Duplicates consume no additional slots. The 33rd unique edge
+fails with the catalog-budget code and declaration provenance before template
+serialization/catalog construction; the planner still validates admitted inputs.
+
 Focused tests cover ability closure and conflicts, deterministic catalogs, defensive immutability,
 duplicate implementation rejection, orphan coherence, required definition identities,
 dependency-first storage planning, request-order independence, missing abilities, missing exact

@@ -82,7 +82,7 @@ func (x *expander) collectAggregateTemplates() error {
 	return nil
 }
 
-func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []string, declaration *genericplan.Declaration, requests *[]genericplan.Request) error {
+func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []string, declaration *genericplan.Declaration, dependencies *sourceDependencies, requests *[]genericplan.Request) error {
 	if ref.Kind != ast.TypeKindNamed {
 		return nil
 	}
@@ -118,11 +118,7 @@ func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []str
 		}
 	}
 	if len(parameters) != 0 {
-		if !slices.ContainsFunc(declaration.Dependencies, func(v genericplan.Dependency) bool {
-			return v.Declaration == dependency.Declaration && slices.Equal(v.Arguments, dependency.Arguments)
-		}) {
-			declaration.Dependencies = append(declaration.Dependencies, dependency)
-		}
+		return dependencies.add(declaration, dependency)
 	} else {
 		*requests = append(*requests, request)
 		if x.requests == nil {
@@ -145,7 +141,7 @@ func aggregateRecordType(e *ast.Expression) (ast.TypeReference, error) {
 	return ref, nil
 }
 
-func (x *expander) registerAggregateRecord(e *ast.Expression, parameters []string, declaration *genericplan.Declaration, requests *[]genericplan.Request) error {
+func (x *expander) registerAggregateRecord(e *ast.Expression, parameters []string, declaration *genericplan.Declaration, dependencies *sourceDependencies, requests *[]genericplan.Request) error {
 	ref, err := aggregateRecordType(e)
 	if err != nil {
 		return err
@@ -155,7 +151,7 @@ func (x *expander) registerAggregateRecord(e *ast.Expression, parameters []strin
 	} else if !found {
 		return fmt.Errorf("unknown generic aggregate %q", ref.Path)
 	}
-	return x.registerAggregateType(ref, parameters, declaration, requests)
+	return x.registerAggregateType(ref, parameters, declaration, dependencies, requests)
 }
 
 func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericplan.Request, error) {
@@ -163,13 +159,14 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 	for _, aggregate := range x.sourceAggregates() {
 		shape := aggregate.shape()
 		declaration := genericplan.Declaration{ID: x.id(shape.Name), Owner: x.owner}
+		dependencies := sourceDependencies{x: x, span: shape.Span}
 		for _, parameter := range shape.TypeParameters {
 			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
 		}
 		var typeError error
 		t := sourceVisitor{typeReference: func(ref *ast.TypeReference) {
 			if typeError == nil {
-				typeError = x.registerAggregateType(*ref, shape.TypeParameters, &declaration, &requests)
+				typeError = x.registerAggregateType(*ref, shape.TypeParameters, &declaration, &dependencies, &requests)
 			}
 		}, binding: func(name string, at diagnostic.Span) error {
 			return x.at(at, FailureDeclaration, x.checkBinding(name))
@@ -179,9 +176,9 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 				return err
 			}
 			if e.Kind == syntax.KindRecord && len(e.TypeArguments) != 0 {
-				return x.registerAggregateRecord(e, shape.TypeParameters, &declaration, &requests)
+				return x.registerAggregateRecord(e, shape.TypeParameters, &declaration, &dependencies, &requests)
 			}
-			return x.registerFunctionCall(e, shape.TypeParameters, &declaration, &requests)
+			return x.registerFunctionCall(e, shape.TypeParameters, &declaration, &dependencies, &requests)
 		}}
 		for _, field := range shape.Fields {
 			t.typ(field.Type)
