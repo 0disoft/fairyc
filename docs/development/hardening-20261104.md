@@ -153,3 +153,14 @@ counts, short prefixes and uint64 overflow. A 1 MiB remainder claiming 1,048,576
 strings is rejected before any item read instead of reserving 16 MiB of slots
 on amd64. Existing stable state/body/cache round trips retain their encoding.
 Linux: rerun contractstatemir and packageartifact in the combined validation.
+
+## 14. Linux normal-completion process ownership
+
+The Go artifact runner observes the leader with waitid(WEXITED|WNOWAIT), kills
+the original group while its ID remains reserved, then lets exec.Cmd.Wait reap
+the leader and drain output. Ordinary nonzero/trap status is preserved; cleanup
+errors cannot be mistaken for an ordinary exit. ECHILD never signals a reused ID.
+Windows completion-order/error tests pass, as do Linux-amd64 test cross-compilation
+and Windows/Linux-target cdriver vet. Native GCC/Clang cases are authored for
+inherited/closed pipes, exit 23 and trap receipt 3; execution remains queued with
+the existing timeout and binary-input/trap tests. This is not a Linux runtime pass.

@@ -56,6 +56,10 @@ leader (`pid`), which may have left that group, before `waitpid(pid, ..., 0)`
 reaps the leader. Interrupted observations and final waits retry `EINTR`.
 The final wait preserves the leader's already-observed original exit status;
 same-group descendants receive cleanup even after an ordinary leader exit.
+The Go C-driver's temporary-artifact runner now uses the same observe-without-
+reaping, group-termination, final-wait order for normal exits, traps and deadlines.
+Cleanup failures remain distinct from ordinary nonzero exit status. If observation
+reports `ECHILD`, it fails without signaling a potentially reused group ID.
 See [wait(2)](https://man7.org/linux/man-pages/man2/waitpid.2.html) for `WNOWAIT`
 and waitability requirements. Invalid PID/outcome values become ABI problems;
 PID 1 is explicitly rejected so group signaling can never become `kill(-1, ...)`.

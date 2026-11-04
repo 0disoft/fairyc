@@ -94,9 +94,12 @@ func ExecuteLinuxTargetWithOptions(artifact Artifact, options LinuxExecutionOpti
 		waitErr := command.Wait()
 		return LinuxHostOutcome{}, errors.Join(fmt.Errorf("close parent trap channel: %w", err), cancelErr, waitErr)
 	}
-	runErr := command.Wait()
+	runErr, cleanupErr := waitOwnedLinuxProcess(command)
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s: %w", options.Timeout, ctx.Err())
+		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s: %w", options.Timeout, errors.Join(ctx.Err(), cleanupErr))
+	}
+	if cleanupErr != nil {
+		return LinuxHostOutcome{}, fmt.Errorf("clean up owned Linux process group: %w", cleanupErr)
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {
