@@ -206,7 +206,7 @@ rename would succeed, so that control detects an improper publication retry.
 Broken stdout after application retains the applied source and reports ambiguity.
 Complete final fixture trees check exact bytes and ordinary staging/lock cleanup.
 
-The first command run (384.61 seconds) failed only in its three staged-observation
+The first native command run (384.61 seconds) failed only in its three staged-observation
 controls per profile: Go `WalkDir` tried reopening the live deletion-capable
 Windows lock. Preview and the twelve apply controls above had already passed.
 The repaired harness captures its initial tree before process startup, enumerates
@@ -228,8 +228,42 @@ go vet -mod=readonly ./internal/cli ./internal/sourceedit
 git diff --check
 ```
 
-Refreshed full candidate dispatcher acceptance remains open. A command-leaf
-image and native fault-injection proof do not establish that separate gate.
+## Complete authored CLI acceptance
+
+`TestCandidateAtlasCLI` passes both Windows MSVC C11 profiles in 619.74 seconds
+(low 495.70s, optimized 101.37s, plus preparation). It retains the real authored
+main/dispatcher and unmodified host adapters. No fault wrappers or companion are
+installed, and PATH is empty during command replay. Existing impact/MCP and
+unsupported-source controls pass alongside the actual structural previews and
+the new edit help route.
+
+The full command applies the same edit as the independent Go reference, compares
+the exact report and source bytes, preserves the old graph lock, and leaves no
+staging or edit lock. Repeating the request and `check --locked` reject the stale
+lock without changing the tree. Ordinary Fairy `check` then regenerates a lock
+byte-identical to Go's, and a subsequent locked check succeeds. Only the selected
+source and subsequently refreshed graph lock change.
+
+The complete CLI originally refused before C compilation because its Go bootstrap
+header exceeded 2 MiB. The [header reduction](windows-bootstrap-header-20261105.md)
+keeps that bound unchanged; the accepted header is 1,919,958 bytes across 23 source
+units. These are current-input replay results, separate from the earlier command
+leaf and its failure-injection observations.
+
+Retained artifacts under `.cache/atlas-edit-cli-20261105/` bind generated C,
+profile/toolchain/stack policy and executable SHA-256. They are local evidence,
+not distribution artifacts or hosted same-commit receipts:
+
+| Profile | Input/policy SHA-256 | Image SHA-256 | Image bytes |
+| --- | --- | --- | ---: |
+| low | `f107844baec79e862fbf393b27f3fa7bcb11f44bd09ea9ea85ca8413fd61b34e` | `8ee084a4373c87d270a0043a00e39d149bb7f427bd721417766901980caab9cd` | 14,120,448 |
+| optimized | `05b213d7f24b568fed04a080a362acc4fb53e38217274cf34cc4abc395e46fab` | `12b759c5011524f5ff5a3491e9dcd0a8cd7c962aea07f3bc02d7ea65262dade4` | 5,391,360 |
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/atlas-edit-cli-20261105'
+go test -mod=readonly -count=1 -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$'
+```
 
 Native Linux stays in the combined queue. Full repository tests, hosted CI,
 clean-machine distribution and push/release/deployment were not performed.

@@ -74,8 +74,9 @@ admits the broader previously tested record/resource map inputs separately.
 
 Syntax/selector/budget failures return 2, workspace/lock/source or unsupported
 candidate-source failures 7, and preparation/output I/O failures 4. Help succeeds
-without reading a workspace. The existing read-only MCP and edit integration
-remain Go-only. Windows native evidence and the batched Linux gap are recorded in
+without reading a workspace. Windows Fairy read-only MCP and structural editing
+now use the same admitted source subset, as described below. Broader production
+facts and Linux command wiring remain separate. Windows native evidence is recorded in
 [the Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
 
 ## Read-only MCP over stdio
@@ -146,6 +147,8 @@ and validates outside-production-root paths. Its application owner acquires the
 exclusive edit lock, revalidates and stages before one opened-directory rename.
 Focused command-leaf and full candidate acceptance are separate evidence. The
 Go reader also enforces this existing body-path restriction.
+Both Windows full candidate profiles now pass impact/MCP/edit and post-edit lock
+recovery; see [the current edit receipt](../ops/windows-candidate-edit-20261105.md).
 Each Fairy preview now owns the exact manifest/production-source/lock fingerprint.
 Its fresh recheck rebuilds the complete edited overlay from the owned replacement
 and compares the fingerprint, path and complete before/after bytes. This supplies

@@ -27,6 +27,13 @@ func TestCandidateAtlasCLI(t *testing.T) {
 	root := t.TempDir()
 	copyLexerFileCLIExample(t, root)
 	build, support := candidateParityBuildPartsWithLimit(t, root, map[string]bool{"CloseHandle": true, "CreateFileW": true, "GetFileInformationByHandleEx": true, "GetFinalPathNameByHandleW": true, "GetLastError": true}, 2<<20)
+	largest := 0
+	for _, source := range build.Sources {
+		if len(source) > largest {
+			largest = len(source)
+		}
+	}
+	t.Logf("C input bytes: header=%d runtime=%d units=%d largest=%d", len(build.Header), len(support), len(build.Sources), largest)
 	tc, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
@@ -77,8 +84,10 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			t.Setenv("PATH", "")
 			verifyCandidateAtlasCommand(t, image)
 			verifyCandidateMCPCommand(t, image)
+			verifyCandidateEditCommand(t, image)
+			verifyCandidateEditCLIApply(t, image)
 			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)
-			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}} {
+			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
 				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 				if code != 0 || out != usage || diagnostic != "" {
 					t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)

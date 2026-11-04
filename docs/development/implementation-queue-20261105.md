@@ -11,8 +11,10 @@ authorized by this queue.
 - [x] Fairy `experimental atlas-mcp`: bounded protocol core, explicit command
   policy, real stdio, current locked Fairy query, negative/native/full CLI tests
   pass on Windows low/optimized. Linux dispatch and execution remain below.
-- [ ] Fairy `experimental atlas-edit`: current identity and source checks,
-  single-body preview/apply, failure-atomic publication and native CLI tests.
+- [x] Fairy `experimental atlas-edit` in its admitted ordinary-source subset:
+  current identity/source checks, single-body preview/apply, failure-atomic
+  publication and Windows low/optimized command-leaf/full CLI acceptance.
+  Broader source families and Linux dispatch/execution remain separate below.
 - [ ] Broaden Fairy Atlas production to the Go-supported source families,
   including SDK, aggregates, foreign declarations and generic facts; retain
   independent current-source expectations and explicit completeness.
@@ -90,3 +92,9 @@ authorized by this queue.
   Partitioned native/type/callback/inline and unchanged single-unit checks pass;
   complete native CLI replay and Fairy emitter/self-build acceptance remain
   separate. See `docs/ops/windows-bootstrap-header-20261105.md`.
+- Refreshed full authored CLI acceptance now passes both Windows profiles
+  (619.74s), including impact/MCP regressions, structural previews, atomic apply,
+  old-lock refusal and ordinary-check lock regeneration matching Go bytes. Help
+  dispatch includes atlas-edit. This closes only the bounded Windows edit family;
+  broader Atlas sources, Linux paths, native persistence, deferred designs and
+  final cross-platform/self-build/distribution/hosted gates remain open.

@@ -23,7 +23,9 @@ Validation:
 - `go vet -mod=readonly ./internal/cbackend` and `git diff --check` passed.
 - Full current-CLI input preparation reports the sizes above. The invocation
   selected no native subtests, so its passing preparation is not full CLI proof.
-  Complete native replay remains a separate gate.
+  Complete native replay is separately recorded in the
+  [structural-edit receipt](windows-candidate-edit-20261105.md): both full CLI
+  profiles pass in 619.74s, including impact/MCP/edit and post-edit lock recovery.
 
 The Fairy emitter and eventual consecutive self-build equality remain separate
 owners. Native Linux stays batched. Public language/SDK ABI, dependencies, DB,
