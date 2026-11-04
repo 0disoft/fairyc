@@ -70,3 +70,6 @@ authorized by this queue.
 - Fairy edit invocation syntax also passes sixteen native invocations per Windows
   profile (5.552s), including Go flag/preview comparisons and an explicitly parsed
   apply bit. This is not yet the actual body-file/apply command.
+- Exact Fairy edit fingerprints pass nine native invocations per profile
+  (66.486s), with independent Go byte/hash construction and fresh locked-source
+  refusal/recovery. The fresh port is ready for apply; publication remains open.

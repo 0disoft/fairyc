@@ -124,6 +124,36 @@ Both Go suites pass, including root/member body exclusion and a valid `src2`
 control. Full candidate dispatch is wired in source; its full CLI acceptance will
 be refreshed together with apply, instead of repeating that expensive image now.
 
+## Exact workspace fingerprints
+
+`project_edit_snapshot` hashes the exact sorted path/NUL/raw-file-hash/NUL
+representation used by the Go edit owner. It includes every local catalog
+manifest and production source plus raw `fairy.lock` bytes. The existing bounded
+merge-sort key index supplies deterministic O(N log N) ordering. The graph lock
+is merged separately, preserving room for 512 manifests and 512 source records
+without dropping the additional lock input.
+
+`from_resolved` describes the supplied immutable loader inputs; it does not claim
+they are still current. It hashes the already owned source and manifest bytes,
+avoiding N additional file opens and repeated directory scans. `capture` always
+loads and verifies the current locked workspace before constructing that value;
+application rechecks must use that fresh entry. Only the lock bytes need an
+additional retained-root read. No cross-attempt file or directory cache is added.
+
+`TestCandidateEditSnapshot` passes nine native invocations per profile in 66.486
+seconds. Independent Go construction checks every fingerprint, including raw root
+and member manifest whitespace, raw lock whitespace, ignored body files, and a
+member whose sorted path precedes the graph lock. The fresh locked entry refuses
+changed source without repairing the lock and succeeds after restoration. Every
+snapshot attempt preserves the entire observed fixture tree.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestCandidateEditSnapshot$'
+```
+
+This is fingerprint-port evidence. Exclusive locking, application revalidation,
+staging and publication are not supplied by this primitive.
+
 ## Remaining integration
 
 Apply needs fresh
