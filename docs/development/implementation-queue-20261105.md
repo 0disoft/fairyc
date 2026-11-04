@@ -60,3 +60,7 @@ authorized by this queue.
   Actual command/session and current-source query wiring now pass focused native
   command (209.544s) and full CLI (494.945s) acceptance in both profiles. See
   `docs/ops/windows-candidate-mcp-20261105.md`; this does not complete the queue.
+- Fairy body edit syntax-only planning now passes 50 Go-oracle cases per Windows
+  profile, including exact raw-byte spans/hashes, Unicode whitespace and injection
+  refusal. Full edited-workspace verification, preview CLI and atomic apply remain
+  open; see `docs/ops/windows-candidate-edit-20261105.md`.
