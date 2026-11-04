@@ -147,7 +147,12 @@ func InspectGeneratedUnwindSelection(unit, runtime, image, linkMap, linkLog []by
 			}
 			return 0, fmt.Errorf("%s unwind target %s is unresolved", input.name, symbol.Name)
 		}
+		relocationOffset := 0
 		for index, section := range object.Sections {
+			// InspectObject emits section-ordered contiguous relocation ranges.
+			// Advance before skipping non-associative or discarded sections.
+			relocations := object.RelocationRecords[relocationOffset : relocationOffset+section.Relocations]
+			relocationOffset += section.Relocations
 			if section.COMDATSelection != ObjectCOMDATAssociative {
 				continue
 			}
@@ -160,10 +165,7 @@ func InspectGeneratedUnwindSelection(unit, runtime, image, linkMap, linkLog []by
 			}
 			expected := slices.Clone(input.raw[section.RawOffset : uint64(section.RawOffset)+uint64(section.RawSize)])
 			positions := make(map[uint32]bool)
-			for _, relocation := range object.RelocationRecords {
-				if relocation.SectionIndex != index+1 {
-					continue
-				}
+			for _, relocation := range relocations {
 				at := relocation.VirtualAddress
 				if relocation.Type != ObjectRelocationAMD64Addr32NB || at%4 != 0 || uint64(at)+4 > uint64(len(expected)) || positions[at] {
 					return result, fmt.Errorf("%s:%s has an invalid or unmeasured unwind relocation", input.name, child.Symbol)
