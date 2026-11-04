@@ -111,6 +111,11 @@ func (s *server) handle(m message) error {
 		if _, exists := s.docs[d.URI]; exists {
 			return bad("document already open")
 		}
+		for _, opened := range s.docs {
+			if sameDocumentPath(opened.Path, filename) {
+				return bad("document already open")
+			}
+		}
 		if len(s.docs) >= 32 || !s.fits(d.URI, d.Text) {
 			return bad("editor document limit exceeded")
 		}

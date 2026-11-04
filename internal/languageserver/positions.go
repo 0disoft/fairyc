@@ -102,6 +102,13 @@ func fileURI(filename string) string {
 	}
 	return (&url.URL{Scheme: "file", Path: p}).String()
 }
+
+func sameDocumentPath(left, right string) bool {
+	if runtime.GOOS == "windows" {
+		return strings.EqualFold(left, right)
+	}
+	return left == right
+}
 func contained(root, filename string) bool {
 	rel, err := filepath.Rel(root, filename)
 	return err == nil && !filepath.IsAbs(rel) && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
