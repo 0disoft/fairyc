@@ -57,6 +57,11 @@ the caller, not learned from the downloaded package or an unsigned server-side c
 
 ## Cache, extraction and publication
 
+Go existing-tree verification shares an 8,193-entry budget including the package root.
+Directory reads admit at most 128 entries per batch plus one overflow probe before
+retaining or sorting. A partial scan cannot certify reuse. Opened-directory identity
+is checked, and each enumeration handle closes before descending into children.
+
 Archives contain `fairy.toml` at ZIP root and the declared source directory with at least one
 `.fy` file. Manifest UID, exact version and language must match the pin/root; nested workspace
 declarations reject. Hooks/scripts are never executed. ZIP entry paths must use portable canonical
