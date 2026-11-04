@@ -192,9 +192,15 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		outgoing[owner] = slices.Compact(targets)
 	}
 	if cycle := findDependencyCycle(outgoing, len(classes)); len(cycle) != 0 {
-		var subjects []string
+		// The simple cycle contains unique classes, whose node IDs are disjoint.
+		// Count once and append in encounter order without quadratic deduplication.
+		subjectCount := 0
 		for _, classIndex := range cycle {
-			subjects = appendUnique(subjects, classes[classIndex].members...)
+			subjectCount += len(classes[classIndex].members)
+		}
+		subjects := make([]string, 0, subjectCount)
+		for _, classIndex := range cycle {
+			subjects = append(subjects, classes[classIndex].members...)
 		}
 		return result, &Rejection{Reason: ReasonDependencyCycle, Subjects: subjects}, nil
 	}
