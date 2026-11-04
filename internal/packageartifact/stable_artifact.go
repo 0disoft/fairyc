@@ -228,7 +228,18 @@ func encodeStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bo
 // Decoding has already checked both before comparing canonical bytes.
 func marshalStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bool) ([]byte, error) {
 	schema, version := stableArtifactContract(transfers)
-	encoded, err := json.Marshal(stableArtifactEnvelope{Schema: schema, Version: version, Artifact: artifact})
+	envelope := stableArtifactEnvelope{Schema: schema, Version: version, Artifact: artifact}
+	tooLarge, err := stableJSONExceedsLimit(envelope, maxBytes)
+	if err != nil {
+		return nil, fmt.Errorf("encode stable package MIR artifact: %w", err)
+	}
+	if tooLarge {
+		if err := stableJSONOperationError(artifact.Functions); err != nil {
+			return nil, fmt.Errorf("encode stable package MIR artifact: %w", err)
+		}
+		return nil, ErrStableArtifactTooLarge
+	}
+	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode stable package MIR artifact: %w", err)
 	}

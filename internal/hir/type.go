@@ -145,6 +145,47 @@ func (t TypeID) writeTo(b *strings.Builder) {
 	}
 }
 
+// VisitStringChunks visits the exact Type.String spelling without building it.
+// Returning false from visit stops traversal immediately.
+func (t TypeID) VisitStringChunks(visit func(string) bool) bool {
+	if t == (Type{}) {
+		return true
+	}
+	n := t.handle.Value()
+	if n.text != "" {
+		return visit(n.text)
+	}
+	switch n.kind {
+	case TypeKindBorrow:
+		if !visit("&") {
+			return false
+		}
+		if n.mutable && !visit("mut ") {
+			return false
+		}
+		return n.element.VisitStringChunks(visit)
+	case TypeKindRawPointer:
+		if !visit("*") {
+			return false
+		}
+		if n.mutable && !visit("mut ") {
+			return false
+		}
+		return n.element.VisitStringChunks(visit)
+	case TypeKindSlice:
+		return visit("[") && n.element.VisitStringChunks(visit) && visit("]")
+	case TypeKindFixedArray:
+		var digits [20]byte
+		return visit("[") && n.element.VisitStringChunks(visit) && visit("; ") && visit(string(strconv.AppendUint(digits[:0], n.length, 10))) && visit("]")
+	case TypeKindOption:
+		return visit("Option<") && n.element.VisitStringChunks(visit) && visit(">")
+	case TypeKindResult:
+		return visit("Result<") && n.element.VisitStringChunks(visit) && visit(", ") && n.failure.VisitStringChunks(visit) && visit(">")
+	default:
+		return visit(t.Descriptor().Name)
+	}
+}
+
 func (t TypeID) MarshalText() ([]byte, error)     { return []byte(t.String()), nil }
 func (t *TypeID) UnmarshalText(data []byte) error { *t = ParseType(string(data)); return nil }
 func (t TypeID) MarshalJSON() ([]byte, error)     { return json.Marshal(t.String()) }

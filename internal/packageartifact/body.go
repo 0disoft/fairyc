@@ -344,7 +344,18 @@ func EncodeStableBody(body StableBodyArtifact, maxBytes uint64) ([]byte, error) 
 	if err := ValidateStableBody(body); err != nil {
 		return nil, err
 	}
-	encoded, err := json.Marshal(bodyEnvelope{Schema: BodySchema, Version: BodyVersion, Body: body})
+	envelope := bodyEnvelope{Schema: BodySchema, Version: BodyVersion, Body: body}
+	tooLarge, err := stableJSONExceedsLimit(envelope, maxBytes)
+	if err != nil {
+		return nil, fmt.Errorf("encode stable function-body artifact: %w", err)
+	}
+	if tooLarge {
+		if err := stableJSONOperationError([]StableBodyArtifact{body}); err != nil {
+			return nil, fmt.Errorf("encode stable function-body artifact: %w", err)
+		}
+		return nil, ErrBodyArtifactTooLarge
+	}
+	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode stable function-body artifact: %w", err)
 	}

@@ -42,6 +42,17 @@ authority for its own identity and semantics.
   the state payload;
 - local state package renumbering under the same coordinate preserves complete artifact bytes.
 
+Compilation, stable MIR and stable-body encoders check their closed JSON wire
+size before constructing the complete output buffer. The preflight accounts for
+field names, punctuation, escaping, IDs, Base64 operand bytes and exact retained
+HIR type spelling. Unknown wire shapes reject explicitly rather than bypassing
+the guard. The existing `json.Marshal` remains the byte-format authority, with a
+final length check as a consistency defense. Exact limits succeed; one byte less
+returns the existing artifact-specific size error. Semantic validation and
+fallible operation-kind encoding errors retain their precedence over size errors.
+This does not impose a total-memory limit on the independent semantic validators,
+including context hashing and state-body validation.
+
 ## Persistent cache admission
 
 ADR 0353 publishes exactly one `compilation` payload per persistent record. Lookup requires the

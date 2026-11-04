@@ -83,9 +83,18 @@ func EncodeStableCompilationArtifact(artifact StableCompilationArtifact, maxByte
 // byte limit from its caller. Decoding and cache projection perform both checks
 // before calling it; public encoding validates arbitrary caller-owned artifacts.
 func marshalStableCompilationArtifact(artifact StableCompilationArtifact, maxBytes uint64) ([]byte, error) {
-	encoded, err := json.Marshal(stableCompilationEnvelope{
-		Schema: StableCompilationSchema, Version: StableCompilationVersion, Compilation: artifact,
-	})
+	envelope := stableCompilationEnvelope{Schema: StableCompilationSchema, Version: StableCompilationVersion, Compilation: artifact}
+	tooLarge, err := stableJSONExceedsLimit(envelope, maxBytes)
+	if err != nil {
+		return nil, fmt.Errorf("encode stable package compilation artifact: %w", err)
+	}
+	if tooLarge {
+		if err := stableJSONOperationError(artifact.MIR.Functions); err != nil {
+			return nil, fmt.Errorf("encode stable package compilation artifact: %w", err)
+		}
+		return nil, ErrStableCompilationTooLarge
+	}
+	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode stable package compilation artifact: %w", err)
 	}
