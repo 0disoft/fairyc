@@ -16,6 +16,7 @@ type CatalogEntry struct {
 
 const (
 	categorySyntax        = "Syntax, modules, and imports"
+	categoryReporting     = "Bounded frontend reporting"
 	categoryResolution    = "Name resolution and source visibility"
 	categoryType          = "Type and initialization"
 	categoryResource      = "Resource ownership and drop"
@@ -46,6 +47,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E0008", Category: categorySyntax, Meaning: "Parser skipped an unexpected real token into an error node."},
 	{Code: "E0009", Category: categorySyntax, Meaning: "Comparison operators are chained without explicit parentheses."},
 	{Code: "E0010", Category: categorySyntax, Meaning: "Shared parser budget is exhausted before a complete bounded result is available."},
+	{Code: "E0011", Category: categoryReporting, Meaning: "Semantic diagnostic reporting budget is exhausted; later diagnostics and unsupported facts were omitted."},
 	{Code: "E0101", Category: categoryResolution, Meaning: "Name or qualified path cannot be resolved in its owning scope."},
 	{Code: "E0102", Category: categoryResolution, Meaning: "Declaration duplicates a name in the same owning scope."},
 	{Code: "E0103", Category: categoryResolution, Meaning: "Resolved item is not source-visible from the use module."},

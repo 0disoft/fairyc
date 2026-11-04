@@ -89,6 +89,7 @@ type analyzer struct {
 	regions               map[*ast.Expression]*symbol
 	regionType            *symbol
 	diagnostics           []Diagnostic
+	diagnosticBudget      diagnosticBudget
 	resolutions           []Resolution
 	types                 []TypeFact
 	borrows               []BorrowFact
@@ -124,6 +125,7 @@ type analyzer struct {
 func newAnalyzer(files []File, packageImports map[packageImportKey]hir.PackageID) *analyzer {
 	return &analyzer{
 		files:              files,
+		diagnosticBudget:   newDiagnosticBudget(DefaultSemanticReportLimit),
 		modules:            make(map[moduleKey]*moduleScope, len(files)),
 		packageImports:     packageImports,
 		resolved:           make(map[*ast.Expression]*symbol),
@@ -542,6 +544,9 @@ func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) 
 func (a *analyzer) resolveBlock(module *moduleScope, block *ast.Block, parent *lexicalScope) {
 	scope := &lexicalScope{parent: parent, names: make(map[string]*symbol)}
 	for index := range block.Statements {
+		if a.canceled() {
+			return
+		}
 		statement := &block.Statements[index]
 		if statement.Binding != nil {
 			a.resolveBinding(module, scope, statement.Binding)
@@ -845,11 +850,11 @@ func (a *analyzer) allocateSymbol() hir.SymbolID {
 }
 
 func (a *analyzer) addDiagnostic(code string, primary hir.Span, related ...RelatedSpan) {
-	a.diagnostics = append(a.diagnostics, Diagnostic{Code: code, Primary: primary, Related: related})
+	a.addDiagnosticRecord(Diagnostic{Code: code, Primary: primary, Related: related})
 }
 
 func (a *analyzer) addUnsupported(source string, value diagnostic.Span, feature string) {
-	a.unsupported = append(a.unsupported, Unsupported{Feature: feature, Span: span(source, value)})
+	a.addUnsupportedRecord(Unsupported{Feature: feature, Span: span(source, value)})
 }
 
 func span(source string, value diagnostic.Span) hir.Span {
@@ -868,4 +873,42 @@ func sourceSpan(source string, start, end int) hir.Span {
 	return hir.Span{Package: packageID, Source: sourcePath, StartByte: start, EndByte: end}
 }
 
-func (a *analyzer) canceled() bool { return a.ctx != nil && a.ctx.Err() != nil }
+func (a *analyzer) addDiagnosticRecord(value Diagnostic) {
+	if value.Code == SemanticReportExhaustedCode {
+		a.markReportExhausted(value.Primary)
+		return
+	}
+	admitted, marker := a.diagnosticBudget.admit()
+	if marker {
+		a.appendReportExhausted(value.Primary)
+	}
+	if admitted {
+		a.diagnostics = append(a.diagnostics, value)
+	}
+}
+
+func (a *analyzer) addUnsupportedRecord(value Unsupported) {
+	admitted, marker := a.diagnosticBudget.admit()
+	if marker {
+		a.appendReportExhausted(value.Span)
+	}
+	if admitted {
+		a.unsupported = append(a.unsupported, value)
+	}
+}
+
+func (a *analyzer) markReportExhausted(primary hir.Span) {
+	if a.diagnosticBudget.exhausted {
+		return
+	}
+	a.diagnosticBudget.exhausted = true
+	a.appendReportExhausted(primary)
+}
+
+func (a *analyzer) appendReportExhausted(primary hir.Span) {
+	a.diagnostics = append(a.diagnostics, semanticReportExhaustedDiagnostic(primary))
+}
+
+func (a *analyzer) canceled() bool {
+	return a.ctx != nil && a.ctx.Err() != nil || a.diagnosticBudget.exhausted
+}

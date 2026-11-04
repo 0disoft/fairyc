@@ -225,10 +225,14 @@ func analyzeBoundNominalsWithVectorCandidate(files []File, bindings map[packageI
 }
 
 func analyzeContext(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) (Result, error) {
+	return analyzeContextWithOptions(ctx, files, bindings, nominals, vectorTypes, analysisOptions{})
+}
+
+func analyzeContextWithOptions(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool, options analysisOptions) (Result, error) {
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
 	}
-	result := analyzeWithContext(ctx, files, bindings, nominals, vectorTypes)
+	result := analyzeWithContextOptions(ctx, files, bindings, nominals, vectorTypes, options)
 	if err := ctx.Err(); err != nil {
 		return Result{}, err
 	}
@@ -236,6 +240,10 @@ func analyzeContext(ctx context.Context, files []File, bindings map[packageImpor
 }
 
 func analyzeWithContext(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool) Result {
+	return analyzeWithContextOptions(ctx, files, bindings, nominals, vectorTypes, analysisOptions{})
+}
+
+func analyzeWithContextOptions(ctx context.Context, files []File, bindings map[packageImportKey]hir.PackageID, nominals map[string]NominalTypeBinding, vectorTypes map[vectorTypeKey]bool, options analysisOptions) Result {
 
 	ordered := cloneResourceAbilityInputs(files)
 	for i := range ordered {
@@ -264,9 +272,17 @@ func analyzeWithContext(ctx context.Context, files []File, bindings map[packageI
 	}
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.ctx = ctx
+	if options.reportLimit > 0 {
+		analyzer.diagnosticBudget = newDiagnosticBudget(options.reportLimit)
+	}
 	analyzer.nominalBindings = nominals
 	analyzer.vectorForTypes = vectorTypes
-	analyzer.diagnostics = testDiagnostics
+	for _, testDiagnostic := range testDiagnostics {
+		analyzer.addDiagnosticRecord(testDiagnostic)
+		if analyzer.diagnosticBudget.exhausted {
+			break
+		}
+	}
 	if len(analyzer.diagnostics) == 0 {
 		analyzer.resolve()
 	}

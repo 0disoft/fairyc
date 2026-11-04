@@ -21,7 +21,7 @@ func (c *typeChecker) requireDetailedType(primary hir.Span, actual, expected hir
 			})
 		}
 	}
-	c.analyzer.diagnostics = append(c.analyzer.diagnostics, Diagnostic{
+	c.analyzer.addDiagnosticRecord(Diagnostic{
 		Code: "E1006", Primary: primary,
 		Related:      related,
 		ExpectedType: expected, ActualType: actual,

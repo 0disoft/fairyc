@@ -16,31 +16,59 @@ import (
 // Use authenticated expansion origins, never a generated-name prefix. Ordinary
 // functions keep their transport types, and unused type arguments remain valid.
 func restrictGenericSignatures(checked semantic.Result, files []semantic.File, expansion genericsource.PackageExpansion) semantic.Result {
-	if checked.FailedPhase == semantic.PhaseResolve || len(expansion.Origins) == 0 {
+	if checked.FailedPhase == semantic.PhaseResolve || len(expansion.Origins) == 0 ||
+		slices.ContainsFunc(checked.Diagnostics, func(value semantic.Diagnostic) bool {
+			return value.Code == semantic.SemanticReportExhaustedCode
+		}) {
 		return checked
 	}
 	functions := make(map[string]bool, len(expansion.Origins))
 	for _, origin := range expansion.Origins {
 		functions[origin.GeneratedName] = true
 	}
-	var unsupported []semantic.Unsupported
+	seen := make(map[genericUnsupportedKey]struct{}, semantic.DefaultSemanticReportLimit)
+	unsupported := make([]semantic.Unsupported, 0, semantic.DefaultSemanticReportLimit)
+	var exhausted bool
+	var exhaustedAt hir.Span
 	for _, file := range files {
+		if exhausted {
+			break
+		}
 		for _, function := range file.Module.Functions {
+			if exhausted {
+				break
+			}
 			if !functions[function.Name] {
 				continue
 			}
-			check := func(reference ast.TypeReference) {
+			check := func(reference ast.TypeReference) bool {
 				if unadmittedGenericScalar(reference) {
-					unsupported = append(unsupported, semantic.Unsupported{
+					value := semantic.Unsupported{
 						Feature: "type " + strings.TrimSpace(reference.Text),
 						Span: hir.Span{Package: file.Package, Source: file.Path,
 							StartByte: reference.Span.StartByte, EndByte: reference.Span.EndByte},
-					})
+					}
+					key := genericUnsupportedKey{span: value.Span, feature: value.Feature}
+					if _, duplicate := seen[key]; duplicate {
+						return true
+					}
+					if len(unsupported) == semantic.DefaultSemanticReportLimit {
+						exhausted = true
+						exhaustedAt = value.Span
+						return false
+					}
+					seen[key] = struct{}{}
+					unsupported = append(unsupported, value)
 				}
+				return true
 			}
-			check(function.ResultType)
+			if !check(function.ResultType) {
+				break
+			}
 			for _, parameter := range function.Parameters {
-				check(parameter.Type)
+				if !check(parameter.Type) {
+					break
+				}
 			}
 		}
 	}
@@ -52,7 +80,17 @@ func restrictGenericSignatures(checked semantic.Result, files []semantic.File, e
 			cmp.Compare(a.Span.StartByte, b.Span.StartByte),
 			cmp.Compare(a.Span.EndByte, b.Span.EndByte), cmp.Compare(a.Feature, b.Feature))
 	})
-	return semantic.Result{CompletedThrough: semantic.PhaseResolve, Unsupported: slices.Compact(unsupported)}
+	result := semantic.Result{CompletedThrough: semantic.PhaseResolve, Unsupported: slices.Compact(unsupported)}
+	if exhausted {
+		result.FailedPhase = semantic.PhaseType
+		result.Diagnostics = []semantic.Diagnostic{{Code: semantic.SemanticReportExhaustedCode, Primary: exhaustedAt}}
+	}
+	return result
+}
+
+type genericUnsupportedKey struct {
+	span    hir.Span
+	feature string
 }
 
 func unadmittedGenericScalar(reference ast.TypeReference) bool {

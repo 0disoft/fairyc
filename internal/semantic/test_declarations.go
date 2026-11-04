@@ -21,14 +21,28 @@ type TestDeclarations struct {
 // source explicitly; source paths or module names never grant test admission.
 // The returned metadata is detached and the module is never modified.
 func InspectTestDeclarations(module *ast.Module) TestDeclarations {
+	budget := newDiagnosticBudget(DefaultSemanticReportLimit)
+	return inspectTestDeclarations(module, &budget)
+}
+
+func inspectTestDeclarations(module *ast.Module, budget *diagnosticBudget) TestDeclarations {
 	result := TestDeclarations{}
 	if module == nil {
 		return result
 	}
+	rejectAttribute := func(span diagnostic.Span) {
+		admitted, marker := budget.admit()
+		if marker {
+			result.Diagnostics = append(result.Diagnostics, diagnostic.Diagnostic{Code: SemanticReportExhaustedCode, Span: span, Repair: diagnostic.RepairNone})
+		}
+		if admitted {
+			result.Diagnostics = append(result.Diagnostics, diagnostic.Diagnostic{Code: "E9001", Span: span, Repair: diagnostic.RepairNone})
+		}
+	}
 	reject := func(attributes []ast.Attribute) {
 		for _, attribute := range attributes {
 			if attribute.Name == testAttribute {
-				result.Diagnostics = append(result.Diagnostics, diagnostic.Diagnostic{Code: "E9001", Span: attribute.Span, Repair: diagnostic.RepairNone})
+				rejectAttribute(attribute.Span)
 			}
 		}
 	}
@@ -65,7 +79,7 @@ func InspectTestDeclarations(module *ast.Module) TestDeclarations {
 		}
 		valid := len(markers) == 1 && len(markers[0].Arguments) == 0 && !function.Public && !function.Unsafe && function.Owner == "" && len(function.Parameters) == 0 && len(function.TypeParameters) == 0 && function.ResultType.Kind == ast.TypeKindNamed && function.ResultType.Path == "void" && len(function.ResultType.Arguments) == 0
 		if !valid {
-			result.Diagnostics = append(result.Diagnostics, diagnostic.Diagnostic{Code: "E9001", Span: markers[0].Span, Repair: diagnostic.RepairNone})
+			rejectAttribute(markers[0].Span)
 			continue
 		}
 		result.Functions = append(result.Functions, index)
@@ -77,11 +91,12 @@ func InspectTestDeclarations(module *ast.Module) TestDeclarations {
 // or generic expansion can erase declarations. File.Test is caller-owned metadata.
 func TestDeclarationDiagnostics(files []File) []Diagnostic {
 	var rejections []Diagnostic
+	budget := newDiagnosticBudget(DefaultSemanticReportLimit)
 	for _, file := range files {
 		if !file.Test {
 			continue
 		}
-		for _, rejection := range InspectTestDeclarations(file.Module).Diagnostics {
+		for _, rejection := range inspectTestDeclarations(file.Module, &budget).Diagnostics {
 			rejections = append(rejections, Diagnostic{Code: rejection.Code, Primary: hir.Span{Package: file.Package, Source: file.Path, StartByte: rejection.Span.StartByte, EndByte: rejection.Span.EndByte}})
 		}
 	}

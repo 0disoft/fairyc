@@ -9,7 +9,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 
 | Range | Category |
 | --- | --- |
-| `E00xx` | Syntax, modules, and imports |
+| `E00xx` | Syntax, modules, imports, and bounded reporting |
 | `E01xx` | Name resolution and source visibility |
 | `E10xx` | Type and initialization |
 | `E11xx` | Resource ownership and drop |
@@ -41,6 +41,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E0008` | Parser skipped an unexpected real token into an error node. |
 | `E0009` | Comparison operators are chained without explicit parentheses. |
 | `E0010` | Shared parser budget is exhausted before a complete bounded result is available. |
+| `E0011` | Semantic diagnostic reporting budget is exhausted; later diagnostics and unsupported facts were omitted. |
 | `E0101` | Name or qualified path cannot be resolved in its owning scope. |
 | `E0102` | Declaration duplicates a name in the same owning scope. |
 | `E0103` | Resolved item is not source-visible from the use module. |
@@ -111,6 +112,8 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `A9001` | Deterministic symbol identity collision or corrupt identity evidence; the map is rejected. |
 
 The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
+
+Semantic analysis admits at most 256 combined diagnostic and unsupported report facts by default. The first omitted fact produces one `E0011` marker, stops further semantic reporting work, and leaves the result failed; compiler consumers must not publish verified MIR from that result. Parser `E0010` exhaustion remains a separate frontend budget.
 
 ## Diagnostic quality rules
 
