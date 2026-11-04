@@ -1,5 +1,24 @@
 package mir
 
+// This verifier uses a dense fixed point, including unreachable components.
+// Bound its quadratic table before allocation; never accept unchecked MIR when
+// the analysis exceeds its budget.
+const maxDominatorBytes = 64 << 20
+
+func dominatorTableSize(count int) (words, cells int, ok bool) {
+	if count < 0 {
+		return 0, 0, false
+	}
+	words = count / 64
+	if count%64 != 0 {
+		words++
+	}
+	if words != 0 && count > (maxDominatorBytes/8)/words {
+		return 0, 0, false
+	}
+	return words, count * words, true
+}
+
 // blockDominatorSets stores one bit per candidate instead of a hash entry.
 // Dense indices keep storage independent of the numeric block IDs.
 type blockDominatorSets struct {
@@ -14,6 +33,7 @@ func (sets *blockDominatorSets) contains(target, candidate BlockID) bool {
 	return targetFound && candidateFound && sets.bits[row*sets.words+column/64]&(uint64(1)<<uint(column%64)) != 0
 }
 
+// blockDominators returns nil if the dense table exceeds the verifier budget.
 func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *blockDominatorSets {
 	indices := make(map[BlockID]int, len(function.Blocks))
 	for _, block := range function.Blocks {
@@ -22,8 +42,11 @@ func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *bl
 		}
 	}
 	count := len(indices)
-	words := (count + 63) / 64
-	sets := &blockDominatorSets{indices: indices, words: words, bits: make([]uint64, count*words)}
+	words, cells, ok := dominatorTableSize(count)
+	if !ok {
+		return nil
+	}
+	sets := &blockDominatorSets{indices: indices, words: words, bits: make([]uint64, cells)}
 	for row := range count {
 		for word := range words {
 			sets.bits[row*words+word] = ^uint64(0)

@@ -52,6 +52,10 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 			// Build the graph once, on the first operation that consumes it.
 			if dominators == nil {
 				blocks, dominators = trapCheckGraph(function)
+				if dominators == nil {
+					return []VerificationError{{Code: "V1501", Entity: operationEntity(block.ID, operationIndex, operation),
+						Detail: "checked-edge dominance analysis exceeds the 64 MiB verifier budget"}}
+				}
 				markers = indexCheckedMarkers(function)
 			}
 			entity := operationEntity(block.ID, operationIndex, operation)

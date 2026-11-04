@@ -393,7 +393,7 @@ The verifier runs before every interpreter or backend handoff.
 | `V1401` | A region-derived value does not escape its region. |
 | `V1402` | Plain-region allocation never receives a `NeedsDrop` type. |
 | `V1403` | Normal control flow enters each lexical Region from one verified live mutable Arena owner, places into it, and resets it exactly once. |
-| `V1501` | Every potentially trapping operation has one complete checked predecessor with matching marker, operands, operator, categories, success edge, and non-returning trap edge. |
+| `V1501` | Every potentially trapping operation has one complete checked predecessor with matching marker, operands, operator, categories, success edge, and non-returning trap edge. Dominance tables are limited to 64 MiB per function; exceeding this budget rejects MIR with an explicit budget detail before allocating the table. Functions without trapping operations do not need this table. |
 | `V1502` | A Stage 0 call has no unwind successor. |
 | `V1601` | `?`, implicit drop, source short-circuiting, and nested side effects do not remain. |
 | `V1701` | Every unsafe instruction carries a source span and unsafe-scope identity. |
