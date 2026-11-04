@@ -22,6 +22,49 @@ pub fn Origin origin(ref Input input,usize at){assert(at<count(input));return *v
 pub fn ref u8[] instance_id(ref Input input,usize at){let p=origin(input,at);return bytes::view(ref input.names)[p.identity_start..p.identity_end];}
 pub fn ref u8[] file(ref Input input,usize at){let p=origin(input,at);return bytes::view(ref input.names)[p.path_start..p.path_end];}
 pub fn Result<catalog::Catalog,catalog::Problem> declarations(ref Input input){return catalog::build_scoped(ref input.sources,ref input.owners,ref input.bindings);}
+// An edit overlay keeps the exact module/import headers. Import declaration IDs
+// can change when private closure helpers are lifted, so remap those IDs rather
+// than reusing stale coordinates. No source or metadata owner is mutated.
+fn usize header(ref syntax::Parsed p,usize at){var usize cursor=at;while(cursor<syntax::declaration_count(p)){let d=syntax::declaration_at(p,cursor);if(d.kind==1 || d.kind==2){break;}cursor+=1;}return cursor;}
+fn Result<v::Vec<usize>,u32> overlay_headers(ref syntax::Parsed before,ref syntax::Parsed after,ref mut usize meter){
+    var v::Vec<usize> mapping=v::empty<usize>();var usize i=0;
+    while(i<syntax::declaration_count(before)){if(!work::charge(meter,1)){return .err(1);}if(!v::push<usize>(ref mut mapping,0).is_ok){return .err(2);}i+=1;}
+    var usize a=header(before,0);var usize b=header(after,0);
+    while(a<syntax::declaration_count(before) && b<syntax::declaration_count(after)){
+        let old=syntax::declaration_at(before,a);let changed=syntax::declaration_at(after,b);
+        if(!work::charge(meter,old.end-old.start+changed.end-changed.start+1)){return .err(1);}
+        if(old.kind!=changed.kind || !bytes::equal(syntax::source_view(before)[old.start..old.end],syntax::source_view(after)[changed.start..changed.end])){return .err(4);}
+        {let slot=v::at_mut<usize>(ref mut mapping,a);*slot=b+1;}
+        a=header(before,a+1);b=header(after,b+1);
+    }
+    if(a!=syntax::declaration_count(before) || b!=syntax::declaration_count(after)){return .err(4);}
+    return .ok(mapping);
+}
+pub fn Result<Input,Problem> with_source(ref Input original,usize selected,ref syntax::Parsed replacement,ref mut usize meter){
+    if(selected>=count(original) || syntax::problem_count(replacement)!=0){return .err(fail(4,0,0,selected,0));}
+    let mapping=switch(overlay_headers(source(original,selected),replacement,meter)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,selected,0));}};
+    var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();var v::Vec<usize> owners=v::empty<usize>();var v::Vec<Origin> origins=v::empty<Origin>();var v::Vec<catalog::Binding> bindings=v::empty<catalog::Binding>();var usize at=0;var usize total=0;
+    while(at<count(original)){
+        let parsed=if(at==selected){replacement}else{source(original,at)};let size=syntax::source_view(parsed).len;
+        if(size>limits::source_set_bytes()-total){return .err(fail(1,0,0,at,0));}total+=size;
+        var usize copied_work=0;let copy=switch(syntax::copy(parsed,ref mut copied_work)){case .ok(p):{p}case .err(code):{return .err(fail(3,code,0,at,0));}};
+        if(!work::charge(meter,copied_work+size+1)){return .err(fail(1,0,0,at,0));}
+        if(!v::push<syntax::Parsed>(ref mut sources,copy).is_ok || !v::push<usize>(ref mut owners,*v::at<usize>(ref original.owners,at)).is_ok || !v::push<Origin>(ref mut origins,origin(original,at)).is_ok){return .err(fail(2,0,0,at,0));}at+=1;
+    }
+    at=0;while(at<v::len<catalog::Binding>(ref original.bindings)){
+        if(!work::charge(meter,1)){return .err(fail(1,0,0,selected,0));}
+        var binding=*v::at<catalog::Binding>(ref original.bindings,at);
+        if(binding.source==selected){
+            if(binding.declaration==0 || binding.declaration>v::len<usize>(ref mapping)){return .err(fail(4,0,0,selected,binding.declaration));}
+            let mapped=*v::at<usize>(ref mapping,binding.declaration-1);
+            if(mapped==0){return .err(fail(4,0,0,selected,binding.declaration));}binding.declaration=mapped;
+        }
+        if(!v::push<catalog::Binding>(ref mut bindings,binding).is_ok){return .err(fail(2,0,0,selected,0));}at+=1;
+    }
+    if(!work::charge(meter,bytes::len(ref original.names)+1)){return .err(fail(1,0,0,selected,0));}
+    let names=switch(bytes::copy(bytes::view(ref original.names))){case .ok(p):{p}case .err(_):{return .err(fail(2,0,0,selected,0));}};
+    return .ok(Input{.sources,.owners,.origins,.bindings,.names});
+}
 fn void put(ref mut v::Vec<usize> values,usize at,usize value){let slot=v::at_mut<usize>(values,at);*slot=value;}
 pub fn Result<Input,Problem> project(ref visibility::Resolved resolved,ref mut usize meter){return project_mode(resolved,false,meter);}
 pub fn Result<Input,Problem> project_tests(ref visibility::Resolved resolved,ref mut usize meter){return project_mode(resolved,true,meter);}

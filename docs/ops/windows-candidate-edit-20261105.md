@@ -42,11 +42,44 @@ duration includes compilation, child processes and independent Go oracle setup;
 it is not a throughput measurement. An initial test-harness run omitted the
 oracle's lock and failed; that setup was corrected before the final passing run.
 
+## Current-source preview and complete edited-workspace verification
+
+`project_edit_preview::prepare` resolves the current graph with an existing lock,
+requires the exact root UID and rederives the visible/full symbol from independently
+verified current source. Only after this selection does it construct the body
+change. `project_compiler_input::with_source` copies the complete input and its
+ownership/origin metadata, preserves module/import headers and remaps selected
+import declaration IDs with one checked index. Source and binding copying is
+linear in retained source/arena size and binding count; the old input is unchanged.
+
+The full generic-aware compiler checks the edited overlay through semantic, Flow,
+MIR, project linking and interface publication. A report is constructed only after
+that factory succeeds. It matches `fairyc.structural-body-edit/v1` exactly and
+must fit 8 KiB. No workspace write, lock refresh or child compiler is involved.
+
+`TestCandidateEditPreview` passes 21 actual preview-process calls per profile with
+an empty PATH. Six successful body/selector combinations compare every report
+field with Go `sourceedit.PlanBody`; ten invalid-body combinations distinguish
+syntax/injection failures from complete semantic rejection. Additional controls
+reject a member UID, unknown symbol, stale raw hash and stale graph lock, then
+accept restored source. The entire fixture tree remains unchanged by previews,
+including rejected ones. This also exercises a fresh cross-package call through
+the preserved import binding in the edited overlay.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateEditPreview$'
+```
+
+Both Windows C11 profiles passed in 242.935 seconds. Initial integration runs
+found an immutable local cursor and a test runner that did not supply stdin;
+both were corrected before the passing run. This is private preview-host evidence,
+not full CLI or atomic application evidence. Broader Atlas source families retain
+their separate admission work.
+
 ## Remaining integration
 
-Current symbol/root selection, full edited-workspace semantic/MIR verification,
-the bounded preview report and actual CLI dispatch remain the next slice. Apply
-also needs fresh closure fingerprints, exclusive edit locking, same-directory
+The actual body-file invocation/CLI dispatch remains next. Apply also needs fresh
+closure fingerprints, exclusive edit locking, same-directory
 staging/sync, final byte rechecks, opened-root atomic rename and explicit
 post-publication failure handling. None is established by syntax-only evidence.
 

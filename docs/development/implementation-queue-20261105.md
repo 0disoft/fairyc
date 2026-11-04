@@ -62,5 +62,7 @@ authorized by this queue.
   `docs/ops/windows-candidate-mcp-20261105.md`; this does not complete the queue.
 - Fairy body edit syntax-only planning now passes 50 Go-oracle cases per Windows
   profile, including exact raw-byte spans/hashes, Unicode whitespace and injection
-  refusal. Full edited-workspace verification, preview CLI and atomic apply remain
-  open; see `docs/ops/windows-candidate-edit-20261105.md`.
+  refusal. Current root/symbol selection, complete edited-workspace verification
+  and bounded preview reports also pass 21 native process calls per profile
+  (242.935s). Body-file CLI and atomic apply remain open; see
+  `docs/ops/windows-candidate-edit-20261105.md`.

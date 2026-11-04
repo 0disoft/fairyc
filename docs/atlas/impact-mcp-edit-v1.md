@@ -135,6 +135,14 @@ This is the named profile, not every optional MCP feature or a client-product ce
 
 ## Single-function structural body edits
 
+The private Fairy `project_edit_body` and `project_edit_preview` owners now supply
+AST-bounded byte replacement and fresh current-source preview for the candidate's
+existing ordinary-source Atlas subset. The complete edited overlay passes the
+generic-aware semantic/Flow/MIR/link/interface factory before a verified report
+is constructed. Windows low/optimized reports and rejection controls match the Go
+owner; see [the body-edit receipt](../ops/windows-candidate-edit-20261105.md).
+Actual body-file CLI invocation and atomic apply remain separate implementation.
+
 ```sh
 fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file edits/body.txt --expected-source-sha256 <raw-file-hash>
 # Add --apply to authorize the current validated replacement.
