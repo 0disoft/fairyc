@@ -38,6 +38,18 @@ func TestStableNativeTestInputRejectsUnsafeAndOversizedFiles(t *testing.T) {
 	}
 }
 
+func TestStableNativeTestInputRejectsSymlinks(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fixtures/input.bin", "input")
+	if err := os.Symlink("input.bin", filepath.Join(root, "fixtures", "link.bin")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := readStableNativeTestInput(root, "fixtures/link.bin"); err == nil || !strings.Contains(err.Error(), "not a regular file") {
+		t.Fatalf("symlink input error = %v", err)
+	}
+}
+
 func TestStableNativeTestInputOptionDomain(t *testing.T) {
 	t.Parallel()
 	options, err := parseStableTestOptions([]string{"--native", "--stdin-file", "fixtures/input.bin", "--", "--stdin-file"})

@@ -442,17 +442,14 @@ func (store *DiskStore) absolutePath(relative string) string {
 }
 
 func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
-	directory, err := root.Open(name)
+	directory, err := durablefile.OpenDirectory(root, name)
 	if err != nil {
 		return nil, err
 	}
 	entries, readErr := directory.ReadDir(-1)
 	closeErr := directory.Close()
-	if readErr != nil {
-		return nil, readErr
-	}
-	if closeErr != nil {
-		return nil, closeErr
+	if readErr != nil || closeErr != nil {
+		return nil, errors.Join(readErr, closeErr)
 	}
 	return entries, nil
 }

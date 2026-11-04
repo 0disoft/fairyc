@@ -194,6 +194,10 @@ These commands treat the current directory as their temporary source root. `pars
 `check-syntax` accept exactly one relative regular file; `check-semantics` accepts one or more
 explicit relative regular files under bounded file-count and aggregate-byte budgets. All reject root
 escape including escaping symbolic links and read no more than the current implementation budget.
+The final input component must itself be a regular file, not a symlink. Admission checks
+the opened handle against the inspected identity; Linux opens nonblocking so a FIFO
+replacement cannot stall before that check. Package-cache directory reads use the same
+opened-identity admission with a directory-only, nonblocking Linux open.
 Their spelling and numeric exit codes are prototype-only.
 Explicit source-closure program commands accept one positional entry plus repeatable `--source`
 values under the same 64-file and aggregate-byte ceilings. They analyze only that explicit FY set,
@@ -757,8 +761,10 @@ Arguments and stdin are process input and do not alter text reports or stable JS
 Explicit `--stdin-file <portable-workspace-file>` is native execution input and does not combine
 with `--stdin` or listing. The path is canonical `/`-separated, workspace-relative, and opened
 through a containment-enforcing root after complete compiler admission. It must identify a regular
-file of at most 65,536 bytes. The compiler reads it once, then gives every selected isolated test a
-fresh reader at byte zero; empty files replay EOF. Missing, non-regular, oversized, unreadable, or
+file of at most 65,536 bytes. The final component cannot be a symlink and uses the same
+regular-file identity and nonblocking Linux admission as explicit source input. The compiler reads
+it once, then gives every selected isolated test a fresh reader at byte zero; empty files replay EOF.
+Missing, non-regular, oversized, unreadable, or
 escaping files fail as code 7 with no process launch. Reports and schemas are unchanged.
 
 Explicit `--timeout-seconds <1..60>` is canonical decimal and native execution only. It bounds each
