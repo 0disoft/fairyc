@@ -221,3 +221,15 @@ artifact values/order, source and sibling isolation, and immediate stop on callb
 failure/cancellation before the next package is extracted. Persistent scoped batches
 still close on early errors. Linux: rerun packageartifact, packagecache,
 workspacecompiler and workspace cache/session CLI tests in the combined validation.
+
+## 19. Process cache JSON admission (2026-11-05)
+
+Both ordinary and storage process codecs measure canonical envelope size after
+verification and before json.Marshal. The existing closed counter now admits
+only the two explicit PackageID-to-digest maps, with allocation-free key counting;
+general map schemas remain rejected. Windows tests retain exact encoded bytes,
+one-byte-below/at/above admission, nil/empty maps, maximum uint32 keys, escaping,
+verification-before-size precedence and bounded canonical decode re-encoding.
+A 16 MiB field rejected at 1 KiB allocates under 1 MiB at the marshal boundary;
+artifact verification has separate graph-copy costs. Linux: rerun packageartifact,
+workspacecompiler and workspace cache/session CLI tests in the combined validation.

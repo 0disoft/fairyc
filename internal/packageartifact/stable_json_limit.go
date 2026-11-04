@@ -17,15 +17,17 @@ import (
 )
 
 var (
-	operandType       = reflect.TypeOf(mir.Operand{})
-	hirType           = reflect.TypeOf(hir.Type{})
-	base64CountType   = reflect.TypeOf(stableBase64Count(0))
-	operationKindType = reflect.TypeOf(mir.OperationKind(0))
-	functionIDType    = reflect.TypeOf(FunctionID{})
-	contextIDType     = reflect.TypeOf(ContextID{})
-	instanceIDType    = reflect.TypeOf(packagegraph.InstanceID{})
-	coordinateIDType  = reflect.TypeOf(packagegraph.CoordinateID{})
-	stateHashType     = reflect.TypeOf(contractstatemir.StateBodyHash{})
+	operandType            = reflect.TypeOf(mir.Operand{})
+	hirType                = reflect.TypeOf(hir.Type{})
+	base64CountType        = reflect.TypeOf(stableBase64Count(0))
+	operationKindType      = reflect.TypeOf(mir.OperationKind(0))
+	functionIDType         = reflect.TypeOf(FunctionID{})
+	contextIDType          = reflect.TypeOf(ContextID{})
+	instanceIDType         = reflect.TypeOf(packagegraph.InstanceID{})
+	coordinateIDType       = reflect.TypeOf(packagegraph.CoordinateID{})
+	stateHashType          = reflect.TypeOf(contractstatemir.StateBodyHash{})
+	processIdentitiesType  = reflect.TypeOf(map[hir.PackageID]packagegraph.InstanceID{})
+	processCoordinatesType = reflect.TypeOf(map[hir.PackageID]packagegraph.CoordinateID{})
 )
 
 var invalidUTF8Extra = func() uint64 { data, _ := json.Marshal("\xff"); return uint64(len(data) - 3) }()
@@ -79,7 +81,7 @@ func stableJSONCheckType(t reflect.Type, seen map[reflect.Type]bool) error {
 	}
 	seen[t] = true
 	switch t {
-	case operandType, hirType, base64CountType, operationKindType, functionIDType, contextIDType, instanceIDType, coordinateIDType, stateHashType:
+	case operandType, hirType, base64CountType, operationKindType, functionIDType, contextIDType, instanceIDType, coordinateIDType, stateHashType, processIdentitiesType, processCoordinatesType:
 		return nil
 	}
 	if t.Implements(stableJSONMarshaler) || t.Implements(stableTextMarshaler) || reflect.PointerTo(t).Implements(stableJSONMarshaler) || reflect.PointerTo(t).Implements(stableTextMarshaler) {
@@ -185,6 +187,8 @@ func stableJSONCount(v reflect.Value, remaining *uint64) bool {
 	}
 	typ := v.Type()
 	switch typ {
+	case processIdentitiesType, processCoordinatesType:
+		return processJSONMapCount(v, remaining)
 	case operandType:
 		op := v.Interface().(mir.Operand)
 		return stableJSONCount(reflect.ValueOf(stableOperandJSON{op.Kind, op.Local, op.I32, op.I64, op.U64, op.Type, stableBase64Count(len(op.StaticData))}), remaining)

@@ -90,6 +90,12 @@ func (codec *ProcessCodec) Encode(artifact Artifact) ([]byte, error) {
 // marshalProcessEnvelope preserves the canonical encoding and byte bound after
 // the caller has verified the artifact and selected its exact codec contract.
 func marshalProcessEnvelope(envelope processEnvelope, maxBytes uint64) ([]byte, error) {
+	// Encode and Decode have already verified all fallible operation kinds.
+	if exceeds, err := stableJSONExceedsLimit(envelope, maxBytes); err != nil {
+		return nil, err
+	} else if exceeds {
+		return nil, ErrProcessArtifactTooLarge
+	}
 	encoded, err := json.Marshal(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("encode process-local package artifact: %w", err)

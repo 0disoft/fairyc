@@ -17,6 +17,12 @@ Add `packageartifact.ProcessCodec`. Each codec instance receives a random 256-bi
 identity and a mandatory caller byte limit. Encoded envelopes include the exact process identity,
 one closed schema and version, and one independently verified package artifact.
 
+After artifact verification, count the exact canonical envelope bytes before
+JSON allocation. The closed counter includes the two PackageID-keyed digest
+maps, unsigned decimal keys, escaping, type spellings and operand base64.
+Oversized encoding and canonical decode re-encoding fail without constructing
+the complete JSON buffer. Existing canonical bytes and error identities remain.
+
 Decoding accepts only bytes from the same codec identity, rejects unknown fields, trailing values,
 oversized input, and noncanonical JSON, then reruns package artifact verification. A different codec
 instance fails with a stable foreign-process error even inside the same executable.
