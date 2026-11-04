@@ -21,6 +21,26 @@ func ReadFile(root *os.Root, name string, max int64) ([]byte, error) {
 	return readFile(root, name, max, nil)
 }
 
+// ReadBodyFile keeps proposed replacement bytes outside every local production
+// source root, as required by the structural edit contract. ReadFile retains
+// canonical spelling, link, opened identity and byte-bound enforcement.
+func ReadBodyFile(w workspaceloader.Workspace, root *os.Root, name string) ([]byte, error) {
+	target := filepath.Join(w.Root, filepath.FromSlash(name))
+	for _, p := range w.Packages {
+		if p.SourceKind != workspaceloader.SourceKindLocal {
+			continue
+		}
+		relative, err := filepath.Rel(p.SourceRoot, target)
+		if err != nil {
+			return nil, fmt.Errorf("invalid edit source root: %w", err)
+		}
+		if relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+			return nil, fmt.Errorf("edit body file must be outside production source roots")
+		}
+	}
+	return ReadFile(root, name, MaxBody)
+}
+
 func readFile(root *os.Root, name string, max int64, cases *pathCaseIndex) ([]byte, error) {
 	if filepath.ToSlash(filepath.Clean(filepath.FromSlash(name))) != name || name == "." || name == ".." || strings.HasPrefix(name, "../") || strings.Contains(name, "\\") {
 		return nil, fmt.Errorf("noncanonical edit path")

@@ -141,7 +141,10 @@ existing ordinary-source Atlas subset. The complete edited overlay passes the
 generic-aware semantic/Flow/MIR/link/interface factory before a verified report
 is constructed. Windows low/optimized reports and rejection controls match the Go
 owner; see [the body-edit receipt](../ops/windows-candidate-edit-20261105.md).
-Actual body-file CLI invocation and atomic apply remain separate implementation.
+The Windows Fairy body-file preview command is connected through retained-root
+reads and validates outside-production-root paths. Its actual command-leaf
+acceptance passes in both profiles; full CLI acceptance and atomic apply remain
+separate. The Go reader also enforces this existing body-path restriction.
 
 ```sh
 fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file edits/body.txt --expected-source-sha256 <raw-file-hash>

@@ -62,7 +62,7 @@ func runAtlasEdit(arguments []string, root string, stdout, stderr io.Writer) int
 	if err != nil {
 		return packageFailure(stderr, err)
 	}
-	body, err := sourceedit.ReadFile(opened, values["--body-file"], sourceedit.MaxBody)
+	body, err := sourceedit.ReadBodyFile(prepared.workspace, opened, values["--body-file"])
 	opened.Close()
 	if err != nil {
 		return packageFailure(stderr, err)

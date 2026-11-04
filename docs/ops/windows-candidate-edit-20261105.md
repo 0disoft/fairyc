@@ -94,9 +94,39 @@ Go-oracle workspace, including the body file and lock, remains unchanged.
 go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateEditOptions$'
 ```
 
+## Actual body-file preview command
+
+`project_edit_preview` now separates exact current root/symbol selection from
+finishing the edited overlay. Selection owns its source, coordinates and copied
+names, so no loader lifetime escapes. The existing already-owned-body entry is
+retained. `project_edit_cli` reads a portable body path through the retained
+Windows root/child-directory adapters only after selection. Paths within any
+local production source root reject; a sibling such as `src2` remains allowed.
+
+The Go command now enforces that same existing outside-production-roots contract
+through `sourceedit.ReadBodyFile`; previously its bounded reader alone admitted
+non-Fairy body files under a production root. No flag or report schema changed.
+
+The actual command leaf passes Windows low/optimized acceptance in 183.671
+seconds with an empty PATH. The successful report matches Go exactly. Controls
+cover invalid semantic/syntax/injected bodies, canonical path and case checks,
+root/member production roots, sibling directories, 65,535/65,536/65,537-byte body
+files, an actual directory symlink, broken stdout and help outside a workspace.
+All preview/error paths preserve the fixture tree. The explicit apply flag fails
+until its publication owner is connected, rather than reporting preview success.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateEditCommand$'
+go test -mod=readonly -count=1 ./internal/sourceedit ./internal/cli -run 'Test(AtlasEdit|Snapshot)'
+```
+
+Both Go suites pass, including root/member body exclusion and a valid `src2`
+control. Full candidate dispatch is wired in source; its full CLI acceptance will
+be refreshed together with apply, instead of repeating that expensive image now.
+
 ## Remaining integration
 
-The actual body-file invocation/CLI dispatch remains next. Apply also needs fresh
+Apply needs fresh
 closure fingerprints, exclusive edit locking, same-directory
 staging/sync, final byte rechecks, opened-root atomic rename and explicit
 post-publication failure handling. None is established by syntax-only evidence.

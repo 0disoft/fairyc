@@ -11,6 +11,7 @@ import project_manifest_values as manifest;
 import project_module_visibility as visibility;
 import project_lock_document as locks;
 import project_coordinate_graph as coordinates;
+import module_public_type_text as public_type;
 import project_compiler_input as input;
 import project_compiler_core as compiler;
 import project_compiler_image_hash as image;
@@ -24,14 +25,18 @@ import std::bytes as bytes;
 import std::vec as v;
 import syntax as syntax;
 
-pub resource Preview{edit::Change change;bytes::Buffer path;bytes::Buffer report;cleanup{}}
+pub resource Selection{input::Input original;public_type::Coordinates table;declarations::Row selected;bytes::Buffer path;bytes::Buffer module_name;bytes::Buffer function;v::Vec<bytes::Buffer> production_roots;cleanup{}}
+pub resource Preview{Selection selection;edit::Change change;bytes::Buffer report;cleanup{}}
 pub struct Problem{u32 stage;u32 code;}
 fn Problem fail(u32 stage,u32 code){return Problem{.stage,.code};}
 pub fn ref u8[] report(ref Preview p){return bytes::view(ref p.report);}
-pub fn ref u8[] path(ref Preview p){return bytes::view(ref p.path);}
+pub fn ref u8[] path(ref Preview p){return bytes::view(ref p.selection.path);}
 pub fn ref u8[] before(ref Preview p){return edit::before(ref p.change);}
 pub fn ref u8[] after(ref Preview p){return edit::after(ref p.change);}
 fn bool vendor(ref u8[] path){let name=b"vendor/";if(path.len<name.len){return false;}var usize i=0;while(i<name.len){let c=path[i];if(c!=name[i] && !(c>=65 && c<=90 && c+32==name[i])){return false;}i+=1;}return true;}
+fn bool prefix(ref u8[] root,ref u8[] path){if(path.len<root.len || path.len>root.len && path[root.len]!=47){return false;}var usize i=0;while(i<root.len){let a=root[i];let b=path[i];if((if(a>=65 && a<=90){a+32}else{a})!=(if(b>=65 && b<=90){b+32}else{b})){return false;}i+=1;}return true;}
+pub fn bool body_allowed(ref Selection p,ref u8[] path){if(!manifest::path(path)){return false;}var usize i=0;while(i<v::len<bytes::Buffer>(ref p.production_roots)){if(prefix(bytes::view(v::at<bytes::Buffer>(ref p.production_roots,i)),path)){return false;}i+=1;}return true;}
+fn Result<v::Vec<bytes::Buffer>,u32> roots(ref catalog::Catalog packages){var v::Vec<bytes::Buffer> out=v::empty<bytes::Buffer>();var usize i=0;while(i<catalog::count(packages)){var path=bytes::empty();let base=catalog::path(packages,i);if(!bytes::equal(base,b".") && (!bytes::append(ref mut path,base).is_ok || !bytes::append_byte(ref mut path,47).is_ok)){return .err(2);}if(!bytes::append(ref mut path,sources::package_value(modules::source_set(catalog::input(packages,i)),b"source")).is_ok){return .err(2);}if(!v::push<bytes::Buffer>(ref mut out,path).is_ok){return .err(2);}i+=1;}return .ok(out);}
 fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] function,ref edit::Change change,ref mut usize meter){
     var out=bytes::empty();discard w::raw(ref mut out,b"{\"schema\":\"fairyc.structural-body-edit/v1\",",meter)?;
     discard w::pair(ref mut out,b"path",path,meter)?;discard w::raw(ref mut out,b",",meter)?;
@@ -44,10 +49,9 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     discard w::raw(ref mut out,b",\"verified\":true,\"applied\":false}",meter)?;
     if(bytes::len(ref out)>8192){return .err(3);}return .ok(out);
 }
-// This host reads current source but never creates or refreshes the lock. It
-// validates the complete immutable edited input before constructing a report.
-@effects(filesystem,environment) pub fn Result<Preview,Problem> prepare(ref u8[] root,ref u8[] uid,ref u8[] symbol,ref u8[] expected,ref u8[] body){
-    if(!manifest::uid(uid) || (!wire::hex(symbol,b"fysym1-sha256-128-",32,false) && !wire::hex(symbol,b"fysym1-sha256-256-",64,false)) || expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
+// Selection precedes body-file access and owns all data used by the overlay.
+@effects(filesystem,environment) pub fn Result<Selection,Problem> select(ref u8[] root,ref u8[] uid,ref u8[] symbol){
+    if(!manifest::uid(uid) || (!wire::hex(symbol,b"fysym1-sha256-128-",32,false) && !wire::hex(symbol,b"fysym1-sha256-256-",64,false))){return .err(fail(1,1));}
     var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
     let loaded=switch(loader::load(root,true,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(_):{return .err(fail(2,1));}};
     let resolved=loader::workspace(ref loaded);let g=visibility::workspace_graph(resolved);
@@ -72,13 +76,26 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     }
     if(matches!=1){return .err(fail(1,3));}
     let parsed=input::source(ref original,selected.module_index);
-    let change=switch(edit::replace(parsed,selected.declaration,expected,body,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};
-    let edited=switch(input::with_source(ref original,selected.module_index,edit::parsed(ref change),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
-    source_work=0;link_work=0;
-    let verified=switch(compiler::build_complete(ref edited,ref table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
     var path=bytes::empty();
     if(!bytes::append(ref mut path,sources::package_value(root_sources,b"source")).is_ok || !bytes::append_byte(ref mut path,47).is_ok || !bytes::append(ref mut path,input::file(ref original,selected.module_index)).is_ok){return .err(fail(6,2));}
     if(vendor(bytes::view(ref path))){return .err(fail(1,4));}
-    let report=switch(render(bytes::view(ref path),graph::module_name(g,0,input::origin(ref original,selected.module_index).module_index),syntax::declaration_name(parsed,selected.declaration+1),ref change,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
-    return .ok(Preview{.change,.path,.report});
+    let module_name=switch(bytes::copy(graph::module_name(g,0,input::origin(ref original,selected.module_index).module_index))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
+    let function=switch(bytes::copy(syntax::declaration_name(parsed,selected.declaration+1))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
+    let production_roots=switch(roots(workspace::local_catalog(local::input(graph::local_graph(g))))){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
+    return .ok(Selection{.original,.table,.selected,.path,.module_name,.function,.production_roots});
+}
+pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u8[] body){
+    if(expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
+    var usize meter=0;
+    let change=switch(edit::replace(input::source(ref selected.original,selected.selected.module_index),selected.selected.declaration,expected,body,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};
+    let edited=switch(input::with_source(ref selected.original,selected.selected.module_index,edit::parsed(ref change),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
+    var usize source_work=0;var usize link_work=0;
+    let verified=switch(compiler::build_complete(ref edited,ref selected.table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
+    let report=switch(render(bytes::view(ref selected.path),bytes::view(ref selected.module_name),bytes::view(ref selected.function),ref change,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
+    return .ok(Preview{.selection=selected,.change,.report});
+}
+// Compatibility entry for an already owned body. No workspace write or lock refresh.
+@effects(filesystem,environment) pub fn Result<Preview,Problem> prepare(ref u8[] root,ref u8[] uid,ref u8[] symbol,ref u8[] expected,ref u8[] body){
+    if(expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
+    let selected=select(root,uid,symbol)?;return finish(selected,expected,body);
 }
