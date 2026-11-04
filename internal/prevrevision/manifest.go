@@ -2,9 +2,10 @@ package prevrevision
 
 import (
 	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -38,23 +39,34 @@ type plannedManifest struct {
 
 // RefreshFixtureSpans maps manifest spans through the exact source migration committed after oldRef.
 func RefreshFixtureSpans(repoRoot, oldRef string, manifests []string, write bool) (ManifestReport, error) {
+	return RefreshFixtureSpansContext(context.Background(), repoRoot, oldRef, manifests, write)
+}
+
+// RefreshFixtureSpansContext shares one bounded Git reader across the complete
+// refresh, and propagates cancellation before any planned file is published.
+func RefreshFixtureSpansContext(ctx context.Context, repoRoot, oldRef string, manifests []string, write bool) (report ManifestReport, err error) {
 	absoluteRoot, err := filepath.Abs(repoRoot)
 	if err != nil {
 		return ManifestReport{}, err
 	}
-	report := ManifestReport{OldRef: oldRef, Mode: "check"}
+	report = ManifestReport{OldRef: oldRef, Mode: "check"}
 	if write {
 		report.Mode = "write"
 	}
 	mapperCache := make(map[string]SpanMapper)
+	revision := newRevisionReader(ctx, absoluteRoot, oldRef)
+	defer func() { err = errors.Join(err, revision.Close()) }()
 	var plan []plannedManifest
 	for _, relativeManifest := range manifests {
+		if err := revision.ctx.Err(); err != nil {
+			return report, err
+		}
 		manifestPath := filepath.Join(absoluteRoot, filepath.FromSlash(relativeManifest))
 		current, err := os.ReadFile(manifestPath)
 		if err != nil {
 			return report, fmt.Errorf("read %s: %w", relativeManifest, err)
 		}
-		baseline, err := gitShow(absoluteRoot, oldRef, filepath.ToSlash(relativeManifest))
+		baseline, err := revision.Read(filepath.ToSlash(relativeManifest))
 		if err != nil {
 			return report, err
 		}
@@ -69,7 +81,7 @@ func RefreshFixtureSpans(repoRoot, oldRef string, manifests []string, write bool
 		if !bytes.Equal(currentShape, baselineShape) {
 			return report, fmt.Errorf("current %s differs from %s outside source-span numbers", relativeManifest, oldRef)
 		}
-		output, count, overrides, err := refreshManifestSpans(absoluteRoot, oldRef, manifestPath, baseline, mapperCache)
+		output, count, overrides, err := refreshManifestSpans(absoluteRoot, manifestPath, baseline, mapperCache, revision.Read)
 		if err != nil {
 			return report, fmt.Errorf("refresh %s: %w", relativeManifest, err)
 		}
@@ -89,10 +101,18 @@ func RefreshFixtureSpans(repoRoot, oldRef string, manifests []string, write bool
 	for _, file := range plan {
 		report.Files = append(report.Files, file.rel)
 	}
+	// Finish and reap Git before publishing any file: a failed reader must not
+	// turn an otherwise rejected refresh into a partially applied plan.
+	if err := revision.Close(); err != nil {
+		return report, err
+	}
 	if !write {
 		return report, nil
 	}
 	for _, file := range plan {
+		if err := ctx.Err(); err != nil {
+			return report, err
+		}
 		if err := atomicReplace(file.path, file.source, file.mode); err != nil {
 			return report, fmt.Errorf("write %s: %w", file.rel, err)
 		}
@@ -101,7 +121,7 @@ func RefreshFixtureSpans(repoRoot, oldRef string, manifests []string, write bool
 	return report, nil
 }
 
-func refreshManifestSpans(repoRoot, oldRef, manifestPath string, input []byte, cache map[string]SpanMapper) ([]byte, int, int, error) {
+func refreshManifestSpans(repoRoot, manifestPath string, input []byte, cache map[string]SpanMapper, readRevision func(string) ([]byte, error)) ([]byte, int, int, error) {
 	cases, err := caseObjectRanges(input)
 	if err != nil {
 		return nil, 0, 0, err
@@ -138,7 +158,7 @@ func refreshManifestSpans(repoRoot, oldRef, manifestPath string, input []byte, c
 			repoRelative = filepath.ToSlash(repoRelative)
 			mapper, found := cache[repoRelative]
 			if !found {
-				oldSource, err := gitShow(repoRoot, oldRef, repoRelative)
+				oldSource, err := readRevision(repoRelative)
 				if err != nil {
 					return nil, 0, 0, err
 				}
@@ -262,13 +282,4 @@ func caseObjectRanges(input []byte) ([]byteRange, error) {
 		}
 	}
 	return nil, fmt.Errorf("unterminated cases array")
-}
-
-func gitShow(repoRoot, oldRef, relative string) ([]byte, error) {
-	command := exec.Command("git", "-C", repoRoot, "show", oldRef+":"+relative)
-	output, err := command.Output()
-	if err != nil {
-		return nil, fmt.Errorf("git show %s:%s: %w", oldRef, relative, err)
-	}
-	return output, nil
 }
