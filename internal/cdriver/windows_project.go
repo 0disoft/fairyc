@@ -40,6 +40,32 @@ func ValidateWindowsProjectStackReserve(reserve uint64) error {
 // BuildWindowsMSVCTargetPartsWithStackReserve is for explicitly sized private
 // compiler images; ordinary project builds use the zero-reservation wrapper.
 func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, true)
+}
+
+// BuildWindowsMSVCTargetPartsImageWithStackReserve builds the same private
+// image as BuildWindowsMSVCTargetPartsWithStackReserve while inspecting each
+// COFF object and releasing its bytes before the link. Publication callers that
+// consume only Bytes keep one object resident at a time instead of the whole
+// object set; the returned artifact has no Objects.
+func BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false)
+}
+
+// maxProjectRetainedObjectBytes bounds the aggregate COFF bytes kept in
+// WindowsHostArtifact.Objects, independently of the source transport limit.
+const maxProjectRetainedObjectBytes = 256 << 20
+
+// retainProjectObject appends one already inspected COFF object while the
+// aggregate retained size stays inside the budget.
+func retainProjectObject(objects []WindowsHostObject, retained int, object WindowsHostObject) ([]WindowsHostObject, int, error) {
+	if retained < 0 || retained > maxProjectRetainedObjectBytes || len(object.Bytes) > maxProjectRetainedObjectBytes-retained {
+		return objects, retained, fmt.Errorf("retained project objects exceed %d MiB; use the image-only project build", maxProjectRetainedObjectBytes>>20)
+	}
+	return append(objects, object), retained + len(object.Bytes), nil
+}
+
+func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64, retainObjects bool) (WindowsHostArtifact, error) {
 	if err := ValidateWindowsProjectStackReserve(reserve); err != nil {
 		return WindowsHostArtifact{}, err
 	}
@@ -87,6 +113,7 @@ func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain,
 	}
 	objects := make([]WindowsHostObject, 0, len(sources))
 	objectPaths := make([]string, 0, len(sources))
+	retainedBytes := 0
 	for _, source := range sources {
 		sourcePath := filepath.Join(directory, source.Name)
 		if err := os.WriteFile(sourcePath, []byte(source.Contents), 0o600); err != nil {
@@ -107,7 +134,14 @@ func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain,
 		if err := inspectProjectObject(contents); err != nil {
 			return WindowsHostArtifact{}, fmt.Errorf("inspect project object %s: %w", objectName, err)
 		}
-		objects = append(objects, WindowsHostObject{Name: objectName, Bytes: contents})
+		// The link consumes the files on disk, so an image-only build can let
+		// each inspected object drop before the next compile starts.
+		if retainObjects {
+			objects, retainedBytes, err = retainProjectObject(objects, retainedBytes, WindowsHostObject{Name: objectName, Bytes: contents})
+			if err != nil {
+				return WindowsHostArtifact{}, fmt.Errorf("retain project object %s: %w", objectName, err)
+			}
+		}
 		objectPaths = append(objectPaths, objectPath)
 	}
 	executable := filepath.Join(directory, "program.exe")

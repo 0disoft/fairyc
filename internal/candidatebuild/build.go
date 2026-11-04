@@ -271,7 +271,9 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if options.Release {
 		profile = cdriver.OptimizedProfile
 	}
-	artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
+	// Publication consumes only the image, so inspect and release each COFF
+	// object before linking instead of retaining the whole object set.
+	artifact, err := cdriver.BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
 	if err != nil {
 		return Result{}, err
 	}

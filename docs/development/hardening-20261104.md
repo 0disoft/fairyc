@@ -17,3 +17,11 @@ image removal. Transient image-release/sharing failures receive bounded cleanup
 retries; permanent cleanup failures are returned. Windows subprocess tests cover
 stdout inheritance, trap receipts and descendants holding the owned image.
 Linux: no Windows Job execution claim; rerun the common cdriver suite later.
+
+## 3. Windows project object residency
+
+Candidate publication uses the image-only project builder. Objects are still
+validated individually; only paths survive until linking. Existing object-returning
+APIs retain their behavior under a 256 MiB aggregate diagnostic-object budget.
+MSVC tests compare exact image bytes and execute ordinary/stack-reserved images.
+Linux: rerun common candidatebuild/cdriver tests in the combined pass.
