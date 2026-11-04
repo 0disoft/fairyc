@@ -96,7 +96,16 @@ func readRegular(root *os.Root, name string, max int64) ([]byte, error) {
 // openRegular preserves the same path, file kind, size and identity checks for
 // readers and comparisons. The caller owns the returned file.
 func openRegular(root *os.Root, name string, max int64) (*os.File, error) {
-	if err := directory(root, path.Dir(name), false); err != nil {
+	return openRegularWithNames(root, name, max, nil)
+}
+
+func openRegularWithNames(root *os.Root, name string, max int64, names *treeNameIndex) (*os.File, error) {
+	checkDirectory := func(name string) error { return directory(root, name, false) }
+	checkName := func(parent, name string) error { return exactName(root, parent, name) }
+	if names != nil {
+		checkDirectory, checkName = names.directory, names.exactName
+	}
+	if err := checkDirectory(path.Dir(name)); err != nil {
 		return nil, err
 	}
 	info, err := root.Lstat(name)
@@ -106,7 +115,7 @@ func openRegular(root *os.Root, name string, max int64) (*os.File, error) {
 	if !info.Mode().IsRegular() || info.Size() > max {
 		return nil, fmt.Errorf("expected bounded regular source file")
 	}
-	if err := exactName(root, path.Dir(name), path.Base(name)); err != nil {
+	if err := checkName(path.Dir(name), path.Base(name)); err != nil {
 		return nil, err
 	}
 	f, err := root.Open(name)
@@ -122,7 +131,11 @@ func openRegular(root *os.Root, name string, max int64) (*os.File, error) {
 }
 
 func readRegularMatches(ctx context.Context, root *os.Root, name string, max int64, expected []byte) (bool, error) {
-	f, err := openRegular(root, name, max)
+	return readRegularMatchesWithNames(ctx, root, name, max, expected, nil)
+}
+
+func readRegularMatchesWithNames(ctx context.Context, root *os.Root, name string, max int64, expected []byte, names *treeNameIndex) (bool, error) {
+	f, err := openRegularWithNames(root, name, max, names)
 	if err != nil {
 		return false, err
 	}

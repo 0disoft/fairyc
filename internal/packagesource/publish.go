@@ -43,6 +43,7 @@ func verifyTreeWithin(ctx context.Context, root *os.Root, name string, b bundle,
 		return fmt.Errorf("existing package directory changed during open")
 	}
 	budget := &directoryscan.Budget{Context: ctx, Remaining: maxEntries - 1}
+	names := &treeNameIndex{root: child, dirs: make(map[string]treeDirectoryNames)}
 	files := 0
 	type pendingEntry struct {
 		name  string
@@ -66,7 +67,7 @@ func verifyTreeWithin(ctx context.Context, root *os.Root, name string, b bundle,
 				if !found {
 					return fmt.Errorf("existing package contains additional file")
 				}
-				matches, err := readRegularMatches(ctx, child, item.name, MaxFileBytes, expected)
+				matches, err := readRegularMatchesWithNames(ctx, child, item.name, MaxFileBytes, expected, names)
 				if err != nil {
 					return err
 				}
@@ -82,13 +83,15 @@ func verifyTreeWithin(ctx context.Context, root *os.Root, name string, b bundle,
 			return err
 		}
 		entries, readErr := directoryscan.ReadSorted(directory, budget)
+		identity, statErr := directory.Stat()
 		closeErr := directory.Close()
 		if errors.Is(readErr, directoryscan.ErrLimit) {
 			return fmt.Errorf("existing package entry limit exceeded")
 		}
-		if err := errors.Join(readErr, closeErr); err != nil {
+		if err := errors.Join(readErr, statErr, closeErr); err != nil {
 			return err
 		}
+		names.remember(item.name, identity, entries)
 		for index := len(entries) - 1; index >= 0; index-- {
 			entry := entries[index]
 			pending = append(pending, pendingEntry{name: path.Join(item.name, entry.Name()), entry: entry})
@@ -97,7 +100,7 @@ func verifyTreeWithin(ctx context.Context, root *os.Root, name string, b bundle,
 	if files != len(b.files) {
 		return fmt.Errorf("existing package is incomplete")
 	}
-	return nil
+	return names.verifyStable(ctx, maxEntries)
 }
 
 func publish(ctx context.Context, root *os.Root, pin Pin, b bundle) (installed bool, err error) {

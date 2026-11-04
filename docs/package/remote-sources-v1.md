@@ -61,6 +61,11 @@ Go existing-tree verification shares an 8,193-entry budget including the package
 Directory reads admit at most 128 entries per batch plus one overflow probe before
 retaining or sorting. A partial scan cannot certify reuse. Opened-directory identity
 is checked, and each enumeration handle closes before descending into children.
+Exact spelling lookups share a verification-local directory-name index, while
+file kind, byte limit and opened identity remain checked per file. A second
+bounded pass compares directory identities, names and kinds before reuse, so
+case renames, added entries and replaced directories cannot reuse stale names.
+This is a pair of directory observations, not transactional filesystem isolation.
 
 Archives contain `fairy.toml` at ZIP root and the declared source directory with at least one
 `.fy` file. Manifest UID, exact version and language must match the pin/root; nested workspace
