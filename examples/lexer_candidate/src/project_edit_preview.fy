@@ -41,7 +41,7 @@ fn bool vendor(ref u8[] path){let name=b"vendor/";if(path.len<name.len){return f
 fn bool prefix(ref u8[] root,ref u8[] path){if(path.len<root.len || path.len>root.len && path[root.len]!=47){return false;}var usize i=0;while(i<root.len){let a=root[i];let b=path[i];if((if(a>=65 && a<=90){a+32}else{a})!=(if(b>=65 && b<=90){b+32}else{b})){return false;}i+=1;}return true;}
 pub fn bool body_allowed(ref Selection p,ref u8[] path){if(!manifest::path(path)){return false;}var usize i=0;while(i<v::len<bytes::Buffer>(ref p.production_roots)){if(prefix(bytes::view(v::at<bytes::Buffer>(ref p.production_roots,i)),path)){return false;}i+=1;}return true;}
 fn Result<v::Vec<bytes::Buffer>,u32> roots(ref catalog::Catalog packages){var v::Vec<bytes::Buffer> out=v::empty<bytes::Buffer>();var usize i=0;while(i<catalog::count(packages)){var path=bytes::empty();let base=catalog::path(packages,i);if(!bytes::equal(base,b".") && (!bytes::append(ref mut path,base).is_ok || !bytes::append_byte(ref mut path,47).is_ok)){return .err(2);}if(!bytes::append(ref mut path,sources::package_value(modules::source_set(catalog::input(packages,i)),b"source")).is_ok){return .err(2);}if(!v::push<bytes::Buffer>(ref mut out,path).is_ok){return .err(2);}i+=1;}return .ok(out);}
-fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] function,ref edit::Change change,ref mut usize meter){
+fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] function,ref edit::Change change,bool applied,ref mut usize meter){
     var out=bytes::empty();discard w::raw(ref mut out,b"{\"schema\":\"fairyc.structural-body-edit/v1\",",meter)?;
     discard w::pair(ref mut out,b"path",path,meter)?;discard w::raw(ref mut out,b",",meter)?;
     discard w::pair(ref mut out,b"module",module_name,meter)?;discard w::raw(ref mut out,b",",meter)?;
@@ -50,7 +50,7 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     discard w::number(ref mut out,edit::end(change),meter)?;discard w::raw(ref mut out,b",",meter)?;
     discard w::pair(ref mut out,b"beforeSha256",edit::before_hash(change),meter)?;discard w::raw(ref mut out,b",",meter)?;
     discard w::pair(ref mut out,b"afterSha256",edit::after_hash(change),meter)?;
-    discard w::raw(ref mut out,b",\"verified\":true,\"applied\":false}",meter)?;
+    discard w::raw(ref mut out,if(applied){b",\"verified\":true,\"applied\":true}"}else{b",\"verified\":true,\"applied\":false}"},meter)?;
     if(bytes::len(ref out)>8192){return .err(3);}return .ok(out);
 }
 // Selection precedes body-file access and owns all data used by the overlay.
@@ -98,7 +98,7 @@ pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u
     let edited=switch(input::with_source(ref selected.original,selected.selected.module_index,edit::parsed(ref change),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
     var usize source_work=0;var usize link_work=0;
     let verified=switch(compiler::build_complete(ref edited,ref selected.table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
-    let report=switch(render(bytes::view(ref selected.path),bytes::view(ref selected.module_name),bytes::view(ref selected.function),ref change,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
+    let report=switch(render(bytes::view(ref selected.path),bytes::view(ref selected.module_name),bytes::view(ref selected.function),ref change,false,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
     return .ok(Preview{.selection=selected,.change,.report});
 }
 // Compatibility entry for an already owned body. No workspace write or lock refresh.
@@ -113,3 +113,4 @@ pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u
     if(!bytes::equal(fingerprint(ref checked),fingerprint(proposal)) || !bytes::equal(path(ref checked),path(proposal)) || !bytes::equal(before(ref checked),before(proposal)) || !bytes::equal(after(ref checked),after(proposal))){return .err(fail(7,5));}
     return .ok(true);
 }
+pub fn Result<bytes::Buffer,u32> applied_report(ref Preview p){var usize meter=0;return render(bytes::view(ref p.selection.path),bytes::view(ref p.selection.module_name),bytes::view(ref p.selection.function),ref p.change,true,ref mut meter);}

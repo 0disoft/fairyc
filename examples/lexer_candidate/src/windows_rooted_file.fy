@@ -43,6 +43,8 @@ fn Result<bytes::Buffer,Problem> wide(ref u8[] input,bool leaf){if(leaf && !vali
 @effects(filesystem) pub fn Result<Directory,Problem> create_directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{create_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
 @effects(filesystem) pub fn Result<Directory,Problem> edit_directory(ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{edit_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)};if(raw==0){return .err(native(3,0));}return .ok(Directory{.raw});}
 @effects(filesystem) pub fn bool erase_directory(ref Directory root){return unsafe{file_delete(root.raw)}!=0;}
+// Consuming close reports failure and never retries an uncertain handle.
+@effects(filesystem) pub fn Result<bool,Problem> close_directory(Directory input){var directory=input;let raw=directory.raw;directory.raw=0;return if(unsafe{close_handle(raw)}!=0){.ok(true)}else{.err(native(11,0))};}
 @effects(filesystem) pub fn Result<bool,Problem> publish_directory(ref Directory source,ref Directory root,ref u8[] leaf){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(unsafe{file_publish_new(source.raw,root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2)}!=0){.ok(true)}else{.err(native(9,0))};}
 // Caller owns a newly created unpublished directory; its cleanup removes any
 // completed files on failure. This does not publish an ordinary cache file.

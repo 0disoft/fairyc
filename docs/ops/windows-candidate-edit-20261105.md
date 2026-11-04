@@ -177,12 +177,59 @@ go vet -mod=readonly ./internal/cli ./internal/sourceedit
 git diff --check
 ```
 
-## Remaining integration
+## Atomic application owner and native command proof
 
-Fresh closure fingerprints and overlay revalidation are available. Apply still
-needs exclusive edit locking, same-directory
-staging/sync, final byte rechecks, opened-root atomic rename and explicit
-post-publication failure handling. None is established by syntax-only evidence.
+The Windows `project_edit_apply` owner now acquires the same exclusive edit
+directory as Go. It freshly rebuilds the complete overlay and compares the owned
+preview before opening a retained source parent. Read-only sources reject. An
+exclusive same-directory temporary is written and synced; a final fresh locked
+closure fingerprint and exact original-byte comparison precede one handle-based
+replacing rename. Existing staging collisions are preserved; sixteen occupied
+names refuse without touching them. No delete-destination or rename retry exists.
+
+The staged object owns cleanup on ordinary failures. A consuming directory-close
+operation clears its handle before the single close attempt. Closing the stage
+or lock may fail after publication; the structured error retains a published bit
+and the command states that the edit was applied. A prior publication error is
+not hidden by a subsequent cleanup error. The bounded applied report is prepared
+before acquiring write authority. Broken output after application also states
+that the source changed, without retrying. `fairy.lock` is never refreshed here.
+
+The actual `project_edit_cli::arguments` command passes the existing preview
+cases and twelve apply controls in each profile, plus refusal of a second request
+using the unchanged old graph lock. Successful source bytes and applied reports
+match the Go command. Collision/exhaustion preserve unrelated temporary files;
+an existing lock and read-only source refuse. Test-only native wrappers inject a
+partial write, sync failure, first-rename failure, post-publication close failure,
+lock-cleanup failure and combined rename/cleanup failure. A hypothetical second
+rename would succeed, so that control detects an improper publication retry.
+Broken stdout after application retains the applied source and reports ambiguity.
+Complete final fixture trees check exact bytes and ordinary staging/lock cleanup.
+
+The first command run (384.61 seconds) failed only in its three staged-observation
+controls per profile: Go `WalkDir` tried reopening the live deletion-capable
+Windows lock. Preview and the twelve apply controls above had already passed.
+The repaired harness captures its initial tree before process startup, enumerates
+the live lock/stage names without reopening them, and updates only its explicitly
+mutated input. All three staging controls then passed per profile (108.22 seconds),
+covering source, dependency and raw graph-lock drift after sync and before final
+publication. Prior passing observations are reused: Fairy sources, generated-C
+inputs and native fault wrappers were unchanged by this Go-only harness repair.
+The complete command was not redundantly replayed after that repair.
+
+```powershell
+# Initial run; only the live-tree observation harness failed as described above.
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestCandidateEditCommand$'
+# Repaired observation controls, both profiles: pass.
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateEditCommand$/(low|optimized)$/staged-(source|dependency|lock)$'
+# Go reference regression and static checks: pass.
+go test -mod=readonly -count=1 ./internal/sourceedit ./internal/cli -run '^Test(AtlasEdit|Snapshot)'
+go vet -mod=readonly ./internal/cli ./internal/sourceedit
+git diff --check
+```
+
+Refreshed full candidate dispatcher acceptance remains open. A command-leaf
+image and native fault-injection proof do not establish that separate gate.
 
 Native Linux stays in the combined queue. Full repository tests, hosted CI,
 clean-machine distribution and push/release/deployment were not performed.

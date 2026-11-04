@@ -77,3 +77,10 @@ authorized by this queue.
   eight process-barrier drift scenarios per Windows profile (199.02s). Raw metadata
   drift and relocked dependency changes reject without writing; atomic application
   and its actual CLI acceptance remain open.
+- Windows atomic application is now connected to the actual Fairy edit command:
+  exclusive lock, complete fresh validation, staged write/sync, final closure and
+  byte checks, one rename, cleanup and explicit post-publication errors. Existing
+  previews and twelve apply controls pass per profile; three after-sync drift
+  controls pass per profile after a Go-only live-tree harness repair. See the
+  detailed reuse/failure accounting in the edit receipt. Refreshed full candidate
+  CLI acceptance remains open; the broader implementation queue is not complete.

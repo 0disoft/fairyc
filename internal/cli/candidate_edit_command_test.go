@@ -14,7 +14,10 @@ import (
 
 func TestCandidateEditCommand(t *testing.T) {
 	main := `module main;import project_edit_cli as edit;@effects(filesystem,environment,console) fn i32 main(){return edit::arguments();}`
-	candidateAtlasProbeSize(t, "project_edit_cli", main, 2<<20, verifyCandidateEditCommand)
+	candidateEditCommandProbe(t, main, func(t *testing.T, image string) {
+		t.Run("preview", func(t *testing.T) { verifyCandidateEditCommand(t, image) })
+		verifyCandidateEditApply(t, image)
+	})
 }
 
 func verifyCandidateEditCommand(t *testing.T, image string) {
@@ -98,10 +101,6 @@ func verifyCandidateEditCommand(t *testing.T, image string) {
 	code, out, stderr = fetchCLIProcess(t, image, root, args, "stdout")
 	if code != 4 || out != "" || !strings.Contains(stderr, "write output failed") {
 		t.Fatalf("broken preview output: %d %s %s", code, out, stderr)
-	}
-	code, out, stderr = fetchCLIProcess(t, image, root, append(append([]string{}, args...), "--apply"), "")
-	if code != 2 || out != "" || !strings.Contains(stderr, "apply publication is not connected") {
-		t.Fatalf("unconnected apply cannot report preview success: %d %s %s", code, out, stderr)
 	}
 	if !reflect.DeepEqual(before, remoteTree(t, root)) {
 		t.Fatal("preview/error path left changes")
