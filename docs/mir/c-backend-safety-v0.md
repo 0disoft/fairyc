@@ -27,6 +27,13 @@ maturity claims false.
 
 ## Current scalar, borrowed-view, flat-resource, and resource-tagged emission slice
 
+Build emission measures function and cleanup bodies once. If the partition
+threshold selects one translation unit, it reuses those fragments with the
+original private linkage, order and metadata. Inline functions keep their
+existing `static inline` spelling. Ordinary single-unit `Emit` remains streaming;
+it does not retain a second set of body buffers. This changes no emitted-C bytes,
+partition threshold, foreign ABI or runtime protocol.
+
 `internal/cbackend` currently emits one deterministic C11 translation unit from verified MIR
 for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 `Result<i32, i32>` parameters and internal results, `void` internal results, a zero-argument

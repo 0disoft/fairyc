@@ -12,7 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-func fanoutDropProgram(t *testing.T, depth int) mir.Program {
+func fanoutDropProgram(t testing.TB, depth int) mir.Program {
 	t.Helper()
 	var text strings.Builder
 	text.WriteString("module main; fn void audit() {} resource Node0 { i32 value; cleanup { audit(); } } fn Node0 make0() { return Node0 { .value = 1 }; }\n")

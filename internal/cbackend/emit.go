@@ -48,36 +48,10 @@ func (value *emitter) emitUnit() (Unit, error) {
 		return Unit{}, err
 	}
 	functions := value.analysis.functions
-	foreignFunctions := value.analysis.foreignFunctions
-
 	output := &value.output
-	if err := value.emitPreamble(output); err != nil {
+	if err := value.emitUnitPrefix(output); err != nil {
 		return Unit{}, err
 	}
-	value.emitByteStringStorage(output)
-	value.emitStringStorage(output)
-	value.emitCStringStorage(output)
-	for index := range foreignFunctions {
-		value.emitForeignMacroGuard(output, index)
-	}
-	for index := range foreignFunctions {
-		if err := value.emitForeignPrototype(output, index); err != nil {
-			return Unit{}, err
-		}
-	}
-	if len(foreignFunctions) != 0 {
-		output.WriteByte('\n')
-	}
-	for index := range functions {
-		if err := value.contextError(); err != nil {
-			return Unit{}, err
-		}
-		if err := value.emitPrototype(output, index); err != nil {
-			return Unit{}, err
-		}
-	}
-	output.WriteByte('\n')
-	value.emitDropHelperPrototypes(output)
 	for index := range value.dropHelpers {
 		if err := value.emitDropHelper(output, index); err != nil {
 			return Unit{}, err
@@ -93,6 +67,105 @@ func (value *emitter) emitUnit() (Unit, error) {
 		if err := value.emitFunction(output, index); err != nil {
 			return Unit{}, err
 		}
+	}
+	if err := value.emitEntry(output); err != nil {
+		return Unit{}, err
+	}
+	return value.unitMetadata(output.String())
+}
+
+type unitBodies struct {
+	dropHelpers []string
+	functions   []string
+}
+
+func (value *emitter) emitUnitBodies() (unitBodies, error) {
+	if err := value.prepareDropHelpers(); err != nil {
+		return unitBodies{}, err
+	}
+	functions := value.analysis.functions
+	var bodies unitBodies
+	for index := range value.dropHelpers {
+		if err := value.contextError(); err != nil {
+			return unitBodies{}, err
+		}
+		var body strings.Builder
+		if err := value.emitDropHelper(&body, index); err != nil {
+			return unitBodies{}, err
+		}
+		bodies.dropHelpers = append(bodies.dropHelpers, body.String())
+	}
+	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return unitBodies{}, err
+		}
+		var body strings.Builder
+		if err := value.emitFunction(&body, index); err != nil {
+			return unitBodies{}, err
+		}
+		bodies.functions = append(bodies.functions, body.String())
+	}
+	return bodies, nil
+}
+
+func (value *emitter) emitUnitPrefix(output *strings.Builder) error {
+	functions := value.analysis.functions
+	foreignFunctions := value.analysis.foreignFunctions
+
+	if err := value.emitPreamble(output); err != nil {
+		return err
+	}
+	value.emitByteStringStorage(output)
+	value.emitStringStorage(output)
+	value.emitCStringStorage(output)
+	for index := range foreignFunctions {
+		value.emitForeignMacroGuard(output, index)
+	}
+	for index := range foreignFunctions {
+		if err := value.emitForeignPrototype(output, index); err != nil {
+			return err
+		}
+	}
+	if len(foreignFunctions) != 0 {
+		output.WriteByte('\n')
+	}
+	for index := range functions {
+		if err := value.contextError(); err != nil {
+			return err
+		}
+		if err := value.emitPrototype(output, index); err != nil {
+			return err
+		}
+	}
+	output.WriteByte('\n')
+	value.emitDropHelperPrototypes(output)
+	return nil
+}
+
+// emitUnitFromBodies formats bodies measured for a partitioned build as the
+// original single unit. Measurement omits single-unit static linkage, so this
+// restores it without emitting any function or cleanup body again.
+func (value *emitter) emitUnitFromBodies(bodies unitBodies) (Unit, error) {
+	functions := value.analysis.functions
+	output := &value.output
+	if err := value.emitUnitPrefix(output); err != nil {
+		return Unit{}, err
+	}
+	for _, body := range bodies.dropHelpers {
+		output.WriteString("static ")
+		output.WriteString(body)
+	}
+	if err := value.emitCallbackAdapters(output); err != nil {
+		return Unit{}, err
+	}
+	for index, body := range bodies.functions {
+		if err := value.contextError(); err != nil {
+			return Unit{}, err
+		}
+		if functions[index].InlineBody == "" {
+			output.WriteString("static ")
+		}
+		output.WriteString(body)
 	}
 	if err := value.emitEntry(output); err != nil {
 		return Unit{}, err

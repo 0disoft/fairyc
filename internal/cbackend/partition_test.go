@@ -84,6 +84,74 @@ fn i32 main() {
 	}
 }
 
+func TestSmallBuildMatchesStreamingUnit(t *testing.T) {
+	program := lowerSource(t, `module main;
+unsafe extern C fn i32 visit(i32 value, unsafe extern C fn i32(i32,ptr mut void) callback, ptr mut void data);
+@inline pub fn i32 combine(i32 a, i32 b) { return (a * 3 + b) / 2; }
+unsafe fn i32 handle(i32 value, ptr mut void data) { return value + 1; }
+resource Leaf { i32 value; cleanup { assert(this.value == 7); } }
+resource Box { Leaf first; Leaf last; cleanup {} }
+resource Outer { Box first; Box last; cleanup {} }
+fn Box make() { return Box { .first = Leaf { .value = 7 }, .last = Leaf { .value = 7 } }; }
+fn ref u8[] literal() { return b"shared"; }
+fn i32 main() {
+    let Outer tree = Outer { .first = make(), .last = make() };
+    assert(literal()[0] == 115);
+    assert(unsafe { visit(21, handle, null) } == 22);
+    return combine(10, 12);
+}`)
+	profiles := []struct {
+		name    string
+		profile cbackend.Profile
+	}{
+		{name: "linux", profile: cbackend.Stage0Profile()},
+		{name: "windows-msvc", profile: cbackend.Stage0WindowsMSVCProfile()},
+		{name: "linux-drop-trace", profile: cbackend.Stage0DropTraceProfile()},
+		{name: "windows-msvc-drop-trace", profile: cbackend.Stage0WindowsMSVCDropTraceProfile()},
+	}
+	for _, test := range profiles {
+		t.Run(test.name, func(t *testing.T) {
+			unit, err := cbackend.Emit(program, "main::main", test.profile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			small, err := cbackend.EmitBuild(program, "main::main", test.profile, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(small.Unit, unit) || small.Header != "" || len(small.Sources) != 0 {
+				t.Fatal("small build changed the single-unit result")
+			}
+			ordered := []string{
+				"const uint8_t fy_static_bytes_",
+				"extern int32_t visit(",
+				"static inline int32_t fy_fn_",
+				"static void fy_drop_",
+				"static int32_t fy_cb_",
+				"int main(void)",
+			}
+			last := -1
+			for _, required := range ordered {
+				if !strings.Contains(unit.Source, required) {
+					t.Fatalf("coverage case missing %q", required)
+				}
+				index := strings.Index(unit.Source[last+1:], required)
+				if index < 0 {
+					t.Fatalf("%q appears out of legacy emission order", required)
+				}
+				last += index + len(required)
+			}
+		})
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	for _, test := range profiles {
+		if _, err := cbackend.EmitBuildContext(ctx, program, "main::main", test.profile, false, 2<<20); err != context.Canceled {
+			t.Fatalf("%s cancellation lost: %v", test.name, err)
+		}
+	}
+}
+
 func TestPartitionedCallbackIdentity(t *testing.T) {
 	program := lowerSource(t, `module main;
 unsafe extern C fn i32 visit(i32 value, unsafe extern C fn i32(i32,ptr mut void) callback, ptr mut void data);

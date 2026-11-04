@@ -37,37 +37,28 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		return BuildUnit{}, err
 	}
 	e := &emitter{analysis: plan, partitioned: true}
-	if err := e.prepareDropHelpers(); err != nil {
+	bodies, err := e.emitUnitBodies()
+	if err != nil {
 		return BuildUnit{}, err
 	}
-	var bodies []string
+	var sourceBodies []string
 	var inlineBodies []string
 	total := 0
-	for index := range e.dropHelpers {
-		var body strings.Builder
-		if err := e.emitDropHelper(&body, index); err != nil {
-			return BuildUnit{}, err
-		}
-		bodies = append(bodies, body.String())
-		total += body.Len()
+	for _, body := range bodies.dropHelpers {
+		sourceBodies = append(sourceBodies, body)
+		total += len(body)
 	}
-	for index := range plan.functions {
-		if err := ctx.Err(); err != nil {
-			return BuildUnit{}, err
-		}
-		var body strings.Builder
-		if err := e.emitFunction(&body, index); err != nil {
-			return BuildUnit{}, err
-		}
+	for index, body := range bodies.functions {
 		if plan.functions[index].InlineBody != "" {
-			inlineBodies = append(inlineBodies, body.String())
+			inlineBodies = append(inlineBodies, body)
 		} else {
-			bodies = append(bodies, body.String())
+			sourceBodies = append(sourceBodies, body)
 		}
-		total += body.Len()
+		total += len(body)
 	}
 	if total <= budget {
-		unit, err := (&emitter{analysis: plan}).emitUnit()
+		e.partitioned = false
+		unit, err := e.emitUnitFromBodies(bodies)
 		return BuildUnit{Unit: unit}, err
 	}
 	var header strings.Builder
@@ -131,7 +122,7 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 			sources = append(sources, include+group.String())
 		}
 	}
-	appendGroups(bodies)
+	appendGroups(sourceBodies)
 	appendGroups(literals)
 	var entrySource strings.Builder
 	if err := e.emitCallbackAdapters(&entrySource); err != nil {
