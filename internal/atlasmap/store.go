@@ -256,22 +256,14 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 		return Partition{}, false, err
 	}
 	directory := expectation.Current.Instance.String()
-	entries, err := readMapDirectory(store.root, directory)
-	if errors.Is(err, os.ErrNotExist) {
-		store.recordMiss()
-		return Partition{}, false, nil
-	}
-	if err != nil {
-		return Partition{}, false, fmt.Errorf("read .fymap package directory: %w", err)
-	}
-	slices.SortFunc(entries, func(left, right os.DirEntry) int { return strings.Compare(left.Name(), right.Name()) })
-	compatible := make([]Partition, 0, 1)
+	var candidate Partition
+	var compatible uint64
 	sawStale := false
 	sawIncompatible := false
 	sawCorrupt := false
-	for _, entry := range entries {
+	err := visitMapDirectory(store.root, directory, func(entry os.DirEntry) error {
 		if entry.IsDir() || !validMapGenerationName(entry.Name()) {
-			continue
+			return nil
 		}
 		path := filepath.Join(directory, entry.Name())
 		partition, readErr := store.readGeneration(path, entry.Name(), directory)
@@ -279,7 +271,7 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 			sawCorrupt = true
 			store.recordRejected()
 			_ = store.root.Remove(path)
-			continue
+			return nil
 		}
 		if compatibilityErr := compatibilityError(partition, expectation); compatibilityErr != nil {
 			switch {
@@ -291,17 +283,32 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 				sawCorrupt = true
 				store.recordRejected()
 			}
-			continue
+			return nil
 		}
-		compatible = append(compatible, partition)
+		compatible++
+		if compatible == 1 {
+			candidate = partition
+		} else {
+			// Continue validating/counting all generations after a conflict,
+			// without retaining payloads that can no longer produce a hit.
+			candidate = Partition{}
+		}
+		return nil
+	})
+	if errors.Is(err, os.ErrNotExist) {
+		store.recordMiss()
+		return Partition{}, false, nil
 	}
-	if len(compatible) == 1 {
+	if err != nil {
+		return Partition{}, false, fmt.Errorf("read .fymap package directory: %w", err)
+	}
+	if compatible == 1 {
 		store.recordHit()
-		return compatible[0], true, nil
+		return candidate, true, nil
 	}
 	store.recordMiss()
-	if len(compatible) > 1 {
-		store.recordRejectedBy(uint64(len(compatible)))
+	if compatible > 1 {
+		store.recordRejectedBy(compatible)
 		return Partition{}, false, ErrMapConflict
 	}
 	if sawStale {
@@ -317,7 +324,7 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 }
 
 func (store *MapStore) readGeneration(path, name, expectedInstance string) (Partition, error) {
-	file, err := store.root.Open(path)
+	file, err := durablefile.OpenRegular(store.root, path)
 	if err != nil {
 		return Partition{}, err
 	}
