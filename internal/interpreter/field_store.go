@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType, fieldSlots *aggregateFieldIndex) error {
+func storeField(r *executionState, locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType, fieldSlots *aggregateFieldIndex) error {
 	if len(op.Operands) != 2 {
 		return fmt.Errorf("invalid field store operand count")
 	}
@@ -75,7 +75,11 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		for index := start; index >= 0 && index < len(definition.Fields); index++ {
 			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
-				current.structure().fields[index] = value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return err
+				}
+				current.structure().fields[index] = copied
 				return nil
 			}
 		}
@@ -91,7 +95,11 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		for index := start; index >= 0 && index < len(definition.Fields); index++ {
 			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.structure().fields[index] = value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return err
+				}
+				receiver.structure().fields[index] = copied
 				return nil
 			}
 		}
@@ -104,7 +112,11 @@ func storeField(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 		for index := start; index >= 0 && index < len(definition.Fields); index++ {
 			field := definition.Fields[index]
 			if field.Name == op.Field && field.Type == op.Type {
-				receiver.resource().fields[index] = value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return err
+				}
+				receiver.resource().fields[index] = copied
 				return nil
 			}
 		}

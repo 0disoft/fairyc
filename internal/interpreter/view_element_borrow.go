@@ -19,7 +19,7 @@ func (v runtimeValue) borrowStructElement(index uint64, typ hir.Type) (runtimeVa
 
 // Integer references retain the backing cell, including offset subviews. Static
 // byte data can yield a shared reference only; it never acquires write authority.
-func (v runtimeValue) borrowViewElement(index uint64, typ hir.Type) (runtimeValue, error) {
+func (r *executionState) borrowViewElement(v runtimeValue, index uint64, typ hir.Type) (runtimeValue, error) {
 	if _, nominal := hir.StructViewElement(v.typ); nominal {
 		return v.borrowStructElement(index, typ)
 	}
@@ -28,7 +28,7 @@ func (v runtimeValue) borrowViewElement(index uint64, typ hir.Type) (runtimeValu
 	if !indexed || !borrowed || referent != element || v.kind != valueView || v.view() == nil || index >= v.view().length || mutable && (!hir.MutableIndexedView(v.typ) || !v.view().mutable || v.view().array == nil) {
 		return runtimeValue{}, capabilityError("invalid indexed integer reference")
 	}
-	value, err := v.indexedAt(index)
+	value, err := r.indexedAt(v, index)
 	if err != nil || !scalarStoreValueMatches(value, element) {
 		return runtimeValue{}, capabilityError("indexed integer reference backing type mismatch")
 	}

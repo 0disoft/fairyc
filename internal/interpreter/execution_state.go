@@ -21,6 +21,7 @@ type executionState struct {
 	testIntrinsics    map[hir.SymbolID]TestIntrinsicKind
 	outputLimit       int
 	steps             int
+	copyUnits         int
 	callDepthLimit    int
 	context           context.Context
 	dropTrace         []DropEvent

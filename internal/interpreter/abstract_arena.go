@@ -47,7 +47,7 @@ func (r *executionState) configureAbstractArenas(options Options) error {
 }
 
 func (r *executionState) createAbstractArena(definition *mir.ResourceType) (runtimeValue, error) {
-	value, err := resourceValue(definition, []runtimeValue{
+	value, err := r.resourceValue(definition, []runtimeValue{
 		{kind: valueNull, typ: definition.Fields[0].Type},
 		{kind: valueUSize, typ: hir.TypeUSize, scalar: 1},
 		{kind: valueU8, typ: hir.TypeU8},
@@ -55,6 +55,10 @@ func (r *executionState) createAbstractArena(definition *mir.ResourceType) (runt
 	if err != nil {
 		return runtimeValue{}, err
 	}
+	result, err := r.resultValue("ok", value)
+	if err != nil {
+		return runtimeValue{}, err
+	}
 	r.abstractArenas[value.resource()] = true
-	return resultValue("ok", value)
+	return result, nil
 }

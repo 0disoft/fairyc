@@ -26,7 +26,7 @@ func BenchmarkNestedTaggedValueCopy(b *testing.B) {
 			b.ReportAllocs()
 			b.ResetTimer()
 			for range b.N {
-				benchmarkValue = value.cloneForValueCopy()
+				benchmarkValue = benchmarkCopyValue(value)
 			}
 		})
 	}

@@ -408,14 +408,25 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The Go harness accepts `Options.MaxSteps`, `Options.MaxCallDepth`, and an optional
-`context.Context` for both i32 and void execution (`ExecuteWithOptions` and
-`ExecuteVoidWithOptions`). Zero limits retain 1,000,000 block/operation steps and
-256 call frames; negative limits are rejected. Cancellation is checked before
-execution, at call and step checkpoints, and during cleanup. It returns `canceled`
-with the original context error, separately from `step-limit`, `call-depth-limit`,
-and `output-limit`. Existing entry wrappers retain their default budgets. These
-are caller-controlled interpreter budgets, not language traps or new CLI flags.
+The Go harness accepts `Options.MaxSteps`, `Options.MaxCallDepth`,
+`Options.MaxCopyUnits`, and an optional `context.Context` for both i32 and void
+execution (`ExecuteWithOptions` and `ExecuteVoidWithOptions`). Zero limits retain
+1,000,000 block/operation steps, 256 call frames, and 1,000,000 aggregate copy
+units; negative limits are rejected. Cancellation is checked before execution, at
+call, step, cleanup, copy, and inert-proof checkpoints. It returns `canceled` with
+the original context error, separately from `step-limit`, `call-depth-limit`,
+`copy-limit`, and `output-limit`. Existing entry wrappers retain their default
+budgets. These are caller-controlled interpreter budgets, not language traps or
+new CLI flags.
+
+One copy unit is charged for each visited value, detached array/struct/enum/tagged
+state, pre-reserved aggregate slice or destination slot, tagged payload slot, and
+node visited by the inert-proof scan. Slice and field capacity is charged before
+`make` or destination publication. A successful copy therefore detaches inert
+storage while borrowed referents and linear resource identity remain unchanged. A
+copy that reaches `maxValueNesting` fails `copy-limit` before recursive traversal
+can exhaust the host stack. Budget or cancellation failure publishes no partial
+destination mutation.
 
 Interpreter struct, enum, and resource fields occupy declaration-ordered value
 slices. Field names resolve against verified definitions rather than per-value

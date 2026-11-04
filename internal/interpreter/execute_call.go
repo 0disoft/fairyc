@@ -19,6 +19,17 @@ type runtimeRegion struct {
 	active     bool
 }
 
+func (r *executionState) placeRegionValue(region *runtimeRegion, stored runtimeValue, borrow hir.Type) (runtimeValue, error) {
+	resultValue := stored
+	resultValue.typ = borrow
+	placed, err := r.resultValue("ok", resultValue)
+	if err != nil {
+		return runtimeValue{}, err
+	}
+	region.placements = append(region.placements, stored)
+	return placed, nil
+}
+
 func (r *executionState) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
 	if err := r.checkCancellation(); err != nil {
 		return callCompletion{}, err
@@ -39,7 +50,11 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 	locals := make(map[mir.LocalID]runtimeValue)
 	regions := make(map[hir.SymbolID]*runtimeRegion)
 	for index, parameter := range function.Parameters {
-		locals[parameter] = arguments[index].cloneForValueCopy()
+		copied, err := r.cloneForValueCopy(arguments[index])
+		if err != nil {
+			return callCompletion{}, fmt.Errorf("call parameter copy in %q: %w", function.Name, err)
+		}
+		locals[parameter] = copied
 		if index < len(function.ParameterTypes) && function.ParameterTypes[index] == hir.TypeRegion {
 			region, ok := arguments[index].payload.(*runtimeRegion)
 			if !ok || region == nil || arguments[index].kind != valueRegion || !region.active {
@@ -85,9 +100,13 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("assign in %q: %w", function.Name, err)
 				}
-				locals[operation.DestinationLocal] = value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("assign in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = copied
 			case mir.OperationUnary:
-				value, trap, err := evaluateUnary(locals, operation)
+				value, trap, err := r.evaluateUnary(locals, operation)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("unary in %q: %w", function.Name, err)
 				}
@@ -131,7 +150,10 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.OwnerType != elementType || operation.Operator != "list" || uint64(len(operation.Operands)) != length {
 					return callCompletion{}, fmt.Errorf("fixed-array construction in %q has incompatible type metadata", function.Name)
 				}
-				values := make([]runtimeValue, len(operation.Operands))
+				values, err := r.newCopyValueSlice(len(operation.Operands))
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array construction in %q: %w", function.Name, err)
+				}
 				for index, operand := range operation.Operands {
 					value, err := evaluate(locals, operand)
 					if err != nil {
@@ -140,7 +162,11 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					if !indexedElementRuntimeMatches(value, elementType) {
 						return callCompletion{}, capabilityError("fixed-array construction element %d in %q has incompatible runtime type", index, function.Name)
 					}
-					values[index] = value.cloneForValueCopy()
+					copied, err := r.cloneForValueCopy(value)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("fixed-array construction element %d in %q: %w", index, function.Name, err)
+					}
+					values[index] = copied
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, payload: &arrayState{elements: values}}
 			case mir.OperationArrayBorrowView:
@@ -190,7 +216,11 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if receiver.array() == nil || index.u64() >= length || index.u64() >= uint64(len(receiver.array().elements)) {
 					return callCompletion{}, fmt.Errorf("fixed-array index in %q executed without a dominating bounds check", function.Name)
 				}
-				locals[operation.DestinationLocal] = receiver.array().elements[index.u64()].cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(receiver.array().elements[index.u64()])
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array index in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = copied
 			case mir.OperationArrayIndexCheck:
 			case mir.OperationArrayIndexStore:
 				receiver, index, value, err := evaluateArrayIndexStoreOperands(locals, operation.Operands)
@@ -202,7 +232,11 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					receiver.array() == nil || index.u64() >= length || index.u64() >= uint64(len(receiver.array().elements)) || !indexedElementRuntimeMatches(value, elementType) {
 					return callCompletion{}, fmt.Errorf("fixed-array index store in %q has incompatible runtime value", function.Name)
 				}
-				receiver.array().elements[index.u64()] = value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array index store in %q: %w", function.Name, err)
+				}
+				receiver.array().elements[index.u64()] = copied
 			case mir.OperationViewLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -231,7 +265,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					operation.IndexType != hir.TypeUSize || operation.Type != element || operation.Operator != "[]" {
 					return callCompletion{}, fmt.Errorf("byte-view index in %q has incompatible runtime value", function.Name)
 				}
-				value, err := receiver.indexedAt(index.u64())
+				value, err := r.indexedAt(receiver, index.u64())
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("byte-view index in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
@@ -241,7 +275,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, err
 				}
-				value, err := receiver.borrowViewElement(index.u64(), operation.Type)
+				value, err := r.borrowViewElement(receiver, index.u64(), operation.Type)
 				if err != nil {
 					return callCompletion{}, err
 				}
@@ -257,7 +291,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					operation.Type != element || operation.Operator != "[]=" {
 					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q has incompatible runtime metadata", function.Name)
 				}
-				if err := receiver.storeIndexed(index.u64(), value); err != nil {
+				if err := r.storeIndexed(receiver, index.u64(), value); err != nil {
 					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
 			case mir.OperationViewSlice:
@@ -281,7 +315,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result construction in %q: %w", function.Name, err)
 				}
-				constructed, err := resultValue(operation.Variant, payload)
+				constructed, err := r.resultValue(operation.Variant, payload)
 				if err != nil {
 					return callCompletion{}, err
 				}
@@ -291,7 +325,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
 				}
-				payload, err := result.resultPayload(operation.Variant, operation.MovePayload)
+				payload, err := r.resultPayload(result, operation.Variant, operation.MovePayload)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
 				}
@@ -307,7 +341,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				} else if len(operation.Operands) != 0 {
 					return callCompletion{}, fmt.Errorf("Option::None construction in %q has a payload", function.Name)
 				}
-				constructed, err := optionValue(operation.Variant, payload)
+				constructed, err := r.optionValue(operation.Variant, payload)
 				if err != nil {
 					return callCompletion{}, err
 				}
@@ -317,7 +351,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
-				payload, err := option.optionPayload(operation.MovePayload)
+				payload, err := r.optionPayload(option, operation.MovePayload)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
@@ -331,7 +365,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					}
 					values[index] = value
 				}
-				constructed, err := enumValue(r.enumTypes[operation.Type], operation.Variant, operation.Fields, values)
+				constructed, err := r.enumValue(r.enumTypes[operation.Type], operation.Variant, operation.Fields, values)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("enum construction in %q: %w", function.Name, err)
 				}
@@ -359,7 +393,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					}
 					values[index] = value
 				}
-				constructed, err := structValue(r.structTypes[operation.Type], values)
+				constructed, err := r.structValue(r.structTypes[operation.Type], values)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("struct construction in %q: %w", function.Name, err)
 				}
@@ -373,17 +407,17 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					}
 					values[index] = value
 				}
-				constructed, err := resourceValue(r.resourceTypes[operation.Type], values)
+				constructed, err := r.resourceValue(r.resourceTypes[operation.Type], values)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = constructed
 			case mir.OperationFieldStore:
-				if err := storeField(locals, operation, r.structTypes, &r.fieldSlots); err != nil {
+				if err := storeField(r, locals, operation, r.structTypes, &r.fieldSlots); err != nil {
 					return callCompletion{}, fmt.Errorf("field store in %q: %w", function.Name, err)
 				}
 			case mir.OperationDerefStore:
-				if err := storeDeref(locals, operation, r.structTypes); err != nil {
+				if err := storeDeref(r, locals, operation, r.structTypes); err != nil {
 					return callCompletion{}, fmt.Errorf("dereference store in %q: %w", function.Name, err)
 				}
 			case mir.OperationFieldRead, mir.OperationFieldBorrow:
@@ -445,14 +479,16 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
 				}
-				stored := value.cloneForValueCopy()
+				stored, err := r.cloneForValueCopy(value)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
+				}
 				if operation.Operator == "alloc_zeroed_bytes" || operation.Operator == "copy_bytes" {
 					stored, err = r.regionBytes(value, operation.Operator == "copy_bytes")
 					if err != nil {
 						return callCompletion{}, err
 					}
 				}
-				region.placements = append(region.placements, stored)
 				borrow, _, result := hir.ResultElements(operation.Type)
 				expectedBorrow := hir.SharedBorrow(operation.OwnerType)
 				if operation.Operator == "alloc_zeroed_bytes" || operation.Operator == "copy_bytes" {
@@ -461,8 +497,7 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				if !result || borrow != expectedBorrow {
 					return callCompletion{}, fmt.Errorf("region placement has incompatible result type")
 				}
-				stored.typ = borrow
-				placed, err := resultValue("ok", stored)
+				placed, err := r.placeRegionValue(region, stored, borrow)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("region place result in %q: %w", function.Name, err)
 				}
@@ -564,7 +599,11 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 				return completion, callErr
 			}
 			if terminator.DestinationLocal != mir.NoLocal {
-				locals[terminator.DestinationLocal] = completion.value.cloneForValueCopy()
+				copied, err := r.cloneForValueCopy(completion.value)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("call result copy in %q: %w", function.Name, err)
+				}
+				locals[terminator.DestinationLocal] = copied
 			}
 			next, err := oneSuccessor(terminator)
 			if err != nil {

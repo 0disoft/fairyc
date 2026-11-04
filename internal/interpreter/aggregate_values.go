@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
-func enumValue(definition *mir.EnumType, variantName string, fieldNames []string, values []runtimeValue) (runtimeValue, error) {
+func (r *executionState) enumValue(definition *mir.EnumType, variantName string, fieldNames []string, values []runtimeValue) (runtimeValue, error) {
 	if definition == nil || definition.Type == hir.TypeInvalid || len(fieldNames) != len(values) {
 		return runtimeValue{}, fmt.Errorf("invalid enum construction definition")
 	}
@@ -20,6 +20,9 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 	}
 	if variant == nil || len(variant.Fields) != len(fieldNames) {
 		return runtimeValue{}, fmt.Errorf("enum %q has no matching variant %q", definition.Type, variantName)
+	}
+	if err := r.consumeCopyUnits(1 + len(values)); err != nil {
+		return runtimeValue{}, err
 	}
 	state := &enumState{definition: definition, variant: variantName, fields: make([]runtimeValue, len(values))}
 	// Small payloads keep a bounded scan without a temporary map. Larger ones
@@ -59,7 +62,11 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 		if field.Name == "" || source < 0 {
 			return runtimeValue{}, fmt.Errorf("enum %q variant %q has mismatched fields", definition.Type, variantName)
 		}
-		state.fields[index] = values[source].cloneForValueCopy()
+		fieldValue, err := r.cloneForValueCopy(values[source])
+		if err != nil {
+			return runtimeValue{}, err
+		}
+		state.fields[index] = fieldValue
 	}
 	if sources != nil {
 		// Reuse the construction index instead of allocating a second lookup table.
@@ -73,19 +80,27 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 	return runtimeValue{kind: valueEnum, typ: definition.Type, payload: state}, nil
 }
 
-func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
+func (r *executionState) resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
 	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) != len(values) || definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
 		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
 	}
-	state := &resourceState{definition: definition, fields: copyValueFields(values)}
+	fields, err := r.copyValueFields(values)
+	if err != nil {
+		return runtimeValue{}, err
+	}
+	state := &resourceState{definition: definition, fields: fields}
 	return runtimeValue{kind: valueResource, typ: definition.Type, payload: state}, nil
 }
 
-func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
+func (r *executionState) structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
 	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) != len(values) {
 		return runtimeValue{}, fmt.Errorf("invalid struct construction definition")
 	}
-	state := &structState{definition: definition, fields: copyValueFields(values)}
+	fields, err := r.copyValueFields(values)
+	if err != nil {
+		return runtimeValue{}, err
+	}
+	state := &structState{definition: definition, fields: fields}
 	return runtimeValue{kind: valueStruct, typ: definition.Type, payload: state}, nil
 }
 

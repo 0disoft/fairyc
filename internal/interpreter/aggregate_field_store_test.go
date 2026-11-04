@@ -99,7 +99,7 @@ func TestIndexedFieldStoresPreserveSelectionAndErrors(t *testing.T) {
 				op.Operands[1].I32 = written
 				for _, name := range []string{"field_0001", "field_0063", "duplicate"} {
 					op.Field = name
-					if err := storeField(locals, op, nil, slots); err != nil {
+					if err := storeField(defaultCopyTestState(), locals, op, nil, slots); err != nil {
 						t.Fatal(err)
 					}
 				}
@@ -108,7 +108,7 @@ func TestIndexedFieldStoresPreserveSelectionAndErrors(t *testing.T) {
 				}
 				for _, name := range []string{"absent", "field_0000"} {
 					op.Field = name
-					if err := storeField(locals, op, nil, slots); err == nil {
+					if err := storeField(defaultCopyTestState(), locals, op, nil, slots); err == nil {
 						t.Fatalf("invalid field %q accepted", name)
 					}
 				}
@@ -116,12 +116,12 @@ func TestIndexedFieldStoresPreserveSelectionAndErrors(t *testing.T) {
 			if kind == "resource" {
 				owner.resource().dropped = true
 				op.Field = "field_0001"
-				if err := storeField(locals, op, nil, &index); err == nil {
+				if err := storeField(defaultCopyTestState(), locals, op, nil, &index); err == nil {
 					t.Fatal("cached store accepted a dropped resource")
 				}
 			} else if kind == "nested" {
 				op.Fields = []string{"absent"}
-				if err := storeField(locals, op, nil, &index); err == nil {
+				if err := storeField(defaultCopyTestState(), locals, op, nil, &index); err == nil {
 					t.Fatal("cached store accepted a missing path")
 				}
 			}

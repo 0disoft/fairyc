@@ -73,7 +73,7 @@ func (r *scalarReference) store(v runtimeValue) {
 
 // Aggregate references retain the stored structState identity. Replace its fields
 // with detached copies so array elements, named owners and returned refs see it.
-func storeDeref(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType) error {
+func storeDeref(r *executionState, locals map[mir.LocalID]runtimeValue, op mir.Operation, structs map[hir.Type]*mir.StructType) error {
 	if mir.ValidDerefStoreShape(op) {
 		return storeScalarDeref(locals, op)
 	}
@@ -91,6 +91,10 @@ func storeDeref(locals map[mir.LocalID]runtimeValue, op mir.Operation, structs m
 	if receiver.typ != op.OwnerType || receiver.kind != valueStruct || receiver.structure() == nil || receiver.structure().definition == nil || receiver.structure().definition.Type != op.Type || value.typ != op.Type || value.kind != valueStruct || value.structure() == nil || value.structure().definition == nil || value.structure().definition.Type != op.Type {
 		return fmt.Errorf("plain struct dereference store type or referent mismatch")
 	}
-	receiver.structure().fields = copyValueFields(value.structure().fields)
+	fields, err := r.copyValueFields(value.structure().fields)
+	if err != nil {
+		return err
+	}
+	receiver.structure().fields = fields
 	return nil
 }

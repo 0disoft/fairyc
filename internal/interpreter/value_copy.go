@@ -4,57 +4,112 @@ import "github.com/0disoft/fairyc/internal/hir"
 
 // Value copies detach inert storage. Borrowed values and resource ownership
 // retain their referents; copying an aggregate must never manufacture ownership.
-func (v runtimeValue) cloneForValueCopy() runtimeValue {
-	return v.cloneWithInertProof(false)
+// Each visited value, detached container, and inert-proof node consumes one unit.
+func (r *executionState) cloneForValueCopy(v runtimeValue) (runtimeValue, error) {
+	return r.cloneWithInertProof(v, false, 0)
 }
 
 // knownInert is a traversal-local proof, never a cache on mutable runtime state.
 // Once a tagged subtree passes inertDropValue, its descendants need no rescan.
-func (v runtimeValue) cloneWithInertProof(knownInert bool) runtimeValue {
+func (r *executionState) cloneWithInertProof(v runtimeValue, knownInert bool, depth int) (runtimeValue, error) {
+	if depth >= maxValueNesting {
+		return runtimeValue{}, capabilityErrorKind(LimitCopy, "interpreter copy nesting limit exceeded")
+	}
+	if err := r.consumeCopyUnits(1); err != nil {
+		return runtimeValue{}, err
+	}
 	if _, _, borrowed := hir.BorrowElement(v.typ); borrowed {
-		return v
+		return v, nil
 	}
 	copy := v
 	switch v.kind {
 	case valueArray:
 		if v.array() != nil {
-			elements := make([]runtimeValue, len(v.array().elements))
-			for index, element := range v.array().elements {
-				elements[index] = element.cloneWithInertProof(knownInert)
+			if err := r.consumeCopyUnits(1); err != nil {
+				return runtimeValue{}, err
+			}
+			elements, err := r.copyFieldsWithInertProof(v.array().elements, knownInert, depth+1)
+			if err != nil {
+				return runtimeValue{}, err
 			}
 			copy.payload = &arrayState{elements: elements}
 		}
 	case valueStruct:
 		if v.structure() != nil {
-			copy.payload = &structState{definition: v.structure().definition, fields: copyFieldsWithInertProof(v.structure().fields, knownInert)}
+			if err := r.consumeCopyUnits(1); err != nil {
+				return runtimeValue{}, err
+			}
+			fields, err := r.copyFieldsWithInertProof(v.structure().fields, knownInert, depth+1)
+			if err != nil {
+				return runtimeValue{}, err
+			}
+			copy.payload = &structState{definition: v.structure().definition, fields: fields}
 		}
 	case valueEnum:
 		if v.enum() != nil {
-			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: copyFieldsWithInertProof(v.enum().fields, knownInert), fieldSlots: v.enum().fieldSlots}
+			if err := r.consumeCopyUnits(1); err != nil {
+				return runtimeValue{}, err
+			}
+			fields, err := r.copyFieldsWithInertProof(v.enum().fields, knownInert, depth+1)
+			if err != nil {
+				return runtimeValue{}, err
+			}
+			copy.payload = &enumState{definition: v.enum().definition, variant: v.enum().variant, fields: fields, fieldSlots: v.enum().fieldSlots}
 		}
 	case valueOption, valueResult:
 		// An owned resource payload uses the existing linear tagged state. Only
 		// inert wrappers may acquire an independent copy of that state.
-		if v.tagged() != nil && (knownInert || inertDropValue(v, 0)) {
+		inert := knownInert
+		if v.tagged() != nil && !inert {
+			var err error
+			inert, err = r.inertDropValue(v, 0)
+			if err != nil {
+				return runtimeValue{}, err
+			}
+		}
+		if v.tagged() != nil && inert {
+			if err := r.consumeCopyUnits(1); err != nil {
+				return runtimeValue{}, err
+			}
 			state := *v.tagged()
 			if state.payload != nil {
-				payload := state.payload.cloneWithInertProof(true)
+				if err := r.consumeCopyUnits(1); err != nil {
+					return runtimeValue{}, err
+				}
+				payload, err := r.cloneWithInertProof(*state.payload, true, depth+1)
+				if err != nil {
+					return runtimeValue{}, err
+				}
 				state.payload = &payload
 			}
 			copy.payload = &state
 		}
 	}
-	return copy
+	return copy, nil
 }
 
-func copyValueFields(fields []runtimeValue) []runtimeValue {
-	return copyFieldsWithInertProof(fields, false)
+func (r *executionState) copyValueFields(fields []runtimeValue) ([]runtimeValue, error) {
+	return r.copyFieldsWithInertProof(fields, false, 0)
 }
 
-func copyFieldsWithInertProof(fields []runtimeValue, knownInert bool) []runtimeValue {
-	copy := make([]runtimeValue, len(fields))
-	for index, value := range fields {
-		copy[index] = value.cloneWithInertProof(knownInert)
+func (r *executionState) newCopyValueSlice(length int) ([]runtimeValue, error) {
+	if err := r.consumeCopyUnits(1 + length); err != nil {
+		return nil, err
 	}
-	return copy
+	return make([]runtimeValue, length), nil
+}
+
+func (r *executionState) copyFieldsWithInertProof(fields []runtimeValue, knownInert bool, depth int) ([]runtimeValue, error) {
+	copy, err := r.newCopyValueSlice(len(fields))
+	if err != nil {
+		return nil, err
+	}
+	for index, value := range fields {
+		cloned, err := r.cloneWithInertProof(value, knownInert, depth)
+		if err != nil {
+			return nil, err
+		}
+		copy[index] = cloned
+	}
+	return copy, nil
 }

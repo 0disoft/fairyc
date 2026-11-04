@@ -80,7 +80,7 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 	return i32Value(result), trap, err
 }
 
-func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (runtimeValue, string, error) {
+func (r *executionState) evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (runtimeValue, string, error) {
 	if len(operation.Operands) != 1 {
 		return runtimeValue{}, "", fmt.Errorf("unary operation has %d operands, want 1", len(operation.Operands))
 	}
@@ -113,7 +113,8 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 			if !exists || !scalarStoreValueMatches(referent, element) {
 				return runtimeValue{}, "", capabilityError("safe dereference has invalid scalar referent")
 			}
-			return referent.cloneForValueCopy(), "", nil
+			copied, err := r.cloneForValueCopy(referent)
+			return copied, "", err
 		}
 		value.typ = element
 		return value, "", nil

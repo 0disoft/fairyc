@@ -10,21 +10,27 @@ func i32Value(value int32) runtimeValue {
 	return runtimeValue{kind: valueI32, scalar: i32Bits(value)}
 }
 
-func resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
+func (r *executionState) resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
 	if variant != "ok" && variant != "err" {
 		return runtimeValue{}, fmt.Errorf("invalid Result variant %q", variant)
 	}
-	copy := payload.cloneForValueCopy()
+	copy, err := r.cloneForValueCopy(payload)
+	if err != nil {
+		return runtimeValue{}, err
+	}
 	return runtimeValue{kind: valueResult, payload: &taggedState{variant: variant, payload: &copy}}, nil
 }
 
-func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
+func (r *executionState) optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 	switch variant {
 	case "some":
 		if payload == nil {
 			return runtimeValue{}, fmt.Errorf("Option::Some has no payload")
 		}
-		copy := payload.cloneForValueCopy()
+		copy, err := r.cloneForValueCopy(*payload)
+		if err != nil {
+			return runtimeValue{}, err
+		}
 		return runtimeValue{kind: valueOption, payload: &taggedState{variant: variant, payload: &copy}}, nil
 	case "none":
 		if payload != nil {
@@ -43,7 +49,7 @@ func (v runtimeValue) asI32() (int32, error) {
 	return v.i32(), nil
 }
 
-func (v runtimeValue) resultPayload(expected string, move bool) (runtimeValue, error) {
+func (r *executionState) resultPayload(v runtimeValue, expected string, move bool) (runtimeValue, error) {
 	if v.kind != valueResult || v.tagged() == nil || v.tagged().payload == nil || v.tagged().dropped {
 		return runtimeValue{}, capabilityError("value is not an executable Result")
 	}
@@ -53,19 +59,21 @@ func (v runtimeValue) resultPayload(expected string, move bool) (runtimeValue, e
 	payload := *v.tagged().payload
 	if move {
 		v.tagged().payload = nil
+		return payload, nil
 	}
-	return payload, nil
+	return r.cloneForValueCopy(payload)
 }
 
-func (v runtimeValue) optionPayload(move bool) (runtimeValue, error) {
+func (r *executionState) optionPayload(v runtimeValue, move bool) (runtimeValue, error) {
 	if v.kind != valueOption || v.tagged() == nil || v.tagged().variant != "some" || v.tagged().payload == nil || v.tagged().dropped {
 		return runtimeValue{}, capabilityError("value is not an executable Option::Some")
 	}
 	payload := *v.tagged().payload
 	if move {
 		v.tagged().payload = nil
+		return payload, nil
 	}
-	return payload, nil
+	return r.cloneForValueCopy(payload)
 }
 
 func fieldAggregateType(value hir.Type) hir.Type {

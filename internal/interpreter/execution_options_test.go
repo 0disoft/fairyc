@@ -3,6 +3,8 @@ package interpreter_test
 import (
 	"context"
 	"errors"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -100,9 +102,59 @@ func TestCallerCancellationBeforeAndDuringExecution(t *testing.T) {
 }
 
 func TestInvalidExecutionBudgetsAreRejected(t *testing.T) {
-	for _, options := range []interpreter.Options{{MaxSteps: -1}, {MaxCallDepth: -1}} {
+	for _, options := range []interpreter.Options{{MaxSteps: -1}, {MaxCallDepth: -1}, {MaxCopyUnits: -1}} {
 		if _, err := interpreter.ExecuteWithOptions(loopingProgram(hir.TypeI32), "main", options); err == nil {
 			t.Fatal("negative budget accepted")
 		}
+	}
+}
+
+func TestCopyLimitOutcomeUsesWrappedCapabilityError(t *testing.T) {
+	program := lowerSource(t, `module main;
+fn i32 echo(i32 value) { return value; }
+fn i32 main() { return echo(7); }
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{MaxCopyUnits: 1, MaxSteps: 100})
+	var limit interpreter.CapabilityError
+	if !errors.As(err, &limit) || limit.Kind != interpreter.LimitCopy || outcome.Kind != interpreter.OutcomeLimit {
+		t.Fatalf("copy limit classification: %+v, %v", outcome, err)
+	}
+}
+
+type copyDuringContext struct {
+	context.Context
+	cancel   context.CancelFunc
+	canceled bool
+}
+
+func (ctx *copyDuringContext) Err() error {
+	if !ctx.canceled {
+		callers := make([]uintptr, 32)
+		frames := runtime.CallersFrames(callers[:runtime.Callers(2, callers)])
+		for {
+			frame, more := frames.Next()
+			if strings.Contains(frame.Function, ".cloneWithInertProof") {
+				ctx.canceled = true
+				ctx.cancel()
+				break
+			}
+			if !more {
+				break
+			}
+		}
+	}
+	return ctx.Context.Err()
+}
+
+func TestCallerCancellationDuringCopyUsesExecuteWithOptions(t *testing.T) {
+	program := lowerSource(t, `module main;
+fn i32 echo(i32 value) { return value; }
+fn i32 main() { return echo(7); }
+`)
+	active, cancel := context.WithCancel(context.Background())
+	ctx := &copyDuringContext{Context: active, cancel: cancel}
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{Context: ctx, MaxCopyUnits: 100, MaxSteps: 100})
+	if !ctx.canceled || !errors.Is(err, context.Canceled) || outcome.Kind != interpreter.OutcomeCanceled {
+		t.Fatalf("copy cancellation classification: canceled=%t, %+v, %v", ctx.canceled, outcome, err)
 	}
 }

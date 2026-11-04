@@ -14,7 +14,11 @@ func (r *executionState) dropValue(value runtimeValue, binding hir.Span, depth i
 	case valueI32, valueI64, valueU8, valueU32, valueUSize, valueNull:
 		return "", nil
 	case valueStruct:
-		if !inertDropValue(value, 0) {
+		inert, err := r.inertDropValue(value, 0)
+		if err != nil {
+			return "", err
+		}
+		if !inert {
 			return "", capabilityError("struct field is not an inert copy value")
 		}
 		return "", nil

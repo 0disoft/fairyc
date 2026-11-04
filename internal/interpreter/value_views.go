@@ -35,7 +35,7 @@ func (v runtimeValue) byteAt(index uint64) (byte, error) {
 	return v.view().staticData[absolute], nil
 }
 
-func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
+func (r *executionState) indexedAt(v runtimeValue, index uint64) (runtimeValue, error) {
 	if hir.NonByteIndexedView(v.typ) {
 		if v.kind != valueView || v.view() == nil || v.view().array == nil || index >= v.view().length ||
 			v.view().offset+index >= uint64(len(v.view().array.elements)) {
@@ -46,13 +46,13 @@ func (v runtimeValue) indexedAt(index uint64) (runtimeValue, error) {
 		if !indexedElementRuntimeMatches(value, element) {
 			return runtimeValue{}, capabilityError("i64-view backing contains a non-i64 value")
 		}
-		return value.cloneForValueCopy(), nil
+		return r.cloneForValueCopy(value)
 	}
 	value, err := v.byteAt(index)
 	return runtimeValue{kind: valueU8, scalar: uint64(value), typ: hir.TypeU8}, err
 }
 
-func (v runtimeValue) storeIndexed(index uint64, value runtimeValue) error {
+func (r *executionState) storeIndexed(v runtimeValue, index uint64, value runtimeValue) error {
 	element, indexed := hir.IndexedViewElement(v.typ)
 	if !indexed || v.kind != valueView || v.view() == nil || !v.view().mutable || !hir.MutableIndexedView(v.typ) ||
 		v.view().array == nil || index >= v.view().length || !indexedElementRuntimeMatches(value, element) {
@@ -69,7 +69,11 @@ func (v runtimeValue) storeIndexed(index uint64, value runtimeValue) error {
 	if absolute >= uint64(len(v.view().array.elements)) {
 		return capabilityError("mutable byte-view store exceeds its array backing")
 	}
-	v.view().array.elements[absolute] = value.cloneForValueCopy()
+	copy, err := r.cloneForValueCopy(value)
+	if err != nil {
+		return err
+	}
+	v.view().array.elements[absolute] = copy
 	return nil
 }
 

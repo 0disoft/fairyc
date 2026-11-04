@@ -23,7 +23,7 @@ func TestStructDerefStoreBackingAndCopy(t *testing.T) {
 	locals := map[mir.LocalID]runtimeValue{1: selected, 2: token}
 	op := mir.Operation{Kind: mir.OperationDerefStore, Symbol: hir.NoSymbol, DestinationLocal: mir.NoLocal, OwnerType: selected.typ, Type: token.typ, Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: 1}, {Kind: mir.OperandLocal, Local: 2}}}
 	structs := map[hir.Type]*mir.StructType{token.typ: definition, child.typ: child.structure().definition}
-	if e := storeDeref(locals, op, structs); e != nil {
+	if e := storeDeref(defaultCopyTestState(), locals, op, structs); e != nil {
 		t.Fatal(e)
 	}
 	token.structure().fields[0].structure().fields[0] = i32Value(99)
@@ -41,7 +41,7 @@ func TestStructDerefStoreBackingAndCopy(t *testing.T) {
 	shared := selected
 	shared.typ = hir.SharedBorrow(token.typ)
 	locals[1] = shared
-	if e := storeDeref(locals, op, structs); e == nil {
+	if e := storeDeref(defaultCopyTestState(), locals, op, structs); e == nil {
 		t.Fatal("shared runtime receiver accepted")
 	}
 }

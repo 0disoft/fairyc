@@ -18,6 +18,7 @@ const (
 	OutcomeTrap                                    = "trap"
 	OutcomeLimit                                   = "limit"
 	LimitStep                                      = "step-limit"
+	LimitCopy                                      = "copy-limit"
 	LimitOutput                                    = "output-limit"
 	TestIntrinsicWriteStdoutByte TestIntrinsicKind = "write-stdout-byte"
 	TestIntrinsicWriteStderrByte TestIntrinsicKind = "write-stderr-byte"
@@ -122,6 +123,7 @@ func (prepared *PreparedProgram) executeEntry(entry string, resultType hir.Type,
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
 		steps:          options.MaxSteps,
+		copyUnits:      options.MaxCopyUnits,
 		callDepthLimit: options.MaxCallDepth,
 		context:        options.Context,
 	}
@@ -144,7 +146,7 @@ func (prepared *PreparedProgram) executeEntry(entry string, resultType hir.Type,
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			return engine.outcome(OutcomeCanceled, 0, ""), err
 		}
-		if errors.As(err, &capability) && (capability.Kind == LimitStep || capability.Kind == LimitCallDepth || capability.Kind == LimitOutput) {
+		if errors.As(err, &capability) && (capability.Kind == LimitStep || capability.Kind == LimitCallDepth || capability.Kind == LimitCopy || capability.Kind == LimitOutput) {
 			return engine.outcome(OutcomeLimit, 0, ""), err
 		}
 		return Outcome{}, err

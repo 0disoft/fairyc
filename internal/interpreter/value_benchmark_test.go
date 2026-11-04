@@ -16,7 +16,7 @@ func BenchmarkScalarValueCopy(b *testing.B) {
 	b.ReportAllocs()
 	b.ReportMetric(float64(unsafe.Sizeof(value)), "value-bytes")
 	for range b.N {
-		benchmarkValue = value.cloneForValueCopy()
+		benchmarkValue = benchmarkCopyValue(value)
 	}
 }
 
@@ -34,6 +34,6 @@ func BenchmarkStructValueCopy(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for range b.N {
-		benchmarkValue = value.cloneForValueCopy()
+		benchmarkValue = benchmarkCopyValue(value)
 	}
 }

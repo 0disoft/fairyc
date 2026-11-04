@@ -10,6 +10,7 @@ import (
 const (
 	DefaultMaxSteps     = 1_000_000
 	DefaultMaxCallDepth = 256
+	DefaultMaxCopyUnits = 1_000_000
 	OutcomeCanceled     = "canceled"
 	LimitCallDepth      = "call-depth-limit"
 	// Value-shape cycle protection is independent of the executable call budget.
@@ -22,6 +23,7 @@ const (
 type Options struct {
 	MaxSteps       int
 	MaxCallDepth   int
+	MaxCopyUnits   int
 	Context        context.Context
 	TestIntrinsics map[string]TestIntrinsicKind
 	OutputLimit    int
@@ -31,14 +33,17 @@ type Options struct {
 }
 
 func (options Options) normalized() (Options, error) {
-	if options.MaxSteps < 0 || options.MaxCallDepth < 0 {
-		return Options{}, fmt.Errorf("interpreter step and call-depth limits must be non-negative")
+	if options.MaxSteps < 0 || options.MaxCallDepth < 0 || options.MaxCopyUnits < 0 {
+		return Options{}, fmt.Errorf("interpreter step, call-depth, and copy-unit limits must be non-negative")
 	}
 	if options.MaxSteps == 0 {
 		options.MaxSteps = DefaultMaxSteps
 	}
 	if options.MaxCallDepth == 0 {
 		options.MaxCallDepth = DefaultMaxCallDepth
+	}
+	if options.MaxCopyUnits == 0 {
+		options.MaxCopyUnits = DefaultMaxCopyUnits
 	}
 	if options.Context == nil {
 		options.Context = context.Background()
@@ -50,6 +55,17 @@ func (r *executionState) checkCancellation() error {
 	if r.context != nil {
 		return r.context.Err()
 	}
+	return nil
+}
+
+func (r *executionState) consumeCopyUnits(amount int) error {
+	if err := r.checkCancellation(); err != nil {
+		return err
+	}
+	if amount < 1 || r.copyUnits < amount {
+		return capabilityErrorKind(LimitCopy, "interpreter copy-unit limit exceeded")
+	}
+	r.copyUnits -= amount
 	return nil
 }
 
