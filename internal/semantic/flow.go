@@ -78,6 +78,9 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 	a.collectRegionOriginFacts(module, &inventory, origins)
 	a.resourceFlowFunction(module, function)
 	a.resultFlowFunction(module, function)
+	if a.resultWork != nil && a.resultWork.exhausted {
+		return // Incomplete Result analysis cannot certify the remaining flow stages.
+	}
 	a.mustUseFlowFunction(module, function)
 }
 

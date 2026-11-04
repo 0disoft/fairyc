@@ -113,6 +113,8 @@ type analyzer struct {
 	resultLoops           []resultLoopFrame
 	resultProducerIndex   map[hir.Span]struct{}
 	resultNeutralScalars  map[*ast.Expression]bool
+	resultWork            *resultWorkBudget
+	resultWorkLimit       int
 	borrowReturns         map[*symbol]borrowReturnSummary
 	borrowWork            map[*ast.Function]*borrowWorkBudget
 	borrowWorkLimit       int

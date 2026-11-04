@@ -61,11 +61,11 @@ func TestScalarResultBackEdgeGuards(t *testing.T) {
 	if !a.canSkipScalarResultBackEdge(loop, nil) {
 		t.Fatal("scalar witness rejected")
 	}
-	if a.canSkipScalarResultBackEdge(loop, resultEnvironment{nil: {pending: true}}) {
-		t.Fatal("pending environment admitted")
+	if !a.canSkipScalarResultBackEdge(loop, resultEnvironment{nil: {pending: true}}) {
+		t.Fatal("unchanged pending environment rejected")
 	}
-	if a.canSkipScalarResultBackEdge(loop, resultEnvironment{nil: {}}) {
-		t.Fatal("handled environment admitted")
+	if !a.canSkipScalarResultBackEdge(loop, resultEnvironment{nil: {}}) {
+		t.Fatal("unchanged handled environment rejected")
 	}
 	copy := *loop
 	if a.canSkipScalarResultBackEdge(&copy, nil) {

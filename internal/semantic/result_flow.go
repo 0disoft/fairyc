@@ -48,6 +48,7 @@ func (a *analyzer) resultFlowFunction(module *moduleScope, function *ast.Functio
 	if function.Body == nil {
 		return
 	}
+	a.resultWork = newResultWorkBudget(a.resultWorkLimit)
 	// Joins run synchronously. Reuse their temporary membership index only for
 	// this function; no environment or diagnostic retains it.
 	defer func() { a.resultProducerIndex = nil }()
@@ -67,10 +68,13 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 	if block == nil {
 		return true
 	}
+	if !a.consumeResultWork(module.file.Path, block.Span, 1+len(environment)) {
+		return false
+	}
 	locals := make([]*symbol, 0)
 	reachable := true
 	for index := range block.Statements {
-		if !reachable {
+		if !reachable || a.resultWork.exhausted {
 			break
 		}
 		statement := &block.Statements[index]
@@ -124,6 +128,9 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 	}
 	if reachable && block.Tail != nil {
 		reachable = a.resultFlowExpression(module, block.Tail, environment, tailUse)
+	}
+	if a.resultWork.exhausted {
+		return false
 	}
 	if functionBody {
 		if reachable {
@@ -181,6 +188,9 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 	}
 	if expression == nil {
 		return true
+	}
+	if !a.consumeResultWork(module.file.Path, expression.Span, 1) {
+		return false
 	}
 	switch expression.Kind {
 	case syntax.KindPropagate:

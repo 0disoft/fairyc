@@ -195,3 +195,15 @@ execution and both file/directory symlink replacement cases. The ordinary
 workspacecompiler suite, genericsource/genericplan suites, focused compiler Check
 cases and sourceedit/genericsource/genericplan vet also pass. No full repository
 suite, Linux runtime execution, CI dispatch, push or release was performed.
+
+## 17. Result flow work (2026-11-05)
+
+Closed scalar loops preserve pending and handled incoming Result states without
+duplicate back-edge visits. Other Result control flow shares a per-function
+1,048,576-unit work allowance; incomplete analysis reports unsupported once and
+does not reach completed Flow or later MIR. Windows semantic and semantic,
+resource, Region and Result fixture suites plus semantic vet pass. Tests compare
+diagnostics/facts with forced baseline visits and cover 20 nested loops under
+512 units, exact/overflow limits, per-function reset and cancellation. Linux:
+rerun semantic, semanticfixture, resourcefixture, regionfixture, resultfixture,
+compiler and workspacecompiler in the combined validation.

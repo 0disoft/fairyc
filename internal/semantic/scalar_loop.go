@@ -22,11 +22,8 @@ func (f *borrowFlowAnalyzer) borrowNeutralScalar(e *ast.Expression) bool {
 
 // A closed scalar body cannot produce, handle or transfer Result obligations,
 // record result-handling facts, or capture loop exits. Keep the first visit and
-// omit only its duplicate back-edge visit when the incoming state is empty.
+// omit only its duplicate back-edge visit. Existing obligations remain unchanged.
 func (a *analyzer) canSkipScalarResultBackEdge(e *ast.Expression, environment resultEnvironment) bool {
-	if len(environment) != 0 {
-		return false
-	}
 	if _, typed := a.expressionTypes[e]; !typed {
 		return false // Do not extend this optimization to synthesized for loops.
 	}

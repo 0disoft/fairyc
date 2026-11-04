@@ -383,6 +383,12 @@ analysis once and cannot admit an incomplete proof to later flow/MIR stages.
 Closed scalar loops preserve incoming parameter borrow states without duplicate
 probes; existing loan/call/summary and non-scalar guards remain conservative.
 
+Result flow has a separate inclusive 1,048,576-unit allowance per function,
+using the same expression/block visit charges. Exhaustion reports unsupported
+analysis once, never a completed flow proof. Closed scalar loop bodies preserve
+both pending and handled incoming Result obligations without a second visit;
+break/continue, Result operations and untyped synthesized loops keep their guards.
+
 The resource runner explicitly requests exhaustive observations through
 `semantic.AnalyzeWithResourceStates`. Ordinary semantic/compiler entry points
 perform identical ownership and cleanup checks without collecting or sorting

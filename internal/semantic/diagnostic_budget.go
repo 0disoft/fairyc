@@ -14,6 +14,7 @@ type analysisOptions struct {
 	reportLimit     int
 	resourceStates  bool
 	borrowWorkLimit int
+	resultWorkLimit int
 }
 
 // diagnosticBudget admits diagnostics and unsupported facts as one bounded
