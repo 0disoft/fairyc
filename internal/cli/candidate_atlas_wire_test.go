@@ -32,14 +32,14 @@ func candidateAtlasProbe(t *testing.T, module, main string, verify func(*testing
 	t.Helper()
 	candidateAtlasProbeSize(t, module, main, 128<<10, verify)
 }
-func candidateAtlasProbeSize(t *testing.T, module, main string, partBytes int, verify func(*testing.T, string)) {
+func candidateAtlasProbeSize(t *testing.T, module, main string, partBytes int, verify func(*testing.T, string), fixtureModules ...string) {
 	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows Atlas native probe; Linux execution is batched")
 	}
 	root := t.TempDir()
 	copyLexerExample(t, root)
-	copyCandidateParityModules(t, root, module)
+	copyCandidateParityModules(t, root, append([]string{module}, fixtureModules...)...)
 	writeTestSource(t, root, "src/main.fy", main)
 	build, support := candidateParityBuildPartsWithLimit(t, root, nil, partBytes)
 	tc, err := cdriver.ResolveWindowsHostMSVC()

@@ -98,3 +98,9 @@ authorized by this queue.
   dispatch includes atlas-edit. This closes only the bounded Windows edit family;
   broader Atlas sources, Linux paths, native persistence, deferred designs and
   final cross-platform/self-build/distribution/hosted gates remain open.
+- The shared Fairy Atlas verified-type projection now matches all 16 ordinary
+  function signatures in a two-package Go v3 oracle on Windows low/optimized
+  (86.55s), including C scalars, nominal coordinates, borrows/slices, pointers,
+  arrays and Option/Result. Invalid ID/work/coordinate controls reject. This is
+  the type prerequisite; producer wiring, SDK and generic families remain open.
+  See `docs/ops/windows-candidate-atlas-types-20261105.md`.
