@@ -70,11 +70,18 @@ type WeakAliasInventory struct {
 // InspectWeakAliases distinguishes COFF class-105 records from linker alias
 // directives. A directive is evidence of an offered alternative, not selection.
 func InspectWeakAliases(raw []byte) (WeakAliasInventory, error) {
-	var result WeakAliasInventory
 	r, err := InspectObject(raw)
 	if err != nil {
-		return result, err
+		return WeakAliasInventory{}, err
 	}
+	return inspectWeakAliasesFromReport(raw, r)
+}
+
+// The report must come from InspectObject on the same raw bytes. Reusing that
+// validated report keeps object admission ahead of directive parsing without
+// decoding the symbol and relocation tables a second time.
+func inspectWeakAliasesFromReport(raw []byte, r ObjectReport) (WeakAliasInventory, error) {
+	var result WeakAliasInventory
 	for _, s := range r.SymbolRecords {
 		if s.StorageClass == coffStorageClassWeakExternal {
 			result.WeakExternals = append(result.WeakExternals, s)
@@ -121,7 +128,7 @@ func PlanDirectWeakAlias(inputs []WeakAliasObject, rootObject, root string) (Dir
 		if err != nil {
 			return result, err
 		}
-		inventory, err := InspectWeakAliases(input.Bytes)
+		inventory, err := inspectWeakAliasesFromReport(input.Bytes, r)
 		if err != nil {
 			return result, err
 		}
