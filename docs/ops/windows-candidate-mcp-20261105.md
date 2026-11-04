@@ -34,8 +34,6 @@ not compiler or application throughput. Parser work retains the shared bounded
 JSON reader's resource policy; full source queries and the real streaming stdio
 host are not established by this protocol fixture.
 
-## Remaining acceptance
-
 ## Streaming input and invocation policy
 
 `project_mcp_stream` owns a 4 KiB fixed read window and constructs one bounded
@@ -56,14 +54,41 @@ go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateMC
 go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateMCPOptions$'
 ```
 
-## Remaining acceptance
+## Current-source command and full CLI
 
-Connect explicit command limits, actual streaming stdin/stdout, fresh locked
-source verification and full Fairy CLI dispatch. Then replay unavailable/stale
-workspaces, continued requests, message/output limits and stream failures through
-the real host. Linux GCC/Clang execution remains in the combined queue; no Windows
-skip counts as Linux evidence. Full repository tests, hosted CI, clean-machine
-execution, push, release and deployment were not performed.
+`project_mcp_cli` connects the explicit policy, bounded streaming input and exact
+response writes. Each tool call freshly runs `project_atlas_source::query` against
+the invocation root and its current lock. It does not retain stale source facts,
+open a caller-selected root or ask a Go child to supply a map. The same dispatch
+is reachable as `experimental atlas-mcp` in the full Fairy candidate.
+
+Both Windows profiles pass the actual command tests with an empty PATH. Impact
+results are compared with the independent Go workspace call index, including
+source/interface/compiler identities and completeness. Tests check workspace
+immutability, stale-source refusal followed by recovery after restoration,
+unavailable selectors, invocation permission and limits, the message ceiling,
+interactive stdin with no EOF, help and a broken stdout pipe.
+
+Executed and passed:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m ./internal/cli -run '^TestCandidateMCPCommand$'
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/mcp-cli-20261105'
+go test -mod=readonly -count=1 -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$'
+go vet -mod=readonly ./internal/cli ./internal/atlasmcp
+git diff --check
+```
+
+The focused command run completed in 209.544 seconds; the full CLI run in 494.945
+seconds, with both low and optimized subtests passing. These are suite durations,
+not throughput measurements. Full CLI acceptance also replays the existing Atlas
+queries, unsupported-source controls and experimental help routes.
+
+Linux GCC/Clang execution remains in the combined queue; no Windows skip counts
+as Linux evidence. Full repository tests, hosted CI, clean-machine execution,
+push, release and deployment were not performed. Linux experimental dispatch and
+broader Atlas source families are separate implementation obligations.
 
 The Go response-bound correction preserves ordinary IDs and emits a bounded
 `-32603`/`id:null` fallback only when escaped IDs cannot fit. No public CLI flag,

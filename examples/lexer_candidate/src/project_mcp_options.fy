@@ -3,6 +3,7 @@ import std::bytes as bytes;
 import std::process as process;
 
 pub struct Policy{usize packages;usize calls;usize depth;usize symbols;usize output;usize requests;}
+pub fn bool valid(Policy p){return p.packages>0 && p.packages<=65536 && p.calls>0 && p.calls<=65536 && p.depth<=64 && p.symbols>0 && p.symbols<=4096 && p.output>=2048 && p.output<=4194304 && p.requests>0 && p.requests<=1024;}
 fn usize flag(ref u8[] s){if(bytes::equal(s,b"--allow-impact")){return 0;}if(bytes::equal(s,b"--max-packages")){return 1;}if(bytes::equal(s,b"--max-calls")){return 2;}if(bytes::equal(s,b"--max-depth")){return 3;}if(bytes::equal(s,b"--max-symbols")){return 4;}if(bytes::equal(s,b"--max-output-bytes")){return 5;}if(bytes::equal(s,b"--max-requests")){return 6;}return 7;}
 fn Result<usize,u32> number(ref u8[] s,usize maximum,bool zero){if(s.len==0 || s.len>1 && s[0]==48){return .err(2);}var usize n=0;var usize i=0;while(i<s.len){if(s[i]<48 || s[i]>57){return .err(2);}let digit=(s[i]-48) as usize;if(n>maximum/10 || n==maximum/10 && digit>maximum%10){return .err(2);}n=n*10+digit;i+=1;}if(n==0 && !zero){return .err(2);}return .ok(n);}
 // The process invocation grants each capability/limit. Request parameters

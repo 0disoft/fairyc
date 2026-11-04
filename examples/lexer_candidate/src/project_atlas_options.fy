@@ -12,6 +12,9 @@ pub fn usize calls(ref Options p){return p.calls;}
 pub fn usize depth(ref Options p){return p.depth;}
 pub fn usize symbols(ref Options p){return p.symbols;}
 pub fn usize output(ref Options p){return p.output;}
+// Owned request selection for a host-supplied policy. No request can widen the
+// invocation limits, and invalid selectors fail before workspace access.
+pub fn Result<Options,u32> selected(ref u8[] package_uid,ref u8[] target,usize packages,usize calls,usize depth,usize symbols,usize output){if(!manifest::uid(package_uid) || (!wire::hex(target,b"fysym1-sha256-128-",32,false) && !wire::hex(target,b"fysym1-sha256-256-",64,false)) || packages==0 || packages>65536 || calls==0 || calls>65536 || depth>64 || symbols==0 || symbols>4096 || output==0 || output>4194304){return .err(2);}var bytes::Buffer uid=bytes::empty();var bytes::Buffer symbol=bytes::empty();if(!bytes::append(ref mut uid,package_uid).is_ok || !bytes::append(ref mut symbol,target).is_ok){return .err(2);}return .ok(Options{.uid,.symbol,.packages,.calls,.depth,.symbols,.output});}
 fn usize flag(ref u8[] s){if(bytes::equal(s,b"--package-uid")){return 0;}if(bytes::equal(s,b"--symbol")){return 1;}if(bytes::equal(s,b"--max-packages")){return 2;}if(bytes::equal(s,b"--max-calls")){return 3;}if(bytes::equal(s,b"--max-depth")){return 4;}if(bytes::equal(s,b"--max-symbols")){return 5;}if(bytes::equal(s,b"--max-output-bytes")){return 6;}if(bytes::equal(s,b"--locked")){return 7;}return 8;}
 fn Result<usize,u32> number(ref u8[] s,usize maximum,bool zero){if(s.len==0 || s.len>1 && s[0]==48){return .err(2);}var usize n=0;var usize i=0;while(i<s.len){if(s[i]<48 || s[i]>57){return .err(2);}let digit=(s[i]-48) as usize;if(n>maximum/10 || n==maximum/10 && digit>maximum%10){return .err(2);}n=n*10+digit;i+=1;}if(n==0 && !zero){return .err(2);}return .ok(n);}
 // Syntax is completely checked before opening any workspace or reading stdin.

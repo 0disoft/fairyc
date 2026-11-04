@@ -76,8 +76,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 
 			t.Setenv("PATH", "")
 			verifyCandidateAtlasCommand(t, image)
+			verifyCandidateMCPCommand(t, image)
 			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)
-			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}} {
+			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}} {
 				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 				if code != 0 || out != usage || diagnostic != "" {
 					t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)

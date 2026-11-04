@@ -8,8 +8,9 @@ authorized by this queue.
 
 ## Implementation
 
-- [ ] Fairy `experimental atlas-mcp`: bounded protocol core, explicit command
-  policy, real stdio, current locked Fairy query, negative/native/full CLI tests.
+- [x] Fairy `experimental atlas-mcp`: bounded protocol core, explicit command
+  policy, real stdio, current locked Fairy query, negative/native/full CLI tests
+  pass on Windows low/optimized. Linux dispatch and execution remain below.
 - [ ] Fairy `experimental atlas-edit`: current identity and source checks,
   single-body preview/apply, failure-atomic publication and native CLI tests.
 - [ ] Broaden Fairy Atlas production to the Go-supported source families,
@@ -17,6 +18,8 @@ authorized by this queue.
   independent current-source expectations and explicit completeness.
 - [ ] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
+- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit to the
+  Linux entry and select compatible host facades before the combined native replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
   or one-attempt behavior.
@@ -54,5 +57,6 @@ authorized by this queue.
   the response allowance even when the original raw ID was admitted.
 - Fairy MCP protocol core passes Windows low/optimized Go-oracle replay. Its
   pure transition module, owned selectors and response validation are complete.
-  Active: actual command/session and current-source query wiring; the MCP item
-  remains open until the real CLI and negative/native acceptance pass.
+  Actual command/session and current-source query wiring now pass focused native
+  command (209.544s) and full CLI (494.945s) acceptance in both profiles. See
+  `docs/ops/windows-candidate-mcp-20261105.md`; this does not complete the queue.

@@ -86,8 +86,12 @@ JSON-RPC lifecycle, explicit query selection and response envelopes. Its pure
 pending selector; `finish` accepts one validated host document or an unavailable
 result. It opens no workspace and owns no stdin/stdout. The protocol-only Windows
 oracle is recorded in [the candidate MCP receipt](../ops/windows-candidate-mcp-20261105.md).
-Actual Fairy command/session and current-source query wiring remain the next slice;
-the existing Go command continues to own the integrated session below.
+The Fairy command now connects explicit invocation policy, bounded streaming
+stdin/stdout and a fresh locked-source query for each tool call. Windows focused
+command and full CLI acceptance pass in both profiles, including stale-source
+refusal/recovery and output failure. The Go host retains the prepared-session
+optimization described below; the Fairy host re-verifies the source on each call.
+Native Linux dispatch/execution and broader source families remain separate.
 
 ```sh
 fairyc experimental atlas-mcp --allow-impact --max-packages 32 --max-calls 8192 --max-depth 8 --max-symbols 256 --max-output-bytes 262144 --max-requests 100
