@@ -177,11 +177,7 @@ func (store *MapStore) publish(partition Partition, hooks mapPublishHooks) (Chec
 		return Checksum{}, fmt.Errorf(".fymap store is not initialized")
 	}
 	schema, encoding, logical := store.transportVersion()
-	encoded, err := encodeVersion(partition, store.limits.MaxMapBytes, schema, encoding, logical)
-	if err != nil {
-		return Checksum{}, err
-	}
-	checksum, err := computeVersionChecksum(documentFromPartition(partition), schema, encoding)
+	encoded, checksum, err := encodeVersionWithChecksum(partition, store.limits.MaxMapBytes, schema, encoding, logical)
 	if err != nil {
 		return Checksum{}, err
 	}

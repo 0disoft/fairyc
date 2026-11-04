@@ -73,28 +73,32 @@ func EncodeV3(partition Partition, maxBytes uint64) ([]byte, error) {
 }
 
 func encodeVersion(partition Partition, maxBytes uint64, schema, encoding, logical string) ([]byte, error) {
-	if maxBytes == 0 {
-		return nil, fmt.Errorf(".fymap byte limit must be positive")
-	}
-	if err := validatePartitionVersion(partition, logical); err != nil {
-		return nil, fmt.Errorf("validate .fymap partition: %w", err)
-	}
-	return encodeValidatedPartition(partition, maxBytes, schema, encoding)
+	encoded, _, err := encodeVersionWithChecksum(partition, maxBytes, schema, encoding, logical)
+	return encoded, err
 }
 
-// encodeValidatedPartition requires a positive limit and a partition already validated
-// for the selected version. Decode uses it to compare canonical bytes without
-// repeating semantic validation and SymbolId derivation.
-func encodeValidatedPartition(partition Partition, maxBytes uint64, schema, encoding string) ([]byte, error) {
+// Return the digest of the exact document encoded here so publication can name
+// its immutable generation without converting and hashing the partition again.
+func encodeVersionWithChecksum(partition Partition, maxBytes uint64, schema, encoding, logical string) ([]byte, Checksum, error) {
+	if maxBytes == 0 {
+		return nil, Checksum{}, fmt.Errorf(".fymap byte limit must be positive")
+	}
+	if err := validatePartitionVersion(partition, logical); err != nil {
+		return nil, Checksum{}, fmt.Errorf("validate .fymap partition: %w", err)
+	}
 	document := documentFromPartition(partition)
 	checksum, err := computeVersionChecksum(document, schema, encoding)
 	if err != nil {
-		return nil, err
+		return nil, Checksum{}, err
 	}
-	return marshalTransportEnvelope(transportEnvelope{
+	encoded, err := marshalTransportEnvelope(transportEnvelope{
 		Schema: schema, Encoding: encoding,
 		ChecksumAlgorithm: ChecksumAlgorithm, Checksum: checksum.String(), Map: document,
 	}, maxBytes)
+	if err != nil {
+		return nil, Checksum{}, err
+	}
+	return encoded, checksum, nil
 }
 
 func marshalTransportEnvelope(envelope transportEnvelope, maxBytes uint64) ([]byte, error) {
