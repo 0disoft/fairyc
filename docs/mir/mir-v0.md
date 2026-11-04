@@ -362,7 +362,7 @@ The verifier runs before every interpreter or backend handoff.
 | Code | Invariant |
 | --- | --- |
 | `V1001` | Reachable control flow has valid entry, successor, terminator, and switch shapes. |
-| `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
+| `V1002` | Every use is dominated by an initialized assignment on all incoming paths. Initialization-state snapshots have a cumulative per-function budget of 1,048,576 map entries; exceeding it fails verification with an explicit budget detail. Straight-line blocks transfer owned state, while joins (including entry backedges) retain immutable snapshots. |
 | `V1003` | Compiler admission capabilities must be valid. |
 | `V1010` | Aggregate definitions have unique concrete identities and cannot collide across kinds. |
 | `V1011` | Aggregate fields and variants have valid unique names and admitted field types. |

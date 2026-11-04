@@ -74,6 +74,8 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		id    BlockID
 		state verificationState
 	}
+	joins := verificationJoinPoints(function)
+	remainingSnapshots := maxVerificationSnapshotEntries
 	queue := []pendingBlock{{id: function.Entry, state: initial}}
 	seen := make(map[BlockID]verificationState)
 	for len(queue) > 0 {
@@ -93,15 +95,22 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 			}
 			item.state = merged
 		}
-		// Queued states already own their maps, and a changed merge also returns
-		// owned maps. Retain that snapshot directly; execution below uses a clone.
-		seen[item.id] = item.state
 		if int(item.id) < 0 || int(item.id) >= len(function.Blocks) {
 			failures = append(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "successor block is missing"})
 			continue
 		}
 		block := function.Blocks[item.id]
-		state := cloneVerificationState(item.state)
+		// A single-predecessor block transfers its owned state along the chain.
+		// Only joins (including loop entries) require an immutable snapshot.
+		state := item.state
+		if joins[item.id] {
+			seen[item.id] = item.state
+			var ok bool
+			state, ok = cloneVerificationSnapshot(item.state, &remainingSnapshots)
+			if !ok {
+				return append(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
+			}
+		}
 		for operationIndex, operation := range block.Operations {
 			failures = append(failures, verifier.verifyOperation(state, operation, operationEntity(item.id, operationIndex, operation))...)
 		}
@@ -189,8 +198,16 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		if terminator.Kind == TerminatorTrap || terminator.Kind == TerminatorUnreachable {
 			continue
 		}
-		for _, successor := range terminator.Successors {
-			queue = append(queue, pendingBlock{id: successor, state: cloneVerificationState(state)})
+		for index, successor := range terminator.Successors {
+			outgoing := state
+			if index+1 < len(terminator.Successors) {
+				var ok bool
+				outgoing, ok = cloneVerificationSnapshot(state, &remainingSnapshots)
+				if !ok {
+					return append(failures, VerificationError{Code: "V1002", Entity: function.Name, Detail: "initialization state exceeds verifier snapshot budget"})
+				}
+			}
+			queue = append(queue, pendingBlock{id: successor, state: outgoing})
 		}
 	}
 	failures = append(failures, verifyTrapCheckEdges(function)...)

@@ -25,3 +25,12 @@ validated individually; only paths survive until linking. Existing object-return
 APIs retain their behavior under a 256 MiB aggregate diagnostic-object budget.
 MSVC tests compare exact image bytes and execute ordinary/stack-reserved images.
 Linux: rerun common candidatebuild/cdriver tests in the combined pass.
+
+## 4. MIR initialization-state snapshots
+
+Single-predecessor chains transfer owned state instead of retaining/copying maps
+for every block. Joins and forks retain independent snapshots under a cumulative
+1,048,576-entry copy budget. Entry backedges count the implicit caller edge.
+Windows MIR tests cover a 2,048-block chain, loop convergence, budget boundaries,
+state isolation and the existing ownership/merge mutation cases.
+Linux: rerun `go test -mod=readonly ./internal/mir`.
