@@ -251,6 +251,9 @@ func expandAllContext(ctx context.Context, modules []*expander, limits genericpl
 	if err != nil {
 		return nil, genericplan.Plan{}, locatePlanningFailure(modules, err)
 	}
+	if err := checkMaterializationBudget(modules, plan, defaultMaterializedASTNodeBudget); err != nil {
+		return nil, genericplan.Plan{}, err
+	}
 	names := map[string]string{}
 	for _, specialization := range plan.Specializations {
 		arguments := make([]genericplan.TypeID, len(specialization.Bindings))

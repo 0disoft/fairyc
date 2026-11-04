@@ -167,7 +167,7 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
 		}
 		var typeError error
-		t := transform{typeReference: func(ref *ast.TypeReference) {
+		t := sourceVisitor{typeReference: func(ref *ast.TypeReference) {
 			if typeError == nil {
 				typeError = x.registerAggregateType(*ref, shape.TypeParameters, &declaration, &requests)
 			}
@@ -187,7 +187,7 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			t.typ(field.Type)
 		}
 		if aggregate.resource != nil && aggregate.resource.Cleanup != nil {
-			if _, err := t.block(aggregate.resource.Cleanup.Body); err != nil {
+			if err := t.block(aggregate.resource.Cleanup.Body); err != nil {
 				return nil, x.at(shape.Span, FailureDeclaration, err)
 			}
 		}

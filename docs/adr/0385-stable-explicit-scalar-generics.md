@@ -121,3 +121,11 @@ generic sharing or resource-element ownership admission.
 
 [ADR 0494](0494-broader-scalar-generic-transport.md) supersedes the direct scalar signature
 restriction for the Go Stage 0 prototype. Composite transport signatures remain closed.
+
+## Materialized syntax bound
+
+Go source preparation preflights the cumulative emitted function/aggregate syntax
+at 1,048,576 nodes, including nested types, expressions and copied local closures,
+before any specialization body is cloned. Excess work uses G2006 and the original
+source location. Count/depth planner limits remain independent. Declaration
+collection walks caller-owned syntax without constructing discarded deep copies.

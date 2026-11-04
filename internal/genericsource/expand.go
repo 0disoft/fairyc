@@ -178,7 +178,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			declaration.Parameters = append(declaration.Parameters, value)
 		}
 		var typeError error
-		t := transform{binding: func(name string, span diagnostic.Span) error {
+		t := sourceVisitor{binding: func(name string, span diagnostic.Span) error {
 			return x.at(span, FailureDeclaration, x.checkBinding(name))
 		}, expression: func(e *ast.Expression) (err error) {
 			defer func() { err = x.at(e.Span, FailureRequest, err) }()
@@ -195,7 +195,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 				typeError = x.registerAggregateType(*ref, fn.TypeParameters, &declaration, &requests)
 			}
 		}
-		if _, err := t.function(fn); err != nil {
+		if err := t.function(fn); err != nil {
 			return nil, fmt.Errorf("generic source %s: %w", fn.Name, err)
 		}
 		if typeError != nil {

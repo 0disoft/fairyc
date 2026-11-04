@@ -34,3 +34,10 @@ for every block. Joins and forks retain independent snapshots under a cumulative
 Windows MIR tests cover a 2,048-block chain, loop convergence, budget boundaries,
 state isolation and the existing ownership/merge mutation cases.
 Linux: rerun `go test -mod=readonly ./internal/mir`.
+
+## 5. Generic materialization
+
+The whole expansion checks its cumulative 1,048,576-node output budget before
+cloning specializations. Declaration collection no longer makes discarded AST
+copies. Windows genericsource tests cover inclusive boundaries, source immutability,
+zero work and arithmetic overflow. Linux: rerun genericsource/compiler suites.
