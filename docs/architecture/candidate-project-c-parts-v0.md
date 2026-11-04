@@ -304,3 +304,12 @@ build allowance; its exact packet retains two prior /Od-/O2 C executions.
 Source check passes 362 files / 4679 MIR functions. No product timeout, API,
 SDK ABI, DB or CI change; no push. Receipt:
 `docs/ops/evidence/candidate-c-literal-scopes-20261012.json`.
+
+## Go Windows consumer object list
+
+The Go MSVC project consumer writes fixed ASCII object basenames, in compilation
+order, to `fy_objects.rsp` in its private build directory. The link invocation
+passes this one response-file argument instead of expanding up to 4,098 object
+paths onto the Windows command line. Separate compilation, object inspection,
+stack reservation, reproducible linking and failure publication rules remain
+unchanged for both image-only and object-retaining builds.

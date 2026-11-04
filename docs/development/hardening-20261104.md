@@ -90,3 +90,14 @@ have identical remaining results for valid, use-after-move and branch-join cases
 Windows semantic/resource/semantic-fixture/Region/Result suites and focused vet
 pass. Linux: rerun semantic, resourcefixture, compiler and workspacecompiler in
 the combined validation.
+
+## 9. Windows project response file
+
+The MSVC link command uses one fixed response-file argument for all object
+basenames. Windows linked 4,098 objects from a 68,553-byte response file in a
+directory containing spaces and executed the image with exit 23. Two compiler
+invocations plus small object copies exercise the admitted link size without
+4,096 compiler invocations. Existing low/optimized reproducibility, image-only
+equivalence, stack reservation and compile/link failure tests pass; cdriver vet
+passes. Linux: rerun common cdriver/candidatebuild tests in the combined pass;
+the MSVC native case remains Windows-only.
