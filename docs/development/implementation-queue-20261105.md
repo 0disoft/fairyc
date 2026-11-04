@@ -84,3 +84,9 @@ authorized by this queue.
   controls pass per profile after a Go-only live-tree harness repair. See the
   detailed reuse/failure accounting in the edit receipt. Refreshed full candidate
   CLI acceptance remains open; the broader implementation queue is not complete.
+- Full edit-CLI input preparation exposed a 2,110,183-byte Go bootstrap header,
+  13,031 bytes over its unchanged 2 MiB bound. Omitting definition-local names
+  from shared prototypes reduces it to 1,919,958 bytes (190,225 bytes saved).
+  Partitioned native/type/callback/inline and unchanged single-unit checks pass;
+  complete native CLI replay and Fairy emitter/self-build acceptance remain
+  separate. See `docs/ops/windows-bootstrap-header-20261105.md`.

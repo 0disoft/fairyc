@@ -51,6 +51,16 @@ fn i32 main() {
 	if len(parts.Sources) < 3 || parts.Unit.Source != "" || parts.Header == "" {
 		t.Fatal("missing function-boundary partitions")
 	}
+	// Header-only declarations omit local parameter names; definitions retain
+	// them. This keeps exact C types and avoids redundant names in every unit.
+	for _, line := range strings.Split(parts.Header, "\n") {
+		if strings.Contains(line, " fy_fn_") && strings.HasSuffix(line, ");") && strings.Contains(line, " fy_l_") {
+			t.Fatalf("shared prototype retained a definition-local name: %s", line)
+		}
+	}
+	if !strings.Contains(strings.Join(parts.Sources, "\n"), " fy_l_") {
+		t.Fatal("function definition lost its parameter names")
+	}
 	metadata := unit
 	metadata.Source = ""
 	if !reflect.DeepEqual(parts.Unit, metadata) {

@@ -31,7 +31,9 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 		output.WriteString("_Noreturn ")
 	}
 	fmt.Fprintf(output, "%s fy_fn_%d(", resultType, functionIndex)
-	if err := e.emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
+	// Shared prototypes need types only. Keeping definition-local names in every
+	// translation unit can push a large compiler over the bounded header limit.
+	if err := e.emitParameterList(output, function.Parameters, function.ParameterTypes, !e.partitioned); err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
 	output.WriteString(");\n")
@@ -69,6 +71,10 @@ func (e *emitter) emitForeignMacroGuard(output *strings.Builder, functionIndex i
 }
 
 func (e *emitter) emitParameters(output *strings.Builder, parameters []mir.LocalID, parameterTypes []hir.Type) error {
+	return e.emitParameterList(output, parameters, parameterTypes, true)
+}
+
+func (e *emitter) emitParameterList(output *strings.Builder, parameters []mir.LocalID, parameterTypes []hir.Type, named bool) error {
 	if len(parameters) != len(parameterTypes) {
 		return fmt.Errorf("parameter type count %d does not match parameter count %d", len(parameterTypes), len(parameters))
 	}
@@ -84,7 +90,10 @@ func (e *emitter) emitParameters(output *strings.Builder, parameters []mir.Local
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(output, "%s fy_l_%d", cType, parameter)
+		output.WriteString(cType)
+		if named {
+			fmt.Fprintf(output, " fy_l_%d", parameter)
+		}
 	}
 	return nil
 }
