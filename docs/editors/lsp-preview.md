@@ -16,8 +16,13 @@ No project builds, execution, downloads, lockfile writes or source writes occur.
 - UTF-16 positions, including non-ASCII source and supplementary-plane characters.
 
 Initialize with one local workspace folder. For each document the nearest
-`fairy.toml` inside that folder selects a project. Declared members, local
-dependencies and the bundled SDK are loaded using the compiler's ordinary
+`fairy.toml` inside that folder identifies its package. If that exact package
+directory is a declared member of a valid ancestor `[workspace]`, the nearest
+such ancestor selects the project, so sibling members and the root's reachable
+dependency closure remain available. A nested package that its ancestors do not
+declare stays in its own project scope. Selection never goes above the
+initialized folder or through a symlinked package directory. Declared members,
+local dependencies and the bundled SDK are loaded using the compiler's ordinary
 workspace rules. Source contents are overlaid in memory and receive fresh graph,
 digest and compilation identities. A file without a manifest receives
 single-file compiler analysis.

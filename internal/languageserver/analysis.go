@@ -6,12 +6,15 @@ import (
 	"errors"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/durablefile"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,20 +52,94 @@ type analysis struct {
 }
 
 func (s *server) projectRoot(filename string) string {
-	// Parent lookup stays within the one explicitly initialized workspace folder.
-	if s.root == "" {
+	// Parent lookup stays within the one explicitly initialized workspace folder and refuses
+	// symlinked package paths.
+	if s.root == "" || !projectDirectoryPath(s.root, s.root) {
 		return ""
 	}
+	packageDirectory := ""
 	for directory := filepath.Dir(filename); contained(s.root, directory); directory = filepath.Dir(directory) {
 		info, err := os.Lstat(filepath.Join(directory, "fairy.toml"))
 		if err == nil && info.Mode().IsRegular() {
+			if !projectDirectoryPath(s.root, directory) {
+				return ""
+			}
+			packageDirectory = directory
+			break
+		}
+		if directory == s.root || directory == filepath.Dir(directory) {
+			break
+		}
+	}
+	if packageDirectory == "" {
+		return ""
+	}
+	// A member manifest cannot carry the outer catalog. Prefer the nearest explicit
+	// workspace whose members name this package directory exactly.
+	for directory := filepath.Dir(packageDirectory); contained(s.root, directory); directory = filepath.Dir(directory) {
+		if workspaceContainsPackage(directory, packageDirectory) {
 			return directory
 		}
 		if directory == s.root || directory == filepath.Dir(directory) {
 			break
 		}
 	}
-	return ""
+	return packageDirectory
+}
+
+func projectDirectoryPath(root, directory string) bool {
+	info, err := os.Lstat(root)
+	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return false
+	}
+	relative, err := filepath.Rel(root, directory)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) || filepath.IsAbs(relative) {
+		return false
+	}
+	current := root
+	for _, component := range strings.Split(relative, string(filepath.Separator)) {
+		if component == "." {
+			continue
+		}
+		current = filepath.Join(current, component)
+		info, err = os.Lstat(current)
+		if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+			return false
+		}
+	}
+	return true
+}
+
+func workspaceContainsPackage(directory, packageDirectory string) bool {
+	root, err := os.OpenRoot(directory)
+	if err != nil {
+		return false
+	}
+	defer root.Close()
+	file, err := durablefile.OpenRegular(root, projectmanifest.FileName)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil || info.Size() > projectmanifest.MaxBytes {
+		return false
+	}
+	contents, err := io.ReadAll(io.LimitReader(file, projectmanifest.MaxBytes+1))
+	if err != nil || len(contents) > projectmanifest.MaxBytes {
+		return false
+	}
+	manifest, err := projectmanifest.Parse(contents)
+	if err != nil || !manifest.Workspace.Present {
+		return false
+	}
+	packageDirectory = filepath.Clean(packageDirectory)
+	for _, member := range manifest.Workspace.Members {
+		if filepath.Clean(filepath.Join(directory, filepath.FromSlash(member))) == packageDirectory {
+			return true
+		}
+	}
+	return false
 }
 func (s *server) analyze(d *document, root string) *analysis {
 	result, _ := s.analyzeContext(context.Background(), d, root)
