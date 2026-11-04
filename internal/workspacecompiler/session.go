@@ -269,36 +269,20 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
-	if err != nil {
-		return Result{}, fmt.Errorf("extract package MIR artifacts: %w", err)
-	}
-	byPackage := make(map[hir.PackageID]packageartifact.Artifact, len(extracted))
-	for _, artifact := range extracted {
-		if err := ctx.Err(); err != nil {
-			return Result{}, err
-		}
-		if _, duplicate := byPackage[artifact.PackageID]; duplicate {
-			return Result{}, fmt.Errorf("lowered MIR produced duplicate package artifact %d", artifact.PackageID)
-		}
-		byPackage[artifact.PackageID] = artifact
-	}
-	for _, packageID := range owners {
-		if err := ctx.Err(); err != nil {
-			return Result{}, err
-		}
-		artifact, found := byPackage[packageID]
-		if !found {
-			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)
-		}
+	err = visitOrdinaryArtifacts(ctx, compiled.MIR, identities, coordinates, owners, func(artifact packageartifact.Artifact) error {
+		packageID := artifact.PackageID
 		if err := session.cache.Put(keys[packageID], interfaces[packageID], artifact); err != nil {
 			if errors.Is(err, packageartifact.ErrProcessArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
-				continue
+				return nil
 			}
-			return Result{}, fmt.Errorf("store package %d MIR artifact: %w", packageID, err)
+			return fmt.Errorf("store package %d MIR artifact: %w", packageID, err)
 		}
 		report.Stored++
+		return nil
+	})
+	if err != nil {
+		return Result{}, err
 	}
 	return Result{Compiler: compiled, Cache: report}, nil
 }
@@ -386,47 +370,34 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
-	if err != nil {
-		return Result{}, fmt.Errorf("extract stable package MIR artifacts: %w", err)
-	}
-	byPackage := make(map[hir.PackageID]packageartifact.Artifact, len(extracted))
-	for _, artifact := range extracted {
-		if _, duplicate := byPackage[artifact.PackageID]; duplicate {
-			return Result{}, fmt.Errorf("lowered MIR produced duplicate package artifact %d", artifact.PackageID)
-		}
-		byPackage[artifact.PackageID] = artifact
-	}
 	stateBodies, err := contractstatemir.DescribeStableHIRStateBodies(analysis.Semantic.HIR, owners, coordinates)
 	if err != nil {
 		return Result{}, fmt.Errorf("describe stable package contract-state bodies: %w", err)
 	}
 	batch := session.stableCache.BeginBatch()
 	defer batch.Close() // Early errors/cancellation still collect published generations.
-	for _, packageID := range owners {
-		if err := ctx.Err(); err != nil {
-			return Result{}, err
-		}
-		artifact, found := byPackage[packageID]
-		if !found {
-			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)
-		}
+	err = visitOrdinaryArtifacts(ctx, compiled.MIR, identities, coordinates, owners, func(artifact packageartifact.Artifact) error {
+		packageID := artifact.PackageID
 		stateBody, found := stateBodies[packageID]
 		if !found || stateBody.Hash != bodies[packageID] {
-			return Result{}, fmt.Errorf("stable contract-state body for package %d does not match the cache-key identity", packageID)
+			return fmt.Errorf("stable contract-state body for package %d does not match the cache-key identity", packageID)
 		}
 		if err := batch.Put(keys[packageID], interfaces[packageID], artifact, stateBody); err != nil {
 			if errors.Is(err, packageartifact.ErrStableCompilationTooLarge) || errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, contractstatemir.ErrStableStateBodyTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
-				continue
+				return nil
 			}
 			if errors.Is(err, packageartifact.ErrStableCacheStore) {
 				report.StoreFailed++
-				continue
+				return nil
 			}
-			return Result{}, fmt.Errorf("store package %d stable compilation artifact: %w", packageID, err)
+			return fmt.Errorf("store package %d stable compilation artifact: %w", packageID, err)
 		}
 		report.Stored++
+		return nil
+	})
+	if err != nil {
+		return Result{}, err
 	}
 	if err := batch.Close(); err != nil {
 		// Publication may have succeeded, but uncollected records are not a

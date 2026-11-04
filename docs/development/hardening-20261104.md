@@ -207,3 +207,17 @@ diagnostics/facts with forced baseline visits and cover 20 nested loops under
 512 units, exact/overflow limits, per-function reset and cancellation. Linux:
 rerun semantic, semanticfixture, resourcefixture, regionfixture, resultfixture,
 compiler and workspacecompiler in the combined validation.
+
+## 18. Streaming package extraction (2026-11-05)
+
+Ordinary/generic/storage memory and persistent miss paths publish one independently
+verified package before extracting the next. Shared symbol metadata and owner
+membership survive; a complete slice of cloned workspace contexts does not. For
+P packages and C cloned declaration metadata, producer context residency becomes
+O(C), replacing O(P*C); this is not a measured whole-process peak-RSS claim.
+Existing ExtractAll APIs retain their independent-copy contracts. Windows
+packageartifact/workspacecompiler suites and vet pass. Tests compare complete
+artifact values/order, source and sibling isolation, and immediate stop on callback
+failure/cancellation before the next package is extracted. Persistent scoped batches
+still close on early errors. Linux: rerun packageartifact, packagecache,
+workspacecompiler and workspace cache/session CLI tests in the combined validation.

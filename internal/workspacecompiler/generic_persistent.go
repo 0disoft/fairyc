@@ -70,32 +70,29 @@ func (session *GenericSession) checkGenericPersistent(ctx context.Context, analy
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := session.artifacts.extract(compiled.MIR, identities, coordinates)
-	if err != nil {
-		return Result{}, err
-	}
 	batch := session.stableCache.BeginBatch()
 	defer batch.Close()
-	for _, artifact := range extracted {
-		if err := ctx.Err(); err != nil {
-			return Result{}, err
-		}
+	err = session.artifacts.visit(ctx, compiled.MIR, identities, coordinates, func(artifact packageartifact.Artifact) error {
 		key, found := keys[artifact.PackageID]
 		if !found {
-			return Result{}, fmt.Errorf("generic persistent artifact has no current key")
+			return fmt.Errorf("generic persistent artifact has no current key")
 		}
 		if err := batch.Put(key, analysis.Interfaces[artifact.PackageID], artifact); err != nil {
 			if errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrContextArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
-				continue
+				return nil
 			}
 			if errors.Is(err, packageartifact.ErrStableCacheStore) {
 				report.StoreFailed++
-				continue
+				return nil
 			}
-			return Result{}, err
+			return err
 		}
 		report.Stored++
+		return nil
+	})
+	if err != nil {
+		return Result{}, err
 	}
 	if err := batch.Close(); err != nil {
 		report.StoreFailed += report.Stored

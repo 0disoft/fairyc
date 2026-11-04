@@ -61,6 +61,10 @@ socket-security policy before Stage 0 has evidence that it needs those costs.
 - lockfile writes remain the existing ordinary-mode behavior and `--locked` remains exact and
   no-write;
 - cache memory is bounded twice by entry/total-byte limits and once by artifact-byte admission;
+- ordinary, generic and private storage miss paths consume verified package artifacts one at a
+  time before extracting the next package. The producer retains one package context instead of
+  the complete set of cloned workspace contexts. Existing slice-returning extraction APIs still
+  return independent artifacts; an early error can leave earlier verified cache publications.
 - the configured standalone Windows compiler smoke proves eight editor-shaped requests cross the
   real process stdin/stdout boundary; ADR 0160 owns its raw timing and memory receipt;
 - reference-machine timing, process peak memory, noise policy, cancellation, editor integration,

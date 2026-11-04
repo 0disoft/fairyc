@@ -1,6 +1,7 @@
 package workspacecompiler
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -43,7 +44,7 @@ type genericArtifactPolicy struct {
 	newMemory     func(packagecache.Limits, uint64) (*packageartifact.GenericCache, error)
 	newDisk       func(string, packagecache.DiskLimits, uint64) (*packageartifact.GenericStableCache, error)
 	newDiskInRoot func(*os.Root, string, packagecache.DiskLimits, uint64) (*packageartifact.GenericStableCache, error)
-	extract       func(mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.PackageID]packagegraph.CoordinateID) ([]packageartifact.Artifact, error)
+	visit         func(context.Context, mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.PackageID]packagegraph.CoordinateID, func(packageartifact.Artifact) error) error
 	reassemble    func([]packageartifact.Artifact) (mir.Program, error)
 	rebind        func([]packageartifact.StableArtifact, map[hir.PackageID]packagegraph.CoordinateID, hir.SymbolID, hir.SymbolID, mir.LocalID) (mir.Program, error)
 	processSuffix string
@@ -63,7 +64,7 @@ func genericArtifactsFor(capabilities admission.Capabilities) (genericArtifactPo
 		newMemory:     packageartifact.NewGenericCache,
 		newDisk:       packageartifact.NewGenericStableCache,
 		newDiskInRoot: packageartifact.NewGenericStableCacheInRoot,
-		extract:       packageartifact.ExtractAll,
+		visit:         packageartifact.VisitAllContext,
 		reassemble:    packageartifact.Reassemble,
 		rebind:        packageartifact.RebindStableArtifacts,
 		processSuffix: ":generic-v0",
@@ -74,7 +75,7 @@ func genericArtifactsFor(capabilities admission.Capabilities) (genericArtifactPo
 			newMemory:     packageartifact.NewStorageTransferCache,
 			newDisk:       packageartifact.NewStorageTransferStableCache,
 			newDiskInRoot: packageartifact.NewStorageTransferStableCacheInRoot,
-			extract:       packageartifact.ExtractAllStorageTransfers,
+			visit:         packageartifact.VisitAllStorageTransfersContext,
 			reassemble:    packageartifact.ReassembleStorageTransfers,
 			rebind:        packageartifact.RebindStorageTransferStableArtifacts,
 			processSuffix: ":generic-v0:storage-transfer-v0",

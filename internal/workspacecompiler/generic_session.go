@@ -225,26 +225,23 @@ func (session *GenericSession) CheckContext(ctx context.Context, workspace works
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := session.artifacts.extract(compiled.MIR, identities, coordinates)
-	if err != nil {
-		return Result{}, err
-	}
-	for _, artifact := range extracted {
-		if err := ctx.Err(); err != nil {
-			return Result{}, err
-		}
+	err = session.artifacts.visit(ctx, compiled.MIR, identities, coordinates, func(artifact packageartifact.Artifact) error {
 		key, found := keys[artifact.PackageID]
 		if !found {
-			return Result{}, fmt.Errorf("generic artifact has no current cache key")
+			return fmt.Errorf("generic artifact has no current cache key")
 		}
 		if err := session.cache.Put(key, analysis.Interfaces[artifact.PackageID], artifact); err != nil {
 			if errors.Is(err, packagecache.ErrRecordTooLarge) || errors.Is(err, packageartifact.ErrProcessArtifactTooLarge) {
 				report.StoreSkipped++
-				continue
+				return nil
 			}
-			return Result{}, err
+			return err
 		}
 		report.Stored++
+		return nil
+	})
+	if err != nil {
+		return Result{}, err
 	}
 	return Result{Compiler: compiled, Cache: report}, nil
 }

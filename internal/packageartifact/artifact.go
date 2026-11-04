@@ -2,6 +2,7 @@ package packageartifact
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"slices"
@@ -59,26 +60,13 @@ func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 }
 
 func extractAll(program mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, verifyMIR func(mir.Program) []mir.VerificationError) ([]Artifact, error) {
-	if failures := verifyMIR(program); len(failures) != 0 {
-		return nil, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
-	}
-	packages := make(map[hir.PackageID]struct{})
-	for _, function := range program.Functions {
-		packages[function.Span.Package] = struct{}{}
-	}
-	packageIDs := make([]hir.PackageID, 0, len(packages))
-	for packageID := range packages {
-		packageIDs = append(packageIDs, packageID)
-	}
-	slices.Sort(packageIDs)
-	artifacts := make([]Artifact, 0, len(packageIDs))
-	index := &extractionIndex{}
-	for _, packageID := range packageIDs {
-		artifact, err := extractVerified(program, packageID, identities, coordinates, verifyMIR, index)
-		if err != nil {
-			return nil, err
-		}
+	artifacts := make([]Artifact, 0)
+	err := visitAll(context.Background(), program, identities, coordinates, verifyMIR, func(artifact Artifact) error {
 		artifacts = append(artifacts, artifact)
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return artifacts, nil
 }
