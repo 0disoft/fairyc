@@ -294,7 +294,15 @@ explicit relation omissions. The same package now implements the caller-bounded 
 transport and domain-separated checksum, then strictly decodes, revalidates, and rederives SymbolIds
 before returning immutable facts. `MapStore` now publishes content-addressed generations beneath an
 opened root, applies caller retention bounds, and returns only one exact compiler/interface/current-
-source match. The package-local query index repeats that current-state check and implements bounded
+source match.
+
+`Publish` collects after every individual publication. `PublishBatch` publishes in input order and
+collects once before returning; retention can temporarily exceed its bounds during the call.
+Batches are not transactions: failure returns the completed prefix's checksums and still collects
+that prefix. An empty batch or a rejected first partition leaves retained generations unchanged.
+Directory enumeration uses fixed-size batches, and a conflicting load counts all compatible
+generations while retaining at most one candidate payload.
+The package-local query index repeats that current-state check and implements bounded
 `overview`, exact-SymbolId `show`, and breadth-first `around` without source text or dependency
 discovery. `internal/contextpack` runs those queries directly and emits a separately byte-bounded,
 checksummed canonical compiler-fact envelope with empty documentation and source-excerpt sections.

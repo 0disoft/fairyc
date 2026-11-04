@@ -173,6 +173,17 @@ func (store *MapStore) Publish(partition Partition) (Checksum, error) {
 }
 
 func (store *MapStore) publish(partition Partition, hooks mapPublishHooks) (Checksum, error) {
+	checksum, err := store.publishGeneration(partition, hooks)
+	if err != nil {
+		return Checksum{}, err
+	}
+	if err := store.Sweep(); err != nil {
+		return Checksum{}, fmt.Errorf("collect .fymap store after publication: %w", err)
+	}
+	return checksum, nil
+}
+
+func (store *MapStore) publishGeneration(partition Partition, hooks mapPublishHooks) (Checksum, error) {
 	if store == nil || store.root == nil {
 		return Checksum{}, fmt.Errorf(".fymap store is not initialized")
 	}
@@ -240,9 +251,6 @@ func (store *MapStore) publish(partition Partition, hooks mapPublishHooks) (Chec
 	}
 	if hooks.afterPublished != nil {
 		hooks.afterPublished(filepath.Join(store.rootName, finalPath))
-	}
-	if err := store.Sweep(); err != nil {
-		return Checksum{}, fmt.Errorf("collect .fymap store after publication: %w", err)
 	}
 	return checksum, nil
 }
@@ -408,65 +416,55 @@ func (store *MapStore) Stats() (MapStoreStats, error) {
 }
 
 func (store *MapStore) scan(clean bool) ([]mapGeneration, error) {
-	directories, err := readMapDirectory(store.root, ".")
-	if err != nil {
-		return nil, fmt.Errorf("scan .fymap store: %w", err)
-	}
 	now := time.Now()
 	result := make([]mapGeneration, 0)
-	for _, directory := range directories {
+	err := visitMapDirectory(store.root, ".", func(directory os.DirEntry) error {
 		if !directory.IsDir() || !validMapPackageDirectory(directory.Name()) {
-			continue
+			return nil
 		}
-		entries, readErr := readMapDirectory(store.root, directory.Name())
-		if readErr != nil {
-			continue
-		}
-		for _, entry := range entries {
+		readErr := visitMapDirectory(store.root, directory.Name(), func(entry os.DirEntry) error {
 			if entry.IsDir() {
-				continue
+				return nil
 			}
 			path := filepath.Join(directory.Name(), entry.Name())
 			info, infoErr := entry.Info()
 			if infoErr != nil {
-				continue
+				if errors.Is(infoErr, os.ErrNotExist) {
+					return nil
+				}
+				return infoErr
+			}
+			if !info.Mode().IsRegular() {
+				return nil
 			}
 			if strings.HasPrefix(entry.Name(), ".tmp-") {
 				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
 					_ = store.root.Remove(path)
 				}
-				continue
+				return nil
 			}
 			if !validMapGenerationName(entry.Name()) {
-				continue
+				return nil
 			}
 			if info.Size() <= 0 || uint64(info.Size()) > store.limits.MaxMapBytes {
 				if clean {
 					_ = store.root.Remove(path)
 					store.rejected++
 				}
-				continue
+				return nil
 			}
 			result = append(result, mapGeneration{path: path, size: uint64(info.Size()), modTime: info.ModTime()})
+			return nil
+		})
+		if errors.Is(readErr, os.ErrNotExist) {
+			return nil
 		}
+		return readErr
+	})
+	if err != nil {
+		return nil, fmt.Errorf("scan .fymap store: %w", err)
 	}
 	return result, nil
-}
-
-func readMapDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
-	directory, err := root.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	entries, readErr := directory.ReadDir(-1)
-	closeErr := directory.Close()
-	if readErr != nil {
-		return nil, readErr
-	}
-	if closeErr != nil {
-		return nil, closeErr
-	}
-	return entries, nil
 }
 
 func mapGenerationName(checksum Checksum) string {
