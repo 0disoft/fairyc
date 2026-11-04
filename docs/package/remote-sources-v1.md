@@ -81,6 +81,13 @@ the named cache blob and retry. Downloads are limited to 30 seconds per request,
 one fetch is limited to 64 MiB compressed and 64 MiB expanded bytes, 4,096 files and 8 MiB/file. Each archive also limits explicit/implicit path entries to 8,192 and path depth to 32 components. Remaining operation budgets apply before reading/decompressing the next archive.
 The operation has a two-minute context. Cache retention is manual, not an unbounded background job. Immutable cache publication requires filesystem hard-link support; unsupported filesystems fail rather than falling back to replacement.
 
+Before the Go ZIP reader allocates per-entry metadata, a framing-only admission
+walk checks the declared and actual central-directory entry counts against the
+8,192-entry limit. ZIP32/ZIP64 end records and prefix adjustment are recognized;
+an understated count or directory size cannot bypass the walk. Full decoding,
+portable/exact path checks, CRCs and decompression limits still belong to the
+ordinary ZIP and source validation path.
+
 The Go Stage 0 downloader shares one 30-second budget across GET attempts, backoff and body
 reading. Only bodyless GETs can retry, at most three attempts with 200 ms then 400 ms backoff,
 for temporary network failures or HTTP 502/503/504 without `Retry-After`. A `Retry-After` response

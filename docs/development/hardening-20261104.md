@@ -101,3 +101,14 @@ invocations plus small object copies exercise the admitted link size without
 equivalence, stack reservation and compile/link failure tests pass; cdriver vet
 passes. Linux: rerun common cdriver/candidatebuild tests in the combined pass;
 the MSVC native case remains Windows-only.
+
+## 10. Source ZIP metadata admission
+
+A framing walk rejects excess advertised or actual directory entries before
+archive/zip metadata allocation. Windows tests cover 8,191/8,192/8,193 entries,
+ZIP32/ZIP64, prefixes, maximum comments, malformed ZIP64 and understated counts
+and directory sizes. Existing path/identity/budget/validation-order tests and
+packagesource vet pass. A 73,728-header baseline accepted by archive/zip allocated
+19,381,032 B and 221,234 objects in a single benchmark iteration; admission rejects
+the same input with 0 B and 0 allocations. Timings are not used as performance
+claims. Linux: rerun packagesource and remote-fetch CLI tests in the combined pass.

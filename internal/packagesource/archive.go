@@ -60,6 +60,12 @@ func unpack(ctx context.Context, data []byte, pin Pin, language string) (bundle,
 }
 
 func unpackWithin(ctx context.Context, data []byte, pin Pin, language string, expandedLimit, fileLimit int) (bundle, error) {
+	if err := admitArchiveDirectory(data); err != nil {
+		if err == errArchiveEntryLimit {
+			return bundle{}, err
+		}
+		return bundle{}, fmt.Errorf("invalid source ZIP: %w", err)
+	}
 	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return bundle{}, fmt.Errorf("invalid source ZIP: %w", err)
