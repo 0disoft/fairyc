@@ -173,12 +173,15 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		}
 		subjects := slices.Clone(classes[dependency.ownerClass].members)
 		seenTargets := make(map[int]struct{}, len(group))
+		// Node IDs are unique and class member sets are disjoint. The owner is
+		// already listed; visit each other target class once in encounter order.
+		seenTargets[dependency.ownerClass] = struct{}{}
 		for _, candidate := range group {
 			if _, seen := seenTargets[candidate.targetClass]; seen {
 				continue
 			}
 			seenTargets[candidate.targetClass] = struct{}{}
-			subjects = appendUnique(subjects, classes[candidate.targetClass].members...)
+			subjects = append(subjects, classes[candidate.targetClass].members...)
 		}
 		return result, &Rejection{Reason: ReasonDuplicateBinding, Subjects: subjects}, nil
 	}
