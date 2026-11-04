@@ -135,9 +135,11 @@ func (r *revisionReader) Close() error {
 		return r.ctx.Err()
 	}
 	r.stdin.Close()
+	// A rejected blob may still be filling stdout. Close that pipe before
+	// waiting so Git cannot wait for us to drain a body we deliberately refused.
+	r.stdout.Close()
 	err := r.command.Wait()
 	close(r.done)
-	r.stdout.Close()
 	if err != nil {
 		return fmt.Errorf("Git revision reader failed: %w: %s", errors.Join(err, r.ctx.Err()), string(r.diagnostics))
 	}

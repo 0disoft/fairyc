@@ -129,6 +129,45 @@ func TestRevisionReaderCancellationReleasesBlockedRead(t *testing.T) {
 	}
 }
 
+func TestRevisionReaderCloseReapsRejectedUndrainedBlob(t *testing.T) {
+	root := revisionFixture(t)
+	file, err := os.Create(filepath.Join(root, "large"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Truncate(maxRevisionBlobBytes + 1); err != nil {
+		file.Close()
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{{"add", "large"}, {"-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--quiet", "-m", "large fixture"}} {
+		if out, err := exec.Command("git", append([]string{"-C", root}, args...)...).CombinedOutput(); err != nil {
+			t.Fatalf("git: %v: %s", err, out)
+		}
+	}
+	r := newRevisionReader(context.Background(), root, "HEAD")
+	if _, err := r.Read("large"); err == nil || !strings.Contains(err.Error(), "byte limit") {
+		r.Close()
+		t.Fatalf("oversized blob = %v", err)
+	}
+	finished := make(chan error, 1)
+	go func() { finished <- r.Close() }()
+	select {
+	case <-finished:
+	case <-time.After(5 * time.Second):
+		r.cancel()
+		<-finished
+		t.Fatal("closing rejected output waited for the read timeout")
+	}
+	// A broken output pipe can terminate Git by SIGPIPE on Unix. Wait still
+	// reaps that process and records ProcessState even when Exited is false.
+	if r.command.ProcessState == nil {
+		t.Fatal("rejected Git process not reaped")
+	}
+}
+
 func TestRevisionBlobBoundsAndProtocolFailures(t *testing.T) {
 	for _, test := range []struct {
 		wire  string

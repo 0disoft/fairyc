@@ -43,7 +43,7 @@ func RefreshFixtureSpans(repoRoot, oldRef string, manifests []string, write bool
 }
 
 // RefreshFixtureSpansContext shares one bounded Git reader across the complete
-// refresh, and propagates cancellation before any planned file is published.
+// refresh, and checks cancellation before publishing each planned file.
 func RefreshFixtureSpansContext(ctx context.Context, repoRoot, oldRef string, manifests []string, write bool) (report ManifestReport, err error) {
 	absoluteRoot, err := filepath.Abs(repoRoot)
 	if err != nil {
