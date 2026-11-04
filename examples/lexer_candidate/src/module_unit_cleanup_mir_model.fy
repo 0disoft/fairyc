@@ -17,6 +17,7 @@ pub struct Drop {usize operand;u32 exit;usize start;usize end;}
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub resource Program {v::Vec<types::Type> types;v::Vec<Frame> frames;v::Vec<Glue> glues;v::Vec<Field> fields;v::Vec<Operand> operands;v::Vec<Drop> drops;usize work;bool project;cleanup{}}
 pub fn usize type_count(ref Program p){return v::len<types::Type>(ref p.types);}
+pub fn ref v::Vec<types::Type> type_records(ref Program p){return ref p.types;}
 pub fn usize glue_count(ref Program p){return v::len<Glue>(ref p.glues);}
 pub fn types::Type type_at(ref Program p,usize id){assert(id!=0 && id<=type_count(p));return *v::at<types::Type>(ref p.types,id-1);}
 pub fn Glue glue_at(ref Program p,usize type){assert(type!=0 && type<=type_count(p));return *v::at<Glue>(ref p.glues,type-1);}

@@ -104,3 +104,10 @@ authorized by this queue.
   arrays and Option/Result. Invalid ID/work/coordinate controls reject. This is
   the type prerequisite; producer wiring, SDK and generic families remain open.
   See `docs/ops/windows-candidate-atlas-types-20261105.md`.
+- The complete-source declaration port now preserves all 27 ordinary/aggregate/
+  foreign declarations in a two-package Go v3 oracle, with exact JSON bytes on
+  Windows low/optimized (75.94s). Six source/coordinate/budget/selector rejection
+  controls pass per profile. Preparation binds the catalog to the Complete
+  owner's exact provenance, including unused C declarations. Producer inventory,
+  separate callable counts/summaries, external-call completeness, SDK/generic
+  facts and actual command integration remain open; no queue family closes here.

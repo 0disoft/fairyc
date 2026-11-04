@@ -10,6 +10,8 @@ import project_atlas_write as w;
 import project_path as work;
 import syntax as syntax;
 import std::bytes as bytes;
+import module_types as graph;
+import std::vec as v;
 
 // Consume the factory's verified, source-bound type graph and exact package
 // coordinates. Neither transient type IDs nor import aliases leave this port.
@@ -65,9 +67,9 @@ fn Result<bool,u32> pointer_scalar(ref mut bytes::Buffer out,u32 id,usize depth,
     if(id==1048591){if(depth+1>=64){return .err(3);}discard head(out,b"pointer",b"",b"",true,0,meter)?;discard builtin(out,b"void",meter)?;return w::raw(out,b"]}",meter);}
     return scalar_type(out,id,meter);
 }
-fn Result<bool,u32> walk(ref input::Input source,ref coordinates::Coordinates table,ref clean::Program p,usize id,usize depth,ref mut bytes::Buffer out,ref mut usize meter){
+fn Result<bool,u32> walk(ref input::Input source,ref coordinates::Coordinates table,ref v::Vec<graph::Type> p,usize id,usize depth,ref mut bytes::Buffer out,ref mut usize meter){
     if(depth>=64 || !work::charge(meter,1)){return .err(3);}
-    if(id==0 || id>clean::type_count(p)){return .err(7);}let t=clean::type_at(p,id);
+    if(id==0 || id>graph::count(p)){return .err(7);}let t=graph::at(p,id);
     if(t.kind==1){return scalar_type(out,t.scalar,meter);}
     if(t.kind>=2 && t.kind<=4){return nominal(source,table,t.module_index,t.declaration,t.kind,out,meter);}
     if(t.kind==19){return builtin(out,b"Region",meter);}
@@ -105,5 +107,11 @@ fn Result<bool,u32> walk(ref input::Input source,ref coordinates::Coordinates ta
     return .err(7);
 }
 pub fn Result<bytes::Buffer,u32> render(ref input::Input source,ref coordinates::Coordinates table,ref clean::Program p,usize id,ref mut usize meter){
+    return render_records(source,table,clean::type_records(p),id,meter);
+}
+// The caller owns the current complete-source signature/field resolution.
+// Detached type records alone grant no cache, source or declaration authority.
+pub fn Result<bytes::Buffer,u32> render_records(ref input::Input source,ref coordinates::Coordinates table,ref v::Vec<graph::Type> p,usize id,ref mut usize meter){
+    if(graph::count(p)>4096){return .err(7);}
     var out=bytes::empty();discard walk(source,table,p,id,0,ref mut out,meter)?;return .ok(out);
 }
