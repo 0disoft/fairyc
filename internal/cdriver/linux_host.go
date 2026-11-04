@@ -75,6 +75,7 @@ func ExecuteLinuxTargetWithOptions(artifact Artifact, options LinuxExecutionOpti
 	ctx, cancel := context.WithTimeout(context.Background(), options.Timeout)
 	defer cancel()
 	command := exec.CommandContext(ctx, executablePath, options.Arguments...)
+	configureToolCancellation(command)
 	command.Dir = temporaryRoot
 	if options.WorkingDirectory != "" {
 		command.Dir = options.WorkingDirectory
@@ -89,13 +90,13 @@ func ExecuteLinuxTargetWithOptions(artifact Artifact, options LinuxExecutionOpti
 		return LinuxHostOutcome{}, fmt.Errorf("start Linux executable: %w", err)
 	}
 	if err := receiptWrite.Close(); err != nil {
-		_ = command.Process.Kill()
-		_ = command.Wait()
-		return LinuxHostOutcome{}, fmt.Errorf("close parent trap channel: %w", err)
+		cancelErr := command.Cancel()
+		waitErr := command.Wait()
+		return LinuxHostOutcome{}, errors.Join(fmt.Errorf("close parent trap channel: %w", err), cancelErr, waitErr)
 	}
 	runErr := command.Wait()
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s", options.Timeout)
+		return LinuxHostOutcome{}, fmt.Errorf("Linux executable exceeded %s: %w", options.Timeout, ctx.Err())
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {

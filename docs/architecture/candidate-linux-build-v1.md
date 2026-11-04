@@ -171,6 +171,14 @@ compile/link failure preservation tests are authored and skipped on Windows.
 
 ## CLI connection
 
+The Go bootstrap's standalone Linux execution driver starts each target in its
+own process group. Its timeout and parent trap-channel failure cleanup terminate
+that group, including descendants that inherit it. Timeout errors retain
+`context.DeadlineExceeded`; binary stdin and the private fd 3 trap receipt keep
+their existing protocol. This is process cleanup, not isolation of programs that
+deliberately escape the owned group. Native regression execution for this change
+is deferred to the batched Linux queue.
+
 `linux_file_cli` connects `build [--release] [--locked]` and build help to
 `linux_build_cli`. Duplicate/unknown flags fail before compilation. Optional
 `--cache-root <existing directory>` and `--cache-status` select the shared

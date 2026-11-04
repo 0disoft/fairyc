@@ -9,10 +9,11 @@ import (
 	"syscall"
 )
 
-// GCC and Clang delegate to child tools. Give this standalone invocation its
-// own process group so a deadline cannot leave a compiler consuming CPU or
-// retaining inherited pipes. The captured Linux companion uses its separate
-// group-inheriting project runner instead of this helper.
+// Compilers and launched targets can delegate to children. Give this
+// standalone invocation its own process group so a deadline cannot leave a
+// descendant consuming CPU or retaining inherited pipes. The captured Linux
+// companion uses its separate group-inheriting project runner instead of this
+// helper.
 func configureToolCancellation(command *exec.Cmd) {
 	if command.SysProcAttr == nil {
 		command.SysProcAttr = &syscall.SysProcAttr{}
