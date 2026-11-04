@@ -147,6 +147,12 @@ physical-media durability are not guaranteed. Output or lock-cleanup errors can 
 inspect hashes before retrying. Keep `fairy.lock` unchanged and run ordinary `check` before locked
 build/run/test. Language/runtime/SDK/map schemas do not change. MCP never exposes apply.
 Neither write authority nor certainty follows from an impact result.
+Each fingerprint attempt shares directory spelling listings only within that
+attempt. Fresh attempts reread the directories; every selected path segment is
+still checked for symlinks and every opened input for regular-file bounds and
+identity. Enumeration and retained names share the loader's 100,000-entry
+workspace ceiling. Failed reads or closes never publish a cached listing, and
+the fingerprint bytes and apply/lock checks are unchanged.
 All tools use explicit package/symbol selectors and treat attributed text or client strings as
 untrusted data, never instructions or authority to run a command. A tool result cannot grant
 write permission or widen the root selected by the process invocation.

@@ -18,6 +18,10 @@ import (
 
 // ReadFile admits one bounded, portable, root-contained regular input without link traversal.
 func ReadFile(root *os.Root, name string, max int64) ([]byte, error) {
+	return readFile(root, name, max, nil)
+}
+
+func readFile(root *os.Root, name string, max int64, cases *pathCaseIndex) ([]byte, error) {
 	if filepath.ToSlash(filepath.Clean(filepath.FromSlash(name))) != name || name == "." || name == ".." || strings.HasPrefix(name, "../") || strings.Contains(name, "\\") {
 		return nil, fmt.Errorf("noncanonical edit path")
 	}
@@ -38,26 +42,8 @@ func ReadFile(root *os.Root, name string, max int64) ([]byte, error) {
 		if info.Mode()&os.ModeSymlink != 0 {
 			return nil, fmt.Errorf("edit path contains a symlink")
 		}
-		d, err := root.Open(parent)
-		if err != nil {
+		if err := checkPathCase(root, cases, parent, part); err != nil {
 			return nil, err
-		}
-		found := false
-		for !found {
-			entries, e := d.ReadDir(128)
-			for _, entry := range entries {
-				if entry.Name() == part {
-					found = true
-					break
-				}
-			}
-			if e != nil {
-				break
-			}
-		}
-		d.Close()
-		if !found {
-			return nil, fmt.Errorf("noncanonical edit path case")
 		}
 	}
 	info, err := root.Lstat(current)
@@ -89,13 +75,14 @@ func snapshot(w workspaceloader.Workspace) (string, error) {
 		return "", err
 	}
 	defer root.Close()
+	cases := newPathCaseIndex(root)
 	records := map[string]string{}
 	for _, p := range w.Packages {
 		if p.SourceKind != workspaceloader.SourceKindLocal {
 			continue
 		}
 		manifestPath := filepath.ToSlash(filepath.Join(p.Path, projectmanifest.FileName))
-		data, err := ReadFile(root, manifestPath, projectmanifest.MaxBytes)
+		data, err := readFile(root, manifestPath, projectmanifest.MaxBytes, cases)
 		if err != nil {
 			return "", err
 		}
@@ -109,7 +96,7 @@ func snapshot(w workspaceloader.Workspace) (string, error) {
 			records[filepath.ToSlash(relative)] = Digest(s.Bytes)
 		}
 	}
-	lock, err := ReadFile(root, "fairy.lock", 8<<20)
+	lock, err := readFile(root, "fairy.lock", 8<<20, cases)
 	if err != nil {
 		return "", err
 	}

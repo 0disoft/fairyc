@@ -175,3 +175,23 @@ Windows genericsource/genericplan suites pass, including 32/33/4,000 dependencie
 for functions and aggregates, 10,000 duplicate additions, exact tuple identity,
 source immutability and failure provenance. Linux: rerun genericsource,
 genericplan, compiler and workspacecompiler in the combined validation.
+
+## 16. Source-edit snapshot directory spelling
+
+One fingerprint attempt reuses an exact-case name index for shared parent
+directories. A new attempt gets a fresh index; segment Lstat, symlink rejection,
+regular-file/size bounds and opened-file identity checks remain per read. The
+loader's 100,000-entry ceiling also bounds index residency and enumeration;
+failed reads/closes do not publish partial listings and directory handles close
+on success, I/O errors and budget failure. Windows tests cover a 256-member
+workspace-shaped catalog (770 to 258 directory enumerations, shared-parent
+enumerations 514 to 2), case/path/symlink rejection after cache hits,
+99,999/100,000/100,001 entries, cross-directory allowance, failure recovery,
+unchanged fingerprints and manifest/lock changes between attempts. Linux: rerun
+sourceedit, workspaceloader and CLI TestAtlasEdit* in the combined validation.
+
+Windows sourceedit and Atlas edit CLI suites pass, including native apply/build
+execution and both file/directory symlink replacement cases. The ordinary
+workspacecompiler suite, genericsource/genericplan suites, focused compiler Check
+cases and sourceedit/genericsource/genericplan vet also pass. No full repository
+suite, Linux runtime execution, CI dispatch, push or release was performed.
