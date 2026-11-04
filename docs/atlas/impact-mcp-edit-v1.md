@@ -101,6 +101,16 @@ contains only protocol frames. EOF ends the session. Every query revalidates loc
 source; unavailable/stale input becomes `isError` without raw diagnostics. Session policy failures
 return 2, output failure 4; tool failure can leave the session usable.
 
+The Go MCP host retains one prepared workspace and one bounded reverse-call index
+within the sequential session. Every call compares all local catalog manifests,
+source names and exact bytes, and lock presence/bytes against the retained inputs;
+it also verifies that the current lock still matches that workspace. Bundled SDK
+sources and compiler identity belong to the same running executable. File metadata
+alone cannot enable reuse. A changed or unreadable input discards the preparation
+and follows ordinary locked preparation, including its failures. Package/symbol
+selectors, join limits, traversal limits and output limits remain per-query checks;
+no cached response bypasses them. Nothing is retained after the session ends.
+
 References: [stdio](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports),
 [lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle),
 [tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).

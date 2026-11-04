@@ -48,6 +48,7 @@ func runAtlasMCP(arguments []string, root string, stdin io.Reader, stdout, stder
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
+	session := atlasImpactSession{root: root}
 	err = atlasmcp.Serve(stdin, stdout, messages, o.output, func(uid, symbol string) (json.RawMessage, error) {
 		if err := validateAtlasPackageUID("atlas-mcp", uid); err != nil {
 			return nil, err
@@ -60,7 +61,7 @@ func runAtlasMCP(arguments []string, root string, stdin io.Reader, stdout, stder
 		selected := o
 		selected.uid, selected.symbol = uid, symbol
 		selected.output -= 1024
-		data, code := impactDocument(root, selected, io.Discard)
+		data, code := session.document(selected, io.Discard)
 		if code != ExitSuccess {
 			return nil, fmt.Errorf("query unavailable")
 		}

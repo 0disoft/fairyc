@@ -64,6 +64,17 @@ func impactDocument(sourceRoot string, o impactOptions, stderr io.Writer) ([]byt
 	if code != ExitSuccess {
 		return nil, code
 	}
+	return (&preparedAtlasImpact{workspace: prepared}).document(o, stderr)
+}
+
+// The session owns this immutable preparation and at most one bounded call index.
+type preparedAtlasImpact struct {
+	workspace preparedAtlasWorkspace
+	index     *atlasmap.WorkspaceCallIndex
+}
+
+func (impact *preparedAtlasImpact) document(o impactOptions, stderr io.Writer) ([]byte, int) {
+	prepared := impact.workspace
 	partition, found := selectAtlasPartition(prepared.partitions, o.uid)
 	matches := 0
 	for _, p := range prepared.partitions {
@@ -77,11 +88,15 @@ func impactDocument(sourceRoot string, o impactOptions, stderr io.Writer) ([]byt
 	if !found {
 		return nil, invocationError(stderr, "impact package UID was not found")
 	}
-	index, err := atlasmap.NewWorkspaceCallIndexV3(prepared.partitions, prepared.expectations, atlasmap.WorkspaceCallBudget{MaxPackages: o.packages, MaxCalls: o.calls})
-	if err != nil {
-		return nil, invocationError(stderr, err.Error())
+	budget := atlasmap.WorkspaceCallBudget{MaxPackages: o.packages, MaxCalls: o.calls}
+	if impact.index == nil || impact.index.Budget() != budget {
+		index, err := atlasmap.NewWorkspaceCallIndexV3(prepared.partitions, prepared.expectations, budget)
+		if err != nil {
+			return nil, invocationError(stderr, err.Error())
+		}
+		impact.index = index
 	}
-	r, err := index.Impact(partition.Header().PackageInstance, o.symbol, o.depth, o.symbols)
+	r, err := impact.index.Impact(partition.Header().PackageInstance, o.symbol, o.depth, o.symbols)
 	if err != nil {
 		return nil, invocationError(stderr, err.Error())
 	}
