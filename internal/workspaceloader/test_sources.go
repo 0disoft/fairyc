@@ -50,7 +50,12 @@ func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error
 // Accumulate test sources under one budget, then resolve the complete graph once.
 // All mutable source/module slices are detached before tests are appended.
 func withPackageTests(workspace Workspace, packagePaths []string) (Workspace, error) {
-	budget := limits{}
+	boundary, err := openWorkspaceRoot(workspace.Root)
+	if err != nil {
+		return Workspace{}, normalizeLoadError(ReasonTestSourceRoot, TestSourceDirectory, err)
+	}
+	defer boundary.Close()
+	budget := limits{root: boundary}
 	packages := make([]Package, 0, len(workspace.Packages))
 	pathIndexes := make(map[string]int)
 	for _, loaded := range workspace.Packages {
@@ -85,7 +90,7 @@ func withPackageTests(workspace Workspace, packagePaths []string) (Workspace, er
 		return Workspace{}, err
 	}
 	graph, instances := buildGraph(packages, pathIndexes)
-	packages, graph, instances, err := injectStandardLibrary(packages, graph, instances, workspace.vectorCandidate)
+	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances, workspace.vectorCandidate)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -173,9 +178,14 @@ func optionalExactDirectory(parent, name string) (string, bool, error) {
 }
 
 func loadTestSources(testRoot string, budget *limits) ([]SourceFile, []packagegraph.Module, error) {
+	sourceBoundary, err := openSourceBoundary(budget, testRoot)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer sourceBoundary.Close()
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
-	err := walkSourceTree(os.DirFS(testRoot), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
+	err = walkSourceTree(sourceBoundary.FS(), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
 		absolute := filepath.Join(testRoot, filepath.FromSlash(relativeName))
 		if walkErr != nil {
 			return walkErr
@@ -216,8 +226,7 @@ func loadTestSources(testRoot string, budget *limits) ([]SourceFile, []packagegr
 	modulePaths := make(map[string]string, len(relativePaths))
 	for _, virtualPath := range relativePaths {
 		relative := strings.TrimPrefix(virtualPath, TestSourceDirectory+"/")
-		absolute := filepath.Join(testRoot, filepath.FromSlash(relative))
-		contents, err := readBoundedRegularFile(absolute, source.DefaultLimits().MaxBytes)
+		contents, err := readBoundedRootFile(sourceBoundary, filepath.FromSlash(relative), source.DefaultLimits().MaxBytes)
 		if err != nil {
 			return nil, nil, &LoadError{Reason: ReasonTestSourceRoot, Path: virtualPath, Cause: err, Detail: err.Error()}
 		}

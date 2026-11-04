@@ -4,7 +4,6 @@ package workspaceloader
 import (
 	"context"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -126,6 +125,7 @@ type limits struct {
 	files   int
 	bytes   int64
 	entries int
+	root    *os.Root
 }
 
 // Load reads only the named root manifest, its explicit members, and their explicit source roots.
@@ -156,7 +156,12 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 	if err != nil {
 		return Workspace{}, err
 	}
-	rootManifest, err := readManifest(workspaceRoot, ".")
+	boundary, err := openWorkspaceRoot(workspaceRoot)
+	if err != nil {
+		return Workspace{}, normalizeLoadError(ReasonRoot, workspaceRoot, err)
+	}
+	defer boundary.Close()
+	rootManifest, err := readManifest(boundary, workspaceRoot, ".")
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -173,9 +178,10 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 	packages := make([]Package, 0, len(packagePaths))
 	uidPaths := make(map[string]string, len(packagePaths))
 	pathIndexes := make(map[string]int, len(packagePaths))
-	budget := limits{ctx: ctx}
+	budget := limits{ctx: ctx, root: boundary}
 	directories := newDirectoryResolver()
 	directories.budget = &budget
+	directories.root = boundary
 	for _, packagePath := range packagePaths {
 		if err := ctx.Err(); err != nil {
 			return Workspace{}, err
@@ -187,7 +193,7 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 			if err != nil {
 				return Workspace{}, err
 			}
-			manifest, err = readManifest(directory, packagePath)
+			manifest, err = readManifest(boundary, directory, packagePath)
 			if err != nil {
 				return Workspace{}, err
 			}
@@ -246,9 +252,13 @@ func resolveRoot(root string) (string, error) {
 	return filepath.Clean(absolute), nil
 }
 
-func readManifest(directory, packagePath string) (projectmanifest.Manifest, error) {
+func readManifest(root *os.Root, directory, packagePath string) (projectmanifest.Manifest, error) {
 	path := filepath.Join(directory, projectmanifest.FileName)
-	contents, err := readBoundedRegularFile(path, projectmanifest.MaxBytes)
+	name, err := relativeToRoot(root, path)
+	if err != nil {
+		return projectmanifest.Manifest{}, err
+	}
+	contents, err := readBoundedRootFile(root, name, projectmanifest.MaxBytes)
 	if err != nil {
 		return projectmanifest.Manifest{}, &LoadError{Reason: ReasonManifest, Path: packagePath + "/" + projectmanifest.FileName, Cause: err, Detail: err.Error()}
 	}
@@ -306,9 +316,14 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 			return Package{}, err
 		}
 	}
+	sourceBoundary, err := openSourceBoundary(budget, sourceRoot)
+	if err != nil {
+		return Package{}, normalizeLoadError(ReasonSourceRoot, packagePath, err)
+	}
+	defer sourceBoundary.Close()
 	var relativePaths []string
 	foldedPaths := make(map[string]string)
-	err := walkSourceTree(os.DirFS(sourceRoot), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
+	err = walkSourceTree(sourceBoundary.FS(), budget, MaxSourceEntries, func(relativeName string, entry fs.DirEntry, walkErr error) error {
 		path := filepath.Join(sourceRoot, filepath.FromSlash(relativeName))
 		if budget.ctx != nil {
 			if err := budget.ctx.Err(); err != nil {
@@ -386,7 +401,7 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 		contents, overlaid := overlays[absolute]
 		var err error
 		if !overlaid {
-			contents, err = readBoundedRegularFile(absolute, source.DefaultLimits().MaxBytes)
+			contents, err = readBoundedRootFile(sourceBoundary, filepath.FromSlash(relative), source.DefaultLimits().MaxBytes)
 		}
 		if len(contents) > source.DefaultLimits().MaxBytes {
 			err = fmt.Errorf("overlay exceeds source byte limit")
@@ -577,46 +592,6 @@ func nodeID(value struct {
 		path = "root"
 	}
 	return "pkg:" + path + "[" + strings.Join(value.features, ",") + "]"
-}
-
-func readBoundedRegularFile(path string, maximum int) ([]byte, error) {
-	linkInfo, err := os.Lstat(path)
-	if err != nil {
-		return nil, err
-	}
-	if linkInfo.Mode()&os.ModeSymlink != 0 {
-		return nil, fmt.Errorf("symlinks are not supported")
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	info, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	currentLinkInfo, err := os.Lstat(path)
-	if err != nil {
-		return nil, err
-	}
-	if currentLinkInfo.Mode()&os.ModeSymlink != 0 || !os.SameFile(linkInfo, currentLinkInfo) || !os.SameFile(linkInfo, info) {
-		return nil, fmt.Errorf("file changed or became a symlink while opening")
-	}
-	if !info.Mode().IsRegular() {
-		return nil, fmt.Errorf("not a regular file")
-	}
-	if info.Size() > int64(maximum) {
-		return nil, fmt.Errorf("file exceeds %d-byte implementation guard", maximum)
-	}
-	contents, err := io.ReadAll(io.LimitReader(file, int64(maximum)+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(contents) > maximum {
-		return nil, fmt.Errorf("file exceeds %d-byte implementation guard", maximum)
-	}
-	return contents, nil
 }
 
 func portablePath(packagePath, sourceRoot, absolute string) string {

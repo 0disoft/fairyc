@@ -23,6 +23,10 @@ below the explicit source root participates; other regular files are ignored. So
 be empty, source paths cannot collide under case folding, and two files cannot declare the same
 module path.
 
+Each load holds an opened workspace root, and each source/test tree holds its own opened root.
+Manifest and source reads remain relative to those handles, with regular-file and identity checks.
+Replacing a checked parent pathname cannot redirect a later read outside the opened boundary.
+
 The implementation guards one load to 1,024 catalog packages, 4,096 `.fy` files, and 64 MiB of
 exact source bytes. Per-file frontend limits still apply. These are denial-of-service guards for the
 prototype and do not define stable language limits.

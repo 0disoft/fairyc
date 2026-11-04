@@ -20,6 +20,7 @@ type directoryResolver struct {
 	listings map[string]map[string]directorySpelling
 	readDir  func(string) ([]os.DirEntry, error)
 	budget   *limits
+	root     *os.Root
 }
 
 func newDirectoryResolver() *directoryResolver {
@@ -28,6 +29,14 @@ func newDirectoryResolver() *directoryResolver {
 		budget:   &limits{},
 	}
 	resolver.readDir = func(directory string) ([]os.DirEntry, error) {
+		if resolver.root != nil {
+			child, err := openContainedDirectory(resolver.root, directory)
+			if err != nil {
+				return nil, err
+			}
+			defer child.Close()
+			return readSourceEntries(child.FS(), ".", resolver.budget, MaxSourceEntries)
+		}
 		return readSourceEntries(os.DirFS(directory), ".", resolver.budget, MaxSourceEntries)
 	}
 	return resolver
@@ -83,7 +92,16 @@ func (r *directoryResolver) resolve(base, relative string) (string, error) {
 			return "", &LoadError{Reason: ReasonPathCase, Path: relative, Detail: fmt.Sprintf("segment %q does not have one exact on-disk spelling", segment)}
 		}
 		current = filepath.Join(current, segment)
-		info, err := os.Lstat(current)
+		var info os.FileInfo
+		if r.root != nil {
+			name, relativeErr := relativeToRoot(r.root, current)
+			if relativeErr != nil {
+				return "", relativeErr
+			}
+			info, err = r.root.Lstat(name)
+		} else {
+			info, err = os.Lstat(current)
+		}
 		if err != nil {
 			return "", &LoadError{Reason: ReasonPath, Path: relative, Cause: err, Detail: err.Error()}
 		}
