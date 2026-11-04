@@ -154,10 +154,33 @@ go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestCandidat
 This is fingerprint-port evidence. Exclusive locking, application revalidation,
 staging and publication are not supplied by this primitive.
 
+## Fresh preview revalidation
+
+`project_edit_preview` retains only the 64-byte digest of the exact owned loader
+snapshot, releasing the fingerprint index after selection. `recheck` loads the
+current locked graph and validates the complete overlay again using its already
+owned replacement body. Fingerprints, paths and full before/after source bytes
+must match. No source or graph-lock write occurs in this entry.
+
+`TestCandidateEditRecheck` passes eight deterministic process-barrier scenarios
+per Windows MSVC C11 profile (16 native invocations, 199.02 seconds). The test
+mutates files only after Fairy has prepared its preview. Source and dependency
+drift, raw root/member manifest whitespace, raw lock whitespace and a changed
+dependency with a newly refreshed lock all reject. Unchanged inputs and a change
+to the external body file succeed using the previously owned replacement. The
+independent Go fingerprint and complete tree preservation are checked each time;
+PATH is empty and no compiler/CLI subprocess implements the Fairy recheck.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateEditRecheck$'
+go vet -mod=readonly ./internal/cli ./internal/sourceedit
+git diff --check
+```
+
 ## Remaining integration
 
-Apply needs fresh
-closure fingerprints, exclusive edit locking, same-directory
+Fresh closure fingerprints and overlay revalidation are available. Apply still
+needs exclusive edit locking, same-directory
 staging/sync, final byte rechecks, opened-root atomic rename and explicit
 post-publication failure handling. None is established by syntax-only evidence.
 

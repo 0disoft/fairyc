@@ -1,5 +1,7 @@
 module project_edit_preview;
 import project_edit_body as edit;
+import project_edit_snapshot as snapshots;
+import windows_rooted_file as host;
 import project_workspace_lock as loader;
 import project_source_set as sources;
 import project_workspace_graph as graph;
@@ -25,7 +27,7 @@ import std::bytes as bytes;
 import std::vec as v;
 import syntax as syntax;
 
-pub resource Selection{input::Input original;public_type::Coordinates table;declarations::Row selected;bytes::Buffer path;bytes::Buffer module_name;bytes::Buffer function;v::Vec<bytes::Buffer> production_roots;cleanup{}}
+pub resource Selection{input::Input original;public_type::Coordinates table;declarations::Row selected;bytes::Buffer path;bytes::Buffer module_name;bytes::Buffer function;v::Vec<bytes::Buffer> production_roots;bytes::Buffer fingerprint;cleanup{}}
 pub resource Preview{Selection selection;edit::Change change;bytes::Buffer report;cleanup{}}
 pub struct Problem{u32 stage;u32 code;}
 fn Problem fail(u32 stage,u32 code){return Problem{.stage,.code};}
@@ -33,6 +35,8 @@ pub fn ref u8[] report(ref Preview p){return bytes::view(ref p.report);}
 pub fn ref u8[] path(ref Preview p){return bytes::view(ref p.selection.path);}
 pub fn ref u8[] before(ref Preview p){return edit::before(ref p.change);}
 pub fn ref u8[] after(ref Preview p){return edit::after(ref p.change);}
+pub fn ref u8[] fingerprint(ref Preview p){return bytes::view(ref p.selection.fingerprint);}
+fn ref u8[] replacement(ref Preview p){let raw=after(p);let end=raw.len-(before(p).len-edit::end(ref p.change));return raw[edit::start(ref p.change)..end];}
 fn bool vendor(ref u8[] path){let name=b"vendor/";if(path.len<name.len){return false;}var usize i=0;while(i<name.len){let c=path[i];if(c!=name[i] && !(c>=65 && c<=90 && c+32==name[i])){return false;}i+=1;}return true;}
 fn bool prefix(ref u8[] root,ref u8[] path){if(path.len<root.len || path.len>root.len && path[root.len]!=47){return false;}var usize i=0;while(i<root.len){let a=root[i];let b=path[i];if((if(a>=65 && a<=90){a+32}else{a})!=(if(b>=65 && b<=90){b+32}else{b})){return false;}i+=1;}return true;}
 pub fn bool body_allowed(ref Selection p,ref u8[] path){if(!manifest::path(path)){return false;}var usize i=0;while(i<v::len<bytes::Buffer>(ref p.production_roots)){if(prefix(bytes::view(v::at<bytes::Buffer>(ref p.production_roots,i)),path)){return false;}i+=1;}return true;}
@@ -82,7 +86,10 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     let module_name=switch(bytes::copy(graph::module_name(g,0,input::origin(ref original,selected.module_index).module_index))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
     let function=switch(bytes::copy(syntax::declaration_name(parsed,selected.declaration+1))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
     let production_roots=switch(roots(workspace::local_catalog(local::input(graph::local_graph(g))))){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
-    return .ok(Selection{.original,.table,.selected,.path,.module_name,.function,.production_roots});
+    let opened=switch(host::open(root)){case .ok(p):{p}case .err(_):{return .err(fail(2,1));}};
+    let observed=switch(snapshots::from_resolved(ref opened,resolved)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
+    let fingerprint=switch(bytes::copy(snapshots::digest(ref observed))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
+    return .ok(Selection{.original,.table,.selected,.path,.module_name,.function,.production_roots,.fingerprint});
 }
 pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u8[] body){
     if(expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
@@ -98,4 +105,11 @@ pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u
 @effects(filesystem,environment) pub fn Result<Preview,Problem> prepare(ref u8[] root,ref u8[] uid,ref u8[] symbol,ref u8[] expected,ref u8[] body){
     if(expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
     let selected=select(root,uid,symbol)?;return finish(selected,expected,body);
+}
+// Rebuild the complete overlay from fresh locked inputs and the already owned
+// replacement. Raw manifest/source/lock drift rejects even when semantics agree.
+@effects(filesystem,environment) pub fn Result<bool,Problem> recheck(ref u8[] root,ref u8[] uid,ref u8[] symbol,ref u8[] expected,ref Preview proposal){
+    let checked=prepare(root,uid,symbol,expected,replacement(proposal))?;
+    if(!bytes::equal(fingerprint(ref checked),fingerprint(proposal)) || !bytes::equal(path(ref checked),path(proposal)) || !bytes::equal(before(ref checked),before(proposal)) || !bytes::equal(after(ref checked),after(proposal))){return .err(fail(7,5));}
+    return .ok(true);
 }

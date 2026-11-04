@@ -73,3 +73,7 @@ authorized by this queue.
 - Exact Fairy edit fingerprints pass nine native invocations per profile
   (66.486s), with independent Go byte/hash construction and fresh locked-source
   refusal/recovery. The fresh port is ready for apply; publication remains open.
+- Preview-owned fingerprints and complete fresh overlay revalidation now pass
+  eight process-barrier drift scenarios per Windows profile (199.02s). Raw metadata
+  drift and relocked dependency changes reject without writing; atomic application
+  and its actual CLI acceptance remain open.

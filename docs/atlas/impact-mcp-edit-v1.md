@@ -145,6 +145,10 @@ The Windows Fairy body-file preview command is connected through retained-root
 reads and validates outside-production-root paths. Its actual command-leaf
 acceptance passes in both profiles; full CLI acceptance and atomic apply remain
 separate. The Go reader also enforces this existing body-path restriction.
+Each Fairy preview now owns the exact manifest/production-source/lock fingerprint.
+Its fresh recheck rebuilds the complete edited overlay from the owned replacement
+and compares the fingerprint, path and complete before/after bytes. This supplies
+application preconditions; it does not itself acquire a lock or publish a file.
 
 ```sh
 fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file edits/body.txt --expected-source-sha256 <raw-file-hash>
