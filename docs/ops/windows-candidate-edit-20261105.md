@@ -76,6 +76,24 @@ both were corrected before the passing run. This is private preview-host evidenc
 not full CLI or atomic application evidence. Broader Atlas source families retain
 their separate admission work.
 
+## Invocation syntax
+
+`project_edit_options` owns the four required values and explicit `--apply` bit.
+It accepts the exact `replace-body` subcommand, checks bounded argv reads and
+rejects missing/duplicate flags, missing values, unknown options and extra
+positionals before workspace access. Selector/path/hash semantics remain the
+host's responsibility, preserving selection before body-file access.
+
+`TestCandidateEditOptions` passes 16 native invocations per profile in 5.552
+seconds. Ordinary and reversed flag order are checked against the real Go
+preview; all thirteen invalid invocations are compared with the real Go flag
+rejections. The apply flag is parsed without executing an apply, and the entire
+Go-oracle workspace, including the body file and lock, remains unchanged.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m ./internal/cli -run '^TestCandidateEditOptions$'
+```
+
 ## Remaining integration
 
 The actual body-file invocation/CLI dispatch remains next. Apply also needs fresh

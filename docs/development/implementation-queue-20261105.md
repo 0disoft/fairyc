@@ -66,3 +66,6 @@ authorized by this queue.
   and bounded preview reports also pass 21 native process calls per profile
   (242.935s). Body-file CLI and atomic apply remain open; see
   `docs/ops/windows-candidate-edit-20261105.md`.
+- Fairy edit invocation syntax also passes sixteen native invocations per Windows
+  profile (5.552s), including Go flag/preview comparisons and an explicitly parsed
+  apply bit. This is not yet the actual body-file/apply command.
