@@ -542,3 +542,11 @@ MovePayload requirement, including an owned tag nested inside another tag. Retyp
 or clearing that transfer is invalid MIR. Opcode spelling and serialized envelope do
 not change. The C backend's eight-layer owning transport bound is a backend capability
 limit; it does not add source flags or make MaybeLive roots usable.
+
+## Expanded array lowering budget
+
+Go HIR-to-MIR lowering reserves array-construction operands before allocation,
+sharing an inclusive 1,048,576-operand budget across every function in one program.
+Both explicit lists and repeats charge their expanded length; repeat initializers
+still evaluate once. Exceeding the budget returns a lowering error, publishes no
+partial MIR, and does not change array wire forms or per-array shape limits.

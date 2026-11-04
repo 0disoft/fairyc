@@ -14,6 +14,9 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 	if !array || !validForm || !hir.ExecutableFixedArrayShape(elementType, length) {
 		return Operand{}, fmt.Errorf("malformed fixed-array construction")
 	}
+	if err := l.reserveArrayOperands(length); err != nil {
+		return Operand{}, err
+	}
 	operands := make([]Operand, 0, len(expression.Children))
 	sequence := make([]hir.Span, 0, len(expression.Children))
 	for index := range expression.Children {
@@ -52,6 +55,18 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 		Expression: expression.Span, Sequence: sequence, MaterializedBeforeParent: true,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) reserveArrayOperands(count uint64) error {
+	if err := l.contextError(); err != nil {
+		return err
+	}
+	if l.arrayOperands != nil {
+		if err := l.arrayOperands.reserve(count); err != nil {
+			return err
+		}
+	}
+	return l.contextError()
 }
 
 func (l *functionLowerer) lowerArrayBorrowView(expression *hir.Expression) (Operand, error) {

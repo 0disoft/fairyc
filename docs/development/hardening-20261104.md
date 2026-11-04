@@ -41,3 +41,10 @@ The whole expansion checks its cumulative 1,048,576-node output budget before
 cloning specializations. Declaration collection no longer makes discarded AST
 copies. Windows genericsource tests cover inclusive boundaries, source immutability,
 zero work and arithmetic overflow. Linux: rerun genericsource/compiler suites.
+
+## 6. Expanded array operands
+
+One lowering operation shares an inclusive 1,048,576-operand allowance across
+functions. Reservation precedes array slice allocation; repeat evaluation remains
+single-shot. Windows MIR tests cover exact/cumulative limits, overflow, malformed
+shape precedence and cancellation. Linux: rerun MIR/compiler/backend suites.

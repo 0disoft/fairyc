@@ -11,7 +11,13 @@ import (
 // Lower normalizes typed HIR into executable mutable-local MIR.
 func Lower(input hir.Package) (Program, error) { return LowerContext(context.Background(), input) }
 
-func LowerContext(ctx context.Context, input hir.Package) (result Program, err error) {
+const defaultArrayOperandBudget uint64 = 1 << 20
+
+func LowerContext(ctx context.Context, input hir.Package) (Program, error) {
+	return lowerContextWithArrayOperandBudget(ctx, input, defaultArrayOperandBudget)
+}
+
+func lowerContextWithArrayOperandBudget(ctx context.Context, input hir.Package, arrayOperandLimit uint64) (result Program, err error) {
 	if err := ctx.Err(); err != nil {
 		return Program{}, err
 	}
@@ -38,6 +44,7 @@ func LowerContext(ctx context.Context, input hir.Package) (result Program, err e
 	}
 	program := Program{StructTypes: structTypes, EnumTypes: enumTypes, ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
 	properties := newTypeProperties(resourceTypes, structTypes, enumTypes)
+	arrayOperands := &arrayOperandBudget{remaining: arrayOperandLimit}
 	for _, module := range input.Modules {
 		moduleIdentity := hir.QualifiedModulePath(module.Package, module.Path)
 		for index := range module.Functions {
@@ -47,6 +54,7 @@ func LowerContext(ctx context.Context, input hir.Package) (result Program, err e
 			function := &module.Functions[index]
 			lowerer := newFunctionLowerer(moduleIdentity, function, properties)
 			lowerer.ctx = ctx
+			lowerer.arrayOperands = arrayOperands
 			lowered, err := lowerer.lower()
 			if err != nil {
 				return Program{}, fmt.Errorf("lower %s::%s: %w", moduleIdentity, function.Name, err)

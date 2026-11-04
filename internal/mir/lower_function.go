@@ -36,21 +36,34 @@ type deferredCall struct {
 	argumentSpans []hir.Span
 }
 
+type arrayOperandBudget struct {
+	remaining uint64
+}
+
+func (b *arrayOperandBudget) reserve(count uint64) error {
+	if count > b.remaining {
+		return fmt.Errorf("expanded fixed-array operand budget exceeded: construction needs %d operand(s), %d remains", count, b.remaining)
+	}
+	b.remaining -= count
+	return nil
+}
+
 type functionLowerer struct {
-	ctx          context.Context
-	module       string
-	source       *hir.Function
-	properties   typeProperties
-	result       Function
-	current      BlockID
-	bindings     map[hir.SymbolID]bindingInfo
-	live         map[hir.SymbolID]bool
-	regions      map[hir.SymbolID]int
-	regionStack  []activeRegion
-	loopStack    []activeLoop
-	currentScope hir.Span
-	deferred     []deferredCall
-	nextLocal    LocalID
+	ctx           context.Context
+	module        string
+	source        *hir.Function
+	properties    typeProperties
+	result        Function
+	current       BlockID
+	bindings      map[hir.SymbolID]bindingInfo
+	live          map[hir.SymbolID]bool
+	regions       map[hir.SymbolID]int
+	regionStack   []activeRegion
+	loopStack     []activeLoop
+	currentScope  hir.Span
+	deferred      []deferredCall
+	nextLocal     LocalID
+	arrayOperands *arrayOperandBudget
 }
 
 func newFunctionLowerer(module string, function *hir.Function, properties typeProperties) *functionLowerer {
