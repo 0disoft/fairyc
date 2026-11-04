@@ -747,7 +747,10 @@ func readStableStateStrings(reader *bytes.Reader) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if count > uint64(reader.Len()) || count > uint64(^uint(0)>>1) {
+	// Every string needs at least its eight-byte length prefix. Divide before
+	// allocating (or multiplying) so impossible counts cannot amplify a small
+	// corrupt descriptor into a large string-slot allocation.
+	if count > uint64(reader.Len()/8) {
 		return nil, fmt.Errorf("stable function descriptor string count exceeds its bytes")
 	}
 	result := make([]string, 0, int(count))

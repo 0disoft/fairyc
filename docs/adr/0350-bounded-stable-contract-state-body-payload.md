@@ -30,6 +30,9 @@ cache artifact into an authority-forging or resource-exhaustion boundary.
    length-delimited descriptor field, validates logical names, byte-exact canonical
    coordinate-stable types and effects, rejects trailing bytes, and requires byte-identical
    canonical re-encoding.
+   String-list counts must fit the remaining descriptor's minimum eight bytes
+   per element before allocating slots. This physical bound preserves every
+   encodable list and rejects impossible counts without multiplication overflow.
 4. Exclude build-local package/function identities, spans, mutable slice identity, and capability
    tokens. Package/function renumbering with the same stable coordinate produces identical payload
    bytes.

@@ -144,3 +144,12 @@ inclusive/shared limits, non-neutral rejection, cancellation and existing borrow
 diagnostic equivalence. Semantic and all semantic/resource/Region/Result fixture
 suites pass. Linux: rerun semantic, compiler and workspacecompiler in the combined
 validation; no Linux execution is claimed.
+
+## 13. Stable descriptor string counts
+
+String-list admission divides remaining bytes by the eight-byte minimum item
+prefix before allocating slots. Windows boundaries cover empty/exact/over-limit
+counts, short prefixes and uint64 overflow. A 1 MiB remainder claiming 1,048,576
+strings is rejected before any item read instead of reserving 16 MiB of slots
+on amd64. Existing stable state/body/cache round trips retain their encoding.
+Linux: rerun contractstatemir and packageartifact in the combined validation.
