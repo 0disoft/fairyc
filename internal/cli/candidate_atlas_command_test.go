@@ -15,7 +15,10 @@ import (
 
 func TestCandidateAtlasCommand(t *testing.T) {
 	main := `module main;import project_atlas_cli as atlas;@effects(filesystem,console,environment) fn i32 main(){return atlas::arguments();}`
-	candidateAtlasProbeSize(t, "project_atlas_cli", main, 2<<20, func(t *testing.T, image string) { verifyCandidateAtlasCommand(t, image) })
+	candidateAtlasProbeSize(t, "project_atlas_cli", main, 2<<20, func(t *testing.T, image string) {
+		verifyCandidateAtlasCommand(t, image)
+		verifyCandidateAtlasFamilies(t, image)
+	})
 }
 func verifyCandidateAtlasCommand(t *testing.T, image string) {
 	t.Helper()

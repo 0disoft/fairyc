@@ -83,6 +83,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 
 			t.Setenv("PATH", "")
 			verifyCandidateAtlasCommand(t, image)
+			verifyCandidateAtlasFamilies(t, image)
 			verifyCandidateMCPCommand(t, image)
 			verifyCandidateEditCommand(t, image)
 			verifyCandidateEditCLIApply(t, image)
@@ -101,7 +102,7 @@ func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
 	t.Helper()
 	var roots []string
 	for _, source := range []string{
-		`module main;struct Pair{i32 value;}fn i32 main(){return 0;}`,
+		`module main;import std::io as io;fn i32 main(){return 0;}`,
 		`module main;fn T identity<T>(T value){return value;}fn i32 main(){return identity<i32>(1);}`,
 	} {
 		root := writeWorkspaceSessionFixture(t, source)

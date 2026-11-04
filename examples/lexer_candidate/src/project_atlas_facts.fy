@@ -23,6 +23,25 @@ pub fn usize files(ref Facts p){return p.files;}
 pub fn Result<v::Vec<usize>,u32> order(ref graph::Graph g,ref mut usize meter){var v::Vec<usize> result=v::empty<usize>();var usize i=0;while(i<graph::node_count(g)){if(!v::push<usize>(ref mut result,i).is_ok){return .err(2);}var usize j=i;while(j>0){if(!work::charge(meter,256)){return .err(3);}let old=*v::at<usize>(ref result,j-1);if(model::before(graph::node_id(g,old),graph::node_id(g,i))){break;}{let slot=v::at_mut<usize>(ref mut result,j);*slot=old;}{let slot=v::at_mut<usize>(ref mut result,j-1);*slot=i;}j-=1;}i+=1;}return .ok(result);}
 fn bool dependency(ref graph::Graph g,usize owner,usize target,ref mut usize meter){var usize i=0;while(i<graph::edge_count(g)){if(!work::charge(meter,1)){return false;}let edge=graph::edge(g,i);if(edge.owner==owner && edge.target==target){return true;}i+=1;}return false;}
 fn usize lock_node(ref locks::Document l,ref u8[] instance,ref mut usize meter){var usize i=0;while(i<locks::package_count(l)){if(!work::charge(meter,256)){return locks::package_count(l);}if(bytes::equal(locks::package_field(l,i,0),instance)){return i;}i+=1;}return locks::package_count(l);}
+fn Result<v::Vec<usize>,u32> order_modules(ref graph::Graph g,usize owner,bool file_names,ref mut usize meter){
+ var order=v::empty<usize>();var usize i=0;
+ while(i<graph::module_count(g,owner)){
+  if(!v::push<usize>(ref mut order,i).is_ok){return .err(2);}var usize at=i;
+  while(at>0){let prior=*v::at<usize>(ref order,at-1);let a=if(file_names){graph::module_file(g,owner,i)}else{graph::module_name(g,owner,i)};let b=if(file_names){graph::module_file(g,owner,prior)}else{graph::module_name(g,owner,prior)};
+   if(!work::charge(meter,a.len+b.len+1)){return .err(3);}if(!model::before(a,b)){break;}{let slot=v::at_mut<usize>(ref mut order,at);*slot=prior;}{let slot=v::at_mut<usize>(ref mut order,at-1);*slot=i;}at-=1;
+  }i+=1;
+ }
+ return .ok(order);
+}
+fn Result<bytes::Buffer,u32> modules_sorted(ref graph::Graph g,usize owner,ref mut usize meter){
+ let order=order_modules(g,owner,false,meter)?;var out=bytes::empty();discard w::raw(ref mut out,b"[",meter)?;var usize i=0;
+ while(i<v::len<usize>(ref order)){
+  let index=*v::at<usize>(ref order,i);if(i>0){discard w::raw(ref mut out,b",",meter)?;}
+  discard w::raw(ref mut out,b"{",meter)?;discard w::pair(ref mut out,b"package_instance",graph::node_id(g,owner),meter)?;discard w::raw(ref mut out,b",",meter)?;
+  discard w::pair(ref mut out,b"path",graph::module_name(g,owner,index),meter)?;discard w::raw(ref mut out,b",",meter)?;
+  discard w::pair(ref mut out,b"source",graph::module_file(g,owner,index),meter)?;discard w::raw(ref mut out,b"}",meter)?;i+=1;
+ }discard w::raw(ref mut out,b"]",meter)?;return .ok(out);
+}
 pub fn Result<Facts,u32> collect(ref graph::Graph g,ref locks::Document l,ref coordinates::Coordinates table,ref interfaces::Records checked,ref ir::Program program,ref u8[] compiler,usize owner,ref mut usize meter){
  let lock=lock_node(l,graph::node_id(g,owner),meter);if(lock==locks::package_count(l)){return .err(9);}var usize record=0;while(record<interfaces::count(checked) && interfaces::owner(interfaces::at(checked,record))!=owner){if(!work::charge(meter,1)){return .err(3);}record+=1;}if(record==interfaces::count(checked)){return .err(9);}let retained=interfaces::at(checked,record);let generic_hash=generic::hash(ir::state_layouts(program),owner,interfaces::descriptor(retained),interfaces::templates(retained),meter)?;
  var bytes::Buffer out=bytes::empty();discard w::raw(ref mut out,b"{",meter)?;
@@ -31,10 +50,10 @@ pub fn Result<Facts,u32> collect(ref graph::Graph g,ref locks::Document l,ref co
  discard w::raw(ref mut out,b",\"features\":[",meter)?;var usize i=0;while(i<locks::feature_count(l,lock)){if(i>0){discard w::raw(ref mut out,b",",meter)?;}discard w::string(ref mut out,locks::feature(l,lock,i),meter)?;i+=1;}discard w::raw(ref mut out,b"],\"dependencies\":[",meter)?;
  let ordered=order(g,meter)?;i=0;var bool first=true;while(i<v::len<usize>(ref ordered)){let node=*v::at<usize>(ref ordered,i);if(dependency(g,owner,node,meter)){if(!first){discard w::raw(ref mut out,b",",meter)?;}discard w::string(ref mut out,graph::node_id(g,node),meter)?;first=false;}i+=1;}
  discard w::raw(ref mut out,b"],\"package_references\":[",meter)?;i=0;first=true;while(i<v::len<usize>(ref ordered)){let node=*v::at<usize>(ref ordered,i);if(node==owner || dependency(g,owner,node,meter)){let target=lock_node(l,graph::node_id(g,node),meter);if(target==locks::package_count(l)){return .err(9);}if(!first){discard w::raw(ref mut out,b",",meter)?;}discard w::raw(ref mut out,b"{",meter)?;discard w::pair(ref mut out,b"uid",locks::package_field(l,target,2),meter)?;discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"instance",graph::node_id(g,node),meter)?;discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"coordinate",coordinates::coordinate_text(table,node),meter)?;discard w::raw(ref mut out,b"}",meter)?;first=false;}i+=1;}
- discard w::raw(ref mut out,b"],\"files\":[",meter)?;var bytes::Buffer modules=bytes::empty();discard w::raw(ref mut modules,b"[",meter)?;i=0;
- while(i<graph::module_count(g,owner)){let index=graph::module_order(g,owner,i);let path=graph::module_file(g,owner,index);let source=graph::module_source(g,owner,index);let digest=w::source_hash(source,false,meter)?;let lines=w::source_hash(source,true,meter)?;if(i>0){discard w::raw(ref mut out,b",",meter)?;discard w::raw(ref mut modules,b",",meter)?;}
+ discard w::raw(ref mut out,b"],\"files\":[",meter)?;i=0;
+ let file_order=order_modules(g,owner,true,meter)?;while(i<graph::module_count(g,owner)){let index=*v::at<usize>(ref file_order,i);let path=graph::module_file(g,owner,index);let source=graph::module_source(g,owner,index);let digest=w::source_hash(source,false,meter)?;let lines=w::source_hash(source,true,meter)?;if(i>0){discard w::raw(ref mut out,b",",meter)?;}
  discard w::raw(ref mut out,b"{",meter)?;discard w::pair(ref mut out,b"package_instance",graph::node_id(g,owner),meter)?;discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"path",path,meter)?;discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"digest",bytes::view(ref digest),meter)?;discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"line_map",bytes::view(ref lines),meter)?;discard w::raw(ref mut out,b",\"kind\":\"source\"}",meter)?;
- discard w::raw(ref mut modules,b"{",meter)?;discard w::pair(ref mut modules,b"package_instance",graph::node_id(g,owner),meter)?;discard w::raw(ref mut modules,b",",meter)?;discard w::pair(ref mut modules,b"path",graph::module_name(g,owner,index),meter)?;discard w::raw(ref mut modules,b",",meter)?;discard w::pair(ref mut modules,b"source",path,meter)?;discard w::raw(ref mut modules,b"}",meter)?;i+=1;
+ i+=1;
  }
- discard w::raw(ref mut out,b"]}",meter)?;discard w::raw(ref mut modules,b"]",meter)?;let expected=switch(json::parse(out,meter)){case .ok(p):{p}case .err(_):{return .err(9);}};return .ok(Facts{.expected,.modules,.files=i});
+ discard w::raw(ref mut out,b"]}",meter)?;let modules=modules_sorted(g,owner,meter)?;let expected=switch(json::parse(out,meter)){case .ok(p):{p}case .err(_):{return .err(9);}};return .ok(Facts{.expected,.modules,.files=i});
 }

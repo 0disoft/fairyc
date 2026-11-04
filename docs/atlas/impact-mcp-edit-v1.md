@@ -55,29 +55,38 @@ It then encodes fresh v3 partitions in memory and re-enters the same reader/curr
 checks, join and traversal. No persisted Atlas map, cached header, Go child or build
 companion supplies current facts. Neither locks nor caches are written by the query.
 
-This first command slice admits root-reachable local packages with ordinary safe
-free functions, no attributes, and builtin `void`, `bool`, `u8`, `i32`, `i64` or
-`usize` parameter/result types. Imports, ordinary nested/direct calls, recursion and
-cycles within that slice are checked through the full compiler. SDK packages,
-foreign/unsafe/aggregate declarations, generics, interfaces, closures, attributed
-functions and other signature forms currently reject with a bounded diagnostic.
-A package without any function declarations also rejects. These are candidate
-admission limits; they do not narrow the broader Go command or language contracts.
+The command admits root-reachable local packages with ordinary functions, C
+foreign functions, structs, resources and enums. Declaration signatures preserve
+checked builtin/C scalar, nominal, borrow/slice, pointer, fixed-array and
+Option/Result types. Representation, declared effects, cleanup effects and C link
+names come from the complete verified source catalog, including unused foreign
+declarations. Constants and static assertions are checked but are not Atlas
+declarations. Module and file tables retain their independently canonical order.
+Direct local/imported calls, recursion and cycles are collected from verified IR;
+same-package foreign calls are external/opaque with their exact C ABI/link name.
+SDK packages, generic/interface/closure and owner-qualified declarations remain
+unsupported. Every package must contain an admitted Atlas declaration. These
+candidate limits do not narrow the broader Go command or language contracts.
 
-Call reachability is exact within the admitted graph. Non-call summaries are not
+Call reachability is exact within the admitted resolved graph. Foreign calls make
+the `calls` completeness partial with reason `external-ffi`; only resolved calls
+consume `--max-calls`. Non-call summaries are not
 collected by this producer: its completeness/header omissions explicitly use
 `candidate-atlas-not-collected`. Generic template bodies retain the existing
 unavailable reason. Output remains partial, carries the independent current
 identities, and never implies exact safe-change evidence. The producer does not
-claim byte parity with Go's richer completeness coverage. The private reader still
-admits the broader previously tested record/resource map inputs separately.
+claim byte parity with Go's richer completeness coverage. Common declaration and
+type ports are now connected to the producer and current-map reader, not only to
+private prebuilt-map probes.
 
 Syntax/selector/budget failures return 2, workspace/lock/source or unsupported
 candidate-source failures 7, and preparation/output I/O failures 4. Help succeeds
-without reading a workspace. Windows Fairy read-only MCP and structural editing
-now use the same admitted source subset, as described below. Broader production
-facts and Linux command wiring remain separate. Windows native evidence is recorded in
-[the Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
+without reading a workspace. Windows Fairy read-only MCP uses the same current
+query producer. Structural editing retains its own ordinary-source selection
+restrictions below. SDK/generic production facts and Linux command wiring remain
+separate. Windows native evidence is recorded in
+[the source-family receipt](../ops/windows-candidate-atlas-families-20261105.md)
+and [the original Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
 
 ## Read-only MCP over stdio
 
@@ -92,7 +101,7 @@ stdin/stdout and a fresh locked-source query for each tool call. Windows focused
 command and full CLI acceptance pass in both profiles, including stale-source
 refusal/recovery and output failure. The Go host retains the prepared-session
 optimization described below; the Fairy host re-verifies the source on each call.
-Native Linux dispatch/execution and broader source families remain separate.
+Native Linux dispatch/execution and SDK/generic source families remain separate.
 
 ```sh
 fairyc experimental atlas-mcp --allow-impact --max-packages 32 --max-calls 8192 --max-depth 8 --max-symbols 256 --max-output-bytes 262144 --max-requests 100

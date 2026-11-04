@@ -111,3 +111,14 @@ authorized by this queue.
   owner's exact provenance, including unused C declarations. Producer inventory,
   separate callable counts/summaries, external-call completeness, SDK/generic
   facts and actual command integration remain open; no queue family closes here.
+- Five declaration families now enter the actual current-source producer. Function
+  counts exclude aggregates/foreign declarations; calls preserve exact C ABI/link
+  names and report external coverage explicitly. File and module tables retain
+  their independent canonical orders. `TestCandidateAtlasProduction` passes both
+  Windows profiles (77.39s): Go decodes every produced partition and matches all
+  declarations plus ordered calls. The complete candidate CLI also passes both
+  Windows profiles (1,008.38s): 17 selected declarations by visible/full IDs,
+  exact-current contexts, resolved-call limits, existing MCP/edit/application and
+  post-edit lock recovery. SDK/generic facts and the broader Atlas queue item
+  remain open. See
+  `docs/ops/windows-candidate-atlas-families-20261105.md`.
