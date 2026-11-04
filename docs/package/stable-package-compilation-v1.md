@@ -50,6 +50,8 @@ the guard. The existing `json.Marshal` remains the byte-format authority, with a
 final length check as a consistency defense. Exact limits succeed; one byte less
 returns the existing artifact-specific size error. Semantic validation and
 fallible operation-kind encoding errors retain their precedence over size errors.
+Stable contract-state type validation separately limits compound nesting to 256
+levels, rejecting excessive reference/pointer prefixes before type interning.
 This does not impose a total-memory limit on the independent semantic validators,
 including context hashing and state-body validation.
 

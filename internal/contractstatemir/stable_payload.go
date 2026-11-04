@@ -666,29 +666,40 @@ func validStableStateBodyType(value string) bool {
 	return ok && canonical == value
 }
 
+const maxStableStateTypeDepth = 256
+
 func canonicalStableStateBodyType(value string) (string, bool) {
-	if stateBodyBuiltinType(hir.ParseType(value)) {
-		return value, true
+	return canonicalStableStateTypeDepth(value, 0)
+}
+
+func canonicalStableStateTypeDepth(value string, depth int) (string, bool) {
+	if depth > maxStableStateTypeDepth {
+		return "", false
 	}
+	// Reject prefix bombs before ParseType can intern their long suffixes.
 	for _, prefix := range []string{"ref mut ", "ref ", "ptr mut ", "ptr "} {
 		if strings.HasPrefix(value, prefix) {
-			element, ok := canonicalStableStateBodyType(strings.TrimPrefix(value, prefix))
+			element, ok := canonicalStableStateTypeDepth(strings.TrimPrefix(value, prefix), depth+1)
 			if !ok {
 				return "", false
 			}
 			return prefix + element, true
 		}
 	}
-	if element, ok := hir.OptionElement(hir.ParseType(value)); ok {
-		canonical, valid := canonicalStableStateBodyType(element.String())
+	typ := hir.ParseType(value)
+	if stateBodyBuiltinType(typ) {
+		return value, true
+	}
+	if element, ok := hir.OptionElement(typ); ok {
+		canonical, valid := canonicalStableStateTypeDepth(element.String(), depth+1)
 		if !valid {
 			return "", false
 		}
 		return "Option<" + canonical + ">", true
 	}
-	if success, failure, ok := hir.ResultElements(hir.ParseType(value)); ok {
-		canonicalSuccess, successValid := canonicalStableStateBodyType(success.String())
-		canonicalFailure, failureValid := canonicalStableStateBodyType(failure.String())
+	if success, failure, ok := hir.ResultElements(typ); ok {
+		canonicalSuccess, successValid := canonicalStableStateTypeDepth(success.String(), depth+1)
+		canonicalFailure, failureValid := canonicalStableStateTypeDepth(failure.String(), depth+1)
 		if !successValid || !failureValid {
 			return "", false
 		}
@@ -699,14 +710,14 @@ func canonicalStableStateBodyType(value string) (string, bool) {
 		if !strings.HasPrefix(element, "pkg[") || strings.HasSuffix(element, "]") {
 			return "", false
 		}
-		canonical, valid := canonicalStableStateBodyType(element)
+		canonical, valid := canonicalStableStateTypeDepth(element, depth+1)
 		return canonical + "[]", valid
 	}
 	if strings.HasSuffix(value, "]") {
 		separator := strings.LastIndexByte(value, '[')
 		if separator > 0 {
 			length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
-			element, valid := canonicalStableStateBodyType(value[:separator])
+			element, valid := canonicalStableStateTypeDepth(value[:separator], depth+1)
 			if err == nil && length > 0 && valid {
 				return element + "[" + strconv.FormatUint(length, 10) + "]", true
 			}
