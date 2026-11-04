@@ -79,6 +79,10 @@ func ExtractWorkspaceSource(
 	index *atlasmap.QueryIndex,
 	request Request,
 ) (Result, error) {
+	return extractWorkspaceSource(workspace.ResolveExactSource, index, request)
+}
+
+func extractWorkspaceSource(resolve exactSourceResolver, index *atlasmap.QueryIndex, request Request) (Result, error) {
 	result := Result{
 		Selection: Selection{Kinds: slices.Clone(request.Kinds), Origins: slices.Clone(request.Origins)},
 		Budget:    request.Budget, Records: make([]Record, 0, 1), Omissions: make([]Omission, 0, 1),
@@ -95,7 +99,7 @@ func ExtractWorkspaceSource(
 		span.StartByte < 0 || span.EndByte <= span.StartByte {
 		return result, fmt.Errorf("Atlas attributed source subject has inconsistent compiler span")
 	}
-	exact, err := workspace.ResolveExactSource(subject.Context.PackageInstance, span.Source)
+	exact, err := resolve(subject.Context.PackageInstance, span.Source)
 	if err != nil {
 		return result, err
 	}

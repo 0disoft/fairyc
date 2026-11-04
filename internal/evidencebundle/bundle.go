@@ -113,23 +113,8 @@ func encodeShow(
 	if err != nil {
 		return nil, err
 	}
-	baseTextRequest := attributedtext.Request{
-		SymbolID: symbolID,
-		Origins:  []attributedtext.Origin{attributedtext.OriginWorkspaceAuthored},
-		Budget:   textBudget,
-	}
-	sourceRequest := baseTextRequest
-	sourceRequest.Kinds = []attributedtext.Kind{attributedtext.KindSourceExcerpt}
-	sourceDocument, err := attributedtext.EncodeWorkspaceSource(
-		workspace, index, sourceRequest, limits.TextDocumentBytes,
-	)
-	if err != nil {
-		return nil, err
-	}
-	documentationRequest := baseTextRequest
-	documentationRequest.Kinds = []attributedtext.Kind{attributedtext.KindDeclarationDocumentation}
-	documentationDocument, err := attributedtext.EncodeWorkspaceDocumentation(
-		workspace, index, snapshot, documentationRequest, limits.TextDocumentBytes,
+	sourceDocument, documentationDocument, err := attributedtext.EncodeWorkspaceSourceAndDocumentation(
+		workspace, index, snapshot, symbolID, textBudget, limits.TextDocumentBytes,
 	)
 	if err != nil {
 		return nil, err

@@ -19,6 +19,10 @@ func ExtractWorkspaceDocumentation(
 	snapshot semanticsnapshot.Snapshot,
 	request Request,
 ) (Result, error) {
+	return extractWorkspaceDocumentation(workspace.ResolveExactSource, index, snapshot, request)
+}
+
+func extractWorkspaceDocumentation(resolve exactSourceResolver, index *atlasmap.QueryIndex, snapshot semanticsnapshot.Snapshot, request Request) (Result, error) {
 	result := Result{
 		Selection: Selection{Kinds: slices.Clone(request.Kinds), Origins: slices.Clone(request.Origins)},
 		Budget:    request.Budget, Records: make([]Record, 0, 1), Omissions: make([]Omission, 0, 1),
@@ -35,7 +39,7 @@ func ExtractWorkspaceDocumentation(
 		declarationSpan.StartByte < 0 || declarationSpan.EndByte <= declarationSpan.StartByte {
 		return result, fmt.Errorf("Atlas attributed documentation subject has inconsistent compiler span")
 	}
-	exact, err := workspace.ResolveExactSource(subject.Context.PackageInstance, declarationSpan.Source)
+	exact, err := resolve(subject.Context.PackageInstance, declarationSpan.Source)
 	if err != nil {
 		return result, err
 	}
