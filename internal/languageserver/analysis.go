@@ -2,6 +2,7 @@ package languageserver
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -33,14 +34,18 @@ type lspDiagnostic struct {
 	Message  string `json:"message"`
 }
 type analysis struct {
-	result      semantic.Result
-	files       map[sourceKey]sourceView
-	imports     map[sourceKey]hir.PackageID
-	diagnostics map[string][]lspDiagnostic
-	positions   map[string]*positionIndex
-	definitions map[string][]definitionSpan
-	completion  completionSourceIndex
-	clean       bool
+	result          semantic.Result
+	files           map[sourceKey]sourceView
+	imports         map[sourceKey]hir.PackageID
+	diagnostics     map[string][]lspDiagnostic
+	positions       map[string]*positionIndex
+	definitions     map[string][]definitionSpan
+	completion      completionSourceIndex
+	clean           bool
+	root            string
+	snapshot        *workspaceloader.FileSnapshot
+	standalone      [sha256.Size]byte
+	standaloneValid bool
 }
 
 func (s *server) projectRoot(filename string) string {
@@ -73,12 +78,24 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			result, err = nil, canceled
 		}
 	}()
-	a := &analysis{files: map[sourceKey]sourceView{}, imports: map[sourceKey]hir.PackageID{}, diagnostics: map[string][]lspDiagnostic{}}
+	if previous := d.View; root == "" && previous != nil && previous.root == "" && previous.standaloneValid && previous.standalone == sha256.Sum256(d.Text) {
+		return previous, nil
+	}
+	a := &analysis{root: root, files: map[sourceKey]sourceView{}, imports: map[sourceKey]hir.PackageID{}, diagnostics: map[string][]lspDiagnostic{}}
 	if root != "" {
 		overlays := map[string][]byte{}
 		for _, opened := range s.docs {
 			if contained(root, opened.Path) {
 				overlays[opened.Path] = opened.Text
+			}
+		}
+		if previous := d.View; previous != nil && previous.root == root && previous.snapshot != nil {
+			current, err := previous.snapshot.Matches(ctx, overlays)
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			if err == nil && current {
+				return previous, nil
 			}
 		}
 		workspace, err := workspaceloader.LoadEditorOverlaysContext(ctx, root, overlays)
@@ -129,6 +146,9 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 		}
 		result, err := workspacecompiler.CheckContext(ctx, workspace)
 		a.result = result.Semantic
+		if err == nil {
+			a.snapshot, _ = workspaceloader.CaptureFileSnapshot(ctx, workspace, overlays)
+		}
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
 		}
@@ -159,6 +179,9 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 		}
 		result, err := compiler.CheckContext(ctx, []semantic.File{{Path: filepath.Base(d.Path), Module: parsed.AST}})
 		a.result = result.Semantic
+		if err == nil {
+			a.standalone, a.standaloneValid = sha256.Sum256(d.Text), true
+		}
 		if err != nil {
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
 		}

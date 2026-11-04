@@ -27,6 +27,11 @@ Each load holds an opened workspace root, and each source/test tree holds its ow
 Manifest and source reads remain relative to those handles, with regular-file and identity checks.
 Replacing a checked parent pathname cannot redirect a later read outside the opened boundary.
 
+Interactive consumers may retain an immutable workspace and a `FileSnapshot`. Reuse checks current
+catalog manifests, exact source names and bytes, all overlay keys/contents, and lockfile presence
+and contents through opened roots. Timestamps alone never authorize a cache hit. This check avoids
+source reparsing; changes or unavailable inputs return to ordinary loading and validation.
+
 The implementation guards one load to 1,024 catalog packages, 4,096 `.fy` files, and 64 MiB of
 exact source bytes. Per-file frontend limits still apply. These are denial-of-service guards for the
 prototype and do not define stable language limits.
