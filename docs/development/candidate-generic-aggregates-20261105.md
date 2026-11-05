@@ -21,11 +21,13 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    field/layout contracts now check specialized shape facts and finite by-value
    layouts. The ordinary Interfaces owner now consumes that route with retained
    constructor, specialization and cleanup facts. Construction value checking is
-   implemented below; ownership/Flow and executable lowering remain open.
-3. **Ownership, cleanup and executable MIR.** Connect resource instances and
-   cleanup-helper calls to Flow, kind-aware identities, MIR verification and both
-   C emission forms. Require native values and exact cleanup traces against Go;
-   planning success alone is insufficient.
+   implemented below, as is ownership/Flow checking. Executable lowering remains
+   open.
+3. **Ownership/Flow checking implemented; cleanup execution and MIR remain open.**
+   Resource instances now enter the ordinary move/loan and cleanup-policy owner.
+   Connect checked bodies to kind-aware identities, MIR verification and both C
+   emission forms. Require native values and exact cleanup traces against Go;
+   checked cleanup requests alone are insufficient.
 4. **Interfaces, restoration and Atlas production.** Keep original templates as
    source exports, bind instance/type/cleanup identities to current source,
    preserve definition-dependent invalidation and emit concrete aggregate and
@@ -421,3 +423,61 @@ Both native profiles execute where provided; the legacy scalar admission group
 also runs its three authored fixtures. Scoped vet, formatting and diff checks
 pass. This supplements the final construction-values replay above without
 claiming ownership/Flow or executable aggregate acceptance.
+
+## Actual ownership/Flow and cleanup-policy admission
+
+Kind-21 resource instances now enter the existing move-only classification.
+Option/Result wrappers inherit that ownership through the same walker. Their
+cleanup requests also enter both no-drop blockers and declared cleanup-effect
+requirements, including nested owning fields. Struct instances remain inert;
+specialization does not grant resource copy or partial-move permission.
+
+`TestCandidateGenericAggregateFlow` runs the actual
+`module_unit_checked_bodies::build` factory, not isolated value or source-plan
+results. That owner checks values, moves, origin/loan diagnostics, cleanup
+abilities/effects and Result handling before retaining the checked body. The
+test helper is shared with the value-only probe, while the two authored Fairy
+assertion modules remain independent.
+
+The matrix contains fifty-two three-package sources per native profile: the
+complete thirty-five-input value matrix plus seventeen ownership/policy inputs.
+Twenty-five accepted sources independently pass Go Flow. Twenty-six sources
+reject in Go and Fairy; the remaining direct layout cycle retains the earlier
+separate Fairy invariant. Positive cases cover scoped resource locals, ownership
+transfer into calls, nested and Option-wrapped resources, declared cleanup
+effects and the earlier explicit burn and borrow lanes. Negative cases cover
+reuse after transfer, double consumption, reads through a moved owner, duplicated
+resource fields, partial field moves, inconsistent branch state, a consumed
+cleanup receiver, implicit destruction of direct/nested no-drop resources,
+missing cleanup effects and an escaping local borrow.
+
+Independent fact assertions require two distinct named locals to retain exactly
+two source-linked scope-cleanup obligations. A consumed call parameter retains
+its obligation; the transferring caller and returning owner retain none for the
+transferred value. These are semantic cleanup requests, not backend drop-order
+or executed-cleanup observations. Fresh checked-source validation succeeds and
+its separate 16 MiB source-work limit rejects exhaustion.
+
+The corrected probe fails at the two-obligation control with the prior production
+classification. During fixture preparation, cleanup effect placement, the source
+validation budget and explicit consuming-operation controls were corrected
+against the existing contracts; earlier failures are not passes. A focused
+Windows low replay then passes in 29.23s.
+
+Final Windows MSVC low/optimized replay passes in 139.713s, with no selected
+skips. The Flow probe passes in 83.12s and the shared-harness value regression
+passes in 56.47s:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregate(Flow|Values)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_values_test.go internal/cli/candidate_generic_aggregate_flow_test.go
+git diff --check
+```
+
+Scoped vet, formatting and diff checks pass. Both probes execute with empty PATH.
+
+Concrete cleanup execution, aggregate MIR/C, interface/cache/Atlas production and
+full commands remain required. Native Linux, consecutive self-build, distribution
+and hosted same-commit evidence remain open. No stable API/SDK ABI, DB,
+dependency, repository-hygiene or runner configuration change.

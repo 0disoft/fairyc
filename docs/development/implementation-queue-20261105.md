@@ -247,3 +247,13 @@ authorized by this queue.
   controls; see the aggregate plan. This is not resource ownership/Flow checking,
   executed cleanup, verified aggregate MIR/C, cache/Atlas or actual CLI acceptance.
   Those and the full implementation/final acceptance queue remain open.
+
+- Aggregate ownership now enters the actual checked-body factory: move-only
+  classification, origin/loan checks, cleanup obligations, no-drop blockers and
+  cleanup-effect authority. The fifty-two-input three-package Go-oracle probe
+  covers moves, nested/tagged ownership, cleanup receiver state, invalid field
+  transfers, effects and escaping borrows. The final Windows low/optimized Flow
+  and value regression replay passes in 139.713s with no selected skips; scoped
+  vet, formatting and diff checks pass. See the aggregate plan. Executed cleanup
+  and verified aggregate MIR/C, identities,
+  cache/Atlas, actual CLI and the complete final acceptance queue remain open.

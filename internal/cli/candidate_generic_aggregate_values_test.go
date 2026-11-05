@@ -8,9 +8,14 @@ import (
 )
 
 func TestCandidateGenericAggregateValues(t *testing.T) {
+	wire := candidateAggregateLayoutOracle(t, candidateAggregateValueFixtures()...)
+	candidateAggregateBodyProbe(t, "module_unit_values", wire, aggregateValuesFieldBuilder, "generic_aggregate_values.fy", "")
+}
+
+func candidateAggregateValueFixtures() []candidateAggregateLayoutFixture {
 	const factory = `pub fn Holder<T> make<T>(T value){return Holder<T>{.payload=Cell<T>{.value=value}};}`
 	const direct = `pub fn Cell<i32> direct(i32 value){return Cell<i32>{.value=value};}`
-	wire := candidateAggregateLayoutOracle(t,
+	return []candidateAggregateLayoutFixture{
 		candidateAggregateLayoutFixture{name: "direct construction", maker: aggregateLayoutMaker + direct},
 		candidateAggregateLayoutFixture{name: "generic factory", maker: aggregateLayoutMaker + factory, root: `module root;import maker as m;fn i32 main(){let value=m::make<i32>(42);discard value;return 0;}`},
 		candidateAggregateLayoutFixture{name: "imported struct constructor", root: `module root;import maker as m;fn i32 main(){let value=m::Cell<i32>{.value=42};let copied=value;return copied.value;}`},
@@ -32,30 +37,38 @@ func TestCandidateGenericAggregateValues(t *testing.T) {
 		candidateAggregateLayoutFixture{name: "integer below minimum", maker: aggregateLayoutMaker + `pub fn Cell<i32> bad(){return Cell<i32>{.value=-2147483649};}`, reject: 1013},
 		candidateAggregateLayoutFixture{name: "exclusive resource field borrow", maker: aggregateLayoutMaker + `pub fn void bad(){var value=Holder<i32>{.payload=Cell<i32>{.value=42}};let alias=ref mut value.payload;discard alias;}`, reject: 1008},
 		candidateAggregateLayoutFixture{name: "drop resource cannot burn", maker: aggregateLayoutMaker + `pub fn void bad(){let value=Holder<i32>{.payload=Cell<i32>{.value=42}};burn value;}`, reject: 1109},
-	)
+	}
+}
+
+func candidateAggregateBodyProbe(t *testing.T, module string, wire []byte, builder, checksFile, imports string) {
+	t.Helper()
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "generic_aggregate_layouts.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	checks, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "generic_aggregate_values.fy"))
+	checks, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", checksFile))
 	if err != nil {
 		t.Fatal(err)
 	}
 	main := strings.Replace(string(raw), "module tests::generic_aggregate_layouts;", "module main;", 1)
-	main = strings.Replace(main, "import module_unit_interfaces as interfaces;", "import module_unit_interfaces as interfaces;import module_unit_bind as binding;import module_unit_call_closure as closure;import module_unit_values as values;import module_unit_value_model as model;import module_unit_drops as drops;", 1)
+	main = strings.Replace(main, "import module_unit_interfaces as interfaces;", "import module_unit_interfaces as interfaces;import module_unit_bind as binding;import module_unit_call_closure as closure;import module_unit_values as values;import module_unit_value_model as model;import module_unit_drops as drops;"+imports, 1)
 	start := strings.Index(main, "fn u32 build_fields(")
 	stop := strings.Index(main, "@effects(console) fn void verify_fields(")
 	if start < 0 || stop < start {
 		t.Fatal("missing layout probe field builder")
 	}
-	signature := main[start : start+strings.Index(main[start:], "{")+1]
-	checkBody := string(checks[strings.Index(string(checks), "pub fn void verify("):])
-	checkBody = strings.Replace(checkBody, "pub fn void verify(", "fn void verify_values(", 1)
-	main = main[:start] + signature + aggregateValuesFieldBuilder + main[stop:] + checkBody + "\n@effects(console) fn i32 main(){return run();}\n"
-	candidateAtlasProbeSize(t, "module_unit_values", main, 512<<10, func(t *testing.T, image string) {
+	signature := "@effects(console) " + main[start:start+strings.Index(main[start:], "{")+1]
+	checkStart := strings.Index(string(checks), "pub fn void verify(")
+	if checkStart < 0 {
+		t.Fatal("missing aggregate body verifier")
+	}
+	checkBody := string(checks[checkStart:])
+	checkBody = strings.Replace(checkBody, "pub fn void verify(", "@effects(console) fn void verify_values(", 1)
+	main = main[:start] + signature + builder + main[stop:] + checkBody + "\n@effects(console) fn i32 main(){return run();}\n"
+	candidateAtlasProbeSize(t, module, main, 512<<10, func(t *testing.T, image string) {
 		t.Setenv("PATH", "")
 		if code, out := candidateAtlasProcess(t, image, wire); code != 0 || out != "" {
-			t.Fatalf("aggregate construction values: %d %q", code, out)
+			t.Fatalf("%s aggregate bodies: %d %q", module, code, out)
 		}
 	}, "project_source_plan")
 }
