@@ -20,9 +20,9 @@ fn join::Problem edge(ref mut v::Vec<Edge> edges,usize owner,usize target,u32 ki
 pub fn Result<Plan,join::Problem> build(ref interfaces::Interfaces imported){
     var v::Vec<Node> nodes=v::empty<Node>();var v::Vec<Edge> edges=v::empty<Edge>();var usize work=0;var usize id=1;
     // Keep canonical IDs unchanged, including graph entries with no drop work.
-    while(id<=interfaces::type_count(imported)){if(!charge(ref mut work,1)){return .err(fail(10,0,0,0));}var node=empty(id);let t=interfaces::type_at(imported,id);node.complete=t.kind!=2 && t.kind!=3 && t.kind!=4 && t.kind!=13;if(!v::push<Node>(ref mut nodes,node).is_ok){return .err(fail(11,0,0,0));}id+=1;}
+    while(id<=interfaces::type_count(imported)){if(!charge(ref mut work,1)){return .err(fail(10,0,0,0));}var node=empty(id);let t=interfaces::type_at(imported,id);node.complete=t.kind!=2 && t.kind!=3 && t.kind!=4 && t.kind!=13 && t.kind!=20 && t.kind!=21;if(!v::push<Node>(ref mut nodes,node).is_ok){return .err(fail(11,0,0,0));}id+=1;}
     var usize i=0;while(i<interfaces::shape_count(imported)){let s=interfaces::shape_at(imported,i);let t=interfaces::type_at(imported,s.type);var node=empty(s.type);node.edge_start=v::len<Edge>(ref edges);
-        if(t.kind==3 || t.kind==13){node.needed=true;node.droppable=(s.abilities&1)!=0;node.own_effects=s.cleanup_effects;node.effects=s.cleanup_effects;var usize c=1;
+        if(t.kind==3 || t.kind==13 || t.kind==21){node.needed=true;node.droppable=(s.abilities&1)!=0;node.own_effects=s.cleanup_effects;node.effects=s.cleanup_effects;var usize c=1;
             while(c<=generics::cleanup_count(interfaces::specializations(imported))){if(!charge(ref mut work,1)){return .err(fail(10,s.module_index,s.start,s.end));}if(generics::cleanup_at(interfaces::specializations(imported),c).type==s.type){node.context=c;break;}c+=1;}
             if(node.context==0){return .err(fail(9,s.module_index,s.start,s.end));}
         }

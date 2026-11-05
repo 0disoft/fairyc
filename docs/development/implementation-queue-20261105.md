@@ -237,3 +237,13 @@ authorized by this queue.
   277.633s on Windows with no selected skips. Scoped vet, formatting and diff
   checks pass. Full CLI, Linux, self-build, distribution and hosted gates remain
   open.
+
+- Aggregate construction values now pass through the actual call-closure/value
+  owners, including ordinary/imported constructors, generic factories, record
+  arrays, cleanup-body construction, whole-owner borrows and explicit burn.
+  Resource drop requirements/contexts and exclusive field-borrow restrictions
+  remain enforced. Thirty-five three-package Windows low/optimized inputs pass
+  (54.84s), with Go Flow/expanded-field oracles and integer-boundary/invalid-field
+  controls; see the aggregate plan. This is not resource ownership/Flow checking,
+  executed cleanup, verified aggregate MIR/C, cache/Atlas or actual CLI acceptance.
+  Those and the full implementation/final acceptance queue remain open.

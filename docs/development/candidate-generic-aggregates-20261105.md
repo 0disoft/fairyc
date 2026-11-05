@@ -20,8 +20,8 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    annotation and constructor type requests use the actual graph. Ordinary
    field/layout contracts now check specialized shape facts and finite by-value
    layouts. The ordinary Interfaces owner now consumes that route with retained
-   constructor, specialization and cleanup facts. Executable body checking and
-   lowering remain open.
+   constructor, specialization and cleanup facts. Construction value checking is
+   implemented below; ownership/Flow and executable lowering remain open.
 3. **Ownership, cleanup and executable MIR.** Connect resource instances and
    cleanup-helper calls to Flow, kind-aware identities, MIR verification and both
    C emission forms. Require native values and exact cleanup traces against Go;
@@ -356,3 +356,68 @@ go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandida
 This covers final production and fixture inputs. Scoped vet, formatting and diff
 checks pass. Full candidate CLI, Linux, consecutive self-build, clean-machine
 distribution and hosted same-commit acceptance remain separate open gates.
+
+## Construction values and type-level drop obligations
+
+The existing call-closure and value owners now consume kind-20/21 concrete
+aggregates. Ordinary constructors retain their selected aggregate seed; concrete
+function and cleanup contexts use the existing dependency seeds. Record checking
+validates every specialized field, rejects duplicate/missing/unknown initializers,
+and preserves resource construction privacy. Record arrays admit the same inert
+field lane as ordinary records, without admitting new scalar-array types.
+
+Generic resources now retain their real type-level drop obligation, cleanup
+context, effects and abilities. Their fields preserve the existing exclusive
+borrow restriction. Whole-owner borrows and explicit same-module burn use the
+ordinary checks; a drop-enabled resource still cannot burn. These are value and
+drop-plan facts, not executed cleanup or ownership/Flow acceptance.
+
+`TestCandidateGenericAggregateValues` runs thirty-five three-package inputs in
+actual MSVC low/optimized processes with empty PATH. Twenty accepted sources pass
+Go `AnalyzeGenericPackages` through Flow, while Fairy runs its actual call closure
+and value checking. Fourteen sources reject in both compilers. The direct
+by-value layout cycle remains the separate Fairy layout invariant inherited from
+the earlier probe, not a Go Flow rejection. Detached Go shapes/fields remain the
+independent source/type oracle.
+
+The matrix covers ordinary/imported constructors, generic factories, nested
+constructors in cleanup, reordered fields, generic record arrays, f64 transport,
+whole-resource shared borrows, mutable struct borrows, and explicit burn. Integer
+endpoints -2147483648 and 2147483647 accept; the immediately adjacent out-of-range
+values reject. Missing/duplicate/unknown fields, wrong/nested-wrong field types,
+private resource construction and exclusive resource-field borrows reject. The
+probe requires checked calls/arguments/returns, concrete local types, original
+constructor spans/types, and complete resource drop contexts.
+
+The focused Windows probe passes in 54.84s:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateGenericAggregateValues$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_values_test.go
+git diff --check
+```
+
+The initial probe exposed omitted resource drop classification before these
+changes. A later burn fixture initially exported a private type; its declaration
+was made explicitly public before the final pass. Those failures are not passes.
+The previous smaller matrix passed before expansion and is superseded by the
+thirty-five-input replay above.
+
+Move/loan analysis, concrete cleanup execution, verified executable MIR, C
+emission/linking, interface/cache/Atlas production and actual aggregate commands
+remain required follow-ups. Linux stays batched; self-build, clean-machine and
+same-commit hosted acceptance remain open. No stable API/SDK ABI, DB, dependency,
+repository-hygiene or runner change; no push or hosted dispatch.
+
+The final five-root Windows regression replay passes in 212.548s with
+`FAIRYC_RUN_PARITY_INTEGRATION=1`, with no selected skips:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidate(GenericAggregateInterfaces|AtlasTypes|GenericTransportAdmission|StaticOperationIdentity|CopiedClosureIdentity)$'
+```
+
+Both native profiles execute where provided; the legacy scalar admission group
+also runs its three authored fixtures. Scoped vet, formatting and diff checks
+pass. This supplements the final construction-values replay above without
+claiming ownership/Flow or executable aggregate acceptance.

@@ -12,9 +12,9 @@ pub fn m::Place field(ref v::Vec<types::Type> graph,m::Expression receiver,m::Ex
     // ADR 0391 permits shared-reference call projections. ADRs 0445/0446
     // restrict mutable-reference field places to named roots; grouping keeps
     // that root place, while a returned temporary reference has no named place.
-    if(t.kind==7 || t.kind==8){let named_mutable=receiver.place.kind==1 && receiver.place.root!=0;p.mutable=t.kind==8 && named_mutable;p.borrowable=t.kind==7 || named_mutable;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13;return p;
+    if(t.kind==7 || t.kind==8){let named_mutable=receiver.place.kind==1 && receiver.place.root!=0;p.mutable=t.kind==8 && named_mutable;p.borrowable=t.kind==7 || named_mutable;}let owner=types::at(graph,selected.field.owner);p.resource_field=p.resource_field || owner.kind==3 || owner.kind==13 || owner.kind==21;return p;
 }
-pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==12 && t.first==0 && t.scalar==1048591;}
+pub fn bool referent(types::Type t){return t.kind==1 && t.scalar>=1 && t.scalar<=6 || t.kind==2 || t.kind==3 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==13 || t.kind==20 || t.kind==21 || t.kind==12 && t.first==0 && t.scalar==1048591;}
 pub fn bool raw_mutable(types::Type t){return t.kind==12 && if(t.first==0){pointers::mutable(t.scalar)}else{t.scalar==1};}
 pub fn bool opaque(types::Type t){return t.kind==12 && t.first==0 && pointers::valid(t.scalar) && pointers::inner(t.scalar)==7;}
 // The caller also checks lexical unsafe provenance and direct local syntax for
