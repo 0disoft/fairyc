@@ -56,6 +56,22 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy actual `experimental atlas-calls list` now derives requested v1/v2/v3
+  maps from one fresh Complete, reauthenticates every package, joins exact current
+  calls and emits canonical v0/v1/v2 catalogs. Argument/help, product error codes,
+  selector/join/output refusal, stale/locked/unlocked behavior and stdout failure
+  pass in the authored full-main Windows low/optimized images. Three appended
+  calls groups and help pass both profiles; existing symbols-source regression
+  also passes optimized. The three bounded selections pass in
+  369.726s/271.206s/164.136s, 117 native observations total. This covers four of
+  thirty-eight registrations at both profiles, with a fifth optimized only.
+  Authored check/locked, Go calls/symbols regression, scoped vet, formatting/LF/
+  diff pass. See `candidate-workspace-calls-20261106.md` for exact scope/digests.
+  Atlas-pack, remaining full CLI and generated consumers, broader source/non-call
+  families and every original implementation/final acceptance gate remain open.
+  The complete objective remains active; native Linux stays batched, no push or
+  dispatch.
+
 - Fairy joined-call catalog v0/v1/v2 now retains actual join limits, exact source/
   specialization/cleanup identities, canonical O(N log N) ordering/deduplication,
   whole-ledger usage, current context and independently checked SHA-256 output.

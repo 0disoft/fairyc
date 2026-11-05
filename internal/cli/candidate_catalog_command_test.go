@@ -19,7 +19,7 @@ import (
 // Start from independent Go source facts, then declare the candidate's existing
 // narrower non-call collection scope. No expected identity, symbol, generic
 // count, cursor, budget or checksum is learned from the candidate response.
-func candidateCatalogCommandIndex(t *testing.T, p atlasmap.Partition, e atlasmap.LoadExpectation, compiler buildidentity.Identity, version int) *atlasmap.QueryIndex {
+func candidateCatalogCommandPartition(t *testing.T, p atlasmap.Partition, e atlasmap.LoadExpectation, compiler buildidentity.Identity, version int) (atlasmap.Partition, atlasmap.LoadExpectation) {
 	t.Helper()
 	encode := []func(atlasmap.Partition, uint64) ([]byte, error){atlasmap.Encode, atlasmap.EncodeV2, atlasmap.EncodeV3}[version-1]
 	data, err := encode(p, 4<<20)
@@ -107,6 +107,12 @@ func candidateCatalogCommandIndex(t *testing.T, p atlasmap.Partition, e atlasmap
 		t.Fatal("independent narrowed map", err)
 	}
 	e.CompilerBuild = compiler
+	return p, e
+}
+
+func candidateCatalogCommandIndex(t *testing.T, p atlasmap.Partition, e atlasmap.LoadExpectation, compiler buildidentity.Identity, version int) *atlasmap.QueryIndex {
+	t.Helper()
+	p, e = candidateCatalogCommandPartition(t, p, e, compiler, version)
 	query := []func(atlasmap.Partition, atlasmap.LoadExpectation) (*atlasmap.QueryIndex, error){atlasmap.NewQueryIndex, atlasmap.NewQueryIndexV2, atlasmap.NewQueryIndexV3}[version-1]
 	index, err := query(p, e)
 	if err != nil {

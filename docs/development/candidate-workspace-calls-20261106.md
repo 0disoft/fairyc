@@ -11,7 +11,7 @@ batched. No push, dispatch, publication or target promotion is authorized here.
 - [x] Current-joined graph output v0/v1/v2 with exact source/cleanup/
   specialization identity, canonical order/deduplication, context, whole-graph
   budget/usage, independently verified checksums and atomic byte/work refusal.
-- [ ] Fresh Complete/source-selected production and actual dispatcher/help/
+- [x] Fresh Complete/source-selected production and actual dispatcher/help/
   lock/error/output acceptance under both Windows profiles. No child Go fallback.
 - [ ] Remaining full authored-main, self-build, distribution, same-commit hosted
   and batched Linux gates from the original queue.
@@ -107,3 +107,86 @@ dispatch/help/error/lock behavior, full CLI, generated consumers and all origina
 self-build/distribution/hosted/Linux gates remain open. No grammar, stable CLI,
 SDK ABI, dependency, DB, runner/workflow or repository-policy change; no push or
 dispatch. The broader implementation objective remains active.
+
+## Fresh source-backed authored CLI
+
+`project_calls_source::query` freshly resolves the requested lock policy,
+selects the exact requested source/map family, builds one ordinary/aggregate
+Complete and derives every package from that same Complete. All packages re-enter
+independent current-source admission before the bounded workspace join and
+catalog encoder. Neither an existing map/cache nor a child Go compiler supplies
+facts. The established SDK source/query work-ledger separation is retained.
+
+`project_calls_cli` and `project_experimental_cli` now route actual
+`experimental atlas-calls list`. Arguments/help precede workspace I/O. Product
+exit codes are 2 for invalid selectors/join/output budgets, 3 for source/family
+refusal, 4 for internal preparation/stdout failure and 7 for workspace/lock failure.
+Successful output is published once, without a trailing newline; failure never
+publishes a partial catalog. The command implements the existing experimental
+contract rather than changing stable CLI, grammar or SDK ABI.
+
+`candidate_calls_command_test.go` uses independent Go source declarations/calls,
+current identities and native image SHA-256. The shared test-only
+`candidateCatalogCommandPartition` projection declares only the existing
+non-call collection omissions; it does not learn IDs, edges, bounds or catalog
+bytes from the candidate. Its 26 ordinary command invocations cover all three
+catalog versions/directions, visible/full selectors, recursive self-call
+deduplication, empty selection, exact byte/join bounds and atomic refusals,
+missing/duplicate/unknown argument policy before I/O, stdout failure, locked
+immutability and stale-source refusal. The unlocked freshness test independently
+discovers the new source selector, restores the exact stale lock, then requires
+the native invocation alone to publish the expected new lock and catalog.
+
+`candidate_calls_source_command_test.go` adds ten native invocations for used
+cross-package function generics in v1/v2, unused templates, two cross-package
+cleanup specializations and distinct owner-qualified namespaces, including
+lower-version source-family refusals. Two SDK invocations cover ordinary SDK v0
+and used Vec v2 with the unchanged SDK-specific diagnostic cap. All locked source
+and SDK workspaces remain byte-identical. Four new help forms join the existing
+ten help probes. These three command groups are appended to the full authored-main
+verifier without deleting or reordering its original thirty-five registrations.
+The helper clears PATH, so a child Go or C compiler cannot satisfy these queries.
+
+The final source and generated image fingerprints are recorded by each command
+below; reuse requires exact generated-C/profile/toolchain/stack and image digest
+agreement. No observation from an old compiler image is promoted to this one.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/atlas-calls-cli'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/optimized$/^(calls-ordinary|calls-sources|calls-sdk|help|catalog-sources)$'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$/^(calls-ordinary|help)$'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$/^(calls-sources|calls-sdk)$'
+```
+
+| Final selection | Result | Log under `.cache/` |
+| --- | --- | --- |
+| Optimized three calls groups, help and existing symbols source regression | PASS, 164.136s | `calls-cli-optimized-20261106.log` |
+| Low ordinary calls and help | PASS, 369.726s | `calls-cli-low-ordinary-20261106.log` |
+| Low source-family and SDK calls | PASS, 271.206s | `calls-cli-low-sources-20261106.log` |
+
+The optimized selection verifies 65 native invocations: 26 ordinary calls,
+ten source-family calls, two SDK calls, fourteen help and thirteen existing
+symbols source checks. The two low selections verify another 52 native
+invocations (40 ordinary/help and 12 source/SDK), 117 full-main observations
+total. Four of thirty-eight registrations pass both profiles; the additional
+existing symbols source group passes optimized. The other thirty-three
+registrations, plus low symbols-source regression, are not attested by these
+selections. The low SDK executions take 82.96s/79.68s under the unchanged
+SDK-specific cap; they are observations, not a product timeout/performance claim.
+
+| Profile | Generated-C/profile/toolchain/stack source fingerprint | Image SHA-256 |
+| --- | --- | --- |
+| Low | `ff5e6c4177b811f5ca3ebdb51317693aa2224c9e91cb39ab482e3ff6e6473cd8` | `e96e871adc33ba6d906ec4c978459290cddc8b65a9d7c489901714fb1e85821f` |
+| Optimized | `28e6e166a6c825f9fc6a61beac70102af5f57ec8606e0e1fcd757b8d2cd00af4` | `2c4e019a3ca25a782f84b444a9fd3f035bc2420151dd883428ed4dc4dd18f2f2` |
+
+The Go calls/symbols command regression passes in 3.781s; scoped CLI vet,
+formatting, LF/diff checks and authored check/locked (655 source files,
+8,190 MIR functions) pass. No stable CLI, grammar, SDK ABI, dependency, DB,
+workflow/runner or repository-policy change.
+
+Actual calls command acceptance is scoped to the admitted producer families.
+The remaining full-main verifiers, generated consumers, broader source/non-call
+coverage, atlas-pack and every original self-build/distribution/hosted/Linux gate
+remain required. Native Linux stays batched; no push, dispatch or publication.
+The complete implementation objective remains active.

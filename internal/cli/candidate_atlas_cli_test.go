@@ -125,6 +125,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"impact-owner-namespaces", verifyCandidateAtlasOwnerNamespaceCommand},
 				{"mcp-owner-namespaces", verifyCandidateMCPOwnerNamespaceCommand},
 				{"edit-owner-namespaces", verifyCandidateEditOwnerNamespaceCommand},
+				{"calls-ordinary", verifyCandidateCallsCommand},
+				{"calls-sources", verifyCandidateCallsSourceCommand},
+				{"calls-sdk", verifyCandidateCallsSDKCommand},
 			} {
 				t.Run(check.name, func(t *testing.T) { check.verify(t, image) })
 			}
@@ -134,7 +137,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 
 func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 	t.Helper()
-	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}, {"experimental", "atlas-symbols", "--help"}, {"experimental", "atlas-symbols", "list", "--help"}, {"experimental", "atlas-symbols", "list", "-h"}, {"experimental", "atlas-symbols", "list", "help"}} {
+	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}, {"experimental", "atlas-symbols", "--help"}, {"experimental", "atlas-symbols", "list", "--help"}, {"experimental", "atlas-symbols", "list", "-h"}, {"experimental", "atlas-symbols", "list", "help"}, {"experimental", "atlas-calls", "--help"}, {"experimental", "atlas-calls", "list", "--help"}, {"experimental", "atlas-calls", "list", "-h"}, {"experimental", "atlas-calls", "list", "help"}} {
 		code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 		if code != 0 || out != usage || diagnostic != "" {
 			t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)
