@@ -10,6 +10,8 @@ import std::vec as v;
 
 pub struct Symbol{usize package;usize token;}
 pub struct Edge{Symbol source;Symbol target;usize source_implementation;usize target_implementation;usize call;bool resource_body;}
+struct Specialization{usize token;usize next;}
+resource Specializations{v::Vec<usize> heads;v::Vec<Specialization> values;cleanup{}}
 resource Packages{v::Vec<current::Ready> values;cleanup{}}
 pub resource Graph{Packages packages;v::Vec<usize> order;v::Vec<Edge> edges;bool partial;cleanup{}}
 fn ref validate::Partition part(ref Packages g,usize p){return current::partition(v::at<current::Ready>(ref g.values,p));}
@@ -38,6 +40,16 @@ fn Result<usize,u32> implementation(ref validate::Partition p,ref u8[] id,ref mu
  while(lo<hi){if(!work::charge(meter,id.len+68)){return .err(3);}let mid=lo+(hi-lo)/2;let row=validate::specialization(p,mid);let value=wire::string(t,row,b"id");if(bytes::equal(value,id)){return .ok(row);}if(model::before(value,id)){lo=mid+1;}else{hi=mid;}}
  return .err(9);
 }
+// Preserve canonical specialization-ID order within each original declaration.
+// Never rescan every implementation for every symbol (including SDK symbols).
+fn Result<Specializations,u32> index_specializations(ref validate::Partition p,ref mut usize meter){
+ var heads=v::empty<usize>();var values=v::empty<Specialization>();let count=validate::specialization_count(p);var usize i=0;
+ if(count==0){return .ok(Specializations{.heads,.values});}
+ while(i<validate::symbol_count(p)){if(!work::charge(meter,1)){return .err(3);}if(!v::push<usize>(ref mut heads,0).is_ok){return .err(2);}i+=1;}
+ let t=validate::tree(p);i=count;while(i>0){if(!work::charge(meter,1)){return .err(3);}i-=1;let token=validate::specialization(p,i);let at=validate::declaration_index(p,wire::field(t,token,b"declaration"),meter)?;if(at>=v::len<usize>(ref heads)){return .err(9);}
+  let next=*v::at<usize>(ref heads,at);if(!v::push<Specialization>(ref mut values,Specialization{.token,.next}).is_ok){return .err(2);}let slot=v::at_mut<usize>(ref mut heads,at);*slot=v::len<Specialization>(ref values);
+ }return .ok(Specializations{.heads,.values});
+}
 fn Result<bool,u32> append_calls(ref Packages g,usize p,usize token,usize body,usize source_implementation,bool resource_body,usize maximum,ref mut v::Vec<Edge> edges,ref mut usize meter){
  let row=part(g,p);let t=validate::tree(row);let calls=model::rows(t,wire::field(t,body,b"calls"),65536,meter)?;var usize c=0;
  while(c<v::len<usize>(ref calls)){let call=*v::at<usize>(ref calls,c);
@@ -64,11 +76,12 @@ pub fn Result<Graph,u32> join(v::Vec<current::Ready> packages,usize max_packages
  while(r<v::len<usize>(ref refs)){let row=*v::at<usize>(ref refs,r);let q=find_package(ref g,wire::string(t,row,b"instance"),meter);if(q==n){return .err(9);}let target=part(ref g,q);let target_tree=validate::tree(target);let target_header=validate::header(target);if(!work::charge(meter,wire::string(t,row,b"uid").len+wire::string(target_tree,target_header,b"package_uid").len+256)){return .err(3);}if(!bytes::equal(wire::string(t,row,b"uid"),wire::string(target_tree,target_header,b"package_uid")) || !bytes::equal(wire::string(t,row,b"coordinate"),wire::string(target_tree,target_header,b"package_coordinate"))){return .err(9);}r+=1;}
  if(!bytes::equal(wire::string(t,h,b"generation_status"),b"exact") || wire::count(t,wire::field(t,h,b"omissions"))!=0){partial=true;}
  r=0;while(r<validate::completeness_count(row)){let c=validate::completeness(row,r);if(!work::charge(meter,1)){return .err(3);}if((bytes::equal(wire::string(t,c,b"relation"),b"calls") || validate::version(row)==3 && (bytes::equal(wire::string(t,c,b"relation"),b"generic-specializations") || bytes::equal(wire::string(t,c,b"relation"),b"generic-template-bodies"))) && (!bytes::equal(wire::string(t,c,b"status"),b"exact") || wire::integer(t,c,b"unknown")!=0 || wire::integer(t,c,b"external")!=0)){partial=true;}r+=1;}
- var usize s=0;while(s<validate::symbol_count(row)){let token=validate::symbol(row,s);let key=wire::field(t,token,b"declaration");
-  let summary=validate::function_for_key(row,key,meter)?;if(summary<json::count(t)){discard append_calls(ref g,p,token,summary,0,false,max_calls,ref mut edges,meter)?;}
-  var usize f=0;while(f<validate::specialization_count(row)){let spec=validate::specialization(row,f);if(!work::charge(meter,1)){return .err(3);}if(model::keys(t,wire::field(t,spec,b"declaration"),key,meter)==0){let names=b"function|cleanup";var usize start=0;
+ let groups=index_specializations(row,meter)?;var usize s=0;while(s<validate::symbol_count(row)){let token=validate::symbol(row,s);let key=wire::field(t,token,b"declaration");
+  if(!work::charge(meter,1)){return .err(3);}let summary=validate::symbol_function(row,s);if(summary<json::count(t)){discard append_calls(ref g,p,token,summary,0,false,max_calls,ref mut edges,meter)?;}
+  var usize f=0;if(v::len<usize>(ref groups.heads)!=0){let at=validate::symbol_declaration_index(row,s);if(!work::charge(meter,1)){return .err(3);}if(at>=v::len<usize>(ref groups.heads)){return .err(9);}f=*v::at<usize>(ref groups.heads,at);}
+  while(f!=0){if(!work::charge(meter,1)){return .err(3);}let item=*v::at<Specialization>(ref groups.values,f-1);let spec=item.token;let names=b"function|cleanup";var usize start=0;
    while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}let body=wire::field(t,spec,names[start..end]);if(body<json::count(t)){discard append_calls(ref g,p,token,body,spec,start>0,max_calls,ref mut edges,meter)?;}start=end+1;}
-  }f+=1;}
+   f=item.next;}
  s+=1;}
  ordered+=1;}
  return .ok(Graph{.packages=g,.order,.edges,.partial});
