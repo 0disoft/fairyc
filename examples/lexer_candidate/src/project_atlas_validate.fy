@@ -17,6 +17,7 @@ pub fn u32 version(ref Partition p){return wire::version(ref p.document);}
 pub fn usize symbol_count(ref Partition p){return v::len<usize>(ref p.symbols);}
 pub fn usize symbol(ref Partition p,usize n){return *v::at<usize>(ref p.symbols,n);}
 pub fn usize symbol_declaration_index(ref Partition p,usize n){return *v::at<usize>(ref p.symbol_declarations,n);}
+pub fn usize symbol_declaration(ref Partition p,usize n){return *v::at<usize>(ref p.declarations,symbol_declaration_index(p,n));}
 pub fn usize symbol_function(ref Partition p,usize n){let at=*v::at<usize>(ref p.symbol_declarations,n);let token=*v::at<usize>(ref p.declaration_functions,at);return if(token==0){json::count(tree(p))}else{token};}
 pub fn usize declaration(ref Partition p,usize key,ref mut usize meter){return model::find_key(tree(p),ref p.declarations,b"key",key,meter);}
 pub fn Result<usize,u32> declaration_index(ref Partition p,usize key,ref mut usize meter){return model::lookup_key(tree(p),ref p.declarations,b"key",tree(p),key,meter);}

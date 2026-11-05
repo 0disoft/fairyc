@@ -10,7 +10,7 @@ batched; no push, dispatch or release is authorized by this record.
 - [x] Explicit canonical v2 map framing with unchanged v1/v3 reader selection.
 - [x] Explicit v2 semantic admission with function-only generic declarations.
 - [x] V2 independent current-source admission before catalog queries.
-- [ ] Current-admitted declaration selection, canonical JSON/checksum and exact
+- [x] Current-admitted declaration selection, canonical JSON/checksum and exact
   selection/output budgets for catalog v1, v2 and v3. Preserve full-ID ordering,
   filtered-set cursor membership, original generic declarations and omissions.
 - [ ] Schema-specific current-source map production. The existing default Fairy
@@ -201,3 +201,71 @@ This completes v2 current-source partition admission only. Catalog page selectio
 and checksums, schema-specific actual source production, new v2 downstream
 query/command acceptance and final self-build/distribution/Linux/hosted gates
 remain open. Historical v1/v3 join acceptance does not attest v2 joins or output.
+
+## Current-admitted catalog pages
+
+`project_catalog::encode` accepts an independently current-admitted `Ready` and
+the parsed exact catalog request. It requires the same map/catalog version and
+package UID; it performs no workspace, cache, network or publication I/O. Exact
+module/name/kind filters define both the total and cursor membership before any
+page is selected. An absent module fails; an absent name is a complete empty
+page. The validated symbol table already has strict full-ID order and one
+original declaration per symbol. Two linear passes preserve that order, with
+constant-time declaration projection through the existing checked association;
+no additional sort, specialization cloning or repeated declaration scan occurs.
+
+`project_catalog_projection.fy` retains the exact Go query/result field layout,
+including owner-qualified names, public/unsafe/foreign flags, generic-interface
+context, selected generic completeness and template-body uncertainty. Selection
+cost uses the mandatory context/filter record plus one separator byte and each
+admitted entry plus one separator byte. Go query nil arrays remain `null` for
+this cost calculation; final top-level context arrays normalize to `[]` exactly
+as the Go encoder does. Empty completeness Reasons remain `null`. Budget
+omissions report the exact remaining count and continue after the last selected
+full ID; selection that cannot fit the first record fails without output.
+
+`project_catalog_json.fy` shares the canonical string quoting and bounded work
+owner, but uses the catalog CLI's 1 GiB maximum rather than inheriting the map
+writer's unrelated 4 MiB ceiling. Encoding constructs one canonical compact JSON
+value with no trailing newline. V1/v2/v3 checksums use their own domain version
+bytes, schema/encoding and length-prefixed logical payload. An exhausted work
+ledger or final byte limit exposes no partial buffer. This writer does not
+convert map schemas or attest source production for a requested version.
+
+`TestCandidateCatalog` derives six package partitions from three real source
+workspaces, with independent current expectations and Go query/encoder oracles.
+It compares every successful output byte and independently recomputes checksum
+framing. The Windows low/optimized matrix runs 292 native processes per profile,
+584 total: all five declaration kinds, multiple modules, equal ordinary and
+owner-qualified leaves, case-sensitive absent names, used/unused function and
+aggregate templates, one-entry pagination including after the last symbol,
+absent/out-of-filter cursors, mandatory/first-entry/full/empty selection limits
+and final output limits at one-short/exact/one-more boundaries. Stale expectations,
+corrupt maps, exhausted work, wrong UID and encoder-level cross-version requests
+reject without stdout. The cross-version case first admits the map under its
+actual schema and then asks the encoder for a different version.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 5m -v ./internal/cli -run '^TestCandidateCatalog(Options)?$'
+```
+
+The final command passes in 69.969s with no selected skips: catalog pages 56.39s,
+unchanged request-parser regression 13.46s. The parser adds 216 native processes,
+so the combined command runs 800. Log: `.cache/atlas-symbol-catalog-20261106.log`.
+The initial page-only replay passed in 53.045s, before strengthening the encoder's
+own version-refusal probe; it is retained at
+`.cache/atlas-symbol-catalog-before-20261106.log`, not counted again. Initial
+authored checking rejected a new direct u32-to-u8 cast before any native run;
+the implementation now indexes the three admitted checksum domain bytes.
+
+Authored `check` and `check --locked` pass with 647 source files and 8,145 MIR
+functions; the tracked lock reflects final LF source bytes. Scoped CLI vet,
+Go formatting and diff checks pass. Source-index and execution-queue progress
+are updated. No public CLI/SDK ABI, dependency, DB, workflow or repository-policy
+changes; no full authored-main rebuild, full Go suite, self-build, distribution,
+native Linux or hosted CI acceptance is claimed. Native Linux remains batched.
+
+Next are schema-specific production from authenticated Complete source facts and
+actual `atlas-symbols list` dispatch/help/lock/command acceptance. `atlas-calls`,
+`atlas-pack`, the broader source families and all original final gates remain
+open. This slice closes only the catalog page/output owner.

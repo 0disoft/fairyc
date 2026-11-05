@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Current-admitted Fairy catalog v1/v2/v3 page selection and canonical output
+  now preserve exact filters, full-ID ordering/cursor membership, original
+  declarations, omissions and independent selection/final byte limits. The
+  page/parser Windows low/optimized replay passes in 69.969s with 800 native
+  processes (584 pages plus 216 parser controls), independent Go byte/checksum
+  comparisons and atomic refusal controls. Authored check/locked, scoped vet,
+  formatting and diff checks pass. See the symbol-catalog plan for precise scope
+  and earlier-attempt accounting. Schema-specific Complete source production,
+  actual symbols dispatch, calls/pack and all final gates remain required.
+
 - The final v2 current/semantic, ordinary/v3 current/semantic/complete-join and
   catalog-parser replay passes seven roots under both Windows profiles in
   134.914s. A pre-commit byte audit found CRLF working files against Git's LF;
