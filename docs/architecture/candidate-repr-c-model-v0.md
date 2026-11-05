@@ -36,3 +36,16 @@ Tag and field-name lane plus value types. 5106 is a name/structure violation,
 Record tags reject every leading underscore; members admit `_value` and `_`
 but reject `__value` and `_Upper`. External-link restrictions such as `main`
 and the target-authenticated `fy_` prefix do not govern record or member names.
+
+## Explicit aggregate preparation
+
+The compiler-private `read_template` entry checks the same original attribute,
+tag, member, duplicate and nonempty-field rules, but delegates value-type checking
+to the aggregate shape owner. That owner must first join the type and every field
+to a unique retained `generic_aggregate_types::Prepared` instance and current
+source, then validate its concrete scalar/raw-pointer field lane before any
+Interfaces publication. An unresolved source `T` is not a concrete C field type.
+
+The ordinary `read` and `layout` entry points retain the boundary above. This
+private metadata preparation does not admit generic by-value FFI, target C layouts
+or executable generic aggregates; those require their separate pipeline checks.

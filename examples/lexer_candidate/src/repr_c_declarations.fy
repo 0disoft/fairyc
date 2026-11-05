@@ -20,7 +20,7 @@ fn bool value_type(ref syntax::Parsed p, usize root) {
 
 struct Lane { u32 code; usize start; usize end; }
 
-fn Lane lane(ref syntax::Parsed p, usize declaration) {
+fn Lane lane(ref syntax::Parsed p, usize declaration, bool concrete_fields) {
     let d = syntax::declaration_at(p, declaration);
     if (d.field_count == 0) { return Lane { .code = 5102, .start = d.name_start, .end = d.name_end }; }
     let ref u8[] tag = syntax::source_view(p)[d.name_start..d.name_end];
@@ -31,7 +31,7 @@ fn Lane lane(ref syntax::Parsed p, usize declaration) {
         if (f.kind != 0) { return Lane { .code = 5102, .start = f.start, .end = f.end }; }
         let ref u8[] name = syntax::source_view(p)[f.name_start..f.name_end];
         if (!symbols::member(name)) { return Lane { .code = 5106, .start = f.name_start, .end = f.name_end }; }
-        if (!value_type(p, f.type_root)) {
+        if (!concrete_fields && !value_type(p, f.type_root)) {
             let t = syntax::type_at(p, f.type_root);
             return Lane { .code = 5102, .start = t.start, .end = t.end };
         }
@@ -50,14 +50,18 @@ fn Lane lane(ref syntax::Parsed p, usize declaration) {
 
 pub fn bool layout(ref syntax::Parsed p, usize declaration) {
     if (syntax::declaration_at(p, declaration).kind != 4) { return false; }
-    return lane(p, declaration).code == 0;
+    return lane(p, declaration, false).code == 0;
 }
 
-pub fn Info read(ref syntax::Parsed p, usize declaration) {
+pub fn Info read(ref syntax::Parsed p, usize declaration) { return read_mode(p, declaration, false); }
+// Only the aggregate shape owner may replace source T fields with authenticated
+// concrete field facts. It must validate their value lane before publishing.
+pub fn Info read_template(ref syntax::Parsed p, usize declaration) { return read_mode(p, declaration, true); }
+fn Info read_mode(ref syntax::Parsed p, usize declaration, bool concrete_fields) {
     let d = syntax::declaration_at(p, declaration);
     var Info info = Info { .repr_c = false, .code = 0, .start = d.start, .end = d.end };
     if (d.kind != 4 || d.attribute_count == 0) { return info; }
-    if (d.generic_parameters != 0) { info.code = 5106; return info; }
+    if (d.generic_parameters != 0 && !concrete_fields) { info.code = 5106; return info; }
     if (d.attribute_count > 1) {
         let extra = syntax::attribute_at(p, d.attribute_start + 1);
         info.code = 5106; info.start = extra.start; info.end = extra.end; return info;
@@ -70,7 +74,7 @@ pub fn Info read(ref syntax::Parsed p, usize declaration) {
     if (arg.kind != 1 || !bytes::equal(syntax::attribute_argument_text(p, a.argument_start), b"C")) {
         info.code = 5106; info.start = arg.start; info.end = arg.end; return info;
     }
-    let l = lane(p, declaration);
+    let l = lane(p, declaration, concrete_fields);
     if (l.code != 0) { info.code = l.code; info.start = l.start; info.end = l.end; return info; }
     info.repr_c = true; info.start = a.start; info.end = a.end; return info;
 }

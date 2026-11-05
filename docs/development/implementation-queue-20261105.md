@@ -207,3 +207,18 @@ authorized by this queue.
   are authored; final replay results are in the aggregate plan. Field/layout and
   Interfaces admission, ownership/cleanup, executable MIR/C, cache/Atlas and full
   commands remain required; no broader queue family closes here.
+
+- Aggregate shape construction now joins exact retained instance/source facts and
+  preserves specialized fields, abilities, repr(C) and cleanup declarations. The
+  private field-contract route rejects illegal ownership/borrows/array elements
+  and recursive by-value layouts while allowing nominal raw-pointer cycles.
+  Fourteen three-package Windows low/optimized layout inputs plus freshness,
+  instance, budget and repr guards pass (23.90s); see the aggregate plan. This is
+  not target size/alignment proof or actual Interfaces/executable admission.
+  Constructor/cleanup/Flow/MIR/C, cache/Atlas/commands and final acceptance remain
+  required; the full implementation queue remains open.
+
+  Final combined aggregate plan/type/signature/layout and ordinary Atlas type
+  replay passes in 168.073s with both Windows profiles and no selected skips.
+  Scoped vet, Go formatting and diff checks pass; full CLI/Linux/self-build/
+  distribution/hosted acceptance remains open.

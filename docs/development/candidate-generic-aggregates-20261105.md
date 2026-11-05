@@ -14,12 +14,13 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    edges, and retains exact package-coordinate `g0_`/public-closure identities.
    User aggregate planning does not acquire SDK storage intrinsics or nominal
    argument admission. Ordinary `build_sources` still closes aggregate execution.
-2. **Concrete types/fields/signatures: preparation implemented; layout integration open.**
+2. **Concrete types/fields/signatures and field contracts implemented; Interfaces integration open.**
    Each original declaration and ordered argument tuple is materialized once;
    fields substitute structurally and preserve source ownership. Signature,
    annotation and constructor type requests use the actual graph. Ordinary
-   field/layout contracts and Interfaces still must reject recursive/unresolved
-   layouts without partial publication before executable admission.
+   field/layout contracts now check specialized shape facts and finite by-value
+   layouts. The ordinary Interfaces owner still must consume that route without
+   partial publication before executable admission.
 3. **Ownership, cleanup and executable MIR.** Connect resource instances and
    cleanup-helper calls to Flow, kind-aware identities, MIR verification and both
    C emission forms. Require native values and exact cleanup traces against Go;
@@ -208,3 +209,74 @@ git diff --check
 All selected tests ran; no selected native test was skipped. The final focused
 signature replay above supplements its initial signature fixture with the last
 scalar-handle controls. Linux remains deferred at the user's request.
+
+## Concrete field and finite-layout contracts
+
+The shape builder now joins kind-20/21 instances to exactly one retained prepared
+instance and the current original source. It preserves concrete field types,
+order, names, raw spans, source field indices, resource abilities and cleanup
+declarations. Invalid IDs, changed source, altered instance records and exhausted
+work reject before publishing shape or field records in the refusal controls.
+
+An explicit aggregate field-contract route rejects borrowed stored fields,
+resource ownership inside an inert struct, unsupported array elements and
+recursive by-value layouts. Layout traversal follows records, Option/Result,
+tagged payloads and arrays; raw pointers terminate traversal. The existing
+ordinary entry points and array scalar boundary remain unchanged. These are
+finite structural layout checks, not target size/alignment/offset evidence.
+
+For generic `@repr(C)` declarations, `repr_c_declarations::read_template` checks
+the original marker, attribute arity and C names. The shape owner then checks
+the authenticated concrete field value lane. The ordinary `read` and `layout`
+routes remain unchanged and cannot erase an unresolved template's parameters.
+No generic aggregate foreign-call or C ABI admission is claimed here.
+
+`TestCandidateGenericAggregateLayouts` runs fourteen three-package inputs in
+actual MSVC low/optimized processes with empty PATH. Nine accepted variants use
+Go `AnalyzeGenericPackages` through Flow and detached concrete Go fields as
+independent expectations. They cover module/owner reorder, nested structs and
+resources, Option/Result, scalar and record arrays, a nominal raw-pointer cycle,
+repr(C), a zero-field resource and a second scalar resource instance. Four
+source inputs reject in Go and Fairy (hidden resource ownership, borrowed field,
+duplicate field and an unsupported f64 array element). The remaining direct
+by-value recursion input passes Go Flow but must independently reject in the
+Fairy finite-layout contract; it is not counted as a Go rejection comparison.
+
+Native guards also check source drift, invalid IDs, forged instance kind, work
+exhaustion, the unchanged ordinary generic-declaration gate, ordinary repr(C)
+template refusal, malformed repr arguments and reserved C member names.
+
+The focused Windows probe passes in 23.90s:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateGenericAggregateLayouts$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_layouts_test.go
+git diff --check
+```
+
+Initial harness failures were corrected before this pass: Flow was incorrectly
+treated as a Go layout-cycle oracle, the type renderer read the frozen signature
+prefix instead of the working shape graph, and one guard overlapped mutable and
+shared graph arguments. Go's unsupported f64 array control also preserved the
+existing array-element boundary rather than widening it. A generic repr(C)
+declaration refusal exposed the source-T versus concrete-field join fixed above.
+
+This completes the field/shape prerequisite only. Actual Interfaces construction,
+constructor demands, cleanup specialization, ownership/Flow/MIR/C execution,
+interface/cache/Atlas and full commands still need connection. Native Linux,
+self-build, clean-machine distribution and same-commit hosted CI remain open.
+No stable public API/SDK ABI, DB, dependency, hygiene or runner change.
+
+The final combined Windows replay passes in 168.073s with all five selected
+roots and both MSVC profiles executed; none is skipped:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidate(GenericAggregate(Plan|Types|Signatures|Layouts)|AtlasTypes)$'
+```
+
+The ordinary Atlas type matrix includes repr(C), resource/enum fields,
+Option/Result, nominal/raw-pointer types and arrays, exercising the preserved
+ordinary route alongside the new private field/layout entry points. Scoped vet,
+Go formatting and diff checks pass. No full candidate CLI, Linux, self-build,
+clean-machine or hosted claim is made by this replay.
