@@ -12,6 +12,15 @@ import (
 )
 
 func TestCandidateGenericAggregatePublicInterfaces(t *testing.T) {
+	candidateAggregatePublicReplay(t, false)
+}
+
+func TestCandidateGenericAggregateArtifactTransport(t *testing.T) {
+	candidateAggregatePublicReplay(t, true)
+}
+
+func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows aggregate interface replay; Linux execution is batched")
 	}
@@ -101,10 +110,33 @@ func TestCandidateGenericAggregatePublicInterfaces(t *testing.T) {
 		t.Fatal(err)
 	}
 	main := strings.Replace(string(raw), "module tests::generic_aggregate_public;", "module main;", 1) + "\n@effects(console) fn i32 main(){return run();}\n"
+	if artifacts {
+		checks, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "generic_aggregate_artifact.fy"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var body []string
+		for _, line := range strings.Split(string(checks), "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "module ") {
+				continue
+			}
+			if strings.HasPrefix(trimmed, "import ") {
+				if !strings.Contains(main, trimmed) {
+					main = strings.Replace(main, "module main;", "module main;\n"+trimmed, 1)
+				}
+				continue
+			}
+			body = append(body, line)
+		}
+		main += strings.Join(body, "\n")
+		main = strings.Replace(main, "let records=core::public_interfaces(ref complete);", "verify_artifact(ref complete,ref sources,ref owners,ref imports,ref table,k==0);let records=core::public_interfaces(ref complete);", 1)
+	}
+	modules := []string{"module_project_artifact_encode", "module_project_artifact_decode", "module_cleanup_artifact_encode", "module_cleanup_artifact_decode", "module_identity_artifact_encode", "module_identity_artifact_decode"}
 	candidateAtlasProbeSize(t, "project_compiler_core", main, 512<<10, func(t *testing.T, image string) {
 		t.Setenv("PATH", "")
 		if code, out := candidateAtlasProcess(t, image, wire.Bytes()); code != 0 || out != "" {
 			t.Fatalf("aggregate public interfaces: %d %q", code, out)
 		}
-	})
+	}, modules...)
 }

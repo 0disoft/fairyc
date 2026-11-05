@@ -26,7 +26,9 @@ pub fn Span member_from(ref u8[] raw,ref mut Cursor c,usize limit,ref u8[] marke
 pub fn usize bodies_from(ref u8[] raw,ref mut Cursor c,ref mut usize work){let count=number_from(raw,c,work);if(c.code==0){if(count>limits::project_frames()){c.code=1002;}else if(c.offset>raw.len || count>(raw.len-c.offset)/16){c.code=1001;}}return count;}
 pub fn u32 end(ref u8[] raw,ref mut Cursor c,ref mut usize work){if(c.code==0){if(!charge(work,1)){c.code=1002;}else if(c.offset!=raw.len){c.code=1001;}}return c.code;}
 // Validate every framing boundary before any nested owner is allocated.
-pub fn u32 preflight(ref u8[] raw,ref mut usize work){var c=switch(cursor(raw,work)){case .ok(c):{c}case .err(code):{return code;}};
-    discard member_from(raw,ref mut c,8388608,b"FYCLEAN0",work);discard member_from(raw,ref mut c,8388608,b"FYSDK000",work);discard member_from(raw,ref mut c,8388608,b"FYMETA00",work);discard member_from(raw,ref mut c,8388608,b"FYSTATE0",work);
+pub fn u32 preflight(ref u8[] raw,ref mut usize work){return preflight_mode(raw,false,work);}
+pub fn u32 preflight_aggregates(ref u8[] raw,ref mut usize work){return preflight_mode(raw,true,work);}
+fn u32 preflight_mode(ref u8[] raw,bool aggregates,ref mut usize work){var c=switch(cursor_marker(raw,if(aggregates){b"FYPROG01"}else{b"FYPROG00"},work)){case .ok(c):{c}case .err(code):{return code;}};
+    discard member_from(raw,ref mut c,8388608,if(aggregates){b"FYCLEAN1"}else{b"FYCLEAN0"},work);discard member_from(raw,ref mut c,8388608,b"FYSDK000",work);discard member_from(raw,ref mut c,8388608,b"FYMETA00",work);discard member_from(raw,ref mut c,8388608,b"FYSTATE0",work);
     let count=bodies_from(raw,ref mut c,work);var usize i=0;while(i<count && c.code==0){discard member_from(raw,ref mut c,16777216,b"FYBODY00",work);i+=1;}return end(raw,ref mut c,work);
 }

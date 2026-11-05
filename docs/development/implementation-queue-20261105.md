@@ -364,3 +364,20 @@ authorized by this queue.
   profiles (143.92s) with four generated consumer executions returning 23. Scoped
   vet, formatting and diff checks pass; aggregate restoration is the next required
   implementation slice, not established by this ordinary regression.
+
+
+- Detached aggregate cleanup/program/project artifacts now retain their explicit
+  admission mode through distinct private markers and fresh full verification.
+  Aggregate instance/cleanup snapshot identities and provenance module bounds are
+  retained; ordinary readers and current-source Complete restoration still reject
+  the new family. The final twelve-positive/four-negative transport matrix passes
+  Windows low/optimized in 100.77s, with 48 exact codec roundtrips and 72 shared Go
+  interface comparisons, plus corruption/work/admission controls. This is not an
+  aggregate cache hit or executed reconstructed C. Current-source rebasing/fresh
+  admission, unit/disk cache, Atlas/SDK, actual commands and all final gates remain
+  open; see the aggregate plan and private cleanup MIR contract.
+
+  The final transport/ordinary regression command passes in 243.269s, no selected
+  skips. The ordinary restoration/inline root passes both profiles in 142.35s
+  with four generated executions returning 23. Scoped vet/format/diff pass;
+  current aggregate source rebinding and fresh admission continue next.

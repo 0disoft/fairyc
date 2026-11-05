@@ -13,9 +13,15 @@ import std::vec as v;
 
 // Returns a freshly verified Program, not a source-bound Complete/cache hit.
 pub fn Result<ir::Program,u32> decode(ref u8[] raw,ref mut usize work){
-    let framed=wire::preflight(raw,work);if(framed!=0){return .err(framed);}var c=switch(wire::cursor(raw,work)){case .ok(c):{c}case .err(code):{return .err(code);}};
-    let clean_span=wire::member_from(raw,ref mut c,8388608,b"FYCLEAN0",work);let sdk_span=wire::member_from(raw,ref mut c,8388608,b"FYSDK000",work);let meta_span=wire::member_from(raw,ref mut c,8388608,b"FYMETA00",work);let state_span=wire::member_from(raw,ref mut c,8388608,b"FYSTATE0",work);let count=wire::bodies_from(raw,ref mut c,work);if(wire::status(ref c)!=0){return .err(wire::status(ref c));}
-    var usize measured=0;let cleaned=switch(cleanup_codec::decode(raw[clean_span.start..clean_span.end],ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}if(count!=clean::frame_count(ref cleaned)){return .err(1001);}
+    return decode_mode(raw,false,work);
+}
+// Detached reconstruction only. Current source/provenance admission follows
+// independently before this can become a Complete owner or cache hit.
+pub fn Result<ir::Program,u32> decode_aggregates(ref u8[] raw,ref mut usize work){return decode_mode(raw,true,work);}
+fn Result<ir::Program,u32> decode_mode(ref u8[] raw,bool aggregates,ref mut usize work){
+    let framed=if(aggregates){wire::preflight_aggregates(raw,work)}else{wire::preflight(raw,work)};if(framed!=0){return .err(framed);}var c=switch(wire::cursor_marker(raw,if(aggregates){b"FYPROG01"}else{b"FYPROG00"},work)){case .ok(c):{c}case .err(code):{return .err(code);}};
+    let clean_span=wire::member_from(raw,ref mut c,8388608,if(aggregates){b"FYCLEAN1"}else{b"FYCLEAN0"},work);let sdk_span=wire::member_from(raw,ref mut c,8388608,b"FYSDK000",work);let meta_span=wire::member_from(raw,ref mut c,8388608,b"FYMETA00",work);let state_span=wire::member_from(raw,ref mut c,8388608,b"FYSTATE0",work);let count=wire::bodies_from(raw,ref mut c,work);if(wire::status(ref c)!=0){return .err(wire::status(ref c));}
+    var usize measured=0;let cleaned=switch(if(aggregates){cleanup_codec::decode_aggregates(raw[clean_span.start..clean_span.end],ref mut measured)}else{cleanup_codec::decode(raw[clean_span.start..clean_span.end],ref mut measured)}){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}if(count!=clean::frame_count(ref cleaned)){return .err(1001);}
     measured=0;let sdk_sources=switch(sdk::decode(raw[sdk_span.start..sdk_span.end],ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}
     measured=0;let meta=switch(metadata::decode(raw[meta_span.start..meta_span.end],ref cleaned,sources::module_count(ref sdk_sources),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}
     measured=0;let states=switch(state::decode(raw[state_span.start..state_span.end],ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}

@@ -8,7 +8,11 @@ import std::vec as v;
 // Preflight counts against remaining bytes before allocation. Reconstruction
 // re-enters cleanup verification; no partially decoded owner escapes.
 pub fn Result<ir::Program,u32> decode(ref u8[] raw,ref mut usize work){
-    var cursor=switch(wire::cursor(raw,b"FYCLEAN0",work)){case .ok(c):{c}case .err(code):{return .err(code);}};let project=wire::flag_from(raw,ref mut cursor,work);var usize i=0;
+    return decode_mode(raw,false,work);
+}
+pub fn Result<ir::Program,u32> decode_aggregates(ref u8[] raw,ref mut usize work){return decode_mode(raw,true,work);}
+fn Result<ir::Program,u32> decode_mode(ref u8[] raw,bool aggregates,ref mut usize work){
+    var cursor=switch(wire::cursor(raw,if(aggregates){b"FYCLEAN1"}else{b"FYCLEAN0"},work)){case .ok(c):{c}case .err(code):{return .err(code);}};let project=wire::flag_from(raw,ref mut cursor,work);var usize i=0;
     let types_count=wire::count_from(raw,ref mut cursor,4096,104,work);
     if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}
     var v::Vec<types::Type> types=v::empty<types::Type>();i=0;while(i<types_count){let row=types::Type{.kind=wire::word_from(raw,ref mut cursor,work),.scalar=wire::word_from(raw,ref mut cursor,work),.module_index=wire::number_from(raw,ref mut cursor,work),.declaration=wire::number_from(raw,ref mut cursor,work),.first=wire::number_from(raw,ref mut cursor,work),.second=wire::number_from(raw,ref mut cursor,work)};
@@ -32,5 +36,5 @@ pub fn Result<ir::Program,u32> decode(ref u8[] raw,ref mut usize work){
     if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}
     var v::Vec<ir::Drop> drops=v::empty<ir::Drop>();i=0;while(i<drops_count){let row=ir::Drop{.operand=wire::number_from(raw,ref mut cursor,work),.exit=wire::word_from(raw,ref mut cursor,work),.start=wire::number_from(raw,ref mut cursor,work),.end=wire::number_from(raw,ref mut cursor,work)};
         if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!v::push<ir::Drop>(ref mut drops,row).is_ok){return .err(1003);}i+=1;}
-    let code=wire::end(raw,ref mut cursor,work);if(code!=0){return .err(code);}var usize measured=0;let restored=switch(ir::assemble_artifact(types,frames,glues,fields,operands,drops,project,ref mut measured)){case .ok(p):{p}case .err(e):{if(!budget::charge(work,measured)){return .err(1002);}return .err(e.code);}};if(!budget::charge(work,measured)){return .err(1002);}return .ok(restored);
+    let code=wire::end(raw,ref mut cursor,work);if(code!=0){return .err(code);}var usize measured=0;let restored=switch(if(aggregates){ir::assemble_aggregate_artifact(types,frames,glues,fields,operands,drops,project,ref mut measured)}else{ir::assemble_artifact(types,frames,glues,fields,operands,drops,project,ref mut measured)}){case .ok(p):{p}case .err(e):{if(!budget::charge(work,measured)){return .err(1002);}return .err(e.code);}};if(!budget::charge(work,measured)){return .err(1002);}return .ok(restored);
 }

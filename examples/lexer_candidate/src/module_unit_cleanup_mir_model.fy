@@ -55,6 +55,14 @@ pub fn Result<Program,Problem> assemble_project_aggregates(v::Vec<types::Type> t
 // verifier. Fresh verification work is returned even on rejection; this owner
 // alone grants neither source checking nor whole-package cache-hit authority.
 pub fn Result<Program,Problem> assemble_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,ref mut usize verification_work){
+    return artifact_mode(types,frames,glues,fields,operands,drops,project,false,verification_work);
+}
+// Explicit detached aggregate reconstruction. Fresh verification grants no
+// current-source, Complete, cache-hit or executable publication authority.
+pub fn Result<Program,Problem> assemble_aggregate_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,ref mut usize verification_work){
+    return artifact_mode(types,frames,glues,fields,operands,drops,project,true,verification_work);
+}
+fn Result<Program,Problem> artifact_mode(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,bool aggregates,ref mut usize verification_work){
     if(v::len<Glue>(ref glues)!=v::len<types::Type>(ref types)){return .err(Problem{.code=1001,.module_index=0,.start=0,.end=0});}
-    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work=0,.project,.aggregates=false};let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
+    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work=0,.project,.aggregates};let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
 }

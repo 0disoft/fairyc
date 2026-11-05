@@ -952,3 +952,62 @@ git diff --check
 The independent Go oracle helper was additionally exercised against all six
 existing aggregate execution fixtures using a temporary Go overlay; those checks
 do not count as new Fairy native execution or a repeat of earlier C consumer runs.
+
+
+## Detached aggregate artifact transport
+
+Cleanup, whole-program and source-identified project transport now use explicit
+aggregate markers and named aggregate decoders through the existing bounded
+component owners. Cold encoders preserve aggregate mode; reconstruction resets
+producer work, rechecks the complete graph/body and retains exact instance and
+cleanup identities. Aggregate source-module indices are checked against the
+provenance count, including types not reached through a live frame. Ordinary
+markers/layouts and ordinary/current-source admission are preserved. The private
+contract is recorded in `candidate-module-cleanup-mir-v0.md`.
+
+`TestCandidateGenericAggregateArtifactTransport` shares the twelve-source Go
+interface oracle and four source rejections, and additionally roundtrips program
+and identified-project bytes exactly for every accepted input. Ordinary program,
+project and cleanup readers reject the new payloads. The ordinary Complete
+restoration path rejects even a structurally valid aggregate artifact at its
+source-admission gate. This is detached transport evidence, not cache restoration
+or executed reconstructed C.
+
+The first probe failed before C execution in 5.06s because its mutation writer
+used an unsupported `usize` to `u8` cast. It now uses the existing nibble-table
+byte construction pattern; the low replay passes in 26.95s. The final matrix adds
+explicit oversized-type-count and tuple-as-frame-result corruption controls, in
+addition to truncated/trailing program/project data, mismatched/downgraded
+markers, a tuple cycle, a missing instance tuple, erased generic identity and
+exact/one-short aggregate-work limits. Final current-input results follow.
+
+
+The final aggregate transport root passes both Windows profiles in 100.77s
+(low 17.28s, optimized 71.44s), with no selected skips. Twelve accepted inputs x
+two codec levels x two profiles give 48 exact program/project roundtrips; the
+shared source oracle again compares all 72 package interfaces. Four source
+refusals execute per profile. Ordinary-reader and current-source exclusion plus
+all named corruption and exact-budget controls pass. These are native compiler
+host/codec observations, not 48 executions of reconstructed user programs.
+Artifact/current-source rebasing and admission, unit/disk cache, Atlas/SDK and
+actual commands remain required. The full implementation queue remains active.
+
+
+Final combined transport/ordinary-inline-artifact acceptance passes in 243.269s,
+with no selected skips. The unchanged ordinary inline/artifact root passes both
+Windows profiles in 142.35s, including four generated consumer executions with
+exit 23 and empty output. Scoped vet, formatting and diff checks pass. No native
+Linux, full CLI/self-build, aggregate cache admission, reconstructed aggregate C,
+distribution/clean-machine or same-commit hosted result is claimed.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestCandidate(GenericAggregateArtifactTransport|InlinePipeline)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_public_test.go
+git diff --check
+```
+
+Only private aggregate artifact markers and their explicit reconstruction contract
+change. Stable public API/SDK ABI, DB, dependencies, cache defaults, target
+maturity, runner/timeout and hygiene policies are unchanged. No push or dispatch.

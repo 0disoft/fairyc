@@ -139,3 +139,31 @@ normal named partitioned C emission. The aggregate implementation plan owns exac
 Windows values/drop traces and ordinary graph/link regressions. This is not
 Complete interface publication, artifact reconstruction or cache/Atlas/SDK/CLI
 admission, and does not change any artifact encoding or stable ABI.
+
+
+Detached aggregate artifact reconstruction (2026-11-05). The explicit
+`assemble_aggregate_artifact` constructor resets producer work and runs the same
+cleanup verifier in aggregate mode. Ordinary `assemble_artifact` remains closed.
+Kind-20/21 identity snapshots retain a source specialization; kind-22 tuples do
+not. Receiver identities must still match the exact resource instance, and all
+coverage, uniqueness, work and provenance module bounds remain enforced.
+
+`FYCLEAN1`, `FYPROG01` and `FYPRJ001` distinguish aggregate cleanup, program and
+project payloads from ordinary `FYCLEAN0` / `FYPROG00` / `FYPRJ000`. Other row and
+body encodings retain their existing order and limits. Encoders select the new
+markers only from an aggregate-enabled verified context. Named
+`decode_aggregates` routes require those exact markers; ordinary decoders never
+fall back or infer aggregate admission from node kinds. Framing preflight precedes
+nested allocation, then cleanup, body, metadata, SDK/state and identity/provenance
+verification run before a detached owner escapes. Ordinary bytes keep their old
+markers and layout; old readers reject aggregate payloads rather than treating
+them as compatible ordinary artifacts.
+
+A decoded project is still `Restored`, not `Complete`, a cache hit or a current
+source identity. The ordinary current-source planner remains aggregate-closed;
+new payloads cannot bypass that gate. Original-source matching, rebasing, fresh
+body/Flow and interface admission, persistent cache and actual command integration
+remain separate required work. This changes private artifact encoding only, not
+stable public source syntax, SDK ABI, MIR opcode, cache default or target maturity.
+The aggregate plan records current Windows roundtrip/refusal evidence; Linux,
+executed reconstructed aggregate C and same-commit hosted acceptance remain open.
