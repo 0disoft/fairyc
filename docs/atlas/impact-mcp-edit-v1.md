@@ -267,6 +267,14 @@ execution of the edited client or cache-hit proof. The refreshed optimized
 authored-main replay passes all twenty groups. Complete low authored-CLI and
 native Linux acceptance remain separate.
 
+Workspaces containing the existing single-operation interface family also admit
+ordinary root-body edits. Windows low/optimized preview/apply matches Go for an
+overlay that replaces i64 calls with newly requested bool operation/algorithm
+implementations. Dependency declaration writes, invalid return types and stale
+lock/source hashes still reject; provider source and the lock remain unchanged.
+See the [static-operation receipt](../ops/windows-candidate-atlas-static-operations-20261105.md).
+This does not make interface/provider/public generic declarations editable.
+
 Require the exact raw source SHA-256. Replace the original AST body span and preserve all outside
 bytes. Parsing must find the same function/body start and exactly the replacement extent; early
 closing to inject siblings fails. Recompile the complete production workspace through an immutable

@@ -18,6 +18,7 @@ return switch(n::parse_i64_decimal(b::view(ref value))){case .ok(p):{if(p==43){4
 
 type candidateEditSDKFixture struct {
 	source, body, invalid, module, name string
+	provider, deniedUID                 string
 }
 
 func TestCandidateEditSDKCommand(t *testing.T) {
@@ -38,7 +39,14 @@ func verifyCandidateEditSDKCommand(t *testing.T, image string) {
 
 func verifyCandidateEditSDKCommandFixture(t *testing.T, image string, fixture candidateEditSDKFixture) {
 	t.Helper()
-	root := writeWorkspaceSessionFixture(t, fixture.source)
+	write := func() string {
+		root := writeWorkspaceSessionFixture(t, fixture.source)
+		if fixture.provider != "" {
+			writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", fixture.provider)
+		}
+		return root
+	}
+	root := write()
 	prepare := func(root string) preparedAtlasWorkspace {
 		t.Helper()
 		var diagnostic bytes.Buffer
@@ -73,7 +81,7 @@ func verifyCandidateEditSDKCommandFixture(t *testing.T, image string, fixture ca
 		t.Fatalf("SDK edit oracle report: %v %s", err, &reference)
 	}
 	apply := append(append([]string{}, args...), "--apply")
-	oracleRoot := writeWorkspaceSessionFixture(t, fixture.source)
+	oracleRoot := write()
 	prepare(oracleRoot)
 	writeWorkspaceFile(t, oracleRoot, "edits/body.txt", fixture.body)
 	reference.Reset()
@@ -99,7 +107,11 @@ func verifyCandidateEditSDKCommandFixture(t *testing.T, image string, fixture ca
 		t.Fatalf("invalid SDK overlay: %d %q %q", code, out, stderr)
 	}
 	writeWorkspaceFile(t, root, "edits/body.txt", fixture.body)
-	denied := replaceWorkspaceSessionArgument(apply, "--package-uid", "fairyc.std")
+	deniedUID := fixture.deniedUID
+	if deniedUID == "" {
+		deniedUID = "fairyc.std"
+	}
+	denied := replaceWorkspaceSessionArgument(apply, "--package-uid", deniedUID)
 	denied = replaceWorkspaceSessionArgument(denied, "--symbol", sdkSymbol)
 	before = remoteTree(t, root)
 	code, out, stderr = candidateAtlasSDKCLIProcess(t, image, root, denied)

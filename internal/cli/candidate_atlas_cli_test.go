@@ -98,6 +98,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"edit-ordinary", verifyCandidateEditCommand},
 				{"edit-publication", verifyCandidateEditCLIApply},
 				{"edit-aggregates", verifyCandidateEditAggregateCommand},
+				{"edit-static-operations", verifyCandidateEditStaticOperationCommand},
 				{"unsupported", func(t *testing.T, image string) { verifyCandidateAtlasUnsupported(t, image, unsupportedRoots) }},
 				{"impact-generics", verifyCandidateAtlasGenericCommand},
 				{"impact-static-operations", verifyCandidateAtlasStaticOperationCommand},

@@ -29,17 +29,20 @@ execution stays batched; no push, dispatch, release or deployment is authorized.
    coordinates reject in each profile. No product change was necessary; the
    existing source/identity/call owners already retain this family. See the
    [production receipt](../ops/windows-candidate-atlas-static-operations-20261105.md).
-3. **Impact and MCP verified; editor remains open.** The actual impact command passes
+3. **Impact, MCP and ordinary body editing verified.** The actual impact command passes
    Windows low/optimized in 175.514s: eight visible/full original selectors,
    exact six-call admission, one-short call/package/output refusals and stale-lock
    rejection followed by independently rechecked provider-edit recovery.
    Actual read-only MCP passes both profiles in 100.776s, including negotiation,
    read-only tool policy, exact Go query contexts, stale-source error and recovery
    in the same real stdio process. Full authored-main registration is updated but
-   its two new groups are not replayed. Verify permitted ordinary root-body
-   editing in workspaces containing operations. Editing interface/provider/public
+   its new groups are not replayed. Actual ordinary root-body preview/apply passes
+   both profiles in 109.395s, including an independently checked overlay that
+   removes i64 implementations and introduces two bool implementations. Exact Go
+   reports/published bytes, invalid type/dependency-write refusals, unchanged lock,
+   staging cleanup and stale lock/hash checks pass. Editing interface/provider/public
    generic declarations remains governed by the existing explicit editor scope.
-   Register and run the complete authored-main groups after implementation.
+   All three verifiers are registered; run the complete authored-main groups.
 4. Keep broader Atlas source forms, complete compiler comparison, consecutive
    self-build, current Windows distribution and clean-environment acceptance,
    batched native Linux and same-commit hosted CI as separate final gates.

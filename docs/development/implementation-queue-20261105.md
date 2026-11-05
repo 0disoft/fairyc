@@ -64,8 +64,10 @@ authorized by this queue.
   the family; no product change is needed. Actual impact commands now pass both
   profiles in 175.514s, with exact six-call admission/refusal and stale/relocked
   provider identities. Actual read-only MCP passes both profiles in 100.776s with
-  exact Go contexts and same-session stale-source recovery. Editor and the two
-  newly registered full authored-main groups remain open. See
+  exact Go contexts and same-session stale-source recovery. Ordinary root-body
+  editing passes both profiles in 109.395s, including fresh bool implementations,
+  exact Go preview/apply reports, dependency-write refusal and publication guards.
+  The three newly registered full authored-main groups remain open. See
   `docs/development/candidate-atlas-static-operations-20261105.md`.
   Broader source families and the complete implementation/final queue remain open.
 
@@ -77,7 +79,7 @@ authorized by this queue.
   reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s, and
   the completed mixed editor retry passes in 441.443s, with matching source/image
   digests. Seven additional core query groups pass in 1042.132s, giving eleven
-  distinct low groups. Nine original groups and the two new static-operation
+  distinct low groups. Nine original groups and the three new static-operation
   groups remain pending in bounded groups. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain

@@ -87,10 +87,34 @@ Scoped vet, Go formatting and diff checks pass; vet log:
 
 The full authored-main `mcp-static-operations` verifier is registered, not replayed.
 
+## Actual ordinary root-body editing
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^Test(AtlasStaticOperationEditOracle|CandidateEditStaticOperationCommand)$'
+```
+
+Windows low/optimized pass in 109.395s (43.68s/54.66s for native profiles).
+The independent Go overlay oracle verifies that two i32 implementations remain,
+two i64 implementations disappear and two previously absent bool algorithm/
+operation implementations enter the checked source. Both native profiles then
+match exact Go preview/apply reports and published root bytes. A bool-to-i32
+return mismatch and writes to the actual provider dependency reject unchanged;
+successful apply preserves the lock, removes staging and changes no other file.
+Old-lock and old-hash refusals remain enforced. Six native invocations per
+profile preserve all four original/overlay checks around publication.
+
+The shared existing editor fixture gains optional provider-source/denied-owner
+setup; default SDK inputs and every existing assertion remain unchanged. This
+attests checked source publication, not execution or cache reuse of the edited
+client. Log: `.cache/atlas-static-operation-edit-20261105.log`. The full authored-
+main `edit-static-operations` verifier is registered, not replayed.
+Scoped vet, Go formatting and diff checks pass; vet log:
+`.cache/atlas-static-operation-edit-vet-20261105.log`.
+
 ## Remaining boundary
 
-Actual editor commands and the two new full authored-main group replays remain
-separate steps. This result does not broaden single-operation language
+The three new full authored-main group replays remain separate steps. This result
+does not broaden single-operation language
 admission, implement multi-operation interfaces or close other Atlas families.
 Native Linux, full compiler comparison, consecutive self-build, distribution,
 clean-machine and hosted same-commit acceptance remain open. No source grammar,
