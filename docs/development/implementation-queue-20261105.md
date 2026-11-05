@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified body/cleanup CFG drop-site collection now preserves executable
+  reachability, operand source spans and canonical deduplication under independent
+  work/count bounds. Fifteen actual source fixtures plus ten controls per Windows
+  profile pass fifty native processes against independent Go facts in 252.399s.
+  Authored check/locked (671 files, 8,317 MIR functions), scoped vet, format/LF/diff
+  pass. Complete-bound map/summary/count/completeness production and command
+  comparisons are required next; the collector does not claim production coverage.
+  See `candidate-atlas-observed-relations-20261106.md`. All original broader and
+  final gates remain open; native Linux stays batched, no push or dispatch.
+
 - Fairy actual `experimental atlas-pack overview/show/around` now derives exact
   requested v1/v2/v3 maps from fresh Complete-bound source, selects one unique
   current package and emits canonical no-newline packs without a Go fallback.
