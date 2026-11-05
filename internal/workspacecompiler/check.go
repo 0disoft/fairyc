@@ -19,6 +19,20 @@ func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 }
 
 func CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (result compiler.Result, err error) {
+	return checkContext(ctx, workspace, false)
+}
+
+// CheckGeneric retains original aggregate declarations for compiler-private
+// consumers, while deriving SDK storage authority from the loaded workspace.
+func CheckGeneric(workspace workspaceloader.Workspace) (compiler.Result, error) {
+	return CheckGenericContext(context.Background(), workspace)
+}
+
+func CheckGenericContext(ctx context.Context, workspace workspaceloader.Workspace) (compiler.Result, error) {
+	return checkContext(ctx, workspace, true)
+}
+
+func checkContext(ctx context.Context, workspace workspaceloader.Workspace, generic bool) (result compiler.Result, err error) {
 	if err := ctx.Err(); err != nil {
 		return compiler.Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: err}
 	}
@@ -35,7 +49,7 @@ func CheckContext(ctx context.Context, workspace workspaceloader.Workspace) (res
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	if len(owners) == 0 && (hasGenericAggregates(input) || !hasGenericDeclarations(input)) {
+	if !generic && len(owners) == 0 && (hasGenericAggregates(input) || !hasGenericDeclarations(input)) {
 		// Preserve ordinary analysis and the unsupported-aggregate boundary.
 		return compiler.CheckPackagesContext(ctx, input)
 	}

@@ -59,7 +59,9 @@ type Result struct {
 	Semantic          semantic.Result
 	MIR               mir.Program
 	StateTransactions []contractstatemir.LoweredTransaction
-	Verified          bool
+	// VerificationCapabilities records the source admission used to verify MIR.
+	VerificationCapabilities admission.Capabilities `json:"-"`
+	Verified                 bool
 }
 
 // Analysis is the completed semantic half of one compiler request. It deliberately contains no
@@ -183,6 +185,7 @@ func lowerWithCapabilitiesContext(ctx context.Context, semanticResult semantic.R
 	}
 	result.MIR = program
 	result.StateTransactions = stateTransactions
+	result.VerificationCapabilities = capabilities
 	result.Verified = true
 	return result, nil
 }

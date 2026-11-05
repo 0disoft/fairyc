@@ -25,7 +25,7 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 	if !result.Semantic.RequiresGenericProvenance {
 		return Snapshot{}, fmt.Errorf("generic provenance contradicts ordinary semantic source metadata")
 	}
-	if err := validateSnapshotInput(result.Semantic, result.MIR); err != nil {
+	if err := validateSnapshotInput(result.Semantic, result.MIR, result.VerificationCapabilities); err != nil {
 		return Snapshot{}, err
 	}
 	metadata, stablePackages, files, err := normalizePackages(packages)

@@ -10,7 +10,6 @@ import (
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
-	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
@@ -166,11 +165,7 @@ func prepareAtlasWorkspaceSchema(sourceRoot string, locked bool, stderr io.Write
 	}
 	var result compiler.Result
 	if schema == atlasmap.LogicalSchemaV3 {
-		coordinates, coordinateErr := workspace.PackageCoordinates()
-		if coordinateErr != nil {
-			return preparedAtlasWorkspace{}, internalError(stderr)
-		}
-		result, _, err = compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+		result, err = workspacecompiler.CheckGeneric(workspace)
 	} else if schema == atlasmap.LogicalSchemaV2 {
 		result, err = workspacecompiler.Check(workspace)
 	} else {

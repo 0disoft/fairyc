@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/0disoft/fairyc/internal/admission"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
@@ -20,18 +21,18 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 	if semanticResult.RequiresGenericProvenance {
 		return Snapshot{}, fmt.Errorf("generic source requires the compiler provenance snapshot path")
 	}
-	if err := validateSnapshotInput(semanticResult, program); err != nil {
+	if err := validateSnapshotInput(semanticResult, program, admission.Capabilities{}); err != nil {
 		return Snapshot{}, err
 	}
 	return buildOrdinarySnapshot(semanticResult, program, packages)
 }
 
-func validateSnapshotInput(semanticResult semantic.Result, program mir.Program) error {
+func validateSnapshotInput(semanticResult semantic.Result, program mir.Program, capabilities admission.Capabilities) error {
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone ||
 		len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		return fmt.Errorf("semantic snapshot requires a successful complete Flow result")
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if failures := mir.VerifyWithCapabilities(program, capabilities); len(failures) != 0 {
 		return fmt.Errorf("semantic snapshot requires verified MIR: %s", failures[0])
 	}
 	return nil

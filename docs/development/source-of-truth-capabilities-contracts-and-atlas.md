@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Go v3 SDK source admission: `internal/workspacecompiler/check.go`, `internal/cli/atlas_pack.go`; MIR admission retention/reverification: `internal/compiler/check.go`, `internal/semanticsnapshot/generic_snapshot.go`; SDK Vec map and missing-admission regression: `internal/cli/atlas_sdk_vec_oracle_test.go`; current Windows evidence and outstanding Fairy SDK scope: `docs/ops/windows-candidate-atlas-sdk-20261105.md`.
+
 - Decision: `docs/adr/0499-bounded-atlas-impact-mcp-and-body-edits.md`.
 - Contract: `docs/atlas/impact-mcp-edit-v1.md`; CLI admission: `docs/cli/command-contract.md`.
 - Owners: `internal/atlasmap/impact.go`, `internal/atlasmcp/`, `internal/sourceedit/`, and `internal/cli/atlas_impact.go`, `atlas_mcp.go`, `atlas_edit.go`.

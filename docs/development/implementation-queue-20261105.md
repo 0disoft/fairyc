@@ -56,6 +56,12 @@ authorized by this queue.
 
 ## Progress
 
+- Go v3 Atlas SDK Vec preparation no longer loses workspace-authenticated
+  storage admission. Snapshot MIR reverification retains that admission and
+  rejects when it is removed. Focused Windows source/map/policy/snapshot and
+  workspace/cancellation checks pass. Fairy SDK production/commands and every
+  final acceptance gate remain open; see the Windows Atlas SDK receipt.
+
 - Actual scalar-aggregate workspace commands now select Complete and matching
   cache families from retained source. The full authored Windows command roots
   pass low (434.19s) and optimized (167.723s), 54 fresh CLI processes in total,
