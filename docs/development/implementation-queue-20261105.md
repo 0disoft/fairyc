@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy `atlas-calls list` argument selection now matches 87 Go parser cases and
+  three invalid actions per Windows profile, 180 native processes total
+  (13.161s). It retains catalog 0/1/2 to map 1/2/3, exact source IDs, direction,
+  canonical bounds and locked selection without I/O. Authored check/locked,
+  scoped vet, formatting/LF/diff pass. Joined-call output and actual dispatch are
+  required next; see `candidate-workspace-calls-20261106.md`. All original
+  broader implementation/final gates remain open; this is only a prerequisite.
+
 - Fairy now dispatches actual `experimental atlas-symbols list` through fresh
   Complete-bound v1/v2/v3 production, exact UID/current admission and canonical
   catalog output. Arguments/help precede I/O; locked requests preserve source
