@@ -10,10 +10,9 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
-	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
-	"github.com/0disoft/fairyc/internal/genericplan"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -118,15 +117,9 @@ func validateOverlay(root, absolute string, after []byte) error {
 	if err != nil {
 		return fmt.Errorf("edited workspace load failed: %w", err)
 	}
-	input, err := w.SemanticInput()
-	if err != nil {
-		return err
-	}
-	coordinates, err := w.PackageCoordinates()
-	if err != nil {
-		return err
-	}
-	r, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	// Derive private storage admission from the overlay's authenticated SDK,
+	// exactly as current-source Atlas preparation does. Client code gains none.
+	r, err := workspacecompiler.CheckGeneric(w)
 	if err != nil || !r.Verified || len(r.Semantic.Diagnostics) != 0 || len(r.Semantic.Unsupported) != 0 {
 		return fmt.Errorf("edited workspace failed semantic/MIR validation")
 	}

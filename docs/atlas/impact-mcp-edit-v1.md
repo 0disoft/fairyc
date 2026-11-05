@@ -240,6 +240,9 @@ bytes. Parsing must find the same function/body start and exactly the replacemen
 closing to inject siblings fails. Recompile the complete production workspace through an immutable
 overlay and require verified generic-aware semantic/MIR output. This validates accepted source,
 not behavioral equivalence or safe-change proof.
+Go overlay validation derives private SDK storage admission from the freshly
+loaded workspace through `workspacecompiler.CheckGeneric`. Only the exact SDK
+bundle's package owns those intrinsics; importing Vec grants no client authority.
 
 Preview returns bounded `fairyc.structural-body-edit/v1`: portable path, module/function, original
 body byte range, before/after raw source hashes and verified/applied states. It writes no source or
