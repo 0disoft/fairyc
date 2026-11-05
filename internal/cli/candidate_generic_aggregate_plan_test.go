@@ -40,10 +40,14 @@ func TestCandidateGenericAggregatePlan(t *testing.T) {
 		if code != 0 || out != "" {
 			t.Fatalf("aggregate source-plan oracle: %d %q", code, out)
 		}
-	}, "module_public_templates")
+	}, "module_public_templates", "project_source_plan", "generic_aggregate_types")
 }
 
 func candidateGenericAggregatePlanOracle(t *testing.T) []byte {
+	return candidateGenericAggregateOracle(t, false)
+}
+
+func candidateGenericAggregateOracle(t *testing.T, materialized bool) []byte {
 	t.Helper()
 	type item struct {
 		name, root, maker, helper string
@@ -62,6 +66,13 @@ func candidateGenericAggregatePlanOracle(t *testing.T) []byte {
 		{name: "implicit arguments", root: strings.Replace(aggregatePlanRoot, "let pair=", "let m::Pair pair=", 1), reject: true},
 		{name: "duplicate binder", maker: strings.Replace(aggregatePlanMaker, "Pair<T,U>", "Pair<T,T>", 1), reject: true},
 		{name: "generated name", maker: aggregatePlanMaker + "fn i32 _fy_generic_hidden(){return 0;}", reject: true},
+	}
+	if materialized {
+		for _, scalar := range []string{"bool", "i8", "i16", "i64", "isize", "u16", "u32", "u64", "usize", "f32", "f64"} {
+			cases = append(cases, item{name: "scalar " + scalar, root: strings.ReplaceAll(aggregatePlanRoot, "i32", scalar)})
+		}
+		cases = append(cases, item{name: "local annotation", root: strings.Replace(aggregatePlanRoot, "let box=", "let m::Holder<i32> box=", 1)}, item{name: "ordered tuple", root: strings.Replace(aggregatePlanRoot, "Pair<i32,u8>", "Pair<u8,i32>", 1)})
+		cases = append(cases, item{name: "structural fields", maker: strings.Replace(aggregatePlanMaker, "pub struct Pair<T,U>{T left;U right;}", "pub struct Pair<T,U>{Option<(T)> left;Result<U,T> right;T[2] values;ptr T raw;ref Cell<T> borrowed;ptr mut Cell<T> nested;Cell<T>[2] cells;}", 1)})
 	}
 	var wire bytes.Buffer
 	wire.WriteString("FYGAGG01")
@@ -126,7 +137,11 @@ func candidateGenericAggregatePlanOracle(t *testing.T) []byte {
 			continue
 		}
 		number(0)
-		if len(expanded.Plan.Roots) != 3 || len(expanded.Plan.Specializations) != 9 {
+		expectedRoots := 3
+		if tc.name == "local annotation" {
+			expectedRoots = 4
+		}
+		if len(expanded.Plan.Roots) != expectedRoots || len(expanded.Plan.Specializations) != 9 {
 			t.Fatalf("aggregate plan coverage %s: roots=%d implementations=%d", tc.name, len(expanded.Plan.Roots), len(expanded.Plan.Specializations))
 		}
 		templates := slices.DeleteFunc(slices.Clone(expanded.Templates), func(p genericsource.PublicTemplate) bool { return p.Module != "maker" })
@@ -140,7 +155,7 @@ func candidateGenericAggregatePlanOracle(t *testing.T) []byte {
 			if slices.Equal(base.Plan.Roots, expanded.Plan.Roots) {
 				t.Fatal("cleanup helper edit lost aggregate dependency")
 			}
-		} else if !slices.Equal(base.Plan.Roots, expanded.Plan.Roots) {
+		} else if c < 5 && !slices.Equal(base.Plan.Roots, expanded.Plan.Roots) {
 			t.Fatal("unrelated source/order edit changed concrete identity", tc.name)
 		}
 		number(len(expanded.Plan.Roots))
@@ -170,6 +185,9 @@ func candidateGenericAggregatePlanOracle(t *testing.T) []byte {
 		for _, p := range templates {
 			field(p.Name)
 			field(p.Closure.String())
+		}
+		if materialized {
+			candidateGenericAggregateTypeFacts(t, expanded, number, field)
 		}
 	}
 	return wire.Bytes()

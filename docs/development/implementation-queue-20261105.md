@@ -190,3 +190,11 @@ authorized by this queue.
   remain separate required steps. See
   `docs/development/candidate-generic-aggregates-20261105.md`; this does not finish
   aggregate execution or any broader queue family.
+
+- Aggregate concrete type preparation now retains the sealed source plan, ordered
+  scalar tuples, deduplicated struct/resource types and structurally substituted
+  fields, with function/annotation/cast/constructor requests using the same graph.
+  Windows native Go-oracle tests cover the source/type matrix and bounded failure
+  controls; see the aggregate plan for final commands and results. Ordinary
+  signature/interface and layout admission, ownership/cleanup, MIR/C, cache/Atlas
+  and full CLI execution remain required; the broad aggregate queue stays open.

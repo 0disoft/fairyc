@@ -69,53 +69,60 @@ fn usize intern(ref mut v::Vec<Type> graph,Type value){
 }
 pub fn usize canonical(ref mut v::Vec<Type> graph,Type value){return intern(graph,value);}
 fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,usize start,usize end){let usize type=intern(graph,value);return if(type==0){fail(if(count(graph)>=4096){10}else{11},module_index,start,end)}else{Resolution{.type,.problem=Problem{.code=0,.module_index,.start=0,.end=0}}};}
-fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions){
+fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==1){let name=syntax::type_text(p,root);
         if(bytes::equal(name,b"Region")){return accepted(graph,node(19,0,0,0,0,0),module_index,n.start,n.end);}
-        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){if(depth!=0){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,transport::named(arguments::name(id)),0,0,0,0),module_index,n.start,n.end);}if(depth!=0 && at(graph,id).kind==1 && transport::extended(at(graph,id).scalar)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
-        let u32 added=transport::named(name);if(added!=0){if(depth!=0){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,added,0,0,0,0),module_index,n.start,n.end);}
+        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){if(depth!=0 && !aggregates){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,transport::named(arguments::name(id)),0,0,0,0),module_index,n.start,n.end);}if(depth!=0 && !aggregates && at(graph,id).kind==1 && transport::extended(at(graph,id).scalar)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        let u32 added=transport::named(name);if(added!=0){if(depth!=0 && !aggregates){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,added,0,0,0,0),module_index,n.start,n.end);}
         let u32 scalar=scalars::primitive(p,root);let u32 c_scalar=abi::resolve(p,root);
         if(scalar!=7 || bytes::equal(name,b"void")){return accepted(graph,node(1,scalar,0,0,0,0),module_index,n.start,n.end);}
         if(abi::valid(c_scalar)){return accepted(graph,node(1,c_scalar,0,0,0,0),module_index,n.start,n.end);}
         let found=catalog::lookup(c,module_index,name);if(found.code!=0){return fail(found.code,module_index,n.start,n.end);}let d=catalog::declaration_at(c,found.item);
-        if(d.kind!=4 && d.kind!=6 && d.kind!=11 || catalog::sdk_vector(c,d.module_index,d.declaration)){return fail(9,module_index,n.start,n.end);}
+        if(d.parameters!=0 || d.kind!=4 && d.kind!=6 && d.kind!=11 || catalog::sdk_vector(c,d.module_index,d.declaration)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(d.kind==4){2}else if(d.kind==6){3}else{4},0,d.module_index,d.declaration,0,0),module_index,n.start,n.end);
     }
+    if(aggregates && n.kind==5){return walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions,true);}
     if(n.kind==8){
         if(n.right==0 || syntax::type_at(p,n.right).kind!=9){return fail(9,module_index,n.start,n.end);}
         let usize length=arrays::count(syntax::type_text(p,n.right));if(length==0){return fail(9,module_index,n.start,n.end);}
-        let child=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions);if(child.problem.code!=0){return child;}
-        if(!array_element(graph,child.type,length)){return fail(9,module_index,n.start,n.end);}
+        let child=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions,aggregates);if(child.problem.code!=0){return child;}
+        if(!array_element(graph,child.type,length) && !(aggregates && (at(graph,child.type).kind==20 || at(graph,child.type).kind==1 && transport::valid(at(graph,child.type).scalar)))){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(16,0,0,0,child.type,length),module_index,n.start,n.end);
     }
     if(n.kind==2 || n.kind==3){var u32 literal=literals::resolve(p,root);let child=syntax::type_at(p,n.left);
-        if(literal==0 && declaration!=0 && child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}let t=at(graph,r.type);if(t.kind==1){literal=views::make(t.scalar,n.kind==3);}}
+        if(literal==0 && declaration!=0 && child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions,aggregates);if(r.problem.code!=0){return r;}let t=at(graph,r.type);if(t.kind==1){literal=views::make(t.scalar,n.kind==3);}}
         if(views::extended(literal)){return accepted(graph,node(15,literal,0,0,0,0),module_index,n.start,n.end);}if(literal!=0){return accepted(graph,node(if(literal==9){9}else if(literal==10){10}else if(literal==12){14}else{11},0,0,0,0,0),module_index,n.start,n.end);}
-        if(child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}if(at(graph,r.type).kind!=2){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(n.kind==2){17}else{18},0,0,0,r.type,0),module_index,n.start,n.end);}
-        let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);
-        if(inner.kind!=2 && inner.kind!=3 && inner.kind!=4 && inner.kind!=5 && inner.kind!=6 && inner.kind!=13 && !(inner.kind==1 && inner.scalar>=1 && inner.scalar<=6) && !(inner.kind==12 && inner.scalar==1048591)){return fail(9,module_index,n.start,n.end);}
+        if(child.kind==4){let r=walk(c,p,module_index,child.left,graph,depth+1,declaration,substitutions,aggregates);if(r.problem.code!=0){return r;}if(at(graph,r.type).kind!=2 && !(aggregates && at(graph,r.type).kind==20)){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(n.kind==2){17}else{18},0,0,0,r.type,0),module_index,n.start,n.end);}
+        let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions,aggregates);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);
+        if(inner.kind!=2 && inner.kind!=3 && inner.kind!=4 && inner.kind!=5 && inner.kind!=6 && inner.kind!=13 && !(aggregates && (inner.kind==20 || inner.kind==21)) && !(inner.kind==1 && inner.scalar>=1 && inner.scalar<=6) && !(inner.kind==12 && inner.scalar==1048591)){return fail(9,module_index,n.start,n.end);}
         return accepted(graph,node(if(n.kind==2){7}else{8},0,0,0,r.type,0),module_index,n.start,n.end);
     }
-    if(n.kind==11 || n.kind==12){let child=syntax::type_at(p,n.left);if(child.kind==1 && scalars::primitive(p,n.left)==7 && !bytes::equal(syntax::type_text(p,n.left),b"void")){let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);if(inner.kind==1 && inner.scalar<=5){return accepted(graph,node(12,pointers::make(inner.scalar,n.kind==12),0,0,0,0),module_index,n.start,n.end);}if(inner.kind!=2){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(12,if(n.kind==12){1}else{0},0,0,r.type,0),module_index,n.start,n.end);}let u32 pointer=pointers::resolve(p,root);return if(pointer==0){fail(9,module_index,n.start,n.end)}else{accepted(graph,node(12,pointer,0,0,0,0),module_index,n.start,n.end)};}
+    if(aggregates && (n.kind==11 || n.kind==12) && syntax::type_at(p,n.left).kind==6){let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions,true);if(r.problem.code!=0){return r;}if(at(graph,r.type).kind!=20){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(12,if(n.kind==12){1}else{0},0,0,r.type,0),module_index,n.start,n.end);}
+    if(n.kind==11 || n.kind==12){let child=syntax::type_at(p,n.left);if(child.kind==1 && scalars::primitive(p,n.left)==7 && !bytes::equal(syntax::type_text(p,n.left),b"void")){let r=walk(c,p,module_index,n.left,graph,depth+1,declaration,substitutions,aggregates);if(r.problem.code!=0){return r;}let inner=at(graph,r.type);if(inner.kind==1 && inner.scalar<=5){return accepted(graph,node(12,pointers::make(inner.scalar,n.kind==12),0,0,0,0),module_index,n.start,n.end);}if(inner.kind!=2 && !(aggregates && inner.kind==20)){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(12,if(n.kind==12){1}else{0},0,0,r.type,0),module_index,n.start,n.end);}let u32 pointer=pointers::resolve(p,root);return if(pointer==0){fail(9,module_index,n.start,n.end)}else{accepted(graph,node(12,pointer,0,0,0,0),module_index,n.start,n.end)};}
     if(n.kind==6){let name=syntax::type_text(p,n.left);let bool option=bytes::equal(name,b"Option");let usize args=syntax::type_argument_count(p,root);
         if(!option && !bytes::equal(name,b"Result")){
             let found=catalog::lookup(c,module_index,name);if(found.code!=0){return fail(if(found.code==5){9}else{found.code},module_index,n.start,n.end);}let d=catalog::declaration_at(c,found.item);
+            if(aggregates && !catalog::sdk_vector(c,d.module_index,d.declaration) && (d.kind==4 || d.kind==6) && d.parameters!=0){
+                if(args!=d.parameters || args>8){return fail(4502,module_index,n.start,n.end);}var values=v::empty<usize>();var usize i=0;
+                while(i<args){let r=walk(c,p,module_index,syntax::type_argument(p,root,i),graph,depth+1,declaration,substitutions,true);if(r.problem.code!=0){return r;}if(!v::push<usize>(ref mut values,r.type).is_ok){return fail(11,module_index,n.start,n.end);}i+=1;}
+                return aggregate(c,d.module_index,d.declaration,ref values,graph);
+            }
             if(args!=1 || !catalog::sdk_vector(c,d.module_index,d.declaration)){return fail(9,module_index,n.start,n.end);}
-            let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions);if(first.problem.code!=0){return first;}
+            let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions,aggregates);if(first.problem.code!=0){return first;}
             if(!element(graph,first.type,0)){return fail(9,module_index,n.start,n.end);}
             return accepted(graph,node(13,0,d.module_index,d.declaration,first.type,0),module_index,n.start,n.end);
         }
         if(!option && !bytes::equal(name,b"Result") || args!=if(option){1}else{2}){return fail(9,module_index,n.start,n.end);}
-        let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions);if(first.problem.code!=0){return first;}var usize second=0;
-        if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions);if(last.problem.code!=0){return last;}second=last.type;}
+        let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions,aggregates);if(first.problem.code!=0){return first;}var usize second=0;
+        if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions,aggregates);if(last.problem.code!=0){return last;}second=last.type;}
         if(at(graph,first.type).kind==19 || second!=0 && at(graph,second).kind==19){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(option){5}else{6},0,0,0,first.type,second),module_index,n.start,n.end);
     }
     return fail(9,module_index,n.start,n.end);
 }
 pub fn Resolution resolve(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph){
     if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,syntax::source_view(p).len);}
-    let empty=v::empty<usize>();let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,0,ref empty);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
+    let empty=v::empty<usize>();let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,0,ref empty,false);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
 }
 pub fn Resolution declaration(ref catalog::Catalog c,usize module_index,usize declaration,ref mut v::Vec<Type> graph){
     let usize id=catalog::identity(c,module_index,declaration);if(id==0){return fail(9,module_index,0,0);}let d=catalog::declaration_at(c,id);
@@ -134,7 +141,7 @@ fn u32 substitution_code(ref catalog::Catalog c,ref syntax::Parsed p,usize modul
 fn Resolution specialize_current(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
     if(declaration==0 || declaration>syntax::declaration_count(p) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}
     let code=substitution_code(c,p,module_index,declaration,root,substitutions,graph);if(code!=0){return fail(code,module_index,if(root>0 && root<=syntax::type_count(p)){syntax::type_at(p,root).start}else{0},if(root>0 && root<=syntax::type_count(p)){syntax::type_at(p,root).end}else{0});}
-    let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
+    let usize before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions,false);if(result.problem.code!=0){while(count(graph)>before){discard v::pop<Type>(graph);}}return result;
 }
 // Only direct written scalar arguments and forwarded parameters can return a
 // source-only descriptor. General resolve/specialize still return value types.
@@ -157,10 +164,30 @@ fn Result<v::Vec<usize>,BatchProblem> batch(ref catalog::Catalog c,ref syntax::P
     if(!catalog::source_matches(c,module_index,p)){return .err(BatchProblem{.problem=Problem{.code=12,.module_index,.start=0,.end=if(specialized){0}else{syntax::source_view(p).len}},.request=0});}
     let usize before=count(graph);var usize i=0;
     while(i<v::len<usize>(roots)){let root=*v::at<usize>(roots,i);var usize type=0;
-        if(root!=0){let resolved=if(specialized){specialize_current(c,p,module_index,declaration,root,substitutions,graph)}else{walk(c,p,module_index,root,graph,0,0,substitutions)};
+        if(root!=0){let resolved=if(specialized){specialize_current(c,p,module_index,declaration,root,substitutions,graph)}else{walk(c,p,module_index,root,graph,0,0,substitutions,false)};
             if(resolved.problem.code!=0){rollback(graph,before);return .err(BatchProblem{.problem=resolved.problem,.request=i+1});}type=resolved.type;}
         if(!v::push<usize>(ref mut result,type).is_ok){rollback(graph,before);return .err(batch_fail(11,module_index,i+1));}i+=1;
     }return .ok(result);
 }
 pub fn Result<v::Vec<usize>,BatchProblem> resolve_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<Type> graph){let empty=v::empty<usize>();return batch(c,p,module_index,roots,0,ref empty,false,graph);}
 pub fn Result<v::Vec<usize>,BatchProblem> specialize_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){return batch(c,p,module_index,roots,declaration,substitutions,true,graph);}
+
+// Compiler-private concrete aggregate values. Kinds 20/21 are struct/resource
+// instances; kind 22 is an ordered scalar argument tuple, never a value type.
+// Ordinary assemble/resolve remain closed until downstream ownership/MIR joins.
+pub fn Resolution aggregate(ref catalog::Catalog c,usize module_index,usize declaration,ref v::Vec<usize> args,ref mut v::Vec<Type> graph){
+    let selected=catalog::identity(c,module_index,declaration);if(selected==0){return fail(4501,module_index,0,0);}let d=catalog::declaration_at(c,selected);let size=v::len<usize>(args);
+    if((d.kind!=4 && d.kind!=6) || catalog::sdk_vector(c,module_index,declaration) || size==0 || size>8 || d.parameters!=size){return fail(4502,module_index,d.source_start,d.source_end);}
+    var usize i=0;while(i<size){let id=*v::at<usize>(args,i);if(id==0 || id>count(graph)){return fail(4502,module_index,d.source_start,d.source_end);}let t=at(graph,id);if(t.kind!=1 || !transport::valid(t.scalar) || t.module_index!=0 || t.declaration!=0 || t.first!=0 || t.second!=0){return fail(4502,module_index,d.source_start,d.source_end);}i+=1;}
+    let before=count(graph);var usize tail=0;i=size;
+    while(i>0){i-=1;tail=intern(graph,node(22,0,0,0,*v::at<usize>(args,i),tail));if(tail==0){let u32 code=if(count(graph)>=4096){10}else{11};rollback(graph,before);return fail(code,module_index,d.source_start,d.source_end);}}
+    let r=accepted(graph,node(if(d.kind==4){20}else{21},0,module_index,declaration,tail,0),module_index,d.source_start,d.source_end);if(r.problem.code!=0){rollback(graph,before);}return r;
+}
+pub fn Resolution aggregate_resolve(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
+    if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,0);}if(declaration==0 && v::len<usize>(substitutions)!=0){return fail(4501,module_index,0,0);}
+    if(declaration!=0){if(declaration>syntax::declaration_count(p)){return fail(4501,module_index,0,0);}let d=syntax::declaration_at(p,declaration-1);let size=v::len<usize>(substitutions);
+        if((d.kind!=3 && d.kind!=4 && d.kind!=6) || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}let n=syntax::type_at(p,root);if(n.start<d.start || n.end>d.end){return fail(4501,module_index,n.start,n.end);}
+        var usize i=0;while(i<size){let id=*v::at<usize>(substitutions,i);if(id==0 || id>count(graph)){return fail(4502,module_index,n.start,n.end);}let t=at(graph,id);if(t.kind!=1 || !transport::valid(t.scalar) || t.module_index!=0 || t.declaration!=0 || t.first!=0 || t.second!=0){return fail(4502,module_index,n.start,n.end);}i+=1;}
+    }
+    let before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions,true);if(result.problem.code!=0){rollback(graph,before);}return result;
+}

@@ -11,7 +11,7 @@ import sdk_authority as sdk;
 // equality. This owner contains no borrowed syntax or source buffers.
 pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Module {usize owner;usize start;usize end;usize source_start;usize source_end;u32[8] digest;bool vector_sdk;}
-pub struct Declaration {u32 kind;usize module_index;usize declaration;bool public;usize start;usize end;usize source_start;usize source_end;}
+pub struct Declaration {usize parameters;u32 kind;usize module_index;usize declaration;bool public;usize start;usize end;usize source_start;usize source_end;}
 pub struct Import {usize module_index;usize target;usize start;usize end;usize path_start;usize path_end;usize source_start;usize source_end;}
 // Explicit checked source-set coordinates, sorted by source/declaration. The
 // package loader resolves visibility; this catalog authenticates exact names,
@@ -90,7 +90,7 @@ fn Result<Catalog,Problem> build_inputs(ref v::Vec<syntax::Parsed> sources,ref v
             count+=1;if(count>128 || v::len<Declaration>(ref declarations)>=limits::project_declarations() || v::len<Import>(ref imports)>=4096){return .err(fail(10,module_index,d.start,d.end));}
             let usize name_start=bytes::len(ref names);if(!append(ref mut names,name)){return .err(fail(11,module_index,d.name_start,d.name_end));}let usize name_end=bytes::len(ref names);
             if(d.kind==2){if(d.public || d.attribute_count!=0){return .err(fail(9,module_index,d.start,d.end));}var bytes::Buffer target=bytes::empty();let u32 code=scalar_modules::normalize(syntax::source_view(p)[d.start..d.end],ref mut target);if(code!=0){return .err(fail(code,module_index,d.start,d.end));}var usize provider=0;if(scoped){if(next_binding>=v::len<Binding>(bindings)){return .err(fail(9,module_index,d.start,d.end));}let b=*v::at<Binding>(bindings,next_binding);if(b.source!=module_index || b.declaration!=index+1 || b.target>=v::len<syntax::Parsed>(sources)){return .err(fail(9,module_index,d.start,d.end));}provider=b.target+1;next_binding+=1;}let usize path_start=bytes::len(ref names);if(!append(ref mut names,bytes::view(ref target)) || !v::push<Import>(ref mut imports,Import{.module_index,.target=provider,.start=name_start,.end=name_end,.path_start,.path_end=bytes::len(ref names),.source_start=d.start,.source_end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}
-            else{if(!v::push<Declaration>(ref mut declarations,Declaration{.kind=d.kind,.module_index,.declaration=index+1,.public=d.public,.start=name_start,.end=name_end,.source_start=d.start,.source_end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}
+            else{if(!v::push<Declaration>(ref mut declarations,Declaration{.parameters=syntax::generic_parameter_count(p,index),.kind=d.kind,.module_index,.declaration=index+1,.public=d.public,.start=name_start,.end=name_end,.source_start=d.start,.source_end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}}
             index+=1;
         }module_index+=1;
     }
