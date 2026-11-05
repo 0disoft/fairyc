@@ -69,7 +69,7 @@ generic headers 29.03s, and ordinary production 78.87s. Scoped
 
 ## Aggregate impact command follow-up
 
-`project_atlas_source_mode::aggregates` classifies exact retained source under
+`project_compiler_source_mode::aggregates` classifies exact retained source under
 the shared work bound. The actual `experimental atlas-impact` leaf selects the
 aggregate Complete/signature/instance factories together when a struct/resource
 template is present. Ordinary/function-only source keeps its existing route.
@@ -178,8 +178,13 @@ profiles, without requiring a C toolchain.
 `go test -mod=readonly -count=1 -timeout 5m ./internal/cbackend -run
 '^Test(Partition|SmallBuildMatchesStreamingUnit)'` passes in 40.352s, including
 the existing Windows low/optimized separate-file native executions. Scoped
-backend vet and diff checks pass. The refreshed full-CLI attempt now emits 24
-parts, largest 2,096,962 bytes; its complete command result remains pending.
+backend vet and diff checks pass. The refreshed full-CLI attempt emits 24
+parts, largest 2,096,962 bytes. The complete `TestCandidateAtlasCLI` replay passes
+in 1590.053s (low 1396.29s, optimized 172.18s). It retains authored main/dispatch
+and all registered ordinary/generic/aggregate impact, real MCP, edit preview,
+publication/fault and help verifiers, with no companion/frontend substitution.
+This is the source snapshot after `157dc58e`, before aggregate workspace-command
+dispatch and interpreter changes; those later inputs require separate acceptance.
 No transport ceiling, per-command timeout, source admission or runner changes.
 
 ## Original producer development failures and remaining work

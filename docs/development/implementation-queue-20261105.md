@@ -53,6 +53,12 @@ authorized by this queue.
 
 ## Progress
 
+- The authored full Atlas CLI snapshot after `157dc58e` passes both Windows
+  profiles in 1590.053s, including its aggregate impact/MCP/edit verifiers.
+  Its exposed C partition prefix overrun is fixed without changing the 2 MiB
+  consumer ceiling. This evidence precedes the ongoing aggregate workspace-command
+  selection/interpreter changes; those inputs and every final gate remain open.
+
 - Aggregate root-body editing now passes Windows low/optimized command-leaf
   acceptance in 182.45s (22 native invocations). Exact Go reports, imported
   aggregate parameters, new replacement-body Cell<bool> instantiation, published
