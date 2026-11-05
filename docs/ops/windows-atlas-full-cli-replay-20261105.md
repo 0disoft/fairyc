@@ -59,9 +59,17 @@ go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^T
 ```
 
 The same integration/artifact environment shown above was set. Log:
-`.cache/atlas-full-cli-low-mixed-query-20261105.log`. A separate mixed editor
-attempt was explicitly interrupted during a read-only status request; it has no
-completion result and is not counted. The seventeen other groups remain open.
+`.cache/atlas-full-cli-low-mixed-query-20261105.log`. An earlier mixed editor
+attempt was explicitly interrupted during a read-only status request and is not
+counted. Its completed retry passes in 441.443s (native profile 422.31s), again
+with the same source/image digests:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^edit-sdk-aggregates$'
+```
+
+Completed retry log: `.cache/atlas-full-cli-low-mixed-edit-20261105.log`. All four
+mixed/help groups now pass; the sixteen other groups remain open.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -83,7 +91,7 @@ completion result and is not counted. The seventeen other groups remain open.
 | mcp-sdk-aggregates | Pass | Pass |
 | edit-sdk | Pass | Pending |
 | edit-sdk-vector | Pass | Pending |
-| edit-sdk-aggregates | Pass | Pending |
+| edit-sdk-aggregates | Pass | Pass |
 | help | Pass | Pass |
 
 The complete low replay, broader Atlas source families, final whole-compiler

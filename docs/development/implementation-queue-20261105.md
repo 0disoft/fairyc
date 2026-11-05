@@ -69,10 +69,11 @@ authorized by this queue.
   This includes ordinary/generic/aggregate/SDK/mixed impact, real stdio MCP,
   body preview/publication/refusal/freshness and help. The existing generated-C,
   runtime/profile/toolchain/stack and image digest policy protects retained-image
-  reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s with
-  matching source/image digests; the other seventeen groups remain pending in
-  bounded groups. The full-CLI receipt records exact coverage and the interrupted
-  editor attempt, which is not counted. Broader source forms and every final gate remain
+  reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s, and
+  the completed mixed editor retry passes in 441.443s, with matching source/image
+  digests. The other sixteen groups remain pending in bounded groups. The full-CLI
+  receipt records exact coverage and excludes the earlier interrupted attempt.
+  Broader source forms and every final gate remain
   open; native Linux stays batched.
 
 - Mixed SDK/client aggregate body editing now passes actual Windows
