@@ -1011,3 +1011,66 @@ git diff --check
 Only private aggregate artifact markers and their explicit reconstruction contract
 change. Stable public API/SDK ABI, DB, dependencies, cache defaults, target
 maturity, runner/timeout and hygiene policies are unchanged. No push or dispatch.
+
+## Current-source aggregate artifact restoration
+
+The private `restore_complete_aggregate_sources` factory now rebinds a detached
+aggregate artifact to current sources and publishes the ordinary `Complete`
+owner only after the existing complete fresh source/body/Flow/state/SDK and
+interface gates. Kind-20/21 instance names join original declarations and exact
+ordered scalar tuples; producer planner ordinals do not supply authority. Module
+rebasing retains aggregate cleanup mode, kind-22 tails remap both type edges and
+kind-21 resource recipes compare their source-derived abilities, effects,
+cleanup receivers and fields. Ordinary restoration remains aggregate-closed.
+
+`TestCandidateGenericAggregateArtifactRestore` extends the existing Go interface
+oracle with nested cleanup/defer, partial-construction propagation and loop
+cleanup sources. Every accepted same-source restoration regenerates exact
+project artifact bytes and all public interface descriptors/hashes/instance IDs,
+then compares cold/restored C headers, literal storage and every partition byte.
+Each restored C packet is independently compiled and executed in both consumer
+profiles. A separate old-packet control reverses all source modules and shifts
+package owners by 19, compares against fresh current interfaces, and executes its
+reconstructed C as well.
+
+The first restoration checkpoint passes both Windows profiles in 179.54s
+(low 57.67s, optimized 110.38s), with no selected skips. It covers fifteen
+accepted inputs, four cold source refusals, 90 exact Go package-interface
+comparisons, 30 same-source C/artifact comparisons and 64 reconstructed consumer
+executions. The rebased source control is included in those 64 executions.
+Nested cleanup output, partial-construction cleanup and loop cleanup retain
+their independent fixed value/trace expectations.
+
+Current-source controls reject same-length main-body, unselected-template and
+private-body edits, helper-source drift, swapped valid instance identities, and
+each one-short source/artifact/link budget. Exact budgets succeed and an already
+overdrawn source ledger remains unchanged. A final control now toggles a retained
+kind-21 resource's store ability while preserving a structurally valid, droppable
+detached recipe: current-source recipe admission rejects it. The first combined
+attempt passed detached transport in 99.74s, then stopped before native restore
+execution because this new test used the reserved word `resource` as a local
+identifier. Renaming it to `receiver` fixes that test-only parser failure; the
+final restore root passes in 176.71s (low 56.14s, optimized 109.15s), including
+the structurally valid recipe rejection and all 64 reconstructed C executions.
+The unchanged transport result is reused: only restoration test code/comments
+changed after that successful transport replay. The final restore/ordinary-inline
+command passes in 317.463s with no selected skips. The unchanged ordinary inline
+root passes both Windows profiles in 140.64s, including four generated consumers
+returning 23 with empty output. Scoped vet, Go formatting and diff checks pass.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+go test -mod=readonly -count=1 -timeout 15m -failfast -v ./internal/cli -run '^TestCandidate(GenericAggregateArtifactRestore|GenericAggregateArtifactTransport|InlinePipeline)$'
+# After the test-only identifier repair, retain the valid transport result.
+go test -mod=readonly -count=1 -timeout 15m -failfast -v ./internal/cli -run '^TestCandidate(GenericAggregateArtifactRestore|InlinePipeline)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_public_test.go
+git diff --check
+```
+
+This is current-source executable restoration, not aggregate unit/disk cache
+reuse, Atlas/SDK production or actual aggregate `check/build/run/test` command
+admission. Those and the complete implementation/final acceptance queue remain
+open. Native Linux execution remains batched. Stable API/SDK ABI, DB,
+dependencies, default cache policy, runner/timeout, target maturity and repository
+hygiene policy are unchanged; no push, dispatch, release or deployment.

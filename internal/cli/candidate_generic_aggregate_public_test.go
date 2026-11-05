@@ -7,19 +7,28 @@ import (
 	"path/filepath"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/candidatebuild"
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cruntime"
 )
 
 func TestCandidateGenericAggregatePublicInterfaces(t *testing.T) {
-	candidateAggregatePublicReplay(t, false)
+	candidateAggregatePublicReplay(t, "public")
 }
 
 func TestCandidateGenericAggregateArtifactTransport(t *testing.T) {
-	candidateAggregatePublicReplay(t, true)
+	candidateAggregatePublicReplay(t, "transport")
 }
 
-func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
+func TestCandidateGenericAggregateArtifactRestore(t *testing.T) {
+	candidateAggregatePublicReplay(t, "restore")
+}
+
+func candidateAggregatePublicReplay(t *testing.T, mode string) {
 	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows aggregate interface replay; Linux execution is batched")
@@ -39,6 +48,13 @@ func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
 		{name: "ordered scalar tuple", root: base.root, maker: aggregateLayoutMaker + "pub fn Pair<u8,i32> reversed(Pair<u8,i32> value){return value;}"},
 		{name: "imported borrow", root: base.root + "pub fn ref m::Cell<i32> borrowed(ref m::Cell<i32> value){return value;}"},
 		{name: "private instantiated aggregate", root: base.root, maker: aggregateLayoutMaker + "struct Hidden<T>{T value;}fn i32 hidden(){let p=Hidden<i32>{.value=1};return p.value;}"},
+	}
+	defaultMaker := aggregateLayoutMaker
+	if mode == "restore" {
+		defaultMaker += "pub fn Cell<bool> bool_cell(Cell<bool> p){return p;}fn i32 artifact_private(){return 1;}pub fn Pair<u8,i32> reversed(Pair<u8,i32> value){return value;}"
+		for _, c := range candidateAggregateExecutions()[3:] {
+			cases = append(cases, c.fixture)
+		}
 	}
 	var wire bytes.Buffer
 	wire.WriteString("FYGIP001")
@@ -60,8 +76,9 @@ func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
 	for _, tc := range append(slices.Clone(cases), negative...) {
 		maker := tc.maker
 		if maker == "" {
-			maker = aggregateLayoutMaker
+			maker = defaultMaker
 		}
+		tc.maker = maker
 		field([]byte(tc.name))
 		shift := uint64(0)
 		order := []int{0, 1, 2}
@@ -110,8 +127,12 @@ func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
 		t.Fatal(err)
 	}
 	main := strings.Replace(string(raw), "module tests::generic_aggregate_public;", "module main;", 1) + "\n@effects(console) fn i32 main(){return run();}\n"
-	if artifacts {
-		checks, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "generic_aggregate_artifact.fy"))
+	if mode != "public" {
+		file := "generic_aggregate_artifact.fy"
+		if mode == "restore" {
+			file = "generic_aggregate_restore.fy"
+		}
+		checks, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", file))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -130,13 +151,75 @@ func candidateAggregatePublicReplay(t *testing.T, artifacts bool) {
 			body = append(body, line)
 		}
 		main += strings.Join(body, "\n")
-		main = strings.Replace(main, "let records=core::public_interfaces(ref complete);", "verify_artifact(ref complete,ref sources,ref owners,ref imports,ref table,k==0);let records=core::public_interfaces(ref complete);", 1)
+		if mode == "transport" {
+			main = strings.Replace(main, "let records=core::public_interfaces(ref complete);", "verify_artifact(ref complete,ref sources,ref owners,ref imports,ref table,k==0);let records=core::public_interfaces(ref complete);", 1)
+		} else {
+			main = strings.Replace(main, "let complete=build(ref sources,ref owners,ref imports,ref table);let records=core::public_interfaces(ref complete);", "let replay=verify_restore(build(ref sources,ref owners,ref imports,ref table),ref sources,ref owners,ref imports,ref table,k==0);let records=core::public_interfaces(complete_c::complete(ref replay));", 1)
+		}
 	}
 	modules := []string{"module_project_artifact_encode", "module_project_artifact_decode", "module_cleanup_artifact_encode", "module_cleanup_artifact_decode", "module_identity_artifact_encode", "module_identity_artifact_decode"}
+	if mode == "restore" {
+		modules = append(modules, "module_project_complete_c")
+	}
 	candidateAtlasProbeSize(t, "project_compiler_core", main, 512<<10, func(t *testing.T, image string) {
+		if mode != "restore" {
+			t.Setenv("PATH", "")
+			if code, out := candidateAtlasProcess(t, image, wire.Bytes()); code != 0 || out != "" {
+				t.Fatalf("aggregate public interfaces: %d %q", code, out)
+			}
+			return
+		}
+		toolchain, err := cdriver.ResolveWindowsHostMSVC()
+		if err != nil {
+			t.Fatal(err)
+		}
+		support, err := cruntime.ScalarSource(80)
+		if err != nil {
+			t.Fatal(err)
+		}
+		support += "\n#include <stdio.h>\nvoid observe_cleanup(int32_t value){printf(\"%d,\",(int)value);}\n"
 		t.Setenv("PATH", "")
-		if code, out := candidateAtlasProcess(t, image, wire.Bytes()); code != 0 || out != "" {
+		code, out := candidateAtlasProcess(t, image, wire.Bytes())
+		if code != 0 {
 			t.Fatalf("aggregate public interfaces: %d %q", code, out)
+		}
+		remaining := []byte(out)
+		// One reordered restoration control precedes all same-source packets.
+		want := []candidateAggregateExecution{{code: 42}}
+		for _, c := range cases {
+			value := candidateAggregateExecution{fixture: c, code: 42}
+			for _, native := range candidateAggregateExecutions()[3:] {
+				if native.fixture.name == c.name {
+					value = native
+				}
+			}
+			want = append(want, value)
+		}
+		for i, native := range want {
+			end := bytes.IndexByte(remaining, '\n')
+			if end < 0 {
+				t.Fatalf("missing C packet %d", i)
+			}
+			n, err := strconv.Atoi(string(remaining[:end]))
+			if err != nil || n <= 0 || n > 2<<20 || n > len(remaining)-end-1 {
+				t.Fatalf("invalid C packet size %d: %v", n, err)
+			}
+			remaining = remaining[end+1:]
+			packet, err := candidatebuild.Decode(remaining[:n])
+			if err != nil {
+				t.Fatal(err)
+			}
+			remaining = remaining[n:]
+			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				built, err := cdriver.BuildWindowsMSVCTargetParts(toolchain, profile, packet.Header, packet.Literals, packet.Units, support)
+				if err != nil {
+					t.Fatalf("restored %d/%s: %v", i, profile.Name, err)
+				}
+				candidateAggregateExecuteImage(t, built.Bytes, native.code, native.output)
+			}
+		}
+		if len(remaining) != 0 {
+			t.Fatalf("unexpected trailing C bytes: %d", len(remaining))
 		}
 	}, modules...)
 }

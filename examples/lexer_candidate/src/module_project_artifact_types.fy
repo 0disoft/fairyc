@@ -40,9 +40,9 @@ pub fn Result<Mapping,u32> match(ref Index p,ref checking::Plan checked,ref v::V
     while(i<type_count(p)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<u8>(ref mut used,0).is_ok){return .err(1003);}i+=1;}i=1;
     while(i<=values::type_count(typed)){if(!budget::charge(work,1)){return .err(1002);}var row=values::type_at(typed,i);
         if(row.first!=0){if(row.first>=i){return .err(1001);}row.first=*v::at<usize>(ref ids,row.first-1);}
-        // Result's second component is a type. Arrays retain their exact length;
-        // pointer scalar bits, source nominal coordinates and Vec origins stay.
-        if(row.kind==6){if(row.second==0 || row.second>=i){return .err(1001);}row.second=*v::at<usize>(ref ids,row.second-1);}
+        // Result and nonempty tuple tails have a second type edge. Arrays retain
+        // exact lengths; pointer bits, nominal coordinates and Vec origins stay.
+        if(row.kind==6 || row.kind==22 && row.second!=0){if(row.second==0 || row.second>=i){return .err(1001);}row.second=*v::at<usize>(ref ids,row.second-1);}
         let id=switch(find(p,row,work)){case .ok(id):{id}case .err(code):{return .err(code);}};if(!v::push<usize>(ref mut ids,id).is_ok){return .err(1003);}let marked=v::at_mut<u8>(ref mut used,id-1);*marked=1;i+=1;
     }return .ok(Mapping{.ids,.used});
 }

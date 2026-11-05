@@ -39,7 +39,7 @@ pub fn Result<ir::Program,Problem> build(ref input::Input sources){
 }
 
 // Phase 5 owns source-plan failures. Source planning/attachment keeps its 16MiB
-// history; project linking keeps the existing independent 8MiB history. A
+// history; project linking keeps the existing independent 16MiB history. A
 // successful owner is published only after all body/Flow checks and rebinding.
 pub fn Result<identified::Program,Problem> build_identified(ref input::Input sources,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){return build_identified_sources(input::sources(sources),input::owners(sources),input::bindings(sources),table,source_work,link_work);}
 pub fn Result<identified::Program,Problem> build_identified_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){
@@ -106,14 +106,28 @@ pub fn Result<Complete,Problem> build_complete_mixed(ref disk::Store store,ref e
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
     identified_units::publish_cached(store,env,input,ref original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
 }
-// Restore keeps independent 16MiB source, aggregate artifact and 8MiB link
+// Restore keeps independent 16MiB source, aggregate artifact and 16MiB link
 // histories. Neither IR nor interfaces escape until their same-owner result is complete.
 pub fn Result<Complete,Problem> restore_complete_sources(artifacts::Restored saved,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
     let current=switch(rebinding::build_sources(saved,sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,1,code,0,0,0,0,0));}};
     let scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
     let metadata_scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};let metadata=switch(signatures::build_catalog(sources,metadata_scope)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    return restore_current(current,sources,ref scope,ref metadata,table,source_work,artifact_work,link_work);
+}
+// Aggregate transport is admitted only through this explicit current-source
+// factory. The metadata owner independently retains its freshly prepared plan;
+// both planning histories accrue to the same bounded source ledger.
+pub fn Result<Complete,Problem> restore_complete_aggregate_sources(artifacts::Restored saved,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
+    let current=switch(rebinding::build_aggregate_sources(saved,sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,1,code,0,0,0,0,0));}};
+    let scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let plan=switch(source_plan::build_aggregate_sources(sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let prepared=switch(aggregate_types::build(plan,sources,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata=switch(signatures::build_aggregates(sources,prepared,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    return restore_current(current,sources,ref scope,ref metadata,table,source_work,artifact_work,link_work);
+}
+fn Result<Complete,Problem> restore_current(rebinding::Rebound current,ref v::Vec<syntax::Parsed> sources,ref modules::Catalog scope,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
     let raw=switch(rebasing::build(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,2,code,0,0,0,0,0));}};
-    let admitted=switch(admission::build(raw,ref current,sources,ref scope,ref metadata,table,artifact_work)){case .ok(p):{p}case .err(e):{if(e.source.stage!=0){var Problem p=fail(3,e.source.stage,e.source.code,e.source.module_index,e.source.start,e.source.end,e.source.expected,e.source.actual);p.declaration_start=e.source.declaration_start;p.declaration_end=e.source.declaration_end;p.move_start=e.source.move_start;p.move_end=e.source.move_end;p.header_start=e.source.header_start;p.header_end=e.source.header_end;p.field_module=e.source.field_module;p.field_start=e.source.field_start;p.field_end=e.source.field_end;return .err(p);}return .err(fail(7,2+e.stage,e.code,0,0,0,0,0));}};
-    let interfaces=switch(interfaces::build_admitted(ref admitted,rebinding::source_plan(ref current),sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
+    let admitted=switch(admission::build(raw,ref current,sources,scope,metadata,table,artifact_work)){case .ok(p):{p}case .err(e):{if(e.source.stage!=0){var Problem p=fail(3,e.source.stage,e.source.code,e.source.module_index,e.source.start,e.source.end,e.source.expected,e.source.actual);p.declaration_start=e.source.declaration_start;p.declaration_end=e.source.declaration_end;p.move_start=e.source.move_start;p.move_end=e.source.move_end;p.header_start=e.source.header_start;p.header_end=e.source.header_end;p.field_module=e.source.field_module;p.field_start=e.source.field_start;p.field_end=e.source.field_end;return .err(p);}return .err(fail(7,2+e.stage,e.code,0,0,0,0,0));}};
+    let interfaces=switch(interfaces::build_admitted(ref admitted,rebinding::source_plan(ref current),sources,metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
     let program=switch(identified::from_admitted(admitted,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};return .ok(Complete{.program,.interfaces});
 }

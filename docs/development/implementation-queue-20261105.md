@@ -381,3 +381,27 @@ authorized by this queue.
   skips. The ordinary restoration/inline root passes both profiles in 142.35s
   with four generated executions returning 23. Scoped vet/format/diff pass;
   current aggregate source rebinding and fresh admission continue next.
+
+
+- Current-source aggregate artifact restoration now has an explicit private
+  `Complete` factory. It reauthenticates exact sources/imports/coordinates,
+  rederives original instance identities and ordered scalar arguments, rebases
+  aggregate types while preserving cleanup mode, and re-enters full current
+  body/Flow/recipe/state/SDK coverage before regenerated interfaces escape.
+  The final fifteen-positive/four-negative Windows low/optimized probe passes
+  in 176.71s, with 90 Go interface comparisons, 30 exact same-source C/artifact
+  comparisons and 64 separately compiled/executed C consumers. A reversed-module,
+  owner-shifted old packet also restores and executes; source/template/private
+  body drift, swapped valid identities, altered resource abilities and exact/
+  one-short work controls pass. See the aggregate plan for initial test-harness
+  failures and final accounting. This closes current-source executable
+  restoration only. Aggregate unit/disk cache keys and reuse, Atlas/SDK production,
+  actual `check/build/run/test` integration and every final acceptance gate remain
+  required. Native Linux execution stays batched; no push or dispatch.
+
+  The final restoration/ordinary-inline-artifact command passes in 317.463s,
+  no selected skips. Ordinary restoration passes both profiles in 140.64s, with
+  four generated consumers returning 23 and empty output. Detached transport
+  passed in 99.74s on unchanged inputs and is retained after the test-only
+  reserved-identifier repair. Scoped vet/format/diff pass. Aggregate unit/disk
+  cache reuse continues next; the full objective remains active.

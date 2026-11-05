@@ -167,3 +167,35 @@ remain separate required work. This changes private artifact encoding only, not
 stable public source syntax, SDK ABI, MIR opcode, cache default or target maturity.
 The aggregate plan records current Windows roundtrip/refusal evidence; Linux,
 executed reconstructed aggregate C and same-commit hosted acceptance remain open.
+
+
+Current-source aggregate restoration (2026-11-05). The explicit
+`project_compiler_core::restore_complete_aggregate_sources` route authenticates
+the complete retained provenance against current bytes, package coordinates and
+import providers before admitting any executable owner. It rebuilds the aggregate
+source plan and independently prepares current signature/layout metadata. Both
+planning histories enter the same source-work ledger; producer planner ordinals
+are never accepted as current identities. Ordinary restoration remains closed to
+aggregate payloads, and the aggregate route requires aggregate mode explicitly.
+
+Kind-20/21 type identities resolve to their original declaration kinds 4/6 and
+exact ordered scalar argument tuples. Kind-22 tuple tails carry a second type
+edge through checked-type matching; their handles are metadata, not executable
+or public value authority. Module/owner rebasing preserves the aggregate cleanup
+mode and keeps all type/frame IDs, operand IDs and source spans intact.
+
+The existing fresh body/Flow, call, cleanup, metadata, whole-project coverage and
+SDK/state admission gates run before regenerated public interfaces and the same
+checked owner escape together as `Complete`. Kind-21 resource recipes now receive
+the same current-source field/ability/effect/receiver comparison as ordinary and
+Vec resources, including the existing unused-recipe liveness rule. The source and
+link ledgers each retain their existing 16 MiB work bounds; artifact verification
+retains its independent aggregate transport-work bound. A valid detached packet
+with changed resource abilities or exchanged instance identities is still not
+current-source authority.
+
+The aggregate implementation plan records the Windows same-source C/interface
+comparison, rebased execution and refusal evidence. This private factory is not a
+unit/disk cache hit or actual CLI/Atlas/SDK integration. No ordinary artifact
+format, default cache policy, public source syntax, SDK ABI, runner or target
+maturity changes here. Linux and same-commit hosted acceptance remain separate.

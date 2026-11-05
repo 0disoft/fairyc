@@ -1,0 +1,73 @@
+module tests::generic_aggregate_restore;
+import project_compiler_core as core;
+import module_project_complete_c as complete_c;
+import module_unit_c_emit as restore_c;
+import module_project_identified_ir as checked;
+import module_project_artifact_encode as restore_encode;
+import module_project_artifact_decode as restore_decode;
+import module_project_artifact_model as restore_model;
+import module_identity_artifact_model as restore_ids;
+import module_program_artifact_wire as restore_budget;
+import candidate_artifact_wire as restore_wire;
+import module_project_interfaces as interfaces;
+import module_public_interface as ordinary;
+import module_state_layout as budget;
+import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
+import module_catalog as catalog;
+import module_public_type_text as coordinates;
+import candidate_limits as limits;
+import syntax as syntax;
+import scanner as scanner;
+import std::bytes as bytes;
+import std::vec as v;
+import std::io as io;
+
+struct RestoreWork{usize source;usize artifact;usize link;}
+fn syntax::Parsed restore_parsed(ref u8[] raw){let data=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{assert(false);return restore_parsed(raw);}};let stream=switch(scanner::collect(data,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return restore_parsed(raw);}};return switch(syntax::parse(stream,512)){case .ok(p):{assert(syntax::problem_count(ref p)==0);p}case .err(_):{assert(false);restore_parsed(raw)}};}
+fn coordinates::Coordinates restore_coords(usize shift){var text=bytes::empty();var rows=v::empty<coordinates::Coordinate>();var usize i=1;while(i<=3){let first=bytes::len(ref text);assert(bytes::append(ref mut text,b"fypc1-sha256-").is_ok);var usize j=0;while(j<64){assert(bytes::append(ref mut text,if(i==1){b"1"}else if(i==2){b"2"}else{b"3"}).is_ok);j+=1;}assert(v::push<coordinates::Coordinate>(ref mut rows,coordinates::Coordinate{.owner=i+shift,.start=first,.end=bytes::len(ref text)}).is_ok);i+=1;}return coordinates::assemble(text,rows);}
+fn core::Complete restore_build(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table){var usize a=0;var usize b=0;return switch(core::build_complete_aggregate_sources(sources,owners,imports,table,ref mut a,ref mut b)){case .ok(p):{p}case .err(_):{assert(false);restore_build(sources,owners,imports,table)}};}
+fn RestoreWork restore_zero(){return RestoreWork{.source=0,.artifact=0,.link=0};}
+fn restore_model::Restored restore_saved(ref u8[] raw){var usize work=0;return switch(restore_decode::decode_aggregates(raw,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);restore_saved(raw)}};}
+fn restore_wire::Payload restore_packet(ref core::Complete p){var usize work=0;return switch(restore_encode::encode(core::checked_program(p),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);restore_packet(p)}};}
+fn Result<core::Complete,core::Problem> restore_attempt(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,ref mut RestoreWork used){
+ var usize a=used.source;var usize b=used.artifact;var usize c=used.link;let result=core::restore_complete_aggregate_sources(restore_saved(raw),sources,owners,imports,table,ref mut a,ref mut b,ref mut c);used.source=a;used.artifact=b;used.link=c;return result;
+}
+@effects(console) fn core::Complete restore_owner(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,ref mut RestoreWork used){return switch(restore_attempt(raw,sources,owners,imports,table,used)){case .ok(p):{p}case .err(e):{discard io::write_stderr("aggregate restore ");discard io::write_stderr_u32(e.phase);discard io::write_stderr("/");discard io::write_stderr_u32(e.stage);discard io::write_stderr("/");discard io::write_stderr_u32(e.code);assert(false);restore_owner(raw,sources,owners,imports,table,used)}};}
+fn usize restore_entry(ref core::Complete p,ref v::Vec<syntax::Parsed> sources){let program=checked::ir_program(core::checked_program(p));var usize found=0;var usize i=1;while(i<=ir::count(program)){let f=clean::frame_at(ir::cleanup_ir(program),i);let source=v::at<syntax::Parsed>(sources,f.module_index);let d=syntax::declaration_at(source,f.declaration-1);if(f.kind==3 && bytes::equal(syntax::source_view(source)[d.name_start..d.name_end],b"main")){assert(found==0);found=i;}i+=1;}assert(found!=0);return found;}
+fn restore_c::Bundle restore_unreachable(){assert(false);return restore_unreachable();}
+fn restore_c::Bundle restore_parts(core::Complete p,usize entry){return switch(complete_c::partition(p,entry,2)){case .ok(p):{p}case .err(_):{return restore_unreachable();}};}
+// Exact descriptors, hashes and source-derived instance identities. These are
+// regenerated from the freshly admitted owner, never copied from the packet.
+fn void restore_interfaces(ref core::Complete a,ref core::Complete b){let x=core::public_interfaces(a);let y=core::public_interfaces(b);assert(interfaces::count(x)==interfaces::count(y));let state=budget::empty();var usize i=0;while(i<interfaces::count(x)){let p=interfaces::at(x,i);let q=interfaces::at(y,i);assert(interfaces::owner(p)==interfaces::owner(q));var usize work=0;let px=switch(ordinary::encode(ref state,interfaces::owner(p),interfaces::descriptor(p),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};work=0;let qx=switch(ordinary::encode(ref state,interfaces::owner(q),interfaces::descriptor(q),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};assert(bytes::equal(bytes::view(ref px),bytes::view(ref qx)) && bytes::equal(interfaces::ordinary_hash(p),interfaces::ordinary_hash(q)) && bytes::equal(interfaces::source_hash(p),interfaces::source_hash(q)));let ps=interfaces::source_specializations(p);let qs=interfaces::source_specializations(q);assert(v::len<bytes::Buffer>(ps)==v::len<bytes::Buffer>(qs));var usize j=0;while(j<v::len<bytes::Buffer>(ps)){assert(bytes::equal(bytes::view(v::at<bytes::Buffer>(ps,j)),bytes::view(v::at<bytes::Buffer>(qs,j))));j+=1;}i+=1;}}
+fn void restore_member(ref mut bytes::Buffer out,ref u8[] raw){assert(bytes::append_usize(out,raw.len).is_ok && bytes::append(out,b"\n").is_ok && bytes::append(out,raw).is_ok);}
+@effects(console) fn void restore_output(ref restore_c::Bundle p){var out=bytes::empty();assert(bytes::append(ref mut out,b"FYCPARTS1\n").is_ok);restore_member(ref mut out,restore_c::project_header(p));restore_member(ref mut out,restore_c::project_literals(p));assert(bytes::append_usize(ref mut out,restore_c::project_unit_count(p)).is_ok && bytes::append(ref mut out,b"\n").is_ok);var usize i=0;while(i<restore_c::project_unit_count(p)){restore_member(ref mut out,restore_c::project_source(p,i));i+=1;}assert(io::write_usize(bytes::len(ref out)).is_ok && io::write("\n").is_ok && io::write_bytes(bytes::view(ref out)).is_ok);}
+@effects(console) pub fn restore_c::Bundle verify_restore(core::Complete cold,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,bool controls){
+ let packet=restore_packet(ref cold);let raw=restore_wire::content(ref packet);var used=restore_zero();let p=restore_owner(raw,sources,owners,imports,table,ref mut used);assert(used.source>0 && used.artifact>0 && used.link>0);restore_interfaces(ref cold,ref p);let again=restore_packet(ref p);assert(bytes::equal(raw,restore_wire::content(ref again)));
+ if(controls){restore_controls(raw,sources,owners,imports,table,used);}
+ let cold_entry=restore_entry(ref cold,sources);let entry=restore_entry(ref p,sources);let original=restore_parts(cold,cold_entry);let result=restore_parts(p,entry);assert(bytes::equal(restore_c::project_header(ref original),restore_c::project_header(ref result)) && bytes::equal(restore_c::project_literals(ref original),restore_c::project_literals(ref result)) && restore_c::project_unit_count(ref original)==restore_c::project_unit_count(ref result));var usize i=0;while(i<restore_c::project_unit_count(ref original)){assert(bytes::equal(restore_c::project_source(ref original,i),restore_c::project_source(ref result,i)));i+=1;}restore_output(ref result);return result;
+}
+fn usize restore_find(ref u8[] raw,ref u8[] needle){assert(needle.len!=0 && needle.len<=raw.len);var usize i=0;while(i<=raw.len-needle.len){if(bytes::equal(raw[i..i+needle.len],needle)){return i;}i+=1;}assert(false);return 0;}
+fn bytes::Buffer restore_replace(ref u8[] raw,ref u8[] before,ref u8[] after){let at=restore_find(raw,before);var out=bytes::empty();assert(bytes::append(ref mut out,raw[..at]).is_ok && bytes::append(ref mut out,after).is_ok && bytes::append(ref mut out,raw[at+before.len..]).is_ok);return out;}
+fn void restore_recipe_control(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table){
+ let saved=restore_saved(raw);let graph=ir::cleanup_ir(restore_model::program(ref saved));var usize receiver=0;var usize i=1;while(i<=clean::type_count(graph)){if(clean::type_at(graph,i).kind==21 && clean::glue_at(graph,i).frame!=0){receiver=i;break;}i+=1;}assert(receiver!=0);let glue=clean::glue_at(graph,receiver);
+ // Fixed-width cleanup framing: project/program members begin at 16/32;
+ // the cleanup component has a 24-byte header, 48-byte types and 56-byte glues.
+ // Toggling store keeps the detached recipe structurally valid and droppable,
+ // but cannot manufacture an ability absent from the original resource.
+ let at=32+24+clean::type_count(graph)*48+(receiver-1)*56+32+7;var bad=bytes::empty();assert(bytes::append(ref mut bad,raw).is_ok && at<bytes::len(ref bad));let old=bytes::view(ref bad)[at];bytes::view_mut(ref mut bad)[at]=if((glue.abilities&2)==0){old|2}else{old&253};var used=restore_zero();assert(switch(restore_attempt(bytes::view(ref bad),sources,owners,imports,table,ref mut used)){case .ok(_):{false}case .err(e):{e.phase==7 && e.stage==4 && e.code==1001}});
+}
+@effects(console) fn void restore_controls(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,RestoreWork cost){
+ var exact=RestoreWork{.source=limits::project_work()-cost.source,.artifact=restore_budget::work_limit()-cost.artifact,.link=limits::project_work()-cost.link};let fitted=restore_owner(raw,sources,owners,imports,table,ref mut exact);assert(exact.source==limits::project_work() && exact.artifact==restore_budget::work_limit() && exact.link==limits::project_work());var usize mode=0;
+ while(mode<3){var used=RestoreWork{.source=limits::project_work()-cost.source,.artifact=restore_budget::work_limit()-cost.artifact,.link=limits::project_work()-cost.link};if(mode==0){used.source+=1;}else if(mode==1){used.artifact+=1;}else{used.link+=1;}assert(switch(restore_attempt(raw,sources,owners,imports,table,ref mut used)){case .ok(_):{false}case .err(e):{e.code==10 || e.code==1002}});mode+=1;}
+ var invalid=RestoreWork{.source=limits::project_work()+1,.artifact=0,.link=0};assert(switch(restore_attempt(raw,sources,owners,imports,table,ref mut invalid)){case .ok(_):{false}case .err(e):{e.phase==7 && e.code==10}} && invalid.source==limits::project_work()+1);
+ mode=0;while(mode<4){var changed=v::empty<syntax::Parsed>();var usize i=0;while(i<3){let text=syntax::source_view(v::at<syntax::Parsed>(sources,i));var edit=bytes::empty();if(mode==0 && i==0){edit=restore_replace(text,b"=40",b"=41");}else if(mode==1 && i==1){edit=restore_replace(text,b"pub struct Unused<T>{T value;}",b"pub struct Unused<T>{T other;}");}else if(mode==2 && i==1){edit=restore_replace(text,b"return 1;",b"return 2;");}else{assert(bytes::append(ref mut edit,text).is_ok);if(mode==3 && i==2){assert(bytes::append(ref mut edit,b"\n").is_ok);}}assert(v::push<syntax::Parsed>(ref mut changed,restore_parsed(bytes::view(ref edit))).is_ok);i+=1;}var used=restore_zero();assert(switch(restore_attempt(raw,ref changed,owners,imports,table,ref mut used)){case .ok(_):{false}case .err(e):{e.phase==7 && e.stage==1 && e.code==12}});mode+=1;}
+ // Struct instances of the same original declaration have different scalar
+ // arguments. Swapping valid, unique g0 identities passes detached decoding;
+ // current admission must reject the identity/argument mismatch itself.
+ let saved=restore_saved(raw);let ids=restore_model::source_identities(ref saved);let graph=ir::cleanup_ir(restore_model::program(ref saved));var usize first=0;var usize second=0;var usize i=1;while(i<=clean::type_count(graph)){let t=clean::type_at(graph,i);if(t.kind==20){if(first==0){first=i;}else{let f=clean::type_at(graph,first);if(t.module_index==f.module_index && t.declaration==f.declaration){second=i;break;}}}i+=1;}assert(first!=0 && second!=0);let left=restore_ids::identity(ids,restore_ids::type_at(ids,first));let right=restore_ids::identity(ids,restore_ids::type_at(ids,second));let a=restore_find(raw,left);let b=restore_find(raw,right);var bad=bytes::empty();assert(bytes::append(ref mut bad,raw).is_ok);i=0;while(i<67){bytes::view_mut(ref mut bad)[a+i]=right[i];bytes::view_mut(ref mut bad)[b+i]=left[i];i+=1;}var used=restore_zero();assert(switch(restore_attempt(bytes::view(ref bad),sources,owners,imports,table,ref mut used)){case .ok(_):{false}case .err(e):{e.phase==7 && e.stage==1 && e.code==9}});
+ restore_recipe_control(raw,sources,owners,imports,table);
+ // A saved parser/planner ordinal has no authority. Current source identities
+ // rebind even when both module and numeric package-owner order change.
+ var reversed=v::empty<syntax::Parsed>();var shifted=v::empty<usize>();i=0;while(i<3){assert(v::push<syntax::Parsed>(ref mut reversed,restore_parsed(syntax::source_view(v::at<syntax::Parsed>(sources,2-i)))).is_ok && v::push<usize>(ref mut shifted,*v::at<usize>(owners,2-i)+19).is_ok);i+=1;}var bindings=v::empty<catalog::Binding>();i=0;while(i<3){var usize j=0;while(j<v::len<catalog::Binding>(imports)){let old=*v::at<catalog::Binding>(imports,j);if(2-old.source==i){assert(v::push<catalog::Binding>(ref mut bindings,catalog::Binding{.source=i,.declaration=old.declaration,.target=2-old.target}).is_ok);}j+=1;}i+=1;}let coords=restore_coords(19);used=restore_zero();let rebound=restore_owner(raw,ref reversed,ref shifted,ref bindings,ref coords,ref mut used);let fresh=restore_build(ref reversed,ref shifted,ref bindings,ref coords);restore_interfaces(ref fresh,ref rebound);let entry=restore_entry(ref rebound,ref reversed);let parts=restore_parts(rebound,entry);restore_output(ref parts);
+}
