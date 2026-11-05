@@ -96,6 +96,15 @@ declarations remain closed. Every package must contain an admitted Atlas
 declaration. These candidate limits do not narrow the broader Go command or
 language contracts.
 
+The private source-production/current/join APIs now also retain authenticated
+SDK scalar Vec templates, concrete fields, cleanup implementations and source
+call endpoints. Checked cleanup intrinsic observations retain inlined
+`take_slot<T>` implementations without inventing callable frames. The
+[SDK vector plan](../development/candidate-atlas-sdk-vector-20261105.md) tracks
+native acceptance and command integration. The command's Vec refusal remains
+until its own impact/MCP/edit acceptance; SDK/user-aggregate combinations keep
+their separate gate.
+
 Call reachability is exact within the admitted resolved graph. Foreign calls make
 the `calls` completeness partial with reason `external-ffi`; only resolved calls
 consume `--max-calls`. Non-call summaries are not

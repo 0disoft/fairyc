@@ -12,6 +12,7 @@ import syntax as syntax;
 import std::bytes as bytes;
 import module_types as graph;
 import std::vec as v;
+import project_atlas_sdk_vector as vector;
 
 // Consume the factory's verified, source-bound type graph and exact package
 // coordinates. Neither transient type IDs nor import aliases leave this port.
@@ -49,7 +50,8 @@ fn Result<bool,u32> nominal_head(ref input::Input source,ref coordinates::Coordi
     if(module_index>=input::count(source) || declaration==0){return .err(7);}
     let parsed=input::source(source,module_index);if(declaration>syntax::declaration_count(parsed)){return .err(7);}
     let d=syntax::declaration_at(parsed,declaration-1);
-    if(d.kind!=if(kind==2 || kind==20){4}else if(kind==3 || kind==21){6}else{11} || (d.generic_parameters!=0)!=(kind==20 || kind==21)){return .err(7);}
+    if(d.kind!=if(kind==2 || kind==20){4}else if(kind==3 || kind==13 || kind==21){6}else{11} || (d.generic_parameters!=0)!=(kind==13 || kind==20 || kind==21)){return .err(7);}
+    if(kind==13 && !vector::declaration(source,module_index,declaration,meter)?){return .err(7);}
     let module_name=module_name(input::file(source,module_index),meter)?;var name=module_name;
     discard w::raw(ref mut name,b"::",meter)?;discard w::raw(ref mut name,syntax::declaration_name(parsed,declaration),meter)?;
     if(coordinates::coordinate_count(table)>512){return .err(7);}
@@ -72,6 +74,11 @@ fn Result<bool,u32> walk(ref input::Input source,ref coordinates::Coordinates ta
     if(id==0 || id>graph::count(p)){return .err(7);}let t=graph::at(p,id);
     if(t.kind==1){return scalar_type(out,t.scalar,meter);}
     if(t.kind>=2 && t.kind<=4){discard nominal_head(source,table,t.module_index,t.declaration,t.kind,out,meter)?;return w::raw(out,b"]}",meter);}
+    if(t.kind==13){
+        if(t.scalar!=0 || t.second!=0 || t.first==0 || t.first>=id){return .err(7);}
+        discard nominal_head(source,table,t.module_index,t.declaration,t.kind,out,meter)?;
+        discard walk(source,table,p,t.first,depth+1,out,meter)?;return w::raw(out,b"]}",meter);
+    }
     if(t.kind==20 || t.kind==21){
         discard nominal_head(source,table,t.module_index,t.declaration,t.kind,out,meter)?;let count=syntax::generic_parameter_count(input::source(source,t.module_index),t.declaration-1);
         if(t.scalar!=0 || t.second!=0 || count==0 || count>8){return .err(7);}var usize next=t.first;var usize i=0;
