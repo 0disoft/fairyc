@@ -42,10 +42,33 @@ Logs: `.cache/atlas-static-operation-production-20261105.log`,
 The shared five-fixture Go oracle passes again in 0.450s after fixture extraction;
 scoped `go vet -mod=readonly ./internal/cli`, Go formatting and diff checks pass.
 
+## Actual impact command
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasStaticOperationCommand$'
+```
+
+Windows low/optimized pass in 175.514s (100.11s/61.58s including preparation).
+The actual Fairy argument/query entry accepts visible and full selectors for
+the operation, algorithm, selected i32 provider and unused bool provider. All
+eight reports match independent Go subjects/nodes, exact current source/generic
+interface contexts and explicit candidate omissions. The exact six-call bound
+passes; five calls, one package or one output byte reject without publication.
+A provider-body edit rejects the stale lock, then an independently refreshed
+query retains the current implementation identities. All thirteen native
+invocations per profile preserve workspace bytes. Log:
+`.cache/atlas-static-operation-command-20261105.log`.
+Scoped vet, Go formatting and diff checks pass; vet log:
+`.cache/atlas-static-operation-command-vet-20261105.log`.
+
+The verifier is registered as `impact-static-operations` in full authored-main
+acceptance; registration alone does not attest that group. The original twenty
+optimized groups and completed low groups retain their separate receipt.
+
 ## Remaining boundary
 
-Actual impact/MCP/editor commands and full authored-main registration/replay
-remain separate steps. This result does not broaden single-operation language
+Actual MCP/editor commands and the new full authored-main group replay remain
+separate steps. This result does not broaden single-operation language
 admission, implement multi-operation interfaces or close other Atlas families.
 Native Linux, full compiler comparison, consecutive self-build, distribution,
 clean-machine and hosted same-commit acceptance remain open. No source grammar,

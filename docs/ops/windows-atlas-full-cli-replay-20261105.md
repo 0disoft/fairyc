@@ -3,7 +3,8 @@
 ## Scope and bounded execution
 
 The full `TestCandidateAtlasCLI` retains the authored main/dispatcher and all
-nineteen original verifier calls plus help, in their original order. Each now
+nineteen original verifier calls plus help, in their original order, and the new
+static-operation impact verifier. Each now
 has a named subtest, allowing bounded profile/group replays. Existing assertions,
 per-process deadlines, C split limit and 16 MiB stack policy stay unchanged.
 PATH is empty for every verifier, with no Go child, companion or prebuilt-map
@@ -29,12 +30,16 @@ go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^T
 go vet -mod=readonly ./internal/cli
 ```
 
-All twenty optimized groups pass with no selected skips in 248.753s (native
+All twenty original optimized groups pass with no selected skips in 248.753s (native
 profile 228.26s). The exact expected top-level group set is also compared with
 the completed test log; nested Vec fixture results do not inflate that count.
 Scoped vet, Go formatting and diff checks pass. Log:
 `.cache/atlas-full-cli-optimized-20261105.log`; scoped vet:
 `.cache/atlas-full-cli-vet-20261105.log`.
+
+The newly registered `impact-static-operations` group remains pending in this
+full authored-main image. Its separate command-leaf acceptance is recorded in
+the static-operation receipt and does not count as this full-image replay.
 
 Optimized generated-input/policy SHA-256:
 `7ca0718ef3068260576a7d0541f6527b4668ccd345646a6958e5c2fbf1125881`.
@@ -69,7 +74,7 @@ go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^T
 ```
 
 Completed retry log: `.cache/atlas-full-cli-low-mixed-edit-20261105.log`. All four
-mixed/help groups now pass; the sixteen other groups remain open.
+mixed/help groups now pass; the seventeen other groups remain open.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -82,6 +87,7 @@ mixed/help groups now pass; the sixteen other groups remain open.
 | edit-aggregates | Pass | Pending |
 | unsupported | Pass | Pending |
 | impact-generics | Pass | Pending |
+| impact-static-operations | Pending | Pending |
 | impact-aggregates | Pass | Pending |
 | impact-sdk | Pass | Pending |
 | impact-sdk-vector | Pass | Pending |

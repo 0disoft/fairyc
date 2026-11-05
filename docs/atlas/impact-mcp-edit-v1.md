@@ -92,8 +92,11 @@ same-package foreign calls are external/opaque with their exact C ABI/link name.
 The seven ordinary authenticated SDK modules (alloc, bytes, fs, io, num,
 process and text) may participate in source production and current queries.
 Authenticated scalar SDK Vec declarations now participate in impact and read-only
-MCP queries. Unsupported interface/closure and owner-qualified declarations
-remain closed. Every package must contain an admitted Atlas
+MCP queries. The existing single-operation interface family in ADR 0495 now has
+Windows production and actual impact-command evidence: original generic headers,
+exact scalar implementations and ordinary provider call targets are retained.
+Broader interfaces, closures and owner-qualified declarations remain closed.
+Every package must contain an admitted Atlas
 declaration. These candidate limits do not narrow the broader Go command or
 language contracts.
 

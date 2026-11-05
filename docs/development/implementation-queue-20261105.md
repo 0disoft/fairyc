@@ -61,8 +61,10 @@ authorized by this queue.
   unused templates, concrete cross-package algorithm/operation/provider endpoints,
   provider/private identity policy and current-reader/join/refusal controls.
   All twenty package maps match Go. The existing generic producer already handles
-  the family; no product change is needed. Actual commands/full authored-main
-  acceptance remain separate. See
+  the family; no product change is needed. Actual impact commands now pass both
+  profiles in 175.514s, with exact six-call admission/refusal and stale/relocked
+  provider identities. MCP/editor and the newly registered full authored-main
+  group remain open. See
   `docs/development/candidate-atlas-static-operations-20261105.md`.
   Broader source families and the complete implementation/final queue remain open.
 
@@ -73,7 +75,8 @@ authorized by this queue.
   runtime/profile/toolchain/stack and image digest policy protects retained-image
   reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s, and
   the completed mixed editor retry passes in 441.443s, with matching source/image
-  digests. The other sixteen groups remain pending in bounded groups. The full-CLI
+  digests. The other sixteen original groups and the new static-operation impact
+  group remain pending in bounded groups. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain
   open; native Linux stays batched.

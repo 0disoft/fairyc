@@ -99,6 +99,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"edit-aggregates", verifyCandidateEditAggregateCommand},
 				{"unsupported", func(t *testing.T, image string) { verifyCandidateAtlasUnsupported(t, image, unsupportedRoots) }},
 				{"impact-generics", verifyCandidateAtlasGenericCommand},
+				{"impact-static-operations", verifyCandidateAtlasStaticOperationCommand},
 				{"impact-aggregates", verifyCandidateAtlasAggregateCommand},
 				{"impact-sdk", verifyCandidateAtlasSDKCommand},
 				{"impact-sdk-vector", verifyCandidateAtlasSDKVectorCommand},
