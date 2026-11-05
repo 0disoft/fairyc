@@ -93,7 +93,10 @@ authorized by this queue.
   profiles, giving fourteen low groups and all twenty-three optimized groups
   through the recorded bounded full-image replays. Two SDK impact groups pass
   in 531.301s and five ordinary editor/SDK MCP groups in 641.688s, giving twenty-
-  one low baseline groups. Only SDK/SDK Vec editing remains pending. The full-CLI
+  one low baseline groups. The final SDK/SDK Vec editor replay now passes in
+  674.058s with the same pre-closure digests, completing 23/23 distinct baseline
+  groups in both profiles. The changed closure source still needs fresh image
+  acceptance. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain
   open; native Linux stays batched. This is the exact pre-closure C/image baseline,

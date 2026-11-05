@@ -116,8 +116,18 @@ go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^T
 ```
 
 Logs: `.cache/atlas-full-cli-low-sdk-impact-20261105.log` and
-`.cache/atlas-full-cli-low-edit-mcp-20261105.log`. Twenty-one distinct baseline
-low groups now pass; only `edit-sdk` and `edit-sdk-vector` remain pending.
+`.cache/atlas-full-cli-low-edit-mcp-20261105.log`. These established twenty-one
+distinct low baseline groups. The final SDK editor replay now passes in 674.058s
+(652.51s native profile), including `edit-sdk` (333.11s) and `edit-sdk-vector`
+(319.32s). Both retain the exact pre-closure source/image digests above. The
+baseline is therefore 23/23 distinct groups in each profile, without attesting
+the changed copied-closure compiler source or its future image.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^(edit-sdk|edit-sdk-vector)$'
+```
+
+Final log: `.cache/atlas-full-cli-low-sdk-edit-20261105.log`.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -140,12 +150,12 @@ low groups now pass; only `edit-sdk` and `edit-sdk-vector` remain pending.
 | mcp-sdk | Pass | Pass |
 | mcp-sdk-vector | Pass | Pass |
 | mcp-sdk-aggregates | Pass | Pass |
-| edit-sdk | Pass | Pending |
-| edit-sdk-vector | Pass | Pending |
+| edit-sdk | Pass | Pass |
+| edit-sdk-vector | Pass | Pass |
 | edit-sdk-aggregates | Pass | Pass |
 | help | Pass | Pass |
 
-The complete low replay, broader Atlas source families, final whole-compiler
+The changed closure compiler requires fresh image acceptance. Broader Atlas source families, final whole-compiler
 Go/Fairy comparisons, consecutive self-build and Windows distribution/clean-machine
 acceptance remain open. Native Linux stays batched. Hosted same-commit CI requires
 an authorized push/dispatch. No grammar, public CLI, SDK/runtime ABI, map wire,
