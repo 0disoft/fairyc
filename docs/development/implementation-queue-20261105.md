@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy current-admitted Context Pack around now traverses canonical local
+  adjacency with separate relation/visited-node ledgers, per-depth membership,
+  ordered frontiers and exact relation-before-node refusal/omission behavior.
+  Eighteen real source/package/schema combinations pass 6,038 independent Go
+  encoder/checksum Windows low/optimized observations in 610.390s. The shared
+  assembler's show regression passes 260 observations in 41.285s. Authored
+  check/locked (668 files, 8,300 MIR functions), scoped vet/format/LF/diff pass.
+  Fresh source-backed actual atlas-pack dispatch and all original implementation
+  and final acceptance gates remain required; see the Context Pack plan.
+
 - Fairy current-admitted Context Pack show now performs exact mandatory
   context/subject selection, canonical incoming/outgoing/both relation selection
   and omission counts under independent record/relation/selection/output/work

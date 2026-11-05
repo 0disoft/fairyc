@@ -13,7 +13,7 @@ no push, dispatch, publication or target promotion is authorized here.
   including independent record/byte/final-byte/work boundaries and checksums.
 - [x] Current-admitted show node/relation selection, specialization/cleanup
   identity, canonical v1/v2/v3 packs and explicit omissions under all bounds.
-- [ ] Current-admitted around traversal, deterministic local node/relation
+- [x] Current-admitted around traversal, deterministic local node/relation
   selection, canonical packs and explicit omissions under all bounds.
 - [ ] Fresh Complete-bound source selection and actual dispatcher/help/error/
   lock/output acceptance at both Windows profiles. No child Go fallback.
@@ -146,7 +146,7 @@ the existing version-specific generic uncertainty.
 selects ordered incoming/outgoing/both observations, and preserves relation-
 before-record-before-byte refusal and exact known remaining counts. Relation
 filters, unjoined selected targets and missing incoming packages remain explicit
-omissions. The public private-host `encode_show` entry runs that selection itself
+omissions. The compiler-private `encode_show` entry runs that selection itself
 and uses the existing version-specific canonical body/checksum/envelope path;
 it never accepts a caller-mutated query result or a map-version conversion.
 
@@ -281,3 +281,56 @@ and ordering, not show/around bounded selection, breadth-first traversal, pack
 assembly or actual CLI. Those and all original implementation/final acceptance
 gates remain open. No grammar, stable CLI, SDK ABI, DB, dependency,
 workflow/runner or hygiene-policy change; no push or native Linux execution.
+
+## Current-admitted around packs
+
+`project_pack_around` reserves the exact context/root as one mandatory record,
+then performs breadth-first local traversal through the canonical lazy adjacency
+merge. Selected relation IDs and visited nodes have separate owned ledgers;
+per-depth membership tags avoid rebuilding or scanning the whole relation set.
+New neighbors are considered in full-SymbolId order and the next frontier uses
+an owned O(V log V) merge sort. Cycles, convergent paths and self-calls retain
+each observed relation once without duplicating nodes.
+
+A relation is reserved before any new adjacent node. If a node then fails its
+record/byte budget, the admitted relation survives and the node omission stays
+unknown-count, exactly as in the owning Go query. Depth zero, exhausted
+frontiers, relation/record/byte stops and depth omissions remain distinct.
+Selected unjoined targets and unavailable incoming package maps keep their
+explicit omissions. Graph traversal never resolves or invents dependency nodes.
+
+`encode_around` runs that selector itself. Show and around share a private
+document assembler after their independent current-map selection; no public
+encoder accepts a detached result as authority. Context/identity, facts,
+completeness, empty text channels, omissions and version-specific checksums
+retain the original canonical pack contracts.
+
+`TestCandidatePackAround` extends the fifteen all-kind source/package/schema
+combinations with three independently compiled wide graphs: twelve arms, six
+shared hubs, local/dependency leaves, a two-function cycle and a self-call.
+It compares every symbol in every direction and both selector forms against
+the actual Go encoders. Each relation filter, every prefix record/relation/
+selection boundary, competing limits, zero/exact/more depth and independent
+output/work limits are checked. The checksum oracle is separately recomputed.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidatePackAround$'
+```
+
+PASS, 610.390s (body 610.21s; low 487.09s, optimized 120.60s), no selected
+skips. Each profile records 3,019 native observations, 6,038 total, in
+`pack-around-owner-20261106.log`. Source/test modification times precede this
+completed replay; no executable input changed afterward. The initial
+`pack-around-20261106.log` fails because a sibling module cannot directly
+construct the private Selection resource; assembly is now owned by the query
+module. That failure is retained and is not acceptance; no policy was relaxed.
+
+The shared assembler's show regression passes 260 observations in 41.285s
+(low 22.70s, optimized 16.06s; `pack-around-show-regression-20261106.log`).
+Authored check/locked pass with 668 files and 8,300 MIR functions; scoped CLI
+vet, Go formatting, LF/EOF and diff checks pass. This closes the current-admitted
+around selector/encoder only. Fresh source-backed actual CLI, all original
+full-CLI/generated-consumer/self-build/distribution/hosted/Linux gates and the
+complete implementation queue remain open. No grammar, stable CLI, public
+SDK/runtime ABI, dependencies, DB, workflow/runner or hygiene-policy change;
+no push, dispatch or native Linux execution.

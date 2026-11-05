@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Fairy exact-current around traversal and canonical packs: `examples/lexer_candidate/src/project_pack_around.fy`, `project_pack_query.fy`, `project_pack.fy`; independent actual-source Go encoder/checksum/native controls: `internal/cli/candidate_pack_around_test.go`. Canonical BFS/frontier order, cycles, convergent paths, relation-before-node refusal and exact independent budgets/omissions retain the query contract. Fresh source-backed actual CLI and final acceptance remain separate; evidence: `docs/development/candidate-context-pack-20261106.md`.
+
 - Fairy exact-current show query and canonical packs: `examples/lexer_candidate/src/project_pack_query.fy`, `project_pack_context.fy`, `project_pack_graph.fy`, `project_pack_frontier.fy`, `project_pack.fy`; independent Go encoder/checksum/native controls: `internal/cli/candidate_pack_show_test.go`. Mandatory facts, adjacency merge, all directions and exact budget/omission rules are preserved. Around and actual CLI remain separate; evidence: `docs/development/candidate-context-pack-20261106.md`.
 
 - Fairy exact-current relation projection and canonical ordering: `examples/lexer_candidate/src/project_pack_relations.fy`, `project_pack_relation_order.fy`; independent actual Go queries and all-kind source/native controls: `internal/cli/candidate_pack_relations_test.go`. Concrete endpoints, cleanup, spans/details and ABI/escape facts remain intact; bounded show/around selection/traversal is a separate next step. Evidence: `docs/development/candidate-context-pack-20261106.md`.

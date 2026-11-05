@@ -22,6 +22,9 @@ pub fn ref u8[] completeness(ref Selection p){return bytes::view(ref p.completen
 pub fn ref u8[] relations(ref Selection p){return bytes::view(ref p.relations);}
 pub fn ref u8[] omissions(ref Selection p){return bytes::view(ref p.omissions);}
 pub fn Usage usage(ref Selection p){return p.usage;}
+// Ownership assembly for the sibling around selector. Pack encoders run their
+// own current-map selector and never accept this detached value from callers.
+pub fn Selection assemble(bytes::Buffer subject,bytes::Buffer facts,bytes::Buffer completeness,bytes::Buffer relations,bytes::Buffer omissions,Usage usage){return Selection{.subject,.facts,.completeness,.relations,.omissions,.usage};}
 pub fn Result<bool,u32> filter(ref mut bytes::Buffer out,usize mask,ref mut usize meter){
     var usize excluded=0;var usize i=0;while(i<10){if((mask & (1<<i))==0){excluded|=1<<i;}i+=1;}
     if(excluded==0){return .ok(true);}return omission(out,b"relation-filter",b"relations",excluded,0,false,meter);
