@@ -5,6 +5,7 @@ import project_atlas_instances as instances;
 import project_atlas_closures as closures;
 import project_atlas_aggregate as aggregate;
 import project_atlas_drop_sites as drops;
+import project_atlas_trap_kinds as traps;
 import module_public_type_text as coordinates;
 import project_compiler_input as input;
 import module_unit_body_ir_model as ir;
@@ -47,7 +48,7 @@ fn Result<v::Vec<Call>,u32> calls(ref input::Input p,ref ir::Program program,ref
   discard add(p,context,projection,frame,ref mut result,Call{.target=site.declaration,.frame=0,.specialization=site.node+1,.start=site.start,.end=site.end,.external=false},meter)?;
  }return .ok(result);
 }
-struct Counts{usize calls;usize external;usize drops;}
+struct Counts{usize calls;usize external;usize drops;usize traps;}
 fn Result<Counts,u32> body(ref mut bytes::Buffer out,ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref instances::Instances context,ref closures::Projection projection,closures::Row projected,usize frame,ref drops::Collection observed,ref mut usize meter){
  let row=projected.declaration;let calls=calls(p,program,context,projection,row,frame,meter)?;var usize total=0;var usize external=0;
  discard w::raw(out,b"{\"function\":",meter)?;discard closures::key(out,p,projection,projected,meter)?;
@@ -62,15 +63,19 @@ fn Result<Counts,u32> body(ref mut bytes::Buffer out,ref input::Input p,ref ir::
   total+=1;j+=1;
  }
  if(frame>drops::frame_count(observed)){return .err(9);}let sites=if(frame==0){drops::Range{.start=0,.end=0}}else{drops::range(observed,frame-1)};
- discard w::raw(out,b"],\"trap_categories\":[],\"unsafe_sites\":[],\"move_sites\":[],\"drop_sites\":[",meter)?;j=0;
+ let u32 mask=if(frame==0){0}else{drops::trap_at(observed,frame-1)};var usize trap_count=0;j=0;
+ discard w::raw(out,b"],\"trap_categories\":[",meter)?;
+ while(j<6){if(!work::charge(meter,1)){return .err(3);}if(traps::contains(mask,j)){if(trap_count>0){discard w::raw(out,b",",meter)?;}discard w::string(out,traps::category(j),meter)?;trap_count+=1;}j+=1;}
+ discard w::raw(out,b"],\"unsafe_sites\":[],\"move_sites\":[],\"drop_sites\":[",meter)?;j=0;
  while(j<sites.end-sites.start){let site=drops::at(observed,sites.start+j);if(j>0){discard w::raw(out,b",",meter)?;}discard declarations::span(out,p,row.module_index,site.start,site.end,meter)?;j+=1;}
- discard w::raw(out,b"],\"allocation_sites\":[],\"return_error_sites\":[],\"borrows\":[]}",meter)?;return .ok(Counts{.calls=total,.external,.drops=sites.end-sites.start});
+ discard w::raw(out,b"],\"allocation_sites\":[],\"return_error_sites\":[],\"borrows\":[]}",meter)?;return .ok(Counts{.calls=total,.external,.drops=sites.end-sites.start,.traps=trap_count});
 }
-pub resource Summaries{bytes::Buffer text;bytes::Buffer specializations;usize calls;usize drops;usize external;usize functions;usize specialization_count;usize templates;usize implementations;cleanup{}}
+pub resource Summaries{bytes::Buffer text;bytes::Buffer specializations;usize calls;usize drops;usize traps;usize external;usize functions;usize specialization_count;usize templates;usize implementations;cleanup{}}
 pub fn ref u8[] text(ref Summaries p){return bytes::view(ref p.text);}
 pub fn ref u8[] specializations(ref Summaries p){return bytes::view(ref p.specializations);}
 pub fn usize count(ref Summaries p){return p.calls;}
 pub fn usize drop_count(ref Summaries p){return p.drops;}
+pub fn usize trap_count(ref Summaries p){return p.traps;}
 pub fn usize external_count(ref Summaries p){return p.external;}
 pub fn usize function_count(ref Summaries p){return p.functions;}
 pub fn usize specialization_count(ref Summaries p){return p.specialization_count;}
@@ -84,11 +89,11 @@ pub fn Result<Summaries,u32> summaries_aggregates(ref input::Input p,ref ir::Pro
  let projection=closures::build(p,program,context,rows,meter)?;return summaries_projected(p,program,metadata,table,context,rows,ref projection,meter);
 }
 pub fn Result<Summaries,u32> summaries_projected(ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref coordinates::Coordinates table,ref instances::Instances context,ref v::Vec<declarations::Row> rows,ref closures::Projection projection,ref mut usize meter){
- let observed=drops::collect_all(program,65536,meter)?;
- var out=bytes::empty();discard w::raw(ref mut out,b"[",meter)?;var usize total=0;var usize drop_total=0;var usize external=0;var usize functions=0;var usize i=0;
+ let observed=drops::collect_observed_all(program,65536,6,meter)?;
+ var out=bytes::empty();discard w::raw(ref mut out,b"[",meter)?;var usize total=0;var usize drop_total=0;var usize trap_total=0;var usize external=0;var usize functions=0;var usize i=0;
  while(i<closures::count(projection)){
   if(!work::charge(meter,1)){return .err(3);}let projected=closures::at(projection,i);let row=projected.declaration;i+=1;let d=syntax::declaration_at(input::source(p,row.module_index),row.declaration);if(d.kind!=3 || d.generic_parameters!=0){continue;}
-  if(functions>0){discard w::raw(ref mut out,b",",meter)?;}let c=body(ref mut out,p,program,metadata,context,projection,projected,if(projected.frame!=0){projected.frame}else{frame(program,row,meter)?},ref observed,meter)?;total+=c.calls;drop_total+=c.drops;external+=c.external;functions+=1;
+  if(functions>0){discard w::raw(ref mut out,b",",meter)?;}let c=body(ref mut out,p,program,metadata,context,projection,projected,if(projected.frame!=0){projected.frame}else{frame(program,row,meter)?},ref observed,meter)?;total+=c.calls;drop_total+=c.drops;trap_total+=c.traps;external+=c.external;functions+=1;
  }
  discard w::raw(ref mut out,b"]",meter)?;var specs=bytes::empty();discard w::raw(ref mut specs,b"[",meter)?;var usize specialized=0;i=0;
  while(i<instances::count(context)){if(!work::charge(meter,1)){return .err(3);}let row=instances::at(context,i);i+=1;var usize j=0;var bool local=false;
@@ -96,8 +101,8 @@ pub fn Result<Summaries,u32> summaries_projected(ref input::Input p,ref ir::Prog
   if(specialized>0){discard w::raw(ref mut specs,b",",meter)?;}discard w::raw(ref mut specs,b"{",meter)?;discard w::pair(ref mut specs,b"id",instances::identity(context,row),meter)?;discard w::raw(ref mut specs,b",\"declaration\":",meter)?;discard declarations::key(ref mut specs,p,row.declaration,meter)?;
   discard w::raw(ref mut specs,b",\"type_arguments\":",meter)?;discard instances::arguments(ref mut specs,context,row,meter)?;
   if(row.type!=0){discard w::raw(ref mut specs,b",\"aggregate\":",meter)?;discard aggregate::declaration(ref mut specs,p,table,program,row,meter)?;}
-  if(row.type==0 || row.frame!=0){if(row.type==0 && row.frame==0 && !instances::inline_leaf(context,row)){return .err(103);}discard w::raw(ref mut specs,if(row.type==0){b",\"function\":"}else{b",\"cleanup\":"},meter)?;let c=body(ref mut specs,p,program,metadata,context,projection,closures::plain(row.declaration),row.frame,ref observed,meter)?;total+=c.calls;drop_total+=c.drops;external+=c.external;}
+  if(row.type==0 || row.frame!=0){if(row.type==0 && row.frame==0 && !instances::inline_leaf(context,row)){return .err(103);}discard w::raw(ref mut specs,if(row.type==0){b",\"function\":"}else{b",\"cleanup\":"},meter)?;let c=body(ref mut specs,p,program,metadata,context,projection,closures::plain(row.declaration),row.frame,ref observed,meter)?;total+=c.calls;drop_total+=c.drops;trap_total+=c.traps;external+=c.external;}
   discard w::raw(ref mut specs,b"}",meter)?;specialized+=1;
  }
- discard w::raw(ref mut specs,b"]",meter)?;return .ok(Summaries{.text=out,.specializations=specs,.calls=total,.drops=drop_total,.external,.functions,.specialization_count=specialized,.templates=instances::template_count(context),.implementations=instances::count(context)});
+ discard w::raw(ref mut specs,b"]",meter)?;return .ok(Summaries{.text=out,.specializations=specs,.calls=total,.drops=drop_total,.traps=trap_total,.external,.functions,.specialization_count=specialized,.templates=instances::template_count(context),.implementations=instances::count(context)});
 }

@@ -1,7 +1,8 @@
 # Fairy Atlas observed relations, 2026-11-06
 
-Part of the complete implementation queue. Existing source production collects
-calls and drops and declares other families unavailable. A checked collector
+Part of the complete implementation queue. Current source production collects
+calls, drops and trap categories and declares other families unavailable. A checked
+collector
 alone must not promote that production/completeness scope or finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
 
@@ -20,8 +21,11 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   concrete cleanup facts, canonical sets and exact work/count refusal controls.
 - [x] Shared verified drop/trap batch with one whole-IR proof and one CFG
   traversal, retaining both standalone APIs and independent count limits.
-- [ ] Complete-bound trap production, summary/header accounting, completeness
-  and actual command comparisons. A private collector is not production evidence.
+- [x] Complete-bound trap production, summary/header accounting, completeness
+  and independent v1/v2/v3 source/current/join comparisons.
+- [ ] Finish the six selected actual authored-main trap command groups under
+  both Windows profiles. Optimized passes; low replay remains in progress.
+  A private collector or map comparison alone is not command evidence.
 - [ ] Remaining unsafe, move, Region allocation, error-propagation and borrow
   collectors, each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
@@ -197,9 +201,9 @@ allocation failure returns 2. Existing compiler/process timeouts are unchanged.
 `TestCandidateAtlasTraps` uses actual source-owned ordinary, generic and concrete
 cleanup bodies against independent Go snapshots. It compares single and batch
 collections, checks owner coverage and unchanged workspace bytes, and exercises
-one-short/exact/one-more work/count limits. Native Windows replay passes below;
-the trap class remains unavailable in production until the separate connection
-and its source/current/query/CLI comparisons are complete. Native Linux and all
+one-short/exact/one-more work/count limits. At this collector-only snapshot, the
+trap class was still unavailable in production. The separate connection below
+requires its own source/current/query/CLI comparisons. Native Linux and all
 broader/final implementation gates stay open.
 
 ### Final trap collector validation
@@ -267,7 +271,7 @@ Command: `go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cl
 `.cache/atlas-observed-shared-native-owned-20261106.log`. Authored `check` and
 `check --locked` pass for this shared-source snapshot (673 files, 8,344 MIR
 functions); scoped vet, Go format and diff checks pass. The production connection
-is a separate, uncommitted working-tree change and is not attested here.
+below is separate and is not attested by this collector receipt.
 
 Earlier shared-source attempts rejected a nested mutable borrow, a dereference
 assignment and a branch ownership gap. Their check logs are respectively
@@ -278,3 +282,52 @@ owned-buffer route keeps publication after success and retains the native
 controls above. Native Linux and the broader/final gates remain open. No public
 CLI/grammar, SDK/runtime ABI, cache wire, dependencies, DB, timeout, runner or
 repository-policy change.
+
+## Complete-bound trap production
+
+`project_atlas_calls` now writes sorted unique categories from the combined
+verified collection into ordinary, concrete generic and concrete cleanup
+summaries. Source-authenticated intrinsic leaves without executable frames keep
+their witnessed empty summary; the existing missing-frame refusals remain.
+Each package relation inventory now counts calls, drops and trap categories.
+Only `may-trap` is newly exact and loses its unavailable omission. The remaining
+observed relation families stay explicitly unavailable, so overall generation
+continues to be partial. Existing wire schemas and current-source authority do
+not change.
+
+The independent Go function oracle now compares categories as well as calls and
+drop spans. Counts are derived from original Go summaries, never candidate
+headers. New source-version cases cover all six categories in an ordinary body,
+signed/unsigned generic division, concrete resource cleanup and implicit checks
+from an empty byte iteration. Original declarations/specializations, map decoding,
+current-source checks and workspace joins remain part of the comparison.
+
+`TestCandidateAtlasSourceVersion` passes in 676.152s, low 576.27s and optimized
+84.26s: 100 native compiler probes and 130 independently checked current maps,
+including existing ordinary/generic/aggregate/SDK cases and schema refusals.
+Log: `.cache/atlas-trap-production-versions-20261106.log`. The separate ordinary,
+generic and SDK Vec production roots pass both profiles in 754.834s: ordinary
+81.39s, generic 136.04s and SDK Vec 537.24s (low 448.02s, optimized 75.44s).
+Original maps, header/completeness, source/export/validation/join budget and
+missing-coordinate refusals remain checked. Log:
+`.cache/atlas-trap-production-roots-20261106.log`.
+Authored check/locked pass (673 files, 8,345 MIR functions). Scoped vet, complete
+Go atlasmap/contextpack regressions, format and diff checks pass.
+
+The actual full authored-main optimized replay passes all six selected groups
+in 158.813s (body 158.67s, profile 140.27s), without a Go fallback or selected
+skip: impact-families, impact-sdk-vector, catalog-ordinary, pack-ordinary,
+pack-sources and pack-sdk. The unchanged independent Go command oracles retain
+categories and count only the explicitly collected classes. Log:
+`.cache/atlas-trap-production-cli-optimized-20261106.log`.
+Generated-C/profile/toolchain source digest:
+`f233e33f51913e0e8d94ef24b88a6b8286883a353d30b38636e444344a10ead4`;
+image SHA-256:
+`6cac6540b97a0968582d20b25f6d92ac96cee10291fed4222ae446b5f2e83239`.
+
+Low command replay is split into bounded parent selections using the existing
+image digest checks and unchanged product timeouts. It remains pending, as do
+the other full-CLI groups, remaining collectors, broader source/consumer work,
+consecutive self-build, distribution, same-commit hosted CI and native Linux.
+No stable CLI flags, source grammar, SDK/runtime ABI, wire schema, dependency,
+DB, target, timeout, runner or repository-policy change; no push or dispatch.

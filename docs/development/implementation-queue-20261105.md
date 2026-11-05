@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound Fairy Atlas production now retains sorted trap categories in
+  ordinary/generic/cleanup summaries, counts them with calls/drops and marks only
+  may-trap newly exact. The versioned source/current/join comparison passes
+  Windows low/optimized in 676.152s: 100 native probes, 130 independent current
+  maps. All six selected actual authored-main command groups pass optimized in
+  158.813s; low command replay remains in progress. The ordinary/generic/SDK Vec
+  production-root command passes both profiles in 754.834s, including independent
+  maps and refusal controls. Authored check/locked (673 files, 8,345 MIR functions), Go
+  atlasmap/contextpack regression and scoped vet/format/diff pass. See the
+  observed-relations plan. All remaining collectors, broader implementation and
+  final gates remain open; native Linux stays batched, no push or dispatch.
+
 - Shared Fairy Atlas drop/trap collection now uses one whole-IR proof and one
   private CFG traversal per frame while keeping standalone count policies
   isolated. Fifteen drop and twenty-eight trap sources, eighteen controls per

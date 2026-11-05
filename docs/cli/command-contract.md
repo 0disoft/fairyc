@@ -23,9 +23,9 @@ Output failure can follow successful source replacement.
 The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite
 signature types and opaque external C calls. Only resolved calls consume the
-call-join budget. Verified executable drop sites are retained in ordinary,
-specialized and concrete cleanup summaries; relation inventories include them
-and the drop completeness class is exact. Other uncollected relation families
+call-join budget. Verified executable drop sites and the six canonical trap
+categories are retained in ordinary, specialized and concrete cleanup summaries;
+relation inventories include both, and drops and may-trap are exact. Other uncollected relation families
 remain explicitly unavailable. The source-selected v1/v2/v3 Windows validation
 and remaining SDK/generic boundaries are recorded in
 `docs/development/candidate-atlas-observed-relations-20261106.md`.

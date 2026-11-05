@@ -88,6 +88,15 @@ fn i32 main(){let t=Token{.value=1};discard Token{.value=2};{let inner=Token{.va
 resource Wrap<T>{Token inner;T marker;cleanup{let t=Token{.value=1};}}
 fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`)
 	fixtures = append(fixtures, fixture{"drops", drops, 1, nil}, fixture{"cleanup-drops", cleanupDrops, 3, nil})
+	traps := writeWorkspaceSessionFixture(t, `module main;
+fn i32 all(bool stop,i32 value,usize index){let u8[1] data=[1];if(stop){assert(false);}discard data[index];return (value/2)<<1;}
+fn i32 main(){return all(false,8,0);}`)
+	genericTraps := writeWorkspaceSessionFixture(t, `module main;pub fn T quotient<T>(T a,T b){return a/b;}fn i32 main(){discard quotient<i32>(8,2);discard quotient<usize>(8,2);return 0;}`)
+	cleanupTraps := writeWorkspaceSessionFixture(t, `module main;resource Token{i32 value;cleanup{}}
+resource Wrap<T>{Token inner;T marker;cleanup{let t=Token{.value=1};var i32 n=4;n/=2;assert(n>0);}}
+fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`)
+	iterationTraps := writeWorkspaceSessionFixture(t, `module main;fn i32 main(){let data=b"";for(let u8 byte in data){discard byte;}return 0;}`)
+	fixtures = append(fixtures, fixture{"traps", traps, 1, nil}, fixture{"generic-traps", genericTraps, 2, nil}, fixture{"cleanup-traps", cleanupTraps, 3, nil}, fixture{"iteration-traps", iterationTraps, 1, nil})
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -162,7 +171,7 @@ fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`)
 						if h.Counts.Relations != candidateAtlasProducedRelationCount(want) {
 							t.Fatalf("source relation count %s: %d want %d", h.PackageUID, h.Counts.Relations, candidateAtlasProducedRelationCount(want))
 						}
-						foundDrops := false
+						foundDrops, foundTraps := false, false
 						for _, r := range got.Completeness() {
 							if r.Relation == "drops" {
 								foundDrops = true
@@ -170,9 +179,18 @@ fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`)
 									t.Fatalf("incorrect source drop completeness: %+v", r)
 								}
 							}
+							if r.Relation == "may-trap" {
+								foundTraps = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source trap completeness: %+v", r)
+								}
+							}
 						}
 						if !foundDrops || slices.Contains(h.Omissions, "drops:unavailable:candidate-atlas-not-collected") {
 							t.Fatal("source drop completeness missing or omitted")
+						}
+						if !foundTraps || slices.Contains(h.Omissions, "may-trap:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source trap completeness missing or omitted")
 						}
 						if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) {
 							a, b := got.Declarations(), want.Declarations()
