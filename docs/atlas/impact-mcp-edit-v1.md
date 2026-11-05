@@ -93,7 +93,7 @@ The seven ordinary authenticated SDK modules (alloc, bytes, fs, io, num,
 process and text) may participate in source production and current queries.
 Authenticated scalar SDK Vec declarations now participate in impact and read-only
 MCP queries. The existing single-operation interface family in ADR 0495 now has
-Windows production and actual impact-command evidence: original generic headers,
+Windows production, impact-command and read-only MCP evidence: original generic headers,
 exact scalar implementations and ordinary provider call targets are retained.
 Broader interfaces, closures and owner-qualified declarations remain closed.
 Every package must contain an admitted Atlas

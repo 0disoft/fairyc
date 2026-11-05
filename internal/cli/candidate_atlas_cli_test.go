@@ -94,6 +94,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"impact-families", verifyCandidateAtlasFamilies},
 				{"mcp-ordinary", verifyCandidateMCPCommand},
 				{"mcp-aggregates", verifyCandidateMCPAggregateCommand},
+				{"mcp-static-operations", verifyCandidateMCPStaticOperationCommand},
 				{"edit-ordinary", verifyCandidateEditCommand},
 				{"edit-publication", verifyCandidateEditCLIApply},
 				{"edit-aggregates", verifyCandidateEditAggregateCommand},

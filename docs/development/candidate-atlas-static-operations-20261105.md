@@ -29,13 +29,14 @@ execution stays batched; no push, dispatch, release or deployment is authorized.
    coordinates reject in each profile. No product change was necessary; the
    existing source/identity/call owners already retain this family. See the
    [production receipt](../ops/windows-candidate-atlas-static-operations-20261105.md).
-3. **Impact verified; MCP/editor remain open.** The actual impact command passes
+3. **Impact and MCP verified; editor remains open.** The actual impact command passes
    Windows low/optimized in 175.514s: eight visible/full original selectors,
    exact six-call admission, one-short call/package/output refusals and stale-lock
    rejection followed by independently rechecked provider-edit recovery.
-   Full authored-main registration is updated but its new group is not replayed.
-   Exercise read-only MCP against independent Go current contexts; then verify
-   permitted ordinary root-body
+   Actual read-only MCP passes both profiles in 100.776s, including negotiation,
+   read-only tool policy, exact Go query contexts, stale-source error and recovery
+   in the same real stdio process. Full authored-main registration is updated but
+   its two new groups are not replayed. Verify permitted ordinary root-body
    editing in workspaces containing operations. Editing interface/provider/public
    generic declarations remains governed by the existing explicit editor scope.
    Register and run the complete authored-main groups after implementation.

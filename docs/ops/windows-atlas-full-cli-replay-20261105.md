@@ -4,7 +4,7 @@
 
 The full `TestCandidateAtlasCLI` retains the authored main/dispatcher and all
 nineteen original verifier calls plus help, in their original order, and the new
-static-operation impact verifier. Each now
+static-operation impact/MCP verifiers. Each now
 has a named subtest, allowing bounded profile/group replays. Existing assertions,
 per-process deadlines, C split limit and 16 MiB stack policy stay unchanged.
 PATH is empty for every verifier, with no Go child, companion or prebuilt-map
@@ -37,7 +37,7 @@ Scoped vet, Go formatting and diff checks pass. Log:
 `.cache/atlas-full-cli-optimized-20261105.log`; scoped vet:
 `.cache/atlas-full-cli-vet-20261105.log`.
 
-The newly registered `impact-static-operations` group remains pending in this
+The newly registered `impact-static-operations`/`mcp-static-operations` groups remain pending in this
 full authored-main image. Its separate command-leaf acceptance is recorded in
 the static-operation receipt and does not count as this full-image replay.
 
@@ -85,7 +85,7 @@ go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^T
 
 Log: `.cache/atlas-full-cli-low-core-query-20261105.log`. Eleven distinct low
 groups now pass; the nine remaining original groups and the new static-operation
-group remain pending.
+groups remain pending.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -93,6 +93,7 @@ group remain pending.
 | impact-families | Pass | Pass |
 | mcp-ordinary | Pass | Pass |
 | mcp-aggregates | Pass | Pass |
+| mcp-static-operations | Pending | Pending |
 | edit-ordinary | Pass | Pending |
 | edit-publication | Pass | Pending |
 | edit-aggregates | Pass | Pending |

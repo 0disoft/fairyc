@@ -57,6 +57,13 @@ func verifyCandidateMCPSDKCommand(t *testing.T, image string) {
 func verifyCandidateMCPSDKCommandFixture(t *testing.T, image, source, module, name string) {
 	t.Helper()
 	root := writeWorkspaceSessionFixture(t, source)
+	verifyCandidateMCPWorkspaceFixture(t, image, root, source, workspaceSessionMemberSource, module, name)
+}
+
+// Keep the same real stdio, freshness and cleanup assertions for workspaces
+// whose member source is prepared by the source family's independent oracle.
+func verifyCandidateMCPWorkspaceFixture(t *testing.T, image, root, source, memberSource, module, name string) {
+	t.Helper()
 	prepare := func() (preparedAtlasWorkspace, *atlasmap.WorkspaceCallIndex) {
 		t.Helper()
 		var diagnostic bytes.Buffer
@@ -131,7 +138,7 @@ func verifyCandidateMCPSDKCommandFixture(t *testing.T, image, source, module, na
 			t.Fatalf("MCP SDK response %d: %v; stderr=%s", id, err, stderr.String())
 		}
 		if len(line) > 100001 || !strings.HasSuffix(line, "\n") || strings.Contains(line, root) ||
-			strings.Contains(line, source) || strings.Contains(line, workspaceSessionMemberSource) {
+			strings.Contains(line, source) || strings.Contains(line, memberSource) {
 			t.Fatalf("MCP SDK protocol/leak response %d: %q", id, line)
 		}
 		var reply candidateMCPSDKReply

@@ -65,9 +65,31 @@ The verifier is registered as `impact-static-operations` in full authored-main
 acceptance; registration alone does not attest that group. The original twenty
 optimized groups and completed low groups retain their separate receipt.
 
+## Actual read-only MCP
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateMCPStaticOperationCommand$'
+```
+
+Windows low/optimized pass in 100.776s (25.89s/62.39s including preparation).
+Each real stdio process negotiates the existing protocol, lists exactly the
+read-only impact tool, queries the imported operation against the independent
+six-call Go workspace, rejects changed unlocked source and recovers in the same
+session after explicit independent relocking. Structured source/interface/
+implementation contexts match Go; queries preserve both root and provider bytes.
+Protocol-only stdout, existing response/message bounds and child/pipe cleanup
+assertions remain active. The existing SDK helper delegates its unchanged body
+to a workspace helper, allowing the actual custom provider source without
+substituting a map or Go child. Log:
+`.cache/atlas-static-operation-mcp-20261105.log`.
+Scoped vet, Go formatting and diff checks pass; vet log:
+`.cache/atlas-static-operation-mcp-vet-20261105.log`.
+
+The full authored-main `mcp-static-operations` verifier is registered, not replayed.
+
 ## Remaining boundary
 
-Actual MCP/editor commands and the new full authored-main group replay remain
+Actual editor commands and the two new full authored-main group replays remain
 separate steps. This result does not broaden single-operation language
 admission, implement multi-operation interfaces or close other Atlas families.
 Native Linux, full compiler comparison, consecutive self-build, distribution,
