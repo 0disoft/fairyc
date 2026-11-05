@@ -83,6 +83,14 @@ does not duplicate these summaries. Calls to generic implementations carry both 
 declaration target and exact specialization ID. Generated implementation names are not source names.
 Source documentation attaches once to the original declaration, not once per implementation.
 
+Original generic aggregate headers retain valid struct `@repr(C)` and resource
+`@effects(...)`. The latter is the sorted, explicitly declared `drop_effects`
+set; function `effects` stays empty. Unused templates retain those attributes
+without acquiring executable summaries. Malformed, repeated, misplaced and
+unsupported aggregate attributes are rejected. Concrete resource cleanup facts
+remain separately compiler-observed; ordinary snapshots and wire schemas do not
+change.
+
 Verified function summaries currently retain:
 
 - exact direct Fairy calls;

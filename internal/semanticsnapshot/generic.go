@@ -126,8 +126,9 @@ func buildGenericDeclarations(provenance compiler.GenericProvenance, originals [
 		declaration.Public = original.Public
 		visible := nominals[scopeKey{original.Package, original.Module}]
 		if declaration.Key.Kind != DeclarationFunction {
-			if len(original.Signature.Attributes) != 0 {
-				return nil, fmt.Errorf("generic aggregate attributes require separate snapshot support")
+			declaration.ReprC, declaration.DropEffects, err = genericAggregateAttributes(declaration.Key.Kind, original.Signature.Attributes)
+			if err != nil {
+				return nil, fmt.Errorf("generic %s attributes: %w", original.Name, err)
 			}
 			declaration.Type = TypeRef{Kind: TypeNominal, Name: original.Module + "::" + original.Name, PackageCoordinate: info.input.Coordinate.String()}
 			for i := range original.Parameters {
@@ -184,6 +185,27 @@ func buildGenericDeclarations(provenance compiler.GenericProvenance, originals [
 	}
 	slices.SortFunc(declarations, func(a, b Declaration) int { return compareDeclarationKey(a.Key, b.Key) })
 	return declarations, nil
+}
+
+// These are written header facts, including for unused templates. Resource
+// effects describe its declared cleanup authority, not inferred nested cleanup.
+func genericAggregateAttributes(kind DeclarationKind, attributes []ast.Attribute) (bool, []string, error) {
+	reprC := false
+	for _, attribute := range attributes {
+		switch {
+		case kind == DeclarationStruct && attribute.Name == "repr":
+			if reprC || len(attribute.Arguments) != 1 || attribute.Arguments[0].Raw != "C" {
+				return false, nil, fmt.Errorf("invalid or repeated aggregate representation")
+			}
+			reprC = true
+		case kind == DeclarationResource && attribute.Name == "effects":
+			// genericEffects validates the entire declaration, including duplicates.
+		default:
+			return false, nil, fmt.Errorf("unsupported aggregate attribute %q", attribute.Name)
+		}
+	}
+	effects, err := genericEffects(attributes)
+	return reprC, effects, err
 }
 
 func genericEffects(attributes []ast.Attribute) ([]string, error) {

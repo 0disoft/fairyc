@@ -186,7 +186,13 @@ their original kind, ordered field names/types/spans and a coordinate-bound self
 type. Nominal template applications retain recursively converted type arguments.
 Binders use canonical positions rather than display names. Cleanup presence is
 the `source-declared` marker, not a claim about empty/non-empty inferred drop glue
-or effects. Aggregate attributes still require separate adaptation and fail closed.
+or inferred effects. Struct `@repr(C)` and resource `@effects(...)` now retain
+their written header facts, including on unused templates. Resource effects
+populate canonical `drop_effects`, not function `effects`; they describe declared
+cleanup authority rather than proof of an unused body or inferred nested cleanup.
+Duplicate, malformed, misplaced and other unsupported aggregate attributes fail
+closed. Existing snapshot and v3 map fields carry these facts without a wire
+schema change.
 
 The existing SymbolId encoder can encode these generic aggregate headers without
 changing ordinary identities or its format. Tests preserve IDs across binder and

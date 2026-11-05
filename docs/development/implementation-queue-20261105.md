@@ -53,6 +53,15 @@ authorized by this queue.
 
 ## Progress
 
+- Atlas aggregate-instance preparation exposed a Go snapshot prerequisite:
+  generic aggregate headers rejected every attribute, including declared cleanup
+  effects used by the existing native aggregate fixtures. The header adapter now
+  preserves struct repr(C) and resource declared drop effects, with used/unused,
+  detached-view and ten malformed/misplaced attribute controls. Complete
+  semanticsnapshot and atlasmap Go suites pass on Windows. This is a Go header
+  fix only; Fairy aggregate-instance projection/production and all remaining
+  queue items still require their own acceptance.
+
 - Baseline: clean `main` at `fdf7e6bb`; all five implementation families and the
   deferred-design/acceptance families above remain in scope.
 - Go MCP fallback error bounds are fixed in `e72b5564`; escaped IDs cannot exceed
