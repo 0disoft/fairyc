@@ -85,16 +85,19 @@ fn attributes::Argument argument(attributes::Argument a,usize offset,ref v::Vec<
     return attributes::Argument{.kind=a.kind,.start=moved(a.start,offset),.end=moved(a.end,offset),.token=token_at(tokens,a.token)};
 }
 
-fn Problem generic(ref syntax::Parsed file,usize module_index){
+fn Problem generic(ref syntax::Parsed file,usize module_index,bool aggregates){
     var usize i=0;while(i<syntax::declaration_count(file)){let d=syntax::declaration_at(file,i);
         let bool vector=d.kind==6 && bytes::equal(syntax::source_view(file)[d.name_start..d.name_end],b"Vec") && sdk::authentic(b"std::vec",syntax::source_view(file));
-        if(d.generic_parameters!=0 && (d.kind!=3 && !vector || d.owner_end!=0)){return fail(4501,module_index,d.start,d.end);}
+        if(d.generic_parameters!=0 && (d.kind!=3 && !vector && !(aggregates && (d.kind==4 || d.kind==6)) || d.owner_end!=0)){return fail(4501,module_index,d.start,d.end);}
         i+=1;
     }
     return Problem{.code=0,.module_index=0,.start=0,.end=0};
 }
 
-pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){
+pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){return join_range_mode(sources,first,stop,false);}
+// The caller must own aggregate-capable signature metadata for these sources.
+pub fn Result<syntax::Parsed,Problem> join_aggregate_range(ref v::Vec<syntax::Parsed> sources,usize first,usize stop){return join_range_mode(sources,first,stop,true);}
+fn Result<syntax::Parsed,Problem> join_range_mode(ref v::Vec<syntax::Parsed> sources,usize first,usize stop,bool aggregates){
     let usize total=v::len<syntax::Parsed>(sources);
     if(total==0 || total>limits::source_files()){return .err(fail(10,0,0,0));}
     if(first>=stop || stop>total){return .err(fail(9,if(first<total){first}else{0},0,0));}
@@ -105,7 +108,7 @@ pub fn Result<syntax::Parsed,Problem> join_range(ref v::Vec<syntax::Parsed> sour
         let ref syntax::Parsed file=v::at<syntax::Parsed>(sources,first+index);
         if(syntax::problem_count(file)!=0){return .err(fail(9,first+index,0,syntax::source_view(file).len));}
         if(syntax::declaration_count(file)==0 || syntax::declaration_at(file,0).kind!=1){return .err(fail(9,first+index,0,0));}
-        let Problem rejected=generic(file,first+index);
+        let Problem rejected=generic(file,first+index,aggregates);
         if(rejected.code!=0){return .err(rejected);}
         let usize separator=if(index+1<count){1}else{0};
         if(syntax::source_view(file).len>limits::source_bytes() || bytes::len(ref joined)>limits::program_bytes()-separator || syntax::source_view(file).len>limits::program_bytes()-separator-bytes::len(ref joined)){return .err(fail(10,first+index,0,syntax::source_view(file).len));}

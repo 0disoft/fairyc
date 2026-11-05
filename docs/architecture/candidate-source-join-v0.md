@@ -47,6 +47,14 @@ member index payload_start+payload_count shifts with the same field base.
 Scalar function templates retain original source ownership until binding and
 specialization. Generic aggregate/receiver declarations remain closed here.
 
+The compiler-private `join_aggregate_range` route retains scalar-parameter struct
+and resource templates for an already authenticated aggregate signature owner.
+`module_unit_bind` selects it only for that owner and recognizes struct generic
+binders when resolving the joined type arena. It shares the exact copy/remapping
+and budget implementation; no source spelling is substituted. Ordinary `join`
+and `join_range` retain their aggregate refusal, and generic receiver methods
+remain closed. This is source preparation, not executable aggregate admission.
+
 Limits of the joined owner: 512 inputs, 1048576 joined bytes including separators,
 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
 1024 fields and 4096 attributes and attribute arguments. The input cap is

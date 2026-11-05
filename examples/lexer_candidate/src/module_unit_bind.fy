@@ -17,9 +17,9 @@ fn Result<usize,u32> target(ref signatures::Program metadata,ref mut v::Vec<Coor
     if(id==0 || id>=v::len<usize>(cache)){return .err(9);}let usize known=*v::at<usize>(cache,id);if(known!=0){return .ok(known);}
     if(!v::push<Coordinate>(targets,coordinate(signatures::declaration_at(metadata,id))).is_ok){return .err(11);}let usize added=v::len<Coordinate>(targets);let ref mut usize slot=v::at_mut<usize>(cache,id);*slot=added;return .ok(added);
 }
-fn bool parameter(ref syntax::Parsed p,usize owner,usize root){
+fn bool parameter(ref syntax::Parsed p,usize owner,usize root,bool aggregates){
     let d=syntax::declaration_at(p,owner);let n=syntax::type_at(p,root);
-    if((d.kind!=3 && d.kind!=6) || d.generic_parameters==0 || n.start<d.start || n.end>d.end){return false;}var usize i=0;
+    if((d.kind!=3 && d.kind!=6 && !(aggregates && d.kind==4)) || d.generic_parameters==0 || n.start<d.start || n.end>d.end){return false;}var usize i=0;
     while(i<syntax::generic_parameter_count(p,owner)){let param=syntax::generic_parameter_at(p,owner,i);if(bytes::equal(syntax::source_view(p)[param.start..param.end],syntax::type_text(p,root))){return true;}i+=1;}
     return false;
 }
@@ -48,14 +48,14 @@ pub fn Result<Bound,join::Problem> bind(ref v::Vec<syntax::Parsed> sources,ref s
     let usize files=v::len<syntax::Parsed>(sources);if(files!=signatures::module_count(metadata)){return .err(fail(12,0,0,0));}
     if(first>=stop || stop>files){return .err(fail(9,0,0,0));}var usize work=0;var usize module_index=0;
     while(module_index<files){if(!charge(ref mut work,1)){return .err(fail(10,module_index,0,0));}if(!signatures::source_matches(metadata,module_index,v::at<syntax::Parsed>(sources,module_index))){return .err(fail(12,module_index,0,0));}module_index+=1;}
-    let p=switch(join::join_range(sources,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let p=switch(if(signatures::aggregate_types(metadata)){join::join_aggregate_range(sources,first,stop)}else{join::join_range(sources,first,stop)}){case .ok(p):{p}case .err(e):{return .err(e);}};
     var v::Vec<Coordinate> definitions=v::empty<Coordinate>();var v::Vec<Coordinate> targets=v::empty<Coordinate>();var v::Vec<usize> cache=v::empty<usize>();var v::Vec<usize> type_targets=v::empty<usize>();var v::Vec<usize> value_targets=v::empty<usize>();
     var usize i=0;while(i<=signatures::declaration_count(metadata)){if(!charge(ref mut work,1)){return .err(fail(10,first,0,0));}if(!v::push<usize>(ref mut cache,0).is_ok){return .err(fail(11,first,0,0));}i+=1;}
     module_index=first;while(module_index<stop){let file=v::at<syntax::Parsed>(sources,module_index);i=0;while(i<syntax::declaration_count(file)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,0,0));}let d=syntax::declaration_at(file,i);if(!v::push<Coordinate>(ref mut definitions,Coordinate{.kind=d.kind,.module_index,.declaration=i+1,.start=d.start,.end=d.end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}i+=1;}module_index+=1;}
     var usize owner=0;i=1;while(i<=syntax::type_count(ref p)){let n=syntax::type_at(ref p,i);if(!charge(ref mut work,1)){return .err(location(ref p,first,10,n.start,n.end));}var usize bound=0;
         while(owner+1<syntax::declaration_count(ref p) && (syntax::declaration_at(ref p,owner).kind==1 || syntax::declaration_at(ref p,owner).kind==2 || n.start>=syntax::declaration_at(ref p,owner).end)){owner+=1;}
         let declaration=syntax::declaration_at(ref p,owner);let storage=declaration.kind==10 && declaration.start<=n.start && n.end<=declaration.end;
-        if(n.kind==1 && !storage && !binding::builtin(syntax::type_text(ref p,i)) && !parameter(ref p,owner,i)){
+        if(n.kind==1 && !storage && !binding::builtin(syntax::type_text(ref p,i)) && !parameter(ref p,owner,i,signatures::aggregate_types(metadata))){
             let usize module_index=first+syntax::module_index(ref p,n.start);let found=signatures::declaration_lookup_measured(metadata,module_index,syntax::type_text(ref p,i),ref mut work);if(work>1048576){return .err(location(ref p,first,10,n.start,n.end));}if(found.code!=0){return .err(location(ref p,first,found.code,n.start,n.end));}let d=signatures::declaration_at(metadata,found.item);if(d.kind!=4 && d.kind!=6 && d.kind!=11){return .err(location(ref p,first,9,n.start,n.end));}
             bound=switch(target(metadata,ref mut targets,ref mut cache,found.item)){case .ok(id):{id}case .err(code):{return .err(location(ref p,first,code,n.start,n.end));}};
         }if(!v::push<usize>(ref mut type_targets,bound).is_ok){return .err(location(ref p,first,11,n.start,n.end));}i+=1;

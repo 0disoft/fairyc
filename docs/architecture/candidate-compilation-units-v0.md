@@ -190,6 +190,17 @@ materialize a field table for every nominal node in the global prefix. Each
 result retains the 512-shape, 2048-field and 512-callable bounds;
 parameter storage is capped at 32768 and owned spelling storage at 65536 bytes.
 
+The explicit aggregate-capable signature route also retains kind-20 struct and
+kind-21 resource shapes. Their source and fields join the sealed preparation
+before publication. Constructors and specialized cleanup contexts retain exact
+body-type requests; resource field queries preserve the same module privacy.
+`module_unit_aggregate_plan` binds these contexts to the original declaration and
+ordered scalar tuple. Cleanup helpers receive those concrete arguments through
+the private scalar-only resolver. Missing plan facts, source drift and unsupported
+stored fields return no Interfaces owner. This preparation leaves construction
+value checking, ownership/cleanup Flow, executable MIR/C and cache/Atlas/CLI
+integration to the next pipeline stages; it does not widen the ordinary entry.
+
 Project linking admits at most 8192 rebound frames. Type, frame and metadata
 plans each retain their 1048576 work cap. Whole-project rebinding and call
 validation have a separate 8388608 work cap, recorded by an explicit project

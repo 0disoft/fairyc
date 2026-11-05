@@ -14,13 +14,14 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    edges, and retains exact package-coordinate `g0_`/public-closure identities.
    User aggregate planning does not acquire SDK storage intrinsics or nominal
    argument admission. Ordinary `build_sources` still closes aggregate execution.
-2. **Concrete types/fields/signatures and field contracts implemented; Interfaces integration open.**
+2. **Concrete types/fields/signatures, field contracts and Interfaces preparation implemented.**
    Each original declaration and ordered argument tuple is materialized once;
    fields substitute structurally and preserve source ownership. Signature,
    annotation and constructor type requests use the actual graph. Ordinary
    field/layout contracts now check specialized shape facts and finite by-value
-   layouts. The ordinary Interfaces owner still must consume that route without
-   partial publication before executable admission.
+   layouts. The ordinary Interfaces owner now consumes that route with retained
+   constructor, specialization and cleanup facts. Executable body checking and
+   lowering remain open.
 3. **Ownership, cleanup and executable MIR.** Connect resource instances and
    cleanup-helper calls to Flow, kind-aware identities, MIR verification and both
    C emission forms. Require native values and exact cleanup traces against Go;
@@ -280,3 +281,78 @@ Option/Result, nominal/raw-pointer types and arrays, exercising the preserved
 ordinary route alongside the new private field/layout entry points. Scoped vet,
 Go formatting and diff checks pass. No full candidate CLI, Linux, self-build,
 clean-machine or hosted claim is made by this replay.
+
+## Actual Interfaces, constructors and cleanup specialization
+
+`module_unit_interfaces::build` and `build_unit_seeded` now consume the private
+aggregate-capable signature owner. The source join has an explicit aggregate
+route, and binding preserves struct as well as resource generic parameters.
+The ordinary source join and ordinary signature entry remain closed for user
+aggregate templates. Source/current-bound validation still precedes publication.
+
+The new `module_unit_aggregate_plan` matches the original module/declaration and
+ordered scalar arguments against the retained sealed source plan. Constructors
+join exact prepared source uses rather than being instantiated as functions.
+Ordinary calls retain an aggregate type slot; specialized function and cleanup
+dependencies retain the same type in their existing dependency records. Body
+type requests independently preserve the record expression and selected context.
+Missing contexts/constructor facts reject instead of adding an orphan instance.
+
+Resource instances seed cleanup preparation with their exact retained argument
+tuple, abilities, effects and source coordinates. Generic cleanup helpers now
+receive forwarded T arguments. A private scalar-only argument resolver handles
+these resource contexts while rejecting composite arguments and rolling back
+temporary graph nodes. Ordinary and authenticated SDK-vector argument resolution
+keep their previous route. Stored-field contracts run before Interfaces escapes.
+Field queries recognize both aggregate kinds and retain resource field privacy.
+
+`TestCandidateGenericAggregateInterfaces` reuses the independent Go Flow/expanded
+field oracle for the layout inputs and adds four accepted source variants:
+ordinary construction, a generic factory called across packages, an extended
+scalar factory argument and a constructor inside generic resource cleanup.
+There are thirteen accepted and five refused source inputs in each native profile;
+the direct by-value cycle remains a separate Fairy invariant, not a Go Flow
+rejection. Actual complete-source Interfaces fields match the Go expectations.
+
+Every accepted input also constructs both retained-import and compilation-unit
+Interfaces for the root package alone. The factory root must retain exactly its
+Cell/Holder shapes, factory/helper specializations and resource cleanup; unused
+Pair shapes do not enter that selected unit. Constructor call/dependency facts
+must join exactly one body-type request. Resource cleanup tuples and field
+privacy are checked against the retained graph. Additional native controls
+exercise the unchanged ordinary join gate, source drift, work exhaustion,
+invalid scalar bindings, missing constructor facts and composite argument refusal
+without graph growth.
+
+Final focused Windows MSVC low/optimized probe passes in 38.26s:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateGenericAggregateInterfaces$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_layouts_test.go internal/cli/candidate_generic_aggregate_interfaces_test.go
+git diff --check
+```
+
+The first execution exposed the existing source-join aggregate refusal; resource
+argument forwarding also required the private resolver above. A reserved-word
+variable in the final test guards was corrected before the final pass. Earlier
+failed runs are not counted as passes.
+
+Interfaces preparation does not check construction values or resource body Flow,
+execute cleanup, lower/verify aggregate MIR, emit/link aggregate C, or provide
+cache/Atlas/full CLI acceptance. Those remain required next steps under the same
+objective. Linux stays batched. No stable API/SDK ABI, DB, dependency, hygiene or
+runner change; no push or hosted dispatch.
+
+The final combined Windows replay passes in 277.633s. All seven selected roots
+execute with no skips, including both native profiles and the three legacy
+scalar-argument/concrete-type/signature-diagnostic fixtures:
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidate(GenericAggregate(Plan|Types|Signatures|Layouts|Interfaces)|AtlasTypes|GenericTransportAdmission)$'
+```
+
+This covers final production and fixture inputs. Scoped vet, formatting and diff
+checks pass. Full candidate CLI, Linux, consecutive self-build, clean-machine
+distribution and hosted same-commit acceptance remain separate open gates.

@@ -204,3 +204,9 @@ pub fn Resolution aggregate_resolve(ref catalog::Catalog c,ref syntax::Parsed p,
 }
 
 pub fn Result<v::Vec<usize>,BatchProblem> aggregate_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){return batch(c,p,module_index,roots,declaration,substitutions,declaration!=0,true,graph);}
+
+// Scalar-only arguments in an authenticated aggregate context include resource
+// cleanup binders. Refused composite requests roll back temporary graph nodes.
+pub fn Resolution aggregate_argument(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,usize root,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){
+ let before=count(graph);let result=aggregate_resolve(c,p,module_index,declaration,root,substitutions,graph);if(result.problem.code!=0){return result;}let t=at(graph,result.type);if(t.kind!=1 || !transport::valid(t.scalar)){rollback(graph,before);let n=syntax::type_at(p,root);return fail(4502,module_index,n.start,n.end);}return result;
+}

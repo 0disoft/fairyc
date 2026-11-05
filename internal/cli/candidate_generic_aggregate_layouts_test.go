@@ -45,15 +45,16 @@ func TestCandidateGenericAggregateLayouts(t *testing.T) {
 	}, "project_source_plan")
 }
 
-func candidateAggregateLayoutOracle(t *testing.T) []byte {
+type candidateAggregateLayoutFixture struct {
+	name, root, maker string
+	reverse           bool
+	reject            uint64
+	layoutOnly        bool
+}
+
+func candidateAggregateLayoutOracle(t *testing.T, additional ...candidateAggregateLayoutFixture) []byte {
 	t.Helper()
-	type fixture struct {
-		name, maker string
-		reverse     bool
-		reject      uint64
-		layoutOnly  bool
-	}
-	cases := []fixture{
+	cases := []candidateAggregateLayoutFixture{
 		{name: "nested scalar struct and resource"},
 		{name: "coordinate and module reorder", reverse: true},
 		{name: "structural wrappers", maker: strings.Replace(aggregateLayoutMaker, "T value;", "T value;Option<T> optional;Result<T,u8> result;", 1)},
@@ -69,6 +70,7 @@ func candidateAggregateLayoutOracle(t *testing.T) []byte {
 		{name: "duplicate field", maker: strings.Replace(aggregateLayoutMaker, "T value;", "T value;T value;", 1), reject: 102},
 		{name: "ordinary recursive layout", maker: strings.Replace(aggregateLayoutMaker, "pub struct Cell<T>{T value;}", "pub struct Loop{Loop next;}pub struct Cell<T>{T value;Loop hidden;}", 1), reject: 9, layoutOnly: true},
 	}
+	cases = append(cases, additional...)
 	var wire bytes.Buffer
 	wire.WriteString("FYGFLD01")
 	number := func(n uint64) {
@@ -84,7 +86,11 @@ func candidateAggregateLayoutOracle(t *testing.T) []byte {
 		if maker == "" {
 			maker = aggregateLayoutMaker
 		}
-		texts := []string{"module root;import maker as m;fn i32 main(){return 0;}", maker, aggregatePlanHelper}
+		root := tc.root
+		if root == "" {
+			root = "module root;import maker as m;fn i32 main(){return 0;}"
+		}
+		texts := []string{root, maker, aggregatePlanHelper}
 		order := []int{0, 1, 2}
 		if tc.reverse {
 			slices.Reverse(order)

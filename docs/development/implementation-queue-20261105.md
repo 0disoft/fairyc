@@ -222,3 +222,18 @@ authorized by this queue.
   replay passes in 168.073s with both Windows profiles and no selected skips.
   Scoped vet, Go formatting and diff checks pass; full CLI/Linux/self-build/
   distribution/hosted acceptance remains open.
+
+- Actual aggregate Interfaces now retain specialized shapes, constructor/body-type
+  facts, resource cleanup tuples and generic helper requests through the existing
+  whole-source and selected-unit owners. An explicit source-join route and
+  scalar-only resource argument resolution preserve ordinary admission gates.
+  The focused Windows low/optimized probe passes in 38.26s over eighteen source
+  variants, selected root/import modes, field privacy and refusal controls; see
+  the aggregate plan. Ownership/construction body checking, actual cleanup,
+  Flow/MIR/C execution, cache/Atlas/full commands and final acceptance remain
+  required. This does not finish the aggregate family or the full objective.
+
+  The final seven-root aggregate/Atlas/legacy scalar admission replay passes in
+  277.633s on Windows with no selected skips. Scoped vet, formatting and diff
+  checks pass. Full CLI, Linux, self-build, distribution and hosted gates remain
+  open.
