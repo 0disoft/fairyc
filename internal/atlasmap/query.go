@@ -1008,10 +1008,12 @@ func cloneQueryContext(value QueryContext) QueryContext {
 }
 
 func cloneQueryHeader(value Header) Header {
-	value.Features = slices.Clone(value.Features)
-	value.Dependencies = slices.Clone(value.Dependencies)
-	value.PackageReferences = slices.Clone(value.PackageReferences)
-	value.Omissions = slices.Clone(value.Omissions)
+	// Map transport has one spelling for an empty array. Keep overview bytes,
+	// record costs and derived checksums independent of nil backing slices.
+	value.Features = append([]string{}, value.Features...)
+	value.Dependencies = append([]string{}, value.Dependencies...)
+	value.PackageReferences = append([]PackageReference{}, value.PackageReferences...)
+	value.Omissions = append([]string{}, value.Omissions...)
 	return value
 }
 

@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Context Pack implementation reproduced and fixes Go overview header nil/empty
+  array drift across unchanged map transport. Four detached header arrays now
+  follow the existing canonical empty-array contract before selection costs are
+  measured. Real source/map round-trip, exact/one-short/one-more mandatory
+  bounds and caller immutability controls pass, as do the complete atlasmap/
+  contextpack suites, experimental Go pack commands and scoped vet/format/LF/
+  diff checks. Exact failed/passed evidence is in the Context Pack plan. This
+  Go prerequisite does not finish Fairy overview/show/around, actual dispatch
+  or any original implementation/final gate.
+
 - Fairy atlas-pack overview/show/around argument selection now matches 317 Go
   parser cases and three invalid queries per Windows profile, 640 native
   observations (33.583s). Exact versions, lexical ten-relation filters, action-

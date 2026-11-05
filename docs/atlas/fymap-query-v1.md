@@ -70,6 +70,11 @@ depth, relation-filter, dependency-join, and unavailable-incoming-map omissions 
 codes with known counts where the index can prove them. An unknown count remains explicitly
 unknown.
 
+Overview normalizes its detached header's empty feature, dependency, package-reference
+and omission arrays before measuring the mandatory package record. Original and
+map-restored indexes therefore retain identical overview bytes, record costs and
+cutoffs. This normalization does not modify the caller's partition or map bytes.
+
 The symbol catalog has separate positive symbol-count and selection-byte limits. Its mandatory
 context/request/total record, including echoed optional module and name filters, counts toward
 selection bytes, while the symbol limit counts emitted identity records. Module, name, and kind

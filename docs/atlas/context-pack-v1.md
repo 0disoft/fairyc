@@ -66,6 +66,13 @@ Go's compact JSON encoder over fixed structs defines the only current byte repre
 that have no entries encode as `[]`, and disabled fact variants encode as `null`. Field omission,
 pretty printing, key reordering, or another JSON spelling is not this encoding.
 
+The overview header's `Features`, `Dependencies`, `PackageReferences` and `Omissions`
+arrays are detached and normalized to `[]` before record selection is measured.
+An unchanged map round trip therefore cannot change overview selection bytes or
+its derived pack checksum merely by changing nil versus empty backing slices.
+Snapshot fact fields retain their owning query representation; this rule does
+not invent a different representation for optional fields or empty reason lists.
+
 ## Checksum and bounds
 
 The checksum is `fyctx1-sha256-` plus 64 lowercase hexadecimal digits. SHA-256 hashes a domain and

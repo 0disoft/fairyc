@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Canonical Go overview header arrays across current-map transport: `internal/atlasmap/query.go`, `query_header_test.go`; owning query/pack rules: `docs/atlas/fymap-query-v1.md`, `context-pack-v1.md`. Detached empty arrays normalize before mandatory record measurement, so map restoration cannot change output or selection costs through nil slice state. Reproduction, regression and current scope: `docs/development/candidate-context-pack-20261106.md`.
+
 - Fairy Context Pack argument selection: `examples/lexer_candidate/src/project_pack_options.fy`; independent actual Go parser/native controls: `internal/cli/candidate_pack_options_test.go`. Exact overview/show/around versions, limits, selectors, relation filters and action policy perform no workspace I/O. Windows evidence and the remaining complete pack/query/dispatcher sequence: `docs/development/candidate-context-pack-20261106.md`.
 
 - Fairy source-backed calls command: `examples/lexer_candidate/src/project_calls_source.fy`, `project_calls_cli.fy`, `project_experimental_cli.fy`. Fresh requested-family Complete production precedes exact UID selection, current admission for every package, whole-workspace join and canonical catalog output. Argument/help precedes I/O; locked requests preserve bytes and unlocked requests refresh the ordinary source lock. Independent Go/native command/source/SDK oracles: `internal/cli/candidate_calls_command_test.go`, `candidate_calls_source_command_test.go`; full authored-main registration: `candidate_atlas_cli_test.go`. Exact Windows evidence, fingerprints and remaining broader/full-CLI/Linux scope: `docs/development/candidate-workspace-calls-20261106.md`.

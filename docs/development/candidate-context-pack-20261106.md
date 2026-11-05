@@ -64,3 +64,29 @@ functions. Scoped CLI vet, Go formatting, LF/EOF and diff checks pass.
 No grammar, stable CLI, SDK ABI, dependency, DB, workflow/runner or hygiene-policy
 change; native Linux/full CLI/full Go/self-build/distribution/hosted execution
 is not established by this isolated leaf. No push or dispatch.
+
+## Go overview header transport prerequisite
+
+Independent pack comparison reproduced a pre-existing Go distinction: source
+partitions can retain nonnil empty feature/dependency slices, while map decode
+reconstructs nil empties. `cloneQueryHeader` previously preserved that allocation
+detail, changing overview JSON, selection costs/cutoffs and derived pack checksums
+after an unchanged map round trip. This is not an identity/source change.
+
+`internal/atlasmap/query_header_test.go` first reproduced the changed overview
+against an actual checked source/map round trip; the original command failed at
+`.cache/pack-header-before-20261106.log`. Header projection now detaches and
+normalizes the four header array fields to `[]`, matching the existing empty-array
+contract. Original/restored mandatory record limits at one-short/exact/one-more
+and nonempty clone immutability are pinned separately.
+
+The full `internal/atlasmap` and `internal/contextpack` package suites pass in
+2.077s/0.202s (`.cache/pack-header-after-20261106.log`). Final focused header
+controls pass in 0.242s. Existing experimental Go atlas-pack command regressions
+pass in 6.631s; scoped atlasmap/contextpack/CLI vet, formatting/LF/diff checks pass.
+The owning query and Context Pack v1 documents now explicitly state normalization;
+v2/v3 retain the same overview projection. This corrects experimental overview
+bytes/checksums and selection costs for empty header arrays; it changes no map
+bytes, original partition, language/SDK ABI, DB, dependency or runner policy.
+It is a Go prerequisite, not Fairy pack or actual CLI acceptance. No push,
+dispatch or native Linux execution; the full objective remains open.
