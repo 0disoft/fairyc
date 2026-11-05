@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- The final drop-production source at `1e4b9248` now passes actual authored-main
+  impact-families, impact-sdk-vector, catalog-ordinary, pack-ordinary,
+  pack-sources and pack-sdk under both Windows profiles: twelve selected
+  profile/group combinations, no selected skips. Separate low parent commands
+  retain every verifier assertion and authenticate the same generated-C/profile/
+  toolchain/image digests; product timeouts are unchanged. See
+  `docs/ops/windows-candidate-atlas-drops-cli-20261106.md` for exact timings,
+  scope and failed-parent accounting. This closes these drop command selections,
+  not all 41 CLI groups, remaining collectors or any broader/final gate.
+
 - Fairy Complete-bound v1/v2/v3 production now retains canonical executable drop
   sites in ordinary, generic and concrete cleanup summaries, counts calls plus
   drops and reports only the newly collected drop class exact. Verified batch
@@ -64,7 +74,8 @@ authorized by this queue.
   and 94 independent current maps in 844.528s, including SDK Vec, current query/
   join admission and exact work/count bounds. Authored check/locked (671 files,
   8,330 MIR functions), selected Go query/pack regressions, scoped vet and format/
-  LF/diff pass. Actual full-main command selections remain in progress; see
+  LF/diff pass. The six actual full-main command selections now pass both
+  profiles in the separate receipt above; see also
   `candidate-atlas-observed-relations-20261106.md`. The remaining collectors and
   every original broader/final gate remain open; native Linux stays batched.
 
