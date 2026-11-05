@@ -345,3 +345,22 @@ authorized by this queue.
   bodies and four separate native runs. Scoped vet/format/diff pass; exact failure
   and unchanged-input reuse accounting is in the aggregate plan. Complete interfaces,
   restoration/cache/Atlas/SDK/actual commands and every final gate remain open.
+
+
+- Aggregate Complete publication now derives original source exports, exact
+  coordinate-bound concrete type spellings, ordinary/source hashes and ordered
+  specialization sets after actual checking/linking. Tuple numbering preserves
+  its second edge; metadata tuples and private instances cannot become public
+  value spellings. The final twelve-positive/four-negative three-package probe
+  passes Windows low/optimized in 83.87s, with 72 exact Go interface comparisons
+  and explicit work/ordering/admission controls. This closes the bounded cold
+  Complete-interface slice; artifact/current-source restoration, unit/disk cache,
+  Atlas/SDK production, actual commands and every final acceptance gate remain
+  open. Admitted spelling code shares the projection but does not yet admit
+  aggregate artifacts. See the aggregate plan for failed-harness/final evidence.
+
+  The final combined public-interface/ordinary-inline-artifact command passes in
+  227.924s with no selected skips. Ordinary restoration/partitioning passes both
+  profiles (143.92s) with four generated consumer executions returning 23. Scoped
+  vet, formatting and diff checks pass; aggregate restoration is the next required
+  implementation slice, not established by this ordinary regression.

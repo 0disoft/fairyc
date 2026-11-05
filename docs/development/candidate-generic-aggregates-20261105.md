@@ -28,7 +28,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
    checked cleanup requests alone are insufficient.
-4. **Unit/project source identities and linking implemented; interfaces, restoration and Atlas production remain.** Keep original templates as
+4. **Unit/project source identities, linking and Complete interfaces implemented; restoration and Atlas production remain.** Keep original templates as
    source exports, bind instance/type/cleanup identities to current source,
    preserve definition-dependent invalidation and emit concrete aggregate and
    cleanup facts from Complete. Include SDK source families through their actual
@@ -879,3 +879,76 @@ prepared/native inputs. The full implementation queue remains active: interface
 publication, restoration/cache/Atlas/SDK/actual commands and all final gates are
 still required. Existing strict standalone warning limitations remain separate
 from this unchanged private native-consumer acceptance.
+
+
+## Complete public aggregate interfaces
+
+The compiler-private `project_compiler_core::build_complete_aggregate_sources`
+now authenticates original aggregate source planning, materializes concrete types,
+checks bodies/Flow, links identified units and derives every package interface
+before returning the existing `Complete` owner. Ordinary complete and cache entry
+points retain their existing admission policy; this does not yet enable aggregate
+CLI execution or restoration.
+
+Cold and admitted public views share the exact retained instance-name projection.
+Kind-20/21 types use their original normalized module and retained source-derived
+`g0_` identity, with no generated declaration added to source exports. Public type
+rendering preserves self/dependency coordinates and checks original declaration
+kind, generic arity, source freshness and visibility. Unresolved instances and
+kind-22 tuple metadata cannot become public value spellings. Public type ordering
+now translates a tuple's second edge as well as its first edge.
+
+`TestCandidateGenericAggregatePublicInterfaces` compares twelve three-package
+source variants with independent production Go analysis, exact ordinary descriptor
+bytes, ordinary/source interface hashes and ordered specialization sets. Inputs
+cover reordered modules/rebased numeric owners, concrete fields, unused exported
+templates, unrelated private bodies, late public records/concrete signatures,
+Option, reversed tuples, imported borrows and private instantiated records.
+Separate failures cover private imports, private instances in exported signatures,
+late unresolved signature types and invalid constructors. The private export must
+fail specifically at interface publication, not silently disappear from a prefix.
+Work exhaustion, ordinary-route exclusion, malformed names and a tuple relocation
+with a moved second edge are explicit controls. Tuple metadata also rejects public
+value rendering after relocation.
+
+Initial native probes failed in their harness: an exhaustion assertion assumed
+an obsolete 8 MiB link allowance while the unchanged product uses 16 MiB, and the
+reversed-source fixture supplied resolved bindings in descending source order.
+The harness now reads the actual limit and supplies canonical bindings. The first
+full command failed in 88.76s; low diagnostic commands failed in 26.62s, 27.73s and
+23.49s. The repaired twelve-positive/three-negative low replay passed in 25.14s.
+These are not credited as final current-input acceptance; the final expanded
+matrix also includes private-export rejection and tuple-relocation controls.
+
+The final sixteen-input matrix passes both Windows profiles in 83.87s
+(low 14.07s, optimized 59.98s), with no selected skips. Twelve positive
+three-package inputs account for 72 exact interface comparisons across the two
+host profiles; four source/publication refusals execute per profile. The earlier
+fifteen-input matrix, including tuple relocation, separately passed in 87.21s
+(low 14.54s, optimized 60.92s); it is not substituted for final-input acceptance.
+
+Native Linux, full CLI, artifact/cache restoration, Atlas/SDK production,
+self-build, distribution/clean-machine and same-commit hosted CI remain required.
+No stable public API/SDK ABI, DB, dependency, runner, timeout or hygiene policy
+changes. No push, CI dispatch, release or deployment.
+
+
+The final combined command passes in 227.924s, with no selected skips. Existing
+`TestCandidateInlinePipeline` passes in 143.92s: cold Complete/public interfaces,
+project artifact encode/decode, current-source restoration and inline header
+partitioning remain valid under both Windows compiler profiles. Both generated
+consumer profiles execute for each host (four runs), returning 23 with no output.
+This is ordinary inline/artifact regression evidence, not aggregate restoration.
+Scoped vet, Go formatting and diff checks also pass.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestCandidate(GenericAggregatePublicInterfaces|InlinePipeline)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_public_test.go internal/cli/candidate_generic_aggregate_interface_oracle_test.go
+git diff --check
+```
+
+The independent Go oracle helper was additionally exercised against all six
+existing aggregate execution fixtures using a temporary Go overlay; those checks
+do not count as new Fairy native execution or a repeat of earlier C consumer runs.

@@ -16,7 +16,7 @@ pub fn usize mapped(ref Order p,usize id){return if(id==0 || id>count(p)){0}else
 pub fn usize original(ref Order p,usize id){assert(id>0 && id<=count(p));return *v::at<usize>(ref p.new_to_old,id-1);}
 fn Result<types::Type,u32> translated(types::Type row,ref v::Vec<usize> map){
     var out=row;if(out.first!=0){if(out.first>v::len<usize>(map)){return .err(9);}out.first=*v::at<usize>(map,out.first-1);if(out.first==0){return .err(9);}}
-    if(out.kind==6){if(out.second==0 || out.second>v::len<usize>(map)){return .err(9);}out.second=*v::at<usize>(map,out.second-1);if(out.second==0){return .err(9);}}return .ok(out);
+    if(out.kind==6 || out.kind==22 && out.second!=0){if(out.second==0 || out.second>v::len<usize>(map)){return .err(9);}out.second=*v::at<usize>(map,out.second-1);if(out.second==0){return .err(9);}}return .ok(out);
 }
 fn Result<usize,u32> find(ref clean::Program p,ref v::Vec<usize> slots,types::Type row,ref mut usize work){var usize slot=identity::bucket(row);var usize probes=0;
     while(probes<8192){if(!budget::charge(work,1)){return .err(10);}let id=*v::at<usize>(slots,slot);if(id==0){return .err(9);}if(identity::same(clean::type_at(p,id),row)){return .ok(id);}slot=(slot+1)&8191;probes+=1;}return .err(10);

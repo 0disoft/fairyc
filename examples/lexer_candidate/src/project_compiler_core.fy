@@ -15,6 +15,7 @@ import module_project_identified_compile as identified_units;
 import module_project_identified_ir as identified;
 import module_project_interfaces as interfaces;
 import generic_source_plan as original_plan;
+import generic_aggregate_types as aggregate_types;
 import generic_signature_diagnostics as diagnostics;
 import std::vec as v;
 import module_catalog as modules;
@@ -61,6 +62,18 @@ pub fn Result<Complete,Problem> build_complete(ref input::Input sources,ref coor
 pub fn Result<Complete,Problem> build_complete_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){
     var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
     return build_complete_reporting_sources(sources,owners,imports,table,ref mut reports,source_work,link_work);
+}
+// Explicit private aggregate route: the same Complete owner is published only
+// after original-source planning, concrete checking, linking and all interfaces.
+// Ordinary/cache restoration entry points keep their existing admission policy.
+pub fn Result<Complete,Problem> build_complete_aggregate_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){
+    let plan=switch(source_plan::build_aggregate_sources(sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let prepared=switch(aggregate_types::build(plan,sources,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata=switch(signatures::build_aggregates(sources,prepared,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let original=aggregate_types::source_plan(signatures::aggregate_source(ref metadata));
+    let program=switch(link_identified(sources,ref metadata,original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let interfaces=switch(interfaces::build(ref program,original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
+    return .ok(Complete{.program,.interfaces});
 }
 // An initially empty error-only sink receives one detached report owner only
 // for an unsupported signature. Normal and other failed builds leave it empty.

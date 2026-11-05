@@ -17,6 +17,7 @@ import candidate_limits as limits;
 import module_state_layout as phase;
 import project_path as budget;
 import syntax as syntax;
+import module_registry as registry;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -43,19 +44,29 @@ pub fn usize parameter_at(ref View p,usize index){return *v::at<usize>(ref p.par
 pub fn ref u8[] linker_name(ref View p,usize index){let c=callable_at(p,index);return bytes::view(ref p.names)[c.link_start..c.link_end];}
 pub fn u32 current(ref View p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){return provenance::current(ref p.provenance,sources,metadata,table,work);}
 
-fn Result<ids::Table,u32> names(ref checked::Program input,ref ir::Program program,ref signatures::Program metadata,ref ordering::Order order,ref mut usize work){
+// Only source-authenticated instance identities reach this detached spelling.
+// Template names remain source exports; these names identify concrete value types.
+fn Result<model::Text,u32> instance_name(ref mut bytes::Buffer text,types::Type type,ref u8[] id,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
+    if(id.len!=67 || type.module_index>=v::len<syntax::Parsed>(sources)){return .err(9);}
+    var prefix=bytes::empty();
+    if(type.kind==13){if(!bytes::append(ref mut prefix,b"std::vec").is_ok){return .err(11);}}
+    else{let source=v::at<syntax::Parsed>(sources,type.module_index);let header=syntax::declaration_at(source,0);if(header.kind!=1 || type.declaration==0 || type.declaration>syntax::declaration_count(source)){return .err(9);}let d=syntax::declaration_at(source,type.declaration-1);if(d.kind!=if(type.kind==20){4}else{6} || d.generic_parameters==0){return .err(9);}if(!phase::charge(work,header.name_end-header.name_start+1)){return .err(10);}let code=registry::normalize(syntax::source_view(source)[header.name_start..header.name_end],ref mut prefix);if(code!=0){return .err(code);}}
+    if(!bytes::append(ref mut prefix,b"::_fy_generic_").is_ok){return .err(11);}let length=bytes::len(ref prefix)+id.len;if(length>1048576 || bytes::len(text)>1048576-length || !phase::charge(work,length+1)){return .err(10);}let start=bytes::len(text);
+    if(!bytes::append(text,bytes::view(ref prefix)).is_ok || !bytes::append(text,id).is_ok){return .err(11);}let value=bytes::view(text)[start..bytes::len(text)];let valid=if(type.kind==13){ids::valid(value)}else{ids::valid_aggregate(value)};if(!valid){return .err(9);}return .ok(model::Text{.start,.end=bytes::len(text)});
+}
+fn Result<ids::Table,u32> names(ref checked::Program input,ref ir::Program program,ref signatures::Program metadata,ref v::Vec<syntax::Parsed> sources,ref ordering::Order order,ref mut usize work){
     var bytes::Buffer text=bytes::empty();var v::Vec<ids::Row> rows=v::empty<ids::Row>();var v::Vec<ids::Stamp> stamps=v::empty<ids::Stamp>();var usize i=0;
     while(i<signatures::module_count(metadata)){if(!phase::charge(work,1)){return .err(10);}if(!v::push<ids::Stamp>(ref mut stamps,ids::Stamp{.owner=signatures::module_owner(metadata,i),.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(11);}i+=1;}
     i=1;while(i<=clean::type_count(ir::cleanup_ir(program))){if(!phase::charge(work,1)){return .err(10);}let type=ordering::at(order,i);var usize owner=0;var model::Text name=model::Text{.start=0,.end=0};
-        if(type.kind==13){let row=checked::type_at(input,ordering::original(order,i));let id=checked::identity(input,row);if(row.node==0 || id.len!=67 || type.module_index>=signatures::module_count(metadata)){return .err(9);}let prefix=b"std::vec::_fy_generic_";if(!phase::charge(work,prefix.len+id.len+1) || bytes::len(ref text)>1048576-prefix.len-id.len){return .err(10);}let start=bytes::len(ref text);if(!bytes::append(ref mut text,prefix).is_ok || !bytes::append(ref mut text,id).is_ok){return .err(11);}name=model::Text{.start,.end=bytes::len(ref text)};if(!ids::valid(bytes::view(ref text)[name.start..name.end])){return .err(9);}owner=signatures::module_owner(metadata,type.module_index);}
+        if(ids::instance(type)){let row=checked::type_at(input,ordering::original(order,i));if(row.node==0){return .err(9);}name=switch(instance_name(ref mut text,type,checked::identity(input,row),sources,work)){case .ok(p):{p}case .err(code):{return .err(code);}};owner=signatures::module_owner(metadata,type.module_index);}
         if(!v::push<ids::Row>(ref mut rows,ids::Row{.type,.owner,.name}).is_ok){return .err(11);}i+=1;
     }return .ok(ids::assemble(text,rows,stamps));
 }
-fn Result<ids::Table,u32> saved_names(ref snapshots::Snapshot input,ref ir::Program program,ref signatures::Program metadata,ref ordering::Order order,ref mut usize work){
+fn Result<ids::Table,u32> saved_names(ref snapshots::Snapshot input,ref ir::Program program,ref signatures::Program metadata,ref v::Vec<syntax::Parsed> sources,ref ordering::Order order,ref mut usize work){
     var bytes::Buffer text=bytes::empty();var v::Vec<ids::Row> rows=v::empty<ids::Row>();var v::Vec<ids::Stamp> stamps=v::empty<ids::Stamp>();var usize i=0;
     while(i<signatures::module_count(metadata)){if(!phase::charge(work,1)){return .err(10);}if(!v::push<ids::Stamp>(ref mut stamps,ids::Stamp{.owner=signatures::module_owner(metadata,i),.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(11);}i+=1;}
     i=1;while(i<=clean::type_count(ir::cleanup_ir(program))){if(!phase::charge(work,1)){return .err(10);}let type=ordering::at(order,i);var usize owner=0;var model::Text name=model::Text{.start=0,.end=0};
-        if(type.kind==13){let row=snapshots::type_at(input,ordering::original(order,i));let id=snapshots::identity(input,row);if(row.node==0 || id.len!=67 || type.module_index>=signatures::module_count(metadata)){return .err(9);}let prefix=b"std::vec::_fy_generic_";if(!phase::charge(work,prefix.len+id.len+1) || bytes::len(ref text)>1048576-prefix.len-id.len){return .err(10);}let start=bytes::len(ref text);if(!bytes::append(ref mut text,prefix).is_ok || !bytes::append(ref mut text,id).is_ok){return .err(11);}name=model::Text{.start,.end=bytes::len(ref text)};if(!ids::valid(bytes::view(ref text)[name.start..name.end])){return .err(9);}owner=signatures::module_owner(metadata,type.module_index);}
+        if(ids::instance(type)){let row=snapshots::type_at(input,ordering::original(order,i));if(row.node==0){return .err(9);}name=switch(instance_name(ref mut text,type,snapshots::identity(input,row),sources,work)){case .ok(p):{p}case .err(code):{return .err(code);}};owner=signatures::module_owner(metadata,type.module_index);}
         if(!v::push<ids::Row>(ref mut rows,ids::Row{.type,.owner,.name}).is_ok){return .err(11);}i+=1;
     }return .ok(ids::assemble(text,rows,stamps));
 }
@@ -78,17 +89,17 @@ fn Result<View,u32> copy(ref ir::Program program,ref signatures::Program metadat
     if(!phase::charge(work,ir::name_bytes(program)+1)){return .err(10);}var bytes::Buffer text=switch(bytes::copy(ir::names_view(program))){case .ok(p):{p}case .err(_):{return .err(11);}};let completed=complete_signatures(metadata,ref mut callables,ref mut parameters,ref mut text,work);if(completed!=0){return .err(completed);}
     return .ok(View{.order,.shapes,.fields,.callables,.parameters,.names=text,.identities,.provenance=stamps});
 }
-fn Result<View,u32> cold_copy(ref checked::Program input,ref signatures::Program metadata,bindings::Bindings stamps,ref mut usize work){let program=checked::ir_program(input);let order=switch(ordering::build(ir::cleanup_ir(program),metadata,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(names(input,program,metadata,ref order,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return copy(program,metadata,stamps,order,ids,work);}
-fn Result<View,u32> admitted_copy(ref admitted::Admitted input,ref signatures::Program metadata,bindings::Bindings stamps,ref mut usize work){let program=admitted::program(input);let order=switch(ordering::build(ir::cleanup_ir(program),metadata,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(saved_names(admitted::source_identities(input),program,metadata,ref order,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return copy(program,metadata,stamps,order,ids,work);}
+fn Result<View,u32> cold_copy(ref checked::Program input,ref signatures::Program metadata,ref v::Vec<syntax::Parsed> sources,bindings::Bindings stamps,ref mut usize work){let program=checked::ir_program(input);let order=switch(ordering::build(ir::cleanup_ir(program),metadata,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(names(input,program,metadata,sources,ref order,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return copy(program,metadata,stamps,order,ids,work);}
+fn Result<View,u32> admitted_copy(ref admitted::Admitted input,ref signatures::Program metadata,ref v::Vec<syntax::Parsed> sources,bindings::Bindings stamps,ref mut usize work){let program=admitted::program(input);let order=switch(ordering::build(ir::cleanup_ir(program),metadata,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(saved_names(admitted::source_identities(input),program,metadata,sources,ref order,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return copy(program,metadata,stamps,order,ids,work);}
 // Freshness is checked before any public facts are copied. Copying has its own
 // 1MiB phase history, folded exactly once into the unchanged 16MiB caller ledger.
 // No parser, body typing, Flow analysis or executable IR is copied or rebuilt.
 pub fn Result<View,u32> build(ref checked::Program input,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){
     let code=checked::current(input,sources,metadata,table,work);if(code!=0){return .err(code);}var usize provenance_work=0;let stamps=switch(bindings::copy(checked::source_provenance(input),ref mut provenance_work)){case .ok(p):{p}case .err(e):{discard budget::charge(work,provenance_work);return .err(e);}};if(!budget::charge(work,provenance_work)){return .err(10);}
-    var usize measured=0;switch(cold_copy(input,metadata,stamps,ref mut measured)){case .ok(p):{if(!budget::charge(work,measured)){return .err(10);}return .ok(p);}case .err(e):{discard budget::charge(work,measured);return .err(e);}};return .err(9);
+    var usize measured=0;switch(cold_copy(input,metadata,sources,stamps,ref mut measured)){case .ok(p):{if(!budget::charge(work,measured)){return .err(10);}return .ok(p);}case .err(e):{discard budget::charge(work,measured);return .err(e);}};return .err(9);
 }
 // Only same-owner source/body/state/SDK admission can enter this restored view.
 pub fn Result<View,u32> build_admitted(ref admitted::Admitted input,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize work){
     let code=provenance::current(admitted::source_provenance(input),sources,metadata,table,work);if(code!=0){return .err(code);}var usize provenance_work=0;let stamps=switch(bindings::copy(admitted::source_provenance(input),ref mut provenance_work)){case .ok(p):{p}case .err(code):{discard budget::charge(work,provenance_work);return .err(code);}};if(!budget::charge(work,provenance_work)){return .err(10);}
-    var usize measured=0;switch(admitted_copy(input,metadata,stamps,ref mut measured)){case .ok(p):{if(!budget::charge(work,measured)){return .err(10);}return .ok(p);}case .err(code):{discard budget::charge(work,measured);return .err(code);}};return .err(9);
+    var usize measured=0;switch(admitted_copy(input,metadata,sources,stamps,ref mut measured)){case .ok(p):{if(!budget::charge(work,measured)){return .err(10);}return .ok(p);}case .err(code):{discard budget::charge(work,measured);return .err(code);}};return .err(9);
 }
