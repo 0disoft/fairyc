@@ -56,6 +56,25 @@ authorized by this queue.
 
 ## Progress
 
+- The final v2 current/semantic, ordinary/v3 current/semantic/complete-join and
+  catalog-parser replay passes seven roots under both Windows profiles in
+  134.914s. A pre-commit byte audit found CRLF working files against Git's LF;
+  those otherwise unchanged files now match the stored checkout and the source
+  lock is regenerated from canonical bytes. No otherwise clean source has a Git
+  content diff. Earlier mixed-byte receipts are retained but do not attest this
+  final input. Catalog page selection/encoding, per-version source production,
+  actual dispatcher and the full final acceptance queue remain open.
+
+- Explicit Fairy v2 current-source Ready now checks independent compiler,
+  ordinary/generic interface, package/source/runtime and complete file/reference
+  facts under the shared bounded ledger. A real unused exported-template edit
+  preserves ordinary interface identity but correctly rejects the old map.
+  Windows low/optimized execute 258 v2 current cases; existing ordinary/v3
+  current and generic/aggregate complete joins also pass (157.111s combined).
+  Catalog selection/checksum, schema-specific source production and actual
+  dispatcher remain required. V2 downstream join/output needs separate evidence;
+  see the symbol-catalog plan. Native Linux and the full queue remain open.
+
 - Fairy v2 semantic admission now preserves bound function signatures while
   rejecting generic aggregates and nominal arguments. All shared ID, source-span,
   implementation/call, type and completeness controls remain active. Forty-one

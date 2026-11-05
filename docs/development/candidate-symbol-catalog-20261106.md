@@ -9,15 +9,15 @@ batched; no push, dispatch or release is authorized by this record.
 - [x] Exact `atlas-symbols list` argument selection with Go parser comparisons.
 - [x] Explicit canonical v2 map framing with unchanged v1/v3 reader selection.
 - [x] Explicit v2 semantic admission with function-only generic declarations.
-- [ ] V2 independent current-source admission before catalog queries.
+- [x] V2 independent current-source admission before catalog queries.
 - [ ] Current-admitted declaration selection, canonical JSON/checksum and exact
   selection/output budgets for catalog v1, v2 and v3. Preserve full-ID ordering,
   filtered-set cursor membership, original generic declarations and omissions.
 - [ ] Schema-specific current-source map production. The existing default Fairy
-  wire owner retains v1/v3 selection and the producer emits v3; explicit v2
-  framing above still needs semantic/current-source and source-production
-  admission. Do not relabel v3
-  maps or catalog output to simulate v1/v2 support.
+  wire owner retains v1/v3 selection and the producer emits v3. The explicit v2
+  framing/semantic/current boundaries above now exist; production must still
+  derive each requested version from authenticated Complete facts. Do not
+  relabel v3 maps or catalog output to simulate v1/v2 support.
 - [ ] Actual authored dispatcher, help, stale-source/lock and failure-atomic
   command acceptance; then current full CLI under both Windows profiles.
 - [ ] Consecutive self-build, distribution, same-commit hosted and deferred
@@ -137,3 +137,67 @@ not evidence supplied by these semantic checks.
 
 Independent v2 current-source admission, catalog selection/encoding, all-version
 production, actual dispatcher and all final acceptance gates remain required.
+
+## V2 current-source admission
+
+`project_atlas_current::read_v2` owns explicit v2 framing and function-generic
+semantics before comparing the independent caller expectation. Its returned
+`Ready` retains the checked partition only after all compiler, ordinary/generic
+interface, language, UID/instance/coordinate/source/kind/runtime, feature,
+dependency/reference and file facts match. The shared work ledger remains
+bounded. Existing ordinary/v3 current readers do not discover or reinterpret v2.
+
+`TestCandidateAtlasV2Current` uses the same six independently checked source
+packages, never expectations learned from the map under test. It covers every
+compatibility field, file/reference inventory, malformed expectations, exhausted
+work and cross-version readers. A real unused public-template body edit leaves
+the ordinary interface unchanged but changes the generic/source identities;
+the old map rejects under both Go `NewQueryIndexV2` and the Fairy current reader.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 7m -v ./internal/cli -run '^TestCandidateAtlas(V2Current|Current|GenericJoin)$'
+```
+
+The combined command passes in 157.111s with no selected skips: v2 current
+74.91s (129 native processes per profile, 258 total), ordinary/v3 current 30.99s,
+and the existing complete generic/aggregate current-source join/impact 50.86s.
+Initial log: `.cache/atlas-v2-current-crlf-20261106.log`; the canonical-checkout
+follow-up below supersedes this input snapshot for the final working tree.
+
+### Canonical-checkout follow-up
+
+The pre-commit audit found CRLF working bytes in the changed current module and
+ten otherwise clean authored files, while Git stores LF (`eol=lf`). Source
+digests intentionally preserve raw bytes, so a lock computed from those working
+bytes would not describe a clean Git checkout. Those files now use the LF bytes
+already stored in Git. The ten otherwise clean files have no Git content diff;
+no grammar or compiler policy changes. The source lock is refreshed below from
+the canonical working tree.
+
+The two earlier current commands passed against their respective working bytes:
+157.111s before normalization, then 94.202s after normalizing the changed module
+alone. Their logs are retained as `.cache/atlas-v2-current-crlf-20261106.log` and
+`.cache/atlas-v2-current-single-lf-20261106.log`; neither attests final all-LF input.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidate(Atlas(V2Validation|GenericValidation|Validation|V2Current|Current|GenericJoin)|CatalogOptions)$'
+```
+
+All seven roots pass on the final all-LF source in 134.914s with both Windows
+profiles and no selected skips: current 20.47s, generic join 29.27s, generic
+validation 23.04s, v2 validation 14.29s, v2 current 19.86s, ordinary validation
+13.83s and catalog options 14.00s. Log:
+`.cache/atlas-v2-canonical-acceptance-20261106.log`. The v2-specific/current/parser
+matrices retain 88, 258 and 216 native processes respectively; older regressions
+are additional coverage, not included in those counts.
+
+Final canonical-source `check` and `check --locked` pass with 644 files and
+8,129 MIR functions. Scoped CLI vet and Go formatting remain valid on unchanged
+Go inputs; final diff checks pass. All tracked authored source now has matching
+LF index/working-tree endings. No actual full CLI image, complete Go suite,
+native Linux, self-build, distribution or hosted-CI acceptance is claimed here.
+
+This completes v2 current-source partition admission only. Catalog page selection
+and checksums, schema-specific actual source production, new v2 downstream
+query/command acceptance and final self-build/distribution/Linux/hosted gates
+remain open. Historical v1/v3 join acceptance does not attest v2 joins or output.
