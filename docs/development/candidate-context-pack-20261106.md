@@ -9,7 +9,7 @@ no push, dispatch, publication or target promotion is authorized here.
 
 - [x] Exact overview/show/around arguments, versions, direction/relation filters,
   canonical numeric bounds and locked selection, compared with actual Go parsers.
-- [ ] Current-admitted overview projection/selection and canonical v1/v2/v3 packs,
+- [x] Current-admitted overview projection/selection and canonical v1/v2/v3 packs,
   including independent record/byte/final-byte/work boundaries and checksums.
 - [ ] Current-admitted show/around node/relation facts, specialization/cleanup
   identity, deterministic local traversal and explicit omissions under all bounds.
@@ -90,3 +90,42 @@ bytes/checksums and selection costs for empty header arrays; it changes no map
 bytes, original partition, language/SDK ABI, DB, dependency or runner policy.
 It is a Go prerequisite, not Fairy pack or actual CLI acceptance. No push,
 dispatch or native Linux execution; the full objective remains open.
+
+## Current-admitted overview packs
+
+`project_pack_projection` explicitly maps checked wire fields to owning Go query
+records; wire JSON is not a snapshot/query JSON record. `project_pack_overview`
+selects the mandatory package, ordered completeness and modules with separate
+record/selection-byte bounds, retaining record-limit precedence and exact known
+omissions. `project_pack` serializes one body, independently domain-hashes it and
+checks the complete envelope length before final copying. Only exact-current
+v1/v2/v3 maps enter their matching pack family. This leaf performs no source,
+filesystem, process or network discovery and emits empty text channels.
+
+`TestCandidatePackOverview` uses the actual ordinary, scalar-generic and aggregate
+source/map fixtures, both package partitions and all three owning Go encoders.
+Its checksum oracle separately hashes the envelope's exact logical bytes.
+All cumulative record costs are checked one-short/exact/one-more, including the
+mandatory package and competing record/byte stops; zero/full-output and exact
+global work limits, corrupt map, stale currentness and wrong family all refuse
+atomically. Both Windows profiles pass 488 native observations each, 976 total:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 8m -v ./internal/cli -run '^TestCandidatePackOverview$'
+```
+
+PASS, 86.667s (body 86.48s; low 49.99s, optimized 35.04s), no selected skips;
+`.cache/pack-overview-normalized-20261106.log`. Earlier attempts retained in
+`pack-overview`, `pack-overview-retry`, `pack-overview-arrays` and
+`pack-overview-omissions` logs are failures, not acceptance. They exposed an
+unsupported harness cast, snapshot/wire empty-array and omission differences,
+and the separately fixed Go header transport defect above. Final source/test
+inputs were unchanged after the passing native replay.
+
+Authored `check`/`check --locked` pass with 659 source files and 8,227 MIR
+functions (`pack-overview-check`/`pack-overview-locked` logs). Scoped
+atlasmap/contextpack/CLI vet, Go formatting, LF/EOF and diff checks pass.
+This closes the overview encoder leaf only. Show/around, fresh source-backed
+actual dispatch, generated consumers and every original final acceptance gate
+remain open. No grammar, stable CLI, public SDK/runtime ABI, dependencies, DB,
+workflow/runner or hygiene-policy change; no push or native Linux execution.

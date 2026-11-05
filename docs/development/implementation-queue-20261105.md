@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy current-admitted Context Pack overview v1/v2/v3 now preserves explicit
+  snapshot projection, mandatory package and ordered record/byte selection,
+  exact omissions and canonical body/envelope checksums. Independent Go encoders
+  and checksum recomputation pass 976 Windows low/optimized observations in
+  86.667s, including cumulative one-short/exact/one-more and atomic refusal
+  boundaries. Authored check/locked (659 files, 8,227 MIR functions), scoped vet,
+  format/LF/diff pass. See the Context Pack plan. Show/around and actual CLI,
+  generated consumers and all original implementation/final gates remain open.
+
 - Context Pack implementation reproduced and fixes Go overview header nil/empty
   array drift across unchanged map transport. Four detached header arrays now
   follow the existing canonical empty-array contract before selection costs are
