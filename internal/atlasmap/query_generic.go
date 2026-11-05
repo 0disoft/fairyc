@@ -75,6 +75,7 @@ func cloneQuerySpecializations(values []QuerySpecializationFacts) []QuerySpecial
 		result[i].TypeArguments = slices.Clone(result[i].TypeArguments)
 		for j := range result[i].TypeArguments {
 			result[i].TypeArguments[j] = cloneTypeRef(result[i].TypeArguments[j])
+			normalizeQueryType(&result[i].TypeArguments[j])
 		}
 		if result[i].Function != nil {
 			value := *result[i].Function
@@ -82,7 +83,7 @@ func cloneQuerySpecializations(values []QuerySpecializationFacts) []QuerySpecial
 			result[i].Function = &value
 		}
 		if result[i].Aggregate != nil {
-			value := cloneDeclarations([]semanticsnapshot.Declaration{*result[i].Aggregate})[0]
+			value := cloneQueryDeclaration(*result[i].Aggregate)
 			result[i].Aggregate = &value
 		}
 		if result[i].Cleanup != nil {

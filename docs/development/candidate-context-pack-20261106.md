@@ -129,3 +129,27 @@ This closes the overview encoder leaf only. Show/around, fresh source-backed
 actual dispatch, generated consumers and every original final acceptance gate
 remain open. No grammar, stable CLI, public SDK/runtime ABI, dependencies, DB,
 workflow/runner or hygiene-policy change; no push or native Linux execution.
+
+## Go node transport prerequisite
+
+Actual Fairy node comparison then reproduced the same allocation drift inside
+Go query declarations: source-prepared empty type arguments, parameters, fields
+and variants encode as `[]`, while unchanged map restoration encodes `null`.
+`TestQueryNodesSurviveMapTransport` independently reproduces this for actual
+ordinary v1, generic v2 and aggregate/cleanup v3 compiler partitions; all three
+fail before the fix (`pack-node-go-before-20261106.log`). Both show/around facts
+and mandatory byte boundaries are affected; this is not a source/map identity
+change. Query copies now normalize nested declaration/type slices to the existing
+map-restored nil-empty representation. Snapshot transport and caller data remain
+unchanged. Concrete type arguments and aggregate fields follow the same rule.
+
+Full atlasmap/contextpack suites pass in 3.291s/0.190s
+(`pack-node-go-after-20261106.log`); existing experimental Go pack CLI regressions
+pass in 2.503s (`pack-node-go-cli-20261106.log`). Scoped vet, Go formatting,
+LF/EOF and diff checks pass. Owning query/pack v1 documents now state this
+normalization explicitly; v2/v3 retain the same detached projection. This
+corrects experimental query/pack bytes, checksums and byte limits for source-
+prepared empty nested arrays. It does not implement Fairy show/around or grant
+actual CLI, Linux, full Go-suite, self-build, distribution or hosted acceptance.
+No grammar, SDK ABI, DB, dependency, workflow/runner or hygiene-policy change;
+no push or dispatch. The complete implementation objective remains active.

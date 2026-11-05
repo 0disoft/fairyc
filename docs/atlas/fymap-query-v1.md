@@ -18,6 +18,13 @@ The index is package-local. It performs no filesystem scan, source read, depende
 network access, process execution, or compiler feedback. All output is detached from the immutable
 index. Symbol selectors accept only canonical visible or full SymbolId v1 text.
 
+Nested declaration/type slices in query nodes use the map decoder's canonical
+nil-empty representation, including concrete specialization arguments and
+aggregate facts. Original-source preparation and stored-map restoration must
+therefore agree on JSON bytes and selection costs. Normalization touches only
+detached query copies, not caller snapshots, partition identities or map bytes.
+The overview header separately normalizes its four exposed arrays to `[]`.
+
 `docs/atlas/workspace-call-join-v0.md` defines a separate internal prerequisite that can join exact
 resolved calls across a caller-supplied complete workspace package set. Package-local queries do not
 consume that ledger, so this v1 result shape and its omissions remain unchanged.

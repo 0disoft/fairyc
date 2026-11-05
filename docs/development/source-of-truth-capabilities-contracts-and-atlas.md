@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Canonical detached Go query declarations/types across map transport: `internal/atlasmap/query_node.go`, `query_node_transport_test.go`, `query.go`, `query_generic.go`; owning snapshot/selection rules: `docs/atlas/fymap-query-v1.md`, `context-pack-v1.md`. Original and restored show/around v1/v2/v3 facts and mandatory byte limits agree; source snapshots/map bytes stay unchanged. Exact evidence and remaining Fairy query work: `docs/development/candidate-context-pack-20261106.md`.
+
 - Fairy current-admitted Context Pack overview projection/selection/envelope: `examples/lexer_candidate/src/project_pack.fy`, `project_pack_overview.fy`, `project_pack_projection.fy`; independent actual Go encoder/checksum/native controls: `internal/cli/candidate_pack_overview_test.go`. Windows scope and remaining show/around/source-backed dispatch: `docs/development/candidate-context-pack-20261106.md`.
 
 - Canonical Go overview header arrays across current-map transport: `internal/atlasmap/query.go`, `query_header_test.go`; owning query/pack rules: `docs/atlas/fymap-query-v1.md`, `context-pack-v1.md`. Detached empty arrays normalize before mandatory record measurement, so map restoration cannot change output or selection costs through nil slice state. Reproduction, regression and current scope: `docs/development/candidate-context-pack-20261106.md`.

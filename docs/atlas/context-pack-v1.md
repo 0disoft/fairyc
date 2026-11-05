@@ -70,8 +70,14 @@ The overview header's `Features`, `Dependencies`, `PackageReferences` and `Omiss
 arrays are detached and normalized to `[]` before record selection is measured.
 An unchanged map round trip therefore cannot change overview selection bytes or
 its derived pack checksum merely by changing nil versus empty backing slices.
-Snapshot fact fields retain their owning query representation; this rule does
-not invent a different representation for optional fields or empty reason lists.
+Nested snapshot facts retain the map-restored query representation: empty type
+arguments, parameters, effects, fields, variants (including payload fields) and
+drop effects encode as `null`. Query projection normalizes detached original
+declarations and concrete specialization arguments/aggregates to that same
+representation before measuring selection costs. The surrounding pack arrays
+still encode as `[]`; optional fields and empty reason lists retain their owning
+query representation. Source versus stored-map allocation cannot select a
+different fact spelling, byte boundary or derived checksum.
 
 ## Checksum and bounds
 

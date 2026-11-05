@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Current-source node comparison reproduces and fixes Go query declaration/type
+  nil/empty drift across ordinary v1, generic v2 and aggregate/cleanup v3 map
+  transport. Detached nested snapshots now retain canonical map-restored
+  spelling before show/around selection measurement. Actual source/map round-
+  trips, both query kinds and mandatory byte boundaries, full atlasmap/contextpack
+  suites, existing Go pack CLI and scoped vet/format/LF/diff pass. See the
+  Context Pack plan. Fairy node projection, query selection and actual dispatch
+  and every original implementation/final gate remain separate required work.
+
 - Fairy current-admitted Context Pack overview v1/v2/v3 now preserves explicit
   snapshot projection, mandatory package and ordered record/byte selection,
   exact omissions and canonical body/envelope checksums. Independent Go encoders

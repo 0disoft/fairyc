@@ -626,7 +626,7 @@ func (index *QueryIndex) ResolveAttributionSubject(symbolID string) (Attribution
 
 func (index *QueryIndex) node(position int) QueryNode {
 	value := index.nodes[position]
-	result := QueryNode{Symbol: value.symbol, Declaration: cloneDeclarations([]semanticsnapshot.Declaration{value.declaration})[0]}
+	result := QueryNode{Symbol: value.symbol, Declaration: cloneQueryDeclaration(value.declaration)}
 	result.TypeParameters = slices.Clone(value.declaration.TypeParameters)
 	result.Specializations = cloneQuerySpecializations(value.specializations)
 	if value.functionProvenance != nil {
