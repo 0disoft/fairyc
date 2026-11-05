@@ -273,3 +273,15 @@ authorized by this queue.
   corrected boundary/invalid-handoff replay passes both profiles in 46.26s.
   Scoped vet, formatting and diff checks pass; see the aggregate plan for exact
   failed-command/reused-result accounting.
+
+
+- Owned aggregate body MIR now retains exact checked frame/node/local/call/field
+  and layout facts. Eight tuple-in-value mutations, invalid frame and exhausted
+  work controls reject, while unchanged bodies pass. The fifty-three-input Windows
+  low/optimized body replay passes in 78.81s; unchanged cleanup/Flow roots pass in
+  75.92s/70.55s. Their combined command failed only on a missing isolated ordinary
+  test dependency. After that harness correction, all five authored ordinary body
+  checks pass both profiles in 50.93s. Scoped vet, formatting and diff checks pass;
+  see the aggregate plan for exact failure/reuse accounting. CFG/drop/defer
+  sequencing, C emission/native values/traces, source identities/restoration,
+  cache/Atlas/actual commands and every final queue gate remain open.

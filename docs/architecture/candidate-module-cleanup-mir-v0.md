@@ -78,3 +78,13 @@ The model holds no ordinary function bodies, CFG or local-execution definitions,
 does not yet carry all source provenance. C emission and execution, CFG placement and
 defer/resource/Region sequencing remain pending; the existing `module_program` C path
 still joins and is unchanged, and this is not a new C pipeline or the full compiler.
+
+
+Owned body consumer (2026-11-05). The ordinary detached body lowerer can consume
+an aggregate-enabled cleanup owner without erasing instance kinds or scalar tuple
+identity. Its verifier rejects tuple IDs in executable expression, local, call,
+field and callable type lanes while preserving instance layout coordinates.
+Private aggregate cleanup admission is still required; no artifact/project gate
+or cache encoding changes. This body acceptance does not establish CFG sequencing,
+C emission, executed cleanup, source-authenticated identities or restoration.
+The aggregate implementation plan owns the Windows acceptance evidence.

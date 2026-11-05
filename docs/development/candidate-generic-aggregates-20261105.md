@@ -23,7 +23,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    constructor, specialization and cleanup facts. Construction value checking is
    implemented below, as is ownership/Flow checking. Executable lowering remains
    open.
-3. **Ownership/Flow and cleanup MIR implemented; executable body MIR/C remain open.**
+3. **Ownership/Flow, cleanup MIR and owned body MIR implemented; CFG/C remain open.**
    Resource instances now enter the ordinary move/loan and cleanup-policy owner.
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
@@ -556,3 +556,58 @@ Scoped vet, formatting and diff checks pass. There are no selected native skips.
 These separate valid results do not turn the earlier failed combined command
 into a pass. Whole-body MIR/C, restoration/identity/Atlas/full commands and the
 remaining queue stay open.
+
+
+## Owned aggregate body MIR
+
+The existing `module_unit_body_ir_lower::lower_checked` now has explicit aggregate
+acceptance through the verified cleanup owner. Detached bodies preserve concrete
+frame context, nodes, locals, calls, field identities and layouts without retaining
+parsed source owners. Kind-22 argument tuples remain identity metadata and cannot
+be expression results/expectations/cast targets, builtin element types, local
+values/expectations or invocation argument types. Shared layout, field, callable
+and module-coordinate checks retain that separation as well.
+
+`TestCandidateGenericAggregateBodyMIR` reuses all fifty-three cleanup/Flow inputs:
+twenty-six accepted source variants, twenty-six paired Go/Fairy rejections and the
+independent Fairy by-value-cycle refusal. It checks the ordinary whole-body owner
+against the retained checked values and shapes. Unchanged reconstructed bodies
+pass; eight tuple-in-value mutations, invalid frame IDs and exhausted body work
+reject. Argument mutations run where calls have arguments; zero-field resources
+also remain in the accepted matrix. No ordinary or artifact cleanup gate is opened.
+
+The initial low replay reproduces the missing guard: an expression result changed
+to a tuple is accepted with code 0. The corrected verifier rejects it with 1001.
+Test preparation also fixed selection of empty cleanup receivers as expression
+mutation targets, and an explicit u32 expected-code annotation. These failed
+commands are not passing evidence. Diagnostic labels identify body stage/mutation.
+
+`TestCandidateOrdinaryBodyMIR` runs all five existing authored ordinary-body checks:
+resource/call frames, literals/assignment/for links, specialized partial cleanup,
+malformed tables/work and UTF-8/C-string validation. Together with the unchanged
+aggregate cleanup/Flow roots it is the focused regression for this verifier change.
+
+CFG placement, actual drop/defer traces, both C emission forms, source-bound
+identities/restoration/cache/Atlas, actual commands and all remaining queue gates
+stay open. Native Linux remains batched. No stable API/SDK ABI, DB, dependency,
+repository hygiene or runner policy changes. Final command results follow below.
+
+
+Windows MSVC low/optimized final-input results (no selected skips): aggregate
+body MIR 78.81s; unchanged aggregate cleanup MIR 75.92s; unchanged aggregate Flow
+70.55s. Their combined command exited 1 because the added ordinary test's isolated
+module copy omitted `module_unit_body_ir_lookup`; this is not a passing combined
+command. After adding that dependency, the five-check ordinary body replay passes
+both profiles in 50.93s. The other three results are reused for unchanged inputs.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidate(GenericAggregateBodyMIR|OrdinaryBodyMIR|GenericAggregateCleanupMIR|GenericAggregateFlow)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateOrdinaryBodyMIR$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_body_mir_test.go internal/cli/candidate_generic_aggregate_cleanup_mir_test.go
+git diff --check
+```
+
+Scoped vet, formatting and diff checks pass. Native probes use empty PATH.
+No full candidate CLI, Linux, self-build, distribution, clean-machine or hosted
+same-commit result is claimed. The complete implementation queue remains active.

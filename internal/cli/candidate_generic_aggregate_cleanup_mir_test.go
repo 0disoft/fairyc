@@ -8,11 +8,7 @@ import (
 )
 
 func TestCandidateGenericAggregateCleanupMIR(t *testing.T) {
-	cases := append(candidateAggregateFlowFixtures(), candidateAggregateLayoutFixture{
-		name:  "eight scalar arguments",
-		maker: aggregateLayoutMaker + `pub struct Octet<A,B,C,D,E,F,G,H>{A value;}pub fn Octet<i32,i32,i32,i32,i32,i32,i32,i32> octet(Octet<i32,i32,i32,i32,i32,i32,i32,i32> value){return value;}`,
-	})
-	wire := candidateAggregateLayoutOracle(t, cases...)
+	wire := candidateAggregateLayoutOracle(t, candidateAggregateMIRFixtures()...)
 	builder := `let owner=switch(checking::build(sources,metadata,0,v::len<syntax::Parsed>(sources))){case .ok(p):{p}case .err(p):{return p.code;}};
  let lowered=switch(lower::lower_checked(sources,ref owner)){case .ok(p):{p}case .err(p):{return p.code;}};verify_values(ref lowered,ref owner);
  let checked=checking::checked_values(ref owner);let p=checking::checked_interfaces(ref owner);var usize i=types::count(records)+1;while(i<=values::type_count(checked)){assert(v::push<types::Type>(records,values::type_at(checked,i)).is_ok);i+=1;}
@@ -20,6 +16,13 @@ func TestCandidateGenericAggregateCleanupMIR(t *testing.T) {
  i=0;while(i<interfaces::field_count(p)){assert(v::push<interfaces::Field>(fields,interfaces::field_at(p,i)).is_ok);i+=1;}
  assert(bytes::append(names,bytes::view(interfaces::name_records(p))).is_ok);return 0;}`
 	candidateAggregateBodyProbe(t, "module_unit_cleanup_mir_lower", wire, builder, "generic_aggregate_cleanup_mir.fy", "import module_unit_checked_bodies as checking;import module_unit_moves as moves;import module_unit_cleanup_mir_lower as lower;import module_unit_cleanup_mir_model as clean;import module_unit_cleanup_mir_verify as proof;")
+}
+
+func candidateAggregateMIRFixtures() []candidateAggregateLayoutFixture {
+	return append(candidateAggregateFlowFixtures(), candidateAggregateLayoutFixture{
+		name:  "eight scalar arguments",
+		maker: aggregateLayoutMaker + `pub struct Octet<A,B,C,D,E,F,G,H>{A value;}pub fn Octet<i32,i32,i32,i32,i32,i32,i32,i32> octet(Octet<i32,i32,i32,i32,i32,i32,i32,i32> value){return value;}`,
+	})
 }
 
 func TestCandidateOrdinaryCleanupMIR(t *testing.T) {
