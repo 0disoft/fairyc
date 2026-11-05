@@ -10,7 +10,7 @@ import std::vec as v;
 
 // Explicit checked-wire -> snapshot projection. Wire names/order and Go query
 // struct names/order are different; raw map JSON is never a query record.
-fn Result<bool,u32> fields(ref mut bytes::Buffer out,ref json::Tree t,usize row,ref u8[] names,ref mut usize meter){
+pub fn Result<bool,u32> fields(ref mut bytes::Buffer out,ref json::Tree t,usize row,ref u8[] names,ref mut usize meter){
     var usize start=0;while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}var usize equal=start;while(equal<end && names[equal]!=61){equal+=1;}if(equal==end){return .err(9);}
         if(start>0){discard w::raw(out,b",",meter)?;}discard w::pair(out,names[start..equal],wire::string(t,row,names[equal+1..end]),meter)?;start=end+1;
     }return .ok(true);

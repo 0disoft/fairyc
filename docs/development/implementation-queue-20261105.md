@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy exact-current query-node projection now matches original declarations,
+  recursive types, scalar/aggregate specialization and cleanup counts across
+  all map families. The twelve actual source/package/schema combinations pass
+  144 Windows low/optimized native controls and 130 independent Go node byte
+  comparisons in 25.382s, including mandatory work and out-of-range refusals.
+  Authored check/locked (661 files, 8,237 MIR functions), scoped vet/format/LF/
+  diff pass. Relations and show/around selection/traversal and actual CLI remain
+  required; the Context Pack plan retains every original implementation/final gate.
+
 - Current-source node comparison reproduces and fixes Go query declaration/type
   nil/empty drift across ordinary v1, generic v2 and aggregate/cleanup v3 map
   transport. Detached nested snapshots now retain canonical map-restored

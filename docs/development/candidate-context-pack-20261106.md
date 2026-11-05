@@ -153,3 +153,39 @@ prepared empty nested arrays. It does not implement Fairy show/around or grant
 actual CLI, Linux, full Go-suite, self-build, distribution or hosted acceptance.
 No grammar, SDK ABI, DB, dependency, workflow/runner or hygiene-policy change;
 no push or dispatch. The complete implementation objective remains active.
+
+## Current-admitted query nodes
+
+`project_pack_snapshot` projects keys/spans, recursive types, parameters,
+fields, enum payload variants and complete original/concrete declarations.
+`project_pack_node` keeps original binders separate from concrete type arguments,
+aggregate fields and function/cleanup relation counts. All ten relation kinds
+have distinct count slots; snapshots use the canonical map-restored nil empties
+described above. Neither module loads source or accepts a caller-built node as
+compiler truth; node selection requires an exact-current Ready map.
+
+`TestCandidatePackNode` compares every node against the actual independent Go
+query API, in full SymbolId order. Twelve package/schema/source combinations
+cover the existing ordinary/generic/aggregate corpus plus repr(C) fixed-array
+fields, payload enums, shared owner methods, exclusive/view/array parameters,
+nonempty cleanup and two generic aggregate/cleanup specializations with real
+helper calls and borrows. Per Windows profile, 65 node records compare exactly
+and 72 native processes exercise all-node bytes, out-of-range atomic rejection
+and one-short/exact/one-more cumulative work boundaries. Both profiles pass:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 8m -v ./internal/cli -run '^TestCandidatePackNode$'
+```
+
+PASS, 25.382s (body 25.26s; low 10.62s, optimized 13.01s), 144 native processes
+and 130 node comparisons, no selected skips; `pack-node-normalized-20261106.log`.
+Earlier retained logs (`pack-node`, `pack-node-retry`, `pack-node-native`,
+`pack-node-names`, `pack-node-view`, `pack-node-counts`, `pack-node-typed`) record
+failed harness API names, a reserved local name, an inferred i32 index and the
+independently fixed Go nested-array drift. They are not passing evidence.
+Authored check/locked pass with 661 files and 8,237 MIR functions; scoped vet,
+Go formatting, LF/EOF and diff checks pass. This is query-node projection only:
+relations, show/around selection/traversal and full pack/actual dispatch remain
+required, as do all original implementation/final gates. No grammar, stable CLI,
+SDK ABI, DB, dependency, workflow/runner or hygiene-policy change; no push or
+native Linux execution.
