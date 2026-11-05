@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Shared Fairy Atlas drop/trap collection now uses one whole-IR proof and one
+  private CFG traversal per frame while keeping standalone count policies
+  isolated. Fifteen drop and twenty-eight trap sources, eighteen controls per
+  collector and twelve combined controls per Windows profile pass: 182 native
+  probe processes in 769.619s, no selected skips. Authored check/locked (673
+  files, 8,344 MIR functions), scoped vet/format/diff pass. The observed-relations
+  plan records earlier rejected attempts and exact timings. Trap map/header/
+  command production is a separate in-progress change; all remaining collectors,
+  broader implementation and final gates stay open. Native Linux remains batched.
+
 - Fairy verified CFG trap-category collection now retains the six canonical
   Go categories through scalar arithmetic, assertions, bounds and implicit
   iteration checks. Single/batch comparisons cover ordinary, generic and

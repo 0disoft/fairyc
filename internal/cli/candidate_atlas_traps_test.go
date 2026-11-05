@@ -18,6 +18,15 @@ func candidateAtlasTrapsMain() string {
 	main += `
  var usize bulk_work=0;let all=traps::collect_all(p,6,ref mut bulk_work)?;
  if(traps::frame_count(ref all)!=ir::count(p)){return 7;}
+ var usize combined_work=0;let combined=drops::collect_observed_all(p,65536,6,ref mut combined_work)?;
+ if(drops::frame_count(ref combined)!=ir::count(p)){return 7;}
+ if(bytes::equal(mode,b"combined-budget") || bytes::equal(mode,b"combined-short-work") || bytes::equal(mode,b"combined-exact-work") || bytes::equal(mode,b"combined-more-work") || bytes::equal(mode,b"combined-short-traps") || bytes::equal(mode,b"combined-exact-traps") || bytes::equal(mode,b"combined-more-traps") || bytes::equal(mode,b"combined-over-traps") || bytes::equal(mode,b"combined-zero-drops") || bytes::equal(mode,b"combined-exact-drops") || bytes::equal(mode,b"combined-over-drops")){
+  var usize meter=0;var usize maximum_drops=65536;var usize maximum_traps=6;
+  if(bytes::equal(mode,b"combined-budget")){meter=16777216;}else if(bytes::equal(mode,b"combined-short-work")){meter=16777216-combined_work+1;}else if(bytes::equal(mode,b"combined-exact-work")){meter=16777216-combined_work;}else if(bytes::equal(mode,b"combined-more-work")){meter=16777216-combined_work-1;}
+  if(bytes::equal(mode,b"combined-short-traps")){maximum_traps=1;}else if(bytes::equal(mode,b"combined-exact-traps")){maximum_traps=2;}else if(bytes::equal(mode,b"combined-more-traps")){maximum_traps=3;}else if(bytes::equal(mode,b"combined-over-traps")){maximum_traps=7;}
+  if(bytes::equal(mode,b"combined-zero-drops")){maximum_drops=0;}else if(bytes::equal(mode,b"combined-exact-drops")){maximum_drops=1;}else if(bytes::equal(mode,b"combined-over-drops")){maximum_drops=65537;}
+  return switch(drops::collect_observed_all(p,maximum_drops,maximum_traps,ref mut meter)){case .ok(_):{0}case .err(code):{discard io::write_usize(code as usize);7}};
+ }
  if(bytes::equal(mode,b"bulk-budget") || bytes::equal(mode,b"bulk-short-work") || bytes::equal(mode,b"bulk-exact-work") || bytes::equal(mode,b"bulk-more-work") || bytes::equal(mode,b"bulk-short-count") || bytes::equal(mode,b"bulk-exact-count") || bytes::equal(mode,b"bulk-more-count") || bytes::equal(mode,b"bulk-over-count")){
   var usize maximum=0;var usize i=0;while(i<traps::frame_count(ref all)){var usize count=0;var usize k=0;while(k<6){if(traps::contains(traps::at(ref all,i),k)){count+=1;}k+=1;}if(count>maximum){maximum=count;}i+=1;}
   var usize meter=0;if(bytes::equal(mode,b"bulk-budget")){meter=16777216;}else if(bytes::equal(mode,b"bulk-short-work")){meter=16777216-bulk_work+1;}else if(bytes::equal(mode,b"bulk-exact-work")){meter=16777216-bulk_work;}else if(bytes::equal(mode,b"bulk-more-work")){meter=16777216-bulk_work-1;}
@@ -29,7 +38,7 @@ func candidateAtlasTrapsMain() string {
   let f=clean::frame_at(clean,frame);let spec=instances::frame_identity(ref observed,frame);
   if(f.kind==2 && spec.len==0){frame+=1;continue;}if(f.kind!=1 && f.kind!=2 && f.kind!=3){frame+=1;continue;}
   var usize measured=0;let mask=traps::collect(p,frame,6,ref mut measured)?;
-  if(traps::at(ref all,frame-1)!=mask){return 7;}var usize count=0;var usize k=0;while(k<6){if(traps::contains(mask,k)){count+=1;}k+=1;}
+  if(traps::at(ref all,frame-1)!=mask || drops::trap_at(ref combined,frame-1)!=mask){return 7;}var usize count=0;var usize k=0;while(k<6){if(traps::contains(mask,k)){count+=1;}k+=1;}
   if(bytes::equal(mode,b"zero") || bytes::equal(mode,b"past") || bytes::equal(mode,b"budget") || bytes::equal(mode,b"short-work") || bytes::equal(mode,b"exact-work") || bytes::equal(mode,b"more-work") || bytes::equal(mode,b"short-count") || bytes::equal(mode,b"exact-count") || bytes::equal(mode,b"more-count") || bytes::equal(mode,b"over-count")){
    if(count==0){frame+=1;continue;}var usize selected=frame;var usize maximum=6;var usize meter=0;
    if(bytes::equal(mode,b"zero")){selected=0;}else if(bytes::equal(mode,b"past")){selected=ir::count(p)+1;}else if(bytes::equal(mode,b"budget")){meter=16777216;}
@@ -50,6 +59,7 @@ func candidateAtlasTrapsMain() string {
 	main = strings.ReplaceAll(main, "return 7;", "return .ok(7);")
 	main = strings.ReplaceAll(main, "return if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4};", "return .ok(if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4});")
 	main = strings.ReplaceAll(main, "return switch(traps::collect", "return .ok(switch(traps::collect")
+	main = strings.ReplaceAll(main, "return switch(drops::collect_observed_all", "return .ok(switch(drops::collect_observed_all")
 	main = strings.ReplaceAll(main, "io::write_usize(code as usize);7}};", "io::write_usize(code as usize);7}});")
 	return main + "\n@effects(filesystem,console,environment) fn i32 main(){return switch(execute()){case .ok(p):{p}case .err(_):{7}};}"
 }
@@ -163,6 +173,39 @@ func TestCandidateAtlasTraps(t *testing.T) {
 			}
 			if code != want || out != failure || stderr != "" {
 				t.Fatalf("trap control %s: %d/%d %q/%q %q", mode, code, want, out, failure, stderr)
+			}
+		}
+		for _, control := range []struct {
+			mode, fixture string
+			code          int
+			output        string
+		}{
+			{"combined-budget", "signed-division", 7, "3"},
+			{"combined-short-work", "signed-division", 7, "3"},
+			{"combined-exact-work", "signed-division", 0, ""},
+			{"combined-more-work", "signed-division", 0, ""},
+			{"combined-short-traps", "signed-division", 7, "3"},
+			{"combined-exact-traps", "signed-division", 0, ""},
+			{"combined-more-traps", "signed-division", 0, ""},
+			{"combined-over-traps", "signed-division", 7, "9"},
+			{"combined-zero-drops", "none", 0, ""},
+			{"combined-zero-drops", "cleanup", 7, "3"},
+			{"combined-exact-drops", "cleanup", 0, ""},
+			{"combined-over-drops", "cleanup", 7, "9"},
+		} {
+			var root string
+			for _, f := range fixtures {
+				if f.name == control.fixture {
+					root = f.root
+					break
+				}
+			}
+			if root == "" {
+				t.Fatal("unknown combined control fixture", control.fixture)
+			}
+			code, out, stderr := fetchCLIProcess(t, image, root, []string{control.mode}, "")
+			if code != control.code || out != control.output || stderr != "" {
+				t.Fatalf("combined control %s/%s: %d/%d %q/%q %q", control.mode, control.fixture, code, control.code, out, control.output, stderr)
 			}
 		}
 	}, "project_compiler_core", "project_workspace_lock", "project_coordinate_graph", "project_atlas_traps", "project_compiler_source_mode")

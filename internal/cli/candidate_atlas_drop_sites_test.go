@@ -24,6 +24,8 @@ func candidateAtlasDropSitesMain() string {
 	return main + `
  var usize bulk_work=0;let all=drops::collect_all(p,65536,ref mut bulk_work)?;
  if(drops::frame_count(ref all)!=ir::count(p)){return 7;}
+ var usize combined_work=0;let combined=drops::collect_observed_all(p,65536,6,ref mut combined_work)?;
+ if(drops::frame_count(ref combined)!=ir::count(p)){return 7;}
  if(bytes::equal(mode,b"bulk-budget") || bytes::equal(mode,b"bulk-short-work") || bytes::equal(mode,b"bulk-exact-work") || bytes::equal(mode,b"bulk-more-work") || bytes::equal(mode,b"bulk-short-count") || bytes::equal(mode,b"bulk-exact-count") || bytes::equal(mode,b"bulk-more-count") || bytes::equal(mode,b"bulk-over-count")){
   var usize maximum=0;var usize i=0;while(i<drops::frame_count(ref all)){let r=drops::range(ref all,i);if(r.end-r.start>maximum){maximum=r.end-r.start;}i+=1;}
   var usize meter=0;if(bytes::equal(mode,b"bulk-budget")){meter=16777216;}else if(bytes::equal(mode,b"bulk-short-work")){meter=16777216-bulk_work+1;}else if(bytes::equal(mode,b"bulk-exact-work")){meter=16777216-bulk_work;}else if(bytes::equal(mode,b"bulk-more-work")){meter=16777216-bulk_work-1;}
@@ -36,7 +38,7 @@ func candidateAtlasDropSitesMain() string {
   if(f.kind==2 && spec.len==0){frame+=1;continue;}
   if(f.kind!=1 && f.kind!=2 && f.kind!=3){frame+=1;continue;}
   var usize measured=0;let sites=switch(drops::collect(p,frame,65536,ref mut measured)){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
-  let r=drops::range(ref all,frame-1);if(r.end-r.start!=v::len<drops::Site>(ref sites)){return 7;}var usize n=0;while(n<v::len<drops::Site>(ref sites)){let a=drops::at(ref all,r.start+n);let b=*v::at<drops::Site>(ref sites,n);if(a.start!=b.start || a.end!=b.end){return 7;}n+=1;}
+  let r=drops::range(ref all,frame-1);let cr=drops::range(ref combined,frame-1);if(r.end-r.start!=v::len<drops::Site>(ref sites) || cr.end-cr.start!=v::len<drops::Site>(ref sites)){return 7;}var usize n=0;while(n<v::len<drops::Site>(ref sites)){let a=drops::at(ref all,r.start+n);let b=*v::at<drops::Site>(ref sites,n);let c=drops::at(ref combined,cr.start+n);if(a.start!=b.start || a.end!=b.end || c.start!=b.start || c.end!=b.end){return 7;}n+=1;}
   if(bytes::equal(mode,b"zero") || bytes::equal(mode,b"past") || bytes::equal(mode,b"budget") || bytes::equal(mode,b"short-work") || bytes::equal(mode,b"exact-work") || bytes::equal(mode,b"more-work") || bytes::equal(mode,b"short-count") || bytes::equal(mode,b"exact-count") || bytes::equal(mode,b"more-count") || bytes::equal(mode,b"over-count")){
    if(bytes::equal(mode,b"short-count") && v::len<drops::Site>(ref sites)==0 || bytes::equal(mode,b"short-work") && measured==0){frame+=1;continue;}
    var usize selected=frame;var usize maximum=65536;var usize meter=0;

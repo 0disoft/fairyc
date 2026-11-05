@@ -18,6 +18,8 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   see `docs/ops/windows-candidate-atlas-drops-cli-20261106.md`.
 - [x] Verified CFG trap-category collection with independent Go function and
   concrete cleanup facts, canonical sets and exact work/count refusal controls.
+- [x] Shared verified drop/trap batch with one whole-IR proof and one CFG
+  traversal, retaining both standalone APIs and independent count limits.
 - [ ] Complete-bound trap production, summary/header accounting, completeness
   and actual command comparisons. A private collector is not production evidence.
 - [ ] Remaining unsafe, move, Region allocation, error-propagation and borrow
@@ -231,3 +233,48 @@ inside a native compiler probe; they do not execute generated user programs or
 establish trap map/CLI production. Public CLI/grammar, SDK/runtime ABI, cache
 wire, dependencies, DB, target, timeout, runner and hygiene policy are unchanged.
 The production connection and every remaining implementation/final gate stay open.
+
+## Shared verified collection
+
+`project_atlas_drop_sites::collect_observed_all` owns one `lower_all` result
+and one private traversal per frame for both canonical drop sites and trap
+category masks. The immutable IR proof runs once per batch, rather than once
+for each separately invoked collector. Graph verification remains per frame.
+`project_atlas_trap_kinds` contains only pure names/mask arithmetic and grants
+no graph or source authority. `project_atlas_traps` retains its previous API
+through explicit trap-only entries in the shared owner.
+
+Standalone drop collection never charges trap extraction or applies a trap
+count limit. Standalone trap collection never gathers or limits drop sites.
+The combined factory retains separate 0..65,536 drop and 0..6 category limits,
+the shared caller work meter and the existing 65,536-site batch ceiling.
+Only private helpers receive graphs or partially filled buffers; public
+factories publish their owned results only after the complete batch succeeds.
+No public graph argument or verification-bypass flag is introduced.
+
+Existing single/batch Go-oracle comparisons now also compare combined ranges,
+spans and masks. Twelve new native controls exercise combined work limits,
+category limits, empty/nonempty zero-drop limits, exact drop count and invalid
+caps. The combined Windows collector command passes in 769.619s with no selected
+skips: drop collection 296.92s (low 228.82s, optimized 53.86s) and trap collection
+472.55s (low 399.67s, optimized 59.91s). Each profile executes fifteen drop and
+twenty-eight trap source fixtures, eighteen standalone controls per collector
+and twelve combined controls: 182 native probe processes total. These probes
+compare compiler facts; they do not execute generated user programs.
+
+Command: `go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli
+-run '^TestCandidateAtlas(DropSites|Traps)$'`. Log:
+`.cache/atlas-observed-shared-native-owned-20261106.log`. Authored `check` and
+`check --locked` pass for this shared-source snapshot (673 files, 8,344 MIR
+functions); scoped vet, Go format and diff checks pass. The production connection
+is a separate, uncommitted working-tree change and is not attested here.
+
+Earlier shared-source attempts rejected a nested mutable borrow, a dereference
+assignment and a branch ownership gap. Their check logs are respectively
+`atlas-observed-shared-check-20261106.log`,
+`atlas-observed-shared-check-assignment-20261106.log` and
+`atlas-observed-shared-check-return-mask-20261106.log`; none is a pass. The final
+owned-buffer route keeps publication after success and retains the native
+controls above. Native Linux and the broader/final gates remain open. No public
+CLI/grammar, SDK/runtime ABI, cache wire, dependencies, DB, timeout, runner or
+repository-policy change.
