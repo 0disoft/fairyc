@@ -98,7 +98,7 @@ fn model::Problem scan_written(ref catalog::Catalog c,ref v::Vec<syntax::Parsed>
     }return model::Problem{.code,.module_index=context.module_index,.declaration,.start,.end};
 }
 pub fn model::Problem collect(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize template_index,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
-    let row=catalog::template_at(c,template_index);let context=Context{.template_index,.module_index=row.module_index,.first=v::len<model::Edge>(edges),.vector=row.kind!=3 || !catalog::parameter_at(c,row.first).scalar,.root=false};var model::Problem problem=scan(c,sources,row.declaration,context,names,args,edges,ranges,work);if(problem.code==0){problem.code=model::finish(edges,names,ranges,context.first,work);}return problem;
+    let row=catalog::template_at(c,template_index);let context=Context{.template_index,.module_index=row.module_index,.first=v::len<model::Edge>(edges),.vector=!catalog::parameter_at(c,row.first).scalar,.root=false};var model::Problem problem=scan(c,sources,row.declaration,context,names,args,edges,ranges,work);if(problem.code==0){problem.code=model::finish(edges,names,ranges,context.first,work);}return problem;
 }
 // Direct source roots reuse the executable projection, never a flat expression scan.
 // Global deduplication preserves one exact declaration/ordered-concrete tuple.

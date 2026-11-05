@@ -21,9 +21,17 @@ pub fn Result<source::Plan,Problem> build(ref input::Input sources,ref coordinat
 // In-memory resolved sources use the same authenticated planning boundary as
 // workspace-owned input, without inventing filesystem origins.
 pub fn Result<source::Plan,Problem> build_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize work){
+    return build_mode(sources,owners,imports,table,false,work);
+}
+// Compiler-private aggregate prerequisite. This authenticates original source
+// planning only; no Complete, concrete layout, cleanup or executable is published.
+pub fn Result<source::Plan,Problem> build_aggregate_sources(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize work){
+    return build_mode(sources,owners,imports,table,true,work);
+}
+fn Result<source::Plan,Problem> build_mode(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,bool aggregates,ref mut usize work){
     if(!budget::charge(work,0)){return .err(fail(sources,0,10,0,0));}
     let bound=switch(bindings::build(sources,owners,imports,table,work)){case .ok(p):{p}case .err(e):{return .err(fail(sources,1,e.code,e.module_index,e.declaration));}};
-    let catalog=switch(templates::build_project(bound,sources,work)){case .ok(p):{p}case .err(e):{return .err(fail(sources,2,e.code,e.module_index,e.declaration));}};
+    let catalog=switch(if(aggregates){templates::build_aggregate_project(bound,sources,work)}else{templates::build_project(bound,sources,work)}){case .ok(p):{p}case .err(e):{return .err(fail(sources,2,e.code,e.module_index,e.declaration));}};
     let roots=switch(requests::build(catalog,sources,work)){case .ok(p):{p}case .err(e):{return .err(Problem{.stage=3,.code=e.code,.module_index=e.module_index,.start=e.start,.end=e.end});}};
     var context::Budget scoped=context::empty();scoped.work=*work;
     let original=switch(prepared::build(roots,sources,ref mut scoped)){case .ok(p):{p}case .err(e):{*work=scoped.work;return .err(Problem{.stage=4,.code=e.source.code,.module_index=e.source.module_index,.start=e.source.start,.end=e.source.end});}};*work=scoped.work;

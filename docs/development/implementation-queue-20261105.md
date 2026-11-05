@@ -180,3 +180,13 @@ authorized by this queue.
   SDK and copied-closure source rejection remain covered. The full CLI test now
   includes this verifier, but its complete authored-main/MCP/edit replay has not
   been rerun. SDK, aggregate compiler execution and the broader queue remain open.
+
+- Aggregate execution's source-plan prerequisite now shares the exact source
+  binding/catalog/planner owners through an explicit private route. Windows
+  low/optimized match Go over five three-package variants (three roots, nine
+  implementations each), public aggregate closures and cleanup-helper edits;
+  seven rejection variants plus ordinary-gate/work controls pass (16.21s).
+  Concrete fields/layout, ownership/cleanup, MIR/C, cache/Atlas and actual commands
+  remain separate required steps. See
+  `docs/development/candidate-generic-aggregates-20261105.md`; this does not finish
+  aggregate execution or any broader queue family.

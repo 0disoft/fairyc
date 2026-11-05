@@ -58,13 +58,13 @@ fn u32 namespace_names(ref syntax::Parsed p,ref mut usize work){
         var usize j=1;while(j<i){if(!budget::charge(work,1)){return 10;}let old=syntax::declaration_at(p,j);if(old.kind==2 || old.kind==3 || old.kind==4 || old.kind==6 || old.kind==7 || old.kind==9 || old.kind==11){if(old.name_start>=old.name_end || old.name_end>raw.len){return 9;}if(!budget::charge(work,name.len+1)){return 10;}if(bytes::equal(name,syntax::declaration_name(p,j+1)) && ((d.owner_end==0 && old.owner_end==0) || (d.owner_end!=0 && old.owner_end!=0 && bytes::equal(raw[d.owner_start..d.owner_end],raw[old.owner_start..old.owner_end])))){return 4501;}}j+=1;}i+=1;
     }return 0;
 }
-fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize module_index,ref syntax::Parsed p,usize declaration,bool vector,ref mut bytes::Buffer names,ref mut v::Vec<Parameter> parameters,ref mut v::Vec<Provider> providers,ref mut usize work){
+fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize module_index,ref syntax::Parsed p,usize declaration,bool vector,bool aggregates,ref mut bytes::Buffer names,ref mut v::Vec<Parameter> parameters,ref mut v::Vec<Provider> providers,ref mut usize work){
     let d=syntax::declaration_at(p,declaration);let raw=syntax::source_view(p);let name=raw[d.name_start..d.name_end];
-    if(d.owner_end!=0 || d.kind==3 && bytes::equal(name,b"source_location") || d.kind!=3 && (!vector || builtin(name) || bytes::equal(name,b"source_location"))){return .err(4501);}
+    if(d.owner_end!=0 || d.kind==3 && bytes::equal(name,b"source_location") || d.kind!=3 && (!vector && !aggregates || builtin(name) || bytes::equal(name,b"source_location"))){return .err(4501);}
     let count=syntax::generic_parameter_count(p,declaration);if(count==0 || count>8 || v::len<Parameter>(parameters)>32768-count){return .err(4501);}let first=v::len<Parameter>(parameters);var usize i=0;
     while(i<count){if(!budget::charge(work,count+1)){return .err(10);}let n=syntax::generic_parameter_at(p,declaration,i);if(n.start>=n.end || n.end>raw.len){return .err(9);}let parameter=raw[n.start..n.end];if(!budget::charge(work,parameter.len+1)){return .err(10);}if(!scanner::canonical_path(parameter) || builtin(parameter)){return .err(4501);}
         var usize j=first;while(j<v::len<Parameter>(parameters)){let old=*v::at<Parameter>(parameters,j);if(!budget::charge(work,parameter.len+1)){return .err(10);}if(bytes::equal(parameter,bytes::view(names)[old.name.start..old.name.end])){return .err(4501);}j+=1;}
-        let saved=switch(retain(names,parameter,work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(!v::push<Parameter>(parameters,Parameter{.name=saved,.scalar=d.kind==3 && !vector}).is_ok){return .err(11);}i+=1;
+        let saved=switch(retain(names,parameter,work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(!v::push<Parameter>(parameters,Parameter{.name=saved,.scalar=!vector}).is_ok){return .err(11);}i+=1;
     }
     let owned_module=bindings::module_at(resolved,module_index);var bytes::Buffer id=bytes::empty();
     if(!bytes::append(ref mut id,bindings::text(resolved,owned_module.namespace)).is_ok || !bytes::append(ref mut id,b"::").is_ok || !bytes::append(ref mut id,bindings::text(resolved,owned_module.path)).is_ok || !bytes::append(ref mut id,b"::").is_ok || !bytes::append(ref mut id,name).is_ok){return .err(11);}
@@ -83,6 +83,11 @@ fn Result<Template,u32> collect_template(ref bindings::Bindings resolved,usize m
 // Uses the current source language policy: user functions are scalar-only;
 // aggregate/nominal exceptions require the exact authenticated SDK Vec bytes.
 pub fn Result<Catalog,Problem> build(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
+    return build_mode(resolved,sources,false,work);
+}
+// Aggregate planning is an explicit prerequisite, not ordinary compiler or SDK
+// admission. The executable build route retains its existing closed boundary.
+fn Result<Catalog,Problem> build_mode(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,bool aggregates,ref mut usize work){
     if(bindings::count(ref resolved)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0));}var usize m=0;
     while(m<v::len<syntax::Parsed>(sources)){let code=current(ref resolved,m,v::at<syntax::Parsed>(sources,m),work);if(code!=0){return .err(fail(code,m,0));}m+=1;}
     var bytes::Buffer names=bytes::empty();var v::Vec<Template> rows=v::empty<Template>();var v::Vec<Parameter> parameters=v::empty<Parameter>();var v::Vec<Provider> providers=v::empty<Provider>();m=0;
@@ -91,7 +96,7 @@ pub fn Result<Catalog,Problem> build(bindings::Bindings resolved,ref v::Vec<synt
         var usize operation_work=0;let operation_code=operations::validate(p,ref mut operation_work);if(!budget::charge(work,operation_work)){return .err(fail(10,m,0));}if(operation_code!=0){return .err(fail(operation_code,m,0));}let valid=namespace_names(p,work);if(valid!=0){return .err(fail(valid,m,0));}var usize d_index=1;
         while(d_index<syntax::declaration_count(p)){if(!budget::charge(work,1)){return .err(fail(10,m,d_index));}let d=syntax::declaration_at(p,d_index);
             if(d.generic_parameters!=0){if((d.kind!=3 && d.kind!=4 && d.kind!=6) || v::len<Template>(ref rows)>=4096){return .err(fail(4501,m,d_index));}
-                let row=switch(collect_template(ref resolved,m,p,d_index,vector,ref mut names,ref mut parameters,ref mut providers,work)){case .ok(value):{value}case .err(code):{return .err(fail(code,m,d_index));}};if(!v::push<Template>(ref mut rows,row).is_ok){return .err(fail(11,m,d_index));}
+                let row=switch(collect_template(ref resolved,m,p,d_index,vector,aggregates,ref mut names,ref mut parameters,ref mut providers,work)){case .ok(value):{value}case .err(code):{return .err(fail(code,m,d_index));}};if(!v::push<Template>(ref mut rows,row).is_ok){return .err(fail(11,m,d_index));}
             }d_index+=1;
         }m+=1;
     }let code=sorted(ref mut rows,ref names,work);if(code!=0){return .err(fail(code,0,0));}return .ok(Catalog{.bindings=resolved,.names,.templates=rows,.parameters,.providers,.scalar_constraints=true});
@@ -100,7 +105,13 @@ pub fn Result<Catalog,Problem> build(bindings::Bindings resolved,ref v::Vec<synt
 // its authenticated Vec lane adds scalar abilities to user templates. Keep
 // source admission (Parameter.scalar) separate from that serialized fact.
 pub fn Result<Catalog,Problem> build_project(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
-    var out=switch(build(resolved,sources,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bool vector=false;var usize i=0;
+    let out=switch(build(resolved,sources,work)){case .ok(p):{p}case .err(e):{return .err(e);}};return project_constraints(out,work);
+}
+pub fn Result<Catalog,Problem> build_aggregate_project(bindings::Bindings resolved,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
+    let out=switch(build_mode(resolved,sources,true,work)){case .ok(p):{p}case .err(e):{return .err(e);}};return project_constraints(out,work);
+}
+fn Result<Catalog,Problem> project_constraints(Catalog input,ref mut usize work){
+    var out=input;var bool vector=false;var usize i=0;
     while(i<bindings::count(ref out.bindings)){let m=bindings::module_at(ref out.bindings,i);let path=bindings::text(ref out.bindings,m.path);if(!budget::charge(work,path.len+1)){return .err(fail(10,i,0));}if(bytes::equal(path,b"std::vec")){vector=true;}i+=1;}
     out.scalar_constraints=vector;return .ok(out);
 }
