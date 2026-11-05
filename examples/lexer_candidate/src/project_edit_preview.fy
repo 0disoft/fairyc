@@ -21,6 +21,8 @@ import project_cache_environment as environment;
 import module_project_identified_ir as identified;
 import project_atlas_facts as facts;
 import project_atlas_declarations as declarations;
+import project_atlas_schema as schema;
+import project_atlas_source_mode as mode;
 import project_atlas_wire as wire;
 import project_atlas_write as w;
 import std::bytes as bytes;
@@ -65,14 +67,17 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     let table=switch(coordinates::collect(g,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(2,e.code));}};
     let original=switch(input::project(resolved,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(2,e.code));}};
     var usize source_work=0;var usize link_work=0;
-    let complete=switch(compiler::build_complete(ref original,ref table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(fail(3,e.code));}};
+    let aggregates=switch(mode::aggregates(ref original,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(3,code));}};
+    let complete=switch(if(aggregates){compiler::build_complete_aggregate_sources(input::sources(ref original),input::owners(ref original),input::bindings(ref original),ref table,ref mut source_work,ref mut link_work)}else{compiler::build_complete(ref original,ref table,ref mut source_work,ref mut link_work)}){case .ok(p):{p}case .err(e):{return .err(fail(3,e.code));}};
     var usize image_work=0;let build=switch(environment::compiler_current(ref mut image_work)){case .ok(p):{p}case .err(_):{return .err(fail(2,3));}};
     let f=switch(facts::collect(g,ref lock,ref table,compiler::public_interfaces(ref complete),identified::ir_program(compiler::checked_program(ref complete)),image::value(ref build),0,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
-    let rows=switch(declarations::collect(ref original,0,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
+    let metadata=switch(if(aggregates){schema::prepare_aggregates(ref original,ref table,ref complete,ref mut meter)}else{schema::prepare(ref original,ref table,ref complete,ref mut meter)}){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
+    var type_rows=switch(schema::type_rows(ref metadata,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
+    let rows=switch(if(aggregates){declarations::collect_aggregates(ref original,0,ref mut meter)}else{declarations::collect_generics(ref original,0,ref mut meter)}){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
     var declarations::Row selected=declarations::Row{.module_index=0,.declaration=0};var usize matches=0;var usize i=0;
     while(i<v::len<declarations::Row>(ref rows)){
         let row=*v::at<declarations::Row>(ref rows,i);
-        let d=switch(declarations::declaration(ref original,row,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
+        let d=switch(schema::declaration(ref original,ref table,ref metadata,ref mut type_rows,row,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
         let digest=switch(declarations::digest(ref f,bytes::view(ref d),ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
         let full=bytes::view(ref digest);
         if(bytes::equal(full,symbol) || symbol.len==50 && bytes::equal(full[18..50],symbol[18..])){matches+=1;selected=row;}
@@ -80,6 +85,7 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     }
     if(matches!=1){return .err(fail(1,3));}
     let parsed=input::source(ref original,selected.module_index);
+    if(syntax::declaration_at(parsed,selected.declaration).kind!=3){return .err(fail(1,3));}
     var path=bytes::empty();
     if(!bytes::append(ref mut path,sources::package_value(root_sources,b"source")).is_ok || !bytes::append_byte(ref mut path,47).is_ok || !bytes::append(ref mut path,input::file(ref original,selected.module_index)).is_ok){return .err(fail(6,2));}
     if(vendor(bytes::view(ref path))){return .err(fail(1,4));}
@@ -97,7 +103,8 @@ pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u
     let change=switch(edit::replace(input::source(ref selected.original,selected.selected.module_index),selected.selected.declaration,expected,body,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};
     let edited=switch(input::with_source(ref selected.original,selected.selected.module_index,edit::parsed(ref change),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
     var usize source_work=0;var usize link_work=0;
-    let verified=switch(compiler::build_complete(ref edited,ref selected.table,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
+    let aggregates=switch(mode::aggregates(ref edited,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(5,code));}};
+    let verified=switch(if(aggregates){compiler::build_complete_aggregate_sources(input::sources(ref edited),input::owners(ref edited),input::bindings(ref edited),ref selected.table,ref mut source_work,ref mut link_work)}else{compiler::build_complete(ref edited,ref selected.table,ref mut source_work,ref mut link_work)}){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
     let report=switch(render(bytes::view(ref selected.path),bytes::view(ref selected.module_name),bytes::view(ref selected.function),ref change,false,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
     return .ok(Preview{.selection=selected,.change,.report});
 }

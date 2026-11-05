@@ -53,6 +53,15 @@ authorized by this queue.
 
 ## Progress
 
+- Aggregate root-body editing now passes Windows low/optimized command-leaf
+  acceptance in 182.45s (22 native invocations). Exact Go reports, imported
+  aggregate parameters, new replacement-body Cell<bool> instantiation, published
+  bytes, complete stage/lock cleanup, unchanged fairy.lock, invalid overlays,
+  noneditable subjects and stale lock/hash controls pass. Target restrictions
+  and locked fresh publication remain unchanged. The full authored CLI verifier
+  is registered but its refreshed execution, SDK source production, native Linux
+  and all final gates remain open; see the aggregate Atlas receipt.
+
 - Aggregate MCP stdio sessions now pass Windows low/optimized in 101.18s: two
   real processes, eight tool requests, exact Go impact/current-image contexts,
   unknown-package isolation, stale source/lock refusal and relocked recovery in

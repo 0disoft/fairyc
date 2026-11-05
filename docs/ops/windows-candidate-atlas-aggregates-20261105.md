@@ -1,5 +1,9 @@
 # Fairy aggregate Atlas production, 2026-11-05
 
+Later follow-ups below supersede an earlier remaining-work statement only for
+their explicitly verified scope. Command-leaf proofs do not attest the complete
+authored CLI or other final queue gates.
+
 ## Scope
 
 The explicit Complete-bound aggregate producer now retains original generic
@@ -126,6 +130,41 @@ adds native acceptance for the already shared query path, not another MCP tool,
 permission, write operation, runtime ABI or runner. Aggregate editing, SDK,
 native Linux and the complete final queue remain open.
 
+## Aggregate body-edit follow-up
+
+The actual edit selector now derives complete root declaration headers and
+SymbolIds through the same Complete-bound schema used by the Atlas producer.
+Original and edited source independently select their ordinary or aggregate
+factory from retained source. Exact root ownership, one private safe ordinary
+non-entry target, expected raw source hash, body extent and immutable overlay
+verification remain required; generic/aggregate/public/entry declarations do
+not become editable. Source publication retains the existing locked fresh
+recheck, staged sync, final fingerprint/byte comparison and one rename.
+
+`TestCandidateEditAggregateCommand` passes both Windows profiles in 182.45s
+(low 100.29s, optimized 70.63s), with 22 native invocations. The root contains
+generic declarations, an attributed noneditable main, and a private function
+whose parameter is an imported concrete aggregate. Its replacement introduces
+a new Cell<bool> specialization; the full edited factory must check it afresh.
+Independent Go preview reports match exact source spans/hashes and verified
+state. Native publication matches expected bytes and changes only the target
+source, leaves no stage/lock files, and preserves fairy.lock. Invalid type,
+unknown field, injected sibling, four noneditable subjects, stale lock and stale
+source hash refuse without changing workspace bytes.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 15m -failfast -v ./internal/cli -run '^TestCandidateEdit(AggregateCommand|Command)$'
+```
+
+The first simpler aggregate edit matrix also passed in 148.79s. The final
+matrix adds the new specialization, attributed main and complete publication
+tree comparison. The combined aggregate/ordinary edit command above passes in
+578.002s; ordinary publication, fault and staged-source/dependency/lock controls
+pass both Windows profiles (395.36s). Scoped CLI vet, Go formatting and diff
+checks also pass. The same verifier is registered in the authored full-CLI test;
+that refreshed complete image replay remains pending. This expands the existing
+experimental edit workspace family, not its editable-target policy or wire ABI.
+
 ## Original producer development failures and remaining work
 
 Initial development runs failed on a Go test's comparison of a slice-containing
@@ -142,8 +181,9 @@ including four refusal controls per each of six source scenarios. Its ordinary
 Atlas type/function-production regressions pass in 183.966s. This evidence does
 not replace the final producer replay above.
 
-Actual aggregate impact/MCP/edit command dispatch, SDK source production,
-aggregate check/build/run/test, native Linux, consecutive self-build, latest
+The follow-ups establish aggregate impact/MCP/edit command-leaf acceptance.
+Refreshed full authored-CLI, SDK source production, aggregate check/build/run/test,
+native Linux, consecutive self-build, latest
 distribution/clean-machine use and same-commit hosted CI remain open. Native
 Linux stays in the batched queue. No stable public API/SDK ABI, wire schema, DB,
 dependency, default timeout/cache policy, target, runner or repository-hygiene

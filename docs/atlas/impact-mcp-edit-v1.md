@@ -199,6 +199,16 @@ file outside production roots. Exact current IDs select root-owned, private, saf
 nongeneric functions without owners/attributes. SDK/member/vendor writes, renames, public/foreign/
 generic/attributed declarations and multi-file edits remain excluded.
 
+The Fairy editor now accepts local workspaces containing generic struct/resource
+templates and concrete aggregate function signatures. Its selector derives all
+root headers through the verified Complete-bound Atlas schema. Original and
+replacement overlays independently select the aggregate factory from retained
+source, including newly requested scalar specializations in a replacement body.
+This does not relax editable-target restrictions or publication/freshness rules.
+Windows command-leaf evidence is in
+`docs/ops/windows-candidate-atlas-aggregates-20261105.md`; refreshed complete
+authored-CLI, SDK and native Linux acceptance remain separate.
+
 Require the exact raw source SHA-256. Replace the original AST body span and preserve all outside
 bytes. Parsing must find the same function/body start and exactly the replacement extent; early
 closing to inject siblings fails. Recompile the complete production workspace through an immutable
