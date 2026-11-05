@@ -74,21 +74,32 @@ go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^T
 ```
 
 Completed retry log: `.cache/atlas-full-cli-low-mixed-edit-20261105.log`. All four
-mixed/help groups now pass; the seventeen other groups remain open.
+mixed/help groups pass.
+
+The seven core query groups also pass without selected skips in 1042.132s
+(native profile 1023.38s), with the same source/image digests:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^(impact-ordinary|impact-families|mcp-ordinary|mcp-aggregates|unsupported|impact-generics|impact-aggregates)$'
+```
+
+Log: `.cache/atlas-full-cli-low-core-query-20261105.log`. Eleven distinct low
+groups now pass; the nine remaining original groups and the new static-operation
+group remain pending.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
-| impact-ordinary | Pass | Pending |
-| impact-families | Pass | Pending |
-| mcp-ordinary | Pass | Pending |
-| mcp-aggregates | Pass | Pending |
+| impact-ordinary | Pass | Pass |
+| impact-families | Pass | Pass |
+| mcp-ordinary | Pass | Pass |
+| mcp-aggregates | Pass | Pass |
 | edit-ordinary | Pass | Pending |
 | edit-publication | Pass | Pending |
 | edit-aggregates | Pass | Pending |
-| unsupported | Pass | Pending |
-| impact-generics | Pass | Pending |
+| unsupported | Pass | Pass |
+| impact-generics | Pass | Pass |
 | impact-static-operations | Pending | Pending |
-| impact-aggregates | Pass | Pending |
+| impact-aggregates | Pass | Pass |
 | impact-sdk | Pass | Pending |
 | impact-sdk-vector | Pass | Pending |
 | impact-sdk-aggregates | Pass | Pass |

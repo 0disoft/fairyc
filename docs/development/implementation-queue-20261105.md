@@ -75,7 +75,8 @@ authorized by this queue.
   runtime/profile/toolchain/stack and image digest policy protects retained-image
   reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s, and
   the completed mixed editor retry passes in 441.443s, with matching source/image
-  digests. The other sixteen original groups and the new static-operation impact
+  digests. Seven additional core query groups pass in 1042.132s, giving eleven
+  distinct low groups. Nine original groups and the new static-operation impact
   group remain pending in bounded groups. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain
