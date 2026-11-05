@@ -3,6 +3,23 @@
 - Status: Accepted compiler-private aggregate execution; stable admission pending
 - Date: 2026-09-07
 
+## Authenticated SDK composition, 2026-11-05
+
+The compiler-private `workspacecompiler.CheckGeneric` path may combine existing
+scalar-parameter user struct/resource templates with an authenticated SDK Vec
+bundle. An explicit source `Policy.ScalarAggregates` opt-in composes the two
+admissions; it requires the existing SDK-template capability and exact nonempty
+SDK storage-owner scope. SDK ownership is still established from current source.
+Client templates gain neither storage intrinsics nor nominal/composite arguments.
+Their aggregate parameters retain scalar constraints, with direct nominal
+requests rejected at the written argument. Ordinary stable checks and configured
+generic cache profiles keep their earlier source admission.
+
+This is the Go prerequisite for the existing SDK/user-aggregate Atlas queue,
+not Fairy producer/command acceptance or language/target promotion. See the
+[composition plan](../development/candidate-atlas-sdk-aggregates-20261105.md) and
+[Windows Go receipt](../ops/windows-atlas-sdk-aggregate-policy-20261105.md).
+
 ## Decision
 
 Retain ordered type parameters on C-shaped aggregate declarations, using the

@@ -94,6 +94,7 @@ type expander struct {
 	allowStorage          bool
 	allowStorageTransfers bool
 	scalarTemplatesOnly   bool
+	scalarAggregates      bool
 	packageNominal        bool
 	nominalContext        string
 	boundNominals         map[genericplan.TypeID]NominalBinding

@@ -69,11 +69,17 @@ func (c Capabilities) VectorCandidate() bool        { return c.Vectors == Candid
 type Policy[Owner comparable] struct {
 	Capabilities  Capabilities
 	StorageOwners []Owner
+	// ScalarAggregates composes compiler-private user scalar templates with
+	// authenticated SDK storage. It grants no intrinsic or nominal authority.
+	ScalarAggregates bool
 }
 
 func (p Policy[Owner]) Validate() error {
 	if err := p.Capabilities.Validate(); err != nil {
 		return err
+	}
+	if p.ScalarAggregates && !p.Capabilities.SDKTemplates() {
+		return fmt.Errorf("scalar aggregate composition requires scoped SDK templates")
 	}
 	if p.StorageOwners != nil || p.Capabilities.SDKTemplates() {
 		if len(p.StorageOwners) == 0 {

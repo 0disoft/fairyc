@@ -74,7 +74,7 @@ func prepareGenericPackageGraphContext(ctx context.Context, input semantic.Packa
 		}
 		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
 	}
-	sourcePolicy := admission.Policy[genericplan.PackageID]{Capabilities: policy.Capabilities}
+	sourcePolicy := admission.Policy[genericplan.PackageID]{Capabilities: policy.Capabilities, ScalarAggregates: policy.ScalarAggregates}
 	if policy.StorageOwners != nil {
 		sourcePolicy.StorageOwners = make([]genericplan.PackageID, len(policy.StorageOwners))
 		for i, owner := range policy.StorageOwners {

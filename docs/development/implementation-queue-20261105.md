@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- SDK/user scalar-aggregate composition now has a Go prerequisite: explicit
+  compiler-private source policy combines authenticated SDK storage owners with
+  scalar user struct/resource templates. Three current v3 source/map/join cases,
+  all three stable-source refusals and six client-intrinsic/nominal controls pass
+  on Windows (2.060s). Default source/cache admission and SDK intrinsic ownership
+  remain unchanged. Fairy producer and command integration are the next steps,
+  not proved by Go preparation. See the composition plan and Windows policy
+  receipt; all remaining implementation and final acceptance families stay open.
+
 - SDK Vec root-body editing now passes actual Windows low/optimized preview
   and apply in 429.975s. The overlay replaces i32 operations with newly requested
   bool Vec/type/helper implementations; exact Go preview/apply reports, published

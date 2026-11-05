@@ -55,7 +55,7 @@ func checkContext(ctx context.Context, workspace workspaceloader.Workspace, gene
 	}
 	policy := admission.Policy[hir.PackageID]{}
 	if len(owners) != 0 {
-		policy = admission.Policy[hir.PackageID]{Capabilities: sdkStorageCapabilities(), StorageOwners: owners}
+		policy = admission.Policy[hir.PackageID]{Capabilities: sdkStorageCapabilities(), StorageOwners: owners, ScalarAggregates: generic}
 	}
 	coordinates, err := workspace.PackageCoordinates()
 	if err != nil {

@@ -60,7 +60,7 @@ func (x *expander) collectAggregateTemplates() error {
 		if len(shape.TypeParameters) == 0 {
 			continue
 		}
-		if x.scalarTemplatesOnly {
+		if x.scalarTemplatesOnly && !x.scalarAggregates {
 			return x.at(shape.NameSpan, FailureDeclaration, fmt.Errorf("generic aggregate declarations are not admitted outside the embedded SDK"))
 		}
 		if slices.Contains(scalarTypes, shape.Name) || slices.Contains([]string{"void", "never", "str", "Region", "Option", "Result", "source_location"}, shape.Name) {
@@ -113,6 +113,9 @@ func (x *expander) registerAggregateType(ref ast.TypeReference, parameters []str
 			if !found {
 				return x.at(argument.Span, FailureRequest, fmt.Errorf("unsupported aggregate argument %q", argument.Path))
 			}
+			if target.module.scalarAggregates && !slices.Contains(scalarTypes, string(typeID)) {
+				return x.at(argument.Span, FailureRequest, fmt.Errorf("SDK composition requires scalar user aggregate arguments"))
+			}
 			dependency.Arguments = append(dependency.Arguments, genericplan.ConcreteType(typeID))
 			request.Arguments = append(request.Arguments, typeID)
 		}
@@ -161,7 +164,11 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 		declaration := genericplan.Declaration{ID: x.id(shape.Name), Owner: x.owner}
 		dependencies := sourceDependencies{x: x, span: shape.Span}
 		for _, parameter := range shape.TypeParameters {
-			declaration.Parameters = append(declaration.Parameters, genericplan.TypeParameter{Name: parameter})
+			value := genericplan.TypeParameter{Name: parameter}
+			if x.scalarAggregates {
+				value.Abilities = []genericplan.Ability{genericplan.AbilityScalar}
+			}
+			declaration.Parameters = append(declaration.Parameters, value)
 		}
 		var typeError error
 		t := sourceVisitor{typeReference: func(ref *ast.TypeReference) {
