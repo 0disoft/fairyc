@@ -133,11 +133,17 @@ func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 	}
 }
 
+func TestCandidateAtlasUnsupportedFixturesHaveValidSource(t *testing.T) {
+	if len(candidateAtlasUnsupportedFixtures(t)) == 0 {
+		t.Fatal("missing unsupported Atlas source controls")
+	}
+}
+
 func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
 	t.Helper()
 	var roots []string
 	for _, source := range []string{
-		`module main;struct Cell{i32 value;}fn i32 Cell::answer(){return 42;}fn i32 main(){return 42;}`,
+		`module main;enum State{ready;}fn i32 State::answer(){return 42;}fn i32 main(){return 42;}`,
 	} {
 		root := writeWorkspaceSessionFixture(t, source)
 		if code, _, diagnostic := runForTest([]string{"check"}, root); code != 0 {

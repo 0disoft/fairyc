@@ -10,6 +10,12 @@ import std::bytes as bytes;
 // Keep earlier consumed operands alive until the whole call/record is complete.
 // Restoring in the caller covers every normal, unreachable and error return.
 fn Result<bool,m::Problem> operands(ref v::Vec<syntax::Parsed> sources,ref values::Plan primary,ref m::Values body,ref v::Vec<u8> owners,ref mut v::Vec<g::Cell> env,ref mut v::Vec<g::Edge> edges,ref mut v::Vec<g::Diagnostic> diagnostics,ref mut v::Vec<g::Fact> facts,m::Expression e,usize depth,ref mut g::Context c){
+    // Dot-call syntax omits the first checked argument. Evaluate and consume
+    // that receiver before explicit arguments, retaining it until the call ends.
+    if(e.kind==6 && e.builtin.kind==0){let source=v::at<syntax::Parsed>(sources,c.value.module_index);let callee=syntax::expression_at(source,e.left);if(callee.kind==8){
+        let receiver=switch(g::expression(body,callee.left,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let consumes=switch(g::owned(primary,receiver.type,c,0)){case .ok(b):{b}case .err(p):{return .err(p);}};
+        let reachable=switch(expression(sources,primary,body,owners,env,edges,diagnostics,facts,callee.left,consumes,depth+1,c)){case .ok(b):{b}case .err(p):{return .err(p);}};if(!reachable){return .ok(false);}if(consumes){let p=g::retain_pending(receiver.type,receiver.source_index,c);if(p.code!=0){return .err(p);}}
+    }}
     let source=v::at<syntax::Parsed>(sources,c.value.module_index);let count=if(e.kind==6){syntax::call_argument_count(source,e.source_index)}else if(e.kind==10){syntax::record_field_count(source,e.source_index)}else{syntax::array_element_count(source,e.source_index)};var usize i=0;
     while(i<count){let original=if(e.kind==6){syntax::call_argument(source,e.source_index,i)}else if(e.kind==10){syntax::expression_at(source,syntax::record_field(source,e.source_index,i)).left}else{syntax::array_element(source,e.source_index,i)};let actual=switch(g::expression(body,original,c)){case .ok(e):{e}case .err(p):{return .err(p);}};let consumes=switch(g::owned(primary,actual.type,c,0)){case .ok(b):{b}case .err(p):{return .err(p);}};let reachable=switch(expression(sources,primary,body,owners,env,edges,diagnostics,facts,original,consumes,depth+1,c)){case .ok(b):{b}case .err(p):{return .err(p);}};if(!reachable){return .ok(false);}if(consumes){let p=g::retain_pending(actual.type,actual.source_index,c);if(p.code!=0){return .err(p);}}i+=1;}return .ok(true);
 }

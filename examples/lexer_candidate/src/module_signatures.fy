@@ -42,6 +42,18 @@ pub fn Signature at(ref Program p,usize id){assert(id>0 && id<=count(p));return 
 pub fn usize parameter_at(ref Program p,usize index){return *v::at<usize>(ref p.parameters,index);}
 pub fn types::Type type_at(ref Program p,usize id){return vectors::type_at(ref p.types,id);}
 pub fn usize type_count(ref Program p){return vectors::type_count(ref p.types);}
+// Owner identities are retained even when an associated function has no receiver.
+// Consumers still authenticate this signature program against the current sources.
+pub fn usize owner_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration){
+    if(module_index>=module_count(p) || declaration==0 || declaration>syntax::declaration_count(source)){return 0;}let d=syntax::declaration_at(source,declaration-1);if(d.owner_end==0){return 0;}
+    let found=declaration_lookup(p,module_index,syntax::source_view(source)[d.owner_start..d.owner_end]);if(found.code!=0){return 0;}let nominal=declaration_at(p,found.item);var usize i=1;
+    while(i<=type_count(p)){let t=type_at(p,i);if((t.kind==2 || t.kind==3) && t.module_index==nominal.module_index && t.declaration==nominal.declaration){return i;}i+=1;}return 0;
+}
+// 0 associated/nonmethod; 1 shared; 2 exclusive; 3 consuming value.
+pub fn u32 receiver_kind(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration){
+    if(module_index>=module_count(p) || declaration==0 || declaration>syntax::declaration_count(source)){return 0;}let d=syntax::declaration_at(source,declaration-1);let id=identity(p,module_index,declaration);if(d.owner_end==0 || id==0 || at(p,id).parameter_count==0){return 0;}
+    let first=syntax::entry_at(source,d.entry_start);if(!bytes::equal(syntax::source_view(source)[first.name_start..first.name_end],b"this")){return 0;}let t=type_at(p,parameter_at(p,at(p,id).parameter_start));return if(t.kind==7){1}else if(t.kind==8){2}else{3};
+}
 pub fn types::Resolution resolve_type(ref Program p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){return vectors::resolve_type(ref p.types,source,module_index,root,graph);}
 pub fn types::Resolution resolve_argument(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::resolve_argument(ref p.types,source,module_index,declaration,root,args,graph);}
 pub fn Result<v::Vec<usize>,types::BatchProblem> resolve_types(ref Program p,ref syntax::Parsed source,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<types::Type> graph){return vectors::resolve_types(ref p.types,source,module_index,roots,graph);}
@@ -74,6 +86,15 @@ pub fn Result<Program,catalog::Problem> build_aggregates(ref v::Vec<syntax::Pars
 pub fn bool aggregate_types(ref Program p){return vectors::aggregate_types(ref p.types);}
 pub fn ref aggregates::Prepared aggregate_source(ref Program p){assert(v::len<aggregates::Prepared>(ref p.aggregates)==1);return v::at<aggregates::Prepared>(ref p.aggregates,0);}
 fn types::Resolution resolve_signature(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<types::Type> graph,bool aggregates){if(aggregates){let empty=v::empty<usize>();return types::aggregate_resolve(c,p,module_index,0,root,ref empty,graph);}return types::resolve(c,p,module_index,root,graph);}
+fn catalog::Problem check_owner(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,syntax::Declaration d,ref v::Vec<usize> parameters,usize start,ref mut v::Vec<types::Type> graph){
+    if(d.owner_end==0){return fail(0,0,0,0);}let found=catalog::lookup(c,module_index,syntax::source_view(p)[d.owner_start..d.owner_end]);if(found.code!=0){return fail(4501,module_index,d.start,d.end);}let nominal=catalog::declaration_at(c,found.item);
+    if(nominal.parameters!=0 || nominal.module_index!=module_index || nominal.kind!=4 && nominal.kind!=6){return fail(4501,module_index,d.start,d.end);}
+    let owner=types::declaration(c,module_index,nominal.declaration,graph);if(owner.problem.code!=0){return fail(owner.problem.code,module_index,d.start,d.end);}var usize i=0;var usize position=0;
+    while(i<d.entry_count){let e=syntax::entry_at(p,d.entry_start+i);i+=1;if(e.kind!=1){continue;}if(bytes::equal(syntax::source_view(p)[e.name_start..e.name_end],b"this")){
+        if(position!=0){return fail(4501,module_index,d.start,d.end);}let receiver=types::at(graph,*v::at<usize>(parameters,start));let target=if(receiver.kind==7 || receiver.kind==8){types::at(graph,receiver.first)}else{receiver};
+        if(target.kind!=if(nominal.kind==4){2}else{3} || target.module_index!=nominal.module_index || target.declaration!=nominal.declaration){return fail(4501,module_index,d.start,d.end);}
+    }position+=1;}return fail(0,0,0,0);
+}
 fn Result<Program,catalog::Problem> build_mode(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c,v::Vec<types::Type> initial,v::Vec<aggregates::Prepared> prepared,bool aggregates){
     if(catalog::module_count(ref c)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0,0));}
     var usize checked=0;while(checked<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,checked);if(!catalog::source_matches(ref c,checked,source)){return .err(fail(9,checked,0,0));}var usize declaration=0;while(declaration<syntax::declaration_count(source)){let inlined=inline::read(source,declaration);if(inlined.code!=0){return .err(fail(inlined.code,checked,inlined.start,inlined.end));}let admission=const_eval::read(source,declaration);if(admission.code!=0){return .err(fail(admission.code,checked,admission.start,admission.end));}declaration+=1;}checked+=1;}
@@ -95,7 +116,7 @@ fn Result<Program,catalog::Problem> build_mode(ref v::Vec<syntax::Parsed> source
                 if(ffi.code!=0){return .err(fail(ffi.code,module_index,ffi.start,ffi.end));}link_start=bytes::len(ref links);let name=syntax::source_view(p)[ffi.link_start..ffi.link_end];if(name.len>1048576-bytes::len(ref links) || !bytes::append(ref mut links,name).is_ok){return .err(fail(11,module_index,d.start,d.end));}link_end=bytes::len(ref links);}
             if(v::len<usize>(ref parameters)-parameter_start>128 || v::len<Signature>(ref signatures)>=limits::project_callables()){return .err(fail(10,module_index,d.start,d.end));}
             let usize parameter_count=v::len<usize>(ref parameters)-parameter_start;
-            if(d.owner_end!=0){let owner=catalog::lookup(ref c,module_index,syntax::source_view(p)[d.owner_start..d.owner_end]);if(owner.code!=0 || parameter_count==0){return .err(fail(4501,module_index,d.start,d.end));}let nominal=catalog::declaration_at(ref c,owner.item);let receiver=types::at(ref graph,*v::at<usize>(ref parameters,parameter_start));if(nominal.parameters!=0 || nominal.module_index!=module_index || (nominal.kind!=4 && nominal.kind!=6) || (receiver.kind!=7 && receiver.kind!=8)){return .err(fail(4501,module_index,d.start,d.end));}let target=types::at(ref graph,receiver.first);let first=syntax::entry_at(p,d.entry_start);if(target.module_index!=nominal.module_index || target.declaration!=nominal.declaration || !bytes::equal(syntax::source_view(p)[first.name_start..first.name_end],b"this")){return .err(fail(4501,module_index,d.start,d.end));}}
+            let owner=check_owner(ref c,p,module_index,d,ref parameters,parameter_start,ref mut graph);if(owner.code!=0){return .err(owner);}
             if(d.kind==9){var usize previous=0;while(previous<v::len<Signature>(ref signatures)){let old=*v::at<Signature>(ref signatures,previous);if(old.foreign && bytes::equal(bytes::view(ref links)[old.link_start..old.link_end],bytes::view(ref links)[link_start..link_end])){if(old.result!=result.type || old.parameter_count!=parameter_count){return .err(fail(5106,module_index,d.start,d.end));}var usize n=0;while(n<parameter_count){if(*v::at<usize>(ref parameters,old.parameter_start+n)!=*v::at<usize>(ref parameters,parameter_start+n)){return .err(fail(5106,module_index,d.start,d.end));}n+=1;}}previous+=1;}}
             if(!v::push<Signature>(ref mut signatures,Signature{.module_index,.declaration=index+1,.public=d.public,.result=result.type,.parameter_start,.parameter_count,.effects=contract.bits,.must_use=contract.must_use,.unsafe_call=d.unsafe_end!=0,.foreign=d.kind==9,.link_start,.link_end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
         }index+=1;}module_index+=1;

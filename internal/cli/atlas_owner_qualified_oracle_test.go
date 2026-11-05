@@ -23,6 +23,12 @@ func atlasOwnerQualifiedFixtures() []atlasOwnerQualifiedFixture {
 		{"value-resource", `module main;resource Token{i32 value;cleanup{}}fn i32 Token::take(Token this){return this.value;}fn i32 main(){let token=Token{.value=42};return Token::take(token);}`, "", "example.session.app", "Token::take", "value"},
 		{"imported-shared", `module main;import answer as a;fn i32 main(){let cell=a::Cell{.value=42};let view=ref cell;return view.get();}`, `module answer;pub struct Cell{i32 value;}pub fn i32 Cell::get(ref Cell this){return this.value;}`, "example.session.answer", "Cell::get", "shared"},
 		{"unused-associated", `module main;struct Cell{i32 value;}fn i32 Cell::answer(){return 42;}fn i32 main(){return 42;}`, "", "example.session.app", "Cell::answer", ""},
+		{"associated-borrow-parameter", `module main;struct Cell{i32 value;}fn i32 Cell::read(ref Cell other){return other.value;}fn i32 main(){let cell=Cell{.value=42};return Cell::read(ref cell);}`, "", "example.session.app", "Cell::read", ""},
+		{"shared-typed", `module main;struct Cell{i32 value;}fn i32 Cell::get(ref Cell this){return this.value;}fn i32 main(){let cell=Cell{.value=42};let ref Cell view=ref cell;return view.get();}`, "", "example.session.app", "Cell::get", "shared"},
+		{"shared-alias", `module main;struct Cell{i32 value;}fn i32 Cell::get(ref Cell this){return this.value;}fn i32 main(){let cell=Cell{.value=42};let view=ref cell;let alias=view;return alias.get();}`, "", "example.session.app", "Cell::get", "shared"},
+		{"shared-group", `module main;struct Cell{i32 value;}fn i32 Cell::get(ref Cell this){return this.value;}fn i32 main(){let cell=Cell{.value=42};let view=(ref cell);return view.get();}`, "", "example.session.app", "Cell::get", "shared"},
+		{"value-record-dot", `module main;struct Cell{i32 value;}fn i32 Cell::take(Cell this){return this.value;}fn i32 main(){let cell=Cell{.value=42};return cell.take();}`, "", "example.session.app", "Cell::take", "value"},
+		{"value-resource-dot", `module main;resource Token{i32 value;cleanup{}}fn i32 Token::take(Token this){return this.value;}fn i32 main(){let token=Token{.value=42};return token.take();}`, "", "example.session.app", "Token::take", "value"},
 	}
 }
 

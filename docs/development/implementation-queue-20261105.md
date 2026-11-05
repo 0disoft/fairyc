@@ -56,14 +56,19 @@ authorized by this queue.
 
 ## Progress
 
-- Owner-qualified Atlas work now has a Go snapshot/codec/query prerequisite:
-  exact written qualified paths, nominal owner coordinates, receiver parameters,
-  resolved calls and canonical maps pass eight independent source oracles.
-  Full snapshot/map packages and scoped vet pass on Windows. Fairy Complete
-  currently has additional signature/public-interface limits beyond Atlas's own
-  refusal; all eight cases, actual commands and fresh-image acceptance remain
-  required. See `candidate-atlas-owner-qualified-20261105.md`. The full queue
-  remains active; Linux stays batched, with no push or dispatch.
+- Owner-qualified Atlas production now matches fourteen independent Go v3 source
+  oracles at both Windows profiles (190.10s): associated functions, shared/exclusive
+  and consuming receivers, imported public owners, typed/alias/grouped receivers
+  and record/resource dot calls. Complete admission passes thirteen positive and
+  six negative controls (60.503s), including a corrected implicit-receiver move
+  omission. Current-source `check`/`check --locked` pass with 643 files and 8,110
+  MIR functions; the lock is refreshed. The combined ordinary/generic/static-
+  operation/copied-closure/owner-qualified producer regression passes in 629.968s
+  without selected skips. Final Go source controls, scoped vet, format and diff
+  checks pass. Actual owner-qualified impact/MCP/body editing, changed full-image
+  acceptance and every final queue gate remain open. See
+  `candidate-atlas-owner-qualified-20261105.md`. Linux stays batched; no push or
+  dispatch, and the full implementation objective remains active.
 
 - Copied-closure Atlas impact, actual read-only MCP and ordinary body preview/apply
   now pass in the full authored-main Windows image at both profiles (346.019s).

@@ -64,7 +64,7 @@ pub fn Result<bool,u32> key_named(ref mut bytes::Buffer out,ref input::Input sou
     discard w::raw(out,b"{",meter)?;discard w::pair(out,b"package_instance",input::instance_id(source,row.module_index),meter)?;
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"module",bytes::view(ref name),meter)?;
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"kind",kind(d.kind),meter)?;
-    discard w::raw(out,b",",meter)?;discard w::pair(out,b"name",if(override.len==0){syntax::declaration_name(parsed,row.declaration+1)}else{override},meter)?;return w::raw(out,b"}",meter);
+    let written=if(override.len==0 && d.owner_end!=0){spans::name(parsed,row.declaration+1,meter)?}else{bytes::empty()};discard w::raw(out,b",",meter)?;discard w::pair(out,b"name",if(override.len!=0){override}else if(d.owner_end!=0){bytes::view(ref written)}else{syntax::declaration_name(parsed,row.declaration+1)},meter)?;return w::raw(out,b"}",meter);
 }
 pub fn Result<bool,u32> effects(ref mut bytes::Buffer out,u32 bits,ref mut usize meter){
     if(bits>4095){return .err(7);}let labels=b"block_context|clock|console|emit|environment|external_call|filesystem|network|process|random|storage_read|storage_write|";
@@ -97,7 +97,7 @@ pub fn Result<bytes::Buffer,u32> declaration(ref input::Input source,ref coordin
 pub fn Result<bytes::Buffer,u32> declaration_named(ref input::Input source,ref coordinates::Coordinates table,ref signatures::Program metadata,ref mut v::Vec<graph::Type> rows,spans::Row row,ref u8[] override,ref mut usize meter){
     if(row.module_index>=input::count(source)){return .err(7);}let p=input::source(source,row.module_index);
     if(row.declaration>=syntax::declaration_count(p)){return .err(7);}if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(p,row.declaration);
-    if(d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=9 && d.kind!=11 || d.owner_end!=d.owner_start){return .err(101);}
+    if(d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=9 && d.kind!=11 || d.owner_end!=0 && (d.kind!=3 || d.generic_parameters!=0)){return .err(101);}
     let template=d.generic_parameters!=0;if(template && d.kind!=3 && d.kind!=4 && d.kind!=6){return .err(101);}
     if(template && d.kind==4 && representation::read_template(p,row.declaration).code!=0){return .err(101);}
     if(template && d.kind==6){var usize i=0;while(i<d.attribute_count){if(!work::charge(meter,1)){return .err(3);}let a=syntax::attribute_at(p,d.attribute_start+i);if(!bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"effects")){return .err(101);}i+=1;}if(effect_policy::read(p,row.declaration).code!=0){return .err(7);}}
@@ -113,7 +113,10 @@ pub fn Result<bytes::Buffer,u32> declaration_named(ref input::Input source,ref c
     discard w::pair(ref mut out,b"abi",if(d.kind==9){b"C"}else{b""},meter)?;discard w::raw(ref mut out,b",",meter)?;
     discard w::pair(ref mut out,b"link_name",if(d.kind==9){signatures::linker_name(metadata,signature)}else{b""},meter)?;
     discard w::raw(ref mut out,b",\"type\":",meter)?;if(template){if(d.kind==3){discard templates::render(ref mut out,source,table,metadata,row.module_index,row.declaration,d.result_type,meter)?;}else{discard templates::self(ref mut out,source,table,row.module_index,row.declaration,meter)?;}}else{discard type(ref mut out,source,table,rows,result,meter)?;}
-    discard w::raw(ref mut out,b",\"owner\":null,\"receiver\":\"\",\"parameters\":[",meter)?;
+    discard w::raw(ref mut out,b",\"owner\":",meter)?;
+    if(d.owner_end==0){discard w::raw(ref mut out,b"null",meter)?;}else{if(!work::charge(meter,signatures::type_count(metadata)+1)){return .err(3);}let id=signatures::owner_type(metadata,p,row.module_index,row.declaration+1);if(id==0){return .err(7);}discard type(ref mut out,source,table,rows,id,meter)?;}
+    let receiver=signatures::receiver_kind(metadata,p,row.module_index,row.declaration+1);
+    discard w::raw(ref mut out,b",",meter)?;discard w::pair(ref mut out,b"receiver",if(receiver==1){b"shared"}else if(receiver==2){b"exclusive"}else if(receiver==3){b"value"}else{b""},meter)?;discard w::raw(ref mut out,b",\"parameters\":[",meter)?;
     var usize i=0;var usize parameters=0;
     while(i<d.entry_count){if(!work::charge(meter,1)){return .err(3);}let e=syntax::entry_at(p,d.entry_start+i);i+=1;if(e.kind!=1){continue;}
         if(!template && (signature==0 || parameters>=signatures::at(metadata,signature).parameter_count)){return .err(7);}
