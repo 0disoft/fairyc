@@ -29,6 +29,9 @@ relation inventories include both, and drops and may-trap are exact. Other uncol
 remain explicitly unavailable. The source-selected v1/v2/v3 Windows validation
 and remaining SDK/generic boundaries are recorded in
 `docs/development/candidate-atlas-observed-relations-20261106.md`.
+The six selected full authored-main Windows groups pass low/optimized at
+`53728a07`; exact scope and remaining groups are recorded in
+`docs/ops/windows-candidate-atlas-traps-cli-20261106.md`.
 Linux command selection remains separate. Body editing retains
 its narrower selection policy; see the owning contract for exact admission.
 

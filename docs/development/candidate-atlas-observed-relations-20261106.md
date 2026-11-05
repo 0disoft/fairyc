@@ -1,9 +1,9 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Current source production collects
-calls, drops and trap categories and declares other families unavailable. A checked
-collector
-alone must not promote that production/completeness scope or finish the broader queue.
+calls, drops and trap categories and declares other families unavailable. A
+checked collector alone must not promote that production/completeness scope or
+finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
 
 ## Required sequence
@@ -23,8 +23,9 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   traversal, retaining both standalone APIs and independent count limits.
 - [x] Complete-bound trap production, summary/header accounting, completeness
   and independent v1/v2/v3 source/current/join comparisons.
-- [ ] Finish the six selected actual authored-main trap command groups under
-  both Windows profiles. Optimized passes; low replay remains in progress.
+- [x] Finish the six selected actual authored-main trap command groups under
+  both Windows profiles at `53728a07`. All twelve profile/group combinations
+  pass without selected skips; see `docs/ops/windows-candidate-atlas-traps-cli-20261106.md`.
   A private collector or map comparison alone is not command evidence.
 - [ ] Remaining unsafe, move, Region allocation, error-propagation and borrow
   collectors, each with independent verified Go facts and production evidence.
@@ -325,9 +326,12 @@ Generated-C/profile/toolchain source digest:
 image SHA-256:
 `6cac6540b97a0968582d20b25f6d92ac96cee10291fed4222ae446b5f2e83239`.
 
-Low command replay is split into bounded parent selections using the existing
-image digest checks and unchanged product timeouts. It remains pending, as do
-the other full-CLI groups, remaining collectors, broader source/consumer work,
-consecutive self-build, distribution, same-commit hosted CI and native Linux.
+Low command replay also passes all six groups in bounded parent selections using
+the existing image digest checks and unchanged product timeouts. The separate
+receipt `docs/ops/windows-candidate-atlas-traps-cli-20261106.md` records every
+selector, timing, source/image digest and local log. Final binary digests were
+recomputed and agree with both retained receipts. The other 35 full-CLI groups,
+remaining collectors, broader source/consumer work, consecutive self-build,
+distribution, same-commit hosted CI and native Linux remain open.
 No stable CLI flags, source grammar, SDK/runtime ABI, wire schema, dependency,
 DB, target, timeout, runner or repository-policy change; no push or dispatch.
