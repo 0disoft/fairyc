@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -101,8 +102,8 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 			}
 			options.module = value
 		case "--name":
-			if len(value) > 512 || !source.ValidIdentifier(value) {
-				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --name as an exact Stage 0 identifier of at most 512 bytes")
+			if len(value) > 512 || !validAtlasDeclarationPath(value) {
+				return fmt.Errorf("experimental command \"atlas-symbols list\" requires --name as an exact Stage 0 identifier path of at most 512 bytes")
 			}
 			options.name = value
 		case "--kind":
@@ -146,4 +147,13 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 	}
 	slices.Sort(options.kinds)
 	return options, nil
+}
+
+func validAtlasDeclarationPath(value string) bool {
+	for _, segment := range strings.Split(value, "::") {
+		if !source.ValidIdentifier(segment) {
+			return false
+		}
+	}
+	return true
 }

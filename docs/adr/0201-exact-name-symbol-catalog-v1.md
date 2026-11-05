@@ -44,6 +44,17 @@ field under the same encoding identifier would silently change a checksummed mac
 
 ## Evidence
 
+### Qualified-name amendment, 2026-11-06
+
+The name domain in decisions 1 and 6 now follows SymbolId v1's nonempty
+`::`-separated Stage 0 declaration path. This admits exact owner-qualified names
+such as `Cell::get` in the query and CLI, retaining the whole-value 512-byte CLI
+limit. Empty/malformed segments, control bytes, normalization, partial-name
+matching and ambiguous cursor selection remain rejected. Existing bare names
+and canonical catalog encoding/checksum bytes are unchanged. Regression tests
+cover exact same-leaf owners, absent/bare/case-mismatched names in all three
+catalog modes, malformed separators and the 512/513-byte boundary.
+
 - Query tests require exact matches across two modules, exact module-plus-name narrowing, successful
   zero matches, deterministic ordering, and rejection of malformed names and cursors outside the
   exact filtered set.

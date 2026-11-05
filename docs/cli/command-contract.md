@@ -248,8 +248,9 @@ empty and package-local relations remain unjoined. Other commands do not inherit
 
 `experimental atlas-symbols list` shares that exact workspace/compiler/currentness preparation. It
 requires one or more exact declaration kinds and explicit symbol, selection-byte, and final-output-
-byte limits. Optional module matching is exact. Optional `--name` accepts one ASCII Stage 0
-identifier of at most 512 bytes and matches declaration names byte-for-byte and case-sensitively.
+byte limits. Optional module matching is exact. Optional `--name` accepts a nonempty
+`::`-separated path of ASCII Stage 0 identifiers of at most 512 bytes, including `Cell::get`,
+and matches declaration names byte-for-byte and case-sensitively.
 Same-name declarations in different modules or kinds remain separate records; zero matches are a
 successful complete empty catalog. Continuation accepts only a canonical full SymbolId returned by
 the same module/name/kind-filtered current catalog. The command writes no `.fymap`, cache, or catalog

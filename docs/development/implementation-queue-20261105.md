@@ -63,7 +63,10 @@ authorized by this queue.
   method refusals. Complete generic-source/planner packages and scoped vet pass.
   The original fourteen source oracles and edit oracle still pass. This is a Go
   prerequisite only; additional same-leaf Fairy production/commands, ordinary-body
-  editing, qualified CLI filtering and every remaining queue gate stay open.
+  editing and every remaining queue gate stay open. Go's exact qualified-name
+  CLI filter now passes all three catalog modes, 512/513-byte and malformed-path
+  controls and existing symbol CLI regressions (1.631s); its normative contracts
+  are updated. The corresponding Fairy command remains unimplemented.
 
 - Owner-qualified Atlas production now matches fourteen independent Go v3 source
   oracles at both Windows profiles (190.10s): associated functions, shared/exclusive

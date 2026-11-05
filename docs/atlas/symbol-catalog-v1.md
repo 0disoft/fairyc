@@ -30,7 +30,8 @@ as locals or ordinary functions.
 
 ## Exact-name filter
 
-The optional `name` is one ASCII Stage 0 identifier. Matching is exact byte equality and is
+The optional `name` is a nonempty `::`-separated path of ASCII Stage 0 identifiers,
+including an owner-qualified name such as `Cell::get`. Matching is exact byte equality and is
 case-sensitive. Atlas performs no normalization, case folding, prefix, substring, edit-distance,
 ranking, or guessed rename. Equal names in different modules or kinds remain distinct records.
 

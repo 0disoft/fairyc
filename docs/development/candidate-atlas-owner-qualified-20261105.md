@@ -188,10 +188,30 @@ Logs: `.cache/atlas-owner-qualified-namespace-before-20261106.log`,
 `-after-20261106.log` and `-packages-20261106.log`.
 
 This Go prerequisite does not attest the additional same-leaf Fairy source
-family, same-leaf ordinary-body editing or CLI qualified-name filtering.
-Those remain separate follow-ups. The existing native full-image replay uses
+family or same-leaf ordinary-body editing. Those remain separate follow-ups.
+The CLI qualified-name filter is now verified separately below.
+The existing native full-image replay uses
 the unchanged fourteen-family Fairy sources; none of its evidence is broadened
 to the two new namespace fixtures.
+
+## Go exact qualified-name CLI filter
+
+The internal exact-name query admitted `Cell::get`, but the CLI still rejected
+every qualified name before loading a workspace. `atlas-symbols list --name`
+now validates the same nonempty `::`-separated Stage 0 declaration path, retaining
+the whole-value 512-byte bound. ADR 0201's qualified-name amendment and Symbol
+Catalog v1/CLI contracts record this accepted input domain; canonical envelope,
+checksum domains, bare-name behavior and versioned cursor policy are unchanged.
+
+All fifteen combinations of the three catalog modes and exact owner/missing/
+bare/case-mismatched names pass. Thirteen parser controls include the 512/513-byte
+boundary, empty segments, malformed separators, digit starts, NUL and newline.
+Existing symbol CLI pagination/filter/budget/output regressions also pass;
+the combined command takes 1.631s. Scoped CLI vet, format and diff checks pass.
+Log: `.cache/atlas-symbols-qualified-cli-final-20261106.log`.
+
+This is the Go experimental CLI filter. The Fairy `atlas-symbols` dispatcher is
+still a separate missing command; no Fairy CLI help/source or image changes here.
 
 New-image full CLI, consecutive self-build, generated-consumer execution,
 clean-machine distribution, same-commit CI and native Linux remain separate.
