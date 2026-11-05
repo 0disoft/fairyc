@@ -21,9 +21,11 @@ pub fn Result<usize,u32> context(ref signatures::Program metadata,ref v::Vec<typ
  return .err(12);
 }
 // application=true names the generic application child; false names its record.
+// A source-prepared SDK constructor keeps kind 13 in mixed aggregate mode;
+// importing Vec never changes the kind of a client struct/resource constructor.
 pub fn Result<usize,u32> construction(ref signatures::Program metadata,ref syntax::Parsed source,usize module_index,usize declaration,ref v::Vec<usize> arguments,usize expression,bool application,ref v::Vec<types::Type> graph,ref mut usize work){
  if(module_index>=signatures::module_count(metadata) || !signatures::source_matches(metadata,module_index,source)){return .err(12);}let node=switch(context(metadata,graph,module_index,declaration,arguments,work)){case .ok(n):{n}case .err(code):{return .err(code);}};let p=signatures::aggregate_source(metadata);var usize selected=0;var usize i=0;
- while(i<aggregates::use_count(p)){if(!charge(work,1)){return .err(4503);}let u=aggregates::use_at(p,i);if(u.kind==4 && u.node==node && u.module_index==module_index && u.declaration==declaration){if(u.source_index==0 || u.source_index>syntax::expression_count(source)){return .err(12);}let e=syntax::expression_at(source,u.source_index);if(e.kind!=10){return .err(12);}if(if(application){e.left==expression}else{u.source_index==expression}){if(selected!=0 || u.type==0 || u.type>types::count(graph)){return .err(12);}let t=types::at(graph,u.type);if(t.kind!=20 && t.kind!=21){return .err(12);}selected=u.type;}}i+=1;}
+ while(i<aggregates::use_count(p)){if(!charge(work,1)){return .err(4503);}let u=aggregates::use_at(p,i);if(u.kind==4 && u.node==node && u.module_index==module_index && u.declaration==declaration){if(u.source_index==0 || u.source_index>syntax::expression_count(source)){return .err(12);}let e=syntax::expression_at(source,u.source_index);if(e.kind!=10){return .err(12);}if(if(application){e.left==expression}else{u.source_index==expression}){if(selected!=0 || u.type==0 || u.type>types::count(graph)){return .err(12);}let t=types::at(graph,u.type);if(t.kind!=20 && t.kind!=21 && !(t.kind==13 && signatures::sdk_vector_source(metadata,t.module_index))){return .err(12);}selected=u.type;}}i+=1;}
  return if(selected==0){.err(12)}else{.ok(selected)};
 }
 // Cleanup receives the concrete tuple retained by the resource type itself.

@@ -107,6 +107,15 @@ producer and impact/MCP command acceptance. SDK Vec root-body preview/apply also
 passes the Windows command leaf, including new bool element specializations;
 SDK/user-aggregate combinations keep their separate acceptance gate.
 
+The compiler-private mixed producer now also retains scalar SDK Vec and scalar
+user struct/resource templates in the same Complete source graph. SDK
+constructors keep authenticated kind-13 storage; a client struct named Vec keeps
+its ordinary aggregate identity. Five native producer/current/join families pass
+the independent Go v3 oracle and bounded-failure controls in both Windows
+profiles. This does not establish mixed command or full authored-main acceptance;
+see the [composition plan](../development/candidate-atlas-sdk-aggregates-20261105.md)
+and [producer receipt](../ops/windows-candidate-atlas-sdk-aggregates-20261105.md).
+
 Call reachability is exact within the admitted resolved graph. Foreign calls make
 the `calls` completeness partial with reason `external-ffi`; only resolved calls
 consume `--max-calls`. Non-call summaries are not

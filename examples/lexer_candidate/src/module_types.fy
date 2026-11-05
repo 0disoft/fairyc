@@ -186,6 +186,14 @@ pub fn Result<v::Vec<usize>,BatchProblem> specialize_many(ref catalog::Catalog c
 // Compiler-private concrete aggregate values. Kinds 20/21 are struct/resource
 // instances; kind 22 is an ordered scalar argument tuple, never a value type.
 // Ordinary assemble/resolve remain closed until downstream ownership/MIR joins.
+// SDK Vec keeps its authenticated kind-13 storage family in a mixed graph.
+// User generic aggregates continue through kind 20/21 and scalar tuples.
+pub fn Resolution vector(ref catalog::Catalog c,usize module_index,usize declaration,ref v::Vec<usize> args,ref mut v::Vec<Type> graph){
+    let item=catalog::identity(c,module_index,declaration);if(item==0){return fail(4502,module_index,0,0);}let d=catalog::declaration_at(c,item);
+    if(!catalog::sdk_vector(c,module_index,declaration) || d.kind!=6 || d.parameters!=1 || v::len<usize>(args)!=1){return fail(4502,module_index,d.source_start,d.source_end);}
+    let value=*v::at<usize>(args,0);if(value==0 || value>count(graph) || !element(graph,value,0)){return fail(4502,module_index,d.source_start,d.source_end);}
+    return accepted(graph,node(13,0,module_index,declaration,value,0),module_index,d.source_start,d.source_end);
+}
 pub fn Resolution aggregate(ref catalog::Catalog c,usize module_index,usize declaration,ref v::Vec<usize> args,ref mut v::Vec<Type> graph){
     let selected=catalog::identity(c,module_index,declaration);if(selected==0){return fail(4501,module_index,0,0);}let d=catalog::declaration_at(c,selected);let size=v::len<usize>(args);
     if((d.kind!=4 && d.kind!=6) || catalog::sdk_vector(c,module_index,declaration) || size==0 || size>8 || d.parameters!=size){return fail(4502,module_index,d.source_start,d.source_end);}

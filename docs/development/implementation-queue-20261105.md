@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Mixed scalar SDK Vec/user aggregate production now preserves the authenticated
+  SDK constructor and existing layout/cleanup type alongside client struct/resource
+  instances. The two reproduced preparation/constructor refusals are corrected.
+  Five independent Go v3 source/map/current/join families pass Windows low and
+  optimized in 751.183s, including same-name client Vec and callable pop/take-slot
+  coverage, bounded failures and workspace immutability. Stable client admission
+  and intrinsic ownership stay unchanged. See the composition plan and producer
+  receipt. Actual mixed impact/MCP/edit, full authored-main, broader source forms
+  and every final gate remain open; the broad Atlas queue is not complete.
+
 - SDK/user scalar-aggregate composition now has a Go prerequisite: explicit
   compiler-private source policy combines authenticated SDK storage owners with
   scalar user struct/resource templates. Three current v3 source/map/join cases,

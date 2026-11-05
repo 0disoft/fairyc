@@ -25,6 +25,12 @@ fn i32 main(){let cell=Cell<i32>{.value=42};var values=v::empty<i32>();assert(v:
 		{"SDK Vec and resource", `module main;import std::vec as v;
 pub resource Flag<T>{T value;cleanup{assert(this.value);}}
 fn i32 main(){let flag=Flag<bool>{.value=true};var values=v::empty<bool>();assert(v::push<bool>(ref mut values,flag.value).is_ok);return if(*v::at<bool>(ref values,0)){42}else{0};}`, "Flag"},
+		{"SDK Vec and same-name struct", `module main;import std::vec as v;
+pub struct Vec<T>{T value;}
+fn i32 main(){let cell=Vec<i32>{.value=42};var values=v::empty<i32>();assert(v::push<i32>(ref mut values,cell.value).is_ok);return *v::at<i32>(ref values,0);}`, "Vec"},
+		{"SDK Vec pop and struct", `module main;import std::vec as v;
+pub struct Cell<T>{T value;}
+fn i32 main(){let cell=Cell<i32>{.value=42};var values=v::empty<i32>();assert(v::push<i32>(ref mut values,cell.value).is_ok);return switch(v::pop<i32>(ref mut values)){case .some(value):{value}case .none:{0}};}`, "Cell"},
 	}
 }
 

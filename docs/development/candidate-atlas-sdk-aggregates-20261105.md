@@ -4,12 +4,12 @@ Scope: finish the SDK/user-aggregate family in the existing implementation
 queue. Native Linux stays batched. This does not replace the remaining queue or
 authorize push, hosted dispatch, publication, a backend or a production provider.
 
-## Observed prerequisite
+## Observed prerequisite before the Go source-policy change
 
 Core SDK plus a user scalar-parameter struct passes current Go v3 preparation.
 Adding authenticated SDK Vec instead rejects the user's struct/resource header
 with E4501, including through `workspacecompiler.CheckGeneric`. The SDK policy
-currently closes all non-SDK aggregate templates. This is an explicit source
+at that baseline closes all non-SDK aggregate templates. This is an explicit source
 admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
 
 ## Sequential commits
@@ -24,10 +24,20 @@ admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
    The [Windows Go receipt](../ops/windows-atlas-sdk-aggregate-policy-20261105.md)
    records three positive families and their refusal controls. This does not
    establish Fairy production or actual command acceptance.
-2. Run the actual Fairy Complete/producer/current/join path against independent
+2. **Bounded Fairy production implemented.** Run the actual Fairy Complete/producer/current/join path against independent
    core-SDK/struct, Vec/struct and Vec/resource Go fixtures. Fix actual source
    authority, selection, layout, cleanup or identity gaps where reproduced;
    existing SDK and non-SDK aggregate acceptance remains required.
+   The mixed type factory now retains the authenticated SDK kind-13 constructor
+   separately from client kind-20/21 instances. The source-bound constructor
+   demand also recognizes that SDK type, preserving the exact source plan.
+   Five Go-oracle families and Windows low/optimized production pass in 751.183s,
+   including a same-name client Vec and a callable pop/take-slot combination.
+   Source-instance/export/current/join limits and missing coordinates reject;
+   every fixture remains unchanged. The
+   [producer receipt](../ops/windows-candidate-atlas-sdk-aggregates-20261105.md)
+   records exact coverage and regression results. This closes the five bounded
+   source-production families, not broader source forms or command acceptance.
 3. Exercise actual impact, read-only MCP and root-body editor commands, including
    fresh overlay specialization, current-source drift and publication policy.
    Register and run complete authored-main acceptance after these source families.
