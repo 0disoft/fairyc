@@ -44,12 +44,24 @@ The image is 5,642,752 bytes.
 
 ## Low replay coverage
 
-Low acceptance is still pending; selected groups must pass on the same current
+Low acceptance remains partial; selected groups must pass on the same current
 generated-input/policy and image digests before they are counted. The current
 low image is 14,811,648 bytes. Its generated-input/policy SHA-256 is
 `928c51f83ee93731750f5519997eb3da2e4ae55ac21de9dc0aa8c0d83fb9702d`, and its
 image SHA-256 is
 `3e181c6e1be313e7ea87bcfb442b0275b7e14f0fa2a654469fddcd823e3f2b86`.
+
+The mixed impact/MCP/help replay passes all three selected groups without skips
+in 628.749s (native profile 608.92s), with both digests matching the image above:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^(impact-sdk-aggregates|mcp-sdk-aggregates|help)$'
+```
+
+The same integration/artifact environment shown above was set. Log:
+`.cache/atlas-full-cli-low-mixed-query-20261105.log`. A separate mixed editor
+attempt was explicitly interrupted during a read-only status request; it has no
+completion result and is not counted. The seventeen other groups remain open.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -65,14 +77,14 @@ image SHA-256 is
 | impact-aggregates | Pass | Pending |
 | impact-sdk | Pass | Pending |
 | impact-sdk-vector | Pass | Pending |
-| impact-sdk-aggregates | Pass | Pending |
+| impact-sdk-aggregates | Pass | Pass |
 | mcp-sdk | Pass | Pending |
 | mcp-sdk-vector | Pass | Pending |
-| mcp-sdk-aggregates | Pass | Pending |
+| mcp-sdk-aggregates | Pass | Pass |
 | edit-sdk | Pass | Pending |
 | edit-sdk-vector | Pass | Pending |
 | edit-sdk-aggregates | Pass | Pending |
-| help | Pass | Pending |
+| help | Pass | Pass |
 
 The complete low replay, broader Atlas source families, final whole-compiler
 Go/Fairy comparisons, consecutive self-build and Windows distribution/clean-machine
