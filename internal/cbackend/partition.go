@@ -112,7 +112,7 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 	appendGroups := func(fragments []string) {
 		var group strings.Builder
 		for _, fragment := range fragments {
-			if group.Len() != 0 && group.Len()+len(fragment) > budget {
+			if group.Len() != 0 && len(include)+group.Len()+len(fragment) > budget {
 				sources = append(sources, include+group.String())
 				group.Reset()
 			}

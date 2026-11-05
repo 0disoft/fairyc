@@ -188,6 +188,54 @@ int32_t visit(int32_t value, fy_c_callback_i32_userdata callback, void *data) {
 	}
 }
 
+func TestPartitionIncludesInByteBudget(t *testing.T) {
+	program := lowerSource(t, `module main;
+fn i32 first() { return 10; }
+fn i32 second() { return 12; }
+fn i32 main() { return first() + second(); }`)
+	for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
+		// A one-byte target keeps each indivisible function separate. Derive
+		// the boundary from real emitted bodies rather than frozen C spelling.
+		separate, err := cbackend.EmitBuildContext(t.Context(), program, "main::main", profile, false, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		const include = "#include \"fy_bootstrap.h\"\n"
+		if len(separate.Sources) < 3 {
+			t.Fatal("missing independent function bodies")
+		}
+		first := strings.TrimPrefix(separate.Sources[0], include)
+		second := strings.TrimPrefix(separate.Sources[1], include)
+		boundary := len(include) + len(first) + len(second)
+		for _, delta := range []int{-1, 0, 1} {
+			budget := boundary + delta
+			parts, err := cbackend.EmitBuildContext(t.Context(), program, "main::main", profile, false, budget)
+			if err != nil {
+				t.Fatal(err)
+			}
+			paired := false
+			for _, source := range parts.Sources {
+				paired = paired || strings.Contains(source, first) && strings.Contains(source, second)
+				if len(source) <= budget {
+					continue
+				}
+				// A single large function still cannot be split. Only packing
+				// multiple bodies must respect the target including its prefix.
+				indivisible := false
+				for _, original := range separate.Sources {
+					indivisible = indivisible || source == original
+				}
+				if !indivisible {
+					t.Fatalf("budget %d: grouped source has %d bytes", budget, len(source))
+				}
+			}
+			if paired != (delta >= 0) {
+				t.Fatalf("budget %d: adjacent bodies paired = %t", budget, paired)
+			}
+		}
+	}
+}
+
 // Compile actual separate files with the host's strict consumer; concatenation
 // would miss duplicate linkage, cross-unit literal identity and header warnings.
 func compileSplitForTest(t *testing.T, parts cbackend.BuildUnit, profile, extra string, want int) {

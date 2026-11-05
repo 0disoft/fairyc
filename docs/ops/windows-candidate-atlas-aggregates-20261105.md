@@ -165,6 +165,23 @@ checks also pass. The same verifier is registered in the authored full-CLI test;
 that refreshed complete image replay remains pending. This expands the existing
 experimental edit workspace family, not its editable-target policy or wire ABI.
 
+## Full-CLI C partition boundary
+
+The refreshed authored CLI initially fails before native compilation in 17.022s:
+one body packet has 2,097,164 bytes, twelve over the unchanged 2 MiB consumer
+limit. The Go partition packer counted function bodies without their shared
+header include. Packing now includes that prefix; it still preserves indivisible
+function boundaries. A public-emitter regression covers one byte below, exactly
+at and one byte above the actual two-function packing boundary for both target
+profiles, without requiring a C toolchain.
+
+`go test -mod=readonly -count=1 -timeout 5m ./internal/cbackend -run
+'^Test(Partition|SmallBuildMatchesStreamingUnit)'` passes in 40.352s, including
+the existing Windows low/optimized separate-file native executions. Scoped
+backend vet and diff checks pass. The refreshed full-CLI attempt now emits 24
+parts, largest 2,096,962 bytes; its complete command result remains pending.
+No transport ceiling, per-command timeout, source admission or runner changes.
+
 ## Original producer development failures and remaining work
 
 Initial development runs failed on a Go test's comparison of a slice-containing
