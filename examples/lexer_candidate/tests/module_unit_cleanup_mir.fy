@@ -8,6 +8,7 @@ import module_unit_bind as binding;
 import module_unit_call_closure as closure;
 import module_signatures as signatures;
 import module_types as types;
+import candidate_limits as limits;
 import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;
@@ -46,7 +47,7 @@ fn u32 mutated(ref ir::Program p,u32 mode){
     i=0;while(i<ir::field_count(p)){var f=ir::field_at(p,i);if(mode==6 && f.owner==operand.type && f.ordinal==0){f.ordinal=1;}if(mode==9 && f.owner==operand.type && f.ordinal==0){f.type=operand.type;}assert(v::push<ir::Field>(ref mut fields,f).is_ok);i+=1;}
     i=1;while(i<=ir::operand_count(p)){var o=ir::operand_at(p,i);if(mode==2){o.type=ir::type_count(p)+1;}assert(v::push<ir::Operand>(ref mut operands,o).is_ok);i+=1;}if(mode==8){assert(v::push<ir::Operand>(ref mut operands,operand).is_ok);}
     i=0;while(i<ir::drop_count(p)){var d=ir::drop_at(p,i);if(mode==1){d.operand=ir::operand_count(p)+1;}assert(v::push<ir::Drop>(ref mut drops,d).is_ok);i+=1;}
-    if(mode>=14){return switch(ir::assemble_project(graph,frames,glues,fields,operands,drops,if(mode==14){1048577}else if(mode==16){4194305}else{4194304})){case .ok(project):{assert(ir::project(ref project) && ir::work_limit(ref project)==4194304 && proof::check(ref project).code==0);0}case .err(e):{e.code}};}
+    if(mode>=14){return switch(ir::assemble_project(graph,frames,glues,fields,operands,drops,if(mode==14){1048577}else if(mode==16){limits::project_work()+1}else if(mode==18){limits::project_work()-1}else{limits::project_work()})){case .ok(project):{assert(ir::project(ref project) && ir::work_limit(ref project)==limits::project_work() && proof::check(ref project).code==0);0}case .err(e):{e.code}};}
     return switch(ir::assemble(graph,frames,glues,fields,operands,drops,if(mode==11){1048577}else{ir::work(p)})){case .ok(unit):{assert(!ir::project(ref unit) && ir::work_limit(ref unit)==1048576);0}case .err(e):{e.code}};
 }
-@test fn void cleanup_mir_rejects_invalid_handoffs_and_missing_authority(){let p=nested();assert(mutated(ref p,0)==0);var u32 mode=1;while(mode<=10){assert(mutated(ref p,mode)==1001);mode+=1;}assert(mutated(ref p,11)==1002 && mutated(ref p,12)==1001 && mutated(ref p,13)==1001);assert(mutated(ref p,14)==0 && mutated(ref p,15)==0 && mutated(ref p,16)==1002 && mutated(ref p,17)==1001);}
+@test fn void cleanup_mir_rejects_invalid_handoffs_and_missing_authority(){let p=nested();assert(mutated(ref p,0)==0);var u32 mode=1;while(mode<=10){assert(mutated(ref p,mode)==1001);mode+=1;}assert(mutated(ref p,11)==1002 && mutated(ref p,12)==1001 && mutated(ref p,13)==1001);assert(mutated(ref p,14)==0 && mutated(ref p,15)==0 && mutated(ref p,16)==1002 && mutated(ref p,17)==1001 && mutated(ref p,18)==0);}

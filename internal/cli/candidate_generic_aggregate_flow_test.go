@@ -6,7 +6,12 @@ import (
 )
 
 func TestCandidateGenericAggregateFlow(t *testing.T) {
-	cases := append(candidateAggregateValueFixtures(),
+	wire := candidateAggregateLayoutOracle(t, candidateAggregateFlowFixtures()...)
+	candidateAggregateBodyProbe(t, "module_unit_checked_bodies", wire, aggregateFlowFieldBuilder, "generic_aggregate_flow.fy", "import module_unit_checked_bodies as checking;import module_unit_moves as moves;import module_unit_cleanup_policy as policy;")
+}
+
+func candidateAggregateFlowFixtures() []candidateAggregateLayoutFixture {
+	return append(candidateAggregateValueFixtures(),
 		candidateAggregateLayoutFixture{name: "two cleanup obligations", maker: aggregateLayoutMaker + `pub fn void cleanup_pair(){let first=Holder<i32>{.payload=Cell<i32>{.value=1}};let second=Holder<i32>{.payload=Cell<i32>{.value=2}};}`},
 		candidateAggregateLayoutFixture{name: "consuming call", maker: aggregateLayoutMaker + `pub fn void release_holder(Holder<i32> value){}pub fn void transfer(){let value=Holder<i32>{.payload=Cell<i32>{.value=42}};release_holder(value);}`},
 		candidateAggregateLayoutFixture{name: "cleanup effects permitted", maker: aggregateLayoutMaker + `@effects(console)pub resource Echo<T>{T value;cleanup{discard this.value;}}@effects(console)pub fn void consume_echo(Echo<i32> value){}`},
@@ -25,8 +30,6 @@ func TestCandidateGenericAggregateFlow(t *testing.T) {
 		candidateAggregateLayoutFixture{name: "wrapped use after move", maker: aggregateLayoutMaker + `pub fn void bad(Option<Holder<i32>> value){let moved=value;discard value;discard moved;}`, reject: 1101},
 		candidateAggregateLayoutFixture{name: "consumed cleanup receiver", maker: strings.Replace(aggregateLayoutMaker, "cleanup{discard h::finish<T>(this.payload.value);}", "cleanup{let moved=this;discard moved;}", 1), reject: 1102},
 	)
-	wire := candidateAggregateLayoutOracle(t, cases...)
-	candidateAggregateBodyProbe(t, "module_unit_checked_bodies", wire, aggregateFlowFieldBuilder, "generic_aggregate_flow.fy", "import module_unit_checked_bodies as checking;import module_unit_moves as moves;import module_unit_cleanup_policy as policy;")
 }
 
 const aggregateFlowFieldBuilder = `

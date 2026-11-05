@@ -23,7 +23,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    constructor, specialization and cleanup facts. Construction value checking is
    implemented below, as is ownership/Flow checking. Executable lowering remains
    open.
-3. **Ownership/Flow checking implemented; cleanup execution and MIR remain open.**
+3. **Ownership/Flow and cleanup MIR implemented; executable body MIR/C remain open.**
    Resource instances now enter the ordinary move/loan and cleanup-policy owner.
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
@@ -481,3 +481,78 @@ Concrete cleanup execution, aggregate MIR/C, interface/cache/Atlas production an
 full commands remain required. Native Linux, consecutive self-build, distribution
 and hosted same-commit evidence remain open. No stable API/SDK ABI, DB,
 dependency, repository-hygiene or runner configuration change.
+
+## Source-independent aggregate cleanup MIR
+
+The checked-body lowerer now retains kind-21 resource recipes, fields, abilities,
+effects and exact cleanup-frame receiver types in the existing source-independent
+cleanup MIR. Its private aggregate constructor admits concrete struct/resource
+descriptors and backwards scalar-argument tuples of length one through eight.
+Ordinary, project and artifact reconstruction remain explicitly closed for those
+types; the private mode is not silently serialized or inferred during restoration.
+The private cleanup MIR contract documents this boundary.
+
+Tuple metadata cannot escape as a frame result/receiver, resource field, operand,
+array or tagged/borrow payload. Canonical identities, frame/effect joins, nested
+drop requirements and existing work/table bounds still run before publication.
+Original declaration arity remains a checked-source fact; this detached owner
+does not invent it after releasing the catalog.
+
+`TestCandidateGenericAggregateCleanupMIR` reuses all fifty-two Flow inputs and
+adds an eight-scalar-parameter aggregate, for fifty-three source inputs per
+profile. Twenty-six accepted inputs pass independent Go Flow/expanded-field
+expectations; twenty-six reject in both compilers and the direct by-value cycle
+retains its independent Fairy layout refusal. The native probe compares every
+semantic drop request's operand/frame/type/span/exit and all generic resource
+recipes/field order against the retained checked owner.
+
+An unchanged aggregate reconstruction succeeds. Thirteen malformed or ordinary
+reconstruction controls reject: ordinary/project/artifact gates, self-referential
+tuples, a non-tuple instance argument, lost resource glue, tuple results/receivers,
+tuple fields/operands, Option/array tuple payloads and excessive tuple depth.
+Field/operand mutations run when those tables are present; the matrix includes
+both nonempty tables and zero-field resources.
+
+The final focused Windows MSVC low/optimized replay passes in 72.19s with no
+selected skips:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateGenericAggregateCleanupMIR$'
+```
+
+The initial fixture used a reserved variable spelling; it was corrected before
+the native passes. Earlier failures are not passes. The smaller low replay is
+superseded by the final thirteen-control matrix above.
+
+This completes cleanup metadata lowering/verification only. Whole-body aggregate
+MIR, source-bound identities, CFG/drop/defer sequencing, both C emission forms,
+actual cleanup traces, interface/cache/Atlas, full commands and final acceptance
+remain required. The overall implementation queue remains active; Linux stays
+batched. No stable API/SDK ABI, DB, dependency, hygiene or runner change; the
+private cleanup MIR architecture contract is updated explicitly.
+
+The ordinary cleanup MIR fixture's four authored checks are now exposed through
+`TestCandidateOrdinaryCleanupMIR` on both Windows profiles. Its first run exposed
+a stale 4 MiB project-work expectation, while `candidate_limits::project_work`
+already specifies 16 MiB in unchanged production code. The fixture now reads the
+owning limit, checking one below, exact and one above, while preserving the
+unit-versus-project and malformed-handoff controls. Product work/time limits are
+unchanged. This is a test correction, not a relaxed production gate.
+
+The combined ordinary/Flow command initially failed only in that old fixture;
+its unchanged fifty-two-input Flow root passed both profiles in 74.47s. That
+result is reused only for those unchanged inputs. The final ordinary-fixture
+replay, including the one-below-boundary control, passes in 46.26s with both
+profiles and all four authored checks executed:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateOrdinaryCleanupMIR$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_flow_test.go internal/cli/candidate_generic_aggregate_cleanup_mir_test.go
+git diff --check
+```
+
+Scoped vet, formatting and diff checks pass. There are no selected native skips.
+These separate valid results do not turn the earlier failed combined command
+into a pass. Whole-body MIR/C, restoration/identity/Atlas/full commands and the
+remaining queue stay open.

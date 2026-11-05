@@ -16,15 +16,17 @@ pub fn bool valid(ref ir::Program p,usize id){
     let t=ir::type_at(p,id);
     // Reject untrusted coordinates before the canonical bucket arithmetic.
     if(t.module_index>=limits::source_files() || t.declaration>1048576 || t.first>4096 || t.second>4096){return false;}
+    if(t.kind==20 || t.kind==21){return ir::aggregates(p) && t.declaration!=0 && t.scalar==0 && t.second==0 && t.first!=0 && t.first<id && ir::type_at(p,t.first).kind==22;}
     if(t.kind==2 || t.kind==3 || t.kind==4){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first==0 && t.second==0;}
     if(t.kind==13){return t.module_index<limits::source_files() && t.declaration!=0 && t.scalar==0 && t.first!=0 && t.first<id && t.second==0;}
     if(t.module_index!=0 || t.declaration!=0){return false;}
+    if(t.kind==22){if(!ir::aggregates(p) || t.scalar!=0 || t.first==0 || t.first>=id || ir::type_at(p,t.first).kind!=1 || !transport::valid(ir::type_at(p,t.first).scalar)){return false;}var usize tail=t.second;var usize length=1;while(tail!=0){if(tail>=id || ir::type_at(p,tail).kind!=22 || length>=8){return false;}length+=1;tail=ir::type_at(p,tail).second;}return true;}
     if(t.kind==1){return t.scalar!=0 && (t.scalar<=7 || transport::extended(t.scalar) || abi::valid(t.scalar)) && t.first==0 && t.second==0;}
     if(t.kind==15){return views::extended(t.scalar) && t.first==0 && t.second==0;}
     if(t.kind==17 || t.kind==18){return t.scalar==0 && t.first!=0 && t.first<id && t.second==0 && ir::type_at(p,t.first).kind==2;}
-    if(t.kind==16){return t.scalar==0 && t.first!=0 && t.first<id && t.second<=4096;}
+    if(t.kind==16){return t.scalar==0 && t.first!=0 && t.first<id && t.second<=4096 && ir::type_at(p,t.first).kind!=22;}
     if(t.kind==12){if(t.second!=0){return false;}return if(t.first==0){pointers::valid(t.scalar) && !(pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767)}else{t.scalar<=1 && t.first<id && ir::type_at(p,t.first).kind==2};}
     if(t.kind>=9 && t.kind<=11 || t.kind==14 || t.kind==19){return t.scalar==0 && t.first==0 && t.second==0;}
-    if(t.kind>=5 && t.kind<=8){return t.scalar==0 && t.first!=0 && t.first<id && ir::type_at(p,t.first).kind!=19 && if(t.kind==6){t.second!=0 && t.second<id && ir::type_at(p,t.second).kind!=19}else{t.second==0};}
+    if(t.kind>=5 && t.kind<=8){return t.scalar==0 && t.first!=0 && t.first<id && ir::type_at(p,t.first).kind!=19 && ir::type_at(p,t.first).kind!=22 && if(t.kind==6){t.second!=0 && t.second<id && ir::type_at(p,t.second).kind!=19 && ir::type_at(p,t.second).kind!=22}else{t.second==0};}
     return false;
 }

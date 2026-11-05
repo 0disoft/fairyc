@@ -257,3 +257,19 @@ authorized by this queue.
   vet, formatting and diff checks pass. See the aggregate plan. Executed cleanup
   and verified aggregate MIR/C, identities,
   cache/Atlas, actual CLI and the complete final acceptance queue remain open.
+
+- Source-independent aggregate cleanup MIR now preserves resource recipes,
+  exact cleanup-frame identities, ordered fields and semantic drop requests.
+  A private verified route admits scalar tuples of length 1..8 while ordinary,
+  project and artifact entry points remain closed. The final fifty-three-input
+  Windows low/optimized probe passes in 72.19s with thirteen reconstruction
+  refusal controls; see the aggregate plan and private cleanup MIR contract.
+  This is not whole-body MIR, executable cleanup/C, linking/restoration,
+  cache/Atlas or actual commands. Those and the complete final queue remain open.
+
+  The unchanged Flow root passes both Windows profiles in 74.47s. The newly
+  exposed four-check ordinary cleanup MIR regression initially finds stale 4 MiB
+  fixture expectations against the unchanged 16 MiB product work limit; its
+  corrected boundary/invalid-handoff replay passes both profiles in 46.26s.
+  Scoped vet, formatting and diff checks pass; see the aggregate plan for exact
+  failed-command/reused-result accounting.

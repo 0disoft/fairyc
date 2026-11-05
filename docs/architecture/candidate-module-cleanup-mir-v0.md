@@ -39,6 +39,29 @@ ordinal contiguity; operand uniqueness per `(frame,kind,id)` through a 32768-slo
 and drop sites that must be owned, droppable, inside the frame's authority and never the
 cleanup receiver.
 
+Compiler-private aggregate admission (2026-11-05). `Program` retains a separate
+aggregate-admission bit. `assemble_aggregates` verifies concrete struct/resource
+kinds 20/21 and ordered scalar-argument tuple kind 22. Instance descriptors retain
+module/declaration coordinates and a backwards reference to a nonempty tuple;
+tuple links are backwards, scalar-only and bounded to eight arguments. Exact
+source declaration arity is checked before lowering by the retained aggregate
+source/type owner, not reconstructed from an absent source catalog here.
+
+Kind 21 uses ordinary resource glue, exact cleanup-frame receiver identity,
+abilities/effects and ordered field types. Tuples are metadata: frame results,
+cleanup receivers, resource fields, operands, arrays and tagged/borrow payloads
+cannot contain a tuple value. Canonical uniqueness and the existing work and
+table bounds remain mandatory. The lowerer selects this private admission while
+copying the already-checked graph; ordinary source types retain their old route.
+
+`assemble`, `assemble_project` and `assemble_artifact` keep aggregate admission
+disabled. This addition changes no artifact encoding and does not authorize
+aggregate restoration, project linking, whole-body MIR, C output or an executable
+cleanup trace. Those owners must preserve the mode and current-source proof
+through explicit follow-up contracts. Authored Windows evidence and the current
+remaining work are recorded in
+`docs/development/candidate-generic-aggregates-20261105.md`.
+
 Validation. `tests/module_unit_cleanup_mir.fy` passes 4/4 and rejects thirteen malformed
 handoffs: out-of-range drop operand or operand type, removed caller authority, removed
 nonempty cleanup frame, changed provider module, reordered field ordinal, removed nested
