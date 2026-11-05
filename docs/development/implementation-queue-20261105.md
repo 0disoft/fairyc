@@ -67,7 +67,9 @@ authorized by this queue.
   exact Go contexts and same-session stale-source recovery. Ordinary root-body
   editing passes both profiles in 109.395s, including fresh bool implementations,
   exact Go preview/apply reports, dependency-write refusal and publication guards.
-  The three newly registered full authored-main groups remain open. See
+  All three new full authored-main groups also pass both profiles, query groups
+  in 172.115s and editor groups in 75.013s, with unchanged source/image digests.
+  This closes the bounded static-operation Atlas family only. See
   `docs/development/candidate-atlas-static-operations-20261105.md`.
   Broader source families and the complete implementation/final queue remain open.
 
@@ -79,8 +81,10 @@ authorized by this queue.
   reuse. Low mixed impact/MCP/help passes three selected groups in 628.749s, and
   the completed mixed editor retry passes in 441.443s, with matching source/image
   digests. Seven additional core query groups pass in 1042.132s, giving eleven
-  distinct low groups. Nine original groups and the three new static-operation
-  groups remain pending in bounded groups. The full-CLI
+  distinct low groups; all three new static-operation groups also pass both
+  profiles, giving fourteen low groups and all twenty-three optimized groups
+  through the recorded bounded full-image replays. Nine original low groups
+  remain pending. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain
   open; native Linux stays batched.

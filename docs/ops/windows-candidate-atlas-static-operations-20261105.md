@@ -61,9 +61,9 @@ invocations per profile preserve workspace bytes. Log:
 Scoped vet, Go formatting and diff checks pass; vet log:
 `.cache/atlas-static-operation-command-vet-20261105.log`.
 
-The verifier is registered as `impact-static-operations` in full authored-main
-acceptance; registration alone does not attest that group. The original twenty
-optimized groups and completed low groups retain their separate receipt.
+The verifier also passes as `impact-static-operations` in full authored-main
+acceptance below. The original twenty optimized groups and completed low groups
+retain their separate receipt.
 
 ## Actual read-only MCP
 
@@ -85,7 +85,7 @@ substituting a map or Go child. Log:
 Scoped vet, Go formatting and diff checks pass; vet log:
 `.cache/atlas-static-operation-mcp-vet-20261105.log`.
 
-The full authored-main `mcp-static-operations` verifier is registered, not replayed.
+The full authored-main `mcp-static-operations` verifier also passes both profiles.
 
 ## Actual ordinary root-body editing
 
@@ -107,14 +107,25 @@ The shared existing editor fixture gains optional provider-source/denied-owner
 setup; default SDK inputs and every existing assertion remain unchanged. This
 attests checked source publication, not execution or cache reuse of the edited
 client. Log: `.cache/atlas-static-operation-edit-20261105.log`. The full authored-
-main `edit-static-operations` verifier is registered, not replayed.
+main `edit-static-operations` verifier also passes both profiles.
 Scoped vet, Go formatting and diff checks pass; vet log:
 `.cache/atlas-static-operation-edit-vet-20261105.log`.
 
+## Full authored-main acceptance
+
+With `FAIRYC_RUN_PARITY_INTEGRATION=1` and the existing retained-image directory,
+both full CLI profiles pass the two named query groups in 172.115s and the named
+editor group in 75.013s, without selected skips. Current generated C, runtime,
+profile, toolchain/stack policy and image digests authenticate both retained
+images. No authored main, dispatcher, source check or query is replaced by Go.
+See [the full-CLI receipt](windows-atlas-full-cli-replay-20261105.md) for exact
+commands, digests and original-group coverage. This closes this bounded Atlas
+source family through all three commands, not all Atlas or final acceptance.
+
 ## Remaining boundary
 
-The three new full authored-main group replays remain separate steps. This result
-does not broaden single-operation language
+Nine original low full-CLI groups, broader Atlas source families and final gates
+remain open. This result does not broaden single-operation language
 admission, implement multi-operation interfaces or close other Atlas families.
 Native Linux, full compiler comparison, consecutive self-build, distribution,
 clean-machine and hosted same-commit acceptance remain open. No source grammar,

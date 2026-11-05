@@ -37,9 +37,10 @@ Scoped vet, Go formatting and diff checks pass. Log:
 `.cache/atlas-full-cli-optimized-20261105.log`; scoped vet:
 `.cache/atlas-full-cli-vet-20261105.log`.
 
-The newly registered static-operation impact/MCP/editor groups remain pending in
-this full authored-main image. Their separate command-leaf acceptance is recorded in
-the static-operation receipt and does not count as this full-image replay.
+The added static-operation impact/MCP/editor groups now also pass both profiles
+in bounded full-image replays below. Combined with the unchanged original twenty
+groups, all twenty-three optimized groups have completed on this current image;
+this is a union of the recorded full-image commands, not one new all-group run.
 
 Optimized generated-input/policy SHA-256:
 `7ca0718ef3068260576a7d0541f6527b4668ccd345646a6958e5c2fbf1125881`.
@@ -84,8 +85,23 @@ go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^T
 ```
 
 Log: `.cache/atlas-full-cli-low-core-query-20261105.log`. Eleven distinct low
-groups now pass; the nine remaining original groups and the new static-operation
-groups remain pending.
+groups pass in those three commands.
+
+All three static-operation groups pass in bounded full authored-main replays,
+again with the exact current generated-input/policy and image digests above:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 12m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^(low|optimized)$/^(impact-static-operations|mcp-static-operations)$'
+go test -mod=readonly -count=1 -failfast -timeout 12m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^(low|optimized)$/^edit-static-operations$'
+```
+
+Query groups pass in 172.115s (low 152.10s; optimized 2.42s), editor groups in
+75.013s (low 55.72s; optimized 1.24s), without selected skips. Logs:
+`.cache/atlas-full-cli-static-operation-query-20261105.log` and
+`.cache/atlas-full-cli-static-operation-edit-20261105.log`. Fourteen distinct low
+groups now pass; nine original groups remain pending. The shared MCP/editor
+helpers retain default SDK inputs and every original assertion; only optional
+workspace/provider setup was added. No product C input or image changed.
 
 | Group | Optimized | Low |
 | --- | --- | --- |
@@ -93,14 +109,14 @@ groups remain pending.
 | impact-families | Pass | Pass |
 | mcp-ordinary | Pass | Pass |
 | mcp-aggregates | Pass | Pass |
-| mcp-static-operations | Pending | Pending |
+| mcp-static-operations | Pass | Pass |
 | edit-ordinary | Pass | Pending |
 | edit-publication | Pass | Pending |
 | edit-aggregates | Pass | Pending |
-| edit-static-operations | Pending | Pending |
+| edit-static-operations | Pass | Pass |
 | unsupported | Pass | Pass |
 | impact-generics | Pass | Pass |
-| impact-static-operations | Pending | Pending |
+| impact-static-operations | Pass | Pass |
 | impact-aggregates | Pass | Pass |
 | impact-sdk | Pass | Pending |
 | impact-sdk-vector | Pass | Pending |

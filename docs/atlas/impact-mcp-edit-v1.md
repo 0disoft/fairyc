@@ -264,7 +264,8 @@ cleanup is retained, and exact Go reports/publication plus refusal/freshness
 checks pass. See the [mixed editor receipt](../ops/windows-atlas-sdk-aggregate-edit-20261105.md).
 SDK declarations remain noneditable. This is checked source publication, not
 execution of the edited client or cache-hit proof. The refreshed optimized
-authored-main replay passes all twenty groups. Complete low authored-CLI and
+authored-main evidence covers all twenty original groups plus the three added
+static-operation groups on the same current image. Complete low authored-CLI and
 native Linux acceptance remain separate.
 
 Workspaces containing the existing single-operation interface family also admit
