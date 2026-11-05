@@ -321,3 +321,14 @@ authorized by this queue.
   Source-bound identities, linking/restoration/cache/Atlas/SDK/actual commands,
   broader resource families and every final queue gate remain open. This closes
   only the bounded aggregate partition consumer, not the implementation objective.
+
+
+- Aggregate unit source identities now bind concrete kind-20/21 descriptors and
+  their ordered scalar tuples to original-source nodes, retaining exact source
+  graph prefixes and cleanup receiver/call identities. The reproduced zero-type-
+  identity cleanup refusal is fixed. Final twenty-input Windows low/optimized
+  acceptance passes in 79.73s, and three unchanged ordinary SDK Vec identity/
+  freshness/work/lifetime checks pass both profiles in 36.18s. Scoped vet,
+  formatting and diff checks pass; the aggregate plan preserves failed harness/
+  reproduction and valid reuse accounting. Project type/frame linking/rebasing,
+  restoration/cache/Atlas/SDK/actual commands and every final gate remain open.

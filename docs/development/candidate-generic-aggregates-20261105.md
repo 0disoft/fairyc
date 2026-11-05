@@ -28,7 +28,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
    checked cleanup requests alone are insufficient.
-4. **Interfaces, restoration and Atlas production.** Keep original templates as
+4. **Unit source identities implemented; project linking, interfaces, restoration and Atlas production remain.** Keep original templates as
    source exports, bind instance/type/cleanup identities to current source,
    preserve definition-dependent invalidation and emit concrete aggregate and
    cleanup facts from Complete. Include SDK source families through their actual
@@ -734,3 +734,65 @@ commands, broader CFG/resource families and every final acceptance gate remain o
 No native Linux/full CLI/self-build/distribution/clean-machine/hosted result is
 claimed. No stable public API/SDK ABI, DB, dependencies, hygiene or runner changes;
 no push, release, deployment or hosted dispatch.
+
+
+## Aggregate unit source identities
+
+The actual `module_source_specializations` bridge now selects kind-20/21 type
+handles through their ordered scalar tuple, original module/declaration and the
+existing completed source-plan selector. Before selection, every source-prepared
+aggregate graph descriptor must match the typed graph prefix, including tuple
+links. Merely matching a declaration cannot erase or exchange argument order.
+Kind-22 tuples retain zero identity rows because they are metadata, not instances.
+The ordinary SDK Vec selector is unchanged.
+
+The existing `module_identified_ir` owner now retains aggregate type rows and can
+bind each generic resource cleanup frame to exactly its receiver's source identity.
+Its late-type guard rejects an unselected Vec or aggregate instance. Function and
+cleanup rows retain their original declaration and specialization call endpoints;
+ordinary rows stay zero. This is a source-bound compilation-unit owner, not linked
+project identity, artifact admission, cache restoration or Complete/Atlas publication.
+
+The first identity probe failed before execution because its isolated source copy
+omitted dependencies. After selecting the existing C-emitter import closure and
+using a separate template-catalog alias, the real low native probe reproduced error
+9 at cleanup frame handle kind 4/index 2: its aggregate receiver had a zero type row.
+The selector fix passed the low checkpoint in 27.72s. A subsequent full aggregate
+replay passed in 78.33s, while the newly exposed ordinary fixture failed only on
+missing isolated generic closure/JSON dependencies. Adding those test dependencies
+makes its three original SDK Vec checks pass both Windows profiles in 36.18s
+(low 6.79s, optimized 24.86s). None of the failed combined commands is a whole pass.
+
+The aggregate verifier uses the same twenty-input Go Flow/expanded-field oracle:
+fifteen accepted inputs, four paired rejections and one independent Fairy layout
+refusal. It compares every aggregate row with the retained source-plan node and
+its original declaration, checks zero tuple/ordinary rows, exact generic cleanup
+receiver identity and each concrete/ordinary call target. The shared field oracle
+independently compares source-plan `g0_` bytes with Go expansion. Exact 16 MiB work,
+one extra work unit, already-exhausted work and otherwise identical source bytes
+with one trailing newline check bounded current-source refusal. This is not a new
+Go/Fairy whole-project artifact or full CLI comparison.
+
+A final aggregate replay after extending the late-instance guard follows below.
+The full implementation queue remains active. Native Linux, project linking,
+restoration/cache/Atlas/SDK production, actual commands and final self-build,
+distribution/clean-machine/hosted acceptance remain required. No stable public
+API/SDK ABI, DB, dependency, hygiene, runner or timeout change; no push or dispatch.
+
+
+Final aggregate replay passes in 79.73s (low 12.25s, optimized 56.07s), no selected
+skips. The ordinary three-check SDK Vec replay above uses unchanged generated
+inputs and is reused; it does not import the extended identified-unit late guard.
+Scoped vet, formatting and diff checks pass on the final files.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateGenericAggregateIdentities$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateOrdinarySourceIdentities$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_identity_test.go
+git diff --check
+```
+
+Only the bounded source-bound unit identity step is complete. Project type/frame
+rebasing and linking, exact current-source restoration/cache, Atlas/SDK and actual
+commands remain next; the complete implementation objective is not finished.

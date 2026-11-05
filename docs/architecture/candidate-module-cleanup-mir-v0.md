@@ -112,3 +112,14 @@ The aggregate plan records 120 Windows low/optimized native executions with fixe
 values and cleanup traces. This does not admit aggregate project linking, source
 identity restoration, artifact/cache/Atlas/SDK or actual command execution; those
 remain required follow-ups. No stable C ABI or compiler-warning policy changes.
+
+
+Source-bound unit identity consumer (2026-11-05). Aggregate-enabled typed inputs
+must preserve the exact source-prepared descriptor prefix. Concrete kind-20/21
+rows select a completed original-source node from ordered scalar tuple arguments;
+kind-22 metadata has no specialization row. The existing identified-unit factory
+checks every generic cleanup frame against the source identity of its exact
+receiver type, preserves specialized call endpoints and rejects late unselected
+Vec/aggregate types. The aggregate plan owns the actual Windows source/Flow/field
+oracle and current/work-boundary results. This does not authorize linked project
+identity, artifact restoration, cache/Atlas/SDK production or actual CLI admission.
