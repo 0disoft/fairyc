@@ -41,7 +41,11 @@ asynchronous and cross-thread closures remain excluded.
 private C11 transport and artifact restoration. The [full CLI/cache receipt](../ops/windows-candidate-copied-closures-cli-cache-20261103.md)
 tracks Windows `check/build/run/test`, interpreter/native execution and ordinary/
 generic cross-package fresh-process disk restoration, invalidation and repair.
-Windows `test` retains its non-cache entry; complete-cache reuse is exercised by
-`check/build/run`, without caching test results. Native Linux is intentionally
+Windows `test` also admits explicit private `--cache-root` / `--cache-status`
+through its existing cached parser and package-unit adapter. Flag-free test
+calls remain uncached; results are never cached. Complete-cache reuse is
+exercised by `check/build/run`. See the
+[aggregate command receipt](../ops/windows-candidate-aggregate-cli-20261105.md).
+Native Linux is intentionally
 deferred in the maintainer's combined validation queue.
 No new MIR opcode, allocator, runtime ABI, dependency or cache wire version.

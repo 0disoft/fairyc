@@ -1,5 +1,6 @@
 module project_compiler_cached;
 import project_compiler_core as core;
+import project_compiler_command as command;
 import project_compiler_input as input;
 import module_public_type_text as coordinates;
 import project_module_visibility as visibility;
@@ -22,18 +23,19 @@ pub fn Observation empty(){return Observation{.path=0,.stored=false,.lookup_phas
 pub fn Result<core::Complete,core::Problem> build(ref disk::Store store,ref environment::Environment env,ref visibility::Resolved loaded,ref input::Input sources,ref coordinates::Coordinates table,ref mut v::Vec<diagnostics::Reports> reports,ref mut artifacts::DiskWork cache_work,ref mut usize source_work,ref mut usize link_work,ref mut Observation observed){
     *observed=empty();
     if(v::len<diagnostics::Reports>(reports)!=0){return core::build_complete_reporting(sources,table,reports,source_work,link_work);}
-    switch(artifacts::from_disk(store,loaded,env,cache_work)){
+    let aggregate=switch(command::aggregates(sources,source_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    switch(if(aggregate){artifacts::from_disk_aggregates(store,loaded,env,cache_work)}else{artifacts::from_disk(store,loaded,env,cache_work)}){
         case .ok(complete):{observed.path=2;return .ok(complete);}
         case .err(e):{observed.lookup_phase=e.phase;observed.lookup_code=e.code;}
     };
     observed.path=1;
     var unit_work=units::empty();let exhausted=observed.lookup_code==9 || observed.lookup_code==10 || observed.lookup_code==11 || observed.lookup_code==1002 || observed.lookup_code==1003;
-    let result=if(exhausted){core::build_complete_reporting(sources,table,reports,source_work,link_work)}else{core::build_complete_mixed(store,env,sources,table,reports,ref mut unit_work,source_work,link_work)};observed.reused_units=unit_work.hits;observed.rebuilt_units=unit_work.misses;observed.stored_units=unit_work.stored;
+    let result=if(exhausted){command::build(sources,table,reports,source_work,link_work)}else if(aggregate){core::build_complete_aggregate_mixed(store,env,sources,table,ref mut unit_work,source_work,link_work)}else{core::build_complete_mixed(store,env,sources,table,reports,ref mut unit_work,source_work,link_work)};observed.reused_units=unit_work.hits;observed.rebuilt_units=unit_work.misses;observed.stored_units=unit_work.stored;
     let complete=switch(result){
         case .ok(p):{p}case .err(e):{return .err(e);}
     };
     if(unit_work.hits>0){observed.path=if(unit_work.misses>0){3}else{4};}
-    switch(artifacts::to_disk(store,loaded,ref complete,env,cache_work)){
+    switch(if(aggregate){artifacts::to_disk_aggregates(store,loaded,ref complete,env,cache_work)}else{artifacts::to_disk(store,loaded,ref complete,env,cache_work)}){
         case .ok(_):{observed.stored=true;}
         case .err(e):{observed.store_phase=e.phase;observed.store_code=e.code;}
     };

@@ -60,9 +60,11 @@ or `cache: mixed`, rather than the whole-project `cache: hit`. Test results,
 native packets/images and stdin are never cached. Every selected test executes
 again; native development/release still use fresh harnesses and compilation.
 
-The shared parser's original entry keeps rejecting cache flags for the authored
-Windows CLI. Only `linux_file_cli` selects `arguments_cached`, which enables the
-new parsing mode. Missing/empty/NUL roots, duplicate cache flags and status
+The shared parser's original entry keeps rejecting cache flags. Both
+`linux_file_cli` and the Windows candidate `file_cli` explicitly select
+`arguments_cached`, enabling the private opt-in mode. The Windows extension is
+recorded in the [aggregate command receipt](../ops/windows-candidate-aggregate-cli-20261105.md).
+Missing/empty/NUL roots, duplicate cache flags and status
 without a root fail before workspace access. Status is written once to stderr
 after test processing, including a skipped status after earlier admission
 failures. JSON stdout retains its existing schema and bytes; status write failure

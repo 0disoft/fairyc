@@ -18,9 +18,14 @@ import (
 // fresh Fairy C packets only; it cannot substitute a Go frontend or cached AST.
 func copiedClosureCLIHost(t *testing.T, profile cdriver.Profile) string {
 	t.Helper()
+	return copiedClosureCLIHostWithLimit(t, profile, 256<<10)
+}
+
+func copiedClosureCLIHostWithLimit(t *testing.T, profile cdriver.Profile, partBytes int) string {
+	t.Helper()
 	root := t.TempDir()
 	copyLexerFileCLIExample(t, root)
-	build, support := candidateParityBuildPartsWithSystemImports(t, root, map[string]bool{"CloseHandle": true, "CreateFileW": true, "GetFileInformationByHandleEx": true, "GetFinalPathNameByHandleW": true, "GetLastError": true})
+	build, support := candidateParityBuildPartsWithLimit(t, root, map[string]bool{"CloseHandle": true, "CreateFileW": true, "GetFileInformationByHandleEx": true, "GetFinalPathNameByHandleW": true, "GetLastError": true}, partBytes)
 	imageDir := t.TempDir()
 	if parent := os.Getenv("FAIRYC_CLOSURE_CLI_ARTIFACTS"); parent != "" {
 		imageDir = filepath.Join(parent, profile.Name)

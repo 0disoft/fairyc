@@ -41,7 +41,7 @@ skipped on Windows. The dispatcher selects this adapter for native test input.
 production lock maintenance/verification, canonical test discovery, interpreter
 execution, listing, JSON, source anchors, exact/file/directory selection and
 root-reachable package/workspace selection. Invalid combinations retain the
-existing argument diagnostics. Linux-only `--cache-root <existing directory>`
+existing argument diagnostics. Explicit private `--cache-root <existing directory>`
 and `--cache-status` select the [verified unit cache](candidate-linux-cache-v1.md)
 for listing, semantic and native execution. Tests execute again on cache hits;
 native compilation and result reporting retain their existing behavior.

@@ -22,7 +22,7 @@ import module_project_identified_ir as identified;
 import project_atlas_facts as facts;
 import project_atlas_declarations as declarations;
 import project_atlas_schema as schema;
-import project_atlas_source_mode as mode;
+import project_compiler_source_mode as mode;
 import project_atlas_wire as wire;
 import project_atlas_write as w;
 import std::bytes as bytes;

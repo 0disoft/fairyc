@@ -3,6 +3,7 @@ import project_workspace_lock as loader;
 import project_source_set as source_set;
 import project_compiler_input as input;
 import project_compiler_core as compiler;
+import project_compiler_command as command;
 import project_compiler_entry as entry;
 import project_check as check;
 import module_unit_c_emit as c;
@@ -71,7 +72,7 @@ pub fn Result<Plan,Error> evaluate_run(ref u8[] root,bool locked,bool retain_loc
     let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0})));}};
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::projection_failure(loaded,e)));}};
     var usize source_work=0;var usize link_work=0;var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();
-    let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure_reports(loaded,projected,e,reports)));}};
+    let complete=switch(command::build(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(p):{p}case .err(e):{return .err(frontend_failure(check::compile_failure_reports(loaded,projected,e,reports)));}};
     return finish(loaded,projected,complete,retain_locations);
 }
 

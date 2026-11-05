@@ -16,6 +16,7 @@ import project_manifest as manifest;
 import project_manifest_values as lexical;
 import project_compiler_input as input;
 import project_compiler_core as compiler;
+import project_compiler_command as command;
 import project_coordinate_graph as coordinates;
 import project_source_set as sources;
 import generic_signature_diagnostics as signatures;
@@ -109,7 +110,7 @@ fn i32 evaluate_test_list(ref u8[] root,ref test_options::TestOptions options,re
     var v::Vec<bytes::Buffer> identities=v::empty<bytes::Buffer>();var usize exact_i=0;while(exact_i<v::len<test_options::TestIdentity>(ref tests)){if(!test_options::test_add(ref mut identities,test_options::test_name(v::at<test_options::TestIdentity>(ref tests,exact_i)))){return 4;}exact_i+=1;}
     let missing_exact=test_missing_exact(test_options::exact(options),ref identities);if(missing_exact!=0){return missing_exact;}
     var usize source_work=0;var usize link_work=0;var v::Vec<signatures::Reports> reports=v::empty<signatures::Reports>();
-    let compiled=if(test_options::cache_root(options).len==0){compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)}else{cache::build(test_options::cache_root(options),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)};
+    let compiled=if(test_options::cache_root(options).len==0){command::build(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)}else{cache::build(test_options::cache_root(options),ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work,observed)};
     let complete=switch(compiled){case .ok(p):{p}case .err(e):{return test_error(check::compile_failure_reports(loaded,projected,e,reports));}};
     if(test_options::flags(options).stdin && v::len<usize>(ref chosen)!=1){return test_invocation(b"command \"test\" requires exactly one selected test when --stdin is supplied");}
     if(!test_options::flags(options).list && !test_options::flags(options).native){return interpreter::tests(ref complete,options,ref tests,ref chosen,ref projected,locks::state_code(lock));}

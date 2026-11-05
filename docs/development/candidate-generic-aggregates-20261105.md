@@ -5,6 +5,14 @@ interface/cache and CLI integration. This plan does not replace that scope with
 source-only projections. ADR 0387 and the existing Go implementation own the
 admitted scalar-parameter struct/resource semantics. Native Linux remains batched.
 
+The actual Windows candidate now selects these scalar-aggregate factories for
+`check/build/run/test`, project persistence and opt-in test-unit reuse. Both
+host profiles pass the full authored command root, including interpreter/native
+execution and invalidation/repair controls; see
+[the command receipt](../ops/windows-candidate-aggregate-cli-20261105.md).
+This does not promote Go's stable source gate or finish SDK Atlas production,
+native Linux, broader generic transport or final self-build/distribution/CI.
+
 ## Commit sequence
 
 1. **Source plan prerequisite, implemented.** The explicit compiler-private

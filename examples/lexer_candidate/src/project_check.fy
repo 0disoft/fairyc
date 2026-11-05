@@ -5,6 +5,7 @@ import project_module_visibility as visibility;
 import project_workspace_graph as graph;
 import project_compiler_input as input;
 import project_compiler_core as compiler;
+import project_compiler_command as command;
 import project_source_set as sources;
 import module_unit_body_ir_model as ir;
 import module_project_identified_ir as identified;
@@ -82,7 +83,7 @@ pub fn Result<Stats,Error> evaluate(ref u8[] root,bool locked){var sources::Budg
     let table=switch(coordinates::collect(visibility::workspace_graph(loader::workspace(ref loaded)),ref mut meter)){case .ok(value):{value}case .err(e):{return .err(projection_failure(loaded,input::Problem{.code=e.code,.reason=2,.owner=e.owner,.module_index=0,.declaration=0}));}};
     let projected=switch(input::project(loader::workspace(ref loaded),ref mut meter)){case .ok(value):{value}case .err(e):{return .err(projection_failure(loaded,e));}};
     var usize source_work=0;var usize link_work=0;
-    var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);let complete=switch(compiler::build_complete_reporting(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(value):{value}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
+    var v::Vec<diagnostics::Reports> reports=v::empty<diagnostics::Reports>();let files=input::count(ref projected);let complete=switch(command::build(ref projected,ref table,ref mut reports,ref mut source_work,ref mut link_work)){case .ok(value):{value}case .err(e):{return .err(compile_failure_reports(loaded,projected,e,reports));}};
     return .ok(Stats{.instances,.files,.functions=functions(identified::ir_program(compiler::checked_program(ref complete)),ref projected),.lock});
 }
 

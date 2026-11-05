@@ -12,7 +12,8 @@ pub fn Outcome result(usize bits){return Outcome{.error=0,.trap=0,.bits};}
 pub fn Outcome failure(u32 error){return Outcome{.error,.trap=0,.bits=0};}
 pub fn Outcome trapped(u32 trap){return Outcome{.error=0,.trap,.bits=0};}
 pub fn u32 scalar(ref ir::Program p,usize type){let t=clean::type_at(ir::cleanup_ir(p),type);return if(t.kind==1){t.scalar}else{0};}
-pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16 || t.kind==19;}
+pub fn bool record(ref ir::Program p,usize type){let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==2 || t.kind==3 || (t.kind==20 || t.kind==21) && clean::aggregates(ir::cleanup_ir(p));}
+pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type) || record(p,type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16 || t.kind==19;}
 pub fn Outcome allocate(ref mut v::Vec<usize> heap,usize count,ref mut usize steps){
     if(count>999999 || *steps<count+1 || v::len<usize>(heap)>1000000-count-1){return failure(2);};
     *steps=*steps-count-1;let id=v::len<usize>(heap)+1;
@@ -32,10 +33,10 @@ pub fn Outcome write_place(ref ir::Program p,ref ir::Body b,usize id,usize bits,
 }
 pub fn Outcome aggregate(ref ir::Program p,ref ir::Body b,usize id,ref v::Vec<usize> values,ref mut v::Vec<usize> heap,ref mut usize steps){
     let e=ir::node_at(b,id-1).value;let t=clean::type_at(ir::cleanup_ir(p),e.type);var usize count=if(t.kind==16){t.second}else{0};
-    if(t.kind==2 || t.kind==3){var usize i=0;var bool found=false;while(i<ir::layout_count(p)){if(*steps==0){return failure(2);};*steps=*steps-1;let s=ir::layout_at(p,i).value;if(s.type==e.type){count=s.field_count;found=true;break;}i+=1;}if(!found){return failure(4);}}
+    if(record(p,e.type)){var usize i=0;var bool found=false;while(i<ir::layout_count(p)){if(*steps==0){return failure(2);};*steps=*steps-1;let s=ir::layout_at(p,i).value;if(s.type==e.type){count=s.field_count;found=true;break;}i+=1;}if(!found){return failure(4);}}
     let a=allocate(heap,count,steps);if(a.error!=0){return a;}
     if(e.kind==29){let bits=*v::at<usize>(values,ir::node(b,e.left));var usize i=0;while(i<count){let slot=v::at_mut<usize>(heap,a.bits+i);*slot=bits;i+=1;}return a;}
-    var usize link=e.right;var usize position=count;while(link!=0){let row=ir::node_at(b,ir::node(b,link)-1).value;var usize child=ir::node(b,row.left);if(child==0 || position==0){return failure(4);}position-=1;var usize index=position;if(t.kind==2 || t.kind==3){let resolved=field_index(p,e.type,row.field.id,steps);if(resolved.error!=0){return resolved;}index=resolved.bits;}let bits=*v::at<usize>(values,child);let slot=v::at_mut<usize>(heap,a.bits+index);*slot=bits;link=row.right;}return if(position==0){a}else{failure(4)};
+    var usize link=e.right;var usize position=count;while(link!=0){let row=ir::node_at(b,ir::node(b,link)-1).value;var usize child=ir::node(b,row.left);if(child==0 || position==0){return failure(4);}position-=1;var usize index=position;if(record(p,e.type)){let resolved=field_index(p,e.type,row.field.id,steps);if(resolved.error!=0){return resolved;}index=resolved.bits;}let bits=*v::at<usize>(values,child);let slot=v::at_mut<usize>(heap,a.bits+index);*slot=bits;link=row.right;}return if(position==0){a}else{failure(4)};
 }
 pub fn bool slots(ref mut v::Vec<usize> values,usize count){if(!v::reserve<usize>(values,count).is_ok){return false;}while(v::len<usize>(values)<count){if(!v::push<usize>(values,0).is_ok){return false;}}return true;}
 pub fn Outcome computed(math::RuntimeValue r){return if(!r.supported){failure(1)}else if(r.trap!=0){trapped(r.trap)}else{result(r.bits)};}

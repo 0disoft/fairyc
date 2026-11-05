@@ -15,6 +15,9 @@ authorized by this queue.
   current identity/source checks, single-body preview/apply, failure-atomic
   publication and Windows low/optimized command-leaf/full CLI acceptance.
   Broader source families and Linux dispatch/execution remain separate below.
+- [x] Windows candidate scalar-aggregate `check/build/run/test` selection,
+  native/interpreter execution and explicit project/test-unit cache reuse.
+  Go stable promotion, SDK aggregate combinations and native Linux stay separate.
 - [ ] Broaden Fairy Atlas production to the Go-supported source families,
   including SDK, aggregates, foreign declarations and generic facts; retain
   independent current-source expectations and explicit completeness.
@@ -52,6 +55,18 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Actual scalar-aggregate workspace commands now select Complete and matching
+  cache families from retained source. The full authored Windows command roots
+  pass low (434.19s) and optimized (167.723s), 54 fresh CLI processes in total,
+  including both program profiles, exact private-Go check/list/interpreter
+  comparisons, value-copy/mutation, arrays/nested/empty resources, cache-hit test
+  reruns, failure/invalidation/repair and cold fallback. Concrete interpreter
+  records are admitted only under verified aggregate mode; tuple metadata stays
+  excluded. Windows explicitly enables the existing private opt-in test-cache
+  parser with unchanged flag-free behavior. The separate ordinary SDK control
+  passes both profiles in 143.793s; see the aggregate CLI receipt. SDK Atlas, native
+  Linux and every final acceptance gate remain open.
 
 - The authored full Atlas CLI snapshot after `157dc58e` passes both Windows
   profiles in 1590.053s, including its aggregate impact/MCP/edit verifiers.

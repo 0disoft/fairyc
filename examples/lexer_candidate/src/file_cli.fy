@@ -64,7 +64,7 @@ pub fn i32 run() {
     if(bytes::equal(flag,b"targets")){return if(argc==2){public_output(public::targets())}else{invocation("command \"targets\" does not accept arguments")};}
     if(bytes::equal(flag,b"explain")){return invocation("command \"explain\" expects exactly one diagnostic code");}
     if(bytes::equal(flag,b"emit")){return invocation("command \"emit\" is not a stable product command; for compiler debugging use \"fairyc experimental emit-workspace-c --target <target-id> [--locked]\"");}
-    if(bytes::equal(flag,b"test")){return testing::arguments();}
+    if(bytes::equal(flag,b"test")){return testing::arguments_cached();}
     if (bytes::equal(flag,b"check")) { if(argc==3){var u8[64] option=[0;64];let n=switch(process::arg(2,ref mut option)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref option;if(bytes::equal(value[..n],b"--cache-status")){return invocation("command \"check\" accepts only optional --locked");}}return check_status(checking::arguments()); }
     if (bytes::equal(flag,b"build")) { return native::run(false); }
     if (bytes::equal(flag,b"run")) { return native::run(true); }

@@ -3,7 +3,7 @@ import project_atlas_facts as facts;
 import project_atlas_instances as instances;
 import project_atlas_produce as produce;
 import project_atlas_schema as schema;
-import project_atlas_source_mode as mode;
+import project_compiler_source_mode as mode;
 import project_atlas_current as current;
 import project_atlas_join as join;
 import project_atlas_impact as impact;
