@@ -14,6 +14,13 @@ pub fn Result<bool,u32> admit(ref input::Input source,ref coordinates::Coordinat
     if(version<1 || version>3){return .err(101);}
     let code=identified::current(compiler::checked_program(complete),input::sources(source),metadata,table,meter);
     if(code!=0){return .err(if(code==10){3}else{7});}
+    return select(source,version,meter);
+}
+// Refusal-only preflight may run before expensive compilation. A successful
+// selection is not Complete, current-source authority or permission to emit a
+// map; the package factory must still call admit with its exact Complete.
+pub fn Result<bool,u32> select(ref input::Input source,u32 version,ref mut usize meter){
+    if(version<1 || version>3){return .err(101);}
     var usize m=0;while(m<input::count(source)){let p=input::source(source,m);var usize i=0;
         while(i<syntax::declaration_count(p)){if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(p,i);
             if(d.generic_parameters!=0 && (version==1 || version==2 && d.kind!=3)){return .err(101);}i+=1;

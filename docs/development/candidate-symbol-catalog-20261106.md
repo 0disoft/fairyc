@@ -13,14 +13,10 @@ batched; no push, dispatch or release is authorized by this record.
 - [x] Current-admitted declaration selection, canonical JSON/checksum and exact
   selection/output budgets for catalog v1, v2 and v3. Preserve full-ID ordering,
   filtered-set cursor membership, original generic declarations and omissions.
-- [ ] Schema-specific current-source map production. The existing default Fairy
-  wire owner retains v1/v3 selection and the producer emits v3. The explicit v2
-  framing/semantic/current boundaries above now exist; production must still
-  derive each requested version from authenticated Complete facts. Do not
-  relabel v3 maps or catalog output to simulate v1/v2 support.
-  The explicit source-selected factories and six-family Windows acceptance are
-  implemented below; explicit SDK-lane acceptance remains required before this
-  sequence item closes.
+- [x] Schema-specific current-source map production from authenticated Complete
+  facts, including ordinary SDK modules and used/unused SDK Vec source. The
+  explicit v1/v2/v3 factories retain whole-source family checks; no relabeling or
+  conversion of maps/catalogs. The SDK and ordinary regression evidence follows.
 - [ ] Actual authored dispatcher, help, stale-source/lock and failure-atomic
   command acceptance; then current full CLI under both Windows profiles.
 - [ ] Consecutive self-build, distribution, same-commit hosted and deferred
@@ -359,3 +355,37 @@ diff checks pass. Source index and execution-queue progress are updated. No publ
 CLI/SDK ABI, DB, dependency, repository-policy or runner/workflow changes. Full
 repository Go tests, legacy full command images, self-build, distribution and
 hosted CI remain later gates; native Linux stays batched. No push or dispatch.
+
+## SDK source selection and production
+
+`project_atlas_source_version::select` provides refusal-only bounded source
+preflight before expensive Complete construction. A successful selection grants
+no current-source or map authority: `admit` still reauthenticates the exact
+Complete/source/signatures/coordinates and repeats the same family checks at
+publication. Unsupported templates anywhere in the closure still reject.
+
+The SDK probe uses the existing SDK-specific three-minute diagnostic process
+limit; no product timeout changes. Both used and unused `std::vec` sources reject
+v1/v2 and produce independently admitted v3 maps/catalogs. The replay passes in
+304.204s (test body 304.05s), with twelve native processes, twelve independent
+maps and eight unsupported-family refusals over both Windows profiles. Low
+unsupported-family refusals finish in 0.25..0.37s, whereas the earlier attempt
+exhausted the generic helper's one-minute limit before a verdict. Log:
+`.cache/atlas-source-version-sdk-preflight-20261106.log`.
+
+The separate final preflight regression includes all six original families and
+ordinary SDK `std::num`/`std::bytes` under v1/v2/v3. It passes in 462.263s (test
+body 461.74s; low 364.30s, optimized 77.98s), with 52 native processes and 66
+independent maps. Together the two final disjoint selections cover nine source
+families, 64 native processes and 78 independent maps. The SDK-scalar low cases
+take 60.31..66.77s and use the existing diagnostic helper; they are not measured
+against or evidence of a changed product timeout. Source/current/join/catalog
+oracles, work/coordinate/contradictory-fact controls and workspace immutability
+pass. Log: `.cache/atlas-source-version-preflight-regression-20261106.log`.
+
+Authored `check`/`check --locked` pass with 648 source files and 8,154 MIR
+functions. Scoped CLI vet, Go formatting, LF byte audit and diff checks pass.
+This closes version-selected source production for the named families only.
+The actual symbols dispatcher, full CLI, self-build, distribution, Linux batch
+and hosted acceptance remain open. No public API/SDK ABI, dependency, DB,
+workflow/runner or repository-policy changes; no push or dispatch.

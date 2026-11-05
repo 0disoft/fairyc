@@ -56,6 +56,17 @@ authorized by this queue.
 
 ## Progress
 
+- Version-selected Fairy source production now includes used/unused SDK Vec v3
+  and ordinary SDK `std::num`/`std::bytes` under v1/v2/v3. Refusal-only source
+  preflight avoids expensive unsupported-family compilation without bypassing
+  Complete authentication. The two disjoint Windows low/optimized replays pass
+  in 304.204s/462.263s, covering nine families, 64 native processes and 78
+  independently admitted maps. Authored check/locked, scoped vet, formatting,
+  LF audit and diff checks pass. See the symbol-catalog plan for scope, limits
+  and exact earlier-attempt accounting. Actual symbols dispatch, calls/pack and
+  all original implementation/final gates remain open; this does not finish
+  the broader Atlas or full implementation objective.
+
 - Explicit Fairy source-selected v1/v2/v3 factories now authenticate their
   Complete source closure, enforce each source family and render matching
   facts/header/envelope/current admission without map conversion. Ordinary v2

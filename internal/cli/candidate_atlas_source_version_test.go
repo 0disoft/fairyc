@@ -23,11 +23,13 @@ import project_atlas_produce as produce;import project_atlas_schema as schema;im
 import project_atlas_facts as facts;import project_lock_document as locks;import project_workspace_graph as graph;
 import project_cache_environment as environment;import project_compiler_image_hash as image;
 import project_atlas_current as current;import project_atlas_join as join;
-import project_catalog as catalog;import project_catalog_options as options;import project_compiler_source_mode as mode;`, 1)
+import project_catalog as catalog;import project_catalog_options as options;import project_compiler_source_mode as mode;import project_atlas_source_version as source_version;`, 1)
 	main = strings.Replace(main, " var sources::Budget", `
  let request=switch(options::arguments()){case .ok(p):{p}case .err(_):{return 2;}};let version=options::version(ref request);
  var u8[1] control=[0];let n=switch(io::read_stdin(ref mut control)){case .ok(p):{p}case .err(_):{return 7;}};
  var sources::Budget`, 1)
+	main = strings.Replace(main, " var usize source_work=0;", ` if(!source_version::select(ref source,version,ref mut meter).is_ok){return 7;}
+ var usize source_work=0;`, 1)
 	main = strings.Replace(main, " let complete=switch(compiler::build_complete(ref source,ref table,ref mut source_work,ref mut link_work))", ` let aggregates=switch(mode::aggregates(ref source,ref mut meter)){case .ok(p):{p}case .err(_):{return 7;}};
  let complete=switch(if(aggregates){compiler::build_complete_aggregate_sources(input::sources(ref source),input::owners(ref source),input::bindings(ref source),ref table,ref mut source_work,ref mut link_work)}else{compiler::build_complete(ref source,ref table,ref mut source_work,ref mut link_work)})`, 1)
 	return main + `
@@ -74,7 +76,10 @@ func TestCandidateAtlasSourceVersion(t *testing.T) {
 	aggregate := writeWorkspaceSessionFixture(t, `module main;import answer as a;pub struct Cell<T>{T value;}pub resource Token<T>{Cell<T> payload;cleanup{}}pub struct Unused<T>{T value;}fn Token<T> make<T>(T value){return Token<T>{.payload=Cell<T>{.value=value}};}fn i32 main(){let t=make<i32>(a::value());discard make<u32>(7);return t.payload.value;}`)
 	unusedAggregate := writeWorkspaceSessionFixture(t, workspaceSessionRootSource)
 	writeWorkspaceFile(t, unusedAggregate, "libs/answer/src/answer.fy", `module answer;pub struct Unused<T>{T value;}pub resource UnusedToken<T>{T value;cleanup{}}pub fn i32 value(){return 42;}`)
-	fixtures := []fixture{{"ordinary-families", ordinary, 1, nil}, {"owner-namespaces", owner, 1, nil}, {"used-functions", used, 2, nil}, {"unused-functions", unused, 2, nil}, {"used-aggregates", aggregate, 3, nil}, {"unused-dependency-aggregates", unusedAggregate, 3, nil}}
+	sdkUnused := writeWorkspaceSessionFixture(t, candidateAtlasSDKVectorUnusedSource)
+	sdkUsed := writeWorkspaceSessionFixture(t, candidateAtlasSDKVectorUsedSource)
+	sdkScalars := writeWorkspaceSessionFixture(t, atlasSDKCommandSource)
+	fixtures := []fixture{{"ordinary-families", ordinary, 1, nil}, {"owner-namespaces", owner, 1, nil}, {"used-functions", used, 2, nil}, {"unused-functions", unused, 2, nil}, {"used-aggregates", aggregate, 3, nil}, {"unused-dependency-aggregates", unusedAggregate, 3, nil}, {"sdk-unused", sdkUnused, 3, nil}, {"sdk-used", sdkUsed, 3, nil}, {"sdk-scalars", sdkScalars, 1, nil}}
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -101,7 +106,13 @@ func TestCandidateAtlasSourceVersion(t *testing.T) {
 					r := atlasmap.SymbolCatalogRequest{Kinds: atlasmap.AllDeclarationKinds(), Budget: atlasmap.SymbolCatalogBudget{MaxSymbols: 64, MaxSelectionBytes: 1 << 20}}
 					args := candidateCatalogArgs(candidateCatalogFixture{uid: "example.session.app", version: v + 1}, r, 1<<20)
 					calls++
-					code, out, stderr := fetchCLIProcess(t, image, f.root, args, "")
+					var code int
+					var out, stderr string
+					if strings.HasPrefix(f.name, "sdk-") {
+						code, out, stderr = candidateAtlasSDKCLIProcess(t, image, f.root, args)
+					} else {
+						code, out, stderr = fetchCLIProcess(t, image, f.root, args, "")
+					}
 					if v+1 < f.minimum {
 						if code != 7 || out != "" || stderr != "" {
 							t.Fatalf("source family must reject atomically: %d %q %q", code, out, stderr)
