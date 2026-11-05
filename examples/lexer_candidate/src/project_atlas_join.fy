@@ -13,7 +13,7 @@ pub struct Edge{Symbol source;Symbol target;usize source_implementation;usize ta
 struct Specialization{usize token;usize next;}
 resource Specializations{v::Vec<usize> heads;v::Vec<Specialization> values;cleanup{}}
 resource Packages{v::Vec<current::Ready> values;cleanup{}}
-pub resource Graph{Packages packages;v::Vec<usize> order;v::Vec<Edge> edges;bool partial;cleanup{}}
+pub resource Graph{Packages packages;v::Vec<usize> order;v::Vec<Edge> edges;bool partial;usize max_packages;usize max_calls;cleanup{}}
 fn ref validate::Partition part(ref Packages g,usize p){return current::partition(v::at<current::Ready>(ref g.values,p));}
 fn ref u8[] name(ref Packages g,usize p){let row=part(g,p);return wire::string(validate::tree(row),validate::header(row),b"package_instance");}
 pub fn ref validate::Partition partition(ref Graph g,usize p){return part(ref g.packages,p);}
@@ -26,6 +26,8 @@ pub fn bool before(ref Graph g,Symbol a,Symbol b){if(a.package!=b.package){retur
 pub fn Result<bool,u32> contains(ref Graph g,Symbol s,ref mut usize meter){if(s.package>=package_count(g)){return .ok(false);}let part=partition(g,s.package);var usize i=0;while(i<validate::symbol_count(part)){if(!work::charge(meter,1)){return .err(3);}if(validate::symbol(part,i)==s.token){return .ok(true);}i+=1;}return .ok(false);}
 pub fn bool partial(ref Graph g){return g.partial;}
 pub fn usize edge_count(ref Graph g){return v::len<Edge>(ref g.edges);}
+pub fn usize max_packages(ref Graph g){return g.max_packages;}
+pub fn usize max_calls(ref Graph g){return g.max_calls;}
 pub fn Edge edge(ref Graph g,usize i){return *v::at<Edge>(ref g.edges,i);}
 fn usize find_package(ref Packages g,ref u8[] value,ref mut usize meter){let n=v::len<current::Ready>(ref g.values);var usize i=0;while(i<n){if(!work::charge(meter,value.len+name(g,i).len+1)){return n;}if(bytes::equal(name(g,i),value)){return i;}i+=1;}return n;}
 fn bool key_equal(ref json::Tree a,usize x,ref json::Tree b,usize y,ref mut usize meter){let names=b"package_instance|module|kind|name";var usize start=0;while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}let field=names[start..end];let left=wire::string(a,x,field);let right=wire::string(b,y,field);if(!work::charge(meter,left.len+right.len+1) || !bytes::equal(left,right)){return false;}start=end+1;}return true;}
@@ -84,5 +86,5 @@ pub fn Result<Graph,u32> join(v::Vec<current::Ready> packages,usize max_packages
    f=item.next;}
  s+=1;}
  ordered+=1;}
- return .ok(Graph{.packages=g,.order,.edges,.partial});
+ return .ok(Graph{.packages=g,.order,.edges,.partial,.max_packages,.max_calls});
 }

@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy joined-call catalog v0/v1/v2 now retains actual join limits, exact source/
+  specialization/cleanup identities, canonical O(N log N) ordering/deduplication,
+  whole-ledger usage, current context and independently checked SHA-256 output.
+  Final Windows low/optimized native comparisons pass 318 observations; the
+  combined parser/generic-join/impact/catalog command passes in 183.703s with no
+  selected skips. Authored check/locked, scoped vet, formatting/LF/diff pass.
+  See `candidate-workspace-calls-20261106.md`. This is the private encoder only;
+  fresh source-backed actual calls dispatch, atlas-pack and all original broader
+  implementation and final acceptance gates remain required.
+
 - Fairy `atlas-calls list` argument selection now matches 87 Go parser cases and
   three invalid actions per Windows profile, 180 native processes total
   (13.161s). It retains catalog 0/1/2 to map 1/2/3, exact source IDs, direction,

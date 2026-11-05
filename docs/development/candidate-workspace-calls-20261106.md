@@ -8,7 +8,7 @@ batched. No push, dispatch, publication or target promotion is authorized here.
 
 - [x] Exact `atlas-calls list` arguments, versions, directions and positive
   package/call/output bounds, compared with the actual Go parser.
-- [ ] Current-joined graph output v0/v1/v2 with exact source/cleanup/
+- [x] Current-joined graph output v0/v1/v2 with exact source/cleanup/
   specialization identity, canonical order/deduplication, context, whole-graph
   budget/usage, independently verified checksums and atomic byte/work refusal.
 - [ ] Fresh Complete/source-selected production and actual dispatcher/help/
@@ -54,3 +54,56 @@ functions. Scoped CLI vet, Go formatting, LF and diff checks pass. This closes
 argument selection only; joined-call rendering, actual calls dispatch, full CLI
 and every original final gate remain open. No public CLI/SDK ABI, grammar,
 dependency, DB, workflow/runner or repository-policy changes; no push or dispatch.
+
+## Current-joined canonical output
+
+`project_calls_catalog::encode` consumes only a current-admitted joined Graph.
+The Graph now retains its actual construction limits; a request with different
+package/call limits, map version or nonunique exact package UID is rejected.
+Selection resolves visible/full original source SymbolIds and preserves outgoing,
+incoming and both directions. Context includes the selected package's independent
+current map identity, map omissions and call/generic completeness, while usage
+continues to describe the whole joined ledger even for an empty selection.
+
+`project_calls_order` sorts owned edge indices with bottom-up merge sort,
+O(N log N) comparisons and O(N) scratch, leaving the Graph unchanged. Order and
+deduplication include original endpoints, cleanup-body marker, exact source/target
+specializations and complete spans. Canonical JSON field order and the separate
+v0/v1/v2 domain-separated SHA-256 envelopes match the existing Go contracts.
+Output is held privately until every write/hash/final-byte/work bound succeeds.
+
+`TestCandidateCallsCatalog` uses three real independently checked workspaces and
+the actual Go v1/v2/v3 join and catalog factories. Its final Windows low/optimized
+matrix passes 159 native observations per profile (318 total), including all
+source symbols and directions, reversed partition order/full selectors, recursive
+self-call deduplication, unused declarations, cross-package specializations and
+two concrete resource cleanups. The Go envelope checksums are recomputed using
+independent SHA-256 and length framing before native byte comparison.
+
+The final matrix also checks exact/one-short whole-graph package/call budgets;
+one-short/exact/one-more final output and measured encoder-work limits;
+independent reader and encoder cross-version refusal; changed budget echoes;
+duplicate/missing packages; unknown UID/symbol; corrupt maps and stale independent
+current expectations. All failures return no partial catalog. This isolated probe
+uses private exit 7 for rejection; product command 2/3/4/7 classification is not
+inferred from that sentinel and remains part of the actual dispatcher work.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 8m -v ./internal/cli -run '^TestCandidate(CallsCatalog|CallsOptions|AtlasGenericJoin|AtlasImpact)$'
+```
+
+PASS, 183.703s, no selected skips. Catalog: 46.72s; existing generic join: 25.75s;
+existing impact: 96.98s; parser: 14.07s. Log:
+`.cache/calls-catalog-core-final-20261106.log`. The initial 300-observation catalog
+run passed in 29.704s before the extra corrupt/stale/encoder-version controls;
+it is not added to the final 318-observation count. The original uncommitted
+sort failed E1008 because it mutated an immutable parameter; moving the owned
+vector into a mutable local fixes it without admitting caller alias mutation.
+
+Authored check/locked pass at this core slice with 653 source files and 8,185 MIR
+functions. Scoped CLI vet, formatting, LF and diff checks pass. This closes the
+private joined-output API only. Fresh Complete-backed command assembly, actual
+dispatch/help/error/lock behavior, full CLI, generated consumers and all original
+self-build/distribution/hosted/Linux gates remain open. No grammar, stable CLI,
+SDK ABI, dependency, DB, runner/workflow or repository-policy change; no push or
+dispatch. The broader implementation objective remains active.
