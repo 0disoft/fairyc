@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Refreshed authored-main Atlas CLI optimized acceptance now passes all twenty
+  named groups in 248.753s, retaining every original verifier and ordering.
+  This includes ordinary/generic/aggregate/SDK/mixed impact, real stdio MCP,
+  body preview/publication/refusal/freshness and help. The existing generated-C,
+  runtime/profile/toolchain/stack and image digest policy protects retained-image
+  reuse. Low replay is still pending in bounded groups; the full-CLI receipt
+  records its exact coverage. Broader source forms and every final gate remain
+  open; native Linux stays batched.
+
 - Mixed SDK/client aggregate body editing now passes actual Windows
   low/optimized commands in 451.186s. Independent Go overlay facts require
   fresh bool SDK Vec and same-name client Vec instances; the resource's real

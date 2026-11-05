@@ -59,6 +59,11 @@ admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
    Register and run complete authored-main acceptance after these source families.
    All three mixed command verifiers are registered; that complete replay is
    still the next required gate and is not established by command-leaf tests.
+   The refreshed authored-main optimized replay now passes all twenty named
+   groups in 248.753s. Low replay is split into bounded groups and remains open;
+   the [full-CLI receipt](../ops/windows-atlas-full-cli-replay-20261105.md) tracks
+   exact source/image digests and group coverage. Named groups retain every
+   original verifier and assertion in the same order.
 4. Keep complete current-source comparisons, consecutive self-build, Windows
    distribution, batched native Linux and same-commit hosted CI as separate final
    acceptance. A Go admission check or prepared map does not prove those gates.

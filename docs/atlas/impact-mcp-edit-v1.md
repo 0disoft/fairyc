@@ -121,7 +121,9 @@ preserving exact Go contexts, stale-source error and same-session recovery,
 protocol-only stdout and workspace immutability. See the
 [MCP receipt](../ops/windows-atlas-sdk-aggregate-mcp-20261105.md).
 Mixed root-body editing also passes the Windows command leaf as described below.
-Full authored-main acceptance remains separate;
+The refreshed optimized authored-main replay passes all twenty current groups;
+low replay remains separate and is tracked in the
+[full-CLI receipt](../ops/windows-atlas-full-cli-replay-20261105.md);
 see the [composition plan](../development/candidate-atlas-sdk-aggregates-20261105.md)
 and [producer receipt](../ops/windows-candidate-atlas-sdk-aggregates-20261105.md).
 
@@ -258,8 +260,9 @@ and same-name client Vec acquire fresh bool instances, nonempty client resource
 cleanup is retained, and exact Go reports/publication plus refusal/freshness
 checks pass. See the [mixed editor receipt](../ops/windows-atlas-sdk-aggregate-edit-20261105.md).
 SDK declarations remain noneditable. This is checked source publication, not
-execution of the edited client or cache-hit proof. Refreshed complete authored-CLI
-and native Linux acceptance remain separate.
+execution of the edited client or cache-hit proof. The refreshed optimized
+authored-main replay passes all twenty groups. Complete low authored-CLI and
+native Linux acceptance remain separate.
 
 Require the exact raw source SHA-256. Replace the original AST body span and preserve all outside
 bytes. Parsing must find the same function/body start and exactly the replacement extent; early

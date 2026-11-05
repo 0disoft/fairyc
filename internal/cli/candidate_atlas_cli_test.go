@@ -80,34 +80,50 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			} else {
 				t.Log("reuse verified generated-C/profile/toolchain/image digest")
 			}
+			t.Logf("authored CLI image: source=%s image=%x", sourceID, hash)
 
 			t.Setenv("PATH", "")
-			verifyCandidateAtlasCommand(t, image)
-			verifyCandidateAtlasFamilies(t, image)
-			verifyCandidateMCPCommand(t, image)
-			verifyCandidateMCPAggregateCommand(t, image)
-			verifyCandidateEditCommand(t, image)
-			verifyCandidateEditCLIApply(t, image)
-			verifyCandidateEditAggregateCommand(t, image)
-			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)
-			verifyCandidateAtlasGenericCommand(t, image)
-			verifyCandidateAtlasAggregateCommand(t, image)
-			verifyCandidateAtlasSDKCommand(t, image)
-			verifyCandidateAtlasSDKVectorCommand(t, image)
-			verifyCandidateAtlasSDKUserAggregateCommand(t, image)
-			verifyCandidateMCPSDKCommand(t, image)
-			verifyCandidateMCPSDKVectorCommand(t, image)
-			verifyCandidateMCPSDKUserAggregateCommand(t, image)
-			verifyCandidateEditSDKCommand(t, image)
-			verifyCandidateEditSDKVectorCommand(t, image)
-			verifyCandidateEditSDKUserAggregateCommand(t, image)
-			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
-				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
-				if code != 0 || out != usage || diagnostic != "" {
-					t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)
-				}
+			// Keep every original verifier and its ordering. Named groups allow
+			// bounded replays against the same freshly authenticated full image;
+			// selecting one group does not attest any unselected group.
+			for _, check := range []struct {
+				name   string
+				verify func(*testing.T, string)
+			}{
+				{"impact-ordinary", verifyCandidateAtlasCommand},
+				{"impact-families", verifyCandidateAtlasFamilies},
+				{"mcp-ordinary", verifyCandidateMCPCommand},
+				{"mcp-aggregates", verifyCandidateMCPAggregateCommand},
+				{"edit-ordinary", verifyCandidateEditCommand},
+				{"edit-publication", verifyCandidateEditCLIApply},
+				{"edit-aggregates", verifyCandidateEditAggregateCommand},
+				{"unsupported", func(t *testing.T, image string) { verifyCandidateAtlasUnsupported(t, image, unsupportedRoots) }},
+				{"impact-generics", verifyCandidateAtlasGenericCommand},
+				{"impact-aggregates", verifyCandidateAtlasAggregateCommand},
+				{"impact-sdk", verifyCandidateAtlasSDKCommand},
+				{"impact-sdk-vector", verifyCandidateAtlasSDKVectorCommand},
+				{"impact-sdk-aggregates", verifyCandidateAtlasSDKUserAggregateCommand},
+				{"mcp-sdk", verifyCandidateMCPSDKCommand},
+				{"mcp-sdk-vector", verifyCandidateMCPSDKVectorCommand},
+				{"mcp-sdk-aggregates", verifyCandidateMCPSDKUserAggregateCommand},
+				{"edit-sdk", verifyCandidateEditSDKCommand},
+				{"edit-sdk-vector", verifyCandidateEditSDKVectorCommand},
+				{"edit-sdk-aggregates", verifyCandidateEditSDKUserAggregateCommand},
+				{"help", verifyCandidateAtlasCLIHelp},
+			} {
+				t.Run(check.name, func(t *testing.T) { check.verify(t, image) })
 			}
 		})
+	}
+}
+
+func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
+	t.Helper()
+	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
+		code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
+		if code != 0 || out != usage || diagnostic != "" {
+			t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)
+		}
 	}
 }
 
