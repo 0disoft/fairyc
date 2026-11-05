@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Static-operation Atlas coverage now has five independent Go v3 source/codec
+  oracles: exact original declarations, unused templates, concrete cross-package
+  algorithm/operation/provider endpoints and provider/private identity policy.
+  This is the prerequisite for the actual Fairy producer, not evidence that its
+  production or commands already accept this family. See
+  `docs/development/candidate-atlas-static-operations-20261105.md`.
+  Broader source families and the complete implementation/final queue remain open.
+
 - Refreshed authored-main Atlas CLI optimized acceptance now passes all twenty
   named groups in 248.753s, retaining every original verifier and ordering.
   This includes ordinary/generic/aggregate/SDK/mixed impact, real stdio MCP,
