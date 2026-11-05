@@ -62,8 +62,12 @@ authorized by this queue.
   preparation controls pass, preserving caller ASTs and duplicate/reserved/generic-
   method refusals. Complete generic-source/planner packages and scoped vet pass.
   The original fourteen source oracles and edit oracle still pass. This is a Go
-  prerequisite only; additional same-leaf Fairy production/commands, ordinary-body
-  editing and every remaining queue gate stay open. Go's exact qualified-name
+  prerequisite only; additional same-leaf Fairy production/commands/editing and
+  every remaining queue gate stay open. Go ordinary-body selection now ignores
+  same-leaf methods before uniqueness checking, fixing an independently reproduced
+  ambiguous-selection failure. Exact preview/apply bytes and method refusals pass
+  with all existing Atlas edit/native tests and the namespace/original edit
+  oracles (7.980s), the full sourceedit package and scoped vet. Go's exact qualified-name
   CLI filter now passes all three catalog modes, 512/513-byte and malformed-path
   controls and existing symbol CLI regressions (1.631s); its normative contracts
   are updated. The corresponding Fairy command remains unimplemented.

@@ -56,7 +56,7 @@ func PlanBody(w workspaceloader.Workspace, module, name, expected string, body [
 		if s.Module != nil && s.Module.Path == module {
 			for i := range s.Module.Functions {
 				f := &s.Module.Functions[i]
-				if f.Name == name {
+				if f.Owner == "" && f.Name == name {
 					if selected != nil {
 						return Plan{}, fmt.Errorf("ambiguous source function")
 					}

@@ -188,7 +188,7 @@ Logs: `.cache/atlas-owner-qualified-namespace-before-20261106.log`,
 `-after-20261106.log` and `-packages-20261106.log`.
 
 This Go prerequisite does not attest the additional same-leaf Fairy source
-family or same-leaf ordinary-body editing. Those remain separate follow-ups.
+family. Its production/command/editor replay remains separate.
 The CLI qualified-name filter is now verified separately below.
 The existing native full-image replay uses
 the unchanged fourteen-family Fairy sources; none of its evidence is broadened
@@ -212,6 +212,24 @@ Log: `.cache/atlas-symbols-qualified-cli-final-20261106.log`.
 
 This is the Go experimental CLI filter. The Fairy `atlas-symbols` dispatcher is
 still a separate missing command; no Fairy CLI help/source or image changes here.
+
+## Go ordinary-body selection beside same-leaf methods
+
+With both owner namespaces admitted, editing the ordinary `get` beside
+`Cell::get` and `Other::get` reproduced `ambiguous source function`. The AST
+selector compared leaf names before applying its existing no-owner policy.
+It now selects only ownerless functions before the uniqueness check. Method
+editing remains refused; no editor capability or publication policy expands.
+
+The new CLI regression previews and applies only the ordinary body, compares
+the exact source/report, refuses both method subjects even with `--apply`, and
+requires every other byte, graph lock and staging entry to remain unchanged.
+All existing Atlas edit tests, including native execution, and the namespace/
+owner-edit oracles pass together in 7.980s. The complete sourceedit package
+passes in 1.638s; scoped vet, format and diff checks pass. Reproduction/final
+logs: `.cache/atlas-owner-qualified-same-leaf-edit-before-20261106.log` and
+`-after-20261106.log`. This is Go editor evidence, not additional same-leaf
+Fairy production or editing acceptance.
 
 New-image full CLI, consecutive self-build, generated-consumer execution,
 clean-machine distribution, same-commit CI and native Linux remain separate.
