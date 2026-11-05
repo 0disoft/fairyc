@@ -128,9 +128,48 @@ Final producer/regression log:
 Final Go source controls:
 `.cache/atlas-owner-qualified-go-source-final-20261106.log`.
 
-Actual owner-qualified impact/MCP/body-edit commands, new-image full CLI,
-consecutive self-build, generated-consumer execution, clean-machine distribution,
-same-commit CI and native Linux remain separate. Enum owners, generic methods and
+## Windows command acceptance
+
+Actual command-leaf verifiers retain independent freshly checked Go v3 contexts
+and run the Fairy executables with an empty PATH. They cannot delegate a query
+or edit to a Go child or build companion.
+
+- `TestCandidateAtlasOwnerQualifiedCommand`: all fourteen source families pass
+  low/optimized in 368.12s. Each exact visible/full qualified subject agrees with
+  Go, with explicit package/output cutoffs and unchanged workspace bytes. The
+  shared-method body edit preserves exact SymbolIds/interface identity, changes
+  source/instance identities, rejects the stale lock and succeeds after relocking.
+  The valid enum-owner source remains a refused command input.
+- `TestCandidateEditOwnerQualifiedCommand`: both profiles pass in 108.84s.
+  An ordinary root body changes from shared method calls to associated, exclusive
+  and consuming method calls; independent Go maps require three original and
+  five edited calls. Exact preview/apply reports, published source bytes,
+  unchanged lock and absence of staging/lock debris match Go. A replacement that
+  consumes a Token twice rejects. Root-owned `Cell::get` is still noneditable;
+  owner-qualified source admission does not widen the existing edit policy.
+  Old lock/source hashes reject after publication and relocking respectively.
+- `TestCandidateMCPOwnerQualifiedCommand`: six source families pass both profiles
+  in 164.79s: associated, shared, exclusive, record/resource consuming dot calls
+  and an imported public method. Real stdio sessions require protocol negotiation,
+  the read-only tool catalog, exact Go impact contexts, stale-source refusal and
+  recovery in the same session. Source/host bytes do not leak into responses and
+  queries do not write the workspace.
+
+The combined three-root command run passes in 641.864s without selected skips.
+
+The three verifiers are appended to `TestCandidateAtlasCLI` as
+`impact-owner-qualified`, `mcp-owner-qualified` and `edit-owner-qualified`, without
+removing or reordering any existing group. Fresh full authored-main acceptance
+has not run for these groups or this changed image. Historical closure/pre-closure
+receipts cannot attest it.
+
+Command log: `.cache/atlas-owner-qualified-commands-20261106.log`.
+Independent edit oracle: `.cache/atlas-owner-qualified-edit-oracle-20261106.log`
+(pass, 0.266s). Scoped vet, formatting and diff checks pass.
+
+New-image full CLI, consecutive self-build, generated-consumer execution,
+clean-machine distribution, same-commit CI and native Linux remain separate.
+Enum owners, generic methods and
 broader expression/closure combinations are not established by this matrix.
 No stable CLI flag, SDK/runtime ABI, map wire version, dependency, DB, runner or
 repository policy is changed. The full implementation objective remains active.

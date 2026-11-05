@@ -65,8 +65,12 @@ authorized by this queue.
   MIR functions; the lock is refreshed. The combined ordinary/generic/static-
   operation/copied-closure/owner-qualified producer regression passes in 629.968s
   without selected skips. Final Go source controls, scoped vet, format and diff
-  checks pass. Actual owner-qualified impact/MCP/body editing, changed full-image
-  acceptance and every final queue gate remain open. See
+  checks pass. Actual impact queries cover all fourteen source families; six
+  real stdio MCP families and ordinary-body preview/apply with new associated,
+  exclusive and consuming calls also pass both profiles (641.864s combined).
+  Direct owner-method editing remains refused. All three verifiers are appended
+  to the full CLI without deleting or reordering existing groups. Changed
+  full-image acceptance and every final queue gate remain open. See
   `candidate-atlas-owner-qualified-20261105.md`. Linux stays batched; no push or
   dispatch, and the full implementation objective remains active.
 

@@ -102,7 +102,15 @@ precede g0-sorted concrete generic owners in module-wide helper numbering;
 unused generic templates do not acquire helpers. One checked pure helper body
 may supply distinct private Atlas identities for its concrete owners without
 changing executable IR. See the [closure source and acceptance record](../development/candidate-atlas-copied-closures-20261105.md).
-Broader interfaces, first-class closures and owner-qualified declarations remain closed.
+Complete-bound source production now also preserves nongeneric struct/resource
+associated functions and shared, exclusive or consuming methods. Written qualified
+names, nominal owner coordinates, receiver parameters and exact call endpoints
+remain distinct through canonical v3 maps and current-source admission; typed,
+alias/grouped and imported receiver sources have independent Windows evidence.
+Actual impact, read-only MCP and ordinary root-body edits have Windows command
+evidence; the changed full-image gates are tracked in the
+[owner-qualified source and acceptance record](../development/candidate-atlas-owner-qualified-20261105.md).
+Enum/generic owners, broader interfaces and first-class closures remain separate.
 Every package must contain an admitted Atlas
 declaration. These candidate limits do not narrow the broader Go command or
 language contracts.

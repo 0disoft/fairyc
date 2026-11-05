@@ -116,6 +116,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"edit-sdk-vector", verifyCandidateEditSDKVectorCommand},
 				{"edit-sdk-aggregates", verifyCandidateEditSDKUserAggregateCommand},
 				{"help", verifyCandidateAtlasCLIHelp},
+				{"impact-owner-qualified", verifyCandidateAtlasOwnerQualifiedCommand},
+				{"mcp-owner-qualified", verifyCandidateMCPOwnerQualifiedCommand},
+				{"edit-owner-qualified", verifyCandidateEditOwnerQualifiedCommand},
 			} {
 				t.Run(check.name, func(t *testing.T) { check.verify(t, image) })
 			}
