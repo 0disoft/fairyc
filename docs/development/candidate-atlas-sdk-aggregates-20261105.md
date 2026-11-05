@@ -46,7 +46,11 @@ admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
    exact/one-short call bounds, package cutoff, stale lock and refreshed source
    contexts match Go. The ordinary SDK optimized control passes in 74.990s.
    See the [impact receipt](../ops/windows-atlas-sdk-aggregate-impact-20261105.md).
-   Mixed MCP/edit acceptance remains separate.
+   **Mixed read-only MCP verified.** The actual stdio session passes Windows
+   low/optimized in 221.177s, including exact Go query contexts, stale-source
+   error and same-session recovery, protocol-only stdout and workspace
+   immutability. See the [MCP receipt](../ops/windows-atlas-sdk-aggregate-mcp-20261105.md).
+   Mixed root-body edit acceptance remains separate.
    Register and run complete authored-main acceptance after these source families.
 4. Keep complete current-source comparisons, consecutive self-build, Windows
    distribution, batched native Linux and same-commit hosted CI as separate final

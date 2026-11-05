@@ -105,7 +105,7 @@ call endpoints. Checked cleanup intrinsic observations retain inlined
 [Windows receipt](../ops/windows-candidate-atlas-sdk-vector-20261105.md) record
 producer and impact/MCP command acceptance. SDK Vec root-body preview/apply also
 passes the Windows command leaf, including new bool element specializations;
-SDK/user-aggregate MCP/edit combinations keep their separate acceptance gate.
+SDK/user-aggregate edit combinations keep their separate acceptance gate.
 
 The compiler-private mixed producer now also retains scalar SDK Vec and scalar
 user struct/resource templates in the same Complete source graph. SDK
@@ -117,7 +117,11 @@ Vec, a same-name client Vec and a client resource with nonempty cleanup. SDK
 visible and client full selectors, exact/one-short call admission, package
 cutoffs and stale/refreshed contexts match Go with no workspace writes. See the
 [impact receipt](../ops/windows-atlas-sdk-aggregate-impact-20261105.md).
-Mixed MCP/edit and full authored-main acceptance remain separate;
+The corresponding read-only Windows MCP session also accepts that mixed source,
+preserving exact Go contexts, stale-source error and same-session recovery,
+protocol-only stdout and workspace immutability. See the
+[MCP receipt](../ops/windows-atlas-sdk-aggregate-mcp-20261105.md).
+Mixed body edits and full authored-main acceptance remain separate;
 see the [composition plan](../development/candidate-atlas-sdk-aggregates-20261105.md)
 and [producer receipt](../ops/windows-candidate-atlas-sdk-aggregates-20261105.md).
 

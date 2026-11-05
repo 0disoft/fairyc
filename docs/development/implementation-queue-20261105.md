@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Mixed SDK/client aggregate read-only MCP now passes actual Windows
+  low/optimized stdio sessions in 221.177s. The shared mixed source preserves
+  both aggregate owners and nonempty cleanup. Protocol negotiation, read-only
+  tool listing, exact Go contexts, stale-source error and same-session recovery,
+  no root/source leakage and workspace immutability pass. Full authored-main
+  registration is updated, not rerun. Mixed body edits, broader source forms,
+  native Linux and every final gate remain open; see the composition plan and
+  MCP receipt.
+
 - Mixed SDK/client aggregate `atlas-impact` now passes actual Windows
   low/optimized commands in 509.294s. One source combines SDK Vec, a same-name
   client Vec and a client resource with nonempty cleanup. Four SDK/root subjects,

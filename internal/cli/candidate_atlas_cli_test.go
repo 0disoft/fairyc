@@ -97,6 +97,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			verifyCandidateAtlasSDKUserAggregateCommand(t, image)
 			verifyCandidateMCPSDKCommand(t, image)
 			verifyCandidateMCPSDKVectorCommand(t, image)
+			verifyCandidateMCPSDKUserAggregateCommand(t, image)
 			verifyCandidateEditSDKCommand(t, image)
 			verifyCandidateEditSDKVectorCommand(t, image)
 			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
