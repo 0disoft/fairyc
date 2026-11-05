@@ -51,7 +51,12 @@ func TestCandidateMCPSDKCommand(t *testing.T) {
 
 func verifyCandidateMCPSDKCommand(t *testing.T, image string) {
 	t.Helper()
-	root := writeWorkspaceSessionFixture(t, atlasSDKCommandSource)
+	verifyCandidateMCPSDKCommandFixture(t, image, atlasSDKCommandSource, "std::num", "parse_i64_decimal")
+}
+
+func verifyCandidateMCPSDKCommandFixture(t *testing.T, image, source, module, name string) {
+	t.Helper()
+	root := writeWorkspaceSessionFixture(t, source)
 	prepare := func() (preparedAtlasWorkspace, *atlasmap.WorkspaceCallIndex) {
 		t.Helper()
 		var diagnostic bytes.Buffer
@@ -69,12 +74,12 @@ func verifyCandidateMCPSDKCommand(t *testing.T, image string) {
 		t.Helper()
 		for _, partition := range prepared.partitions {
 			for _, symbol := range partition.Symbols() {
-				if symbol.Declaration.Module == "std::num" && symbol.Declaration.Name == "parse_i64_decimal" {
+				if symbol.Declaration.Module == module && symbol.Declaration.Name == name {
 					return partition, symbol.Visible
 				}
 			}
 		}
-		t.Fatal("missing authenticated std::num::parse_i64_decimal")
+		t.Fatalf("missing authenticated %s::%s", module, name)
 		return atlasmap.Partition{}, ""
 	}
 	prepared, index := prepare()
@@ -126,7 +131,7 @@ func verifyCandidateMCPSDKCommand(t *testing.T, image string) {
 			t.Fatalf("MCP SDK response %d: %v; stderr=%s", id, err, stderr.String())
 		}
 		if len(line) > 100001 || !strings.HasSuffix(line, "\n") || strings.Contains(line, root) ||
-			strings.Contains(line, atlasSDKCommandSource) || strings.Contains(line, workspaceSessionMemberSource) {
+			strings.Contains(line, source) || strings.Contains(line, workspaceSessionMemberSource) {
 			t.Fatalf("MCP SDK protocol/leak response %d: %q", id, line)
 		}
 		var reply candidateMCPSDKReply
@@ -204,7 +209,7 @@ func verifyCandidateMCPSDKCommand(t *testing.T, image string) {
 		t.Fatal("MCP SDK query changed workspace")
 	}
 
-	writeWorkspaceFile(t, root, "src/main.fy", atlasSDKCommandSource+"\n")
+	writeWorkspaceFile(t, root, "src/main.fy", source+"\n")
 	stale := remoteTree(t, root)
 	if stale["libs/answer/src/answer.fy"] != memberBefore {
 		t.Fatal("stale setup changed the workspace member")

@@ -86,3 +86,56 @@ program execution or distribution proof is inferred from map-probe acceptance.
 No public language/CLI, SDK/runtime ABI, map schema, DB, dependency, default
 timeout, work limit, repository hygiene or CI runner changes. No push, dispatch
 or publication.
+
+## Impact and read-only MCP command follow-up
+
+After the producer/current/join acceptance at `1cb4f678`, the actual source
+query removes its SDK Vec guard. Impact and MCP use the same fresh locked
+Complete-bound source preparation; no map, cache header or selected SDK name
+grants source authority. The obsolete vector-only impact diagnostic is removed.
+
+The impact fixture queries unused, `at<i32>` and `pop<i32>` workspaces, selecting
+both visible and full declaration IDs. The independent Go workspace call index
+supplies exact subjects, reachability and current contexts. Native image identity
+is independently bound to the actual executable bytes. Exact call/package limits,
+one-short cutoffs, changed-source rejection and relocked recovery pass, with
+unchanged workspace bytes and an empty child PATH.
+
+The read-only MCP fixture selects `std::vec::take_slot` in a live stdio session
+with 127 resolved calls. It preserves the existing initialize/permission/tool
+protocol checks, exact Go impact expectations, unknown-package isolation, stale
+source refusal and relocked recovery in that same process. Stdout contains only
+bounded protocol frames; raw source/host paths are absent. SDK declarations
+remain noneditable, and MCP exposes no write tool.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 25m -v ./internal/cli -run '^TestCandidateAtlasSDK(Vector)?Command$'
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateMCPSDK(Vector)?Command$'
+```
+
+Both commands pass without selected skips on Windows amd64 with MSVC:
+
+| Root | low | optimized | Total |
+| --- | ---: | ---: | ---: |
+| Ordinary SDK impact | 341.87s | 91.61s | 452.62s |
+| SDK Vec impact | 340.94s | 78.92s | 435.12s |
+| Ordinary SDK MCP | 175.62s | 104.15s | 298.18s |
+| SDK Vec MCP | 170.04s | 81.49s | 274.46s |
+
+Complete Go command durations are 887.890s and 572.800s. Logs are retained in
+`.cache/atlas-sdk-vector-impact-20261105.log` and
+`.cache/atlas-sdk-vector-mcp-20261105.log`; timings include native preparation
+and diagnostic controls and are not benchmarks. The source-bound workspace
+`check` and `check --locked` pass with 641 sources and 8,080 MIR functions.
+Scoped `go vet -mod=readonly ./internal/cli`, Go formatting and
+`git diff --check` pass for this follow-up.
+
+The full authored-main impact/MCP verifiers are registered, but that full CLI
+replay is not repeated for this command-leaf slice. Vec user-body editing,
+SDK/user-aggregate combinations, native Linux, current-source full comparisons,
+consecutive self-builds, distribution and hosted CI keep their separate gates.
+This supersedes only the earlier Vec impact/MCP refusal statements above.
+
+No public language/CLI shape, SDK/runtime ABI, map schema, DB, dependency,
+product timeout, work allowance, target, repository hygiene or CI runner change.
+No push, hosted dispatch or publication.

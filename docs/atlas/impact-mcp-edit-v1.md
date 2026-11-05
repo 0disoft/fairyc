@@ -91,8 +91,9 @@ Direct local/imported calls, recursion and cycles are collected from verified IR
 same-package foreign calls are external/opaque with their exact C ABI/link name.
 The seven ordinary authenticated SDK modules (alloc, bytes, fs, io, num,
 process and text) may participate in source production and current queries.
-SDK vector declarations, unsupported interface/closure and owner-qualified
-declarations remain closed. Every package must contain an admitted Atlas
+Authenticated scalar SDK Vec declarations now participate in impact and read-only
+MCP queries. Unsupported interface/closure and owner-qualified declarations
+remain closed. Every package must contain an admitted Atlas
 declaration. These candidate limits do not narrow the broader Go command or
 language contracts.
 
@@ -100,10 +101,10 @@ The private source-production/current/join APIs now also retain authenticated
 SDK scalar Vec templates, concrete fields, cleanup implementations and source
 call endpoints. Checked cleanup intrinsic observations retain inlined
 `take_slot<T>` implementations without inventing callable frames. The
-[SDK vector plan](../development/candidate-atlas-sdk-vector-20261105.md) tracks
-native acceptance and command integration. The command's Vec refusal remains
-until its own impact/MCP/edit acceptance; SDK/user-aggregate combinations keep
-their separate gate.
+[SDK vector plan](../development/candidate-atlas-sdk-vector-20261105.md) and
+[Windows receipt](../ops/windows-candidate-atlas-sdk-vector-20261105.md) record
+producer and impact/MCP command acceptance. Structural body editing and
+SDK/user-aggregate combinations keep their separate acceptance gates.
 
 Call reachability is exact within the admitted resolved graph. Foreign calls make
 the `calls` completeness partial with reason `external-ffi`; only resolved calls
@@ -120,8 +121,8 @@ Syntax/selector/budget failures return 2, workspace/lock/source or unsupported
 candidate-source failures 7, and preparation/output I/O failures 4. Help succeeds
 without reading a workspace. Windows Fairy read-only MCP uses the same current
 query producer. Structural editing retains its own ordinary-source selection
-restrictions below. SDK Vec production, SDK/user-aggregate combinations and
-Linux command wiring remain separate. Windows native evidence is recorded in
+restrictions below. SDK/user-aggregate combinations and Linux command wiring
+remain separate. Windows native evidence is recorded in
 [the source-family receipt](../ops/windows-candidate-atlas-families-20261105.md)
 and [the original Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
 
@@ -148,7 +149,7 @@ stdin/stdout and a fresh locked-source query for each tool call. Windows focused
 command and full CLI acceptance pass in both profiles, including stale-source
 refusal/recovery and output failure. The Go host retains the prepared-session
 optimization described below; the Fairy host re-verifies the source on each call.
-The same ordinary SDK query admission applies to MCP. SDK Vec and broader
+The same authenticated scalar SDK Vec query admission applies to MCP. Broader
 source-family combinations, plus native Linux dispatch/execution, remain separate.
 
 ```sh

@@ -56,6 +56,17 @@ authorized by this queue.
 
 ## Progress
 
+- Authenticated SDK Vec source production now passes the independent Go oracle
+  at `1cb4f678`. The actual Windows impact command now accepts unused/at/pop
+  sources in both profiles (435.12s), and the matching read-only MCP sessions
+  pass (274.46s). Ordinary SDK impact/MCP controls also pass. Current-source
+  identities, cutoff/stale/relocked behavior, protocol-only stdout and workspace
+  immutability are retained. The complete command totals are 887.890s and
+  572.800s. Full authored-main verifiers are registered, not rerun for this slice.
+  Vec user-body editing, SDK/user-aggregate combinations and every final gate
+  remain open. See the Windows SDK vector receipt. Native Linux stays batched;
+  no push or dispatch.
+
 - SDK Vec's independent Go oracle now fixes unused/used source expectations:
   ten implementations already exist for ordinary SDK view signatures; explicit
   root `empty/push/at<i32>` use produces fourteen. Original declarations/generic

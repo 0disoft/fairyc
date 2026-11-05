@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"reflect"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
@@ -140,13 +139,5 @@ func verifyCandidateAtlasSDKCommand(t *testing.T, image string) {
 	query(sdk, selected, current)
 	if !reflect.DeepEqual(before, remoteTree(t, root)) {
 		t.Fatal("SDK relocked query changed workspace")
-	}
-	vector := writeWorkspaceSessionFixture(t, `module main;import std::vec as v;fn i32 main(){return 0;}`)
-	if code, _, diagnostic := runForTest([]string{"check"}, vector); code != 0 {
-		t.Fatalf("SDK vector control must be otherwise valid: %d %s", code, diagnostic)
-	}
-	code, out, diagnostic = candidateAtlasSDKCLIProcess(t, image, vector, base)
-	if code != 7 || out != "" || !strings.Contains(diagnostic, "SDK vector declarations") {
-		t.Fatalf("closed SDK vector source: %d %q %q", code, out, diagnostic)
 	}
 }

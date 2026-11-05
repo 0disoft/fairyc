@@ -14,7 +14,6 @@ import project_lock_document as locks;
 import project_coordinate_graph as coordinates;
 import project_module_visibility as visibility;
 import project_workspace_graph as graph;
-import project_sdk_bundle as sdk;
 import project_source_set as sources;
 import project_compiler_input as input;
 import project_compiler_core as compiler;
@@ -30,7 +29,7 @@ fn Problem fail(u32 stage,u32 code){return Problem{.stage,.code};}
 // Always freshly resolve and verify the existing lock. No cache/map file or Go
 // child supplies current facts. All successful data comes from this Complete.
 @effects(filesystem,environment) pub fn Result<bytes::Buffer,Problem> query(ref u8[] root,ref options::Options o){var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
- let loaded=switch(loader::load(root,true,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(_):{return .err(fail(1,0));}};let workspace=loader::workspace(ref loaded);let graph=visibility::workspace_graph(workspace);if(graph::node_count(graph)>options::packages(o)){return .err(fail(4,3));}let has_sdk=graph::has_sdk(graph);if(has_sdk && sdk::vector(graph::standard_library(graph))){return .err(fail(2,100));}
+ let loaded=switch(loader::load(root,true,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(_):{return .err(fail(1,0));}};let workspace=loader::workspace(ref loaded);let graph=visibility::workspace_graph(workspace);if(graph::node_count(graph)>options::packages(o)){return .err(fail(4,3));}let has_sdk=graph::has_sdk(graph);
  let lock=switch(locks::project(workspace,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(1,e.code));}};let table=switch(coordinates::collect(graph,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(2,e.code));}};let projected=switch(input::project(workspace,ref mut meter)){case .ok(p):{p}case .err(e):{return .err(fail(2,e.code));}};let aggregates=switch(mode::aggregates(ref projected,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};var usize source_work=0;var usize link_work=0;let complete=switch(if(aggregates){compiler::build_complete_aggregate_sources(input::sources(ref projected),input::owners(ref projected),input::bindings(ref projected),ref table,ref mut source_work,ref mut link_work)}else{compiler::build_complete(ref projected,ref table,ref mut source_work,ref mut link_work)}){case .ok(p):{p}case .err(e):{return .err(fail(2,e.code));}};let program=identified::ir_program(compiler::checked_program(ref complete));var usize image_work=0;let build=switch(environment::compiler_current(ref mut image_work)){case .ok(p):{p}case .err(_):{return .err(fail(3,0));}};
  let metadata=switch(if(aggregates){schema::prepare_aggregates(ref projected,ref table,ref complete,ref mut meter)}else{schema::prepare(ref projected,ref table,ref complete,ref mut meter)}){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};var type_rows=switch(schema::type_rows(ref metadata,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
  let observed=switch(if(aggregates){instances::collect_aggregates(ref projected,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)}else{instances::collect(ref projected,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)}){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};

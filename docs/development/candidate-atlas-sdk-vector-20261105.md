@@ -2,8 +2,8 @@
 
 Scope: complete the remaining authenticated SDK Vec source-production path,
 then connect the existing impact/MCP/editor consumers. This is part of the full
-implementation queue, not a replacement objective. The current impact/MCP Vec
-refusal remains until actual producer and current-source acceptance pass. Ordinary
+implementation queue, not a replacement objective. Impact/MCP Vec admission now
+has actual producer, current-source and Windows command acceptance. Ordinary
 SDK command evidence belongs to `docs/ops/windows-candidate-atlas-sdk-20261105.md`.
 
 ## Ground truth
@@ -54,8 +54,11 @@ uncollected relations retain the existing explicit completeness omissions.
   unavailable coverage. The full unused/used/pop matrix passes both profiles;
   the [Windows receipt](../ops/windows-candidate-atlas-sdk-vector-20261105.md)
   records the exact scope and remaining command gate.
-- [ ] Remove the command's Vec guard only after that acceptance and exercise
-  actual impact/MCP/edit commands, keeping SDK declarations noneditable.
+- [x] Remove the command's Vec guard after that acceptance and exercise actual
+  impact and read-only MCP commands. Both Windows profiles pass; SDK declarations
+  remain noneditable and MCP retains no write tool.
+- [ ] Exercise actual Vec user-body preview/apply, including newly requested
+  element specializations, without changing SDK declaration authority.
 - [ ] Complete SDK/user-aggregate combinations and final authored-main replay.
   Linux execution remains batched; self-build/distribution/hosted gates remain
   part of the original queue.
