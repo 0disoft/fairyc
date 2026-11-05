@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Copied-closure Fairy Atlas production now binds private helper declarations
+  and calls to exact checked concrete owner frames and g0 identities. Module-wide
+  ordinary-before-concrete ordering agrees with Go, and unused generic templates
+  emit no helpers. Seven independent source families pass Windows low/optimized
+  production, current-source admission and complete joins (134.22s), with budget
+  and missing-coordinate refusals. The combined ordinary/generic/static-operation
+  production regression passes in 462.853s without selected skips. Original
+  source check/locked pass with 642 files and 8,103 MIR functions; the source lock
+  is refreshed. Actual closure impact/MCP/edit and changed full-image acceptance
+  remain open, as do broader Atlas and every final queue gate. See the closure
+  plan for reproduction, harness-failure and validation accounting.
+
 - Copied-closure Atlas work exposed and fixes Go snapshot documentation-owner
   collisions between distinct helpers sharing a generic closure source span.
   Exact declaration keys plus spans now own attachments, with five refusal

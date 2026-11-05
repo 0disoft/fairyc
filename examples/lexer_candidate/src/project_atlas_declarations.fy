@@ -32,7 +32,7 @@ fn Result<bool,u32> before(ref input::Input p,Row a,Row b,ref mut usize meter){
 fn Result<v::Vec<Row>,u32> collect_mode(ref input::Input p,usize owner,bool all,bool generics,bool aggregates,bool vectors,ref mut usize meter){
  var rows=v::empty<Row>();var usize m=0;
  while(m<input::count(p)){if(input::origin(p,m).owner==owner){
-  let parsed=input::source(p,m);if(syntax::closure_prepared(parsed)){return .err(101);}let sdk=if(vectors){vector::source(p,m,meter)?}else{false};var usize i=0;
+  let parsed=input::source(p,m);if(!all && syntax::closure_prepared(parsed)){return .err(101);}let sdk=if(vectors){vector::source(p,m,meter)?}else{false};var usize i=0;
   while(i<syntax::declaration_count(parsed)){
    if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(parsed,i);let row=Row{.module_index=m,.declaration=i};i+=1;
    if(d.kind==1 || d.kind==2 || all && (d.kind==7 || d.kind==8)){continue;}

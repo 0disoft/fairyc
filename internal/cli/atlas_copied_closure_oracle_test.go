@@ -17,7 +17,20 @@ func atlasCopiedClosureSources() []struct{ name, source string } {
 		{"four-captures-parameters", `module main;fn i32 main(){let i32 a=1;let i32 b=2;let i32 c=3;let i32 d=4;let sum=fn [i32 a,i32 b,i32 c,i32 d] i32(i32 p,i32 q,i32 r,i32 s){return a+b+c+d+p+q+r+s;};return sum(5,6,7,14);}`},
 		{"two-owners", `module main;fn i32 other(){let second=fn [] i32(){return 2;};return second();}fn i32 main(){let first=fn [] i32(){return 40;};return first()+other();}`},
 		{"generic-owner", `module main;fn i32 choose<T>(T marker){discard marker;let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}fn i32 main(){discard choose<bool>(true);return choose<i32>(1);}`},
+		{"mixed-owners", `module main;fn i32 choose<T>(T marker){discard marker;let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}fn i32 leaf(){discard choose<bool>(true);discard choose<i32>(1);let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}fn i32 main(){return leaf();}`},
+		{"unused-generic-owner", `module main;fn i32 choose<T>(T marker){discard marker;let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}fn i32 main(){return 42;}`},
 	}
+}
+
+func atlasCopiedClosureSource(t *testing.T, name string) string {
+	t.Helper()
+	for _, fixture := range atlasCopiedClosureSources() {
+		if fixture.name == name {
+			return fixture.source
+		}
+	}
+	t.Fatal("missing copied closure fixture", name)
+	return ""
 }
 
 func TestAtlasCopiedClosureSourceOracle(t *testing.T) {
@@ -70,6 +83,10 @@ func TestAtlasCopiedClosureSourceOracle(t *testing.T) {
 					wantHelpers, wantCalls, wantArity = 2, 3, 0
 				case "generic-owner":
 					wantHelpers, wantCalls = 2, 4
+				case "mixed-owners":
+					wantHelpers, wantCalls = 3, 6
+				case "unused-generic-owner":
+					wantHelpers, wantCalls = 0, 0
 				}
 				if len(helpers) != wantHelpers {
 					t.Fatalf("helper inventory: got %d want %d", len(helpers), wantHelpers)
@@ -80,7 +97,7 @@ func TestAtlasCopiedClosureSourceOracle(t *testing.T) {
 					}
 				}
 				functions := partition.Functions()
-				if fixture.name == "generic-owner" {
+				if fixture.name == "generic-owner" || fixture.name == "mixed-owners" {
 					if len(partition.Specializations()) != 2 {
 						t.Fatal("missing distinct generic owner implementations")
 					}
@@ -97,11 +114,16 @@ func TestAtlasCopiedClosureSourceOracle(t *testing.T) {
 						shared = &declaration.Span
 						functions = append(functions, implementation.Function)
 					}
+					if fixture.name == "mixed-owners" {
+						if _, ok := helpers["_fy_closure_leaf_1"]; !ok {
+							t.Fatal("ordinary owner did not precede concrete generic owners")
+						}
+					}
 				} else {
 					if len(partition.Specializations()) != 0 {
 						t.Fatal("ordinary closure became a generic implementation")
 					}
-					if _, ok := helpers["_fy_closure_main_1"]; !ok && fixture.name != "two-owners" {
+					if _, ok := helpers["_fy_closure_main_1"]; !ok && fixture.name != "two-owners" && wantHelpers != 0 {
 						t.Fatal("ordinary closure identity differs", helpers)
 					}
 					if fixture.name == "two-owners" {

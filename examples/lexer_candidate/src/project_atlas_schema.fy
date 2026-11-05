@@ -56,12 +56,15 @@ pub fn ref u8[] kind(u32 kind){
     if(kind==4){return b"struct";}if(kind==6){return b"resource";}if(kind==11){return b"enum";}if(kind==9){return b"foreign-function";}return b"function";
 }
 pub fn Result<bool,u32> key(ref mut bytes::Buffer out,ref input::Input source,spans::Row row,ref mut usize meter){
+    return key_named(out,source,row,b"",meter);
+}
+pub fn Result<bool,u32> key_named(ref mut bytes::Buffer out,ref input::Input source,spans::Row row,ref u8[] override,ref mut usize meter){
     let parsed=input::source(source,row.module_index);let d=syntax::declaration_at(parsed,row.declaration);
     let name=types::module_name(input::file(source,row.module_index),meter)?;
     discard w::raw(out,b"{",meter)?;discard w::pair(out,b"package_instance",input::instance_id(source,row.module_index),meter)?;
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"module",bytes::view(ref name),meter)?;
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"kind",kind(d.kind),meter)?;
-    discard w::raw(out,b",",meter)?;discard w::pair(out,b"name",syntax::declaration_name(parsed,row.declaration+1),meter)?;return w::raw(out,b"}",meter);
+    discard w::raw(out,b",",meter)?;discard w::pair(out,b"name",if(override.len==0){syntax::declaration_name(parsed,row.declaration+1)}else{override},meter)?;return w::raw(out,b"}",meter);
 }
 pub fn Result<bool,u32> effects(ref mut bytes::Buffer out,u32 bits,ref mut usize meter){
     if(bits>4095){return .err(7);}let labels=b"block_context|clock|console|emit|environment|external_call|filesystem|network|process|random|storage_read|storage_write|";
@@ -89,6 +92,9 @@ fn Result<bool,u32> fields(ref mut bytes::Buffer out,ref input::Input source,ref
     discard w::raw(out,b"[",meter)?;var usize i=0;while(i<count){if(!work::charge(meter,1)){return .err(3);}if(i>0){discard w::raw(out,b",",meter)?;}discard field(out,source,table,metadata,rows,module_index,first+i,template_declaration,meter)?;i+=1;}return w::raw(out,b"]",meter);
 }
 pub fn Result<bytes::Buffer,u32> declaration(ref input::Input source,ref coordinates::Coordinates table,ref signatures::Program metadata,ref mut v::Vec<graph::Type> rows,spans::Row row,ref mut usize meter){
+    return declaration_named(source,table,metadata,rows,row,b"",meter);
+}
+pub fn Result<bytes::Buffer,u32> declaration_named(ref input::Input source,ref coordinates::Coordinates table,ref signatures::Program metadata,ref mut v::Vec<graph::Type> rows,spans::Row row,ref u8[] override,ref mut usize meter){
     if(row.module_index>=input::count(source)){return .err(7);}let p=input::source(source,row.module_index);
     if(row.declaration>=syntax::declaration_count(p)){return .err(7);}if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(p,row.declaration);
     if(d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=9 && d.kind!=11 || d.owner_end!=d.owner_start){return .err(101);}
@@ -99,7 +105,7 @@ pub fn Result<bytes::Buffer,u32> declaration(ref input::Input source,ref coordin
     if(template){if(d.kind==3){let effects=effect_policy::read(p,row.declaration);if(effects.code!=0){return .err(7);}declared_effects=effects.bits;unsafe_call=d.unsafe_end!=0;}}
     else if(d.kind==3 || d.kind==9){signature=signatures::identity(metadata,row.module_index,row.declaration+1);if(signature==0){return .err(7);}let s=signatures::at(metadata,signature);result=s.result;declared_effects=s.effects;unsafe_call=s.unsafe_call;}
     else{let t=signatures::declaration_type(metadata,row.module_index,row.declaration+1,rows);if(t.problem.code!=0){return .err(7);}result=t.type;}
-    var out=bytes::empty();discard w::raw(ref mut out,b"{",meter)?;if(template){discard w::raw(ref mut out,b"\"type_parameters\":",meter)?;discard templates::parameters(ref mut out,p,row.declaration,meter)?;discard w::raw(ref mut out,b",",meter)?;}discard w::raw(ref mut out,b"\"key\":",meter)?;discard key(ref mut out,source,row,meter)?;
+    var out=bytes::empty();discard w::raw(ref mut out,b"{",meter)?;if(template){discard w::raw(ref mut out,b"\"type_parameters\":",meter)?;discard templates::parameters(ref mut out,p,row.declaration,meter)?;discard w::raw(ref mut out,b",",meter)?;}discard w::raw(ref mut out,b"\"key\":",meter)?;discard key_named(ref mut out,source,row,override,meter)?;
     discard w::raw(ref mut out,b",\"span\":",meter)?;discard spans::span(ref mut out,source,row.module_index,d.start,d.end,meter)?;
     discard w::raw(ref mut out,b",\"provenance\":\"compiler-declared\",\"public\":",meter)?;discard w::raw(ref mut out,if(d.public){b"true"}else{b"false"},meter)?;
     discard w::raw(ref mut out,if(unsafe_call){b",\"unsafe\":true"}else{b",\"unsafe\":false"},meter)?;
