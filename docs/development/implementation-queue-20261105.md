@@ -53,6 +53,14 @@ authorized by this queue.
 
 ## Progress
 
+- Aggregate MCP stdio sessions now pass Windows low/optimized in 101.18s: two
+  real processes, eight tool requests, exact Go impact/current-image contexts,
+  unknown-package isolation, stale source/lock refusal and relocked recovery in
+  the same process. Native requests preserve workspace bytes and do not reveal
+  raw source/host paths. The full CLI verifier is registered but its refreshed
+  run remains pending. Aggregate editing, SDK, native Linux and the broader
+  implementation/final queue remain open; see the aggregate Atlas receipt.
+
 - The actual Fairy aggregate impact command now selects its Complete, signature
   and instance factories from exact retained source. Windows low/optimized
   command-leaf acceptance passes in 144.66s: 22 native invocations, five original

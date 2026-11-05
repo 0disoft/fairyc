@@ -85,6 +85,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			verifyCandidateAtlasCommand(t, image)
 			verifyCandidateAtlasFamilies(t, image)
 			verifyCandidateMCPCommand(t, image)
+			verifyCandidateMCPAggregateCommand(t, image)
 			verifyCandidateEditCommand(t, image)
 			verifyCandidateEditCLIApply(t, image)
 			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)

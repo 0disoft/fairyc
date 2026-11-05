@@ -104,6 +104,28 @@ checks pass. The aggregate command's successful-path source/arguments remain
 unchanged after its native run; the following edit changes only the unsupported
 declaration message and the opt-in Go full-CLI verifier registration.
 
+## Aggregate MCP session follow-up
+
+The existing read-only MCP query consumes the same exact-source factory
+selection. `TestCandidateMCPAggregateCommand` passes both Windows profiles in
+101.18s (low 35.55s, optimized 51.43s), using two real stdio processes and eight
+tool requests. Each session initializes, returns Go-exact aggregate impact,
+isolates an unknown package, refuses stale template source/lock, then recovers
+after an explicit Go-oracle relock without restarting. Request IDs, current
+image and package contexts, source/lock nonmutation and absence of host paths or
+raw source in replies are checked. Pipes, deadline and child lifetime are owned
+through failure and normal EOF.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -failfast -v ./internal/cli -run '^TestCandidateMCPAggregateCommand$'
+```
+
+The verifier is registered in the full authored CLI test; that refreshed full
+replay remains pending until the remaining command integration is ready. This
+adds native acceptance for the already shared query path, not another MCP tool,
+permission, write operation, runtime ABI or runner. Aggregate editing, SDK,
+native Linux and the complete final queue remain open.
+
 ## Original producer development failures and remaining work
 
 Initial development runs failed on a Go test's comparison of a slice-containing
