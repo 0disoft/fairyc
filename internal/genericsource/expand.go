@@ -147,10 +147,14 @@ func (x *expander) collect() error {
 		if x.storageSelector(fn.Name) != "" {
 			return fmt.Errorf("reserved private storage query name %q", fn.Name)
 		}
-		if x.names[fn.Name] || strings.HasPrefix(fn.Name, generatedPrefix) {
-			return x.at(fn.NameSpan, FailureDeclaration, fmt.Errorf("duplicate or reserved function %q", fn.Name))
+		name := fn.Name
+		if fn.Owner != "" {
+			name = fn.Owner + "::" + fn.Name
 		}
-		x.names[fn.Name] = true
+		if x.names[name] || strings.HasPrefix(fn.Name, generatedPrefix) {
+			return x.at(fn.NameSpan, FailureDeclaration, fmt.Errorf("duplicate or reserved function %q", name))
+		}
+		x.names[name] = true
 		if len(fn.TypeParameters) == 0 {
 			continue
 		}

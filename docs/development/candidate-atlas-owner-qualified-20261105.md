@@ -167,6 +167,32 @@ Command log: `.cache/atlas-owner-qualified-commands-20261106.log`.
 Independent edit oracle: `.cache/atlas-owner-qualified-edit-oracle-20261106.log`
 (pass, 0.266s). Scoped vet, formatting and diff checks pass.
 
+## Go distinct-owner namespace follow-up
+
+A separate current-source regression reproduces E4501 in v3 preparation for
+`Cell::get` and `Other::get`, with or without an ordinary `get`. Normal `check`
+accepts both sources. Generic preparation's module-name collision table discarded
+the owner and incorrectly merged these distinct functions. The table now uses
+the written `Owner::name` key while preserving original AST owner/name fields.
+Bare-name collisions and reserved private prefixes still reject; generic methods
+remain closed.
+
+`TestAtlasOwnerQualifiedDistinctNamespaces` now retains both exact method IDs,
+the optional ordinary ID and two/three resolved calls through complete v3 joins.
+Six isolated preparation controls cover accepted namespaces, duplicate ordinary
+and same-owner declarations, generic owners and reserved generated names, with
+unchanged caller ASTs. Full `genericsource` and `genericplan` packages pass
+(0.412s/0.068s); the two namespace cases, fourteen original source oracles and
+edit oracle pass together (1.392s). Scoped vet and diff checks pass.
+Logs: `.cache/atlas-owner-qualified-namespace-before-20261106.log`,
+`-after-20261106.log` and `-packages-20261106.log`.
+
+This Go prerequisite does not attest the additional same-leaf Fairy source
+family, same-leaf ordinary-body editing or CLI qualified-name filtering.
+Those remain separate follow-ups. The existing native full-image replay uses
+the unchanged fourteen-family Fairy sources; none of its evidence is broadened
+to the two new namespace fixtures.
+
 New-image full CLI, consecutive self-build, generated-consumer execution,
 clean-machine distribution, same-commit CI and native Linux remain separate.
 Enum owners, generic methods and

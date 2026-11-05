@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Go generic source preparation now keeps owner-qualified method namespaces:
+  valid `Cell::get`/`Other::get` and an ordinary same-leaf `get` no longer collide
+  at v3 Atlas preparation. The two complete source/join cases and six bounded
+  preparation controls pass, preserving caller ASTs and duplicate/reserved/generic-
+  method refusals. Complete generic-source/planner packages and scoped vet pass.
+  The original fourteen source oracles and edit oracle still pass. This is a Go
+  prerequisite only; additional same-leaf Fairy production/commands, ordinary-body
+  editing, qualified CLI filtering and every remaining queue gate stay open.
+
 - Owner-qualified Atlas production now matches fourteen independent Go v3 source
   oracles at both Windows profiles (190.10s): associated functions, shared/exclusive
   and consuming receivers, imported public owners, typed/alias/grouped receivers
