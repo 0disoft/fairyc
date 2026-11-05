@@ -95,7 +95,14 @@ Authenticated scalar SDK Vec declarations now participate in impact and read-onl
 MCP queries. The existing single-operation interface family in ADR 0495 now has
 Windows production, impact-command and read-only MCP evidence: original generic headers,
 exact scalar implementations and ordinary provider call targets are retained.
-Broader interfaces, closures and owner-qualified declarations remain closed.
+The existing bounded copied-local i32 closure family now has a Complete-bound
+source projection. Private helper declarations preserve written closure spans,
+copied capture/parameter types and exact checked call endpoints. Ordinary owners
+precede g0-sorted concrete generic owners in module-wide helper numbering;
+unused generic templates do not acquire helpers. One checked pure helper body
+may supply distinct private Atlas identities for its concrete owners without
+changing executable IR. See the [closure source and acceptance record](../development/candidate-atlas-copied-closures-20261105.md).
+Broader interfaces, first-class closures and owner-qualified declarations remain closed.
 Every package must contain an admitted Atlas
 declaration. These candidate limits do not narrow the broader Go command or
 language contracts.

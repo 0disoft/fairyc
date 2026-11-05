@@ -95,13 +95,16 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"mcp-ordinary", verifyCandidateMCPCommand},
 				{"mcp-aggregates", verifyCandidateMCPAggregateCommand},
 				{"mcp-static-operations", verifyCandidateMCPStaticOperationCommand},
+				{"mcp-copied-closures", verifyCandidateMCPCopiedClosureCommand},
 				{"edit-ordinary", verifyCandidateEditCommand},
 				{"edit-publication", verifyCandidateEditCLIApply},
 				{"edit-aggregates", verifyCandidateEditAggregateCommand},
 				{"edit-static-operations", verifyCandidateEditStaticOperationCommand},
+				{"edit-copied-closures", verifyCandidateEditCopiedClosureCommand},
 				{"unsupported", func(t *testing.T, image string) { verifyCandidateAtlasUnsupported(t, image, unsupportedRoots) }},
 				{"impact-generics", verifyCandidateAtlasGenericCommand},
 				{"impact-static-operations", verifyCandidateAtlasStaticOperationCommand},
+				{"impact-copied-closures", verifyCandidateAtlasCopiedClosureCommand},
 				{"impact-aggregates", verifyCandidateAtlasAggregateCommand},
 				{"impact-sdk", verifyCandidateAtlasSDKCommand},
 				{"impact-sdk-vector", verifyCandidateAtlasSDKVectorCommand},
@@ -134,7 +137,7 @@ func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
 	t.Helper()
 	var roots []string
 	for _, source := range []string{
-		`module main;fn i32 main(){let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}`,
+		`module main;struct Cell{i32 value;}fn i32 Cell::answer(){return 42;}fn i32 main(){return 42;}`,
 	} {
 		root := writeWorkspaceSessionFixture(t, source)
 		if code, _, diagnostic := runForTest([]string{"check"}, root); code != 0 {

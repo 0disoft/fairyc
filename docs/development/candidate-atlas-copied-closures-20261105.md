@@ -35,9 +35,14 @@ native Linux remains batched and no remote publication is authorized.
    generic, static-operation and closure production replay passes in 462.853s
    without selected skips, including ordinary 81.41s, generic 120.80s and static
    operation 126.27s. Actual command acceptance remains the next gate.
-3. Exercise impact, real read-only MCP and permitted ordinary root-body edits,
-   including closure changes and freshness/refusal/publication controls. Update
-   full authored-main registration and replay after the actual source family works.
+3. **Actual impact/MCP/body editing verified in the full authored CLI.** All
+   four selected groups pass Windows low/optimized in 346.019s. The verifiers
+   below preserve independent Go expectations, current-source identities,
+   freshness/refusal and publication controls. The three new groups are registered
+   without removing or reordering the original verifiers. The unsupported-source
+   fixture now uses a valid owner-qualified declaration, which remains closed;
+   a supported closure plus an unknown symbol no longer masquerades as source
+   refusal evidence. Other full-image groups remain separate final replay work.
 4. Keep other Atlas families, final Go/Fairy comparison, consecutive self-build,
    distribution/clean-machine, native Linux and hosted same-commit gates separate.
 
@@ -79,7 +84,7 @@ before-concrete and unused-template expectations are independent of the Fairy
 projection. Source `check` and `check --locked` pass with 642 source files and
 8,103 MIR functions; the lock is refreshed for the added source module. Scoped
 Go vet, formatting and diff checks pass. Actual impact/MCP/edit command and new
-full authored-main image acceptance remain separate pending work at this point.
+full authored-main image acceptance are recorded separately below.
 
 ```powershell
 go test -mod=readonly -count=1 -timeout 2m -v ./internal/cli -run '^TestAtlasCopiedClosureSourceOracle$'
@@ -97,3 +102,66 @@ This is a private source projection, not new closure syntax, first-class or
 retained callbacks, public CLI/SDK ABI, map wire, DB, dependency, target, timeout,
 runner or repository-policy change. Native Linux remains batched; no push,
 dispatch, release or deployment.
+
+## Command and full-image acceptance
+
+`TestCandidateAtlasCLI` builds the real authored main and dispatcher. No Go
+compiler child or build companion supplies Atlas facts. PATH is empty during
+execution. The exact same command verifiers also have standalone command-leaf
+test roots; these roots were not rerun because the stronger full-image replay
+executes their actual verifiers in both profiles.
+
+Impact executes fourteen native invocations per profile: visible/full selectors
+for three distinct private helpers and the original generic owner, exact six-call
+admission, a one-short call limit and package/output limits, stale-lock refusal, refreshed
+current-source success and rejection of an old concrete helper selector after
+its owner body changes. Results and compiler/current-source contexts match the
+independent Go call index; all query/refusal paths preserve workspace bytes.
+
+MCP uses two real stdio sessions per profile, for ordinary and generic owners.
+It selects actual private helper identities, checks read-only negotiation/tool
+policy and exact Go contexts, rejects stale source, and recovers after relocking
+in the same process. Protocol stdout has no workspace/source leakage; EOF and
+owned process cleanup complete normally.
+
+The ordinary `leaf` editor changes both copied capture values and the requested
+generic owner from i32 to bool. A separate Go overlay oracle verifies one fresh
+concrete owner and two private helpers before/after. Exact Go preview/apply reports,
+published bytes, invalid closure/dependency-write refusal, unchanged lock,
+staging cleanup and stale lock/hash guards all pass. This does not authorize
+editing generated helper declarations or generic declarations themselves.
+
+| Full authored-main group | Low | Optimized |
+| --- | --- | --- |
+| mcp-copied-closures | 44.08s | 0.93s |
+| edit-copied-closures | 55.11s | 1.17s |
+| unsupported | 0.05s | 0.04s |
+| impact-copied-closures | 131.62s | 2.09s |
+
+The complete selected command passes in 346.019s, including code generation and
+both native builds. Neither selected profile/group is skipped. The low source
+digest is `23e8921697d92626c29a6f9e73ca4bbd6e1f2bec8c5276d5b03e399f82af9e2e`,
+image `ac581106cadd00343f1a00ee8d8e7e9e126ce6b16b791ed14e5848bfcf101bde`.
+Optimized source digest is
+`e03b305608fcf0cd56e7275c7e696db38ad7982ec706a8f50963852fc6531958`,
+image `c926a72303be2382c8a3c09499ef6330f29f118f27e1108dbf3e3b0694cd5930`.
+Retained images remain bound to exact C/runtime/profile/toolchain/stack/image
+digests. The pre-closure image's 23/23 baseline does not attest this new image.
+Only these four of the now twenty-six registered groups have current full-image
+acceptance; the other twenty-two still require the final fresh replay.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 2m -v ./internal/cli -run '^TestAtlasCopiedClosureEditOracle$'
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path $PWD '.cache/atlas-copied-closure-cli-20261105'
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^(low|optimized)$/^(impact-copied-closures|mcp-copied-closures|edit-copied-closures|unsupported)$'
+```
+
+The Go overlay oracle passes in 0.262s. Final logs:
+`.cache/atlas-copied-closure-edit-oracle-20261105.log` and
+`.cache/atlas-copied-closure-full-cli-20261105.log`.
+This closes the seven-fixture bounded closure Atlas slice. Broader source forms,
+uncovered source-family combinations, first-class closures, final Go/Fairy
+comparison, consecutive self-build, distribution/clean-machine, batched native
+Linux and same-commit hosted acceptance remain open. No product correction was
+needed after the production fix; this follow-up adds tests and evidence only.

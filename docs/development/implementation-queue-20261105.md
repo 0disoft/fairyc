@@ -56,6 +56,20 @@ authorized by this queue.
 
 ## Progress
 
+- Copied-closure Atlas impact, actual read-only MCP and ordinary body preview/apply
+  now pass in the full authored-main Windows image at both profiles (346.019s).
+  Four distinct helper/generic-owner selectors preserve exact six-call contexts,
+  cutoffs, stale/relocked source and old-concrete-helper refusal. Ordinary and
+  generic MCP sessions recover without source/host leakage or workspace writes.
+  Editing changes capture values and replaces an i32 concrete owner with bool,
+  with exact independent Go reports/publication and existing failure guards.
+  A valid owner-qualified source now owns unsupported-source refusal evidence.
+  The three new verifiers are registered in the full CLI; only these three plus
+  the refusal group have been replayed on the changed image. The other twenty-two
+  groups, broader Atlas sources and all final queue gates remain open. See the
+  closure plan for source/image digests and exact scope. Linux stays batched;
+  no push or dispatch. The full implementation objective remains active.
+
 - Copied-closure Fairy Atlas production now binds private helper declarations
   and calls to exact checked concrete owner frames and g0 identities. Module-wide
   ordinary-before-concrete ordering agrees with Go, and unused generic templates
