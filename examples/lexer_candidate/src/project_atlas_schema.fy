@@ -63,7 +63,7 @@ pub fn Result<bool,u32> key(ref mut bytes::Buffer out,ref input::Input source,sp
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"kind",kind(d.kind),meter)?;
     discard w::raw(out,b",",meter)?;discard w::pair(out,b"name",syntax::declaration_name(parsed,row.declaration+1),meter)?;return w::raw(out,b"}",meter);
 }
-fn Result<bool,u32> effects(ref mut bytes::Buffer out,u32 bits,ref mut usize meter){
+pub fn Result<bool,u32> effects(ref mut bytes::Buffer out,u32 bits,ref mut usize meter){
     if(bits>4095){return .err(7);}let labels=b"block_context|clock|console|emit|environment|external_call|filesystem|network|process|random|storage_read|storage_write|";
     let u32[12] flags=[128,32,1,256,4,512,2,16,8,64,1024,2048];var usize index=0;var usize start=0;var usize end=0;var bool first=true;
     discard w::raw(out,b"[",meter)?;while(end<labels.len){
@@ -92,7 +92,9 @@ pub fn Result<bytes::Buffer,u32> declaration(ref input::Input source,ref coordin
     if(row.module_index>=input::count(source)){return .err(7);}let p=input::source(source,row.module_index);
     if(row.declaration>=syntax::declaration_count(p)){return .err(7);}if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(p,row.declaration);
     if(d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=9 && d.kind!=11 || d.owner_end!=d.owner_start){return .err(101);}
-    let template=d.generic_parameters!=0;if(template && (d.kind!=3 && d.kind!=4 && d.kind!=6 || d.kind!=3 && d.attribute_count!=0)){return .err(101);}
+    let template=d.generic_parameters!=0;if(template && d.kind!=3 && d.kind!=4 && d.kind!=6){return .err(101);}
+    if(template && d.kind==4 && representation::read_template(p,row.declaration).code!=0){return .err(101);}
+    if(template && d.kind==6){var usize i=0;while(i<d.attribute_count){if(!work::charge(meter,1)){return .err(3);}let a=syntax::attribute_at(p,d.attribute_start+i);if(!bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"effects")){return .err(101);}i+=1;}if(effect_policy::read(p,row.declaration).code!=0){return .err(7);}}
     var usize result=0;var u32 declared_effects=0;var bool unsafe_call=false;var usize signature=0;
     if(template){if(d.kind==3){let effects=effect_policy::read(p,row.declaration);if(effects.code!=0){return .err(7);}declared_effects=effects.bits;unsafe_call=d.unsafe_end!=0;}}
     else if(d.kind==3 || d.kind==9){signature=signatures::identity(metadata,row.module_index,row.declaration+1);if(signature==0){return .err(7);}let s=signatures::at(metadata,signature);result=s.result;declared_effects=s.effects;unsafe_call=s.unsafe_call;}
@@ -128,10 +130,10 @@ pub fn Result<bytes::Buffer,u32> declaration(ref input::Input source,ref coordin
         discard w::raw(ref mut out,b"}",meter)?;variants+=1;
     }
     discard w::raw(ref mut out,b"],\"repr_c\":",meter)?;
-    discard w::raw(ref mut out,if(d.kind==4 && representation::read(p,row.declaration).repr_c){b"true"}else{b"false"},meter)?;
+    discard w::raw(ref mut out,if(d.kind==4 && if(template){representation::read_template(p,row.declaration).repr_c}else{representation::read(p,row.declaration).repr_c}){b"true"}else{b"false"},meter)?;
     discard w::raw(ref mut out,b",",meter)?;
     discard w::pair(ref mut out,b"drop_kind",if(d.kind!=6){b""}else if(template){b"source-declared"}else if(syntax::block_statement_count(p,d.cleanup_body)==0 && syntax::statement_at(p,d.cleanup_body).expression==0){b"empty"}else{b"non-empty"},meter)?;
     discard w::raw(ref mut out,b",\"drop_effects\":",meter)?;
-    discard effects(ref mut out,if(d.kind==6 && !template){effect_policy::read(p,row.declaration).bits}else{0},meter)?;
+    discard effects(ref mut out,if(d.kind==6){effect_policy::read(p,row.declaration).bits}else{0},meter)?;
     discard w::raw(ref mut out,b"}",meter)?;return .ok(out);
 }

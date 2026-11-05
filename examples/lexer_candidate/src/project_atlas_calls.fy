@@ -2,6 +2,8 @@ module project_atlas_calls;
 import project_atlas_write as w;
 import project_atlas_declarations as declarations;
 import project_atlas_instances as instances;
+import project_atlas_aggregate as aggregate;
+import module_public_type_text as coordinates;
 import project_compiler_input as input;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
@@ -61,6 +63,9 @@ pub fn usize template_count(ref Summaries p){return p.templates;}
 pub fn usize implementation_count(ref Summaries p){return p.implementations;}
 pub fn Result<Summaries,u32> summaries(ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref v::Vec<declarations::Row> rows,ref mut usize meter){let context=instances::empty();return summaries_generics(p,program,metadata,ref context,rows,meter);}
 pub fn Result<Summaries,u32> summaries_generics(ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref instances::Instances context,ref v::Vec<declarations::Row> rows,ref mut usize meter){
+ let table=coordinates::assemble(bytes::empty(),v::empty<coordinates::Coordinate>());return summaries_aggregates(p,program,metadata,ref table,context,rows,meter);
+}
+pub fn Result<Summaries,u32> summaries_aggregates(ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref coordinates::Coordinates table,ref instances::Instances context,ref v::Vec<declarations::Row> rows,ref mut usize meter){
  var out=bytes::empty();discard w::raw(ref mut out,b"[",meter)?;var usize total=0;var usize external=0;var usize functions=0;var usize i=0;
  while(i<v::len<declarations::Row>(rows)){
   if(!work::charge(meter,1)){return .err(3);}let row=*v::at<declarations::Row>(rows,i);i+=1;let d=syntax::declaration_at(input::source(p,row.module_index),row.declaration);if(d.kind!=3 || d.generic_parameters!=0){continue;}
@@ -70,7 +75,10 @@ pub fn Result<Summaries,u32> summaries_generics(ref input::Input p,ref ir::Progr
  while(i<instances::count(context)){if(!work::charge(meter,1)){return .err(3);}let row=instances::at(context,i);i+=1;var usize j=0;var bool local=false;
   while(j<v::len<declarations::Row>(rows)){if(!work::charge(meter,1)){return .err(3);}let d=*v::at<declarations::Row>(rows,j);if(d.module_index==row.declaration.module_index && d.declaration==row.declaration.declaration){local=true;break;}j+=1;}if(!local){continue;}
   if(specialized>0){discard w::raw(ref mut specs,b",",meter)?;}discard w::raw(ref mut specs,b"{",meter)?;discard w::pair(ref mut specs,b"id",instances::identity(context,row),meter)?;discard w::raw(ref mut specs,b",\"declaration\":",meter)?;discard declarations::key(ref mut specs,p,row.declaration,meter)?;
-  discard w::raw(ref mut specs,b",\"type_arguments\":",meter)?;discard instances::arguments(ref mut specs,context,row,meter)?;discard w::raw(ref mut specs,b",\"function\":",meter)?;let c=body(ref mut specs,p,program,metadata,context,row.declaration,row.frame,meter)?;discard w::raw(ref mut specs,b"}",meter)?;total+=c.calls;external+=c.external;specialized+=1;
+  discard w::raw(ref mut specs,b",\"type_arguments\":",meter)?;discard instances::arguments(ref mut specs,context,row,meter)?;
+  if(row.type!=0){discard w::raw(ref mut specs,b",\"aggregate\":",meter)?;discard aggregate::declaration(ref mut specs,p,table,program,row,meter)?;}
+  if(row.type==0 || row.frame!=0){discard w::raw(ref mut specs,if(row.type==0){b",\"function\":"}else{b",\"cleanup\":"},meter)?;let c=body(ref mut specs,p,program,metadata,context,row.declaration,row.frame,meter)?;total+=c.calls;external+=c.external;}
+  discard w::raw(ref mut specs,b"}",meter)?;specialized+=1;
  }
  discard w::raw(ref mut specs,b"]",meter)?;return .ok(Summaries{.text=out,.specializations=specs,.calls=total,.external,.functions,.specialization_count=specialized,.templates=instances::template_count(context),.implementations=instances::count(context)});
 }

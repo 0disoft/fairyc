@@ -14,9 +14,10 @@ import project_atlas_types as types;
 
 pub struct Row{usize module_index;usize declaration;}
 pub fn ref u8[] kind(u32 kind){if(kind==4){return b"struct";}if(kind==6){return b"resource";}if(kind==11){return b"enum";}if(kind==9){return b"foreign-function";}return b"function";}
-pub fn Result<v::Vec<Row>,u32> collect(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,false,false,meter);}
-pub fn Result<v::Vec<Row>,u32> collect_all(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,true,false,meter);}
-pub fn Result<v::Vec<Row>,u32> collect_generics(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,true,true,meter);}
+pub fn Result<v::Vec<Row>,u32> collect(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,false,false,false,meter);}
+pub fn Result<v::Vec<Row>,u32> collect_all(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,true,false,false,meter);}
+pub fn Result<v::Vec<Row>,u32> collect_generics(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,true,true,false,meter);}
+pub fn Result<v::Vec<Row>,u32> collect_aggregates(ref input::Input p,usize owner,ref mut usize meter){return collect_mode(p,owner,true,true,true,meter);}
 fn Result<bool,u32> before(ref input::Input p,Row a,Row b,ref mut usize meter){
  let left=input::source(p,a.module_index);let right=input::source(p,b.module_index);
  let lm=types::module_name(input::file(p,a.module_index),meter)?;let rm=types::module_name(input::file(p,b.module_index),meter)?;
@@ -26,14 +27,14 @@ fn Result<bool,u32> before(ref input::Input p,Row a,Row b,ref mut usize meter){
  let ln=syntax::declaration_name(left,a.declaration+1);let rn=syntax::declaration_name(right,b.declaration+1);
  if(!work::charge(meter,ln.len+rn.len+1)){return .err(3);}return .ok(model::before(ln,rn));
 }
-fn Result<v::Vec<Row>,u32> collect_mode(ref input::Input p,usize owner,bool all,bool generics,ref mut usize meter){
+fn Result<v::Vec<Row>,u32> collect_mode(ref input::Input p,usize owner,bool all,bool generics,bool aggregates,ref mut usize meter){
  var rows=v::empty<Row>();var usize m=0;
  while(m<input::count(p)){if(input::origin(p,m).owner==owner){
   let parsed=input::source(p,m);if(syntax::closure_prepared(parsed)){return .err(101);}var usize i=0;
   while(i<syntax::declaration_count(parsed)){
    if(!work::charge(meter,1)){return .err(3);}let d=syntax::declaration_at(parsed,i);let row=Row{.module_index=m,.declaration=i};i+=1;
    if(d.kind==1 || d.kind==2 || all && (d.kind==7 || d.kind==8)){continue;}
-   if(d.generic_parameters!=0 && (!generics || d.kind!=3) || d.owner_end!=d.owner_start){return .err(101);}
+   if(d.generic_parameters!=0 && (!generics || d.kind!=3 && (!aggregates || d.kind!=4 && d.kind!=6)) || d.owner_end!=d.owner_start){return .err(101);}
    if(all){if(d.kind!=3 && d.kind!=4 && d.kind!=6 && d.kind!=9 && d.kind!=11){return .err(101);}}
    else if(d.kind!=3 || d.unsafe_end!=d.unsafe_start || d.attribute_count!=0 || d.field_count!=0){return .err(101);}
    if(v::len<Row>(ref rows)>=4096){return .err(3);}if(!v::push<Row>(ref mut rows,row).is_ok){return .err(2);}

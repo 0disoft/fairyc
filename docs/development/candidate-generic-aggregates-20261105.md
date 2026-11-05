@@ -28,7 +28,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
    checked cleanup requests alone are insufficient.
-4. **Unit/project source identities, linking and Complete interfaces implemented; restoration and Atlas production remain.** Keep original templates as
+4. **Unit/project source identities, linking, Complete interfaces, artifact/cache restoration and private Atlas production implemented; SDK and command selection remain.** Keep original templates as
    source exports, bind instance/type/cleanup identities to current source,
    preserve definition-dependent invalidation and emit concrete aggregate and
    cleanup facts from Complete. Include SDK source families through their actual
@@ -38,6 +38,22 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    consecutive self-build, distribution and hosted evidence under the main queue.
 
 ## Source-plan evidence
+
+### Current private Atlas production
+
+The explicit aggregate Complete producer now publishes concrete struct/resource
+and cleanup records in v3 maps. Original headers preserve repr(C) and declared
+resource effects. Verified concrete layouts supply fields/types/spans; checked
+empty cleanup frames join their exact resource identity without acquiring an
+executable summary. `TestCandidateAtlasAggregateProduction` passes all eight
+three-package scenarios in Windows low/optimized (246.69s): 48 native probe
+invocations and 48 returned package maps, strict Go v3 decoding/comparisons,
+independent current-source checks and complete workspace joins. Work and missing
+coordinate controls reject without workspace mutation. See
+`docs/ops/windows-candidate-atlas-aggregates-20261105.md` for failure accounting,
+ordinary regressions and exact scope. Actual query/MCP/edit and aggregate
+check/build/run/test selection, SDK source production and all final queue gates
+remain open. No native Linux evidence is claimed.
 
 ### Current Atlas instance projection
 

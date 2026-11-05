@@ -53,6 +53,21 @@ authorized by this queue.
 
 ## Progress
 
+- Private Fairy aggregate v3 map production now passes all eight three-package
+  Windows low/optimized scenarios in 246.69s: 48 native invocations and 48 returned
+  maps, strict independent Go declaration/SymbolId/interface/aggregate/cleanup-call
+  comparisons, current-source revalidation, complete joins and refusal controls.
+  Source repr(C)/declared effects are retained. The reproduced empty-cleanup
+  frame refusal is fixed without inventing an executable summary. See
+  `docs/ops/windows-candidate-atlas-aggregates-20261105.md`. Actual aggregate
+  query/MCP/edit and check/build/run/test selection, SDK production and every
+  final acceptance gate remain open. Linux stays batched; no push or dispatch.
+
+  The final aggregate/function-generic/source-header/ordinary production command
+  passes both profiles in 477.908s with no selected skips. Scoped vet, formatting
+  and diff checks pass. This closes the private aggregate producer only, not the
+  broader Atlas/SDK/command or final-acceptance queue.
+
 - Complete-bound Fairy aggregate instance projection now passes Windows
   low/optimized in 106.21s: six three-package source scenarios, exact Go v3
   instance/type/cleanup-call comparisons and four refusal controls per scenario

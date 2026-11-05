@@ -64,8 +64,9 @@ from these explicit ports.
 Original generic declaration headers now project retained AST binders, types,
 coordinates and spans. `prepare_declarations` is source-only; the normal `prepare`
 continues to require exact Complete provenance. Generic function headers pass the
-complete Fairy factory, while user generic aggregates still need their compiler
-instantiation/layout/cleanup path (4501 at source admission). Source-only aggregate
+complete Fairy factory. User generic aggregates now have a separate private
+Complete instantiation/layout/cleanup, restoration/cache and Atlas producer path;
+the actual query command still needs to select that factory. Source-only aggregate
 headers do not establish executable or CLI support.
 See [the generic receipt](../ops/windows-candidate-atlas-generics-20261105.md).
 The Fairy CLI now dispatches `experimental atlas-impact`

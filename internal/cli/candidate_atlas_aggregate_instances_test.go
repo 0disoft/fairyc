@@ -60,14 +60,7 @@ func TestCandidateAtlasAggregateInstances(t *testing.T) {
 		want                []fact
 	}
 	var fixtures []fixture
-	cases := []candidateAggregateLayoutFixture{
-		{name: "ordered tuples and imported resources", root: "module root;import maker as m;fn i32 main(){let a=m::Cell<i32>{.value=42};return a.value;}"},
-		{name: "unused templates", root: "module root;import maker as m;fn i32 main(){return m::answer();}", maker: "module maker;import helper as h;pub struct Cell<T>{T value;}pub resource Token<T>{T value;cleanup{discard h::finish<T>(this.value);}}pub fn i32 answer(){return 42;}"},
-		{name: "two scalar instances", root: "module root;import maker as m;fn i32 main(){let a=m::Cell<i32>{.value=42};let b=m::Cell<bool>{.value=true};assert(b.value);return a.value;}"},
-	}
-	for _, execution := range candidateAggregateExecutions()[3:] {
-		cases = append(cases, execution.fixture)
-	}
+	cases := candidateAtlasAggregateFixtures()
 	for _, source := range cases {
 		root := candidateAggregateCacheWorkspace(t, source)
 		var diagnostic bytes.Buffer
@@ -147,7 +140,7 @@ func candidateAtlasAggregateOracleFailure(t *testing.T, root string) {
 	}
 	compiled, _, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
 	if err != nil || !compiled.Verified {
-		t.Fatalf("aggregate Go compilation: %v %+v", err, compiled.Semantic)
+		t.Fatalf("aggregate Go compilation: %v diagnostics=%+v unsupported=%+v", err, compiled.Semantic.Diagnostics, compiled.Semantic.Unsupported)
 	}
 	build, err := buildidentity.Current()
 	if err != nil {
@@ -159,4 +152,16 @@ func candidateAtlasAggregateOracleFailure(t *testing.T, root string) {
 	if _, err := atlasmap.CurrentWorkspaceExpectationsV3(w, compiled, build); err != nil {
 		t.Fatalf("aggregate Go Atlas expectations: %v", err)
 	}
+}
+
+func candidateAtlasAggregateFixtures() []candidateAggregateLayoutFixture {
+	cases := []candidateAggregateLayoutFixture{
+		{name: "ordered tuples and imported resources", root: "module root;import maker as m;fn i32 main(){let a=m::Cell<i32>{.value=42};return a.value;}"},
+		{name: "unused templates", root: "module root;import maker as m;fn i32 main(){return m::answer();}", maker: "module maker;import helper as h;pub struct Cell<T>{T value;}pub resource Token<T>{T value;cleanup{discard h::finish<T>(this.value);}}pub fn i32 answer(){return 42;}"},
+		{name: "two scalar instances", root: "module root;import maker as m;fn i32 main(){let a=m::Cell<i32>{.value=42};let b=m::Cell<bool>{.value=true};assert(b.value);return a.value;}"},
+	}
+	for _, execution := range candidateAggregateExecutions()[3:] {
+		cases = append(cases, execution.fixture)
+	}
+	return cases
 }

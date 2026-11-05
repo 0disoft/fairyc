@@ -65,7 +65,14 @@ fn Result<Instances,u32> collect_mode(ref input::Input source,ref coordinates::C
  }
  var by_frame=v::empty<usize>();i=0;while(i<=ir::count(program)){if(!work::charge(meter,1)){return .err(3);}if(!v::push<usize>(ref mut by_frame,0).is_ok){return .err(2);}i+=1;}i=0;
  while(i<v::len<Row>(ref rows)){let r=*v::at<Row>(ref rows,i);if(r.frame!=0){let slot=v::at_mut<usize>(ref mut by_frame,r.frame);if(*slot!=0){return .err(7);};*slot=i+1;}i+=1;}
- if(aggregates){frame=1;while(frame<=ir::count(program)){if(!work::charge(meter,1)){return .err(3);}if(clean::frame_at(context,frame).kind==2 && named::identity(checked,named::frame_at(checked,frame)).len!=0 && *v::at<usize>(ref by_frame,frame)==0){return .err(7);}frame+=1;}}
+ if(aggregates){frame=1;while(frame<=ir::count(program)){if(!work::charge(meter,1)){return .err(3);}let f=clean::frame_at(context,frame);let id=named::identity(checked,named::frame_at(checked,frame));
+  if(f.kind==2 && id.len!=0 && *v::at<usize>(ref by_frame,frame)==0){
+   // Checked empty cleanup frames have no executable glue/Atlas summary. They
+   // must still join the retained aggregate, rather than disappear unchecked.
+   if(f.receiver_type==0 || f.receiver_type>clean::type_count(context)){return .err(7);}let t=clean::type_at(context,f.receiver_type);let g=clean::glue_at(context,f.receiver_type);
+   if(t.kind!=21 || t.module_index!=f.module_index || t.declaration!=f.declaration || g.kind!=1 || g.nonempty || g.frame!=0 || ir::call_count(ir::at(program,frame))!=0 || !bytes::equal(id,named::identity(checked,named::type_at(checked,f.receiver_type)))){return .err(7);}
+  }frame+=1;
+ }}
  var call_starts=v::empty<usize>();var call_frames=v::empty<usize>();if(!v::push<usize>(ref mut call_starts,0).is_ok){return .err(2);}frame=1;
  while(frame<=ir::count(program)){let body=ir::at(program,frame);i=0;while(i<ir::call_count(body)){if(!work::charge(meter,1)){return .err(3);}let target=switch(named::call_frame(checked,frame,i,meter)){case .ok(p):{p}case .err(code):{return .err(if(code==1002){3}else{7});}};if(!v::push<usize>(ref mut call_frames,target).is_ok){return .err(2);}i+=1;}if(!v::push<usize>(ref mut call_starts,v::len<usize>(ref call_frames)).is_ok){return .err(2);}frame+=1;}
  let template_count=catalog::count(templates);var plans=v::empty<plan::Plan>();if(!v::push<plan::Plan>(ref mut plans,original).is_ok){return .err(2);}return .ok(Instances{.names,.plans,.rows,.by_frame,.call_starts,.call_frames,.templates=template_count,.aggregates});

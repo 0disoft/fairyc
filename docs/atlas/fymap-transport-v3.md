@@ -54,3 +54,14 @@ explicit store consumer and current-source reader are documented in
 `docs/atlas/fymap-query-v3.md`. Workspace joins, symbol catalog 3 and call catalog 2
 now explicitly consume v3; their CLI paths use in-memory maps. Stable aggregate
 source admission is not promoted.
+
+## Private Fairy producer
+
+The explicit aggregate Complete path projects concrete layout/cleanup records
+through `project_atlas_aggregate.fy`, `project_atlas_calls.fy` and
+`project_atlas_produce.fy`. Source template attributes retain repr(C) and declared
+drop effects in existing fields. Checked empty cleanup frames join their resource
+identity but do not become executable summaries. This is a private source-bound
+producer, separate from codec authority and stable command admission. Its Windows
+matrix and remaining command/SDK/Linux gates are recorded in
+`docs/ops/windows-candidate-atlas-aggregates-20261105.md`.
