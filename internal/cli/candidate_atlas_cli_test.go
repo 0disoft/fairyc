@@ -89,6 +89,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			verifyCandidateEditCLIApply(t, image)
 			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)
 			verifyCandidateAtlasGenericCommand(t, image)
+			verifyCandidateAtlasAggregateCommand(t, image)
 			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
 				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 				if code != 0 || out != usage || diagnostic != "" {

@@ -53,6 +53,15 @@ authorized by this queue.
 
 ## Progress
 
+- The actual Fairy aggregate impact command now selects its Complete, signature
+  and instance factories from exact retained source. Windows low/optimized
+  command-leaf acceptance passes in 144.66s: 22 native invocations, five original
+  declarations plus full ID, cross-package cleanup callers, exact Go current
+  contexts, call/package bounds and stale/relocked unused-template drift. The
+  full authored CLI verifier is wired but has not been rerun for this slice.
+  MCP aggregate sessions, edit selection/overlay/application, SDK, native Linux
+  and every final gate remain open. See the aggregate Atlas receipt.
+
 - Private Fairy aggregate v3 map production now passes all eight three-package
   Windows low/optimized scenarios in 246.69s: 48 native invocations and 48 returned
   maps, strict independent Go declaration/SymbolId/interface/aggregate/cleanup-call

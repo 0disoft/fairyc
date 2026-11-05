@@ -63,7 +63,48 @@ roots pass both profiles: generic-function production 123.16s, source-only
 generic headers 29.03s, and ordinary production 78.87s. Scoped
 `go vet -mod=readonly ./internal/cli`, Go formatting and `git diff --check` pass.
 
-## Development failures and remaining work
+## Aggregate impact command follow-up
+
+`project_atlas_source_mode::aggregates` classifies exact retained source under
+the shared work bound. The actual `experimental atlas-impact` leaf selects the
+aggregate Complete/signature/instance factories together when a struct/resource
+template is present. Ordinary/function-only source keeps its existing route.
+Neither a selected symbol nor a map/cache header can select or upgrade the mode.
+
+`TestCandidateAtlasAggregateCommand` passes Windows low/optimized in 144.66s
+(76.73s/56.90s). Its three-package source contains two scalar Cell instances,
+nested resources with declared effects and foreign cleanup, a zero-field resource
+with empty cleanup, an unused template, and a generic cross-package cleanup
+helper. It queries five original declarations plus the helper's full SymbolId,
+compares exact Go v3 impact nodes and source/interface/current-image contexts,
+and requires the resource cleanup caller to appear. Exact four-call admission,
+three-call refusal, package cutoff, stale lock, relocked unused-template field
+changes and workspace nonmutation are verified: 11 native invocations per profile.
+
+The first low run failed only on a test assumption that changing unused aggregate
+fields preserved the ordinary interface hash. A public aggregate header edit can
+change that interface as well. The corrected verifier still compares every
+ordinary/generic hash to independent Go and requires generic/source/instance
+drift; it no longer invents a field-change identity contract.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateAtlasAggregateCommand$'
+```
+
+The same verifier is wired into opt-in `TestCandidateAtlasCLI`; that refreshed
+full authored-main/dispatcher replay remains pending. Standalone MCP aggregate
+session and edit selection/overlay/application acceptance remain separate, as do
+SDK, native Linux and the broader queue. The CLI's unsupported-declaration text
+no longer claims that all generics are unsupported. This expands the existing
+experimental CLI source family without a stable language/SDK ABI or wire revision.
+
+The existing function-only generic command and SDK/copied-closure refusal
+regression passes both profiles in 145.69s. Scoped vet, Go formatting and diff
+checks pass. The aggregate command's successful-path source/arguments remain
+unchanged after its native run; the following edit changes only the unsupported
+declaration message and the opt-in Go full-CLI verifier registration.
+
+## Original producer development failures and remaining work
 
 Initial development runs failed on a Go test's comparison of a slice-containing
 struct, a fixture that constructed a resource outside its owning module, and
