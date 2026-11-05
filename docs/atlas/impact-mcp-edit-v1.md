@@ -103,8 +103,9 @@ call endpoints. Checked cleanup intrinsic observations retain inlined
 `take_slot<T>` implementations without inventing callable frames. The
 [SDK vector plan](../development/candidate-atlas-sdk-vector-20261105.md) and
 [Windows receipt](../ops/windows-candidate-atlas-sdk-vector-20261105.md) record
-producer and impact/MCP command acceptance. Structural body editing and
-SDK/user-aggregate combinations keep their separate acceptance gates.
+producer and impact/MCP command acceptance. SDK Vec root-body preview/apply also
+passes the Windows command leaf, including new bool element specializations;
+SDK/user-aggregate combinations keep their separate acceptance gate.
 
 Call reachability is exact within the admitted resolved graph. Foreign calls make
 the `calls` completeness partial with reason `external-ffi`; only resolved calls
@@ -231,7 +232,10 @@ source, including newly requested scalar specializations in a replacement body.
 This does not relax editable-target restrictions or publication/freshness rules.
 Windows command-leaf evidence is in
 `docs/ops/windows-candidate-atlas-aggregates-20261105.md`. The ordinary SDK
-user-body-edit command leaf is tracked in the SDK receipt. Refreshed complete
+user-body-edit command leaf is tracked in the SDK receipt. Authenticated scalar
+SDK Vec root-body editing also passes exact Go preview/apply comparisons and
+fresh bool specialization controls in the SDK vector receipt. SDK declarations
+remain noneditable. Refreshed complete
 authored-CLI, SDK/user-aggregate combinations and native Linux acceptance remain
 separate.
 

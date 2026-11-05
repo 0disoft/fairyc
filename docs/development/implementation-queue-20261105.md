@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- SDK Vec root-body editing now passes actual Windows low/optimized preview
+  and apply in 429.975s. The overlay replaces i32 operations with newly requested
+  bool Vec/type/helper implementations; exact Go preview/apply reports, published
+  bytes, unchanged graph lock, staging cleanup, invalid overlays, SDK-write
+  refusal and stale lock/hash checks pass. The ordinary SDK optimized control
+  passes in 100.729s. The Go overlay's missing SDK authority prerequisite is
+  corrected separately at `70396315`. The full authored-main Vec editor verifier
+  is registered, not rerun. SDK/user-aggregate composition, native Linux and every
+  final acceptance gate remain open; see the SDK vector receipt.
+
 - Authenticated SDK Vec source production now passes the independent Go oracle
   at `1cb4f678`. The actual Windows impact command now accepts unused/at/pop
   sources in both profiles (435.12s), and the matching read-only MCP sessions

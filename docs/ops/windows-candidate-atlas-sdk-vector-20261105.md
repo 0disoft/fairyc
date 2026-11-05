@@ -139,3 +139,46 @@ This supersedes only the earlier Vec impact/MCP refusal statements above.
 No public language/CLI shape, SDK/runtime ABI, map schema, DB, dependency,
 product timeout, work allowance, target, repository hygiene or CI runner change.
 No push, hosted dispatch or publication.
+
+## Actual root-body editing follow-up
+
+The Vec command fixture replaces an original i32 empty/push/at body with a bool
+body. Bool has no ordinary SDK view signature, so fresh overlay preparation must
+request its Vec type, cleanup helper and empty/push/at/write implementations.
+The independent `TestAtlasSDKVectorEditOracle` pins all six new implementation
+families. The replacement reads the stored bool to choose 43 or 1; this is not
+only an unused template declaration.
+
+Actual Fairy preview/apply reports match independent Go invocations on separate
+workspaces. Invalid overlays and SDK declaration writes reject; valid apply
+preserves all four original/overlay checks, publishes exact expected bytes,
+preserves fairy.lock and unrelated files, and removes owned staging/lock files.
+Old graph locks and old source hashes reject after publication/relocking.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 25m -v ./internal/cli -run '^TestCandidateEditSDKVectorCommand$'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateEditSDKCommand$/^optimized$'
+go test -mod=readonly -count=1 -failfast -timeout 3m -v ./internal/cli -run '^TestAtlasSDKVectorEditOracle$'
+```
+
+The Vec native command passes both profiles in 429.975s: low 341.29s and optimized
+71.04s, with successful apply taking 149.602s and 5.716s respectively. The ordinary
+SDK optimized command control passes in 100.729s, with apply taking 5.209s.
+The final bool Go oracle passes within the 2.092s combined Go regression command
+recorded in [the overlay authority receipt](windows-atlas-edit-sdk-authority-20261105.md).
+Native logs are `.cache/atlas-sdk-vector-edit-20261105.log` and
+`.cache/atlas-sdk-vector-edit-core-20261105.log`.
+
+Two initial native attempts failed before candidate execution: the first harness
+used inadmissible i16 storage, and the corrected bool case exposed the Go overlay
+authority defect. Its independently reproduced correction is `70396315` and is
+required by the final command. Failed attempts remain separate evidence; neither
+counts as a passing native case. The per-process three-minute diagnostic cap and
+existing six-minute apply cap remain unchanged; product timeouts are unchanged.
+
+The full authored CLI now registers impact, MCP and editing Vec verifiers; its
+complete replay remains pending. SDK/user-aggregate combinations, batched native
+Linux, final current-source comparison, consecutive self-build, distribution and
+same-commit hosted CI are not established by command-leaf acceptance.
+No public API, SDK/runtime ABI, wire schema, DB, dependency, product policy,
+repository hygiene or CI runner change; no push or dispatch.

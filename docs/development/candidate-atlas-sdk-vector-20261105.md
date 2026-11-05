@@ -57,8 +57,8 @@ uncollected relations retain the existing explicit completeness omissions.
 - [x] Remove the command's Vec guard after that acceptance and exercise actual
   impact and read-only MCP commands. Both Windows profiles pass; SDK declarations
   remain noneditable and MCP retains no write tool.
-- [ ] Exercise actual Vec user-body preview/apply, including newly requested
-  element specializations, without changing SDK declaration authority.
+- [x] Exercise actual Vec user-body preview/apply, including newly requested
+  bool element specializations, without changing SDK declaration authority.
 - [ ] Complete SDK/user-aggregate combinations and final authored-main replay.
   Linux execution remains batched; self-build/distribution/hosted gates remain
   part of the original queue.
