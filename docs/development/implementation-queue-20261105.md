@@ -419,3 +419,16 @@ authorized by this queue.
   Aggregate whole-project cache restoration/reuse, Atlas/SDK production, actual
   command integration and every final acceptance gate remain open. Native Linux
   remains batched; no push or dispatch. The full objective stays active.
+
+- Aggregate whole-project persistence now has explicit authenticated key,
+  lookup, envelope and current-source restoration factories. Aggregate and
+  ordinary routes/ledgers are separate, with no cross-family fallback. The
+  Windows low/optimized replay passes in 208.69s/136.24s: 34 fresh processes,
+  64 generated C executions, exact cold C/interfaces, source and key drift
+  refusal, corrupt-generation repair, failed Complete preserving cache bytes
+  and exact/one-short work controls. Existing ordinary keys match Go for all
+  15 package pairs per profile over five source graphs (141.56s). Scoped
+  vet/format/diff pass; see the aggregate plan for preparation failures and
+  unchanged-input reuse. This closes the private whole-project cache API only.
+  Atlas/SDK source production, actual aggregate commands and every final
+  acceptance gate remain open. Linux stays batched; no push or dispatch.

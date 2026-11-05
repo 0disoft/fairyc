@@ -40,8 +40,12 @@ fn u32 package(ref mut bytes::Buffer out,ref graph::Graph g,usize owner,ref mut 
     while(i<v::len<usize>(ref order)){let at=*v::at<usize>(ref order,i);code=field(out,graph::binding(g,at),work);if(code!=0){return code;}code=field(out,graph::node_id(g,graph::edge(g,at).target),work);if(code!=0){return code;}i+=1;}return 0;
 }
 pub fn Result<Identity,u32> collect(ref visibility::Resolved loaded,ref environment::Environment env,ref mut usize work){
+    return collect_mode(loaded,env,false,work);
+}
+pub fn Result<Identity,u32> collect_aggregates(ref visibility::Resolved loaded,ref environment::Environment env,ref mut usize work){return collect_mode(loaded,env,true,work);}
+fn Result<Identity,u32> collect_mode(ref visibility::Resolved loaded,ref environment::Environment env,bool aggregates,ref mut usize work){
     if(!budget::charge(work,0)){return .err(10);}let g=visibility::workspace_graph(loaded);let order=switch(nodes(g,work)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    let fields=switch(environment::key_environment(env,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer out=bytes::empty();var u32 code=mapped(budget::raw(ref mut out,b"fairyc.candidate-project-lookup\x00\x00",work));if(code!=0){return .err(code);}var usize i=0;
+    let fields=switch(environment::key_environment(env,work)){case .ok(p):{p}case .err(e):{return .err(e);}};var bytes::Buffer out=bytes::empty();var u32 code=mapped(budget::raw(ref mut out,if(aggregates){b"fairyc.candidate-project-lookup\x00\x01"}else{b"fairyc.candidate-project-lookup\x00\x00"},work));if(code!=0){return .err(code);}var usize i=0;
     while(i<8){code=field(ref mut out,key::environment_field(ref fields,i),work);if(code!=0){return .err(code);}i+=1;}
     code=field(ref mut out,profile::target(),work);if(code!=0){return .err(code);}code=field(ref mut out,environment::standard_library(env),work);if(code!=0){return .err(code);}code=field(ref mut out,graph::node_id(g,0),work);if(code!=0){return .err(code);}
     code=number(ref mut out,v::len<usize>(ref order),work);if(code!=0){return .err(code);}i=0;while(i<v::len<usize>(ref order)){code=package(ref mut out,g,*v::at<usize>(ref order,i),work);if(code!=0){return .err(code);}i+=1;}

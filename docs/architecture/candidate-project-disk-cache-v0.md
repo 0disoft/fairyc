@@ -2,12 +2,13 @@
 
 `examples/lexer_candidate/src/project_cache_disk.fy` owns the store and drives
 `windows_rooted_file.fy` for handle-relative I/O, reusing `sha256_block`
-compression for its own digest. It transports raw `FYCACHE0` candidate bytes
+compression for its own digest. It transports raw `FYCACHE0` and explicit
+aggregate-family `FYCACHE1` candidate bytes
 between processes and generations inside one caller-supplied root. It admits no
 checked compiler owner and returns no reuse decision: every buffer it hands back
 is still unverified, and the public SDK and CLI contracts are unchanged.
 
-A returned candidate is never authority. The store exists so raw `FYCACHE0`
+A returned candidate is never authority. The store exists so raw private cache
 envelopes can survive a process boundary, and it never answers a reuse question
 on its own. `project_cache_artifact.restore` still re-runs current complete
 source admission and exact key preimages before any cached bytes become a
@@ -36,7 +37,7 @@ newest first by modification time with a name tiebreak, and tries matching route
 in that order. Each candidate opens through the same root handle, its observed
 size must be at least 8 bytes and at most the per-record limit, and bytes are read
 in chunks of at most 64 KiB. A premature EOF (a zero-byte read before the recorded
-size), a trailing byte past the recorded size, a missing `FYCACHE0` marker, or a
+size), a trailing byte past the recorded size, an unrecognized envelope marker, or a
 whole-content digest that disagrees with the leaf name marks that generation
 corrupt and the lookup moves to the next one.
 Allocation failure or exhausted work fails the whole lookup instead of returning a
@@ -216,3 +217,42 @@ the unchanged 8388608 project ledger during body output at work 8229686 with a
 complete fixed point, per-package mixed reuse, product defaults, Linux/full suite
 and same-head CI remain open. No default cache or public Go CLI change. Receipt:
 [candidate-check-cache-command-20261014.json](../ops/evidence/candidate-check-cache-command-20261014.json).
+
+
+## Explicit aggregate whole-project restoration, 2026-11-05
+
+`project_cache_artifact.encode_aggregates`, `restore_aggregates`,
+`to_disk_aggregates` and `from_disk_aggregates` admit only the aggregate Complete
+family. Existing ordinary entry points remain ordinary-only. The whole-project
+aggregate envelope is `FYCACHE1` / `FYCKEYS1` / `FYPRJ001`; unit envelopes also
+start with `FYCACHE1` but require their different `FYPUNIT1` first member.
+The semantic readers require exact member types and never fall back between
+families. Ordinary `FYCACHE0` / `FYCKEYS0` / `FYPRJ000` bytes are unchanged.
+
+`project_cache_lookup.collect_aggregates` changes only the lookup domain's final
+version byte from zero to one. It retains the same authenticated compiler,
+profile, SDK, exact package instances, original module paths and resolved imports.
+This creates a different route for the same sources under the aggregate mode;
+ordinary lookup cannot accidentally reject/delete a valid aggregate generation.
+Neither route nor a valid content hash establishes reuse authority.
+
+`project_cache_keys.collect_aggregates` retains the checked Complete mode and
+fresh complete source/workspace facts. Its specialization projection validates
+kind-20/21 aggregate instances as well as SDK instances and concrete frames
+against the original source-derived specialization set. Tuple kind 22 is metadata
+only. The existing canonical ordinary/generic package-key algorithms and public
+interface hashes are unchanged; the private ledger marker binds their mode.
+
+Restoration frames the complete envelope before reconstruction, uses the named
+aggregate project decoder and current-source Complete factory, then derives all
+current keys and compares every ledger preimage. Source drift, wrong families,
+contradictory keys or any failed verification returns no Complete. Source,
+projection, artifact, key, link, disk-I/O and scan meters retain separate bounded
+histories across candidates; errors remain disposable cache misses. Publication
+still requires a fully checked Complete and uses the unchanged retained-directory
+no-replace/repair/retention owner. Actual CLI cache selection remains a separate
+implementation step; this API adds no implicit aggregate command admission.
+
+Windows evidence is recorded in the generic aggregate implementation plan.
+Linux, full CLI/self-build, distribution and same-commit hosted acceptance remain
+separate requirements; stable API, SDK ABI, DB, dependencies and runners do not change.

@@ -1136,3 +1136,65 @@ Aggregate whole-project disk restoration, Atlas/SDK production, actual command
 integration and the full acceptance queue remain required. Native Linux stays
 batched; stable API/SDK ABI, DB, dependencies, default policy, runner/timeout,
 target maturity and repository hygiene are unchanged. No push or dispatch.
+
+
+## Aggregate whole-project persistent restoration
+
+`project_cache_artifact` now exposes explicit aggregate encode/restore and disk
+publication/read entry points. The aggregate lookup domain has a distinct route;
+its envelope requires `FYCACHE1` / `FYCKEYS1` / `FYPRJ001`. Ordinary routes and
+wire bytes remain unchanged. Both transport and key production preserve exact
+mode, while the specialization projection now joins kind-20/21 instance IDs to
+the current Complete's original source-derived specialization membership.
+
+A whole-project hit uses the existing aggregate detached decoder and current-source
+Complete factory, then regenerates and compares every package-key preimage. It
+never substitutes cold-lowered IR or trusts an envelope hash as admission. Source,
+projection, artifact, key, link, scan and I/O ledgers remain separate and cumulative.
+Publication retains the existing rooted immutable-generation/repair policy.
+
+`TestCandidateGenericAggregateDiskCache` runs seventeen fresh processes per host:
+three-package cold/warm restoration, exact corrupt-generation repair, private
+body and consumed generic-helper edits, failed Complete preserving every cache
+byte, and exactly exhausted I/O fallback. Three more cold/warm pairs execute
+nested/deferred cleanup, partial construction and loop cleanup; the last pair
+checks ordinary whole-project restoration. Sixteen successful processes compare
+all current public interfaces and exact C packets against a fresh full-source
+cold compilation, then execute both low/optimized C consumers: 32 executions
+per host. The other process emits nothing for rejected current source.
+
+Every cold aggregate/ordinary case additionally checks opposite-family key and
+restoration refusal, distinct lookup preimages/digests, exact/one-short framing
+work limits and a structurally framed key mutation rejected at the late key join
+(phase 6 / code 1001). Both private and helper edits also directly replay the old
+valid packet against the new source; current-source admission rejects at phase 4.
+Warm processes require nonzero source/artifact/link/key work and zero producer
+lowering history. PATH is empty and no Go compiler child performs those operations.
+
+The first two harness attempts stopped during probe preparation: an explicitly
+used file helper was absent from the copied closure, then the test named a private
+reader instead of the existing public rooted reader. The final test uses
+`project_source_file.read`; neither attempt is execution evidence. The low host
+now passes in 208.69s (196.81s native subtest); optimized passes in 136.24s
+(124.10s native subtest). Both have no selected skips and together execute 64
+generated C consumers across 34 fresh processes. The independent ordinary
+complete-key Go comparison passes both Windows profiles in 141.56s: each verifies
+15 ordinary/generic package-key pairs over five source graphs, with a 39,765-byte
+ledger. Their combined optimized/regression command passes in 277.959s. Scoped
+vet, formatting and diff checks pass on the implementation inputs. The previous
+unit-cache and raw-store results remain valid on their unchanged source closures.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateGenericAggregateDiskCache$/low$'
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^(TestCandidateCompleteCacheKeysV5|TestCandidateGenericAggregateDiskCache)$/optimized$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_disk_cache_test.go
+git diff --check
+```
+
+This is the private whole-project cache API, not actual aggregate command or
+Atlas/SDK production admission. Those, Linux, full current-source/self-build,
+distribution/clean-machine and same-commit hosted acceptance remain required.
+Stable API/SDK ABI, DB, dependencies, default policy, runners, target maturity and
+repository hygiene are unchanged; no push, dispatch, release or deployment.

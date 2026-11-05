@@ -10,11 +10,15 @@ import project_identity_bytes as binary;
 import project_cache_key as ordinary;
 import project_generic_cache_key as generic;
 import project_cache_encoding as budget;
+import module_project_identified_ir as checked;
+import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
 import std::bytes as bytes;
 import std::vec as v;
 
 pub resource Record{usize owner;bytes::Buffer instance;bytes::Buffer coordinate;ordinary::Identity ordinary;generic::Identity generic;cleanup{}}
-pub resource Keys{v::Vec<Record> packages;cleanup{}}
+pub resource Keys{v::Vec<Record> packages;bool aggregates;cleanup{}}
+pub fn bool aggregates(ref Keys p){return p.aggregates;}
 struct Dependency{ordinary::Dependency ordinary;generic::Dependency generic;}
 pub fn usize count(ref Keys p){return v::len<Record>(ref p.packages);}
 pub fn ref Record at(ref Keys p,usize index){return v::at<Record>(ref p.packages,index);}
@@ -52,7 +56,7 @@ fn Result<Record,u32> package(ref workspace::Facts facts,ref core::Complete comp
     let inline_hash=switch(binary::words(interfaces::inline_hash(r),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var u8[32] inline_bytes=[0;32];i=0;while(i<32){inline_bytes[i]=bytes::view(ref inline_hash)[i];i+=1;}
     let base=ordinary::assemble(e,v::empty<bytes::Buffer>(),ordinary::Facts{.standard_library,.package=package_id,.source,.current_interface,.current_body,.inline_bodies=inline_bytes},ordinary_deps,features);
     let ordinary_key=switch(ordinary::compute(ref base,work)){case .ok(p):{p}case .err(code):{return .err(mapped(code));}};
-    let selected=switch(specializations::collect(complete,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(specializations::copy_ids(ref selected,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
+    let selected=switch(if(clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))){specializations::collect_aggregates(complete,owner,work)}else{specializations::collect(complete,owner,work)}){case .ok(p):{p}case .err(code):{return .err(code);}};let ids=switch(specializations::copy_ids(ref selected,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let source_input=generic::assemble(base,current_generic,generic_deps,ids);let generic_key=switch(generic::compute(ref source_input,work)){case .ok(p):{p}case .err(code):{return .err(mapped(code));}};
     let instance=switch(copy(workspace::instance(p),work)){case .ok(p):{p}case .err(code):{return .err(code);}};let namespace=switch(copy(workspace::coordinate(p),work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     return .ok(Record{.owner,.instance,.coordinate=namespace,.ordinary=ordinary_key,.generic=generic_key});
@@ -62,7 +66,12 @@ fn Result<Record,u32> package(ref workspace::Facts facts,ref core::Complete comp
 // specialization sets, environment strings or partial key vector are admitted.
 // The keys are compatibility facts, not artifact verification or cache hits.
 pub fn Result<Keys,u32> collect(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){
+    return collect_mode(loaded,complete,env,false,work);
+}
+pub fn Result<Keys,u32> collect_aggregates(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){return collect_mode(loaded,complete,env,true,work);}
+fn Result<Keys,u32> collect_mode(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,bool aggregates,ref mut usize work){
+    if(clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))!=aggregates){return .err(9);}
     if(!budget::charge(work,0)){return .err(10);}let facts=switch(workspace::collect(loaded,complete,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(interfaces::count(core::public_interfaces(complete))!=workspace::count(ref facts)){return .err(9);}
     let standard_library=switch(digest(environment::standard_library(env),b"fypi1-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};var v::Vec<Record> packages=v::empty<Record>();var usize owner=0;
-    while(owner<workspace::count(ref facts)){if(!budget::charge(work,1)){return .err(10);}let p=switch(package(ref facts,complete,env,standard_library,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<Record>(ref mut packages,p).is_ok){return .err(11);}owner+=1;}return .ok(Keys{.packages});
+    while(owner<workspace::count(ref facts)){if(!budget::charge(work,1)){return .err(10);}let p=switch(package(ref facts,complete,env,standard_library,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<Record>(ref mut packages,p).is_ok){return .err(11);}owner+=1;}return .ok(Keys{.packages,.aggregates});
 }
