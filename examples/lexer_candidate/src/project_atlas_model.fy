@@ -24,12 +24,21 @@ pub fn bool sorted(ref json::Tree t,usize at,ref mut usize meter){let values=swi
 pub fn usize find(ref json::Tree t,ref v::Vec<usize> rows,ref u8[] field,ref u8[] value,ref mut usize meter){var usize i=0;while(i<v::len<usize>(rows)){let at=*v::at<usize>(rows,i);let s=wire::string(t,at,field);if(!work::charge(meter,s.len+value.len+1)){return json::count(t);}if(bytes::equal(s,value)){return at;}i+=1;}return json::count(t);}
 // Declaration/function tables must first pass the partition owner's strict key
 // ordering check. Unvalidated or symbol-hash-ordered rows cannot use this lookup.
-pub fn usize key_position(ref json::Tree t,ref v::Vec<usize> rows,ref u8[] field,usize key,ref mut usize meter){
- var usize first=0;var usize last=v::len<usize>(rows);
- while(first<last){if(!work::charge(meter,256)){return v::len<usize>(rows);}let mid=first+(last-first)/2;let at=*v::at<usize>(rows,mid);let order=keys(t,wire::field(t,at,field),key,meter);
-  if(order==2){return v::len<usize>(rows);}if(order==0){return mid;}if(order<0){first=mid+1;}else{last=mid;}
- }return v::len<usize>(rows);
+fn i32 keys_between(ref json::Tree a,usize left,ref json::Tree b,usize right,ref mut usize meter){
+ let names=b"package_instance|module|kind|name";var usize start=0;
+ while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}let name=names[start..end];let x=wire::string(a,left,name);let y=wire::string(b,right,name);
+  if(!work::charge(meter,x.len+y.len+1)){return 2;}if(!bytes::equal(x,y)){return if(before(x,y)){-1}else{1};}start=end+1;
+ }return 0;
 }
+// Cross-package keys belong to different immutable JSON trees. Budget failures
+// stay errors so a caller cannot mistake an interrupted lookup for an absent row.
+pub fn Result<usize,u32> lookup_key(ref json::Tree t,ref v::Vec<usize> rows,ref u8[] field,ref json::Tree source,usize key,ref mut usize meter){
+ var usize first=0;var usize last=v::len<usize>(rows);
+ while(first<last){if(!work::charge(meter,256)){return .err(3);}let mid=first+(last-first)/2;let at=*v::at<usize>(rows,mid);let order=keys_between(t,wire::field(t,at,field),source,key,meter);
+  if(order==2){return .err(3);}if(order==0){return .ok(mid);}if(order<0){first=mid+1;}else{last=mid;}
+ }return .ok(v::len<usize>(rows));
+}
+pub fn usize key_position(ref json::Tree t,ref v::Vec<usize> rows,ref u8[] field,usize key,ref mut usize meter){return switch(lookup_key(t,rows,field,t,key,meter)){case .ok(p):{p}case .err(_):{v::len<usize>(rows)}};}
 pub fn usize find_key(ref json::Tree t,ref v::Vec<usize> rows,ref u8[] field,usize key,ref mut usize meter){let at=key_position(t,rows,field,key,meter);return if(at<v::len<usize>(rows)){*v::at<usize>(rows,at)}else{json::count(t)};}
 pub fn bool module_path(ref u8[] path,ref u8[] module_name){if(path.len<4 || !bytes::equal(path[path.len-3..],b".fy")){return false;}var usize a=0;var usize b=0;while(a<path.len-3){if(path[a]==47){if(b+1>=module_name.len || module_name[b]!=58 || module_name[b+1]!=58){return false;}b+=2;}else{if(b>=module_name.len || path[a]!=module_name[b]){return false;}b+=1;}a+=1;}return b==module_name.len && qualified(module_name);}
 pub fn bool span(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref mut usize meter){return bytes::equal(wire::string(t,at,b"package_instance"),instance) && wire::integer(t,at,b"start_byte")<=wire::integer(t,at,b"end_byte") && wire::integer(t,at,b"end_byte")<=9223372036854775807 && find(t,files,b"path",wire::string(t,at,b"source"),meter)<json::count(t);}

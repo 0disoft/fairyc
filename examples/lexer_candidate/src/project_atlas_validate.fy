@@ -9,7 +9,7 @@ import project_path as work;
 import std::bytes as bytes;
 import std::vec as v;
 
-pub resource Partition{wire::Document document;v::Vec<usize> files;v::Vec<usize> modules;v::Vec<usize> declarations;v::Vec<usize> symbols;v::Vec<usize> functions;v::Vec<usize> completeness;v::Vec<usize> specializations;cleanup{}}
+pub resource Partition{wire::Document document;v::Vec<usize> files;v::Vec<usize> modules;v::Vec<usize> declarations;v::Vec<usize> symbols;v::Vec<usize> declaration_symbols;v::Vec<usize> functions;v::Vec<usize> completeness;v::Vec<usize> specializations;cleanup{}}
 pub fn ref json::Tree tree(ref Partition p){return wire::tree(ref p.document);}
 pub fn usize header(ref Partition p){return wire::header(ref p.document);}
 pub fn usize root(ref Partition p){return wire::map(ref p.document);}
@@ -17,6 +17,8 @@ pub fn u32 version(ref Partition p){return wire::version(ref p.document);}
 pub fn usize symbol_count(ref Partition p){return v::len<usize>(ref p.symbols);}
 pub fn usize symbol(ref Partition p,usize n){return *v::at<usize>(ref p.symbols,n);}
 pub fn usize declaration(ref Partition p,usize key,ref mut usize meter){return model::find_key(tree(p),ref p.declarations,b"key",key,meter);}
+pub fn Result<usize,u32> symbol_for_key(ref Partition p,ref json::Tree source,usize key,ref mut usize meter){let at=model::lookup_key(tree(p),ref p.declarations,b"key",source,key,meter)?;return .ok(if(at<v::len<usize>(ref p.declarations)){*v::at<usize>(ref p.declaration_symbols,at)}else{json::count(tree(p))});}
+pub fn Result<usize,u32> function_for_key(ref Partition p,usize key,ref mut usize meter){let at=model::lookup_key(tree(p),ref p.functions,b"function",tree(p),key,meter)?;return .ok(if(at<v::len<usize>(ref p.functions)){*v::at<usize>(ref p.functions,at)}else{json::count(tree(p))});}
 pub fn usize file_count(ref Partition p){return v::len<usize>(ref p.files);}
 pub fn usize function_count(ref Partition p){return v::len<usize>(ref p.functions);}
 pub fn usize function(ref Partition p,usize n){return *v::at<usize>(ref p.functions,n);}
@@ -113,12 +115,13 @@ fn Result<Partition,u32> partition(wire::Document document,bool generics,ref mut
  while(i<v::len<usize>(ref files)){let r=*v::at<usize>(ref files,i);if(!equal(t,r,b"package_instance",instance) || !wire::hex(wire::string(t,r,b"digest"),b"fyfile1-sha256-",64,true) || !wire::hex(wire::string(t,r,b"line_map"),b"fylm1-sha256-",64,true) || !equal(t,r,b"kind",b"source") && !equal(t,r,b"kind",b"test") || i>0 && !model::before(wire::string(t,*v::at<usize>(ref files,i-1),b"path"),wire::string(t,r,b"path"))){return .err(7);}i+=1;}
  i=0;while(i<v::len<usize>(ref modules)){let r=*v::at<usize>(ref modules,i);if(!equal(t,r,b"package_instance",instance) || !model::module_path(wire::string(t,r,b"source"),wire::string(t,r,b"path")) || model::find(t,ref files,b"path",wire::string(t,r,b"source"),meter)==json::count(t) || i>0 && !model::before(wire::string(t,*v::at<usize>(ref modules,i-1),b"path"),wire::string(t,r,b"path"))){return .err(7);}var usize j=0;while(j<i){if(!work::charge(meter,wire::string(t,r,b"source").len+wire::string(t,*v::at<usize>(ref modules,j),b"source").len+1) || model::eq(t,r,*v::at<usize>(ref modules,j),b"source")){return .err(7);}j+=1;}i+=1;}
  i=0;while(i<v::len<usize>(ref declarations)){let r=*v::at<usize>(ref declarations,i);if(!declaration_valid(t,r,instance,ref files,ref modules,generics,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref declarations,i-1),b"key"),wire::field(t,r,b"key"),meter)>=0){return .err(7);}i+=1;}
- var seen=v::empty<bool>();i=0;while(i<v::len<usize>(ref declarations)){if(!work::charge(meter,1)){return .err(3);}if(!v::push<bool>(ref mut seen,false).is_ok){return .err(2);}i+=1;}
+ var seen=v::empty<usize>();i=0;while(i<v::len<usize>(ref declarations)){if(!work::charge(meter,1)){return .err(3);}if(!v::push<usize>(ref mut seen,0).is_ok){return .err(2);}i+=1;}
  i=0;while(i<v::len<usize>(ref ids)){let r=*v::at<usize>(ref ids,i);let position=model::key_position(t,ref declarations,b"key",wire::field(t,r,b"declaration"),meter);if(position==v::len<usize>(ref declarations)){return .err(7);}let decl=*v::at<usize>(ref declarations,position);
-  if(!symbols::matches(t,h,decl,r,meter) || *v::at<bool>(ref seen,position) || i>0 && (!model::before(wire::string(t,*v::at<usize>(ref ids,i-1),b"full"),wire::string(t,r,b"full")) || model::eq(t,r,*v::at<usize>(ref ids,i-1),b"visible"))){return .err(7);}
+  if(!symbols::matches(t,h,decl,r,meter) || *v::at<usize>(ref seen,position)!=0 || i>0 && (!model::before(wire::string(t,*v::at<usize>(ref ids,i-1),b"full"),wire::string(t,r,b"full")) || model::eq(t,r,*v::at<usize>(ref ids,i-1),b"visible"))){return .err(7);}
   // A matched visible ID is the full ID's prefix, so collisions are adjacent
-  // in the already checked full-ID order. Declarations use a distinct bitmap.
-  {let slot=v::at_mut<bool>(ref mut seen,position);*slot=true;}i+=1;
+  // in the already checked full-ID order. Retain the declaration's symbol token
+  // for later cross-package joins; zero marks an unassigned declaration.
+  {let slot=v::at_mut<usize>(ref mut seen,position);*slot=r;}i+=1;
  }
  var usize total=0;i=0;while(i<v::len<usize>(ref functions)){let r=*v::at<usize>(ref functions,i);if(!function_valid(t,h,r,instance,ref files,ref declarations,generics,false,false,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref functions,i-1),b"function"),wire::field(t,r,b"function"),meter)>=0){return .err(7);}
  total+=relation_count(t,r);if(generics && !generic::calls(t,h,r,ref declarations,ref specs,meter)){return .err(7);}
@@ -133,7 +136,7 @@ fn Result<Partition,u32> partition(wire::Document document,bool generics,ref mut
   }
  }
  let counts=wire::field(t,h,b"counts");if(wire::integer(t,counts,b"specializations")!=v::len<usize>(ref specs) || wire::integer(t,counts,b"files")!=v::len<usize>(ref files) || wire::integer(t,counts,b"modules")!=v::len<usize>(ref modules) || wire::integer(t,counts,b"symbols")!=v::len<usize>(ref ids) || wire::integer(t,counts,b"functions")!=v::len<usize>(ref functions) || wire::integer(t,counts,b"relations")!=total || wire::integer(t,counts,b"completeness")!=v::len<usize>(ref complete) || !completeness_valid(t,h,ref complete,meter)){return .err(7);}
- return .ok(Partition{.document,.files,.modules,.declarations,.symbols=ids,.functions,.completeness=complete,.specializations=specs});
+ return .ok(Partition{.document,.files,.modules,.declarations,.symbols=ids,.declaration_symbols=seen,.functions,.completeness=complete,.specializations=specs});
 }
 
 fn usize relation_count(ref json::Tree t,usize body){

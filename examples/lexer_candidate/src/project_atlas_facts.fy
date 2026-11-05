@@ -43,7 +43,14 @@ fn Result<bytes::Buffer,u32> modules_sorted(ref graph::Graph g,usize owner,ref m
  }discard w::raw(ref mut out,b"]",meter)?;return .ok(out);
 }
 pub fn Result<Facts,u32> collect(ref graph::Graph g,ref locks::Document l,ref coordinates::Coordinates table,ref interfaces::Records checked,ref ir::Program program,ref u8[] compiler,usize owner,ref mut usize meter){
- let lock=lock_node(l,graph::node_id(g,owner),meter);if(lock==locks::package_count(l)){return .err(9);}var usize record=0;while(record<interfaces::count(checked) && interfaces::owner(interfaces::at(checked,record))!=owner){if(!work::charge(meter,1)){return .err(3);}record+=1;}if(record==interfaces::count(checked)){return .err(9);}let retained=interfaces::at(checked,record);let generic_hash=generic::hash(ir::state_layouts(program),owner,interfaces::descriptor(retained),interfaces::templates(retained),meter)?;
+ let lock=lock_node(l,graph::node_id(g,owner),meter);if(lock==locks::package_count(l)){return .err(9);}var usize record=0;while(record<interfaces::count(checked) && interfaces::owner(interfaces::at(checked,record))!=owner){if(!work::charge(meter,1)){return .err(3);}record+=1;}if(record==interfaces::count(checked)){return .err(9);}let retained=interfaces::at(checked,record);
+ // Generic hashing owns a 1 MiB sub-operation allowance. The enclosing project
+ // has a 16 MiB ledger; prior source work must not consume the hash's allowance.
+ // Charge the actual operation cost back even when the hash itself rejects.
+ var usize hash_work=0;let generic_hash=switch(generic::hash(ir::state_layouts(program),owner,interfaces::descriptor(retained),interfaces::templates(retained),ref mut hash_work)){
+  case .ok(p):{if(!work::charge(meter,hash_work)){return .err(3);}p}
+  case .err(code):{if(!work::charge(meter,hash_work)){return .err(3);}return .err(if(code==10){3}else if(code==11){2}else{7});}
+ };
  var bytes::Buffer out=bytes::empty();discard w::raw(ref mut out,b"{",meter)?;
  let names=b"compiler_build|interface_hash|generic_interface_hash|language|package_uid|package_instance|package_coordinate|package_source|package_source_kind|runtime_abi";var usize start=0;var usize field=0;
  while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}let name=names[start..end];if(field>0){discard w::raw(ref mut out,b",",meter)?;}discard w::pair(ref mut out,name,if(field==0){compiler}else if(field==1){interfaces::ordinary_hash(retained)}else if(field==2){bytes::view(ref generic_hash)}else if(field==3){locks::header(l,3)}else if(field==4){locks::package_field(l,lock,2)}else if(field==5){graph::node_id(g,owner)}else if(field==6){coordinates::coordinate_text(table,owner)}else if(field==7){locks::package_field(l,lock,8)}else if(field==8){locks::package_field(l,lock,3)}else{locks::package_field(l,lock,6)},meter)?;start=end+1;field+=1;}

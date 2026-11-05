@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Core SDK Atlas source production/current-admission/join APIs now pass Windows
+  low/optimized in 318.186s, with exact Go declarations, IDs, interfaces and calls
+  across all three packages and ten fresh native processes. The hash allowance,
+  repeated identity-header parsing and cross-package join lookup prerequisites
+  are fixed. Final lookup/invalid-map/generic-join/impact regressions pass in
+  272.804s. This API proof uses explicit separate bounded projection and admission
+  ledgers; actual SDK command ledger integration/dispatch remains open, as do Vec
+  production, SDK aggregate combinations, Linux and all final acceptance gates.
+  See the Windows Atlas SDK receipt for failures and the exact acceptance scope.
+
 - Canonical Atlas declaration/function lookup now uses validated sorted tables,
   and symbol ownership uses a bounded bitmap plus adjacent validated ID prefixes.
   Windows low/optimized ordinary/generic invalid-map and 0/1/2/257-row lookup
