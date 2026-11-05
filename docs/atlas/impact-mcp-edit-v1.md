@@ -45,15 +45,18 @@ reader, identity checks, join, traversal and output. No source bodies or host pa
 are included, and neither an exact-current map nor a complete traversal proves a
 change safe.
 
-The complete semantic/current-source reader still rejects generic declarations
-and specialization records; it does not silently discard them. The v3 transport
-reader now preserves concrete function/aggregate/cleanup records, type arguments
-and specialization call IDs, while v1 refuses generic fields and v2 remains
-unsupported. Transport success does not grant semantic admission. Its common
-binder/identity port now validates generic
-function/struct/resource headers, nested positional type references and exact
-SymbolId arity separately; this is not complete generic-map or CLI admission.
-See [the declaration-identity receipt](../ops/windows-candidate-atlas-generics-20261105.md).
+The ordinary semantic/current-source reader still rejects generic declarations
+and specialization records; it never silently discards them. The explicit
+`project_atlas_validate::validate_generics` v3 entry separately checks declaration
+binders/identities, canonical implementation IDs, local ownership, scalar argument
+bindings, function/aggregate/cleanup compatibility, recursive aggregate substitution,
+contained cleanup spans, exact local call implementations and conservative generic
+completeness. It retains separate specialization records and counts all body
+relations. Cross-package implementation existence still belongs to a complete
+workspace join. Semantic consistency is not current-source/compiler authorship.
+V1 refuses generic fields and v2 remains unsupported. Source production, current
+admission and command integration remain separate from this explicit reader.
+See [the generic receipt](../ops/windows-candidate-atlas-generics-20261105.md).
 The Fairy CLI now dispatches `experimental atlas-impact`
 with the selectors and explicit limits above. Both with and without `--locked`,
 it freshly resolves the workspace and requires an existing current lock, completes

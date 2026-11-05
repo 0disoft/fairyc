@@ -2,12 +2,14 @@ module project_atlas_validate;
 import project_atlas_wire as wire;
 import project_atlas_model as model;
 import project_atlas_symbols as symbols;
+import project_atlas_binders as binders;
+import project_atlas_specializations as generic;
 import project_json_tree as json;
 import project_path as work;
 import std::bytes as bytes;
 import std::vec as v;
 
-pub resource Partition{wire::Document document;v::Vec<usize> files;v::Vec<usize> modules;v::Vec<usize> declarations;v::Vec<usize> symbols;v::Vec<usize> functions;v::Vec<usize> completeness;cleanup{}}
+pub resource Partition{wire::Document document;v::Vec<usize> files;v::Vec<usize> modules;v::Vec<usize> declarations;v::Vec<usize> symbols;v::Vec<usize> functions;v::Vec<usize> completeness;v::Vec<usize> specializations;cleanup{}}
 pub fn ref json::Tree tree(ref Partition p){return wire::tree(ref p.document);}
 pub fn usize header(ref Partition p){return wire::header(ref p.document);}
 pub fn usize root(ref Partition p){return wire::map(ref p.document);}
@@ -20,6 +22,8 @@ pub fn usize function_count(ref Partition p){return v::len<usize>(ref p.function
 pub fn usize function(ref Partition p,usize n){return *v::at<usize>(ref p.functions,n);}
 pub fn usize completeness_count(ref Partition p){return v::len<usize>(ref p.completeness);}
 pub fn usize completeness(ref Partition p,usize n){return *v::at<usize>(ref p.completeness,n);}
+pub fn usize specialization_count(ref Partition p){return v::len<usize>(ref p.specializations);}
+pub fn usize specialization(ref Partition p,usize n){return *v::at<usize>(ref p.specializations,n);}
 fn bool equal(ref json::Tree t,usize at,ref u8[] name,ref u8[] expected){return bytes::equal(wire::string(t,at,name),expected);}
 fn bool header_valid(ref json::Tree t,usize h,u32 version,ref mut usize meter){
  if(!equal(t,h,b"snapshot_model",b"fairyc.semantic-snapshot/v0")){return false;}
@@ -51,23 +55,25 @@ fn bool header_valid(ref json::Tree t,usize h,u32 version,ref mut usize meter){
   var usize j=0;while(j<i){let prior=*v::at<usize>(ref refs,j);if(equal(t,prior,b"coordinate",coordinate) && !model::eq(t,prior,r,b"uid")){return false;}j+=1;}i+=1;
  }return self;
 }
-fn bool fields_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref mut usize meter){let rows=switch(model::rows(t,at,4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref rows)){let r=*v::at<usize>(ref rows,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::type(t,wire::field(t,r,b"type"),0,meter) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter)){return false;}var usize j=0;while(j<i){if(!work::charge(meter,128) || model::eq(t,r,*v::at<usize>(ref rows,j),b"name")){return false;}j+=1;}i+=1;}return true;}
-fn bool declaration_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref v::Vec<usize> modules,ref mut usize meter){
- // Generic symbol/type support is separate from complete generic-map admission.
- if(wire::field(t,at,b"type_parameters")<json::count(t)){return false;}
- let key=wire::field(t,at,b"key");if(!equal(t,key,b"package_instance",instance) || !model::kind(wire::string(t,key,b"kind")) || !model::identifier(wire::string(t,key,b"name")) || model::find(t,modules,b"path",wire::string(t,key,b"module"),meter)==json::count(t) || !equal(t,at,b"provenance",b"compiler-declared") || !model::span(t,wire::field(t,at,b"span"),instance,files,meter) || !model::type(t,wire::field(t,at,b"type"),0,meter)){return false;}
- let owner=wire::field(t,at,b"owner");if(json::token(t,owner).kind!=11 && !model::type(t,owner,0,meter)){return false;}
- if(!model::sorted(t,wire::field(t,at,b"effects"),meter) || !model::sorted(t,wire::field(t,at,b"drop_effects"),meter) || !fields_valid(t,wire::field(t,at,b"fields"),instance,files,meter)){return false;}
- let params=switch(model::rows(t,wire::field(t,at,b"parameters"),4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref params)){let r=*v::at<usize>(ref params,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::type(t,wire::field(t,r,b"type"),0,meter) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter)){return false;}i+=1;}
- let variants=switch(model::rows(t,wire::field(t,at,b"variants"),4096,meter)){case .ok(p):{p}case .err(_):{return false;}};i=0;while(i<v::len<usize>(ref variants)){let r=*v::at<usize>(ref variants,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter) || !fields_valid(t,wire::field(t,r,b"fields"),instance,files,meter)){return false;}var usize j=0;while(j<i){if(!work::charge(meter,128) || model::eq(t,r,*v::at<usize>(ref variants,j),b"name")){return false;}j+=1;}i+=1;}return true;
+fn bool fields_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,usize arity,bool generics,ref mut usize meter){let rows=switch(model::rows(t,at,4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref rows)){let r=*v::at<usize>(ref rows,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::bound_type(t,wire::field(t,r,b"type"),0,arity,generics,meter) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter)){return false;}var usize j=0;while(j<i){if(!work::charge(meter,128) || model::eq(t,r,*v::at<usize>(ref rows,j),b"name")){return false;}j+=1;}i+=1;}return true;}
+fn bool declaration_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref v::Vec<usize> modules,bool generics,ref mut usize meter){
+ // Generic declarations enter only through the explicit v3 semantic entry.
+ if(!generics && wire::field(t,at,b"type_parameters")<json::count(t)){return false;}
+ let usize arity=if(generics){switch(binders::validate(t,at,meter)){case .ok(p):{p}case .err(_):{return false;}}}else{0};
+ let key=wire::field(t,at,b"key");if(!equal(t,key,b"package_instance",instance) || !model::kind(wire::string(t,key,b"kind")) || !model::identifier(wire::string(t,key,b"name")) || model::find(t,modules,b"path",wire::string(t,key,b"module"),meter)==json::count(t) || !equal(t,at,b"provenance",b"compiler-declared") || !model::span(t,wire::field(t,at,b"span"),instance,files,meter) || !model::bound_type(t,wire::field(t,at,b"type"),0,arity,generics,meter)){return false;}
+ let owner=wire::field(t,at,b"owner");if(json::token(t,owner).kind!=11 && !model::bound_type(t,owner,0,0,generics,meter)){return false;}
+ if(!model::sorted(t,wire::field(t,at,b"effects"),meter) || !model::sorted(t,wire::field(t,at,b"drop_effects"),meter) || !fields_valid(t,wire::field(t,at,b"fields"),instance,files,arity,generics,meter)){return false;}
+ let params=switch(model::rows(t,wire::field(t,at,b"parameters"),4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref params)){let r=*v::at<usize>(ref params,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::bound_type(t,wire::field(t,r,b"type"),0,arity,generics,meter) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter)){return false;}i+=1;}
+ let variants=switch(model::rows(t,wire::field(t,at,b"variants"),4096,meter)){case .ok(p):{p}case .err(_):{return false;}};i=0;while(i<v::len<usize>(ref variants)){let r=*v::at<usize>(ref variants,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter) || !fields_valid(t,wire::field(t,r,b"fields"),instance,files,arity,generics,meter)){return false;}var usize j=0;while(j<i){if(!work::charge(meter,128) || model::eq(t,r,*v::at<usize>(ref variants,j),b"name")){return false;}j+=1;}i+=1;}return true;
 }
 fn bool spans_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref mut usize meter){let rows=switch(model::rows(t,at,4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref rows)){let r=*v::at<usize>(ref rows,i);if(!model::span(t,r,instance,files,meter) || i>0 && model::spans(t,*v::at<usize>(ref rows,i-1),r,meter)>=0){return false;}i+=1;}return true;}
-fn bool function_valid(ref json::Tree t,usize h,usize at,ref u8[] instance,ref v::Vec<usize> files,ref v::Vec<usize> declarations,ref mut usize meter){
- let key=wire::field(t,at,b"function");if(!equal(t,key,b"package_instance",instance) || !equal(t,key,b"kind",b"function") || model::find_key(t,declarations,b"key",key,meter)==json::count(t) || !equal(t,at,b"provenance",b"compiler-observed") || !model::sorted(t,wire::field(t,at,b"trap_categories"),meter)){return false;}
+fn bool function_valid(ref json::Tree t,usize h,usize at,ref u8[] instance,ref v::Vec<usize> files,ref v::Vec<usize> declarations,bool generics,bool specialized,bool resource_body,ref mut usize meter){
+ let key=wire::field(t,at,b"function");if(!equal(t,key,b"package_instance",instance) || !equal(t,key,b"kind",if(resource_body){b"resource"}else{b"function"}) || model::find_key(t,declarations,b"key",key,meter)==json::count(t) || !equal(t,at,b"provenance",b"compiler-observed") || !model::sorted(t,wire::field(t,at,b"trap_categories"),meter)){return false;}
+ let decl=model::find_key(t,declarations,b"key",key,meter);if(!specialized && wire::field(t,decl,b"type_parameters")<json::count(t)){return false;}
  let refs=switch(model::rows(t,wire::field(t,h,b"package_references"),33,meter)){case .ok(p):{p}case .err(_):{return false;}};
  let calls=switch(model::rows(t,wire::field(t,at,b"calls"),65536,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;
- while(i<v::len<usize>(ref calls)){let call=*v::at<usize>(ref calls,i);if(wire::field(t,call,b"specialization")<json::count(t)){return false;}let target=wire::field(t,call,b"target");let span=wire::field(t,call,b"span");if(!model::span(t,span,instance,files,meter) || !wire::hex(wire::string(t,target,b"package_instance"),b"fypi1-sha256-",64,false) || !model::qualified(wire::string(t,target,b"module")) || !model::identifier(wire::string(t,target,b"name")) || !model::kind(wire::string(t,target,b"kind")) || model::find(t,ref refs,b"instance",wire::string(t,target,b"package_instance"),meter)==json::count(t)){return false;}
- if(i>0){let previous=*v::at<usize>(ref calls,i-1);let order=model::spans(t,wire::field(t,previous,b"span"),span,meter);if(order>0 || order==0 && model::keys(t,wire::field(t,previous,b"target"),target,meter)>=0){return false;}}
+ while(i<v::len<usize>(ref calls)){let call=*v::at<usize>(ref calls,i);if(!generics && wire::field(t,call,b"specialization")<json::count(t)){return false;}let target=wire::field(t,call,b"target");let span=wire::field(t,call,b"span");if(!model::span(t,span,instance,files,meter) || !wire::hex(wire::string(t,target,b"package_instance"),b"fypi1-sha256-",64,false) || !model::qualified(wire::string(t,target,b"module")) || !model::identifier(wire::string(t,target,b"name")) || !model::kind(wire::string(t,target,b"kind")) || model::find(t,ref refs,b"instance",wire::string(t,target,b"package_instance"),meter)==json::count(t)){return false;}
+ if(i>0){let previous=*v::at<usize>(ref calls,i-1);let order=model::spans(t,wire::field(t,previous,b"span"),span,meter);let keys=model::keys(t,wire::field(t,previous,b"target"),target,meter);if(order>0 || order==0 && (keys>0 || keys==0 && !model::before(wire::string(t,previous,b"specialization"),wire::string(t,call,b"specialization")))){return false;}}
  if(equal(t,call,b"target_kind",b"resolved")){if(!equal(t,call,b"certainty",b"exact") || wire::string(t,call,b"abi").len!=0 || wire::string(t,call,b"link_name").len!=0 || !equal(t,target,b"kind",b"function")){return false;}if(equal(t,target,b"package_instance",instance) && model::find_key(t,declarations,b"key",target,meter)==json::count(t)){return false;}}
  else if(equal(t,call,b"target_kind",b"external")){if(!equal(t,call,b"certainty",b"opaque") || !model::text(wire::string(t,call,b"abi")) || !model::text(wire::string(t,call,b"link_name")) || !equal(t,target,b"package_instance",instance) || !equal(t,target,b"kind",b"foreign-function") || model::find_key(t,declarations,b"key",target,meter)==json::count(t)){return false;}}
  else{return false;}i+=1;
@@ -92,28 +98,38 @@ fn bool completeness_valid(ref json::Tree t,usize h,ref v::Vec<usize> records,re
  i=0;while(i<v::len<usize>(ref expected)){let value=json::value(t,*v::at<usize>(ref expected,i));var usize matches=0;var usize j=0;while(j<v::len<bytes::Buffer>(ref omissions)){let actual=bytes::view(v::at<bytes::Buffer>(ref omissions,j));if(!work::charge(meter,value.len+actual.len+1)){return false;}if(bytes::equal(value,actual)){matches+=1;}j+=1;}if(matches!=1){return false;}i+=1;}return true;
 }
 // Semantically checked partition; current-source expectations are a separate gate.
-pub fn Result<Partition,u32> validate(wire::Document document,ref mut usize meter){
+pub fn Result<Partition,u32> validate(wire::Document document,ref mut usize meter){return partition(document,false,meter);}
+// Explicit v3 semantic reader. This does not create a current-source Ready or
+// widen the ordinary query/command path before generic production and joins.
+pub fn Result<Partition,u32> validate_generics(wire::Document document,ref mut usize meter){if(wire::version(ref document)!=3){return .err(7);}return partition(document,true,meter);}
+fn Result<Partition,u32> partition(wire::Document document,bool generics,ref mut usize meter){
  let t=wire::tree(ref document);let h=wire::header(ref document);let map=wire::map(ref document);if(!header_valid(t,h,wire::version(ref document),meter)){return .err(7);}
- if(wire::field(t,map,b"specializations")<json::count(t) || wire::field(t,wire::field(t,h,b"counts"),b"specializations")<json::count(t)){return .err(7);}
+ if(!generics && (wire::field(t,map,b"specializations")<json::count(t) || wire::field(t,wire::field(t,h,b"counts"),b"specializations")<json::count(t))){return .err(7);}
+ let specs=if(wire::field(t,map,b"specializations")<json::count(t)){model::rows(t,wire::field(t,map,b"specializations"),4096,meter)?}else{v::empty<usize>()};
  let files=model::rows(t,wire::field(t,map,b"files"),4096,meter)?;let modules=model::rows(t,wire::field(t,map,b"modules"),4096,meter)?;let declarations=model::rows(t,wire::field(t,map,b"declarations"),4096,meter)?;let ids=model::rows(t,wire::field(t,map,b"symbols"),4096,meter)?;let functions=model::rows(t,wire::field(t,map,b"functions"),4096,meter)?;let complete=model::rows(t,wire::field(t,map,b"completeness"),4096,meter)?;
  if(v::len<usize>(ref files)==0 || v::len<usize>(ref files)!=v::len<usize>(ref modules) || v::len<usize>(ref declarations)==0 || v::len<usize>(ref ids)!=v::len<usize>(ref declarations)){return .err(7);}
  var usize token=0;while(token<json::count(t)){if(json::value(t,token).len>4096){return .err(3);}token+=1;}
  let instance=wire::string(t,h,b"package_instance");var usize i=0;
  while(i<v::len<usize>(ref files)){let r=*v::at<usize>(ref files,i);if(!equal(t,r,b"package_instance",instance) || !wire::hex(wire::string(t,r,b"digest"),b"fyfile1-sha256-",64,true) || !wire::hex(wire::string(t,r,b"line_map"),b"fylm1-sha256-",64,true) || !equal(t,r,b"kind",b"source") && !equal(t,r,b"kind",b"test") || i>0 && !model::before(wire::string(t,*v::at<usize>(ref files,i-1),b"path"),wire::string(t,r,b"path"))){return .err(7);}i+=1;}
  i=0;while(i<v::len<usize>(ref modules)){let r=*v::at<usize>(ref modules,i);if(!equal(t,r,b"package_instance",instance) || !model::module_path(wire::string(t,r,b"source"),wire::string(t,r,b"path")) || model::find(t,ref files,b"path",wire::string(t,r,b"source"),meter)==json::count(t) || i>0 && !model::before(wire::string(t,*v::at<usize>(ref modules,i-1),b"path"),wire::string(t,r,b"path"))){return .err(7);}var usize j=0;while(j<i){if(!work::charge(meter,wire::string(t,r,b"source").len+wire::string(t,*v::at<usize>(ref modules,j),b"source").len+1) || model::eq(t,r,*v::at<usize>(ref modules,j),b"source")){return .err(7);}j+=1;}i+=1;}
- i=0;while(i<v::len<usize>(ref declarations)){let r=*v::at<usize>(ref declarations,i);if(!declaration_valid(t,r,instance,ref files,ref modules,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref declarations,i-1),b"key"),wire::field(t,r,b"key"),meter)>=0){return .err(7);}i+=1;}
+ i=0;while(i<v::len<usize>(ref declarations)){let r=*v::at<usize>(ref declarations,i);if(!declaration_valid(t,r,instance,ref files,ref modules,generics,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref declarations,i-1),b"key"),wire::field(t,r,b"key"),meter)>=0){return .err(7);}i+=1;}
  i=0;while(i<v::len<usize>(ref ids)){let r=*v::at<usize>(ref ids,i);let decl=model::find_key(t,ref declarations,b"key",wire::field(t,r,b"declaration"),meter);if(decl==json::count(t) || !symbols::matches(t,h,decl,r,meter) || i>0 && !model::before(wire::string(t,*v::at<usize>(ref ids,i-1),b"full"),wire::string(t,r,b"full"))){return .err(7);}var usize j=0;while(j<i){let old=*v::at<usize>(ref ids,j);if(!work::charge(meter,256) || model::eq(t,r,old,b"visible") || model::keys(t,wire::field(t,r,b"declaration"),wire::field(t,old,b"declaration"),meter)==0){return .err(7);}j+=1;}i+=1;}
- var usize relations=0;i=0;while(i<v::len<usize>(ref functions)){let r=*v::at<usize>(ref functions,i);if(!function_valid(t,h,r,instance,ref files,ref declarations,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref functions,i-1),b"function"),wire::field(t,r,b"function"),meter)>=0){return .err(7);}
- relations+=wire::count(t,wire::field(t,r,b"calls"));
- relations+=wire::count(t,wire::field(t,r,b"trap_categories"));
- relations+=wire::count(t,wire::field(t,r,b"unsafe_sites"));
- relations+=wire::count(t,wire::field(t,r,b"move_sites"));
- relations+=wire::count(t,wire::field(t,r,b"drop_sites"));
- relations+=wire::count(t,wire::field(t,r,b"allocation_sites"));
- relations+=wire::count(t,wire::field(t,r,b"return_error_sites"));
- relations+=wire::count(t,wire::field(t,r,b"borrows"));
+ var usize total=0;i=0;while(i<v::len<usize>(ref functions)){let r=*v::at<usize>(ref functions,i);if(!function_valid(t,h,r,instance,ref files,ref declarations,generics,false,false,meter) || i>0 && model::keys(t,wire::field(t,*v::at<usize>(ref functions,i-1),b"function"),wire::field(t,r,b"function"),meter)>=0){return .err(7);}
+ total+=relation_count(t,r);if(generics && !generic::calls(t,h,r,ref declarations,ref specs,meter)){return .err(7);}
  i+=1;}
- i=0;while(i<v::len<usize>(ref declarations)){let r=*v::at<usize>(ref declarations,i);let key=wire::field(t,r,b"key");if(equal(t,key,b"kind",b"function") && model::find_key(t,ref functions,b"function",key,meter)==json::count(t)){return .err(7);}i+=1;}
- let counts=wire::field(t,h,b"counts");if(wire::integer(t,counts,b"files")!=v::len<usize>(ref files) || wire::integer(t,counts,b"modules")!=v::len<usize>(ref modules) || wire::integer(t,counts,b"symbols")!=v::len<usize>(ref ids) || wire::integer(t,counts,b"functions")!=v::len<usize>(ref functions) || wire::integer(t,counts,b"relations")!=relations || wire::integer(t,counts,b"completeness")!=v::len<usize>(ref complete) || !completeness_valid(t,h,ref complete,meter)){return .err(7);}
- return .ok(Partition{.document,.files,.modules,.declarations,.symbols=ids,.functions,.completeness=complete});
+ i=0;while(i<v::len<usize>(ref declarations)){let r=*v::at<usize>(ref declarations,i);let key=wire::field(t,r,b"key");if(equal(t,key,b"kind",b"function") && wire::count(t,wire::field(t,r,b"type_parameters"))==0 && model::find_key(t,ref functions,b"function",key,meter)==json::count(t)){return .err(7);}i+=1;}
+ if(generics){
+  if(!generic::records(t,h,ref declarations,ref specs,ref complete,meter)){return .err(7);}i=0;
+  while(i<v::len<usize>(ref specs)){let spec=*v::at<usize>(ref specs,i);let names=b"function|cleanup";var usize start=0;
+   while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}let body=wire::field(t,spec,names[start..end]);
+    if(body<json::count(t)){if(!function_valid(t,h,body,instance,ref files,ref declarations,true,true,start>0,meter) || !generic::calls(t,h,body,ref declarations,ref specs,meter)){return .err(7);}total+=relation_count(t,body);}start=end+1;
+   }i+=1;
+  }
+ }
+ let counts=wire::field(t,h,b"counts");if(wire::integer(t,counts,b"specializations")!=v::len<usize>(ref specs) || wire::integer(t,counts,b"files")!=v::len<usize>(ref files) || wire::integer(t,counts,b"modules")!=v::len<usize>(ref modules) || wire::integer(t,counts,b"symbols")!=v::len<usize>(ref ids) || wire::integer(t,counts,b"functions")!=v::len<usize>(ref functions) || wire::integer(t,counts,b"relations")!=total || wire::integer(t,counts,b"completeness")!=v::len<usize>(ref complete) || !completeness_valid(t,h,ref complete,meter)){return .err(7);}
+ return .ok(Partition{.document,.files,.modules,.declarations,.symbols=ids,.functions,.completeness=complete,.specializations=specs});
+}
+
+fn usize relation_count(ref json::Tree t,usize body){
+ return wire::count(t,wire::field(t,body,b"calls"))+wire::count(t,wire::field(t,body,b"trap_categories"))+wire::count(t,wire::field(t,body,b"unsafe_sites"))+wire::count(t,wire::field(t,body,b"move_sites"))+wire::count(t,wire::field(t,body,b"drop_sites"))+wire::count(t,wire::field(t,body,b"allocation_sites"))+wire::count(t,wire::field(t,body,b"return_error_sites"))+wire::count(t,wire::field(t,body,b"borrows"));
 }

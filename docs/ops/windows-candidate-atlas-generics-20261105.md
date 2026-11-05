@@ -97,3 +97,53 @@ Generic declaration/source production, semantic specialization substitution and
 ownership, full joins, SDK/CLI acceptance and final acceptance remain open.
 No new schema, stable public API/SDK ABI, DB, dependency, hygiene or runner change;
 no push, release or deployment. Native Linux remains deferred.
+
+## Explicit v3 semantic specialization reader
+
+`project_atlas_validate::validate_generics` is now the explicit v3 semantic entry.
+The ordinary `validate`/current-source path remains closed to generic declarations
+and specialization records. The new entry returns a partition that retains its
+specialization table, without creating current-source authority or widening CLI
+production. V1/v2 are not guessed or upgraded.
+
+The shared declaration/binder and SymbolId checks apply before implementation
+checks. `project_atlas_specializations` enforces canonical ordered `g0_` IDs,
+package-local template ownership, exact arity, the admitted scalar argument set,
+unique declaration/argument bindings and compatible function/aggregate/resource
+cleanup bodies. Aggregate headers match source metadata and recursive type
+substitution; fields contain their original spans and remain inside the original
+declaration. Cleanup observations remain inside the source resource. Exact local
+calls require the matching implementation; cross-package existence still belongs
+to the complete workspace join. Ordinary executable summaries cannot stand in for
+template bodies. Relation counts include concrete function and cleanup facts.
+
+Template-body coverage stays unavailable; specialization coverage stays exact.
+Coverage counts may exceed the local inventory because they describe the source
+snapshot, but cannot undercount it. IDs have format/ownership checks here, not
+compiler-provenance authentication; an independent current-source reader/producer
+must establish those facts. No checksum is treated as authorship.
+
+Executed and passed on Windows MSVC low/optimized:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m ./internal/cli -run '^TestCandidateAtlasGenericValidation$'
+go test -mod=readonly -count=1 -timeout 6m ./internal/cli -run '^TestCandidateAtlas(Binders|GenericWire|Wire|Validation|Current|Impact)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_atlas_generic_validate_test.go
+git diff --check
+```
+
+The final generic semantic suite passes (21.062s); unchanged binder/wire/ordinary
+validation/current-source/impact regressions pass (119.684s). Used/unused Go v3
+maps, admitted scalar choices, containing field-span and snapshot-wide ledger
+boundaries pass. Resealed ID, binding, arity, ownership, summary, nested field,
+cleanup, local call, counts and coverage contradictions reject, as does an
+exhausted shared semantic work budget. The Go codec independently determines
+acceptance before each native comparison. An initial probe needed a non-keyword
+local name and immediate handling of a Result; those failed attempts are not
+passing evidence.
+
+Full current-source generic joins/production, SDK/full CLI acceptance and final
+self-build/distribution/hosted gates remain open. Native Linux remains batched at
+the user's request. Stable public API/SDK ABI, DB, dependencies, repository hygiene
+and runner configuration are unchanged. No push, release or deployment.

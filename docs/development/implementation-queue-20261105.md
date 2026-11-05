@@ -137,3 +137,12 @@ authorized by this queue.
   v1 generic fields and byte/work overruns reject. Generic semantic admission
   remains explicitly closed until implementation ownership, substitutions,
   coverage and join checks are connected; no broad queue item closes here.
+
+- Explicit v3 semantic generic admission now retains concrete tables and checks
+  implementation identity/ownership/arity/scalar bindings, source aggregate
+  substitution, contained resource-cleanup facts, exact local implementation
+  calls, relation counts and conservative completeness. Windows low/optimized
+  Go-oracle semantic tests pass (21.062s); existing binder/wire/current/impact
+  regressions pass (119.684s). The ordinary/current reader remains closed until
+  complete joins and actual source production are connected. SDK/CLI and final
+  cross-platform gates remain open; see the generic receipt.
