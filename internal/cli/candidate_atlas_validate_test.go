@@ -27,6 +27,23 @@ func TestCandidateAtlasValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 			cases = append(cases, fixture{fmt.Sprintf("%s-%d", schema, i), data, true})
+			if bytes.Contains(data, []byte(`"calls":[{`)) {
+				changed := atlasRechecksum(t, bytes.Replace(data, []byte(`"calls":[{`), []byte(`"calls":[{"specialization":"g0_`+strings.Repeat("a", 64)+`",`), 1))
+				decoded, err := decode(changed, 4<<20)
+				if err == nil {
+					if schema != atlasmap.LogicalSchemaV3 {
+						t.Fatal("Go legacy codec admitted a specialization call")
+					}
+					// V3 resolves cross-package implementations at the complete
+					// workspace join, rather than guessing from one partition.
+					joined := append([]atlasmap.Partition{}, p.partitions...)
+					joined[i] = decoded
+					if _, err := atlasmap.NewWorkspaceCallIndexV3(joined, p.expectations, atlasmap.WorkspaceCallBudget{MaxPackages: 8, MaxCalls: 128}); err == nil {
+						t.Fatal("Go admitted an orphan specialization call")
+					}
+				}
+				cases = append(cases, fixture{"unsupported-specialization", changed, false})
+			}
 			if i != 0 {
 				continue
 			}
@@ -91,7 +108,11 @@ func TestCandidateAtlasValidation(t *testing.T) {
 				if (code == 0) != c.ok {
 					t.Fatalf("want accepted=%v got %d %q", c.ok, code, out)
 				}
-				if !c.ok && out != "7" {
+				want := "7"
+				if (c.name == "unsupported-generic" || c.name == "unsupported-specialization") && bytes.Contains(c.data, []byte(`fairyc.fymap-logical/v1`)) {
+					want = "5" // V1 refuses generic fields at the transport boundary.
+				}
+				if !c.ok && out != want {
 					t.Fatalf("semantic mutation did not reach semantic checks: %q", out)
 				}
 			})

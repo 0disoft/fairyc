@@ -130,3 +130,10 @@ authorized by this queue.
   regressions pass; this is a prerequisite, not complete generic-map/SDK source
   production or CLI acceptance. See
   `docs/ops/windows-candidate-atlas-generics-20261105.md`.
+- The v3 transport reader now preserves separate function, aggregate and resource
+  cleanup specialization records, ordered type arguments and concrete call IDs.
+  Used/unused Go v3 maps pass exact-byte native replay in both Windows profiles
+  (9.816s), while unknown/omitted/duplicate bodies, noncanonical optional fields,
+  v1 generic fields and byte/work overruns reject. Generic semantic admission
+  remains explicitly closed until implementation ownership, substitutions,
+  coverage and join checks are connected; no broad queue item closes here.

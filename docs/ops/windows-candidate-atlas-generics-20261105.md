@@ -54,3 +54,46 @@ current-source production, SDK and full CLI acceptance, consecutive self-build
 equality, clean-machine distribution and same-commit hosted CI remain open.
 Stable public API/SDK ABI, DB, dependencies, repository hygiene and runner
 configuration are unchanged. No push, release or deployment.
+
+## Separate v3 specialization transport
+
+The transport reader now shapes v3 function, aggregate and resource-cleanup
+specializations, including recursive type arguments, exact call specialization
+IDs and the optional specialization count. Member order/types remain strict;
+unknown, missing, duplicate-body and null-body forms reject. Optional empty
+arrays, empty strings and zero specialization counts reject instead of accepting
+a noncanonical encoding. V1 refuses generic fields; v2 remains unsupported.
+
+This is not a semantic promotion. The existing complete validator explicitly
+refuses specialization records/counts and specialization calls, as well as
+generic declarations, until those independent checks are implemented. A
+well-shaped checksummed map with a false implementation ID can pass transport,
+but cannot be admitted. Current-source expectations remain independently owned.
+
+`TestCandidateAtlasGenericWire` passes in Windows MSVC low/optimized (9.816s):
+used/unused two-package Go maps and the controlled semantic contradiction retain
+every original byte. The used fixture requires function implementations, nested
+aggregate implementations, empty cleanup, two concrete resource cleanups, borrow
+facts and helper specialization call IDs; fixture assertions require empty
+cleanup and exactly two executable cleanup records. Nine structural/canonical/version
+mutations plus byte/work overruns reject. All original maps and mutations are
+checked against the Go codec before native replay. Each transported generic
+document is also submitted to the complete reader and must be refused there.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateAtlasGenericWire$'
+go test -mod=readonly -count=1 -timeout 6m ./internal/cli -run '^TestCandidateAtlas(Wire|Validation|Current)$'
+```
+
+The legacy Wire/Validation/Current group passes in both profiles (27.207s).
+The new orphan-call vectors compare v1 rejection at decoding and v3 rejection
+at complete-workspace joining: a single v3 package does not guess another
+package's implementations. Native ordinary admission refuses either form while
+generic joins remain unimplemented. Early attempts needed the probe's semantic
+module closure and an explicit usize length; an oracle assertion was also moved
+to the correct join layer. Those attempts are not passing evidence.
+
+Generic declaration/source production, semantic specialization substitution and
+ownership, full joins, SDK/CLI acceptance and final acceptance remain open.
+No new schema, stable public API/SDK ABI, DB, dependency, hygiene or runner change;
+no push, release or deployment. Native Linux remains deferred.

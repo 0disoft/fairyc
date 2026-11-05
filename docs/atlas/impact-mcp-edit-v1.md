@@ -45,8 +45,12 @@ reader, identity checks, join, traversal and output. No source bodies or host pa
 are included, and neither an exact-current map nor a complete traversal proves a
 change safe.
 
-The reader rejects generic/type-parameter/specialization records and v2; it does
-not silently discard them. Its common binder/identity port now validates generic
+The complete semantic/current-source reader still rejects generic declarations
+and specialization records; it does not silently discard them. The v3 transport
+reader now preserves concrete function/aggregate/cleanup records, type arguments
+and specialization call IDs, while v1 refuses generic fields and v2 remains
+unsupported. Transport success does not grant semantic admission. Its common
+binder/identity port now validates generic
 function/struct/resource headers, nested positional type references and exact
 SymbolId arity separately; this is not complete generic-map or CLI admission.
 See [the declaration-identity receipt](../ops/windows-candidate-atlas-generics-20261105.md).
