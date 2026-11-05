@@ -18,6 +18,9 @@ batched; no push, dispatch or release is authorized by this record.
   framing/semantic/current boundaries above now exist; production must still
   derive each requested version from authenticated Complete facts. Do not
   relabel v3 maps or catalog output to simulate v1/v2 support.
+  The explicit source-selected factories and six-family Windows acceptance are
+  implemented below; explicit SDK-lane acceptance remains required before this
+  sequence item closes.
 - [ ] Actual authored dispatcher, help, stale-source/lock and failure-atomic
   command acceptance; then current full CLI under both Windows profiles.
 - [ ] Consecutive self-build, distribution, same-commit hosted and deferred
@@ -269,3 +272,90 @@ Next are schema-specific production from authenticated Complete source facts and
 actual `atlas-symbols list` dispatch/help/lock/command acceptance. `atlas-calls`,
 `atlas-pack`, the broader source families and all original final gates remain
 open. This slice closes only the catalog page/output owner.
+
+## Schema-selected Complete source generation
+
+The explicit `project_atlas_produce::package_version` factory obtains its program
+from the supplied Complete, reauthenticates current source/signatures/coordinates
+through `project_atlas_source_version::admit`, and checks the whole source closure
+before creating a versioned package. V1 rejects every generic declaration; v2
+admits function generics and rejects generic aggregate declarations even when
+unused or owned by a dependency. Existing package factories retain v3.
+
+Version-specific facts are computed from the retained Complete interfaces and
+source-specialization inventory. V1 derives only the ordinary interface. V2
+retains generic interfaces for every package only when the checked source closure
+has templates, matching Go's ordinary versus generic workspace selection. V3
+retains its explicit generic source interface even for ordinary input. A package
+factory rejects facts whose generic-identity presence contradicts that selection.
+No generated map is stripped, relabeled or reinterpreted as another version.
+
+The header and envelope writers render the selected schema directly. Ordinary v1
+omits generic interface fields and the two generic completeness relations; v2/v3
+preserve original declarations and separate observed specializations. Checksums,
+counts, omissions and independent current expectations belong to that same
+selection. `produce::ready` selects explicit v2 current admission; the original
+v1/v3 readers keep their prior selection. All output remains private until the
+full encode/current/query path succeeds.
+
+`TestCandidateAtlasSourceVersion` compiles actual retained workspaces with Fairy,
+produces the selected maps, runs Fairy current admission and joins, and renders
+the selected source-backed catalog. Its Go source oracles separately check
+declarations, SymbolIds, ordinary/generic interfaces, implementation identities,
+aggregate layouts and observed function/cleanup calls. Go also admits every map
+against independent source/file expectations and the independently hashed native
+compiler image. The catalog bytes/checksum are compared with the Go writer over
+that admitted map; this does not claim that the Fairy non-call fact collector
+has Go's broader coverage. Its omissions remain explicit.
+
+The source matrix includes ordinary foreign/resource/enum/type families,
+owner-qualified methods beside an ordinary same-leaf function, used and unused
+function templates, used aggregate templates, and unused dependency-owned struct/
+resource templates. Negative controls exercise exhausted source admission work,
+missing coordinates and contradictory ordinary/generic fact selection.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasSourceVersion$'
+```
+
+The six-family matrix passes in 288.017s with both Windows profiles and no
+selected skips: low 201.28s, optimized 70.52s. Each profile executes 23 native
+processes and admits/compares 24 maps, 46 processes and 48 maps total. There are
+24 successful source/current/join/catalog paths, twelve unsupported-family
+refusals, and ten work/coordinate/contradictory-facts controls across the profiles.
+Log: `.cache/atlas-source-version-20261106.log`. No existing full authored-main
+image or native Linux acceptance is supplied by this private production probe.
+
+The initial harness failed before native execution on a missing fixture-module
+closure, then on untyped fixture locals. The first native comparison used raw Go
+memory against codec-roundtripped declarations; it now compares both through the
+correct version's canonical codec. A subsequent negative probe used a broken-stream
+helper instead of stdin transport; it now uses the existing actual stdin process
+helper. These failures are retained separately at `atlas-source-version-before`,
+`-integration`, `-native` and `-canonical` logs under `.cache/`, each suffixed
+`-20261106.log`. They do not establish product failures.
+
+The next replay exposed an actual v2 implementation mismatch: ordinary source
+was incorrectly given the v3 lane's always-present generic interface identity.
+The final producer follows the checked global template inventory and matches the
+independent Go source expectation for every package. This failed replay is
+`.cache/atlas-source-version-ordinary-generic-before-20261106.log`; the successful
+final matrix above supersedes it.
+
+An additional explicit SDK source attempt stopped at the test helper's one-minute
+process cap on low `sdk-unused/v1` (exit 1, empty output, 60.01s). It did not reach
+either SDK family acceptance. The existing SDK-specific helper uses a separate
+three-minute diagnostic cap, documented in
+`docs/ops/windows-candidate-atlas-sdk-vector-20261105.md`. That attempt is retained
+as `.cache/atlas-source-version-sdk-20261106.log`; it is not a pass or a product
+timeout change. SDK-specific early refusal/production/current/catalog acceptance
+is the next independent slice. The six-family successful inputs and product code
+were unchanged by that test-only fixture addition/removal, so their valid result
+is retained without repeating 46 native processes.
+
+Authored `check` and `check --locked` pass with 648 source files and 8,153 MIR
+functions; the lock reflects final LF bytes. Scoped CLI vet, Go formatting and
+diff checks pass. Source index and execution-queue progress are updated. No public
+CLI/SDK ABI, DB, dependency, repository-policy or runner/workflow changes. Full
+repository Go tests, legacy full command images, self-build, distribution and
+hosted CI remain later gates; native Linux stays batched. No push or dispatch.

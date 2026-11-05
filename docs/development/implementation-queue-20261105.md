@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Explicit Fairy source-selected v1/v2/v3 factories now authenticate their
+  Complete source closure, enforce each source family and render matching
+  facts/header/envelope/current admission without map conversion. Ordinary v2
+  generic-identity presence now matches Go's actual compilation lane. The
+  six-family Windows matrix passes both profiles in 288.017s: 46 native processes,
+  48 independently admitted maps and exact source-backed catalog comparisons.
+  Authored check/locked, scoped vet, formatting and diff checks pass. An extra
+  SDK attempt hit the generic helper's one-minute diagnostic cap and is not
+  acceptance; explicit SDK early selection/production and the actual symbols
+  dispatcher remain next. The symbol-catalog plan records failed attempts,
+  retained unchanged-input evidence and all remaining final gates.
+
 - Current-admitted Fairy catalog v1/v2/v3 page selection and canonical output
   now preserve exact filters, full-ID ordering/cursor membership, original
   declarations, omissions and independent selection/final byte limits. The
