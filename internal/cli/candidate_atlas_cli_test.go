@@ -116,6 +116,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"edit-sdk-vector", verifyCandidateEditSDKVectorCommand},
 				{"edit-sdk-aggregates", verifyCandidateEditSDKUserAggregateCommand},
 				{"help", verifyCandidateAtlasCLIHelp},
+				{"catalog-ordinary", verifyCandidateCatalogCommand},
+				{"catalog-sources", verifyCandidateCatalogSourceCommand},
+				{"catalog-sdk", verifyCandidateCatalogSDKCommand},
 				{"impact-owner-qualified", verifyCandidateAtlasOwnerQualifiedCommand},
 				{"mcp-owner-qualified", verifyCandidateMCPOwnerQualifiedCommand},
 				{"edit-owner-qualified", verifyCandidateEditOwnerQualifiedCommand},
@@ -131,7 +134,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 
 func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 	t.Helper()
-	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
+	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}, {"experimental", "atlas-symbols", "--help"}, {"experimental", "atlas-symbols", "list", "--help"}, {"experimental", "atlas-symbols", "list", "-h"}, {"experimental", "atlas-symbols", "list", "help"}} {
 		code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 		if code != 0 || out != usage || diagnostic != "" {
 			t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)

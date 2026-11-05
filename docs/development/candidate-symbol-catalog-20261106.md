@@ -17,8 +17,10 @@ batched; no push, dispatch or release is authorized by this record.
   facts, including ordinary SDK modules and used/unused SDK Vec source. The
   explicit v1/v2/v3 factories retain whole-source family checks; no relabeling or
   conversion of maps/catalogs. The SDK and ordinary regression evidence follows.
-- [ ] Actual authored dispatcher, help, stale-source/lock and failure-atomic
-  command acceptance; then current full CLI under both Windows profiles.
+- [x] Actual authored dispatcher, help, stale-source/lock and failure-atomic
+  command acceptance for the admitted source families under both Windows profiles.
+- [ ] Complete current-source full CLI replay across all registered verifiers.
+  The scoped symbols replay below covers five of thirty-five registrations.
 - [ ] Consecutive self-build, distribution, same-commit hosted and deferred
   native Linux acceptance from the original queue.
 
@@ -389,3 +391,109 @@ This closes version-selected source production for the named families only.
 The actual symbols dispatcher, full CLI, self-build, distribution, Linux batch
 and hosted acceptance remain open. No public API/SDK ABI, dependency, DB,
 workflow/runner or repository-policy changes; no push or dispatch.
+
+## Actual authored symbols command
+
+`project_catalog_source::query` freshly loads the complete workspace under the
+requested ordinary lock policy, performs refusal-only version selection, builds
+the actual ordinary/aggregate Complete, and obtains source schemas, observed
+specializations and independent current expectations from that Complete. It
+produces the requested family for every package before selecting the exact UID,
+so a filter cannot hide unsupported declarations in another package. All
+package call/external totals belong to that same checked workspace. The selected
+package re-enters version-specific current admission before catalog encoding.
+The existing bounded SDK source/query ledger separation remains explicit.
+
+`project_catalog_cli::arguments` validates arguments before workspace I/O and
+writes only the fully encoded result. Workspace/lock failures return 7; source
+refusals return 3; selector/budget failures return 2; internal/output failures
+return 4. Both namespace and `list` help requests use the existing public help.
+`project_experimental_cli` now dispatches `atlas-symbols` directly to this Fairy
+implementation, with no child Go compiler, map/cache lookup or map publication.
+Unlocked queries refresh the ordinary lock; locked queries preserve all bytes.
+
+The source-backed command oracle starts with independently checked Go source
+partitions, exact declarations/IDs and interface/specialization facts. It
+declares the existing narrower candidate collection policy, including empty
+generic-specialization/unavailable-template-body classes for ordinary v2/v3,
+without learning expected facts from a candidate response. Go strict canonical
+decoding/current admission and the actual Go catalog writer then derive exact
+output bytes, selection sizes, full-ID cursors and independently recomputed
+checksums. Non-call collection is still explicitly unavailable; this is not a
+claim of Go's broader non-call Atlas coverage.
+
+The full authored-main verifier registers three additional groups in
+`candidate_atlas_cli_test.go`: `catalog-ordinary`, `catalog-sources`, and
+`catalog-sdk`. Ordinary requests cover all three versions, exact/absent names,
+one-entry continuation, selection/final output at one-short/exact/one-more,
+unknown package/module/cursor, argument rejection before I/O, broken stdout,
+locked source drift and unlocked lock refresh. Separate source inputs cover
+all five declaration kinds in each schema, owner-qualified names, used/unused
+function templates and aggregate/resource templates. SDK inputs exercise
+ordinary scalar v1 and used Vec v3. PATH is empty and no companion is installed.
+
+Initial authored checking caught a missing switch-statement terminator before
+native execution; it was corrected. Two checks invoked from the wrong working
+directory failed before reaching the authored checker and supply no evidence.
+The first Go command also failed at compilation on an unused test import; log:
+`.cache/catalog-cli-before-20261106.log`. The first native full image exposed
+missing command help; `.cache/catalog-cli-integration-20261106.log` records that
+failure, fixed in the command owner. The next replay completed help and v1
+queries but rejected the oracle's omission of ordinary v2 generic completeness;
+`.cache/catalog-cli-command-20261106.log` records that failed expectation. The
+corrected oracle explicitly derives those empty classes from the existing
+candidate collection contract. Repeated byte/page checks now use a small real
+workspace; all complex declaration families retain separate v1/v2/v3 checks.
+
+The combined five-group low/optimized attempt hit its Go parent's fifteen-minute
+limit during low generic source tests, after the ordinary command verifier had
+checked all 44 invocations. It is a failed command, not full CLI acceptance:
+`.cache/catalog-cli-final-20261106.log` (900.272s). No orphan child of that test
+parent remained after termination. Final profile/group receipts are recorded
+below; no product timeout or compiler warning policy was changed.
+
+Final bounded commands reuse only an authenticated generated-C/profile/toolchain/
+image digest. The low image has source ID
+`007285e769ca0ba027e51335bbb0a3f584024c4c825d12813ff06ff74eb7b77c` and SHA-256
+`097067cb377cdb4e8db5b4fbdebe1a3ac377ed9c066f6c26d5d71b634b5c9fb4`.
+The optimized source/image IDs are
+`d645e1cfd46d587c56e26449f192c367210a431e9e42cf1076cc43c4c1d7201b` /
+`af2c9e435c5bd671d8b87889470a6b36b09a3c6bade3604b16759bc597082613`.
+Each command freshly regenerates the C input before deciding whether reuse is
+valid. The C input has 24 units, a 1,996,907-byte header, a 153,115-byte runtime
+and a largest unit of 2,097,059 bytes. No stale source/image result is reused.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/catalog-cli-20261106'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$/^catalog-ordinary$'
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$/^(catalog-sources|catalog-sdk)$'
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low$/^(impact-ordinary|help)$'
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/optimized$/^(catalog-ordinary|catalog-sources|catalog-sdk|help|impact-ordinary)$'
+```
+
+| Final scope | Result | Log under `.cache/` |
+| --- | --- | --- |
+| Low ordinary command, 44 native invocations | PASS, 605.333s; assertions 585.41s | `catalog-cli-low-ordinary-20261106.log` |
+| Low eight source inputs/five family refusals plus two SDK inputs | PASS, 282.344s; source 120.59s, SDK 140.50s | `catalog-cli-low-sources-20261106.log` |
+| Low existing impact and ten help invocations | PASS, 172.973s | `catalog-cli-low-regression-20261106.log` |
+| Optimized all five groups above | PASS, 179.152s | `catalog-cli-optimized-20261106.log` |
+| Unchanged Go symbol command regression | PASS, 11.846s | `catalog-go-regression-20261106.log` |
+
+The disjoint final profile/group selections verify 87 native CLI invocations per
+profile, 174 total: 88 ordinary catalog, 26 source-family, four SDK, twenty help
+and 36 existing impact observations. This covers five of thirty-five full-main
+registrations, not the unselected thirty or generated consumers. The low SDK
+inputs take 70.17s/70.33s under the unchanged SDK-specific diagnostic cap;
+optimized takes 2.18s/2.60s. These are observations, not a product performance or
+default-timeout acceptance claim. The failed combined attempt remains failed.
+
+Authored `check`/`check --locked` pass with 650 source files and 8,159 MIR
+functions. Scoped CLI vet, Go formatting, LF audit and diff checks pass. The
+source index and original implementation queue retain the broader outstanding
+work. This implements the existing experimental symbols surface in Fairy; no
+stable CLI, grammar, SDK ABI, dependency, DB, workflow/runner or hygiene-policy
+changes. Full Go tests, complete current full CLI, self-build, distribution,
+native Linux and same-commit hosted acceptance remain open. Native Linux stays
+batched; no push, dispatch or publication. Actual `atlas-calls` and `atlas-pack`
+are the next command implementations; the full objective remains active.

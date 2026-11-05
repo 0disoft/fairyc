@@ -23,7 +23,7 @@ authorized by this queue.
   independent current-source expectations and explicit completeness.
 - [ ] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
-- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit to the
+- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
@@ -55,6 +55,21 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Fairy now dispatches actual `experimental atlas-symbols list` through fresh
+  Complete-bound v1/v2/v3 production, exact UID/current admission and canonical
+  catalog output. Arguments/help precede I/O; locked requests preserve source
+  bytes and unlocked requests refresh the ordinary lock. Disjoint final Windows
+  low/optimized full-main selections pass all 174 native observations across
+  five of thirty-five registrations, including source/generic/aggregate/SDK,
+  page/byte boundaries, errors, existing impact and help. The original combined
+  fifteen-minute command failed on its parent budget and is preserved as failed;
+  bounded replays pass in 605.333s/282.344s/172.973s/179.152s. Authored check/locked,
+  scoped vet, original Go command regression, formatting/LF/diff checks pass.
+  See the symbol-catalog plan for exact IDs, coverage, failed attempts and costs.
+  The other thirty full-CLI groups, actual calls/pack commands, Linux dispatch,
+  broader source/collection families and all original final gates remain open.
+  This closes the admitted symbols command only, not the full objective.
 
 - Version-selected Fairy source production now includes used/unused SDK Vec v3
   and ordinary SDK `std::num`/`std::bytes` under v1/v2/v3. Refusal-only source
