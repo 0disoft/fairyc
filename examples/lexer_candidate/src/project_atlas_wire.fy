@@ -8,7 +8,8 @@ import std::bytes as bytes;
 import std::text as text;
 
 // Private transport-only view. No semantic/current-source trust is implied.
-// V3 transport includes original generic declarations and separate concrete
+// Explicit v2 transport is function-generic only; the original reader retains
+// v1/v3 admission. V3 includes original generic declarations and separate concrete
 // function/aggregate/cleanup records. Semantic/current-source admission remains
 // separate; V1 rejects generic fields rather than discarding them.
 pub resource Document{json::Tree tree;usize map;usize header;u32 version;cleanup{}}
@@ -99,20 +100,29 @@ fn u32 generic_fields(ref json::Tree t,u32 version,ref mut usize meter){
    let array=bytes::equal(name,b"type_parameters") || bytes::equal(name,b"specializations") && json::token(t,i+2).kind==3;
    let count=bytes::equal(name,b"specializations") && json::token(t,i+2).kind==8;
    let text=bytes::equal(name,b"specialization") || bytes::equal(name,b"generic_interface_algorithm") || bytes::equal(name,b"generic_interface_hash");
-   if(array || count || text){if(version!=3 || array && json::token(t,i+3).kind==4 || count && bytes::equal(json::value(t,i+2),b"0") || text && json::value(t,i+2).len==0){return 5;}}
+   if(version==2 && (bytes::equal(name,b"aggregate") || bytes::equal(name,b"cleanup"))){return 5;}
+   if(array || count || text){if(version==1 || array && json::token(t,i+3).kind==4 || count && bytes::equal(json::value(t,i+2),b"0") || text && json::value(t,i+2).len==0){return 5;}}
   }i+=1;
  }return 0;
 }
 fn bool framed(ref mut sha::State state,ref u8[] data){var u8[8] size=[0;8];var usize n=data.len;var usize i=8;while(i>0){i-=1;let hex=b"0123456789abcdef";let u8 hi=hex[(n%256)/16];let u8 lo=hex[n%16];size[i]=((if(hi<=57){hi-48}else{hi-87})<<4)|(if(lo<=57){lo-48}else{lo-87});n/=256;}return sha::update(state,ref size) && sha::update(state,data);}
 // Codes: JSON codes 1..4; 5 schema/canonical, 6 checksum. Caller meter is shared.
 pub fn Result<Document,decode::Problem> read(bytes::Buffer source,usize maximum,ref mut usize meter){
+ return read_selected(source,maximum,false,meter);
+}
+// This grants transport ownership only, never semantic/current-source Ready.
+// The caller explicitly selects v2; neither entry point converts a map version.
+pub fn Result<Document,decode::Problem> read_v2(bytes::Buffer source,usize maximum,ref mut usize meter){
+ return read_selected(source,maximum,true,meter);
+}
+fn Result<Document,decode::Problem> read_selected(bytes::Buffer source,usize maximum,bool v2_only,ref mut usize meter){
  let size=bytes::len(ref source);if(maximum==0 || maximum>4194304 || size==0 || size>maximum){return .err(fail(3));}if(!text::validate_utf8(bytes::view(ref source)).is_ok){return .err(fail(5));}
  let t=switch(json::parse(source,meter)){case .ok(t):{t}case .err(p):{return .err(p);}};
  var usize i=0;var usize end=0;while(i<json::count(ref t)){let tok=json::token(ref t,i);if(tok.start!=end){return .err(fail(5));}end=tok.end;if(tok.kind==7){let value=switch(quoted::quote(json::value(ref t,i),meter)){case .ok(p):{p}case .err(_):{return .err(fail(3));}};if(!bytes::equal(bytes::view(ref value),json::source(ref t)[tok.start..tok.end])){return .err(fail(5));}}i+=1;}if(end!=size){return .err(fail(5));}
  let code=shape(ref t,0,1,0,meter);if(code!=0){return .err(fail(code));}
- let schema=string(ref t,0,b"schema");let encoding=string(ref t,0,b"encoding");let u32 version=if(bytes::equal(schema,b"fairyc.fymap/v1") && bytes::equal(encoding,b"fairyc.fymap-json/v1")){1}else if(bytes::equal(schema,b"fairyc.fymap/v3") && bytes::equal(encoding,b"fairyc.fymap-json/v3")){3}else{0};
- if(version==0 || !bytes::equal(string(ref t,0,b"checksum_algorithm"),b"fairyc.fymap-checksum/v1-sha256")){return .err(fail(5));}
- let map=field(ref t,0,b"map");let header=field(ref t,map,b"header");if(!bytes::equal(string(ref t,header,b"logical_schema"),if(version==1){b"fairyc.fymap-logical/v1"}else{b"fairyc.fymap-logical/v3"})){return .err(fail(5));}
+ let schema=string(ref t,0,b"schema");let encoding=string(ref t,0,b"encoding");let u32 version=if(bytes::equal(schema,b"fairyc.fymap/v1") && bytes::equal(encoding,b"fairyc.fymap-json/v1")){1}else if(bytes::equal(schema,b"fairyc.fymap/v2") && bytes::equal(encoding,b"fairyc.fymap-json/v2")){2}else if(bytes::equal(schema,b"fairyc.fymap/v3") && bytes::equal(encoding,b"fairyc.fymap-json/v3")){3}else{0};
+ if(version==0 || v2_only && version!=2 || !v2_only && version==2 || !bytes::equal(string(ref t,0,b"checksum_algorithm"),b"fairyc.fymap-checksum/v1-sha256")){return .err(fail(5));}
+ let map=field(ref t,0,b"map");let header=field(ref t,map,b"header");if(!bytes::equal(string(ref t,header,b"logical_schema"),if(version==1){b"fairyc.fymap-logical/v1"}else if(version==2){b"fairyc.fymap-logical/v2"}else{b"fairyc.fymap-logical/v3"})){return .err(fail(5));}
  let generic=generic_fields(ref t,version,meter);if(generic!=0){return .err(fail(generic));}
  let digest=string(ref t,0,b"checksum");if(!hex(digest,b"fymap1-sha256-",64,false)){return .err(fail(6));}
  let begin=json::token(ref t,map).start;let stop=json::token(ref t,json::next(ref t,map)-1).end;var sha::State state=sha::empty();if(!sha::update(ref mut state,b"fairyc.fymap-checksum\0\x01") || !framed(ref mut state,schema) || !framed(ref mut state,encoding) || !framed(ref mut state,json::source(ref t)[begin..stop]) || !sha::matches(ref state,digest[14..])){return .err(fail(6));}

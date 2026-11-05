@@ -56,12 +56,20 @@ authorized by this queue.
 
 ## Progress
 
+- Explicit Fairy v2 map framing now passes nineteen input cases and four boundary
+  modes in each Windows profile (46 native processes). Default wire selection
+  still accepts v1/v3 only. V2/native v1-v3 regression passes in 42.832s; unchanged
+  v3 generic framing passed in 25.24s and is reused after a test-only seed fix.
+  No semantic/current-source authority or catalog dispatcher is granted. V2
+  semantic/current admission, schema-specific production and actual catalog
+  selection/encoding/commands remain required; see the symbol-catalog plan.
+
 - Fairy symbol catalog argument selection now matches the Go parser for 105
   argument cases and three invalid actions under each Windows profile (33.237s),
   including version, kind, cursor, canonical numeric and exact length bounds.
   It performs no workspace I/O. Catalog selection/encoding, schema-specific
-  current production and actual dispatcher remain required; the existing wire
-  owner has no v2 admission and must not silently convert v3 maps. See
+  current production and actual dispatcher remain required; the explicit v2
+  framing follow-up above must not silently convert v3 maps. See
   `docs/development/candidate-symbol-catalog-20261106.md`. This is a prerequisite,
   not completion of the symbols command or the complete objective.
 
