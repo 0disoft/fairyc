@@ -53,6 +53,15 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound Fairy aggregate instance projection now passes Windows
+  low/optimized in 106.21s: six three-package source scenarios, exact Go v3
+  instance/type/cleanup-call comparisons and four refusal controls per scenario
+  (60 native probe invocations). Original ordered scalar IDs join concrete
+  aggregate types and resource cleanup frames; tuple metadata cannot render as
+  a value. This is not aggregate map production or actual command admission.
+  Atlas/SDK production, aggregate check/build/run/test and every final queue gate
+  remain open; Linux stays batched. See the aggregate implementation plan.
+
 - Atlas aggregate-instance preparation exposed a Go snapshot prerequisite:
   generic aggregate headers rejected every attribute, including declared cleanup
   effects used by the existing native aggregate fixtures. The header adapter now

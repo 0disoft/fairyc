@@ -39,6 +39,36 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
 
 ## Source-plan evidence
 
+### Current Atlas instance projection
+
+`project_atlas_schema::prepare_aggregates` reconstructs signatures from exact
+Complete-bound source and rejects ordinary/aggregate mode mismatches. The
+instance collector joins original plan IDs to concrete kind-20/21 types,
+function frames and nonempty resource cleanup frames. Every plan specialization
+must have exactly one retained implementation. Ordered scalar tuple arguments
+are rendered on their nominal self types; metadata tuple kind 22 cannot become
+a value type. Cleanup call targets retain their selected specialization identity.
+
+`TestCandidateAtlasAggregateInstances` passes Windows MSVC low/optimized in
+106.21s, with six three-package source scenarios and four rejection controls per
+scenario: 60 native probe invocations. The independent Go v3 oracle covers
+ordered/imported aggregates, unused templates, multiple scalar instances,
+nested/deferred cleanup, partial construction and loop cleanup. Exhausted work,
+missing coordinates, ordinary-mode misuse and stale source all reject. The first
+probe compilation exposed two local harness/parser issues (an untyped zero arm
+and a missing statement separator after an if expression); both were corrected
+before this passing run. This proves the private instance projection only.
+Aggregate map production, current-source command/SDK integration and every final
+acceptance gate remain open. Native Linux execution stays batched.
+
+Command: `go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateAtlasAggregateInstances$'`.
+
+The ordinary Atlas type and generic-function production regression roots also
+pass both profiles in 183.966s (`TestCandidate(AtlasTypes|AtlasGenericProduction)`).
+Scoped `go vet ./internal/cli`, Go formatting and `git diff --check` pass. No
+stable API/SDK ABI, wire schema, DB, dependency, timeout, runner, target or
+repository-hygiene change; no push or dispatch.
+
 `TestCandidateGenericAggregatePlan` compares actual Fairy MSVC low/optimized
 execution with `genericsource.PreparePackages` over three packages. Five positive
 variants each contain three roots, nine specializations and five public maker

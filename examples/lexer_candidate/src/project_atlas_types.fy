@@ -45,11 +45,11 @@ fn Result<bool,u32> scalar_type(ref mut bytes::Buffer out,u32 id,ref mut usize m
     if(id==0 || id>7){return .err(7);}
     return builtin(out,scalar(id),meter);
 }
-fn Result<bool,u32> nominal(ref input::Input source,ref coordinates::Coordinates table,usize module_index,usize declaration,u32 kind,ref mut bytes::Buffer out,ref mut usize meter){
+fn Result<bool,u32> nominal_head(ref input::Input source,ref coordinates::Coordinates table,usize module_index,usize declaration,u32 kind,ref mut bytes::Buffer out,ref mut usize meter){
     if(module_index>=input::count(source) || declaration==0){return .err(7);}
     let parsed=input::source(source,module_index);if(declaration>syntax::declaration_count(parsed)){return .err(7);}
     let d=syntax::declaration_at(parsed,declaration-1);
-    if(d.kind!=if(kind==2){4}else if(kind==3){6}else{11} || d.generic_parameters!=0){return .err(7);}
+    if(d.kind!=if(kind==2 || kind==20){4}else if(kind==3 || kind==21){6}else{11} || (d.generic_parameters!=0)!=(kind==20 || kind==21)){return .err(7);}
     let module_name=module_name(input::file(source,module_index),meter)?;var name=module_name;
     discard w::raw(ref mut name,b"::",meter)?;discard w::raw(ref mut name,syntax::declaration_name(parsed,declaration),meter)?;
     if(coordinates::coordinate_count(table)>512){return .err(7);}
@@ -60,7 +60,7 @@ fn Result<bool,u32> nominal(ref input::Input source,ref coordinates::Coordinates
     }
     if(found==coordinates::coordinate_count(table)){return .err(7);}
     let coordinate=coordinates::coordinate_text(table,found);if(!coordinates::valid_coordinate(coordinate)){return .err(7);}
-    discard head(out,b"nominal",bytes::view(ref name),coordinate,false,0,meter)?;return w::raw(out,b"]}",meter);
+    return head(out,b"nominal",bytes::view(ref name),coordinate,false,0,meter);
 }
 fn Result<bool,u32> pointer_scalar(ref mut bytes::Buffer out,u32 id,usize depth,ref mut usize meter){
     if(depth>=64 || !work::charge(meter,1)){return .err(3);}
@@ -71,7 +71,13 @@ fn Result<bool,u32> walk(ref input::Input source,ref coordinates::Coordinates ta
     if(depth>=64 || !work::charge(meter,1)){return .err(3);}
     if(id==0 || id>graph::count(p)){return .err(7);}let t=graph::at(p,id);
     if(t.kind==1){return scalar_type(out,t.scalar,meter);}
-    if(t.kind>=2 && t.kind<=4){return nominal(source,table,t.module_index,t.declaration,t.kind,out,meter);}
+    if(t.kind>=2 && t.kind<=4){discard nominal_head(source,table,t.module_index,t.declaration,t.kind,out,meter)?;return w::raw(out,b"]}",meter);}
+    if(t.kind==20 || t.kind==21){
+        discard nominal_head(source,table,t.module_index,t.declaration,t.kind,out,meter)?;let count=syntax::generic_parameter_count(input::source(source,t.module_index),t.declaration-1);
+        if(t.scalar!=0 || t.second!=0 || count==0 || count>8){return .err(7);}var usize next=t.first;var usize i=0;
+        while(next!=0){if(i>=count || next>=id || !work::charge(meter,1)){return .err(if(i>=count || next>=id){7}else{3});}let tuple=graph::at(p,next);if(tuple.kind!=22 || tuple.scalar!=0 || tuple.module_index!=0 || tuple.declaration!=0 || tuple.first==0 || tuple.first>=next || tuple.second>=next){return .err(7);}let argument=graph::at(p,tuple.first);if(argument.kind!=1 || !scalars::valid(argument.scalar)){return .err(7);}if(i>0){discard w::raw(out,b",",meter)?;}discard walk(source,table,p,tuple.first,depth+1,out,meter)?;next=tuple.second;i+=1;}
+        if(i!=count){return .err(7);}return w::raw(out,b"]}",meter);
+    }
     if(t.kind==19){return builtin(out,b"Region",meter);}
     if(t.kind==9 || t.kind==14){
         if(depth+1>=64 || !work::charge(meter,1)){return .err(3);}

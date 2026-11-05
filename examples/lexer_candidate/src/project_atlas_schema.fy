@@ -15,6 +15,10 @@ import repr_c_declarations as representation;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
+import project_source_plan as planner;
+import generic_aggregate_types as aggregates;
+import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
 
 // Build from the exact source closure authenticated by Complete. Rebuilding the
 // signature table preserves unused foreign declarations and source-only types;
@@ -24,6 +28,15 @@ pub fn Result<signatures::Program,u32> prepare(ref input::Input source,ref coord
     let current=identified::current(compiler::checked_program(complete),input::sources(source),ref metadata,table,meter);
     if(current!=0){return .err(if(current==10){3}else{7});}
     return .ok(metadata);
+}
+// Re-enter the source/type owner before projecting an aggregate Complete. The
+// ordinary projection remains closed; detached type rows cannot select this mode.
+pub fn Result<signatures::Program,u32> prepare_aggregates(ref input::Input source,ref coordinates::Coordinates table,ref compiler::Complete complete,ref mut usize meter){
+    if(!clean::aggregates(ir::cleanup_ir(identified::ir_program(compiler::checked_program(complete))))){return .err(7);}
+    let original=switch(planner::build_aggregate_sources(input::sources(source),input::owners(source),input::bindings(source),table,meter)){case .ok(p):{p}case .err(e):{return .err(if(e.code==10){3}else if(e.code==11){2}else{7});}};
+    let prepared=switch(aggregates::build(original,input::sources(source),meter)){case .ok(p):{p}case .err(e):{return .err(if(e.code==10){3}else if(e.code==11){2}else{7});}};
+    let metadata=switch(signatures::build_aggregates(input::sources(source),prepared,meter)){case .ok(p):{p}case .err(e):{return .err(if(e.code==10){3}else if(e.code==11){2}else{7});}};
+    let current=identified::current(compiler::checked_program(complete),input::sources(source),ref metadata,table,meter);if(current!=0){return .err(if(current==10){3}else{7});}return .ok(metadata);
 }
 // Source-only original-header projection, matching GenericDeclarations. It is
 // not Complete, current-source query authority, or proof of any template body.
