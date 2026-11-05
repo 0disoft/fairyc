@@ -28,7 +28,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
    checked cleanup requests alone are insufficient.
-4. **Unit source identities implemented; project linking, interfaces, restoration and Atlas production remain.** Keep original templates as
+4. **Unit/project source identities and linking implemented; interfaces, restoration and Atlas production remain.** Keep original templates as
    source exports, bind instance/type/cleanup identities to current source,
    preserve definition-dependent invalidation and emit concrete aggregate and
    cleanup facts from Complete. Include SDK source families through their actual
@@ -796,3 +796,86 @@ git diff --check
 Only the bounded source-bound unit identity step is complete. Project type/frame
 rebasing and linking, exact current-source restoration/cache, Atlas/SDK and actual
 commands remain next; the complete implementation objective is not finished.
+
+
+## Aggregate project linking and named partitioned C
+
+The existing identified-unit builder now also accepts an explicit tighter source
+partition bound while preserving ordinary grouping, checking, capacity retries,
+current-source provenance and whole-plan publication. Its existing `build` entry
+uses the unchanged maximum-source bound. The aggregate probe forces three
+independently checked source units; it does not substitute one joined body for
+project linking.
+
+Project type interning now remaps both links of kind-22 ordered scalar tuples.
+The regression constructs two source-prefix-valid graphs with different local
+IDs for the same two-element tuple and verifies shared canonical head/tail IDs.
+An extra Option pad makes an unchanged local second link point at the wrong
+kind, so merely retaining the original tuple index cannot pass. Array lengths
+remain lengths and raw-pointer bits remain bits.
+
+Project cleanup reconstruction retains kind-21 resource recipes, exact rebound
+cleanup receivers/field types and the explicit aggregate admission mode through
+`assemble_project_aggregates`. Ordinary `assemble_project` and artifact constructors
+remain aggregate-closed. Project identity merging accepts exact identified
+aggregate type rows alongside SDK Vec rows; concrete functions and cleanup rows
+still merge through the existing original-source/frame/receiver checks. The
+normal named project C emitter then consumes that linked owner.
+
+The first low replay fails at checking stage 6 with error 1001. Per-source units
+retain global signature types, including generic resources not carried by any
+selected body. Cleanup lowering already permits missing storage for unused
+ordinary/Vec resources, but omitted kind 21. It now applies the same liveness
+rule to kind 21; a resource carried by a body still requires its actual layout.
+The fix preserves the existing used-type traversal and rejects used missing shapes.
+The failed command is not counted as a pass.
+
+The same twenty-input source/Go Flow/expanded-field matrix has fifteen accepted
+programs, four paired rejections and one independent Fairy cycle refusal. Each
+accepted program verifies source-unit ranges and linked aggregate/project mode,
+nonempty aggregate identities, exact cleanup receiver identity and specialized
+call targets. Its two named C packets select all bodies split at one frame, or
+entry-reachable bodies split at two. Native consumers check fixed values and exact
+nested/defer/partial/loop cleanup bytes under unchanged private C flags.
+
+The corrected low command passes in 104.29s (89.64s subtest), producing 60 native
+consumer executions. Ordinary type-graph regressions pass both Windows profiles
+in 53.46s (9.20s/36.18s): independent units, reordered wrappers, array lengths,
+256/257 units, 4096-node exhaustion and signature-prefix refusal. Ordinary raw
+project-link regressions pass both profiles in 77.14s (15.16s/47.40s), retaining
+missing/duplicate ordinary-body refusal and four native generic-namespace runs.
+Those two roots complete together in 130.709s without selected skips.
+
+The Go-only native roots now explicitly skip unsupported hosts before resolving
+MSVC; Linux execution remains deferred, not a claimed pass. Their Windows
+prepared-source/native-consumer inputs are unchanged by this host-selection guard.
+The final optimized aggregate results and commands follow below.
+
+This closes bounded source-authenticated unit-to-project linking and named
+partitioned aggregate C. Complete public interfaces, current-source restoration,
+persistent caches, Atlas/SDK production and actual CLI commands remain required.
+Neither a wire/schema nor artifact admission, stable API/SDK ABI, DB, dependency,
+hygiene, runner or timeout policy is changed. Full CLI, Linux, self-build,
+distribution/clean-machine and hosted CI remain open; no push or dispatch.
+
+
+Optimized aggregate replay passes in 151.22s (135.85s subtest), no selected skips.
+All 120 aggregate project C consumer executions pass; the separate ordinary
+project regression accounts for four more, not a Go reference or Linux result.
+Scoped vet, formatting and diff checks pass.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregateProjectC$/low$'
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregateProjectC$/optimized$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateOrdinaryProject(Types|Link)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_c_test.go internal/cli/candidate_generic_aggregate_project_test.go
+git diff --check
+```
+
+The Go shared replay helper selects the original single/partition source inputs
+unchanged and adds the project case. Its new host guard changes no Windows
+prepared/native inputs. The full implementation queue remains active: interface
+publication, restoration/cache/Atlas/SDK/actual commands and all final gates are
+still required. Existing strict standalone warning limitations remain separate
+from this unchanged private native-consumer acceptance.

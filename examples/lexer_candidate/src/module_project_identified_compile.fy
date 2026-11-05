@@ -1,6 +1,7 @@
 module module_project_identified_compile;
 import module_project_compile as compile;
 import module_units as grouping;
+import candidate_limits as limits;
 import module_identified_ir as identified;
 import module_signatures as signatures;
 import generic_source_plan as source;
@@ -44,9 +45,15 @@ fn compile::Problem append(ref v::Vec<syntax::Parsed> sources,ref signatures::Pr
     };return failed(12,first,stop);
 }
 pub fn Result<Plan,compile::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref source::Plan original,ref mut usize work){
+    return build_partitioned(sources,metadata,original,limits::source_files(),work);
+}
+// Keep normal capacity grouping, with an explicit tighter source-unit bound.
+// The same checked/identified factory and whole-plan publication own every split.
+pub fn Result<Plan,compile::Problem> build_partitioned(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref source::Plan original,usize max_files,ref mut usize work){
+    if(max_files==0 || max_files>limits::source_files()){return .err(failed(if(max_files==0){9}else{10},0,v::len<syntax::Parsed>(sources)));}
     let grouped=switch(grouping::build(sources)){case .ok(p):{p}case .err(e):{var compile::Problem result=failed(e.code,0,v::len<syntax::Parsed>(sources));result.module_index=e.module_index;result.start=e.start;result.end=e.end;return .err(result);}};
     var v::Vec<identified::Program> units=v::empty<identified::Program>();var v::Vec<compile::Range> ranges=v::empty<compile::Range>();var usize retries=0;var usize next=0;var usize i=0;
-    while(i<grouping::count(ref grouped)){let unit=grouping::at(ref grouped,i);assert(unit.first==next && unit.first<unit.stop);let e=append(sources,metadata,original,unit.first,unit.stop,0,ref mut units,ref mut ranges,ref mut retries,work);if(e.code!=0){return .err(e);}next=unit.stop;i+=1;}
+    while(i<grouping::count(ref grouped)){let unit=grouping::at(ref grouped,i);assert(unit.first==next && unit.first<unit.stop);var usize first=unit.first;while(first<unit.stop){let stop=if(max_files<unit.stop-first){first+max_files}else{unit.stop};let e=append(sources,metadata,original,first,stop,0,ref mut units,ref mut ranges,ref mut retries,work);if(e.code!=0){return .err(e);}first=stop;}next=unit.stop;i+=1;}
     assert(next==grouping::file_count(ref grouped) && v::len<identified::Program>(ref units)==v::len<compile::Range>(ref ranges));let stamps=switch(bindings::copy(templates::packages(original_input::templates(source::input(original))),work)){case .ok(p):{p}case .err(code):{var compile::Problem e=failed(code,0,next);e.stage=8;return .err(e);}};return .ok(Plan{.units,.ranges,.files=next,.retries,.provenance=stamps});
 }
 

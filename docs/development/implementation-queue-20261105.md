@@ -332,3 +332,16 @@ authorized by this queue.
   formatting and diff checks pass; the aggregate plan preserves failed harness/
   reproduction and valid reuse accounting. Project type/frame linking/rebasing,
   restoration/cache/Atlas/SDK/actual commands and every final gate remain open.
+
+
+- Aggregate project linking now preserves ordered tuple edges, kind-21 resource
+  recipes and both project/aggregate proof modes. Three independently checked
+  source units retain original aggregate/cleanup/call identities through canonical
+  type/frame merging and normal named C partitioning. The exposed unused-resource
+  lowering refusal is fixed under the existing liveness rule; used missing layouts
+  remain rejected. Fifteen programs x two output modes x two consumer profiles x
+  two Windows hosts pass all 120 native executions (low 104.29s, optimized 151.22s).
+  Ordinary type/link regressions pass in 130.709s, including limits, missing/duplicate
+  bodies and four separate native runs. Scoped vet/format/diff pass; exact failure
+  and unchanged-input reuse accounting is in the aggregate plan. Complete interfaces,
+  restoration/cache/Atlas/SDK/actual commands and every final gate remain open.

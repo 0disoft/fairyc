@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -48,15 +49,23 @@ func candidateAggregateExecutions() []candidateAggregateExecution {
 }
 
 func TestCandidateGenericAggregateC(t *testing.T) {
-	candidateAggregateCReplay(t, false)
+	candidateAggregateCReplay(t, "single")
 }
 
 func TestCandidateGenericAggregatePartitionC(t *testing.T) {
-	candidateAggregateCReplay(t, true)
+	candidateAggregateCReplay(t, "partition")
 }
 
-func candidateAggregateCReplay(t *testing.T, partitioned bool) {
+func TestCandidateGenericAggregateProjectC(t *testing.T) {
+	candidateAggregateCReplay(t, "project")
+}
+
+func candidateAggregateCReplay(t *testing.T, mode string) {
 	t.Helper()
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("Windows aggregate native replay; Linux execution is batched")
+	}
+	partitioned := mode != "single"
 	cases := candidateAggregateExecutions()
 	extra := make([]candidateAggregateLayoutFixture, len(cases))
 	for i, c := range cases {
@@ -97,6 +106,11 @@ func candidateAggregateCReplay(t *testing.T, partitioned bool) {
 		checksFile = "generic_aggregate_partition_c.fy"
 		imports += "import module_unit_c_names as c_names;import candidate_limits as limits;import module_project_c_owner as c_owner;"
 		builder = strings.Replace(builder, "verify_values(ref lowered,sources);", "verify_values(ref lowered,sources,metadata);", 1)
+	}
+	if mode == "project" {
+		checksFile = "generic_aggregate_project_c.fy"
+		imports += "import module_project_identified_compile as units;import module_project_identified_ir as linked;import module_project_types as project_types;"
+		builder = strings.Replace(builder, "verify_values(ref lowered,sources,metadata);", "verify_values(ref lowered,sources,metadata,aggregates::source_plan(signatures::aggregate_source(metadata)));", 1)
 	}
 	candidateAggregateBodyProbe(t, "module_unit_c_emit", wire, builder, checksFile, imports, func(t *testing.T, out string) {
 		remaining := []byte(out)

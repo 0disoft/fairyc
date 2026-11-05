@@ -47,6 +47,10 @@ pub fn Result<Program,Problem> assemble_project(v::Vec<types::Type> types,v::Vec
 // until aggregate restoration has an explicit source and transport contract.
 pub fn Result<Program,Problem> assemble_aggregates(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work){return assemble_scoped(types,frames,glues,fields,operands,drops,work,false,true);}
 
+// Linked aggregate units preserve both admission modes. Ordinary project and
+// artifact constructors still require their existing non-aggregate contracts.
+pub fn Result<Program,Problem> assemble_project_aggregates(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,usize work){return assemble_scoped(types,frames,glues,fields,operands,drops,work,true,true);}
+
 // Artifact reconstruction resets producer accounting and re-enters the same
 // verifier. Fresh verification work is returned even on rejection; this owner
 // alone grants neither source checking nor whole-package cache-hit authority.

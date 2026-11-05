@@ -38,7 +38,7 @@ pub fn Result<Plan,clean::Problem> build(ref signatures::Program metadata,ref v:
         // against the shared catalog before using any edge as a map index.
         let validated=switch(signatures::own_types(metadata,copy)){case .ok(p):{p}case .err(code):{return .err(fail(translated(code)));}};
         let usize start=v::len<usize>(ref maps);i=1;while(i<=nt){if(!budget::charge(ref mut work,1)){return .err(fail(1002));}var t=types::graph_at(ref validated,i);
-            if(t.first!=0){t.first=*v::at<usize>(ref maps,start+t.first-1);}if(t.kind==6){t.second=*v::at<usize>(ref maps,start+t.second-1);}
+            if(t.first!=0){t.first=*v::at<usize>(ref maps,start+t.first-1);}if(t.kind==6 || t.kind==22 && t.second!=0){t.second=*v::at<usize>(ref maps,start+t.second-1);}
             // Array second is a length; pointer scalar carries ABI bits.
             let id=switch(intern(ref mut graph,ref mut table,t,ref mut work)){case .ok(id):{id}case .err(p):{return .err(p);}};
             if(!v::push<usize>(ref mut maps,id).is_ok){return .err(fail(1003));}i+=1;
@@ -47,6 +47,7 @@ pub fn Result<Plan,clean::Problem> build(ref signatures::Program metadata,ref v:
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(p):{p}case .err(code):{return .err(fail(translated(code)));}};
     return .ok(Plan{.graph=owned,.units,.maps,.work});
 }
+pub fn bool aggregates(ref Plan p){return types::aggregate_graph(ref p.graph);}
 pub fn usize unit_count(ref Plan p){return v::len<Unit>(ref p.units);}
 pub fn usize type_count(ref Plan p){return types::graph_count(ref p.graph);}
 pub fn types::Type type_at(ref Plan p,usize id){return types::graph_at(ref p.graph,id);}

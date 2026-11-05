@@ -123,3 +123,19 @@ receiver type, preserves specialized call endpoints and rejects late unselected
 Vec/aggregate types. The aggregate plan owns the actual Windows source/Flow/field
 oracle and current/work-boundary results. This does not authorize linked project
 identity, artifact restoration, cache/Atlas/SDK production or actual CLI admission.
+
+
+Linked aggregate project consumer (2026-11-05). The explicit
+`assemble_project_aggregates` factory re-enters the same verifier with both project
+work accounting and aggregate descriptors enabled. Ordinary project and artifact
+constructors retain their old non-aggregate mode. The linker remaps kind-22 first
+and nonzero second edges, selects kind-21 resource glue and coalesces cleanup
+receivers by the canonical global type. Source units may omit a globally known
+kind-21 storage recipe only when the existing liveness traversal proves no body
+carries it, matching the existing ordinary/Vec rule. Selected recipes still match
+rebound fields, frames, abilities and effects before complete publication.
+Original-source aggregate identity rows survive project type/frame merging and
+normal named partitioned C emission. The aggregate implementation plan owns exact
+Windows values/drop traces and ordinary graph/link regressions. This is not
+Complete interface publication, artifact reconstruction or cache/Atlas/SDK/CLI
+admission, and does not change any artifact encoding or stable ABI.
