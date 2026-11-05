@@ -11,8 +11,12 @@ import std::text as text;
 // never from the candidate map's own header or from an unauthenticated cache.
 pub resource Ready{validate::Partition partition;cleanup{}}
 pub fn ref validate::Partition partition(ref Ready r){return ref r.partition;}
-pub fn Result<Ready,u32> read(bytes::Buffer source,bytes::Buffer expected,ref mut usize meter){
- let doc=switch(wire::read(source,4194304,meter)){case .ok(p):{p}case .err(p):{return .err(p.code);}};let partition=validate::validate(doc,meter)?;
+pub fn Result<Ready,u32> read(bytes::Buffer source,bytes::Buffer expected,ref mut usize meter){return admit(source,expected,false,meter);}
+// Independent current expectations are required for generic v3 maps too. The
+// source producer, rather than a transported/cache header, must own expectations.
+pub fn Result<Ready,u32> read_generics(bytes::Buffer source,bytes::Buffer expected,ref mut usize meter){return admit(source,expected,true,meter);}
+fn Result<Ready,u32> admit(bytes::Buffer source,bytes::Buffer expected,bool generics,ref mut usize meter){
+ let doc=switch(wire::read(source,4194304,meter)){case .ok(p):{p}case .err(p):{return .err(p.code);}};let partition=if(generics){validate::validate_generics(doc,meter)?}else{validate::validate(doc,meter)?};
  if(bytes::len(ref expected)==0 || bytes::len(ref expected)>4194304 || !text::validate_utf8(bytes::view(ref expected)).is_ok){return .err(8);}
  let current=switch(json::parse(expected,meter)){case .ok(p):{p}case .err(p):{return .err(p.code);}};
  if(json::token(ref current,0).kind!=1){return .err(8);}let t=validate::tree(ref partition);let h=validate::header(ref partition);let root=validate::root(ref partition);

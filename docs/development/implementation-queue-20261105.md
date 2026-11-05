@@ -146,3 +146,12 @@ authorized by this queue.
   regressions pass (119.684s). The ordinary/current reader remains closed until
   complete joins and actual source production are connected. SDK/CLI and final
   cross-platform gates remain open; see the generic receipt.
+
+- Explicit independent current-source v3 generic reading and complete joins now
+  preserve implementation endpoints, cleanup ownership and raw spans. Remote
+  implementations resolve against the exact target declaration; Go-exact impact
+  JSON preserves unavailable template-body coverage. Windows low/optimized
+  generic joins pass (17.481s), including real unused-template source drift,
+  missing/wrong-owner/erased remote IDs and zero-call unused templates. Actual
+  Fairy generic source production, SDK/full CLI and final acceptance remain open;
+  see the generic receipt.

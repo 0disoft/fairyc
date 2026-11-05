@@ -147,3 +147,52 @@ Full current-source generic joins/production, SDK/full CLI acceptance and final
 self-build/distribution/hosted gates remain open. Native Linux remains batched at
 the user's request. Stable public API/SDK ABI, DB, dependencies, repository hygiene
 and runner configuration are unchanged. No push, release or deployment.
+
+## Independent v3 current admission and complete generic join
+
+`project_atlas_current::read_generics` now requires the independent verified
+current expectation after explicit v3 semantic admission. It compares both public
+interface identities plus compiler, package/source/reference/file identities.
+The ordinary current reader remains closed to generic maps. This supplies a port
+for the actual Fairy source producer; it does not replace that remaining producer
+with transported claims or Go child-process output.
+
+The shared join retains source/target implementation identity, cleanup-body
+ownership and exact call-span tokens. Generic function and resource-cleanup calls
+enter the same resolved-call ceiling as ordinary calls. Remote ID lookup uses the
+canonical implementation table with binary search, then requires that the found
+record belongs to the exact target declaration. An absent ID on a generic target
+rejects; unused templates invent no executable summary or edge. Package-reference,
+public-target, version, duplicate-package and shared-work checks remain active.
+Template uncertainty remains in both the graph and rendered impact contexts.
+
+`TestCandidateAtlasGenericJoin` passes in both Windows MSVC profiles (17.481s).
+Its independently compiled two-package fixture contains two concrete resource
+cleanups, a generic wrapper calling public dependency templates at two concrete
+types, another public template and an unused exported template. Every ordered
+joined call (including both implementation IDs, body and raw span) exactly matches
+Go, in forward and reversed package-input order. Full impact JSON for every source
+symbol matches Go at three depth/symbol limits in each order. Unknown remote ID,
+ID owned by another declaration and erased generic ID pass single-package Go
+validation but reject at both Go and Fairy complete joins. Exact call budgets pass
+and one fewer rejects; missing/duplicate packages, stale compiler/public/generic
+interface/source/files expectations reject. A real unused exported-template body
+edit preserves the ordinary interface, changes the generic interface and makes
+old maps fail the fresh independent expectation. An unused-template workspace joins
+at a zero-call ceiling without producing an edge.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateAtlasGenericJoin$'
+go test -mod=readonly -count=1 -timeout 6m ./internal/cli -run '^TestCandidateAtlas(Current|Impact)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_atlas_generic_join_test.go
+git diff --check
+```
+
+The existing ordinary Current/Impact regression group also passes in both profiles
+(70.838s); scoped vet, formatting and diff checks pass.
+
+Native Linux remains batched; actual generic source production, SDK/full CLI,
+self-build equality, distribution/clean-machine and hosted same-commit evidence
+remain open. Stable public API/SDK ABI, DB, dependencies, repository hygiene and
+runner configuration are unchanged. No push, release or deployment.

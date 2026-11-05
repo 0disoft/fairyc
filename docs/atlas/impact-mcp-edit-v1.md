@@ -52,10 +52,15 @@ binders/identities, canonical implementation IDs, local ownership, scalar argume
 bindings, function/aggregate/cleanup compatibility, recursive aggregate substitution,
 contained cleanup spans, exact local call implementations and conservative generic
 completeness. It retains separate specialization records and counts all body
-relations. Cross-package implementation existence still belongs to a complete
-workspace join. Semantic consistency is not current-source/compiler authorship.
-V1 refuses generic fields and v2 remains unsupported. Source production, current
-admission and command integration remain separate from this explicit reader.
+relations. Cross-package implementation existence is checked by the complete workspace
+join. Semantic consistency is not current-source/compiler authorship.
+V1 refuses generic fields and v2 remains unsupported. `project_atlas_current::read_generics` requires an independently derived v3
+current expectation, including the exact generic source-interface hash. The shared
+join preserves source/target implementation IDs, cleanup ownership and call spans,
+resolves the remote ID against its exact original declaration, and retains template
+uncertainty in impact output. Ordinary `read` remains closed to generic maps.
+Actual Fairy generic source production and command integration remain separate
+from these explicit ports.
 See [the generic receipt](../ops/windows-candidate-atlas-generics-20261105.md).
 The Fairy CLI now dispatches `experimental atlas-impact`
 with the selectors and explicit limits above. Both with and without `--locked`,
