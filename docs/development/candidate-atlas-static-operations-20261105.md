@@ -20,12 +20,15 @@ execution stays batched; no push, dispatch, release or deployment is authorized.
    All five preserve original declaration/spans/symbol facts after normalizing
    only the exact-snapshot package instance, which legitimately changes with source
    bytes. Type identity uses binder index `0`, not the display name `T`.
-2. **Actual Fairy production remains next.** Reuse these independent source
-   fixtures with the existing generic producer. Require exact original headers,
-   interfaces, symbol identities, concrete tuples and provider call endpoints,
-   followed by strict reader/current-source admission and workspace joining.
-   Fix any reproduced refusal in its owning layer; do not replace written
-   declarations with synthetic wrappers or silently omit their calls.
+2. **Actual Fairy production verified.** The existing generic producer accepts
+   all five independent sources in Windows low/optimized (165.744s), preserving
+   exact original headers, interfaces, symbol identities, concrete tuples and
+   provider call endpoints. Strict reader/current-source admission and workspace
+   joining run inside the actual Fairy probe. All twenty returned package maps
+   also pass independent Go v3 decoding/comparisons. Exhausted work and missing
+   coordinates reject in each profile. No product change was necessary; the
+   existing source/identity/call owners already retain this family. See the
+   [production receipt](../ops/windows-candidate-atlas-static-operations-20261105.md).
 3. **Command integration remains open.** Exercise impact and read-only MCP against
    independent Go current contexts; then verify permitted ordinary root-body
    editing in workspaces containing operations. Editing interface/provider/public

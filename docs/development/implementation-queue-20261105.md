@@ -56,11 +56,13 @@ authorized by this queue.
 
 ## Progress
 
-- Static-operation Atlas coverage now has five independent Go v3 source/codec
-  oracles: exact original declarations, unused templates, concrete cross-package
-  algorithm/operation/provider endpoints and provider/private identity policy.
-  This is the prerequisite for the actual Fairy producer, not evidence that its
-  production or commands already accept this family. See
+- Static-operation Atlas production now passes all five independent Go v3
+  source families in Windows low/optimized (165.744s): exact original declarations,
+  unused templates, concrete cross-package algorithm/operation/provider endpoints,
+  provider/private identity policy and current-reader/join/refusal controls.
+  All twenty package maps match Go. The existing generic producer already handles
+  the family; no product change is needed. Actual commands/full authored-main
+  acceptance remain separate. See
   `docs/development/candidate-atlas-static-operations-20261105.md`.
   Broader source families and the complete implementation/final queue remain open.
 

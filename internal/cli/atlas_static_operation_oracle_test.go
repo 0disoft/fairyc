@@ -24,6 +24,21 @@ fn i32 private_value(){return 1;}`
 const atlasStaticOperationUsed = `module main;import answer as a;
 fn i32 main(){discard a::algorithm<i64>(14);return a::algorithm<i32>(21);}`
 
+type atlasStaticOperationFixture struct {
+	name, source, provider string
+	used                   bool
+}
+
+func atlasStaticOperationFixtures() []atlasStaticOperationFixture {
+	return []atlasStaticOperationFixture{
+		{"used", atlasStaticOperationUsed, atlasStaticOperationProvider, true},
+		{"unused", `module main;import answer as a;fn i32 main(){return a::value();}`, atlasStaticOperationProvider, false},
+		{"selected-provider-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "value*2", "value*3", 1), true},
+		{"unused-provider-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "return value;", "return false;", 1), true},
+		{"private-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "return 1;", "return 2;", 1), true},
+	}
+}
+
 func atlasStaticOperationWorkspace(t *testing.T, source, provider string) string {
 	t.Helper()
 	root := writeWorkspaceSessionFixture(t, source)
@@ -47,16 +62,7 @@ func atlasStaticOperationOriginalFacts(t *testing.T, partition atlasmap.Partitio
 func TestAtlasStaticOperationSpecializationOracle(t *testing.T) {
 	var original atlasmap.Partition
 	var originalIDs map[string]string
-	for _, fixture := range []struct {
-		name, source, provider string
-		used                   bool
-	}{
-		{"used", atlasStaticOperationUsed, atlasStaticOperationProvider, true},
-		{"unused", `module main;import answer as a;fn i32 main(){return a::value();}`, atlasStaticOperationProvider, false},
-		{"selected-provider-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "value*2", "value*3", 1), true},
-		{"unused-provider-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "return value;", "return false;", 1), true},
-		{"private-edit", atlasStaticOperationUsed, strings.Replace(atlasStaticOperationProvider, "return 1;", "return 2;", 1), true},
-	} {
+	for _, fixture := range atlasStaticOperationFixtures() {
 		t.Run(fixture.name, func(t *testing.T) {
 			root := atlasStaticOperationWorkspace(t, fixture.source, fixture.provider)
 			var diagnostic bytes.Buffer
