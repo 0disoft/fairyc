@@ -189,3 +189,48 @@ relations, show/around selection/traversal and full pack/actual dispatch remain
 required, as do all original implementation/final gates. No grammar, stable CLI,
 SDK ABI, DB, dependency, workflow/runner or hygiene-policy change; no push or
 native Linux execution.
+
+## Current-admitted relation projection and ordering
+
+`project_pack_relations` expands the ten observed relation kinds from ordinary
+functions, concrete functions and concrete aggregate cleanup bodies. Source/
+target specialization, cleanup ownership, local/unjoined target identities,
+optional spans, trap detail, certainty, C ABI/link name and escaping-borrow facts
+retain their owning Go query fields and order. The total expansion must equal
+the checked header count and is capped at 65,536 observations. It grants no new
+source-family or dependency-map admission and performs no host I/O.
+
+`project_pack_relation_order` uses stable bottom-up mergesort over owned indices:
+O(R log R) comparisons and O(R) scratch, preserving equal observations. Ordering
+matches the complete Go relation tuple, including numeric span offsets and both
+implementation endpoints; raw JSON lexical order is not an ordering oracle.
+
+`TestCandidatePackRelations` uses the node corpus plus three actual-source root
+maps with Region placement, both borrow kinds, escaped field borrow, foreign
+calls, self-calls, trap observations, resource moves/drops and `?` propagation.
+The independent Go outgoing queries cover every admitted kind and explicitly
+require seven optional fact families (source/target specialization, cleanup,
+unjoined target, foreign link, escaping borrow and spanless detail). Reverse
+input has the same result; an added equal observation stays duplicated. Global
+work limits are independently checked one-short/exact/one-more after current
+admission, with atomic failure output.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 8m -v ./internal/cli -run '^TestCandidatePackRelations$'
+```
+
+The final expanded assertion set passes Windows low/optimized in 28.754s (body
+28.64s; low 11.69s, optimized 15.24s): 105 native processes and 65 independent
+relation comparisons per profile, 210/130 total, no selected skips.
+Log: `pack-relations-final-20261106.log`. The preceding all-kind byte replay
+passed in 31.522s before adding the seven explicit coverage assertions; it is
+not substituted for final-input acceptance. Earlier `pack-relations` and
+`pack-relations-place` attempts fail on a non-place borrow fixture and missing
+actual `?` propagation respectively; those are not passes.
+
+Authored check/locked pass with 663 files and 8,252 MIR functions; scoped CLI
+vet, Go formatting, LF/EOF and diff checks pass. This closes relation projection
+and ordering, not show/around bounded selection, breadth-first traversal, pack
+assembly or actual CLI. Those and all original implementation/final acceptance
+gates remain open. No grammar, stable CLI, SDK ABI, DB, dependency,
+workflow/runner or hygiene-policy change; no push or native Linux execution.

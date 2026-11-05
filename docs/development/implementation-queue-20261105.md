@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy current-admitted relation projection and canonical O(R log R) ordering
+  now preserve all ten kinds, both specialization endpoints, cleanup ownership,
+  optional spans/details, ABI/link names and escaping borrows. Fifteen actual
+  source/package/schema combinations pass 210 Windows low/optimized native
+  controls and 130 independent Go relation comparisons in 28.754s. Reversed
+  input, retained duplicates and exact work boundaries pass. Authored check/
+  locked (663 files, 8,252 MIR functions), scoped vet/format/LF/diff pass. The
+  Context Pack plan retains show/around selection/traversal/assembly and actual
+  dispatch plus every original implementation/final acceptance gate.
+
 - Fairy exact-current query-node projection now matches original declarations,
   recursive types, scalar/aggregate specialization and cleanup counts across
   all map families. The twelve actual source/package/schema combinations pass

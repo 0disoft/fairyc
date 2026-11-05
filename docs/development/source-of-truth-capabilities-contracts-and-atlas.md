@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Fairy exact-current relation projection and canonical ordering: `examples/lexer_candidate/src/project_pack_relations.fy`, `project_pack_relation_order.fy`; independent actual Go queries and all-kind source/native controls: `internal/cli/candidate_pack_relations_test.go`. Concrete endpoints, cleanup, spans/details and ABI/escape facts remain intact; bounded show/around selection/traversal is a separate next step. Evidence: `docs/development/candidate-context-pack-20261106.md`.
+
 - Fairy exact-current query nodes and snapshot projection: `examples/lexer_candidate/src/project_pack_node.fy`, `project_pack_snapshot.fy`; independent actual Go source/query and native controls: `internal/cli/candidate_pack_node_test.go`. Original and concrete generic/aggregate/cleanup facts stay distinct; relation selection and show/around remain separate. Evidence: `docs/development/candidate-context-pack-20261106.md`.
 
 - Canonical detached Go query declarations/types across map transport: `internal/atlasmap/query_node.go`, `query_node_transport_test.go`, `query.go`, `query_generic.go`; owning snapshot/selection rules: `docs/atlas/fymap-query-v1.md`, `context-pack-v1.md`. Original and restored show/around v1/v2/v3 facts and mandatory byte limits agree; source snapshots/map bytes stay unchanged. Exact evidence and remaining Fairy query work: `docs/development/candidate-context-pack-20261106.md`.
