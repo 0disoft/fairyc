@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy current-admitted Context Pack show now performs exact mandatory
+  context/subject selection, canonical incoming/outgoing/both relation selection
+  and omission counts under independent record/relation/selection/output/work
+  limits. Adjacency lists and a lazy heap merge retain self-call deduplication.
+  Fifteen actual source/package/schema combinations pass 2,420 independent Go
+  encoder/checksum Windows low/optimized observations in 156.692s. Authored
+  check/locked (667 files, 8,294 MIR functions), scoped vet/format/LF/diff pass.
+  The Context Pack plan retains around traversal/packs, source-backed actual
+  dispatch and every original implementation/final acceptance gate.
+
 - Fairy current-admitted relation projection and canonical O(R log R) ordering
   now preserve all ten kinds, both specialization endpoints, cleanup ownership,
   optional spans/details, ABI/link names and escaping borrows. Fifteen actual

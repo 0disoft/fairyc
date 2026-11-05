@@ -1,6 +1,7 @@
 module project_pack;
 import project_pack_overview as overview;
 import project_pack_projection as projection;
+import project_pack_query as query;
 import project_catalog_json as w;
 import project_atlas_current as current;
 import project_atlas_validate as validate;
@@ -42,4 +43,22 @@ pub fn Result<bytes::Buffer,u32> encode_overview(ref current::Ready ready,u32 ve
     discard w::raw(ref mut out,b"]},\"show\":null,\"around\":null},\"relations\":[],\"documentation\":[],\"source_excerpts\":[],\"omissions\":[",meter)?;
     discard w::raw(ref mut out,overview::omissions(ref selected),meter)?;discard w::raw(ref mut out,b"],\"warnings\":[]}",meter)?;
     return envelope(bytes::view(ref out),version,output,meter);
+}
+pub fn Result<bytes::Buffer,u32> encode_show(ref current::Ready ready,u32 version,ref u8[] symbol,query::Policy policy,usize output,ref mut usize meter){
+    let p=current::partition(ready);if(version<1 || version>3 || version!=validate::version(p) || output==0){return .err(9);}
+    let selected=query::show(ready,symbol,policy,meter)?;let t=validate::tree(p);let h=validate::header(p);let usage=query::usage(ref selected);var out=bytes::empty();
+    discard w::raw(ref mut out,b"{",meter)?;discard w::pair(ref mut out,b"map_version",wire::string(t,h,b"logical_schema"),meter)?;
+    discard w::raw(ref mut out,b",\"package_identity\":",meter)?;discard projection::identity(ref mut out,p,meter)?;
+    discard w::raw(ref mut out,b",\"compatibility\":",meter)?;discard projection::compatibility(ref mut out,p,meter)?;
+    discard w::raw(ref mut out,b",\"query\":{\"kind\":\"show\",",meter)?;discard w::pair(ref mut out,b"subject",query::subject(ref selected),meter)?;
+    discard w::raw(ref mut out,b",",meter)?;let ref u8[] direction=if(policy.direction==0){b"outgoing"}else if(policy.direction==1){b"incoming"}else{b"both"};discard w::pair(ref mut out,b"direction",direction,meter)?;
+    discard w::raw(ref mut out,b",\"relations\":",meter)?;discard query::kinds(ref mut out,policy.mask,meter)?;discard w::raw(ref mut out,b"},\"budget\":{\"max_records\":",meter)?;discard w::number(ref mut out,policy.records,meter)?;
+    discard w::raw(ref mut out,b",\"max_relations\":",meter)?;discard w::number(ref mut out,policy.relations,meter)?;discard w::raw(ref mut out,b",\"max_depth\":",meter)?;discard w::number(ref mut out,policy.depth,meter)?;
+    discard w::raw(ref mut out,b",\"max_selection_bytes\":",meter)?;discard w::number(ref mut out,policy.selection,meter)?;discard w::raw(ref mut out,b"},\"usage\":{\"records\":",meter)?;discard w::number(ref mut out,usage.records,meter)?;
+    discard w::raw(ref mut out,b",\"relations\":",meter)?;discard w::number(ref mut out,usage.relations,meter)?;discard w::raw(ref mut out,b",\"depth\":",meter)?;discard w::number(ref mut out,usage.depth,meter)?;
+    discard w::raw(ref mut out,b",\"selection_bytes\":",meter)?;discard w::number(ref mut out,usage.selection,meter)?;discard w::raw(ref mut out,b"},\"completeness\":[",meter)?;discard w::raw(ref mut out,query::completeness(ref selected),meter)?;
+    discard w::raw(ref mut out,b"],\"facts\":{\"overview\":null,\"show\":{\"subject\":",meter)?;discard w::raw(ref mut out,query::facts(ref selected),meter)?;
+    discard w::raw(ref mut out,b"},\"around\":null},\"relations\":[",meter)?;discard w::raw(ref mut out,query::relations(ref selected),meter)?;
+    discard w::raw(ref mut out,b"],\"documentation\":[],\"source_excerpts\":[],\"omissions\":[",meter)?;discard w::raw(ref mut out,query::omissions(ref selected),meter)?;
+    discard w::raw(ref mut out,b"],\"warnings\":[]}",meter)?;return envelope(bytes::view(ref out),version,output,meter);
 }

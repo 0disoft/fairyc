@@ -11,8 +11,10 @@ no push, dispatch, publication or target promotion is authorized here.
   canonical numeric bounds and locked selection, compared with actual Go parsers.
 - [x] Current-admitted overview projection/selection and canonical v1/v2/v3 packs,
   including independent record/byte/final-byte/work boundaries and checksums.
-- [ ] Current-admitted show/around node/relation facts, specialization/cleanup
-  identity, deterministic local traversal and explicit omissions under all bounds.
+- [x] Current-admitted show node/relation selection, specialization/cleanup
+  identity, canonical v1/v2/v3 packs and explicit omissions under all bounds.
+- [ ] Current-admitted around traversal, deterministic local node/relation
+  selection, canonical packs and explicit omissions under all bounds.
 - [ ] Fresh Complete-bound source selection and actual dispatcher/help/error/
   lock/output acceptance at both Windows profiles. No child Go fallback.
 - [ ] Original full-CLI/generated-consumer/self-build/distribution/hosted/Linux
@@ -129,6 +131,51 @@ This closes the overview encoder leaf only. Show/around, fresh source-backed
 actual dispatch, generated consumers and every original final acceptance gate
 remain open. No grammar, stable CLI, public SDK/runtime ABI, dependencies, DB,
 workflow/runner or hygiene-policy change; no push or native Linux execution.
+
+## Current-admitted show packs
+
+`project_pack_graph` binds the already verified relation observations to source
+and optional local-target SymbolId positions and builds ascending adjacency
+lists. `project_pack_frontier` lazily merges those lists with a bounded owned
+min-heap, consuming a self-call once even when both directions are selected.
+No repeated whole-relation scan or workspace/dependency discovery supplies
+query facts. `project_pack_context` projects only requested completeness plus
+the existing version-specific generic uncertainty.
+
+`project_pack_query` reserves the exact context/subject as one mandatory record,
+selects ordered incoming/outgoing/both observations, and preserves relation-
+before-record-before-byte refusal and exact known remaining counts. Relation
+filters, unjoined selected targets and missing incoming packages remain explicit
+omissions. The public private-host `encode_show` entry runs that selection itself
+and uses the existing version-specific canonical body/checksum/envelope path;
+it never accepts a caller-mutated query result or a map-version conversion.
+
+`TestCandidatePackShow` uses the fifteen actual source/package/schema fixtures
+from the all-kind relation corpus. All nodes compare against each actual Go
+show encoder in all three directions and both full/visible selector forms.
+Each kind, combined filters, generic/cleanup facts, mandatory and cumulative
+selection bytes, every selected record/relation boundary and their precedence,
+final output length and global work one-short/exact/one-more pass. Malformed/
+missing selectors, stale/corrupt maps, wrong versions and invalid policies
+publish nothing. The checksum is independently recomputed from logical bytes.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 12m -v ./internal/cli -run '^TestCandidatePackShow$'
+```
+
+PASS, 156.692s (body 156.49s; low 102.18s, optimized 51.85s), 1,210 native
+observations per profile, 2,420 total, no selected skips;
+`pack-show-frontier-20261106.log`. Earlier `pack-show` and `pack-show-names`
+attempts failed on an import/function name collision and mutable borrowing of
+a nested heap resource respectively. The final merge owns the heap directly
+and keeps the deduplication cursor separately; no query policy was relaxed.
+
+Authored check/locked pass with 667 source files and 8,294 MIR functions;
+scoped CLI vet, Go formatting, LF/EOF and diff checks pass. This closes the
+show encoder only. Around BFS/packs, source-backed actual dispatch, generated
+consumers and every original implementation/final gate remain open. No grammar,
+stable CLI, SDK/runtime ABI, DB, dependency, workflow/runner or hygiene-policy
+change; no push, dispatch or native Linux execution.
 
 ## Go node transport prerequisite
 
