@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy atlas-pack overview/show/around argument selection now matches 317 Go
+  parser cases and three invalid queries per Windows profile, 640 native
+  observations (33.583s). Exact versions, lexical ten-relation filters, action-
+  specific required/forbidden flags, positive limits and around depth 0..64,
+  UID/source selectors and the full 43-word invocation pass without workspace
+  I/O. See `candidate-context-pack-20261106.md`. Current-admitted pack projection,
+  selection/traversal/checksums and actual CLI remain required; this does not
+  close atlas-pack or any original broader/final queue item.
+
 - Fairy actual `experimental atlas-calls list` now derives requested v1/v2/v3
   maps from one fresh Complete, reauthenticates every package, joins exact current
   calls and emits canonical v0/v1/v2 catalogs. Argument/help, product error codes,
