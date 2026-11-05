@@ -285,3 +285,13 @@ authorized by this queue.
   see the aggregate plan for exact failure/reuse accounting. CFG/drop/defer
   sequencing, C emission/native values/traces, source identities/restoration,
   cache/Atlas/actual commands and every final queue gate remain open.
+
+
+- Aggregate C acceptance exposed missing Go MIR cleanup of already completed
+  owning fields when a later initializer propagates an error. The lowering now
+  retains private typed prefix obligations and transfers them only on successful
+  parent construction. Eight interpreter/codec/dual-target C-emission controls,
+  complete MIR tests and selected nested/ignored-resource regressions pass on
+  Windows; see `docs/ops/windows-partial-aggregate-cleanup-20261105.md` for exact
+  failed/passed accounting. This does not close native aggregate C execution or
+  any other broad queue item; that implementation continues next.

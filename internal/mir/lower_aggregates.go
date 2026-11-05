@@ -25,6 +25,7 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 		positions[name] = index
 	}
 	operands := make([]Operand, len(fields))
+	var partials []hir.SymbolID
 	for index := range expression.Children {
 		value, err := l.lowerExpression(&expression.Children[index])
 		if err != nil {
@@ -50,6 +51,23 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 			return Operand{}, fmt.Errorf("aggregate construction has unknown or duplicate field %q", expression.Fields[index])
 		}
 		operands[position] = value
+		// A completed owning field must survive later fallible initializers.
+		// Retain a private obligation until the whole parent takes ownership.
+		if isResource && index+1 < len(expression.Children) && l.properties.NeedsDrop(expression.Children[index].Type) {
+			local := l.newTemporary()
+			symbol := hir.SymbolID(local)
+			span := expression.Children[index].Span
+			l.result.Resources = append(l.result.Resources, ResourceLocal{Symbol: symbol, Type: expression.Children[index].Type, Binding: span})
+			l.appendOperation(Operation{Kind: OperationInitialize, Span: span, Symbol: symbol, DestinationLocal: local, Operands: []Operand{value}})
+			l.live[symbol] = true
+			partials = append(partials, symbol)
+		}
+	}
+	// The original operands are already materialized. Discharge only the
+	// private copies; the successful aggregate acquires their obligations.
+	for _, symbol := range partials {
+		l.appendOperation(Operation{Kind: OperationMove, Span: expression.Span, Symbol: symbol, Destination: "resource-field"})
+		l.live[symbol] = false
 	}
 	destination := l.newTemporary()
 	kind := OperationStructConstruct
