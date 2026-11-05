@@ -14,10 +14,12 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    edges, and retains exact package-coordinate `g0_`/public-closure identities.
    User aggregate planning does not acquire SDK storage intrinsics or nominal
    argument admission. Ordinary `build_sources` still closes aggregate execution.
-2. **Concrete aggregate types and fields, preparation implemented.** Materialize each original declaration
-   and ordered argument tuple once; substitute fields structurally, preserve
-   source ownership, and reject recursive/unresolved layouts without partial
-   publication. Integrate with actual signatures, annotations and construction.
+2. **Concrete types/fields/signatures: preparation implemented; layout integration open.**
+   Each original declaration and ordered argument tuple is materialized once;
+   fields substitute structurally and preserve source ownership. Signature,
+   annotation and constructor type requests use the actual graph. Ordinary
+   field/layout contracts and Interfaces still must reject recursive/unresolved
+   layouts without partial publication before executable admission.
 3. **Ownership, cleanup and executable MIR.** Connect resource instances and
    cleanup-helper calls to Flow, kind-aware identities, MIR verification and both
    C emission forms. Require native values and exact cleanup traces against Go;
@@ -107,9 +109,10 @@ nodes plus a one-argument tuple and instance fill the 4,096-node limit; at 4,095
 the partial tuple is rolled back; at 4,096 failure preserves the graph. Repeating
 an existing instance at full capacity returns the same ID without growth.
 
-The ordinary `module_types::assemble` gate still refuses these private aggregate
-and tuple records. The ordinary `module_signatures::Program` and Interfaces
-owners, full field/layout validity, construction value checking, ownership,
+At that preparation checkpoint, ordinary `module_types::assemble` still refused
+these private aggregate and tuple records. The signature-only follow-up below
+now joins the existing Program owner through a private route. Interfaces, full
+field/layout validity, construction value checking, ownership,
 cleanup, Flow/MIR/C, interface/cache/Atlas publication and full CLI execution
 remain required follow-up work. In particular this preparation does not attest
 layout size/alignment, borrowed fields in stored records, or native aggregate
@@ -138,3 +141,70 @@ probes and focused aggregate replay attest the final source. This run is not a
 refreshed full CLI or consecutive self-build result. Linux remains batched; self-build, clean-machine distribution and
 same-commit hosted CI remain open. No stable public API/SDK ABI, DB, dependencies,
 repository-hygiene or runner configuration changed.
+
+## Ordinary signature integration
+
+`module_signatures::build_aggregates` now consumes the authenticated concrete
+preparation and publishes the existing Program owner with its retained original
+plan/fields. Ordinary `build`/`build_catalog` remain closed for explicit user
+aggregate instances. Source reauthentication precedes signature publication;
+work exhaustion, declaration checks and existing effect/foreign diagnostics return
+no partial Program. Generic methods remain outside the admitted slice.
+
+The type Graph records whether it was admitted through the private aggregate
+validator. That validator checks original declaration kind and arity, ordered
+scalar tuple tails, bounds, backwards edges and uniqueness. Tuples cannot become
+Option/Result/borrow payloads. Struct/resource instances stay distinct from SDK
+Vec. `sdk_vector_plan` keeps that graph mode through actual signature resolution,
+specialization, ordered batch queries and owned graph reconstruction; ordinary
+callers keep the existing path. Source-only extended scalar handles materialize
+into concrete scalar nodes when the private specialization resolver needs them.
+
+`TestCandidateGenericAggregateSignatures` independently runs Go
+`AnalyzeGenericPackages`, requiring completion through Flow, no diagnostics and
+no unsupported forms for each accepted input. Detached Go expansion supplies the
+expected ordinary signature types; Fairy uses its actual Program owner. Seven
+three-package positive variants cover concrete resource return/borrow, ordered
+struct arguments, owner/module reorder, f64, Result, borrow and `@must_use`.
+Forty ordinary signatures are compared per native profile. Three rejected inputs
+cover invalid must-use result, foreign generic aggregate and generic owner method;
+Go rejection includes its explicit unsupported-source channel.
+
+Additional controls retain the ordinary signature gate, exact source drift/work
+refusal, mode-preserving owned graphs, tuple escape, wrong arity and ordered batch
+failure without graph growth. The probe's supplied sources are Go Flow-valid in
+accepted cases, but no candidate body Flow/MIR, cleanup execution or executable
+aggregate behavior is claimed by this signature-only admission.
+
+Actual field/layout contracts and ordinary Interfaces wiring, construction value
+checking, ownership/cleanup, executable MIR/C, interface/cache/Atlas and command
+acceptance remain required. The complete queue remains open; native Linux stays
+batched. No stable API/SDK ABI, DB, dependencies, hygiene or runner change.
+
+Final signature probe passes in 23.01s on Windows MSVC low/optimized, including
+all seven extended scalar handles through single and ordered batch specialization,
+plus invalid-handle refusal without graph growth:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateGenericAggregateSignatures$'
+```
+
+The final scalar-handle controls were added after the combined replay began;
+that combined replay's production inputs are unchanged. The focused probe above
+contains the final test inputs. Scoped vet, gofmt and diff checks pass. Native
+processes use empty PATH. No Linux, full candidate CLI, consecutive self-build,
+clean-machine or hosted same-commit claim is made by these tests.
+
+The combined Windows replay passes in 184.063s with
+`FAIRYC_RUN_PARITY_INTEGRATION=1`:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidate(GenericAggregatePlan|GenericAggregateTypes|GenericAggregateSignatures|AtlasTypes|GenericTransportAdmission)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_types_test.go internal/cli/candidate_generic_aggregate_signatures_test.go
+git diff --check
+```
+
+All selected tests ran; no selected native test was skipped. The final focused
+signature replay above supplements its initial signature fixture with the last
+scalar-handle controls. Linux remains deferred at the user's request.

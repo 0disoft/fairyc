@@ -34,7 +34,7 @@ fn Result<v::Vec<usize>,u32> arguments(ref plan::Plan p,plan::Node n,ref mut v::
     var out=v::empty<usize>();var usize i=0;let c=input::types(plan::input(p));
     while(i<n.count){let t=concrete::at(c,n.arguments[i]-1);if(t.kind!=1){return .err(4502);}let id=types::canonical(graph,types::Type{.kind=1,.scalar=t.scalar,.module_index=0,.declaration=0,.first=0,.second=0});if(id==0){return .err(if(types::count(graph)>=4096){10}else{11});}if(!v::push<usize>(ref mut out,id).is_ok){return .err(11);}i+=1;}return .ok(out);
 }
-fn Result<catalog::Catalog,Problem> build_catalog(ref plan::Plan p,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
+pub fn Result<catalog::Catalog,Problem> build_catalog(ref plan::Plan p,ref v::Vec<syntax::Parsed> sources,ref mut usize work){
     let c=input::templates(plan::input(p));let b=templates::packages(c);if(bindings::count(b)!=v::len<syntax::Parsed>(sources)){return .err(fail(12,0,0,0));}var owners=v::empty<usize>();var imports=v::empty<catalog::Binding>();var usize i=0;
     while(i<bindings::count(b)){let code=templates::current(b,i,v::at<syntax::Parsed>(sources,i),work);if(code!=0){return .err(fail(code,i,0,0));}if(!v::push<usize>(ref mut owners,bindings::module_at(b,i).owner).is_ok){return .err(fail(11,i,0,0));}i+=1;}
     i=0;while(i<bindings::import_count(b)){let row=bindings::import_at(b,i);if(!v::push<catalog::Binding>(ref mut imports,catalog::Binding{.source=row.module_index,.declaration=row.declaration,.target=row.target}).is_ok){return .err(fail(11,row.module_index,0,0));}i+=1;}

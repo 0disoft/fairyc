@@ -43,12 +43,13 @@ pub fn Instance at(ref Plan p,usize index){assert(index<count(p));return *v::at<
 pub fn usize find(ref Plan p,usize type){var usize i=0;while(i<count(p)){if(at(p,i).type==type){return i+1;}i+=1;}return 0;}
 pub fn types::Type type_at(ref Plan p,usize id){return types::graph_at(ref p.graph,id);}
 pub fn usize type_count(ref Plan p){return types::graph_count(ref p.graph);}
-pub fn types::Resolution resolve_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){return types::resolve(ref p.declarations,source,module_index,root,graph);}
+pub fn bool aggregate_types(ref Plan p){return types::aggregate_graph(ref p.graph);}
+pub fn types::Resolution resolve_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize root,ref mut v::Vec<types::Type> graph){if(aggregate_types(p)){let empty=v::empty<usize>();return types::aggregate_resolve(ref p.declarations,source,module_index,0,root,ref empty,graph);}return types::resolve(ref p.declarations,source,module_index,root,graph);}
 pub fn types::Resolution resolve_argument(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return types::resolve_argument(ref p.declarations,source,module_index,declaration,root,args,graph);}
-pub fn Result<v::Vec<usize>,types::BatchProblem> resolve_types(ref Plan p,ref syntax::Parsed source,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<types::Type> graph){return types::resolve_many(ref p.declarations,source,module_index,roots,graph);}
-pub fn Result<v::Vec<usize>,types::BatchProblem> specialize_types(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){return types::specialize_many(ref p.declarations,source,module_index,declaration,roots,arguments,graph);}
+pub fn Result<v::Vec<usize>,types::BatchProblem> resolve_types(ref Plan p,ref syntax::Parsed source,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<types::Type> graph){if(aggregate_types(p)){let empty=v::empty<usize>();return types::aggregate_many(ref p.declarations,source,module_index,0,roots,ref empty,graph);}return types::resolve_many(ref p.declarations,source,module_index,roots,graph);}
+pub fn Result<v::Vec<usize>,types::BatchProblem> specialize_types(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> arguments,ref mut v::Vec<types::Type> graph){if(aggregate_types(p)){return types::aggregate_many(ref p.declarations,source,module_index,declaration,roots,arguments,graph);}return types::specialize_many(ref p.declarations,source,module_index,declaration,roots,arguments,graph);}
 pub fn types::Resolution declaration_type(ref Plan p,usize module_index,usize declaration,ref mut v::Vec<types::Type> graph){return types::declaration(ref p.declarations,module_index,declaration,graph);}
-pub fn Result<types::Graph,u32> own_types(ref Plan p,v::Vec<types::Type> graph){return types::assemble(ref p.declarations,graph);}
+pub fn Result<types::Graph,u32> own_types(ref Plan p,v::Vec<types::Type> graph){return if(aggregate_types(p)){types::assemble_aggregates(ref p.declarations,graph)}else{types::assemble(ref p.declarations,graph)};}
 pub fn usize module_count(ref Plan p){return catalog::module_count(ref p.declarations);}
 pub fn usize module_owner(ref Plan p,usize module_index){return catalog::module_owner(ref p.declarations,module_index);}
 pub fn usize declaration_count(ref Plan p){return catalog::declaration_count(ref p.declarations);}
@@ -65,4 +66,4 @@ pub fn usize field_offset(usize index){assert(index<field_count());return index*
 pub fn usize storage_size(){return 48;}
 pub fn usize storage_alignment(){return 8;}
 
-pub fn types::Resolution specialize_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return types::specialize(ref p.declarations,source,module_index,declaration,root,args,graph);}
+pub fn types::Resolution specialize_type(ref Plan p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return if(aggregate_types(p)){types::aggregate_resolve(ref p.declarations,source,module_index,declaration,root,args,graph)}else{types::specialize(ref p.declarations,source,module_index,declaration,root,args,graph)};}

@@ -18,30 +18,41 @@ pub struct Problem {u32 code;usize module_index;usize start;usize end;}
 pub struct Resolution {usize type;Problem problem;}
 // Request is one-based; zero identifies a batch-wide source/capacity failure.
 pub struct BatchProblem {Problem problem;usize request;}
-pub resource Graph {v::Vec<Type> types;cleanup{}}
+pub resource Graph {v::Vec<Type> types;bool aggregates;cleanup{}}
 // Comparisons borrow the frozen records; no graph write occurs until they end.
 fn bool same(ref Type a,ref Type b){return a.kind==b.kind && a.scalar==b.scalar && a.module_index==b.module_index && a.declaration==b.declaration && a.first==b.first && a.second==b.second;}
-pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){
+pub fn u32 validate(ref catalog::Catalog c,ref v::Vec<Type> types){return validate_mode(c,types,false);}
+fn u32 validate_mode(ref catalog::Catalog c,ref v::Vec<Type> types,bool aggregates){
     if(v::len<Type>(types)>4096){return 10;}var usize i=0;while(i<v::len<Type>(types)){let t=v::at<Type>(types,i);
         var usize previous=0;while(previous<i){if(same(v::at<Type>(types,previous),t)){return 9;}previous+=1;}
-        if(t.kind==13){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || !catalog::sdk_vector(c,t.module_index,t.declaration) || !element(types,t.first,0)){return 9;}}
-        else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
+        if(aggregates && t.kind==22){
+            if(t.scalar!=0 || t.module_index!=0 || t.declaration!=0 || t.first==0 || t.first>i || at(types,t.first).kind!=1 || !transport::valid(at(types,t.first).scalar)){return 9;}
+            var usize tail=t.second;var usize length=1;while(tail!=0){if(tail>i || at(types,tail).kind!=22 || length>=8){return 9;}length+=1;tail=at(types,tail).second;}
+        }
+        else if(aggregates && (t.kind==20 || t.kind==21)){
+            let item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.second!=0 || t.first==0 || t.first>i){return 9;}let d=catalog::declaration_at(c,item);if(d.kind!=if(t.kind==20){4}else{6} || d.parameters==0 || d.parameters>8 || catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}
+            var usize tail=t.first;var usize length=0;while(tail!=0){if(tail>i || at(types,tail).kind!=22 || length>=8){return 9;}length+=1;tail=at(types,tail).second;}if(length!=d.parameters){return 9;}
+        }
+        else if(t.kind==13){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || !catalog::sdk_vector(c,t.module_index,t.declaration) || !element(types,t.first,0)){return 9;}}
+        else if(t.kind==2 || t.kind==3 || t.kind==4){let usize item=catalog::identity(c,t.module_index,t.declaration);if(item==0 || t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}let d=catalog::declaration_at(c,item);if(d.parameters!=0 || d.kind!=if(t.kind==2){4}else if(t.kind==3){6}else{11} || t.kind==3 && catalog::sdk_vector(c,t.module_index,t.declaration)){return 9;}}
         else{if(t.module_index!=0 || t.declaration!=0){return 9;}
             if(t.kind==1){if(t.scalar==0 || t.scalar>7 && !transport::extended(t.scalar) && !abi::valid(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
             else if(t.kind==15){if(!views::extended(t.scalar) || t.first!=0 || t.second!=0){return 9;}}
-            else if(t.kind==17 || t.kind==18){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || at(types,t.first).kind!=2){return 9;}}
-            else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second)){return 9;}}
-            else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2){return 9;}}
+            else if(t.kind==17 || t.kind==18){if(t.scalar!=0 || t.first==0 || t.first>i || t.second!=0 || at(types,t.first).kind!=2 && !(aggregates && at(types,t.first).kind==20)){return 9;}}
+            else if(t.kind==16){if(t.scalar!=0 || t.first==0 || t.first>i || !array_element(types,t.first,t.second) && !(aggregates && t.second>=1 && t.second<=4096 && (at(types,t.first).kind==20 || at(types,t.first).kind==1 && transport::valid(at(types,t.first).scalar)))){return 9;}}
+            else if(t.kind==12){if(t.second!=0){return 9;}if(t.first==0){if(!pointers::valid(t.scalar) || pointers::inner(t.scalar)>=256 && pointers::inner(t.scalar)<=767){return 9;}}else if(t.scalar>1 || t.first>i || v::at<Type>(types,t.first-1).kind!=2 && !(aggregates && at(types,t.first).kind==20)){return 9;}}
             else if(t.kind>=9 && t.kind<=11 || t.kind==14 || t.kind==19){if(t.scalar!=0 || t.first!=0 || t.second!=0){return 9;}}
-            else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}if(at(types,t.first).kind==19 || t.second!=0 && at(types,t.second).kind==19){return 9;}}
+            else if(t.kind>=5 && t.kind<=8){if(t.scalar!=0 || t.first==0 || t.first>i || t.kind==6 && (t.second==0 || t.second>i) || t.kind!=6 && t.second!=0){return 9;}if(at(types,t.first).kind==19 || at(types,t.first).kind==22 || t.second!=0 && (at(types,t.second).kind==19 || at(types,t.second).kind==22)){return 9;}}
             else{return 9;}
         }i+=1;
     }return 0;
 }
-pub fn Result<Graph,u32> assemble(ref catalog::Catalog c,v::Vec<Type> types){let u32 code=validate(c,ref types);if(code!=0){return .err(code);}return .ok(Graph{.types});}
+pub fn Result<Graph,u32> assemble(ref catalog::Catalog c,v::Vec<Type> types){let u32 code=validate(c,ref types);if(code!=0){return .err(code);}return .ok(Graph{.types,.aggregates=false});}
 pub fn usize graph_count(ref Graph graph){return v::len<Type>(ref graph.types);}
 pub fn ref v::Vec<Type> graph_records(ref Graph graph){return ref graph.types;}
-pub fn u32 validate_graph(ref catalog::Catalog c,ref Graph graph){return validate(c,ref graph.types);}
+pub fn bool aggregate_graph(ref Graph graph){return graph.aggregates;}
+pub fn Result<Graph,u32> assemble_aggregates(ref catalog::Catalog c,v::Vec<Type> types){let code=validate_mode(c,ref types,true);if(code!=0){return .err(code);}return .ok(Graph{.types,.aggregates=true});}
+pub fn u32 validate_graph(ref catalog::Catalog c,ref Graph graph){return validate_mode(c,ref graph.types,graph.aggregates);}
 pub fn Type graph_at(ref Graph graph,usize id){assert(id>0 && id<=graph_count(graph));return *v::at<Type>(ref graph.types,id-1);}
 pub fn usize count(ref v::Vec<Type> graph){return v::len<Type>(graph);}
 pub fn Type at(ref v::Vec<Type> graph,usize id){assert(id>0 && id<=count(graph));return *v::at<Type>(graph,id-1);}
@@ -158,19 +169,19 @@ fn BatchProblem batch_fail(u32 code,usize module_index,usize request){return Bat
 fn void rollback(ref mut v::Vec<Type> graph,usize before){while(count(graph)>before){discard v::pop<Type>(graph);}}
 // The shared source/catalog loans stay live for the entire ordered batch. A
 // zero root preserves an unrequested slot; no successful prefix escapes errors.
-fn Result<v::Vec<usize>,BatchProblem> batch(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,ref v::Vec<usize> roots,usize declaration,ref v::Vec<usize> substitutions,bool specialized,ref mut v::Vec<Type> graph){
+fn Result<v::Vec<usize>,BatchProblem> batch(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,ref v::Vec<usize> roots,usize declaration,ref v::Vec<usize> substitutions,bool specialized,bool aggregates,ref mut v::Vec<Type> graph){
     if(v::len<usize>(roots)>4096){return .err(batch_fail(10,module_index,0));}
     var v::Vec<usize> result=v::empty<usize>();if(v::len<usize>(roots)==0){return .ok(result);}
     if(!catalog::source_matches(c,module_index,p)){return .err(BatchProblem{.problem=Problem{.code=12,.module_index,.start=0,.end=if(specialized){0}else{syntax::source_view(p).len}},.request=0});}
     let usize before=count(graph);var usize i=0;
     while(i<v::len<usize>(roots)){let root=*v::at<usize>(roots,i);var usize type=0;
-        if(root!=0){let resolved=if(specialized){specialize_current(c,p,module_index,declaration,root,substitutions,graph)}else{walk(c,p,module_index,root,graph,0,0,substitutions,false)};
+        if(root!=0){let resolved=if(aggregates){aggregate_resolve(c,p,module_index,if(specialized){declaration}else{0},root,substitutions,graph)}else if(specialized){specialize_current(c,p,module_index,declaration,root,substitutions,graph)}else{walk(c,p,module_index,root,graph,0,0,substitutions,false)};
             if(resolved.problem.code!=0){rollback(graph,before);return .err(BatchProblem{.problem=resolved.problem,.request=i+1});}type=resolved.type;}
         if(!v::push<usize>(ref mut result,type).is_ok){rollback(graph,before);return .err(batch_fail(11,module_index,i+1));}i+=1;
     }return .ok(result);
 }
-pub fn Result<v::Vec<usize>,BatchProblem> resolve_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<Type> graph){let empty=v::empty<usize>();return batch(c,p,module_index,roots,0,ref empty,false,graph);}
-pub fn Result<v::Vec<usize>,BatchProblem> specialize_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){return batch(c,p,module_index,roots,declaration,substitutions,true,graph);}
+pub fn Result<v::Vec<usize>,BatchProblem> resolve_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,ref v::Vec<usize> roots,ref mut v::Vec<Type> graph){let empty=v::empty<usize>();return batch(c,p,module_index,roots,0,ref empty,false,false,graph);}
+pub fn Result<v::Vec<usize>,BatchProblem> specialize_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){return batch(c,p,module_index,roots,declaration,substitutions,true,false,graph);}
 
 // Compiler-private concrete aggregate values. Kinds 20/21 are struct/resource
 // instances; kind 22 is an ordered scalar argument tuple, never a value type.
@@ -187,7 +198,9 @@ pub fn Resolution aggregate_resolve(ref catalog::Catalog c,ref syntax::Parsed p,
     if(!catalog::source_matches(c,module_index,p)){return fail(12,module_index,0,0);}if(declaration==0 && v::len<usize>(substitutions)!=0){return fail(4501,module_index,0,0);}
     if(declaration!=0){if(declaration>syntax::declaration_count(p)){return fail(4501,module_index,0,0);}let d=syntax::declaration_at(p,declaration-1);let size=v::len<usize>(substitutions);
         if((d.kind!=3 && d.kind!=4 && d.kind!=6) || size==0 || size>8 || size!=syntax::generic_parameter_count(p,declaration-1) || root==0 || root>syntax::type_count(p)){return fail(4501,module_index,0,0);}let n=syntax::type_at(p,root);if(n.start<d.start || n.end>d.end){return fail(4501,module_index,n.start,n.end);}
-        var usize i=0;while(i<size){let id=*v::at<usize>(substitutions,i);if(id==0 || id>count(graph)){return fail(4502,module_index,n.start,n.end);}let t=at(graph,id);if(t.kind!=1 || !transport::valid(t.scalar) || t.module_index!=0 || t.declaration!=0 || t.first!=0 || t.second!=0){return fail(4502,module_index,n.start,n.end);}i+=1;}
+        var usize i=0;while(i<size){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){i+=1;continue;}if(id==0 || id>count(graph)){return fail(4502,module_index,n.start,n.end);}let t=at(graph,id);if(t.kind!=1 || !transport::valid(t.scalar) || t.module_index!=0 || t.declaration!=0 || t.first!=0 || t.second!=0){return fail(4502,module_index,n.start,n.end);}i+=1;}
     }
     let before=count(graph);let result=walk(c,p,module_index,root,graph,0,declaration,substitutions,true);if(result.problem.code!=0){rollback(graph,before);}return result;
 }
+
+pub fn Result<v::Vec<usize>,BatchProblem> aggregate_many(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize declaration,ref v::Vec<usize> roots,ref v::Vec<usize> substitutions,ref mut v::Vec<Type> graph){return batch(c,p,module_index,roots,declaration,substitutions,declaration!=0,true,graph);}

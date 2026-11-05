@@ -198,3 +198,12 @@ authorized by this queue.
   controls; see the aggregate plan for final commands and results. Ordinary
   signature/interface and layout admission, ownership/cleanup, MIR/C, cache/Atlas
   and full CLI execution remain required; the broad aggregate queue stays open.
+
+- The private aggregate source preparation now enters the actual ordinary
+  `module_signatures::Program` owner, with explicit graph validation/mode and
+  mode-preserving scalar/aggregate batch and specialization resolution. The
+  original plan/fields remain owned for subsequent layout and provenance joins.
+  Windows Go-Flow/expansion signature comparison and source/graph refusal controls
+  are authored; final replay results are in the aggregate plan. Field/layout and
+  Interfaces admission, ownership/cleanup, executable MIR/C, cache/Atlas and full
+  commands remain required; no broader queue family closes here.

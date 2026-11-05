@@ -1,5 +1,6 @@
 module module_signatures;
 import candidate_limits as limits;
+import generic_aggregate_types as aggregates;
 import module_catalog as catalog;
 import module_state_declarations as state_declarations;
 import module_state_layout as state;
@@ -20,7 +21,7 @@ import std::bytes as bytes;
 import std::vec as v;
 
 pub struct Signature {usize module_index;usize declaration;bool public;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
-pub resource Program {state::Plan states;vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;cleanup{}}
+pub resource Program {state::Plan states;vectors::Plan types;v::Vec<Signature> signatures;v::Vec<usize> parameters;v::Vec<bool> vector_sources;bytes::Buffer links;v::Vec<aggregates::Prepared> aggregates;cleanup{}}
 pub fn ref state::Plan state_layouts(ref Program p){return ref p.states;}
 pub fn Result<bytes::Buffer,u32> public_state_prefix(ref Program p,usize owner,ref mut usize work){return state_interface::prefix(ref p.states,owner,work);}
 pub fn Result<bytes::Buffer,u32> public_interface_hash(ref Program p,usize owner,ref public_model::Descriptor descriptor,ref mut usize work){return public_interface::hash(ref p.states,owner,descriptor,work);}
@@ -61,34 +62,47 @@ pub fn Result<Program,catalog::Problem> build(ref v::Vec<syntax::Parsed> sources
 }
 // Own the package-resolved catalog, accepting only its exact retained sources.
 pub fn Result<Program,catalog::Problem> build_catalog(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c){
+    let graph=v::empty<types::Type>();let prepared=v::empty<aggregates::Prepared>();return build_mode(sources,c,graph,prepared,false);
+}
+// Private signature admission retains the exact current source plan and fields.
+// It does not claim body/ownership, executable MIR, cache or Atlas acceptance.
+pub fn Result<Program,catalog::Problem> build_aggregates(ref v::Vec<syntax::Parsed> sources,aggregates::Prepared prepared,ref mut usize work){
+    let c=switch(aggregates::build_catalog(aggregates::source_plan(ref prepared),sources,work)){case .ok(c):{c}case .err(p):{return .err(fail(p.code,p.module_index,p.start,p.end));}};
+    var graph=v::empty<types::Type>();var usize i=1;while(i<=types::count(aggregates::type_records(ref prepared))){if(!limits::project_charge(work,1)){return .err(fail(10,0,0,0));}if(!v::push<types::Type>(ref mut graph,types::at(aggregates::type_records(ref prepared),i)).is_ok){return .err(fail(11,0,0,0));}i+=1;}
+    var records=v::empty<aggregates::Prepared>();if(!v::push<aggregates::Prepared>(ref mut records,prepared).is_ok){return .err(fail(11,0,0,0));}return build_mode(sources,c,graph,records,true);
+}
+pub fn bool aggregate_types(ref Program p){return vectors::aggregate_types(ref p.types);}
+pub fn ref aggregates::Prepared aggregate_source(ref Program p){assert(v::len<aggregates::Prepared>(ref p.aggregates)==1);return v::at<aggregates::Prepared>(ref p.aggregates,0);}
+fn types::Resolution resolve_signature(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<types::Type> graph,bool aggregates){if(aggregates){let empty=v::empty<usize>();return types::aggregate_resolve(c,p,module_index,0,root,ref empty,graph);}return types::resolve(c,p,module_index,root,graph);}
+fn Result<Program,catalog::Problem> build_mode(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c,v::Vec<types::Type> initial,v::Vec<aggregates::Prepared> prepared,bool aggregates){
     if(catalog::module_count(ref c)!=v::len<syntax::Parsed>(sources)){return .err(fail(9,0,0,0));}
     var usize checked=0;while(checked<v::len<syntax::Parsed>(sources)){let source=v::at<syntax::Parsed>(sources,checked);if(!catalog::source_matches(ref c,checked,source)){return .err(fail(9,checked,0,0));}var usize declaration=0;while(declaration<syntax::declaration_count(source)){let inlined=inline::read(source,declaration);if(inlined.code!=0){return .err(fail(inlined.code,checked,inlined.start,inlined.end));}let admission=const_eval::read(source,declaration);if(admission.code!=0){return .err(fail(admission.code,checked,admission.start,admission.end));}declaration+=1;}checked+=1;}
     let states=switch(state_declarations::build(sources,ref c)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    var v::Vec<types::Type> graph=v::empty<types::Type>();var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
+    var v::Vec<types::Type> graph=initial;var v::Vec<Signature> signatures=v::empty<Signature>();var v::Vec<usize> parameters=v::empty<usize>();var v::Vec<bool> vector_sources=v::empty<bool>();var bytes::Buffer links=bytes::empty();
     var usize module_index=0;while(module_index<v::len<syntax::Parsed>(sources)){let p=v::at<syntax::Parsed>(sources,module_index);var usize index=1;var usize operation_work=0;let operation_valid=operations::validate(p,ref mut operation_work);if(operation_valid!=0){return .err(fail(operation_valid,module_index,0,syntax::source_view(p).len));}
         let bool vector_sdk=catalog::sdk_vector_source(ref c,module_index);if(!v::push<bool>(ref mut vector_sources,vector_sdk).is_ok){return .err(fail(11,module_index,0,0));}
         while(index<syntax::declaration_count(p)){let d=syntax::declaration_at(p,index);if((d.kind==3 || d.kind==9) && d.generic_parameters==0){
             if(d.generic_parameters!=0){return .err(fail(4501,module_index,d.start,d.end));}
             let contract=effects::read(p,index);if(contract.code!=0){return .err(fail(contract.code,module_index,contract.start,contract.end));}
             var usize link_start=0;var usize link_end=0;
-            let result=types::resolve(ref c,p,module_index,d.result_type,ref mut graph);if(result.problem.code!=0){return .err(fail(result.problem.code,module_index,result.problem.start,result.problem.end));}
-            let result_type=types::at(ref graph,result.type);if(result_type.kind==19){let location=syntax::type_at(p,d.result_type);return .err(fail(3103,module_index,location.start,location.end));}if(contract.must_use && (result_type.kind==1 && result_type.scalar==7 || result_type.kind!=1 && result_type.kind!=2 && result_type.kind!=4 && result_type.kind!=12)){return .err(fail(4201,module_index,contract.must_start,contract.must_end));}
+            let result=resolve_signature(ref c,p,module_index,d.result_type,ref mut graph,aggregates);if(result.problem.code!=0){return .err(fail(result.problem.code,module_index,result.problem.start,result.problem.end));}
+            let result_type=types::at(ref graph,result.type);if(result_type.kind==19){let location=syntax::type_at(p,d.result_type);return .err(fail(3103,module_index,location.start,location.end));}if(contract.must_use && (result_type.kind==1 && result_type.scalar==7 || result_type.kind!=1 && result_type.kind!=2 && result_type.kind!=4 && result_type.kind!=12 && !(aggregates && result_type.kind==20))){return .err(fail(4201,module_index,contract.must_start,contract.must_end));}
             let usize parameter_start=v::len<usize>(ref parameters);var usize e=d.entry_start;
-            while(e<d.entry_start+d.entry_count){let entry=syntax::entry_at(p,e);if(entry.kind==1){let type=types::resolve(ref c,p,module_index,entry.type_root,ref mut graph);if(type.problem.code!=0){return .err(fail(type.problem.code,module_index,type.problem.start,type.problem.end));}let t=types::at(ref graph,type.type);if(t.kind==1 && t.scalar==7){return .err(fail(9,module_index,entry.type_start,entry.type_end));}if(d.kind==9 && !ffi_type(sources,ref graph,type.type,false)){return .err(fail(5102,module_index,entry.type_start,entry.type_end));}if(v::len<usize>(ref parameters)>=32768 || !v::push<usize>(ref mut parameters,type.type).is_ok){return .err(fail(10,module_index,entry.start,entry.end));}}e+=1;}
+            while(e<d.entry_start+d.entry_count){let entry=syntax::entry_at(p,e);if(entry.kind==1){let type=resolve_signature(ref c,p,module_index,entry.type_root,ref mut graph,aggregates);if(type.problem.code!=0){return .err(fail(type.problem.code,module_index,type.problem.start,type.problem.end));}let t=types::at(ref graph,type.type);if(t.kind==1 && t.scalar==7){return .err(fail(9,module_index,entry.type_start,entry.type_end));}if(d.kind==9 && !ffi_type(sources,ref graph,type.type,false)){return .err(fail(5102,module_index,entry.type_start,entry.type_end));}if(v::len<usize>(ref parameters)>=32768 || !v::push<usize>(ref mut parameters,type.type).is_ok){return .err(fail(10,module_index,entry.start,entry.end));}}e+=1;}
             if(d.kind==9){let t=types::at(ref graph,result.type);
                 let bool repr_result=t.kind==2 && repr::read(v::at<syntax::Parsed>(sources,t.module_index),t.declaration-1).repr_c;
                 let ffi=foreign::read_signature(p,index,repr_result || ffi_type(sources,ref graph,result.type,true),true);
                 if(ffi.code!=0){return .err(fail(ffi.code,module_index,ffi.start,ffi.end));}link_start=bytes::len(ref links);let name=syntax::source_view(p)[ffi.link_start..ffi.link_end];if(name.len>1048576-bytes::len(ref links) || !bytes::append(ref mut links,name).is_ok){return .err(fail(11,module_index,d.start,d.end));}link_end=bytes::len(ref links);}
             if(v::len<usize>(ref parameters)-parameter_start>128 || v::len<Signature>(ref signatures)>=limits::project_callables()){return .err(fail(10,module_index,d.start,d.end));}
             let usize parameter_count=v::len<usize>(ref parameters)-parameter_start;
-            if(d.owner_end!=0){let owner=catalog::lookup(ref c,module_index,syntax::source_view(p)[d.owner_start..d.owner_end]);if(owner.code!=0 || parameter_count==0){return .err(fail(4501,module_index,d.start,d.end));}let nominal=catalog::declaration_at(ref c,owner.item);let receiver=types::at(ref graph,*v::at<usize>(ref parameters,parameter_start));if(nominal.module_index!=module_index || (nominal.kind!=4 && nominal.kind!=6) || (receiver.kind!=7 && receiver.kind!=8)){return .err(fail(4501,module_index,d.start,d.end));}let target=types::at(ref graph,receiver.first);let first=syntax::entry_at(p,d.entry_start);if(target.module_index!=nominal.module_index || target.declaration!=nominal.declaration || !bytes::equal(syntax::source_view(p)[first.name_start..first.name_end],b"this")){return .err(fail(4501,module_index,d.start,d.end));}}
+            if(d.owner_end!=0){let owner=catalog::lookup(ref c,module_index,syntax::source_view(p)[d.owner_start..d.owner_end]);if(owner.code!=0 || parameter_count==0){return .err(fail(4501,module_index,d.start,d.end));}let nominal=catalog::declaration_at(ref c,owner.item);let receiver=types::at(ref graph,*v::at<usize>(ref parameters,parameter_start));if(nominal.parameters!=0 || nominal.module_index!=module_index || (nominal.kind!=4 && nominal.kind!=6) || (receiver.kind!=7 && receiver.kind!=8)){return .err(fail(4501,module_index,d.start,d.end));}let target=types::at(ref graph,receiver.first);let first=syntax::entry_at(p,d.entry_start);if(target.module_index!=nominal.module_index || target.declaration!=nominal.declaration || !bytes::equal(syntax::source_view(p)[first.name_start..first.name_end],b"this")){return .err(fail(4501,module_index,d.start,d.end));}}
             if(d.kind==9){var usize previous=0;while(previous<v::len<Signature>(ref signatures)){let old=*v::at<Signature>(ref signatures,previous);if(old.foreign && bytes::equal(bytes::view(ref links)[old.link_start..old.link_end],bytes::view(ref links)[link_start..link_end])){if(old.result!=result.type || old.parameter_count!=parameter_count){return .err(fail(5106,module_index,d.start,d.end));}var usize n=0;while(n<parameter_count){if(*v::at<usize>(ref parameters,old.parameter_start+n)!=*v::at<usize>(ref parameters,parameter_start+n)){return .err(fail(5106,module_index,d.start,d.end));}n+=1;}}previous+=1;}}
             if(!v::push<Signature>(ref mut signatures,Signature{.module_index,.declaration=index+1,.public=d.public,.result=result.type,.parameter_start,.parameter_count,.effects=contract.bits,.must_use=contract.must_use,.unsafe_call=d.unsafe_end!=0,.foreign=d.kind==9,.link_start,.link_end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
         }index+=1;}module_index+=1;
     }
-    let owned=switch(types::assemble(ref c,graph)){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
+    let owned=switch(if(aggregates){types::assemble_aggregates(ref c,graph)}else{types::assemble(ref c,graph)}){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
     let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
-    return .ok(Program{.states,.types=planned,.signatures,.parameters,.vector_sources,.links});
+    return .ok(Program{.states,.types=planned,.signatures,.parameters,.vector_sources,.links,.aggregates=prepared});
 }
 
 pub fn types::Resolution specialize_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration,usize root,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph){return vectors::specialize_type(ref p.types,source,module_index,declaration,root,args,graph);}

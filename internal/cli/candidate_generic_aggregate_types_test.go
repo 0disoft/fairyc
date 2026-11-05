@@ -31,46 +31,7 @@ func TestCandidateGenericAggregateTypes(t *testing.T) {
 // not the Fairy preparer's type tags or a parallel text-substitution routine.
 func candidateGenericAggregateTypeFacts(t *testing.T, expanded genericsource.PackageExpansion, number func(int), field func(string)) {
 	t.Helper()
-	names := map[string]string{}
-	for _, origin := range expanded.Origins {
-		names[origin.GeneratedName] = string(origin.Specialization)
-	}
-	var render func(ast.TypeReference) string
-	render = func(r ast.TypeReference) string {
-		switch r.Kind {
-		case ast.TypeKindNamed:
-			name := r.Path
-			parts := strings.Split(name, "::")
-			if id, ok := names[parts[len(parts)-1]]; ok {
-				name = id
-			}
-			if len(r.Arguments) != 0 {
-				var args []string
-				for _, a := range r.Arguments {
-					args = append(args, render(a))
-				}
-				name += "<" + strings.Join(args, ",") + ">"
-			}
-			return name
-		case ast.TypeKindGrouped:
-			return render(*r.Element)
-		case ast.TypeKindArray:
-			return render(*r.Element) + "[" + r.Length.Text + "]"
-		case ast.TypeKindRawPointer:
-			if r.Mutable {
-				return "ptr mut " + render(*r.Element)
-			}
-			return "ptr " + render(*r.Element)
-		case ast.TypeKindReference:
-			if r.Mutable {
-				return "ref mut " + render(*r.Element)
-			}
-			return "ref " + render(*r.Element)
-		default:
-			t.Fatalf("uncovered oracle type: %+v", r)
-			return ""
-		}
-	}
+	names, render := candidateAggregateTypeOracle(t, expanded)
 	type shape struct {
 		id     string
 		module int
@@ -129,4 +90,49 @@ func candidateGenericAggregateTypeFacts(t *testing.T, expanded genericsource.Pac
 			field(render(p.Type))
 		}
 	}
+}
+
+func candidateAggregateTypeOracle(t *testing.T, expanded genericsource.PackageExpansion) (map[string]string, func(ast.TypeReference) string) {
+	t.Helper()
+	names := map[string]string{}
+	for _, origin := range expanded.Origins {
+		names[origin.GeneratedName] = string(origin.Specialization)
+	}
+	var render func(ast.TypeReference) string
+	render = func(r ast.TypeReference) string {
+		switch r.Kind {
+		case ast.TypeKindNamed:
+			name := r.Path
+			parts := strings.Split(name, "::")
+			if id, ok := names[parts[len(parts)-1]]; ok {
+				name = id
+			}
+			if len(r.Arguments) != 0 {
+				var args []string
+				for _, a := range r.Arguments {
+					args = append(args, render(a))
+				}
+				name += "<" + strings.Join(args, ",") + ">"
+			}
+			return name
+		case ast.TypeKindGrouped:
+			return render(*r.Element)
+		case ast.TypeKindArray:
+			return render(*r.Element) + "[" + r.Length.Text + "]"
+		case ast.TypeKindRawPointer:
+			if r.Mutable {
+				return "ptr mut " + render(*r.Element)
+			}
+			return "ptr " + render(*r.Element)
+		case ast.TypeKindReference:
+			if r.Mutable {
+				return "ref mut " + render(*r.Element)
+			}
+			return "ref " + render(*r.Element)
+		default:
+			t.Fatalf("uncovered oracle type: %+v", r)
+			return ""
+		}
+	}
+	return names, render
 }
