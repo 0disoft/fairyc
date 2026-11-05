@@ -323,9 +323,13 @@ func buildDeclarations(hirPackage hir.Package, metadata map[hir.PackageID]packag
 }
 
 type documentationOwner struct {
+	// Specialized closure helpers can share source coordinates. Documentation
+	// still belongs to one complete declaration key, never to the span alone.
 	packageInstance string
 	source          string
 	kind            DeclarationKind
+	module          string
+	name            string
 	startByte       int
 	endByte         int
 }
@@ -340,6 +344,7 @@ func buildDocumentationSpans(
 		owner := documentationOwner{
 			packageInstance: declaration.Span.PackageInstance,
 			source:          declaration.Span.Source, kind: declaration.Key.Kind,
+			module: declaration.Key.Module, name: declaration.Key.Name,
 			startByte: declaration.Span.StartByte, endByte: declaration.Span.EndByte,
 		}
 		if _, duplicate := owners[owner]; duplicate {
@@ -350,7 +355,7 @@ func buildDocumentationSpans(
 
 	result := make([]DeclarationDocumentation, 0)
 	seen := make(map[DeclarationKey]struct{})
-	appendDocumentation := func(kind DeclarationKind, declarationSpan, documentationSpan hir.Span) error {
+	appendDocumentation := func(kind DeclarationKind, module, name string, declarationSpan, documentationSpan hir.Span) error {
 		if documentationSpan == (hir.Span{}) {
 			return nil
 		}
@@ -371,6 +376,7 @@ func buildDocumentationSpans(
 		owner := documentationOwner{
 			packageInstance: stableDeclaration.PackageInstance,
 			source:          stableDeclaration.Source, kind: kind,
+			module: module, name: name,
 			startByte: stableDeclaration.StartByte, endByte: stableDeclaration.EndByte,
 		}
 		key, found := owners[owner]
@@ -389,17 +395,17 @@ func buildDocumentationSpans(
 
 	for _, module := range hirPackage.Modules {
 		for _, value := range module.Structs {
-			if err := appendDocumentation(DeclarationStruct, value.Span, value.DocumentationSpan); err != nil {
+			if err := appendDocumentation(DeclarationStruct, module.Path, value.Name, value.Span, value.DocumentationSpan); err != nil {
 				return nil, err
 			}
 		}
 		for _, value := range module.Enums {
-			if err := appendDocumentation(DeclarationEnum, value.Span, value.DocumentationSpan); err != nil {
+			if err := appendDocumentation(DeclarationEnum, module.Path, value.Name, value.Span, value.DocumentationSpan); err != nil {
 				return nil, err
 			}
 		}
 		for _, value := range module.Resources {
-			if err := appendDocumentation(DeclarationResource, value.Span, value.DocumentationSpan); err != nil {
+			if err := appendDocumentation(DeclarationResource, module.Path, value.Name, value.Span, value.DocumentationSpan); err != nil {
 				return nil, err
 			}
 		}
@@ -408,13 +414,13 @@ func buildDocumentationSpans(
 				return nil, fmt.Errorf("compiler-private drop glue carries declaration documentation")
 			}
 			if value.DropGlueFor == hir.ParseType("") {
-				if err := appendDocumentation(DeclarationFunction, value.Span, value.DocumentationSpan); err != nil {
+				if err := appendDocumentation(DeclarationFunction, module.Path, value.Name, value.Span, value.DocumentationSpan); err != nil {
 					return nil, err
 				}
 			}
 		}
 		for _, value := range module.ForeignFunctions {
-			if err := appendDocumentation(DeclarationForeignFunction, value.Span, value.DocumentationSpan); err != nil {
+			if err := appendDocumentation(DeclarationForeignFunction, module.Path, value.Name, value.Span, value.DocumentationSpan); err != nil {
 				return nil, err
 			}
 		}

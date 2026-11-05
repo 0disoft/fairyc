@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Copied-closure Atlas work exposed and fixes Go snapshot documentation-owner
+  collisions between distinct helpers sharing a generic closure source span.
+  Exact declaration keys plus spans now own attachments, with five refusal
+  controls. Complete snapshot/map package tests, five independent CLI source
+  oracles and scoped vet pass on Windows. This is a Go prerequisite; actual
+  Fairy closure production/current/join/commands remain open. See
+  `docs/development/candidate-atlas-copied-closures-20261105.md`.
+
 - Static-operation Atlas production now passes all five independent Go v3
   source families in Windows low/optimized (165.744s): exact original declarations,
   unused templates, concrete cross-package algorithm/operation/provider endpoints,
