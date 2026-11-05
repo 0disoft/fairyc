@@ -23,8 +23,13 @@ Output failure can follow successful source replacement.
 The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite
 signature types and opaque external C calls. Only resolved calls consume the
-call-join budget; non-call coverage remains explicitly unavailable. SDK/generic
-source facts and Linux command selection remain separate. Body editing retains
+call-join budget. Verified executable drop sites are retained in ordinary,
+specialized and concrete cleanup summaries; relation inventories include them
+and the drop completeness class is exact. Other uncollected relation families
+remain explicitly unavailable. The source-selected v1/v2/v3 Windows validation
+and remaining SDK/generic boundaries are recorded in
+`docs/development/candidate-atlas-observed-relations-20261106.md`.
+Linux command selection remains separate. Body editing retains
 its narrower selection policy; see the owning contract for exact admission.
 
 ## Stable version inspection v1

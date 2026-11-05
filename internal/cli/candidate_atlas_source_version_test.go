@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -80,6 +81,13 @@ func TestCandidateAtlasSourceVersion(t *testing.T) {
 	sdkUsed := writeWorkspaceSessionFixture(t, candidateAtlasSDKVectorUsedSource)
 	sdkScalars := writeWorkspaceSessionFixture(t, atlasSDKCommandSource)
 	fixtures := []fixture{{"ordinary-families", ordinary, 1, nil}, {"owner-namespaces", owner, 1, nil}, {"used-functions", used, 2, nil}, {"unused-functions", unused, 2, nil}, {"used-aggregates", aggregate, 3, nil}, {"unused-dependency-aggregates", unusedAggregate, 3, nil}, {"sdk-unused", sdkUnused, 3, nil}, {"sdk-used", sdkUsed, 3, nil}, {"sdk-scalars", sdkScalars, 1, nil}}
+	drops := writeWorkspaceSessionFixture(t, `module main;import answer as a;resource Token{i32 value;cleanup{}}
+fn i32 choose(bool stop){let t=Token{.value=1};if(stop){assert(false);}return 0;}
+fn i32 main(){let t=Token{.value=1};discard Token{.value=2};{let inner=Token{.value=3};}return choose(false);}`)
+	cleanupDrops := writeWorkspaceSessionFixture(t, `module main;import answer as a;resource Token{i32 value;cleanup{}}
+resource Wrap<T>{Token inner;T marker;cleanup{let t=Token{.value=1};}}
+fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`)
+	fixtures = append(fixtures, fixture{"drops", drops, 1, nil}, fixture{"cleanup-drops", cleanupDrops, 3, nil})
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -150,6 +158,21 @@ func TestCandidateAtlasSourceVersion(t *testing.T) {
 						want, err = decode(canonical, 4<<20)
 						if err != nil {
 							t.Fatal(err)
+						}
+						if h.Counts.Relations != candidateAtlasProducedRelationCount(want) {
+							t.Fatalf("source relation count %s: %d want %d", h.PackageUID, h.Counts.Relations, candidateAtlasProducedRelationCount(want))
+						}
+						foundDrops := false
+						for _, r := range got.Completeness() {
+							if r.Relation == "drops" {
+								foundDrops = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source drop completeness: %+v", r)
+								}
+							}
+						}
+						if !foundDrops || slices.Contains(h.Omissions, "drops:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source drop completeness missing or omitted")
 						}
 						if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) {
 							a, b := got.Declarations(), want.Declarations()

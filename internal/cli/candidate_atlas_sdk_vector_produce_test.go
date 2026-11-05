@@ -309,6 +309,9 @@ func candidateAtlasSDKVectorGlobalOracle(t *testing.T, partitions map[string]atl
 func verifyCandidateAtlasSDKVectorPartition(t *testing.T, got, want atlasmap.Partition) {
 	t.Helper()
 	h, expected := got.Header(), want.Header()
+	if h.Counts.Relations != candidateAtlasProducedRelationCount(want) {
+		t.Fatalf("SDK source relation count: %d want %d", h.Counts.Relations, candidateAtlasProducedRelationCount(want))
+	}
 	if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) ||
 		h.InterfaceHash != expected.InterfaceHash || h.GenericInterfaceHash != expected.GenericInterfaceHash {
 		t.Fatalf("SDK vector declarations/IDs/interfaces differ %s", h.PackageUID)
@@ -352,6 +355,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 		callStatus, callReason = semanticsnapshot.CompletenessPartial, "external-ffi"
 	}
 	wantRows["calls"] = semanticsnapshot.Completeness{Relation: "calls", Status: callStatus, Resolved: global.calls, External: global.external}
+	wantRows["drops"] = semanticsnapshot.Completeness{Relation: "drops", Status: semanticsnapshot.CompletenessExact}
 	wantRows["generic-specializations"] = semanticsnapshot.Completeness{Relation: "generic-specializations", Status: semanticsnapshot.CompletenessExact, Resolved: global.implementations}
 	wantRows["generic-template-bodies"] = semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: semanticsnapshot.CompletenessUnavailable, Unknown: global.templates, Reasons: []string{"bodies-checked-only-after-specialization"}}
 	if callReason != "" {
@@ -359,7 +363,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 		row.Reasons = []string{callReason}
 		wantRows["calls"] = row
 	}
-	for _, relation := range []string{"allocates", "borrows", "drops", "effects", "may-trap", "moves", "reads", "returns-error", "test-calls", "uses-unsafe", "writes"} {
+	for _, relation := range []string{"allocates", "borrows", "effects", "may-trap", "moves", "reads", "returns-error", "test-calls", "uses-unsafe", "writes"} {
 		wantRows[relation] = semanticsnapshot.Completeness{Relation: relation, Status: semanticsnapshot.CompletenessUnavailable, Reasons: []string{"candidate-atlas-not-collected"}}
 	}
 	actual := got.Completeness()

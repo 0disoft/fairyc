@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy Complete-bound v1/v2/v3 production now retains canonical executable drop
+  sites in ordinary, generic and concrete cleanup summaries, counts calls plus
+  drops and reports only the newly collected drop class exact. Verified batch
+  CFG lowering removes repeated whole-IR proofs per summarized function. Windows
+  low/optimized collector and source-version roots pass 142 native processes
+  and 94 independent current maps in 844.528s, including SDK Vec, current query/
+  join admission and exact work/count bounds. Authored check/locked (671 files,
+  8,330 MIR functions), selected Go query/pack regressions, scoped vet and format/
+  LF/diff pass. Actual full-main command selections remain in progress; see
+  `candidate-atlas-observed-relations-20261106.md`. The remaining collectors and
+  every original broader/final gate remain open; native Linux stays batched.
+
 - Fairy verified body/cleanup CFG drop-site collection now preserves executable
   reachability, operand source spans and canonical deduplication under independent
   work/count bounds. Fifteen actual source fixtures plus ten controls per Windows

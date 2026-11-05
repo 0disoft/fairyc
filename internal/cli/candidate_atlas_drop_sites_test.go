@@ -22,12 +22,21 @@ func candidateAtlasDropSitesMain() string {
 	main = strings.Replace(main, "instances::collect(ref source,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)", "if(aggregate_mode){instances::collect_aggregates(ref source,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)}else{instances::collect(ref source,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)}", 1)
 	main = strings.Replace(main, ` if(bytes::equal(mode,b"budget")){meter=16777216;}`, "", 1)
 	return main + `
+ var usize bulk_work=0;let all=drops::collect_all(p,65536,ref mut bulk_work)?;
+ if(drops::frame_count(ref all)!=ir::count(p)){return 7;}
+ if(bytes::equal(mode,b"bulk-budget") || bytes::equal(mode,b"bulk-short-work") || bytes::equal(mode,b"bulk-exact-work") || bytes::equal(mode,b"bulk-more-work") || bytes::equal(mode,b"bulk-short-count") || bytes::equal(mode,b"bulk-exact-count") || bytes::equal(mode,b"bulk-more-count") || bytes::equal(mode,b"bulk-over-count")){
+  var usize maximum=0;var usize i=0;while(i<drops::frame_count(ref all)){let r=drops::range(ref all,i);if(r.end-r.start>maximum){maximum=r.end-r.start;}i+=1;}
+  var usize meter=0;if(bytes::equal(mode,b"bulk-budget")){meter=16777216;}else if(bytes::equal(mode,b"bulk-short-work")){meter=16777216-bulk_work+1;}else if(bytes::equal(mode,b"bulk-exact-work")){meter=16777216-bulk_work;}else if(bytes::equal(mode,b"bulk-more-work")){meter=16777216-bulk_work-1;}
+  if(bytes::equal(mode,b"bulk-short-count")){maximum-=1;}else if(bytes::equal(mode,b"bulk-more-count")){maximum+=1;}else if(bytes::equal(mode,b"bulk-over-count")){maximum=65537;}
+  return switch(drops::collect_all(p,maximum,ref mut meter)){case .ok(_):{0}case .err(code):{discard io::write_usize(code as usize);7}};
+ }
  var out=bytes::empty();discard w::raw(ref mut out,b"[",ref mut meter)?;var usize frame=1;var usize written=0;
  while(frame<=ir::count(p)){
   let f=clean::frame_at(clean,frame);let spec=instances::frame_identity(ref observed,frame);
   if(f.kind==2 && spec.len==0){frame+=1;continue;}
   if(f.kind!=1 && f.kind!=2 && f.kind!=3){frame+=1;continue;}
   var usize measured=0;let sites=switch(drops::collect(p,frame,65536,ref mut measured)){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
+  let r=drops::range(ref all,frame-1);if(r.end-r.start!=v::len<drops::Site>(ref sites)){return 7;}var usize n=0;while(n<v::len<drops::Site>(ref sites)){let a=drops::at(ref all,r.start+n);let b=*v::at<drops::Site>(ref sites,n);if(a.start!=b.start || a.end!=b.end){return 7;}n+=1;}
   if(bytes::equal(mode,b"zero") || bytes::equal(mode,b"past") || bytes::equal(mode,b"budget") || bytes::equal(mode,b"short-work") || bytes::equal(mode,b"exact-work") || bytes::equal(mode,b"more-work") || bytes::equal(mode,b"short-count") || bytes::equal(mode,b"exact-count") || bytes::equal(mode,b"more-count") || bytes::equal(mode,b"over-count")){
    if(bytes::equal(mode,b"short-count") && v::len<drops::Site>(ref sites)==0 || bytes::equal(mode,b"short-work") && measured==0){frame+=1;continue;}
    var usize selected=frame;var usize maximum=65536;var usize meter=0;
@@ -100,8 +109,8 @@ func TestCandidateAtlasDropSites(t *testing.T) {
 	// fixture, compiler implementation or independent Go expectations.
 	main = strings.ReplaceAll(main, "return 7;", "return .ok(7);")
 	main = strings.ReplaceAll(main, "return if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4};", "return .ok(if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4});")
-	main = strings.Replace(main, "return switch(drops::collect", "return .ok(switch(drops::collect", 1)
-	main = strings.Replace(main, "io::write_usize(code as usize);7}};", "io::write_usize(code as usize);7}});", 1)
+	main = strings.ReplaceAll(main, "return switch(drops::collect", "return .ok(switch(drops::collect")
+	main = strings.ReplaceAll(main, "io::write_usize(code as usize);7}};", "io::write_usize(code as usize);7}});")
 	main += "\n@effects(filesystem,console,environment) fn i32 main(){return switch(execute()){case .ok(p):{p}case .err(_):{7}};}"
 	candidateAtlasProbeSize(t, "project_atlas_source", main, 2<<20, func(t *testing.T, image string) {
 		t.Setenv("PATH", "")
@@ -156,13 +165,13 @@ func TestCandidateAtlasDropSites(t *testing.T) {
 				return
 			}
 		}
-		for _, mode := range []string{"zero", "past", "budget", "short-work", "exact-work", "more-work", "short-count", "exact-count", "more-count", "over-count"} {
+		for _, mode := range []string{"zero", "past", "budget", "short-work", "exact-work", "more-work", "short-count", "exact-count", "more-count", "over-count", "bulk-budget", "bulk-short-work", "bulk-exact-work", "bulk-more-work", "bulk-short-count", "bulk-exact-count", "bulk-more-count", "bulk-over-count"} {
 			code, out, stderr := fetchCLIProcess(t, image, fixtures[1].root, []string{mode}, "")
 			want := 0
 			failure := ""
-			if mode == "zero" || mode == "past" || mode == "over-count" {
+			if mode == "zero" || mode == "past" || mode == "over-count" || mode == "bulk-over-count" {
 				want, failure = 7, "9"
-			} else if mode == "budget" || mode == "short-work" || mode == "short-count" {
+			} else if mode == "budget" || mode == "short-work" || mode == "short-count" || mode == "bulk-budget" || mode == "bulk-short-work" || mode == "bulk-short-count" {
 				want, failure = 7, "3"
 			}
 			if code != want || out != failure || stderr != "" {

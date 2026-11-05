@@ -163,8 +163,27 @@ func compareAtlasProducedFunctions(t *testing.T, got, want []semanticsnapshot.Fu
 	}
 	for i, f := range got {
 		w := want[i]
-		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) {
-			t.Fatalf("produced calls differ: got %+v want %+v", f, w)
+		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) || !slices.Equal(f.DropSites, w.DropSites) {
+			t.Fatalf("produced calls/drops differ: got %+v want %+v", f, w)
 		}
 	}
+}
+
+// Count only the currently collected families from independent Go source facts.
+// In particular, do not use candidate map counts as the expected inventory.
+func candidateAtlasProducedRelationCount(p atlasmap.Partition) int {
+	count := 0
+	add := func(f semanticsnapshot.FunctionSummary) { count += len(f.Calls) + len(f.DropSites) }
+	for _, f := range p.Functions() {
+		add(f)
+	}
+	for _, s := range p.Specializations() {
+		if s.Aggregate == nil {
+			add(s.Function)
+		}
+		if s.Cleanup != nil {
+			add(*s.Cleanup)
+		}
+	}
+	return count
 }
