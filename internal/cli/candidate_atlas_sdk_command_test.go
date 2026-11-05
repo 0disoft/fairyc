@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -56,7 +57,12 @@ func TestCandidateAtlasSDKCommand(t *testing.T) {
 
 func verifyCandidateAtlasSDKCommand(t *testing.T, image string) {
 	t.Helper()
-	root := writeWorkspaceSessionFixture(t, atlasSDKCommandSource)
+	verifyCandidateAtlasSDKCommandSource(t, image, atlasSDKCommandSource, "std::num", "parse_i64_decimal")
+}
+
+func verifyCandidateAtlasSDKCommandSource(t *testing.T, image, source, module, name string, subjects ...string) {
+	t.Helper()
+	root := writeWorkspaceSessionFixture(t, source)
 	prepare := func() (preparedAtlasWorkspace, *atlasmap.WorkspaceCallIndex) {
 		t.Helper()
 		var diagnostic bytes.Buffer
@@ -104,18 +110,23 @@ func verifyCandidateAtlasSDKCommand(t *testing.T, image string) {
 	}
 	t.Setenv("PATH", "")
 	before := remoteTree(t, root)
+	matched := map[string]bool{}
 	for _, p := range prepared.partitions {
 		for _, s := range p.Symbols() {
-			if s.Declaration.Module == "std::num" && s.Declaration.Name == "parse_i64_decimal" {
+			if s.Declaration.Module == module && s.Declaration.Name == name {
+				if selected != "" {
+					t.Fatal("duplicate SDK subject")
+				}
 				sdk, selected = p, s.Visible
 				query(p, s.Visible, index)
-			} else if p.Header().PackageUID == "example.session.app" && s.Declaration.Name == "leaf" {
+			} else if p.Header().PackageUID == "example.session.app" && (s.Declaration.Name == "leaf" || slices.Contains(subjects, s.Declaration.Name)) {
+				matched[s.Declaration.Name] = true
 				query(p, s.Full, index)
 			}
 		}
 	}
-	if selected == "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
-		t.Fatal("SDK selection or read-only query guarantee")
+	if selected == "" || len(matched) != len(subjects)+1 || !reflect.DeepEqual(before, remoteTree(t, root)) {
+		t.Fatal("SDK/root selection or read-only query guarantee", matched)
 	}
 	base := append([]string{"experimental", "atlas-impact"}, impactArgs(sdk.Header().PackageUID, selected)...)
 	base = replaceWorkspaceSessionArgument(base, "--max-calls", strconv.Itoa(resolved))
@@ -128,7 +139,7 @@ func verifyCandidateAtlasSDKCommand(t *testing.T, image string) {
 	if !reflect.DeepEqual(before, remoteTree(t, root)) {
 		t.Fatal("SDK cutoff changed workspace")
 	}
-	writeWorkspaceFile(t, root, "src/main.fy", atlasSDKCommandSource+"\n")
+	writeWorkspaceFile(t, root, "src/main.fy", source+"\n")
 	stale := remoteTree(t, root)
 	code, out, diagnostic := candidateAtlasSDKCLIProcess(t, image, root, base)
 	if code != 7 || out != "" || diagnostic == "" || !reflect.DeepEqual(stale, remoteTree(t, root)) {

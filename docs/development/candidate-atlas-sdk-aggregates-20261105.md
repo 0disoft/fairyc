@@ -40,6 +40,13 @@ admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
    source-production families, not broader source forms or command acceptance.
 3. Exercise actual impact, read-only MCP and root-body editor commands, including
    fresh overlay specialization, current-source drift and publication policy.
+   **Mixed impact verified.** The actual Windows command passes both profiles
+   in 509.294s on a source containing SDK Vec, a same-name client Vec and a
+   client resource with real cleanup. SDK visible and three root full selectors,
+   exact/one-short call bounds, package cutoff, stale lock and refreshed source
+   contexts match Go. The ordinary SDK optimized control passes in 74.990s.
+   See the [impact receipt](../ops/windows-atlas-sdk-aggregate-impact-20261105.md).
+   Mixed MCP/edit acceptance remains separate.
    Register and run complete authored-main acceptance after these source families.
 4. Keep complete current-source comparisons, consecutive self-build, Windows
    distribution, batched native Linux and same-commit hosted CI as separate final

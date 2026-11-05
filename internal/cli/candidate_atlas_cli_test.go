@@ -94,6 +94,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			verifyCandidateAtlasAggregateCommand(t, image)
 			verifyCandidateAtlasSDKCommand(t, image)
 			verifyCandidateAtlasSDKVectorCommand(t, image)
+			verifyCandidateAtlasSDKUserAggregateCommand(t, image)
 			verifyCandidateMCPSDKCommand(t, image)
 			verifyCandidateMCPSDKVectorCommand(t, image)
 			verifyCandidateEditSDKCommand(t, image)

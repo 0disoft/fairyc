@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Mixed SDK/client aggregate `atlas-impact` now passes actual Windows
+  low/optimized commands in 509.294s. One source combines SDK Vec, a same-name
+  client Vec and a client resource with nonempty cleanup. Four SDK/root subjects,
+  exact/one-short call admission, package limits and stale/relocked current
+  contexts match Go without workspace writes. The ordinary SDK optimized
+  control passes in 74.990s. Full authored-main registration is updated, not
+  rerun. Mixed MCP/edit, broader source forms, native Linux and every final
+  acceptance gate remain open; see the composition plan and impact receipt.
+
 - Mixed scalar SDK Vec/user aggregate production now preserves the authenticated
   SDK constructor and existing layout/cleanup type alongside client struct/resource
   instances. The two reproduced preparation/constructor refusals are corrected.
