@@ -56,6 +56,12 @@ authorized by this queue.
 
 ## Progress
 
+- Canonical Atlas declaration/function lookup now uses validated sorted tables,
+  and symbol ownership uses a bounded bitmap plus adjacent validated ID prefixes.
+  Windows low/optimized ordinary/generic invalid-map and 0/1/2/257-row lookup
+  boundaries pass in 41.644s. This removes quadratic lookup/duplicate work needed
+  by SDK maps; full SDK production/commands and final acceptance remain open.
+
 - Go v3 Atlas SDK Vec preparation no longer loses workspace-authenticated
   storage admission. Snapshot MIR reverification retains that admission and
   rejects when it is removed. Focused Windows source/map/policy/snapshot and

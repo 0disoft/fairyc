@@ -4,6 +4,8 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Bounded Atlas tools
 
+- Canonically ordered Atlas declaration/function lookup and symbol uniqueness: `examples/lexer_candidate/src/project_atlas_model.fy`, `project_atlas_validate.fy`; independent native key/work boundaries: `internal/cli/candidate_atlas_ordered_keys_test.go`; ordinary/generic invalid-map coverage: `internal/cli/candidate_atlas_validate_test.go`, `candidate_atlas_generic_validate_test.go`; Windows evidence: `docs/ops/windows-candidate-atlas-sdk-20261105.md`.
+
 - Go v3 SDK source admission: `internal/workspacecompiler/check.go`, `internal/cli/atlas_pack.go`; MIR admission retention/reverification: `internal/compiler/check.go`, `internal/semanticsnapshot/generic_snapshot.go`; SDK Vec map and missing-admission regression: `internal/cli/atlas_sdk_vec_oracle_test.go`; current Windows evidence and outstanding Fairy SDK scope: `docs/ops/windows-candidate-atlas-sdk-20261105.md`.
 
 - Decision: `docs/adr/0499-bounded-atlas-impact-mcp-and-body-edits.md`.

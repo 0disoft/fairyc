@@ -36,3 +36,32 @@ recorded with the local commit.
 The Fairy SDK producer and actual impact/MCP/edit commands are separate work.
 Full Go suite, complete current CLI replay, Linux, self-build, distribution and
 same-commit hosted acceptance are not established by these checks.
+
+## Bounded ordered-table validation prerequisite
+
+SDK source preparation exposed repeated linear declaration lookup and pairwise
+symbol duplicate checks. `project_atlas_model::find_key` now searches only tables
+whose strict canonical key order was already validated. All callers use either
+the validated declaration table or the fully validated function table. Malformed
+and unsorted tables still reject before these lookups. `key_position` returns a
+table-relative slot and an explicit missing/exhausted sentinel.
+
+Symbol validation retains full-ID order and checks visible-prefix collisions
+against the adjacent full-ID row, after digest matching proves the prefix rule.
+A bounded local bitmap detects repeated declaration ownership. No borrowed input
+is mutated. For D declarations, F functions and C local calls, these table
+lookups change from O((D+F+C)D) to O((D+F+C) log D); symbol duplicate checking
+changes from D(D-1)/2 comparisons to D bitmap operations and adjacent checks,
+using O(D) extra space within the existing 4,096-row bound.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestCandidateAtlas(OrderedKeys|Validation|GenericValidation)$'
+```
+
+The combined Windows command passes in 41.644s. Both low and optimized profiles
+pass existing ordinary/generic/aggregate invalid-map controls and the new lookup
+boundaries: 0/1/2/257 rows, first/middle/last, missing keys, and exhausted work.
+For the supplied complete four-part keys, 257 rows require at most nine
+comparisons and 3,150 charged units. Existing source/map/depth/work ceilings and
+wire schemas remain unchanged. This establishes the lookup prerequisite, not
+full SDK command admission or complete CLI acceptance.
