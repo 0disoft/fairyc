@@ -5,6 +5,7 @@ import project_mcp_cli as mcp;
 import project_edit_cli as editing;
 import project_catalog_cli as catalog;
 import project_calls_cli as calls;
+import project_pack_cli as packs;
 import std::bytes as bytes;
 import std::process as process;
-@effects(filesystem,console,environment,network,clock) pub fn i32 arguments(){if(process::arg_count()>=3){var u8[4096] raw=[0;4096];let n=switch(process::arg(2,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] command=ref raw;if(bytes::equal(command[..n],b"atlas-impact")){return atlas::arguments();}if(bytes::equal(command[..n],b"atlas-mcp")){return mcp::arguments();}if(bytes::equal(command[..n],b"atlas-edit")){return editing::arguments();}if(bytes::equal(command[..n],b"atlas-symbols")){return catalog::arguments();}if(bytes::equal(command[..n],b"atlas-calls")){return calls::arguments();}}return fetching::arguments();}
+@effects(filesystem,console,environment,network,clock) pub fn i32 arguments(){if(process::arg_count()>=3){var u8[4096] raw=[0;4096];let n=switch(process::arg(2,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] command=ref raw;if(bytes::equal(command[..n],b"atlas-impact")){return atlas::arguments();}if(bytes::equal(command[..n],b"atlas-mcp")){return mcp::arguments();}if(bytes::equal(command[..n],b"atlas-edit")){return editing::arguments();}if(bytes::equal(command[..n],b"atlas-symbols")){return catalog::arguments();}if(bytes::equal(command[..n],b"atlas-calls")){return calls::arguments();}if(bytes::equal(command[..n],b"atlas-pack")){return packs::arguments();}}return fetching::arguments();}

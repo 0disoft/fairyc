@@ -15,7 +15,7 @@ no push, dispatch, publication or target promotion is authorized here.
   identity, canonical v1/v2/v3 packs and explicit omissions under all bounds.
 - [x] Current-admitted around traversal, deterministic local node/relation
   selection, canonical packs and explicit omissions under all bounds.
-- [ ] Fresh Complete-bound source selection and actual dispatcher/help/error/
+- [x] Fresh Complete-bound source selection and actual dispatcher/help/error/
   lock/output acceptance at both Windows profiles. No child Go fallback.
 - [ ] Original full-CLI/generated-consumer/self-build/distribution/hosted/Linux
   acceptance gates and the remaining implementation queue.
@@ -334,3 +334,87 @@ full-CLI/generated-consumer/self-build/distribution/hosted/Linux gates and the
 complete implementation queue remain open. No grammar, stable CLI, public
 SDK/runtime ABI, dependencies, DB, workflow/runner or hygiene-policy change;
 no push, dispatch or native Linux execution.
+
+## Fresh source-backed authored CLI
+
+`project_pack_source` loads the manifest-owned workspace under the exact requested
+lock policy and selects the requested source/map family before Complete checking.
+All package maps derive from that one current Complete; the selected unique UID
+then independently enters exact-current admission. No stored map, cache artifact
+or child Go compiler supplies source authority. The established SDK source/query
+work ledgers remain separate. Requested versions are generated directly, never
+converted or relabeled.
+
+`project_pack_cli` validates options/help before workspace I/O and routes the
+three actual queries through `project_experimental_cli`. It retains source,
+workspace, selector/budget and output error families 3/7/2/4. Encoding completes
+in private memory before one no-newline stdout write. The existing query bounds,
+integrity checks, empty text channels and explicit non-call/incoming/dependency
+omissions remain unchanged; no source text or graph completeness is invented.
+
+The original full authored-main test retains every prior registration and adds
+pack ordinary/source/SDK groups. Its empty child PATH forbids child-compiler
+fallback. Independent Go source/map facts are narrowed only by the already
+declared candidate non-call collection scope and actual compiler image hash;
+no expected node, relation, budget, omission or checksum is learned from output.
+The ordinary group covers each query/version/direction, visible/full selectors,
+all ten relation flags, output one-short/exact/one-more, mandatory selection
+refusal, depth zero, cycles, bad options before I/O, missing/current/stale locks,
+unlocked refresh and failed stdout. Separate source groups cover function
+specializations, unused templates, aggregate cleanup and owner namespaces;
+SDK groups cover ordinary modules and used Vec.
+
+The final registered Windows replays pass against unchanged executable/source
+and test inputs, with no selected skips:
+
+| Selection | Result | Native processes |
+| --- | --- | --- |
+| Both profiles, ordinary and help | PASS 656.069s; low 535.86s, optimized 103.17s | 148: 48 ordinary plus 26 help per profile |
+| Low source and SDK | PASS 602.330s; source 204.89s, SDK 379.30s | 26: 20 source plus 6 SDK |
+| Optimized source and SDK | PASS 33.560s; source 3.27s, SDK 12.66s | 26: 20 source plus 6 SDK |
+
+The three disjoint selections attest 200 native processes, four of the 41 full
+authored-main verifier registrations under both profiles. Source/SDK low runs
+overlap the ordinary replay; these times are execution evidence, not isolated
+performance benchmarks. Existing unselected groups remain registered and are
+not counted as current full-CLI acceptance.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path (Get-Location) '.cache/atlas-pack-cli'
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/(low|optimized)/(pack-ordinary|help)$'
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCLI$/low/(pack-sources|pack-sdk)$'
+go test -mod=readonly -count=1 -failfast -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/optimized/(pack-sources|pack-sdk)$'
+```
+
+Logs: `pack-cli-ordinary-final-20261106.log`,
+`pack-cli-sources-low-20261106.log`, `pack-cli-sources-optimized-20261106.log`.
+Each reuse authenticates generated C, profile, toolchain, stack policy and image
+hashes. Final source/image SHA-256 pairs are:
+
+- low: `53b941a456727aeba28f2410fcd0655ab1f8f6d869b782cd08577f18519c7082` /
+  `65730fcadf52efe00d763ee36afc9ddc838daeab12595657cd6fb803dc14adbf`.
+- optimized: `b6f591d4c469d98d79486fdcdcc72a81c9bd4b1c939d091eac6e7da3dbcabe36` /
+  `9b48ed7e2561bc297866a8d33388286783d7ed7a4338fde286e61b3b78218c45`.
+
+The first `pack-cli-ordinary-20261106.log` and diagnostic
+`pack-cli-ordinary-diff-20261106.log` attempts failed, not passed. They exposed
+an oracle projection gap: catalog/call comparisons never observed the original
+Go non-call body facts, but overview and node summaries do. In the ordinary
+fixture the Go header retained nine relations while Fairy explicitly collected
+seven calls. The independent pack fixture now clears the seven uncollected body
+arrays in original Go functions/specialization/cleanup summaries and recomputes
+the relation count from unchanged original call rows before validated decode
+and query construction. Declarations, identities, calls, targets, spans and
+specializations are retained. No expected fact or count comes from candidate
+output and no production collection/completeness claim is broadened.
+
+Authored check/locked pass with 670 source files and 8,305 MIR functions.
+Existing Go experimental pack regressions pass in 2.266s; final scoped CLI vet,
+Go formatting, LF/EOF and diff checks pass. The CLI contract index now names the
+already implemented Go v3 option alongside v1/v2. Actual admitted Windows pack
+dispatch is closed. Remaining source/non-call families, other generated
+consumers, full CLI/Go comparisons, consecutive self-build, distribution,
+same-commit hosted CI and native Linux remain required by the complete queue.
+No grammar, stable CLI flag, public SDK/runtime ABI, dependencies, DB,
+workflow/runner or hygiene-policy change; no push or dispatch.

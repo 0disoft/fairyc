@@ -56,6 +56,20 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy actual `experimental atlas-pack overview/show/around` now derives exact
+  requested v1/v2/v3 maps from fresh Complete-bound source, selects one unique
+  current package and emits canonical no-newline packs without a Go fallback.
+  Four of 41 full authored-main verifier registrations pass both Windows
+  profiles: 200 native processes across ordinary, source, SDK and help groups.
+  Output/selection bounds, selectors, source-family refusals, stale/locked and
+  unlocked refresh, stdout failure, generics, cleanup and SDK Vec pass against
+  independently scoped original Go facts and checksums. Authored check/locked
+  (670 files, 8,305 MIR functions), existing Go pack regressions and scoped vet/
+  format/LF/diff pass. See the Context Pack plan for timings, digests and failed
+  oracle attempts. Broader production/non-call families, generated consumers,
+  other full-CLI verifiers and every original implementation/final gate remain
+  open. Native Linux stays batched; no push or dispatch.
+
 - Fairy current-admitted Context Pack around now traverses canonical local
   adjacency with separate relation/visited-node ledgers, per-depth membership,
   ordered frontiers and exact relation-before-node refusal/omission behavior.
