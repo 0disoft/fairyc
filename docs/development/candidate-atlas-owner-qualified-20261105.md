@@ -160,8 +160,9 @@ The combined three-root command run passes in 641.864s without selected skips.
 The three verifiers are appended to `TestCandidateAtlasCLI` as
 `impact-owner-qualified`, `mcp-owner-qualified` and `edit-owner-qualified`, without
 removing or reordering any existing group. Fresh full authored-main acceptance
-has not run for these groups or this changed image. Historical closure/pre-closure
-receipts cannot attest it.
+now passes these groups and the refusal/help controls at both profiles below.
+Historical closure/pre-closure receipts cannot attest the other groups on this
+changed image.
 
 Command log: `.cache/atlas-owner-qualified-commands-20261106.log`.
 Independent edit oracle: `.cache/atlas-owner-qualified-edit-oracle-20261106.log`
@@ -231,7 +232,44 @@ logs: `.cache/atlas-owner-qualified-same-leaf-edit-before-20261106.log` and
 `-after-20261106.log`. This is Go editor evidence, not additional same-leaf
 Fairy production or editing acceptance.
 
-New-image full CLI, consecutive self-build, generated-consumer execution,
+## Full authored-main acceptance
+
+The actual authored dispatcher, without a companion, passes the three new
+owner-qualified groups and `unsupported`/`help` under both profiles in 817.462s.
+The five selected groups pass without skips; the other twenty-four of the
+twenty-nine registered groups are not attested for this image. This is neither
+full 29/29 acceptance nor new same-leaf namespace-family evidence.
+
+| Group | Low | Optimized |
+| --- | ---: | ---: |
+| unsupported | 0.06s | 0.05s |
+| help | 0.17s | 0.19s |
+| impact-owner-qualified | 487.26s | 8.43s |
+| mcp-owner-qualified | 139.18s | 2.69s |
+| edit-owner-qualified | 67.38s | 1.36s |
+
+Reproduction (the cache directory is test-only):
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path $PWD '.cache/atlas-owner-qualified-cli-20261106'
+go test -mod=readonly -count=1 -timeout 16m -v ./internal/cli -run '^TestCandidateAtlasCLI$/(low|optimized)$/^(impact-owner-qualified|mcp-owner-qualified|edit-owner-qualified|unsupported|help)$'
+```
+
+Log: `.cache/atlas-owner-qualified-full-cli-20261106.log`.
+The C input has a 1,982,488-byte header, 153,115-byte runtime and 24 body units;
+the largest unit is 2,097,059 bytes, within the unchanged 2 MiB consumer bound.
+Images retain the existing 16 MiB stack reserve and profile/toolchain/C-input
+and executable digest verification. Later Go namespace/filter/editor fixes do
+not change these Fairy/runtime sources; the accepted fourteen-family scope is
+unchanged and does not absorb those separate Go-only namespace fixtures.
+
+| Profile | Source/profile/toolchain digest | Image SHA-256 |
+| --- | --- | --- |
+| low | `82e2b663aee139e21ee4989260628bddd8f360e2189a1aa71b26d1c958078988` | `867662ac5ef14e697deafb5938b6b9f5744555b3f130ac3409be9686f2afc599` |
+| optimized | `b6b4ee70d71a49d7762e792665e1567968107b32fc9b8139f7b9e3867ad03b7b` | `443842c2cdeab427eaeb5d0dc46bac9da4f89a5885ea9f20d17984d4f75c8808` |
+
+The other full-CLI groups, consecutive self-build, generated-consumer execution,
 clean-machine distribution, same-commit CI and native Linux remain separate.
 Enum owners, generic methods and
 broader expression/closure combinations are not established by this matrix.

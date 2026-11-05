@@ -85,8 +85,12 @@ authorized by this queue.
   real stdio MCP families and ordinary-body preview/apply with new associated,
   exclusive and consuming calls also pass both profiles (641.864s combined).
   Direct owner-method editing remains refused. All three verifiers are appended
-  to the full CLI without deleting or reordering existing groups. Changed
-  full-image acceptance and every final queue gate remain open. See
+  to the full CLI without deleting or reordering existing groups. The new full
+  authored-main image passes those three groups and refusal/help at both profiles
+  in 817.462s, with exact source/profile/toolchain and executable digests. This is
+  five of twenty-nine registered groups; the other twenty-four and every final
+  queue gate remain open. Additional same-leaf Fairy namespace sources are not
+  attested by the original fourteen-family replay. See
   `candidate-atlas-owner-qualified-20261105.md`. Linux stays batched; no push or
   dispatch, and the full implementation objective remains active.
 
