@@ -196,3 +196,50 @@ Native Linux remains batched; actual generic source production, SDK/full CLI,
 self-build equality, distribution/clean-machine and hosted same-commit evidence
 remain open. Stable public API/SDK ABI, DB, dependencies, repository hygiene and
 runner configuration are unchanged. No push, release or deployment.
+
+## Original generic source declaration projection
+
+`project_atlas_template_types` projects positional binders, source-resolved nominal
+coordinates and recursive declared types directly from the retained AST/catalog.
+The common schema now writes original function/struct/resource declarations,
+including unused templates. Function parameters and generic aggregate fields use
+source name spans; generic resource cleanup is `source-declared`, without inferred
+body/effect facts. Imported aliases/comments resolve through the actual signature
+catalog. Generic attributes/owners outside the Go snapshot contract stay closed.
+Scalar slices normalize as builtin views; nominal/bound slices preserve structure.
+Literal array lengths retain the full positive u64 declaration range, including
+4,097 and 18,446,744,073,709,551,615, independently of concrete runtime array limits.
+
+`prepare_declarations` owns only source-bound metadata. It grants no Complete,
+current map or body authority. `prepare` still additionally checks the exact
+Complete-owned source provenance and coordinates. This separation is material:
+Fairy's compiler currently rejects user generic aggregates in
+`generic_source_catalog::collect_template` (4501), while Go's Atlas v3 preparation
+admits them explicitly. Opening that compiler gate alone cannot implement the
+missing aggregate layout, instantiation, cleanup and identity path. The full
+aggregate producer remains open; no SDK impersonation or partial Complete is used.
+
+Executed and passed Windows low/optimized:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m ./internal/cli -run '^TestCandidateAtlas(Schema|GenericSchema|GenericFunctionSchema)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_atlas_generic_schema_test.go
+git diff --check
+```
+
+The group passes (203.210s). GenericSchema compares every original declaration byte
+against independently compiled Go v3 output, including ten used/unused templates,
+nested/imported aggregates, two binders, unsafe/effects, arrays, pointers, borrows,
+slices and Option/Result. It is deliberately source-only for aggregates.
+GenericFunctionSchema first completes actual Fairy source/body/Flow/MIR/interface
+verification, then compares four original generic headers and ordinary declarations
+with Go; wrong/stale Complete provenance and coordinates reject. Bounds/work/header
+rejections and read-only workspace checks also pass. The original ordinary Schema
+suite passes unchanged. An early attempted aggregate Complete failed with 4501;
+that is remaining compiler work, not passing aggregate execution evidence.
+
+Actual map inventory/specialization production, compiler aggregate execution,
+SDK/full CLI and final acceptance remain open. Native Linux remains batched.
+Stable public API/SDK ABI, DB, dependencies, repository hygiene and runners are
+unchanged. No push, release or deployment.

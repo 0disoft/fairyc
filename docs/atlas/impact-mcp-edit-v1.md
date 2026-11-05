@@ -61,6 +61,12 @@ resolves the remote ID against its exact original declaration, and retains templ
 uncertainty in impact output. Ordinary `read` remains closed to generic maps.
 Actual Fairy generic source production and command integration remain separate
 from these explicit ports.
+Original generic declaration headers now project retained AST binders, types,
+coordinates and spans. `prepare_declarations` is source-only; the normal `prepare`
+continues to require exact Complete provenance. Generic function headers pass the
+complete Fairy factory, while user generic aggregates still need their compiler
+instantiation/layout/cleanup path (4501 at source admission). Source-only aggregate
+headers do not establish executable or CLI support.
 See [the generic receipt](../ops/windows-candidate-atlas-generics-20261105.md).
 The Fairy CLI now dispatches `experimental atlas-impact`
 with the selectors and explicit limits above. Both with and without `--locked`,

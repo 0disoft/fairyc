@@ -155,3 +155,11 @@ authorized by this queue.
   missing/wrong-owner/erased remote IDs and zero-call unused templates. Actual
   Fairy generic source production, SDK/full CLI and final acceptance remain open;
   see the generic receipt.
+
+- Original generic source declarations now project binders, nested/imported types,
+  source spans and declared effects/cleanup with exact Go JSON. Windows source-only
+  aggregate and complete generic-function plus ordinary schema tests pass
+  (203.210s). Actual Fairy compilation still rejects user aggregate templates at
+  catalog admission (4501); their complete instantiation/layout/cleanup path must
+  be implemented, not inferred from the reader or source-only header port. Generic
+  map production/SDK/CLI and the full queue remain open; see the generic receipt.

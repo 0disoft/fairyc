@@ -26,13 +26,13 @@ fn ref u8[] scalar(u32 id){
     if(id==1){return b"i32";}if(id==2){return b"i64";}if(id==3){return b"u8";}
     if(id==4){return b"u32";}if(id==5){return b"usize";}if(id==6){return b"bool";}return b"void";
 }
-fn Result<bool,u32> head(ref mut bytes::Buffer out,ref u8[] kind,ref u8[] name,ref u8[] coordinate,bool mutable,usize length,ref mut usize meter){
+pub fn Result<bool,u32> head(ref mut bytes::Buffer out,ref u8[] kind,ref u8[] name,ref u8[] coordinate,bool mutable,usize length,ref mut usize meter){
     discard w::raw(out,b"{",meter)?;discard w::pair(out,b"kind",kind,meter)?;discard w::raw(out,b",",meter)?;
     discard w::pair(out,b"name",name,meter)?;discard w::raw(out,b",",meter)?;discard w::pair(out,b"package_coordinate",coordinate,meter)?;
     discard w::raw(out,if(mutable){b",\"mutable\":true,\"length\":"}else{b",\"mutable\":false,\"length\":"},meter)?;
     discard w::number(out,length,meter)?;return w::raw(out,b",\"arguments\":[",meter);
 }
-fn Result<bool,u32> builtin(ref mut bytes::Buffer out,ref u8[] name,ref mut usize meter){discard head(out,b"builtin",name,b"",false,0,meter)?;return w::raw(out,b"]}",meter);}
+pub fn Result<bool,u32> builtin(ref mut bytes::Buffer out,ref u8[] name,ref mut usize meter){discard head(out,b"builtin",name,b"",false,0,meter)?;return w::raw(out,b"]}",meter);}
 fn Result<bool,u32> scalar_type(ref mut bytes::Buffer out,u32 id,ref mut usize meter){
     if(c::valid(id)){
         let ref u8[] names=b"bool|char|double|float|int|long|longlong|schar|short|size_t|ssize_t|uchar|uint|ulong|ulonglong|ushort|";
