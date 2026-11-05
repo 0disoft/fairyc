@@ -40,7 +40,7 @@ func candidateAggregateValueFixtures() []candidateAggregateLayoutFixture {
 	}
 }
 
-func candidateAggregateBodyProbe(t *testing.T, module string, wire []byte, builder, checksFile, imports string) {
+func candidateAggregateBodyProbe(t *testing.T, module string, wire []byte, builder, checksFile, imports string, outputs ...func(*testing.T, string)) {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "generic_aggregate_layouts.fy"))
 	if err != nil {
@@ -67,8 +67,14 @@ func candidateAggregateBodyProbe(t *testing.T, module string, wire []byte, build
 	main = main[:start] + signature + builder + main[stop:] + checkBody + "\n@effects(console) fn i32 main(){return run();}\n"
 	candidateAtlasProbeSize(t, module, main, 512<<10, func(t *testing.T, image string) {
 		t.Setenv("PATH", "")
-		if code, out := candidateAtlasProcess(t, image, wire); code != 0 || out != "" {
+		code, out := candidateAtlasProcess(t, image, wire)
+		if code != 0 {
 			t.Fatalf("%s aggregate bodies: %d %q", module, code, out)
+		}
+		if len(outputs) != 0 {
+			outputs[0](t, out)
+		} else if out != "" {
+			t.Fatalf("unexpected aggregate output: %q", out)
 		}
 	}, "project_source_plan")
 }

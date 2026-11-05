@@ -295,3 +295,17 @@ authorized by this queue.
   Windows; see `docs/ops/windows-partial-aggregate-cleanup-20261105.md` for exact
   failed/passed accounting. This does not close native aggregate C execution or
   any other broad queue item; that implementation continues next.
+
+
+- Aggregate single-buffer C now admits concrete struct/resource records, inert
+  record arrays and structural cleanup through the existing body/CFG C owner.
+  The final twenty-input Windows low/optimized host replay passes in 146.16s:
+  fifteen accepted C programs x both consumers x both hosts = 60 native runs;
+  six independent Go references x both consumers = 12 native runs. Fixed values
+  and nested/defer/partial-propagation/continue/break cleanup traces match in all
+  72. Tuple metadata still rejects a C value spelling. Scoped vet, formatting
+  and diff checks pass. Existing private consumer flags are used unchanged;
+  an attempted stable `/W4 /WX` single-unit build reports pre-existing labels/
+  narrowing warnings and is not claimed as passing. Partitioned C, remaining CFG
+  families, source identities/restoration/cache/Atlas/SDK/actual commands and all
+  final gates remain open. See the aggregate plan for exact failure/pass scope.

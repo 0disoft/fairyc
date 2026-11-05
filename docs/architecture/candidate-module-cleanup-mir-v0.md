@@ -72,12 +72,13 @@ descriptor. Receipt: `docs/ops/evidence/candidate-module-cleanup-mir-20261010.js
 Invariants and limits. types 1..4096, frames 1024, operands 16384, drops 16384, fields
 1024, effects 4095, abilities 7, recursion depth 64, work 1048576.
 
-Pending. Drop sites keep their semantic request order; attaching them to CFG blocks and
-ordering reverse-lexically with defer and Region sequence happens before any C handoff.
-The model holds no ordinary function bodies, CFG or local-execution definitions, so it
-does not yet carry all source provenance. C emission and execution, CFG placement and
-defer/resource/Region sequencing remain pending; the existing `module_program` C path
-still joins and is unchanged, and this is not a new C pipeline or the full compiler.
+Sequencing ownership. Drop sites retain semantic request order in this cleanup-only
+fragment. The separate owned-body CFG consumer attaches them to blocks and orders
+cleanup with defer/Region operations before its private C handoff. This fragment
+holds no ordinary bodies or CFGs and does not by itself establish their provenance.
+The bounded aggregate single-buffer C path has its own native Windows values/drop
+trace evidence below. Project linking, restoration, source-bound identities, cache
+and actual command acceptance remain separate; this is not the full compiler.
 
 
 Owned body consumer (2026-11-05). The ordinary detached body lowerer can consume
@@ -88,3 +89,13 @@ Private aggregate cleanup admission is still required; no artifact/project gate
 or cache encoding changes. This body acceptance does not establish CFG sequencing,
 C emission, executed cleanup, source-authenticated identities or restoration.
 The aggregate implementation plan owns the Windows acceptance evidence.
+
+
+Single-buffer C consumer (2026-11-05). Kind-20/21 concrete layouts and constructors
+use the existing checked body/CFG C owner, including kind-21 structural cleanup
+and inert record arrays. Kind-22 tuples never receive a C value spelling.
+The aggregate plan records native Windows execution of values, nested cleanup,
+defer, partial construction propagation and loop exits under the existing private
+consumer policy. Partitioned emission, source-authenticated project linking and
+restoration/cache/Atlas/actual CLI are still required. This does not open ordinary
+or artifact cleanup admission, promote a C ABI or change compiler warning flags.

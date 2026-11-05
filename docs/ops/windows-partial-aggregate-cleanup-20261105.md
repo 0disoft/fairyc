@@ -42,3 +42,12 @@ final eight-case test passes in 0.196s. Earlier failing commands are not passes.
 Actual native Go/Fairy C trace comparison follows in the aggregate C execution
 slice. Full CLI/cache, Linux execution, self-build, distribution and hosted CI
 remain separate. No push, release, deployment or runner changes.
+
+
+The subsequent final `TestCandidateGenericAggregateC` replay passes in 146.16s.
+It includes actual Windows low/optimized Go reference C execution of the failing
+partial-construction case and the same source through both Fairy host and C
+consumer profiles. All observe exactly the single initialized child (`3,`) and
+no outer cleanup; the successful nested/defer case observes `8,9,2,1,`.
+The aggregate implementation plan owns the full 72-execution matrix and private
+C consumer/strict-warning distinction. This is not Linux or full CLI evidence.

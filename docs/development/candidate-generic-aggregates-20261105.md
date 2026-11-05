@@ -23,7 +23,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    constructor, specialization and cleanup facts. Construction value checking is
    implemented below, as is ownership/Flow checking. Executable lowering remains
    open.
-3. **Ownership/Flow, cleanup MIR and owned body MIR implemented; CFG/C remain open.**
+3. **Ownership/Flow, cleanup/body MIR and single-buffer CFG/C execution implemented; partitioned C remains open.**
    Resource instances now enter the ordinary move/loan and cleanup-policy owner.
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
@@ -611,3 +611,69 @@ git diff --check
 Scoped vet, formatting and diff checks pass. Native probes use empty PATH.
 No full candidate CLI, Linux, self-build, distribution, clean-machine or hosted
 same-commit result is claimed. The complete implementation queue remains active.
+
+
+## Single-buffer aggregate C execution
+
+`module_unit_c_aggregate` now gives kind-20/21 instances distinct private C record
+names, forward declarations, recursively defined concrete fields, ordinary
+constructors and kind-21 cleanup recipes. Arrays may contain admitted inert
+kind-20 records. Scalar-only arguments and existing field/ownership restrictions
+still come from the checked graph; kind-22 tuples have no C value spelling.
+The existing checked body-to-C entry revalidates bodies and lowers/verifies CFGs
+before emission. No parser, AST join or reference frontend substitutes for it.
+
+The C probe contains the fourteen baseline field/layout inputs plus six executed
+programs: constructed copies, two scalar specializations, repeated record arrays,
+nested cleanup/defer, partial construction with Result propagation and loop
+continue/break cleanup. Fifteen accepted inputs emit C; four paired source
+rejections and the independent Fairy by-value-cycle rejection emit no program.
+The baseline entry returns zero and does not execute every unused declaration.
+The additional six entries return 42 and assert values or exact cleanup traces.
+
+Each emitted single-buffer C program is consumed unchanged by the existing private
+candidate C builder at low/optimized. The inert header/literal companions add no
+program behavior. This uses the existing candidate consumer policy, not the stable
+single-unit `/W4 /WX` API: an initial attempt with that API reports pre-existing
+unreferenced-label and checked-helper narrowing warnings. No compiler flag,
+warning suppression, product timeout or runner policy is changed to obtain a pass.
+Strict standalone C-warning cleanup is not attested by this private execution path.
+
+Both Go-generated and Fairy-generated native programs independently check fixed
+expected return values and exact comma-separated observer bytes. The partial
+construction case exposed the Go MIR defect fixed separately in `74240245`; it
+is kept as a native regression, not removed from the matrix. The initial observer
+used CRT newlines and was changed to commas so bytes do not depend on text-mode
+newline translation. The original Go entry lookup was also corrected to use the
+actual package-qualified module identity. Earlier failed commands are not passes.
+
+Partitioned output, source-bound identities, project linking/restoration/cache,
+Atlas/SDK and actual `check/build/run/test` remain separate required steps. No
+stable source/FFI ABI or cache wire promotion follows from private C execution.
+Native Linux, self-build, distribution and hosted CI remain open. Final Windows
+command results follow below.
+
+
+The final twenty-input Windows MSVC replay passes in 146.16s, with candidate
+low/optimized hosts (35.79s/93.44s) and no selected skips. Fifteen Fairy C programs
+run under two consumer profiles for each host: 60 actual native executions.
+The six Go reference programs separately run under both profiles: 12 executions.
+All 72 match fixed expected exit/output bytes. Each candidate source also passes
+its independent Go Flow/expanded-field oracle or the specified rejection control.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregateC$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_c_test.go internal/cli/candidate_generic_aggregate_values_test.go
+git diff --check
+```
+
+Scoped vet, formatting and diff checks pass. The C emission/source programs and
+observer bytes are final inputs of the command above. This closes the bounded
+single-buffer native aggregate step, including the named CFG cleanup traces.
+Partitioned emission, broader CFG/resource forms, source identities/restoration,
+cache/Atlas/SDK/full CLI and every final acceptance family remain open. The
+strict standalone C-warning attempt remains failed/unclaimed; it is not erased
+by the private consumer pass. Native Linux remains deferred at the user's request.
+No stable public API/SDK ABI, DB, dependencies, hygiene, runners or timeout policy
+changed. No push, release, deployment or hosted dispatch.
