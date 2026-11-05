@@ -309,3 +309,15 @@ authorized by this queue.
   narrowing warnings and is not claimed as passing. Partitioned C, remaining CFG
   families, source identities/restoration/cache/Atlas/SDK/actual commands and all
   final gates remain open. See the aggregate plan for exact failure/pass scope.
+
+
+- Aggregate partitioned C now emits bounded shared header/literal/body packets
+  through an explicit private route, preserving ordinary project admission.
+  Fifteen accepted programs x two selection/split modes x two consumer profiles
+  x two Windows host profiles pass all 120 native executions with fixed values
+  and exact cleanup traces. Source/boundary/gate refusals and independent packet
+  validation pass; single-buffer/Go regression, scoped vet, formatting and diff
+  checks pass. See the aggregate plan for times and unchanged-input reuse.
+  Source-bound identities, linking/restoration/cache/Atlas/SDK/actual commands,
+  broader resource families and every final queue gate remain open. This closes
+  only the bounded aggregate partition consumer, not the implementation objective.

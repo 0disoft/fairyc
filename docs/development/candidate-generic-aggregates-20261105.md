@@ -23,7 +23,7 @@ admitted scalar-parameter struct/resource semantics. Native Linux remains batche
    constructor, specialization and cleanup facts. Construction value checking is
    implemented below, as is ownership/Flow checking. Executable lowering remains
    open.
-3. **Ownership/Flow, cleanup/body MIR and single-buffer CFG/C execution implemented; partitioned C remains open.**
+3. **Ownership/Flow, cleanup/body MIR and single-buffer/partitioned CFG/C execution implemented.**
    Resource instances now enter the ordinary move/loan and cleanup-policy owner.
    Connect checked bodies to kind-aware identities, MIR verification and both C
    emission forms. Require native values and exact cleanup traces against Go;
@@ -677,3 +677,60 @@ strict standalone C-warning attempt remains failed/unclaimed; it is not erased
 by the private consumer pass. Native Linux remains deferred at the user's request.
 No stable public API/SDK ABI, DB, dependencies, hygiene, runners or timeout policy
 changed. No push, release, deployment or hosted dispatch.
+
+
+## Partitioned aggregate C execution
+
+The compiler-private `module_unit_c_emit::emit_aggregates` route now emits the
+existing bounded shared header, shared literals and contiguous body units from
+verified aggregate-enabled body IR. It retains the same CFG, SDK, call/drop
+reachability and output/work accounting owners as ordinary partitioning. The
+caller retains its checked input; an error returns no successful partial Emission.
+The route does not admit source-authenticated project linking or artifact restore.
+Ordinary partition/test/scoped entry points retain their old project gate.
+
+`TestCandidateGenericAggregatePartitionC` replays the same twenty source inputs
+as the single-buffer test. Fifteen accepted programs each emit two packets:
+all frames split at one frame, and entry-reachable frames split at two frames.
+The Fairy verifier checks exact range coverage, nonempty selected frames, unchanged
+aggregate/project mode, and work limits. The independent Go packet decoder checks
+markers, length/canonical framing, literal identities, ordered original frame
+symbols and exactly one entry before native compilation.
+
+Each accepted input also rejects zero/over-limit partition sizes, zero/out-of-range
+or cleanup entry, ordinary test/partition/scoped aggregate admission, a plain program
+at the private aggregate entry and kind-22 C value spelling. The four paired source
+rejections and independent Fairy by-value-cycle refusal still produce no C packet.
+Both output modes use the same fixed exit/output expectations as the single-buffer
+and Go reference tests, including nested/defer/partial/loop cleanup order.
+
+Windows results, no selected skips:
+
+- Single-buffer regression: 149.55s; low 35.15s, optimized 98.70s. The product,
+  generated Fairy probe, runtime and native fixture inputs are unchanged by the
+  subsequent Go-only replay-helper extraction, so these results are reused.
+- Partitioned low host: 104.40s total, 92.18s subtest; 60 consumer executions.
+- Partitioned optimized host: 162.66s total, 149.81s subtest; 60 consumer executions.
+- All 120 partitioned consumer executions match the fixed expected bytes/status.
+  The separate single-buffer/Go regression accounts for 60/12 native executions;
+  reference executions are not rerun or counted again by the partition-only roots.
+- Scoped vet, packet/decode tests, Go formatting and diff checks pass.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregateC$'
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregatePartitionC$/low$'
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestCandidateGenericAggregatePartitionC$/optimized$'
+go test -mod=readonly -count=1 ./internal/candidatebuild -run 'Packet|Decode'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_c_test.go
+git diff --check
+```
+
+The standalone fixture parser helper/import precede its exported verifier and are
+not copied by the native replay harness; their addition changes no generated probe
+input. Private consumer flags, default timeouts and strict standalone warning
+boundaries are unchanged. Source identities/restoration/cache/Atlas/SDK, actual
+commands, broader CFG/resource families and every final acceptance gate remain open.
+No native Linux/full CLI/self-build/distribution/clean-machine/hosted result is
+claimed. No stable public API/SDK ABI, DB, dependencies, hygiene or runner changes;
+no push, release, deployment or hosted dispatch.

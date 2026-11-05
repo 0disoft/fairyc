@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/candidatebuild"
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -47,6 +48,15 @@ func candidateAggregateExecutions() []candidateAggregateExecution {
 }
 
 func TestCandidateGenericAggregateC(t *testing.T) {
+	candidateAggregateCReplay(t, false)
+}
+
+func TestCandidateGenericAggregatePartitionC(t *testing.T) {
+	candidateAggregateCReplay(t, true)
+}
+
+func candidateAggregateCReplay(t *testing.T, partitioned bool) {
+	t.Helper()
 	cases := candidateAggregateExecutions()
 	extra := make([]candidateAggregateLayoutFixture, len(cases))
 	for i, c := range cases {
@@ -63,14 +73,16 @@ func TestCandidateGenericAggregateC(t *testing.T) {
 	}
 	support += "\n#include <stdio.h>\nvoid observe_cleanup(int32_t value){printf(\"%d,\",(int)value);}\n"
 	// The same native expectations independently constrain both compilers.
-	for _, c := range cases {
-		unit := candidateAggregateReferenceC(t, c.fixture)
-		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-			image, err := cdriver.BuildWindowsMSVCTarget(toolchain, profile, unit, support)
-			if err != nil {
-				t.Fatalf("Go %s: %v", c.fixture.name, err)
+	if !partitioned {
+		for _, c := range cases {
+			unit := candidateAggregateReferenceC(t, c.fixture)
+			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+				image, err := cdriver.BuildWindowsMSVCTarget(toolchain, profile, unit, support)
+				if err != nil {
+					t.Fatalf("Go %s: %v", c.fixture.name, err)
+				}
+				candidateAggregateExecuteImage(t, image.Bytes, c.code, c.output)
 			}
-			candidateAggregateExecuteImage(t, image.Bytes, c.code, c.output)
 		}
 	}
 	builder := `let owner=switch(checking::build(sources,metadata,0,v::len<syntax::Parsed>(sources))){case .ok(p):{p}case .err(p):{return p.code;}};
@@ -80,7 +92,13 @@ func TestCandidateGenericAggregateC(t *testing.T) {
  i=0;while(i<interfaces::field_count(p)){assert(v::push<interfaces::Field>(fields,interfaces::field_at(p,i)).is_ok);i+=1;}
  assert(bytes::append(names,bytes::view(interfaces::name_records(p))).is_ok);return 0;}`
 	imports := "import module_unit_checked_bodies as checking;import module_unit_body_ir_lower as lower;import module_unit_body_ir_model as body_ir;import module_unit_cleanup_mir_model as clean;import module_unit_c_emit as emit;import module_unit_c_aggregate as aggregate;import c_text as w;"
-	candidateAggregateBodyProbe(t, "module_unit_c_emit", wire, builder, "generic_aggregate_c.fy", imports, func(t *testing.T, out string) {
+	checksFile := "generic_aggregate_c.fy"
+	if partitioned {
+		checksFile = "generic_aggregate_partition_c.fy"
+		imports += "import module_unit_c_names as c_names;import candidate_limits as limits;import module_project_c_owner as c_owner;"
+		builder = strings.Replace(builder, "verify_values(ref lowered,sources);", "verify_values(ref lowered,sources,metadata);", 1)
+	}
+	candidateAggregateBodyProbe(t, "module_unit_c_emit", wire, builder, checksFile, imports, func(t *testing.T, out string) {
 		remaining := []byte(out)
 		var chunks []string
 		for len(remaining) != 0 {
@@ -97,17 +115,33 @@ func TestCandidateGenericAggregateC(t *testing.T) {
 			remaining = remaining[n:]
 		}
 		// Nine accepted baseline variants include module reversal and zero fields.
-		if len(chunks) != 9+len(cases) {
+		modes := 1
+		if partitioned {
+			modes = 2
+		}
+		if len(chunks) != modes*(9+len(cases)) {
 			t.Fatalf("C programs = %d", len(chunks))
 		}
 		for i, unit := range chunks {
 			code, output := 0, ""
-			if i >= 9 {
-				code, output = cases[i-9].code, cases[i-9].output
+			program := i / modes
+			if program >= 9 {
+				code, output = cases[program-9].code, cases[program-9].output
+			}
+			packet := candidatebuild.Packet{Header: "/* single-buffer transport */\n", Literals: "typedef int fy_empty_literals;\n", Units: []string{unit}}
+			if partitioned {
+				var err error
+				packet, err = candidatebuild.Decode([]byte(unit))
+				if err != nil {
+					t.Fatalf("partition packet %d: %v", i, err)
+				}
+				if len(packet.Units) < 2 {
+					t.Fatalf("packet %d did not split bodies", i)
+				}
 			}
 			for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 				// Keep the existing private candidate C consumer policy.
-				image, err := cdriver.BuildWindowsMSVCTargetParts(toolchain, profile, "/* single-buffer transport */\n", "typedef int fy_empty_literals;\n", []string{unit}, support)
+				image, err := cdriver.BuildWindowsMSVCTargetParts(toolchain, profile, packet.Header, packet.Literals, packet.Units, support)
 				if err != nil {
 					t.Fatalf("Fairy C %d/%s: %v", i, profile.Name, err)
 				}

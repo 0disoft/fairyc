@@ -99,3 +99,16 @@ defer, partial construction propagation and loop exits under the existing privat
 consumer policy. Partitioned emission, source-authenticated project linking and
 restoration/cache/Atlas/actual CLI are still required. This does not open ordinary
 or artifact cleanup admission, promote a C ABI or change compiler warning flags.
+
+
+Partitioned C consumer (2026-11-05). The explicit private `emit_aggregates` entry
+requires aggregate-enabled, non-project cleanup IR and revalidates body/CFG proof
+before sharing the ordinary bounded header/literal/body-unit preparation owners.
+All-frame and entry-reachable modes preserve structural drop dependencies and
+contiguous frame ranges. Only a complete Emission escapes; the checked input
+remains borrowed and retains its admission mode. Ordinary partition/scoped/test
+routes keep their project gate, and kind-22 tuples remain metadata-only.
+The aggregate plan records 120 Windows low/optimized native executions with fixed
+values and cleanup traces. This does not admit aggregate project linking, source
+identity restoration, artifact/cache/Atlas/SDK or actual command execution; those
+remain required follow-ups. No stable C ABI or compiler-warning policy changes.
