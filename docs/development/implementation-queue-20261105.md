@@ -56,13 +56,24 @@ authorized by this queue.
 
 ## Progress
 
+- Same-leaf full authored-main impact/MCP/editor groups now pass Windows
+  low/optimized (296.675s), including reversed method declarations, ordinary
+  same-leaf `get`, visible/full selectors, exact/one-short call budgets, workspace
+  immutability, real stdio and ordinary-body publication with method refusal.
+  The three appended groups reuse authenticated unchanged images; together with
+  the earlier five groups they attest eight of thirty-two registrations. The
+  other twenty-four groups, generated consumers and final acceptance remain
+  open. See the owner-qualified receipt. Fairy symbols/calls/pack dispatchers,
+  enum owners and remaining SDK/aggregate combinations still require work.
+
 - Same-leaf Fairy Atlas production now preserves `Cell::get`, `Other::get` and
   an optional ordinary `get`: both sources pass Windows low/optimized (84.432s),
   returning eight package maps with exact independent Go v3/current/join facts
   and two/three calls. Existing compiler/runtime code already supports these
   namespaces. The original fourteen-case producer and controls remain registered;
-  scoped vet/format/diff pass. Actual same-leaf commands, editor publication,
-  generated consumers, fresh full-CLI selection and final queue gates stay open.
+  scoped vet/format/diff pass. Actual same-leaf commands, editor publication and
+  full-CLI selection are recorded above; generated consumers and final queue
+  gates stay open.
 
 - Go generic source preparation now keeps owner-qualified method namespaces:
   valid `Cell::get`/`Other::get` and an ordinary same-leaf `get` no longer collide

@@ -249,9 +249,9 @@ implementation already handles this source family; no compiler or runtime
 change is required by this proof. Scoped CLI vet, formatting and diff checks
 pass. Log: `.cache/atlas-owner-qualified-namespace-production-20261106.log`.
 
-Actual same-leaf impact/MCP/editor commands, generated-consumer execution and
-their full authored-main replay remain separate. The original fourteen-family
-full-CLI receipt below is unchanged and does not attest these new sources.
+Actual same-leaf impact/MCP/editor commands and their full authored-main replay
+are recorded below. Generated-consumer execution remains separate. The original
+fourteen-family full-CLI receipt is unchanged.
 
 ## Full authored-main acceptance
 
@@ -296,3 +296,37 @@ Enum owners, generic methods and
 broader expression/closure combinations are not established by this matrix.
 No stable CLI flag, SDK/runtime ABI, map wire version, dependency, DB, runner or
 repository policy is changed. The full implementation objective remains active.
+
+## Distinct-owner namespace command acceptance
+
+`candidate_atlas_owner_namespace_command_test.go` appends three groups to the
+existing full authored-main verifier. The two source variants independently
+retain `Cell::get` and `Other::get`, with an optional ordinary `get`. The
+two-owner variant reverses method declaration order. Impact compares visible
+and full selectors against the independent current Go v3 call index, admits the
+exact two/three-call budget and rejects one-short budgets without output. Read
+queries preserve every workspace byte. Real stdio MCP resolves each namespace;
+ordinary `get` preview/apply succeeds while direct owner-method edits reject.
+
+```powershell
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_ATLAS_CLI_ARTIFACTS=Join-Path $PWD '.cache/atlas-owner-qualified-cli-20261106'
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateAtlasCLI$/(low|optimized)$/^(impact-owner-namespaces|mcp-owner-namespaces|edit-owner-namespaces)$'
+```
+
+The command passes in 296.675s with no selected skips. Both profiles reuse the
+exact verified C-input/profile/toolchain/image digests in the preceding table;
+no compiler/runtime source changed and no fresh native compilation is claimed.
+
+| Group | Low | Optimized |
+| --- | ---: | ---: |
+| impact-owner-namespaces | 141.99s | 2.11s |
+| mcp-owner-namespaces | 57.04s | 0.89s |
+| edit-owner-namespaces | 72.86s | 1.30s |
+
+Log: `.cache/atlas-owner-qualified-namespace-full-cli-20261106.log`.
+Together with the earlier five groups, this attests eight of the now thirty-two
+registered groups on these exact images. The other twenty-four groups,
+generated consumers, consecutive self-build, clean-machine distribution,
+same-commit hosted CI and native Linux remain separate. Fairy `atlas-symbols`,
+`atlas-calls` and `atlas-pack` dispatchers remain unimplemented.

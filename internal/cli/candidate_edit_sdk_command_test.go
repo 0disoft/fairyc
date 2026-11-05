@@ -19,6 +19,7 @@ return switch(n::parse_i64_decimal(b::view(ref value))){case .ok(p):{if(p==43){4
 type candidateEditSDKFixture struct {
 	source, body, invalid, module, name string
 	provider, deniedUID                 string
+	subject                             string
 }
 
 func TestCandidateEditSDKCommand(t *testing.T) {
@@ -57,10 +58,14 @@ func verifyCandidateEditSDKCommandFixture(t *testing.T, image string, fixture ca
 		return p
 	}
 	prepared := prepare(root)
+	subject := fixture.subject
+	if subject == "" {
+		subject = "leaf"
+	}
 	var symbol, sdkSymbol string
 	for _, p := range prepared.partitions {
 		for _, s := range p.Symbols() {
-			if p.Header().PackageUID == "example.session.app" && s.Declaration.Name == "leaf" {
+			if p.Header().PackageUID == "example.session.app" && s.Declaration.Name == subject {
 				symbol = s.Visible
 			} else if s.Declaration.Module == fixture.module && s.Declaration.Name == fixture.name {
 				sdkSymbol = s.Visible

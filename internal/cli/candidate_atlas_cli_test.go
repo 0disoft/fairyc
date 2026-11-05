@@ -119,6 +119,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"impact-owner-qualified", verifyCandidateAtlasOwnerQualifiedCommand},
 				{"mcp-owner-qualified", verifyCandidateMCPOwnerQualifiedCommand},
 				{"edit-owner-qualified", verifyCandidateEditOwnerQualifiedCommand},
+				{"impact-owner-namespaces", verifyCandidateAtlasOwnerNamespaceCommand},
+				{"mcp-owner-namespaces", verifyCandidateMCPOwnerNamespaceCommand},
+				{"edit-owner-namespaces", verifyCandidateEditOwnerNamespaceCommand},
 			} {
 				t.Run(check.name, func(t *testing.T) { check.verify(t, image) })
 			}
