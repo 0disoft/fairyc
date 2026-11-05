@@ -8,8 +8,9 @@ import std::bytes as bytes;
 import std::text as text;
 
 // Private transport-only view. No semantic/current-source trust is implied.
-// Initial slice admits v1/v3 without generic-interface/specialization records;
-// unsupported fields reject rather than being discarded.
+// The partial v1/v3 document reader can shape generic declaration headers, but
+// complete semantic admission still rejects them. Specialization records remain
+// unsupported here; no unknown field is silently discarded.
 pub resource Document{json::Tree tree;usize map;usize header;u32 version;cleanup{}}
 pub fn ref json::Tree tree(ref Document d){return ref d.tree;}
 pub fn usize header(ref Document d){return d.header;}
@@ -37,6 +38,7 @@ fn ref u8[] layout(u32 id){
  if(id==18){return b"function|provenance|calls|trap_categories|unsafe_sites|move_sites|drop_sites|allocation_sites|return_error_sites|borrows";}
  if(id==19){return b"relation|status|resolved|external|unknown|reasons";}
  if(id==20){return b"logical_schema|snapshot_model|compiler_build|compiler_build_algorithm|language|package_uid|package_instance|package_coordinate|package_source|package_source_kind|runtime_abi|target_scope|target|package_instance_algorithm|package_coordinate_algorithm|package_source_algorithm|source_file_algorithm|line_map_algorithm|symbol_algorithm|interface_algorithm|interface_hash|generic_interface_algorithm|generic_interface_hash|features|dependencies|package_references|generation_status|omissions|counts";}
+ if(id==21){return b"type_parameters|key|span|provenance|public|unsafe|foreign|abi|link_name|type|owner|receiver|parameters|effects|fields|variants|repr_c|drop_kind|drop_effects";}
  return b"";
 }
 fn u32 child(u32 id,usize index){
@@ -60,6 +62,7 @@ fn u32 child(u32 id,usize index){
  if(id==18){if(index==0){return 8;}if(index==2){return 216;}if(index==3){return 300;}if(index==4){return 209;}if(index==5){return 209;}if(index==6){return 209;}if(index==7){return 209;}if(index==8){return 209;}if(index==9){return 217;}return 100;}
  if(id==19){if(index==2){return 101;}if(index==3){return 101;}if(index==4){return 101;}if(index==5){return 300;}return 100;}
  if(id==20){if(index==23 || index==24 || index==27){return 300;}if(index==25){return 205;}if(index==28){return 4;}return 100;}
+ if(id==21){return if(index==0){300}else{child(14,index-1)};}
  return 0;
 }
 pub fn usize field(ref json::Tree t,usize at,ref u8[] name){if(at>=json::count(t) || json::token(t,at).kind!=1){return json::count(t);}var usize i=at+1;while(json::token(t,i).kind!=2){if(bytes::equal(json::value(t,i),name)){return i+2;}i=json::next(t,i+2);if(json::token(t,i).kind==6){i+=1;}}return json::count(t);}
@@ -74,10 +77,11 @@ fn u32 shape(ref json::Tree t,usize at,u32 id,usize depth,ref mut usize meter){
  if(depth>160 || !work::charge(meter,1)){return 3;}let kind=json::token(t,at).kind;
  if(id==100){return if(kind==7){0}else{5};}if(id==101){return if(kind==8 && number(json::value(t,at)).is_ok){0}else{5};}if(id==102){return if(kind==9 || kind==10){0}else{5};}if(id==103){return if(kind==11){0}else{shape(t,at,10,depth+1,meter)};}
  if(id>=200){if(kind!=3){return 5;}var usize i=at+1;var usize n=0;while(json::token(t,i).kind!=4){if(n>=65536){return 3;}let code=shape(t,i,if(id==300){100}else{id-200},depth+1,meter);if(code!=0){return code;}n+=1;i=json::next(t,i);if(json::token(t,i).kind==6){i+=1;}}return 0;}
- if(kind!=1){return 5;}let u32 owner=if(id==3 && field(t,at,b"generic_interface_algorithm")<json::count(t)){20}else{id};let names=layout(owner);var usize start=0;var usize index=0;var usize i=at+1;
+ if(kind!=1){return 5;}let u32 owner=if(id==3 && field(t,at,b"generic_interface_algorithm")<json::count(t)){20}else if(id==14 && field(t,at,b"type_parameters")<json::count(t)){21}else{id};let names=layout(owner);var usize start=0;var usize index=0;var usize i=at+1;
  while(start<names.len){var usize end=start;while(end<names.len && names[end]!=124){end+=1;}if(json::token(t,i).kind!=7 || !bytes::equal(json::value(t,i),names[start..end])){return 5;}let code=shape(t,i+2,child(owner,index),depth+1,meter);if(code!=0){return code;}i=json::next(t,i+2);if(json::token(t,i).kind==6){i+=1;}index+=1;start=end+1;}
  return if(json::token(t,i).kind==2){0}else{5};
 }
+pub fn u32 declaration_shape(ref json::Tree t,usize at,ref mut usize meter){if(at>=json::count(t)){return 5;}return shape(t,at,14,0,meter);}
 fn bool framed(ref mut sha::State state,ref u8[] data){var u8[8] size=[0;8];var usize n=data.len;var usize i=8;while(i>0){i-=1;let hex=b"0123456789abcdef";let u8 hi=hex[(n%256)/16];let u8 lo=hex[n%16];size[i]=((if(hi<=57){hi-48}else{hi-87})<<4)|(if(lo<=57){lo-48}else{lo-87});n/=256;}return sha::update(state,ref size) && sha::update(state,data);}
 // Codes: JSON codes 1..4; 5 schema/canonical, 6 checksum. Caller meter is shared.
 pub fn Result<Document,decode::Problem> read(bytes::Buffer source,usize maximum,ref mut usize meter){

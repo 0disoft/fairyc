@@ -34,6 +34,7 @@ func TestCandidateAtlasValidation(t *testing.T) {
 			f := partition.Files()[0]
 			sym := partition.Symbols()[0]
 			changes := []struct{ name, old, new string }{
+				{"unsupported-generic", `"key":{`, `"type_parameters":["T"],"key":{`},
 				{"compiler-algorithm", `"compiler_build_algorithm":"` + h.CompilerBuildAlgorithm + `"`, `"compiler_build_algorithm":"unknown"`},
 				{"instance-zero", `"package_instance":"` + h.PackageInstance + `"`, `"package_instance":"fypi1-sha256-` + strings.Repeat("0", 64) + `"`},
 				{"interface-zero", `"interface_hash":"` + h.InterfaceHash + `"`, `"interface_hash":"fyif5-sha256-` + strings.Repeat("0", 64) + `"`},

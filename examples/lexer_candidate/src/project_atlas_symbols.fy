@@ -1,6 +1,7 @@
 module project_atlas_symbols;
 import project_atlas_wire as wire;
 import project_atlas_model as model;
+import project_atlas_binders as binders;
 import project_json_tree as json;
 import project_path as work;
 import sha256_stream as sha;
@@ -36,9 +37,10 @@ fn Result<bytes::Buffer,u32> signature(ref json::Tree t,usize header,usize decl,
  discard text(ref mut out,120,wire::string(t,decl,b"drop_kind"),meter)?;discard strings(t,wire::field(t,decl,b"drop_effects"),ref mut out,121,meter)?;return .ok(out);
 }
 pub fn Result<bytes::Buffer,u32> derive(ref json::Tree t,usize header,usize decl,ref mut usize meter){
+ let arity=binders::validate(t,decl,meter)?;
  let sig=switch(signature(t,header,decl,meter)){case .ok(p):{p}case .err(code):{return .err(code);}};var bytes::Buffer data=bytes::empty();
  if(!add(ref mut data,b"fairyc.symbol-identity\0\x01",meter).is_ok || !text(ref mut data,117,wire::string(t,header,b"package_uid"),meter).is_ok){return .err(3);}
- let key=wire::field(t,decl,b"key");if(!text(ref mut data,109,wire::string(t,key,b"module"),meter).is_ok || !text(ref mut data,107,wire::string(t,key,b"kind"),meter).is_ok || !text(ref mut data,112,wire::string(t,key,b"name"),meter).is_ok || !tag(ref mut data,103,meter).is_ok || !number(ref mut data,0,meter).is_ok || !text(ref mut data,115,bytes::view(ref sig),meter).is_ok){return .err(3);}
+ let key=wire::field(t,decl,b"key");if(!text(ref mut data,109,wire::string(t,key,b"module"),meter).is_ok || !text(ref mut data,107,wire::string(t,key,b"kind"),meter).is_ok || !text(ref mut data,112,wire::string(t,key,b"name"),meter).is_ok || !tag(ref mut data,103,meter).is_ok || !number(ref mut data,arity,meter).is_ok || !text(ref mut data,115,bytes::view(ref sig),meter).is_ok){return .err(3);}
  var sha::State state=sha::empty();if(!sha::update(ref mut state,bytes::view(ref data))){return .err(3);}var bytes::Buffer full=bytes::empty();discard add(ref mut full,b"fysym1-sha256-256-",meter)?;if(!sha::append_hex(ref state,ref mut full)){return .err(2);}return .ok(full);
 }
 pub fn bool matches(ref json::Tree t,usize header,usize decl,usize symbol,ref mut usize meter){

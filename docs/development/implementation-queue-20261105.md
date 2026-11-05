@@ -122,3 +122,11 @@ authorized by this queue.
   post-edit lock recovery. SDK/generic facts and the broader Atlas queue item
   remain open. See
   `docs/ops/windows-candidate-atlas-families-20261105.md`.
+- Generic declaration binding and SymbolId arity now match the independent Go
+  original-declaration oracle for functions, structs and resources. Windows
+  low/optimized verify alpha-renaming, nested binder/nominal types, aggregate self
+  types, 63/64 type-depth boundaries and malformed inputs. Ordinary map validation
+  still rejects generic declarations explicitly. Existing wire/current/impact
+  regressions pass; this is a prerequisite, not complete generic-map/SDK source
+  production or CLI acceptance. See
+  `docs/ops/windows-candidate-atlas-generics-20261105.md`.

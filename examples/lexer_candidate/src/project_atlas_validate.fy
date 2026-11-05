@@ -53,6 +53,8 @@ fn bool header_valid(ref json::Tree t,usize h,u32 version,ref mut usize meter){
 }
 fn bool fields_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref mut usize meter){let rows=switch(model::rows(t,at,4096,meter)){case .ok(p):{p}case .err(_):{return false;}};var usize i=0;while(i<v::len<usize>(ref rows)){let r=*v::at<usize>(ref rows,i);if(!model::identifier(wire::string(t,r,b"name")) || !model::type(t,wire::field(t,r,b"type"),0,meter) || !model::span(t,wire::field(t,r,b"span"),instance,files,meter)){return false;}var usize j=0;while(j<i){if(!work::charge(meter,128) || model::eq(t,r,*v::at<usize>(ref rows,j),b"name")){return false;}j+=1;}i+=1;}return true;}
 fn bool declaration_valid(ref json::Tree t,usize at,ref u8[] instance,ref v::Vec<usize> files,ref v::Vec<usize> modules,ref mut usize meter){
+ // Generic symbol/type support is separate from complete generic-map admission.
+ if(wire::field(t,at,b"type_parameters")<json::count(t)){return false;}
  let key=wire::field(t,at,b"key");if(!equal(t,key,b"package_instance",instance) || !model::kind(wire::string(t,key,b"kind")) || !model::identifier(wire::string(t,key,b"name")) || model::find(t,modules,b"path",wire::string(t,key,b"module"),meter)==json::count(t) || !equal(t,at,b"provenance",b"compiler-declared") || !model::span(t,wire::field(t,at,b"span"),instance,files,meter) || !model::type(t,wire::field(t,at,b"type"),0,meter)){return false;}
  let owner=wire::field(t,at,b"owner");if(json::token(t,owner).kind!=11 && !model::type(t,owner,0,meter)){return false;}
  if(!model::sorted(t,wire::field(t,at,b"effects"),meter) || !model::sorted(t,wire::field(t,at,b"drop_effects"),meter) || !fields_valid(t,wire::field(t,at,b"fields"),instance,files,meter)){return false;}

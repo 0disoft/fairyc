@@ -46,7 +46,11 @@ are included, and neither an exact-current map nor a complete traversal proves a
 change safe.
 
 The reader rejects generic/type-parameter/specialization records and v2; it does
-not silently discard them. The Fairy CLI now dispatches `experimental atlas-impact`
+not silently discard them. Its common binder/identity port now validates generic
+function/struct/resource headers, nested positional type references and exact
+SymbolId arity separately; this is not complete generic-map or CLI admission.
+See [the declaration-identity receipt](../ops/windows-candidate-atlas-generics-20261105.md).
+The Fairy CLI now dispatches `experimental atlas-impact`
 with the selectors and explicit limits above. Both with and without `--locked`,
 it freshly resolves the workspace and requires an existing current lock, completes
 Fairy semantic/body/Flow/IR and interface verification, hashes its own executable,
