@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified CFG trap-category collection now retains the six canonical
+  Go categories through scalar arithmetic, assertions, bounds and implicit
+  iteration checks. Single/batch comparisons cover ordinary, generic and
+  concrete cleanup owners; all 28 source fixtures plus eighteen controls per
+  Windows profile pass in 367.888s (92 native compiler processes, no selected
+  skips). Authored check/locked (672 files, 8,339 MIR functions), scoped vet,
+  formatting/LF/diff checks pass. The observed-relations plan records the
+  reproduced iteration gap and earlier source/harness failures. Complete-bound
+  trap summaries/header/completeness, actual commands, remaining collectors and
+  every original implementation/final gate remain open. Native Linux stays
+  batched; no push or dispatch.
+
 - The final drop-production source at `1e4b9248` now passes actual authored-main
   impact-families, impact-sdk-vector, catalog-ordinary, pack-ordinary,
   pack-sources and pack-sdk under both Windows profiles: twelve selected

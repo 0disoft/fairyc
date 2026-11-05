@@ -1,8 +1,8 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Existing source production collects
-calls and declares other families unavailable. A checked collector alone must
-not promote that production/completeness scope or finish the broader queue.
+calls and drops and declares other families unavailable. A checked collector
+alone must not promote that production/completeness scope or finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
 
 ## Required sequence
@@ -13,9 +13,14 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   cleanup summaries, correct record counts and relation-specific completeness.
   Refresh source/current/join comparisons without learning expected facts from
   candidate output.
-- [ ] Finish the actual authored-main pack/catalog/impact command comparisons
-  against independently retained drops under both Windows profiles.
-- [ ] Remaining trap, unsafe, move, Region allocation, error-propagation and borrow
+- [x] Finish the six selected authored-main pack/catalog/impact command groups
+  against independently retained drops under both Windows profiles at `1e4b9248`;
+  see `docs/ops/windows-candidate-atlas-drops-cli-20261106.md`.
+- [x] Verified CFG trap-category collection with independent Go function and
+  concrete cleanup facts, canonical sets and exact work/count refusal controls.
+- [ ] Complete-bound trap production, summary/header accounting, completeness
+  and actual command comparisons. A private collector is not production evidence.
+- [ ] Remaining unsafe, move, Region allocation, error-propagation and borrow
   collectors, each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
@@ -146,9 +151,12 @@ The experimental CLI contract and source index now describe collected drops;
 stable CLI flags, grammar, SDK/runtime ABI, dependency, DB, runner and hygiene
 policies are unchanged.
 
-Actual authored-main pack/catalog/impact comparisons remain in progress in
-`.cache/atlas-drop-batch-cli-20261106.log`; this native factory receipt does not
-attest their complete selection. Full CLI/generated consumers/self-build/
+The separate final-source command receipt now passes the six selected
+authored-main pack/catalog/impact groups under both profiles at `1e4b9248`;
+see `docs/ops/windows-candidate-atlas-drops-cli-20261106.md`. This factory
+receipt alone does not attest those commands. The earlier broad parent timeout
+in `.cache/atlas-drop-batch-cli-20261106.log` remains a failed observation.
+Full CLI/generated consumers/self-build/
 distribution/hosted/Linux gates and the other observed relation collectors
 remain open.
 
@@ -158,3 +166,68 @@ maps had passed. Its repeated whole-IR proof was replaced by the existing
 verified batch port, not by widening the timeout. The initial optimized actual
 CLI selection passed in 318.892s (`atlas-drop-production-cli-optimized-20261106.log`)
 but predates that correction and does not attest the final source.
+
+## Trap-category collector
+
+`project_atlas_traps::collect` and `collect_all` construct their own verified
+CFGs from immutable body/cleanup IR. The batch entry performs the existing
+whole-IR proof once. No public entry accepts a graph, a source-authenticated
+summary or a caller-provided category set as executable authority.
+
+Reachable assertion blocks, checked scalar unary/binary and compound operations,
+and array/view index/slice evaluations contribute the six Go MIR categories:
+`assertion-failed`, `bounds`, `division-by-zero`, `integer-overflow`,
+`invalid-shift`, `signed-division-overflow`. Division overflow applies only to
+i32/i64. The normalized minimum integer literal is not unary arithmetic.
+Ordinary branches retain both CFG edges; a direct literal-false assertion stops
+the continuation exactly as Go lowering does. Callee categories are not merged
+into callers. Category names form a sorted unique set, not a list of source sites.
+The iteration CFG step also retains Go's implicit bounds check and checked
+usize increment, including empty views and bodies that terminate with a trap.
+
+Each frame uses a six-bit mask. Traversal costs O(B + E) work and O(B) temporary
+space for B blocks/E edges, apart from existing separately bounded verification
+and CFG lowering. Batch storage adds one mask per frame. Independent caller
+work and per-frame 0..6 distinct-category limits reject without partial results.
+Invalid frame/count inputs return 9, exhausted work/count returns 3, and
+allocation failure returns 2. Existing compiler/process timeouts are unchanged.
+
+`TestCandidateAtlasTraps` uses actual source-owned ordinary, generic and concrete
+cleanup bodies against independent Go snapshots. It compares single and batch
+collections, checks owner coverage and unchanged workspace bytes, and exercises
+one-short/exact/one-more work/count limits. Native Windows replay passes below;
+the trap class remains unavailable in production until the separate connection
+and its source/current/query/CLI comparisons are complete. Native Linux and all
+broader/final implementation gates stay open.
+
+### Final trap collector validation
+
+`go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli
+-run '^TestCandidateAtlasTraps$'` passes in 367.888s (body 367.76s;
+low 301.80s, optimized 53.17s). Each profile runs 28 source fixtures and eighteen
+frame/work/count controls: 92 native collector processes, no selected skips.
+Log: `.cache/atlas-traps-native-iteration-20261106.log`.
+
+Coverage includes all six categories in one function, signed/unsigned division,
+remainder, shifts, unary/binary/compound arithmetic, the normalized i32 minimum,
+ordinary/grouped/constant assertion terminals, conditional and short-circuit
+edges, array reads/stores, slicing, borrows without traps, loop exits, ordinary/
+empty/trapping iteration, defer captures, generics and concrete cleanup.
+
+Initial native attempts are not passes. The first rejected an ambiguous static
+borrow in category-name selection (`atlas-traps-native-20261106.log`); one
+static string with selected slices fixes its origin. The next exposed a test
+JSON package-key mismatch (`atlas-traps-native-category-owner-20261106.log`).
+The subsequent independent comparison reproduced missing implicit iteration
+bounds/increment categories (`atlas-traps-native-owner-key-20261106.log`).
+Go's owning expansion is `internal/ast/byte_for_lower.go`; the final collector
+and the two added empty/trapping loop controls retain those facts.
+
+Final authored `check` and `check --locked` pass with two instances, 672 source
+files and 8,339 MIR functions (`atlas-traps-check-iteration-20261106.log`,
+`atlas-traps-locked-iteration-20261106.log`). Scoped CLI vet, Go formatting,
+UTF-8/LF/final-newline and diff checks pass. These tests execute the collector
+inside a native compiler probe; they do not execute generated user programs or
+establish trap map/CLI production. Public CLI/grammar, SDK/runtime ABI, cache
+wire, dependencies, DB, target, timeout, runner and hygiene policy are unchanged.
+The production connection and every remaining implementation/final gate stay open.
