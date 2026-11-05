@@ -243,3 +243,60 @@ Actual map inventory/specialization production, compiler aggregate execution,
 SDK/full CLI and final acceptance remain open. Native Linux remains batched.
 Stable public API/SDK ABI, DB, dependencies, repository hygiene and runners are
 unchanged. No push, release or deployment.
+
+## Verified-source generic function map production
+
+`project_atlas_instances` now rebuilds the original generic plan from exact
+Complete-bound source, matches the checked frames by original `g0_` bytes and
+retains ordered concrete scalar arguments. Invocation specialization contexts
+are resolved through the checked owner's call-target port; their numbers are
+never assumed to equal linked frame ordinals. Returned identity views share one
+owned byte buffer, including the empty ordinary-frame view.
+
+The current-source producer retains used and unused original generic function
+headers, separate concrete implementation summaries and specialization call
+endpoints. Canonical symbol keys are serialized independently of the declaration
+layout; declaration/full-hash orders remain independent. Counts include concrete
+calls and implementations separately from original functions. Global
+`generic-specializations` coverage is exact for this admitted family, while all
+template bodies remain unavailable with a nonzero unknown count, even when no
+specializations are requested. Other uncollected relations remain unavailable.
+
+Windows acceptance:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 6m -v ./internal/cli -run '^TestCandidateAtlasGenericProduction$'
+```
+
+Passes (112.33s), MSVC low/optimized. The actual Fairy source/body/Flow/MIR/interface
+factory produces maps for two two-package workspaces: seven concrete generic
+functions, including two ordered argument tuples with the same result type and
+cross-package forwarded calls; and exported unused templates with no concrete
+implementation. Each output passes Fairy current-source semantic admission and
+the complete package join, then the independent Go v3 decoder. Original
+declarations, symbol/interface identities, ordered type arguments, `g0_` IDs and
+ordinary/concrete calls match Go. Work exhaustion and missing-coordinate controls
+reject; process PATH is empty and workspace bytes remain unchanged.
+
+The Go comparison uses each compiler's v3 encoding/decoding boundary so nil and
+empty in-memory slices do not manufacture a declaration difference. Early new
+probe runs found an untyped test-harness length and a mixed static/owned identity
+borrow; both were corrected before this passing run.
+
+The unchanged ordinary production, generic semantic validation and generic join
+regressions pass in both Windows profiles (111.151s):
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestCandidateAtlas(Production|GenericValidation|GenericJoin)$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_atlas_generic_produce_test.go
+git diff --check
+```
+
+Scoped vet, formatting and diff checks pass.
+
+Actual generic command/full-CLI acceptance, SDK production, user aggregate
+instantiation/cleanup, native Linux and final self-build/distribution/hosted gates
+remain open. This completes only the admitted generic-function producer slice;
+the broader queue remains active. Stable public API/SDK ABI, DB, dependencies,
+repository hygiene and runner policy are unchanged. No push, release or deployment.

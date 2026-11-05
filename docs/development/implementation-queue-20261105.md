@@ -163,3 +163,12 @@ authorized by this queue.
   catalog admission (4501); their complete instantiation/layout/cleanup path must
   be implemented, not inferred from the reader or source-only header port. Generic
   map production/SDK/CLI and the full queue remain open; see the generic receipt.
+
+- Complete-bound generic function map production now preserves original used and
+  unused headers, scalar argument tuples, separate implementation summaries and
+  exact specialization call endpoints. Source-derived `g0_` IDs resolve through
+  the checked program's call-target port rather than frame-number assumptions.
+  Windows low/optimized production and current-source semantic admission/join
+  pass against Go v3 (112.33s), including seven implementations and a zero-instance
+  unused-template workspace. Actual generic command/full CLI, SDK and compiler
+  aggregate execution remain open; the broader Atlas item is not complete.
