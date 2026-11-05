@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy v2 semantic admission now preserves bound function signatures while
+  rejecting generic aggregates and nominal arguments. All shared ID, source-span,
+  implementation/call, type and completeness controls remain active. Forty-one
+  inputs plus three entry/budget controls per Windows profile pass 88 native
+  executions; v2 and unchanged ordinary/v3 aggregate regressions pass together
+  in 76.048s. Current-source Ready, catalog selection/encoding, current production
+  and actual dispatcher remain open; see the symbol-catalog implementation plan.
+
 - Explicit Fairy v2 map framing now passes nineteen input cases and four boundary
   modes in each Windows profile (46 native processes). Default wire selection
   still accepts v1/v3 only. V2/native v1-v3 regression passes in 42.832s; unchanged

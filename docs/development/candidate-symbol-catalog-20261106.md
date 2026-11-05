@@ -8,7 +8,8 @@ batched; no push, dispatch or release is authorized by this record.
 
 - [x] Exact `atlas-symbols list` argument selection with Go parser comparisons.
 - [x] Explicit canonical v2 map framing with unchanged v1/v3 reader selection.
-- [ ] V2 semantic/current-source admission before a catalog can trust a map.
+- [x] Explicit v2 semantic admission with function-only generic declarations.
+- [ ] V2 independent current-source admission before catalog queries.
 - [ ] Current-admitted declaration selection, canonical JSON/checksum and exact
   selection/output budgets for catalog v1, v2 and v3. Preserve full-ID ordering,
   filtered-set cursor membership, original generic declarations and omissions.
@@ -98,3 +99,41 @@ repository suite, native Linux or hosted CI execution is claimed for this slice.
 V2 semantic/current-source admission, all-version source production and actual
 catalog command selection remain open. This does not complete `atlas-symbols`
 or any broader implementation/final acceptance family.
+
+## V2 semantic admission
+
+`project_atlas_validate::validate_v2` accepts only v2 documents and shares the
+existing key/span/SymbolId/function/specialization/completeness checks. Generic
+function signatures retain bound parameter indices; v2 rejects generic
+aggregate declarations, nominal type arguments and binders in fields/variants.
+The ordinary and v3 factories reject v2 explicitly. Existing v3 aggregate
+declaration admission is unchanged; no current-source Ready is created here.
+
+`TestCandidateAtlasV2Validation` compares six independent Go v2 package maps
+from ordinary, used-generic and unused-template sources. Resealed mutations
+are checked against Go `DecodeV2` before native execution: invalid/missing
+IDs/owners, arity/types, duplicate bindings/order, observed-body provenance,
+local implementation endpoints, counts and omitted template uncertainty.
+All thirteen admitted scalar names are represented across original/modified
+bindings. Snapshot-wide completeness counts remain allowed. A valid unused v3
+aggregate source, framed as v2 for the negative probe, rejects semantically.
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 7m -v ./internal/cli -run '^TestCandidateAtlas(V2Validation|GenericValidation|Validation)$'
+```
+
+The final combined command passes in 76.048s with no selected skips: v2 19.05s,
+v3 generic/aggregate 26.92s, ordinary 29.86s. The v2 root executes 41 cases and
+three explicit entry/work-budget controls per profile, 88 native processes.
+Log: `.cache/atlas-v2-validation-20261106.log`. The first attempt failed before
+native compilation on an inferred integer type in the new field-arity branch;
+explicit `usize` fixes it without changing admission policy. Its log is
+`.cache/atlas-v2-validation-before-20261106.log`.
+
+The authored workspace passes `check` and `check --locked` with 644 sources and
+8,128 MIR functions; the tracked source lock is refreshed. Scoped CLI vet,
+formatting and diff checks pass. The current-source test is a subsequent slice,
+not evidence supplied by these semantic checks.
+
+Independent v2 current-source admission, catalog selection/encoding, all-version
+production, actual dispatcher and all final acceptance gates remain required.
