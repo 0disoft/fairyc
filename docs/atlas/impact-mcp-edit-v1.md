@@ -59,8 +59,8 @@ current expectation, including the exact generic source-interface hash. The shar
 join preserves source/target implementation IDs, cleanup ownership and call spans,
 resolves the remote ID against its exact original declaration, and retains template
 uncertainty in impact output. Ordinary `read` remains closed to generic maps.
-Actual Fairy generic source production and command integration remain separate
-from these explicit ports.
+Actual Fairy generic source production and command integration use the
+Complete-bound paths below rather than obtaining authority from these ports.
 Original generic declaration headers now project retained AST binders, types,
 coordinates and spans. `prepare_declarations` is source-only; the normal `prepare`
 continues to require exact Complete provenance. Generic function headers pass the
@@ -89,9 +89,12 @@ declarations. Constants and static assertions are checked but are not Atlas
 declarations. Module and file tables retain their independently canonical order.
 Direct local/imported calls, recursion and cycles are collected from verified IR;
 same-package foreign calls are external/opaque with their exact C ABI/link name.
-SDK packages, generic/interface/closure and owner-qualified declarations remain
-unsupported. Every package must contain an admitted Atlas declaration. These
-candidate limits do not narrow the broader Go command or language contracts.
+The seven ordinary authenticated SDK modules (alloc, bytes, fs, io, num,
+process and text) may participate in source production and current queries.
+SDK vector declarations, unsupported interface/closure and owner-qualified
+declarations remain closed. Every package must contain an admitted Atlas
+declaration. These candidate limits do not narrow the broader Go command or
+language contracts.
 
 Call reachability is exact within the admitted resolved graph. Foreign calls make
 the `calls` completeness partial with reason `external-ffi`; only resolved calls
@@ -108,10 +111,20 @@ Syntax/selector/budget failures return 2, workspace/lock/source or unsupported
 candidate-source failures 7, and preparation/output I/O failures 4. Help succeeds
 without reading a workspace. Windows Fairy read-only MCP uses the same current
 query producer. Structural editing retains its own ordinary-source selection
-restrictions below. SDK/generic production facts and Linux command wiring remain
-separate. Windows native evidence is recorded in
+restrictions below. SDK Vec production, SDK/user-aggregate combinations and
+Linux command wiring remain separate. Windows native evidence is recorded in
 [the source-family receipt](../ops/windows-candidate-atlas-families-20261105.md)
 and [the original Fairy receipt](../ops/windows-candidate-atlas-impact-20261104.md).
+
+SDK queries retain the 16 MiB source/projection work allowance and use one
+separate 16 MiB allowance for current-map admission, the complete join, impact
+exploration and rendering. That second allowance is shared across all packages;
+it is never reset per map, symbol or request component. Its larger combined
+allowance explicitly covers re-reading the SDK's full declaration/call inventory.
+Workspaces without SDK retain their existing single shared 16 MiB allowance.
+Existing source, package, call, traversal and output ceilings still apply.
+Compile/link work has its existing independent bounds. This is compiler-private
+SDK admission policy; no CLI flag, wire format or default build timeout changes.
 
 ## Read-only MCP over stdio
 
@@ -126,7 +139,8 @@ stdin/stdout and a fresh locked-source query for each tool call. Windows focused
 command and full CLI acceptance pass in both profiles, including stale-source
 refusal/recovery and output failure. The Go host retains the prepared-session
 optimization described below; the Fairy host re-verifies the source on each call.
-Native Linux dispatch/execution and SDK/generic source families remain separate.
+The same ordinary SDK query admission applies to MCP. SDK Vec and broader
+source-family combinations, plus native Linux dispatch/execution, remain separate.
 
 ```sh
 fairyc experimental atlas-mcp --allow-impact --max-packages 32 --max-calls 8192 --max-depth 8 --max-symbols 256 --max-output-bytes 262144 --max-requests 100
@@ -206,8 +220,10 @@ replacement overlays independently select the aggregate factory from retained
 source, including newly requested scalar specializations in a replacement body.
 This does not relax editable-target restrictions or publication/freshness rules.
 Windows command-leaf evidence is in
-`docs/ops/windows-candidate-atlas-aggregates-20261105.md`; refreshed complete
-authored-CLI, SDK and native Linux acceptance remain separate.
+`docs/ops/windows-candidate-atlas-aggregates-20261105.md`. The ordinary SDK
+user-body-edit command leaf is tracked in the SDK receipt. Refreshed complete
+authored-CLI, SDK/user-aggregate combinations and native Linux acceptance remain
+separate.
 
 Require the exact raw source SHA-256. Replace the original AST body span and preserve all outside
 bytes. Parsing must find the same function/body start and exactly the replacement extent; early

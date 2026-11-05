@@ -1,7 +1,8 @@
 # Windows Atlas SDK work, 2026-11-05
 
-This receipt records prerequisites, not completion of SDK source production or
-the full implementation queue. Native Linux remains batched. No push, hosted
+This receipt records core SDK source APIs and their command integration, not
+SDK Vec production or completion of the implementation queue. Native Linux
+remains batched. No push, hosted
 CI dispatch, release or distribution is performed here.
 
 ## Go SDK vector oracle prerequisite
@@ -116,10 +117,11 @@ vet, Go formatting and diff checks pass.
 The SDK API probe uses one bounded 16 MiB source/projection ledger and a separate
 bounded 16 MiB current-admission/join ledger. The extra map export for the Go
 oracle has its own bounded artifact allowance. These explicit API operations do
-not establish admission under the actual command's existing shared ledger:
-`project_atlas_source::query` still refuses SDK workspaces. SDK command ledger
-integration and impact/MCP/edit acceptance remain required. Vec source production
-and SDK-plus-user-aggregate combinations are also not established here.
+did not establish admission under the command's then-shared ledger:
+`project_atlas_source::query` still refused SDK workspaces at this API checkpoint.
+The subsequent command integration below supersedes that refusal for ordinary
+SDK modules. Vec source production and SDK-plus-user-aggregate combinations
+remain separate.
 
 Earlier full SDK probes reproduced the false hash limit, then reached the
 shared-counter ceiling (`16777215` used) while Go accepted the produced map.
@@ -135,3 +137,67 @@ External API/SDK ABI, map wire schema, DB, dependencies, repository hygiene and
 runner settings are unchanged. New lookup helpers/retained slots are compiler
 private. Linux, full current CLI, self-build, distribution and hosted acceptance
 remain outstanding.
+
+## Core SDK command integration
+
+`project_atlas_source::query` now admits the authenticated ordinary SDK bundle.
+Vector-bearing SDK bundles still fail before source compilation. The existing
+16 MiB source/projection allowance is retained, while one separate 16 MiB query
+allowance covers every map's current admission, the complete join, selector
+resolution, traversal and JSON rendering. It is not reset per map or component.
+Ordinary non-SDK queries retain their prior single shared allowance. Compiler
+and executable hashing keep their pre-existing independent limits.
+
+Focused Windows native acceptance commands:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasSDKCommand$'
+go test -mod=readonly -count=1 -timeout 20m -v ./internal/cli -run '^TestCandidateMCPSDKCommand$'
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateEditSDKCommand$'
+```
+
+Impact passes low/optimized in 617.996s (profile subtests 437.90s/152.29s).
+The independent Go v3 graph contains 121 resolved calls. SDK visible and user
+full selectors, exact nodes/current contexts/completeness, package/call cutoffs,
+stale-lock refusal, fresh queries after relock, read-only workspace bytes and
+the closed Vec control pass. PATH is empty during native candidate execution.
+
+MCP passes low/optimized in 445.35s (287.30s/124.09s). This command was executed
+by the sidecar and its test source reviewed by the parent. It covers protocol
+initialization and tool listing, the authenticated SDK selector and independent
+Go impact/context comparison, stale-source refusal, recovery after relock in
+the same live session, workspace preservation and protocol-only stdout.
+
+The first edit command failed at its three-minute diagnostic process cap during
+valid apply (547.165s overall, low subtest 424.20s). Apply retains four full
+semantic checks: original and overlay before the lock, then both again under
+the lock. The final acceptance uses a six-minute cap for valid apply alone;
+the other edit processes retain three minutes.
+
+The final edit command passes in 614.563s (low 465.01s, optimized 99.61s).
+Valid apply takes 200.126s/6.429s respectively. Exact Go preview/apply reports,
+replacement source bytes, semantic-overlay rejection, SDK declaration-write
+refusal, unchanged fairy.lock, no staging/lock leftovers, stale-lock refusal
+and old-hash refusal after relock pass. The three SDK command roots cover 28
+fresh native processes across both profiles, including two live MCP sessions.
+
+The unchanged ordinary Atlas command regression also passes both profiles:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 15m -v ./internal/cli -run '^TestCandidateAtlasCommand$'
+go vet -mod=readonly ./internal/cli
+```
+
+Ordinary regression: 761.012s (low 627.03s, optimized 100.99s). Scoped vet,
+Go formatting and diff checks pass. No selected Windows profile was skipped.
+These verifiers are also registered in the full authored-main CLI test; that
+refreshed full test has not yet run. The SDK command tests use explicit bounded
+diagnostic timeouts (three minutes per impact/ordinary edit process, six minutes
+for valid edit apply and eight minutes per MCP session). They do not claim a
+60-second runtime acceptance, change any
+product/default build timeout, or raise a public CLI limit.
+
+Vec source production, SDK/user-aggregate combinations, final full authored CLI,
+native Linux, self-build, distribution and same-commit hosted CI remain open.
+External API/SDK ABI, wire schema, DB, dependencies, repository hygiene and
+runner settings are unchanged. No push, dispatch, release or deployment.

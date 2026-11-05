@@ -56,6 +56,20 @@ authorized by this queue.
 
 ## Progress
 
+- Core SDK impact/MCP/user-body-edit command leaves now pass Windows
+  low/optimized: impact 617.996s, MCP 445.35s, edit 614.563s, with 28 fresh
+  native processes and exact Go current-context/report comparisons. SDK source
+  projection retains its 16 MiB ledger; one separate shared 16 MiB ledger
+  covers all current-map admission/join/traversal/output operations. Non-SDK
+  allowance is unchanged. SDK writes and Vec source queries remain rejected.
+  Valid edit apply preserves all four semantic checks and takes 200.126s/6.429s;
+  its earlier three-minute diagnostic failure is retained, and final apply uses
+  a bounded six-minute test cap without product timeout changes. Ordinary Atlas
+  command regression passes both profiles in 761.012s; scoped vet/format/diff
+  pass. Full authored-main replay is registered but not rerun. Vec production,
+  SDK/user-aggregate combinations, Linux and all final gates remain open; see
+  `docs/ops/windows-candidate-atlas-sdk-20261105.md`.
+
 - Core SDK Atlas source production/current-admission/join APIs now pass Windows
   low/optimized in 318.186s, with exact Go declarations, IDs, interfaces and calls
   across all three packages and ten fresh native processes. The hash allowance,
