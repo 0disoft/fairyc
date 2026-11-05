@@ -56,14 +56,23 @@ authorized by this queue.
 
 ## Progress
 
+- Same-leaf Fairy Atlas production now preserves `Cell::get`, `Other::get` and
+  an optional ordinary `get`: both sources pass Windows low/optimized (84.432s),
+  returning eight package maps with exact independent Go v3/current/join facts
+  and two/three calls. Existing compiler/runtime code already supports these
+  namespaces. The original fourteen-case producer and controls remain registered;
+  scoped vet/format/diff pass. Actual same-leaf commands, editor publication,
+  generated consumers, fresh full-CLI selection and final queue gates stay open.
+
 - Go generic source preparation now keeps owner-qualified method namespaces:
   valid `Cell::get`/`Other::get` and an ordinary same-leaf `get` no longer collide
   at v3 Atlas preparation. The two complete source/join cases and six bounded
   preparation controls pass, preserving caller ASTs and duplicate/reserved/generic-
   method refusals. Complete generic-source/planner packages and scoped vet pass.
   The original fourteen source oracles and edit oracle still pass. This is a Go
-  prerequisite only; additional same-leaf Fairy production/commands/editing and
-  every remaining queue gate stay open. Go ordinary-body selection now ignores
+  prerequisite only; the separate Fairy production proof is recorded above.
+  Actual same-leaf commands/editing and remaining queue gates stay open.
+  Go ordinary-body selection now ignores
   same-leaf methods before uniqueness checking, fixing an independently reproduced
   ambiguous-selection failure. Exact preview/apply bytes and method refusals pass
   with all existing Atlas edit/native tests and the namespace/original edit

@@ -188,8 +188,9 @@ edit oracle pass together (1.392s). Scoped vet and diff checks pass.
 Logs: `.cache/atlas-owner-qualified-namespace-before-20261106.log`,
 `-after-20261106.log` and `-packages-20261106.log`.
 
-This Go prerequisite does not attest the additional same-leaf Fairy source
-family. Its production/command/editor replay remains separate.
+This Go prerequisite does not itself attest the additional same-leaf Fairy
+source family. Its subsequent production proof is recorded below; actual
+command/editor and generated-consumer replay remain separate.
 The CLI qualified-name filter is now verified separately below.
 The existing native full-image replay uses
 the unchanged fourteen-family Fairy sources; none of its evidence is broadened
@@ -229,8 +230,28 @@ All existing Atlas edit tests, including native execution, and the namespace/
 owner-edit oracles pass together in 7.980s. The complete sourceedit package
 passes in 1.638s; scoped vet, format and diff checks pass. Reproduction/final
 logs: `.cache/atlas-owner-qualified-same-leaf-edit-before-20261106.log` and
-`-after-20261106.log`. This is Go editor evidence, not additional same-leaf
-Fairy production or editing acceptance.
+`-after-20261106.log`. This is Go editor evidence; the separate Fairy production
+proof below does not attest actual Fairy editing.
+
+## Fairy distinct-owner namespace production
+
+`TestCandidateAtlasOwnerQualifiedNamespaceProduction` reuses the original
+Complete-bound producer verifier with two independent Go v3 workspaces:
+`Cell::get`/`Other::get`, and both methods beside ordinary `get`. The original
+fourteen-case test and all of its controls remain registered unchanged.
+
+Both namespace sources pass Windows low/optimized in 84.432s. Eight returned
+package maps agree with independently canonicalized Go declarations, owner and
+receiver types, source spans/interfaces, distinct SymbolIds and two/three exact
+calls. Current-source admission and complete joins pass; workspaces do not
+change and the native processes have an empty PATH. The existing Fairy
+implementation already handles this source family; no compiler or runtime
+change is required by this proof. Scoped CLI vet, formatting and diff checks
+pass. Log: `.cache/atlas-owner-qualified-namespace-production-20261106.log`.
+
+Actual same-leaf impact/MCP/editor commands, generated-consumer execution and
+their full authored-main replay remain separate. The original fourteen-family
+full-CLI receipt below is unchanged and does not attest these new sources.
 
 ## Full authored-main acceptance
 

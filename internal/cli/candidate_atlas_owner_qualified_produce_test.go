@@ -11,13 +11,25 @@ import (
 )
 
 func TestCandidateAtlasOwnerQualifiedProduction(t *testing.T) {
+	runCandidateAtlasOwnerQualifiedProduction(t, atlasOwnerQualifiedFixtures())
+}
+
+func TestCandidateAtlasOwnerQualifiedNamespaceProduction(t *testing.T) {
+	runCandidateAtlasOwnerQualifiedProduction(t, []atlasOwnerQualifiedFixture{
+		{name: "two-owners", source: atlasOwnerQualifiedNamespaceSource(false)},
+		{name: "ordinary-same-leaf", source: atlasOwnerQualifiedNamespaceSource(true)},
+	})
+}
+
+func runCandidateAtlasOwnerQualifiedProduction(t *testing.T, sources []atlasOwnerQualifiedFixture) {
+	t.Helper()
 	type fixture struct {
 		name, root string
 		partitions map[string]atlasmap.Partition
 		global     candidateAtlasSDKVectorGlobal
 	}
 	var fixtures []fixture
-	for _, source := range atlasOwnerQualifiedFixtures() {
+	for _, source := range sources {
 		root := atlasOwnerQualifiedWorkspace(t, source)
 		var diagnostic bytes.Buffer
 		prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
