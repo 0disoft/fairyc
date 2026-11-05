@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- SDK Vec's independent Go oracle now fixes unused/used source expectations:
+  ten implementations already exist for ordinary SDK view signatures; explicit
+  root `empty/push/at<i32>` use produces fourteen. Original declarations/generic
+  interface identity, exact instance tuples, physical fields, cleanup/borrow
+  facts and root call endpoints survive canonical v3 codec reconstruction.
+  The focused Windows Go command passes in 2.754s, including the existing removed
+  storage-authority refusal. This is not Fairy/native Vec production. The
+  source-authority/cleanup/type/header/command implementation sequence and
+  failed-harness accounting are in
+  `docs/development/candidate-atlas-sdk-vector-20261105.md`; all remaining queue
+  families and final acceptance gates stay open.
+
 - Core SDK impact/MCP/user-body-edit command leaves now pass Windows
   low/optimized: impact 617.996s, MCP 445.35s, edit 614.563s, with 28 fresh
   native processes and exact Go current-context/report comparisons. SDK source
