@@ -561,7 +561,9 @@ func functionDeclaration(module hir.Module, value hir.Function, metadata map[hir
 		if normalized.Kind == TypeNominal && strings.HasPrefix(ownerName, prefix) {
 			ownerName = strings.TrimPrefix(ownerName, prefix)
 		}
-		name = ownerName + "::" + value.Name
+		if !strings.HasPrefix(name, ownerName+"::") {
+			name = ownerName + "::" + name
+		}
 	}
 	result, err := declarationBase(module, DeclarationFunction, name, value.Span, metadata)
 	if err != nil {

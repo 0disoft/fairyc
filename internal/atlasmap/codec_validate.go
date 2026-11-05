@@ -595,7 +595,7 @@ func validateLocalKey(value semanticsnapshot.DeclarationKey, instance string, mo
 	if _, found := modules[value.Module]; !found {
 		return fmt.Errorf("declaration %+v references unknown module", value)
 	}
-	if !validDeclarationKind(value.Kind) || !source.ValidIdentifier(value.Name) {
+	if !validDeclarationKind(value.Kind) || !validQualifiedPath(value.Name) {
 		return fmt.Errorf("declaration %+v has invalid kind or name", value)
 	}
 	return nil
@@ -605,7 +605,7 @@ func validateCallTarget(value semanticsnapshot.DeclarationKey) error {
 	if _, err := packagegraph.ParseInstanceID(value.PackageInstance); err != nil {
 		return fmt.Errorf("call target package: %w", err)
 	}
-	if !validQualifiedPath(value.Module) || !validDeclarationKind(value.Kind) || !source.ValidIdentifier(value.Name) {
+	if !validQualifiedPath(value.Module) || !validDeclarationKind(value.Kind) || !validQualifiedPath(value.Name) {
 		return fmt.Errorf("call target %+v is invalid", value)
 	}
 	return nil

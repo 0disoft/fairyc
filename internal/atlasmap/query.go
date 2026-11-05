@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
-	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
@@ -674,8 +673,8 @@ func validateSymbolCatalogRequest(
 			return nil, nil, fmt.Errorf("%w: %s", ErrModuleNotFound, request.Module)
 		}
 	}
-	if request.Name != "" && !source.ValidIdentifier(request.Name) {
-		return nil, nil, fmt.Errorf("Atlas symbol catalog name must be an exact Stage 0 identifier")
+	if request.Name != "" && !validQualifiedPath(request.Name) {
+		return nil, nil, fmt.Errorf("Atlas symbol catalog name must be an exact Stage 0 identifier or qualified declaration path")
 	}
 	kinds := slices.Clone(request.Kinds)
 	if len(kinds) == 0 {

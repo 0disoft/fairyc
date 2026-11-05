@@ -205,6 +205,11 @@ func TestQueryIndexCatalogSymbolsIsExactFilteredAndPageable(t *testing.T) {
 	if err != nil || !empty.Complete || empty.Total != 0 || len(empty.Symbols) != 0 || empty.Name != "absent" {
 		t.Fatalf("missing exact-name catalog = %+v, %v", empty, err)
 	}
+	missingName.Name = "not::an_identifier"
+	empty, err = index.CatalogSymbols(missingName)
+	if err != nil || !empty.Complete || empty.Total != 0 || len(empty.Symbols) != 0 || empty.Name != missingName.Name {
+		t.Fatalf("valid missing qualified declaration catalog = %+v, %v", empty, err)
+	}
 }
 
 func TestQueryIndexCatalogSymbolsRejectsAmbiguousOrUnpageableRequests(t *testing.T) {
@@ -227,7 +232,7 @@ func TestQueryIndexCatalogSymbolsRejectsAmbiguousOrUnpageableRequests(t *testing
 		{name: "duplicate kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = append(value.Kinds, value.Kinds[0]) }},
 		{name: "unknown kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = []semanticsnapshot.DeclarationKind{"variable"} }},
 		{name: "unknown module", mutate: func(value *SymbolCatalogRequest) { value.Module = "missing" }, want: ErrModuleNotFound},
-		{name: "invalid exact name", mutate: func(value *SymbolCatalogRequest) { value.Name = "not::an_identifier" }},
+		{name: "invalid exact name", mutate: func(value *SymbolCatalogRequest) { value.Name = "not:::an_identifier" }},
 		{name: "visible cursor", mutate: func(value *SymbolCatalogRequest) { value.After = index.nodes[0].symbol.Visible }},
 		{name: "foreign full cursor", mutate: func(value *SymbolCatalogRequest) {
 			value.After = "fysym1-sha256-256-" + strings.Repeat("a", 64)
