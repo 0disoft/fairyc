@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy symbol catalog argument selection now matches the Go parser for 105
+  argument cases and three invalid actions under each Windows profile (33.237s),
+  including version, kind, cursor, canonical numeric and exact length bounds.
+  It performs no workspace I/O. Catalog selection/encoding, schema-specific
+  current production and actual dispatcher remain required; the existing wire
+  owner has no v2 admission and must not silently convert v3 maps. See
+  `docs/development/candidate-symbol-catalog-20261106.md`. This is a prerequisite,
+  not completion of the symbols command or the complete objective.
+
 - Same-leaf full authored-main impact/MCP/editor groups now pass Windows
   low/optimized (296.675s), including reversed method declarations, ordinary
   same-leaf `get`, visible/full selectors, exact/one-short call budgets, workspace
