@@ -50,8 +50,15 @@ admission boundary, not a proven MIR/runtime defect or Fairy producer failure.
    low/optimized in 221.177s, including exact Go query contexts, stale-source
    error and same-session recovery, protocol-only stdout and workspace
    immutability. See the [MCP receipt](../ops/windows-atlas-sdk-aggregate-mcp-20261105.md).
-   Mixed root-body edit acceptance remains separate.
+   **Mixed root-body edits verified.** Windows low/optimized pass in 451.186s.
+   Independent Go overlay facts require fresh bool SDK and same-name client Vec
+   instances. Exact preview/apply reports and bytes, invalid field/SDK-write
+   refusals, unchanged lock, staging cleanup and stale lock/hash checks pass.
+   See the [editor receipt](../ops/windows-atlas-sdk-aggregate-edit-20261105.md).
+   This verifies checked source publication, not edited-client execution/cache.
    Register and run complete authored-main acceptance after these source families.
+   All three mixed command verifiers are registered; that complete replay is
+   still the next required gate and is not established by command-leaf tests.
 4. Keep complete current-source comparisons, consecutive self-build, Windows
    distribution, batched native Linux and same-commit hosted CI as separate final
    acceptance. A Go admission check or prepared map does not prove those gates.

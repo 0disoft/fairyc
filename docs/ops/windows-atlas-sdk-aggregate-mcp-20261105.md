@@ -15,7 +15,8 @@ terminating the session. After independent lock/source refresh, the same session
 returns the new Go-matching context. Every query preserves the root, dependency
 and lock bytes it received. Responses contain neither local root nor source
 contents, stdout contains protocol frames only, and EOF closes the process with
-empty trailing output/stderr and success. The command owns no write capability.
+empty trailing output/stderr and success. The exposed tool policy admits only
+read-only impact queries.
 
 ```powershell
 go test -mod=readonly -count=1 -failfast -timeout 12m -v ./internal/cli -run '^TestCandidateMCPSDKUserAggregateCommand$'

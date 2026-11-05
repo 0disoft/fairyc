@@ -104,8 +104,7 @@ call endpoints. Checked cleanup intrinsic observations retain inlined
 [SDK vector plan](../development/candidate-atlas-sdk-vector-20261105.md) and
 [Windows receipt](../ops/windows-candidate-atlas-sdk-vector-20261105.md) record
 producer and impact/MCP command acceptance. SDK Vec root-body preview/apply also
-passes the Windows command leaf, including new bool element specializations;
-SDK/user-aggregate edit combinations keep their separate acceptance gate.
+passes the Windows command leaf, including new bool element specializations.
 
 The compiler-private mixed producer now also retains scalar SDK Vec and scalar
 user struct/resource templates in the same Complete source graph. SDK
@@ -121,7 +120,8 @@ The corresponding read-only Windows MCP session also accepts that mixed source,
 preserving exact Go contexts, stale-source error and same-session recovery,
 protocol-only stdout and workspace immutability. See the
 [MCP receipt](../ops/windows-atlas-sdk-aggregate-mcp-20261105.md).
-Mixed body edits and full authored-main acceptance remain separate;
+Mixed root-body editing also passes the Windows command leaf as described below.
+Full authored-main acceptance remains separate;
 see the [composition plan](../development/candidate-atlas-sdk-aggregates-20261105.md)
 and [producer receipt](../ops/windows-candidate-atlas-sdk-aggregates-20261105.md).
 
@@ -252,10 +252,14 @@ Windows command-leaf evidence is in
 `docs/ops/windows-candidate-atlas-aggregates-20261105.md`. The ordinary SDK
 user-body-edit command leaf is tracked in the SDK receipt. Authenticated scalar
 SDK Vec root-body editing also passes exact Go preview/apply comparisons and
-fresh bool specialization controls in the SDK vector receipt. SDK declarations
-remain noneditable. Refreshed complete
-authored-CLI, SDK/user-aggregate combinations and native Linux acceptance remain
-separate.
+fresh bool specialization controls in the SDK vector receipt. Mixed SDK/client
+aggregate body editing also passes the Windows command leaf: both the SDK Vec
+and same-name client Vec acquire fresh bool instances, nonempty client resource
+cleanup is retained, and exact Go reports/publication plus refusal/freshness
+checks pass. See the [mixed editor receipt](../ops/windows-atlas-sdk-aggregate-edit-20261105.md).
+SDK declarations remain noneditable. This is checked source publication, not
+execution of the edited client or cache-hit proof. Refreshed complete authored-CLI
+and native Linux acceptance remain separate.
 
 Require the exact raw source SHA-256. Replace the original AST body span and preserve all outside
 bytes. Parsing must find the same function/body start and exactly the replacement extent; early

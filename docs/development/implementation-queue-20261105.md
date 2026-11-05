@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Mixed SDK/client aggregate body editing now passes actual Windows
+  low/optimized commands in 451.186s. Independent Go overlay facts require
+  fresh bool SDK Vec and same-name client Vec instances; the resource's real
+  cleanup is retained. Exact Go preview/apply reports and published bytes,
+  invalid field/SDK-write refusal, unchanged lock, staging cleanup and stale
+  lock/hash checks pass. All three mixed impact/MCP/edit verifiers are now
+  registered in full authored-main acceptance, which remains the next gate.
+  More source forms, edited-client execution/cache, native Linux and every final
+  acceptance gate remain separate; see the composition plan and editor receipt.
+
 - Mixed SDK/client aggregate read-only MCP now passes actual Windows
   low/optimized stdio sessions in 221.177s. The shared mixed source preserves
   both aggregate owners and nonempty cleanup. Protocol negotiation, read-only
