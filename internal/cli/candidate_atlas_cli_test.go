@@ -88,6 +88,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			verifyCandidateEditCommand(t, image)
 			verifyCandidateEditCLIApply(t, image)
 			verifyCandidateAtlasUnsupported(t, image, unsupportedRoots)
+			verifyCandidateAtlasGenericCommand(t, image)
 			for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}} {
 				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
 				if code != 0 || out != usage || diagnostic != "" {
@@ -103,7 +104,7 @@ func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
 	var roots []string
 	for _, source := range []string{
 		`module main;import std::io as io;fn i32 main(){return 0;}`,
-		`module main;fn T identity<T>(T value){return value;}fn i32 main(){return identity<i32>(1);}`,
+		`module main;fn i32 main(){let i32 offset=40;let add=fn [i32 offset] i32(i32 x){return offset+x;};return add(2);}`,
 	} {
 		root := writeWorkspaceSessionFixture(t, source)
 		if code, _, diagnostic := runForTest([]string{"check"}, root); code != 0 {

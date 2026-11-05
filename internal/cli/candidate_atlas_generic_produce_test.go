@@ -12,6 +12,23 @@ import (
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
+const atlasGenericProductionUsedSource = `module main;import answer as a;
+pub fn T wrap<T>(T value){return a::id<T>(value);}
+pub fn U choose<T,U>(T first,U second){discard first;return second;}
+pub fn T unused<T>(T value){return value;}
+fn i32 main(){discard wrap<u8>(3);discard choose<u8,i32>(2,3);return choose<bool,i32>(true,wrap<i32>(a::other<i32>(4)));}`
+
+func candidateAtlasGenericProductionWorkspace(t *testing.T, source string) string {
+	t.Helper()
+	root := writeWorkspaceSessionFixture(t, source)
+	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", `module answer;
+pub fn T id<T>(T value){return value;}
+pub fn T other<T>(T value){return value;}
+pub fn T unused<T>(T value){return value;}
+pub fn i32 value(){return 42;}`)
+	return root
+}
+
 func candidateAtlasGenericProduceMain() string {
 	main := candidateAtlasProduceMain()
 	main = strings.Replace(main, "import project_atlas_produce as produce;", `import project_atlas_produce as produce;
@@ -43,21 +60,12 @@ func TestCandidateAtlasGenericProduction(t *testing.T) {
 	}
 	var fixtures []fixture
 	for _, source := range []struct{ name, main string }{
-		{"used", `module main;import answer as a;
-pub fn T wrap<T>(T value){return a::id<T>(value);}
-pub fn U choose<T,U>(T first,U second){discard first;return second;}
-pub fn T unused<T>(T value){return value;}
-fn i32 main(){discard wrap<u8>(3);discard choose<u8,i32>(2,3);return choose<bool,i32>(true,wrap<i32>(a::other<i32>(4)));}`},
+		{"used", atlasGenericProductionUsedSource},
 		{"unused", `module main;import answer as a;
 pub fn T unused<T>(T value){return value;}
 fn i32 main(){return a::value();}`},
 	} {
-		root := writeWorkspaceSessionFixture(t, source.main)
-		writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", `module answer;
-pub fn T id<T>(T value){return value;}
-pub fn T other<T>(T value){return value;}
-pub fn T unused<T>(T value){return value;}
-pub fn i32 value(){return 42;}`)
+		root := candidateAtlasGenericProductionWorkspace(t, source.main)
 		var diagnostic bytes.Buffer
 		prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
 		if code != 0 {

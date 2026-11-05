@@ -114,15 +114,19 @@ func verifyCandidateAtlasFamilyContext(t *testing.T, got, want atlasmap.QueryCon
 	t.Helper()
 	// Identity and observed calls come from the independent Go source oracle.
 	// The candidate explicitly reports its narrower non-call collection scope.
-	if len(want.Completeness) != 1 || want.Completeness[0].Relation != "calls" {
+	if len(want.Completeness) != 1 && len(want.Completeness) != 3 || want.Completeness[0].Relation != "calls" {
 		t.Fatalf("unexpected Go call oracle: %+v", want.Completeness)
 	}
 	want.CompilerBuild = compiler
 	want.Generation = "partial"
-	want.Completeness = append(want.Completeness[:1:1],
-		semanticsnapshot.Completeness{Relation: "generic-specializations", Status: "exact"},
-		semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: "unavailable", Reasons: []string{"bodies-checked-only-after-specialization"}},
-	)
+	if len(want.Completeness) == 1 {
+		want.Completeness = append(want.Completeness[:1:1],
+			semanticsnapshot.Completeness{Relation: "generic-specializations", Status: "exact"},
+			semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: "unavailable", Reasons: []string{"bodies-checked-only-after-specialization"}},
+		)
+	} else if want.Completeness[1].Relation != "generic-specializations" || want.Completeness[2].Relation != "generic-template-bodies" {
+		t.Fatalf("unexpected Go generic oracle: %+v", want.Completeness)
+	}
 	want.MapOmissions = []string{"generic-template-bodies:unavailable:bodies-checked-only-after-specialization"}
 	for _, relation := range []string{"allocates", "borrows", "drops", "effects", "may-trap", "moves", "reads", "returns-error", "test-calls", "uses-unsafe", "writes"} {
 		want.MapOmissions = append(want.MapOmissions, relation+":unavailable:candidate-atlas-not-collected")

@@ -172,3 +172,11 @@ authorized by this queue.
   pass against Go v3 (112.33s), including seven implementations and a zero-instance
   unused-template workspace. Actual generic command/full CLI, SDK and compiler
   aggregate execution remain open; the broader Atlas item is not complete.
+
+- The actual generic `atlas-impact` command leaf now passes thirteen native
+  invocations in each Windows profile (158.77s): visible/full original selectors,
+  cross-package calls, exact generic counts, call/package limits, stale-lock
+  refusal and unused-template source/interface/instance changes after refresh.
+  SDK and copied-closure source rejection remain covered. The full CLI test now
+  includes this verifier, but its complete authored-main/MCP/edit replay has not
+  been rerun. SDK, aggregate compiler execution and the broader queue remain open.

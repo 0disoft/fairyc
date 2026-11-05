@@ -300,3 +300,43 @@ instantiation/cleanup, native Linux and final self-build/distribution/hosted gat
 remain open. This completes only the admitted generic-function producer slice;
 the broader queue remains active. Stable public API/SDK ABI, DB, dependencies,
 repository hygiene and runner policy are unchanged. No push, release or deployment.
+
+## Actual generic impact command acceptance
+
+The actual `project_atlas_cli::arguments` dispatcher now has Windows low/optimized
+acceptance over the same seven-implementation source. Thirteen native invocations
+per profile verify three original generic declarations by visible and full
+SymbolId, cross-package reverse-call traversal, exact global generic completeness,
+the seven-call admission boundary and its six-call rejection, package-budget
+rejection, stale-lock refusal, fresh-source recovery and the still-closed SDK and
+copied-closure Atlas source families. PATH is empty; no Go child or compiler
+companion supplies the query. Failed and successful queries preserve workspace
+bytes; only the explicit source edit and Go preparation refresh the fixture/lock.
+
+An unused exported-template body edit preserves the ordinary public interface but
+changes the generic interface, source digest and package instance. Contexts are
+matched by package UID because canonical instance order changes after this edit.
+The fresh query matches the independently recompiled Go v3 call index and all
+package contexts, including the recomputed identities and generic relation counts.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestCandidateAtlasGenericCommand$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_atlas_generic_command_test.go internal/cli/candidate_atlas_generic_produce_test.go internal/cli/candidate_atlas_cli_test.go internal/cli/candidate_atlas_families_test.go
+git diff --check
+```
+
+Native command replay passes (158.77s); scoped vet, formatting and diff checks pass.
+During test development, positional context comparison failed after package
+reordering; UID matching fixes that harness assumption. An aggregate negative
+fixture was itself outside ordinary Go check admission and was replaced by the
+already-admitted copied closure. Negative-fixture Go admission is now checked
+before constructing either native image.
+
+The same generic command verifier is connected to opt-in `TestCandidateAtlasCLI`.
+That full authored main/dispatcher/MCP/edit replay has not been rerun for this
+slice; the command-leaf pass cannot replace it. SDK/aggregate compiler execution,
+native Linux, consecutive self-builds, clean-machine distribution and hosted
+same-commit CI remain open. Normative source-of-truth contracts, stable public
+API/SDK ABI, DB, dependencies, repository hygiene and runners are unchanged.
+No push, release or deployment.
