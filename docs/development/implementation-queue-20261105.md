@@ -81,7 +81,7 @@ authorized by this queue.
   `docs/development/candidate-atlas-static-operations-20261105.md`.
   Broader source families and the complete implementation/final queue remain open.
 
-- Refreshed authored-main Atlas CLI optimized acceptance now passes all twenty
+- Pre-closure authored-main Atlas CLI optimized acceptance passes all twenty
   named groups in 248.753s, retaining every original verifier and ordering.
   This includes ordinary/generic/aggregate/SDK/mixed impact, real stdio MCP,
   body preview/publication/refusal/freshness and help. The existing generated-C,
@@ -91,11 +91,13 @@ authorized by this queue.
   digests. Seven additional core query groups pass in 1042.132s, giving eleven
   distinct low groups; all three new static-operation groups also pass both
   profiles, giving fourteen low groups and all twenty-three optimized groups
-  through the recorded bounded full-image replays. Nine original low groups
-  remain pending. The full-CLI
+  through the recorded bounded full-image replays. Two SDK impact groups pass
+  in 531.301s and five ordinary editor/SDK MCP groups in 641.688s, giving twenty-
+  one low baseline groups. Only SDK/SDK Vec editing remains pending. The full-CLI
   receipt records exact coverage and excludes the earlier interrupted attempt.
   Broader source forms and every final gate remain
-  open; native Linux stays batched.
+  open; native Linux stays batched. This is the exact pre-closure C/image baseline,
+  not acceptance of a subsequently changed copied-closure compiler image.
 
 - Mixed SDK/client aggregate body editing now passes actual Windows
   low/optimized commands in 451.186s. Independent Go overlay facts require

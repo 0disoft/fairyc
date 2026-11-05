@@ -1,4 +1,4 @@
-# Current Windows authored Atlas CLI replay, 2026-11-05
+# Windows authored Atlas CLI baseline replay, 2026-11-05
 
 ## Scope and bounded execution
 
@@ -20,6 +20,9 @@ Current C input is a 1,976,252-byte header, 153,115-byte runtime and 24 body
 parts, largest 2,096,561 bytes. All parts fit the unchanged 2 MiB limit.
 Product source is unchanged from `2b1a2d2a`; no compiler, source-admission or
 wire change is introduced by named test grouping.
+This receipt covers that pre-closure product baseline. Subsequent copied-closure
+implementation must authenticate its own generated C/image and gather its own
+acceptance; these baseline results do not attest a changed compiler image.
 
 ## Optimized full replay
 
@@ -103,6 +106,19 @@ groups now pass; nine original groups remain pending. The shared MCP/editor
 helpers retain default SDK inputs and every original assertion; only optional
 workspace/provider setup was added. No product C input or image changed.
 
+The two SDK impact groups additionally pass in 531.301s (native profile
+513.79s), and five ordinary editor/SDK MCP groups pass in 641.688s (native
+profile 623.75s), with those same baseline source/image digests:
+
+```powershell
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^(impact-sdk|impact-sdk-vector)$'
+go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run '^TestCandidateAtlasCLI$/^low$/^(mcp-sdk|mcp-sdk-vector|edit-ordinary|edit-publication|edit-aggregates)$'
+```
+
+Logs: `.cache/atlas-full-cli-low-sdk-impact-20261105.log` and
+`.cache/atlas-full-cli-low-edit-mcp-20261105.log`. Twenty-one distinct baseline
+low groups now pass; only `edit-sdk` and `edit-sdk-vector` remain pending.
+
 | Group | Optimized | Low |
 | --- | --- | --- |
 | impact-ordinary | Pass | Pass |
@@ -110,19 +126,19 @@ workspace/provider setup was added. No product C input or image changed.
 | mcp-ordinary | Pass | Pass |
 | mcp-aggregates | Pass | Pass |
 | mcp-static-operations | Pass | Pass |
-| edit-ordinary | Pass | Pending |
-| edit-publication | Pass | Pending |
-| edit-aggregates | Pass | Pending |
+| edit-ordinary | Pass | Pass |
+| edit-publication | Pass | Pass |
+| edit-aggregates | Pass | Pass |
 | edit-static-operations | Pass | Pass |
 | unsupported | Pass | Pass |
 | impact-generics | Pass | Pass |
 | impact-static-operations | Pass | Pass |
 | impact-aggregates | Pass | Pass |
-| impact-sdk | Pass | Pending |
-| impact-sdk-vector | Pass | Pending |
+| impact-sdk | Pass | Pass |
+| impact-sdk-vector | Pass | Pass |
 | impact-sdk-aggregates | Pass | Pass |
-| mcp-sdk | Pass | Pending |
-| mcp-sdk-vector | Pass | Pending |
+| mcp-sdk | Pass | Pass |
+| mcp-sdk-vector | Pass | Pass |
 | mcp-sdk-aggregates | Pass | Pass |
 | edit-sdk | Pass | Pending |
 | edit-sdk-vector | Pass | Pending |
