@@ -405,3 +405,17 @@ authorized by this queue.
   passed in 99.74s on unchanged inputs and is retained after the test-only
   reserved-identifier repair. Scoped vet/format/diff pass. Aggregate unit/disk
   cache reuse continues next; the full objective remains active.
+
+- Aggregate package-unit persistence now uses a separate authenticated key and
+  envelope family, fresh body/Flow/identity/table/state/SDK admission and the
+  existing whole-project linker. Cold units publish only after Complete
+  interfaces succeed. The final Windows low/optimized replay passes in
+  217.23s/139.79s, with 36 fresh processes and 68 generated native executions.
+  It covers exact reuse/invalidation counts, corruption repair, failed Complete
+  preserving all cache bytes, exhausted-I/O cold fallback and nested/partial/
+  loop cleanup. Independent cold public interfaces and same-grouping forced-cold
+  C bytes agree; ordinary cold/warm and cross-family refusal controls pass.
+  Scoped vet/format/diff pass. See the aggregate plan for failed-harness accounting.
+  Aggregate whole-project cache restoration/reuse, Atlas/SDK production, actual
+  command integration and every final acceptance gate remain open. Native Linux
+  remains batched; no push or dispatch. The full objective stays active.

@@ -62,7 +62,7 @@ pub fn Result<Plan,compile::Problem> build_partitioned(ref v::Vec<syntax::Parsed
 // the linked result without the ordinary type/frame remapping and verifier.
 @effects(filesystem)
 fn compile::Problem append_cached(ref disk::Store store,ref environment::Environment env,ref project_input::Input input,ref catalog::Catalog scope,ref signatures::Program metadata,ref source::Plan original,usize first,usize stop,usize depth,ref mut v::Vec<identified::Program> units,ref mut v::Vec<compile::Range> ranges,ref mut usize retries,ref mut usize work,ref mut cache::Work cache_work){
-    if(v::len<identified::Program>(units)>=512){return failed(10,first,stop);}let sources=project_input::sources(input);var usize key_work=cache_work.key;let selected=cache_key::collect(input,original,env,first,stop,ref mut key_work);cache_work.key=key_work;
+    if(v::len<identified::Program>(units)>=512){return failed(10,first,stop);}let sources=project_input::sources(input);var usize key_work=cache_work.key;let selected=if(signatures::aggregate_types(metadata)){cache_key::collect_aggregates(input,original,env,first,stop,ref mut key_work)}else{cache_key::collect(input,original,env,first,stop,ref mut key_work)};cache_work.key=key_work;
     switch(selected){case .ok(key):{switch(cache::load(store,ref key,sources,scope,metadata,original,first,stop,cache_work)){case .ok(p):{if(!v::push<identified::Program>(units,p).is_ok || !v::push<compile::Range>(ranges,compile::Range{.first,.stop}).is_ok){return failed(11,first,stop);}cache_work.hits+=1;var result=failed(0,first,stop);result.stage=0;return result;}case .err(_):{}};}case .err(_):{}};
     switch(compile::range_identified(sources,metadata,original,first,stop,work)){
         case .ok(p):{cache::mark_cold(cache_work,v::len<identified::Program>(units));if(!v::push<identified::Program>(units,p).is_ok || !v::push<compile::Range>(ranges,compile::Range{.first,.stop}).is_ok){return failed(11,first,stop);}cache_work.misses+=1;var result=failed(0,first,stop);result.stage=0;return result;}
@@ -80,5 +80,13 @@ pub fn Result<Plan,compile::Problem> build_cached(ref disk::Store store,ref envi
 // A later source error therefore cannot publish a successful cache prefix.
 @effects(filesystem,clock)
 pub fn void publish_cached(ref disk::Store store,ref environment::Environment env,ref project_input::Input input,ref source::Plan original,ref Plan units,ref mut cache::Work work){
-    var usize i=0;while(i<count(units) && i<512){if(cache::is_cold(work,i)){let r=range_at(units,i);var usize key_work=work.key;let result=cache_key::collect(input,original,env,r.first,r.stop,ref mut key_work);work.key=key_work;switch(result){case .ok(key):{if(cache::save(store,ref key,at(units,i),work)){work.stored+=1;}}case .err(_):{}};}i+=1;}
+    publish_cached_mode(store,env,input,original,units,false,work);
+}
+@effects(filesystem,clock)
+pub fn void publish_cached_aggregates(ref disk::Store store,ref environment::Environment env,ref project_input::Input input,ref source::Plan original,ref Plan units,ref mut cache::Work work){
+    publish_cached_mode(store,env,input,original,units,true,work);
+}
+@effects(filesystem,clock)
+fn void publish_cached_mode(ref disk::Store store,ref environment::Environment env,ref project_input::Input input,ref source::Plan original,ref Plan units,bool aggregates,ref mut cache::Work work){
+    var usize i=0;while(i<count(units) && i<512){if(cache::is_cold(work,i)){let r=range_at(units,i);var usize key_work=work.key;let result=if(aggregates){cache_key::collect_aggregates(input,original,env,r.first,r.stop,ref mut key_work)}else{cache_key::collect(input,original,env,r.first,r.stop,ref mut key_work)};work.key=key_work;switch(result){case .ok(key):{if(cache::save(store,ref key,at(units,i),work)){work.stored+=1;}}case .err(_):{}};}i+=1;}
 }

@@ -79,7 +79,7 @@ carries independent key, scan, I/O, source and artifact histories. Inside the
 envelope the `FYPUNIT0` identity member is capped at 16 MiB (16777216), the
 IR-program member at the 256 MiB transport limit (268435456) and aggregate work
 at 1073741824 charged units, all from `module_program_artifact_wire`. Source
-planning keeps its 16 MiB history and project linking its independent 8 MiB history. These
+planning keeps its 16 MiB history and project linking its independent 16 MiB history. These
 are resource ceilings, not a measured result.
 
 ## Evidence
@@ -95,3 +95,42 @@ records 108 passing process observations across both candidate C profiles throug
 the 410-source authored check/build/run entry points. The current 511-source full
 private dispatcher still stops in project linking with code 1002. No product
 performance result or latest full-dispatcher fixed point is claimed here.
+
+## Explicit aggregate unit family, 2026-11-05
+
+`project_cache_unit_key.collect_aggregates` derives the same authenticated
+environment, selected package and topology preimage using `FYPUNIT1` instead of
+`FYPUNIT0`. Its opaque identity retains aggregate mode. The different preimage
+produces a different route; neither a caller boolean supplied to restoration nor
+the presence of aggregate-shaped bytes changes an ordinary key into this family.
+Aggregate units use `FYCACHE1` / `FYPUNIT1` / `FYPROG01` in that order. Ordinary
+unit bytes and `collect` remain unchanged. Encoding rejects a key/program mode
+mismatch and linked-project programs; reading requires the exact key, envelope,
+program and current-signature modes before current admission.
+
+`module_unit_artifact_admission.restore_aggregates` uses the named aggregate
+program decoder, then the existing current checked-range, original identity,
+full body/Flow/call/cleanup/metadata coverage, state and SDK owners. Both unit
+admission routes reject linked-project payloads. A reconstructed unit has no
+producer lowering history; it still runs fresh current checking and may be
+discarded as a miss when canonical numbering or consumed contracts differ.
+
+`project_compiler_core.build_complete_aggregate_mixed` prepares current aggregate
+source/type/signature facts, selects the aggregate key family for package-owned
+ranges, and relinks reused and cold units through the same project verifier.
+Publication uses `publish_cached_aggregates` only after complete linked interfaces
+succeed. Cache failures fall back to the existing current-source cold unit
+compiler, and a failed Complete publishes no successful unit prefix. Ordinary
+mixed compilation keeps its existing entry point and key family.
+
+The shared raw disk store transports both `FYCACHE0` and `FYCACHE1`, checking their
+existing content-addressed generation identity and retained-directory policy.
+It confers no semantic authority. Unit and whole-project readers still own their
+exact version and first-member contracts, so an opaque raw record cannot cross
+their admission boundary. Storage naming, retention, publication and cleanup
+semantics are unchanged.
+
+Windows unit-cache evidence is recorded in the aggregate implementation plan.
+This explicit compiler-core entry does not wire aggregate whole-project disk
+restoration or actual CLI commands. Linux execution, full CLI/self-build,
+distribution and same-commit hosted acceptance remain separate required work.

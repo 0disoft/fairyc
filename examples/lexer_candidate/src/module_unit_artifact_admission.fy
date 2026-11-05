@@ -7,6 +7,7 @@ import module_unit_artifact_identities as ids;
 import module_identified_ir as identified;
 import module_project_compile as compile;
 import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
 import module_signatures as signatures;
 import module_catalog as catalog;
 import generic_source_plan as source;
@@ -18,7 +19,14 @@ import std::vec as v;
 // Identity attachment rejects incompatible canonical type/planner numbering;
 // the cache caller treats any such rejection as a disposable miss.
 pub fn Result<identified::Program,u32> restore(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref source::Plan plan,usize first,usize stop,ref mut usize source_work,ref mut usize artifact_work){
-    let saved=switch(decoder::decode(raw,artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};
+    return restore_mode(raw,sources,scope,metadata,plan,first,stop,false,source_work,artifact_work);
+}
+pub fn Result<identified::Program,u32> restore_aggregates(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref source::Plan plan,usize first,usize stop,ref mut usize source_work,ref mut usize artifact_work){
+    return restore_mode(raw,sources,scope,metadata,plan,first,stop,true,source_work,artifact_work);
+}
+fn Result<identified::Program,u32> restore_mode(ref u8[] raw,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref source::Plan plan,usize first,usize stop,bool aggregates,ref mut usize source_work,ref mut usize artifact_work){
+    let saved=switch(if(aggregates){decoder::decode_aggregates(raw,artifact_work)}else{decoder::decode(raw,artifact_work)}){case .ok(p):{p}case .err(code):{return .err(code);}};
+    if(clean::project(ir::cleanup_ir(ref saved)) || clean::aggregates(ir::cleanup_ir(ref saved))!=signatures::aggregate_types(metadata)){return .err(1001);}
     let checked=switch(compile::check_range(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
     let current=switch(identified::build(saved,plan,sources,metadata,compile::checked_interfaces(ref checked),source_work)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
     let snapshot=switch(ids::extract(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let program=identified::ir_program(ref current);

@@ -1074,3 +1074,65 @@ admission. Those and the complete implementation/final acceptance queue remain
 open. Native Linux execution remains batched. Stable API/SDK ABI, DB,
 dependencies, default cache policy, runner/timeout, target maturity and repository
 hygiene policy are unchanged; no push, dispatch, release or deployment.
+
+## Aggregate package-unit persistent cache
+
+The explicit aggregate mixed Complete factory now prepares the current original
+plan and concrete signatures before consulting package-owned unit records. Keys
+use `FYPUNIT1`; envelopes and program members require `FYCACHE1` and `FYPROG01`.
+Ordinary `FYPUNIT0` / `FYCACHE0` / `FYPROG00` bytes remain separate. Encoding and
+restoration reject mismatched modes and linked-project payloads. A cache hit
+still checks current bodies/Flow, original identities, full saved-table coverage,
+state and SDK facts before skipping lowering and entering the project linker.
+No cold unit is published until linked Complete interfaces succeed.
+
+`TestCandidateGenericAggregateUnitCache` uses the actual compiler-image digest
+and a retained directory across eighteen fresh processes per host profile.
+Seventeen successful processes each compare all three current public interfaces
+with an independent ordinary-grouping cold compilation. Their C packets compare
+byte-for-byte with a fresh package-grouping compilation whose cache I/O ledger
+is already exactly exhausted: no hit, publication or meter reset can explain the
+reference result. Each packet then executes under both C consumer profiles.
+The remaining process verifies failed Complete diagnostics and publishes no C;
+Go additionally compares every cache filename and byte before and after it.
+
+The matrix covers cold/warm three-unit reuse; one corrupt record repaired with
+two units reused; a private maker-body edit with two units reused; a consumed
+generic helper edit with one unit reused and native result changing 42 to 43;
+exact I/O-budget fallback; nested/deferred cleanup, partial-construction
+propagation and loop cleanup; and ordinary cold/warm reuse. Every cold aggregate
+case also checks separate key routes, cross-family refusal and a directly
+restored unit with zero producer lowering work.
+
+Initial harness attempts failed before cache admission because members were
+missing or unordered, a dependency used a package-relative path, and `module
+root` was stored under `main.fy`. They now use the owning manifest's sorted
+explicit members, workspace-root-relative paths and `root.fy`. The subsequent
+C comparison incorrectly required different source-unit grouping strategies
+to produce the same packet; public interfaces already agreed. The final test
+keeps that independent interface comparison and compares exact C bytes using
+the same package grouping, with all cache I/O blocked for its cold reference.
+Temporary tracing is removed. These failed attempts are not passing evidence.
+
+The final low host passes in 217.23s (204.89s native subtest); optimized passes
+in 139.79s (128.48s native subtest). Their 34 generated consumer executions each
+give 68 native executions total, with no selected skips. Scoped vet, Go
+formatting and diff checks pass on these implementation inputs.
+The unchanged ordinary raw-store regression passes both Windows profiles in
+19.05s; its independent hashing, corruption, retention and rooted-I/O controls
+remain covered after admitting the second opaque envelope marker.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateGenericAggregateUnitCache$/low$'
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateGenericAggregateUnitCache$/optimized$'
+go test -mod=readonly -count=1 -timeout 8m -failfast -v ./internal/cli -run '^TestCandidateCacheDiskWindows$'
+go vet -mod=readonly ./internal/cli
+gofmt -l internal/cli/candidate_generic_aggregate_unit_cache_test.go
+git diff --check
+```
+
+This closes only the authored package-unit path under both Windows host profiles.
+Aggregate whole-project disk restoration, Atlas/SDK production, actual command
+integration and the full acceptance queue remain required. Native Linux stays
+batched; stable API/SDK ABI, DB, dependencies, default policy, runner/timeout,
+target maturity and repository hygiene are unchanged. No push or dispatch.

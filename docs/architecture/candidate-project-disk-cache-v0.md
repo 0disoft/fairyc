@@ -88,6 +88,15 @@ development/release, and the root and locked source checks pass 512 files / 6347
 functions. Evidence:
 [candidate-project-disk-cache-20261014.json](../ops/evidence/candidate-project-disk-cache-20261014.json).
 
+The explicit aggregate unit family (2026-11-05) adds opaque `FYCACHE1` envelope
+transport alongside `FYCACHE0`. The raw store accepts exactly those two markers;
+it does not parse a key, grant aggregate admission or fall back between semantic
+readers. All content hashes, retained-directory I/O, bounds and publication/
+repair behavior above apply to both. Unit and whole-project readers retain their
+own exact marker/member and fresh-source contracts. See
+[the unit cache contract](candidate-package-unit-cache-v0.md) and the aggregate
+implementation plan for Windows execution evidence; Linux remains deferred.
+
 ## Checked disk owner admission
 
 `project_cache_artifact.from_disk` and `to_disk` connect the private store to

@@ -3,6 +3,8 @@ import project_cache_unit_key as keys;
 import project_cache_disk as disk;
 import module_unit_artifact_admission as admission;
 import module_identified_ir as identified;
+import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
 import module_program_artifact_encode as encoder;
 import module_program_artifact_wire as wire;
 import candidate_artifact_wire as payload;
@@ -20,11 +22,13 @@ pub fn bool is_cold(ref Work p,usize index){assert(index<512);let usize mask=1<<
 // Share the bounded store and retention policy with whole-project generations.
 // Distinct route preimages and envelope members keep their admission isolated.
 pub fn Result<payload::Payload,u32> encode(ref keys::Identity key,ref identified::Program unit,ref mut usize work){
-    let program=switch(encoder::encode(identified::ir_program(unit),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var wire::Status status=wire::Status{.code=0};var out=wire::writer_marker(b"FYCACHE0",ref mut status,work);wire::member(ref mut out,keys::canonical(key),ref mut status,work);wire::member(ref mut out,payload::content(ref program),ref mut status,work);return wire::finish(out,status);
+    let context=ir::cleanup_ir(identified::ir_program(unit));if(clean::project(context) || keys::aggregates(key)!=clean::aggregates(context)){return .err(1001);}
+    let program=switch(encoder::encode(identified::ir_program(unit),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var wire::Status status=wire::Status{.code=0};var out=wire::writer_marker(if(keys::aggregates(key)){b"FYCACHE1"}else{b"FYCACHE0"},ref mut status,work);wire::member(ref mut out,keys::canonical(key),ref mut status,work);wire::member(ref mut out,payload::content(ref program),ref mut status,work);return wire::finish(out,status);
 }
 pub fn Result<identified::Program,u32> restore(ref u8[] raw,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut usize source_work,ref mut usize artifact_work){
-    var cursor=switch(wire::cursor_marker(raw,b"FYCACHE0",artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let identity=wire::member_from(raw,ref mut cursor,16777216,b"FYPUNIT0",artifact_work);let program=wire::member_from(raw,ref mut cursor,wire::byte_limit(),b"FYPROG00",artifact_work);let code=wire::end(raw,ref mut cursor,artifact_work);if(code!=0){return .err(code);}let expected=keys::canonical(key);if(!wire::charge(artifact_work,expected.len+1)){return .err(1002);}if(!bytes::equal(raw[identity.start..identity.end],expected)){return .err(1001);}
-    return admission::restore(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work);
+    let aggregates=keys::aggregates(key);if(aggregates!=signatures::aggregate_types(metadata)){return .err(1001);}
+    var cursor=switch(wire::cursor_marker(raw,if(aggregates){b"FYCACHE1"}else{b"FYCACHE0"},artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let identity=wire::member_from(raw,ref mut cursor,16777216,if(aggregates){b"FYPUNIT1"}else{b"FYPUNIT0"},artifact_work);let program=wire::member_from(raw,ref mut cursor,wire::byte_limit(),if(aggregates){b"FYPROG01"}else{b"FYPROG00"},artifact_work);let code=wire::end(raw,ref mut cursor,artifact_work);if(code!=0){return .err(code);}let expected=keys::canonical(key);if(!wire::charge(artifact_work,expected.len+1)){return .err(1002);}if(!bytes::equal(raw[identity.start..identity.end],expected)){return .err(1001);}
+    return if(aggregates){admission::restore_aggregates(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work)}else{admission::restore(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work)};
 }
 @effects(filesystem)
 pub fn Result<identified::Program,u32> load(ref disk::Store store,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut Work work){

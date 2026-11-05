@@ -106,6 +106,20 @@ pub fn Result<Complete,Problem> build_complete_mixed(ref disk::Store store,ref e
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
     identified_units::publish_cached(store,env,input,ref original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
 }
+// Explicit aggregate unit-cache composition. Reuse still runs fresh checking;
+// no successful unit prefix is published before linked Complete/interfaces.
+@effects(filesystem,clock)
+pub fn Result<Complete,Problem> build_complete_aggregate_mixed(ref disk::Store store,ref environment::Environment env,ref input::Input input,ref coordinates::Coordinates table,ref mut unit_cache::Work cache_work,ref mut usize source_work,ref mut usize link_work){
+    let sources=input::sources(input);let scope=switch(modules::build_scoped(sources,input::owners(input),input::bindings(input))){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let plan=switch(source_plan::build_aggregate_sources(sources,input::owners(input),input::bindings(input),table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let prepared=switch(aggregate_types::build(plan,sources,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata=switch(signatures::build_aggregates(sources,prepared,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let original=aggregate_types::source_plan(signatures::aggregate_source(ref metadata));
+    let units=switch(identified_units::build_cached(store,env,input,ref scope,ref metadata,original,source_work,cache_work)){case .ok(p):{p}case .err(e):{var p=fail(3,e.stage,e.code,e.module_index,e.start,e.end,e.expected,e.actual);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}};
+    let program=switch(identified::build(ref metadata,ref units,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let interfaces=switch(interfaces::build(ref program,original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
+    identified_units::publish_cached_aggregates(store,env,input,original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
+}
 // Restore keeps independent 16MiB source, aggregate artifact and 16MiB link
 // histories. Neither IR nor interfaces escape until their same-owner result is complete.
 pub fn Result<Complete,Problem> restore_complete_sources(artifacts::Restored saved,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
