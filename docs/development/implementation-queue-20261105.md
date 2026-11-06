@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- The shared JSON tree now indexes each object's decoded keys with binary
+  search, retaining duplicate spans, original token/source order and the same
+  16,777,216 work limit. New Windows low/optimized key/budget controls and the
+  unchanged source-plan corpus pass in 61.225s (28 new native executions plus
+  1,698 source-plan cases). Authored check/locked (674 files, 8,383 MIR functions),
+  format and diff checks pass. See `candidate-json-key-index-20261106.md`.
+  Unsafe map/command production retains its separate acceptance gate; all
+  remaining implementation/final work and batched Linux stay open.
+
 - Fairy verified CFG unsafe-site collection passes 29 source fixtures and
   twenty frame/work/count controls per Windows profile: 98 native processes,
   no selected skips (low 479.689s, optimized 84.173s). Safe calls in unsafe

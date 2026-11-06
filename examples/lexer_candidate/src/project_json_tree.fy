@@ -17,11 +17,22 @@ pub fn usize next(ref Tree tree,usize at){assert(at<count(tree));return *v::at<u
 fn decode::Problem fail(ref tokens::Tokens input,u32 code,usize at){let usize size=tokens::count(input);let usize start=if(at<size){tokens::at(input,at).start}else{tokens::source(input).len};let usize end=if(at<size){tokens::at(input,at).end}else{start};return decode::Problem{.code,.start,.end};}
 fn void state(ref mut v::Vec<Frame> stack,u32 value){let usize index=v::len<Frame>(stack)-1;let ref mut Frame frame=v::at_mut<Frame>(stack,index);frame.state=value;}
 fn void close(ref mut v::Vec<Frame> stack,ref mut v::Vec<usize> keys,ref mut v::Vec<usize> after,usize at){let frame=*v::at<Frame>(stack,v::len<Frame>(stack)-1);let ref mut usize slot=v::at_mut<usize>(after,frame.start);*slot=at+1;discard v::truncate<usize>(keys,frame.keys);let usize index=v::len<Frame>(stack)-1;discard v::truncate<Frame>(stack,index);}
+// Keep only the current object's decoded keys sorted. Original tokens/source
+// stay untouched; closing a nested object restores its parent's key segment.
+fn Result<bool,decode::Problem> insert_key(ref tokens::Tokens input,ref mut v::Vec<usize> keys,usize first,usize at,ref mut usize meter){
+    let value=tokens::value(input,at);var usize low=first;var usize high=v::len<usize>(keys);
+    while(low<high){let middle=low+(high-low)/2;let prior=tokens::value(input,*v::at<usize>(keys,middle));if(!work::charge(meter,prior.len+value.len+1)){return .err(fail(input,3,at));}let order=bytes::compare(prior,value);
+        if(order==0){return .err(fail(input,4,at));}if(order<0){low=middle+1;}else{high=middle;}
+    }
+    if(!v::push<usize>(keys,at).is_ok){return .err(fail(input,2,at));}var usize index=v::len<usize>(keys)-1;
+    while(index>low){if(!work::charge(meter,1)){return .err(fail(input,3,at));}let prior=*v::at<usize>(keys,index-1);{let slot=v::at_mut<usize>(keys,index);*slot=prior;}index-=1;}
+    {let slot=v::at_mut<usize>(keys,low);*slot=at;}return .ok(true);
+}
 fn Result<Tree,decode::Problem> validate(tokens::Tokens input,ref mut usize meter){let usize size=tokens::count(ref input);if(size==0){return .err(fail(ref input,1,0));}var v::Vec<usize> after=v::empty<usize>();var v::Vec<Frame> stack=v::empty<Frame>();var v::Vec<usize> keys=v::empty<usize>();var usize at=0;while(at<size){if(!work::charge(meter,1)){return .err(fail(ref input,3,at));}if(!v::push<usize>(ref mut after,at+1).is_ok){return .err(fail(ref input,2,at));}at+=1;}at=0;var bool root=false;
     while(at<size){if(!work::charge(meter,1)){return .err(fail(ref input,3,at));}let t=tokens::at(ref input,at);let usize depth=v::len<Frame>(ref stack);if(depth==0){if(root){return .err(fail(ref input,1,at));}root=true;}else{let frame=*v::at<Frame>(ref stack,depth-1);
             // Object: 1 initial key/end, 2 colon, 3 value, 4 comma/end, 5 key.
             // Array: 6 initial value/end, 7 comma/end, 8 value after comma.
-            if(frame.state==1 || frame.state==5){if(t.kind==2 && frame.state==1){close(ref mut stack,ref mut keys,ref mut after,at);at+=1;continue;}if(t.kind!=7){return .err(fail(ref input,1,at));}var usize key=frame.keys;while(key<v::len<usize>(ref keys)){let previous=*v::at<usize>(ref keys,key);let ref u8[] a=tokens::value(ref input,previous);let ref u8[] b=tokens::value(ref input,at);if(!work::charge(meter,a.len+b.len+1)){return .err(fail(ref input,3,at));}if(bytes::equal(a,b)){return .err(fail(ref input,4,at));}key+=1;}if(!v::push<usize>(ref mut keys,at).is_ok){return .err(fail(ref input,2,at));}state(ref mut stack,2);at+=1;continue;}
+            if(frame.state==1 || frame.state==5){if(t.kind==2 && frame.state==1){close(ref mut stack,ref mut keys,ref mut after,at);at+=1;continue;}if(t.kind!=7){return .err(fail(ref input,1,at));}discard insert_key(ref input,ref mut keys,frame.keys,at,meter)?;state(ref mut stack,2);at+=1;continue;}
             if(frame.state==2){if(t.kind!=5){return .err(fail(ref input,1,at));}state(ref mut stack,3);at+=1;continue;}
             if(frame.state==4 || frame.state==7){let u32 closing=if(frame.state==4){2}else{4};if(t.kind==closing){close(ref mut stack,ref mut keys,ref mut after,at);at+=1;continue;}if(t.kind!=6){return .err(fail(ref input,1,at));}state(ref mut stack,if(frame.state==4){5}else{8});at+=1;continue;}
             if(frame.state==6 && t.kind==4){close(ref mut stack,ref mut keys,ref mut after,at);at+=1;continue;}
