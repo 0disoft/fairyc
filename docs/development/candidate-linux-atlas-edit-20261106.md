@@ -226,3 +226,42 @@ command/help wiring and actual command acceptance remain required. Native Linux,
 the complete current-source/self-build/distribution/hosted acceptance and every
 other implementation queue family stay open. Public CLI/SDK ABI, DB, dependencies,
 timeouts, CI/runners and repository policy are unchanged; no push or dispatch.
+
+## Consuming directory-lease close
+
+Edit lock and staging cleanup need observable close results. The existing
+`linux_package_directory::Directory` now owns its retained parent and child
+descriptors directly and exposes a borrowed rooted child view. Ordinary rooted
+directories and independently duplicated children retain their own close owner.
+The unsafe borrowed-view constructor requires an external owner which outlives
+every use; safe `directory(ref lease)` access keeps the lease's borrow lifetime.
+A borrowed view's drop does not close the owner and consuming rooted close
+rejects that view before entering the native boundary.
+
+The new consuming lease `close` clears both owned handles, closes parent then
+child exactly once, and returns both native causes. It never removes the named
+directory or retries an uncertain close. Automatic cleanup preserves the same
+parent-before-child order. This avoids resource-field moves, mutable projected
+resource borrows and hidden descriptor duplication. No native export, runtime
+asset/pin, public SDK ABI or language feature is added.
+
+`TestLinuxPackageDirectoryPolicy` and `TestLinuxRootedFilePolicy` pass Windows
+low/optimized in 6.676s. New cases cover borrowed view drop/close, ordinary and
+published/erased lease close, each individual close failure and combined failures.
+Existing malformed ownership, partial acquisition, independent duplicate and
+automatic cleanup counts remain unchanged. Related edit-source/directory/cache/
+scratch/starter/package filesystem and online/offline fetch regressions pass in
+86.775s; the direct source native test emits both targets/selects the real Linux
+runtime but explicitly skips actual Linux execution here.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestLinux(RootedFilePolicy|PackageDirectoryPolicy)$'
+go test -mod=readonly -count=1 -timeout 8m -failfast -v ./internal/cli -run '^TestLinux(EditSource(Policy|GoReference|Native)|RemoteFileSystemPolicy|RemoteCachePolicy|RemoteOfflinePolicy|RemoteOnlinePolicy|CacheFilePolicy|DirectoryPolicy|BuildScratchPolicy|StarterPolicy)$'
+```
+
+Linux edit publication composition, prepared source selection, actual commands
+and the broader implementation/final acceptance queue remain required. This
+prerequisite makes close failures observable; it does not establish an applied
+Linux edit or native Linux execution. Original check/locked passes 700 source
+files / 8,677 MIR functions; a fresh Linux preparation passes 700 / 8,678. Scoped
+vet, Go formatting and canonical text/diff checks pass. No push, dispatch or deployment.

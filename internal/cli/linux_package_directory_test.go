@@ -5,6 +5,7 @@ import "testing"
 func TestLinuxPackageDirectoryPolicy(t *testing.T) {
 	runLinuxCandidateFixture(t, []string{"linux_command", "linux_rooted_file", "linux_package_directory"}, "linux_package_directory", `
 @effects(filesystem) fn i32 main(){
+    consuming_close_preserves_both_errors_and_never_retries();
     validates_input_and_transfers_owned_handles();
     preserves_native_errors_and_reclaims_partial_or_invalid_outputs();
     publication_and_removal_freeze_the_old_name();
@@ -17,7 +18,7 @@ func TestLinuxPackageDirectoryPolicy(t *testing.T) {
 const linuxPackageDirectoryPolicyStub = `
 #include <stdlib.h>
 static uint32_t package_mode,package_acquires,package_publishes,package_erases;
-void package_directory_probe_mode(uint32_t value){const char *path=getenv("PATH");assert(path==NULL || path[0]==0);package_mode=value;package_acquires=package_publishes=package_erases=0;rooted_probe_mode(0);}
+void package_directory_probe_mode(uint32_t value){const char *path=getenv("PATH");assert(path==NULL || path[0]==0);package_mode=value;package_acquires=package_publishes=package_erases=0;rooted_probe_mode(value>=19 && value<=21?value-2:0);}
 uint32_t package_directory_probe_calls(void){return package_acquires*100+package_publishes*10+package_erases;}
 static uint32_t package_acquire(uint32_t root,const uint8_t *leaf,size_t size,uint32_t *child,uint32_t *parent,uint32_t *cleanup){
     assert(root==1 && strcmp((const char *)leaf,"stage")==0 && size==6);++package_acquires;*child=2;*parent=8;*cleanup=0;

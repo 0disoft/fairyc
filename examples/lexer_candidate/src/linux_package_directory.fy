@@ -10,11 +10,12 @@ import std::bytes as bytes;
 @effects(filesystem) @link_name("fairyc_private_linux_package_directory_clone_v1") unsafe extern C fn u32 native_clone(u32 root,ptr mut u32 output,ptr mut u32 cleanup_code);
 @effects(filesystem) @link_name("fairyc_private_linux_root_file_close_v1") unsafe extern C fn u32 native_close(u32 raw);
 
-// The child is a real rooted-I/O capability. Its automatic field cleanup closes
-// it separately after this resource's parent cleanup; both descriptors are owned.
+// This resource owns both descriptors. The child capability is a nonowning
+// view, borrowed through directory(), so consuming close can report both errors
+// without moving a resource field or leaving a second automatic close owner.
 @effects(filesystem) pub resource Directory {
-    rooted::Directory child;u32 parent;bytes::Buffer leaf;bool named;
-    cleanup { unsafe { discard native_close(this.parent); }; }
+    rooted::Directory child;u32 raw;u32 parent;bytes::Buffer leaf;bool named;
+    cleanup { unsafe { discard native_close(this.parent);discard native_close(this.raw); }; }
 }
 // 1 input, 2 allocation, 3 native, 5 ABI, 6 phase.
 pub struct Problem { u32 kind;u32 os_code;u32 cleanup_code; }
@@ -38,8 +39,8 @@ fn Result<bytes::Buffer,Problem> path(ref u8[] leaf){
         if(handle(parent) && parent!=child && parent!=borrowed){let closed=unsafe{native_close(parent)};if(cleanup_code==0){cleanup_code=closed;}}
         return .err(fail(if(code!=0){3}else{5},code,cleanup_code));
     }
-    let owned=unsafe{rooted::from_owned_directory_handle(child)};
-    return .ok(Directory{.child=owned,.parent,.leaf=encoded,.named=true});
+    let view=unsafe{rooted::from_borrowed_directory_handle(child)};
+    return .ok(Directory{.child=view,.raw=child,.parent,.leaf=encoded,.named=true});
 }
 @effects(filesystem) pub fn Result<Directory,Problem> create(ref rooted::Directory root,ref u8[] leaf){return acquire(root,leaf,true);}
 @effects(filesystem) pub fn Result<Directory,Problem> edit(ref rooted::Directory root,ref u8[] leaf){return acquire(root,leaf,false);}
@@ -73,4 +74,12 @@ pub fn ref rooted::Directory directory(ref Directory value){return ref value.chi
     if(!value.named){return .err(fail(6,0,0));}
     let code=erase_native(value);
     if(code!=0){return .err(fail(3,code,0));}value.named=false;return .ok(true);
+}
+// Close never removes a name or retries an uncertain close. The parent closes
+// first, preserving automatic cleanup order; a child error is retained too.
+@effects(filesystem) pub fn Result<bool,Problem> close(Directory input){
+    var Directory value=input;let parent=value.parent;let child=value.raw;value.parent=0;value.raw=0;
+    let parent_code=unsafe{native_close(parent)};let child_code=unsafe{native_close(child)};
+    if(parent_code!=0){return .err(fail(3,parent_code,child_code));}
+    return if(child_code!=0){.err(fail(3,child_code,0))}else{.ok(true)};
 }

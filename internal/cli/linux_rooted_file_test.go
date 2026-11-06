@@ -5,6 +5,7 @@ import "testing"
 func TestLinuxRootedFilePolicy(t *testing.T) {
 	runLinuxCandidateFixture(t, []string{"linux_command", "linux_rooted_file"}, "linux_rooted_file", `
 @effects(filesystem) fn i32 main() {
+    borrowed_views_never_close_the_retaining_owner();
     validates_leaves_before_native_calls();
     preserves_metadata_binary_reads_and_consuming_close();
     separates_missing_io_and_malformed_native_results();
@@ -44,7 +45,9 @@ uint32_t fairyc_private_linux_root_file_read_v1(uint32_t file,uint8_t *data,size
     memcpy(data,"a\0\xff",3);*copied=scenario==3 ? 5 : 3;return 0;
 }
 uint32_t fairyc_private_linux_root_file_close_v1(uint32_t handle) {
-    if(handle==0) {return 0;}assert(handle==1 || handle==2 || handle==8 || handle==9);++closes;return scenario==1 ? 4 : 0;
+    if(handle==0) {return 0;}assert(handle==1 || handle==2 || handle==8 || handle==9);++closes;
+    if(handle==8 && (scenario==17 || scenario==19)){return 61;}
+    if(handle==2 && (scenario==18 || scenario==19)){return 62;}return scenario==1 ? 4 : 0;
 }
 uint32_t fairyc_private_linux_root_file_create_v1(uint32_t root,uint32_t *out) {
     assert(root==1);++opens;*out=0;if(scenario==10) {return 95;}*out=9;return 0;

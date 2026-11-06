@@ -7,6 +7,14 @@ import std::bytes as bytes;
 @link_name("rooted_probe_counts") unsafe extern C fn u32 counts();
 @effects(filesystem) fn rooted::Directory opened(){return switch(rooted::open(b"/work")){case .ok(p):{p}case .err(_):{assert(false);return opened();}};}
 @effects(filesystem) fn package::Directory created(ref rooted::Directory root){return switch(package::create(root,b"stage")){case .ok(p):{p}case .err(_):{assert(false);return created(root);}};}
+@test @effects(filesystem) fn void consuming_close_preserves_both_errors_and_never_retries(){
+    var u32 scenario=19;while(scenario<=21){unsafe{mode(scenario);}{let root=opened();let stage=created(ref root);let problem=switch(package::close(stage)){case .ok(_):{assert(false);return;}case .err(p):{p}};
+        assert(problem.kind==3 && problem.os_code==if(scenario==20){62}else{61} && problem.cleanup_code==if(scenario==21){62}else{0});assert(unsafe{counts()}==102);
+    }assert(unsafe{counts()}==103);scenario+=1;}
+    unsafe{mode(0);}{let root=opened();let stage=created(ref root);assert(package::close(stage).is_ok && unsafe{counts()}==102 && unsafe{calls()}==100);}assert(unsafe{counts()}==103);
+    unsafe{mode(0);}{let root=opened();var stage=created(ref root);assert(package::erase(ref mut stage).is_ok);assert(package::close(stage).is_ok && unsafe{counts()}==102 && unsafe{calls()}==101);}assert(unsafe{counts()}==103);
+    unsafe{mode(0);}{let root=opened();var stage=created(ref root);assert(package::publish(ref mut stage,ref root,b"package").is_ok);assert(package::close(stage).is_ok && unsafe{counts()}==102 && unsafe{calls()}==110);}assert(unsafe{counts()}==103);
+}
 @test @effects(filesystem) fn void validates_input_and_transfers_owned_handles(){
     unsafe{mode(0);}
     {

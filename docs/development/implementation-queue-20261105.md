@@ -67,6 +67,14 @@ authorized by this queue.
 
 ## Progress
 
+- Linux retained directory leases now expose consuming close with separate
+  parent/child errors. Their child view borrows the lease rather than holding a
+  second close obligation; automatic order and independent duplicates stay
+  unchanged. Windows root/lease controls pass both profiles (6.676s), and related
+  edit-source/cache/filesystem/online/offline consumers pass (86.775s). Actual
+  Linux stays batched. Edit lock/stage publication composition and every broader
+  implementation/final acceptance gate remain open; see the Linux edit receipt.
+
 - Linux edit-specific source reads now admit regular hard links, preserve exact
   metadata/bytes and reject open/read drift, without reusing package provenance.
   Streaming exact-name lookup avoids sibling-list allocation and shares explicit

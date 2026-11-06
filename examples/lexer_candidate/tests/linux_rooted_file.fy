@@ -9,6 +9,12 @@ import std::bytes as bytes;
 @effects(filesystem) fn rooted::Directory opened() {
     return switch(rooted::open(b"/work")) { case .ok(p): { p } case .err(_): { assert(false); return opened(); } };
 }
+@test @effects(filesystem) fn void borrowed_views_never_close_the_retaining_owner(){
+    unsafe{mode(0);}{let root=opened();{let view=unsafe{rooted::from_borrowed_directory_handle(rooted::directory_handle(ref root))};assert(rooted::directory_handle(ref view)==1);}assert(unsafe{counts()}==100);
+        let view=unsafe{rooted::from_borrowed_directory_handle(rooted::directory_handle(ref root))};let problem=switch(rooted::close_directory(view)){case .ok(_):{assert(false);return;}case .err(p):{p}};
+        assert(problem.stage==1 && problem.os_code==0 && unsafe{counts()}==100);assert(rooted::close_directory(root).is_ok && unsafe{counts()}==101);
+    }assert(unsafe{counts()}==101);
+}
 @test @effects(filesystem) fn void validates_leaves_before_native_calls() {
     unsafe { mode(0); }
     assert(!rooted::valid_leaf(b"") && !rooted::valid_leaf(b".") && !rooted::valid_leaf(b".."));

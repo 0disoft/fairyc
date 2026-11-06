@@ -15,7 +15,9 @@ import std::text as text;
 @effects(filesystem) @link_name("fairyc_private_linux_root_file_publish_new_v1") unsafe extern C fn u32 file_publish_new(u32 file,u32 root,ptr u8 leaf,usize size);
 
 // raw is fd+1; zero means no owned descriptor, including after consuming close.
-@effects(filesystem) pub resource Directory { u32 raw; cleanup { unsafe { discard close_handle(this.raw); }; } }
+// A retained lease may expose a nonowning view. Its enclosing owner closes the
+// descriptor; shared access never transfers that close obligation.
+@effects(filesystem) pub resource Directory { u32 raw; bool owned; cleanup { if(this.owned){unsafe { discard close_handle(this.raw); };} } }
 @effects(filesystem) pub resource File { u32 raw; bool staged; cleanup { unsafe { discard close_handle(this.raw); }; } }
 // Borrowed transport for other private host modules; ownership stays with Directory.
 pub fn u32 directory_handle(ref Directory root) { return root.raw; }
@@ -23,7 +25,12 @@ pub fn u32 file_handle(ref File file) { return file.raw; }
 // Private host capability transfer. The unsafe caller must own this descriptor
 // exclusively and relinquish it after adoption; this does not duplicate an fd.
 @effects(filesystem) pub unsafe fn Directory from_owned_directory_handle(u32 raw) {
-    assert(raw>0 && raw<=2147483648);return Directory{.raw};
+    assert(raw>0 && raw<=2147483648);return Directory{.raw,.owned=true};
+}
+// Only a private owner which retains raw and outlives every use may construct
+// this view. It must never escape that owner's lifetime; there is no fd copy.
+@effects(filesystem) pub unsafe fn Directory from_borrowed_directory_handle(u32 raw){
+    assert(raw>0 && raw<=2147483648);return Directory{.raw,.owned=false};
 }
 // Stages: 1 input/bound, 2 allocation, 3 directory, 4 file, 5 metadata, 6 read, 7 close, 8 native ABI.
 // 9 anonymous creation, 10 write (completed prefix), 11 sync, 12 publication.
@@ -45,12 +52,12 @@ fn Result<bytes::Buffer,Problem> path(ref u8[] value,bool leaf) {
 @effects(filesystem) pub fn Result<Directory,Problem> open(ref u8[] value) {
     let encoded=switch(path(value,false)) { case .ok(p): { p } case .err(e): { return .err(e); } };
     var u32 raw=0; let code=unsafe { open_directory(bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded),ref mut raw as ptr mut u32) };
-    if(code!=0) { return .err(fail(3,code,0)); } if(raw==0 || raw>2147483648) { return .err(fail(8,0,0)); } return .ok(Directory{.raw});
+    if(code!=0) { return .err(fail(3,code,0)); } if(raw==0 || raw>2147483648) { return .err(fail(8,0,0)); } return .ok(Directory{.raw,.owned=true});
 }
 @effects(filesystem) pub fn Result<Directory,Problem> directory(ref Directory root,ref u8[] leaf) {
     let encoded=switch(path(leaf,true)) { case .ok(p): { p } case .err(e): { return .err(e); } };
     var u32 raw=0; let code=unsafe { open_child_directory(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded),ref mut raw as ptr mut u32) };
-    if(code!=0) { return .err(fail(3,code,0)); } if(raw==0 || raw>2147483648) { return .err(fail(8,0,0)); } return .ok(Directory{.raw});
+    if(code!=0) { return .err(fail(3,code,0)); } if(raw==0 || raw>2147483648) { return .err(fail(8,0,0)); } return .ok(Directory{.raw,.owned=true});
 }
 @effects(filesystem) pub fn Result<File,Problem> open_read(ref Directory root,ref u8[] leaf) {
     let encoded=switch(path(leaf,true)) { case .ok(p): { p } case .err(e): { return .err(e); } };
@@ -82,7 +89,8 @@ pub unsafe fn File from_owned_staging_handle(u32 raw) {
 }
 @effects(filesystem) pub fn Result<bool,Problem> close_directory(Directory input) {
     var Directory root=input;
-    let raw=root.raw; root.raw=0; let code=unsafe { close_handle(raw) }; return if(code==0){.ok(true)}else{.err(fail(7,code,0))};
+    let raw=root.raw;root.raw=0;if(!root.owned){return .err(fail(1,0,0));}root.owned=false;
+    let code=unsafe { close_handle(raw) }; return if(code==0){.ok(true)}else{.err(fail(7,code,0))};
 }
 // Unsupported O_TMPFILE filesystems fail rather than introducing named cleanup races.
 @effects(filesystem) pub fn Result<File,Problem> create(ref Directory root) {
