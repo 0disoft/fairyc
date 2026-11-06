@@ -1674,3 +1674,18 @@ authorized by this queue.
   unchanged-input reuse. This closes the private whole-project cache API only.
   Atlas/SDK source production, actual aggregate commands and every final
   acceptance gate remain open. Linux stays batched; no push or dispatch.
+
+- Fairy detached state graphs now independently verify root borrow/view/copy
+  lifetimes and exact storage/helper invalidation. A separate sealed program
+  factory verifies canonical helper names, acyclic reachable calls, exact
+  transitive effects, root/helper exits and combined operation bounds. The final
+  Windows low/optimized graph+borrow+helper run passes in 50.456s, including 464
+  native processes and six ownership refusals; five Go-only identity/effect-order
+  cases per native profile are explicitly unrepresentable, not counted as native
+  passes. Fresh whole-source `check` and `check --locked` pass 706 files / 8,781
+  MIR functions. Scoped vet/format/diff pass. Evidence belongs to
+  `candidate-state-graph-borrows-20261107.md` and
+  `candidate-state-graph-helpers-20261107.md`. Current-source/Complete production,
+  artifacts/cache, native persistence/commands and every final gate remain open;
+  source production and detached codec work continue in disjoint parallel files.
+  Linux stays batched; no push or dispatch. The full objective remains active.
