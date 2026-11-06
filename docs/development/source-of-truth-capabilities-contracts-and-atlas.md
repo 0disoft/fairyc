@@ -347,9 +347,11 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatenative/overlay_native.go`, `overlay_native_c.go`, `overlay_native_windows_test.go`
   - `internal/contractstatenative/overlay_persistent.go`, `overlay_persistent_test.go`, `overlay_persistent_windows_test.go`
   - `docs/architecture/native-state-overlay-transport-v1.md`
-- **Private native graph stable values, dynamic keys and borrow epochs; graph C execution and persistence remain pending**
+- **Private native graph stable values, dynamic keys, borrow epochs and verified operation C execution; graph framing/persistence remain pending**
   - `internal/cstdlib/contract_state_graph.go`, `stage0_contract_state_graph.h`, `stage0_contract_state_graph.c`, `stage0_contract_state_graph_key.c`
   - `internal/contractstatenative/graph_runtime_probe.c`, `graph_runtime_windows_test.go`
+  - `internal/contractstatenative/graph_emit.go`, `graph_emit_windows_test.go`, `graph_cases_windows_test.go`, `graph_execute_probe.c`
+  - `internal/contractstatefixture/hir_cases.go`
   - `docs/architecture/native-state-graph-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`

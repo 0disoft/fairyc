@@ -1,7 +1,7 @@
 # Native state graph values and execution v1
 
-Status: private allocation-free value/key/borrow runtime implemented. Verified
-graph/helper C emission, framing and CAS admission remain required. This is a
+Status: private allocation-free value/key/borrow runtime and verified operation
+C emission implemented. Graph framing and CAS admission remain required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux
 remains batched. No push, hosted dispatch, release or deployment is authorized.
@@ -20,7 +20,7 @@ remains batched. No push, hosted dispatch, release or deployment is authorized.
 4. Complete source/developer invocation, artifact/cache authority and the full
    current-source/compiler/self-build/distribution/authorized-CI acceptance.
 
-Only step 1 is implemented here. The existing literal overlay native/CAS route
+Steps 1 and 2 are implemented below for the verified native admission. The existing literal overlay native/CAS route
 retains its separate sealed admission and does not silently accept graphs.
 
 ## Caller-owned value and mutation storage
@@ -112,6 +112,66 @@ limit or warning is relaxed. Full cstdlib tests were launched earlier, but their
 process handle was unavailable on continuation and completion is unobserved;
 they are not counted as a pass. The focused native replay is the runtime evidence.
 
-Graph C emission/execution, helper/borrow MIR integration, graph framing/CAS,
+Subsequent C emission/execution evidence is recorded below. Graph framing/CAS,
 source/cache/CLI, Linux and all final gates remain open. No public language/CLI/
 SDK ABI, DB/provider, dependencies, default limits or CI/runner policy changes.
+
+## Verified state MIR to C
+
+`EmitGraph` re-verifies its prepared exact-body owner before lowering. It emits
+the current acyclic branch/jump graph, explicit typed join arguments, dynamic
+cell/map read/write/delete operands, block-confined borrow/view/copy operations
+and existing static void helpers through the actual graph runtime. Legacy and
+graph bodies share the helper overlay, original operation indices and exact
+cost rules. The ordinary HIR helper-call admission stays unchanged: graph/helper
+combinations that its existing owner closes are not newly admitted by C code.
+
+Each body owns local SSA/borrow slots. Verified global uniqueness and absence
+of backedges let a predecessor assign fresh target parameters directly without
+overwriting an input. Immutable value bytes stay in the caller's arena.
+Helper-scoped arena bytes are released at every return/failure; helpers return
+no values, and overlay writes own their copies. Successful root exits seal the
+overlay once; reject/trap/runtime failure clear it. Trap codes bind a canonical
+private category table. The per-entry hash includes that table as well as C,
+layout, body and target, distinguishing identical C with different trap labels.
+
+The native owner limits total root/helper value and borrow slots to 4,096
+before source generation. Exact 4,096 succeeds and 4,097 refuses, without
+changing the general state verifier or literal admission. This explicit native
+work bound keeps caller-created graphs from producing unbounded C locals.
+Zero owners, unsupported targets and corrupt MIR reject before build or I/O.
+
+`contractstatefixture.LoadHIRCases` exposes fresh authored HIR and limits from
+the existing validated manifests, not oracle output or preselected native
+answers. Native tests re-enter `Prepare`; the original fixed-result manifest
+runner remains an independent prerequisite. Both Windows consumer profiles run
+nineteen original v0-v4 cases (38 compiled C executions): linear cell/maps,
+branch/join, transitive helper commit/reject, nested and unrelated-map borrows,
+and native limit rollback.
+
+Fourteen additional graphs cover all seven codecs with present/missing reads,
+both found branches, two-argument joins, dynamic map keys and values, deletion,
+SSA bytes surviving an unrelated arena repack, canonical zero fallback and
+commit/reject/trap. Their 28 C executions compare complete successful read
+traces, operation indices, typed binary values, cost, sorted writes/deletions and
+byte cost against Go. Error cases require matching status and no proposed
+writes. A trap-to-reject Go control makes the otherwise panicking trap path's
+observations/cost independently visible, without supplying native result bytes.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/contractstatenative -run '^TestNativeStateGraph(Emission|Admission)$'
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/contractstatenative -run '^TestNativeStateGraphEmission$/v4-dynamic'
+go test -mod=readonly -count=1 -timeout 2m -v ./internal/contractstatenative -run '^TestNativeStateGraph(SlotBoundary|HashBindsTrap)$'
+go test -mod=readonly -count=1 -timeout 2m ./internal/contractstatefixture ./internal/contractstatemir
+go vet -mod=readonly ./internal/contractstatenative ./internal/contractstatefixture ./internal/cstdlib
+git diff --check
+```
+
+The original native matrix/admission passes in 24.370s. After adding the seven-
+codec cases, their selected matrix passes in 17.021s on unchanged product
+inputs. New slot/hash controls pass in 0.057s; fixture/state-MIR regressions
+pass in 0.057s/0.074s. Scoped vet, formatting and diff checks pass; no selected
+skips. This is actual verified-operation C execution through a test acceptance
+entry, not production graph framing or durable graph execution. Graph binary
+transport/admission, real one-attempt graph CAS/reopen, source/developer/cache/
+CLI integration, native Linux and every final acceptance gate remain required.

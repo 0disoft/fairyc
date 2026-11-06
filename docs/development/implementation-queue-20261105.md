@@ -67,6 +67,18 @@ authorized by this queue.
 
 ## Progress
 
+- Verified native graph operation C now executes dynamic keys/values, typed
+  branch/join edges, current helper calls and read borrow/view/copy through the
+  actual runtime. Nineteen original v0-v4 fixtures plus fourteen seven-codec
+  present/missing graphs pass 66 Windows low/optimized C executions, with full
+  successful Go traces/cost/writes, trap controls and failed-write rollback.
+  Original matrix/admission passes in 24.370s; added dynamic cases pass in
+  17.021s on unchanged product inputs. Exact/one-over native slot and same-C
+  distinct-trap identity controls pass; fixture/state-MIR regressions and scoped
+  vet/format/diff pass. This closes operation C emission only: production graph
+  framing/admission, graph CAS/reopen, source/developer/cache/CLI and all Linux/
+  final gates remain open. See `architecture/native-state-graph-v1.md`.
+
 - Native graph preparation now has an allocation-free C runtime for immutable
   typed values, dynamic physical map keys, exact-key mutation epochs and checked
   nested read borrows. Windows low/optimized match 4,698 independent Go codec/

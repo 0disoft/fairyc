@@ -39,8 +39,9 @@ this does not close step 3 or the complete execution queue.
 
 The next graph prerequisite now supplies caller-owned stable SSA bytes,
 canonical dynamic-key hashing and exact-key borrow mutation generations. Its
-separate [graph execution plan](native-state-graph-v1.md) keeps actual graph/
-helper C emission, graph framing/CAS and source/cache/commands open.
+separate [graph execution plan](native-state-graph-v1.md) now records actual
+verified graph/helper/borrow operation C execution. Production graph framing/
+admission/CAS and source/cache/commands remain open.
 
 ## Sealed transport owner
 
