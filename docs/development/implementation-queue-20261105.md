@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Linux archive-cache storage now validates pins/size/input hashes before I/O,
+  rehashes every hit, preserves corrupt/linked/aliased/leftover entries and syncs
+  anonymous files before one no-replace publication attempt. Independent Windows
+  cold/warm, simulated collision, failure/close and lifetime controls pass both
+  profiles, as do reference check/locked (690 files / 8,599 MIR functions).
+  This closes the private storage API only: offline restore, HTTPS, CLI and
+  actual Linux execution remain open. See the Linux fetch receipt.
+
 - Linux package filesystem composition now preflights contained paths and case/
   type conflicts, reads exact stable single-linked binary files, syncs anonymous
   files before exclusive publication and clears owned stages under entry/depth

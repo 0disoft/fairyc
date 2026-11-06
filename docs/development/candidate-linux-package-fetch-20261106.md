@@ -221,6 +221,51 @@ Scoped vet and diff checks pass; the example lock is refreshed. Local logs:
 `.cache/linux-remote-fs-directory-policy-20261106.log`, and
 `.cache/linux-remote-fs-check-20261106.log` (not staged).
 
+## Linux archive-cache publication API
+
+`linux_remote_cache::store` now preflights a lower-case 64-byte SHA-256 pin and
+the 16 MiB archive bound, hashes input before creating cache directories and
+reuses existing blobs only after a fresh bounded, single-link read and rehash.
+It retains `build/package-sources/<sha256>.zip`. Corrupt, linked, aliased or
+different existing entries fail without replacement. A pre-existing digest-
+derived named download stage also fails without removing it.
+
+New writes use the existing anonymous O_TMPFILE capability, partial-write loop,
+sync-before-hard-link publication and consuming non-retried close. A publication
+collision accepts a competing entry only after re-reading and matching its hash;
+different bytes are retained and rejected. Each store makes at most one anonymous
+file creation/publication attempt. Sync/write failures retain I/O classification,
+and close errors stay separate from the primary operation. A completed blob may
+remain after close reports an error; explicit later reuse must rehash it.
+
+The caller still owns ZIP/package identity validation and the fetch lock. The
+storage-layer oracle uses synthetic blobs, not proof of archive acceptance or
+an online/offline CLI. No transport is imported or invoked by this API.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinuxRemote(CachePolicy|FileSystemPolicy)$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+```
+
+The final combined Windows command passes both profiles / four native executions
+in 6.845s, without selected skips. Independent namespace/handle/cursor assertions
+cover wrong digest before mutation, 16 MiB+1 preflight, zero-length blob storage,
+cold publication and unchanged warm reuse, corruption/hard-link/symlink/case-alias
+refusal, preserved named stages, partial/zero writes and sync failures, matching
+and differing simulated competing publications, and consumed close errors.
+The competitor cases observe exactly one creation and one publication attempt;
+they are not real concurrent Linux executions. All native processes observe an
+empty PATH and finish with no retained fake handles/cursors. Both-target C
+emission passes. Input hashing is intentionally independent of a trusted caller.
+
+Reference check and locked check pass 690 files / 8,599 MIR functions, with the
+example lock refreshed. Scoped vet, Go format, UTF-8/LF/final newline and diff
+checks pass. Local logs are `.cache/linux-remote-cache-policy-20261106.log` and
+`.cache/linux-remote-cache-check-20261106.log` (not staged).
+The initial focused cache probe passed in 3.376s; review then separated sync-stage
+I/O errors from publication conflicts and added explicit sync/zero-write oracles.
+The final combined command above includes that correction and the extended model.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
@@ -236,7 +281,7 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: cache publication, offline restoration, verified HTTPS and online/offline Linux
+Next implementation: offline restoration, verified HTTPS and online/offline Linux
 CLI selection. The Windows substitute does not prove those paths. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.
