@@ -421,3 +421,7 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0499: Bounded Atlas impact, MCP and checked body edits](0499-bounded-atlas-impact-mcp-and-body-edits.md)
 
 - [0501: Isolated Linux HTTPS producer and bounded pipe transport](0501-linux-https-isolated-worker.md)
+
+- [0502: One-attempt native state execution and CAS publication](0502-native-state-one-attempt-cas.md)
+
+- [0503: Explicit source admission for state graphs](0503-experimental-source-state-graphs.md)

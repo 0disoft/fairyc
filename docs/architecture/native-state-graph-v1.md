@@ -5,8 +5,11 @@ C emission implemented. Go graph request/path-witness/response admission, actual
 C framing and opaque Windows build/run are implemented in
 [transport v1](native-state-graph-transport-v1.md). One-attempt graph CAS and real
 local-store/reopen/conflict/cancellation evidence are implemented in
-[graph persistence v1](native-state-graph-persistence-v1.md). Source/developer/
-artifact/cache/CLI and the full acceptance queue remain required. This is a
+[graph persistence v1](native-state-graph-persistence-v1.md). The first explicit
+[source graph admission](source-state-graph-v1.md) now connects five-codec
+cells/maps, read values and structured branch/join through actual C/local CAS.
+Source helpers/borrows, developer/artifact/cache/CLI and the full acceptance
+queue remain required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux
 remains batched. No push, hosted dispatch, release or deployment is authorized.
