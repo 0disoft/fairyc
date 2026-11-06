@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Seventeen independent Go borrow source/map-round-trip cases and two unsupported
+  source controls pass in 1.264s. Returned unmaterialized parameters retain their
+  expression spans; retained loans keep their written borrow sites and escape
+  flags. Snapshot/map/pack regressions and scoped vet pass. See
+  `candidate-atlas-borrow-sites-20261106.md`. This freezes the Go prerequisite;
+  Fairy collection/production/commands and all broader/final gates remain open.
+  Native Linux stays batched; no push or dispatch.
+
 - Complete-bound Result-propagation production retains original question spans
   in ordinary, specialized and concrete cleanup summaries, relation counts and
   exact returns-error completeness. Six independent source families cover root
