@@ -32,9 +32,10 @@ authorized by this queue.
   `candidate-linux-runtime-sync-20261106.md`.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
-  Impact dispatch, Linux help and shared locked-source query are connected;
+  Impact/MCP dispatch, Linux help and shared locked-source queries are connected;
   Windows command/full-entry evidence and the authored native replay are in
-  `candidate-linux-atlas-cli-20261106.md`. Other Atlas commands remain open.
+  `candidate-linux-atlas-cli-20261106.md`. Symbols/calls/pack/edit remain open;
+  native stdio/default-SIGPIPE/closed-pipe behavior also needs explicit replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
   or one-attempt behavior.

@@ -54,6 +54,11 @@ func TestCandidateMCPCommand(t *testing.T) {
 
 func verifyCandidateMCPCommand(t *testing.T, image string) {
 	t.Helper()
+	verifyCandidateMCPCommandWithHelp(t, image, usage)
+}
+
+func verifyCandidateMCPCommandWithHelp(t *testing.T, image, help string) {
+	t.Helper()
 	const source = `module main;import answer as answer;fn i32 leaf(){return answer::value();}fn i32 main(){return leaf();}`
 	root := writeWorkspaceSessionFixture(t, source)
 	var diagnostic bytes.Buffer
@@ -133,7 +138,7 @@ func verifyCandidateMCPCommand(t *testing.T, image string) {
 	for _, args := range [][]string{{"experimental", "atlas-mcp", "--help"}, candidateMCPArguments()[0:3]} {
 		code, out, _ := candidateMCPProcess(t, image, t.TempDir(), args, "")
 		if len(args) == 3 && args[2] == "--help" {
-			if code != 0 || out != usage {
+			if code != 0 || out != help {
 				t.Fatal("help read workspace")
 			}
 		} else if code != 2 || out != "" {

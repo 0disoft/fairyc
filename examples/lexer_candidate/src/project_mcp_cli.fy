@@ -21,6 +21,7 @@ import std::io as io;
  }
  return 0;
 }
-@effects(filesystem,environment,console) pub fn i32 arguments(){if(process::arg_count()==4){var u8[4096] raw=[0;4096];let n=switch(process::arg(3,ref mut raw)){case .ok(value):{value}case .err(_):{0}};let ref u8[] flag=ref raw;if(bytes::equal(flag[..n],b"--help") || bytes::equal(flag[..n],b"-h") || bytes::equal(flag[..n],b"help")){return if(io::write(public::help()).is_ok){0}else{4};}}
+@effects(filesystem,environment,console) pub fn i32 arguments(){return arguments_with_help(public::help());}
+@effects(filesystem,environment,console) pub fn i32 arguments_with_help(ref str help){if(process::arg_count()==4){var u8[4096] raw=[0;4096];let n=switch(process::arg(3,ref mut raw)){case .ok(value):{value}case .err(_):{0}};let ref u8[] flag=ref raw;if(bytes::equal(flag[..n],b"--help") || bytes::equal(flag[..n],b"-h") || bytes::equal(flag[..n],b"help")){return if(io::write(help).is_ok){0}else{4};}}
  let p=switch(policy::arguments()){case .ok(value):{value}case .err(_):{return error(2,"invalid experimental atlas-mcp arguments");}};return serve(b".",p);
 }

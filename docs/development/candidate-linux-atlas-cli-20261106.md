@@ -90,3 +90,54 @@ its source and verification inputs are unchanged. No failed/incomplete test is
 counted as a native pass. Native Linux replay, all other Atlas command ports,
 the broader comparison/distribution gates and the full implementation objective
 remain open.
+
+## MCP command
+
+Linux experimental mode 2 now selects the shared `project_mcp_cli` owner with
+Linux help through `arguments_with_help`; the original `arguments()` still
+supplies default help. Root, explicit capability, all budgets, framing, current
+locked-source admission and response/error policies remain owned by the shared
+implementation. `project_mcp_stream` uses the existing target console ABI; Linux
+support selects the direct POSIX read/write implementation. No separate stream
+adapter, network listener, child query provider or write tool is introduced.
+
+`TestLinuxAtlasMCPCommand` uses the same independent Go query/context oracle and
+live-session verifier as the default command, with exact Linux help aliases.
+Initialization, valid/unavailable/valid query recovery, message/notification
+limits, empty-PATH execution, response before stdin EOF, changed-source refusal
+and recovery, unchanged workspace bytes and broken stdout are covered. The
+default verifier now accepts an explicit expected help string internally; its
+existing entry retains the unchanged expectation. Actual full-entry Linux replay
+reuses each already-built CLI image via `checkLinuxAtlasMCP` without another full
+compiler or companion build.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^(TestLinuxAtlasMCPCommand|TestCandidateMCPCommand|TestCandidateMCPStream)$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestLinuxFileCLI$'
+go test -mod=readonly -count=1 -timeout 4m ./internal/cli -run '^TestLinuxFetchCommand$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-atlas-mcp-20261106
+```
+
+The final command/stream group passes in 309.388s, with no selected skips:
+default MCP 153.38s (low 53.67s / optimized 80.84s), Linux-help MCP 151.86s
+(53.87s / 82.61s), stream 3.94s. Stream controls include 4,096-byte chunk and
+65,536/65,537-byte frame boundaries, CRLF/final EOF, progress before failure and
+live multi-frame responses. Fetch regression passes both profiles in 28.927s,
+including the final independent MCP help-presence expectation.
+
+Full-entry both-target emission and closed Linux support selection pass in
+38.232s: 24 C partitions, 1,976,208-byte header. Portable dispatch passes both
+Windows profiles in 7.06s, including exact MCP selection and near-name refusals.
+The outer test explicitly skips native Linux compilation/execution. Original
+source check/locked passes 698 files / 8,640 MIR functions; freshly prepared
+Linux check/locked passes 698 / 8,641. Scoped vet, formatting and canonical-text/
+diff checks pass. The example lock changes only current root identity/order.
+
+Native Linux stdio, default-SIGPIPE/closed-pipe behavior and session freshness
+remain unverified. The console writes directly to the descriptor; a Windows
+broken-pipe observation cannot establish Linux signal/error behavior. Retain
+that explicit signal-policy check in the combined native replay. No Linux
+MCP/fetch/syscall/TLS/self-build pass is claimed here. Symbols/calls/pack/edit,
+all broader source-family comparisons and every final acceptance gate remain
+open. Public API/SDK ABI, DB, dependency, timeout, CI/runner and repository
+policies are unchanged; no push, hosted dispatch, release or deployment.
