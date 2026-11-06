@@ -444,8 +444,13 @@ with 62 native processes and 83 independent current maps per profile. Logs:
 Both authored checks pass (674 files, 8,384 MIR functions), with logs
 `atlas-unsafe-production-indexed-check-20261106.log` and
 `atlas-unsafe-production-indexed-locked-20261106.log` under `.cache`.
-Production roots and actual low CLI replay retain separate pending acceptance
-until their running selections finish.
+The refreshed ordinary/generic/SDK Vec production-root selection also passes
+both profiles in 929.227s, including independent maps, current admission, joins
+and the existing refusal controls. The exact selection is
+`^TestCandidateAtlas(Production|GenericProduction|SDKVectorProduction)$` with
+`go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run`.
+Log: `.cache/atlas-unsafe-production-roots-20261106.log`. Actual low CLI replay
+retains separate pending acceptance until its running selections finish.
 
 ## Move-site Go prerequisite
 

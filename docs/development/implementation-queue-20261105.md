@@ -69,8 +69,9 @@ authorized by this queue.
   traps. Only uses-unsafe becomes newly exact. Windows source/current/join
   comparisons pass both profiles (low 789.366s, optimized 97.914s), 124 native
   processes and 166 independent current maps. All six selected actual optimized
-  CLI groups pass in 179.891s; low command replay and the refreshed production
-  root selection remain separately pending. Authored check/locked pass (674
+  CLI groups pass in 179.891s. The ordinary/generic/SDK Vec production roots
+  pass both profiles in 929.227s; low command replay remains separately
+  pending. Authored check/locked pass (674
   files, 8,384 MIR functions), as do Go atlasmap/contextpack regressions and
   scoped vet/hygiene. See the observed-relations plan and
   `docs/ops/windows-candidate-atlas-unsafe-cli-20261106.md`. Every remaining

@@ -1,5 +1,8 @@
 # Windows Fairy Atlas unsafe command replay, 2026-11-06
 
+Product source: `f8fc5354`, with collector `29bb4e58` and the unchanged-limit
+JSON key index from `b9c99000`.
+
 The authored main and dispatcher retain original Go unsafe observations in
 ordinary, specialized and concrete cleanup summaries. The separately witnessed
 pinned SDK leaf retains the helper's source span, without inventing a caller
@@ -26,7 +29,7 @@ unused/used/pop. Every expected declaration, site, trap, count, omission,
 specialization, query/pack byte and checksum comes from original independent
 Go facts, with only still-uncollected classes explicitly projected away.
 
-Each command invocation authenticates the retained image against the complete
+Each selected test parent authenticates the retained image against the complete
 generated-C/profile/toolchain input and actual binary digests:
 
 | Profile | Source digest | Image digest |
