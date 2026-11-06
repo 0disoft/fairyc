@@ -41,6 +41,7 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"--tokens-file",2)==0 && file_cli::command(b"--mir-file",4)==0);
     assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
     assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==10);
+    assert(file_cli::command(b"experimental",2)==11 && file_cli::command(b"experimental",4)==11);
     assert(file_cli::command(b"--c-file",3)==4 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::command(b"--c-file",2)==0 && file_cli::command(b"--c-file",4)==0);
     assert(file_cli::command(b"--c-workspace",3)==5 && file_cli::command(b"--c-workspace",4)==5);
@@ -196,6 +197,7 @@ fn i32 cli_probe() {
 			checkLinuxRun(t, artifact, backend)
 			checkLinuxTest(t, artifact, backend)
 			checkLinuxNew(t, artifact, backend)
+			checkLinuxFetch(t, artifact)
 			checkLinuxCEmission(t, toolchain, artifact)
 		})
 	}

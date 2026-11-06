@@ -4,8 +4,10 @@ This is the Fairy response/lifetime policy for the pending Linux source-fetch
 transport, within ADR 0498 and `package/remote-sources-v1.md`. The native producer
 uses system libcurl under [ADR 0501](../adr/0501-linux-https-isolated-worker.md).
 Parent-side deadline/cancellation and opt-in runtime selection are implemented;
-native Linux execution remains pending. This does not admit Linux fetch commands
-or establish executed Linux TLS I/O.
+native Linux execution remains pending. The private Linux candidate fetch command
+now selects these adapters; this does not establish executed Linux TLS I/O or
+promote target support. See the
+[CLI receipt](../development/candidate-linux-fetch-cli-20261106.md).
 
 ## Ownership and private ABI
 
@@ -106,8 +108,8 @@ Windows MSVC low/optimized executions pass with empty PATH. This is private poli
 evidence only. The Linux fetch receipt records exact commands, failures and scope.
 Independent Windows native-call substitutes also exercise the actual reader,
 producer and parent owner. Authored GCC/Clang two-profile process, negative trust,
-DNS and TLS-stall replays are pending; positive trusted HTTPS and CLI selection
-remain required. The private `linux_remote_online::fetch` orchestration now caps
+DNS and TLS-stall replays are pending; positive trusted HTTPS and actual CLI
+execution remain required. The private `linux_remote_online::fetch` orchestration caps
 each request by min(30,000 ms, the remaining 120,000 ms operation deadline), calls
 this facade only on exact-cache absence and retains its `{code, native_code,
 cleanup_code}` in a stage-10 problem. Cached bytes never bypass hashing/archive

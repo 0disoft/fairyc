@@ -59,6 +59,15 @@ authorized by this queue.
 
 ## Progress
 
+- The Linux full entry now routes experimental mode 11 to online/offline fetch
+  and shares its Linux-only help with the command leaf. Both-target full C emission
+  and runtime admission pass; portable low/optimized dispatch passes on Windows,
+  while actual Linux execution is explicitly skipped. Original/prepared source
+  checks pass 697 files / 8,635 and 8,636 MIR functions respectively. The existing
+  real Linux CLI replay reuses its built profiles for fetch/restore/check and
+  untrusted-TLS observations. Runtime pack parity, trusted TLS, provisioning and
+  native/final acceptance remain open. See the Linux fetch CLI receipt.
+
 - Linux fetch has a command leaf over the actual Linux offline/online owners,
   Linux-only help and shared platform-independent result/error rendering. Exact
   command/namespace/error/output behavior is covered by independent Windows models;
