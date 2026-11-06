@@ -128,7 +128,7 @@ func verifyCandidateAtlasFamilyContext(t *testing.T, got, want atlasmap.QueryCon
 		t.Fatalf("unexpected Go generic oracle: %+v", want.Completeness)
 	}
 	want.MapOmissions = []string{"generic-template-bodies:unavailable:bodies-checked-only-after-specialization"}
-	for _, relation := range []string{"effects", "reads", "test-calls", "writes"} {
+	for _, relation := range []string{"reads", "test-calls", "writes"} {
 		want.MapOmissions = append(want.MapOmissions, relation+":unavailable:candidate-atlas-not-collected")
 	}
 	if want.Completeness[0].External != 0 {

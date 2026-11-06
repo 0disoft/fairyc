@@ -365,6 +365,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 	wantRows["moves"] = semanticsnapshot.Completeness{Relation: "moves", Status: semanticsnapshot.CompletenessExact}
 	wantRows["allocates"] = semanticsnapshot.Completeness{Relation: "allocates", Status: semanticsnapshot.CompletenessExact}
 	wantRows["returns-error"] = semanticsnapshot.Completeness{Relation: "returns-error", Status: semanticsnapshot.CompletenessExact}
+	wantRows["effects"] = semanticsnapshot.Completeness{Relation: "effects", Status: semanticsnapshot.CompletenessExact}
 	wantRows["borrows"] = semanticsnapshot.Completeness{Relation: "borrows", Status: semanticsnapshot.CompletenessExact}
 	wantRows["generic-specializations"] = semanticsnapshot.Completeness{Relation: "generic-specializations", Status: semanticsnapshot.CompletenessExact, Resolved: global.implementations}
 	wantRows["generic-template-bodies"] = semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: semanticsnapshot.CompletenessUnavailable, Unknown: global.templates, Reasons: []string{"bodies-checked-only-after-specialization"}}
@@ -373,7 +374,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 		row.Reasons = []string{callReason}
 		wantRows["calls"] = row
 	}
-	for _, relation := range []string{"effects", "reads", "test-calls", "writes"} {
+	for _, relation := range []string{"reads", "test-calls", "writes"} {
 		wantRows[relation] = semanticsnapshot.Completeness{Relation: relation, Status: semanticsnapshot.CompletenessUnavailable, Reasons: []string{"candidate-atlas-not-collected"}}
 	}
 	actual := got.Completeness()

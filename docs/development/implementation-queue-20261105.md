@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Declared-effects production now agrees with Go completeness: every Package
+  declaration passes the source schema, legacy header factories retain unavailable
+  evidence, and effects do not inflate executable relation counts. Twelve authority
+  names plus ordinary/foreign/generic/cleanup and cross-package source cases pass
+  both Windows profiles (18 processes / 28 independent maps). Explicit collection
+  controls pass; optimized generic/SDK Vec production and six real authored-main
+  CLI groups pass, as do authored check/locked, scoped vet and map/pack/snapshot
+  regressions. Exact commands, failed attempts and skipped scope are recorded in
+  `candidate-atlas-effects-20261106.md`. The earlier effects-completeness difference
+  below is resolved. Broader source-family parity, Linux implementation, native
+  state, deferred designs and every final gate remain open; no push or dispatch.
+
 - Complete-bound borrow maps now preserve original spans, shared/mutable kinds
   and escape flags in ordinary/generic/cleanup summaries, counts and exact
   completeness. Raw-IR legacy factories retain unavailable evidence. The actual

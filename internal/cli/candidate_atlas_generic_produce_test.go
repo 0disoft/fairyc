@@ -125,6 +125,7 @@ fn i32 main(){return a::value();}`},
 						t.Fatalf("generic identities differ %s: interfaces %s/%s want %s/%s; symbols got %+v want %+v", h.PackageUID, h.InterfaceHash, h.GenericInterfaceHash, want.Header().InterfaceHash, want.Header().GenericInterfaceHash, got.Symbols(), want.Symbols())
 					}
 					compareAtlasProducedFunctions(t, got.Functions(), want.Functions())
+					verifyCandidateAtlasEffectCompleteness(t, got)
 					actual, expected := got.Specializations(), want.Specializations()
 					if len(actual) != len(expected) || h.Counts.Specializations != len(expected) {
 						t.Fatal("generic implementation count differs", h.PackageUID, len(actual), len(expected))

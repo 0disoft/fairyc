@@ -53,6 +53,10 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   See `candidate-atlas-borrow-sites-20261106.md` for exact acceptance scope.
 - [ ] Complete-bound borrow production, remapped specialization ownership,
   cache/restoration metadata, summaries/counts/completeness and actual commands.
+- [x] Declared-effects completeness bound to schema-produced declarations, with
+  independent v1/v2/v3/FFI/generic/cleanup source expectations and unchanged
+  executable relation counts. Legacy headers retain unavailable evidence. Exact
+  Windows scope: `candidate-atlas-effects-20261106.md`.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
 

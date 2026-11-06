@@ -81,6 +81,13 @@ func TestCandidateAtlasSourceVersion(t *testing.T) {
 	sdkUsed := writeWorkspaceSessionFixture(t, candidateAtlasSDKVectorUsedSource)
 	sdkScalars := writeWorkspaceSessionFixture(t, atlasSDKCommandSource)
 	fixtures := []fixture{{"ordinary-families", ordinary, 1, nil}, {"owner-namespaces", owner, 1, nil}, {"used-functions", used, 2, nil}, {"unused-functions", unused, 2, nil}, {"used-aggregates", aggregate, 3, nil}, {"unused-dependency-aggregates", unusedAggregate, 3, nil}, {"sdk-unused", sdkUnused, 3, nil}, {"sdk-used", sdkUsed, 3, nil}, {"sdk-scalars", sdkScalars, 1, nil}}
+	for _, effects := range atlasEffectProductionSources() {
+		root := writeWorkspaceSessionFixture(t, effects.source)
+		if effects.name == "effects-declarations" {
+			writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer;@effects(clock) pub fn i32 value(){return 42;}")
+		}
+		fixtures = append(fixtures, fixture{effects.name, root, effects.minimum, nil})
+	}
 	drops := writeWorkspaceSessionFixture(t, `module main;import answer as a;resource Token{i32 value;cleanup{}}
 fn i32 choose(bool stop){let t=Token{.value=1};if(stop){assert(false);}return 0;}
 fn i32 main(){let t=Token{.value=1};discard Token{.value=2};{let inner=Token{.value=3};}return choose(false);}`)
@@ -210,6 +217,7 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 						if h.Counts.Relations != candidateAtlasProducedRelationCount(want) {
 							t.Fatalf("source relation count %s: %d want %d", h.PackageUID, h.Counts.Relations, candidateAtlasProducedRelationCount(want))
 						}
+						verifyCandidateAtlasEffectCompleteness(t, got)
 						foundBorrows := false
 						for _, r := range got.Completeness() {
 							if r.Relation == "borrows" {
