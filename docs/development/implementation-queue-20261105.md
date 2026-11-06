@@ -1850,3 +1850,15 @@ authorized by this queue.
   Raw transport grants no graph admission; route binding and actual graph cache
   integration remain separate. Linux stays batched; no push or dispatch. The
   full implementation objective remains active.
+
+- Graph disk lookup now routes before source compilation using domain-separated
+  environment/SDK/coordinate/exact-source preimages. Save routes derive source
+  and coordinate only from the same sealed graph Complete. Sol high sidecar
+  work passes 134 Windows native cases in 108.805s against independent Go
+  framing/SHA256, including raw source boundaries, namespace scope, actual
+  environment derivation, owner lifetime and exact/one-short work. Complete-
+  source check/locked check pass 722 files / 9,023 MIR functions. Receipt
+  `candidate-state-graph-cache-lookup-20261107.md` keeps failed preparation
+  separate. A route remains an untrusted candidate hint; graph disk reuse,
+  normal workspace selection, execution/persistence and final gates stay open.
+  Linux stays batched; no push or dispatch. Full objective stays active.
