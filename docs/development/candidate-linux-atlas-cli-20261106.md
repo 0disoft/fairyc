@@ -11,7 +11,8 @@ policies. No push, hosted dispatch, release or deployment is authorized here.
 help text; the existing `arguments()` still supplies the same Windows/default
 help and preserves its signature. Linux help lists only connected commands.
 Fetch retains unknown-command, help and overlong-argument precedence and remains
-the sole network operation. This does not route MCP, edits or symbol queries.
+the sole network operation. This first slice routes impact only; subsequent
+sections record MCP and symbol-query selection separately. Edits remain open.
 
 The prepared Linux workspace already selects its retained workspace readers,
 compiler-image reader and cache/host-path environment. Atlas impact consumes
@@ -35,8 +36,9 @@ same Go oracle and command controls without another compiler/companion build.
 This actual Linux replay is authored, not executed on the Windows host.
 
 Validation commands and final results are recorded in the completion section.
-MCP/stdio, symbols/calls/pack selection and edit filesystem publication remain
-separate implementation slices, as do actual Linux TLS/runtime and final gates.
+MCP/stdio and symbol selection have separate slices below. Calls/pack selection
+and edit filesystem publication remain open, along with actual Linux TLS/runtime
+and final gates.
 
 No public command policy, SDK ABI, DB, dependency, timeout, CI/runner or
 repository-hygiene change. This adds private Linux dispatch and a help-injection
@@ -139,5 +141,54 @@ broken-pipe observation cannot establish Linux signal/error behavior. Retain
 that explicit signal-policy check in the combined native replay. No Linux
 MCP/fetch/syscall/TLS/self-build pass is claimed here. Symbols/calls/pack/edit,
 all broader source-family comparisons and every final acceptance gate remain
-open. Public API/SDK ABI, DB, dependency, timeout, CI/runner and repository
+open at this slice; symbol selection continues below. Public API/SDK ABI, DB,
+dependency, timeout, CI/runner and repository
 policies are unchanged; no push, hosted dispatch, release or deployment.
+
+## Symbol catalog command
+
+Linux experimental mode 3 selects `project_catalog_cli::arguments_with_help`;
+the original `arguments()` retains default help. Shared option parsing, fresh
+source/Complete production, requested v1/v2/v3 catalog family, selection/output
+budgets and lock policy are unchanged. Linux help now lists the admitted
+`atlas-symbols list` flags and optional filters/cursor/locked mode. Unknown and
+near-name commands retain fetch's existing refusal policy.
+
+`TestLinuxAtlasSymbolsCommand` executes the Linux-help entry with real Windows
+workspace I/O in low/optimized. The original Go source/catalog oracle supplies
+all expected identities, cursor boundaries, selection/output byte counts and
+canonical complete JSON independently of candidate output. It checks all three
+catalog versions, name filtering, pagination, exact/one-short/one-over byte
+ceilings, invalid selectors/arguments, stdout failure, locked byte preservation,
+stale-source refusal and actual unlocked lock refresh. The probe also retains
+the original default entry in the same image via a test-only argv prefix, and
+separately requires exact default help for all three aliases at both direct and
+`list` positions. This prefix is absent from product dispatch.
+
+The full-entry Linux replay reuses its already-built per-profile image for the
+same Linux-help and query oracle. The portable entry checks exact mode 3 and
+near-name refusals. Both-target full entry emission and closed Linux support
+selection pass in 39.378s: 25 C partitions and a 1,988,729-byte header. Portable
+Windows dispatch passes both profiles in 6.76s; the outer 39.08s test explicitly
+skips native Linux execution.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestLinuxAtlasSymbolsCommand$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestLinuxFileCLI$'
+go test -mod=readonly -count=1 -timeout 4m ./internal/cli -run '^TestLinuxFetchCommand$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-atlas-symbols-20261106
+```
+
+Fetch regression passes both profiles in 36.628s, including independent presence
+checks for all connected help lines. Original check/locked passes 698 files /
+8,641 MIR functions; freshly prepared Linux check/locked passes 698 / 8,642.
+The final catalog command passes in 490.118s (test body 489.97s): low 383.74s,
+optimized 92.06s. Each profile executes 44 independent-oracle command cases,
+six Linux-help cases and six unchanged default-help cases: 112 generated command
+executions across both profiles, all with empty PATH. There are no selected
+command-leaf skips. Scoped vet, Go formatting, UTF-8/LF/final-newline and diff
+checks pass. No compiler/program deadline or warning policy is relaxed.
+
+No public CLI/SDK ABI, DB, dependency, timeout, CI/runner or repository policy
+changes. Native Linux filesystem/lock/publication, pipe/signal behavior, all
+remaining command ports and the complete final acceptance queue stay open.
