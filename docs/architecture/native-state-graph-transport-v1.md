@@ -1,7 +1,8 @@
 # Native state graph transport admission v1
 
 Status: private Go request/path-witness/response admission, actual C framing and
-opaque Windows build/run implemented. One-attempt graph persistence remains required by
+opaque Windows build/run implemented. One-attempt graph persistence is implemented
+in [graph persistence v1](native-state-graph-persistence-v1.md), completing step 3 of
 [the complete graph plan](native-state-graph-v1.md). This is not an alternate
 completion target. Native Linux remains batched; no push or hosted dispatch.
 

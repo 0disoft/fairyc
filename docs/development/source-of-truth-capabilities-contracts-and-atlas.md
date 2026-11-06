@@ -347,12 +347,21 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatenative/overlay_native.go`, `overlay_native_c.go`, `overlay_native_windows_test.go`
   - `internal/contractstatenative/overlay_persistent.go`, `overlay_persistent_test.go`, `overlay_persistent_windows_test.go`
   - `docs/architecture/native-state-overlay-transport-v1.md`
-- **Private native graph stable values, dynamic keys, borrow epochs and verified operation C execution; graph framing/persistence remain pending**
+- **Private native graph stable values, dynamic keys, borrow epochs and verified operation C execution**
   - `internal/cstdlib/contract_state_graph.go`, `stage0_contract_state_graph.h`, `stage0_contract_state_graph.c`, `stage0_contract_state_graph_key.c`
   - `internal/contractstatenative/graph_runtime_probe.c`, `graph_runtime_windows_test.go`
   - `internal/contractstatenative/graph_emit.go`, `graph_emit_windows_test.go`, `graph_cases_windows_test.go`, `graph_execute_probe.c`
   - `internal/contractstatefixture/hir_cases.go`
   - `docs/architecture/native-state-graph-v1.md`
+- **Sealed graph path-witness admission and actual Windows binary C framing/build/run**
+  - `internal/contractstatenative/graph_plan.go`, `graph_transport.go`, `graph_decode.go`, `graph_bounds.go`
+  - `internal/contractstatenative/graph_native.go`, `graph_native_c.go`, `graph_native_windows_test.go`, `graph_digest_windows_test.go`
+  - `internal/contractstatenative/graph_transport_test.go`, `graph_transport_graph_test.go`
+  - `docs/architecture/native-state-graph-transport-v1.md`
+- **One-attempt native graph layout/version CAS with real local reopen, rollback, conflict, cancellation and evidence ceilings; broader source/artifact/cache/CLI remain required**
+  - `internal/contractstatenative/graph_persistent.go`, `graph_persistent_test.go`, `graph_persistent_windows_test.go`
+  - `internal/contractstatenative/graph_persistent_failures_windows_test.go`, `graph_persistent_limits_windows_test.go`
+  - `docs/architecture/native-state-graph-persistence-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

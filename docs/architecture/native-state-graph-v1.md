@@ -3,7 +3,10 @@
 Status: private allocation-free value/key/borrow runtime and verified operation
 C emission implemented. Go graph request/path-witness/response admission, actual
 C framing and opaque Windows build/run are implemented in
-[transport v1](native-state-graph-transport-v1.md); graph CAS remains required. This is a
+[transport v1](native-state-graph-transport-v1.md). One-attempt graph CAS and real
+local-store/reopen/conflict/cancellation evidence are implemented in
+[graph persistence v1](native-state-graph-persistence-v1.md). Source/developer/
+artifact/cache/CLI and the full acceptance queue remain required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux
 remains batched. No push, hosted dispatch, release or deployment is authorized.
@@ -22,7 +25,9 @@ remains batched. No push, hosted dispatch, release or deployment is authorized.
 4. Complete source/developer invocation, artifact/cache authority and the full
    current-source/compiler/self-build/distribution/authorized-CI acceptance.
 
-Steps 1 and 2 are implemented below for the verified native admission. The existing literal overlay native/CAS route
+Steps 1 through 3 are implemented for the verified native admission, with the
+later transport/persistence evidence in the linked documents. Earlier sections
+below retain their checkpoint scope. The existing literal overlay native/CAS route
 retains its separate sealed admission and does not silently accept graphs.
 
 ## Caller-owned value and mutation storage
