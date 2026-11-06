@@ -6,11 +6,12 @@ in [graph persistence v1](native-state-graph-persistence-v1.md), completing step
 [the complete graph plan](native-state-graph-v1.md). This is not an alternate
 completion target. Native Linux remains batched; no push or hosted dispatch.
 
-The Fairy counterpart now has Complete-bound audited entry/framed-C preparation
+The Fairy counterpart has Complete-bound audited entry/framed-C preparation
 and immutable request encoding under ADRs 0530–0532. Its complete C/hash/request
-bytes match Go and execute on Windows. Fairy response/path/write admission,
-native orchestration and persistent CAS remain separate pending steps; the Go
-decoder used by those execution tests does not complete the Fairy decoder.
+bytes match Go and execute on Windows. ADR 0533 adds the sealed Fairy response,
+CFG/call-return and snapshot/overlay admission pipeline, with independent
+Windows native evidence in `../development/candidate-state-graph-response-20261107.md`.
+Native orchestration and persistent CAS remain separate mandatory steps.
 
 ## Authority and input
 

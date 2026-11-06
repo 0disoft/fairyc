@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Complete-bound Fairy graph response admission**: `examples/lexer_candidate/src/module_state_graph_response.fy`, `module_state_graph_response_common.fy`, `module_state_graph_response_wire.fy`, `module_state_graph_response_path.fy`, `module_state_graph_response_evidence.fy`; native integration and independent prerequisite tests in `internal/cli/candidate_state_graph_response*_test.go`. Sealed result, request identity, path/overlay admission and ownership: ADR 0533 and `docs/development/candidate-state-graph-response-20261107.md`.
+
 - **Complete-bound Fairy graph framing and compiled-owner requests**: `examples/lexer_candidate/src/module_state_graph_transport.fy`, `module_state_graph_transport_request.fy`, `internal/cli/candidate_state_graph_transport_test.go`; full Go C/hash/wire and actual C execution comparisons, separate remaining response/CAS scope: ADR 0532 and `docs/development/candidate-state-graph-transport-20261107.md`.
 
 - **Fairy graph snapshot request encoding**: `examples/lexer_candidate/src/module_state_graph_request.fy`, `internal/cli/candidate_state_graph_request_test.go`; exact Go wire/hash comparison, canonical cell validation and separate structural/byte work: ADR 0531 and `docs/development/candidate-state-graph-request-20261107.md`.

@@ -67,6 +67,20 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound Fairy graph response admission now checks the immutable request
+  digest, actual Verified CFG/helper continuations, operation/cost/trap counters,
+  canonical original map keys, snapshot/preceding-overlay reads and exact sorted
+  commit writes. A sealed owner copies read/write/trap bytes and exposes no
+  speculative writes after reject/trap/error. Disjoint Sol high worker code is
+  integrated with actual Fairy C execution, Go and independent MIR comparisons;
+  the receipt preserves preparation/harness failures separately from retained
+  valid observations and corrected native successes. Fresh source/lock checks
+  pass at 741 files / 9,270 MIR functions. See ADR 0533 and
+  `candidate-state-graph-response-20261107.md`. Native build/run orchestration,
+  one-attempt persistent CAS, ordinary command selection and all other queue/final
+  gates remain open. Linux stays batched; no push or dispatch. Full objective
+  remains active.
+
 - Actual Fairy Complete now owns audited native entry, framed C and its exact
   Go-compatible transport hash; a compiled-owner wrapper emits immutable
   requests from the same retained Complete. Windows low/optimized pass 144
