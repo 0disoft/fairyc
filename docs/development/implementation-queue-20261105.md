@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy now composes the sealed actual Windows graph builder/runner and real
+  local provider into one snapshot, one execution and at most one complete CAS.
+  Typed failures preserve storage/runner causes and admitted response owners;
+  acknowledged receipts cannot become retryable publication errors. Twenty
+  low/optimized scenarios pass in 67.934s with independent Go semantics/reopen,
+  unknown-key preservation, reject/trap/no-op/MAX and actual rename/runtime
+  failures. Complete check/locked check pass 748 files / 9,428 MIR functions;
+  all 1,218 authored sources and verified lock match final inputs. See ADR 0539
+  and `candidate-windows-persistent-state-graphs-20261107.md`. Explicit Windows
+  binding is complete, while ordinary command selection, cancellation, forced
+  graph-to-CAS conflict coverage and final gates remain open; the full native
+  persistence row remains unchecked. Linux stays batched; no push/dispatch.
+
 - The authored Fairy Windows provider now opens/creates the existing rooted
   local-state files and implements snapshot, overlay CAS and append-only layout
   CAS under real independent nonblocking OS leases. Complete staged bytes are
