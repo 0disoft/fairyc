@@ -68,3 +68,51 @@ fn rooted::Metadata empty_metadata() { return rooted::Metadata{.device=0,.identi
 @effects(filesystem) pub fn Result<Entries,Problem> scan_packages(ref rooted::Directory root,ref mut usize work) {
     return scan_bounded(root,8192,work);
 }
+
+// Edit spelling checks need only one exact name, not an allocated package list.
+// Share this budget across path components (or an entire edit snapshot).
+pub struct EditBudget { usize entries; usize work; }
+pub struct Lookup { bool found; rooted::Metadata info; }
+pub fn usize edit_entry_limit(){return 100000;}
+pub fn usize edit_work_limit(){return 67108864;}
+fn bool edit_charge(ref mut EditBudget budget,usize cost){
+    if(budget.entries>edit_entry_limit() || budget.work>edit_work_limit() || cost>edit_work_limit()-budget.work){return false;}
+    budget.work+=cost;return true;
+}
+@effects(filesystem) fn Result<Lookup,Problem> find_edit(ref mut Cursor cursor,ref u8[] wanted,ref mut EditBudget budget){
+    var u8[256] raw=[0;256];
+    while(true){
+        // Charge skipped records and EOF too, so malformed/vanishing streams
+        // cannot evade the work limit. Dot entries do not spend the entry limit.
+        if(!edit_charge(budget,297)){return .err(fail(7,0,budget.entries));}
+        var u32 length=0;var u32 state=0;var info=empty_metadata();
+        let code={let ref mut u8[] output=ref mut raw;unsafe{native_next(cursor.raw,output as ptr mut u8,256,ref mut length as ptr mut u32,ref mut state as ptr mut u32,ref mut info as ptr mut void)}};
+        if(code!=0){return .err(fail(4,code,budget.entries));}
+        if(state==0){if(length!=0){return .err(fail(6,0,budget.entries));}return .ok(Lookup{.found=false,.info=empty_metadata()});}
+        if((state!=1 && state!=2) || length==0 || length>255){return .err(fail(6,0,budget.entries));}
+        let ref u8[] view=ref raw;let leaf=view[..(length as usize)];
+        if(view[length as usize]!=0){return .err(fail(6,0,budget.entries));}
+        var usize i=0;while(i<leaf.len){if(leaf[i]==0 || leaf[i]==47){return .err(fail(6,0,budget.entries));}i+=1;}
+        if(bytes::equal(leaf,b".") || bytes::equal(leaf,b"..")){if(state!=2){return .err(fail(6,0,budget.entries));}continue;}
+        if(budget.entries==edit_entry_limit()){return .err(fail(7,0,budget.entries));}budget.entries+=1;
+        if(state==2){continue;}
+        // Unrelated names need not be portable or UTF-8, just as in Go's
+        // exact spelling check. Regular hard links are ordinary read inputs.
+        if(bytes::equal(leaf,wanted)){
+            if(info.modified_nanos>=1000000000){return .err(fail(6,0,budget.entries));}
+            return .ok(Lookup{.found=true,.info});
+        }
+    }return .err(fail(6,0,budget.entries));
+}
+@effects(filesystem) pub fn Result<Lookup,Problem> lookup_edit(ref rooted::Directory root,ref u8[] leaf,ref mut EditBudget budget){
+    if(!rooted::valid_leaf(leaf)){return .err(fail(1,0,budget.entries));}
+    if(!edit_charge(budget,1)){return .err(fail(7,0,budget.entries));}
+    var usize raw=0;let opened=unsafe{native_open(rooted::directory_handle(root),ref mut raw as ptr mut usize)};
+    if(opened!=0){return .err(fail(3,opened,budget.entries));}if(raw==0){return .err(fail(6,0,budget.entries));}
+    var cursor=Cursor{.raw};let result=find_edit(ref mut cursor,leaf,budget);
+    cursor.raw=0;let closed=unsafe{native_close(raw)};
+    return switch(result){
+        case .ok(value):{if(closed!=0){.err(fail(5,closed,budget.entries))}else{.ok(value)}}
+        case .err(original):{var p=original;p.close_code=closed;.err(p)}
+    };
+}

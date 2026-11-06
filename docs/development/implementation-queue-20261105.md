@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Linux edit-specific source reads now admit regular hard links, preserve exact
+  metadata/bytes and reject open/read drift, without reusing package provenance.
+  Streaming exact-name lookup avoids sibling-list allocation and shares explicit
+  100,000-entry/64 MiB work bounds across path components. Buffer ownership moves
+  directly; copied metadata publishes only after every owned close succeeds.
+  Windows low/optimized source and related host regressions pass in 19.275s,
+  with real Go hard-link/binary/portable-path reference checks. See
+  `candidate-linux-atlas-edit-20261106.md` for errors, exact scope and commands.
+  Linux preview/apply/CLI composition and every broader/final gate remain open.
+
 - Linux edit's Fairy file facade now retains an immutable source-metadata
   snapshot, bounds cumulative writes, reuses rooted partial-write checks through
   explicit owned-handle transfer and seals failed/publication attempts. Both

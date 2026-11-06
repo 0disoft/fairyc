@@ -156,3 +156,73 @@ aliases rather than select the package-download reader's stricter provenance
 policy. This facade does not complete edit or any final acceptance gate.
 Public API/SDK ABI, DB, dependencies, product deadlines, CI/runners and repository
 policy remain unchanged; no push, dispatch, release or deployment.
+
+## Edit-specific source reads
+
+`linux_edit_fs.fy` now reads portable workspace inputs without selecting the
+package-download observer or its single-hard-link provenance rule. The caller
+retains the root. The reader opens every directory without following symlinks,
+requires exact byte spelling and a regular final file, and compares the opened
+file's device/inode/size/mtime/mode against the named observation. The same six
+fields must still agree after reading. A size-plus-one buffer and explicit EOF
+probe reject both truncation and growth; the maximum admitted bound is 8 MiB.
+Read-only regular files and regular hard-link aliases remain valid read inputs.
+
+The detailed `read_observed` port moves one owned byte Buffer and copies out its
+metadata only after successful file and directory closes. Failure leaves that
+metadata argument unchanged. Primary errors, consuming file/cursor close errors,
+and owned-directory close errors are separate. The `read` compatibility port
+retains the shared editor's Buffer/u32 signature. There are no publication or
+namespace-mutation operations in this module.
+
+`linux_directory::lookup_edit` streams one exact spelling using a 256-byte row
+and detached scalar metadata, rather than allocating a listing of all siblings.
+The shared budget admits 100,000 non-dot entries across path components. A
+separate 64 MiB work budget charges every native record and EOF probe, including
+dot/vanished rows, so skipped records cannot create an infinite scan. Dot entries
+do not reduce the entry limit. Unlike package tree validation, unrelated names
+need not be portable or UTF-8 and a differently cased sibling does not hide an
+existing exact name. Existing directory/package scan policies are unchanged.
+
+`TestLinuxEditSourcePolicy` executes five source groups under Windows low and
+optimized with an independent descriptor/stream model. It covers binary/empty
+reads, metadata snapshots, hard-link admission, read-only files, exact spelling,
+unrelated invalid UTF-8, symlink refusal, all six open/read freshness fields,
+8 MiB minus-one/exact/one-over, truncation/growth/partial reads, 100,000 entries
+minus-one/exact/one-over, shared path budgets, malformed records, vanished/dot
+streams, I/O and combined close failures. Model handles/cursors consume exactly
+once and no shell helper is available. `TestLinuxEditSourceGoReference` separately
+reads real multiply-linked binary files with the current Go editor, checking
+exact/one-short byte bounds and portable/case rejection on this Windows host.
+
+The first probes rejected untyped branch constants, resource-field extraction,
+and two missing statement separators. The final implementation returns a Buffer
+directly and copies metadata only on success; no language admission or warning
+policy was weakened. The combined source/directory/package-reader/edit-file/
+rooted regression passes in 19.275s, including source policy 4.20s (low 1.84s,
+optimized 1.99s) and the independent Go reference. Both-target C emission passes.
+This remains a modeled Linux ABI on Windows, not actual Linux filesystem replay.
+
+`TestLinuxEditSourceNative` independently emits its actual-filesystem client for
+both targets and selects the real complete Linux runtime (0.30s on Windows).
+GCC/Clang low/optimized executions are authored for Linux: read-only hard-link
+aliases, binary/empty/nested inputs, symlink components, wrong spelling and
+oversized/nonregular inputs. The fixture root contains a space; generated
+programs run with empty PATH. This Windows run explicitly skips those native
+executions, and no such execution is included in the passing model count.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestLinux(EditSource(Policy|GoReference)|DirectoryPolicy|RemoteFileSystemPolicy|EditFilePolicy|RootedFilePolicy)$'
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestLinuxEditSourceNative$'
+go vet -mod=readonly ./internal/cli
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-edit-source-20261106-final
+```
+
+Original check/locked passes 700 source files / 8,675 MIR functions; freshly
+prepared Linux check/locked passes 700 / 8,676. Scoped vet, Go formatting, UTF-8,
+LF, final-newline and diff checks pass.
+Linux edit lock/stage composition, preview/apply, preparation selection, public
+command/help wiring and actual command acceptance remain required. Native Linux,
+the complete current-source/self-build/distribution/hosted acceptance and every
+other implementation queue family stay open. Public CLI/SDK ABI, DB, dependencies,
+timeouts, CI/runners and repository policy are unchanged; no push or dispatch.
