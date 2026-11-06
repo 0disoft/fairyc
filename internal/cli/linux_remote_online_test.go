@@ -38,8 +38,6 @@ func TestLinuxRemoteOnlinePolicy(t *testing.T) {
 		t.Skip("Windows policy oracle; Linux syscall/TLS acceptance remains batched")
 	}
 	fixtures := linuxOnlineFixtures(t)
-	var cases strings.Builder
-	cases.WriteString("static void online_fixture(uint32_t index){switch(index){\n")
 	for _, f := range fixtures {
 		passed := t.Run(f.name, func(t *testing.T) {
 			root := linuxOfflineMaterialize(t, f.initial)
@@ -75,55 +73,12 @@ func TestLinuxRemoteOnlinePolicy(t *testing.T) {
 		}
 	}
 	fixtures = append(fixtures, linuxOnlineFaults(t, fixtures)...)
-	for index, f := range fixtures {
-		fmt.Fprintf(&cases, "case %d:\n", index)
-		for _, name := range linuxOfflineNames(f.initial) {
-			linuxOfflineSeed(&cases, "offline_seed", name, f.initial[name], f.kinds[name])
-		}
-		var urls []string
-		for url := range f.replies {
-			urls = append(urls, url)
-		}
-		sort.Strings(urls)
-		for _, url := range urls {
-			var reply, address strings.Builder
-			linuxOfflineSeed(&reply, "online_reply", url, f.replies[url], 0)
-			address.WriteByte('"')
-			for _, value := range []byte(url) {
-				fmt.Fprintf(&address, "\\%03o", value)
-			}
-			address.WriteByte('"')
-			cases.WriteString(strings.Replace(reply.String(), fmt.Sprintf("%q", url), address.String(), 1))
-		}
-		fmt.Fprintf(&cases, "offline_fault=%d;online_mode=%d;offline_alter();break;\n", f.fault, f.mode)
-	}
-	cases.WriteString("default:assert(0);}}\nstatic void online_expected(uint32_t index){switch(index){\n")
-	for index, f := range fixtures {
-		fmt.Fprintf(&cases, "case %d:\n", index)
-		for _, name := range linuxOfflineNames(f.final) {
-			linuxOfflineSeed(&cases, "offline_expect", name, f.final[name], f.kinds[name])
-		}
-		fmt.Fprintf(&cases, "offline_expect_count(%d);assert(online_live==0 && online_opens==%d && online_closes==%d);", len(f.final), f.calls, f.closes)
-		if f.mode == 11 || f.mode == 12 || f.mode == 13 || f.mode == 14 || f.mode == 15 {
-			fmt.Fprintf(&cases, "assert(remote_anonymous==%d && online_cache_publications==%d);", map[uint32]int{11: 1, 12: 1, 13: 1, 14: 4, 15: 1}[f.mode], map[uint32]int{11: 0, 12: 0, 13: 1, 14: 1, 15: 1}[f.mode])
-		}
-		cases.WriteString("break;\n")
-	}
-	cases.WriteString("default:assert(0);}}\n")
 	root := t.TempDir()
 	copyLexerExample(t, root)
 	copyCandidateParityModules(t, root, "linux_remote_online")
 	writeTestSource(t, root, "src/main.fy", linuxOnlineEntry)
 	build, support := linuxRemoteBuild(t, root, target.X8664WindowsMSVC, true)
-	model := strings.NewReplacer("uint8_t data[256]", "uint8_t data[65536]", "size+count<=256", "size+count<=65536",
-		"remote_handles[256]", "remote_handles[4096]", "remote_handle_count<256", "remote_handle_count<4096",
-		"remote_cursors[64]", "remote_cursors[2048]", "remote_cursor_count<64", "remote_cursor_count<2048").Replace(linuxRemoteFileSystemStub)
-	for _, name := range []string{"create", "publish", "erase"} {
-		model = strings.Replace(model, "uint32_t fairyc_private_linux_package_directory_"+name+"_v1(", "static uint32_t offline_base_"+name+"(", 1)
-	}
-	model = strings.Replace(model, "uint32_t fairyc_private_linux_root_file_publish_new_v1(", "static uint32_t online_base_file_publish(", 1)
-	base := strings.Split(linuxOfflineModel, "uint32_t fairyc_private_linux_monotonic_ms_v1(")[0]
-	support += "\n" + model + base + linuxOfflineFaultModel + linuxOnlineModel + cases.String() + linuxOnlineModelEntry
+	support += "\n" + linuxOnlineModelSupport(fixtures)
 	tc, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
@@ -260,3 +215,52 @@ import linux_remote_online as online;import std::io as io;
     switch(result){case .ok(p):{discard io::write_bytes(b"ok ");discard io::write_usize(p.packages);discard io::write_bytes(b" ");discard io::write_usize(p.downloaded);discard io::write_bytes(b" ");discard io::write_usize(p.cache_hits);discard io::write_bytes(b" ");discard io::write_usize(p.installed);discard io::write_bytes(b" ");discard io::write_usize(p.reused);discard io::write_bytes(b"\n");return 0;}
     case .err(p):{discard io::write_bytes(b"error ");discard io::write_u32(p.stage);discard io::write_bytes(b" ");discard io::write_u32(p.code);discard io::write_bytes(b" ");discard io::write_u32(p.native_code);discard io::write_bytes(b" ");discard io::write_u32(p.cleanup_code);discard io::write_bytes(b"\n");return 7;}};return 7;
 }`
+
+func linuxOnlineModelSupport(fixtures []*linuxOnlineFixture) string {
+	var cases strings.Builder
+	cases.WriteString("static void online_fixture(uint32_t index){switch(index){\n")
+	for index, f := range fixtures {
+		fmt.Fprintf(&cases, "case %d:\n", index)
+		for _, name := range linuxOfflineNames(f.initial) {
+			linuxOfflineSeed(&cases, "offline_seed", name, f.initial[name], f.kinds[name])
+		}
+		var urls []string
+		for url := range f.replies {
+			urls = append(urls, url)
+		}
+		sort.Strings(urls)
+		for _, url := range urls {
+			var reply, address strings.Builder
+			linuxOfflineSeed(&reply, "online_reply", url, f.replies[url], 0)
+			address.WriteByte('"')
+			for _, value := range []byte(url) {
+				fmt.Fprintf(&address, "\\%03o", value)
+			}
+			address.WriteByte('"')
+			cases.WriteString(strings.Replace(reply.String(), fmt.Sprintf("%q", url), address.String(), 1))
+		}
+		fmt.Fprintf(&cases, "offline_fault=%d;online_mode=%d;offline_alter();break;\n", f.fault, f.mode)
+	}
+	cases.WriteString("default:assert(0);}}\nstatic void online_expected(uint32_t index){switch(index){\n")
+	for index, f := range fixtures {
+		fmt.Fprintf(&cases, "case %d:\n", index)
+		for _, name := range linuxOfflineNames(f.final) {
+			linuxOfflineSeed(&cases, "offline_expect", name, f.final[name], f.kinds[name])
+		}
+		fmt.Fprintf(&cases, "offline_expect_count(%d);assert(online_live==0 && online_opens==%d && online_closes==%d);", len(f.final), f.calls, f.closes)
+		if f.mode == 11 || f.mode == 12 || f.mode == 13 || f.mode == 14 || f.mode == 15 {
+			fmt.Fprintf(&cases, "assert(remote_anonymous==%d && online_cache_publications==%d);", map[uint32]int{11: 1, 12: 1, 13: 1, 14: 4, 15: 1}[f.mode], map[uint32]int{11: 0, 12: 0, 13: 1, 14: 1, 15: 1}[f.mode])
+		}
+		cases.WriteString("break;\n")
+	}
+	cases.WriteString("default:assert(0);}}\n")
+	model := strings.NewReplacer("uint8_t data[256]", "uint8_t data[65536]", "size+count<=256", "size+count<=65536",
+		"remote_handles[256]", "remote_handles[4096]", "remote_handle_count<256", "remote_handle_count<4096",
+		"remote_cursors[64]", "remote_cursors[2048]", "remote_cursor_count<64", "remote_cursor_count<2048").Replace(linuxRemoteFileSystemStub)
+	for _, name := range []string{"create", "publish", "erase"} {
+		model = strings.Replace(model, "uint32_t fairyc_private_linux_package_directory_"+name+"_v1(", "static uint32_t offline_base_"+name+"(", 1)
+	}
+	model = strings.Replace(model, "uint32_t fairyc_private_linux_root_file_publish_new_v1(", "static uint32_t online_base_file_publish(", 1)
+	base := strings.Split(linuxOfflineModel, "uint32_t fairyc_private_linux_monotonic_ms_v1(")[0]
+	return model + base + linuxOfflineFaultModel + linuxOnlineModel + cases.String() + linuxOnlineModelEntry
+}

@@ -23,6 +23,9 @@ authorized by this queue.
   independent current-source expectations and explicit completeness.
 - [ ] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
+- [ ] Synchronize the Fairy GNU companion runtime selector and pinned source
+  pack with the package-directory/file, clock and HTTPS host adapters; compare
+  complete emitted C against live Go selection before Linux self-build acceptance.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
@@ -55,6 +58,13 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Linux fetch has a command leaf over the actual Linux offline/online owners,
+  Linux-only help and shared platform-independent result/error rendering. Exact
+  command/namespace/error/output behavior is covered by independent Windows models;
+  full Linux dispatch, preparation/native replay and companion runtime parity stay
+  open. See `candidate-linux-fetch-cli-20261106.md`. Windows fetch keeps its public
+  behavior; its process helper now explicitly runs with empty PATH.
 
 - Private Linux online fetch now composes missing-cache HTTPS retrieval, request/
   operation deadlines, fresh hash/ZIP/package identity validation, immutable cache

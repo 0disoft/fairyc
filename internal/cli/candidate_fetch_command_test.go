@@ -51,6 +51,7 @@ func fetchCLIProcess(t *testing.T, image, root string, args []string, broken str
 	defer cancel()
 	cmd := exec.CommandContext(ctx, image, args...)
 	cmd.Dir = root
+	cmd.Env = append(os.Environ(), "PATH=")
 	var out, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &stderr
 	if broken != "" {
