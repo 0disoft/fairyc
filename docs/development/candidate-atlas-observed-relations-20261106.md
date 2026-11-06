@@ -43,8 +43,11 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   concrete generic/cleanup Go facts and exact frame/work/count refusals.
 - [x] Complete-bound allocation production, summaries/counts/completeness and
   independent source/current/join and actual-command comparisons.
-- [ ] Remaining error-propagation and borrow collectors, each with independent
-  verified Go facts and production evidence.
+- [x] Verified Result-propagation collector with independent original Go question
+  spans, ordinary/concrete owners and exact frame/work/count policies.
+- [ ] Complete-bound Result-propagation production, summaries/counts/completeness
+  and independent source/current/join and actual-command comparisons.
+- [ ] Borrow collector and production with independent verified Go facts.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
 
@@ -861,4 +864,17 @@ and scoped CLI vet passes. Both-profile source and command scope is recorded in
 the allocation command receipt. Broader source/CLI/generated-consumer work,
 remaining collectors, consecutive self-build, distribution/clean-machine,
 same-commit hosted and native Linux acceptance remain separate open gates.
+Native Linux stays batched; no push or dispatch.
+
+## Result-propagation collector
+
+`project_atlas_return_error_sites` observes reached, verified Result-tag branches
+and retains only the original written question token. Nineteen independent Go
+sources and twenty frame/work/count controls pass both Windows profiles in
+406.107s: 78 native compiler processes without selected skips. Ordinary, generic
+and concrete cleanup ownership and original terminal-operand behavior remain
+independently checked. The authored checks pass 679 files / 8,479 MIR functions.
+Exact contract, commands, logs and limits:
+`candidate-atlas-return-error-sites-20261106.md`. Complete-bound error production,
+borrows, broader source/command work and every original final gate remain open.
 Native Linux stays batched; no push or dispatch.

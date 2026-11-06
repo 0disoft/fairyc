@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified CFG Result-propagation collection retains exact written question
+  tokens after completed operands and excludes earlier terminal paths. Nineteen
+  independent Go source cases and twenty frame/work/count controls pass both
+  Windows profiles in 406.107s: 78 native processes, no selected skips. Authored
+  checks pass 679 files / 8,479 MIR functions, as do scoped vet and hygiene. See
+  `candidate-atlas-return-error-sites-20261106.md`. Complete-bound error maps,
+  counts/completeness and actual commands are still required, along with borrows,
+  every broader implementation/final gate and batched Linux work.
+
 - Complete-bound Region allocation production retains original full-call spans
   in ordinary, generic and concrete cleanup summaries, relation counts and exact
   allocates completeness. Windows source/version/current/join comparisons pass
