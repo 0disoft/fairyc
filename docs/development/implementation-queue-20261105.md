@@ -67,6 +67,18 @@ authorized by this queue.
 
 ## Progress
 
+- Single-cell native state now executes through the existing persistence port:
+  opaque compilation, one snapshot, one actual C execution and at most one CAS,
+  with complete response/receipt checks, explicit conflicts and no retry. Real
+  Windows low/optimized local-store reopen and repeated execution match 64 Go
+  outcomes; four competing C attempts yield exactly one successful publication
+  per profile. Backend/capacity/process failures, rollback/no-op durable bytes,
+  cancellation and acknowledged-publication behavior are covered. The shared
+  context-aware Windows execution prerequisite is `d811f50c`. This completes step
+  2 only for the existing single `cell<u64>` family; multi-field/maps/codecs/
+  graphs/helpers/borrows, source/native CLI/cache, Linux and every final gate
+  remain open. See `architecture/native-state-persistence-v1.md` and ADR 0502.
+
 - Native persistent-state preparation now has a sealed single-cell snapshot/
   overlay transport over the existing verified C/runtime owner. Exact layout,
   package body, selected native entry and original version are bound before

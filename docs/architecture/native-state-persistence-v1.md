@@ -25,9 +25,9 @@ the maintainer's combined batch. No push, hosted dispatch or release is authoriz
    complete the full Windows suite, authored Linux batch, same-source compiler
    comparisons, self-build, distribution and authorized hosted acceptance.
 
-Only step 1 is implemented in the initial transport commit. There is no durable
-native execution, compare-and-publish call, native state CLI or broader native
-state admission established by this commit. The complete queue remains open.
+Steps 1 and 2 are implemented for the original single `cell<u64>` Windows MSVC
+family. Source/developer native invocation, broader state MIR and steps 3/4
+remain open. The initial transport commit alone established only step 1.
 
 ## Sealed transport owner
 
@@ -153,7 +153,75 @@ The initial ten-family prototype (52.751s) and its separate maximum-read probe
 264-run count. The unchanged original native handoff suite passes in 6.865s.
 Full transaction/persistence and state-MIR regressions pass in 0.369s/0.103s;
 the unchanged runtime-owner structural check passes in 0.061s. Scoped vet,
-formatting and diff checks pass. Native Linux, actual durable C execution,
-wider state MIR and all final queue gates remain pending. Public CLI, language,
+formatting and diff checks pass. At that initial transport commit, native Linux,
+actual durable C execution, wider state MIR and all final queue gates remained
+pending. Public CLI, language,
 SDK/runtime ABI, DB, dependencies, timeouts, runner configuration and repository
 policy are unchanged.
+
+## One-attempt native execution and CAS publication
+
+`BuildPersistent` compiles only a sealed `PersistentArtifact` with the existing
+contract-state runtime and returns an opaque `PersistentExecutable`. Compilation
+is separate from execution and touches no state store. Caller-provided executable,
+source or result bytes cannot construct a valid production execution owner.
+
+`ExecutePersistent` checks the owner and positive execution limits before storage
+I/O. It takes exactly one complete snapshot, runs the actual generated C once in
+an owned process and validates the complete response against that snapshot and
+prepared native program. No Go interpretation supplies the native result. A
+successful commit submits at most one complete overlay to the original layout/
+version compare-and-publish port. Read-only and empty commits still compare that
+version with an empty overlay; their receipt preserves the original version and
+reports zero writes/bytes. Dirty writes reject version exhaustion before CAS.
+
+Reject, trap, intermediate limit, process failure and malformed response never
+call publication. Trap retains the named Go trap category after native rollback.
+Conflict/layout/backend errors retain their causes and never trigger reexecution
+or publication retry. Cancellation is checked before snapshot, after snapshot,
+after execution and before CAS. The context-aware Windows driver retains the
+existing owned job, bounded pipes, timer cleanup and original execution error.
+It can terminate a running child when its caller cancels or reaches a deadline.
+The synchronous persistence port itself retains its existing cancellation contract.
+
+After a successful CAS acknowledgement, cancellation does not change known
+success into failure. An acknowledged receipt with inconsistent layout/version/
+write count returns `PublicationReceiptError` with that receipt: state may already
+be published and must be inspected rather than blindly retried. Local publication
+retains ADR 0500's process-restart scope; power-loss durability is not established.
+
+The new Windows tests compare commit/reject/trap, deletion, read-only and empty
+execution against the independent Go runner with present/absent initial values
+and both native profiles. Each store is closed and reopened, then both execution
+paths run again: 64 paired native/Go results. Four additional real C attempts
+share two stale snapshots; scheduled publication against the real OS-locked local
+store yields one success and one explicit conflict per profile, with no retry.
+Four real C executions exercise injected publication error and actual local value
+capacity failure; two corrupt-image attempts exercise launch failure. Failed
+publication, reject/trap and clean commits preserve durable bytes as applicable.
+Controlled-port tests additionally cover malformed responses, admission/error
+ordering, cancellation boundaries, acknowledgement inconsistency and no-op
+versions 0, UINT64_MAX-1 and UINT64_MAX.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 4m -failfast -v ./internal/contractstatenative
+go test -mod=readonly -count=1 -timeout 3m -failfast -v ./internal/cdriver -run '^(TestWindowsTargetContextCancellation|TestWindowsExecutionBoundsInheritedOutput|TestWindowsExecutionDrainPreservesCompletedOutput|TestExecuteWindowsHostWithTimeoutBounds|TestExecuteWindowsMSVCTargetWithInputRejectsNilInput|TestWindowsTrapControlResultErrorPrecedence)$'
+go test -mod=readonly -count=1 -timeout 4m ./internal/contractstate ./internal/contractstatemir
+go vet -mod=readonly ./internal/cdriver ./internal/contractstatenative
+```
+
+The complete native-state package passes in 76.981s without selected skips,
+including the existing 244 transport/Go comparisons and twenty malformed native
+requests. The standalone new execution replay passes in 18.318s before the added
+no-op UINT64_MAX boundary control; that control is included in the final complete
+package run. Context/pipe/trap-precedence regression passes in 12.383s, transaction
+and state-MIR regressions in 0.340s/0.071s, and the unchanged runtime structural
+owner in 0.039s. Scoped vet, formatting and diff checks pass. Initial context-test
+compilation rejected a code-free runtime translation unit at the existing COFF
+inspection gate; the fixture now contains a real function, with no inspection or
+warning relaxation.
+
+Native Linux, multi-field/maps/codecs/graphs/helpers/borrows, source/native CLI,
+artifact/cache integration and every final queue gate remain pending. No public
+CLI/language/SDK/runtime ABI, dependency, DB/provider, default timeout, workflow/
+runner or repository-policy change accompanies this private execution path.
