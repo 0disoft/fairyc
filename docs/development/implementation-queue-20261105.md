@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Linux HTTPS now has a streaming protocol reader and parent-side deadline,
+  child/descriptor owner, selected once with the producer/clock by the private
+  runtime symbol selector. Independent Windows low/optimized process-boundary,
+  producer, reader and Fairy-facade probes pass; the three HTTPS C probes are
+  explicitly rerun with empty PATH after correcting their inherited-PATH helper.
+  Authored actual process, parent-death, negative TLS, DNS and stalled-handshake
+  replay stay batched. Positive trusted TLS, online orchestration/CLI, baseline
+  provisioning and all broader/final gates stay open. The architecture records
+  the standalone single-threaded/exclusive-reaper scope and cleanup error limits.
+
 - Linux HTTPS now has a bounded native response producer and private pipe frames,
   with system libcurl selection and isolation decision ADR 0501. Independent
   Windows low/optimized loader/option/callback/lifetime controls pass 24 producer

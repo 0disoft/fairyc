@@ -1,6 +1,6 @@
 # ADR 0501: Isolated Linux HTTPS producer and bounded pipe transport
 
-- Status: Accepted bounded producer decision; parent adapter and Linux execution pending
+- Status: Accepted; producer and parent adapter implemented, native Linux execution pending
 - Date: 2026-11-06
 - Extends ADR 0498 and `architecture/candidate-linux-https-v1.md`.
 
@@ -14,13 +14,13 @@ ordinary Go dependencies or the current baseline toolchain provisioning by this
 decision. Other distribution paths and installation/bundling are not certified.
 
 Run TLS/DNS/global libcurl setup and cleanup only in a dedicated request child.
-The planned parent owns one monotonic deadline covering startup, metadata and
+The parent owns one monotonic deadline covering startup, metadata and
 body reads, and must terminate and reap its exclusively owned child on early
 failure, timeout or close. No borrowed parent pointers enter the child: metadata
 and binary body frames cross a private pipe. The child must not inherit unrelated
 workspace descriptors. Initial process creation, signal ownership, parent-death
-behavior, partial frames, absolute timeout and kill/reap error cases require their
-own implementation and evidence before runtime selection.
+behavior, partial frames, absolute timeout and kill/reap error cases have
+independent Windows substitute controls; real Linux replay remains required.
 
 This boundary is required because libcurl's NOSIGNAL setting with a synchronous
 resolver cannot itself time out a DNS lookup. Its ordinary timeout is useful
@@ -51,12 +51,18 @@ The body retains no complete archive; it forwards at most maximum+1 bytes so the
 Fairy caller can distinguish an exact limit from overflow. OS errors are nonzero
 u32 values; libcurl errors use 65,536 plus CURLcode. No native error text is logged.
 
-Current implementation: source assets, bounded metadata/body producer, dynamic
-system API setup and independent Windows loader/libcurl/callback controls. These
-assets are deliberately not selected by LinuxSource until the owning parent
-adapter exists. The authored native loopback test rejects a fresh untrusted TLS
-certificate without modifying any trust store, but has not run. Positive trusted
-TLS, DNS cancellation, actual child lifetime, online orchestration, CLI selection,
+Current implementation: bounded metadata/body producer, dynamic system API setup,
+streaming protocol reader and single-threaded standalone-CLI parent owner, with
+independent Windows loader/libcurl/callback and POSIX boundary controls. LinuxSource
+selects all assets and the monotonic clock only for one of the four HTTPS symbols.
+The private architecture records SIGCHLD/exclusive-reaper preconditions, fork,
+parent-death race handling, descriptor isolation and cleanup-error semantics.
+This is not permission to call fork/libcurl from a multithreaded embedding host.
+
+Authored GCC/Clang low/optimized probes cover actual process/descriptor lifetime,
+parent death, stalled producer, DNS and stalled TLS handshake, and fresh untrusted
+loopback certificates without changing system trust. They have not run. Positive
+trusted TLS, actual child lifetime/deadlines, online orchestration, CLI selection,
 distribution prerequisites and all broader/final gates remain open.
 
 No public command/SDK, support flag, Go dependency, DB, CI or runner is changed.

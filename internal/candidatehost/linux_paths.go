@@ -65,8 +65,12 @@ func LinuxSource(header string) (string, error) {
 	packageDirectory := false
 	packageFile := false
 	clock := false
+	https := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_https_open_v1", "fairyc_private_linux_https_headers_v1",
+			"fairyc_private_linux_https_read_v1", "fairyc_private_linux_https_close_v1":
+			clock, https = true, true
 		case "fairyc_private_linux_monotonic_ms_v1":
 			clock = true
 		case "fairyc_private_linux_package_file_info_v1":
@@ -163,6 +167,12 @@ func LinuxSource(header string) (string, error) {
 			source += "\n"
 		}
 		source += linuxClock
+	}
+	if https {
+		// Feature selection must precede headers from every optional adapter,
+		// including the clock's POSIX declarations and libcurl's headers.
+		source = "#ifndef _GNU_SOURCE\n#define _GNU_SOURCE 1\n#endif\n" + source + "\n" +
+			linuxHTTPSProtocol + "\n" + linuxHTTPSWorker + "\n" + linuxHTTPSReader + "\n" + linuxHTTPSParent
 	}
 	return source, nil
 }

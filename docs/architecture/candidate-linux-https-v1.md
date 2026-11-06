@@ -3,8 +3,9 @@
 This is the Fairy response/lifetime policy for the pending Linux source-fetch
 transport, within ADR 0498 and `package/remote-sources-v1.md`. The native producer
 uses system libcurl under [ADR 0501](../adr/0501-linux-https-isolated-worker.md).
-Parent-side deadline/cancellation and runtime selection remain pending. This does
-not admit Linux fetch commands or establish executed Linux TLS I/O.
+Parent-side deadline/cancellation and opt-in runtime selection are implemented;
+native Linux execution remains pending. This does not admit Linux fetch commands
+or establish executed Linux TLS I/O.
 
 ## Ownership and private ABI
 
@@ -15,8 +16,8 @@ status/encoding/length mismatch 4 and byte limit 5. Native error values are opaq
 nonzero u32 values, preserved separately from a consuming-close failure. No
 native diagnostic string or credentials are returned or logged.
 
-The native implementation must implement all four C functions below before this
-facade can be selected in production Linux runtime assembly. They return zero
+The native implementation supplies all four C functions below when their symbols
+select the optional Linux runtime assembly. They return zero
 on success and a nonzero native error on failure:
 
 - `fairyc_private_linux_https_open_v1(address, size, maximum, timeout, output)`:
@@ -66,12 +67,35 @@ external executable through PATH. A facade/model pass does not prove any of thos
 native requirements. The TLS provider, native assembly and real-socket acceptance
 remain separate implementation work.
 
-The producer's bounded metadata/body callbacks and native libcurl setup now
-exist in `internal/candidatehost/linux_https_protocol.c` and
-`linux_https_worker.c`. These are embedded assets for the pending child owner,
-not a production-selected implementation of the four request functions above.
+The producer's bounded metadata/body callbacks and native libcurl setup exist in
+`internal/candidatehost/linux_https_protocol.c` and `linux_https_worker.c`.
+`linux_https_reader.c` consumes detached metadata and streams body frames without
+retaining caller output pointers. `linux_https_parent.c` supplies the four request
+functions, selected together with those assets and the monotonic clock only when
+an HTTPS symbol is requested. GNU feature selection precedes all libc headers.
 Building this optional component requires libcurl headers; online execution
 requires the compatible system runtime and reference system CA store.
+
+The parent adapter is private to the standalone single-threaded generated CLI,
+not a general multithreaded C embedding API. No other owner/signal handler may
+reap its child. It rejects nondefault SIGCHLD and SA_NOCLDWAIT before acquisition.
+One monotonic deadline covers allocation/setup, fork, detached metadata and all
+reads, and successful consuming close. Poll/read interruptions never reset it;
+backward clock movement and clock failures fail closed. This is an observed
+deadline, not a real-time OS scheduling or kernel-reap latency guarantee.
+
+The forked child installs SIGKILL on parent death and checks the original parent
+identity before library work. It moves its writer to fd 3, checks close_range for
+all descriptors >=4 and closes 0..2. Setup failure sends its native error through
+the currently owned pipe, then uses _exit without inherited parent cleanup.
+The parent keeps its read end nonblocking and exposes partial acquisition through
+an exclusively owned closeable handle. Close observes the unreaped child before
+signaling/reaping and consumes every owned descriptor once, including on EINTR.
+ECHILD never permits signaling a potentially reused PID. A rejected signal or
+reap is a cleanup failure, never success; OS refusal can prevent reclamation and
+must not be interpreted as evidence that cleanup completed. Refused signaling
+does not trigger an unbounded blocking wait. The Fairy facade retains the primary
+I/O error separately from this consuming-close error and does not retry either.
 
 ## Current evidence
 
@@ -80,3 +104,7 @@ independent native boundary/fault outputs. The source fixture is
 `examples/lexer_candidate/tests/linux_remote_https.fy`. Both-target emission and
 Windows MSVC low/optimized executions pass with empty PATH. This is private policy
 evidence only. The Linux fetch receipt records exact commands, failures and scope.
+Independent Windows native-call substitutes also exercise the actual reader,
+producer and parent owner. Authored GCC/Clang two-profile process, negative trust,
+DNS and TLS-stall replays are pending; positive trusted HTTPS, online orchestration
+and CLI selection remain required.

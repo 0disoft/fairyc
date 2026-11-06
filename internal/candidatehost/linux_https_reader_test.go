@@ -1,8 +1,13 @@
 package candidatehost
 
 import (
+	"context"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
@@ -21,8 +26,23 @@ func TestLinuxHTTPSReaderBoundaries(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			runLinuxPathProbe(t, artifact.Bytes, "https-reader.exe")
+			runLinuxHTTPSProbe(t, artifact.Bytes, "https-reader.exe")
 		})
+	}
+}
+
+func runLinuxHTTPSProbe(t *testing.T, image []byte, name string) {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), name)
+	if err := os.WriteFile(path, image, 0700); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, path)
+	cmd.Env = append(os.Environ(), "PATH=")
+	if out, err := cmd.CombinedOutput(); err != nil || len(out) != 0 {
+		t.Fatalf("HTTPS probe: %v %s", err, out)
 	}
 }
 

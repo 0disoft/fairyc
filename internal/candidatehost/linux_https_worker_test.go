@@ -23,7 +23,7 @@ func TestLinuxHTTPSWorkerBoundaries(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			runLinuxPathProbe(t, artifact.Bytes, "https-worker.exe")
+			runLinuxHTTPSProbe(t, artifact.Bytes, "https-worker.exe")
 		})
 	}
 }

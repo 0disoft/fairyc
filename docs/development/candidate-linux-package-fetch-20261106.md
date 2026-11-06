@@ -463,13 +463,74 @@ end requires actual pipe EOF; trailing bytes and truncated frames fail. An input
 error is latched, so another read cannot replay the failed stream.
 
 `go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^TestLinuxHTTPSReaderBoundaries$'`
-passes both Windows profiles in 0.942s with empty PATH. Independent byte-layout
+passes both Windows profiles in 0.942s. That initial helper inherited PATH; the
+parent-owner validation below reruns this probe with PATH explicitly empty.
+Independent byte-layout
 fixtures exercise 29 short-read strides, every truncation of the 197-byte valid
 stream, twenty malformed/error cases and exact 65,536/65,537-byte boundaries.
 A separate producer/reader composition check preserves NUL/0xff bytes. The first
 probe compilation found a harness-global name shadowing a producer local; the
 fixture name was corrected without weakening warnings. Runtime selection stays
 closed until the process/deadline owner exists. Actual Linux remains deferred.
+
+## Parent-side process, deadline and runtime selection
+
+`linux_https_parent.c` now supplies all four private HTTPS functions, with an
+owned partial-factory handle, nonblocking parent pipe and one monotonic deadline.
+Repeated poll/read interrupts and EAGAIN do not extend the deadline. Cached
+headers and successful consuming close also check it. The streaming reader
+retains only detached metadata and one frame's remaining byte count.
+
+The dedicated fork child is limited to the standalone single-threaded generated
+CLI with default SIGCHLD and no competing reaper. It installs a parent-death
+SIGKILL, checks the fork/prctl race, installs fd 3 and checks close_range plus
+closure of 0..2 before invoking the producer. Setup errors preserve their native
+code in an end frame. The parent closes each owned descriptor once, observes
+its exclusively owned unreaped child before kill/reap and never signals after
+ECHILD. Signal/reap/close failures remain cleanup failures; a refused signal
+does not enter an unbounded blocking wait. OS rejection of cleanup is not a
+proof of reclamation. The private architecture documents this boundary and the
+absence of a hard real-time scheduling/kernel-reap guarantee.
+
+LinuxSource selects clock/protocol/worker/reader/parent once, only when an HTTPS
+symbol is requested, and places GNU feature selection before all libc headers.
+Unrequested/unknown/Windows symbols remain excluded. This enables the optional
+runtime ABI; it does not yet connect online fetch orchestration or CLI dispatch.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^(TestPrivateLinux(HTTPS|HostSymbol|Clock)Selection|TestLinuxHTTPSParentNativeInputs|TestLinuxHTTPS(Parent|Reader|Worker)Boundaries|TestLinuxClockAdapterBoundaries)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinuxRemoteHTTPSPolicy$'
+go vet -mod=readonly ./internal/candidatehost ./internal/cli
+```
+
+The final owner/native-selection regression command passes in 6.023s; all four
+native probe groups run low/optimized without selected skips. The unchanged
+Fairy facade passes both profiles in 3.938s; scoped vet passes. All three HTTPS
+C probes now explicitly run with empty PATH. Review found the earlier shared
+path-probe helper inherited PATH; a private HTTPS runner corrects this and the
+producer and reader are rerun, rather than reusing the earlier claim.
+
+Independent parent controls cover malformed inputs, allocation/pipe/fcntl/fork
+and parent-writer close failures, partial outputs, clocks before/after fork,
+backward time, deadline-1/deadline, cached headers, EOF, one-byte reads and
+cross-frame binary data, repeated interrupts/EAGAIN, invalid poll/read results,
+native and consuming-close causes, ECHILD, kill/wait/close failures and successful
+collection expiring during close. The two interrupt storms each expire after
+30 simulated 1,000 ms interruptions. Actual child-branch substitutions inspect
+descriptor isolation and exact setup-error end frames. Each admitted model
+ownership path ends with zero model allocations/descriptors/children; the kill-
+failure fixture models a child which has concurrently become terminal, not a
+kernel guarantee that rejected signaling kills a live child.
+
+Initial probe compilation caught a function macro also replacing a struct tag,
+and later a signed/unsigned assertion; the harness was corrected without lowering
+warnings. An initial assertion incorrectly expected the read-end close fault to
+fail open and was moved to consuming close. No `.fy` source changed; the prior
+693-file / 8,617-function reference check/locked receipt retains its exact input
+scope. No full source rebuild is claimed. Native real-process, parent-death,
+negative TLS trust, DNS and stalled TLS handshake commands below are authored,
+not run. Positive trusted TLS and ordinary response-header/body socket stalls
+remain separate from the controlled producer's real-process replay.
 
 ## Authored Linux replay and remaining implementation
 
@@ -479,6 +540,8 @@ go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^T
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxClockAdapterNative$'
 go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestLinuxRemoteOfflineNative$'
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxHTTPSWorkerRejectsUntrustedNative$'
+
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxHTTPSParent(Process|RejectsUntrusted|DNSDeadline|TLSDeadline)Native$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
@@ -489,8 +552,10 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: parent-side HTTPS protocol/deadline/process cleanup, online
-orchestration and online/offline Linux CLI selection. The Windows substitute does not prove those paths. Complete
+Next implementation: online orchestration, positive trusted TLS acceptance and
+online/offline Linux CLI selection. Parent process/clock/descriptor and actual
+libcurl replay remain in the combined Linux batch; the Windows substitute does
+not prove their Linux behavior. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.
 

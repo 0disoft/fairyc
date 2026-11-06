@@ -21,6 +21,19 @@ import (
 // Authored actual-libcurl negative TLS replay. No test CA is installed, no
 // insecure flag is used, and this does not prove positive trusted downloads.
 func TestLinuxHTTPSWorkerRejectsUntrustedNative(t *testing.T) {
+	linuxHTTPSUntrustedNative(t, linuxHTTPSProtocol+"\n"+linuxHTTPSWorker, linuxHTTPSUntrustedNativeProbe)
+}
+
+func TestLinuxHTTPSParentRejectsUntrustedNative(t *testing.T) {
+	source, err := LinuxSource("fairyc_private_linux_https_open_v1(")
+	if err != nil {
+		t.Fatal(err)
+	}
+	linuxHTTPSUntrustedNative(t, source, linuxHTTPSParentUntrustedNativeProbe)
+}
+
+func linuxHTTPSUntrustedNative(t *testing.T, source, probe string) {
+	t.Helper()
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		t.Skip("requires real Linux amd64, libcurl 8 development headers and system runtime; execution remains batched")
 	}
@@ -36,7 +49,7 @@ func TestLinuxHTTPSWorkerRejectsUntrustedNative(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				artifact, err := cdriver.Build(tc, profile, linuxHTTPSProtocol+"\n"+linuxHTTPSWorker+linuxHTTPSUntrustedNativeProbe, "typedef int fy_https_worker_runtime;\n")
+				artifact, err := cdriver.Build(tc, profile, source+probe, "typedef int fy_https_worker_runtime;\n")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -58,6 +71,16 @@ func TestLinuxHTTPSWorkerRejectsUntrustedNative(t *testing.T) {
 		t.Fatalf("untrusted endpoint received %d HTTP requests", requests.Load())
 	}
 }
+
+const linuxHTTPSParentUntrustedNativeProbe = `
+#include <assert.h>
+int main(int argc,char **argv){
+    assert(argc==2);size_t raw=0;uint32_t code=fairyc_private_linux_https_open_v1((const uint8_t *)argv[1],strlen(argv[1])+1,1024,3000,&raw);
+    assert(code==0 && raw!=0);uint32_t status=0;uint8_t encoding[128];size_t length=0,declared=0;
+    assert(fairyc_private_linux_https_headers_v1(raw,&status,encoding,128,&length,&declared)==65536u+(uint32_t)CURLE_PEER_FAILED_VERIFICATION);
+    assert(fairyc_private_linux_https_close_v1(raw)==0);int exit_status=0;errno=0;assert(waitpid(-1,&exit_status,WNOHANG)==-1 && errno==ECHILD);return 0;
+}
+`
 
 const linuxHTTPSUntrustedNativeProbe = `
 #include <assert.h>
