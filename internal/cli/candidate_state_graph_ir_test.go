@@ -33,11 +33,11 @@ fn Result<m::Graph,u32> read(ref u8[] raw,ref mut usize work){
  var c=switch(wire::cursor(raw,b"FYSGTEST",work)){case .ok(c):{c}case .err(code):{return .err(code);}};
  let effects=wire::word_from(raw,ref mut c,work);let capability=number(raw,ref mut c,work);let layout=number(raw,ref mut c,work);let entry=number(raw,ref mut c,work);
  var v::Vec<m::Value> ps=v::empty<m::Value>();var v::Vec<usize> args=v::empty<usize>();var v::Vec<m::Operation> ops=v::empty<m::Operation>();var v::Vec<m::Block> bs=v::empty<m::Block>();
- let parameters=wire::count_from(raw,ref mut c,4096,16,work);let arguments=wire::count_from(raw,ref mut c,8192,8,work);let operations=wire::count_from(raw,ref mut c,1025,112,work);let blocks=wire::count_from(raw,ref mut c,65,128,work);let size=wire::count_from(raw,ref mut c,1048577,1,work);
+ let parameters=wire::count_from(raw,ref mut c,4096,16,work);let arguments=wire::count_from(raw,ref mut c,8192,8,work);let operations=wire::count_from(raw,ref mut c,1025,152,work);let blocks=wire::count_from(raw,ref mut c,65,128,work);let size=wire::count_from(raw,ref mut c,1048577,1,work);
  if(wire::status(ref c)!=0){return .err(wire::status(ref c));}var usize i=0;
  while(i<parameters){let row=m::Value{.id=number(raw,ref mut c,work),.codec=wire::word_from(raw,ref mut c,work)};if(!v::push<m::Value>(ref mut ps,row).is_ok){return .err(1003);}i+=1;}i=0;
  while(i<arguments){if(!v::push<usize>(ref mut args,number(raw,ref mut c,work)).is_ok){return .err(1003);}i+=1;}i=0;
- while(i<operations){let row=m::Operation{.kind=wire::word_from(raw,ref mut c,work),.capability=number(raw,ref mut c,work),.field=number(raw,ref mut c,work),.key=operand(raw,ref mut c,work),.value=operand(raw,ref mut c,work),.result=number(raw,ref mut c,work),.found=number(raw,ref mut c,work),.cost=number(raw,ref mut c,work)};if(!v::push<m::Operation>(ref mut ops,row).is_ok){return .err(1003);}i+=1;}i=0;
+ while(i<operations){let row=m::Operation{.kind=wire::word_from(raw,ref mut c,work),.capability=number(raw,ref mut c,work),.field=number(raw,ref mut c,work),.key=operand(raw,ref mut c,work),.value=operand(raw,ref mut c,work),.result=number(raw,ref mut c,work),.found=number(raw,ref mut c,work),.cost=number(raw,ref mut c,work),.callee=number(raw,ref mut c,work),.borrow_input=number(raw,ref mut c,work),.borrow_result=number(raw,ref mut c,work),.view_offset=number(raw,ref mut c,work),.view_length=number(raw,ref mut c,work)};if(!v::push<m::Operation>(ref mut ops,row).is_ok){return .err(1003);}i+=1;}i=0;
  while(i<blocks){let id=number(raw,ref mut c,work);let ps=number(raw,ref mut c,work);let pc=number(raw,ref mut c,work);let os=number(raw,ref mut c,work);let oc=number(raw,ref mut c,work);
  let term=m::Terminator{.kind=wire::word_from(raw,ref mut c,work),.condition=number(raw,ref mut c,work),.target=number(raw,ref mut c,work),.argument_start=number(raw,ref mut c,work),.argument_count=number(raw,ref mut c,work),.alternative=number(raw,ref mut c,work),.alternate_start=number(raw,ref mut c,work),.alternate_count=number(raw,ref mut c,work),.category_start=number(raw,ref mut c,work),.category_end=number(raw,ref mut c,work),.cost=number(raw,ref mut c,work)};
  if(!v::push<m::Block>(ref mut bs,m::Block{.id,.parameter_start=ps,.parameter_count=pc,.operation_start=os,.operation_count=oc,.term}).is_ok){return .err(1003);}i+=1;}
@@ -148,7 +148,7 @@ func stateGraphIRPacket(p contractstatemir.Program) []byte {
 		number(start)
 		number(end)
 	}
-	kinds := map[contractstatemir.OperationKind]uint64{contractstatemir.OperationCellRead: 1, contractstatemir.OperationCellWrite: 2, contractstatemir.OperationCellDelete: 3, contractstatemir.OperationMapRead: 4, contractstatemir.OperationMapWrite: 5, contractstatemir.OperationMapDelete: 6}
+	kinds := map[contractstatemir.OperationKind]uint64{contractstatemir.OperationCellRead: 1, contractstatemir.OperationCellWrite: 2, contractstatemir.OperationCellDelete: 3, contractstatemir.OperationMapRead: 4, contractstatemir.OperationMapWrite: 5, contractstatemir.OperationMapDelete: 6, contractstatemir.OperationCellBorrow: 7, contractstatemir.OperationMapBorrow: 8, contractstatemir.OperationBorrowView: 9, contractstatemir.OperationBorrowCopy: 10, contractstatemir.OperationCall: 11}
 	for _, b := range p.Blocks {
 		for _, op := range b.Operations {
 			number(kinds[op.Kind])
@@ -159,10 +159,19 @@ func stateGraphIRPacket(p contractstatemir.Program) []byte {
 			for _, n := range []uint64{uint64(op.Result), uint64(op.Found), uint64(op.Cost)} {
 				number(n)
 			}
+			var callee uint64
+			for i, helper := range p.Helpers {
+				if helper.Name == op.Callee {
+					callee = uint64(i + 1)
+				}
+			}
+			for _, n := range []uint64{callee, uint64(op.BorrowInput), uint64(op.BorrowResult), uint64(op.ViewOffset), uint64(op.ViewLength)} {
+				number(n)
+			}
 		}
 	}
 	parameters, operations, arguments = 0, 0, 0
-	terms := map[contractstatemir.TerminatorKind]uint64{contractstatemir.TerminatorJump: 1, contractstatemir.TerminatorBranch: 2, contractstatemir.TerminatorCommit: 3, contractstatemir.TerminatorReject: 4, contractstatemir.TerminatorTrap: 5}
+	terms := map[contractstatemir.TerminatorKind]uint64{contractstatemir.TerminatorJump: 1, contractstatemir.TerminatorBranch: 2, contractstatemir.TerminatorCommit: 3, contractstatemir.TerminatorReject: 4, contractstatemir.TerminatorTrap: 5, contractstatemir.TerminatorReturn: 6}
 	for _, b := range p.Blocks {
 		term := b.Terminator
 		for _, n := range []uint64{uint64(b.ID), parameters, uint64(len(b.Parameters)), operations, uint64(len(b.Operations)), terms[term.Kind], uint64(term.Condition)} {

@@ -6,9 +6,10 @@ import std::vec as v;
 // never execution authority. Only the independent verifier may publish a proof.
 pub struct Value{usize id;u32 codec;}
 pub struct Operand{usize input;u32 codec;usize start;usize end;}
-// 1..6: cell read/write/delete, map read/write/delete. Helpers/borrows stay closed.
-pub struct Operation{u32 kind;usize capability;usize field;Operand key;Operand value;usize result;usize found;usize cost;}
-// 1 jump, 2 branch, 3 commit, 4 reject, 5 trap. Edges use ordered typed arguments.
+// 1..6 storage, 7 cell borrow, 8 map borrow, 9 view, 10 copy, 11 helper call.
+// New families require independent root/program verification before publication.
+pub struct Operation{u32 kind;usize capability;usize field;Operand key;Operand value;usize result;usize found;usize cost;usize callee;usize borrow_input;usize borrow_result;usize view_offset;usize view_length;}
+// 1 jump, 2 branch, 3 commit, 4 reject, 5 trap, 6 helper return.
 pub struct Terminator{u32 kind;usize condition;usize target;usize argument_start;usize argument_count;usize alternative;usize alternate_start;usize alternate_count;usize category_start;usize category_end;usize cost;}
 pub struct Block{usize id;usize parameter_start;usize parameter_count;usize operation_start;usize operation_count;Terminator term;}
 pub struct Header{usize layout;usize capability;u32 effects;usize entry;}
