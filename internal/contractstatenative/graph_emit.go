@@ -42,6 +42,8 @@ type graphEmitter struct {
 	helpers map[string]int
 	traps   map[string]int
 	site    int
+	audit   bool
+	term    uint32
 }
 
 const graphNativeValueSlots = 4096
@@ -50,6 +52,10 @@ const graphNativeValueSlots = 4096
 // capability. The separate literal emitter and its sealed protocol stay closed
 // to these graphs until their own framing/CAS admission is implemented.
 func EmitGraph(handoff Handoff, id target.ID) (GraphArtifact, error) {
+	return emitGraph(handoff, id, false)
+}
+
+func emitGraph(handoff Handoff, id target.ID, audit bool) (GraphArtifact, error) {
 	if id != target.X8664WindowsMSVC || handoff.bodyHash == (contractstatemir.StateBodyHash{}) {
 		return GraphArtifact{}, fmt.Errorf("graph emission requires a prepared Windows owner")
 	}
@@ -58,7 +64,7 @@ func EmitGraph(handoff Handoff, id target.ID) (GraphArtifact, error) {
 		return GraphArtifact{}, fmt.Errorf("graph emission requires verified MIR: %s", failures[0])
 	}
 	bodies := []graphBody{{p.Operations, p.Entry, p.Blocks, p.Exit, p.TrapCategory}}
-	e := graphEmitter{fields: p.Layout.Fields, helpers: make(map[string]int), traps: make(map[string]int)}
+	e := graphEmitter{fields: p.Layout.Fields, helpers: make(map[string]int), traps: make(map[string]int), audit: audit}
 	for index, helper := range p.Helpers {
 		e.helpers[helper.Name] = index + 1
 		bodies = append(bodies, graphBody{helper.Operations, helper.Entry, helper.Blocks, helper.Exit, helper.TrapCategory})
@@ -90,7 +96,11 @@ func EmitGraph(handoff Handoff, id target.ID) (GraphArtifact, error) {
 		return GraphArtifact{}, err
 	}
 	e.WriteString(header)
-	e.WriteString("\ntypedef int32_t (*fycs_graph_observer_v1)(void *, uint64_t, uint32_t, const uint8_t[32], uint8_t, const uint8_t *, size_t, uint8_t);\n")
+	if audit {
+		e.WriteString("\ntypedef int32_t (*fycs_graph_observer_v1)(void *, uint64_t, uint32_t, const fycs_graph_value_v1 *, const fycs_graph_value_v1 *, uint8_t);\n")
+	} else {
+		e.WriteString("\ntypedef int32_t (*fycs_graph_observer_v1)(void *, uint64_t, uint32_t, const uint8_t[32], uint8_t, const uint8_t *, size_t, uint8_t);\n")
+	}
 	e.WriteString("static const uint8_t fygr_bool_v1[2] = {0u,1u};\n")
 	for index := range bodies {
 		fmt.Fprintf(&e, "static int32_t fygr_body_%d(fycs_graph_v1 *, size_t, fycs_graph_observer_v1, void *, uint8_t *, uint32_t *);\n", index)
@@ -162,6 +172,7 @@ func (e *graphEmitter) body(index int, body graphBody) {
 		for _, op := range body.operations {
 			e.operation(op, false, values, borrows)
 		}
+		e.auditTerm()
 		e.exit(body.exit, body.trap)
 	} else {
 		fmt.Fprintf(e, "    goto block_%d;\n", body.entry)
@@ -171,6 +182,7 @@ func (e *graphEmitter) body(index int, body graphBody) {
 				e.operation(op, true, values, borrows)
 			}
 			e.checked("fycs_graph_step_v1(context,1u,0u)")
+			e.auditTerm()
 			term := block.Terminator
 			switch term.Kind {
 			case contractstatemir.TerminatorJump:
@@ -194,6 +206,13 @@ func (e *graphEmitter) body(index int, body graphBody) {
 		}
 	}
 	e.WriteString("finished:\n    context->used = mark; return status;\n}\n")
+}
+
+func (e *graphEmitter) auditTerm() {
+	e.term++
+	if e.audit {
+		e.checked(fmt.Sprintf("observe(user,context->operation,%du,NULL,NULL,0u)", graphTerminatorSite|e.term))
+	}
 }
 
 func (e *graphEmitter) exit(kind contractstatemir.ExitKind, trap string) {
@@ -223,11 +242,17 @@ func (e *graphEmitter) operation(op contractstatemir.Operation, graph bool, valu
 	e.site++
 	if op.Kind == contractstatemir.OperationCall {
 		e.checked("fycs_graph_step_v1(context,1u,1u)")
+		if e.audit {
+			e.checked(fmt.Sprintf("observe(user,context->operation,%du,NULL,NULL,0u)", e.site))
+		}
 		e.checked(fmt.Sprintf("fygr_body_%d(context,max_key,observe,user,exit_kind,trap_kind)", e.helpers[op.Callee]))
 		e.WriteString("    if (*exit_kind != 3u) { goto finished; }\n")
 		return
 	}
 	e.WriteString("    {\n")
+	if e.audit {
+		e.WriteString("    fycs_graph_value_v1 audit_key = {0}, audit_value = {0}; uint8_t audit_found = 0u;\n")
+	}
 	switch op.Kind {
 	case contractstatemir.OperationBorrowView:
 		e.checked(fmt.Sprintf("fycs_graph_borrow_view_v1(context,&borrows[%d],%du,%du,&borrows[%d])", borrows[op.BorrowInput], op.ViewOffset, op.ViewLength, borrows[op.BorrowResult]))
@@ -241,6 +266,9 @@ func (e *graphEmitter) operation(op contractstatemir.Operation, graph bool, valu
 		charge = 1
 	}
 	e.checked(fmt.Sprintf("fycs_graph_step_v1(context,%du,1u)", charge))
+	if e.audit {
+		e.checked(fmt.Sprintf("observe(user,context->operation,%du,&audit_key,&audit_value,audit_found)", e.site))
+	}
 	e.WriteString("    }\n")
 }
 
@@ -258,6 +286,9 @@ func (e *graphEmitter) storage(op contractstatemir.Operation, graph bool, values
 			e.literal(key, op.Key)
 		}
 		e.checked(fmt.Sprintf("fycs_graph_map_key_v1(prefix,&%s,max_key,key)", key))
+		if e.audit {
+			fmt.Fprintf(e, "    audit_key = %s;\n", key)
+		}
 	}
 	switch op.Kind {
 	case contractstatemir.OperationCellRead, contractstatemir.OperationMapRead, contractstatemir.OperationCellBorrow, contractstatemir.OperationMapBorrow:
@@ -278,7 +309,11 @@ func (e *graphEmitter) storage(op contractstatemir.Operation, graph bool, values
 		if borrow {
 			length = value + ".length"
 		}
-		e.checked(fmt.Sprintf("observe(user,context->operation,%du,key,%du,%s.bytes,%s,found)", e.site, codec, value, length))
+		if e.audit {
+			fmt.Fprintf(e, "    audit_value = %s; audit_value.length = %s; audit_found = found;\n", value, length)
+		} else {
+			e.checked(fmt.Sprintf("observe(user,context->operation,%du,key,%du,%s.bytes,%s,found)", e.site, codec, value, length))
+		}
 		if graph {
 			fmt.Fprintf(e, "    values[%d].bytes = fygr_bool_v1+found; values[%d].length = 1u; values[%d].codec = FYCS_CODEC_BOOL;\n", values[op.Found], values[op.Found], values[op.Found])
 		}
@@ -290,6 +325,9 @@ func (e *graphEmitter) storage(op contractstatemir.Operation, graph bool, values
 			e.literal(value, op.Value)
 		}
 		e.checked(fmt.Sprintf("fycs_graph_write_v1(context,key,&%s,0u)", value))
+		if e.audit {
+			fmt.Fprintf(e, "    audit_value = %s; audit_found = 1u;\n", value)
+		}
 	case contractstatemir.OperationCellDelete, contractstatemir.OperationMapDelete:
 		e.checked("fycs_graph_write_v1(context,key,NULL,1u)")
 	}

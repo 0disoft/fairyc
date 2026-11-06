@@ -81,6 +81,19 @@ static void fycs_graph_sha_finish_v1(fycs_graph_sha_v1 *state, uint8_t output[32
     for (i = 0u; i < 32u; ++i) { output[i] = (uint8_t)(state->words[i/4u] >> ((3u-i%4u)*8u)); }
 }
 
+int32_t fycs_graph_digest_v1(const uint8_t *first, size_t first_size,
+    const uint8_t *second, size_t second_size, uint8_t output[32]) {
+    fycs_graph_sha_v1 state = {{1779033703u,3144134277u,1013904242u,2773480762u,
+        1359893119u,2600822924u,528734635u,1541459225u},{0},0u,0u};
+    if (output == NULL || (first == NULL && first_size != 0u) ||
+        (second == NULL && second_size != 0u) || (uint64_t)first_size > UINT64_MAX/8u ||
+        (uint64_t)second_size > UINT64_MAX/8u-(uint64_t)first_size) { return FYCS_OV_INVALID; }
+    fycs_graph_sha_update_v1(&state, first, first_size);
+    fycs_graph_sha_update_v1(&state, second, second_size);
+    fycs_graph_sha_finish_v1(&state, output);
+    return FYCS_OV_OK;
+}
+
 int32_t fycs_graph_map_key_v1(const uint8_t prefix[32], const fycs_graph_value_v1 *key,
     size_t maximum, uint8_t output[32]) {
     static const uint8_t domain[] = "fairyc-contract-state-map-entry/v1";

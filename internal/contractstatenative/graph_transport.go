@@ -2,6 +2,7 @@ package contractstatenative
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"slices"
 
@@ -24,6 +25,8 @@ type GraphTransport struct {
 	sites   map[uint32]graphSite
 	start   uint32
 	input   OverlayTransport
+	work    uint64
+	literal int
 }
 
 type GraphInput struct {
@@ -46,13 +49,17 @@ type GraphResult struct {
 }
 
 func PrepareGraphTransport(handoff Handoff, id target.ID) (GraphTransport, error) {
-	entry, err := EmitGraph(handoff, id)
+	entry, err := emitGraph(handoff, id, true)
 	if err != nil {
 		return GraphTransport{}, err
 	}
 	prepared := GraphTransport{entry: entry}
-	prepared.program = sha256.Sum256(append([]byte("fairyc.native-state-graph-transport/v1\x00"), entry.program[:]...))
 	prepared.sites, prepared.start = graphPlan(handoff.program, entry.traps)
+	prepared.work, prepared.literal = graphWorkBounds(handoff.program)
+	identity := append([]byte("fairyc.native-state-graph-transport/v1\x00"), entry.program[:]...)
+	identity = binary.BigEndian.AppendUint64(identity, prepared.work)
+	identity = binary.BigEndian.AppendUint64(identity, uint64(prepared.literal))
+	prepared.program = sha256.Sum256(append(identity, graphNativeFrameC...))
 	// Reuse snapshot framing/validation, not the literal operation or write plan.
 	prepared.input = OverlayTransport{
 		entry: OverlayArtifact{layout: entry.layout, body: entry.body, programHash: prepared.program, valid: true},

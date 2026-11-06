@@ -45,6 +45,7 @@ int32_t fycs_graph_value_copy_v1(fycs_graph_v1 *, uint8_t, const uint8_t *, size
 int32_t fycs_graph_read_v1(fycs_graph_v1 *, const uint8_t[32], uint8_t, fycs_graph_value_v1 *, uint8_t *);
 int32_t fycs_graph_write_v1(fycs_graph_v1 *, const uint8_t[32], const fycs_graph_value_v1 *, uint8_t);
 int32_t fycs_graph_map_key_v1(const uint8_t[32], const fycs_graph_value_v1 *, size_t, uint8_t[32]);
+int32_t fycs_graph_digest_v1(const uint8_t *, size_t, const uint8_t *, size_t, uint8_t[32]);
 int32_t fycs_graph_borrow_v1_begin(fycs_graph_v1 *, const uint8_t[32], uint8_t, fycs_graph_borrow_v1 *, uint8_t *);
 int32_t fycs_graph_borrow_view_v1(fycs_graph_v1 *, const fycs_graph_borrow_v1 *, size_t, size_t, fycs_graph_borrow_v1 *);
 int32_t fycs_graph_borrow_copy_v1(fycs_graph_v1 *, const fycs_graph_borrow_v1 *, fycs_graph_value_v1 *);

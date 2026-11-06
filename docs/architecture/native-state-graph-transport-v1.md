@@ -1,7 +1,7 @@
 # Native state graph transport admission v1
 
-Status: private Go request/path-witness/response admission implemented. Native C
-framing, opaque build/run and one-attempt graph persistence remain required by
+Status: private Go request/path-witness/response admission, actual C framing and
+opaque Windows build/run implemented. One-attempt graph persistence remains required by
 [the complete graph plan](native-state-graph-v1.md). This is not an alternate
 completion target. Native Linux remains batched; no push or hosted dispatch.
 
@@ -9,8 +9,9 @@ completion target. Native Linux remains batched; no push or hosted dispatch.
 
 `PrepareGraphTransport` selects the verified graph emitter, seals copied site
 descriptors and keeps the existing literal transport separate. The program hash
-uses a graph-transport-specific domain over the exact emitted graph hash, which
-already binds layout, package body, target, C and the sorted trap table.
+uses a graph-transport-specific domain over the exact audited graph hash,
+native work/literal bounds and C framing implementation. The graph hash already
+binds layout, package body, target, C and the sorted trap table.
 
 Input uses the existing 152-byte big-endian snapshot framing with separate
 `FYGRIN01` magic and the graph transport program hash. Four positive limits
@@ -112,5 +113,75 @@ fixture; no verifier rule or native admission is relaxed. These tests run on
 Windows but do not execute C framing. Actual C framing/allocation/EOF cleanup,
 opaque build/run, graph CAS/reopen/conflict/cancellation, source/artifact/cache/
 CLI and all final Linux/compiler/self-build/distribution/hosted gates remain
-required. Public CLI/API, SDK/runtime ABI, DB/provider, dependencies, default
+required at that checkpoint. Public CLI/API, SDK/runtime ABI, DB/provider, dependencies, default
 limits, CI/runners and repository policy are unchanged.
+
+## Actual C framing and built owner, 2026-11-07
+
+The explicit audited emitter preserves the original `EmitGraph` read-observer
+ABI and adds a separately selected operation/terminator witness callback.
+Successful operations charge their original counters before observation; calls
+record before entering the helper, and graph terminators record before taking
+their selected edge/exit. Storage events retain original map operands and the
+actual immutable read/write bytes. The full emitted source participates in the
+transport identity; ordinary graph probes keep their separate entry.
+
+`GraphTransport.Source`, `BuildGraph` and `RunGraph` provide actual binary stdin/
+stdout framing and an opaque image/decoder owner. The host accepts no command
+arguments, performs exact identity/count/length/order/canonical-cell/EOF checks,
+hashes header and payload through the private allocation-free SHA-256 runtime,
+and emits no response for malformed input or allocation failure. Every allocated
+snapshot, workspace, epoch/value arena and trace follows one cleanup path.
+Nil contexts reject, cancellation causes remain inspectable, and the existing
+one-minute process and explicit 64MiB capture ceilings are retained.
+
+Native scratch uses a conservative sum of all static blocks and transitive
+acyclic helper invocations, including mutually exclusive paths. The bound
+saturates at the transport ceiling and combines with the observed snapshot and
+literal sizes. It never substitutes the write-value policy for the maximum
+readable size. Overlay count/bytes and value/trace arenas remain bounded;
+exhausting a transport cap below the caller's policy is a framing/resource
+failure rather than a fabricated transaction-policy failure. No threshold or
+warning level is relaxed.
+
+Windows low/optimized execute the original nineteen v0-v4 fixtures and fourteen
+seven-codec dynamic graphs through the real framing and decoder: 66 native
+semantic comparisons against the existing independent Go transaction oracle.
+Twelve additional direct/helper commit/reject/trap executions match separately
+authored response bytes exactly. Sixteen injected allocation failures and the
+successful cleanup controls observe zero outstanding allocations at exit.
+Malformed header/identity/policy/count/EOF/snapshot/codec/duplicate controls
+cannot publish bytes. Seeded dynamic-map snapshots preserve exact full-width
+limits and current request hashes. Binary reads cover present-empty and
+65,535/65,536/65,537 bytes under a one-byte write-value policy.
+
+Actual C responses at 64MiB-minus-one and exactly 64MiB pass in both profiles.
+A one-byte larger complete witness fails with the checked read prefix and no
+completed exit, writes or byte cost; it is not truncated into success. The new
+two-span SHA-256 entry also matches independent Go digests at SHA padding/block
+boundaries, every selected split and three output-alias modes, preserving output
+on null/length-overflow rejection. The existing runtime's 4,698 key comparisons
+and value/borrow observations pass after adding this private digest symbol.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/contractstatenative -run '^(TestGraphFraming|TestGraphTransport|TestOverlayTransport)'
+go test -mod=readonly -count=1 -timeout 3m -failfast -v ./internal/contractstatenative -run '^(TestNativeStateGraph(Digest|Runtime)|TestGraphFramingSnapshot)$'
+go vet -mod=readonly ./internal/contractstatenative ./internal/cstdlib
+git diff --check
+```
+
+One-attempt graph CAS/reopen/conflict/cancellation, source/developer/artifact/
+cache/CLI and the complete current-source/self-build/distribution/hosted/Linux
+acceptance remain required. This adds only a compiler-private native digest and
+transport; public CLI/API, SDK/runtime ABI, DB/provider, dependencies, default
+budgets/timeouts, CI/runners and repository policy stay unchanged. No push,
+dispatch, release or deployment.
+
+The final framing/wire/literal-transport replay passes in 72.864s with no
+selected skips (`.cache/native-graph-framing-final-20261107.log`). Digest,
+snapshot-cancellation and runtime controls pass separately in 6.940s; a final
+unchanged-runtime/slot/hash replay passes in 2.108s. Eight original read-observer
+ABI executions (linear, transitive helper, nested cell borrow and unrelated-map
+borrow under both profiles) pass in 4.584s after the audited emitter was added.
+Scoped vet, formatting and diff checks pass. These results cover the selected
+native routes, not the full repository or outstanding persistence/final gates.

@@ -1,9 +1,9 @@
 # Native state graph values and execution v1
 
 Status: private allocation-free value/key/borrow runtime and verified operation
-C emission implemented. Go graph request/path-witness/response admission is now
-implemented in [transport v1](native-state-graph-transport-v1.md); actual C framing
-and graph CAS remain required. This is a
+C emission implemented. Go graph request/path-witness/response admission, actual
+C framing and opaque Windows build/run are implemented in
+[transport v1](native-state-graph-transport-v1.md); graph CAS remains required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux
 remains batched. No push, hosted dispatch, release or deployment is authorized.
