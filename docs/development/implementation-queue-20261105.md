@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Linux HTTPS now has a bounded native response producer and private pipe frames,
+  with system libcurl selection and isolation decision ADR 0501. Independent
+  Windows low/optimized loader/option/callback/lifetime controls pass 24 producer
+  scenarios plus direct parser/input/boundary cases. The producer assets remain
+  unselected until the parent request/deadline/descriptor/kill-reap owner exists.
+  Actual libcurl/TLS/DNS execution and authored untrusted-loopback replay stay
+  batched; positive TLS, online orchestration/CLI, remaining queue and every final
+  gate stay open. Optional native headers/runtime prerequisites are recorded in
+  the Linux fetch receipt; no Go dependency, CI or runner is changed.
+
 - The private Fairy Linux HTTPS response/lifetime facade now validates URL and
   body/time bounds before opening, checks metadata and exact binary read bounds,
   and preserves native/consuming-close errors without replay. Four source groups

@@ -407,6 +407,52 @@ pass as a successful Linux download. Logs are
 `.cache/linux-remote-https-policy-20261106.log` and
 `.cache/linux-remote-https-check-20261106.log` (not staged).
 
+## Native HTTPS response producer
+
+ADR 0501 selects an isolated request-child producer using system libcurl and
+fixed reference Ubuntu/Debian amd64 library/CA paths. The producer and private
+pipe framing are implemented in `linux_https_protocol.c` / `linux_https_worker.c`.
+They are embedded but intentionally not admitted by LinuxSource: the owning
+parent-side watchdog, descriptor boundary, protocol reader and kill/reap adapter
+are still required. Calling the producer from a normal multithreaded host is not
+an alternative to that isolation boundary.
+
+Fresh libcurl state uses HTTPS only, verified system certificate and hostname,
+TLS 1.2 minimum, no redirect/proxy/ambient auth/cookie state and no automatic
+content decompression. Every setopt result is checked. Missing libraries/symbols,
+unsupported versions/TLS, allocation/setup/perform and cleanup failures retain
+numeric errors while acquired local resources close. No archive buffer, helper
+executable or native diagnostic text is retained. The parser caps total headers
+at 64 KiB / 1,024 lines and body forwarding at maximum+1. It rejects ambiguous
+length/transfer metadata, malformed/folded headers and framing-changing trailers;
+it preserves informational headers, identical lengths and benign trailers.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^TestLinuxHTTPSWorkerBoundaries$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+```
+
+The final Windows command passes both profiles in 1.152s. Independent library/
+loader/option/callback substitutes cover 24 producer scenarios plus direct header,
+overflow, framing and input controls. They inspect every option, exact output
+frames/bytes, one perform attempt, partial acquisition cleanup, native/library
+errors, module/global/easy/header lifetimes and 65,536/65,537-byte bodies. This is
+actual producer code with substitutes, not real libcurl/TLS or child execution.
+Initial harness compilation required callback typedefs for MSVC va_arg, explicit
+pointer-array initialization and representable signed-char fixture bytes; warning
+levels were not changed. The first run also corrected the harness's expectation
+that normal scenario zero should make no perform call. Final output is retained
+in `.cache/linux-https-worker-20261106.log` (not staged).
+
+`TestLinuxHTTPSWorkerRejectsUntrustedNative` is authored for GCC/Clang x both
+profiles against a fresh loopback TLS certificate, without installing a CA or
+disabling verification. It remains unexecuted. It would establish only negative
+trust behavior, not positive trusted downloads or the pending process deadline.
+The optional producer now requires libcurl development headers and the compatible
+system libcurl/CA runtime; Go dependencies and baseline/CI provisioning are
+unchanged. No current Fairy source changed, so the prior 693-file / 8,617-function
+check/locked receipts retain their unchanged input scope.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
@@ -414,6 +460,7 @@ go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^T
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageFileAdapterNative$'
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxClockAdapterNative$'
 go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestLinuxRemoteOfflineNative$'
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxHTTPSWorkerRejectsUntrustedNative$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
@@ -424,8 +471,8 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: verified HTTPS and online/offline Linux
-CLI selection. The Windows substitute does not prove those paths. Complete
+Next implementation: parent-side HTTPS protocol/deadline/process cleanup, online
+orchestration and online/offline Linux CLI selection. The Windows substitute does not prove those paths. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.
 

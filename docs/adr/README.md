@@ -419,3 +419,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0498: Explicit pinned remote source preparation](0498-explicit-pinned-remote-package-sources.md)
 
 - [0499: Bounded Atlas impact, MCP and checked body edits](0499-bounded-atlas-impact-mcp-and-body-edits.md)
+
+- [0501: Isolated Linux HTTPS producer and bounded pipe transport](0501-linux-https-isolated-worker.md)

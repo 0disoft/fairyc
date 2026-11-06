@@ -1,8 +1,10 @@
 # Private Linux HTTPS facade v1
 
 This is the Fairy response/lifetime policy for the pending Linux source-fetch
-transport, within ADR 0498 and `package/remote-sources-v1.md`. It does not admit
-Linux fetch commands or establish a native TLS provider or executed Linux I/O.
+transport, within ADR 0498 and `package/remote-sources-v1.md`. The native producer
+uses system libcurl under [ADR 0501](../adr/0501-linux-https-isolated-worker.md).
+Parent-side deadline/cancellation and runtime selection remain pending. This does
+not admit Linux fetch commands or establish executed Linux TLS I/O.
 
 ## Ownership and private ABI
 
@@ -63,6 +65,13 @@ and compression; retain safe cancellation lifetimes; and work without finding an
 external executable through PATH. A facade/model pass does not prove any of those
 native requirements. The TLS provider, native assembly and real-socket acceptance
 remain separate implementation work.
+
+The producer's bounded metadata/body callbacks and native libcurl setup now
+exist in `internal/candidatehost/linux_https_protocol.c` and
+`linux_https_worker.c`. These are embedded assets for the pending child owner,
+not a production-selected implementation of the four request functions above.
+Building this optional component requires libcurl headers; online execution
+requires the compatible system runtime and reference system CA store.
 
 ## Current evidence
 
