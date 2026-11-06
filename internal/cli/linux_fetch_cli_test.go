@@ -250,7 +250,7 @@ func linuxFetchHelp(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("Linux help contract: %v %q", err, value)
 	}
-	for _, line := range []string{"usage: lexer-candidate-linux --help | --version | targets\n", "new <package-name> --uid <package-uid>\n", "check [--locked]", "build [--release]", "run [--release]", "test --native", "experimental fetch-packages [--offline]\n", "experimental atlas-impact ", "experimental atlas-mcp --allow-impact ", "experimental atlas-symbols list ", "--c-workspace <root> [--locked]\n", "No arguments: private binary stdin protocol.\n"} {
+	for _, line := range []string{"usage: lexer-candidate-linux --help | --version | targets\n", "new <package-name> --uid <package-uid>\n", "check [--locked]", "build [--release]", "run [--release]", "test --native", "experimental fetch-packages [--offline]\n", "experimental atlas-impact ", "experimental atlas-mcp --allow-impact ", "experimental atlas-symbols list ", "experimental atlas-calls list ", "--c-workspace <root> [--locked]\n", "No arguments: private binary stdin protocol.\n"} {
 		if !strings.Contains(value, line) {
 			t.Fatalf("Linux help missing %q", line)
 		}

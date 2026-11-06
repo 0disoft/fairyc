@@ -192,3 +192,72 @@ checks pass. No compiler/program deadline or warning policy is relaxed.
 No public CLI/SDK ABI, DB, dependency, timeout, CI/runner or repository policy
 changes. Native Linux filesystem/lock/publication, pipe/signal behavior, all
 remaining command ports and the complete final acceptance queue stay open.
+
+## Call catalog command
+
+Linux experimental mode 4 selects `project_calls_cli::arguments_with_help`.
+The existing default `arguments()` signature/help remains intact. Both entries
+use the same complete source-backed call-query owner, 0/1/2 catalog selection,
+outgoing/incoming/both directions, original package/symbol IDs, construction and
+output budgets, error classifications and locked/unlocked policy. Linux help
+lists only that existing admitted syntax; no query or source producer is copied.
+
+`TestLinuxAtlasCallsCommand` reuses the independent Go workspace-call oracle for
+all version/direction combinations, recursion, exact/one-short/one-over output
+bytes and package/call ceilings, missing/invalid selectors and arguments,
+read-only locked execution, stdout failure, stale lock refusal and an actual
+unlocked source/lock refresh. Fresh Go expectations restore the old lock before
+the unlocked candidate invocation, so its publication is not supplied by setup.
+The same probe image checks both default and Linux help aliases at direct and
+`list` positions. The default selector is test-only, absent from product dispatch.
+
+`checkLinuxAtlasCalls` attaches the same Linux-help/query verifier to the existing
+per-profile native full-CLI image. It adds no full compiler/companion build.
+Portable full-entry selection checks exact mode 4 and near-name refusals;
+both-target emission must retain closed Linux support without Windows symbols.
+Actual Linux filesystem/lock/pipe behavior and all final acceptance gates stay
+batched and unverified.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^TestLinuxAtlasCallsCommand$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestLinuxFileCLI$'
+go test -mod=readonly -count=1 -timeout 4m ./internal/cli -run '^TestLinuxFetchCommand$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-atlas-calls-20261106
+```
+
+Final calls command execution passes in 273.41s: low 186.94s and optimized
+73.31s. Each profile runs 26 independent Go-oracle query/error/lock cases, six
+Linux-help aliases/actions and six unchanged default-help aliases/actions:
+76 generated command executions with empty PATH, without selected command skips.
+
+The additional `TestLinuxCLIHelp` compares every connected experimental command
+line with the independent Go usage contract. It corrects the calls version flag
+to optional, symbols kind to required/repeatable and impact depth to 0..64,
+retaining the exact existing command policy. Its final isolated run passes in
+0.100s. The initial combined test command exited 1 after calls passed because a
+redundant help-only native probe incorrectly used a partition-required helper.
+That duplicate native probe was removed; the existing calls test already checks
+exact generated help bytes. No product source changed after the passing calls
+execution, and that result is retained rather than rerunning its 76 commands.
+
+Current regression command:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 12m -v ./internal/cli -run '^(TestLinuxAtlasCallsCommand|TestLinuxCLIHelp)$'
+go test -mod=readonly -count=1 -timeout 1m -v ./internal/cli -run '^TestLinuxCLIHelp$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^(TestLinuxFileCLI|TestLinuxFetchCommand)$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-atlas-calls-final-20261106
+```
+
+The fetch regression passes both profiles in 26.49s. Current full-entry emission
+and closed Linux support selection pass with 25 C partitions and a 1,996,624-byte
+header; portable dispatch passes in 5.46s. The full-entry test takes 32.18s and
+explicitly skips actual Linux execution; its combined regression command exits
+0 in 58.984s. Original check/locked passes 698 files / 8,642 MIR functions;
+freshly prepared Linux check/locked passes 698 / 8,643. Scoped vet, Go formatting,
+UTF-8/LF/final-newline and diff checks pass.
+
+Pack/edit selection, native Linux filesystem/lock/publication, pipe/signal
+behavior, broader source-family parity and every final acceptance gate remain
+open. Public CLI policies, SDK ABI, DB, dependency, timeout, CI/runner and
+repository rules remain unchanged; no push, hosted dispatch, release or deployment.

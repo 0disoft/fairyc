@@ -32,9 +32,9 @@ authorized by this queue.
   `candidate-linux-runtime-sync-20261106.md`.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
-  Impact/MCP/symbol dispatch, Linux help and shared current-source queries are connected;
+  Impact/MCP/symbol/call dispatch, Linux help and shared current-source queries are connected;
   Windows command/full-entry evidence and the authored native replay are in
-  `candidate-linux-atlas-cli-20261106.md`. Calls/pack/edit remain open;
+  `candidate-linux-atlas-cli-20261106.md`. Pack/edit remain open;
   native stdio/default-SIGPIPE/closed-pipe behavior also needs explicit replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
@@ -66,6 +66,15 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Linux calls now selects the shared current-source call owner and injected Linux
+  help, preserving default entry signatures and query policy. Both Windows
+  profiles pass 26 independent query/error/lock cases plus twelve help cases each;
+  connected Linux help lines also match the independent Go command contract.
+  Current full entry emits both targets and passes portable dispatch, and original/
+  prepared check/locked plus scoped vet pass. Exact timing and initial help-fixture
+  failure accounting are in `candidate-linux-atlas-cli-20261106.md`. Pack/edit,
+  native Linux replay, broader parity and every final gate remain open.
 
 - Linux MCP and symbol catalog now select shared real owners with Linux help,
   preserving default entry signatures and fresh current-source/query policies.

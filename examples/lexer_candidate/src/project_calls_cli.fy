@@ -10,12 +10,15 @@ import std::process as process;
     if(!io::write_stderr("fairyc: ").is_ok || !io::write_stderr(message).is_ok || !io::write_stderr("\n").is_ok){return 4;}return code;
 }
 @effects(filesystem,console,environment) pub fn i32 arguments(){
+    return arguments_with_help(public::help());
+}
+@effects(filesystem,console,environment) pub fn i32 arguments_with_help(ref str help){
     let argc=process::arg_count();
     if(argc==4 || argc==5){
         var u8[4096] raw=[0;4096];let action_size=switch(process::arg(3,ref mut raw)){case .ok(p):{p}case .err(_):{0}};
         let ref u8[] action=ref raw;let nested=argc==5 && bytes::equal(action[..action_size],b"list");
         if(argc==4 || nested){let n=switch(process::arg(argc-1,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] flag=ref raw;
-            if(bytes::equal(flag[..n],b"--help") || bytes::equal(flag[..n],b"-h") || bytes::equal(flag[..n],b"help")){return if(io::write(public::help()).is_ok){0}else{4};}
+            if(bytes::equal(flag[..n],b"--help") || bytes::equal(flag[..n],b"-h") || bytes::equal(flag[..n],b"help")){return if(io::write(help).is_ok){0}else{4};}
         }
     }
     let request=switch(options::arguments()){case .ok(p):{p}case .err(_):{return error(2,"invalid experimental atlas-calls list arguments");}};
