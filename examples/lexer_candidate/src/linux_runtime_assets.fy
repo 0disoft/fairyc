@@ -38,6 +38,7 @@ pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bo
     if((plan.hosts&(1<<14))!=0){let usize n=append(ref mut output,b"#ifndef _GNU_SOURCE\n#define _GNU_SOURCE 1\n#endif")?;}
     let usize base=hosts(bundle,ref plan,15,20,1,ref mut output)?;
     let usize packages=hosts(bundle,ref plan,26,27,1<<11,ref mut output)?;
+    let usize editing=hosts(bundle,ref plan,33,33,1<<18,ref mut output)?;
     let usize tail=hosts(bundle,ref plan,21,25,1<<6,ref mut output)?;
     let usize remote=hosts(bundle,ref plan,28,32,1<<13,ref mut output)?;
     var u32 id=1;while(id<=10){if(selection::contains(ref plan,id)){

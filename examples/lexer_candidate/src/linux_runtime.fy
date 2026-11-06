@@ -16,7 +16,9 @@ pub fn bool contains(ref Plan p,u32 id){return id>=1 && id<=10 && (p.components 
 // Host mask order for assembly: rooted, process, capture, input, paths,
 // directory, retention, workspace, build scratch, starter, GNU; then package
 // directory, package file, clock, HTTPS protocol, worker, reader, parent.
+// Edit-file is bit 18; its asset is assembled after package-file.
 pub fn u32 host(ref u8[] name){
+    if(bytes::equal(name,b"fairyc_private_linux_edit_file_prepare_v1") || bytes::equal(name,b"fairyc_private_linux_edit_file_publish_v1")){return 1|(1<<18);}
     if(bytes::equal(name,b"fairyc_private_linux_https_open_v1") || bytes::equal(name,b"fairyc_private_linux_https_headers_v1") || bytes::equal(name,b"fairyc_private_linux_https_read_v1") || bytes::equal(name,b"fairyc_private_linux_https_close_v1")){return (1<<13)|(1<<14)|(1<<15)|(1<<16)|(1<<17);}
     if(bytes::equal(name,b"fairyc_private_linux_monotonic_ms_v1")){return 1<<13;}
     if(bytes::equal(name,b"fairyc_private_linux_package_directory_create_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_edit_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_publish_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_erase_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_clone_v1")){return 1|(1<<11);}

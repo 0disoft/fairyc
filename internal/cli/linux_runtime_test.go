@@ -83,7 +83,7 @@ func TestLinuxGNUCompanionRuntime(t *testing.T) {
 		cstdlibcontract.ComponentArena, cstdlibcontract.ComponentTextView,
 		cstdlibcontract.ComponentLinuxProcessArgs, cstdlibcontract.ComponentOwnedText,
 	}
-	files := []string{"linux_rooted_file.c", "linux_process.c", "linux_capture.c", "linux_test_input.c", "linux_paths.c", "linux_directory.c", "linux_retention.c", "linux_workspace.c", "linux_build_scratch.c", "linux_starter.c", "linux_gnu.c", "linux_package_directory.c", "linux_package_file.c", "linux_clock.c", "linux_https_protocol.c", "linux_https_worker.c", "linux_https_reader.c", "linux_https_parent.c"}
+	files := []string{"linux_rooted_file.c", "linux_process.c", "linux_capture.c", "linux_test_input.c", "linux_paths.c", "linux_directory.c", "linux_retention.c", "linux_workspace.c", "linux_build_scratch.c", "linux_starter.c", "linux_gnu.c", "linux_package_directory.c", "linux_package_file.c", "linux_clock.c", "linux_https_protocol.c", "linux_https_worker.c", "linux_https_reader.c", "linux_https_parent.c", "linux_edit_file.c"}
 	parts := make([]string, len(files))
 	for i, file := range files {
 		data, err := os.ReadFile(filepath.Join("..", "candidatehost", file))

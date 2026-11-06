@@ -38,6 +38,7 @@ SOURCES = [
     'internal/candidatehost/linux_https_worker.c',
     'internal/candidatehost/linux_https_reader.c',
     'internal/candidatehost/linux_https_parent.c',
+    'internal/candidatehost/linux_edit_file.c',
 ]
 PIN = ROOT / 'examples/lexer_candidate/src/linux_runtime_asset_pin.fy'
 

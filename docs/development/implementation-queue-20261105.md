@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Linux edit now has a selected native file prerequisite: anonymous-file
+  permission preparation, retained exact metadata checks and one atomic rename,
+  with separate primary/cleanup errors and identity-checked stage cleanup.
+  Independent Windows low/optimized namespace/fault models and related adapter
+  regressions pass. The synchronized companion admits 120 live-Go plans and
+  80 complete C outputs per profile; current original/prepared checks and scoped
+  vet pass. See `candidate-linux-atlas-edit-20261106.md`. Fairy lifetime/apply
+  composition, Linux edit dispatch, actual Linux replay and every broader/final
+  gate remain open; this does not complete the edit row or the overall objective.
+
 - Linux pack now selects the shared current-source overview/show/around owner
   with Linux help. Both Windows profiles pass 48 independent Go-oracle query/
   error/lock cases plus 24 help cases each: 144 generated command executions.

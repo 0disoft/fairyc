@@ -24,21 +24,24 @@ The existing Go bootstrap companion remains the default and retains its original
 
 ### Runtime assets and plan selection
 
-`tools/package-candidate-linux-runtime.py` reads 32 authoritative raw C sources from the
-repository and verifies their exact bytes while producing a 172,006-byte asset pack. The
+`tools/package-candidate-linux-runtime.py` reads 33 authoritative raw C sources from the
+repository and verifies their exact bytes while producing a 176,458-byte asset pack. The
 loader accepts at most 1 MiB, checks the generated pin, and assembles at most 8 MiB of
 runtime C. Windows dependencies and unknown target markers fail admission.
 
 The authored selector is compared with the live Go standard-library contract and Linux
 host-source inventory by `TestLinuxGNUCompanionRuntime`. The current focused checks cover
-118 plans and 76 complete runtime C outputs in low/optimized profiles. Both-target emission
+120 plans and 80 complete runtime C outputs in low/optimized profiles. Both-target emission
 and Windows MSVC checks pass. These are Windows-development observations, not Linux-native
 execution.
 
 The package-directory/file, monotonic-clock and HTTPS protocol/worker/reader/parent
 sources are included. HTTPS selects its clock dependency and `_GNU_SOURCE` before
 all libc headers; package sources follow rooted/directory sources, matching the Go
-assembly byte for byte. The pin rejects earlier packs. Current synchronization and
+assembly byte for byte. Edit-file support follows package-file and retains its
+rooted prerequisite. Its native implementation/Windows-model boundary is recorded in
+`docs/development/candidate-linux-atlas-edit-20261106.md`; Linux edit selection
+and execution remain open. The pin rejects earlier packs. Current synchronization and
 remaining native gates are recorded in
 `docs/development/candidate-linux-runtime-sync-20261106.md`. Compiling HTTPS support
 requires the optional libcurl development headers from ADR 0501; runtime/CA

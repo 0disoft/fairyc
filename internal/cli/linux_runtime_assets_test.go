@@ -39,6 +39,7 @@ func TestLinuxGNUCompanionRuntimeAssets(t *testing.T) {
 		"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1",
 		"fairyc_private_linux_package_directory_clone_v1", "fairyc_private_linux_package_file_info_v1",
 		"fairyc_private_linux_monotonic_ms_v1", "fairyc_private_linux_https_open_v1",
+		"fairyc_private_linux_edit_file_prepare_v1", "fairyc_private_linux_edit_file_publish_v1",
 		"fairyc_private_linux_https_headers_v1", "fairyc_private_linux_https_read_v1", "fairyc_private_linux_https_close_v1"}
 	for _, name := range hosts {
 		cases = append(cases, []string{name})

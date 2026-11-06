@@ -34,6 +34,9 @@ var linuxPackageDirectory string
 //go:embed linux_package_file.c
 var linuxPackageFile string
 
+//go:embed linux_edit_file.c
+var linuxEditFile string
+
 //go:embed linux_retention.c
 var linuxRetention string
 
@@ -64,10 +67,13 @@ func LinuxSource(header string) (string, error) {
 	gnu := false
 	packageDirectory := false
 	packageFile := false
+	editFile := false
 	clock := false
 	https := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_edit_file_prepare_v1", "fairyc_private_linux_edit_file_publish_v1":
+			rooted, editFile = true, true
 		case "fairyc_private_linux_https_open_v1", "fairyc_private_linux_https_headers_v1",
 			"fairyc_private_linux_https_read_v1", "fairyc_private_linux_https_close_v1":
 			clock, https = true, true
@@ -146,6 +152,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if packageFile {
 		source += "\n" + linuxPackageFile
+	}
+	if editFile {
+		source += "\n" + linuxEditFile
 	}
 	if retention {
 		source += "\n" + linuxRetention
