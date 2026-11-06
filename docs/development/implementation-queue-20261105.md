@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- General inline expansion now admits up to sixteen immutable i32 locals under
+  the shared 64-node expression budget. Go/Fairy source and detached-IR v2
+  identities preserve initializer order, unused traps and unchanged v1 bodies.
+  Restored Go cross-package memory/disk caches and C11/C17 native calls pass;
+  recovered Fairy source/artifact/pipeline and Go trap checks pass both Windows
+  profiles (235.926s), including forged IR and exact/one-over controls. Full
+  authored CLI currently requires the separately bounded compiler-host header
+  path: its generated header exceeds ordinary 2MiB by 2,833 bytes. Calls,
+  mutation, control flow, other broader inline families and every Linux/final
+  gate remain open. See ADR 0509 and `candidate-inline-locals-20261107.md`.
+
 - The SDK/user-aggregate acceptance now includes SDK Vec calls from a concrete
   user-resource cleanup and generic functions returning a concrete user struct.
   Actual production-loaded maps retain the independent Go oracle's fourteen

@@ -234,3 +234,74 @@ func TestInlineCacheRejectsAndHealsStaleMarkers(t *testing.T) {
 		}
 	}
 }
+
+const inlineLocalsDependency = `module answer;@inline pub fn i32 value(){let i32 ignored=1;let i32 seed=40;let answer=seed+2;return answer;}fn i32 private_helper(){return 1;}`
+
+func TestCrossPackageInlineLocalsCacheInvalidation(t *testing.T) {
+	for _, storage := range []string{StorageMemory, StorageDisk} {
+		t.Run(storage, func(t *testing.T) {
+			root := writeCacheWorkspace(t, inlineLocalsDependency)
+			config := Configuration{Target: target.X8664WindowsMSVC, Cache: packagecache.Limits{MaxEntries: 8, MaxBytes: 32 << 20}, MaxArtifactBytes: 8 << 20}
+			if storage == StorageDisk {
+				config = persistentTestConfiguration(t.TempDir(), "inline-test-build")
+			}
+			session, err := NewSession(config)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { session.Close() }()
+			check := func(text string, want, hits int, allHit bool) {
+				t.Helper()
+				writeFile(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), text)
+				workspace := loadCacheWorkspace(t, root)
+				r, err := session.Check(workspace)
+				if err != nil || !r.Compiler.Verified || r.Cache.Hits != hits || (r.Cache.Outcome == OutcomeAllHit) != allHit {
+					t.Fatalf("cache: %v %+v %+v", err, r.Cache, r.Compiler.Semantic.Diagnostics)
+				}
+				id, err := workspace.RootPackageID()
+				if err != nil {
+					t.Fatal(err)
+				}
+				entry := hir.QualifiedModulePath(id, "main") + "::main"
+				out, err := interpreter.Execute(r.Compiler.MIR, entry)
+				if err != nil || out.Value != int32(want) {
+					t.Fatalf("result: %+v %v", out, err)
+				}
+				for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
+					unit, err := cbackend.Emit(r.Compiler.MIR, entry, profile)
+					if err != nil || !strings.Contains(unit.Source, "static inline int32_t") {
+						if !strings.Contains(text, "@inline") {
+							continue
+						}
+						t.Fatal("inline body lost", err)
+					}
+				}
+			}
+			check(inlineLocalsDependency, 42, 0, false)
+			check(inlineLocalsDependency, 42, 2, true)
+			if storage == StorageDisk {
+				session.Close()
+				session, err = NewSession(config)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			check(inlineLocalsDependency, 42, 2, true)
+			changed := strings.Replace(inlineLocalsDependency, "seed=40", "seed=41", 1)
+			check(changed, 43, 0, false)
+			check(changed, 43, 2, true)
+			private := strings.Replace(changed, "return 1;", "return 2;", 1)
+			check(private, 43, 1, false)
+			check(private, 43, 2, true)
+			formatted := strings.ReplaceAll(strings.Replace(private, "seed=41", "renamed=(0x29)", 1), "seed+2", "renamed+2")
+			check(formatted, 43, 1, false)
+			check(formatted, 43, 2, true)
+			unused := strings.Replace(formatted, "ignored=1", "ignored=2", 1)
+			check(unused, 43, 0, false)
+			check(unused, 43, 2, true)
+			removed := strings.Replace(unused, "@inline ", "", 1)
+			check(removed, 43, 0, false)
+			check(removed, 43, 2, true)
+		})
+	}
+}

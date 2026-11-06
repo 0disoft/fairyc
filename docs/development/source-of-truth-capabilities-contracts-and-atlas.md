@@ -407,6 +407,11 @@ Part 3 of 3 of the [source index](source-of-truth.md).
 
 ## Generics, contract IDL, contract profile, and chain primitives
 
+- **Go/Fairy inline immutable i32 local sequences, canonical v2 identities and current-source detached-IR verification**
+  - `internal/hir/inline.go`; `examples/lexer_candidate/src/module_inline_declarations.fy`, `module_inline_identity.fy`, `module_inline_ir.fy`
+  - `internal/compiler/inline_locals_test.go`, `internal/workspacecompiler/inline_locals_native_test.go`, `internal/cli/candidate_inline_locals_identity_test.go`, `candidate_inline_locals_pipeline_test.go`, `candidate_inline_locals_trap_test.go`
+  - `docs/adr/0509-inline-immutable-local-bindings.md`, `docs/development/candidate-inline-locals-20261107.md`; full authored CLI acceptance remains a separate receipt.
+
 
 - **Stable language-14 explicit scalar generic workspace functions, coordinate-bound expansion, and separate private generic interface/cache transport**
   - `internal/genericplan/`

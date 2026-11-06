@@ -13,12 +13,23 @@
 
 The authored candidate admits one argument-free `@inline` on a public, safe,
 nongeneric ordinary function returning i32, with zero through four immutable i32
-parameters and no effects or owner. Its returned expression contains at most 64
-nodes: integer literals, parameter paths, grouping, unary +/- and binary
-+,-,*,/,%. Calls, locals, mutation, control flow, unsafe/effectful bodies,
+parameters and no effects or owner. ADR 0509 also admits zero through sixteen
+immutable i32 local bindings followed by the returned expression. Initializers
+and return share the existing 64-node budget: integer literals, parameter or
+preceding-local paths, grouping, unary +/- and binary +,-,*,/,%. Calls, mutation,
+control flow, unsafe/effectful bodies,
 aggregates, resources, generic functions and cleanup annotations remain closed.
 The current source grammar uses an explicit `return` in a function statement
 block. No function-tail grammar extension is introduced by this implementation.
+
+Local-free bodies retain their original v1 identity. Local-bearing bodies use
+the v2 canonical initializer sequence from [ADR 0509](../adr/0509-inline-immutable-local-bindings.md),
+including unused initializers in source order. Existing HIR/IR/C locals execute
+once and retain traps; admission never substitutes or erases them. The detached
+IR verifier reconstructs the same sequence. Source/artifact, Go cross-package
+cache and Windows native evidence is in
+`docs/development/candidate-inline-locals-20261107.md`; final full authored CLI
+acceptance is recorded separately there and in its follow-up receipt.
 
 `module_inline_declarations` validates annotations, including declarations not
 selected for ordinary signatures. Its canonical JSON and SHA-256 agree with

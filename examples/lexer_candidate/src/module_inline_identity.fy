@@ -8,6 +8,8 @@ import std::bytes as bytes;
 pub fn bool zero(u32[8] hash){var usize i=0;while(i<8){if(hash[i]!=0){return false;}i+=1;}return true;}
 pub fn bool equal(u32[8] a,u32[8] b){var usize i=0;while(i<8){if(a[i]!=b[i]){return false;}i+=1;}return true;}
 pub fn bool header(ref mut bytes::Buffer out,usize arity,ref mut json::Ledger work){return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v1\",\"Arity\":",work) && json::number(out,arity,work) && json::raw(out,b",\"Root\":",work);}
+// Locals use a new canonical tuple while keeping the existing digest transport.
+pub fn bool locals_header(ref mut bytes::Buffer out,usize arity,ref mut json::Ledger work){return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v2\",\"Arity\":",work) && json::number(out,arity,work) && json::raw(out,b",\"Root\":",work) && branch(out,b"bindings",work);}
 pub fn bool leaf(ref mut bytes::Buffer out,ref u8[] op,usize value,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":",work) && json::quoted(out,op,work) && json::raw(out,b",\"Value\":\"",work) && json::number(out,value,work) && json::raw(out,b"\",\"Children\":null}",work);}
 pub fn bool operator(ref u8[] op,bool binary){return bytes::equal(op,b"+") || bytes::equal(op,b"-") || binary && (bytes::equal(op,b"*") || bytes::equal(op,b"/") || bytes::equal(op,b"%"));}
 pub fn bool branch(ref mut bytes::Buffer out,ref u8[] op,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":",work) && json::quoted(out,op,work) && json::raw(out,b",\"Value\":\"\",\"Children\":[",work);}

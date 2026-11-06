@@ -10,11 +10,11 @@ import (
 
 const InlineFunctionPrefix = "fyinlinefn1-sha256-"
 
-// InlineFunctionID describes the closed first source body family. Source spans,
+// InlineFunctionID describes the bounded source body family. Source spans,
 // local symbol numbering, parameter names, whitespace and literal spelling are inert.
 func InlineFunctionID(fn Function) (string, error) {
-	if !fn.Public || fn.Unsafe || len(fn.Effects) != 0 || fn.OwnerType != (Type{}) || fn.DropGlueFor != (Type{}) || fn.ResultType != TypeI32 || len(fn.Parameters) > 4 || len(fn.Locals) != 0 {
-		return "", fmt.Errorf("@inline requires a public safe i32 function with at most four i32 parameters and no effects, owner or locals")
+	if !fn.Public || fn.Unsafe || len(fn.Effects) != 0 || fn.OwnerType != (Type{}) || fn.DropGlueFor != (Type{}) || fn.ResultType != TypeI32 || len(fn.Parameters) > 4 || len(fn.Locals) > 16 {
+		return "", fmt.Errorf("@inline requires a public safe i32 function with at most four i32 parameters and no effects or owner and at most 16 immutable i32 locals")
 	}
 	parameters := make(map[SymbolID]int)
 	for i, p := range fn.Parameters {
@@ -24,11 +24,22 @@ func InlineFunctionID(fn Function) (string, error) {
 		parameters[p.Symbol] = i
 	}
 	expression := fn.Body.Tail
-	if len(fn.Body.Statements) == 1 && fn.Body.Statements[0].Kind == StatementReturn && fn.Body.Tail == nil {
-		expression = fn.Body.Statements[0].Expression
-	} else if len(fn.Body.Statements) != 0 {
-		return "", fmt.Errorf("@inline requires one returned expression")
+	statements := fn.Body.Statements
+	if len(statements) > 0 && statements[len(statements)-1].Kind == StatementReturn && expression == nil {
+		expression = statements[len(statements)-1].Expression
+		statements = statements[:len(statements)-1]
 	}
+	if len(statements) != len(fn.Locals) {
+		return "", fmt.Errorf("@inline requires immutable bindings followed by one returned expression")
+	}
+	locals := make(map[SymbolID]Local)
+	for _, local := range fn.Locals {
+		if local.Mutable || local.Type != TypeI32 {
+			return "", fmt.Errorf("@inline requires immutable i32 locals")
+		}
+		locals[local.Symbol] = local
+	}
+	bound := make(map[SymbolID]int)
 	type node struct {
 		Op       string
 		Value    string
@@ -62,7 +73,12 @@ func InlineFunctionID(fn Function) (string, error) {
 		case ExpressionPath:
 			i, ok := parameters[e.Symbol]
 			if !ok {
-				return n, fmt.Errorf("inline path must name a parameter")
+				if j, local := bound[e.Symbol]; local {
+					n.Op = "local"
+					n.Value = strconv.Itoa(j)
+					return n, nil
+				}
+				return n, fmt.Errorf("inline path must name a parameter or preceding local")
 			}
 			n.Value = strconv.Itoa(i)
 		case ExpressionPrefix:
@@ -87,15 +103,35 @@ func InlineFunctionID(fn Function) (string, error) {
 		}
 		return n, nil
 	}
+	var initializers []node
+	for i, statement := range statements {
+		_, ok := locals[statement.Binding]
+		_, duplicate := bound[statement.Binding]
+		_, parameter := parameters[statement.Binding]
+		if statement.Kind != StatementBinding || !ok || duplicate || parameter || statement.Target != nil || statement.For != nil {
+			return "", fmt.Errorf("@inline requires immutable i32 bindings in source order")
+		}
+		initializer, err := encode(statement.Expression)
+		if err != nil {
+			return "", err
+		}
+		initializers = append(initializers, initializer)
+		bound[statement.Binding] = i
+	}
 	root, err := encode(expression)
 	if err != nil {
 		return "", err
+	}
+	version := "fairyc.inline-function/v1"
+	if len(initializers) != 0 {
+		version = "fairyc.inline-function/v2"
+		root = node{Op: "bindings", Children: append(initializers, root)}
 	}
 	data, err := json.Marshal(struct {
 		Version string
 		Arity   int
 		Root    node
-	}{"fairyc.inline-function/v1", len(fn.Parameters), root})
+	}{version, len(fn.Parameters), root})
 	if err != nil {
 		return "", err
 	}
