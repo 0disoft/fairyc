@@ -207,8 +207,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("Result switch in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_OK) { goto fy_b_%d; }\n", value, success)
-		fmt.Fprintf(output, "    if ((%s).tag == FY_RESULT_ERR) { goto fy_b_%d; }\n", value, failure)
+		emitResultTagBranches(output, value, success, failure)
 		fmt.Fprintf(output, "    %s;\n", e.trapCall("FY_TRAP_UNREACHABLE", terminator.Span))
 	case "checked-unary":
 		operand, err := oneOperand(terminator.SwitchOperands)

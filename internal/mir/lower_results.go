@@ -15,6 +15,9 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	if resultValue.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("propagate operand has no value")
 	}

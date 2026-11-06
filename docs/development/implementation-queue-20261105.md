@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Thirteen independent Go Result-propagation source/codec controls now retain
+  exact written question-token spans and partial-operand reachability. A
+  reproduced MIR invariant failure preserves the original terminal operand;
+  the required MSVC Result-tag read barrier also fixes optimized C4702 without
+  weakening warnings. All six Windows native executions pass with exact trap
+  receipts/early return, in a 9.775s combined command. The observed-relations
+  plan records the separate deferred-call canonicalization defect and remaining
+  Fairy collector/map/CLI work. Native Linux and all broader/final gates stay open.
+
 - Fairy Region `alloc_zeroed_bytes` and `copy_bytes` now use resolved lexical
   capabilities, contextual `usize`/byte-view checking, original Region origins,
   retained lifecycle descriptors, verified CFG/IR and the existing native runtime.

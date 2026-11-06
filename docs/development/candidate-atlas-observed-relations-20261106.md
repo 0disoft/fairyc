@@ -642,3 +642,46 @@ dependency, default timeout, target, runner or repository-policy change.
 This prerequisite does not implement the Fairy allocation collector, promote
 allocation completeness or complete map/command parity. Those steps and every
 original wider/final gate remain required; no push or dispatch.
+
+## Result propagation Go prerequisite
+
+`TestAtlasReturnErrorSitesOracle` fixes thirteen independent source/codec
+observations before the Fairy collector is derived. A propagation site is the
+single original `?` byte, not the full operand or its implicit error return.
+Explicit `.err` construction creates no propagation site. The corpus retains
+local/call operands, repeated/nested propagation, branches/loops, both partial
+argument orders, an earlier direct trap and terminal trap/return operands.
+
+The trapped operand reproduced exit 4, `internal compiler invariant failed`,
+because Go MIR demanded a result value after its operand had already terminated.
+`lowerPropagate` now preserves that termination before demanding a live value
+or creating any result switch, cleanup or observation. The related Result
+construction guard likewise preserves an already terminated payload. Invalid
+operands on live paths still reject. Failed attempts remain in
+`.cache/atlas-return-error-trapped-operand-before-20261106.log` and
+`atlas-return-error-oracle-native-20261106.log`.
+
+The native partial-argument case exposed a second required backend correction:
+MSVC optimized emission inferred the callee's constant Result tag, then reported
+C4702 on its caller's valid MIR continuation. `result_switch.go` now snapshots
+the tag once through a private volatile write/read under `_MSC_VER` before
+selecting the unchanged success/error edges. Other C compilers retain the
+ordinary tag reads. This has an explicit two-access volatile cost per Result
+switch on MSVC; it changes neither source/ABI/IR/cache contracts nor warning
+policy. The failed native attempt and inspected generated unit remain in
+`.cache/atlas-return-error-operand-guard-20261106.log` and
+`result-payload-debug.c`. The temporary diagnostic Go test was removed.
+
+The thirteen source/codec controls and six actual Windows low/optimized native
+executions pass together in 9.775s. The native programs retain assertion trap
+receipts, empty stdout/stderr and the explicit early error-return exit 3.
+Command: `go test -mod=readonly -count=1 -failfast -v ./internal/cli -run
+'^Test(AtlasReturnErrorSitesOracle|WindowsResultPropagationOperandExit)$'`.
+Log: `.cache/atlas-return-error-operand-native-pass-20261106.log`.
+
+A separately observed cleanup/defer-plus-propagation source still produces
+duplicate Go Atlas calls and fails canonical encoding. The failed observation
+is retained in `.cache/atlas-return-error-oracle-native-final-20261106.log`;
+call canonicalization is the next independent fix, not covered by this receipt.
+Fairy error-site collection/map/CLI work, allocation production and all broader
+and final queue gates remain open. Native Linux stays batched; no push/dispatch.

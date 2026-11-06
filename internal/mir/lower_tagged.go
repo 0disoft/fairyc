@@ -15,6 +15,9 @@ func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operan
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	if payload.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("Result::%s payload has no value", expression.Variant)
 	}
