@@ -2,7 +2,10 @@
 
 Status: compiler-private one-attempt graph execution and CAS persistence
 implemented on Windows. This completes the existing graph plan's native storage
-step, not its source/developer/artifact/cache/CLI or final acceptance queue.
+step. The later [source/developer step](source-state-graph-v1.md) adds explicit
+source graph admission and native developer selection for five source codecs.
+Source helpers/borrows, Complete/artifact/cache/ordinary CLI and final acceptance
+remain required.
 Native Linux remains batched. No push, dispatch, release or deployment.
 
 Owners: [graph execution](native-state-graph-v1.md),

@@ -5,8 +5,9 @@ The latest [graph persistence step](native-state-graph-persistence-v1.md) connec
 the admitted graphs, helpers and read borrows through actual C framing to one
 real layout/version CAS. The first [source graph step](source-state-graph-v1.md)
 now adds explicit multi-field/map/read-value/branch/join admission and actual
-source-to-C/local-store comparisons. Source helpers/borrows, developer/artifact/
-cache/CLI and final acceptance remain required; the sections below retain their
+source-to-C/local-store comparisons, plus explicit native developer selection.
+Source helpers/borrows, Complete/artifact/cache/ordinary CLI and final acceptance
+remain required; the sections below retain their
 original checkpoint scope.
 This implements the existing execution queue; it does not replace its full
 native-state requirement with single-cell acceptance. Linux execution stays in

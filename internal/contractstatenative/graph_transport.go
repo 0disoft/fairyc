@@ -29,6 +29,11 @@ type GraphTransport struct {
 	literal int
 }
 
+// BodyHash and ProgramHash expose immutable receipt identities, not executable
+// or publication authority. ProgramHash includes the actual framing program.
+func (prepared GraphTransport) BodyHash() contractstatemir.StateBodyHash { return prepared.entry.body }
+func (prepared GraphTransport) ProgramHash() [32]byte                    { return prepared.program }
+
 type GraphInput struct {
 	packet []byte
 	valid  bool

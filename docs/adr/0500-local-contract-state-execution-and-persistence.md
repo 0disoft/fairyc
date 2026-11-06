@@ -94,3 +94,38 @@ I/O/backend/output failure, 6 transaction rejection, 7 conflict/layout drift/bus
 report; unexpected implementation panics remain panics. A report-output failure after
 publication is explicitly described as possibly committed and must not trigger an
 automatic retry. There is no default compiler CLI integration or target flag.
+
+## Explicit native graph developer mode
+
+The developer command additionally accepts exactly
+`<init|execute|snapshot> <directory> <source.fy> --engine native-graph --profile low|optimized`.
+This selects [ADR 0503](0503-experimental-source-state-graphs.md) source admission
+and the existing sealed Windows graph/CAS path. The original three-argument
+Go-MIR form, report v1 and single-cell admission remain unchanged. There is no
+interpreter fallback. Invocation/profile validation precedes source/store I/O.
+
+The native mode requires Windows amd64. Every call reloads the bounded regular
+source file through the existing opened-root/identity checks and re-enters the
+compiler and native handoff. Execute builds one C image before opening the
+store; init/snapshot admit the source and graph without building or executing
+its body. Storage and transaction policies are identical to the original mode.
+Creation remains explicit and exclusive; reopening never initializes a store.
+
+Native reports use `fairyc.local-state-run/v2`, retaining the action/layout and
+outcome/snapshot fields and adding engine, selected profile, exact verified
+body hash and framing-program SHA-256. These identities report fresh admission;
+they are not a cache, trusted Complete provenance or artifact restoration.
+Execute takes one snapshot, runs actual generated C once and performs at most
+one CAS. Existing exit codes retain their meaning; trap conversion catches
+only the named state trap. An inconsistent publication acknowledgement retains
+both its outcome and actual receipt, with failure text and exit 4. Report-output
+failure explicitly warns of possible publication. Neither path retries.
+
+Interrupt cancellation reaches native process execution and is checked before
+store access and CAS by the existing one-attempt owner. Native construction
+retains the existing bounded compiler timeout; cancellation is checked before
+and after construction. Successful CAS acknowledgement remains success when
+cancellation arrives during publication. The synchronous storage port is not
+made cancellable. Native Linux, source helper/borrow and dynamic byte/text
+admission, ordinary CLI selection and Complete/artifact/cache integration stay
+in the remaining queue. No SDK, ABI, dependency, default limit or runner changes.

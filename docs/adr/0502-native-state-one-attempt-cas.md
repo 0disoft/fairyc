@@ -4,6 +4,13 @@
 - Extends: ADRs 0376, 0382 and 0500
 - Owner: [native persistence integration](../architecture/native-state-persistence-v1.md)
 
+The subsequent [graph persistence](../architecture/native-state-graph-persistence-v1.md)
+step also implements the existing graph/helper/borrow native family on Windows.
+[ADR 0503](0503-experimental-source-state-graphs.md) and ADR 0500's explicit native
+developer mode connect the currently admitted source graphs. The original
+single-cell/literal decisions below retain their checkpoint scope; complete
+source/Complete/artifact/cache/ordinary-CLI integration and final gates remain open.
+
 Compile a sealed prepared native owner into an opaque executable before state
 access. One execution takes one snapshot, runs generated C exactly once, checks
 the complete bound response and submits at most one overlay through the existing

@@ -8,7 +8,8 @@ local-store/reopen/conflict/cancellation evidence are implemented in
 [graph persistence v1](native-state-graph-persistence-v1.md). The first explicit
 [source graph admission](source-state-graph-v1.md) now connects five-codec
 cells/maps, read values and structured branch/join through actual C/local CAS.
-Source helpers/borrows, developer/artifact/cache/CLI and the full acceptance
+That subset also has explicit native developer selection under ADR 0500.
+Source helpers/borrows, Complete/artifact/cache/ordinary CLI and the full acceptance
 queue remain required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux

@@ -367,6 +367,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatenative/graph_source_windows_test.go`
   - `examples/contract_state_graph/transaction.fy`
   - `docs/adr/0503-experimental-source-state-graphs.md`, `docs/architecture/source-state-graph-v1.md`
+- **Explicit native graph developer command with fresh source admission, native C execution and one-attempt local CAS; ordinary CLI/Complete/cache remain pending**
+  - `tools/dev/fairyc-state/native.go`, `native_test.go`, `native_windows_test.go`, `main.go`
+  - `internal/contractstatenative/graph_transport.go`: immutable body/framing-program receipt identities
+  - `docs/adr/0500-local-contract-state-execution-and-persistence.md`, `docs/architecture/source-state-graph-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

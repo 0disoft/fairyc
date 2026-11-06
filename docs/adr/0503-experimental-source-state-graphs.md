@@ -52,8 +52,9 @@ remain separate unchanged checks.
 This is the first source-graph slice, not completion of native state integration.
 The checked-in example and Windows tests pass the compiled owner through
 `PrepareCompiled`, actual generated graph C, the sealed response admission and
-one-attempt local-store CAS. Source helper/borrow syntax and dynamic byte/text
-schema admission, developer/CLI selection, current Complete/source provenance,
+one-attempt local-store CAS. The admitted subset also has explicit native
+developer selection under ADR 0500. Source helper/borrow syntax and dynamic byte/text
+schema admission, ordinary CLI selection, current Complete/source provenance,
 artifact/cache invalidation and full acceptance remain required. The broader
 seven-codec/helper/borrow HIR/native runtime remains independently available.
 

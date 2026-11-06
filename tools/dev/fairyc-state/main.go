@@ -1,13 +1,15 @@
 // Command fairyc-state executes one experimental source state transaction through
-// the Go MIR oracle and a bounded local store. It is not a chain deployment tool.
+// Go MIR or an explicitly selected native graph and a bounded local store.
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/0disoft/fairyc/internal/compiler"
@@ -18,9 +20,15 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-const usage = `Experimental local Fairy state runner (Go verified-MIR execution)
+const usage = `Experimental local Fairy state runner
 
 Usage: fairyc-state <init|execute|snapshot> <existing-store-directory> <source.fy>
+       fairyc-state <init|execute|snapshot> <existing-store-directory> <source.fy> --engine native-graph --profile low|optimized
+
+The original three-argument form uses Go MIR and single-cell source admission.
+Native graph mode uses fresh graph source admission and actual Windows amd64
+MSVC C execution, with no interpreter fallback or artifact cache. Only execute
+builds/runs the native image; init/snapshot never execute the transaction body.
 
 One source file and exactly one transaction are accepted. init exclusively creates
 state; execute performs one attempt; snapshot never runs the transaction body.
@@ -40,9 +48,19 @@ type report struct {
 	Snapshot     *contractstate.PersistentSnapshot `json:"snapshot,omitempty"`
 }
 
-func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
+func main() { os.Exit(runWithSignals()) }
+
+func runWithSignals() int {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	return runContext(ctx, os.Args[1:], os.Stdout, os.Stderr)
+}
 
 func run(args []string, stdout, stderr io.Writer) int {
+	return runContext(context.Background(), args, stdout, stderr)
+}
+
+func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	if stdout == nil || stderr == nil {
 		return 4
 	}
@@ -52,6 +70,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 4
 		}
 		return 0
+	}
+	if len(args) != 3 {
+		return runNative(ctx, args, stdout, stderr)
 	}
 	if len(args) != 3 || (args[0] != "init" && args[0] != "execute" && args[0] != "snapshot") || args[1] == "" || filepath.Ext(args[2]) != ".fy" {
 		return fail(2, errors.New(usage))
@@ -68,12 +89,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(3, err)
 	}
-	limits := contractstate.LocalPersistenceLimits{MaxStateBytes: 16 << 20, MaxEntries: 65536, MaxValueBytes: 64 << 10}
 	open := contractstate.OpenLocalPersistence
 	if args[0] == "init" {
 		open = contractstate.CreateLocalPersistence
 	}
-	store, err := open(args[1], layout, limits)
+	store, err := open(args[1], layout, localStateLimits())
 	if err != nil {
 		return fail(storageExit(err), err)
 	}
@@ -107,57 +127,65 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 
 func compileSource(path string) (contractstatemir.Program, error) {
-	root, err := os.OpenRoot(filepath.Dir(path))
+	compiled, err := compileSourceResult(path, compiler.CheckExperimentalState)
 	if err != nil {
 		return contractstatemir.Program{}, err
+	}
+	return compiled.StateTransactions[0].Program, nil
+}
+
+func compileSourceResult(path string, check func(semantic.File) (compiler.Result, error)) (compiler.Result, error) {
+	root, err := os.OpenRoot(filepath.Dir(path))
+	if err != nil {
+		return compiler.Result{}, err
 	}
 	defer root.Close()
 	name := filepath.Base(path)
 	info, err := root.Lstat(name)
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	if !info.Mode().IsRegular() {
-		return contractstatemir.Program{}, fmt.Errorf("source must be a regular file")
+		return compiler.Result{}, fmt.Errorf("source must be a regular file")
 	}
 	file, err := root.Open(name)
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	defer file.Close()
 	opened, err := file.Stat()
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	if !os.SameFile(info, opened) || !opened.Mode().IsRegular() {
-		return contractstatemir.Program{}, fmt.Errorf("source identity changed")
+		return compiler.Result{}, fmt.Errorf("source identity changed")
 	}
 	limits := source.DefaultLimits()
 	if opened.Size() > int64(limits.MaxBytes) {
-		return contractstatemir.Program{}, fmt.Errorf("source size limit exceeded")
+		return compiler.Result{}, fmt.Errorf("source size limit exceeded")
 	}
 	data, err := io.ReadAll(io.LimitReader(file, int64(limits.MaxBytes)+1))
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	if len(data) > limits.MaxBytes {
-		return contractstatemir.Program{}, fmt.Errorf("source size limit exceeded")
+		return compiler.Result{}, fmt.Errorf("source size limit exceeded")
 	}
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile(name, data), limits)
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
-		return contractstatemir.Program{}, fmt.Errorf("source syntax rejected")
+		return compiler.Result{}, fmt.Errorf("source syntax rejected")
 	}
-	compiled, err := compiler.CheckExperimentalState(semantic.File{Path: name, Module: parsed.AST})
+	compiled, err := check(semantic.File{Path: name, Module: parsed.AST})
 	if err != nil {
-		return contractstatemir.Program{}, err
+		return compiler.Result{}, err
 	}
 	if !compiled.Verified || len(compiled.StateTransactions) != 1 {
-		return contractstatemir.Program{}, fmt.Errorf("source requires exactly one verified experimental state transaction")
+		return compiler.Result{}, fmt.Errorf("source requires exactly one verified experimental state transaction")
 	}
-	return compiled.StateTransactions[0].Program, nil
+	return compiled, nil
 }
 
 func storageLayout(layout contractstatemir.Layout) (contractstate.Layout, error) {
@@ -198,7 +226,7 @@ func execute(store contractstate.PersistencePort, program contractstatemir.Progr
 			}
 		}
 	}()
-	outcome, err = contractstatemir.ExecutePersistent(store, program, contractstate.Limits{MaxWrites: 1024, MaxWriteBytes: 1 << 20, MaxValueBytes: 64 << 10, MaxMapKeyBytes: 1024})
+	outcome, err = contractstatemir.ExecutePersistent(store, program, stateExecutionLimits())
 	return outcome, "", err
 }
 
@@ -207,4 +235,12 @@ func storageExit(err error) int {
 		return 7
 	}
 	return 4
+}
+
+func localStateLimits() contractstate.LocalPersistenceLimits {
+	return contractstate.LocalPersistenceLimits{MaxStateBytes: 16 << 20, MaxEntries: 65536, MaxValueBytes: 64 << 10}
+}
+
+func stateExecutionLimits() contractstate.Limits {
+	return contractstate.Limits{MaxWrites: 1024, MaxWriteBytes: 1 << 20, MaxValueBytes: 64 << 10, MaxMapKeyBytes: 1024}
 }
