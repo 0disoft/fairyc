@@ -29,9 +29,9 @@ fn Problem fail(u32 stage,u32 code,bool published){return Problem{.stage,.code,.
     }
     return .err(fail(4,3,false));
 }
-@effects(filesystem) fn Result<bool,Problem> publish(ref host::Directory root,ref u8[] root_path,ref host::Directory parent,ref mut host::File stage,ref u8[] leaf,ref preview::Preview proposal){
+@effects(filesystem) fn Result<bool,Problem> publish(ref u8[] root_path,ref host::Directory parent,ref mut host::File stage,ref u8[] leaf,ref preview::Preview proposal){
     if(!host::write_all(stage,preview::after(proposal)).is_ok || !host::sync(stage).is_ok){return .err(fail(5,1,false));}
-    let current=switch(snapshots::capture(root,root_path)){case .ok(p):{p}case .err(code):{return .err(fail(6,code,false));}};
+    let current=switch(snapshots::capture_path(root_path)){case .ok(p):{p}case .err(code):{return .err(fail(6,code,false));}};
     if(!bytes::equal(snapshots::digest(ref current),preview::fingerprint(proposal))){return .err(fail(6,5,false));}
     let original=switch(files::read(parent,leaf,8388608)){case .ok(p):{p}case .err(code):{return .err(fail(7,code,false));}};
     if(!bytes::equal(bytes::view(ref original),preview::before(proposal))){return .err(fail(7,5,false));}
@@ -46,7 +46,7 @@ fn Problem fail(u32 stage,u32 code,bool published){return Problem{.stage,.code,.
     let parent=switch(files::descend(root,target[..at-1],false)){case .ok(p):{p}case .err(code):{return .err(fail(3,code,false));}};
     discard writable(ref parent,target[at..])?;
     var stage=temporary(ref parent)?;
-    let outcome=publish(root,root_path,ref parent,ref mut stage,target[at..],proposal);
+    let outcome=publish(root_path,ref parent,ref mut stage,target[at..],proposal);
     let closed=switch(host::close(stage)){case .ok(_):{true}case .err(_):{false}};let parent_closed=switch(host::close_directory(parent)){case .ok(_):{true}case .err(_):{false}};
     return switch(outcome){
         case .ok(_):{if(!closed || !parent_closed){.err(fail(9,1,true))}else{.ok(true)}}

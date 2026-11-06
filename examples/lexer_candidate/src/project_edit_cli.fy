@@ -27,8 +27,9 @@ import std::io as io;
     }
     return if(switch(io::write_bytes(preview::report(ref result))){case .ok(n):{n==preview::report(ref result).len}case .err(_):{false}}){0}else{error(4,"write output failed")};
 }
-@effects(filesystem,environment,console) pub fn i32 arguments(){
-    if(process::arg_count()==4){var u8[4096] raw=[0;4096];let n=switch(process::arg(3,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref raw;if(bytes::equal(value[..n],b"--help") || bytes::equal(value[..n],b"-h") || bytes::equal(value[..n],b"help")){return if(io::write(public::help()).is_ok){0}else{4};}}
+@effects(filesystem,environment,console) pub fn i32 arguments_with_help(ref str help){
+    if(process::arg_count()==4){var u8[4096] raw=[0;4096];let n=switch(process::arg(3,ref mut raw)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref raw;if(bytes::equal(value[..n],b"--help") || bytes::equal(value[..n],b"-h") || bytes::equal(value[..n],b"help")){return if(io::write(help).is_ok){0}else{4};}}
     let o=switch(options::arguments()){case .ok(p):{p}case .err(_):{return error(2,"invalid experimental atlas-edit replace-body arguments");}};
     return run(b".",ref o);
 }
+@effects(filesystem,environment,console) pub fn i32 arguments(){return arguments_with_help(public::help());}

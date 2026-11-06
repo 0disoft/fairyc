@@ -24,6 +24,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	selectLinuxCEmission(t, root)
 	selectLinuxTestExecutor(t, root)
 	selectLinuxCache(t, root)
+	selectLinuxEdit(t, root)
 	entryPath := filepath.Join(root, "src", "main.fy")
 	entry, err := os.ReadFile(entryPath)
 	if err != nil {
@@ -49,7 +50,8 @@ fn i32 cli_probe() {
     assert(linux_experimental::command(b"atlas-symbols\n")==0 && linux_experimental::command(b"atlas-calls")==4);
     assert(linux_experimental::command(b"atlas-calls-extra")==0 && linux_experimental::command(b"atlas-calls\n")==0);
     assert(linux_experimental::command(b"atlas-pack")==5 && linux_experimental::command(b"atlas-pack-extra")==0);
-    assert(linux_experimental::command(b"atlas-pack\n")==0 && linux_experimental::command(b"atlas-edit")==0);
+    assert(linux_experimental::command(b"atlas-pack\n")==0 && linux_experimental::command(b"atlas-edit")==6);
+    assert(linux_experimental::command(b"atlas-edit-extra")==0 && linux_experimental::command(b"atlas-edit\n")==0);
     assert(linux_experimental::command(b"atlas-impact-extra")==0 && linux_experimental::command(b"atlas-impact\n")==0);
     assert(file_cli::command(b"--c-file",3)==4 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::command(b"--c-file",2)==0 && file_cli::command(b"--c-file",4)==0);
@@ -101,6 +103,15 @@ fn i32 cli_probe() {
 	support, err := nativesupport.Source(target.X8664LinuxGNU, linux.Unit.ForeignSymbols, nativesupport.Options{SDKStorage: true, CandidateHost: true})
 	if err != nil || !strings.Contains(support, "fairyc_private_linux_root_file_read_v1") {
 		t.Fatalf("Linux CLI runtime selection: %v", err)
+	}
+	for _, wanted := range []string{"fairyc_private_linux_edit_file_prepare_v1", "fairyc_private_linux_edit_file_publish_v1"} {
+		found := false
+		for _, symbol := range linux.Unit.ForeignSymbols {
+			found = found || symbol == wanted
+		}
+		if !found || !strings.Contains(support, wanted+"(") {
+			t.Fatalf("Linux edit entry/runtime missing %s", wanted)
+		}
 	}
 	t.Log("both-target full Linux entry emission and closed Linux support selection passed")
 	t.Run("portable-dispatch", func(t *testing.T) {
@@ -212,6 +223,7 @@ fn i32 cli_probe() {
 			checkLinuxAtlasSymbols(t, artifact)
 			checkLinuxAtlasCalls(t, artifact)
 			checkLinuxAtlasPack(t, artifact)
+			checkLinuxAtlasEdit(t, artifact)
 			checkLinuxCEmission(t, toolchain, artifact)
 		})
 	}

@@ -334,3 +334,84 @@ functions. Public CLI/SDK ABI, DB, dependencies, default budgets/timeouts,
 CI/runners and repository policy are unchanged; no push or dispatch. Fresh Linux
 preparation check/locked passes 701 files / 8,690 MIR functions. Scoped vet,
 Go formatting, UTF-8/LF/final-newline and diff checks pass.
+
+## Prepared command and full-entry selection
+
+Linux experimental mode 6 selects the shared edit command through
+`arguments_with_help(linux_cli_data::help())`. The existing `arguments()` keeps
+default Windows help. Both preparation and the full-entry test select Linux
+rooted-file imports in the command, preview and snapshot modules, edit-specific
+reads in the command/snapshot, and `linux_edit_apply` for publication. Source
+checking, body validation, fingerprinting, overlay admission, reports and command
+ordering keep their existing shared owners. Import-boundary drift fails preparation.
+
+An initial full-entry/prepared check rejected the unselected Windows application
+module: its held Windows Directory was passed to the now Linux-selected snapshot
+module. Windows publication now uses the existing path-only `capture_path` port
+at the same post-sync/pre-original-read recheck boundary. The root remains held
+by `apply`/`locked`; its explicit path snapshot owns and closes its own root.
+Private `publish` no longer takes the unused Directory argument. Public entry
+signatures and primary publication/cleanup ordering stay unchanged.
+
+`TestLinuxAtlasEditCommand` executes the actual shared command with Windows I/O
+and Linux help in both host profiles. Independent Go reports, invalid bodies,
+exact/one-short/one-over body limits, portable/exact spelling, symlink refusal,
+stale lock/source checks, preview immutability, apply bytes and cleanup are
+retained. Default-help behavior shares each built image. This proves command
+composition and shared Windows behavior, not actual Linux I/O or publication.
+`TestCandidateEditCommand` separately retains Windows native fault injection,
+including partial write, sync/rename/close failures, source drift and lock/stage
+cleanup behavior after the snapshot boundary change.
+
+`checkLinuxAtlasEdit` attaches the command/apply verifiers to the already built
+native Linux full CLI. Its Linux-only metadata replay additionally requires a
+hard-linked source, a read-only hard-linked replacement body, preserved 0640
+source permissions, survival of the old source inode/bytes and refusal to apply
+to a read-only target. These observations remain authored and unexecuted here.
+The shared output-failure helper opens `os.DevNull` read-only: Windows retains
+`NUL`, while Linux selects `/dev/null` rather than requiring a literal `NUL`
+file. It still exercises an unwritable inherited stream, not a native SIGPIPE
+or closed-pipe observation.
+
+Current commands:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -failfast -v ./internal/cli -run '^TestLinux(FileCLI|CLIHelp)$'
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestLinuxAtlasEditCommand$'
+go test -mod=readonly -count=1 -timeout 12m -failfast -v ./internal/cli -run '^TestCandidateEditCommand$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-edit-cli-20261106-wired-v1
+# In examples/lexer_candidate and in that prepared directory:
+go run -mod=readonly ../../cmd/fairyc check
+go run -mod=readonly ../../cmd/fairyc check --locked
+go vet -mod=readonly ./internal/cli
+git diff --check
+```
+
+The initial preparation succeeded; an incorrect follow-up `check --project`
+invocation was rejected with exit 2 before source checking. The actual commands
+above run from each workspace directory. No unsupported command is counted as
+validation and no product timeout or warning policy is relaxed.
+
+The Linux/default-help command replay passes in 291.86s (low 201.11s,
+optimized 75.63s), without selected skips. Full-entry C emission has 26
+partitions and a 2,059,704-byte header; both targets and the closed Linux support
+selection pass, including both edit prepare/publish native symbols and absence
+of Windows foreign symbols. Portable dispatch passes both profiles in 6.92s.
+The full-entry root takes 37.27s and explicitly skips actual Linux execution;
+its help/emission command exits 0 in 37.484s. Original check/locked passes 701
+files / 8,690 MIR functions; prepared check/locked passes 701 / 8,691. Final
+focused help compilation, scoped vet, Go formatting and diff checks pass.
+
+The Windows fault-injected command regression passes all 32 named leaves under
+both profiles in 497.22s (low 419.86s, optimized 62.30s), with command exit 0 in
+497.396s and no selected skips. The final native-only metadata additions do not
+change those executed Windows branches or generated image inputs; the portable
+output helper still resolves to the identical `NUL` path on Windows. Those
+observations are retained after the focused final Go compilation/vet rather
+than repeating either large native command matrix. Canonical UTF-8/LF/final
+newline checks and the final diff check pass.
+
+Native Linux filesystem/lock/publication, stdio/default-SIGPIPE/closed-pipe
+behavior, broader language/Atlas scope and every final acceptance gate remain
+open. Public SDK/runtime ABI, DB, dependencies, default budgets/timeouts,
+CI/runners and repository policy are unchanged. No push or hosted dispatch.

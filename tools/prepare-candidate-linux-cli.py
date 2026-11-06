@@ -84,6 +84,27 @@ def select_linux_cache(output):
         path.write_text(source, encoding='utf-8', newline='\n')
 
 
+def select_linux_edit(output):
+    # Only host selection changes. Shared source checking, snapshot identity,
+    # body validation, reports and command ordering keep their authored owners.
+    for name in ('project_edit_cli', 'project_edit_preview', 'project_edit_snapshot'):
+        path = output / 'src' / (name + '.fy')
+        source = path.read_text(encoding='utf-8')
+        changes = [('import windows_rooted_file as host;',
+                    'import linux_rooted_file as host;')]
+        if name != 'project_edit_preview':
+            changes.append(('import project_remote_fs as files;',
+                            'import linux_edit_fs as files;'))
+        if name == 'project_edit_cli':
+            changes.append(('import project_edit_apply as applying;',
+                            'import linux_edit_apply as applying;'))
+        for old, new in changes:
+            if source.count(old) != 1:
+                raise ValueError(f'{name} edit host selection changed: {old}')
+            source = source.replace(old, new)
+        path.write_text(source, encoding='utf-8', newline='\n')
+
+
 def prepare(output, companion=False):
     output = output.resolve()
     if not output.is_relative_to((ROOT / '.cache').resolve()):
@@ -109,6 +130,7 @@ def prepare(output, companion=False):
         select_linux_emission(output)
         select_linux_tests(output)
         select_linux_cache(output)
+        select_linux_edit(output)
     return output
 
 

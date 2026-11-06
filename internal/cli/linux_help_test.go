@@ -8,7 +8,7 @@ import (
 // Required and optional flags come from the independent Go command policy.
 func TestLinuxCLIHelp(t *testing.T) {
 	help := linuxFetchHelp(t)
-	for _, command := range []string{"fetch-packages", "atlas-impact", "atlas-mcp", "atlas-symbols list", "atlas-calls list", "atlas-pack"} {
+	for _, command := range []string{"fetch-packages", "atlas-impact", "atlas-mcp", "atlas-symbols list", "atlas-calls list", "atlas-pack", "atlas-edit replace-body"} {
 		prefix := "fairyc experimental " + command + " "
 		found := false
 		for _, line := range strings.Split(usage, "\n") {

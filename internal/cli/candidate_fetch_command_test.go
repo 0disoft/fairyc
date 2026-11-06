@@ -55,7 +55,7 @@ func fetchCLIProcess(t *testing.T, image, root string, args []string, broken str
 	var out, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &stderr
 	if broken != "" {
-		file, err := os.Open("NUL")
+		file, err := os.Open(os.DevNull)
 		if err != nil {
 			t.Fatal(err)
 		}

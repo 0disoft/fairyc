@@ -30,11 +30,11 @@ authorized by this queue.
   match in Windows low/optimized, including feature macro/source order. Native
   compilation, trusted TLS and consecutive Linux self-build remain pending. See
   `candidate-linux-runtime-sync-20261106.md`.
-- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols/calls/pack to the
+- [x] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols/calls/pack to the
   Linux entry and select compatible host facades before the combined native replay.
-  Impact/MCP/symbol/call/pack dispatch, Linux help and shared current-source queries are connected;
+  Impact/MCP/edit/symbol/call/pack dispatch, Linux help and shared current-source queries are connected;
   Windows command/full-entry evidence and the authored native replay are in
-  `candidate-linux-atlas-cli-20261106.md`. Edit remains open;
+  `candidate-linux-atlas-cli-20261106.md` and `candidate-linux-atlas-edit-20261106.md`;
   native stdio/default-SIGPIPE/closed-pipe behavior also needs explicit replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
@@ -66,6 +66,20 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Linux Atlas edit now selects the edit-specific Linux readers, retained-root
+  snapshot and one-attempt application owner through the actual prepared/full
+  entry. Linux/default help and independent Go preview/apply/error cases pass
+  Windows low/optimized (291.86s). Both-target full-entry C emission, closed Linux
+  runtime selection and portable dispatch pass; actual Linux is explicitly
+  skipped. Original/prepared check and locked check pass 701 files / 8,690 and
+  8,691 MIR functions. The shared snapshot's path-only boundary fixes the
+  unselected Windows application's cross-platform Directory type error.
+  Windows command/fault regression passes all 32 named low/optimized leaves in
+  497.22s. The shared unwritable-output helper uses the host's `os.DevNull`.
+  Native metadata/hard-link/permissions replay is attached to the existing
+  Linux CLI image; kernel I/O/publication, pipe/signal behavior and the entire
+  broader implementation/final queue remain open. See the Linux edit receipt.
 
 - Linux edit application policy now composes the real lock/stage/file/reader
   owners: prepared/synced bytes, fresh closure and exact original rechecks,

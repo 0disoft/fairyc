@@ -22,6 +22,11 @@ func TestCandidateEditCommand(t *testing.T) {
 
 func verifyCandidateEditCommand(t *testing.T, image string) {
 	t.Helper()
+	verifyCandidateEditCommandWithHelp(t, image, usage)
+}
+
+func verifyCandidateEditCommandWithHelp(t *testing.T, image, help string) {
+	t.Helper()
 	root, args := editFixture(t)
 	var reference, diagnostic bytes.Buffer
 	if code := runAtlasEdit(args[2:], root, &reference, &diagnostic); code != 0 {
@@ -106,7 +111,7 @@ func verifyCandidateEditCommand(t *testing.T, image string) {
 		t.Fatal("preview/error path left changes")
 	}
 	code, out, stderr = fetchCLIProcess(t, image, t.TempDir(), []string{"experimental", "atlas-edit", "--help"}, "")
-	if code != 0 || out != usage || stderr != "" {
+	if code != 0 || out != help || stderr != "" {
 		t.Fatalf("edit help without workspace: %d %q %q", code, out, stderr)
 	}
 }
