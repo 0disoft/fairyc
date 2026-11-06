@@ -693,6 +693,13 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 }
 
 func executeWindowsMSVCArtifactWithContext(parent context.Context, artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (outcome WindowsHostOutcome, err error) {
+	return executeWindowsMSVCArtifactWithOutputLimit(parent, artifact, label, stdin, programArgs, timeout, workingDirectory, maxProcessOutput)
+}
+
+func executeWindowsMSVCArtifactWithOutputLimit(parent context.Context, artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string, outputLimit int) (outcome WindowsHostOutcome, err error) {
+	if outputLimit <= 0 || outputLimit > maxWindowsExecutionOutputBytes {
+		return WindowsHostOutcome{}, fmt.Errorf("%s execution output limit must be 1..%d bytes", label, maxWindowsExecutionOutputBytes)
+	}
 	if parent == nil {
 		return WindowsHostOutcome{}, fmt.Errorf("%s execution context must not be nil", label)
 	}
@@ -730,7 +737,7 @@ func executeWindowsMSVCArtifactWithContext(parent context.Context, artifact Wind
 	if workingDirectory != "" {
 		command.Dir = workingDirectory
 	}
-	output := newBoundedProcessOutput(maxProcessOutput)
+	output := newBoundedProcessOutput(outputLimit)
 	command.Stdout = output.stdoutWriter()
 	command.Stderr = output.stderrWriter()
 	trapControl := ""
@@ -751,7 +758,7 @@ func executeWindowsMSVCArtifactWithContext(parent context.Context, artifact Wind
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {
-		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %d output bytes", label, maxProcessOutput)
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %d output bytes", label, outputLimit)
 	}
 	exitCode := 0
 	if err != nil {

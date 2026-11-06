@@ -158,3 +158,20 @@ response framing, multi-key CAS publication and compiler-cache/CLI integration
 remain required before claiming durable multi-field support. Graphs, helpers,
 borrows and non-Windows emission remain explicitly refused; Linux execution and
 the broader final queue remain deferred.
+
+## Explicit binary response capture prerequisite
+
+The context-aware Windows execution driver also accepts an explicit 1..64MiB
+combined stdout/stderr limit for private binary transports. Existing execution
+entrypoints still use 64KiB. The ceiling is its own capture policy, independent
+of executable image size. It retains owned-job, deadline, cancellation, pipe
+drain and cleanup behavior. This is a prerequisite, not wider state framing or
+publication admission.
+
+`TestWindowsTargetExplicitOutputLimit` compiles a real program emitting all
+binary byte values across 65,537 bytes: 65,536 fails, 65,537 and 65,538 preserve
+every byte, and the ordinary entrypoint still fails at 64KiB. Invalid limits
+reject before materialization. Context/inherited-pipe/completed-trap-output
+regression passes in 9.475s; the final explicit-limit replay passes in 0.883s.
+Scoped vet and formatting/diff checks pass. No default output or timeout policy,
+public CLI/SDK ABI, DB/provider, dependency or runner changes.
