@@ -15,8 +15,12 @@ short/overdrawn structural and byte work, **65,535/65,536/65,537 entries** and
 digest mutation are refused. Input storage is moved/owned and Packet never
 retains caller views. No forced OOM is claimed.
 
-Final current-source command, replay and lock evidence are recorded in the
-transport integration receipt. Packet tests do not stand in for execution or
+The unchanged final request source is replayed in **70.08s**, with its private
+Packet refusals passing separately, in `.cache/graph-transport-final.log`.
+That broader invocation fails in the separately owned seeded-branch expectation;
+the passed request group is not claimed as an overall command pass. Corrected
+transport replay and lock evidence are recorded in the integration receipt.
+Packet tests do not stand in for execution or
 response/CAS admission. Linux execution is batched; full Go suite and hosted
 CI are unexecuted. Public CLI/SDK/runtime ABI, DB, dependencies, existing wire
 ceilings, repository and runners are unchanged. No push, dispatch, release or

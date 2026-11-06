@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- Actual Fairy Complete now owns audited native entry, framed C and its exact
+  Go-compatible transport hash; a compiled-owner wrapper emits immutable
+  requests from the same retained Complete. Windows low/optimized pass 144
+  preparation/request processes and 18 real C images, each also refusing a
+  foreign-identity request. Full source/lock passes at 736 files / 9,169 MIR
+  functions. Tests compare complete C,
+  hash, requests and SHA256 before actual C execution and independent response/
+  MIR checks. Fairy response admission, native orchestration and persistent CAS
+  remain open, so the native-persistence row is unchecked. See ADR 0532 and
+  `candidate-state-graph-transport-20261107.md`.
+
 - Fairy now encodes copied immutable graph requests with whole-request SHA256,
   canonical known cells, opaque other keys and exact Go wire bytes. Windows
   low/optimized cover all seven codecs, full-width limits, exact 65,536-entry/

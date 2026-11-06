@@ -6,6 +6,12 @@ in [graph persistence v1](native-state-graph-persistence-v1.md), completing step
 [the complete graph plan](native-state-graph-v1.md). This is not an alternate
 completion target. Native Linux remains batched; no push or hosted dispatch.
 
+The Fairy counterpart now has Complete-bound audited entry/framed-C preparation
+and immutable request encoding under ADRs 0530–0532. Its complete C/hash/request
+bytes match Go and execute on Windows. Fairy response/path/write admission,
+native orchestration and persistent CAS remain separate pending steps; the Go
+decoder used by those execution tests does not complete the Fairy decoder.
+
 ## Authority and input
 
 `PrepareGraphTransport` selects the verified graph emitter, seals copied site

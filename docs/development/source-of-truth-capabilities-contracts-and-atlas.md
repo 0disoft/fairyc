@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Complete-bound Fairy graph framing and compiled-owner requests**: `examples/lexer_candidate/src/module_state_graph_transport.fy`, `module_state_graph_transport_request.fy`, `internal/cli/candidate_state_graph_transport_test.go`; full Go C/hash/wire and actual C execution comparisons, separate remaining response/CAS scope: ADR 0532 and `docs/development/candidate-state-graph-transport-20261107.md`.
+
 - **Fairy graph snapshot request encoding**: `examples/lexer_candidate/src/module_state_graph_request.fy`, `internal/cli/candidate_state_graph_request_test.go`; exact Go wire/hash comparison, canonical cell validation and separate structural/byte work: ADR 0531 and `docs/development/candidate-state-graph-request-20261107.md`.
 
 - **Fairy graph transport facts and explicit C-frame input**: `examples/lexer_candidate/src/module_state_graph_transport_plan.fy`, `module_state_graph_frame_assets.fy`, `module_state_graph_frame_pin.fy`, `tools/package-candidate-state-graph-frame.py`; independent Go/native and ownership tests: `internal/cli/candidate_state_graph_transport_plan_test.go`, `candidate_state_graph_frame_assets_test.go`. Admission and exact evidence: ADR 0530 and `docs/development/candidate-state-graph-framing-inputs-20261107.md`.
