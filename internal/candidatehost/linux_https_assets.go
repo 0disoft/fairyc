@@ -10,3 +10,6 @@ var linuxHTTPSProtocol string
 
 //go:embed linux_https_worker.c
 var linuxHTTPSWorker string
+
+//go:embed linux_https_reader.c
+var linuxHTTPSReader string

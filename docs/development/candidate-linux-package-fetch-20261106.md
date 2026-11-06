@@ -453,6 +453,24 @@ system libcurl/CA runtime; Go dependencies and baseline/CI provisioning are
 unchanged. No current Fairy source changed, so the prior 693-file / 8,617-function
 check/locked receipts retain their unchanged input scope.
 
+## Parent-side bounded protocol reader
+
+`linux_https_reader.c` now consumes the producer's pipe protocol without retaining
+caller buffers or an archive-sized allocation. It retains detached metadata and
+the unconsumed byte count of one body frame. Reads span frames, reject invalid
+kind/order/code/length, and admit at most maximum+1 total body bytes. A successful
+end requires actual pipe EOF; trailing bytes and truncated frames fail. An input
+error is latched, so another read cannot replay the failed stream.
+
+`go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^TestLinuxHTTPSReaderBoundaries$'`
+passes both Windows profiles in 0.942s with empty PATH. Independent byte-layout
+fixtures exercise 29 short-read strides, every truncation of the 197-byte valid
+stream, twenty malformed/error cases and exact 65,536/65,537-byte boundaries.
+A separate producer/reader composition check preserves NUL/0xff bytes. The first
+probe compilation found a harness-global name shadowing a producer local; the
+fixture name was corrected without weakening warnings. Runtime selection stays
+closed until the process/deadline owner exists. Actual Linux remains deferred.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
