@@ -19,6 +19,7 @@ import std::text as text;
 @effects(filesystem) pub resource File { u32 raw; bool staged; cleanup { unsafe { discard close_handle(this.raw); }; } }
 // Borrowed transport for other private host modules; ownership stays with Directory.
 pub fn u32 directory_handle(ref Directory root) { return root.raw; }
+pub fn u32 file_handle(ref File file) { return file.raw; }
 // Private host capability transfer. The unsafe caller must own this descriptor
 // exclusively and relinquish it after adoption; this does not duplicate an fd.
 @effects(filesystem) pub unsafe fn Directory from_owned_directory_handle(u32 raw) {

@@ -47,8 +47,7 @@ fn rooted::Metadata empty_metadata() { return rooted::Metadata{.device=0,.identi
 }
 
 // Returned names and metadata own detached storage; an error never returns a prefix.
-@effects(filesystem) pub fn Result<Entries,Problem> scan(ref rooted::Directory root,usize maximum,ref mut usize work) {
-    if(maximum==0 || maximum>4096) { return .err(fail(1,0,0)); }
+@effects(filesystem) fn Result<Entries,Problem> scan_bounded(ref rooted::Directory root,usize maximum,ref mut usize work) {
     if(!charge(work,1)) { return .err(fail(7,0,0)); }
     var usize raw=0;let opened=unsafe { native_open(rooted::directory_handle(root),ref mut raw as ptr mut usize) };
     if(opened!=0) { return .err(fail(3,opened,0)); } if(raw==0) { return .err(fail(6,0,0)); }
@@ -58,4 +57,14 @@ fn rooted::Metadata empty_metadata() { return rooted::Metadata{.device=0,.identi
         case .ok(entries): { if(closed!=0) { return .err(fail(5,closed,count(ref entries))); } return .ok(entries); }
         case .err(original): { var problem=original;problem.close_code=closed;return .err(problem); }
     };return .err(fail(6,0,0));
+}
+
+@effects(filesystem) pub fn Result<Entries,Problem> scan(ref rooted::Directory root,usize maximum,ref mut usize work) {
+    if(maximum==0 || maximum>4096) { return .err(fail(1,0,0)); }
+    return scan_bounded(root,maximum,work);
+}
+// Package ZIP source policy permits at most 8,192 explicit/implicit path rows.
+// Other directory users retain the original 4,096-item admission above.
+@effects(filesystem) pub fn Result<Entries,Problem> scan_packages(ref rooted::Directory root,ref mut usize work) {
+    return scan_bounded(root,8192,work);
 }

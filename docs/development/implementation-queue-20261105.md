@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Linux package-file observation now rejects hard links without changing generic
+  file semantics; conditional cleanup preserves exact metadata and partial-error
+  results. Package scans admit 8,192 rows while ordinary scans retain 4,096 and
+  the same work budget. Independent Windows low/optimized C/Fairy probes and
+  reference check/locked pass (688 files / 8,576 MIR functions). Native Linux
+  file replay is authored but remains batched; package filesystem/cache, offline,
+  HTTPS and CLI integration remain open. See the Linux fetch receipt.
+
 - Fairy retained package-directory capabilities now bind the native prerequisite
   to owned child/parent handles, retained names and publication/removal phases.
   Independent malformed/partial output, borrowed-root preservation and lifetime

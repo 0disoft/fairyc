@@ -130,16 +130,61 @@ Final local logs: `.cache/linux-package-directory-policy-empty-path-20261106.log
 does not add a CI job, select actual Linux execution or prove missing package
 filesystem/transport/CLI integration.
 
+## Package file observations and scan capacity
+
+`linux_package_file.c` adds one held-file metadata observation which rejects
+any link count other than one before releasing package metadata. Generic rooted
+file observations keep their previous semantics. The private 40-byte metadata
+layout remains unchanged; native `EMLINK` is statically bound to Linux error 31.
+The Fairy package-file facade retains complete identity/size/time/mode through
+the existing single-link conditional erase primitive. It validates names and
+metadata before mutation and preserves applied-removal and separate close errors.
+
+`linux_directory::scan_packages` permits 8,192 rows through the same collector,
+work ledger and cursor ownership as ordinary scans. Ordinary `scan` still admits
+only 1..4,096. Independent 8,192/8,193 streams, exact/one-short work, end names and
+ordinary-limit refusal pass without changing the 16,777,216 work limit.
+
+Windows evidence:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^(TestPrivateLinuxPackageFileSelection|TestLinuxPackageFileAdapterBoundaries)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinux(PackageFilePolicy|DirectoryPolicy|RootedFilePolicy|CacheFilePolicy)$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+```
+
+The C selection/boundary command passes in 0.818s, both MSVC profiles. It checks
+link counts 0/1/2, unchanged generic observations, malformed metadata and handles,
+zeroed error output, stat failure and observation EINTR retry. Its first attempt
+fails only on a test-local `links` name shadowing the shared stub counter under
+warnings-as-errors; renaming that local corrects the harness without suppressions.
+The Fairy policy command passes four roots / eight native executions in 10.850s
+with empty PATH, both-target emission and no selected skips. It includes native
+error/malformed-success results, metadata preflight, stale non-removal and applied
+erase with close/native failures. Scoped vet, formatting and diff checks pass.
+The reference full-source check and locked check pass 688 files / 8,576 MIR
+functions; the example lock is refreshed. Logs are
+`.cache/linux-package-file-adapter-20261106.log`,
+`.cache/linux-package-file-policy-20261106.log` and
+`.cache/linux-package-file-check-20261106.log` (not staged).
+
+This prepares the filesystem facade; it does not yet connect package/cache I/O,
+offline restoration or transport/CLI selection.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageDirectoryAdapterNative$'
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageFileAdapterNative$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
 checks real no-replace collisions, binary contents, empty-tree cleanup,
 symlink/replaced-inode refusal and continued use after closing the original
 parent and renaming its path. It remains required in the combined Linux replay.
+The separately authored file probe checks anonymous/single-linked/hard-linked
+files, binary bytes and conditional removal preserving a hard-linked file. Its
+GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
 Next implementation: package filesystem facade, package file and cache
 publication, offline restoration, verified HTTPS and online/offline Linux

@@ -28,6 +28,9 @@ var linuxDirectory string
 //go:embed linux_package_directory.c
 var linuxPackageDirectory string
 
+//go:embed linux_package_file.c
+var linuxPackageFile string
+
 //go:embed linux_retention.c
 var linuxRetention string
 
@@ -57,8 +60,11 @@ func LinuxSource(header string) (string, error) {
 	starter := false
 	gnu := false
 	packageDirectory := false
+	packageFile := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_package_file_info_v1":
+			rooted, packageFile = true, true
 		case "fairyc_private_linux_package_directory_create_v1", "fairyc_private_linux_package_directory_edit_v1",
 			"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1":
 			rooted, packageDirectory = true, true
@@ -126,6 +132,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if packageDirectory {
 		source += "\n" + linuxPackageDirectory
+	}
+	if packageFile {
+		source += "\n" + linuxPackageFile
 	}
 	if retention {
 		source += "\n" + linuxRetention

@@ -7,6 +7,21 @@ import std::bytes as bytes;
 @effects(filesystem) fn rooted::Directory root() {
     return switch(rooted::open(b"/work")) { case .ok(p): { p } case .err(_): { assert(false); return root(); } };
 }
+
+@test @effects(filesystem) fn void package_scan_preserves_separate_8192_item_and_work_limits(){
+    let root=root();unsafe{mode(19);}var usize work=0;
+    let full=switch(directory::scan_packages(ref root,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(directory::count(ref full)==8192 && bytes::equal(directory::name(ref full,8191),b"entry8191"));
+    let usize exact=1+8192*(297+49)+297;assert(work==exact);
+    unsafe{mode(20);}work=0;
+    switch(directory::scan_packages(ref root,ref mut work)){case .ok(_):{assert(false);}case .err(p):{assert(p.kind==7 && p.completed==8192);}};
+    unsafe{mode(19);}work=directory::work_limit()-exact;
+    let bounded=switch(directory::scan_packages(ref root,ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    assert(work==directory::work_limit() && directory::count(ref bounded)==8192);
+    unsafe{mode(19);}work=directory::work_limit()-exact+1;
+    switch(directory::scan_packages(ref root,ref mut work)){case .ok(_):{assert(false);}case .err(p):{assert(p.kind==7 && p.completed==8192);}};
+    rejected(ref root,19,7,4096,0);
+}
 @effects(filesystem) fn directory::Entries scanned(ref rooted::Directory root,usize maximum,ref mut usize work) {
     return switch(directory::scan(root,maximum,work)) { case .ok(p): { p } case .err(_): { assert(false); return scanned(root,maximum,work); } };
 }

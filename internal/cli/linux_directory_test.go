@@ -7,7 +7,8 @@ func TestLinuxDirectoryPolicy(t *testing.T) {
 @effects(filesystem) fn i32 main() {
     owns_names_metadata_and_restarts_each_scan();
     preserves_primary_failure_and_closes_cursor_once();
-    enforces_exact_item_and_cumulative_work_limits(); return 0;
+    enforces_exact_item_and_cumulative_work_limits();
+    package_scan_preserves_separate_8192_item_and_work_limits();return 0;
 }
 `, linuxRootedFilePolicyStub+linuxDirectoryPolicyStub)
 }
@@ -28,8 +29,8 @@ uint32_t fairyc_private_linux_directory_scan_next_v1(size_t cursor,uint8_t *data
     if(scan_case==17) {*length=1;return 0;}
     const char *names[]={".","..","alpha","\xed\x95\x9c","link","gone"};
     if(scan_case==12) {memcpy(data,"gone",5);*state=2;*length=4;return 0;}
-    if(scan_case==13 || scan_case==14) {
-        if(scan_row==(scan_case==13 ? 4096u : 4097u)) {return 0;}
+    if(scan_case==13 || scan_case==14 || scan_case==19 || scan_case==20) {
+        if(scan_row==(scan_case==13 ? 4096u : scan_case==14 ? 4097u : scan_case==19 ? 8192u : 8193u)) {return 0;}
         int size=snprintf((char *)data,256,"entry%04u",scan_row);assert(size==9);*length=9;*state=1;
     } else {
         if(scan_row==6) {return 0;}
