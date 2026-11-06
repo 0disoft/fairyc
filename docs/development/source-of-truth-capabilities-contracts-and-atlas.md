@@ -410,10 +410,11 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_artifact.fy`
   - `internal/cli/candidate_state_graph_artifact_test.go`
   - `docs/adr/0514-candidate-state-graph-artifact.md`, `docs/development/candidate-state-graph-artifact-20261107.md`
-- **Fairy exact authored-source straight-line literal state graph production, seven codecs and immutable source/spans; broader source/Complete admission remains separate**
-  - `examples/lexer_candidate/src/module_state_graph_source.fy`
-  - `internal/cli/candidate_state_graph_source_test.go`
+- **Fairy exact authored-source state graphs with immutable locals, dynamic operands, borrow/view/copy, structured joins and verified helpers; ordinary Complete admission remains separate**
+  - `examples/lexer_candidate/src/module_state_graph_source.fy`, `module_state_graph_source_context.fy`, `module_state_graph_source_operands.fy`, `module_state_graph_source_bindings.fy`, `module_state_graph_source_flow.fy`
+  - `internal/cli/candidate_state_graph_source_test.go`, `internal/cli/candidate_state_graph_source_values_test.go`
   - `docs/adr/0515-candidate-authored-state-graph-source.md`, `docs/development/candidate-state-graph-source-20261107.md`
+  - `docs/development/candidate-state-source-operands-20261107.md`, `docs/development/candidate-state-source-bindings-20261107.md`, `docs/development/candidate-state-source-flow-20261107.md`
 - **Fairy exact Go-compatible single-transaction portable graph body preimage/hash, helper and borrow identities; current-source/cache association remains separate**
   - `examples/lexer_candidate/src/module_state_graph_body_hash.fy`, `module_state_graph_hash_context.fy`, `module_state_graph_hash_encoding.fy`
   - `internal/cli/candidate_state_graph_body_hash_test.go`

@@ -1736,3 +1736,20 @@ authorized by this queue.
   Wider source locals/control/helpers/borrows, ordinary Complete/package/cache
   binding, command/native persistence and all final gates remain open. Linux
   stays batched; no push or dispatch. The complete objective remains active.
+
+- Fairy authored state-graph production now lowers immutable and typed locals,
+  aliases/presence bits, dynamic cell/map operands, root borrow/view/copy,
+  structured branches/joins and reachable acyclic helpers with exact transitive
+  effects. The sealed source owner and exact-source envelope retain the entire
+  independently verified root/helper program. Disjoint operand/binding/flow
+  implementation and documentation/boundary work use GPT-6.1 Sol high workers;
+  the parent owns integration, current-source lock and commits. The final
+  68-case Go source/MIR/body-identity oracle matches 136 Windows low/optimized
+  native processes (24.792s); original source/artifact regressions add 238 native
+  requests and eight ownership refusals on the same source. Fresh bootstrap
+  `check` and `check --locked` pass 716 files / 8,917 MIR functions, with all
+  1,186 authored `.fy` files matching the checked copy. Scoped vet passes.
+  Source receipts record initial harness failures separately. This closes the
+  bounded wider source producer; ordinary Complete/package/cache admission,
+  command selection, native persistence and all final gates remain open.
+  Linux stays batched; no push or dispatch. The full objective remains active.

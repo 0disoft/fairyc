@@ -84,13 +84,6 @@ func stateGraphSourceTrials() []stateGraphSourceTrial {
 	} {
 		invalid(fixture.name, fixture.body)
 	}
-	for _, fixture := range []struct{ name, body string }{
-		{"local-read-closed", `let x=storage::read("count");storage::commit();`},
-		{"branch-closed", `let flag=storage::read("flag");if(flag){storage::commit();}else{storage::reject();}`},
-		{"borrow-closed", `let x=storage::borrow("count");storage::commit();`},
-	} {
-		trials = append(trials, stateGraphSourceTrial{fixture.name, stateGraphSourceText(fixture.body), "1001", true})
-	}
 	base := stateGraphSourceText(`storage::write("count",1);storage::commit();`)
 	for _, fixture := range []struct {
 		name, text string
@@ -112,7 +105,6 @@ func stateGraphSourceTrials() []stateGraphSourceTrial {
 		{"duplicate-field", strings.Replace(base, "cell u32 count;", "cell u32 count;cell u32 count;", 1), false},
 		{"bad-layout-codec", strings.Replace(base, "cell u32 count;", "cell i32 count;", 1), false},
 		{"duplicate-uid", strings.Replace(base, "state {", `@contract_uid("other") state {`, 1), false},
-		{"helper-closed", strings.Replace(strings.Replace(base, `storage::write("count",1);`, `help();`, 1), "storage_read,storage_write", "storage_write", 1) + `@effects(storage_write) fn void help(){storage::write("count",1);return;}`, true},
 	} {
 		trials = append(trials, stateGraphSourceTrial{fixture.name, fixture.text, "1001", fixture.goValid})
 	}
