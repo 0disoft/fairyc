@@ -1753,3 +1753,16 @@ authorized by this queue.
   bounded wider source producer; ordinary Complete/package/cache admission,
   command selection, native persistence and all final gates remain open.
   Linux stays batched; no push or dispatch. The full objective remains active.
+
+- An independent source-limit worker now checks three-function programs with
+  1,023 / 1,024 / 1,025 combined operations in both root declaration orders,
+  reverse helper ordering, zero-operation aliases after the exact allowance,
+  and semantic 1001 versus policy 1002 refusal. All ten Go cases and twenty
+  Windows low/optimized native processes pass in 26.969s; no source fix was
+  needed. Positive bodies match exact Go bytes through original/source-restored/
+  detached-decoded proofs and exact/one-short work controls. Scoped vet,
+  formatting and hygiene pass; the complete source lock remains valid because
+  this slice changes only the test, receipt and indexes. See
+  `candidate-state-source-limits-20261107.md`. This closes boundary acceptance,
+  not ordinary Complete/cache/command/native persistence. Linux stays batched;
+  no push or dispatch. The full implementation objective remains active.
