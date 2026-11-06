@@ -432,6 +432,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
   - `internal/cli/candidate_state_graph_source_artifact_test.go`
   - `docs/adr/0517-candidate-source-graph-artifact-binding.md`, `docs/development/candidate-state-graph-source-artifact-20261107.md`
+- **Explicit bounded state-graph memory packets; hits restore actual current-source Complete under one ledger**
+  - `examples/lexer_candidate/src/project_state_graph_memory_cache.fy`
+  - `internal/cli/candidate_state_graph_memory_cache_test.go`
+  - `docs/adr/0521-candidate-state-graph-memory-cache.md`, `docs/development/candidate-state-graph-memory-cache-20261107.md`
 - **Explicit common Complete graph mode with source/package/body/interface ownership and current-source restoration; graph cache/native/commands remain separate**
   - `examples/lexer_candidate/src/project_compiler_core.fy`, `project_compiler_state_graph.fy`, `module_project_interfaces.fy`, `module_public_interface_extract.fy`, `project_cache_body_identity.fy`
   - `internal/cli/candidate_state_graph_complete_test.go`, `internal/cli/candidate_state_graph_complete_guards_test.go`

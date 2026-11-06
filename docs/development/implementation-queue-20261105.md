@@ -1796,3 +1796,17 @@ authorized by this queue.
   cache admission and workspace binding, native lowering/persistence, actual
   command selection and all final gates remain open. Linux stays batched;
   no push or dispatch. The full implementation objective remains active.
+
+- The explicit common-Complete graph lane now has bounded session-local packet
+  reuse. Each hit restores and fully revalidates current source, coordinate,
+  decoded graph, body and public/source interfaces; owner rebinding uses the
+  canonical coordinate. Disjoint Sol high work passes 70 Windows low/optimized
+  native processes / 156 cache requests, with 130 Complete returns, 26 expected
+  request errors and four sealed-owner refusals. Disabled/full cold fallback,
+  failed-publication preservation and exact/one-short shared work pass. Receipt
+  `candidate-state-graph-memory-cache-20261107.md` distinguishes the first failed
+  combined harness command from retained native and corrected owner successes.
+  Current-source check/locked check pass 719 files / 8,995 MIR functions. This
+  closes explicit in-process packet reuse, not disk identity/persistence, normal
+  workspace command selection or native graph execution. Linux stays batched;
+  no push or dispatch. The full implementation objective remains active.
