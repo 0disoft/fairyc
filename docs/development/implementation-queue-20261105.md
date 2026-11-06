@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Original Go move-site observations are fixed by fourteen source/codec controls
+  (Windows 1.123s). A consumed first argument remains observed when a later
+  argument traps; an unevaluated later argument, discard and internal Result
+  propagation do not create MoveSites. The observed-relations plan records the
+  resulting operand-level collection requirement. This is a Go prerequisite;
+  Fairy move collection/production, unsafe low CLI replay and every remaining
+  implementation/final gate stay open. Native Linux remains batched.
+
 - Complete-bound unsafe production now retains original Go sites in ordinary,
   specialized and concrete cleanup summaries and counts them with calls/drops/
   traps. Only uses-unsafe becomes newly exact. Windows source/current/join

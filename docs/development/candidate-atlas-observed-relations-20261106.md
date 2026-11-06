@@ -446,3 +446,28 @@ Both authored checks pass (674 files, 8,384 MIR functions), with logs
 `atlas-unsafe-production-indexed-locked-20261106.log` under `.cache`.
 Production roots and actual low CLI replay retain separate pending acceptance
 until their running selections finish.
+
+## Move-site Go prerequisite
+
+`TestAtlasMoveSitesOracle` fixes original source spans from fourteen independent
+Go source fixtures, with v3 encode/decode before comparison. It distinguishes
+copy/borrow/discard/temporary uses from binding, return, call, owning field,
+Option/Result payload and switch-scrutinee transfers. The two argument-order
+controls prove that a first argument's move survives a later direct assertion
+trap, while a later argument after an earlier trap has no move observation.
+Resource-bearing `?` transfers an obligation internally but contributes no
+Go `MoveSites`; error propagation has its own observation family.
+
+This changes the collector implementation plan: derive consumption at each
+evaluated operand, including partial parent evaluation, rather than scanning
+only completed calls/constructors or treating every ownership state change as
+an Atlas move. Source-relative identity is `main.fy` under the manifest's source
+root. Empty decoded site lists are compared semantically, not by nil/slice shape.
+
+The Windows Go selection passes fourteen cases without skips in 1.123s:
+`go test -mod=readonly -count=1 -failfast -timeout 5m -v ./internal/cli -run
+'^TestAtlasMoveSitesOracle$'`. Log: `.cache/atlas-move-sites-oracle-20261106.log`.
+Initial probe compile/shape/source-path/syntax errors were corrected before the
+passing selection and are not production defects. No Fairy move collector,
+map completeness promotion, generated-program run, Linux or hosted result is
+claimed by this Go-only prerequisite. The full implementation queue stays open.
