@@ -33,29 +33,46 @@ func verifyCandidatePackSourceCommand(t *testing.T, image string) {
 			if fixture.genericDependency {
 				writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", `module answer;pub fn i32 value(){return 42;}pub fn T id<T>(T value){return value;}`)
 			}
-			candidateCallsCommandSetup(t, root)
-			f := candidatePackCommandFixture(t, image, root, fixture.version)
-			q := candidatePackCommandControls(t, f, fixture.subject)
-			q.Symbol = candidatePackCommandSubject(t, f, fixture.subject, true)
-			before := remoteTree(t, root)
-			observations := 0
-			for _, action := range []string{"overview", "show", "around"} {
-				checkCandidatePackCommand(t, image, root, f, q, action, false)
-				observations++
-			}
-			for version := 1; version < fixture.minimum; version++ {
-				q.Version = version
-				observations++
-				if code, out, stderr := fetchCLIProcess(t, image, root, candidatePackCommandArgs(f, q, "around"), ""); code != 3 || out != "" || stderr == "" {
-					t.Fatalf("unsupported pack family v%d: %d %.500s %.500s", version, code, out, stderr)
-				}
-			}
-			if !reflect.DeepEqual(before, remoteTree(t, root)) {
-				t.Fatal("source packs changed the workspace")
-			}
-			t.Logf("pack source command native processes: %d", observations)
+			verifyCandidatePackSourceFixture(t, image, root, fixture.subject, fixture.version, fixture.minimum)
 		})
 	}
+	for _, fixture := range atlasReturnErrorProductionFixtures() {
+		t.Run("errors-"+fixture.name, func(t *testing.T) {
+			subject := "exercise"
+			switch fixture.name {
+			case "operand-order":
+				subject = "before"
+			case "generic":
+				subject = "forward"
+			}
+			verifyCandidatePackSourceFixture(t, image, atlasReturnErrorProductionWorkspace(t, fixture), subject, fixture.minimum, fixture.minimum)
+		})
+	}
+}
+
+func verifyCandidatePackSourceFixture(t *testing.T, image, root, subject string, version, minimum int) {
+	t.Helper()
+	candidateCallsCommandSetup(t, root)
+	f := candidatePackCommandFixture(t, image, root, version)
+	q := candidatePackCommandControls(t, f, subject)
+	q.Symbol = candidatePackCommandSubject(t, f, subject, true)
+	before := remoteTree(t, root)
+	observations := 0
+	for _, action := range []string{"overview", "show", "around"} {
+		checkCandidatePackCommand(t, image, root, f, q, action, false)
+		observations++
+	}
+	for version := 1; version < minimum; version++ {
+		q.Version = version
+		observations++
+		if code, out, stderr := fetchCLIProcess(t, image, root, candidatePackCommandArgs(f, q, "around"), ""); code != 3 || out != "" || stderr == "" {
+			t.Fatalf("unsupported pack family v%d: %d %.500s %.500s", version, code, out, stderr)
+		}
+	}
+	if !reflect.DeepEqual(before, remoteTree(t, root)) {
+		t.Fatal("source packs changed the workspace")
+	}
+	t.Logf("pack source command native processes: %d", observations)
 }
 
 func verifyCandidatePackSDKCommand(t *testing.T, image string) {

@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound Result-propagation production retains original question spans
+  in ordinary, specialized and concrete cleanup summaries, relation counts and
+  exact returns-error completeness. Six independent source families cover root
+  and dependency coordinates and all schema selections under both Windows
+  profiles: 149 native processes / 243 current maps, with the full old source
+  corpus also replayed under optimized. Six selected actual optimized CLI groups
+  pass, and six new pack cases pass both profiles (42 processes, no selected
+  skips). Authored checks pass 679 files / 8,480 MIR functions; scoped vet and
+  hygiene pass. See `candidate-atlas-return-error-sites-20261106.md`. Borrow
+  collection/production, broader implementation and all final gates stay open;
+  native Linux stays batched, no push or dispatch.
+
 - Fairy verified CFG Result-propagation collection retains exact written question
   tokens after completed operands and excludes earlier terminal paths. Nineteen
   independent Go source cases and twenty frame/work/count controls pass both

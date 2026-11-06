@@ -1,7 +1,8 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Current source production collects
-calls, drops, trap categories, unsafe sites, moves and Region allocations and declares other families unavailable. A
+calls, drops, trap categories, unsafe sites, moves, Region allocations and Result
+propagation and declares other families unavailable. A
 checked collector alone must not promote that production/completeness scope or
 finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
@@ -45,7 +46,7 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   independent source/current/join and actual-command comparisons.
 - [x] Verified Result-propagation collector with independent original Go question
   spans, ordinary/concrete owners and exact frame/work/count policies.
-- [ ] Complete-bound Result-propagation production, summaries/counts/completeness
+- [x] Complete-bound Result-propagation production, summaries/counts/completeness
   and independent source/current/join and actual-command comparisons.
 - [ ] Borrow collector and production with independent verified Go facts.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
@@ -874,7 +875,12 @@ sources and twenty frame/work/count controls pass both Windows profiles in
 406.107s: 78 native compiler processes without selected skips. Ordinary, generic
 and concrete cleanup ownership and original terminal-operand behavior remain
 independently checked. The authored checks pass 679 files / 8,479 MIR functions.
-Exact contract, commands, logs and limits:
-`candidate-atlas-return-error-sites-20261106.md`. Complete-bound error production,
-borrows, broader source/command work and every original final gate remain open.
+Exact collector contract, commands, logs and limits:
+`candidate-atlas-return-error-sites-20261106.md`. Subsequent Complete-bound
+production retains those original question spans, relation counts and exact
+returns-error completeness. Windows comparisons pass 149 native processes and
+243 independent current maps. Six actual optimized CLI groups and all six new
+source pack cases under both profiles pass: 42 new commands without selected
+skips. The linked plan records source/image hashes and separate validation scope.
+Borrows, broader source/command work and every original final gate remain open.
 Native Linux stays batched; no push or dispatch.

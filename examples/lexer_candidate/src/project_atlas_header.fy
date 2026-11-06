@@ -3,7 +3,7 @@ import project_atlas_facts as facts;
 import project_atlas_write as w;
 import std::bytes as bytes;
 pub fn ref u8[] relations(){return b"allocates|borrows|calls|drops|effects|generic-specializations|generic-template-bodies|may-trap|moves|reads|returns-error|test-calls|uses-unsafe|writes";}
-fn bool exact(ref u8[] relation,usize external){return bytes::equal(relation,b"calls") && external==0 || bytes::equal(relation,b"drops") || bytes::equal(relation,b"may-trap") || bytes::equal(relation,b"uses-unsafe") || bytes::equal(relation,b"moves") || bytes::equal(relation,b"allocates") || bytes::equal(relation,b"generic-specializations");}
+fn bool exact(ref u8[] relation,usize external){return bytes::equal(relation,b"calls") && external==0 || bytes::equal(relation,b"drops") || bytes::equal(relation,b"may-trap") || bytes::equal(relation,b"uses-unsafe") || bytes::equal(relation,b"moves") || bytes::equal(relation,b"allocates") || bytes::equal(relation,b"returns-error") || bytes::equal(relation,b"generic-specializations");}
 fn ref u8[] status(ref u8[] relation,usize external){if(bytes::equal(relation,b"calls") && external!=0){return b"partial";}if(exact(relation,external)){return b"exact";}return b"unavailable";}
 fn ref u8[] reason(ref u8[] relation){if(bytes::equal(relation,b"calls")){return b"external-ffi";}if(bytes::equal(relation,b"generic-template-bodies")){return b"bodies-checked-only-after-specialization";}return b"candidate-atlas-not-collected";}
 pub fn Result<bytes::Buffer,u32> completeness(usize resolved,usize external,ref mut usize meter){return completeness_generics(resolved,external,0,0,meter);}

@@ -119,6 +119,9 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	for _, allocation := range atlasAllocationProductionFixtures() {
 		fixtures = append(fixtures, fixture{"sdk-allocations-" + allocation.name, writeWorkspaceSessionFixture(t, allocation.source), allocation.minimum, nil})
 	}
+	for _, propagation := range atlasReturnErrorProductionFixtures() {
+		fixtures = append(fixtures, fixture{"errors-" + propagation.name, atlasReturnErrorProductionWorkspace(t, propagation), propagation.minimum, nil})
+	}
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -246,6 +249,18 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 						}
 						if !foundAllocations || slices.Contains(h.Omissions, "allocates:unavailable:candidate-atlas-not-collected") {
 							t.Fatal("source allocation completeness missing or omitted")
+						}
+						foundErrors := false
+						for _, r := range got.Completeness() {
+							if r.Relation == "returns-error" {
+								foundErrors = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source error propagation completeness: %+v", r)
+								}
+							}
+						}
+						if !foundErrors || slices.Contains(h.Omissions, "returns-error:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source error propagation completeness missing or omitted")
 						}
 						if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) {
 							a, b := got.Declarations(), want.Declarations()

@@ -13,7 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 )
 
-// The producer collects calls, drops, traps, unsafe sites, moves and allocations.
+// The producer collects calls, drops, traps, unsafe sites, moves, allocations and error propagation.
 // Packs expose these counts and summaries. Project only the explicitly declared
 // collection scope before querying; retain the original Go declarations, calls,
 // observed spans, trap categories and specialization identities.
@@ -75,8 +75,12 @@ func candidatePackCommandFixture(t *testing.T, image, root string, version int) 
 		if err := json.Unmarshal(fields["allocation_sites"], &allocations); err != nil {
 			t.Fatal(err)
 		}
-		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves) + len(allocations)
-		for _, field := range []string{"return_error_sites", "borrows"} {
+		var returnErrors []json.RawMessage
+		if err := json.Unmarshal(fields["return_error_sites"], &returnErrors); err != nil {
+			t.Fatal(err)
+		}
+		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves) + len(allocations) + len(returnErrors)
+		for _, field := range []string{"borrows"} {
 			if _, ok := fields[field]; !ok {
 				t.Fatalf("missing independent body field %s", field)
 			}
