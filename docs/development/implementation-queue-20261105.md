@@ -1823,3 +1823,19 @@ authorized by this queue.
   retains failed preparation separately. This closes a key prerequisite, not
   disk transport/admission, filesystem persistence, workspace selection or graph
   execution. Linux stays batched; no push or dispatch. Full objective stays active.
+
+- Graph cache transport now binds canonical cache identity to the exact-source
+  envelope under a disjoint bounded marker. Restore first re-admits actual
+  source/package Complete, then recomputes and compares the whole key before
+  returning ownership. Valid source/key splices, environment/library/coordinate
+  drift, malformed framing and work exhaustion are refused. The coordinator's
+  disjoint source/test work passes 44 Windows low/optimized native processes in
+  30.801s, including same-coordinate rebinding, exact/one-short work, 8 MiB
+  framing boundaries and destroyed-input lifetime. Current complete-source
+  check/locked check pass 721 files / 9,013 MIR functions; all 1,191 authored
+  files match the checked snapshot. Receipt
+  `candidate-state-graph-cache-artifact-20261107.md` preserves preparation failures
+  and exclusions. Memory packet reuse, keys and private transport are now closed
+  for this family. Actual graph disk file lookup/publication/retention, ordinary
+  workspace commands, native execution/persistence and final gates remain open.
+  Linux stays batched; no push or dispatch. Full objective stays active.

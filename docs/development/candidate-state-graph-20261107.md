@@ -104,3 +104,18 @@ source codecs, helpers, branches and borrows. Steps 3-5 remain open. It does not
 select graph mode through ordinary workspace commands or publish cache hits.
 See `candidate-state-graph-complete-20261107.md` for current evidence; the earlier
 layout-only acceptance and failures above remain historical records.
+
+
+## Explicit cache prerequisites
+
+ADRs 0521-0523 now add bounded session-local packet reuse, a graph-specific
+Complete-derived cache identity and key-bound exact-source transport. Memory
+hits fully restore current-source Complete; detached disk transport likewise
+re-admits source/package ownership and recomputes the whole key before returning
+Complete. Windows low/optimized receipts are the corresponding memory-cache,
+cache-key and cache-artifact development documents. No latency improvement or
+native state-program execution is inferred from these packet checks.
+
+Step 3 is partially closed: filesystem graph lookup/publication/retention is
+still required. Steps 4-5, wider source families and the full implementation
+objective remain open. Linux execution stays batched; no push or dispatch.

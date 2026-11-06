@@ -432,6 +432,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
   - `internal/cli/candidate_state_graph_source_artifact_test.go`
   - `docs/adr/0517-candidate-source-graph-artifact-binding.md`, `docs/development/candidate-state-graph-source-artifact-20261107.md`
+- **Key-bound state-graph cache transport; current-source Complete restoration and fresh complete-key comparison**
+  - `examples/lexer_candidate/src/project_state_graph_cache_artifact.fy`
+  - `internal/cli/candidate_state_graph_cache_artifact_test.go`
+  - `docs/adr/0523-candidate-state-graph-cache-artifact.md`, `docs/development/candidate-state-graph-cache-artifact-20261107.md`
 - **State-graph cache identity from sealed Complete and current compatibility; disjoint canonical and digest domains**
   - `examples/lexer_candidate/src/project_state_graph_cache_key.fy`
   - `internal/cli/candidate_state_graph_cache_key_test.go`
