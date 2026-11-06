@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Private Linux online fetch now composes missing-cache HTTPS retrieval, request/
+  operation deadlines, fresh hash/ZIP/package identity validation, immutable cache
+  storage and the existing offline package publisher under an exclusive held lock.
+  Primary HTTPS native and independent cleanup causes survive orchestration.
+  Both Windows profiles pass independent Go-reference namespace/outcome cases and
+  network/cache/lock/deadline fault controls; offline regressions and exact native
+  replay inputs also pass. Full source check/locked pass 694 files / 8,623 MIR
+  functions. Actual Linux filesystem/libcurl/TLS replay remains batched; positive
+  trusted TLS, online/offline CLI dispatch, provisioning and final gates stay open.
+
 - Linux HTTPS now has a streaming protocol reader and parent-side deadline,
   child/descriptor owner, selected once with the producer/clock by the private
   runtime symbol selector. Independent Windows low/optimized process-boundary,

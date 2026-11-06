@@ -62,7 +62,13 @@ This is not permission to call fork/libcurl from a multithreaded embedding host.
 Authored GCC/Clang low/optimized probes cover actual process/descriptor lifetime,
 parent death, stalled producer, DNS and stalled TLS handshake, and fresh untrusted
 loopback certificates without changing system trust. They have not run. Positive
-trusted TLS, actual child lifetime/deadlines, online orchestration, CLI selection,
+trusted TLS, actual child lifetime/deadlines, CLI selection,
 distribution prerequisites and all broader/final gates remain open.
+
+Private online orchestration is now implemented in `linux_remote_online.fy`,
+reusing the admitted plan/binding/archive/cache and offline publication owners.
+Its independent Windows model evidence and deferred real-filesystem/untrusted-
+TLS composition replay are recorded in the Linux fetch receipt. This does not
+establish a trusted Linux download or admit the pending CLI command.
 
 No public command/SDK, support flag, Go dependency, DB, CI or runner is changed.

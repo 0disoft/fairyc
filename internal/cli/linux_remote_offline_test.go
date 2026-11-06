@@ -330,6 +330,11 @@ func linuxOfflineSeed(out *strings.Builder, function, name string, data []byte, 
 }
 func linuxOfflineBuild(t *testing.T, root string, selected target.ID) (cbackend.BuildUnit, string) {
 	t.Helper()
+	return linuxRemoteBuild(t, root, selected, false)
+}
+
+func linuxRemoteBuild(t *testing.T, root string, selected target.ID, online bool) (cbackend.BuildUnit, string) {
+	t.Helper()
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
 		t.Fatal(err)
@@ -346,7 +351,7 @@ func linuxOfflineBuild(t *testing.T, root string, selected target.ID) (cbackend.
 			t.Fatal(err)
 		}
 		for _, symbol := range unit.Unit.ForeignSymbols {
-			if strings.Contains(strings.ToLower(symbol), "http") || strings.HasPrefix(symbol, "fairyc_private_windows_") {
+			if (!online && strings.Contains(strings.ToLower(symbol), "http")) || strings.HasPrefix(symbol, "fairyc_private_windows_") {
 				t.Fatalf("offline host/transport leak: %s", symbol)
 			}
 		}
@@ -365,7 +370,7 @@ func linuxOfflineBuild(t *testing.T, root string, selected target.ID) (cbackend.
 	}
 	var symbols []string
 	for _, symbol := range build.Unit.ForeignSymbols {
-		if !strings.HasPrefix(symbol, "fairyc_private_linux_") && !strings.HasPrefix(symbol, "offline_probe_") {
+		if !strings.HasPrefix(symbol, "fairyc_private_linux_") && !strings.HasPrefix(symbol, "offline_probe_") && !strings.HasPrefix(symbol, "online_probe_") {
 			symbols = append(symbols, symbol)
 		}
 	}

@@ -106,5 +106,10 @@ Windows MSVC low/optimized executions pass with empty PATH. This is private poli
 evidence only. The Linux fetch receipt records exact commands, failures and scope.
 Independent Windows native-call substitutes also exercise the actual reader,
 producer and parent owner. Authored GCC/Clang two-profile process, negative trust,
-DNS and TLS-stall replays are pending; positive trusted HTTPS, online orchestration
-and CLI selection remain required.
+DNS and TLS-stall replays are pending; positive trusted HTTPS and CLI selection
+remain required. The private `linux_remote_online::fetch` orchestration now caps
+each request by min(30,000 ms, the remaining 120,000 ms operation deadline), calls
+this facade only on exact-cache absence and retains its `{code, native_code,
+cleanup_code}` in a stage-10 problem. Cached bytes never bypass hashing/archive
+identity checks. Verified new bytes enter immutable cache storage before the
+existing offline publication owner. No transport/publication retry is added.

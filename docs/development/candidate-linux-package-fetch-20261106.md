@@ -532,6 +532,77 @@ negative TLS trust, DNS and stalled TLS handshake commands below are authored,
 not run. Positive trusted TLS and ordinary response-header/body socket stalls
 remain separate from the controlled producer's real-process replay.
 
+## Private Linux online fetch composition
+
+`linux_remote_online::fetch` now reads/binds the source plan and root manifest,
+acquires the same held-directory exclusive fetch lock as offline restoration,
+and reuses the admitted source-plan/binding/archive/immutable-cache and offline
+package-publication owners. Only `linux_remote_fs`'s exact absent classification
+permits HTTPS; corruption, aliases, links, special files and read errors fail
+without falling back to transport. Every hit and download is hashed again, then
+ZIP/package identity is validated before immutable cache storage or publication.
+New verified cache blobs and prior complete packages may remain on a later error.
+
+The existing 16 MiB/archive, 64 MiB compressed/expanded, 4,096 files, 8 MiB/file,
+8,192 path entries and depth-32 policies remain unchanged. Pure archive/request
+budget helpers reject overflowed/exhausted totals before subtraction and cap each
+request by min(30 seconds, remaining two-minute deadline). Deadline checks cover
+phase boundaries and the final result; existing decoding/filesystem operations
+are not interrupted mid-entry. The HTTPS owner supplies its own I/O deadline.
+There is no transport, cache or package publication retry.
+
+The private online problem keeps stage/code plus native/consuming-close causes;
+in particular HTTPS errors retain their numeric native cause instead of being
+reduced to a generic stage. A later lock-cleanup error cannot overwrite a primary
+request-close failure. No public command or SDK type is changed by this module.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m ./internal/cli -run '^TestLinuxRemoteOnlinePolicy$'
+go test -mod=readonly -count=1 -timeout 5m ./internal/cli -run '^TestLinuxRemoteOnlineNativeInputs$'
+go test -mod=readonly -count=1 -timeout 8m ./internal/cli -run '^TestLinuxRemoteOfflinePolicy$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+# From examples/lexer_candidate:
+go run -mod=readonly ../../cmd/fairyc check
+go run -mod=readonly ../../cmd/fairyc check --locked
+```
+
+Final Windows online policy passes in 22.864s, native replay input checks in
+5.776s and the offline regression in 27.603s, without selected skips. Both target
+C-emission profiles and native Windows low/optimized execution pass with empty
+PATH. The online oracle compares Go outcomes, request counts and complete final
+file/directory bytes against an independent Linux ABI namespace/HTTPS model. It
+covers cached and downloaded stored/DEFLATE/ZIP64, exact and empty-directory reuse,
+corrupt/aliased caches, conflicting trees, invalid binding/archive/package identity,
+two-package and partial-success behavior, new cache parents and byte-exact escaped/
+Unicode URL delivery. Pure helpers cover archive cap-1/cap/cap+1, exhausted/SIZE_MAX
+totals and 29,999/30,000/30,001 ms request caps.
+
+Independent controls observe factory/partial/metadata/read/close/native timeout
+causes, status/encoding/byte/ABI rejection, cache zero writes/sync/consuming-close,
+matching/differing publication competitors, operation expiry before/after download,
+15,000 ms and 1 ms remaining request budgets, start-clock failure, hash mismatch,
+one-attempt package collision, competing lock and combined primary/request-close/
+lock-cleanup errors. Complete expected namespaces preserve verified blobs and
+foreign/failed-cleanup leftovers; model handles/cursors/requests close.
+Those simulated competitors and faults are not evidence of Linux kernel races.
+
+The initial online run exposed two harness URL issues: Go Request.URL.String
+escapes Unicode, and native C fixtures need explicit byte escapes independent of
+the C execution character set. The Go lookup now uses parsed URL serialization;
+native addresses use exact UTF-8 octal bytes. The corrected complete run above
+passes both profiles. Scoped vet, Go formatting and diff checks pass. Reference
+source check and locked check pass 694 files / 8,623 MIR functions, refreshing the
+example graph lock for the added authored module. Source pins/manifests and user
+workspace graph locks are never modified by the online implementation.
+
+`TestLinuxRemoteOnlineNative` is authored for GCC/Clang x low/optimized. It uses
+the actual selected filesystem/clock/parent/worker/libcurl assembly, checks cached
+operations open zero loopback connections, rejects a fresh untrusted loopback TLS
+certificate without changing trust, and observes no unreaped child after the
+Fairy operation. Its exact inputs and no-model runtime assembly pass on Windows;
+actual Linux compilation/execution is not run. This is not positive trusted TLS,
+CLI dispatch, baseline provisioning or final self-build/distribution acceptance.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
@@ -542,6 +613,8 @@ go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestLinuxRe
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxHTTPSWorkerRejectsUntrustedNative$'
 
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxHTTPSParent(Process|RejectsUntrusted|DNSDeadline|TLSDeadline)Native$'
+
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestLinuxRemoteOnlineNative$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
@@ -552,8 +625,8 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: online orchestration, positive trusted TLS acceptance and
-online/offline Linux CLI selection. Parent process/clock/descriptor and actual
+Next implementation: online/offline Linux CLI selection and positive trusted TLS
+acceptance. Parent process/clock/descriptor and actual
 libcurl replay remain in the combined Linux batch; the Windows substitute does
 not prove their Linux behavior. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
