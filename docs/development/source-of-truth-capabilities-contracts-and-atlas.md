@@ -330,6 +330,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatenative/`
   - `internal/cstdlib/stage0_contract_state.c`
   - `docs/adr/0382-private-single-cell-contract-state-native-handoff.md`
+- **Private prepared native snapshot/overlay transport; durable CAS integration and broader native state remain pending**
+  - `internal/contractstatenative/persistent_transport.go`, `persistent_transport_c.go`
+  - `internal/contractstatenative/persistent_transport_test.go`, `persistent_transport_windows_test.go`
+  - `docs/architecture/native-state-persistence-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

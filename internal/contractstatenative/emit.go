@@ -52,6 +52,10 @@ func Prepare(input hir.Package, packageID hir.PackageID, function hir.SymbolID, 
 // Emit lowers the first bounded native contract-state slice. It deliberately accepts only one
 // straight-line u64 cell transaction and fails closed for every broader state-MIR form.
 func Emit(handoff Handoff, targetID target.ID) (Artifact, error) {
+	return emit(handoff, targetID, false)
+}
+
+func emit(handoff Handoff, targetID target.ID, persistent bool) (Artifact, error) {
 	if targetID != target.X8664WindowsMSVC {
 		return Artifact{}, fmt.Errorf("contract-state native transport does not admit target %q", targetID)
 	}
@@ -76,9 +80,21 @@ func Emit(handoff Handoff, targetID target.ID) (Artifact, error) {
 		if operation.FieldIndex != 0 {
 			return Artifact{}, fmt.Errorf("contract-state native operation %d names unsupported field %d", index, operation.FieldIndex)
 		}
+		if persistent {
+			kind := 1
+			if operation.Kind == contractstatemir.OperationCellWrite {
+				kind = 2
+			} else if operation.Kind == contractstatemir.OperationCellDelete {
+				kind = 3
+			}
+			fmt.Fprintf(&source, "    { const int32_t gate = fycs_persistent_before_v1(%du); if (gate != 0) { fycs_native_rollback_v0(&transaction); return gate; } }\n", kind)
+		}
 		switch operation.Kind {
 		case contractstatemir.OperationCellRead:
 			fmt.Fprintf(&source, "    if (fycs_native_cell_read_v0(&transaction, fycs_native_last_read_v0, &fycs_native_last_read_length_v0, &fycs_native_last_read_found_v0) != 0) { fycs_native_rollback_v0(&transaction); return -20; }\n")
+			if persistent {
+				fmt.Fprintf(&source, "    if (fycs_persistent_observe_v1(%du, fycs_native_last_read_v0, fycs_native_last_read_length_v0, fycs_native_last_read_found_v0) != 0) { fycs_native_rollback_v0(&transaction); return -26; }\n", index)
+			}
 		case contractstatemir.OperationCellWrite:
 			name := fmt.Sprintf("fycs_native_value_%d_v0", index)
 			fmt.Fprintf(&source, "    static const uint8_t %s[] = {%s};\n", name, cBytes(operation.Value.Encoded))
@@ -87,6 +103,9 @@ func Emit(handoff Handoff, targetID target.ID) (Artifact, error) {
 			fmt.Fprint(&source, "    if (fycs_native_cell_delete_v0(&transaction) != 0) { fycs_native_rollback_v0(&transaction); return -22; }\n")
 		default:
 			return Artifact{}, fmt.Errorf("contract-state native operation %d kind %q is not admitted", index, operation.Kind)
+		}
+		if persistent && operation.Kind != contractstatemir.OperationCellRead {
+			fmt.Fprint(&source, "    fycs_persistent_written_v1();\n")
 		}
 	}
 	switch program.Exit {

@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- Native persistent-state preparation now has a sealed single-cell snapshot/
+  overlay transport over the existing verified C/runtime owner. Exact layout,
+  package body, selected native entry and original version are bound before
+  any proposed write escapes; intermediate 41-byte writes/33-byte deletes and
+  canonical read traces preserve the Go kernel's rollback/limit policy.
+  A two-owner shared-package hash regression is fixed by explicit native program
+  identity. Windows low/optimized pass 244 independent Go comparisons and twenty malformed
+  native requests (74.629s), including the exact 1,024-read/13,447-byte response
+  ceiling. Transaction/state-MIR and unchanged native/runtime regressions pass.
+  This is step 1 of `architecture/native-state-persistence-v1.md`, not
+  actual durable native execution. Opaque executable/one-attempt CAS integration,
+  broader state MIR/source/CLI, native Linux and every final gate remain required.
+
 - Linux Atlas edit now selects the edit-specific Linux readers, retained-root
   snapshot and one-attempt application owner through the actual prepared/full
   entry. Linux/default help and independent Go preview/apply/error cases pass
