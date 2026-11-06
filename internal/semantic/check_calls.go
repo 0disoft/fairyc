@@ -154,6 +154,7 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 			Kind: syntax.KindPrefix, Span: receiverExpression.Span, Text: operator, Children: []*ast.Expression{receiverExpression},
 		}
 		calleeExpression.Children[0] = borrowExpression
+		c.analyzer.expressionTypes[borrowExpression] = expectedReceiver
 		receiver = &hir.Expression{
 			Kind: hir.ExpressionPrefix, Span: span(c.module.file.Path, receiverExpression.Span), Operator: operator,
 			Type: expectedReceiver, Symbol: hir.NoSymbol, Children: []hir.Expression{*receiver},
