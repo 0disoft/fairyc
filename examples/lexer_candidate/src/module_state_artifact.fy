@@ -5,12 +5,14 @@ import project_cache_encoding as budget;
 import std::bytes as bytes;
 import std::vec as v;
 
-// FYSTATE0 stores the original identities, not a trusted-hash flag. Both
-// directions recompute field prefixes and layout hashes with the same checker.
-fn u32 checked(ref state::Plan p,ref mut usize work){var usize measured=0;let code=state::validate(p,ref mut measured);if(!budget::charge(work,measured)){return 1002;}return if(code==0){0}else if(code==10){1002}else if(code==11){1003}else{1001};}
-pub fn Result<wire::Payload,u32> encode(ref state::Plan p,ref mut usize work){
-    if(!budget::charge(work,0)){return .err(1002);}let code=checked(p,work);if(code!=0){return .err(code);}
-    var wire::Status status=wire::Status{.code=0};var out=wire::writer(b"FYSTATE0",ref mut status,work);
+// FYSTATE0 retains five codecs; FYSTATE1 explicitly admits graph bytes/text.
+// Both directions recompute prefixes and layout hashes, not a trusted flag.
+fn u32 checked(ref state::Plan p,bool dynamic,ref mut usize work){var usize measured=0;let code=if(dynamic){state::validate_graph(p,ref mut measured)}else{state::validate(p,ref mut measured)};if(!budget::charge(work,measured)){return 1002;}return if(code==0){0}else if(code==10){1002}else if(code==11){1003}else{1001};}
+pub fn Result<wire::Payload,u32> encode(ref state::Plan p,ref mut usize work){return encode_mode(p,false,work);}
+pub fn Result<wire::Payload,u32> encode_graph(ref state::Plan p,ref mut usize work){return encode_mode(p,true,work);}
+fn Result<wire::Payload,u32> encode_mode(ref state::Plan p,bool dynamic,ref mut usize work){
+    if(!budget::charge(work,0)){return .err(1002);}let code=checked(p,dynamic,work);if(code!=0){return .err(code);}
+    var wire::Status status=wire::Status{.code=0};var out=wire::writer(if(dynamic){b"FYSTATE1"}else{b"FYSTATE0"},ref mut status,work);
     wire::number(ref mut out,state::count(p),ref mut status,work);var usize i=0;
     while(i<state::count(p)){let row=state::at(p,i);
         wire::number(ref mut out,row.owner,ref mut status,work);wire::number(ref mut out,row.module_index,ref mut status,work);wire::number(ref mut out,row.declaration,ref mut status,work);
@@ -27,8 +29,10 @@ pub fn Result<wire::Payload,u32> encode(ref state::Plan p,ref mut usize work){
     wire::number(ref mut out,state::name_bytes(p),ref mut status,work);if(wire::output_status(ref status)!=0){return .err(wire::output_status(ref status));}
     let written=budget::raw(ref mut out,state::names(p),work);if(written!=0){return .err(if(written==4){1003}else{1002});}return wire::finish(out,status);
 }
-pub fn Result<state::Plan,u32> decode(ref u8[] raw,ref mut usize work){
-    if(!budget::charge(work,0)){return .err(1002);}var cursor=switch(wire::cursor(raw,b"FYSTATE0",work)){case .ok(c):{c}case .err(code):{return .err(code);}};
+pub fn Result<state::Plan,u32> decode(ref u8[] raw,ref mut usize work){return decode_mode(raw,false,work);}
+pub fn Result<state::Plan,u32> decode_graph(ref u8[] raw,ref mut usize work){return decode_mode(raw,true,work);}
+fn Result<state::Plan,u32> decode_mode(ref u8[] raw,bool dynamic,ref mut usize work){
+    if(!budget::charge(work,0)){return .err(1002);}var cursor=switch(wire::cursor(raw,if(dynamic){b"FYSTATE1"}else{b"FYSTATE0"},work)){case .ok(c):{c}case .err(code):{return .err(code);}};
     let count=wire::count_from(raw,ref mut cursor,512,136,work);if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}
     var v::Vec<state::Layout> layouts=v::empty<state::Layout>();var usize i=0;
     while(i<count){var row=state::Layout{.owner=wire::number_from(raw,ref mut cursor,work),.module_index=wire::number_from(raw,ref mut cursor,work),.declaration=wire::number_from(raw,ref mut cursor,work),.start=wire::number_from(raw,ref mut cursor,work),.end=wire::number_from(raw,ref mut cursor,work),.uid_start=wire::number_from(raw,ref mut cursor,work),.uid_end=wire::number_from(raw,ref mut cursor,work),.field_start=wire::number_from(raw,ref mut cursor,work),.field_count=wire::number_from(raw,ref mut cursor,work),.hash=[0;8]};
@@ -41,5 +45,5 @@ pub fn Result<state::Plan,u32> decode(ref u8[] raw,ref mut usize work){
     }
     let size=wire::count_from(raw,ref mut cursor,1048576,1,work);if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!budget::charge(work,size+1)){return .err(1002);}
     let names=switch(bytes::copy(raw[cursor.offset..cursor.offset+size])){case .ok(p):{p}case .err(_):{return .err(1003);}};cursor.offset+=size;let code=wire::end(raw,ref mut cursor,work);if(code!=0){return .err(code);}
-    let p=state::assemble(names,layouts,fields);let verified=checked(ref p,work);if(verified!=0){return .err(verified);}return .ok(p);
+    let p=state::assemble(names,layouts,fields);let verified=checked(ref p,dynamic,work);if(verified!=0){return .err(verified);}return .ok(p);
 }

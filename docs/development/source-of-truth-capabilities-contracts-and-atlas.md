@@ -390,6 +390,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/workspacecompiler/state_graph_session.go`, `state_graph_session_test.go`, `state_graph_process_test.go`, `state_graph_session_windows_test.go`
   - `internal/workspacecompiler/session.go`: ordinary default analyzer, opt-in restore boundary and existing verified memory/disk coordinator
   - `docs/adr/0507-source-state-graph-workspace-cache.md`, `docs/architecture/source-state-graph-cache-v1.md`
+- **Explicit Fairy seven-codec layout declarations, isolated graph wire and current-source layout matching; Complete/cache admission remains separate**
+  - `examples/lexer_candidate/src/module_state_layout.fy`, `module_state_declarations.fy`, `module_state_artifact.fy`, `module_project_artifact_state.fy`
+  - `internal/cli/candidate_state_graph_layout_test.go`: independent Go canonical bytes, source/current/corruption/budget and original authored-layout replay
+  - `docs/adr/0508-candidate-state-graph-layout-artifacts.md`, `docs/development/candidate-state-graph-20261107.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

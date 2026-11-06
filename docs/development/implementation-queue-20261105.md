@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- The explicit Fairy source-graph prerequisite now has seven-codec declarations,
+  isolated `FYSTATE1` layout artifacts and exact current-source layout matching.
+  Independent Go canonical bytes, source/framing/current/budget controls pass
+  Windows low/optimized (15.487s); four original authored layout assertions
+  also pass both profiles (114.684s). Ordinary five-codec bytes/admission and
+  cache-key parity are retained. Work exhaustion now propagates its actual
+  error class instead of masquerading as allocation failure. This completes
+  layout/source-matching foundations only: Fairy graph IR, Complete ownership,
+  artifact/cache/ordinary-CLI integration and all Linux/final gates remain
+  required. See ADR 0508 and `candidate-state-graph-20261107.md`.
+
 - The explicit Go workspace state-graph session now uses existing verified
   memory/disk artifacts with current-source analysis before lookup and a
   distinct admission key. Reconstructed MIR/state owners are rebound to fresh
