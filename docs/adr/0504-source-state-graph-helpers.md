@@ -3,6 +3,9 @@
 - Status: Accepted for the explicit experimental graph entry point
 - Extends: ADRs 0379, 0381 and 0503
 
+The subsequent [ADR 0505](0505-source-state-read-borrows.md) connects root
+borrow/view/copy source syntax while retaining helper-owned borrow refusal.
+
 Allow one source `transaction` and up to 32 private, safe, nongeneric, no-argument
 void helpers in the same explicit source file. Every helper must be reachable
 from the root and the complete call graph must be acyclic. Calls to the root,

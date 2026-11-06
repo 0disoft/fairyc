@@ -376,6 +376,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatemir/lower.go`, `graph_verify.go`, `graph_helper_test.go`
   - `internal/contractstatenative/graph_source_helpers_windows_test.go`
   - `examples/contract_state_graph/helpers/transaction.fy`, `docs/adr/0504-source-state-graph-helpers.md`
+- **Source root state borrow/view/copy locals, same-block aliases, frozen presence and copied values across joins**
+  - `internal/compiler/state_graph_borrows.go`, `state_graph_borrows_test.go`, `state_graph_source.go`, `state_graph_operands.go`
+  - `internal/contractstatenative/graph_source_borrows_windows_test.go`, `tools/dev/fairyc-state/native_windows_test.go`
+  - `examples/contract_state_graph/borrows/transaction.fy`, `docs/adr/0505-source-state-read-borrows.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

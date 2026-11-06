@@ -126,6 +126,7 @@ store access and CAS by the existing one-attempt owner. Native construction
 retains the existing bounded compiler timeout; cancellation is checked before
 and after construction. Successful CAS acknowledgement remains success when
 cancellation arrives during publication. The synchronous storage port is not
-made cancellable. Native Linux, source helper/borrow and dynamic byte/text
-admission, ordinary CLI selection and Complete/artifact/cache integration stay
+made cancellable. Source helper and root borrow/view/copy admission are added by
+ADRs 0504/0505. Native Linux, dynamic byte/text admission, ordinary CLI selection
+and Complete/artifact/cache integration stay
 in the remaining queue. No SDK, ABI, dependency, default limit or runner changes.

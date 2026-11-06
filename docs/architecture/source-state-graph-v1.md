@@ -4,8 +4,9 @@ Status: explicit source-to-HIR/state-MIR admission with Windows native C and
 local-store evidence. [ADR 0503](../adr/0503-experimental-source-state-graphs.md)
 owns the admitted source subset. This advances step 4 of
 [native persistence integration](native-state-persistence-v1.md); the full
-source/helper/borrow/Complete/artifact/cache/ordinary-CLI acceptance stays open.
-The explicit developer mode below now connects the admitted source subset.
+source/Complete/artifact/cache/ordinary-CLI acceptance stays open. Later helper
+and root borrow steps (ADRs 0504/0505) connect the five-codec source subset to
+the explicit native developer mode. Sections below retain their checkpoint scope.
 
 The actual authored source in
 `examples/contract_state_graph/transaction.fy` reads a key and flag, selects a
@@ -107,3 +108,42 @@ The helper native root passes in 4.808s, with twelve actual executions and no
 selected skips. The first harness build failed on an unused test import; it
 was removed. No compiler-warning or policy relaxation was used. Existing
 linear and graph callers retain their exact original bounds and result policies.
+
+## Root source read borrows
+
+[ADR 0505](../adr/0505-source-state-read-borrows.md) now connects explicit
+borrow/view/copy locals, same-block aliases, frozen presence and copied-value
+transport. Handles never enter graph edges; helper ownership and dynamic map
+borrow keys remain closed. Bounds, exact-key invalidation, writing-helper
+invalidation and typed canonicality re-enter the existing state verifier/runtime.
+Dynamic byte/text schemas and Complete/artifact/cache/ordinary-CLI integration
+remain required; the existing five source codecs retain their identities.
+
+The new native roots pass 42 actual executions in 17.986s: 24 local-store
+branch/commit/reject/trap/helper/close-reopen comparisons, ten five-codec map
+borrow comparisons, and eight local-store runtime failures with zero CAS.
+The developer command additionally executes both authored helper and borrow
+sources under both profiles. It checks three reads, two writes, version 1 and
+independent source costs 12/16, then reopens through snapshot. No Go result is
+used to construct native output and no selected native case is skipped.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m ./internal/compiler -run '^TestExperimentalStateGraphSourceBorrow'
+go test -mod=readonly -count=1 -timeout 3m -v ./internal/contractstatenative -run '^TestGraphSourceNative(Borrows|MapBorrowCodecs|BorrowFailures)$'
+go test -mod=readonly -count=1 -timeout 3m -v ./tools/dev/fairyc-state
+go vet -mod=readonly ./internal/compiler ./internal/contractstatemir ./internal/contractstatenative ./tools/dev/fairyc-state
+```
+
+Native Linux and all final queue gates remain separate. No stable source/CLI/
+SDK/runtime ABI, DB/provider, dependency, default limit or runner change.
+
+The final combined `^TestGraphSourceNative` replay passes in 38.284s with all
+100 actual C attempts (46 original source, 12 helper and 42 borrow cases).
+The complete developer-command package passes in 15.465s. A separately built
+executable also passes init/execute/snapshot for helper optimized and borrow low,
+with costs 12/16, three reads and reopened version 1. Focused compiler controls,
+full state/state-MIR/fixture regressions, scoped vet, formatting and diff checks
+pass. Logs remain local under `.cache/state-graph-source-all-20261107.log`,
+`.cache/state-graph-owner-commands-20261107.log` and
+`.cache/state-graph-owner-smoke-20261107/receipt.json`. Full Go/Fairy comparison,
+consecutive self-build, distribution, hosted CI and Linux remain separate gates.

@@ -427,3 +427,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0503: Explicit source admission for state graphs](0503-experimental-source-state-graphs.md)
 
 - [0504: Source state graph helpers and checked call projections](0504-source-state-graph-helpers.md)
+
+- [0505: Explicit source state read borrows, views and copies](0505-source-state-read-borrows.md)

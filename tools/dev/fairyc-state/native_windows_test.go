@@ -167,3 +167,48 @@ fn void transaction() { storage::write("value", 18446744073709551616); storage::
 		t.Fatal("refused source touched store", err, entries)
 	}
 }
+
+func TestNativeGraphHelperBorrowCommand(t *testing.T) {
+	for _, trial := range []struct {
+		fixture string
+		cost    uint64
+	}{{"helpers", 12}, {"borrows", 16}} {
+		for _, profile := range []string{"low", "optimized"} {
+			t.Run(trial.fixture+"/"+profile, func(t *testing.T) {
+				directory, store := t.TempDir(), t.TempDir()
+				path := filepath.Join(directory, "transaction.fy")
+				data, err := os.ReadFile(filepath.Join("..", "..", "..", "examples", "contract_state_graph", trial.fixture, "transaction.fy"))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(path, data, 0o600); err != nil {
+					t.Fatal(err)
+				}
+				call := func(action string) nativeReport {
+					t.Helper()
+					var out, diagnostics bytes.Buffer
+					if code := run([]string{action, store, path, "--engine", "native-graph", "--profile", profile}, &out, &diagnostics); code != 0 {
+						t.Fatalf("%s code %d: %s", action, code, &diagnostics)
+					}
+					var result nativeReport
+					if err := json.Unmarshal(out.Bytes(), &result); err != nil {
+						t.Fatal(err, out.String())
+					}
+					return result
+				}
+				initial := call("init")
+				if initial.Snapshot.Version != 0 || len(initial.Snapshot.Entries) != 0 {
+					t.Fatal("source body ran during creation", initial)
+				}
+				executed := call("execute")
+				if executed.Engine != "native-graph" || executed.Profile != profile || executed.ProgramHash != initial.ProgramHash || executed.Outcome == nil || executed.Outcome.Cost != trial.cost || executed.Outcome.Receipt.Version != 1 || executed.Outcome.Receipt.Writes != 2 || len(executed.Outcome.Reads) != 3 {
+					t.Fatalf("helper/borrow source command %+v", executed)
+				}
+				snapshot := call("snapshot")
+				if snapshot.Snapshot.Version != 1 || len(snapshot.Snapshot.Entries) != 2 {
+					t.Fatal("helper/borrow state did not reopen", snapshot)
+				}
+			})
+		}
+	}
+}

@@ -9,8 +9,9 @@ local-store/reopen/conflict/cancellation evidence are implemented in
 [source graph admission](source-state-graph-v1.md) now connects five-codec
 cells/maps, read values and structured branch/join through actual C/local CAS.
 That subset also has explicit native developer selection under ADR 0500.
-Source helpers/borrows, Complete/artifact/cache/ordinary CLI and the full acceptance
-queue remain required. This is a
+Source helpers and root borrow/view/copy are connected under ADRs 0504/0505.
+Dynamic byte/text schemas, Complete/artifact/cache/ordinary CLI and the full
+acceptance queue remain required. This is a
 step of [native persistence](native-state-persistence-v1.md), not a replacement
 for the complete implementation queue. Windows is verified below; native Linux
 remains batched. No push, hosted dispatch, release or deployment is authorized.

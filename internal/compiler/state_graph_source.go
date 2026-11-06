@@ -87,6 +87,7 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 type stateGraphBinding struct {
 	name, typeID string
 	value, found hir.StateValueID
+	borrow       hir.StateBorrowID
 }
 
 type stateGraphSource struct {
@@ -94,6 +95,7 @@ type stateGraphSource struct {
 	fields     map[string]hir.StateField
 	blocks     []hir.StateBlock
 	values     hir.StateValueID
+	borrows    hir.StateBorrowID
 	operations *int
 	callees    map[string]hir.SymbolID
 	helper     bool
@@ -124,8 +126,13 @@ func (lower *stateGraphSource) newBlock(environment []stateGraphBinding) (int, [
 	block := hir.StateBlock{ID: hir.StateBlockID(id)}
 	copy := append([]stateGraphBinding(nil), environment...)
 	for index := range copy {
-		copy[index].value = lower.value()
-		block.Parameters = append(block.Parameters, hir.StateBlockParameter{ID: copy[index].value, TypeID: copy[index].typeID})
+		// Owner-bound handles end at the source block edge. Only copied
+		// ordinary values and frozen presence bits enter successor parameters.
+		copy[index].borrow = 0
+		if copy[index].value != 0 {
+			copy[index].value = lower.value()
+			block.Parameters = append(block.Parameters, hir.StateBlockParameter{ID: copy[index].value, TypeID: copy[index].typeID})
+		}
 		if copy[index].found != 0 {
 			copy[index].found = lower.value()
 			block.Parameters = append(block.Parameters, hir.StateBlockParameter{ID: copy[index].found, TypeID: stateSourceBoolType})
@@ -138,7 +145,9 @@ func (lower *stateGraphSource) newBlock(environment []stateGraphBinding) (int, [
 func stateGraphArguments(environment []stateGraphBinding) []hir.StateValueID {
 	arguments := make([]hir.StateValueID, 0, len(environment)*2)
 	for _, binding := range environment {
-		arguments = append(arguments, binding.value)
+		if binding.value != 0 {
+			arguments = append(arguments, binding.value)
+		}
 		if binding.found != 0 {
 			arguments = append(arguments, binding.found)
 		}

@@ -5,7 +5,8 @@
 
 The subsequent [ADR 0504](0504-source-state-graph-helpers.md) adds bounded
 source helpers and graph call admission; the original single-root checkpoint
-below retains its scope. Source borrows and the full integration queue remain open.
+below retains its scope. [ADR 0505](0505-source-state-read-borrows.md) adds
+root read borrows; the full integration queue remains open.
 
 `compiler.CheckExperimentalStateGraph` admits one parsed source file containing
 one state declaration and one private, safe, nongeneric, parameterless

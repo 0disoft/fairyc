@@ -34,7 +34,7 @@ func stateGraphLookup(name string, environment []stateGraphBinding) (stateGraphB
 func (lower *stateGraphSource) reference(expression *ast.Expression, environment []stateGraphBinding) (hir.StateValueID, string, error) {
 	expression = stateGraphUngroup(expression)
 	if expression != nil && expression.Kind == syntax.KindPath {
-		if binding, found := stateGraphLookup(expression.Text, environment); found {
+		if binding, found := stateGraphLookup(expression.Text, environment); found && binding.value != 0 {
 			return binding.value, binding.typeID, nil
 		}
 	}
@@ -67,7 +67,17 @@ func (lower *stateGraphSource) binding(statement ast.Statement, current int, env
 	}
 	value := stateGraphBinding{name: binding.Name}
 	name, _, ok := stateGraphCall(binding.Expression)
-	if ok && name == "storage::read" {
+	borrowAlias, isBorrowAlias := stateGraphBorrowAlias(binding.Expression, environment)
+	if ok && (name == "storage::borrow" || name == "storage::view" || name == "storage::copy") {
+		var err error
+		value, err = lower.borrowBinding(binding.Name, binding.Expression, current, environment)
+		if err != nil {
+			return nil, err
+		}
+	} else if isBorrowAlias {
+		value = borrowAlias
+		value.name = binding.Name
+	} else if ok && name == "storage::read" {
 		access, err := lower.access(binding.Expression, environment)
 		if err != nil {
 			return nil, err
@@ -89,7 +99,7 @@ func (lower *stateGraphSource) binding(statement ast.Statement, current int, env
 			value.found = original.found
 		}
 	}
-	if binding.Type != nil && stateGraphSourceType(*binding.Type) != value.typeID {
+	if binding.Type != nil && (value.borrow != 0 || stateGraphSourceType(*binding.Type) != value.typeID) {
 		return nil, lower.fail(statement.Span, "storage binding annotation differs from the read codec")
 	}
 	return append(environment, value), nil
