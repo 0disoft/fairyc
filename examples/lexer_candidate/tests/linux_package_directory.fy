@@ -66,3 +66,16 @@ import std::bytes as bytes;
     {let root=opened();var stage=created(ref root);let problem=switch(package::erase(ref mut stage)){case .ok(_):{assert(false);return;}case .err(p):{p}};assert(problem.kind==3 && problem.os_code==39 && unsafe{calls()}==101);}
     assert(unsafe{counts()}==103);
 }
+
+@test @effects(filesystem) fn void duplicates_owned_directory_without_losing_or_closing_borrowed_handles(){
+    unsafe{mode(0);}
+    {let root=opened();let owned={let staged=created(ref root);switch(package::duplicate(ref staged)){case .ok(p):{p}case .err(_):{assert(false);return;}}};
+        assert(rooted::directory_handle(ref owned)==9 && unsafe{counts()}==102);
+        assert(rooted::close_directory(owned).is_ok && unsafe{counts()}==103);
+    }assert(unsafe{counts()}==104);
+    var u32 value=14;while(value<=18){unsafe{mode(value);}
+        {let root=opened();let staged=created(ref root);let problem=switch(package::duplicate(ref staged)){case .ok(_):{assert(false);return;}case .err(p):{p}};
+            assert(problem.kind==if(value==18){3}else{5});assert(problem.os_code==if(value==18){5}else{0});assert(problem.cleanup_code==if(value==18){4}else{0});
+        }assert(unsafe{counts()}==if(value==18){104}else{103});value+=1;
+    }
+}

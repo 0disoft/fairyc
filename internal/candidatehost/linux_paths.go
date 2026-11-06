@@ -66,7 +66,8 @@ func LinuxSource(header string) (string, error) {
 		case "fairyc_private_linux_package_file_info_v1":
 			rooted, packageFile = true, true
 		case "fairyc_private_linux_package_directory_create_v1", "fairyc_private_linux_package_directory_edit_v1",
-			"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1":
+			"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1",
+			"fairyc_private_linux_package_directory_clone_v1":
 			rooted, packageDirectory = true, true
 		case "fairyc_private_linux_gnu_stage_v1", "fairyc_private_linux_gnu_write_v1", "fairyc_private_linux_gnu_read_v1",
 			"fairyc_private_linux_gnu_find_v1", "fairyc_private_linux_gnu_run_v1", "fairyc_private_linux_gnu_publish_v1":

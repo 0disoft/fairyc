@@ -68,6 +68,16 @@ uint32_t fairyc_private_linux_package_directory_edit_v1(uint32_t root,
     return fy_linux_package_directory(root, leaf, size, 0, child, parent, cleanup);
 }
 
+uint32_t fairyc_private_linux_package_directory_clone_v1(uint32_t root,
+        uint32_t *output, uint32_t *cleanup) {
+    if (output == NULL || cleanup == NULL || output == cleanup) { return EINVAL; }
+    *output = 0; *cleanup = 0;
+    int fd = fy_linux_root_fd(root);
+    if (fd < 0) { return EINVAL; }
+    /* Open the held directory itself, never reopen a possibly renamed leaf. */
+    return fy_linux_package_open_directory(fd, ".", output, cleanup);
+}
+
 /* A retained fd survives parent renames. Recheck the final directory entry
  * against that fd before removing or publishing it; never follow a symlink. */
 static uint32_t fy_linux_package_same_directory(uint32_t child, uint32_t parent,

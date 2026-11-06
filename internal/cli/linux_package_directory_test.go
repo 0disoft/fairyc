@@ -8,7 +8,8 @@ func TestLinuxPackageDirectoryPolicy(t *testing.T) {
     validates_input_and_transfers_owned_handles();
     preserves_native_errors_and_reclaims_partial_or_invalid_outputs();
     publication_and_removal_freeze_the_old_name();
-    failed_publication_retains_cleanup_authority_without_retry();return 0;
+    failed_publication_retains_cleanup_authority_without_retry();
+    duplicates_owned_directory_without_losing_or_closing_borrowed_handles();return 0;
 }
 `, linuxRootedFilePolicyStub+linuxPackageDirectoryPolicyStub)
 }
@@ -35,6 +36,9 @@ static uint32_t package_acquire(uint32_t root,const uint8_t *leaf,size_t size,ui
 }
 uint32_t fairyc_private_linux_package_directory_create_v1(uint32_t root,const uint8_t *leaf,size_t size,uint32_t *child,uint32_t *parent,uint32_t *cleanup){return package_acquire(root,leaf,size,child,parent,cleanup);}
 uint32_t fairyc_private_linux_package_directory_edit_v1(uint32_t root,const uint8_t *leaf,size_t size,uint32_t *child,uint32_t *parent,uint32_t *cleanup){return package_acquire(root,leaf,size,child,parent,cleanup);}
+uint32_t fairyc_private_linux_package_directory_clone_v1(uint32_t root,uint32_t *output,uint32_t *cleanup){
+    assert(root==2);*output=9;*cleanup=0;if(package_mode==14){*output=2;}if(package_mode==15){*output=8;}if(package_mode==16){*output=0;}if(package_mode==17){*output=UINT32_MAX;}if(package_mode==18){*cleanup=4;scenario=1;return 5;}return 0;
+}
 uint32_t fairyc_private_linux_package_directory_publish_v1(uint32_t child,uint32_t parent,const uint8_t *from,size_t from_size,uint32_t root,const uint8_t *leaf,size_t size){
     assert(child==2 && parent==8 && strcmp((const char *)from,"stage")==0 && from_size==6 && root==1 && strcmp((const char *)leaf,"package")==0 && size==8);++package_publishes;return package_mode==9?4:0;
 }

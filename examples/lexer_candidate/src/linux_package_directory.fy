@@ -7,6 +7,7 @@ import std::bytes as bytes;
 @effects(filesystem) @link_name("fairyc_private_linux_package_directory_edit_v1") unsafe extern C fn u32 native_edit(u32 root,ptr u8 leaf,usize size,ptr mut u32 child,ptr mut u32 parent,ptr mut u32 cleanup_code);
 @effects(filesystem) @link_name("fairyc_private_linux_package_directory_publish_v1") unsafe extern C fn u32 native_publish(u32 child,u32 parent,ptr u8 from,usize from_size,u32 root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_linux_package_directory_erase_v1") unsafe extern C fn u32 native_erase(u32 child,u32 parent,ptr u8 leaf,usize size);
+@effects(filesystem) @link_name("fairyc_private_linux_package_directory_clone_v1") unsafe extern C fn u32 native_clone(u32 root,ptr mut u32 output,ptr mut u32 cleanup_code);
 @effects(filesystem) @link_name("fairyc_private_linux_root_file_close_v1") unsafe extern C fn u32 native_close(u32 raw);
 
 // The child is a real rooted-I/O capability. Its automatic field cleanup closes
@@ -45,6 +46,17 @@ fn Result<bytes::Buffer,Problem> path(ref u8[] leaf){
 // Borrowed access carries the containing resource's lifetime. It grants no
 // ownership of the child, parent descriptor, retained name or phase flag.
 pub fn ref rooted::Directory directory(ref Directory value){return ref value.child;}
+// Transfer a separate descriptor for the same held object, with no pathname
+// reopen and no permission to erase the original lease's retained name.
+@effects(filesystem) pub fn Result<rooted::Directory,Problem> duplicate(ref Directory value){
+    let borrowed=rooted::directory_handle(ref value.child);var u32 raw=0;var u32 cleanup_code=0;
+    let code=unsafe{native_clone(borrowed,ref mut raw as ptr mut u32,ref mut cleanup_code as ptr mut u32)};
+    if(code!=0 || cleanup_code!=0 || !handle(raw) || raw==borrowed || raw==value.parent){
+        if(handle(raw) && raw!=borrowed && raw!=value.parent){let closed=unsafe{native_close(raw)};if(cleanup_code==0){cleanup_code=closed;}}
+        return .err(fail(if(code!=0){3}else{5},code,cleanup_code));
+    }
+    return .ok(unsafe{rooted::from_owned_directory_handle(raw)});
+}
 @effects(filesystem) fn u32 publish_native(ref Directory value,ref rooted::Directory destination,ref u8[] leaf){
     return unsafe{native_publish(rooted::directory_handle(ref value.child),value.parent,bytes::view(ref value.leaf) as ptr u8,bytes::len(ref value.leaf),rooted::directory_handle(destination),leaf as ptr u8,leaf.len)};
 }

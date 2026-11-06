@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Linux package filesystem composition now preflights contained paths and case/
+  type conflicts, reads exact stable single-linked binary files, syncs anonymous
+  files before exclusive publication and clears owned stages under entry/depth
+  bounds. Held-directory cloning preserves object identity across lease release.
+  Independent Windows two-profile filesystem/lifetime/error probes, scoped vet
+  and reference check/locked pass (689 files / 8,594 MIR functions). Cache,
+  offline restore, transport/CLI and native Linux remain open; see the fetch receipt.
+
 - Linux package-file observation now rejects hard links without changing generic
   file semantics; conditional cleanup preserves exact metadata and partial-error
   results. Package scans admit 8,192 rows while ordinary scans retain 4,096 and

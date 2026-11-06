@@ -10,7 +10,7 @@ import (
 )
 
 func TestPrivateLinuxPackageDirectorySelection(t *testing.T) {
-	for _, name := range []string{"create", "edit", "publish", "erase"} {
+	for _, name := range []string{"create", "edit", "publish", "erase", "clone"} {
 		source, err := LinuxSource("fairyc_private_linux_package_directory_" + name + "_v1(")
 		if err != nil || source != linuxRootedFile+"\n"+linuxPackageDirectory {
 			t.Fatalf("%s: missing package-directory source: %v", name, err)
@@ -188,6 +188,12 @@ static uint32_t publish(void){return fairyc_private_linux_package_directory_publ
 static uint32_t erase(void){return fairyc_private_linux_package_directory_erase_v1(1,21,stage,sizeof stage);}
 int main(void){
     uint32_t child=99,parent=99,cleanup=99;
+    reset(NORMAL);assert(fairyc_private_linux_package_directory_clone_v1(11,&child,&cleanup)==0 && child==21 && cleanup==0 && opens==1 && mkdirs==0);
+    assert(fairyc_private_linux_root_file_close_v1(child)==0 && closed_parent==1);
+    reset(PARENT_OPEN);assert(fairyc_private_linux_package_directory_clone_v1(11,&child,&cleanup)==EACCES && child==0 && cleanup==0);
+    reset(PARENT_STAT);assert(fairyc_private_linux_package_directory_clone_v1(11,&child,&cleanup)==EIO && child==0 && closed_parent==1);
+    reset(NORMAL);assert(fairyc_private_linux_package_directory_clone_v1(0,&child,&cleanup)==EINVAL && child==0 && cleanup==0 && opens==0);
+    assert(fairyc_private_linux_package_directory_clone_v1(11,&child,&child)==EINVAL && opens==0);
     reset(NORMAL);assert(create(&child,&parent,&cleanup)==0 && child==1 && parent==21 && cleanup==0 && opens==2 && mkdirs==1 && closes==0);
     assert(fairyc_private_linux_root_file_close_v1(child)==0 && fairyc_private_linux_root_file_close_v1(parent)==0 && closed_child==1 && closed_parent==1);
     reset(NORMAL);assert(edit(&child,&parent,&cleanup)==0 && child==1 && parent==21 && mkdirs==0 && unlinks==0);
@@ -249,6 +255,8 @@ int main(void){
     int directory=fy_linux_root_fd(root);
     assert(fairyc_private_linux_package_directory_create_v1(root,from,sizeof from,&stage,&parent,&cleanup)==0 && cleanup==0);
     assert(stage!=0 && parent!=0 && parent!=root);
+    uint32_t duplicate=0;assert(fairyc_private_linux_package_directory_clone_v1(stage,&duplicate,&cleanup)==0 && cleanup==0 && duplicate!=stage);
+    struct stat original,copy;assert(fstat(fy_linux_root_fd(stage),&original)==0 && fstat(fy_linux_root_fd(duplicate),&copy)==0 && original.st_dev==copy.st_dev && original.st_ino==copy.st_ino);
     assert((fcntl(fy_linux_root_fd(stage),F_GETFD)&FD_CLOEXEC)!=0 && (fcntl(fy_linux_root_fd(parent),F_GETFD)&FD_CLOEXEC)!=0);
     struct stat identity;assert(fstat(fy_linux_root_fd(stage),&identity)==0 && (identity.st_mode&0777)==0700);
     uint32_t absent=99,absent_parent=99;
@@ -289,6 +297,8 @@ int main(void){
     assert(fairyc_private_linux_package_directory_erase_v1(edited,edited_parent,to,sizeof to)==0);
     assert(fairyc_private_linux_root_file_close_v1(edited)==0 && fairyc_private_linux_root_file_close_v1(edited_parent)==0);
     assert(fairyc_private_linux_root_file_close_v1(stage)==0 && fairyc_private_linux_root_file_close_v1(parent)==0);
+    assert(fstat(fy_linux_root_fd(duplicate),&copy)==0 && S_ISDIR(copy.st_mode) && copy.st_ino==original.st_ino);
+    assert(fairyc_private_linux_root_file_close_v1(duplicate)==0);
     assert(rmdir(moved)==0);return 0;
 }
 `

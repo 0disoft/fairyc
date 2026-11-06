@@ -8,7 +8,7 @@ hosted dispatch, release or deployment is authorized by this work.
 ## Retained-directory native prerequisite
 
 `internal/candidatehost/linux_package_directory.c` supplies four private
-directory operations selected by `LinuxSource` after rooted I/O:
+initial directory operations selected by `LinuxSource` after rooted I/O:
 
 - `create`: create an exclusive 0700 child and retain independently opened
   parent/child descriptors. Both descriptors transfer to the caller on success.
@@ -171,6 +171,56 @@ functions; the example lock is refreshed. Logs are
 This prepares the filesystem facade; it does not yet connect package/cache I/O,
 offline restoration or transport/CLI selection.
 
+## Package filesystem composition
+
+`linux_remote_fs.fy` now composes retained directories, package scans, single-link
+file observation and anonymous-file publication. It preflights complete paths,
+ASCII case aliases, symlinks/types, depth and per-read/write byte limits; missing
+read/lookup paths do not create directories. Reads preserve exact binary bytes,
+probe one byte past the declared size and compare held-file metadata before and
+after reading. Only an exact complete read is returned. Writes sync the anonymous
+file before no-replace hard-link publication; errors discard its descriptor.
+
+Private tree publication preserves existing trees, and cleanup charges one
+caller entry budget plus the depth bound, refuses special/linked/stale files and
+removes only identity-matched empty child directories. Earlier successful
+cleanup may remain applied when a later entry fails, as in the existing policy.
+The caller must supply its own unpublished stage under the fetch lock.
+
+The directory prerequisite adds `clone`: open `.` relative to the held child,
+then transfer a separate rooted capability. Container-directory creation can
+therefore retain the same object after the temporary removable lease drops,
+without reopening a name or allowing partial resource-field moves. C selection,
+failure/handle checks and a native Linux identity/lifetime probe are extended.
+Fairy clone guards preserve borrowed child/parent handles, reclaim malformed
+partial outputs once and retain both primary and cleanup errors.
+
+Windows evidence:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^(TestPrivateLinuxPackageDirectorySelection|TestLinuxPackageDirectoryAdapterBoundaries)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinux(RemoteFileSystemPolicy|PackageDirectoryPolicy)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinuxPackageDirectoryPolicy$'
+```
+
+The C command passes both profiles in 1.323s. The combined Fairy command passes
+four native executions in 5.634s; the final extended clone oracle separately
+passes both profiles in 3.228s. Its success and malformed/borrowed/partial output
+cases observe descriptor lifetime after the source lease drops. The filesystem
+oracle independently models nodes, handles, cursors and namespace transitions;
+it observes no leaked handles/cursors on ordinary and failure exits, exact binary
+and empty files, partial writes, sync before publication, alias/link/type refusal,
+short/growing/changed reads, no-replace/stale cleanup and exact entry/depth bounds.
+Programs run with empty PATH and both target C-emission profiles pass. These are
+Windows generated-program observations against substitutes, not Linux syscalls.
+
+Reference source check and locked check pass 689 files / 8,594 MIR functions.
+Scoped vet and diff checks pass; the example lock is refreshed. Local logs:
+`.cache/linux-remote-fs-directory-adapter-20261106.log`,
+`.cache/linux-remote-fs-policy-20261106.log`,
+`.cache/linux-remote-fs-directory-policy-20261106.log`, and
+`.cache/linux-remote-fs-check-20261106.log` (not staged).
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
@@ -186,8 +236,7 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: package filesystem facade, package file and cache
-publication, offline restoration, verified HTTPS and online/offline Linux
+Next implementation: cache publication, offline restoration, verified HTTPS and online/offline Linux
 CLI selection. The Windows substitute does not prove those paths. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.
