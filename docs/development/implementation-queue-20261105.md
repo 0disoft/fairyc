@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- A separate parallel worker adds a bounded Linux replay planner/collector over
+  existing concrete Go test roots. Default planning invokes no subprocess;
+  explicit Linux execution records raw argv/output/exit and skip/partial/error
+  evidence with offline Go settings and owned-process cleanup. Expensive full
+  CLI/Atlas/closed-pipe replay is opt-in. Seventeen Windows fake-process/parser
+  unit tests pass; no Linux execution is inferred. See
+  `linux-native-batch-20261107.md` and
+  `tools/collect-linux-native-validation.py`. The complete transferable source/
+  validation handoff and all native Linux/final gates remain open. No push,
+  dispatch or release; the full implementation objective remains active.
+
 - Fairy now composes the sealed actual Windows graph builder/runner and real
   local provider into one snapshot, one execution and at most one complete CAS.
   Typed failures preserve storage/runner causes and admitted response owners;
