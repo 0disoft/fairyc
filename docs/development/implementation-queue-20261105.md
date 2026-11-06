@@ -56,6 +56,13 @@ authorized by this queue.
 
 ## Progress
 
+- Linux fetch now has an explicit monotonic 120-second deadline prerequisite.
+  Independent Windows low/optimized timestamp/overflow/native-error and Fairy
+  deadline boundary probes pass, as do authored check/locked (691 files / 8,604
+  MIR functions). Clock errors expire fail-closed. Native Linux replay is authored
+  and stays batched. Offline restore, HTTPS, CLI and all broader/final gates stay
+  open; see the Linux fetch receipt.
+
 - Linux archive-cache storage now validates pins/size/input hashes before I/O,
   rehashes every hit, preserves corrupt/linked/aliased/leftover entries and syncs
   anonymous files before one no-replace publication attempt. Independent Windows

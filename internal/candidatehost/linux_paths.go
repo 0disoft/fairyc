@@ -10,6 +10,9 @@ import (
 //go:embed linux_paths.c
 var linuxPaths string
 
+//go:embed linux_clock.c
+var linuxClock string
+
 //go:embed linux_process.c
 var linuxProcess string
 
@@ -61,8 +64,11 @@ func LinuxSource(header string) (string, error) {
 	gnu := false
 	packageDirectory := false
 	packageFile := false
+	clock := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_monotonic_ms_v1":
+			clock = true
 		case "fairyc_private_linux_package_file_info_v1":
 			rooted, packageFile = true, true
 		case "fairyc_private_linux_package_directory_create_v1", "fairyc_private_linux_package_directory_edit_v1",
@@ -151,6 +157,12 @@ func LinuxSource(header string) (string, error) {
 	}
 	if gnu {
 		source += "\n" + linuxGNU
+	}
+	if clock {
+		if source != "" {
+			source += "\n"
+		}
+		source += linuxClock
 	}
 	return source, nil
 }

@@ -266,11 +266,39 @@ The initial focused cache probe passed in 3.376s; review then separated sync-sta
 I/O errors from publication conflicts and added explicit sync/zero-write oracles.
 The final combined command above includes that correction and the extended model.
 
+## Monotonic operation deadline prerequisite
+
+`linux_fetch_deadline` uses a private Linux `CLOCK_MONOTONIC` millisecond
+observation. The C adapter rejects null output, invalid timespec values and
+conversion overflow; syscall errors leave zero output and retain their native
+code. Deadline creation propagates observation errors. Subsequent errors or a
+backward observation fail closed as expired, without replaying the operation.
+The existing 120,000 ms operation budget is unchanged.
+
+Windows low/optimized substitute probes pass exact `SIZE_MAX`, overflow,
+submillisecond truncation, native error and invalid timestamp cases. Independent
+Fairy policy probes pass elapsed 119,999/120,000/120,001 ms, reverse-time,
+near-maximum timestamps and start/subsequent clock failures. Generated programs
+run with empty PATH. The C selection/boundary command passes in 0.985s and the
+Fairy policy command in 2.822s:
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/candidatehost -run '^(TestPrivateLinuxClockSelection|TestLinuxClockAdapterBoundaries)$'
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinuxFetchDeadlinePolicy$'
+```
+
+Reference source `check` and `check --locked` pass with 691 source files and
+8,604 MIR functions. Native Linux GCC/Clang replay is authored as
+`TestLinuxClockAdapterNative` and remains unexecuted. These probes establish
+the deadline prerequisite only; they do not establish offline restoration,
+networking or Linux CLI integration.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageDirectoryAdapterNative$'
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageFileAdapterNative$'
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxClockAdapterNative$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
