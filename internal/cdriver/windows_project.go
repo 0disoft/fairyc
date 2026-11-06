@@ -40,7 +40,7 @@ func ValidateWindowsProjectStackReserve(reserve uint64) error {
 // BuildWindowsMSVCTargetPartsWithStackReserve is for explicitly sized private
 // compiler images; ordinary project builds use the zero-reservation wrapper.
 func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, true)
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, true, false)
 }
 
 // BuildWindowsMSVCTargetPartsImageWithStackReserve builds the same private
@@ -49,7 +49,16 @@ func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain,
 // consume only Bytes keep one object resident at a time instead of the whole
 // object set; the returned artifact has no Objects.
 func BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false)
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, false)
+}
+
+// BuildWindowsMSVCCompilerHostPartsWithStackReserve consumes verified private
+// compiler-host C with a separately bounded 8MiB header. Ordinary target builders
+// retain their 2MiB header limit. All other source, stack, timeout, COFF and image
+// policies are unchanged. Each object is inspected and released before linking;
+// the result contains the image without retaining the complete object set.
+func BuildWindowsMSVCCompilerHostPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, true)
 }
 
 // maxProjectRetainedObjectBytes bounds the aggregate COFF bytes kept in
@@ -65,7 +74,7 @@ func retainProjectObject(objects []WindowsHostObject, retained int, object Windo
 	return append(objects, object), retained + len(object.Bytes), nil
 }
 
-func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64, retainObjects bool) (WindowsHostArtifact, error) {
+func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64, retainObjects, compilerHost bool) (WindowsHostArtifact, error) {
 	if err := ValidateWindowsProjectStackReserve(reserve); err != nil {
 		return WindowsHostArtifact{}, err
 	}
@@ -81,18 +90,8 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 	if profile != LowProfile && profile != OptimizedProfile {
 		return WindowsHostArtifact{}, fmt.Errorf("unsupported project C profile %q", profile.Name)
 	}
-	if len(header) == 0 || len(header) > 2*1024*1024 || len(literals) == 0 || len(literals) > 2*1024*1024 || len(units) == 0 || len(units) > 4096 || len(runtimeSource) == 0 || len(runtimeSource) > 8*1024*1024 {
-		return WindowsHostArtifact{}, fmt.Errorf("invalid bounded project C inputs")
-	}
-	total := len(header) + len(literals) + len(runtimeSource)
-	for _, unit := range units {
-		if len(unit) == 0 || len(unit) > 2*1024*1024 {
-			return WindowsHostArtifact{}, fmt.Errorf("invalid bounded project C body")
-		}
-		total += len(unit)
-		if total > 96*1024*1024 {
-			return WindowsHostArtifact{}, fmt.Errorf("project C transport exceeds 96 MiB")
-		}
+	if err := validateWindowsProjectInputs(header, literals, units, runtimeSource, compilerHost); err != nil {
+		return WindowsHostArtifact{}, err
 	}
 	directory, err := os.MkdirTemp("", "fairyc-msvc-project-")
 	if err != nil {

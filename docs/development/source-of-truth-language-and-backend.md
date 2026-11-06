@@ -173,6 +173,10 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 - **Shared constrained-C driver and scalar runtime**
   - `internal/cdriver/`
   - `internal/cruntime/`
+- **Explicit private Windows compiler-host header admission with unchanged ordinary project bounds**
+  - `internal/cdriver/windows_project.go`, `windows_project_limits.go`, `windows_project_limits_test.go`
+  - `internal/cli/candidate_copied_closure_cli_host_test.go`: exact-source/image-bound full authored CLI builder
+  - `docs/adr/0510-private-windows-compiler-host-headers.md`; full command/cache evidence: `docs/development/candidate-inline-locals-full-cli-20261107.md`
 - **Provisional target standard-library C sources and native probes**
   - `internal/cstdlib/`
 - **Closed standard-library C symbol and component contract**

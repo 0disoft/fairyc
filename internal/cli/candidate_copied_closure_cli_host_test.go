@@ -56,7 +56,7 @@ func copiedClosureCLIHostWithLimit(t *testing.T, profile cdriver.Profile, partBy
 			t.Fatal(err)
 		}
 		t.Logf("full authored CLI %s: %d C parts", profile.Name, len(build.Sources))
-		artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(tc, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
+		artifact, err := cdriver.BuildWindowsMSVCCompilerHostPartsWithStackReserve(tc, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
 		if err != nil {
 			t.Fatal(err)
 		}

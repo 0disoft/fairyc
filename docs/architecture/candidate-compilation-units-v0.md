@@ -1,5 +1,22 @@
 # Bounded candidate compilation units
 
+## Explicit Windows compiler-host header budget (2026-11-07)
+
+ADR 0510 adds a separate native builder for verified private compiler-host C.
+The measured authored-main header is 2,099,985 bytes, exceeding ordinary project
+admission by 2,833 bytes; source partitioning does not change that header.
+The explicit compiler-host entry admits at most 8MiB of header, while ordinary
+builders (including explicit-stack/image-only variants) retain 2MiB. Literal,
+body, runtime, total-source, timeout and stack policies remain unchanged.
+Every COFF object is inspected and released before link; only the image is
+retained. No packet decoder or ordinary companion gains a larger limit.
+
+Role/shared-limit boundaries, the measured header size under both Windows
+profiles, and existing ordinary stack/compile/link regressions pass in 8.620s.
+Full authored CLI/cache acceptance is tracked separately in
+`docs/development/candidate-inline-locals-full-cli-20261107.md`; this prerequisite
+does not establish consecutive self-build or target/distribution maturity.
+
 ## Default semantic test implementation (2026-10-17)
 
 The candidate now implements the initial scalar default `test` runtime; its
