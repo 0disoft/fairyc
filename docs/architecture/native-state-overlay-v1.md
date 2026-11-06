@@ -2,8 +2,9 @@
 
 Status: compiler-private execution-core prerequisite for step 3 of
 [native persistence integration](native-state-persistence-v1.md).
-This implements the multi-key C overlay and seven canonical codec validators,
-not broader MIR emission, wire framing, state CLI or durable native admission.
+This implements the multi-key C overlay, seven canonical codec validators and
+verified literal multi-field/cell/map MIR emission. Wider wire framing, state CLI
+and durable multi-key native admission remain open.
 The original single-cell emitter/runtime and its CAS path remain unchanged.
 
 ## Sequential delivery
@@ -11,8 +12,9 @@ The original single-cell emitter/runtime and its CAS path remain unchanged.
 1. **Implemented:** actual allocation-free C multi-key overlay, exact write
    policy, seven canonical codec validators and independent Windows native/Go
    comparisons. Header and runtime are separately available to the compiler.
-2. Generate checked multi-field/cell/map operations and exact physical addresses
-   from the existing verified state MIR, then bind snapshots, complete sorted
+2. **Literal MIR emission implemented:** generate checked multi-field/cell/map
+   operations and exact physical addresses from existing verified state MIR.
+   **Still required:** bind snapshots, complete sorted
    overlays and read traces in a versioned transport to the existing one-attempt
    CAS executor. Validate every literal key's original encoded-byte limit before
    hashing. Do not equate a 32-byte physical address with its map-key byte cost.
@@ -107,3 +109,52 @@ compiler-source transactions or durable multi-key execution. Native Linux and
 all later steps remain open. No source grammar, public CLI/SDK/runtime ABI,
 provider/DB, dependency, default timeout, workflow/runner or repository-policy
 change is made; no push, dispatch, release or target promotion is implied.
+
+## Verified literal MIR emission
+
+`EmitOverlay` admits an already prepared Windows state owner only after complete
+state-MIR verification. Its immutable `OverlayArtifact` retains generated source,
+layout/body identity and an entry hash binding target, layout, body, explicit exit,
+trap category and complete generated C. Two same-package owners with identical
+operation C but different trap categories must have different entry identities.
+
+All seven codec families may appear in multiple cell/map fields. Constant map
+addresses use the existing domain-separated SHA-256 prefix plus eight-byte
+canonical key length and key bytes. The original encoded key length remains a
+separate per-operation check against MaxMapKeyBytes; a hash never substitutes
+for that cost. Empty byte keys are supported without generating an unsigned
+comparison against zero. Empty values use a valid one-byte C initializer while
+retaining zero semantic length; no zero-length C arrays are emitted.
+
+Every read passes the field codec, original operation index, presence and exact
+bytes to the compiler-owned observer. Present values pass the canonical codec
+gate. Literals are verified before emission and checked again by the C codec
+owner before writes. Every runtime/observer/key-policy failure aborts the entire
+overlay; key-policy failure has private status 7. Commit seals the complete
+proposed overlay; reject/trap clear it and retain explicit exit identity. Empty
+bodies compile without unused failure labels or locals. No Go execution supplies
+native observation or overlay bytes.
+
+The Windows MIR fixture has fourteen actual fields and 56 verified operations:
+one cell/map pair per codec, absent/present/deleted reads, typed writes and map
+deletion. Commit/reject/trap/empty x low/optimized x seven policies yield 56 real
+generated-C/Go comparisons. Each compares complete ordered read bytes and types,
+exit/error classification and sorted overlay keys/deletion/value/cost against the
+independent `contractstatemir.ExecutePersistent` path. Policies include exact and
+one-short count/value/key limits and 32/33-byte accounting. Portable tests cover
+deterministic identities, zero/unsupported owners, malformed operations and
+same-package distinct trap categories.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m -failfast -v ./internal/contractstatenative -run '^TestOverlayMIR'
+```
+
+The first full literal emission replay passes in 10.056s. The follow-up includes
+the stronger per-entry identity, original overlay core and single-cell execution
+regression and passes in 27.514s without selected skips. Scoped vet, formatting,
+UTF-8/LF and diff checks pass. This is real verified-MIR-to-C operation execution, but its enclosing
+native acceptance probe owns bounded test input/output. Production snapshot/
+response framing, multi-key CAS publication and compiler-cache/CLI integration
+remain required before claiming durable multi-field support. Graphs, helpers,
+borrows and non-Windows emission remain explicitly refused; Linux execution and
+the broader final queue remain deferred.

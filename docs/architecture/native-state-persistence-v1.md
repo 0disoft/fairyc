@@ -30,9 +30,10 @@ family. Source/developer native invocation, broader state MIR and steps 3/4
 remain open. The initial transport commit alone established only step 1.
 
 Step 3 now has an independently exercised multi-key C overlay and all seven
-canonical codec validators. [Overlay v1](native-state-overlay-v1.md) records the
-memory policy, Windows evidence and remaining emitter/transport/graph integration.
-That prerequisite alone does not admit broader native state execution.
+canonical codec validators, plus actual verified literal multi-field/cell/map
+MIR-to-C emission. [Overlay v1](native-state-overlay-v1.md) records the memory
+policy, Windows evidence and remaining transport/CAS/graph integration. Those
+prerequisites alone do not admit durable multi-key native state execution.
 
 ## Sealed transport owner
 

@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Native state literal MIR now lowers multi-field cells/maps across all seven
+  codecs into the actual overlay C core. Windows low/optimized match 56 complete
+  native/Go execution cases across commit/reject/trap/empty and exact/one-short
+  policies (10.056s). Encoded map-key limits retain their original byte length,
+  canonical physical derivation uses its eight-byte length, observers preserve
+  operation/type/presence/bytes and failed attempts clear the whole overlay.
+  Entry identity also distinguishes same-package identical-C different traps.
+  Production framing/multi-key CAS, graph/helper/borrow, source/cache/native CLI,
+  Linux and all final gates remain open. See `architecture/native-state-overlay-v1.md`.
+
 - Native state step 3 now has a real multi-key physical overlay C core with all
   seven canonical codec validators. Windows low/optimized match 9,556 independent
   Go codec decisions and 26 complete multi-field/map overlay scenarios, including
