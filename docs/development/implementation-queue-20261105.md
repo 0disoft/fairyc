@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy checked-body semantic borrow retention and private single/batch collection
+  pass twenty-seven independent Go source families and twenty controls per Windows
+  profile in 77.221s: ninety-four native processes without selected skips. Exact
+  source spans, kind, escapes, canonical order, owner/frame multiplicity and work/
+  count boundaries pass with empty PATH and unchanged workspaces. Authored check/
+  locked pass 681 files / 8,506 MIR functions; scoped vet and hygiene pass. See
+  `candidate-atlas-borrow-sites-20261106.md`. Complete-bound/remapped borrow metadata,
+  production/completeness/commands and all broader/final gates remain open. Native
+  Linux stays batched; no push or dispatch.
+
 - Seventeen independent Go borrow source/map-round-trip cases and two unsupported
   source controls pass in 1.264s. Returned unmaterialized parameters retain their
   expression spans; retained loans keep their written borrow sites and escape

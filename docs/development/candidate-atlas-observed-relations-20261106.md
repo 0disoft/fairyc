@@ -48,7 +48,11 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   spans, ordinary/concrete owners and exact frame/work/count policies.
 - [x] Complete-bound Result-propagation production, summaries/counts/completeness
   and independent source/current/join and actual-command comparisons.
-- [ ] Borrow collector and production with independent verified Go facts.
+- [x] Checked-body semantic borrow retention and private single/batch collection
+  with independent ordinary/generic/concrete-cleanup Go facts and bounded APIs.
+  See `candidate-atlas-borrow-sites-20261106.md` for exact acceptance scope.
+- [ ] Complete-bound borrow production, remapped specialization ownership,
+  cache/restoration metadata, summaries/counts/completeness and actual commands.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
 
