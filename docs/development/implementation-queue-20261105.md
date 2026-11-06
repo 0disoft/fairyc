@@ -1810,3 +1810,16 @@ authorized by this queue.
   closes explicit in-process packet reuse, not disk identity/persistence, normal
   workspace command selection or native graph execution. Linux stays batched;
   no push or dispatch. The full implementation objective remains active.
+
+- Graph cache identity now comes from sealed Complete source/coordinate/body/
+  public/source-interface facts plus the existing compatibility and SDK members.
+  A private disjoint marker/hash family excludes numeric owner IDs, so current-
+  source restoration and same-coordinate rebinding preserve keys while source,
+  schema, environment or library drift invalidates them. A disjoint Sol high
+  worker passes 82 Windows low/optimized native cases against independent Go
+  canonical/SHA256 bytes in 105.823s, including actual environment-adapter and
+  exact/one-short work controls. Current-source check/locked check pass 720 files
+  / 9,004 MIR functions. Receipt `candidate-state-graph-cache-key-20261107.md`
+  retains failed preparation separately. This closes a key prerequisite, not
+  disk transport/admission, filesystem persistence, workspace selection or graph
+  execution. Linux stays batched; no push or dispatch. Full objective stays active.
