@@ -127,6 +127,47 @@ size_t fairyc_private_windows_root_file_open_v1(size_t root, const uint8_t *leaf
     return (size_t)(uintptr_t)file;
 }
 
+/* Fixed flat state lock. 1=reopen authority, 2=create exclusive authority,
+ * 3=reopen lease. Never change the legacy rooted file mode/share contract. */
+size_t fairyc_private_windows_root_file_state_open_v1(size_t root, uint32_t mode) {
+    if (root == 0 || mode < 1 || mode > 3) { SetLastError(ERROR_INVALID_PARAMETER); return 0; }
+    HMODULE module = GetModuleHandleW(L"ntdll.dll");
+    if (module == NULL) { return 0; }
+    fy_root_nt_create create = (fy_root_nt_create)GetProcAddress(module, "NtCreateFile");
+    fy_root_nt_error error = (fy_root_nt_error)GetProcAddress(module, "RtlNtStatusToDosError");
+    if (create == NULL || error == NULL) { SetLastError(ERROR_PROC_NOT_FOUND); return 0; }
+    WCHAR leaf[] = L"state-v1.lock";
+    UNICODE_STRING name = { (USHORT)(sizeof(leaf) - sizeof(WCHAR)), (USHORT)sizeof(leaf), leaf };
+    OBJECT_ATTRIBUTES attributes = { sizeof(OBJECT_ATTRIBUTES), (HANDLE)(uintptr_t)root, &name, 0x40, NULL, NULL };
+    IO_STATUS_BLOCK io;
+    HANDLE file = NULL;
+    NTSTATUS status = create(&file, GENERIC_READ | GENERIC_WRITE | SYNCHRONIZE, &attributes, &io, NULL,
+        FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ | FILE_SHARE_WRITE | (mode == 3 ? 0 : FILE_SHARE_DELETE),
+        mode == 2 ? 2u : 1u, 0x00000040u | 0x00000020u | 0x00200000u, NULL, 0);
+    if (status < 0) { SetLastError(error(status)); return 0; }
+    if (!fy_root_regular(file)) {
+        DWORD failure = GetLastError(); CloseHandle(file); SetLastError(failure); return 0;
+    }
+    return (size_t)(uintptr_t)file;
+}
+
+int32_t fairyc_private_windows_root_file_state_same_v1(size_t file, size_t authority) {
+    HANDLE current = (HANDLE)(uintptr_t)file, retained = (HANDLE)(uintptr_t)authority;
+    BY_HANDLE_FILE_INFORMATION a, b;
+    if (!fy_root_regular(current) || !fy_root_regular(retained) ||
+        !GetFileInformationByHandle(current, &a) || !GetFileInformationByHandle(retained, &b)) { return 0; }
+    if (a.dwVolumeSerialNumber != b.dwVolumeSerialNumber || a.nFileIndexHigh != b.nFileIndexHigh ||
+        a.nFileIndexLow != b.nFileIndexLow) { SetLastError(ERROR_FILE_INVALID); return 0; }
+    return 1;
+}
+
+int32_t fairyc_private_windows_root_file_state_lock_v1(size_t file) {
+    OVERLAPPED position;
+    memset(&position, 0, sizeof(position));
+    return LockFileEx((HANDLE)(uintptr_t)file, LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+        0, 1, 0, &position);
+}
+
 int32_t fairyc_private_windows_root_file_size_v1(size_t file, size_t *size) {
     LARGE_INTEGER value;
     if (!GetFileSizeEx((HANDLE)(uintptr_t)file, &value)) { return 0; }

@@ -9,6 +9,9 @@ import windows_host_paths as paths;
 @effects(filesystem) @link_name("fairyc_private_windows_root_directory_create_v1") unsafe extern C fn usize create_child_directory(usize root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_directory_edit_v1") unsafe extern C fn usize edit_child_directory(usize root,ptr u8 leaf,usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_open_v1") unsafe extern C fn usize open_file(usize root,ptr u8 leaf,usize size,u32 mode);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_state_open_v1") unsafe extern C fn usize state_open(usize root,u32 mode);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_state_same_v1") unsafe extern C fn i32 state_same(usize file,usize authority);
+@effects(filesystem) @link_name("fairyc_private_windows_root_file_state_lock_v1") unsafe extern C fn i32 state_lock(usize file);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_size_v1") unsafe extern C fn i32 file_size(usize file,ptr mut usize size);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_read_v1") unsafe extern C fn i32 file_read(usize file,ptr mut u8 data,usize size,ptr mut usize copied);
 @effects(filesystem) @link_name("fairyc_private_windows_root_file_write_v1") unsafe extern C fn i32 file_write(usize file,ptr u8 data,usize size,ptr mut usize written);
@@ -27,9 +30,15 @@ import windows_host_paths as paths;
 // Exclusive staging owns its handle, not a path to reopen on cleanup. A failed
 // publication deletes only this created object. Published files survive close.
 @effects(filesystem) pub resource File{usize raw;bool staged;cleanup{if(this.raw!=0){unsafe{if(this.staged){discard file_delete(this.raw);}discard close_handle(this.raw);};}}}
+// Private owning fields seal authority and leases. Neither is a staging file;
+// nested File cleanup closes the handle and never deletes state-v1.lock.
+pub resource StateLock{File file;cleanup{}}
+pub resource StateLease{File file;cleanup{}}
 // 1 input, 2 path allocation, 3 directory open, 4 file open, 5 size,
 // 6 read, 7 write, 8 sync, 9 rename, 10 staged cleanup, 11 consuming close.
 // 12 metadata/scan, 13 malformed native records, 14 bound/work.
+// 15 nonblocking lock (busy iff os_code=33), 16 stale/invalid lock authority
+// (identity mismatch os_code=1006). Native open/metadata failures retain 4/12.
 pub struct Problem{u32 stage;u32 os_code;usize completed;u32 close_code;}
 fn Problem fail(u32 stage,u32 os_code,usize completed){return Problem{.stage,.os_code,.completed,.close_code=0};}
 @effects(filesystem) fn Problem native(u32 stage,usize completed){return fail(stage,unsafe{last_error()},completed);}
@@ -52,6 +61,24 @@ pub fn void keep_in_stage(ref mut File file){file.staged=false;}
 @effects(filesystem) fn Result<File,Problem> child(ref Directory root,ref u8[] leaf,bool create){let encoded=switch(wide(leaf,true)){case .ok(p):{p}case .err(e):{return .err(e);}};let raw=unsafe{open_file(root.raw,bytes::view(ref encoded) as ptr u8,bytes::len(ref encoded)-2,if(create){2}else{1})};if(raw==0){return .err(native(4,0));}return .ok(File{.raw,.staged=create});}
 @effects(filesystem) pub fn Result<File,Problem> open_read(ref Directory root,ref u8[] leaf){return child(root,leaf,false);}
 @effects(filesystem) pub fn Result<File,Problem> create_new(ref Directory root,ref u8[] leaf){return child(root,leaf,true);}
+// Creation is exclusive and reopening never initializes or truncates. Retain
+// this handle across operations, but acquire a fresh independent handle per lease.
+@effects(filesystem) pub fn Result<StateLock,Problem> state_lock_open(ref Directory root,bool create){
+    let raw=unsafe{state_open(root.raw,if(create){2}else{1})};if(raw==0){return .err(native(4,0));}
+    return .ok(StateLock{.file=File{.raw,.staged=false}});
+}
+@effects(filesystem) pub fn Result<StateLease,Problem> state_lock_acquire(ref Directory root,ref StateLock authority){
+    let raw=unsafe{state_open(root.raw,3)};if(raw==0){return .err(native(4,0));}
+    let file=File{.raw,.staged=false};
+    let source=switch(observe(ref authority.file)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let actual=switch(observe(ref file)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    if(!regular(source) || !regular(actual) || source.identity!=actual.identity){return .err(fail(16,1006,0));}
+    // Also compare volume identity natively. The new handle denies delete
+    // sharing, so its rooted name cannot be replaced through the lease scope.
+    if(unsafe{state_same(file.raw,authority.file.raw)}==0){return .err(native(16,0));}
+    if(unsafe{state_lock(file.raw)}==0){return .err(native(15,0));}
+    return .ok(StateLease{.file});
+}
 @effects(filesystem) pub fn Result<usize,Problem> size(ref File file){var usize size=0;if(unsafe{file_size(file.raw,ref mut size as ptr mut usize)}==0){return .err(native(5,0));}return .ok(size);}
 @effects(filesystem) pub fn Result<usize,Problem> read(ref mut File file,ref mut u8[] data){if(data.len>65536){return .err(fail(1,0,0));}var usize copied=0;if(unsafe{file_read(file.raw,data as ptr mut u8,data.len,ref mut copied as ptr mut usize)}==0){return .err(native(6,copied));}if(copied>data.len){return .err(fail(6,0,copied));}return .ok(copied);}
 @effects(filesystem) pub fn Result<usize,Problem> write_all(ref mut File file,ref u8[] data){if(!file.staged){return .err(fail(1,0,0));}var usize written=0;while(written<data.len){let usize count=if(data.len-written>65536){65536}else{data.len-written};var usize copied=0;if(unsafe{file_write(file.raw,data[written..written+count] as ptr u8,count,ref mut copied as ptr mut usize)}==0){return .err(native(7,written+copied));}if(copied==0 || copied>count){return .err(fail(7,0,written));}written+=copied;}return .ok(written);}

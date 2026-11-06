@@ -51,6 +51,9 @@ var admitted = map[string]bool{
 	"fairyc_private_windows_root_file_rename_v1":      true,
 	"fairyc_private_windows_root_file_publish_new_v1": true,
 	"fairyc_private_windows_root_file_link_new_v1":    true,
+	"fairyc_private_windows_root_file_state_open_v1":  true,
+	"fairyc_private_windows_root_file_state_same_v1":  true,
+	"fairyc_private_windows_root_file_state_lock_v1":  true,
 	"fairyc_private_windows_root_file_time_v1":        true,
 	"fairyc_private_windows_root_file_info_v1":        true, "fairyc_private_windows_root_directory_query_v1": true,
 }

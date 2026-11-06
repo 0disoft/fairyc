@@ -67,6 +67,18 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy now retains a fixed rooted local-state lock authority and acquires
+  independent nonblocking one-byte Windows leases against the same file/volume
+  identity. Parallel worker evidence covers Go/Fairy/process contention, normal/
+  failed/process-death release and the six existing rooted fixture bodies in
+  both profiles. The coordinator closes authored runtime-selector/pin drift
+  with complete live-Go C comparisons and a current-source check/locked check
+  at 745 files / 9,347 MIR functions. See ADR 0536 and
+  `candidate-local-state-lock-20261107.md`. Canonical records and actual lock
+  primitives are ready; state-file I/O, sync-before-rename publication and
+  one-attempt native graph CAS are still open. Linux stays batched; no push or
+  dispatch. Full implementation objective remains active.
+
 - Fairy now reads/re-encodes the existing Go local-state record bytes for its
   admitted graph layouts, retaining canonical JSON/base64/SHA256, full-width
   versions, null/empty distinction and detached snapshot ownership. Parallel
