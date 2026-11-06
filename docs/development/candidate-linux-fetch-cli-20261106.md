@@ -108,10 +108,11 @@ The native source requires the optional libcurl development headers plus the
 system runtime/CA prerequisites recorded in ADR 0501; baseline provisioning has
 not been changed or certified here.
 
-The GNU companion's authored runtime selector/asset pack also needs the recently
-added package-directory/file/clock/HTTPS assets before consecutive full Linux
-self-builds can be certified. Go native support already selects those assets;
-the separate authored selector must not be assumed equivalent without its oracle.
+The GNU companion's authored runtime selector/asset pack now includes the
+package-directory/file/clock/HTTPS assets. The independent Windows low/optimized
+oracle matches 118 plans and 76 complete runtime C outputs against live Go
+selection; see `candidate-linux-runtime-sync-20261106.md`. Actual Linux
+compilation, trusted TLS and consecutive full Linux self-build remain unverified.
 
 Public CLI spellings/output/exit policies, SDK ABI, dependencies, DB, CI/runners
 and repository hygiene are unchanged. Internal implementation routing and queue

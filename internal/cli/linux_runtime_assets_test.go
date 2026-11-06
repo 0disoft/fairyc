@@ -34,7 +34,12 @@ func TestLinuxGNUCompanionRuntimeAssets(t *testing.T) {
 		"fairyc_private_linux_capture_open_v1", "fairyc_private_linux_test_capture_open_v1",
 		"fairyc_private_linux_host_path_v1", "fairyc_private_linux_directory_scan_open_v1",
 		"fairyc_private_linux_root_file_erase_if_v1", "fairyc_private_linux_workspace_path_kind_v1",
-		"fairyc_private_linux_build_scratch_open_v1", "fairyc_private_linux_starter_create_v1", "fairyc_private_linux_gnu_run_v1"}
+		"fairyc_private_linux_build_scratch_open_v1", "fairyc_private_linux_starter_create_v1", "fairyc_private_linux_gnu_run_v1",
+		"fairyc_private_linux_package_directory_create_v1", "fairyc_private_linux_package_directory_edit_v1",
+		"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1",
+		"fairyc_private_linux_package_directory_clone_v1", "fairyc_private_linux_package_file_info_v1",
+		"fairyc_private_linux_monotonic_ms_v1", "fairyc_private_linux_https_open_v1",
+		"fairyc_private_linux_https_headers_v1", "fairyc_private_linux_https_read_v1", "fairyc_private_linux_https_close_v1"}
 	for _, name := range hosts {
 		cases = append(cases, []string{name})
 	}
@@ -42,7 +47,10 @@ func TestLinuxGNUCompanionRuntimeAssets(t *testing.T) {
 	for _, names := range cases[:12] {
 		all = append(all, names...)
 	}
-	cases = append(cases, all)
+	cases = append(cases, all,
+		[]string{"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_file_info_v1", "fairyc_private_linux_root_file_erase_if_v1"},
+		[]string{"fairyc_private_linux_https_open_v1", "fairyc_private_linux_process_start_v1", "fy_std_stdout_write_all_v0"},
+		[]string{"fairyc_private_linux_https_read_v1", "fairyc_private_linux_monotonic_ms_v1", "fairyc_private_linux_https_open_v1"})
 	var fixture bytes.Buffer
 	put := func(n uint32) {
 		t.Helper()

@@ -31,6 +31,13 @@ SOURCES = [
     'internal/candidatehost/linux_build_scratch.c',
     'internal/candidatehost/linux_starter.c',
     'internal/candidatehost/linux_gnu.c',
+    'internal/candidatehost/linux_package_directory.c',
+    'internal/candidatehost/linux_package_file.c',
+    'internal/candidatehost/linux_clock.c',
+    'internal/candidatehost/linux_https_protocol.c',
+    'internal/candidatehost/linux_https_worker.c',
+    'internal/candidatehost/linux_https_reader.c',
+    'internal/candidatehost/linux_https_parent.c',
 ]
 PIN = ROOT / 'examples/lexer_candidate/src/linux_runtime_asset_pin.fy'
 

@@ -15,6 +15,9 @@ fn ref u8[] raw(ref Bundle bundle,usize id){assert(id>=1 && id<=pin::count());re
 fn bool at(ref u8[] data,usize i,ref u8[] prefix){return i<=data.len && prefix.len<=data.len-i && bytes::equal(data[i..i+prefix.len],prefix);}
 fn Result<usize,Problem> append(ref mut bytes::Buffer output,ref u8[] data){if(data.len>8388608 || bytes::len(output)>8388608-data.len || !bytes::append(output,data).is_ok){return .err(fail(3));}return .ok(bytes::len(output));}
 fn Result<usize,Problem> part(ref Bundle bundle,usize id,ref mut bytes::Buffer output){if(bytes::len(output)!=0){let usize gap=append(output,b"\n")?;}return append(output,raw(bundle,id));}
+fn Result<usize,Problem> hosts(ref Bundle bundle,ref selection::Plan plan,usize first,usize last,u32 bit,ref mut bytes::Buffer output){
+    var usize i=first;var u32 mask=bit;while(i<=last){if((plan.hosts&mask)!=0){let usize n=part(bundle,i,output)?;}mask*=2;i+=1;}return .ok(bytes::len(output));
+}
 fn Result<usize,Problem> scalar(ref Bundle bundle,bool trap,ref mut bytes::Buffer output){
     if(bytes::len(output)!=0){let usize gap=append(output,b"\n")?;}let source=raw(bundle,1);var usize i=0;var usize first=0;var u32 seen=0;
     while(i<source.len){var u32 bit=0;var usize size=0;if(at(source,i,b"@TRAP_EXIT_BASE@")){bit=1;size=16;}else if(at(source,i,b"@TRAP_RECEIPT_INCLUDE@")){bit=2;size=22;}else if(at(source,i,b"@TRAP_RECEIPT_WRITE@")){bit=4;size=20;}
@@ -28,9 +31,15 @@ fn Result<usize,Problem> scalar(ref Bundle bundle,bool trap,ref mut bytes::Buffe
 }
 pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bool trap){
     let plan=switch(selection::select(header)){case .ok(p):{p}case .err(e):{return .err(Problem{.kind=2,.symbol_kind=e.kind,.start=e.start,.end=e.end});}};
-    var bytes::Buffer output=bytes::empty();var u32 bit=1;var usize i=15;
-    // Feature macros from rooted/process adapters precede every libc include.
-    while(i<=25){if((plan.hosts&bit)!=0){let usize n=part(bundle,i,ref mut output)?;}bit*=2;i+=1;}
+    var bytes::Buffer output=bytes::empty();
+    // Match LinuxSource exactly: HTTPS feature selection precedes all headers,
+    // package adapters follow directory, and clock precedes the HTTPS quartet.
+    // part() supplies the prefix's final newline before the first host source.
+    if((plan.hosts&(1<<14))!=0){let usize n=append(ref mut output,b"#ifndef _GNU_SOURCE\n#define _GNU_SOURCE 1\n#endif")?;}
+    let usize base=hosts(bundle,ref plan,15,20,1,ref mut output)?;
+    let usize packages=hosts(bundle,ref plan,26,27,1<<11,ref mut output)?;
+    let usize tail=hosts(bundle,ref plan,21,25,1<<6,ref mut output)?;
+    let usize remote=hosts(bundle,ref plan,28,32,1<<13,ref mut output)?;
     var u32 id=1;while(id<=10){if(selection::contains(ref plan,id)){
         let usize asset=if(id==1){2}else if(id==2){3}else if(id==3){5}else if(id==4){6}else if(id==5){7}else if(id==6){8}else if(id==7){10}else if(id==8){11}else if(id==9){12}else{13};
         let usize n=part(bundle,asset,ref mut output)?;if(id==2 || id==6){let usize extra=part(bundle,asset+1,ref mut output)?;}

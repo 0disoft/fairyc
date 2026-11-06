@@ -23,11 +23,12 @@ authorized by this queue.
   independent current-source expectations and explicit completeness.
 - [ ] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
-- [ ] Synchronize the Fairy GNU companion runtime selector and pinned source
+- [x] Synchronize the Fairy GNU companion runtime selector and pinned source
   pack with the package-directory/file, clock and HTTPS host adapters; compare
   complete emitted C against live Go selection before Linux self-build acceptance.
-  The selector now matches 118 live Go plans in Windows low/optimized; pinned
-  assets and complete C assembly remain next. See
+  The selector matches 118 live Go plans and all 76 complete runtime C outputs
+  match in Windows low/optimized, including feature macro/source order. Native
+  compilation, trusted TLS and consecutive Linux self-build remain pending. See
   `candidate-linux-runtime-sync-20261106.md`.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
