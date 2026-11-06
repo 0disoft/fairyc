@@ -14,8 +14,13 @@ fn bool word(u8 c){return c>=48 && c<=57 || c>=65 && c<=90 || c>=97 && c<=122 ||
 fn bool space(u8 c){return c==9 || c==10 || c==12 || c==13 || c==32;}
 pub fn bool contains(ref Plan p,u32 id){return id>=1 && id<=10 && (p.components & (1<<(id-1)))!=0;}
 // Host mask order for assembly: rooted, process, capture, input, paths,
-// directory, retention, workspace, build scratch, starter.
+// directory, retention, workspace, build scratch, starter, GNU; then package
+// directory, package file, clock, HTTPS protocol, worker, reader, parent.
 pub fn u32 host(ref u8[] name){
+    if(bytes::equal(name,b"fairyc_private_linux_https_open_v1") || bytes::equal(name,b"fairyc_private_linux_https_headers_v1") || bytes::equal(name,b"fairyc_private_linux_https_read_v1") || bytes::equal(name,b"fairyc_private_linux_https_close_v1")){return (1<<13)|(1<<14)|(1<<15)|(1<<16)|(1<<17);}
+    if(bytes::equal(name,b"fairyc_private_linux_monotonic_ms_v1")){return 1<<13;}
+    if(bytes::equal(name,b"fairyc_private_linux_package_directory_create_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_edit_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_publish_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_erase_v1") || bytes::equal(name,b"fairyc_private_linux_package_directory_clone_v1")){return 1|(1<<11);}
+    if(bytes::equal(name,b"fairyc_private_linux_package_file_info_v1")){return 1|(1<<12);}
     if(bytes::equal(name,b"fairyc_private_linux_gnu_stage_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_write_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_read_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_find_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_run_v1") || bytes::equal(name,b"fairyc_private_linux_gnu_publish_v1")){return 1031;}
     if(bytes::equal(name,b"fairyc_private_linux_host_path_v1")){return 16;}
     if(bytes::equal(name,b"fairyc_private_linux_process_start_v1") || bytes::equal(name,b"fairyc_private_linux_process_wait_v1") || bytes::equal(name,b"fairyc_private_linux_process_discard_v1") || bytes::equal(name,b"fairyc_private_linux_process_wait_for_v1")){return 2;}

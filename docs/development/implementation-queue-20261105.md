@@ -26,6 +26,9 @@ authorized by this queue.
 - [ ] Synchronize the Fairy GNU companion runtime selector and pinned source
   pack with the package-directory/file, clock and HTTPS host adapters; compare
   complete emitted C against live Go selection before Linux self-build acceptance.
+  The selector now matches 118 live Go plans in Windows low/optimized; pinned
+  assets and complete C assembly remain next. See
+  `candidate-linux-runtime-sync-20261106.md`.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
 - [ ] Generated-C/native persistent state execution through the existing exact

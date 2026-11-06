@@ -73,7 +73,9 @@ func TestLinuxGNUCompanionRuntime(t *testing.T) {
 		cases = append(cases, []string{symbol})
 	}
 	cases = append(cases, symbols, []string{}, []string{"fy_private_vector_reserve_v0"},
-		[]string{"fairyc_private_linux_directory_scan_next_v1", "fy_std_file_read_append_v0", "fy_private_vector_element_slot_v0"})
+		[]string{"fairyc_private_linux_directory_scan_next_v1", "fy_std_file_read_append_v0", "fy_private_vector_element_slot_v0"},
+		[]string{"fairyc_private_linux_https_read_v1", "fairyc_private_linux_monotonic_ms_v1"},
+		[]string{"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_file_info_v1", "fairyc_private_linux_https_open_v1"})
 	components := []cstdlibcontract.Component{
 		cstdlibcontract.ComponentLinuxConsole, cstdlibcontract.ComponentLinuxFile,
 		cstdlibcontract.ComponentSystemHeap, cstdlibcontract.ComponentByteCompare,
@@ -81,7 +83,7 @@ func TestLinuxGNUCompanionRuntime(t *testing.T) {
 		cstdlibcontract.ComponentArena, cstdlibcontract.ComponentTextView,
 		cstdlibcontract.ComponentLinuxProcessArgs, cstdlibcontract.ComponentOwnedText,
 	}
-	files := []string{"linux_rooted_file.c", "linux_process.c", "linux_capture.c", "linux_test_input.c", "linux_paths.c", "linux_directory.c", "linux_retention.c", "linux_workspace.c", "linux_build_scratch.c", "linux_starter.c", "linux_gnu.c"}
+	files := []string{"linux_rooted_file.c", "linux_process.c", "linux_capture.c", "linux_test_input.c", "linux_paths.c", "linux_directory.c", "linux_retention.c", "linux_workspace.c", "linux_build_scratch.c", "linux_starter.c", "linux_gnu.c", "linux_package_directory.c", "linux_package_file.c", "linux_clock.c", "linux_https_protocol.c", "linux_https_worker.c", "linux_https_reader.c", "linux_https_parent.c"}
 	parts := make([]string, len(files))
 	for i, file := range files {
 		data, err := os.ReadFile(filepath.Join("..", "candidatehost", file))
