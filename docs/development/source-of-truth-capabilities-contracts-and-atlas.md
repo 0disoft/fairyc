@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Explicit Fairy graph runtime distribution input**: `tools/package-candidate-state-graph-runtime.py`, `examples/lexer_candidate/src/module_state_graph_native_assets.fy`, `module_state_graph_native_asset_pin.fy`; full live-Go byte and linked native comparisons: `internal/cli/candidate_state_graph_native_assets_test.go`. Admission and exact Windows scope: ADR 0527 and `docs/development/candidate-state-graph-native-assets-20261107.md`.
+
 ## Bounded Atlas tools
 
 - SDK Vec inside user aggregate cleanup, edited concrete generic results and actual MCP/editor/current-impact command acceptance: `internal/cli/candidate_atlas_sdk_aggregate_cleanup_commands_test.go`, `atlas_sdk_aggregate_cleanup_edit_oracle_test.go`, `candidate_edit_sdk_command_test.go`, `candidate_atlas_cli_test.go`; independent Go original/edited facts and unchanged SDK authority are retained. Bounded Windows profile/group evidence, two retained timeout failures, exact resume identity and remaining full authored-main/map/Linux/final gates: `docs/development/candidate-atlas-sdk-aggregate-commands-20261107.md`.

@@ -67,6 +67,13 @@ authorized by this queue.
 
 ## Progress
 
+- The explicit Fairy graph runtime input now has a deterministic distribution
+  packager and sealed size/SHA256-pinned Bundle. Windows low/optimized compare
+  complete declarations/runtime against current Go and execute linked graph
+  calls. This is a native-emission prerequisite; transaction graph emission,
+  persistent execution and the existing final gates remain open. See ADR 0527
+  and `candidate-state-graph-native-assets-20261107.md`.
+
 - Atlas SDK/user-cleanup acceptance now executes the actual MCP/editor command
   closures and edited-source impact queries, including a new bool aggregate
   implementation while preserving all fourteen pinned SDK implementations.
