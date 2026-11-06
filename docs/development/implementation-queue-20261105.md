@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Go snapshots now retain one fully identical source call when defer lowering
+  copies it onto mutually exclusive exits, with completeness counted after
+  canonicalization. Fourteen error-site source/codec controls and three new
+  ordinary/cleanup/generic call-inventory cases pass in 1.134s; the complete
+  snapshot/map/pack suites and scoped vet pass. The owning snapshot contract
+  clarifies source-site multiplicity. See the observed-relations plan for the
+  original failures and separate native Result receipt. Fairy collectors/maps,
+  broader implementation and all final gates remain open; Linux stays batched.
+
 - Thirteen independent Go Result-propagation source/codec controls now retain
   exact written question-token spans and partial-operand reachability. A
   reproduced MIR invariant failure preserves the original terminal operand;

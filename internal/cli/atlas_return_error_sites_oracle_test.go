@@ -35,6 +35,7 @@ func atlasReturnErrorSiteOracleCases() []atlasReturnErrorOracleFixture {
 		{"after-direct-trap", prefix + "fn Result<i32,i32> exercise(){assert(false);let n=read()?;return .ok(n);}", nil},
 		{"trapping-operand", prefix + "fn Result<i32,i32> exercise(){let n={assert(false);read()}?;return .ok(n);}", nil},
 		{"returning-operand", prefix + "fn Result<i32,i32> exercise(){let n={return .err(3);read()}?;return .ok(n);}", nil},
+		{"cleanup-and-defer", prefix + "resource Token{i32 value;cleanup{}}fn void notice(){}fn Result<i32,i32> exercise(){let token=Token{.value=1};defer notice();let n=read()?;return .ok(n);}", []site{{"exercise", "read()?"}}},
 	}
 }
 

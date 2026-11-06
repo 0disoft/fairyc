@@ -102,6 +102,12 @@ Verified function summaries currently retain:
 - `Result` propagation sites; and
 - semantic shared or mutable borrow sites and escape status.
 
+Call facts describe source sites. Identical call records created by lowering one
+deferred invocation onto mutually exclusive exits are retained once per function
+summary. Distinct written sites remain distinct, and completeness counts the
+canonical source-call inventory. Equality includes all retained target, ABI and
+certainty fields; conflicting records are not silently merged.
+
 Every fact carries either `compiler-declared` or `compiler-observed` provenance. Source bodies,
 documentation bodies, ordinary comments, generated summaries, credentials, environment data, build
 logs, and local paths are absent.

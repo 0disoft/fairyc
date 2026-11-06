@@ -679,9 +679,44 @@ Command: `go test -mod=readonly -count=1 -failfast -v ./internal/cli -run
 '^Test(AtlasReturnErrorSitesOracle|WindowsResultPropagationOperandExit)$'`.
 Log: `.cache/atlas-return-error-operand-native-pass-20261106.log`.
 
-A separately observed cleanup/defer-plus-propagation source still produces
-duplicate Go Atlas calls and fails canonical encoding. The failed observation
+A separately observed cleanup/defer-plus-propagation source initially produced
+duplicate Go Atlas calls and failed canonical encoding. The failed observation
 is retained in `.cache/atlas-return-error-oracle-native-final-20261106.log`;
-call canonicalization is the next independent fix, not covered by this receipt.
+the independent correction and its expanded receipt follow below.
 Fairy error-site collection/map/CLI work, allocation production and all broader
 and final queue gates remain open. Native Linux stays batched; no push/dispatch.
+
+## Deferred source-call canonicalization
+
+One deferred source invocation can appear in several mutually exclusive MIR
+exit blocks, including normal return and Result propagation. Go snapshot
+construction previously emitted each copy and incremented its completeness
+counter before canonical sorting. That duplicated source calls and made valid
+cleanup/defer programs fail strict `.fymap` encoding. Reproduction:
+`.cache/atlas-deferred-result-calls-before-20261106.log`.
+
+After the existing source-key sort, `buildFunctionSummaries` now compacts only
+fully identical owned Call records and counts the resulting source inventory.
+It preserves different written sites and every target/specialization/ABI/
+certainty field. Conflicting records remain distinct and subject to the
+unchanged strict codec; no arbitrary winner is selected. The added pass is
+O(C) time and O(1) auxiliary space over the already-owned sorted C-call slice.
+Executable MIR and input snapshots are not changed.
+
+`TestAtlasDeferredResultCalls` independently requires three source calls with
+resource cleanup, four with two distinct written defers, and six across two
+generic specializations. It checks ordinary/concrete owners, exact source-call
+and question inventories, canonical codec round trips and noninflated global
+completeness. The original error-site corpus now includes the cleanup/defer
+case: all fourteen source/codec controls and three new call cases pass in 1.134s.
+Command: `go test -mod=readonly -count=1 -failfast -v ./internal/cli -run
+'^TestAtlas(ReturnErrorSitesOracle|DeferredResultCalls)$'`.
+Log: `.cache/atlas-deferred-result-calls-final-20261106.log`.
+
+Full Go snapshot/map/pack suites pass (0.208s/2.325s/0.226s), as does scoped vet.
+The preceding Result-operand correction separately passes the complete Go MIR
+and C-backend suites (0.710s/74.346s) and its scoped vet. Formatting,
+UTF-8/LF/final-newline and diff checks pass. Source-call multiplicity is clarified
+in the snapshot contract; no schema/API/ABI, cache format, dependency, DB,
+timeout, runner or repository-policy change. Fairy collector/production and
+every broader/final gate remain open; native Linux stays batched, no push/dispatch.

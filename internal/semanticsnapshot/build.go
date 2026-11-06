@@ -838,11 +838,9 @@ func buildFunctionSummaries(
 				call.Certainty = CertaintyOpaque
 				call.ABI = foreign.ABI
 				call.LinkName = foreign.LinkName
-				externalCalls++
 			} else {
 				call.TargetKind = CallTargetResolved
 				call.Certainty = CertaintyExact
-				resolvedCalls++
 			}
 			summary.Calls = append(summary.Calls, call)
 		}
@@ -884,6 +882,17 @@ func buildFunctionSummaries(
 			summary.ReturnErrorSites = append(summary.ReturnErrorSites, span)
 		}
 		slices.SortFunc(summary.Calls, compareCall)
+		// A deferred source call can be lowered onto several mutually exclusive
+		// exits. Keep one identical source observation, including all ABI facts,
+		// and count the canonical inventory rather than the executable copies.
+		summary.Calls = slices.Compact(summary.Calls)
+		for _, call := range summary.Calls {
+			if call.TargetKind == CallTargetExternal {
+				externalCalls++
+			} else {
+				resolvedCalls++
+			}
+		}
 		summary.UnsafeSites = canonicalSpans(summary.UnsafeSites)
 		summary.MoveSites = canonicalSpans(summary.MoveSites)
 		summary.DropSites = canonicalSpans(summary.DropSites)
