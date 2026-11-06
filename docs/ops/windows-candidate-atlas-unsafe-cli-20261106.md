@@ -14,10 +14,10 @@ No Go fallback or companion is installed, and child PATH is empty.
 
 | Authored-main group | Windows low | Windows optimized |
 | --- | --- | --- |
-| impact-families | pending | PASS, 8.18s |
-| impact-sdk-vector | pending | PASS, 15.23s |
-| catalog-ordinary | pending | PASS, 7.37s |
-| pack-ordinary | pending | PASS, 8.52s |
+| impact-families | completed assertions before parent timeout | PASS, 8.18s |
+| impact-sdk-vector | completed assertions before parent timeout | PASS, 15.23s |
+| catalog-ordinary | completed 44 invocations before parent timeout | PASS, 7.37s |
+| pack-ordinary | completed 48 invocations before parent timeout | PASS, 8.52s |
 | pack-sources | pending | PASS, 5.50s |
 | pack-sdk | pending | PASS, 19.58s |
 
@@ -56,9 +56,31 @@ verifier assertion; unselected registrations are not attested.
 | `^TestCandidateAtlasCLI$/low/(catalog-ordinary\|pack-ordinary\|pack-sources)$` | `.cache/atlas-unsafe-production-cli-low-pack-catalog-20261106.log` |
 | `^TestCandidateAtlasCLI$/low/(pack-sdk\|impact-families\|impact-sdk-vector)$` | `.cache/atlas-unsafe-production-cli-low-impact-sdk-20261106.log` |
 
+Both original three-group low parents failed at the Go test's aggregate
+20-minute alarm (1200.171s and 1200.176s). The first completed catalog and
+ordinary-pack verifiers, then stopped in the first source-pack case; the
+second completed both impact groups, then stopped in ordinary SDK pack.
+These commands are failed observations, not completed passing selections.
+Their earlier completed verifier assertions are retained separately; there is
+no product assertion or C build failure in those logs before the parent alarm.
+
+The unfinished groups are replayed in separate 15-minute parents, using the
+same authenticated source/profile/toolchain/image digests. Replace the command
+prefix's `-timeout 20m` with `-timeout 15m` for these exact selections:
+
+| Exact selection | Local log |
+| --- | --- |
+| `^TestCandidateAtlasCLI$/low/pack-sources$` | `.cache/atlas-unsafe-production-cli-low-pack-sources-20261106.log` |
+| `^TestCandidateAtlasCLI$/low/pack-sdk$` | `.cache/atlas-unsafe-production-cli-low-pack-sdk-20261106.log` |
+
+Replays are still running. No test/product timeout, warning, work/count limit,
+source fixture, expected fact or command assertion was relaxed. Orphan cleanup
+checks were restricted to the terminated parents' children and the exact retained
+image path. Linux, hosted CI and all unselected groups remain separate gates.
+
 ## Remaining scope
 
-Low replay is still running and is not counted as a pass here. The other 35
+Low replay is still running; no complete low selection pass is claimed here. The other 35
 registered CLI groups, remaining move/allocation/error/borrow collection,
 broader source/editor coverage, generated consumers, complete Go/Fairy
 comparison, consecutive self-build, Windows distribution/clean-machine

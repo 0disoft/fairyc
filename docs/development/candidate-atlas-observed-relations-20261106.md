@@ -449,8 +449,13 @@ both profiles in 929.227s, including independent maps, current admission, joins
 and the existing refusal controls. The exact selection is
 `^TestCandidateAtlas(Production|GenericProduction|SDKVectorProduction)$` with
 `go test -mod=readonly -count=1 -failfast -timeout 20m -v ./internal/cli -run`.
-Log: `.cache/atlas-unsafe-production-roots-20261106.log`. Actual low CLI replay
-retains separate pending acceptance until its running selections finish.
+Log: `.cache/atlas-unsafe-production-roots-20261106.log`. Both initial low CLI
+parents hit their aggregate 20-minute test alarm, after completing catalog/
+ordinary pack or the two impact groups. They remain failed commands. Source
+pack and SDK pack now have separate running 15-minute replays with identical
+authenticated inputs and unchanged product policies. Actual low CLI acceptance
+stays pending; the unsafe command receipt distinguishes retained assertions,
+failed parents and the unfinished replay.
 
 ## Move-site Go prerequisite
 
