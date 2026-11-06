@@ -1,4 +1,5 @@
 module module_unit_cfg_lower;
+import module_unit_region_builtin as region_builtin;
 import module_unit_cfg_model as cfg;
 import module_unit_body_ir_model as ir;
 import module_unit_body_ir_verify as proof;
@@ -56,7 +57,7 @@ fn Result<usize,clean_ir::Problem> logical_expression(ref ir::Program p,ref drop
         let branch=switch(emit(blocks,sites,captures,3,ir::node(b,e.left),0,if(bytes::equal(op,b"&&")){right}else{skipped},if(bytes::equal(op,b"&&")){skipped}else{right},0,e.start,e.end,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return expression(p,table,e.left,branch,loop,depth+1,blocks,sites,captures,c);
     }
 
-fn Result<usize,clean_ir::Problem> argument_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated){var usize after=evaluated;var usize link=e.right;while(link!=0){if(!m::charge(ref mut c.work,1)){return .err(fail(c,1002,e.start,e.end));}let pair=ir::node_at(b,ir::node(b,link)-1).value;after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};link=pair.right;}let receiver=if(e.builtin.kind==300){ir::node_at(b,ir::node(b,e.left)-1).value.left}else{e.left};return expression(p,table,receiver,after,loop,depth+1,blocks,sites,captures,c);}
+fn Result<usize,clean_ir::Problem> argument_expression(ref ir::Program p,ref drop_index::Table table,ref ir::Body b,ref m::Expression e,usize id,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c,usize evaluated){var usize after=evaluated;var usize link=e.right;while(link!=0){if(!m::charge(ref mut c.work,1)){return .err(fail(c,1002,e.start,e.end));}let pair=ir::node_at(b,ir::node(b,link)-1).value;after=switch(expression(p,table,pair.left,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};link=pair.right;}let receiver=if(region_builtin::allocation(e.builtin.kind)){ir::node_at(b,ir::node(b,e.left)-1).value.left}else{e.left};return expression(p,table,receiver,after,loop,depth+1,blocks,sites,captures,c);}
 fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,ref drop_index::Table table,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
     if(original==0){return .ok(next);}if(depth>=64 || !m::charge(ref mut c.work,1)){return .err(fail(c,1002,0,0));}let b=ir::at(p,c.frame);let id=ir::node(b,original);if(id==0){return .err(fail(c,1001,0,0));}let e=ir::node_at(b,id-1).value;
     if(e.kind==32 || e.kind==33){return .err(fail(c,1004,e.start,e.end));}

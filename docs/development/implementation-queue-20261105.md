@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy Region `alloc_zeroed_bytes` and `copy_bytes` now use resolved lexical
+  capabilities, contextual `usize`/byte-view checking, original Region origins,
+  retained lifecycle descriptors, verified CFG/IR and the existing native runtime.
+  Same-spelled record methods remain ordinary calls. Windows low/optimized pass
+  all eight source cases in 371.984s: sixteen independent Fairy interpreter/C
+  emissions and thirty-two emitted-program executions. See
+  `candidate-region-bytes-20261106.md`. Atlas allocation collection/production,
+  the broader source queue and every final gate remain separate; native Linux
+  stays batched, no push or dispatch.
+
 - The Region allocation prerequisite now freezes fourteen original Go call-span
   observations, including byte placements, partial argument order and heap-call
   exclusions. It reproduces and fixes a Go MIR internal failure after a trapping

@@ -1,4 +1,5 @@
 module module_unit_interpreter;
+import module_unit_region_builtin as region_builtin;
 import module_unit_interpreter_values as runtime;
 import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_model as ir;
@@ -107,7 +108,7 @@ fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize
     if(e.kind==4){if(e.minimum){return runtime::result(if(type==1){2147483648}else{9223372036854775808});}return runtime::computed(math::runtime_prefix(type,op,*v::at<usize>(values,left)));}
     if(e.kind==5){return runtime::computed(math::runtime_binary(runtime::scalar(p,ir::node_at(b,left-1).value.type),op,*v::at<usize>(values,left),*v::at<usize>(values,right)));}
     if(e.kind==23){return runtime::computed(math::runtime_cast(runtime::scalar(p,ir::node_at(b,left-1).value.type),type,*v::at<usize>(values,left)));}
-    if(e.kind==6){if(e.builtin.kind==300){return runtime::region_place(b,id,locals,values,heap,steps);}if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
+    if(e.kind==6){if(region_builtin::allocation(e.builtin.kind)){return runtime::region_place(b,id,locals,values,heap,steps);}if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
     return runtime::failure(1);
 }
 // Internal checked-frame entry also permits abstract Arena arguments in tests.

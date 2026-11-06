@@ -1,4 +1,5 @@
 module module_unit_c_function;
+import module_unit_region_builtin as region_builtin;
 import std::vec as v;
 import c_abi_contract as abi;
 import module_identified_ir as identified;
@@ -57,7 +58,7 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
             else if(e.kind==9 && borrowed_arrays::omitted(ref arrays,left)){if(!borrowed_arrays::read(p,b,n.source,out,s)){return false;}}
             else if(e.kind==6 && e.builtin.kind>=101 && e.builtin.kind<=107){if(!storage::expression(p,b,n.source,out,s,work)){return false;}}
             else if(e.kind==6 && e.builtin.kind>=9 && e.builtin.kind<=12){if(!raw_views::expression(p,b,n.source,out,s,work)){return false;}}
-            else if(e.kind==6 && e.builtin.kind==300){if(!lifecycle::placement(p,plan,b,n.source,out,s,work)){return false;}}
+            else if(e.kind==6 && region_builtin::allocation(e.builtin.kind)){if(!lifecycle::placement(p,plan,b,n.source,out,s,work)){return false;}}
             else if(clean::type_at(ir::cleanup_ir(p),e.type).kind==19){if(!lifecycle::value(b,n.source,out,s,work)){return false;}}
             else if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!calls::call(p,named,plan,indexed,body_index,ref invocations,g,n.source,0,out,s,work)){return false;}}
             else if(e.kind==1 && literals::descriptor(clean::type_at(ir::cleanup_ir(p),e.type))){if(!literals::expression(p,b,n.source,out,s,work)){return false;}}

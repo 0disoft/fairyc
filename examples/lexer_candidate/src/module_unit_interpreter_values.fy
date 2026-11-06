@@ -145,6 +145,7 @@ pub fn Outcome region_place(ref ir::Body b,usize id,ref v::Vec<usize> locals,ref
             let capability=item(heap,*v::at<usize>(locals,x.capability),0);if(capability.error!=0 || capability.trap!=0){return capability;}
             let active=item(heap,capability.bits,0);if(active.error!=0 || active.trap!=0 || active.bits!=1){return failure(4);}
             let argument=ir::node(b,x.argument);if(argument==0){return failure(4);}
+            if(ir::node_at(b,id-1).value.builtin.kind!=300){return region_bytes(ir::node_at(b,id-1).value.builtin.kind,*v::at<usize>(values,argument),heap,steps);}
             let cell=rx_cell(heap,*v::at<usize>(values,argument),steps);if(cell.error!=0){return cell;}
             let borrow=rx_descriptor(heap,cell.bits,0,0,0,steps);if(borrow.error!=0){return borrow;}
             let result=allocate(heap,2,steps);if(result.error!=0){return result;}
@@ -152,4 +153,11 @@ pub fn Outcome region_place(ref ir::Body b,usize id,ref v::Vec<usize> locals,ref
             {let slot=v::at_mut<usize>(heap,result.bits+1);*slot=borrow.bits;}return result;
         }i+=1;
     }return failure(4);
+}
+fn Outcome region_bytes(u32 kind,usize argument,ref mut v::Vec<usize> heap,ref mut usize steps){
+    let length=if(kind==301){result(argument)}else{item(heap,argument,3)};if(length.error!=0 || length.trap!=0){return length;}
+    let data=allocate(heap,length.bits,steps);if(data.error!=0){return data;}
+    if(kind==302){var usize i=0;while(i<length.bits){let selected=rx_view_index(heap,argument,i,steps);if(selected.error!=0 || selected.trap!=0){return selected;}let value=rx_get(heap,selected.bits,steps);if(value.error!=0 || value.trap!=0){return value;}{let slot=v::at_mut<usize>(heap,data.bits+i);*slot=value.bits;}i+=1;}}
+    let cell=rx_cell(heap,data.bits,steps);if(cell.error!=0){return cell;}let view=rx_descriptor(heap,cell.bits,0,0,length.bits,steps);if(view.error!=0){return view;}
+    let carrier=allocate(heap,2,steps);if(carrier.error!=0){return carrier;}{let slot=v::at_mut<usize>(heap,carrier.bits);*slot=1;}{let slot=v::at_mut<usize>(heap,carrier.bits+1);*slot=view.bits;}return carrier;
 }
