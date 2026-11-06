@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- Atlas SDK/user-cleanup acceptance now executes the actual MCP/editor command
+  closures and edited-source impact queries, including a new bool aggregate
+  implementation while preserving all fourteen pinned SDK implementations.
+  Optimized passes in 149.285s. Low MCP and editor/user-query checks complete
+  across two honestly retained timeout attempts; only the unfinished SDK query
+  is resumed with the identical image/source and passes in 192.445s. The new
+  query has a bounded six-minute integration allowance; existing shared/product
+  timers are unchanged. Default Go oracles/refusals pass with the heavy native
+  case explicitly opt-in. Full authored-main/edited-map/Linux/final gates remain
+  required. See `candidate-atlas-sdk-aggregate-commands-20261107.md`.
+
 - Fairy detached state graph IR now verifies six cell/map operations, typed
   branch/join arguments, block-local values, seven canonical codecs, effects,
   transaction identity, cost, reachability and acyclicity before sealed ownership.

@@ -20,6 +20,7 @@ type candidateEditSDKFixture struct {
 	source, body, invalid, module, name string
 	provider, deniedUID                 string
 	subject                             string
+	verifyCurrent                       func(*testing.T, string, string, preparedAtlasWorkspace)
 }
 
 func TestCandidateEditSDKCommand(t *testing.T) {
@@ -152,10 +153,13 @@ func verifyCandidateEditSDKCommandFixture(t *testing.T, image string, fixture ca
 	if code != 7 || out != "" || stderr == "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
 		t.Fatalf("SDK edit old lock: %d %q %q", code, out, stderr)
 	}
-	prepare(root)
+	currentPrepared := prepare(root)
 	before = remoteTree(t, root)
 	code, out, stderr = candidateAtlasSDKCLIProcess(t, image, root, args)
 	if code != 2 || out != "" || stderr == "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
 		t.Fatalf("SDK edit old hash: %d %q %q", code, out, stderr)
+	}
+	if fixture.verifyCurrent != nil {
+		fixture.verifyCurrent(t, image, root, currentPrepared)
 	}
 }
