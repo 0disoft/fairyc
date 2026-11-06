@@ -67,6 +67,20 @@ authorized by this queue.
 
 ## Progress
 
+- Literal multi-key native state now performs one snapshot, one actual C run and
+  at most one existing layout/version CAS. Windows low/optimized match 32 native/
+  Go local-store outcomes across commit/reject/trap/empty, absent/present state
+  and reopen/repeat, preserving an unmentioned map key. Real concurrent writers,
+  four policy rollbacks, backend/capacity/process failures, cancellation and
+  acknowledged publication/reopen pass. Large binary read-only commits preserve
+  durable bytes/version. The complete persistence replay passes in 14.559s;
+  the strengthened initial-state root plus shared framing replay passes in
+  34.308s, without selected skips. State/state-MIR regressions and scoped vet/
+  format/diff pass. Dynamic keys/values, graph/helper/borrow, source/developer
+  commands, artifact/cache authority and all Linux/final gates remain open.
+  This completes literal multi-key CAS only; the full objective remains active.
+  See `architecture/native-state-overlay-transport-v1.md` and ADR 0502.
+
 - Multi-key literal state now has actual binary C framing, an opaque Windows
   build/run owner and complete host admission. Windows low/optimized cover 56
   native/Go exit/policy cases, 32 malformed requests, all six allocation failures,

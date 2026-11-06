@@ -1,6 +1,6 @@
 # ADR 0502: One-attempt native state execution and CAS publication
 
-- Status: Accepted for the experimental single-cell Windows MSVC family
+- Status: Accepted for experimental single-cell and literal multi-key Windows MSVC families
 - Extends: ADRs 0376, 0382 and 0500
 - Owner: [native persistence integration](../architecture/native-state-persistence-v1.md)
 
@@ -26,7 +26,11 @@ generic pre-publication failure.
 Windows acceptance requires real generated-C execution against LocalPersistence,
 close/reopen and Go comparisons, stale competing writers, backend/capacity/process
 failure, and separate controlled-port protocol/cancellation tests. The native
-family remains one straight-line `cell<u64>`. Broader state MIR, source/CLI/cache
+single-cell family remains one straight-line `cell<u64>`. The separately bound
+multi-key family admits straight-line literal cells/maps across the seven
+canonical codecs, with its own framing and built owner. Both routes retain
+the same persistence authority and acknowledged-publication error type.
+Dynamic keys/values, graphs/helpers/borrows and source/CLI/cache
 integration, Linux and all final acceptance gates remain required by the full
 implementation queue. No production provider, public ABI or target promotion is
 selected. Local durability retains ADR 0500's process-restart boundary.

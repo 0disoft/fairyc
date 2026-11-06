@@ -25,8 +25,8 @@ type overlayReadSpec struct {
 	typeID    string
 }
 
-// OverlayTransport seals Go-side request/response authority for a literal MIR
-// owner. The native framing entry and CAS executor are separate delivery steps.
+// OverlayTransport seals request/response authority for a literal MIR owner.
+// Native execution and one-attempt CAS both use this owner for admission.
 type OverlayTransport struct {
 	entry      OverlayArtifact
 	known      map[contractstate.Key]string

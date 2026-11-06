@@ -93,12 +93,20 @@ func RunOverlay(ctx context.Context, executable OverlayExecutable, input Overlay
 	if !executable.valid || !input.valid {
 		return OverlayResult{}, fmt.Errorf("native overlay requires built and request owners")
 	}
-	result, err := cdriver.ExecuteWindowsMSVCTargetWithContextAndOutputLimit(ctx, executable.image, bytes.NewReader(input.Bytes()), time.Minute, overlayResponseBytes)
+	result, err := executable.run(ctx, input)
 	if err != nil {
 		return OverlayResult{}, fmt.Errorf("execute native overlay: %w", err)
 	}
+	return executable.prepared.decodeProcess(input, result)
+}
+
+func (executable OverlayExecutable) run(ctx context.Context, input OverlayInput) (cdriver.WindowsHostOutcome, error) {
+	return cdriver.ExecuteWindowsMSVCTargetWithContextAndOutputLimit(ctx, executable.image, bytes.NewReader(input.Bytes()), time.Minute, overlayResponseBytes)
+}
+
+func (prepared OverlayTransport) decodeProcess(input OverlayInput, result cdriver.WindowsHostOutcome) (OverlayResult, error) {
 	if result.ExitCode != 0 || result.Stderr != "" || result.TrapControl != "" {
 		return OverlayResult{}, fmt.Errorf("native overlay process failed framing (exit %d)", result.ExitCode)
 	}
-	return executable.prepared.Decode(input, []byte(result.Stdout))
+	return prepared.Decode(input, []byte(result.Stdout))
 }

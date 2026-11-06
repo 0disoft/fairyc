@@ -337,14 +337,15 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/cdriver/windows_host_context.go`, `windows_host_context_windows_test.go`
   - `docs/architecture/native-state-persistence-v1.md`
   - `docs/adr/0502-native-state-one-attempt-cas.md`
-- **Allocation-free multi-key native state overlay, seven canonical codecs and verified literal-MIR emission; wider transport remains pending**
+- **Allocation-free multi-key native state overlay, seven canonical codecs and verified literal-MIR emission**
   - `internal/cstdlib/contract_state_overlay.go`, `stage0_contract_state_overlay.h`, `stage0_contract_state_overlay.c`
   - `internal/contractstatenative/overlay_runtime_probe.c`, `overlay_runtime_windows_test.go`
   - `internal/contractstatenative/overlay_emit.go`, `overlay_emit_test.go`, `overlay_emit_windows_test.go`
   - `docs/architecture/native-state-overlay-v1.md`
-- **Sealed multi-key native state request/response admission and actual Windows C framing; multi-key CAS remains pending**
+- **Sealed multi-key native state request/response admission, actual Windows C framing and one-attempt literal multi-key CAS**
   - `internal/contractstatenative/overlay_transport.go`, `overlay_transport_test.go`
   - `internal/contractstatenative/overlay_native.go`, `overlay_native_c.go`, `overlay_native_windows_test.go`
+  - `internal/contractstatenative/overlay_persistent.go`, `overlay_persistent_test.go`, `overlay_persistent_windows_test.go`
   - `docs/architecture/native-state-overlay-transport-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`

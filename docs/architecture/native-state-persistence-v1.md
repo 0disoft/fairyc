@@ -31,9 +31,11 @@ remain open. The initial transport commit alone established only step 1.
 
 Step 3 now has an independently exercised multi-key C overlay and all seven
 canonical codec validators, plus actual verified literal multi-field/cell/map
-MIR-to-C emission. [Overlay v1](native-state-overlay-v1.md) records the memory
-policy, Windows evidence and remaining transport/CAS/graph integration. Those
-prerequisites alone do not admit durable multi-key native state execution.
+MIR-to-C emission. Actual binary framing and one-attempt multi-key publication
+are now implemented for that literal family. [Overlay transport](native-state-overlay-transport-v1.md)
+records real local-store reopen, concurrent CAS and rollback evidence. Dynamic
+keys/values, graphs, helpers, borrows and source/cache/CLI integration remain open;
+this does not close step 3 or the complete execution queue.
 
 ## Sealed transport owner
 

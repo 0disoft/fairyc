@@ -1,7 +1,7 @@
 # Native literal-state overlay transport v1
 
-Status: sealed request/response admission, actual C framing and opaque Windows
-executable implemented. The multi-key CAS connection remains required. This is a delivery step of
+Status: sealed request/response admission, actual C framing, opaque Windows
+executable and one-attempt literal multi-key CAS implemented. This is a delivery step of
 [overlay v1](native-state-overlay-v1.md), not durable multi-key native acceptance.
 
 ## Authority and bounds
@@ -169,3 +169,58 @@ reported possibly uninitialized transaction cleanup; explicit initialization
 fixes it without disabling warnings. This closes native framing only. Real
 multi-key CAS/reopen, graph/helper/borrow, source/cache/commands and every final
 acceptance gate remain required; native Linux remains batched.
+
+## One-attempt multi-key persistence
+
+`ExecuteOverlayPersistent` accepts only an opaque built owner. It checks context,
+preparation and positive policies before storage access, takes one complete
+snapshot, executes the actual C image once, validates the complete response and
+submits at most one sorted overlay through the existing layout/version CAS.
+It never evaluates Go MIR to obtain native output and never retries a conflict.
+The process decoder is shared with `RunOverlay`, including exit/stderr/trap
+channel refusal and exact response admission.
+
+Only a completed commit can reach CAS. Reject returns its read trace; trap
+rethrows the original typed category. All seven runtime failure statuses,
+malformed responses, process/limit/storage errors and pre-CAS cancellation publish
+nothing. Native value/count/byte/map-key failures retain the original Go error
+identities. A clean commit still compares its version with an empty overlay;
+it preserves the version, including UINT64_MAX. Nonempty writes at UINT64_MAX
+reject before CAS. Intermediate deletes and writes retain their operation
+policies even when the final values are absent or unchanged.
+
+Success validates the acknowledged layout, next version and write count. A
+cancel arriving during successful publication does not convert it into failure.
+An inconsistent acknowledged receipt uses the existing `PublicationReceiptError`
+and returns the commit outcome/receipt for inspection without a retry. Storage
+and process failures preserve causes and simultaneous cancellation. Local storage
+retains its existing restart-visible guarantee, without a power-loss claim.
+
+Windows low/optimized exercise commit/reject/trap/empty against actual local
+stores, absent and fully populated initial states, close/reopen and repeated
+execution (32 independent native/Go comparisons). Initial state also contains an
+unmentioned second map key: every commit/rollback/reopen must retain it. Separate
+real-native tests prove one winner/one conflict from two concurrent stale writers
+per profile, four rollback policies, backend/capacity/invalid-image failures,
+snapshot cancellation and successful-but-canceled publication surviving reopen.
+A 65,540-byte binary read-only commit succeeds with a one-byte write limit,
+preserves exact durable bytes/version and reopens unchanged. Controlled ports
+cover complete process/protocol failures, cancellation phases, acknowledged
+receipt inconsistencies, all failure statuses and empty CAS at version boundaries.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 4m -failfast -v ./internal/contractstatenative -run '^TestOverlayPersistence'
+go test -mod=readonly -count=1 -timeout 4m -failfast -v ./internal/contractstatenative -run '^(TestOverlayFraming|TestOverlayPersistenceNativeLocalStore)'
+go vet -mod=readonly ./internal/contractstatenative ./internal/cdriver ./internal/contractstate ./internal/contractstatemir
+git diff --check
+```
+
+The first complete persistence replay passes in 14.559s without selected skips.
+After adding the unrelated-map initial-state control, its changed local-store
+root and shared framing regression pass together in 34.308s. Other persistence
+roots retain unchanged inputs. State and state-MIR regressions pass in
+0.272s/0.069s; scoped vet, formatting and diff checks pass. Dynamic
+state values/keys, graphs/helpers/borrows, source/developer commands, artifact/
+cache authority, native Linux and all full/self-build/distribution/hosted gates
+remain open. No stable CLI/language/SDK ABI, DB format/provider, dependency,
+default limit, workflow/runner or repository-policy change.
