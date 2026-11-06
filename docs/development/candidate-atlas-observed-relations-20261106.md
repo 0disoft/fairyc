@@ -335,3 +335,79 @@ remaining collectors, broader source/consumer work, consecutive self-build,
 distribution, same-commit hosted CI and native Linux remain open.
 No stable CLI flags, source grammar, SDK/runtime ABI, wire schema, dependency,
 DB, target, timeout, runner or repository-policy change; no push or dispatch.
+
+## Unsafe-site collector
+
+`project_atlas_unsafe_sites::collect` and `collect_all` construct verified CFGs
+from immutable body/cleanup IR. The batch entry proves the whole IR once.
+No public factory accepts a graph, permission flag or detached observations as
+authority. Source-relative spans acquire package/source identity only at the
+separate Complete-bound publication boundary.
+
+Reachable raw-address casts, raw-view constructors, SDK storage operations and
+foreign C calls contribute sites. Foreign targets come from verified callable
+contracts and use a sorted module/declaration index. Ordinary calls do not
+become unsafe merely because they occur in an unsafe function or block; empty
+unsafe blocks, safe borrows, scalar casts and null pointers add no sites.
+Direct literal-false assertions stop traversal as in Go MIR; ordinary branches
+retain both successors. Canonical spans sort by start/end and deduplicate.
+
+The pinned Vec cleanup folds its safe `take_slot<T>` call to storage-take IR.
+That caller span is not an unsafe site. A verified folded invocation plus the
+program's authenticated SDK bytes supplies the original helper's unique
+`storage_take<T>(slot)` span through an owned leaf record. Concrete helpers with
+ordinary frames retain normal collection; frame-less implementations use that
+record only with the existing checked specialization witness. Names or plan
+nodes alone grant no leaf authority. A changed/missing/duplicate pinned source
+pattern rejects instead of guessing a span or dropping the helper's facts.
+
+Apart from existing separately bounded proof/CFG construction, traversal costs
+O(B + E + N + C log(F + 1) + U log(U + 1)) for blocks, edges, nodes, calls,
+foreign targets and raw occurrences. The target index costs O(F log(F + 1))
+once per collection; the bounded pinned-source scan adds O(S) work for S SDK
+bytes. Site and work limits are independent, with at most 65,536
+raw sites per frame and 65,536 batch output sites. Invalid frame/count input
+returns 9, work/count exhaustion returns 3 and allocation failure returns 2.
+Failed factories publish no partial result; existing product timeouts remain.
+
+`TestCandidateAtlasUnsafeSites` compares every emitted ordinary, specialized
+and concrete cleanup owner with original independent Go `UnsafeSites` facts.
+Single-frame and batched results agree, with separate witnessed frame-less
+helper rows. SDK Vec unused/used/pop cases use the
+batch path to avoid repeated whole-program proof. The fixture corpus retains
+the safe-call overcount regression instead of altering Go expectations.
+Native controls cover zero/past-end frames, exhausted and one-short/exact/
+one-more work/count limits, over-ceiling counts and empty/nonempty zero caps.
+Child PATH is empty and workspace bytes must remain unchanged.
+
+This collector alone does not attest unsafe map/CLI production. The production
+header still declares `uses-unsafe` unavailable until the separate connection
+and its independent map/current/join/command comparisons pass. Native Linux
+and every broader/final implementation gate remain open.
+
+### Windows unsafe collector validation
+
+Both bounded native selections pass without selected skips:
+
+| Exact selection after `^TestCandidateAtlasUnsafeSites$` | Package time | Profile body | Native processes |
+| --- | ---: | ---: | ---: |
+| `/low` | 479.689s | 463.55s | 49 |
+| `/optimized` | 84.173s | 69.52s | 49 |
+
+Command prefix: `go test -mod=readonly -count=1 -failfast -timeout 15m -v
+./internal/cli -run`. Logs: `.cache/atlas-unsafe-native-leaf-low-20261106.log`
+and `atlas-unsafe-native-leaf-optimized-20261106.log`. Each profile executes
+29 source fixtures, eighteen frame/work/count controls and two zero-count
+controls. All ordinary, specialized and concrete cleanup owners, including
+frame-less pinned SDK helpers, retain original Go expectations.
+
+Authored check and locked check pass (674 files, 8,382 MIR functions) in
+`atlas-unsafe-check-leaf-20261106.log` and `atlas-unsafe-locked-leaf-20261106.log`.
+Scoped CLI vet, Go formatting, UTF-8/LF/final-newline audit and diff checks pass.
+Earlier syntax/probe failures, safe-call overcount and folded-SDK overcount are
+not passes; their logs retain the native attempts. The interrupted
+`atlas-unsafe-native-foreign-20261106.log` run is likewise not a completed pass.
+The collector does not execute generated user programs or establish complete
+maps/CLI, Linux, hosted CI, self-build or distribution acceptance. No stable
+CLI/grammar, SDK/runtime ABI, cache wire, dependencies, DB, target, timeout,
+runner or repository-policy change; no push or dispatch.

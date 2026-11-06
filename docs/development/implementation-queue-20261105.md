@@ -56,6 +56,17 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified CFG unsafe-site collection passes 29 source fixtures and
+  twenty frame/work/count controls per Windows profile: 98 native processes,
+  no selected skips (low 479.689s, optimized 84.173s). Safe calls in unsafe
+  scopes remain absent, while raw views/addresses, foreign calls and SDK storage
+  operations retain exact Go spans. Folded Vec calls keep their original
+  checked helper observations separately rather than duplicating caller sites.
+  Authored check/locked (674 files, 8,382 MIR functions), scoped vet and hygiene
+  checks pass. See the observed-relations plan. Complete-bound unsafe map/header/
+  command connection, every remaining collector and broader/final gate stay
+  open. Native Linux remains batched; no push or dispatch.
+
 - Complete-bound Fairy Atlas production now retains sorted trap categories in
   ordinary/generic/cleanup summaries, counts them with calls/drops and marks only
   may-trap newly exact. The versioned source/current/join comparison passes
