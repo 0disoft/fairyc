@@ -364,6 +364,7 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `docs/architecture/native-state-graph-persistence-v1.md`
 - **Explicit source state graphs: typed cells/maps, copied read values/presence and structured branch/join, with actual Windows C/local CAS comparisons**
   - `internal/compiler/state_graph_source.go`, `state_graph_operands.go`, `state_graph_source_test.go`
+  - Current-source analysis before MIR publication and cancellation: `internal/compiler/state_graph_analysis_test.go`
   - `internal/contractstatenative/graph_source_windows_test.go`
   - `examples/contract_state_graph/transaction.fy`
   - `docs/adr/0503-experimental-source-state-graphs.md`, `docs/architecture/source-state-graph-v1.md`

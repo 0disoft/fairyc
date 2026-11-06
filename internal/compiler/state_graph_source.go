@@ -1,6 +1,7 @@
 package compiler
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -17,21 +18,52 @@ const stateSourceMaxBlocks, stateSourceMaxOperations = 64, 1024
 // CheckExperimentalStateGraph selects the explicit graph source admission.
 // Neither ordinary Check nor the original single-cell admission is widened.
 func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
-	skeleton, err := stateGraphSkeleton(file)
+	return CheckExperimentalStateGraphContext(context.Background(), file)
+}
+
+func CheckExperimentalStateGraphContext(ctx context.Context, file semantic.File) (Result, error) {
+	analysis, err := AnalyzeExperimentalStateGraphContext(ctx, file)
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := analyzeStateGraphSource(skeleton)
+	// Re-enter atomic ordinary/state publication and independent state-MIR
+	// checks, including effects, types, edges, cost and codec validity.
+	result, err := LowerAnalyzedContext(ctx, analysis)
+	if result.Verified && len(result.StateTransactions) != 1 {
+		return Result{}, fmt.Errorf("experimental state source requires exactly one root transaction")
+	}
+	return result, err
+}
+
+// AnalyzeExperimentalStateGraph rebuilds current source and typed state graphs
+// without publishing ordinary or state MIR. Cache owners must still lower or
+// independently verify and rebind a complete artifact set before execution.
+func AnalyzeExperimentalStateGraph(file semantic.File) (Analysis, error) {
+	return AnalyzeExperimentalStateGraphContext(context.Background(), file)
+}
+
+func AnalyzeExperimentalStateGraphContext(ctx context.Context, file semantic.File) (Analysis, error) {
+	if ctx == nil {
+		return Analysis{}, fmt.Errorf("experimental state graph requires a context")
+	}
+	if err := ctx.Err(); err != nil {
+		return Analysis{}, err
+	}
+	skeleton, err := stateGraphSkeleton(file)
 	if err != nil {
-		return Result{}, err
+		return Analysis{}, err
+	}
+	analysis, err := analyzeStateGraphSource(ctx, skeleton)
+	if err != nil {
+		return Analysis{}, err
 	}
 	checked := analysis.Semantic
 	if checked.CompletedThrough != semantic.PhaseFlow || checked.FailedPhase != semantic.PhaseNone ||
 		len(checked.Diagnostics)+len(checked.Unsupported) != 0 {
-		return Result{Semantic: checked}, nil
+		return analysis, nil
 	}
 	if len(checked.HIR.Modules) != 1 || len(checked.HIR.Modules[0].Functions) != len(file.Module.Functions) || len(checked.HIR.StateLayouts) != 1 {
-		return Result{}, fmt.Errorf("experimental state graph requires exact semantic owners and layout")
+		return Analysis{}, fmt.Errorf("experimental state graph requires exact semantic owners and layout")
 	}
 	owners := make(map[string]hir.SymbolID)
 	for _, owner := range checked.HIR.Modules[0].Functions {
@@ -44,48 +76,48 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 	work := 0
 	transactions := make([]hir.StateTransaction, 0, len(file.Module.Functions))
 	for _, function := range file.Module.Functions {
+		if err := ctx.Err(); err != nil {
+			return Analysis{}, err
+		}
 		lower := stateGraphSource{file: file, fields: fields, callees: owners, helper: function.Name != "transaction", operations: &work}
 		if _, _, err := lower.newBlock(nil); err != nil {
-			return Result{}, err
+			return Analysis{}, err
 		}
 		if end, _, err := lower.block(function.Body, 0, nil); err != nil {
-			return Result{}, err
+			return Analysis{}, err
 		} else if end >= 0 {
-			return Result{}, lower.fail(function.Body.Span, "every root/helper path requires an explicit transaction exit or helper return")
+			return Analysis{}, lower.fail(function.Body.Span, "every root/helper path requires an explicit transaction exit or helper return")
 		}
 		transactions = append(transactions, hir.StateTransaction{Package: checked.HIR.Modules[0].Package, Function: owners[function.Name], Entry: 0, Blocks: lower.blocks, Span: lower.span(function.Body.Span)})
 	}
 	if err := stateGraphHelperReachability(transactions, owners["transaction"]); err != nil {
-		return Result{}, err
+		return Analysis{}, err
 	}
 	if len(transactions) > 1 {
 		// Resolve the call-only ordinary projection through normal semantics.
 		// Graph control and storage actions remain in the checked state side
 		// table; this projection is not an executable replacement for that graph.
 		projection := stateGraphCallProjection(skeleton, transactions, owners)
-		analysis, err = analyzeStateGraphSource(projection)
+		analysis, err = analyzeStateGraphSource(ctx, projection)
 		if err != nil {
-			return Result{}, err
+			return Analysis{}, err
 		}
 		if analysis.Semantic.CompletedThrough != semantic.PhaseFlow || analysis.Semantic.FailedPhase != semantic.PhaseNone || len(analysis.Semantic.Diagnostics)+len(analysis.Semantic.Unsupported) != 0 {
-			return Result{Semantic: analysis.Semantic}, nil
+			return analysis, nil
 		}
 		if err := rebindStateGraphOwners(transactions, file.Module.Functions, owners, analysis.Semantic.HIR); err != nil {
-			return Result{}, err
+			return Analysis{}, err
 		}
 	}
-	analysis.Semantic.HIR.StateTransactions = transactions
-	// Re-enter the existing atomic ordinary/state publication and independent
-	// state-MIR checks, including effects, types, edges, cost and codec validity.
-	result, err := LowerAnalyzed(analysis)
-	if result.Verified && len(result.StateTransactions) != 1 {
-		return Result{}, fmt.Errorf("experimental state source requires exactly one root transaction")
+	if err := ctx.Err(); err != nil {
+		return Analysis{}, err
 	}
-	return result, err
+	analysis.Semantic.HIR.StateTransactions = transactions
+	return analysis, nil
 }
 
-func analyzeStateGraphSource(file semantic.File) (Analysis, error) {
-	checked, err := semantic.AnalyzeExperimentalStatePackages(semantic.PackageInput{Files: []semantic.File{file}})
+func analyzeStateGraphSource(ctx context.Context, file semantic.File) (Analysis, error) {
+	checked, err := semantic.AnalyzeExperimentalStatePackagesContext(ctx, semantic.PackageInput{Files: []semantic.File{file}})
 	if err != nil {
 		return Analysis{}, &Error{Stage: StagePackageInput, Cause: err}
 	}

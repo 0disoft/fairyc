@@ -199,3 +199,33 @@ current-source/Complete provenance, artifact/cache invalidation, ordinary
 compiler CLI selection and every final acceptance gate remain required.
 No stable language/CLI/SDK/runtime ABI, dependency, DB/provider, default limit,
 repository-policy or runner changes occur here.
+
+## Separate current-source analysis for cache admission
+
+`AnalyzeExperimentalStateGraph[Context]` now rebuilds the current layout,
+owners, helper projection and typed source graphs without publishing MIR.
+`CheckExperimentalStateGraph[Context]` uses that analysis and the unchanged
+atomic `LowerAnalyzedContext` boundary. Existing callers keep their signature.
+Canceled requests publish neither ordinary nor state MIR, and nil explicit
+contexts refuse. This is a prerequisite for current-source cache admission;
+it does not itself create a cache hit or bind an artifact to current source.
+
+The four authored source families pass analysis plus independent check/lower
+equivalence, exact stable body hashes under package 57 and source AST
+immutability. Source refusal and cancellation controls pass. The complete
+`^TestExperimentalStateGraphSource` selection passes in 0.201s. The initial
+test attempt used a file basename inconsistent with the authored module and
+failed parsing; the harness now uses the required `transaction.fy` identity.
+The native dynamic/helper/borrow replay passes all 48 actual C attempts under
+both Windows profiles in 15.951s. Scoped compiler vet and diff/format checks
+pass. Logs: `.cache/state-graph-analysis-source-20261107.log` and
+`.cache/state-graph-analysis-native-20261107.log`.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m ./internal/compiler -run '^TestExperimentalStateGraphSource'
+go test -mod=readonly -count=1 -timeout 3m -v ./internal/contractstatenative -run '^TestGraphSourceNative(Dynamic|Helpers|Borrows)$'
+go vet -mod=readonly ./internal/compiler
+```
+
+Current-source artifact/cache use, Fairy Complete authority, ordinary CLI,
+native Linux and all final acceptance gates remain required.
