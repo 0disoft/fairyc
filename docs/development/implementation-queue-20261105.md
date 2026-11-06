@@ -67,6 +67,15 @@ authorized by this queue.
 
 ## Progress
 
+- The Fairy common Complete now lowers its admitted structured state graph to
+  genuine Windows C through a sealed artifact and explicit pinned runtime
+  input. Windows low/optimized pass 344 emission/refusal processes and 48 real
+  generated-C runs, with 24 independent MIR/state comparisons. Both observer
+  modes preserve live Go C/identity bytes, including all
+  seven codecs, SSA edges, helper calls and borrow/view/copy. Native transport
+  and persistent CAS are still separate open steps; the row is intentionally
+  unchecked. See ADR 0529 and `candidate-state-graph-native-20261107.md`.
+
 - The Fairy native graph plan preserves Go slot order, independent borrow
   slots, global 4096-slot preflight and canonical copied trap IDs/JSON. Windows
   low/optimized and sealed-owner checks pass 39 cases in 22.052s. This detached
