@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- The private Fairy Linux HTTPS response/lifetime facade now validates URL and
+  body/time bounds before opening, checks metadata and exact binary read bounds,
+  and preserves native/consuming-close errors without replay. Four source groups
+  exercise 28 independent model modes in Windows low/optimized with empty PATH;
+  both-target emission passes. The native TLS/DNS/socket provider, I/O cancellation
+  and absolute deadline, Linux runtime assembly, online orchestration/CLI and real
+  TLS replay remain required. This is not a working Linux transport or completion
+  of the fetch row. See the Linux fetch receipt and private HTTPS architecture.
+
 - Private Linux offline restoration now connects validated source plans, manifest
   binding, rehashed pinned archives, exclusive held-directory locks and bounded
   no-replace tree publication/cleanup. Twenty-five Go reference cases plus fifteen

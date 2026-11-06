@@ -364,6 +364,49 @@ This is the private offline API only. Verified HTTPS, online/offline Linux CLI
 selection, actual Linux execution, broader queue items and final gates stay open.
 The remote-source product contract and its budgets are unchanged.
 
+## Linux HTTPS response and lifetime facade
+
+`linux_remote_https::download` now admits exact UTF-8/NUL-terminated URLs and
+explicit maximum body/total timeout budgets through the private pull ABI in
+`architecture/candidate-linux-https-v1.md`. It validates input before native I/O,
+requires status 200 and absent/exact identity encoding, checks declared and actual
+lengths, and reads at most 65,536 bytes with an extra-byte overflow/EOF probe.
+Scratch buffers survive consuming request close. Every acquired request closes
+once, including partial factory failure; primary native errors and independent
+close failures are retained together. It does not retry or access the filesystem.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestLinuxRemoteHTTPSPolicy$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+```
+
+The final focused policy command passes in 4.406s with both MSVC profiles and
+empty PATH. Four authored test groups cover URL/UTF-8/NUL/path admission and
+zero/maximum/over-limit time/body bounds; partial/malformed native outputs and
+exact native/close causes; response/encoding/declared length, truncation and
+over-read; and binary data, preserved escaped/Unicode URLs, exact 65,536 and
+65,537 byte chunk/EOF boundaries. All 28 model modes execute, with no retained
+fake requests and no selected skips. Both-target emission passes.
+
+The first test attempted a narrowing usize-to-u8 observer cast outside the
+current subset; the independent observer now widens each received byte instead.
+The first full source check rejected an ownership-dependent resource move inside
+an if-expression; an explicit error return before the successful owned-buffer
+return preserves cleanup and passes the owner checks.
+
+Reference check and locked check pass 693 files / 8,617 MIR functions. Scoped
+vet, Go format, strict UTF-8/LF/final newline and diff checks also pass. Only
+the private ABI architecture and implementation-routing/receipt/queue documents
+are added or updated; the remote-source product contract is unchanged.
+
+This closes the Fairy facade only. Native TLS/DNS/sockets, absolute I/O deadline
+and cancellation, Linux runtime symbol selection, real TLS replay, online
+orchestration and command selection remain unimplemented. No substitute native
+implementation or fallback is selected for production. Do not describe the model
+pass as a successful Linux download. Logs are
+`.cache/linux-remote-https-policy-20261106.log` and
+`.cache/linux-remote-https-check-20261106.log` (not staged).
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
