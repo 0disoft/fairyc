@@ -1862,3 +1862,20 @@ authorized by this queue.
   separate. A route remains an untrusted candidate hint; graph disk reuse,
   normal workspace selection, execution/persistence and final gates stay open.
   Linux stays batched; no push or dispatch. Full objective stays active.
+
+- Explicit graph disk reuse now composes current-source lookup, the actual rooted
+  filesystem store, fresh full Complete/key admission and same-Complete save
+  routes. Cache errors preserve independent cold source diagnostics/budgets;
+  failed Complete never publishes. The coordinator's 98 Windows low/optimized
+  native processes pass in 38.791s, including independent Go identity/interface
+  comparisons, new-process and actual-environment hits, decoded helper/borrow/
+  branch fixtures, digest-valid semantic splices, exact/one-short counters,
+  corruption repair, retention and two-process publication. Fresh full source
+  check/locked check pass 723 files / 9,034 MIR functions; all 1,193 authored
+  files match the checked snapshot. Receipt
+  `candidate-state-graph-disk-cache-20261107.md` records preparation failures and
+  precise storage/verification exclusions. This closes explicit private memory/
+  disk graph cache APIs for the existing family. Ordinary workspace binding and
+  command selection, native graph lowering/execution/state persistence, wider
+  families and all final gates remain open. Linux stays batched; no push or
+  dispatch. The original full implementation objective remains active.

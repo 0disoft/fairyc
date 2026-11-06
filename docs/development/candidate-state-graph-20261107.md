@@ -119,3 +119,18 @@ native state-program execution is inferred from these packet checks.
 Step 3 is partially closed: filesystem graph lookup/publication/retention is
 still required. Steps 4-5, wider source families and the full implementation
 objective remain open. Linux execution stays batched; no push or dispatch.
+
+
+## Explicit graph disk reuse
+
+ADRs 0524-0526 now connect the actual rooted store, domain-separated precompile
+lookup and same-Complete publication to the source/key-checked graph transport.
+New processes and the production environment adapter cold-store then hit; all
+returned graphs re-enter complete current-source admission. Raw publication/
+repair/retention retain their existing policy and concurrency contract.
+
+Step 3 is now closed for the explicit admitted single-module graph family.
+Normal workspace/command selection (step 4), independent final acceptance (step
+5), wider source families and native graph lowering/execution/state persistence
+remain required. The full queue remains active. Native Linux stays batched;
+no push or dispatch. Current detailed evidence is in the disk-cache receipt.

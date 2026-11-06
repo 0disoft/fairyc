@@ -432,6 +432,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
   - `internal/cli/candidate_state_graph_source_artifact_test.go`
   - `docs/adr/0517-candidate-source-graph-artifact-binding.md`, `docs/development/candidate-state-graph-source-artifact-20261107.md`
+- **Actual graph disk cache reuse; current-source Complete admission, same-owner publication and cold fallback**
+  - `examples/lexer_candidate/src/project_state_graph_disk_cache.fy`
+  - `internal/cli/candidate_state_graph_disk_cache_test.go`
+  - `docs/adr/0526-candidate-state-graph-disk-cache.md`, `docs/development/candidate-state-graph-disk-cache-20261107.md`
 - **Pre-compilation graph disk route and same-Complete save route; untrusted hints with distinct preimages**
   - `examples/lexer_candidate/src/project_state_graph_cache_lookup.fy`
   - `internal/cli/candidate_state_graph_cache_lookup_test.go`
