@@ -1,7 +1,7 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Current source production collects
-calls, drops, trap categories and unsafe sites and declares other families unavailable. A
+calls, drops, trap categories, unsafe sites and moves and declares other families unavailable. A
 checked collector alone must not promote that production/completeness scope or
 finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
@@ -35,7 +35,10 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   groups; four low groups retain assertions only from failed aggregate parents.
 - [x] Verified move-site collector with independent original Go operands,
   scope/conditional/generic/cleanup comparisons and exact work/count controls.
-- [ ] Complete-bound move summaries/counts/completeness and actual CLI evidence.
+- [x] Complete-bound move summaries/counts/completeness with both-profile
+  original-source/current/join evidence.
+- [ ] Complete the six selected actual move CLI groups at both profiles; all
+  optimized groups and the two new low move-pack source cases pass.
 - [ ] Remaining Region allocation, error-propagation and borrow collectors,
   each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
@@ -542,3 +545,64 @@ comparisons remain a separate required step. Allocation/error/borrow collectors,
 unsafe low replays, broader source families and all original full-comparison,
 self-build/distribution/hosted/Linux gates remain open. Native Linux stays batched;
 no push or dispatch.
+
+## Complete-bound move production
+
+The Complete-owned summary path now writes original move spans into ordinary,
+specialized and concrete cleanup functions. Relation counts include moves beside
+calls/drops/traps/unsafe. Only `moves` becomes newly exact and loses its unavailable
+omission; allocation/error/borrow/effects and other uncollected classes stay
+unavailable, and generation stays partial. Folded SDK scalar helper leaves keep
+empty move observations rather than gaining fabricated caller sites.
+
+A first production comparison reproduced an existing call-reachability defect:
+`moves-before-later-trap/v1` had five relations instead of the independent Go
+four, because checking the parent call was mistaken for executing it. The failed
+command is retained in `.cache/atlas-move-production-first-optimized-20261106.log`.
+`project_atlas_reachability.fy` now builds one verified whole-program CFG batch
+and a private per-frame completed-expression ledger. Calls are included only at
+their evaluated node; deferred calls are included at their invocation node, not
+capture time. Original checked-call/target guards remain, as do folded-helper
+identity checks. A consumed first operand and any completed earlier calls stay
+observed when a later argument traps. The ledger/traversal costs O(sum(N+B+E)) time beyond
+IR/CFG construction, O(sum(N+B)) temporary/retained storage, and is metered by
+the existing work budget. No caller-supplied graph can grant this authority.
+
+Independent source/current/join comparisons cover the original nineteen source
+fixtures, nine move fixtures and three call-reachability fixtures, each requested
+at v1/v2/v3. Named missing source families keep their existing explicit refusals.
+Go function comparisons retain the original MoveSites, and command pack oracles
+now preserve moves instead of stripping them. No candidate output teaches those
+expectations. Ordinary/cleanup move pack fixtures are registered in the actual
+full authored CLI verifier.
+
+Windows move production validation:
+
+- The corrected first optimized move selection passes in 79.88s: 27 native
+  processes and 46 independently prepared current maps.
+- Final full optimized source selection passes in 110.65s: 98 native processes
+  and 147 independent current maps; `.cache/atlas-move-production-final-optimized-20261106.log`.
+- Final low selections pass in three bounded parents: moves/reachability in
+  303.16s (36 native processes, 64 current maps), SDK in 466.28s (9/15), and
+  ordinary in 350.16s (53/68). Logs are
+  `.cache/atlas-move-production-final-low-{moves,sdk,ordinary}-20261106.log`.
+  Their disjoint union matches all 93 optimized source/version selections.
+  Both profiles complete 196 native processes and 294 independently prepared
+  current maps, with no selected skips. Every parent retains its twelve-minute
+  Go test limit; product limits and verifier assertions are unchanged.
+- Authored check/locked pass (676 files, 8,423 MIR functions). Go atlasmap and
+  contextpack regressions pass in 3.717s/0.257s; scoped vet/format/diff pass.
+- Actual full-main pack-sources/move-sites and cleanup-move-sites pass under
+  optimized in 115.39s and low in 118.44s: eight native invocations per profile.
+  Logs: `.cache/atlas-move-production-cli-first-{optimized,low}-20261106.log`.
+- All six selected actual optimized CLI groups pass in 93.43s using the same
+  authenticated generated-C/profile/toolchain/image digest:
+  catalog-ordinary, pack-ordinary, pack-sources, pack-sdk, impact-families and
+  impact-sdk-vector. Log: `.cache/atlas-move-production-cli-final-optimized-20261106.log`.
+  Complete low command replay remains a separate gate.
+
+The full low six-group command replay remains open; two selected low source
+cases do not attest the complete pack group. Other full CLI groups, unsafe low
+replays, remaining collectors/source families and every original final acceptance
+gate remain open.
+Native Linux remains batched; no push, dispatch, release or deployment.

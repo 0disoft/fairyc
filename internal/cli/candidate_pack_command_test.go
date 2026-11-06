@@ -13,10 +13,10 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 )
 
-// The source producer currently collects calls, drops, trap categories and unsafe sites. Catalog/call output never
+// The source producer currently collects calls, drops, trap categories, unsafe sites and moves. Catalog/call output never
 // exposed the Go oracle's other body facts, but packs expose their counts and
 // node summaries too. Project that explicitly declared scope before querying;
-// retain every original Go declaration, call, drop, trap category, unsafe span and specialization identity.
+// retain every original Go declaration, call, drop, trap category, unsafe span, move span and specialization identity.
 func candidatePackCommandFixture(t *testing.T, image, root string, version int) candidateCatalogFixture {
 	t.Helper()
 	prepared := candidateCallsCommandFixture(t, image, root, version-1).prepared
@@ -67,8 +67,12 @@ func candidatePackCommandFixture(t *testing.T, image, root string, version int) 
 		if err := json.Unmarshal(fields["unsafe_sites"], &unsafeSites); err != nil {
 			t.Fatal(err)
 		}
-		count += len(calls) + len(drops) + len(traps) + len(unsafeSites)
-		for _, field := range []string{"move_sites", "allocation_sites", "return_error_sites", "borrows"} {
+		var moves []json.RawMessage
+		if err := json.Unmarshal(fields["move_sites"], &moves); err != nil {
+			t.Fatal(err)
+		}
+		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves)
+		for _, field := range []string{"allocation_sites", "return_error_sites", "borrows"} {
 			if _, ok := fields[field]; !ok {
 				t.Fatalf("missing independent body field %s", field)
 			}

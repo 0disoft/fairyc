@@ -103,6 +103,19 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	cleanupUnsafe := writeWorkspaceSessionFixture(t, `module main;resource Token<T>{T value;cleanup{let u8 n=1;discard unsafe{ref n as ptr u8};}}fn i32 main(){let t=Token<i32>{.value=1};return 0;}`)
 	safeUnsafeScope := writeWorkspaceSessionFixture(t, `module main;fn i32 id(i32 n){return n;}fn i32 main(){unsafe{discard id(id(1));}return 0;}`)
 	fixtures = append(fixtures, fixture{"unsafe-sites", unsafeSites, 1, nil}, fixture{"generic-unsafe", genericUnsafe, 2, nil}, fixture{"cleanup-unsafe", cleanupUnsafe, 3, nil}, fixture{"safe-unsafe-scope", safeUnsafeScope, 1, nil})
+	moveCases := map[string]int{"binding": 1, "resource-field": 1, "before-later-trap": 1, "after-earlier-trap": 1, "if-result": 1, "else-if-result": 1, "generic": 3, "cleanup": 3, "nested-tag": 1}
+	for _, move := range atlasMoveCollectorCases() {
+		if minimum, ok := moveCases[move.name]; ok {
+			fixtures = append(fixtures, fixture{"moves-" + move.name, writeWorkspaceSessionFixture(t, move.source), minimum, nil})
+		}
+	}
+	for _, call := range []struct{ name, source string }{
+		{"deferred-call", "module main;fn void step(){}fn i32 main(){defer step();return 0;}"},
+		{"deferred-trap", "module main;fn void step(){}fn i32 main(){defer step();assert(false);return 0;}"},
+		{"partial-arguments", "module main;resource Token{i32 value;cleanup{}}fn void step(){}fn i32 take(Token token,i32 n){return token.value+n;}fn i32 main(){let token=Token{.value=1};return take(token,{step();assert(false);0});}"},
+	} {
+		fixtures = append(fixtures, fixture{"reachable-" + call.name, writeWorkspaceSessionFixture(t, call.source), 1, nil})
+	}
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -206,6 +219,18 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 						}
 						if !foundUnsafe || slices.Contains(h.Omissions, "uses-unsafe:unavailable:candidate-atlas-not-collected") {
 							t.Fatal("source unsafe completeness missing or omitted")
+						}
+						foundMoves := false
+						for _, r := range got.Completeness() {
+							if r.Relation == "moves" {
+								foundMoves = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source move completeness: %+v", r)
+								}
+							}
+						}
+						if !foundMoves || slices.Contains(h.Omissions, "moves:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source move completeness missing or omitted")
 						}
 						if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) {
 							a, b := got.Declarations(), want.Declarations()

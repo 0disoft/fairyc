@@ -163,8 +163,8 @@ func compareAtlasProducedFunctions(t *testing.T, got, want []semanticsnapshot.Fu
 	}
 	for i, f := range got {
 		w := want[i]
-		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) || !slices.Equal(f.DropSites, w.DropSites) || !slices.Equal(f.TrapCategories, w.TrapCategories) || !slices.Equal(f.UnsafeSites, w.UnsafeSites) {
-			t.Fatalf("produced calls/drops/traps/unsafe differ: got %+v want %+v", f, w)
+		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) || !slices.Equal(f.DropSites, w.DropSites) || !slices.Equal(f.TrapCategories, w.TrapCategories) || !slices.Equal(f.UnsafeSites, w.UnsafeSites) || !slices.Equal(f.MoveSites, w.MoveSites) {
+			t.Fatalf("produced calls/drops/traps/unsafe/moves differ: got %+v want %+v", f, w)
 		}
 	}
 }
@@ -174,7 +174,7 @@ func compareAtlasProducedFunctions(t *testing.T, got, want []semanticsnapshot.Fu
 func candidateAtlasProducedRelationCount(p atlasmap.Partition) int {
 	count := 0
 	add := func(f semanticsnapshot.FunctionSummary) {
-		count += len(f.Calls) + len(f.DropSites) + len(f.TrapCategories) + len(f.UnsafeSites)
+		count += len(f.Calls) + len(f.DropSites) + len(f.TrapCategories) + len(f.UnsafeSites) + len(f.MoveSites)
 	}
 	for _, f := range p.Functions() {
 		add(f)

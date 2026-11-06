@@ -24,9 +24,10 @@ The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite
 signature types and opaque external C calls. Only resolved calls consume the
 call-join budget. Verified executable drop sites, the six canonical trap
-categories and unsafe sites are retained in ordinary, specialized and concrete
-cleanup summaries; relation inventories include all three, and drops, may-trap
-and uses-unsafe are exact. Other uncollected relation families
+categories, unsafe sites and move spans are retained in ordinary, specialized
+and concrete cleanup summaries; relation inventories include all four, and
+drops, may-trap, uses-unsafe and moves are exact. Checked calls require completed
+CFG invocation, including deferred invocation rather than argument capture. Other uncollected relation families
 remain explicitly unavailable. The source-selected v1/v2/v3 Windows validation
 and remaining SDK/generic boundaries are recorded in
 `docs/development/candidate-atlas-observed-relations-20261106.md`.

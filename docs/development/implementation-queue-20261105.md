@@ -56,6 +56,21 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound move production now preserves original sites in ordinary,
+  generic and concrete cleanup summaries, relation counts and exact moves
+  completeness. An independent source case also fixes checked-but-unexecuted
+  parent calls: a private verified-CFG completion ledger preserves earlier
+  operand/call observations and treats deferred invocation separately from capture.
+  Windows source/current/join validation passes 196 native processes and 294
+  independently prepared current maps across both profiles; bounded low parents
+  match all 93 optimized source/version selections without skips. Actual new
+  move pack cases pass both profiles, and all six selected actual optimized CLI
+  groups pass in 93.43s. Authored check/locked pass (676 files, 8,423 MIR functions),
+  Go atlasmap/contextpack, scoped vet and hygiene pass. See the observed-relations
+  plan for failed attempts, exact commands/logs and remaining low full-CLI scope.
+  Allocation/error/borrow collection, broader work and every original final gate
+  remain open; native Linux stays batched, no push or dispatch.
+
 - Fairy verified CFG move-site collection now retains original evaluated operand
   spans through bindings, calls, returns, owned fields/tags, scoped/conditional
   results, generic bodies and concrete cleanup. Thirty-four admitted sources,
