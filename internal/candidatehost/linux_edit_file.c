@@ -29,7 +29,9 @@ static uint32_t fy_linux_edit_current(int root, const char *leaf,
     do { result = fstatat(root, leaf, &info, AT_SYMLINK_NOFOLLOW); }
     while (result < 0 && errno == EINTR);
     if (result < 0) { return (uint32_t)errno; }
-    if (!S_ISREG(info.st_mode) || info.st_nlink != 1) { return ESTALE; }
+    /* Replacing one authored path preserves other links to the old inode, as
+     * the Go editor does. Only the new staging file must be anonymous. */
+    if (!S_ISREG(info.st_mode) || info.st_nlink == 0) { return ESTALE; }
     if (info.st_size < 0 || (size_t)info.st_dev != expected->device ||
         (size_t)info.st_ino != expected->identity || (size_t)info.st_size != expected->size ||
         (int64_t)info.st_mtim.tv_sec != expected->modified_seconds ||

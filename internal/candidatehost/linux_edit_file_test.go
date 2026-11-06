@@ -131,10 +131,11 @@ int main(void){
  struct fy_linux_root_metadata_v1 m=expected(),saved=m;uint32_t cleanup=99;
  reset(0);assert(publish(&m,&cleanup)==0 && cleanup==0 && links==1 && renames==1 && unlinks==0 && target_new && !body && memcmp(&m,&saved,sizeof m)==0);
  for(int field=0;field<6;++field){reset(0);m=expected();if(field==0){++m.device;}if(field==1){++m.identity;}if(field==2){++m.size;}if(field==3){++m.modified_seconds;}if(field==4){++m.modified_nanos;}if(field==5){m.mode^=01000;}assert(publish(&m,&cleanup)==ESTALE && cleanup==0 && links==0 && renames==0 && !target_new);}
- const int failures[]={1,2,3,8,9,10,12,13,15,16,17,18,19,21,22,23,24,26,27};
- const uint32_t codes[]={EIO,EINVAL,EINVAL,EINVAL,EXDEV,ENOENT,EEXIST,ESTALE,EIO,EINTR,EIO,EIO,EIO,EIO,EIO,ESTALE,ESTALE,ESTALE,ESTALE};
+ const int failures[]={1,2,3,8,9,10,12,13,15,16,17,18,19,21,22,23,26,27};
+ const uint32_t codes[]={EIO,EINVAL,EINVAL,EINVAL,EXDEV,ENOENT,EEXIST,ESTALE,EIO,EINTR,EIO,EIO,EIO,EIO,EIO,ESTALE,ESTALE,ESTALE};
  for(size_t i=0;i<sizeof failures/sizeof failures[0];++i){reset(failures[i]);m=expected();cleanup=99;assert(publish(&m,&cleanup)==codes[i] && !target_new && renames<=1);assert(cleanup==(uint32_t)(fault==17?EPERM:fault==18?ESTALE:fault==19?EIO:0));if(fault==13){assert(renames==0 && unlinks==1 && !body);}if(fault==16){assert(renames==1 && unlinks==1);}if(fault==18){assert(unlinks==0 && body);}}
  reset(14);m=expected();assert(publish(&m,&cleanup)==0 && checks==3 && renames==1);
+ reset(24);m=expected();assert(publish(&m,&cleanup)==0 && cleanup==0 && renames==1 && target_new);
  reset(0);m=expected();m.mode=32768|0400;assert(publish(&m,&cleanup)==EACCES && stats==0 && links==0);
  m=expected();m.modified_nanos=1000000000;assert(publish(&m,&cleanup)==EINVAL && stats==0);
  m=expected();m.mode=16384|0700;assert(publish(&m,&cleanup)==EINVAL && stats==0);
@@ -173,8 +174,13 @@ int main(void){
  assert(fairyc_private_linux_edit_file_publish_v1(file,stage,root,(const uint8_t *)"target",7,&expected,&cleanup)==EACCES && cleanup==0);
  assert(fairyc_private_linux_root_file_close_v1(file)==0 && fchmod(fy_linux_root_fd(current),0640)==0);
  assert(linkat(parent,"target",parent,"alias",0)==0 && fairyc_private_linux_root_file_info_v1(current,&expected)==0);
- assert(fairyc_private_linux_root_file_create_v1(stage,&file)==0 && fairyc_private_linux_edit_file_prepare_v1(file,0640)==0);
- assert(fairyc_private_linux_edit_file_publish_v1(file,stage,root,(const uint8_t *)"target",7,&expected,&cleanup)==ESTALE && cleanup==0);
+ assert(fairyc_private_linux_root_file_create_v1(stage,&file)==0);
+ assert(fairyc_private_linux_root_file_write_v1(file,(const uint8_t *)"next",4,&copied)==0 && copied==4 && fairyc_private_linux_edit_file_prepare_v1(file,0640)==0);
+ assert(fairyc_private_linux_edit_file_publish_v1(file,stage,root,(const uint8_t *)"target",7,&expected,&cleanup)==0 && cleanup==0);
+ uint32_t alias=0;assert(fairyc_private_linux_root_file_open_v1(root,(const uint8_t *)"alias",6,&alias)==0);
+ assert(read(fy_linux_root_fd(alias),data,3)==3 && memcmp(data,"n\0\xff",3)==0 && fairyc_private_linux_root_file_close_v1(alias)==0);
+ uint32_t replaced=0;assert(fairyc_private_linux_root_file_open_v1(root,(const uint8_t *)"target",7,&replaced)==0);uint8_t next[4];
+ assert(read(fy_linux_root_fd(replaced),next,4)==4 && memcmp(next,"next",4)==0 && fairyc_private_linux_root_file_close_v1(replaced)==0);
  assert(fairyc_private_linux_root_file_close_v1(file)==0 && fairyc_private_linux_root_file_close_v1(current)==0 && unlinkat(parent,"alias",0)==0);
  assert(unlinkat(parent,"target",0)==0 && fairyc_private_linux_root_file_close_v1(stage)==0 && unlinkat(parent,"stage",AT_REMOVEDIR)==0);
  assert(fairyc_private_linux_root_file_close_v1(root)==0 && rmdir(path)==0);return 0;

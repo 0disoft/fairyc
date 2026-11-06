@@ -75,6 +75,11 @@ fn Result<bytes::Buffer,Problem> path(ref u8[] value,bool leaf) {
 @effects(filesystem) pub fn u32 into_handle(File input) {
     var File file=input; let raw=file.raw; file.raw=0; return raw;
 }
+// The caller transfers one owned, unpublished staging descriptor. This unsafe
+// constructor is the inverse of into_handle for private file facades.
+pub unsafe fn File from_owned_staging_handle(u32 raw) {
+    assert(raw!=0 && raw<=2147483648);return File{.raw,.staged=true};
+}
 @effects(filesystem) pub fn Result<bool,Problem> close_directory(Directory input) {
     var Directory root=input;
     let raw=root.raw; root.raw=0; let code=unsafe { close_handle(raw) }; return if(code==0){.ok(true)}else{.err(fail(7,code,0))};

@@ -25,7 +25,7 @@ The existing Go bootstrap companion remains the default and retains its original
 ### Runtime assets and plan selection
 
 `tools/package-candidate-linux-runtime.py` reads 33 authoritative raw C sources from the
-repository and verifies their exact bytes while producing a 176,458-byte asset pack. The
+repository and verifies their exact bytes while producing a 176,611-byte asset pack. The
 loader accepts at most 1 MiB, checks the generated pin, and assembles at most 8 MiB of
 runtime C. Windows dependencies and unknown target markers fail admission.
 

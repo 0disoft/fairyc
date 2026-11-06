@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Linux edit's Fairy file facade now retains an immutable source-metadata
+  snapshot, bounds cumulative writes, reuses rooted partial-write checks through
+  explicit owned-handle transfer and seals failed/publication attempts. Both
+  Windows profiles pass lifetime, exact byte bounds, primary/cleanup and consuming
+  close controls, including known publication on close failure. The native
+  prerequisite now preserves old hard-link aliases like Go, with renewed Windows
+  model and runtime byte comparisons. See `candidate-linux-atlas-edit-20261106.md`.
+  Linux source-reader/lock/stage/apply composition, command selection, actual native
+  replay and every broader/final gate remain open.
+
 - Linux edit now has a selected native file prerequisite: anonymous-file
   permission preparation, retained exact metadata checks and one atomic rename,
   with separate primary/cleanup errors and identity-checked stage cleanup.
