@@ -29,6 +29,7 @@ fn rooted::Metadata metadata(ref Contents p){return p.info;}
         assert(problem(ref root,b"",3).kind==4 && problem(ref root,b"/input",3).kind==4 && problem(ref root,b"tree//item",3).kind==4 && problem(ref root,b"tree/../input",3).kind==4);
         assert(problem(ref root,b"input/",3).kind==4 && problem(ref root,b"tree\\input",3).kind==4 && problem(ref root,b"tree/con.txt",3).kind==4 && problem(ref root,b"tree/file?",3).kind==4 && problem(ref root,b"tree/file.",3).kind==4 && problem(ref root,b"tree/file ",3).kind==4);
         assert(problem(ref root,b"input",8388609).kind==3 && unsafe{calls()}==count);
+        assert(!fs::open_directory(ref root,b"tree/..").is_ok && !fs::open_directory(ref root,b"tree//branch").is_ok && !fs::open_directory(ref root,b"/tree").is_ok && unsafe{calls()}==count);
         var long=bytes::empty();discard bytes::append(ref mut long,b"tree/");var usize i=0;while(i<256){discard bytes::append_byte(ref mut long,97);i+=1;}assert(problem(ref root,bytes::view(ref long),3).kind==4 && unsafe{calls()}==count);
         discard bytes::truncate(ref mut long,0);i=0;while(i<2048){discard bytes::append(ref mut long,b"a/");i+=1;}assert(problem(ref root,bytes::view(ref long),3).kind==4 && unsafe{calls()}==count);
         assert(problem(ref root,b"input",2).kind==3 && unsafe{reads()}==0);

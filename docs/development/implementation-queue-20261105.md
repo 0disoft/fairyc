@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- Linux edit application policy now composes the real lock/stage/file/reader
+  owners: prepared/synced bytes, fresh closure and exact original rechecks,
+  one publication attempt, consuming cleanup and retained publication status.
+  Windows low/optimized pass twenty-eight controlled-port namespace scenarios;
+  the real shared path-based snapshot matches the independent Go fingerprint
+  and rejects stale source in both profiles (25.695s). Existing collision names
+  and failed-cleanup leftovers remain owned by their original authority. See
+  the Linux edit receipt for prototype failures and exact proof boundaries.
+  Prepared preview/apply selection, command/help wiring, actual native Linux
+  and the complete broader/final queue remain open.
+
 - Linux retained directory leases now expose consuming close with separate
   parent/child errors. Their child view borrows the lease rather than holding a
   second close obligation; automatic order and independent duplicates stay

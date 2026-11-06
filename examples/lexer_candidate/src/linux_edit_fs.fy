@@ -43,6 +43,11 @@ pub fn usize split(ref u8[] path){var usize i=path.len;while(i>0){i-=1;if(path[i
         };start=end+1;
     }return .ok(current);
 }
+// Retain a checked source parent for the editor's one-attempt publication.
+@effects(filesystem) pub fn Result<rooted::Directory,Problem> open_directory(ref rooted::Directory root,ref u8[] path){
+    if(!valid_path(path)){return .err(fail(4,1,0,0));}
+    var budget=directory::EditBudget{.entries=0,.work=0};return descend(root,path,ref mut budget);
+}
 @effects(filesystem) fn Result<bytes::Buffer,Problem> read_held(ref mut rooted::File file,rooted::Metadata expected,usize maximum_bytes){
     let before=switch(rooted::observe(file)){case .ok(p):{p}case .err(p):{return .err(fail(if(p.stage==8){7}else{1},5,p.os_code,0));}};
     if(!same(expected,before)){return .err(fail(6,5,0,0));}if(before.size>maximum_bytes){return .err(fail(3,5,0,0));}

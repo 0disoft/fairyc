@@ -27,6 +27,11 @@ fn i32 main() {
 
 func runLinuxCandidateFixture(t *testing.T, modules []string, fixtureName, entry, extraSupport string) {
 	t.Helper()
+	runLinuxCandidateFixtureSources(t, modules, fixtureName, entry, extraSupport, nil)
+}
+
+func runLinuxCandidateFixtureSources(t *testing.T, modules []string, fixtureName, entry, extraSupport string, overrides map[string]string) {
+	t.Helper()
 	root := t.TempDir()
 	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
 [package]
@@ -42,6 +47,9 @@ source = "src"
 			t.Fatal(err)
 		}
 		writeTestSource(t, root, "src/"+name+".fy", string(module))
+	}
+	for name, source := range overrides {
+		writeTestSource(t, root, "src/"+name+".fy", source)
 	}
 	fixture, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", fixtureName+".fy"))
 	if err != nil {

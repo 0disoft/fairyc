@@ -265,3 +265,72 @@ prerequisite makes close failures observable; it does not establish an applied
 Linux edit or native Linux execution. Original check/locked passes 700 source
 files / 8,677 MIR functions; a fresh Linux preparation passes 700 / 8,678. Scoped
 vet, Go formatting and canonical text/diff checks pass. No push, dispatch or deployment.
+
+## Linux application policy composition
+
+`linux_edit_apply.fy` composes the real retained-directory, edit-file and
+edit-source owners. It takes the already verified Preview and shared Options,
+acquires the cooperating `.fairyc-edit.lock`, rechecks the complete overlay,
+retains the exact source parent and reads immutable original bytes/metadata.
+Read-only or different originals reject before creating a staging directory.
+At most sixteen definitely existing-name collisions select an unused private
+stage; EINTR, other errors and secondary acquisition failures never retry.
+
+An anonymous file in that same-filesystem stage receives the complete new bytes,
+preserved permissions and sync. A fresh exact closure fingerprint follows
+preparation. The original bytes and all six metadata fields must still agree
+before the single native publication attempt. There is no destination deletion,
+publication retry, recursive cleanup or implicit lock refresh. Existing names
+belonging to competitors are left alone.
+
+Each owner has an outer cleanup layer: consuming file close, identity-checked
+empty staging erase and two-descriptor close, retained source-parent close,
+then empty lock erase and close. Primary and first cleanup causes retain their
+precedence. A known publication remains known through file, directory, lock
+or native-protocol cleanup failure, so the command can tell callers to inspect
+hashes rather than blindly replay. Failed cleanup leaves inspectable names.
+
+The shared `project_edit_snapshot::capture_path` port retains existing capture
+semantics without exposing one platform's Directory type to another application
+owner. It closes its opened root explicitly. Windows `TestCandidateEditSnapshot`
+passes low/optimized in 25.695s: independent Go fingerprint equality for existing
+and new entry points, source/lock drift rejection, restoration and immutability.
+Linux preparation/command selection remains the next separate integration step.
+
+`TestLinuxEditApplyPolicy` runs the actual application/file/reader/directory
+modules against the independent namespace model. Only preview recheck and
+closure snapshot ports are controlled; the Options factory is appended inside
+its real module to preserve private construction. Twenty-eight scenarios per
+profile cover successful binary replacement and surviving old hard links,
+fifteen/sixteen existing-stage collisions, lock contention, anonymous-file
+failure, partial writes, preparation, overlay/closure failures, read-only and
+changed originals, I/O/close errors, final bytes/metadata races, non-replayed
+EINTR, malformed success-with-cleanup, and combined cleanup failures. Every
+owned descriptor/cursor is consumed and expected competing/failed-cleanup names
+are checked; the native rename model never observes more than one attempt.
+These policy results do not execute the real Linux kernel or the real source
+checker inside the controlled ports. Separate C adapter and Windows snapshot
+receipts retain those narrower boundaries; full prepared command acceptance
+and actual Linux execution are still required.
+
+Prototype probes rejected a reserved fixture parameter, private Options
+construction, a missing statement separator, an ambiguous fixture borrow and
+MSVC's unsafe strcpy warning. The final probes use a module-owned factory,
+explicit control flow and bounded literal copies. Product admission and warning
+policies are unchanged. The initial complete policy run passes in 3.890s;
+the related shared-helper/edit-source/root/lease regression passes in 18.883s.
+The final link-count/alias-consistent namespace replay passes in 3.972s
+(low 1.28s, optimized 2.12s), including exact preservation of every pre-existing
+collision directory and its foreign child.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestLinux(EditApplyPolicy|EditSourcePolicy|RootedFilePolicy|PackageDirectoryPolicy|CommandTransport)$'
+go test -mod=readonly -count=1 -timeout 8m -failfast -v ./internal/cli -run '^TestCandidateEditSnapshot$'
+```
+
+This closes the application-policy composition, not Linux CLI wiring or the
+full objective. Original check/locked passes 701 source files / 8,689 MIR
+functions. Public CLI/SDK ABI, DB, dependencies, default budgets/timeouts,
+CI/runners and repository policy are unchanged; no push or dispatch. Fresh Linux
+preparation check/locked passes 701 files / 8,690 MIR functions. Scoped vet,
+Go formatting, UTF-8/LF/final-newline and diff checks pass.

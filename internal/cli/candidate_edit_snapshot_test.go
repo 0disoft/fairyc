@@ -18,7 +18,7 @@ const candidateEditSnapshotMain = `module main;import project_edit_snapshot as s
 @effects(filesystem,console) fn i32 main(){var sources::Budget budget=sources::Budget{.files=0,.bytes=0};var usize meter=0;
  let resolved=switch(visibility::load(b".",ref mut budget,ref mut meter)){case .ok(p):{p}case .err(_):{return 2;}};
  let root=switch(host::open(b".")){case .ok(p):{p}case .err(_):{return 2;}};
- let result=switch(if(process::arg_count()==2){snapshot::capture(ref root,b".")}else{snapshot::from_resolved(ref root,ref resolved)}){case .ok(p):{p}case .err(_):{return 2;}};
+ let result=switch(if(process::arg_count()==3){snapshot::capture_path(b".")}else if(process::arg_count()==2){snapshot::capture(ref root,b".")}else{snapshot::from_resolved(ref root,ref resolved)}){case .ok(p):{p}case .err(_):{return 2;}};
  return if(io::write_bytes(snapshot::digest(ref result)).is_ok){0}else{4};
 }`
 
@@ -80,6 +80,10 @@ func TestCandidateEditSnapshot(t *testing.T) {
 			return out
 		}
 		first := run()
+		pathCode, pathOut, pathDiagnostic := fetchCLIProcess(t, image, root, []string{"path", "capture"}, "")
+		if pathCode != 0 || pathOut != first || pathDiagnostic != "" {
+			t.Fatalf("path-owned snapshot: %d %q %q; want %s", pathCode, pathOut, pathDiagnostic, first)
+		}
 		code, out, diagnostic := fetchCLIProcess(t, image, root, []string{"locked"}, "")
 		if code != 0 || out != first || diagnostic != "" {
 			t.Fatalf("fresh locked snapshot: %d %q %q", code, out, diagnostic)
@@ -98,6 +102,10 @@ func TestCandidateEditSnapshot(t *testing.T) {
 		code, out, diagnostic = fetchCLIProcess(t, image, root, []string{"locked"}, "")
 		if code != 2 || out != "" || diagnostic != "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
 			t.Fatalf("fresh snapshot must reject stale lock: %d %q %q", code, out, diagnostic)
+		}
+		pathCode, pathOut, pathDiagnostic = fetchCLIProcess(t, image, root, []string{"path", "capture"}, "")
+		if pathCode != 2 || pathOut != "" || pathDiagnostic != "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
+			t.Fatalf("path-owned snapshot accepted stale source: %d %q %q", pathCode, pathOut, pathDiagnostic)
 		}
 		writeWorkspaceFile(t, root, "src/main.fy", string(original))
 		code, out, diagnostic = fetchCLIProcess(t, image, root, []string{"locked"}, "")

@@ -69,3 +69,10 @@ fn Result<bytes::Buffer,u32> path(ref u8[] package,ref u8[] source,ref u8[] file
     let loaded=switch(loader::load(path,true,ref mut budget,ref mut meter)){case .ok(p):{p}case .err(_):{return .err(5);}};
     return from_resolved(root,loader::workspace(ref loaded));
 }
+// The path-only port keeps the application policy independent of a platform's
+// Directory type. Linux preparation must select the rooted/read host imports.
+@effects(filesystem) pub fn Result<Snapshot,u32> capture_path(ref u8[] path){
+    let root=switch(host::open(path)){case .ok(p):{p}case .err(_):{return .err(1);}};
+    let result=capture(ref root,path);let closed=host::close_directory(root).is_ok;
+    return switch(result){case .ok(p):{if(!closed){return .err(1);};.ok(p)}case .err(code):{.err(code)}};
+}
