@@ -18,6 +18,8 @@ func verifyCandidatePackSourceCommand(t *testing.T, image string) {
 		{"cleanup-specializations", `module main;import answer as a;resource Token<T>{T value;cleanup{let T observed=a::id<T>(this.value);}}fn i32 main(){let a=Token<i32>{.value=1};let b=Token<u8>{.value=2};return a::value();}`, "Token", 3, 3, true},
 		{"owner-namespaces", atlasOwnerQualifiedNamespaceSource(true), "main", 3, 1, false},
 		{"cleanup-local-drops", `module main;import answer as a;resource Token{i32 value;cleanup{}}resource Wrap<T>{Token inner;T marker;cleanup{let t=Token{.value=1};}}fn i32 main(){let t=Wrap<i32>{.inner=Token{.value=2},.marker=3};return 0;}`, "Wrap", 3, 3, false},
+		{"unsafe-sites", `module main;unsafe extern C fn i32 native_value(i32 n);fn i32 main(){let u8 n=1;discard unsafe{ref n as ptr u8};return unsafe{native_value(1)};}`, "main", 1, 1, false},
+		{"cleanup-unsafe-sites", `module main;resource Token<T>{T value;cleanup{let u8 n=1;discard unsafe{ref n as ptr u8};}}fn i32 main(){let t=Token<i32>{.value=1};return 0;}`, "Token", 3, 3, false},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			var root string

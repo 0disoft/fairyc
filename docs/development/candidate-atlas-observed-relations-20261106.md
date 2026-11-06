@@ -1,7 +1,7 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Current source production collects
-calls, drops and trap categories and declares other families unavailable. A
+calls, drops, trap categories and unsafe sites and declares other families unavailable. A
 checked collector alone must not promote that production/completeness scope or
 finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
@@ -27,8 +27,11 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   both Windows profiles at `53728a07`. All twelve profile/group combinations
   pass without selected skips; see `docs/ops/windows-candidate-atlas-traps-cli-20261106.md`.
   A private collector or map comparison alone is not command evidence.
-- [ ] Remaining unsafe, move, Region allocation, error-propagation and borrow
-  collectors, each with independent verified Go facts and production evidence.
+- [x] Verified unsafe-site collector with independent ordinary, specialized,
+  concrete cleanup and pinned SDK helper observations and exact budget controls.
+- [ ] Complete-bound unsafe production and both-profile actual command replay.
+- [ ] Remaining move, Region allocation, error-propagation and borrow collectors,
+  each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
 
@@ -380,10 +383,9 @@ Native controls cover zero/past-end frames, exhausted and one-short/exact/
 one-more work/count limits, over-ceiling counts and empty/nonempty zero caps.
 Child PATH is empty and workspace bytes must remain unchanged.
 
-This collector alone does not attest unsafe map/CLI production. The production
-header still declares `uses-unsafe` unavailable until the separate connection
-and its independent map/current/join/command comparisons pass. Native Linux
-and every broader/final implementation gate remain open.
+This collector alone does not attest unsafe map/CLI production. The separate
+connection below owns its independent map/current/join/command comparisons.
+Native Linux and every broader/final implementation gate remain open.
 
 ### Windows unsafe collector validation
 
@@ -411,3 +413,36 @@ The collector does not execute generated user programs or establish complete
 maps/CLI, Linux, hosted CI, self-build or distribution acceptance. No stable
 CLI/grammar, SDK/runtime ABI, cache wire, dependencies, DB, target, timeout,
 runner or repository-policy change; no push or dispatch.
+
+## Complete-bound unsafe production
+
+`project_atlas_calls` now collects one verified unsafe batch for the complete
+project and retains its canonical sites in ordinary, generic and concrete
+cleanup summaries. The authenticated frame-less SDK helper uses its original
+source leaf; caller summaries do not duplicate a folded storage operation.
+`project_atlas_produce` counts unsafe sites with calls, drops and trap categories.
+Only `uses-unsafe` becomes newly exact and loses its unavailable omission;
+every remaining uncollected family stays unavailable and generation stays partial.
+
+The source/current/join oracle retains independent original Go `UnsafeSites`;
+pack expectations retain those sites and count them instead of clearing them.
+The versioned source corpus adds raw-view/foreign-call, generic, cleanup and
+safe-call-in-unsafe-scope controls. Source-backed pack commands also exercise
+unsafe ordinary and cleanup declarations. No expected fact comes from the
+candidate result, and no product work/count or process timeout is increased.
+
+An earlier SDK Vec current-map join exhausted the shared JSON work budget
+(`join:9/16777152`). The separate decoded-key index fix in `b9c99000` preserves
+the 16,777,216 limit and exact decoded duplicate behavior; this production
+selection uses that final input. Earlier failed/partial diagnostic attempts
+are not acceptance evidence.
+
+The versioned source selections pass in 789.366s (low) and 97.914s (optimized),
+with 62 native processes and 83 independent current maps per profile. Logs:
+`.cache/atlas-unsafe-production-versions-indexed-low-20261106.log` and
+`atlas-unsafe-production-versions-indexed-optimized-20261106.log`.
+Both authored checks pass (674 files, 8,384 MIR functions), with logs
+`atlas-unsafe-production-indexed-check-20261106.log` and
+`atlas-unsafe-production-indexed-locked-20261106.log` under `.cache`.
+Production roots and actual low CLI replay retain separate pending acceptance
+until their running selections finish.

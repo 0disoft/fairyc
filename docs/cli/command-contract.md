@@ -23,15 +23,18 @@ Output failure can follow successful source replacement.
 The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite
 signature types and opaque external C calls. Only resolved calls consume the
-call-join budget. Verified executable drop sites and the six canonical trap
-categories are retained in ordinary, specialized and concrete cleanup summaries;
-relation inventories include both, and drops and may-trap are exact. Other uncollected relation families
+call-join budget. Verified executable drop sites, the six canonical trap
+categories and unsafe sites are retained in ordinary, specialized and concrete
+cleanup summaries; relation inventories include all three, and drops, may-trap
+and uses-unsafe are exact. Other uncollected relation families
 remain explicitly unavailable. The source-selected v1/v2/v3 Windows validation
 and remaining SDK/generic boundaries are recorded in
 `docs/development/candidate-atlas-observed-relations-20261106.md`.
 The six selected full authored-main Windows groups pass low/optimized at
 `53728a07`; exact scope and remaining groups are recorded in
 `docs/ops/windows-candidate-atlas-traps-cli-20261106.md`.
+Unsafe production and its separately recorded current-source/command evidence
+are tracked in `docs/ops/windows-candidate-atlas-unsafe-cli-20261106.md`.
 Linux command selection remains separate. Body editing retains
 its narrower selection policy; see the owning contract for exact admission.
 

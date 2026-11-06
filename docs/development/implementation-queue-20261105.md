@@ -56,6 +56,19 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound unsafe production now retains original Go sites in ordinary,
+  specialized and concrete cleanup summaries and counts them with calls/drops/
+  traps. Only uses-unsafe becomes newly exact. Windows source/current/join
+  comparisons pass both profiles (low 789.366s, optimized 97.914s), 124 native
+  processes and 166 independent current maps. All six selected actual optimized
+  CLI groups pass in 179.891s; low command replay and the refreshed production
+  root selection remain separately pending. Authored check/locked pass (674
+  files, 8,384 MIR functions), as do Go atlasmap/contextpack regressions and
+  scoped vet/hygiene. See the observed-relations plan and
+  `docs/ops/windows-candidate-atlas-unsafe-cli-20261106.md`. Every remaining
+  collector, broader implementation and final gate stays open; Linux remains
+  batched, no push or dispatch.
+
 - The shared JSON tree now indexes each object's decoded keys with binary
   search, retaining duplicate spans, original token/source order and the same
   16,777,216 work limit. New Windows low/optimized key/budget controls and the
