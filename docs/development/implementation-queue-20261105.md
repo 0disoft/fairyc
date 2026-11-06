@@ -1689,3 +1689,14 @@ authorized by this queue.
   artifacts/cache, native persistence/commands and every final gate remain open;
   source production and detached codec work continue in disjoint parallel files.
   Linux stays batched; no push or dispatch. The full objective remains active.
+
+- Detached Fairy graph artifact encode/decode now preserves complete graph,
+  layout and helper facts under a private disjoint marker. Count/section/span
+  checks precede allocation and decode re-enters full independent verification.
+  The final Windows low/optimized suite passes in 29.455s: 51 Go admissions,
+  416 native processes and two owner refusals, including exact/one-short budgets,
+  semantic corruption, reverse marker rejection and the 8 MiB boundary. Receipt:
+  `candidate-state-graph-artifact-20261107.md`. Source binding, Complete/cache
+  admission, runtime execution, ordinary commands and every final gate remain
+  open. Source generation, exact-source envelope and portable body hash work
+  continue separately. Linux remains batched; no push or dispatch.
