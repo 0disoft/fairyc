@@ -32,6 +32,9 @@ authorized by this queue.
   `candidate-linux-runtime-sync-20261106.md`.
 - [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
   Linux entry and select compatible host facades before the combined native replay.
+  Impact dispatch, Linux help and shared locked-source query are connected;
+  Windows command/full-entry evidence and the authored native replay are in
+  `candidate-linux-atlas-cli-20261106.md`. Other Atlas commands remain open.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
   or one-attempt behavior.
@@ -62,6 +65,18 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- GNU companion source selection and pinned assets now match live Go selection:
+  118 plans and 76 complete C outputs pass Windows low/optimized, including
+  package-directory/file, clock, HTTPS dependency closure and exact feature macro/
+  source order. Linux impact now dispatches to the shared current locked-source
+  query with Linux help. Default Windows impact and Linux-help impact/fetch pass
+  both Windows profiles; full Linux entry C emission/selection and portable
+  dispatch pass, with native execution explicitly skipped. Exact initial outer
+  timeout and final separate-run accounting are in
+  `candidate-linux-runtime-sync-20261106.md` and
+  `candidate-linux-atlas-cli-20261106.md`. Other Atlas commands, native Linux
+  runtime/TLS/self-build and every final gate remain open.
 
 - The Linux full entry now routes experimental mode 11 to online/offline fetch
   and shares its Linux-only help with the command leaf. Both-target full C emission

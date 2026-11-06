@@ -7,7 +7,7 @@ import project_test_cli as testing;
 import linux_build_cli as building;
 import linux_new_cli as creating;
 import project_emit_cli as workspace_c;
-import linux_fetch_cli as fetching;
+import linux_experimental_cli as experimental;
 import linux_cli_data as display;
 import std::bytes as bytes;
 import std::io as io;
@@ -51,7 +51,7 @@ pub fn i32 run() {
     if(mode==8) { return build_arguments(true); }
     if(mode==9) { return test_arguments(); }
     if(mode==10) { return new_arguments(); }
-    if(mode==11) { return fetching::arguments(); }
+    if(mode==11) { return experimental::arguments(); }
     if(mode!=4) { return if(io::write(if(mode==1){help()}else if(mode==2){public::version()}else{public::targets()}).is_ok){0}else{4}; }
     var u8[4096] path=[0;4096];
     let length=switch(process::arg(2,ref mut path)) { case .ok(p):{p} case .err(_):{return failure("error: file path limit (4095 UTF-8 bytes)\n",2);} };

@@ -247,8 +247,13 @@ func linuxFetchHelp(t *testing.T) string {
 	}
 	text := strings.TrimSpace(string(source)[start+7 : end])
 	value, err := strconv.Unquote(text)
-	if err != nil || !strings.Contains(value, "experimental fetch-packages [--offline]\n") || strings.Contains(value, "atlas-") {
+	if err != nil {
 		t.Fatalf("Linux help contract: %v %q", err, value)
+	}
+	for _, line := range []string{"usage: lexer-candidate-linux --help | --version | targets\n", "new <package-name> --uid <package-uid>\n", "check [--locked]", "build [--release]", "run [--release]", "test --native", "experimental fetch-packages [--offline]\n", "experimental atlas-impact ", "--c-workspace <root> [--locked]\n", "No arguments: private binary stdin protocol.\n"} {
+		if !strings.Contains(value, line) {
+			t.Fatalf("Linux help missing %q", line)
+		}
 	}
 	return value
 }

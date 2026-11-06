@@ -32,7 +32,7 @@ func TestLinuxFileCLI(t *testing.T) {
 	if strings.Count(string(entry), "import file_cli as file_cli;") != 1 {
 		t.Fatal("candidate dispatcher import changed")
 	}
-	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;\nimport linux_run_cli as linux_run;\nimport project_cache_profile as cache_profile;", 1)+`
+	writeTestSource(t, root, "src/main.fy", strings.Replace(string(entry), "import file_cli as file_cli;", "import linux_file_cli as file_cli;\nimport linux_experimental_cli as linux_experimental;\nimport linux_c_file as linux_wire;\nimport linux_build_cli as linux_build;\nimport linux_run_cli as linux_run;\nimport project_cache_profile as cache_profile;", 1)+`
 fn i32 cli_probe() {
     assert(file_cli::command(b"--help",2)==1 && file_cli::command(b"help",2)==1 && file_cli::command(b"-h",2)==1);
     assert(file_cli::command(b"--version",2)==2 && file_cli::command(b"targets",2)==3);
@@ -42,6 +42,9 @@ fn i32 cli_probe() {
     assert(file_cli::command(b"check",2)==6 && file_cli::command(b"build",3)==7 && file_cli::command(b"run",4)==8);
     assert(file_cli::command(b"test",2)==9 && file_cli::command(b"new",3)==10);
     assert(file_cli::command(b"experimental",2)==11 && file_cli::command(b"experimental",4)==11);
+    assert(linux_experimental::command(b"atlas-impact")==1);
+    assert(linux_experimental::command(b"fetch-packages")==0 && linux_experimental::command(b"atlas-mcp")==0);
+    assert(linux_experimental::command(b"atlas-impact-extra")==0 && linux_experimental::command(b"atlas-impact\n")==0);
     assert(file_cli::command(b"--c-file",3)==4 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::command(b"--c-file",2)==0 && file_cli::command(b"--c-file",4)==0);
     assert(file_cli::command(b"--c-workspace",3)==5 && file_cli::command(b"--c-workspace",4)==5);
@@ -198,6 +201,7 @@ fn i32 cli_probe() {
 			checkLinuxTest(t, artifact, backend)
 			checkLinuxNew(t, artifact, backend)
 			checkLinuxFetch(t, artifact)
+			checkLinuxAtlasImpact(t, artifact)
 			checkLinuxCEmission(t, toolchain, artifact)
 		})
 	}
