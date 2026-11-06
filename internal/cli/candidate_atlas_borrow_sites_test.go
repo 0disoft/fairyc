@@ -183,6 +183,17 @@ func TestCandidateAtlasBorrowSites(t *testing.T) {
 		for _, r := range want {
 			canonical(r.sites)
 		}
+		if f.name == "implicit-private-cleanup" {
+			count := 0
+			for name, r := range want {
+				if strings.HasSuffix(name, "/true") {
+					count += len(r.sites)
+				}
+			}
+			if count == 0 {
+				t.Fatal("private cleanup Go oracle contains no borrow observations")
+			}
+		}
 		fixtures = append(fixtures, fixture{f.name, root, want})
 	}
 	candidateAtlasProbeSize(t, "project_atlas_source", candidateAtlasBorrowSitesMain(t), 2<<20, func(t *testing.T, image string) {

@@ -61,6 +61,12 @@ Windows low/optimized receipts:
 | Complete admission | Passed both profiles, including exact negative codes | 62.70 | same log |
 | Actual authored CLI | Passed six new `pack-sources/borrows-implicit-*` families under both profiles: 42 commands | 421.502 | `implicit-receiver-full-cli-20261106.log` |
 
+The follow-up private-cleanup replay additionally requires at least one cleanup
+borrow in the independently checked Go oracle before either native comparison.
+Both Windows profiles pass in 67.461s (`implicit-receiver-private-cleanup-positive-20261106.log`).
+This prevents an accidentally empty oracle from satisfying the positive case;
+it changes no compiler source or prior execution inputs.
+
 The combined persistence/execution/Complete admission command passes in 709.654s
 with no selected skips. Its Complete cases include ordinary/static mismatches,
 immutable exclusive receivers, consumed owners, returned local escapes and
