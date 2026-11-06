@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- The authored Fairy Windows provider now opens/creates the existing rooted
+  local-state files and implements snapshot, overlay CAS and append-only layout
+  CAS under real independent nonblocking OS leases. Complete staged bytes are
+  synced before handle-relative rename; pre-publication errors preserve old
+  bytes and clean only owned stages, with no fallible post-rename decision.
+  Nine real-file scenarios/profile, admission and owner checks pass in 17.259s,
+  including Go interoperation, two native writers, stale/no-op/MAX versions,
+  layout drift and actual rename failure. Exact source/lock checks pass 747
+  files / 9,394 MIR functions. See ADR 0538 and
+  `candidate-windows-local-state-provider-20261107.md`. Compiled graph one-attempt
+  binding, cancellation, ordinary command selection and final gates remain open.
+  Linux stays batched; no push or dispatch. Full objective remains active.
+
 - Fairy local-state canonical mutation preparation now accepts unsorted rows
   without caller mutation, rejects duplicates before I/O and merges in linear
   time after bounded index sorting. Nil/empty values, exact no-op/nonempty/MAX
