@@ -410,6 +410,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_artifact.fy`
   - `internal/cli/candidate_state_graph_artifact_test.go`
   - `docs/adr/0514-candidate-state-graph-artifact.md`, `docs/development/candidate-state-graph-artifact-20261107.md`
+- **Fairy exact authored-source straight-line literal state graph production, seven codecs and immutable source/spans; broader source/Complete admission remains separate**
+  - `examples/lexer_candidate/src/module_state_graph_source.fy`
+  - `internal/cli/candidate_state_graph_source_test.go`
+  - `docs/adr/0515-candidate-authored-state-graph-source.md`, `docs/development/candidate-state-graph-source-20261107.md`
 - **Explicit Fairy seven-codec layout declarations, isolated graph wire and current-source layout matching; Complete/cache admission remains separate**
   - `examples/lexer_candidate/src/module_state_layout.fy`, `module_state_declarations.fy`, `module_state_artifact.fy`, `module_project_artifact_state.fy`
   - `internal/cli/candidate_state_graph_layout_test.go`: independent Go canonical bytes, source/current/corruption/budget and original authored-layout replay

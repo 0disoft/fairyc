@@ -1700,3 +1700,14 @@ authorized by this queue.
   admission, runtime execution, ordinary commands and every final gate remain
   open. Source generation, exact-source envelope and portable body hash work
   continue separately. Linux remains batched; no push or dispatch.
+
+- The first Fairy authored graph source lane now derives exact source ownership,
+  layouts, literal cell/map operations and final exits instead of trusting a test
+  IR packet. All seven codecs and checked decimal u32/u64 maxima are covered.
+  The explicit 64 KiB/single-module/single-root straight-line subset fails closed
+  on the wider Go source families. The final source suite passes in 29.699s:
+  83 Go source/MIR oracle cases, 166 Windows low/optimized native processes and
+  five owner refusals. Receipt: `candidate-state-graph-source-20261107.md`.
+  Wider lowering, Complete/package authority, cache/commands/execution and every
+  final gate remain open. Source-bound artifact and body identity work continue;
+  Linux remains batched and the full implementation objective remains active.
