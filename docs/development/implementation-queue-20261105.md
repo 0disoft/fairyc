@@ -1711,3 +1711,14 @@ authorized by this queue.
   Wider lowering, Complete/package authority, cache/commands/execution and every
   final gate remain open. Source-bound artifact and body identity work continue;
   Linux remains batched and the full implementation objective remains active.
+
+- Fairy detached graph body identity now matches the existing Go portable
+  preimage and `fycsbody1-sha256-` hash for one root/helper/borrow program.
+  Canonical descriptor/context ownership and exact effects are checked before
+  hashing. The final Windows low/optimized run passes in 21.735s: 254 native
+  processes covering 65 HIR bodies, 33 additional descriptor shapes and 29
+  invalid contexts per profile, plus four owner refusals. Receipt:
+  `candidate-state-graph-body-hash-20261107.md`. This closes neither current-source
+  signature/body ownership nor Complete/cache/commands/execution. Zero/multiple
+  transaction hashing and every final gate remain separate. Linux stays batched;
+  no push or dispatch. The full objective remains active.
