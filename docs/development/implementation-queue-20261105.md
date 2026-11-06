@@ -67,6 +67,13 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy graph framing now has memoized saturated work/literal bounds and the
+  sorted native-codec cell table, plus an exact hash-pinned C-frame bundle.
+  Windows low/optimized pass independent plan/source/ownership controls. These
+  are transport prerequisites; request/response admission, native persistent
+  execution and all final gates remain open. See ADR 0530 and
+  `candidate-state-graph-framing-inputs-20261107.md`.
+
 - The Fairy common Complete now lowers its admitted structured state graph to
   genuine Windows C through a sealed artifact and explicit pinned runtime
   input. Windows low/optimized pass 344 emission/refusal processes and 48 real

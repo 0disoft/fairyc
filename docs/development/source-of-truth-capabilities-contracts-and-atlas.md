@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Fairy graph transport facts and explicit C-frame input**: `examples/lexer_candidate/src/module_state_graph_transport_plan.fy`, `module_state_graph_frame_assets.fy`, `module_state_graph_frame_pin.fy`, `tools/package-candidate-state-graph-frame.py`; independent Go/native and ownership tests: `internal/cli/candidate_state_graph_transport_plan_test.go`, `candidate_state_graph_frame_assets_test.go`. Admission and exact evidence: ADR 0530 and `docs/development/candidate-state-graph-framing-inputs-20261107.md`.
+
 - **Complete-bound Fairy native state graph C emission**: `examples/lexer_candidate/src/module_state_graph_native.fy`, `module_state_graph_native_text.fy`, `module_state_graph_native_bodies.fy`, `module_state_graph_native_operations.fy`; full Go C/identity and actual Windows execution: `internal/cli/candidate_state_graph_native_test.go`, `candidate_state_graph_native_semantics_test.go`, `candidate_state_graph_native_operations_test.go`. Exact admitted scope and separate remaining transport/persistence: ADR 0529 and `docs/development/candidate-state-graph-native-20261107.md`.
 
 - **Fairy native graph slot/trap preparation**: `examples/lexer_candidate/src/module_state_graph_native_plan.fy`, `internal/cli/candidate_state_graph_native_plan_test.go`; detached owner, sparse identities and 4096-slot admission: ADR 0528 and `docs/development/candidate-state-graph-native-plan-20261107.md`.
