@@ -48,6 +48,21 @@ func verifyCandidatePackSourceCommand(t *testing.T, image string) {
 			verifyCandidatePackSourceFixture(t, image, atlasReturnErrorProductionWorkspace(t, fixture), subject, fixture.minimum, fixture.minimum)
 		})
 	}
+	for _, fixture := range atlasBorrowCollectorCases() {
+		version, subject := 1, "exercise"
+		switch fixture.name {
+		case "shared-local", "mutable-local", "returned-parameter", "retained-call-result", "conditional-origins":
+		case "generic":
+			version = 2
+		case "cleanup":
+			version, subject = 3, "Box"
+		default:
+			continue
+		}
+		t.Run("borrows-"+fixture.name, func(t *testing.T) {
+			verifyCandidatePackSourceFixture(t, image, writeWorkspaceSessionFixture(t, fixture.source), subject, version, version)
+		})
+	}
 }
 
 func verifyCandidatePackSourceFixture(t *testing.T, image, root, subject string, version, minimum int) {

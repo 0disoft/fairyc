@@ -94,3 +94,8 @@ Final borrow map output, relation counts/completeness and actual command accepta
 remain required, together with all broader implementation and final acceptance
 gates in the original queue. No public CLI/API, SDK/runtime ABI, DB, dependency,
 repository hygiene or runner policy changes. No push, dispatch or release.
+
+The subsequent [Complete-bound production receipt](candidate-atlas-borrow-production-20261106.md)
+records map/count/completeness and selected actual command acceptance separately.
+It supersedes that bounded production gap, not the broader implementation or
+complete final-acceptance queue retained above.

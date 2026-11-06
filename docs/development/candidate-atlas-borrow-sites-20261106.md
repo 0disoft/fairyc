@@ -100,3 +100,7 @@ The subsequent [Complete/restore prerequisite](candidate-atlas-borrow-observatio
 retains exact observations through unit/project frame remapping and fresh artifact
 admission. Its separate receipt supersedes only the Complete-bound retention gap;
 final borrow map/count/completeness and actual command acceptance remain open.
+
+That production gap is addressed in the later
+[map/command receipt](candidate-atlas-borrow-production-20261106.md), with explicit
+profile/source/version scope. The broader queue and every final gate remain open.

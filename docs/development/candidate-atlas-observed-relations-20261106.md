@@ -900,3 +900,17 @@ twenty-eight-family cold/restore source matrix and exact Windows results are in
 `candidate-atlas-borrow-observations-20261106.md`. This closes retention and source
 restoration only; final borrow map/count/completeness/commands, the complete broader
 implementation queue and all final acceptance gates remain open. Linux stays batched.
+
+## Complete-bound borrow publication
+
+`project_atlas_calls`, `project_atlas_header`, `project_atlas_produce` and the actual
+`project_atlas_source` query path now publish retained Complete-owned borrows.
+Original Go arrays, spans, kinds, escapes and multiplicity remain the independent
+oracle. Summaries/counts include borrows and only observed maps promote their
+borrow completeness; legacy raw-IR paths retain unavailable status. Optimized
+source/version/current/join acceptance passes 218 processes / 381 maps; selected
+full-main groups and all seven new Pack families pass, with 48 new both-profile
+commands. Exact SDK/profile scope, preceding failures, source/image identities and
+commands are in `candidate-atlas-borrow-production-20261106.md`. Effects parity,
+broader source families/commands and every original final acceptance gate remain
+open. Native Linux remains batched, without push or dispatch.

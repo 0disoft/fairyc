@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound borrow maps now preserve original spans, shared/mutable kinds
+  and escape flags in ordinary/generic/cleanup summaries, counts and exact
+  completeness. Raw-IR legacy factories retain unavailable evidence. The actual
+  impact/MCP/edit producer now enters the same Complete-bound versioned factory.
+  Optimized source/version/current/join replay passes 218 processes / 381 maps;
+  six actual optimized CLI groups pass, and seven new Pack families pass both
+  profiles (48 new commands). The separate prototype-header fix preserves native
+  limits. See `candidate-atlas-borrow-production-20261106.md` for SDK, failed-run
+  accounting and exact Windows scope. Effects completeness remains a Go/Fairy
+  difference; Go itself still marks reads/writes/test-calls unavailable. Broader
+  implementation and every final gate remain open. Linux stays batched; no push.
+
 - Borrow observations now attach to the actual Complete owner, follow every linker
   alias and reconstruct from current checks on unit/project artifact restoration.
   The independent twenty-eight-family source matrix checks exact ordinary/generic/

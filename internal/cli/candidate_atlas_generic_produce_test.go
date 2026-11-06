@@ -40,7 +40,7 @@ import project_atlas_join as join;`, 1)
  let absent=table::assemble(bytes::empty(),v::empty<table::Coordinate>());
  let observed=switch(if(bytes::equal(mode,b"missing-coordinate")){instances::collect(ref source,ref absent,compiler::checked_program(ref complete),ref metadata,ref mut meter)}else{instances::collect(ref source,ref table,compiler::checked_program(ref complete),ref metadata,ref mut meter)}){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
  var packages=`, 1)
-	main = strings.Replace(main, "produce::package(f,ref source,p,ref table,ref metadata,ref mut rows,owner,ref mut meter)", "produce::package_generics(f,ref source,p,ref table,ref metadata,ref mut rows,ref observed,owner,ref mut meter)", 1)
+	main = strings.Replace(main, "produce::package_complete(f,ref source,ref table,ref complete,ref metadata,ref mut rows,owner,ref mut meter)", "produce::package_version(f,ref source,ref table,ref complete,ref metadata,ref mut rows,ref observed,owner,3,ref mut meter)", 1)
 	main = strings.Replace(main, " var out=bytes::empty();", " var admitted=v::empty<current::Ready>();var out=bytes::empty();", 1)
 	main = strings.Replace(main, "  if(owner>0", `
   let ready=switch(produce::ready(v::at<produce::Package>(ref packages,owner),total-external,external,ref mut meter)){case .ok(p):{p}case .err(code):{discard io::write("ready/");discard io::write_usize(code as usize);return 7;}};
@@ -163,8 +163,8 @@ func compareAtlasProducedFunctions(t *testing.T, got, want []semanticsnapshot.Fu
 	}
 	for i, f := range got {
 		w := want[i]
-		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) || !slices.Equal(f.DropSites, w.DropSites) || !slices.Equal(f.TrapCategories, w.TrapCategories) || !slices.Equal(f.UnsafeSites, w.UnsafeSites) || !slices.Equal(f.MoveSites, w.MoveSites) || !slices.Equal(f.AllocationSites, w.AllocationSites) || !slices.Equal(f.ReturnErrorSites, w.ReturnErrorSites) {
-			t.Fatalf("produced calls/drops/traps/unsafe/moves/allocations/errors differ: got %+v want %+v", f, w)
+		if f.Function != w.Function || f.Provenance != w.Provenance || !slices.Equal(f.Calls, w.Calls) || !slices.Equal(f.DropSites, w.DropSites) || !slices.Equal(f.TrapCategories, w.TrapCategories) || !slices.Equal(f.UnsafeSites, w.UnsafeSites) || !slices.Equal(f.MoveSites, w.MoveSites) || !slices.Equal(f.AllocationSites, w.AllocationSites) || !slices.Equal(f.ReturnErrorSites, w.ReturnErrorSites) || !slices.Equal(f.Borrows, w.Borrows) {
+			t.Fatalf("produced calls/drops/traps/unsafe/moves/allocations/errors/borrows differ: got %+v want %+v", f, w)
 		}
 	}
 }
@@ -174,7 +174,7 @@ func compareAtlasProducedFunctions(t *testing.T, got, want []semanticsnapshot.Fu
 func candidateAtlasProducedRelationCount(p atlasmap.Partition) int {
 	count := 0
 	add := func(f semanticsnapshot.FunctionSummary) {
-		count += len(f.Calls) + len(f.DropSites) + len(f.TrapCategories) + len(f.UnsafeSites) + len(f.MoveSites) + len(f.AllocationSites) + len(f.ReturnErrorSites)
+		count += len(f.Calls) + len(f.DropSites) + len(f.TrapCategories) + len(f.UnsafeSites) + len(f.MoveSites) + len(f.AllocationSites) + len(f.ReturnErrorSites) + len(f.Borrows)
 	}
 	for _, f := range p.Functions() {
 		add(f)

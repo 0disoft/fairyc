@@ -122,6 +122,20 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	for _, propagation := range atlasReturnErrorProductionFixtures() {
 		fixtures = append(fixtures, fixture{"errors-" + propagation.name, atlasReturnErrorProductionWorkspace(t, propagation), propagation.minimum, nil})
 	}
+	for _, borrow := range atlasBorrowCollectorCases() {
+		minimum := 1
+		if borrow.name == "generic" {
+			minimum = 2
+		} else if borrow.name == "cleanup" {
+			minimum = 3
+		}
+		fixtures = append(fixtures, fixture{"borrows-" + borrow.name, writeWorkspaceSessionFixture(t, borrow.source), minimum, nil})
+	}
+	dependencyBorrows := writeWorkspaceSessionFixture(t, `module main;import answer as a;fn i32 main(){let i32 value=7;let ref i32 view=a::relay(ref value);return *view;}`)
+	writeWorkspaceFile(t, dependencyBorrows, "libs/answer/src/answer.fy", `module answer;pub fn ref i32 relay(ref i32 input){return input;}`)
+	fixtures = append(fixtures, fixture{"borrows-dependency", dependencyBorrows, 1, nil})
+	closureBorrows := writeWorkspaceSessionFixture(t, `module main;fn i32 main(){let i32 value=7;let ref i32 view=ref value;let add=fn [i32 value] i32(i32 n){return value+n;};return add(*view);}`)
+	fixtures = append(fixtures, fixture{"borrows-copied-closure", closureBorrows, 1, nil})
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -195,6 +209,18 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 						}
 						if h.Counts.Relations != candidateAtlasProducedRelationCount(want) {
 							t.Fatalf("source relation count %s: %d want %d", h.PackageUID, h.Counts.Relations, candidateAtlasProducedRelationCount(want))
+						}
+						foundBorrows := false
+						for _, r := range got.Completeness() {
+							if r.Relation == "borrows" {
+								foundBorrows = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source borrow completeness: %+v", r)
+								}
+							}
+						}
+						if !foundBorrows || slices.Contains(h.Omissions, "borrows:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source borrow completeness missing or omitted")
 						}
 						foundDrops, foundTraps, foundUnsafe := false, false, false
 						for _, r := range got.Completeness() {

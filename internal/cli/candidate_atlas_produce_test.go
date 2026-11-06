@@ -28,7 +28,7 @@ import project_compiler_image_hash as image;`, 1)
  var packages=v::empty<produce::Package>();var usize owner=0;var usize total=0;var usize external=0;
  while(owner<graph::node_count(graph)){
   let f=switch(facts::collect(graph,ref lock,ref table,compiler::public_interfaces(ref complete),p,image::value(ref compiler_image),owner,ref mut meter)){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
-  let part=switch(produce::package(f,ref source,p,ref table,ref metadata,ref mut rows,owner,ref mut meter)){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
+  let part=switch(produce::package_complete(f,ref source,ref table,ref complete,ref metadata,ref mut rows,owner,ref mut meter)){case .ok(p):{p}case .err(code):{discard io::write_usize(code as usize);return 7;}};
   total+=produce::call_count(ref part);external+=produce::external_count(ref part);if(!v::push<produce::Package>(ref mut packages,part).is_ok){return 7;}owner+=1;
  }
  var out=bytes::empty();if(!w::raw(ref mut out,b"[",ref mut meter).is_ok){return 7;}owner=0;

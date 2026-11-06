@@ -13,7 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 )
 
-// The producer collects calls, drops, traps, unsafe sites, moves, allocations and error propagation.
+// The producer collects calls, drops, traps, unsafe sites, moves, allocations, error propagation and borrows.
 // Packs expose these counts and summaries. Project only the explicitly declared
 // collection scope before querying; retain the original Go declarations, calls,
 // observed spans, trap categories and specialization identities.
@@ -79,14 +79,12 @@ func candidatePackCommandFixture(t *testing.T, image, root string, version int) 
 		if err := json.Unmarshal(fields["return_error_sites"], &returnErrors); err != nil {
 			t.Fatal(err)
 		}
-		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves) + len(allocations) + len(returnErrors)
-		for _, field := range []string{"borrows"} {
-			if _, ok := fields[field]; !ok {
-				t.Fatalf("missing independent body field %s", field)
-			}
-			prefix := []byte(fmt.Sprintf("%q:", field))
-			data = bytes.ReplaceAll(data, append(slices.Clone(prefix), fields[field]...), append(prefix, []byte("[]")...))
+		var borrows []json.RawMessage
+		if err := json.Unmarshal(fields["borrows"], &borrows); err != nil {
+			t.Fatal(err)
 		}
+		count += len(borrows) + len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves) + len(allocations) + len(returnErrors)
+
 	}
 	data = bytes.Replace(data, []byte(fmt.Sprintf(`"relations":%d`, p.Header().Counts.Relations)), []byte(fmt.Sprintf(`"relations":%d`, count)), 1)
 	p, err = []func([]byte, uint64) (atlasmap.Partition, error){atlasmap.Decode, atlasmap.DecodeV2, atlasmap.DecodeV3}[version-1](atlasRechecksum(t, data), 4<<20)

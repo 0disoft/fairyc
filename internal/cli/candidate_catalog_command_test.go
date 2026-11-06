@@ -69,7 +69,7 @@ func candidateCatalogCommandPartition(t *testing.T, p atlasmap.Partition, e atla
 	var omissions []string
 	for i := range rows {
 		r := &rows[i]
-		if r.Relation != "calls" && r.Relation != "drops" && r.Relation != "may-trap" && r.Relation != "uses-unsafe" && r.Relation != "moves" && r.Relation != "allocates" && r.Relation != "returns-error" && !strings.HasPrefix(r.Relation, "generic-") {
+		if r.Relation != "calls" && r.Relation != "drops" && r.Relation != "may-trap" && r.Relation != "uses-unsafe" && r.Relation != "moves" && r.Relation != "allocates" && r.Relation != "returns-error" && r.Relation != "borrows" && !strings.HasPrefix(r.Relation, "generic-") {
 			r.Status, r.Resolved, r.External, r.Unknown = "unavailable", 0, 0, 0
 			r.Reasons = []string{"candidate-atlas-not-collected"}
 		}

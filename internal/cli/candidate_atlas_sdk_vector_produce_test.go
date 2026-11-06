@@ -111,30 +111,32 @@ func TestCandidateAtlasSDKVectorProduction(t *testing.T) {
 		for _, f := range fixtures {
 			t.Run(f.name, func(t *testing.T) {
 				before := remoteTree(t, f.root)
-				code, out, stderr := candidateAtlasSDKCLIProcess(t, image, f.root, nil)
-				if code != 0 || stderr != "" {
-					t.Fatalf("SDK vector production: %d %s %s", code, out, stderr)
-				}
-				var documents []json.RawMessage
-				if err := json.Unmarshal([]byte(out), &documents); err != nil || len(documents) != len(f.partitions) {
-					t.Fatalf("SDK vector partitions: %v %d, want %d", err, len(documents), len(f.partitions))
-				}
-				global := candidateAtlasSDKVectorGlobalOracle(t, f.partitions)
-				seen := map[string]bool{}
-				for _, raw := range documents {
-					got, err := atlasmap.DecodeV3(raw, 4<<20)
-					if err != nil {
-						t.Fatalf("Go rejected produced SDK vector map: %v", err)
+				t.Run("source", func(t *testing.T) {
+					code, out, stderr := candidateAtlasSDKCLIProcess(t, image, f.root, nil)
+					if code != 0 || stderr != "" {
+						t.Fatalf("SDK vector production: %d %s %s", code, out, stderr)
 					}
-					h := got.Header()
-					want, ok := f.partitions[h.PackageInstance]
-					if !ok || seen[h.PackageInstance] {
-						t.Fatalf("unexpected or duplicate SDK vector partition %s", h.PackageInstance)
+					var documents []json.RawMessage
+					if err := json.Unmarshal([]byte(out), &documents); err != nil || len(documents) != len(f.partitions) {
+						t.Fatalf("SDK vector partitions: %v %d, want %d", err, len(documents), len(f.partitions))
 					}
-					seen[h.PackageInstance] = true
-					verifyCandidateAtlasSDKVectorPartition(t, got, want)
-					verifyCandidateAtlasSDKVectorCompleteness(t, got, want, global)
-				}
+					global := candidateAtlasSDKVectorGlobalOracle(t, f.partitions)
+					seen := map[string]bool{}
+					for _, raw := range documents {
+						got, err := atlasmap.DecodeV3(raw, 4<<20)
+						if err != nil {
+							t.Fatalf("Go rejected produced SDK vector map: %v", err)
+						}
+						h := got.Header()
+						want, ok := f.partitions[h.PackageInstance]
+						if !ok || seen[h.PackageInstance] {
+							t.Fatalf("unexpected or duplicate SDK vector partition %s", h.PackageInstance)
+						}
+						seen[h.PackageInstance] = true
+						verifyCandidateAtlasSDKVectorPartition(t, got, want)
+						verifyCandidateAtlasSDKVectorCompleteness(t, got, want, global)
+					}
+				})
 				// These API boundaries are shared by all three fixtures. Exercise
 				// each once per compiler profile. All source fixtures still have
 				// their own complete map comparison.
@@ -149,10 +151,12 @@ func TestCandidateAtlasSDKVectorProduction(t *testing.T) {
 					}
 				}
 				for _, bad := range controls {
-					code, out, stderr := candidateAtlasSDKCLIProcess(t, image, f.root, []string{bad.mode})
-					if code != 7 || out != bad.output || stderr != "" {
-						t.Fatalf("%s: %d %q %q, want 7 %q", bad.mode, code, out, stderr, bad.output)
-					}
+					t.Run(bad.mode, func(t *testing.T) {
+						code, out, stderr := candidateAtlasSDKCLIProcess(t, image, f.root, []string{bad.mode})
+						if code != 7 || out != bad.output || stderr != "" {
+							t.Fatalf("%s: %d %q %q, want 7 %q", bad.mode, code, out, stderr, bad.output)
+						}
+					})
 				}
 				if !reflect.DeepEqual(before, remoteTree(t, f.root)) {
 					t.Fatal("SDK vector production changed workspace")
@@ -361,6 +365,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 	wantRows["moves"] = semanticsnapshot.Completeness{Relation: "moves", Status: semanticsnapshot.CompletenessExact}
 	wantRows["allocates"] = semanticsnapshot.Completeness{Relation: "allocates", Status: semanticsnapshot.CompletenessExact}
 	wantRows["returns-error"] = semanticsnapshot.Completeness{Relation: "returns-error", Status: semanticsnapshot.CompletenessExact}
+	wantRows["borrows"] = semanticsnapshot.Completeness{Relation: "borrows", Status: semanticsnapshot.CompletenessExact}
 	wantRows["generic-specializations"] = semanticsnapshot.Completeness{Relation: "generic-specializations", Status: semanticsnapshot.CompletenessExact, Resolved: global.implementations}
 	wantRows["generic-template-bodies"] = semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: semanticsnapshot.CompletenessUnavailable, Unknown: global.templates, Reasons: []string{"bodies-checked-only-after-specialization"}}
 	if callReason != "" {
@@ -368,7 +373,7 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 		row.Reasons = []string{callReason}
 		wantRows["calls"] = row
 	}
-	for _, relation := range []string{"borrows", "effects", "reads", "test-calls", "writes"} {
+	for _, relation := range []string{"effects", "reads", "test-calls", "writes"} {
 		wantRows[relation] = semanticsnapshot.Completeness{Relation: relation, Status: semanticsnapshot.CompletenessUnavailable, Reasons: []string{"candidate-atlas-not-collected"}}
 	}
 	actual := got.Completeness()
