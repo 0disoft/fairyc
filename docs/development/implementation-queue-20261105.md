@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy detached state graph IR now verifies six cell/map operations, typed
+  branch/join arguments, block-local values, seven canonical codecs, effects,
+  transaction identity, cost, reachability and acyclicity before sealed ownership.
+  The 56-program independent Go matrix passes 112 Windows low/optimized processes
+  (41.787s), including exact/one-short work and block/operation boundaries. A fresh
+  bootstrap checks the complete isolated current source and lock at 704 files /
+  8,750 MIR functions. Helpers/borrows, current-source lowering/Complete, body
+  identities, artifact/cache/native/ordinary CLI and all final gates remain open.
+  See ADR 0511 and `candidate-state-graph-ir-20261107.md`.
+
 - Linux existing-tree package reuse now compares the held file's device, inode,
   size, complete mode and modification time with the earlier directory scan
   before allocating or reading bytes. Same-byte replacements reject without a
