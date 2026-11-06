@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified CFG Region allocation collection now retains full original
+  call spans and terminal-operand reachability in ordinary, generic and cleanup
+  frames. Twenty independent source cases and twenty frame/work/count controls
+  pass both Windows profiles: eighty unique generated compiler processes,
+  empty PATH and unchanged workspaces. The observed-relations plan records
+  bounded low parents, earlier timeout failures and a separate current-bootstrap
+  renewal. Allocation map/header/completeness/CLI production and all remaining
+  original implementation/final gates stay open; native Linux stays batched.
+
 - Go snapshots now retain one fully identical source call when defer lowering
   copies it onto mutually exclusive exits, with completeness counted after
   canonicalization. Fourteen error-site source/codec controls and three new

@@ -39,8 +39,12 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   original-source/current/join evidence.
 - [ ] Complete the six selected actual move CLI groups at both profiles; all
   optimized groups and the two new low move-pack source cases pass.
-- [ ] Remaining Region allocation, error-propagation and borrow collectors,
-  each with independent verified Go facts and production evidence.
+- [x] Verified Region allocation-site collector with independent ordinary,
+  concrete generic/cleanup Go facts and exact frame/work/count refusals.
+- [ ] Complete-bound allocation production, summaries/counts/completeness and
+  independent source/current/join and actual-command comparisons.
+- [ ] Remaining error-propagation and borrow collectors, each with independent
+  verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
 
@@ -642,6 +646,88 @@ dependency, default timeout, target, runner or repository-policy change.
 This prerequisite does not implement the Fairy allocation collector, promote
 allocation completeness or complete map/command parity. Those steps and every
 original wider/final gate remain required; no push or dispatch.
+
+## Region allocation-site collector
+
+`project_atlas_allocation_sites` lowers independently verified detached IR into
+private CFGs and visits executable blocks from each entry. Only reached typed
+Region place/zeroed-byte/copy-byte operations create observations. Arena or
+SystemHeap construction creates none. Terminal operands and earlier call
+arguments do not invent a later placement; a completed earlier placement stays
+observed when a later argument traps. Complete-bound source/package authority
+and map publication remain the production caller's separate responsibility.
+
+Both standalone and batch APIs canonicalize full original call spans with a
+bounded merge sort. For B blocks/E edges/A raw sites, traversal uses O(B+E)
+work/space and canonicalization O(A log A) work and O(A) space, excluding the
+separately bounded immutable-IR proof and CFG construction. Standalone lowering
+proves the program; batch lowering proves it once and independently verifies
+every resulting graph. No public collector accepts a caller-supplied CFG or
+detached observation list. Raw sites and total retained batch sites are bounded
+at 65,536; the caller's per-frame unique maximum is independent. Frame/count
+malformation returns 9, caller work/count exhaustion 3, allocation failure 2.
+No partial collection is published on failure.
+
+`TestCandidateAtlasAllocationSites` compares all ordinary/concrete function and
+cleanup owners to independent original Go spans, including every selected SDK
+frame. Standalone/batch comparison is repeated for root-source frames; retained
+SDK frame comparisons do not redundantly rerun whole-program proof for every
+unrelated helper. Twenty actual source cases include zeroed/copy bytes, both
+partial argument orders, all three terminal operands, after-direct-trap,
+nested placement, Result propagation, loop exits, generics and concrete cleanup.
+Twenty separate controls retain empty/nonempty zero-count behavior, bad frame
+IDs, one-short/exact/one-more work and unique counts, and over-ceiling counts.
+PATH is empty in every generated compiler process and workspace bytes stay
+unchanged. There is no Go fallback.
+
+The initial low parents failed after 60.01s in two source cases, with no output:
+`.cache/atlas-allocation-collector-low-corpus-a-20261106.log` and
+`atlas-allocation-collector-low-corpus-b-20261106.log`. Isolated `two-places`
+passed in 51.93s (76.724s parent). The SDK-heavy compiler check was incorrectly
+using the package-fetch helper's one-minute process deadline. The collector
+now uses the existing three-minute Atlas SDK process helper, including explicit
+timeout diagnostics. Product/compiler limits and warning levels are unchanged.
+Four bounded fifteen-minute parent commands preserve all source and control
+assertions; together they pass all forty unique low observations without skips:
+
+| Selected low group | Parent seconds | Log under `.cache/` |
+| --- | ---: | --- |
+| first ten source cases | 619.314 | `atlas-allocation-low-corpus-a-final-20261106.log` |
+| remaining ten source cases | 646.482 | `atlas-allocation-low-corpus-b-final-20261106.log` |
+| standalone and zero-count controls | 671.889 | `atlas-allocation-low-controls-a-final-20261106.log` |
+| remaining batch controls | 449.834 | `atlas-allocation-low-controls-b-final-20261106.log` |
+
+The matching forty optimized observations pass in 157.031s, log
+`atlas-allocation-collector-final-optimized-20261106.log`. These are concurrent
+correctness timings, not isolated compiler-speed benchmarks. The source corpus
+also passes the Go preparation oracle; subsequent Go backend fixes are checked
+in the current-bootstrap renewal below rather than silently attributed to these
+earlier compiler images.
+
+After the separate Go Result/C-backend corrections, a fresh optimized compiler
+passes all forty source/control observations in 159.122s. A fresh low compiler
+passes the trapped-byte-view source and standalone/batch exact-work controls
+in 194.469s (three selected observations). Logs:
+`atlas-allocation-current-bootstrap-optimized-20261106.log` and
+`atlas-allocation-current-bootstrap-low-20261106.log`. These renewals are
+explicitly separate from the earlier full low matrix: they do not claim that
+all forty low cases were repeated with the changed Go bootstrap. A log audit
+confirms the full low and renewed optimized selected case sets are identical,
+with twenty source cases and twenty controls each and no duplicate or missing
+observations. The forty-three renewed executions are not new source coverage.
+
+The final original Go allocation oracles pass in 5.307s, and scoped CLI vet,
+formatting, UTF-8/LF/final-newline and diff checks pass. Final authored unlocked
+and locked checks pass with two instances, 678 source files and 8,453 MIR
+functions; the lock is updated and then verified. Logs:
+`atlas-allocation-collector-commit-check-20261106.log` and
+`atlas-allocation-collector-commit-locked-20261106.log`.
+
+No schema/API/ABI, grammar, SDK/version, cache format, dependency, DB, product
+timeout, target-maturity, runner or repository-policy change is made.
+This closes the private collector only: allocation summaries, header inventory,
+completeness, current/join/command production and all original broader/final
+gates remain open. Native Linux stays batched; no push or workflow dispatch.
 
 ## Result propagation Go prerequisite
 
