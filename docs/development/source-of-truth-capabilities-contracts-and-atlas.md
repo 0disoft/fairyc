@@ -342,8 +342,9 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/contractstatenative/overlay_runtime_probe.c`, `overlay_runtime_windows_test.go`
   - `internal/contractstatenative/overlay_emit.go`, `overlay_emit_test.go`, `overlay_emit_windows_test.go`
   - `docs/architecture/native-state-overlay-v1.md`
-- **Sealed multi-key native state Go request/response admission; actual C framing and multi-key CAS remain pending**
+- **Sealed multi-key native state request/response admission and actual Windows C framing; multi-key CAS remains pending**
   - `internal/contractstatenative/overlay_transport.go`, `overlay_transport_test.go`
+  - `internal/contractstatenative/overlay_native.go`, `overlay_native_c.go`, `overlay_native_windows_test.go`
   - `docs/architecture/native-state-overlay-transport-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`

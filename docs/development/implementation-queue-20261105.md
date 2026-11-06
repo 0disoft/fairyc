@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Multi-key literal state now has actual binary C framing, an opaque Windows
+  build/run owner and complete host admission. Windows low/optimized cover 56
+  native/Go exit/policy cases, 32 malformed requests, all six allocation failures,
+  cleanup and exact binary output, including 64MiB-1/exact/one-over evidence.
+  Combined framing/wire/MIR/runtime/single-cell-CAS regression passes in 71.168s;
+  the subsequently added ceiling fixture passes in 2.899s on unchanged product
+  inputs. Scoped vet/format/diff pass. Multi-key CAS/reopen, dynamic graph/helper/
+  borrow, source/cache/native CLI and all final gates remain open. See
+  `architecture/native-state-overlay-transport-v1.md`.
+
 - Multi-key native state has a sealed Go binary request/response authority over
   its real literal-MIR emitter: exact layout/body/entry/version, sorted immutable
   16MiB/65,536-entry snapshots, complete typed read plans and exact final literal

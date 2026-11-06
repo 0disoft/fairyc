@@ -28,12 +28,14 @@ type overlayReadSpec struct {
 // OverlayTransport seals Go-side request/response authority for a literal MIR
 // owner. The native framing entry and CAS executor are separate delivery steps.
 type OverlayTransport struct {
-	entry  OverlayArtifact
-	known  map[contractstate.Key]string
-	reads  []overlayReadSpec
-	writes []contractstate.PersistentWrite
-	exit   byte
-	trap   string
+	entry      OverlayArtifact
+	known      map[contractstate.Key]string
+	reads      []overlayReadSpec
+	writes     []contractstate.PersistentWrite
+	exit       byte
+	trap       string
+	workspace  uint64
+	maxLiteral int
 }
 
 type OverlayInput struct {
@@ -60,6 +62,7 @@ func PrepareOverlayTransport(handoff Handoff, id target.ID) (OverlayTransport, e
 	}
 	prepared := OverlayTransport{entry: entry, known: make(map[contractstate.Key]string), trap: handoff.program.TrapCategory}
 	final := make(map[contractstate.Key]contractstate.PersistentWrite)
+	maximum := make(map[contractstate.Key]int)
 	for index, op := range handoff.program.Operations {
 		field := handoff.program.Layout.Fields[op.FieldIndex]
 		key := overlayOperationKey(field, op.Key.Encoded)
@@ -76,13 +79,20 @@ func PrepareOverlayTransport(handoff Handoff, id target.ID) (OverlayTransport, e
 			prepared.reads = append(prepared.reads, overlayReadSpec{operation: uint32(index), codec: codec, typeID: field.ValueTypeID})
 		case contractstatemir.OperationCellWrite, contractstatemir.OperationMapWrite:
 			final[key] = contractstate.PersistentWrite{Key: key, Value: slices.Clone(op.Value.Encoded)}
+			maximum[key] = max(maximum[key], len(op.Value.Encoded))
+			prepared.maxLiteral = max(prepared.maxLiteral, len(op.Value.Encoded))
 		case contractstatemir.OperationCellDelete, contractstatemir.OperationMapDelete:
 			final[key] = contractstate.PersistentWrite{Key: key, Deleted: true}
 		}
 	}
 	for _, write := range final {
 		prepared.writes = append(prepared.writes, write)
+		if uint64(maximum[write.Key])+33 > uint64(overlayResponseBytes)-prepared.workspace {
+			return OverlayTransport{}, fmt.Errorf("literal overlay workspace exceeds native byte limit")
+		}
+		prepared.workspace += 33 + uint64(maximum[write.Key])
 	}
+	prepared.workspace = max(1, prepared.workspace)
 	slices.SortFunc(prepared.writes, func(a, b contractstate.PersistentWrite) int { return bytes.Compare(a.Key[:], b.Key[:]) })
 	if handoff.program.Exit == contractstatemir.ExitReject {
 		prepared.exit = 1

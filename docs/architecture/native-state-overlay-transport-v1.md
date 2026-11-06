@@ -1,8 +1,7 @@
 # Native literal-state overlay transport v1
 
-Status: Go-side sealed request factory and response admission implemented.
-The actual C framing entry, built transport owner and multi-key CAS connection
-remain required. This is a delivery step of
+Status: sealed request/response admission, actual C framing and opaque Windows
+executable implemented. The multi-key CAS connection remains required. This is a delivery step of
 [overlay v1](native-state-overlay-v1.md), not durable multi-key native acceptance.
 
 ## Authority and bounds
@@ -124,9 +123,49 @@ go vet -mod=readonly ./internal/contractstatenative ./internal/cdriver
 The final 64-bit-limit wire replay passes in 0.094s. The preceding combined
 native-MIR/overlay/single-cell-CAS replay passes in 27.181s; its native path and
 shared address-helper inputs are unchanged by the final Go wire-width update.
-Native C request parsing/output serialization, memory/I/O fault handling,
-large-output boundary evidence, opaque built transport, real multi-key local
-publication/reopen/conflicts, graph/helper/borrow and source/cache/native CLI
-remain open. Linux execution, the complete final suite, distribution and hosted
+The subsequent C framing implementation and evidence are recorded below. Real
+multi-key local publication/reopen/conflicts, graph/helper/borrow and
+source/cache/native CLI remain open. Linux execution, the complete final suite, distribution and hosted
 acceptance remain deferred. No public language/CLI/SDK/runtime ABI, DB/provider,
 dependency, default limit, workflow/runner or repository-policy change is made.
+
+## Actual C framing and built execution
+
+`OverlayTransport.Source` emits the original verified operation C plus a bound
+binary entry. `BuildOverlay` returns an opaque Windows image; `RunOverlay`
+executes that image once with binary stdin, a one-minute deadline and explicit
+64MiB combined capture, then admits only a zero-exit, empty-stderr, trap-free
+complete response through the existing decoder. It grants no storage authority.
+
+The native entry checks request magic/identity, full-width policies, snapshot
+counts/lengths, sorted unique keys, known canonical codecs and exact EOF.
+Payload, snapshot, writes, two work arenas and trace storage have bounded owned
+lifetimes and one cleanup path. The transaction is initialized before that
+cleanup path, preserving strict MSVC warning checks on early allocation errors.
+The sealed literal plan bounds workspace by the sum of 33 plus the largest
+literal per written key, capped at 64MiB. Read trace storage is bounded by the
+actual read count and largest observed/literal value, capped at the response
+ceiling. A response that cannot fit fails without any writes. Partial stream
+output or process failure cannot satisfy host admission and cannot be published.
+
+Windows low/optimized evidence includes all four exit families and seven
+policies (56 native/Go comparisons), sixteen malformed requests per profile,
+all six allocation failures and successful cleanup, and a 65,537-byte binary
+read with capture limits 65,688/65,689/65,690. A separate six-read fixture proves
+responses of exactly 64MiB-1 and 64MiB; one additional byte returns a bounded
+failure prefix with no writes. Every returned binary observation is checked.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 4m -failfast -v ./internal/contractstatenative -run '^(TestOverlayFraming|TestOverlayTransport|TestOverlayMIR|TestNativeOverlayRuntime|TestPersistentExecution)'
+go test -mod=readonly -count=1 -timeout 4m -failfast -v ./internal/contractstatenative -run '^TestOverlayFramingResponseCeiling$'
+go vet -mod=readonly ./internal/contractstatenative ./internal/cdriver
+git diff --check
+```
+
+The combined replay passes in 71.168s before the ceiling test is added; that
+test alone passes in 2.899s with unchanged implementation inputs. No selected
+skips. Scoped vet, formatting and diff checks pass. The first strict build
+reported possibly uninitialized transaction cleanup; explicit initialization
+fixes it without disabling warnings. This closes native framing only. Real
+multi-key CAS/reopen, graph/helper/borrow, source/cache/commands and every final
+acceptance gate remain required; native Linux remains batched.
