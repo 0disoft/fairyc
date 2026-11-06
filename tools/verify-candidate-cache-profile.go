@@ -31,7 +31,7 @@ func run(output string) error {
 	if err != nil {
 		return err
 	}
-	fields := []string{sdkstdlib.LanguageRevision, "fairyc.candidate-owned-body-ir/0", spec.SchemaVersion, strings.Join([]string{"fairyc.target-abi-profile/0", string(spec.ID), spec.DataModel, spec.CallingConvention, spec.AggregateLayout, spec.ReturnClassifier, spec.ObjectFormat, spec.UnwindModel}, ";"), "not-applicable:verified-candidate-owned-body-ir", "verified-candidate-owned-body-ir", sdkstdlib.RuntimeABI, string(spec.ID)}
+	fields := []string{sdkstdlib.LanguageRevision, "fairyc.candidate-owned-body-ir/2", spec.SchemaVersion, strings.Join([]string{"fairyc.target-abi-profile/0", string(spec.ID), spec.DataModel, spec.CallingConvention, spec.AggregateLayout, spec.ReturnClassifier, spec.ObjectFormat, spec.UnwindModel}, ";"), "not-applicable:verified-candidate-owned-body-ir", "verified-candidate-owned-body-ir", sdkstdlib.RuntimeABI, string(spec.ID)}
 	var out bytes.Buffer
 	out.WriteString("FYCPROF1")
 	number := func(n int) { binary.Write(&out, binary.BigEndian, uint64(n)) }

@@ -538,10 +538,15 @@ limit or warning is relaxed.
 
 The native corpus has 34 admitted sources, two explicit source-factory gap
 controls and twenty frame/work/count controls per Windows profile (56 executions).
-The original Go-supported implicit shared/exclusive owner method forms still
+At that collector snapshot, the Go-supported implicit shared/exclusive owner method forms
 reject at the current Fairy factory with `4/1006`; explicit ref/ref-mut receiver
 bindings are positive controls. These two gaps remain broader source-family work,
 not empty successful move lists or a claim of full Go/Fairy parity.
+
+The named implicit-receiver implementation supersedes this historical factory
+gap. Current argument/move/origin/native/cache/Atlas evidence and its retained
+negative controls live in `candidate-implicit-receiver-20261106.md`. Broader
+receiver forms and final full-compiler acceptance remain separate.
 
 Windows validation:
 

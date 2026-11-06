@@ -12,11 +12,12 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
 )
 
 func atlasBorrowCollectorCases() []atlasBorrowOracleFixture {
 	const prefix = "module main;fn i32 main(){return 0;}"
-	return append(atlasBorrowSiteOracleCases(), []atlasBorrowOracleFixture{
+	return append(append(atlasBorrowSiteOracleCases(), atlasImplicitReceiverBorrowCases()...), []atlasBorrowOracleFixture{
 		{name: "mutable-slice", source: prefix + "fn void exercise(){var i32[2] data=[1,2];let ref mut i32[] view=ref mut data[..];view[0]=3;}"},
 		{name: "borrowed-element", source: prefix + "fn void exercise(){let i32[2] data=[1,2];let ref i32 item=ref data[0];discard item;}"},
 		{name: "retained-subview", source: prefix + "fn void exercise(ref i32[] input){let ref i32[] view=input[..];discard view;}"},
@@ -124,7 +125,8 @@ func TestCandidateAtlasBorrowSites(t *testing.T) {
 	}
 	canonical := func(rows []semanticsnapshot.Borrow) { slices.SortFunc(rows, compare) }
 	var fixtures []fixture
-	for _, f := range atlasBorrowCollectorCases() {
+	cases := append(atlasBorrowCollectorCases(), atlasBorrowOracleFixture{name: "implicit-private-cleanup", source: `module main;struct Cell{i32 value;}fn ref Cell Cell::view(ref Cell this){return this;}resource Token{i32 value;cleanup{let cell=Cell{.value=42};let view=cell.view();assert(view.value==42);}}fn i32 main(){let token=Token{.value=1};return 0;}`})
+	for _, f := range cases {
 		root := writeWorkspaceSessionFixture(t, f.source)
 		var diagnostic bytes.Buffer
 		prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
@@ -132,6 +134,17 @@ func TestCandidateAtlasBorrowSites(t *testing.T) {
 			t.Fatalf("borrow source oracle %s: %d %s", f.name, code, &diagnostic)
 		}
 		want := map[string]observation{}
+		// Logical Atlas deliberately omits nongeneric private drop bodies. The
+		// checked-body collector includes them, so use the independent Go
+		// semantic facts for those owners instead of inventing empty observations.
+		checked, err := workspacecompiler.CheckGeneric(prepared.workspace)
+		if err != nil {
+			t.Fatal(err)
+		}
+		packages, err := prepared.workspace.SemanticPackages()
+		if err != nil {
+			t.Fatal(err)
+		}
 		add := func(k semanticsnapshot.DeclarationKey, cleanup bool, sites []semanticsnapshot.Borrow) {
 			name := key(k, cleanup)
 			r := want[name]
@@ -140,6 +153,21 @@ func TestCandidateAtlasBorrowSites(t *testing.T) {
 			want[name] = r
 		}
 		for _, part := range prepared.partitions {
+			for _, declaration := range part.Declarations() {
+				if declaration.Key.Kind != semanticsnapshot.DeclarationResource || len(declaration.TypeParameters) != 0 {
+					continue
+				}
+				var sites []semanticsnapshot.Borrow
+				for _, fact := range checked.Semantic.Borrows {
+					span := fact.Borrow
+					for _, pkg := range packages {
+						if pkg.ID == span.Package && pkg.Instance.String() == declaration.Key.PackageInstance && span.Source == declaration.Span.Source && span.StartByte >= declaration.Span.StartByte && span.EndByte <= declaration.Span.EndByte {
+							sites = append(sites, semanticsnapshot.Borrow{Span: semanticsnapshot.Span{PackageInstance: declaration.Key.PackageInstance, Source: span.Source, StartByte: span.StartByte, EndByte: span.EndByte}, Kind: fact.Kind, Escapes: fact.Escapes})
+						}
+					}
+				}
+				add(declaration.Key, true, sites)
+			}
 			for _, f := range part.Functions() {
 				add(f.Function, false, f.Borrows)
 			}

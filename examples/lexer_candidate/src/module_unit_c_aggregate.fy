@@ -1,6 +1,7 @@
 module module_unit_c_aggregate;
 import generic_transport_scalars as transport;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_receiver as receiver;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
@@ -23,6 +24,10 @@ fn u32 element(types::Type t){return if(t.kind==10 || t.kind==11){3}else if(t.ki
 fn bool item(ref ir::Program p,types::Type t,usize id){return if(t.kind==17 || t.kind==18){t.first==id && clean::type_at(ir::cleanup_ir(p),id).kind==2}else{view(t) && scalar::scalar(p,id)==element(t)};}
 fn bool item_type(ref ir::Program p,types::Type t,ref mut bytes::Buffer out,ref mut w::State s){return if(t.kind==17 || t.kind==18){type(p,t.first,out,s)}else{w::type(out,s,element(t))};}
 pub fn bool shared(ref ir::Program p,usize expected,usize actual){if(expected==0 || actual==0 || expected>clean::type_count(ir::cleanup_ir(p)) || actual>clean::type_count(ir::cleanup_ir(p))){return false;}let a=clean::type_at(ir::cleanup_ir(p),expected);let b=clean::type_at(ir::cleanup_ir(p),actual);return a.kind==7 && b.kind==8 && a.first==b.first || view(a) && view(b) && !mutable(a) && mutable(b) && a.first==b.first && element(a)==element(b);}
+pub fn bool call_argument(ref ir::Program p,ref ir::Body b,budget::Argument a,ref mut bytes::Buffer out,ref mut w::State s){
+    if(receiver::implicit(ir::cleanup_ir(p),b,a)){return w::text(out,s,b"&(") && place(p,b,a.expression,out,s,0) && w::text(out,s,b")");}
+    return argument(p,a,out,s);
+}
 pub fn bool argument(ref ir::Program p,budget::Argument a,ref mut bytes::Buffer out,ref mut w::State s){
     if(a.actual!=a.expected){if(!a.shared || !shared(p,a.expected,a.actual)){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),a.expected);if(view(t)){return w::text(out,s,b"(") && type(p,a.expected,out,s) && w::text(out,s,b"){.fy_data=") && scalar::value(out,s,a.expression) && w::text(out,s,b".fy_data,.fy_length=") && scalar::value(out,s,a.expression) && w::text(out,s,b".fy_length}");}}
     return scalar::value(out,s,a.expression);

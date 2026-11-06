@@ -52,10 +52,14 @@ func verifyCandidatePackSourceCommand(t *testing.T, image string) {
 		version, subject := 1, "exercise"
 		switch fixture.name {
 		case "shared-local", "mutable-local", "returned-parameter", "retained-call-result", "conditional-origins":
-		case "generic":
+		case "implicit-shared-owner", "implicit-exclusive-owner", "implicit-returned", "implicit-mutable-returned":
+			subject = "main"
+		case "generic", "implicit-generic":
 			version = 2
 		case "cleanup":
 			version, subject = 3, "Box"
+		case "implicit-cleanup":
+			version, subject = 3, "Token"
 		default:
 			continue
 		}

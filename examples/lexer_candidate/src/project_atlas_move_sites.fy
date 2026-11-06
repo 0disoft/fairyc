@@ -1,5 +1,6 @@
 module project_atlas_move_sites;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_receiver as receiver;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_lower as lower;
 import module_unit_cfg_model as cfg;
@@ -76,9 +77,10 @@ fn Result<bool,u32> block_result(ref ir::Program p,ref ir::Body body,usize state
 fn Result<v::Vec<u8>,u32> consumers(ref ir::Program p,usize frame,ref cfg::Graph graph,ref mut usize meter){
     let body=ir::at(p,frame);let scopes=scopes(p,graph,meter)?;var flags=v::empty<u8>();var usize i=0;
     while(i<ir::node_count(body)){if(!work::charge(meter,1)){return .err(3);}if(!v::push<u8>(ref mut flags,0).is_ok){return .err(2);}i+=1;}
-    // Checked ordinary arguments include an owning dot-call receiver. Tagged
+    // Only consuming dot-call receivers move; implicit shared/exclusive
+    // receivers retain their owner. Tagged
     // constructors also retain original argument wrappers in the node table.
-    i=0;while(i<ir::argument_count(body)){if(!work::charge(meter,1)){return .err(3);}let a=ir::argument_at(body,i);discard mark(p,body,a.expression,ref mut flags,meter)?;i+=1;}
+    i=0;while(i<ir::argument_count(body)){if(!work::charge(meter,1)){return .err(3);}let a=ir::argument_at(body,i);if(!receiver::implicit(ir::cleanup_ir(p),body,a)){discard mark(p,body,a.expression,ref mut flags,meter)?;}i+=1;}
     i=0;while(i<ir::statement_count(body)){if(!work::charge(meter,1)){return .err(3);}let s=ir::statement_at(body,i).value;i+=1;
         if(s.kind==2 || s.kind==3 || s.kind==4){discard mark(p,body,ir::node(body,s.expression),ref mut flags,meter)?;}
         else if(s.kind==6 || s.kind==12){discard ignored(p,body,ir::node(body,s.expression),ref mut flags,meter)?;}

@@ -131,9 +131,9 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	}
 	for _, borrow := range atlasBorrowCollectorCases() {
 		minimum := 1
-		if borrow.name == "generic" {
+		if borrow.name == "generic" || borrow.name == "implicit-generic" {
 			minimum = 2
-		} else if borrow.name == "cleanup" {
+		} else if borrow.name == "cleanup" || borrow.name == "implicit-cleanup" {
 			minimum = 3
 		}
 		fixtures = append(fixtures, fixture{"borrows-" + borrow.name, writeWorkspaceSessionFixture(t, borrow.source), minimum, nil})

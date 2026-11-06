@@ -3,6 +3,7 @@ import module_unit_move_model as g;
 import module_unit_move_control as control;
 import module_unit_value_model as m;
 import module_unit_values as values;
+import module_unit_receiver_borrow as borrowed;
 import syntax as syntax;
 import std::vec as v;
 import std::bytes as bytes;
@@ -13,7 +14,7 @@ fn Result<bool,m::Problem> operands(ref v::Vec<syntax::Parsed> sources,ref value
     // Dot-call syntax omits the first checked argument. Evaluate and consume
     // that receiver before explicit arguments, retaining it until the call ends.
     if(e.kind==6 && e.builtin.kind==0){let source=v::at<syntax::Parsed>(sources,c.value.module_index);let callee=syntax::expression_at(source,e.left);if(callee.kind==8){
-        let receiver=switch(g::expression(body,callee.left,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let consumes=switch(g::owned(primary,receiver.type,c,0)){case .ok(b):{b}case .err(p):{return .err(p);}};
+        let receiver=switch(g::expression(body,callee.left,c)){case .ok(n):{n}case .err(p):{return .err(p);}};let first=switch(borrowed::first(body,e.source_index,ref mut c.work)){case .ok(n):{n}case .err(p):{return .err(p);}};var bool implicit=false;if(first!=0){let a=m::argument_at(body,first-1);implicit=borrowed::conversion(values::type_at(primary,a.expected),values::type_at(primary,a.actual),a.actual);}let consumes=!implicit && switch(g::owned(primary,receiver.type,c,0)){case .ok(b):{b}case .err(p):{return .err(p);}};
         let reachable=switch(expression(sources,primary,body,owners,env,edges,diagnostics,facts,callee.left,consumes,depth+1,c)){case .ok(b):{b}case .err(p):{return .err(p);}};if(!reachable){return .ok(false);}if(consumes){let p=g::retain_pending(receiver.type,receiver.source_index,c);if(p.code!=0){return .err(p);}}
     }}
     let source=v::at<syntax::Parsed>(sources,c.value.module_index);let count=if(e.kind==6){syntax::call_argument_count(source,e.source_index)}else if(e.kind==10){syntax::record_field_count(source,e.source_index)}else{syntax::array_element_count(source,e.source_index)};var usize i=0;

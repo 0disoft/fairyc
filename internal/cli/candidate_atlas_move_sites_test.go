@@ -134,23 +134,6 @@ func TestCandidateAtlasMoveSites(t *testing.T) {
 				return
 			}
 		}
-		// Preserve the original Go-supported direct-owner cases as explicit
-		// current-factory gaps. They must not fabricate an empty observation.
-		for _, gap := range atlasMoveImplicitBorrowCases() {
-			root := writeWorkspaceSessionFixture(t, gap.source)
-			var diagnostic bytes.Buffer
-			if _, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3); code != ExitSuccess {
-				t.Fatalf("implicit receiver Go source: %d %s", code, &diagnostic)
-			}
-			before := remoteTree(t, root)
-			code, out, stderr := fetchCLIProcess(t, image, root, nil, "")
-			if !reflect.DeepEqual(before, remoteTree(t, root)) {
-				t.Fatal("implicit receiver refusal changed workspace")
-			}
-			if code != 7 || out != "4/1006" || stderr != "" {
-				t.Fatalf("implicit receiver factory boundary %s: %d %q %q", gap.name, code, out, stderr)
-			}
-		}
 		for _, control := range []struct {
 			fixture, code int
 			output        string
@@ -178,7 +161,7 @@ func TestCandidateAtlasMoveSites(t *testing.T) {
 
 func atlasMoveCollectorCases() []atlasMoveOracleFixture {
 	const resource = "module main;resource Token{i32 value;cleanup{}}\n"
-	return append(atlasMoveSiteOracleCases(), []atlasMoveOracleFixture{
+	return append(append(atlasMoveSiteOracleCases(), atlasMoveImplicitBorrowCases()...), []atlasMoveOracleFixture{
 		{name: "reassign", source: resource + "fn i32 main(){var first=Token{.value=1};let second=Token{.value=2};first=second;return first.value;}"},
 		{name: "consuming-method", source: resource + "fn void Token::finish(Token this){}fn i32 main(){let token=Token{.value=1};token.finish();return 0;}"},
 		{name: "borrowing-method", source: resource + "fn i32 Token::read(ref Token this){return this.value;}fn i32 main(){let token=Token{.value=1};let view=ref token;return view.read();}"},
@@ -213,9 +196,8 @@ func TestAtlasMoveCollectionSources(t *testing.T) {
 	}
 }
 
-// TODO: these original Go-supported direct-owner forms remain a source-family
-// implementation task. Keep the written cases until Fairy can produce their
-// verified borrowed arguments, origin/lifetime proof and native/cache transport.
+// Implicit receiver borrows must retain independent Go move observations;
+// successful checking alone must not fabricate an empty observation.
 func atlasMoveImplicitBorrowCases() []atlasMoveOracleFixture {
 	const resource = "module main;resource Token{i32 value;cleanup{}}\n"
 	return []atlasMoveOracleFixture{

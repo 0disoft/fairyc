@@ -3,6 +3,7 @@ import module_unit_region_builtin as region_builtin;
 import module_unit_interpreter_values as runtime;
 import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_receiver as receiver;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
 import module_unit_cfg_lower as flow;
@@ -79,10 +80,10 @@ fn runtime::Outcome drop_value(ref identified::Program owned,ref Plan plan,usize
     var usize i=g.field_count;while(i>0){i-=1;if(*steps==0){return runtime::failure(2);};*steps=*steps-1;let f=clean::field_at(ir::cleanup_ir(p),g.field_start+i);let payload=runtime::item(heap,current,i);if(payload.error!=0 || payload.trap!=0){return payload;}let done=drop_value(owned,plan,f.type,payload.bits,heap,steps,depth+1);if(done.error!=0 || done.trap!=0){return done;}}return runtime::result(0);
 }
 
-fn runtime::Outcome invoke(ref identified::Program owned,ref Plan plan,usize frame,usize invocation,usize site,ref v::Vec<usize> values,ref v::Vec<usize> captures,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
+fn runtime::Outcome invoke(ref identified::Program owned,ref Plan plan,usize frame,usize invocation,usize site,ref v::Vec<usize> values,ref v::Vec<usize> locals,ref v::Vec<usize> captures,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
     let p=identified::ir_program(owned);let b=ir::at(p,frame);if(invocation==0 || invocation>ir::call_count(b)){return runtime::failure(4);}let call=ir::call_at(b,invocation-1);var usize work=0;
     let target=switch(identified::call_frame(owned,frame,invocation-1,ref mut work)){case .ok(n):{n}case .err(_):{return runtime::failure(4);}};if(target==0){return runtime::failure(1);}
-    var v::Vec<usize> arguments=v::empty<usize>();var usize i=0;while(i<call.argument_count){let a=ir::argument_at(b,call.argument_start+i);if(!runtime::admitted(p,a.actual)){return runtime::failure(1);}let value=if(site==0){*v::at<usize>(values,a.expression)}else{*v::at<usize>(captures,cfg::deferred_at(v::at<cfg::Graph>(ref plan.graphs,frame-1),site).capture_start+i+1)};if(!v::push<usize>(ref mut arguments,value).is_ok){return runtime::failure(4);}i+=1;}
+    var v::Vec<usize> arguments=v::empty<usize>();var usize i=0;while(i<call.argument_count){let a=ir::argument_at(b,call.argument_start+i);if(!runtime::admitted(p,a.actual)){return runtime::failure(1);}let value=if(site==0 && receiver::implicit(ir::cleanup_ir(p),b,a)){let borrowed=runtime::rx_place(p,b,a.expression,locals,values,heap,steps,0);if(borrowed.error!=0 || borrowed.trap!=0){return borrowed;}borrowed.bits}else if(site==0){*v::at<usize>(values,a.expression)}else{*v::at<usize>(captures,cfg::deferred_at(v::at<cfg::Graph>(ref plan.graphs,frame-1),site).capture_start+i+1)};if(!v::push<usize>(ref mut arguments,value).is_ok){return runtime::failure(4);}i+=1;}
     return execute(owned,plan,target,ref arguments,heap,steps,depth+1);
 }
 fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize frame,usize id,ref v::Vec<usize> values,ref v::Vec<usize> locals,ref v::Vec<usize> captures,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
@@ -108,7 +109,7 @@ fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize
     if(e.kind==4){if(e.minimum){return runtime::result(if(type==1){2147483648}else{9223372036854775808});}return runtime::computed(math::runtime_prefix(type,op,*v::at<usize>(values,left)));}
     if(e.kind==5){return runtime::computed(math::runtime_binary(runtime::scalar(p,ir::node_at(b,left-1).value.type),op,*v::at<usize>(values,left),*v::at<usize>(values,right)));}
     if(e.kind==23){return runtime::computed(math::runtime_cast(runtime::scalar(p,ir::node_at(b,left-1).value.type),type,*v::at<usize>(values,left)));}
-    if(e.kind==6){if(region_builtin::allocation(e.builtin.kind)){return runtime::region_place(b,id,locals,values,heap,steps);}if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
+    if(e.kind==6){if(region_builtin::allocation(e.builtin.kind)){return runtime::region_place(b,id,locals,values,heap,steps);}if(e.builtin.kind==200){return location_value(plan,frame,id,heap,steps);}if(e.builtin.kind!=0){return runtime::failure(1);}var usize i=0;while(i<ir::call_count(b)){if(ir::call_at(b,i).expression==id){return invoke(owned,plan,frame,i+1,0,values,locals,captures,heap,steps,depth);}i+=1;}return runtime::failure(4);}
     return runtime::failure(1);
 }
 // Internal checked-frame entry also permits abstract Arena arguments in tests.
@@ -134,7 +135,7 @@ pub fn runtime::Outcome execute(ref identified::Program owned,ref Plan plan,usiz
         else if(n.kind==10 || n.kind==11){if(n.target!=0){let bits=*v::at<usize>(ref values,n.target);let slot=v::at_mut<usize>(ref mut values,n.source);*slot=bits;}}
         else if(n.kind==12){return runtime::trapped(7);}
         else if(n.kind==13){let bits=*v::at<usize>(ref values,n.source);let slot=v::at_mut<usize>(ref mut captures,n.target);*slot=bits;}
-        else if(n.kind==14){r=invoke(owned,plan,frame,cfg::deferred_at(g,n.target).invocation,n.target,ref values,ref captures,heap,steps,depth);}
+        else if(n.kind==14){r=invoke(owned,plan,frame,cfg::deferred_at(g,n.target).invocation,n.target,ref values,ref locals,ref captures,heap,steps,depth);}
         else if(n.kind==15){
             if(*v::at<usize>(ref active_regions,n.target)!=0){return runtime::failure(4);}r=runtime::region_begin(*v::at<usize>(ref values,n.source),heap,steps);
             if(r.error==0 && r.trap==0){let scope=ir::region_at(b,n.target-1);let stored=runtime::rx_set_cell(heap,*v::at<usize>(ref locals,scope.capability),r.bits);if(stored.error!=0 || stored.trap!=0){return stored;}{let slot=v::at_mut<usize>(ref mut active_regions,n.target);*slot=r.bits;}region_count+=1;}

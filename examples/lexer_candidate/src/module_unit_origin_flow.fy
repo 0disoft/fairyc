@@ -25,6 +25,18 @@ fn Result<g::Value,m::Problem> place(ref inputs::Inputs input,ref values::Plan p
     if(e.kind==2 && e.binding!=0){if(e.binding>v::len<g::Value>(env)){return .err(g::fail(c,12,e.start,e.end));}let descriptor=e.type!=0 && borrows::borrowed(inputs::type_at(input,primary,c.frame,e.type));if(descriptor){let n=*v::at<g::Value>(env,e.binding-1);return .ok(if(n.origin==0){g::Value{.subview=false,.loan=0,.origin=1,.allocation=0}}else{n});}let origin=switch(g::leaf(input,e,c)){case .ok(n):{n}case .err(p):{return .err(p);}};return .ok(g::Value{.subview=false,.loan=0,.origin,.allocation=0});}
     if(e.kind==3 || e.kind==8 || e.kind==9 || e.kind==26 || e.kind==4 && e.place.kind==3){return place(input,primary,body,e.left,env,c,depth+1);}return .ok(g::Value{.subview=false,.loan=0,.origin=1,.allocation=0});
 }
+// Implicit method borrows use the same owner/loan checks as a written prefix,
+// but keep the original named value and its source span intact.
+pub fn Result<g::Flow,m::Problem> borrow_receiver(ref v::Vec<syntax::Parsed> sources,ref inputs::Inputs input,ref values::Plan primary,ref v::Vec<g::Value> summaries,ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut v::Vec<p::Row> allocations,ref mut v::Vec<g::Returned> returns,ref mut v::Vec<g::Unknown> unknowns,ref mut v::Vec<g::Value> env,ref mut v::Vec<g::Edge> edges,ref mut v::Vec<loan::Loan> loan_records,ref mut v::Vec<loan::Held> held_loans,ref mut v::Vec<loan::Conflict> loan_conflicts,ref mut g::Context c,usize original,bool mutable,usize depth){
+    let body=inputs::body(input,primary,c.frame);let e=switch(g::expression(body,original,c)){case .ok(e):{e}case .err(p):{return .err(p);}};
+    let prior=c.place_root;c.place_root=original;let evaluated=expression(sources,input,primary,summaries,entries,members,allocations,returns,unknowns,env,edges,loan_records,held_loans,loan_conflicts,c,original,depth);c.place_root=prior;
+    let left=switch(evaluated){case .ok(f):{f}case .err(p):{return .err(p);}};if((left.outcomes&1)==0){return .ok(left);}
+    let origin=switch(place(input,primary,body,original,env,c,depth+1)){case .ok(v):{v}case .err(p):{return .err(p);}};
+    let owner=switch(loans::root(input,body,original,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    let checked=loans::check(input,env,entries,members,original,false,owner,mutable,false,e.start,e.end,loan_records,held_loans,loan_conflicts,c);if(checked.code!=0){return .err(checked);}
+    let pending=switch(loans::create(owner,mutable,e.start,e.end,loan_records,held_loans,loan_conflicts,c)){case .ok(n):{n}case .err(p):{return .err(p);}};
+    return .ok(g::Flow{.loan=pending,.allocation=origin.allocation,.origin=origin.origin,.outcomes=left.outcomes});
+}
 pub fn Result<g::Flow,m::Problem> expression(ref v::Vec<syntax::Parsed> sources,ref inputs::Inputs input,ref values::Plan primary,ref v::Vec<g::Value> summaries,ref mut v::Vec<sets::Entry> entries,ref mut v::Vec<usize> members,ref mut v::Vec<p::Row> allocations,ref mut v::Vec<g::Returned> returns,ref mut v::Vec<g::Unknown> unknowns,ref mut v::Vec<g::Value> env,ref mut v::Vec<g::Edge> edges,ref mut v::Vec<loan::Loan> loan_records,ref mut v::Vec<loan::Held> held_loans,ref mut v::Vec<loan::Conflict> loan_conflicts,ref mut g::Context c,usize original,usize depth){
     if(original==0){return .ok(g::Flow{.loan=0,.allocation=0,.origin=0,.outcomes=1});}let source=v::at<syntax::Parsed>(sources,c.value.module_index);let written=syntax::expression_at(source,original);let prior=c.place_root;
     if(written.kind==21 || written.kind==22){let root=switch(references::root(inputs::body(input,primary,c.frame),written.left,c)){case .ok(e):{e}case .err(p):{return .err(p);}};c.place_root=root.source_index;}

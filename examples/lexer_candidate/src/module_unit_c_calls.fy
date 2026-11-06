@@ -1,5 +1,6 @@
 module module_unit_c_calls;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_receiver as receiver;
 import module_inline_identity as inline;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
@@ -54,7 +55,7 @@ fn usize target(ref ir::Program p,ref targets::Index body_index,ref ir::Body b,u
     let e=ir::node_at(b,c.expression-1).value;let f=clean::frame_at(ir::cleanup_ir(p),caller);let found=targets::find(p,body_index,c.target_module,c.target_declaration,c.instance,c.kind==2,work,ref mut s.code);
     if(found!=0){let t=clean::frame_at(ir::cleanup_ir(p),found);if(t.result!=e.type || (f.effects&t.effects)!=t.effects){return 0;}}var usize i=1;
     if(found==0){return 0;}let body=ir::at(p,found);if(parameters(body)!=c.argument_count){return 0;}var usize position=0;i=1;
-    while(i<=ir::local_count(body)){if(!budget::charge(work,1)){return 0;}let l=ir::local_at(body,i);if(l.kind==1){let a=ir::argument_at(b,c.argument_start+position);if(!a.checked || a.expected!=l.type || ir::node_at(b,a.expression-1).value.state!=1 || a.actual!=ir::node_at(b,a.expression-1).value.type || a.actual!=l.type && (!a.shared || !aggregate::shared(p,l.type,a.actual)) || a.actual==l.type && a.shared){return 0;}position+=1;}i+=1;}return found;
+    while(i<=ir::local_count(body)){if(!budget::charge(work,1)){return 0;}let l=ir::local_at(body,i);if(l.kind==1){let a=ir::argument_at(b,c.argument_start+position);if(!a.checked || a.expected!=l.type || ir::node_at(b,a.expression-1).value.state!=1 || a.actual!=ir::node_at(b,a.expression-1).value.type || a.actual!=l.type && (!a.shared || !aggregate::shared(p,l.type,a.actual)) && !receiver::implicit(ir::cleanup_ir(p),b,a) || a.actual==l.type && a.shared){return 0;}position+=1;}i+=1;}return found;
 }
 fn usize foreign(ref ir::Program p,ref sdk::Plan plan,ref contracts::Index indexed,ref ir::Body b,usize caller,usize invocation,ref mut usize work,ref mut w::State s){
     if(invocation==0){return 0;}let call=ir::call_at(b,invocation-1);if(call.kind!=1 || !call.checked){return 0;}let e=ir::node_at(b,call.expression-1).value;let frame=clean::frame_at(ir::cleanup_ir(p),caller);
@@ -76,6 +77,6 @@ pub fn bool call(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref
     let usize external=if(callee==0){foreign(p,plan,indexed,b,cfg::frame(g),index,work,s)}else{0};
     if(s.code!=0){return false;}if(callee==0 && external==0){s.code=if(*work>=1048576){1002}else{1004};return false;}let c=ir::call_at(b,index-1);let type=scalar::scalar(p,ir::node_at(b,expression-1).value.type);
     if(site==0 && type!=7 && (!scalar::value(out,s,expression) || !w::text(out,s,b"="))){return false;}
-    if(!(if(external==0){names::function(named,callee,out,s)}else if(sdk::rule(plan,external-1)!=0){sdk::name(out,s,external)}else{w::text(out,s,ir::linker_name(p,external-1))}) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<c.argument_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(site==0){if(!aggregate::argument(p,ir::argument_at(b,c.argument_start+i),out,s)){return false;}}else{if(!scalar::capture(out,s,cfg::deferred_at(g,site).capture_start+i+1)){return false;}}i+=1;}
+    if(!(if(external==0){names::function(named,callee,out,s)}else if(sdk::rule(plan,external-1)!=0){sdk::name(out,s,external)}else{w::text(out,s,ir::linker_name(p,external-1))}) || !w::text(out,s,b"(")){return false;}var usize i=0;while(i<c.argument_count){if(i!=0 && !w::text(out,s,b",")){return false;}if(site==0){if(!aggregate::call_argument(p,b,ir::argument_at(b,c.argument_start+i),out,s)){return false;}}else{if(!scalar::capture(out,s,cfg::deferred_at(g,site).capture_start+i+1)){return false;}}i+=1;}
     return w::text(out,s,b");\n");
 }

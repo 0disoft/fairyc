@@ -56,6 +56,14 @@ authorized by this queue.
 
 ## Progress
 
+- Named implicit shared/exclusive owner receivers now enter the existing
+  argument, move, origin, detached-body, C and interpreter owners. The Go
+  returned-borrow prerequisite is committed as `ecab5f4f`; Atlas move collection
+  now distinguishes those borrows from consuming receivers. The current
+  Windows acceptance receipt is `candidate-implicit-receiver-20261106.md`.
+  Grouped/projected/temporary receivers, broader source-family parity and every
+  final gate remain separate. Native Linux remains batched; no push or dispatch.
+
 - Declared-effects production now agrees with Go completeness: every Package
   declaration passes the source schema, legacy header factories retain unavailable
   evidence, and effects do not inflate executable relation counts. Twelve authority

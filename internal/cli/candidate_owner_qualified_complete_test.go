@@ -19,7 +19,29 @@ func TestCandidateOwnerQualifiedComplete(t *testing.T) {
 			fixtures = append(fixtures, fixture{f.name, f.source, 0})
 		}
 	}
+	for _, f := range atlasMoveImplicitBorrowCases() {
+		fixtures = append(fixtures, fixture{f.name, f.source, 0})
+	}
+	const returned = `module main;resource Token{i32 value;cleanup{}}
+fn ref Token Token::view(ref Token this){return this;}
+fn ref mut Token Token::edit(ref mut Token this){return this;}
+fn void Token::set(ref mut Token this,i32 n){this.value=n;}`
 	fixtures = append(fixtures,
+		fixture{"implicit returned shared borrow", implicitReceiverReturnedSource, 0},
+		fixture{"implicit returned mutable borrow", returned + `fn i32 main(){var token=Token{.value=1};let view=token.edit();view.value=2;return token.value;}`, 0},
+		fixture{"implicit forwarded shared parameter", returned + `fn ref Token forward(ref Token token){return token.view();}fn i32 main(){return 0;}`, 0},
+		fixture{"implicit forwarded mutable parameter", returned + `fn ref mut Token forward(ref mut Token token){return token.edit();}fn i32 main(){return 0;}`, 0},
+		fixture{"implicit local borrow cannot escape", returned + `fn ref Token escape(){let token=Token{.value=1};return token.view();}fn i32 main(){return 0;}`, 2102},
+		fixture{"implicit mutable local borrow cannot escape", returned + `fn ref mut Token escape(){var token=Token{.value=1};return token.edit();}fn i32 main(){return 0;}`, 2102},
+		fixture{"implicit returned shared conflict", returned + `fn i32 main(){var token=Token{.value=1};let view=token.view();token.set(2);return view.value;}`, 2101},
+		fixture{"implicit returned mutable conflict", returned + `fn i32 main(){var token=Token{.value=1};let view=token.edit();let copy=token.value;return view.value+copy;}`, 2101},
+	)
+	fixtures = append(fixtures,
+		fixture{"implicit immutable exclusive borrow", `module main;struct Cell{i32 value;}fn void Cell::set(ref mut Cell this,i32 n){this.value=n;}fn i32 main(){let cell=Cell{.value=1};cell.set(2);return 0;}`, 1008},
+		fixture{"ordinary argument is not implicit", `module main;struct Cell{i32 value;}fn i32 read(ref Cell cell){return cell.value;}fn i32 main(){let cell=Cell{.value=1};return read(cell);}`, 1006},
+		fixture{"static call is not implicit", `module main;struct Cell{i32 value;}fn i32 Cell::read(ref Cell this){return this.value;}fn i32 main(){let cell=Cell{.value=1};return Cell::read(cell);}`, 1006},
+		fixture{"implicit consumed receiver", `module main;resource Token{i32 value;cleanup{}}fn i32 Token::read(ref Token this){return this.value;}fn i32 main(){let token=Token{.value=1};let other=token;return token.read();}`, 1101},
+		fixture{"implicit active shared loan", `module main;struct Cell{i32 value;}fn void Cell::set(ref mut Cell this,i32 n){this.value=n;}fn i32 main(){var cell=Cell{.value=1};let view=ref cell;cell.set(2);return view.value;}`, 2101},
 		fixture{"wrong receiver", `module main;struct Cell{i32 value;}struct Other{i32 value;}fn i32 Cell::bad(ref Other this){return this.value;}fn i32 main(){return 42;}`, 4501},
 		fixture{"late receiver", `module main;struct Cell{i32 value;}fn i32 Cell::bad(i32 value,ref Cell this){return value+this.value;}fn i32 main(){return 42;}`, 4501},
 		fixture{"generic owner remains closed", `module main;struct Cell<T>{T value;}fn i32 Cell::bad(ref Cell<i32> this){return this.value;}fn i32 main(){return 42;}`, 9},
