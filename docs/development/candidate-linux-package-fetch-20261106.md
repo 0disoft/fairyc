@@ -293,12 +293,84 @@ Reference source `check` and `check --locked` pass with 691 source files and
 the deadline prerequisite only; they do not establish offline restoration,
 networking or Linux CLI integration.
 
+## Private Linux offline restoration
+
+`linux_remote_offline::restore` now composes the existing source-plan, manifest
+binding, ZIP32/ZIP64 stored/DEFLATE and SHA-256 owners with the held-directory
+Linux filesystem. It reads the plan and manifest without creating missing paths,
+validates binding before mutation, and acquires `.fairyc-fetch.lock` exclusively
+with a retained directory lease. Failed acquisition never removes a competing
+lock. Release checks the original held directory identity and does not recurse.
+
+Every package reads and rehashes only its exact pinned
+`build/package-sources/<sha256>.zip`; missing/corrupt caches fail without transport.
+Archive/package identity is checked before staging. The unchanged 16 MiB archive,
+64 MiB compressed/expanded, 4,096-file, 8 MiB/file, 8,192-entry and depth-32 budgets
+are passed to the existing bounded owners. The monotonic two-minute deadline is
+checked around processing, reuse and publication; it does not interrupt native
+I/O or decoding in the middle of an entry.
+
+An exact existing tree can be reused, including additional empty directories.
+Changed/missing/extra files, aliases and links reject without replacement. New
+trees use the digest-derived private stage, synced anonymous file publication and
+one identity-checked no-replace directory publication. A pre-existing stage stays
+untouched. Ordinary failure clears only the owned current stage under entry/depth
+bounds. Partial native acquisition and later cleanup failures retain their error
+codes; earlier completed packages may remain. Source pins, manifest, graph lock
+and cache bytes are unchanged.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinuxRemoteOfflinePolicy$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^TestLinuxRemoteOfflineNativeInputs$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+```
+
+The policy command passes in 17.546s: 25 real-Windows-filesystem Go reference
+cases supply independent outcomes and complete final namespace/byte expectations,
+and 15 independent Linux-specific fault controls supply exact error expectations.
+All 40 execute in each MSVC profile, 80 generated-program processes, with empty
+PATH and no retained model handles/cursors. Both-target C emission passes and
+rejects Windows host/HTTP symbol leakage. Go offline references make zero requests.
+The generated Fairy program runs over a separate namespace/descriptor model;
+this is not evidence that Linux syscalls executed on Windows.
+
+Cases cover stored/deflated/ZIP64 archives, fresh publication and exact reuse,
+empty directories, cache miss/corruption/case, changed/extra/incomplete packages,
+destination files, held locks, invalid plan/manifest/binding/archive identity,
+two-package success and retained earlier success after a later failure. Controls
+add hard/symbolic links, stale stages, partial/zero writes, sync and cleanup errors,
+deadline/clock failures, simulated directory collision and a competing lock after
+observation. Cleanup failure preserves the primary failure and owned leftovers;
+neither collision publication nor failed lock acquisition is replayed.
+
+The exact real-syscall replay entry and Linux support assembly are separately
+checked on Windows, including no model imports and monotonic/nofollow/O_TMPFILE/
+no-replace primitives. `TestLinuxRemoteOfflineNative` is authored for actual
+GCC/Clang x low/optimized, with the reference corpus and real symlink/hard-link/
+stale-stage preservation cases. It is not executed here.
+
+Reference source check and locked check pass 692 files / 8,612 MIR functions.
+The initial source check caught an inferred i32 conditional used for the remaining
+usize byte budget; the local binding now explicitly uses usize. Initial Go test
+compilation caught a target.ID/string comparison in the harness. The expanded
+model initially applied its single-publication assertion across a two-package
+operation; it now asserts one attempt only for the injected collision, allowing
+the independent two-package success expectation. Both profiles pass after those
+corrections. Final logs are `.cache/linux-remote-offline-policy-20261106.log`,
+`.cache/linux-remote-offline-native-inputs-20261106.log` and
+`.cache/linux-remote-offline-check-20261106.log` (not staged).
+
+This is the private offline API only. Verified HTTPS, online/offline Linux CLI
+selection, actual Linux execution, broader queue items and final gates stay open.
+The remote-source product contract and its budgets are unchanged.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageDirectoryAdapterNative$'
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxPackageFileAdapterNative$'
 go test -mod=readonly -count=1 -timeout 10m -v ./internal/candidatehost -run '^TestLinuxClockAdapterNative$'
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^TestLinuxRemoteOfflineNative$'
 ```
 
 This test is authored, not executed. It selects GCC/Clang x low/optimized,
@@ -309,7 +381,7 @@ The separately authored file probe checks anonymous/single-linked/hard-linked
 files, binary bytes and conditional removal preserving a hard-linked file. Its
 GCC/Clang x low/optimized executions are also not run and remain in that batch.
 
-Next implementation: offline restoration, verified HTTPS and online/offline Linux
+Next implementation: verified HTTPS and online/offline Linux
 CLI selection. The Windows substitute does not prove those paths. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.

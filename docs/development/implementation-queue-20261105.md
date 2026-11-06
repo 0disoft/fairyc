@@ -56,6 +56,16 @@ authorized by this queue.
 
 ## Progress
 
+- Private Linux offline restoration now connects validated source plans, manifest
+  binding, rehashed pinned archives, exclusive held-directory locks and bounded
+  no-replace tree publication/cleanup. Twenty-five Go reference cases plus fifteen
+  independent error controls pass both Windows profiles: eighty native policy
+  executions with empty PATH and exact final namespace/byte expectations. Authored
+  source check/locked pass 692 files / 8,612 MIR functions. Exact native Linux
+  replay inputs are checked, but real Linux execution stays batched. HTTPS, Linux
+  CLI selection, broader parity/deferred designs and every final gate remain open.
+  See the Linux fetch receipt; this does not close the fetch row or overall goal.
+
 - Linux fetch now has an explicit monotonic 120-second deadline prerequisite.
   Independent Windows low/optimized timestamp/overflow/native-error and Fairy
   deadline boundary probes pass, as do authored check/locked (691 files / 8,604

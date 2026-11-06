@@ -3,8 +3,21 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-f527d3c28da9c15fec33280246674065f50d2f9ecff5437ef5bde7ae089cd311",
+  "root": "fypi1-sha256-68eedf2da9d633ad6eb1d8e3f1d887339297a15fe77dcb9b106498215db3ac42",
   "packages": [
+    {
+      "id": "fypi1-sha256-68eedf2da9d633ad6eb1d8e3f1d887339297a15fe77dcb9b106498215db3ac42",
+      "role": "root",
+      "packageUid": "example.lexer-candidate",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-ec986f972805b1182993f9f3284ed6b00395be97f232dab885a9b0c327cd9b5b",
+      "sourceDigest": "fysrc1-sha256-ec986f972805b1182993f9f3284ed6b00395be97f232dab885a9b0c327cd9b5b",
+      "version": "0.71.0",
+      "features": []
+    },
     {
       "id": "fypi1-sha256-eb3f63d50ef081a07981b6aa8e10489929b687dcacc46b8024f4fadedc62e467",
       "role": "standard-library",
@@ -17,24 +30,11 @@
       "sourceDigest": "fysrc1-sha256-e256aabfe2a16a603f947d4ef5b55b5a4ae80915fdd855e18c6016910fbcc597",
       "version": "0.0.0-stage0.87",
       "features": []
-    },
-    {
-      "id": "fypi1-sha256-f527d3c28da9c15fec33280246674065f50d2f9ecff5437ef5bde7ae089cd311",
-      "role": "root",
-      "packageUid": "example.lexer-candidate",
-      "sourceKind": "local",
-      "localPath": ".",
-      "sdkIdentity": "",
-      "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-7f076133a03f15ac0e2f5c8caacf59a494431948e538dcc14425a5c0ba230aa0",
-      "sourceDigest": "fysrc1-sha256-7f076133a03f15ac0e2f5c8caacf59a494431948e538dcc14425a5c0ba230aa0",
-      "version": "0.71.0",
-      "features": []
     }
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-f527d3c28da9c15fec33280246674065f50d2f9ecff5437ef5bde7ae089cd311",
+      "owner": "fypi1-sha256-68eedf2da9d633ad6eb1d8e3f1d887339297a15fe77dcb9b106498215db3ac42",
       "binding": "stdlib",
       "target": "fypi1-sha256-eb3f63d50ef081a07981b6aa8e10489929b687dcacc46b8024f4fadedc62e467"
     }
