@@ -67,6 +67,18 @@ authorized by this queue.
 
 ## Progress
 
+- The explicit Go workspace state-graph session now uses existing verified
+  memory/disk artifacts with current-source analysis before lookup and a
+  distinct admission key. Reconstructed MIR/state owners are rebound to fresh
+  HIR before unchanged native admission. All four authored source families
+  pass cold/warm identity, four fresh Go processes, source/helper invalidation,
+  source rejection, cancellation and repair. Sixteen restored C images perform
+  32 Windows low/optimized native commit/reopen attempts against independent
+  Go outcomes/state (15.017s); portable, repair, ordinary cache regression and
+  scoped vet pass. See ADR 0507 and `architecture/source-state-graph-cache-v1.md`.
+  Fairy Complete/source/artifact/cache integration, ordinary CLI and every
+  Linux/final gate remain required; the full objective is still active.
+
 - Explicit source graphs now admit dynamic bytes/text through an isolated
   semantic entry and the existing native developer mode (ADR 0506). The authored
   helper/map/nested-copy/branch example retains independent seven-read/six-write/

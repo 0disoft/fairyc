@@ -92,7 +92,9 @@ type Session struct {
 	storage         string
 	target          target.Spec
 	standardLibrary packagegraph.InstanceID
+	analyze         func(context.Context, semantic.PackageInput) (compiler.Analysis, error)
 	lower           func(context.Context, compiler.Analysis) (compiler.Result, error)
+	restore         func(compiler.Result) (compiler.Result, error)
 }
 
 // NewSession validates every compatibility input before creating the bounded cache.
@@ -150,7 +152,8 @@ func NewSession(configuration Configuration) (*Session, error) {
 	return &Session{
 		cache: processCache, stableCache: stableCache, compilerBuild: compilerBuild, storage: storage,
 		target: targetSpec, standardLibrary: standardLibrary,
-		lower: compiler.LowerAnalyzedContext,
+		analyze: compiler.AnalyzePackagesContext,
+		lower:   compiler.LowerAnalyzedContext,
 	}, nil
 }
 
@@ -177,7 +180,7 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 			result, err = Result{}, &compiler.Error{Stage: compiler.StageSemantic, Cause: canceled}
 		}
 	}()
-	if session == nil || session.cache == nil && session.stableCache == nil || session.lower == nil {
+	if session == nil || session.cache == nil && session.stableCache == nil || session.analyze == nil || session.lower == nil {
 		return Result{}, fmt.Errorf("workspace compiler session is not initialized")
 	}
 	input, err := workspace.SemanticInput()
@@ -192,7 +195,7 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := compiler.AnalyzePackagesContext(ctx, input)
+	analysis, err := session.analyze(ctx, input)
 	if err != nil {
 		return Result{}, err
 	}
@@ -255,8 +258,15 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
 		}
 		if reassemblyErr == nil {
-			report.Outcome = OutcomeAllHit
-			return resultWithCurrentState(analysis, compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, report)
+			var restored Result
+			restored, reassemblyErr = resultWithCurrentState(analysis, compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, report)
+			if reassemblyErr == nil && session.restore != nil {
+				restored.Compiler, reassemblyErr = session.restore(restored.Compiler)
+			}
+			if reassemblyErr == nil {
+				restored.Cache.Outcome = OutcomeAllHit
+				return restored, nil
+			}
 		}
 		report.ReassemblyFallback = true
 	}
@@ -339,8 +349,15 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		program, stateTransactions, reassemblyErr := rebindPersistentCompilations(
 			compilations, analysis.Semantic.HIR, coordinates, bodies, owners,
 		)
+		compiled := compiler.Result{
+			Semantic: analysis.Semantic, MIR: program,
+			StateTransactions: stateTransactions, Verified: true,
+		}
 		if reassemblyErr == nil {
 			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
+			if reassemblyErr == nil && session.restore != nil {
+				compiled, reassemblyErr = session.restore(compiled)
+			}
 			if reassemblyErr != nil {
 				// Remove exactly the observed rejected generations before publishing repairs.
 				// Otherwise old and repaired bytes conflict under the same immutable disk key.
@@ -352,11 +369,8 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{
-				Compiler: compiler.Result{
-					Semantic: analysis.Semantic, MIR: program,
-					StateTransactions: stateTransactions, Verified: true,
-				},
-				Cache: report,
+				Compiler: compiled,
+				Cache:    report,
 			}, nil
 		}
 		report.ReassemblyFallback = true

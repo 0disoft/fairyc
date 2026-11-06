@@ -386,6 +386,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/compiler/state_graph_operands.go`, `state_graph_source.go`, `state_graph_dynamic_test.go`
   - `internal/contractstatenative/graph_source_dynamic_windows_test.go`, `tools/dev/fairyc-state/native_windows_test.go`
   - `examples/contract_state_graph/dynamic/transaction.fy`, `docs/adr/0506-source-state-dynamic-codecs.md`
+- **Explicit current-source Go workspace graph artifact/cache reuse with fresh HIR namespace binding before native handoff**
+  - `internal/workspacecompiler/state_graph_session.go`, `state_graph_session_test.go`, `state_graph_process_test.go`, `state_graph_session_windows_test.go`
+  - `internal/workspacecompiler/session.go`: ordinary default analyzer, opt-in restore boundary and existing verified memory/disk coordinator
+  - `docs/adr/0507-source-state-graph-workspace-cache.md`, `docs/architecture/source-state-graph-cache-v1.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

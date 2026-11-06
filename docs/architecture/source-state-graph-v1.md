@@ -229,3 +229,10 @@ go vet -mod=readonly ./internal/compiler
 
 Current-source artifact/cache use, Fairy Complete authority, ordinary CLI,
 native Linux and all final acceptance gates remain required.
+
+[ADR 0507](../adr/0507-source-state-graph-workspace-cache.md) subsequently
+connects this analyzer to the explicit Go workspace memory/disk artifact owner.
+[The cache record](source-state-graph-cache-v1.md) covers current-source keys,
+fresh namespace binding, separate-process restore and actual restored C
+execution. Fairy Complete/source/cache authority and ordinary CLI selection
+remain separate, along with Linux and every final acceptance gate.
