@@ -188,6 +188,39 @@ int32_t visit(int32_t value, fy_c_callback_i32_userdata callback, void *data) {
 	}
 }
 
+func TestPartitionedDropHelperPrototypes(t *testing.T) {
+	program := lowerSource(t, `module main;
+unsafe extern C fn void observe(i32 value);
+unsafe extern C fn i32 finish();
+resource Leaf{i32 value;cleanup{unsafe{observe(this.value);};}}
+resource Box{Leaf inner;cleanup{unsafe{observe(9);};}}
+fn i32 main(){{let box=Box{.inner=Leaf{.value=4}};}return unsafe{finish()};}`)
+	profile := cbackend.Stage0Profile()
+	if runtime.GOOS == "windows" {
+		profile = cbackend.Stage0WindowsMSVCProfile()
+	}
+	unit, err := cbackend.Emit(program, "main::main", profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(unit.Source, " *fy_value);") || !strings.Contains(unit.Source, " fy_a_0") {
+		t.Fatal("single-unit legacy drop prototype changed or fixture has no nested cleanup")
+	}
+	parts, err := cbackend.EmitBuildContext(t.Context(), program, "main::main", profile, false, 256)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(parts.Header, "void fy_drop_") || strings.Contains(parts.Header, "fy_value") || strings.Contains(parts.Header, " fy_a_") || !strings.Contains(strings.Join(parts.Sources, "\n"), "*fy_value) {") {
+		t.Fatal("shared declaration must omit names while cleanup definitions retain them")
+	}
+	probe := `static int32_t trace;
+void observe(int32_t value){trace=trace*10+value;}
+int32_t finish(void){return trace==94?42:1;}`
+	for _, optimization := range []string{"low", "optimized"} {
+		t.Run(optimization, func(t *testing.T) { compileSplitForTest(t, parts, optimization, probe, 42) })
+	}
+}
+
 func TestPartitionIncludesInByteBudget(t *testing.T) {
 	program := lowerSource(t, `module main;
 fn i32 first() { return 10; }

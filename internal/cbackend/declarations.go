@@ -58,7 +58,10 @@ func (e *emitter) emitForeignPrototype(output *strings.Builder, functionIndex in
 			if typeErr != nil {
 				return fmt.Errorf("foreign prototype for %s: %w", function.Name, typeErr)
 			}
-			fmt.Fprintf(output, "%s fy_a_%d", cType, index)
+			output.WriteString(cType)
+			if !e.partitioned {
+				fmt.Fprintf(output, " fy_a_%d", index)
+			}
 		}
 	}
 	output.WriteString(");\n")

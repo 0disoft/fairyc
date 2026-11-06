@@ -49,9 +49,13 @@ func (e *emitter) prepareDropHelpers() error {
 }
 
 func (e *emitter) emitDropHelperPrototypes(output *strings.Builder) {
+	parameter := "fy_value"
+	if e.partitioned {
+		parameter = ""
+	}
 	for index, key := range e.dropHelpers {
 		resource := e.analysis.resourceByType[key.resourceType]
-		fmt.Fprintf(output, "%svoid fy_drop_%d(fy_resource_%d *fy_value);\n", e.functionLinkage(), index, resource)
+		fmt.Fprintf(output, "%svoid fy_drop_%d(fy_resource_%d *%s);\n", e.functionLinkage(), index, resource, parameter)
 	}
 }
 
