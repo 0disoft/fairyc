@@ -49,12 +49,7 @@ func EmitOverlay(handoff Handoff, targetID target.ID) (OverlayArtifact, error) {
 	out.WriteString("\ntypedef int32_t (*fycs_overlay_observer_v1)(void *, uint32_t, uint8_t, const uint8_t *, size_t, uint8_t);\n")
 	for index, op := range program.Operations {
 		field := program.Layout.Fields[op.FieldIndex]
-		key := field.Prefix
-		if field.Kind == contractstate.FieldMap {
-			payload := append([]byte("fairyc-contract-state-map-entry/v1"), field.Prefix[:]...)
-			payload = binary.BigEndian.AppendUint64(payload, uint64(len(op.Key.Encoded)))
-			key = sha256.Sum256(append(payload, op.Key.Encoded...))
-		}
+		key := overlayOperationKey(field, op.Key.Encoded)
 		fmt.Fprintf(&out, "static const uint8_t fycs_overlay_key_%d_v1[32] = {%s};\n", index, cBytes(key[:]))
 		if op.Kind == contractstatemir.OperationCellWrite || op.Kind == contractstatemir.OperationMapWrite {
 			value := op.Value.Encoded
@@ -123,6 +118,15 @@ func EmitOverlay(handoff Handoff, targetID target.ID) (OverlayArtifact, error) {
 	identity = append(identity, []byte(string(program.Exit)+"\x00"+program.TrapCategory+"\x00"+artifact.source)...)
 	artifact.programHash = sha256.Sum256(identity)
 	return artifact, nil
+}
+
+func overlayOperationKey(field contractstatemir.LayoutField, encoded []byte) contractstate.Key {
+	if field.Kind == contractstate.FieldCell {
+		return field.Prefix
+	}
+	payload := append([]byte("fairyc-contract-state-map-entry/v1"), field.Prefix[:]...)
+	payload = binary.BigEndian.AppendUint64(payload, uint64(len(encoded)))
+	return sha256.Sum256(append(payload, encoded...))
 }
 
 func overlayCodec(typeID string) (uint8, error) {

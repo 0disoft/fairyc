@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- Multi-key native state has a sealed Go binary request/response authority over
+  its real literal-MIR emitter: exact layout/body/entry/version, sorted immutable
+  16MiB/65,536-entry snapshots, complete typed read plans and exact final literal
+  writes. Seven error statuses carry no publication authority; all four execution
+  limits retain their full 64-bit values. Final wire tests pass in 0.094s; native
+  MIR/overlay/single-cell-CAS regression passes in 27.181s before the final Go-only
+  wire width update. `288ee829` adds explicit bounded response capture without
+  changing ordinary 64KiB output. Actual C framing and multi-key CAS/reopen,
+  graph/helper/borrow/source/cache/native CLI and every final gate remain open.
+  See `architecture/native-state-overlay-transport-v1.md`.
+
 - Native state literal MIR now lowers multi-field cells/maps across all seven
   codecs into the actual overlay C core. Windows low/optimized match 56 complete
   native/Go execution cases across commit/reject/trap/empty and exact/one-short

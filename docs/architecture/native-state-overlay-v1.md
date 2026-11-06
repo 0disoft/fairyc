@@ -14,8 +14,10 @@ The original single-cell emitter/runtime and its CAS path remain unchanged.
    comparisons. Header and runtime are separately available to the compiler.
 2. **Literal MIR emission implemented:** generate checked multi-field/cell/map
    operations and exact physical addresses from existing verified state MIR.
-   **Still required:** bind snapshots, complete sorted
-   overlays and read traces in a versioned transport to the existing one-attempt
+   **Go request/response admission implemented:** see
+   [transport v1](native-state-overlay-transport-v1.md). **Still required:** bind
+   snapshots, complete sorted overlays and read traces through actual C framing
+   to the existing one-attempt
    CAS executor. Validate every literal key's original encoded-byte limit before
    hashing. Do not equate a 32-byte physical address with its map-key byte cost.
 3. Expand the same runtime path to data-dependent keys/values, graph exits,
