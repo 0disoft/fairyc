@@ -28,8 +28,10 @@ including unused initializers in source order. Existing HIR/IR/C locals execute
 once and retain traps; admission never substitutes or erases them. The detached
 IR verifier reconstructs the same sequence. Source/artifact, Go cross-package
 cache and Windows native evidence is in
-`docs/development/candidate-inline-locals-20261107.md`; final full authored CLI
-acceptance is recorded separately there and in its follow-up receipt.
+`docs/development/candidate-inline-locals-20261107.md`. Actual full authored-main
+run/test commands and persistent-cache restoration pass both host profiles in
+`docs/development/candidate-inline-locals-full-cli-20261107.md`. The private
+compiler-host header policy (ADR 0510) does not widen ordinary C packet limits.
 
 `module_inline_declarations` validates annotations, including declarations not
 selected for ordinary signatures. Its canonical JSON and SHA-256 agree with

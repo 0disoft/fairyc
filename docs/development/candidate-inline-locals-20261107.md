@@ -106,9 +106,14 @@ This is measurement/admission evidence, not full authored CLI execution acceptan
 
 The private harness requested 262,144-byte partitions. Unit count is not the
 reason for rejection, and changing partition size cannot fix this header bound.
-Full CLI/persistent-cache scope remains open for a separately bounded compiler-host
-path owned by the parent; the ordinary 2MiB driver contract stays intact. No shared
-driver/backend change was made by this slice.
+At this implementation checkpoint, full CLI/persistent-cache acceptance required
+a separately bounded compiler-host path owned by the parent; the ordinary 2MiB
+contract stays intact. No shared driver/backend change was made by this slice.
+ADR 0510 subsequently adds that private entry; the follow-up in
+`candidate-inline-locals-full-cli-20261107.md` passes both full host profiles,
+28 independent run/test processes, eight cold/warm trap pairs and twelve exact
+Go reports (610.715s). This supersedes the header blocker for the named command
+family; it does not admit broader inline bodies or final release gates.
 The focused pipeline/artifact restoration and Go cross-package persistent cache
 checks are the available evidence. Native Linux, full example admission, full
 suite, hosted CI, push, release and deployment remain deferred. Parent separately
@@ -143,6 +148,7 @@ scoped `git diff --check` passes. No staging, commit or lock refresh was perform
 Coordinator acceptance after worker handoff: a freshly built Go bootstrap passes
 the complete example `check` and `check --locked` at 701 source files / 8,705 MIR
 functions. The example lock and current inline architecture/index/queue are
-updated in this implementation slice. The separately bounded compiler-host
-header path and full authored CLI follow-up remain independent work; the narrow
-pipeline results above do not substitute for that full command acceptance.
+updated in this implementation slice. The private compiler-host header path and
+full authored CLI follow-up were implemented and verified separately afterward;
+their dedicated receipt above supplies command evidence rather than substituting
+the narrow pipeline results for full command execution.

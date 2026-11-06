@@ -73,8 +73,11 @@ authorized by this queue.
   Restored Go cross-package memory/disk caches and C11/C17 native calls pass;
   recovered Fairy source/artifact/pipeline and Go trap checks pass both Windows
   profiles (235.926s), including forged IR and exact/one-over controls. Full
-  authored CLI currently requires the separately bounded compiler-host header
-  path: its generated header exceeds ordinary 2MiB by 2,833 bytes. Calls,
+  authored CLI now uses the explicit compiler-host header path (ADR 0510):
+  ordinary builders retain 2MiB and the compiler host admits 8MiB. Both host
+  profiles pass 28 independent run/test processes, eight cold/warm trap pairs
+  and twelve exact Go-matching reports in 610.715s. See
+  `candidate-inline-locals-full-cli-20261107.md`. Calls,
   mutation, control flow, other broader inline families and every Linux/final
   gate remain open. See ADR 0509 and `candidate-inline-locals-20261107.md`.
 
