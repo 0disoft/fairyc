@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Fairy local-state canonical record compatibility**: `examples/lexer_candidate/src/module_state_local_codec.fy`, `module_state_local_base64.fy`, immutable Snapshot accessors in `module_state_graph_request.fy`; independent Go disk-byte, base64, limits and owner checks in `internal/cli/candidate_state_local_codec_test.go`, `candidate_state_local_base64_test.go`. Record-only authority and remaining actual storage/CAS: ADR 0535 and `docs/development/candidate-local-state-codec-20261107.md`.
+
 - **Fairy-owned Windows graph build/run orchestration**: `examples/lexer_candidate/src/module_state_graph_windows_build.fy`, `module_state_graph_windows_run.fy`, `windows_run_capture.fy`; actual native integration and capture boundaries in `internal/cli/candidate_state_graph_windows_build_test.go`, `candidate_state_graph_windows_run_test.go`, `candidate_windows_capture_limit_test.go`. Sealed Prepared/image ownership, received response admission and separate remaining CAS: ADR 0534 and `docs/development/candidate-state-graph-native-orchestration-20261107.md`.
 
 - **Complete-bound Fairy graph response admission**: `examples/lexer_candidate/src/module_state_graph_response.fy`, `module_state_graph_response_common.fy`, `module_state_graph_response_wire.fy`, `module_state_graph_response_path.fy`, `module_state_graph_response_evidence.fy`; native integration and independent prerequisite tests in `internal/cli/candidate_state_graph_response*_test.go`. Sealed result, request identity, path/overlay admission and ownership: ADR 0533 and `docs/development/candidate-state-graph-response-20261107.md`.

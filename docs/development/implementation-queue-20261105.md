@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy now reads/re-encodes the existing Go local-state record bytes for its
+  admitted graph layouts, retaining canonical JSON/base64/SHA256, full-width
+  versions, null/empty distinction and detached snapshot ownership. Parallel
+  base64 work passes both profiles through 16MiB raw input; coordinator record
+  tests pass 52 cases plus empty-layout and sealed-owner checks. See ADR 0535
+  and `candidate-local-state-codec-20261107.md`. Actual rooted storage/locking,
+  file publication and one-attempt graph CAS remain separate mandatory work;
+  the native-persistence row remains unchecked. Linux stays batched; no push
+  or dispatch. Full implementation objective remains active.
+
 - Explicit Fairy graph execution now consumes sealed Prepared/runtime owners,
   builds and validates two actual Windows COFF objects and their PE, encodes
   the same-owner request, executes that image and admits actual received stdout.

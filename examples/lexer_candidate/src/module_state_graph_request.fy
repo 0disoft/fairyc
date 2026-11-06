@@ -11,6 +11,13 @@ pub struct Entry{u32[8] key;usize start;usize end;}
 struct Identity{u32[8] layout;usize version;}
 pub resource Snapshot{Identity identity;bytes::Buffer data;v::Vec<Entry> entries;cleanup{}}
 pub fn Snapshot snapshot_of(u32[8] layout,usize version,bytes::Buffer data,v::Vec<Entry> entries){return Snapshot{.identity=Identity{.layout,.version},.data,.entries};}
+// Immutable observations also let the local-store bridge verify detached
+// snapshot lifetime; no mutable projection or execution authority is exposed.
+pub fn usize snapshot_version(ref Snapshot p){return p.identity.version;}
+pub fn u32[8] snapshot_layout(ref Snapshot p){return p.identity.layout;}
+pub fn usize snapshot_count(ref Snapshot p){return v::len<Entry>(ref p.entries);}
+pub fn u32[8] snapshot_key(ref Snapshot p,usize index){return v::at<Entry>(ref p.entries,index).key;}
+pub fn ref u8[] snapshot_value(ref Snapshot p,usize index){let row=*v::at<Entry>(ref p.entries,index);return bytes::view(ref p.data)[row.start..row.end];}
 pub struct Limits{usize writes;usize bytes;usize value;usize key;}
 pub struct Work{usize structure;usize bytes;}
 pub fn Work empty_work(){return Work{.structure=0,.bytes=0};}
