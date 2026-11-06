@@ -41,7 +41,7 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   optimized groups and the two new low move-pack source cases pass.
 - [x] Verified Region allocation-site collector with independent ordinary,
   concrete generic/cleanup Go facts and exact frame/work/count refusals.
-- [ ] Complete-bound allocation production, summaries/counts/completeness and
+- [x] Complete-bound allocation production, summaries/counts/completeness and
   independent source/current/join and actual-command comparisons.
 - [ ] Remaining error-propagation and borrow collectors, each with independent
   verified Go facts and production evidence.
@@ -850,9 +850,10 @@ The same five allocation source families pass every v1/v2/v3 selection under
 low, with no selected skips: bounded parents finish in 692.323s and 711.491s,
 fifteen native processes and 36 current maps. Combined source production proves
 128 native processes and 219 current maps; only the optimized parent includes
-the full pre-existing source corpus. Low actual allocation pack replay remains
-in progress, separately from map/current/join admission. Exact commands, scope,
-image digests and interrupted-run accounting:
+the full pre-existing source corpus. The five actual allocation pack cases also
+pass low in bounded 697.183s and 1079.871s parents: thirty new actual-main pack
+processes across both profiles without selected skips. The implementation source
+revision is `04894e8f`. Exact commands, scope, image digests and interrupted-run accounting:
 `docs/ops/windows-candidate-atlas-allocations-20261106.md`.
 
 Full Go atlasmap/contextpack/semanticsnapshot suites pass (2.284s/0.253s/0.210s),

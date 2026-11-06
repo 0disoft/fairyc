@@ -62,8 +62,9 @@ authorized by this queue.
   128 native processes and 219 independent maps; all five allocation source
   families pass every version selection under both profiles, while optimized
   also replays the full existing source corpus. Six selected actual optimized
-  CLI groups pass, including fifteen new allocation pack commands. Low actual
-  pack acceptance is still running and is not included in those passes. See
+  CLI groups pass. All five actual allocation pack cases also pass both profiles,
+  thirty new main-command processes without selected skips; bounded low parents
+  exit zero in 697.183s and 1079.871s against the same authenticated image. See
   `docs/ops/windows-candidate-atlas-allocations-20261106.md`. Error/borrow
   collectors, broader source/command work and every original final gate stay
   open; native Linux remains batched, no push or dispatch.

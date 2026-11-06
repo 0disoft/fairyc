@@ -5,6 +5,9 @@ The private collector was accepted separately at `95e26d5e`. This receipt does
 not promote unrelated source families, every CLI verifier, native Linux,
 consecutive self-build, distribution or same-commit hosted CI.
 
+Implementation source revision: `04894e8f`. The source/image digests below bind
+this receipt to that allocation implementation, before later collector work.
+
 ## Source and command checks
 
 `TestAtlasAllocationProductionSources` fixes five independent Go inventories:
@@ -21,8 +24,8 @@ candidate output never supplies the expected inventory.
 | Low allocation ordinary and operand-order corpus | pass; 6 native processes, 18 current maps | 692.323 | `atlas-allocation-production-low-a-20261106.log` |
 | Low allocation generic, cleanup and loop/Result corpus | pass; 9 native processes, 18 current maps | 711.491 | `atlas-allocation-production-low-b-20261106.log` |
 | Six selected actual optimized CLI groups | pass | 267.342 | `atlas-allocation-cli-optimized-20261106.log` |
-| Actual low allocation ordinary/operand-order pack commands | running | pending | `atlas-allocation-cli-low-a-20261106.log` |
-| Actual low allocation generic/cleanup/loop pack commands | running | pending | `atlas-allocation-cli-low-b-20261106.log` |
+| Actual low allocation ordinary/operand-order pack commands | pass; 6 native processes | 697.183 | `atlas-allocation-cli-low-a-20261106.log` |
+| Actual low allocation generic/cleanup/loop pack commands | pass; 9 native processes | 1079.871 | `atlas-allocation-cli-low-b-20261106.log` |
 
 The optimized full-main groups are impact-families, impact-sdk-vector,
 catalog-ordinary, pack-ordinary, pack-sources and pack-sdk. The latter includes
@@ -30,6 +33,10 @@ five new allocation owners through overview/show/around: fifteen new processes
 per compiler profile, exact independent Go pack bytes and unchanged workspaces.
 Low replay selects these five new cases separately; it does not attest the
 other low command groups or every pre-existing SDK pack fixture.
+
+All five new allocation cases pass both profiles without selected skips: thirty
+fresh actual-main pack processes in total. Each bounded low parent exits zero.
+The recorded times are concurrent local observations, not a controlled benchmark.
 
 The full compiler image retains the real main/dispatcher and has empty PATH
 during every command. No companion or Go frontend fallback performs Atlas work.
