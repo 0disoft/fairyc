@@ -37,6 +37,11 @@ records real local-store reopen, concurrent CAS and rollback evidence. Dynamic
 keys/values, graphs, helpers, borrows and source/cache/CLI integration remain open;
 this does not close step 3 or the complete execution queue.
 
+The next graph prerequisite now supplies caller-owned stable SSA bytes,
+canonical dynamic-key hashing and exact-key borrow mutation generations. Its
+separate [graph execution plan](native-state-graph-v1.md) keeps actual graph/
+helper C emission, graph framing/CAS and source/cache/commands open.
+
 ## Sealed transport owner
 
 `internal/contractstatenative/persistent_transport.go` mints `PersistentArtifact`

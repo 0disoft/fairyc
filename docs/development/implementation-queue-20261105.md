@@ -67,6 +67,15 @@ authorized by this queue.
 
 ## Progress
 
+- Native graph preparation now has an allocation-free C runtime for immutable
+  typed values, dynamic physical map keys, exact-key mutation epochs and checked
+  nested read borrows. Windows low/optimized match 4,698 independent Go codec/
+  SHA decisions and Go value/borrow observations, with arena/range/lifetime/
+  overflow controls. Combined new/existing runtime replay passes in 3.150s,
+  no selected skips. This is a runtime prerequisite only: verified graph/helper
+  C emission, graph framing/admission/CAS, source/cache/native commands and every
+  final gate remain required. See `architecture/native-state-graph-v1.md`.
+
 - Literal multi-key native state now performs one snapshot, one actual C run and
   at most one existing layout/version CAS. Windows low/optimized match 32 native/
   Go local-store outcomes across commit/reject/trap/empty, absent/present state
