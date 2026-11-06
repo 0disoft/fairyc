@@ -13,13 +13,16 @@ import (
 // Freeze actual Go MIR observations before deriving the Fairy collector. In
 // particular, a consumed argument is observable before a later argument traps;
 // scanning only completed call operations would silently lose that move.
-func TestAtlasMoveSitesOracle(t *testing.T) {
-	type site struct{ function, context, operand string }
+type atlasMoveOracleSite struct{ function, context, operand string }
+type atlasMoveOracleFixture struct {
+	name, source string
+	sites        []atlasMoveOracleSite
+}
+
+func atlasMoveSiteOracleCases() []atlasMoveOracleFixture {
+	type site = atlasMoveOracleSite
 	const resource = "module main;resource Token{i32 value;cleanup{}}\n"
-	for _, test := range []struct {
-		name, source string
-		sites        []site
-	}{
+	return []atlasMoveOracleFixture{
 		{"copy", "module main;fn i32 main(){let i32 value=1;let copy=value;return copy;}", nil},
 		{"discard", resource + "fn i32 main(){let token=Token{.value=1};discard token;return 0;}", nil},
 		{"binding", resource + "fn i32 main(){let token=Token{.value=1};let other=token;return other.value;}", []site{{"main", "other=token;", "token"}}},
@@ -34,7 +37,11 @@ func TestAtlasMoveSitesOracle(t *testing.T) {
 		{"result-payload", resource + "fn i32 main(){let token=Token{.value=1};let Result<Token,i32> result=.ok(token);discard result;return 0;}", []site{{"main", ".ok(token)", "token"}}},
 		{"propagation", resource + "fn Result<i32,i32> work(){let Result<Token,i32> result=.ok(Token{.value=1});let token=result?;return .ok(token.value);}fn i32 main(){discard work();return 0;}", nil},
 		{"switch", resource + "fn i32 main(){let Option<Token> maybe=.some(Token{.value=1});switch(maybe){case .some(value):{discard value;}case .none:{}};return 0;}", []site{{"main", "switch(maybe)", "maybe"}}},
-	} {
+	}
+}
+
+func TestAtlasMoveSitesOracle(t *testing.T) {
+	for _, test := range atlasMoveSiteOracleCases() {
 		t.Run(test.name, func(t *testing.T) {
 			root := writeWorkspaceSessionFixture(t, test.source)
 			var diagnostic bytes.Buffer

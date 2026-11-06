@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy verified CFG move-site collection now retains original evaluated operand
+  spans through bindings, calls, returns, owned fields/tags, scoped/conditional
+  results, generic bodies and concrete cleanup. Thirty-four admitted sources,
+  two retained implicit-receiver source-factory gaps and twenty controls per
+  Windows profile pass 112 native executions without selected skips (low
+  368.35s, optimized 71.76s). The expanded run reproduced and fixes a missing
+  if-then tail observation; independent Go facts remain unchanged. Authored
+  check/locked pass (675 files, 8,417 MIR functions), as do scoped vet and hygiene.
+  See the observed-relations plan. Complete-bound move production/commands,
+  allocation/error/borrow collectors, broader source work, unsafe low replays
+  and every original final gate remain open; native Linux stays batched.
+
 - Original Go move-site observations are fixed by fourteen source/codec controls
   (Windows 1.123s). A consumed first argument remains observed when a later
   argument traps; an unevaluated later argument, discard and internal Result

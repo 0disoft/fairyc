@@ -33,7 +33,10 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   comparisons under both profiles.
 - [ ] Complete passing both-profile selections for the six actual unsafe CLI
   groups; four low groups retain assertions only from failed aggregate parents.
-- [ ] Remaining move, Region allocation, error-propagation and borrow collectors,
+- [x] Verified move-site collector with independent original Go operands,
+  scope/conditional/generic/cleanup comparisons and exact work/count controls.
+- [ ] Complete-bound move summaries/counts/completeness and actual CLI evidence.
+- [ ] Remaining Region allocation, error-propagation and borrow collectors,
   each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
   distribution/hosted/Linux gates from the complete implementation queue.
@@ -485,3 +488,57 @@ Initial probe compile/shape/source-path/syntax errors were corrected before the
 passing selection and are not production defects. No Fairy move collector,
 map completeness promotion, generated-program run, Linux or hosted result is
 claimed by this Go-only prerequisite. The full implementation queue stays open.
+
+## Move-site collector
+
+`project_atlas_move_sites.fy` derives consumed complete-root paths from verified
+body/cleanup IR and a private executable CFG. It marks operand evaluation, not
+only completed parent calls, so a first consumed argument remains observed before
+a later argument traps, while an unevaluated later argument stays absent.
+Copy, explicit borrow, fresh temporary, direct discard and internal Result `?`
+transfer do not become invented MoveSites. Binding, reassignment, return, owned
+fields, tagged payloads, consuming receivers and switch results retain original
+Go operand spans. Generic functions and concrete cleanup frames use the same walk.
+
+Block-tail capture uses the verified scope's local obligations and cleanup exits.
+The then arm of an if expression is stored as a statement block, unlike its else
+block expression. The initial expanded native selection reproduced a missing
+then-tail site; applying the same block-scope rule to that arm fixes it without
+marking every owning conditional as a move. Nested else-if, external tail paths
+with/without a scoped live obligation, and ignored/propagated blocks are compared
+to independent original Go observations.
+
+Per-frame and batched APIs agree. The batch proves the whole IR once; source
+paths and spans remain private observations until a Complete-owned producer
+binds them to a package. Reachability has one visited ledger per frame. Root and
+type peeling keep the existing 64-level bounds; merge sorting canonicalizes
+scope/site spans, with at most 65,536 retained sites and the existing 16,777,216
+work limit. Invalid frame/count arguments, zero capacity on empty/nonempty input,
+and one-short/exact/one-more work/count limits preserve typed refusals. No policy
+limit or warning is relaxed.
+
+The native corpus has 34 admitted sources, two explicit source-factory gap
+controls and twenty frame/work/count controls per Windows profile (56 executions).
+The original Go-supported implicit shared/exclusive owner method forms still
+reject at the current Fairy factory with `4/1006`; explicit ref/ref-mut receiver
+bindings are positive controls. These two gaps remain broader source-family work,
+not empty successful move lists or a claim of full Go/Fairy parity.
+
+Windows validation:
+
+- Original Go sites and expanded source admission pass, 48 selected cases,
+  in 3.471s (`.cache/atlas-move-oracles-expanded-20261106.log`).
+- Optimized native selection passes in 71.76s, including all 56 executions
+  (`.cache/atlas-move-native-final-optimized-20261106.log`).
+- Low native selection passes in 368.35s, including all 56 executions
+  (`.cache/atlas-move-native-final-low-20261106.log`). Both profiles complete
+  112 native executions without selected skips.
+- Authored `check` and `check --locked` pass for two instances, 675 source files
+  and 8,417 MIR functions. Scoped `go vet ./internal/cli`, Go formatting and
+  `git diff --check` pass.
+
+Complete-bound move summary/header/count/completeness production and actual CLI
+comparisons remain a separate required step. Allocation/error/borrow collectors,
+unsafe low replays, broader source families and all original full-comparison,
+self-build/distribution/hosted/Linux gates remain open. Native Linux stays batched;
+no push or dispatch.
