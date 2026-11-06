@@ -77,7 +77,7 @@ func (a *analyzer) checkStateLayout(module *moduleScope, declaration *ast.StateD
 			continue
 		}
 		seen[field.Name] = fieldSpan
-		valueType, valueOK := stateCodecTypeID(field.ValueType)
+		valueType, valueOK := a.stateCodecTypeID(field.ValueType)
 		if !valueOK {
 			a.addDiagnostic("E7203", span(module.file.Path, field.ValueType.Span))
 			valid = false
@@ -94,7 +94,7 @@ func (a *analyzer) checkStateLayout(module *moduleScope, declaration *ast.StateD
 				valid = false
 				continue
 			}
-			keyType, keyOK := stateCodecTypeID(*field.KeyType)
+			keyType, keyOK := a.stateCodecTypeID(*field.KeyType)
 			if !keyOK {
 				a.addDiagnostic("E7203", span(module.file.Path, field.KeyType.Span))
 				valid = false
@@ -136,7 +136,7 @@ func (a *analyzer) checkStateLayout(module *moduleScope, declaration *ast.StateD
 	return result, true
 }
 
-func stateCodecTypeID(reference ast.TypeReference) (string, bool) {
+func (a *analyzer) stateCodecTypeID(reference ast.TypeReference) (string, bool) {
 	if reference.Kind != ast.TypeKindNamed || len(reference.Arguments) != 0 || strings.Contains(reference.Path, "::") {
 		return "", false
 	}
@@ -151,7 +151,16 @@ func stateCodecTypeID(reference ast.TypeReference) (string, bool) {
 		return contractstate.Byte20.TypeID(), true
 	case "bytes32":
 		return contractstate.Byte32.TypeID(), true
+	case "bytes":
+		if a.dynamicStateCodecs {
+			return contractstate.Bytes.TypeID(), true
+		}
+	case "text":
+		if a.dynamicStateCodecs {
+			return contractstate.Text.TypeID(), true
+		}
 	default:
 		return "", false
 	}
+	return "", false
 }

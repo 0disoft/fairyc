@@ -68,6 +68,7 @@ type methodKey struct {
 
 type analyzer struct {
 	ctx                   context.Context
+	dynamicStateCodecs    bool
 	nominalBindings       map[string]NominalTypeBinding
 	vectorForTypes        map[vectorTypeKey]bool
 	files                 []File

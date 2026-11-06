@@ -280,6 +280,7 @@ func analyzeWithContextOptions(ctx context.Context, files []File, bindings map[p
 	}
 	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.ctx = ctx
+	analyzer.dynamicStateCodecs = options.dynamicStateCodecs
 	analyzer.observeResourceStates = options.resourceStates
 	analyzer.borrowWorkLimit = options.borrowWorkLimit
 	analyzer.resultWorkLimit = options.resultWorkLimit

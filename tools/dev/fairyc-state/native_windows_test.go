@@ -172,7 +172,9 @@ func TestNativeGraphHelperBorrowCommand(t *testing.T) {
 	for _, trial := range []struct {
 		fixture string
 		cost    uint64
-	}{{"helpers", 12}, {"borrows", 16}} {
+		reads   int
+		writes  int
+	}{{"helpers", 12, 3, 2}, {"borrows", 16, 3, 2}, {"dynamic", 25, 7, 6}} {
 		for _, profile := range []string{"low", "optimized"} {
 			t.Run(trial.fixture+"/"+profile, func(t *testing.T) {
 				directory, store := t.TempDir(), t.TempDir()
@@ -201,12 +203,12 @@ func TestNativeGraphHelperBorrowCommand(t *testing.T) {
 					t.Fatal("source body ran during creation", initial)
 				}
 				executed := call("execute")
-				if executed.Engine != "native-graph" || executed.Profile != profile || executed.ProgramHash != initial.ProgramHash || executed.Outcome == nil || executed.Outcome.Cost != trial.cost || executed.Outcome.Receipt.Version != 1 || executed.Outcome.Receipt.Writes != 2 || len(executed.Outcome.Reads) != 3 {
-					t.Fatalf("helper/borrow source command %+v", executed)
+				if executed.Engine != "native-graph" || executed.Profile != profile || executed.ProgramHash != initial.ProgramHash || executed.Outcome == nil || executed.Outcome.Cost != trial.cost || executed.Outcome.Receipt.Version != 1 || executed.Outcome.Receipt.Writes != trial.writes || len(executed.Outcome.Reads) != trial.reads {
+					t.Fatalf("%s source command %+v", trial.fixture, executed)
 				}
 				snapshot := call("snapshot")
-				if snapshot.Snapshot.Version != 1 || len(snapshot.Snapshot.Entries) != 2 {
-					t.Fatal("helper/borrow state did not reopen", snapshot)
+				if snapshot.Snapshot.Version != 1 || len(snapshot.Snapshot.Entries) != trial.writes {
+					t.Fatal("source state did not reopen", snapshot)
 				}
 			})
 		}

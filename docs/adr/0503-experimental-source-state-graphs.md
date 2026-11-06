@@ -54,6 +54,10 @@ remain separate unchanged checks.
 
 ## Remaining sequence
 
+ADRs 0504/0505 subsequently connect source helpers and root read borrows;
+[ADR 0506](0506-source-state-dynamic-codecs.md) connects source bytes/text.
+Those later contracts supersede the corresponding initial deferrals below.
+
 This is the first source-graph slice, not completion of native state integration.
 The checked-in example and Windows tests pass the compiled owner through
 `PrepareCompiled`, actual generated graph C, the sealed response admission and

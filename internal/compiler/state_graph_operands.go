@@ -249,6 +249,21 @@ func (lower *stateGraphSource) operand(expression *ast.Expression, typeID string
 				_, err = contractstate.Byte32.Decode(value.Encoded)
 			}
 		}
+	case contractstate.Bytes.TypeID():
+		if !strings.HasPrefix(expression.Text, "b\"") {
+			err = fmt.Errorf("bytes requires a byte-string literal")
+		} else {
+			value.Encoded, err = hex.DecodeString(expression.Cooked)
+		}
+	case contractstate.Text.TypeID():
+		var text string
+		var ok bool
+		text, ok = stateGraphString(expression)
+		if !ok {
+			err = fmt.Errorf("text requires a UTF-8 string literal")
+		} else {
+			value.Encoded, err = contractstate.Text.Encode(text)
+		}
 	default:
 		err = fmt.Errorf("codec is not admitted by source state declarations")
 	}
@@ -281,6 +296,10 @@ func stateGraphSourceType(reference ast.TypeReference) string {
 		return contractstate.Byte20.TypeID()
 	case "bytes32":
 		return contractstate.Byte32.TypeID()
+	case "bytes":
+		return contractstate.Bytes.TypeID()
+	case "text":
+		return contractstate.Text.TypeID()
 	default:
 		return ""
 	}

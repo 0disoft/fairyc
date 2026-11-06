@@ -134,8 +134,10 @@ and platform gates.
 
 ## Remaining integration
 
-Source/developer invocation, exact current-source/artifact/cache admission and
-ordinary CLI selection for the broader graphs/helpers/borrows remain required.
+The explicit source/developer path now connects graphs, helpers, root read
+borrows and dynamic bytes/text through ADRs 0503-0506 and
+[source-state-graph-v1](source-state-graph-v1.md). Exact current-source/Complete/
+artifact/cache admission and ordinary CLI selection remain required.
 The earlier single-cell `experimental run-state` command does not acquire these
 features by calling this internal API. Full current-source compiler comparisons,
 consecutive self-build, clean-machine distribution, same-commit hosted and native

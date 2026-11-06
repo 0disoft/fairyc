@@ -380,6 +380,11 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `internal/compiler/state_graph_borrows.go`, `state_graph_borrows_test.go`, `state_graph_source.go`, `state_graph_operands.go`
   - `internal/contractstatenative/graph_source_borrows_windows_test.go`, `tools/dev/fairyc-state/native_windows_test.go`
   - `examples/contract_state_graph/borrows/transaction.fy`, `docs/adr/0505-source-state-read-borrows.md`
+- **Explicit source state bytes/text codecs with isolated semantic opt-in, binary/UTF-8 literals and existing native graph/developer execution**
+  - `internal/semantic/state_experimental.go`, `state_experimental_test.go`, `state.go`
+  - `internal/compiler/state_graph_operands.go`, `state_graph_source.go`, `state_graph_dynamic_test.go`
+  - `internal/contractstatenative/graph_source_dynamic_windows_test.go`, `tools/dev/fairyc-state/native_windows_test.go`
+  - `examples/contract_state_graph/dynamic/transaction.fy`, `docs/adr/0506-source-state-dynamic-codecs.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

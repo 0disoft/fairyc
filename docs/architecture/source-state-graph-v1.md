@@ -5,8 +5,10 @@ local-store evidence. [ADR 0503](../adr/0503-experimental-source-state-graphs.md
 owns the admitted source subset. This advances step 4 of
 [native persistence integration](native-state-persistence-v1.md); the full
 source/Complete/artifact/cache/ordinary-CLI acceptance stays open. Later helper
-and root borrow steps (ADRs 0504/0505) connect the five-codec source subset to
-the explicit native developer mode. Sections below retain their checkpoint scope.
+and root borrow steps (ADRs 0504/0505) connect the initial five-codec source
+subset to the explicit native developer mode. ADR 0506 adds dynamic bytes/text
+to that explicit path. Sections below retain their checkpoint scope; later
+sections supersede the earlier pending statements only for their named slice.
 
 The actual authored source in
 `examples/contract_state_graph/transaction.fy` reads a key and flag, selects a
@@ -147,3 +149,53 @@ pass. Logs remain local under `.cache/state-graph-source-all-20261107.log`,
 `.cache/state-graph-owner-commands-20261107.log` and
 `.cache/state-graph-owner-smoke-20261107/receipt.json`. Full Go/Fairy comparison,
 consecutive self-build, distribution, hosted CI and Linux remain separate gates.
+
+## Dynamic bytes and text source codecs
+
+[ADR 0506](../adr/0506-source-state-dynamic-codecs.md) adds `bytes`/`text` cells
+and map keys/values to the explicit source graph compiler and existing native
+developer selection. The ordinary semantic entry and original single-cell
+source compiler retain the five-codec vocabulary. Layout analysis and the
+helper call-only projection both receive the explicit opt-in; neither produces
+Complete/artifact/cache authority. Original source AST bytes are unchanged.
+
+The authored `dynamic/transaction.fy` example combines helper writes, dynamic
+binary/UTF-8 map addressing, nested byte views, a complete text-scalar view,
+copy-before-replacement and branch control. Independent successful expectations
+are seven reads, six final writes and cost 25. The byte copy is `AB` followed
+by 0x1a and the text copy is `나`, even after both original cells are replaced.
+
+All 54 new Windows low/optimized native attempts pass through actual generated
+C and one-attempt local CAS, independent Go outcome/snapshot comparison and
+real close/reopen. Twelve authored-example attempts cover repeated commit,
+reject and trap; eight cover absent/present-empty and NUL/0xff/CRLF/0x1a;
+ten cover valid/fragmented UTF-8 views and distinct Unicode-equivalent keys;
+24 cover each codec at 1,023/1,024/1,025-byte keys and
+65,535/65,536/65,537-byte values. Text limits count bytes, not scalar values.
+Invalid UTF-8 writes and over-limit attempts perform one snapshot, zero CAS
+and preserve all durable bytes. Every case retains unrelated state.
+
+The complete `^TestGraphSourceNative` replay passes in 66.804s with all 154
+actual C attempts, including the previous 100 source/helper/borrow cases.
+Source/semantic/developer focused validation passes in 0.324s/0.113s/4.281s.
+The developer command checks init/execute/snapshot for helpers, borrows and
+dynamic codecs under both profiles; only execute runs a transaction. Complete
+state/state-MIR/fixture regression passes in 0.381s/0.123s/0.077s and the full
+developer-command package passes in 11.618s. Scoped vet and formatting/diff
+checks pass.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/contractstatenative -run '^TestGraphSourceNative'
+go test -mod=readonly -count=1 -timeout 3m ./internal/compiler ./internal/semantic ./tools/dev/fairyc-state -run '^(TestExperimentalStateGraphSource|TestAnalyzeExperimentalState|TestAnalyzePackages(LowersSourceStateDeclaration|RejectsInvalidSourceStateDeclarations)|TestNativeGraphHelperBorrowCommand)'
+go test -mod=readonly -count=1 -timeout 3m ./internal/contractstate ./internal/contractstatemir ./internal/contractstatefixture ./tools/dev/fairyc-state
+go vet -mod=readonly ./internal/compiler ./internal/semantic ./internal/contractstatenative ./tools/dev/fairyc-state
+git diff --check
+```
+
+Logs remain local under `.cache/state-graph-source-dynamic-final-20261107.log`,
+`.cache/state-graph-dynamic-source-owner-20261107.log` and
+`.cache/state-graph-dynamic-regression-20261107.log`. Native Linux, exact
+current-source/Complete provenance, artifact/cache invalidation, ordinary
+compiler CLI selection and every final acceptance gate remain required.
+No stable language/CLI/SDK/runtime ABI, dependency, DB/provider, default limit,
+repository-policy or runner changes occur here.

@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- Explicit source graphs now admit dynamic bytes/text through an isolated
+  semantic entry and the existing native developer mode (ADR 0506). The authored
+  helper/map/nested-copy/branch example retains independent seven-read/six-write/
+  cost-25 expectations. Fifty-four new Windows low/optimized actual C attempts
+  cover repeated commit/reject/trap/reopen, binary/present-empty values, UTF-8
+  fragments and exact key/value policy boundaries. Every failure takes one
+  snapshot, no CAS and preserves durable bytes. The combined source-native
+  replay passes all 154 attempts in 66.804s; focused source/semantic/developer
+  checks and scoped vet pass. The ordinary five-codec source path is unchanged.
+  Current-source/Complete/artifact/cache/ordinary-CLI integration and every
+  Linux/final gate remain required; this does not complete the native-state row.
+  See `architecture/source-state-graph-v1.md` and its retained command logs.
+
 - Verified native graph operation C now executes dynamic keys/values, typed
   branch/join edges, current helper calls and read borrow/view/copy through the
   actual runtime. Nineteen original v0-v4 fixtures plus fourteen seven-codec

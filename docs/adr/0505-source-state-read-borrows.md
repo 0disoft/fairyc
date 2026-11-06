@@ -5,8 +5,9 @@
 
 Admit immutable untyped source locals initialized with
 `storage::borrow("cell")` or `storage::borrow("map", literal_key)`.
-The existing five source codecs and exact canonical key rules apply. These
-locals are opaque owner-bound handles, never ordinary scalar values. Same-block
+The initial five source codecs and exact canonical key rules apply;
+[ADR 0506](0506-source-state-dynamic-codecs.md) adds bytes/text to this explicit
+path. These locals are opaque owner-bound handles, never ordinary scalar values. Same-block
 immutable aliases retain the handle and frozen presence result.
 
 `storage::view(borrow, decimal_u32_offset, positive_decimal_u32_length)` creates
@@ -42,8 +43,8 @@ operands. Runtime range checks retain subtraction-based overflow safety and
 the current graph/transport limits. A copied partial fixed-width value is still
 that codec; a later typed write/key must be canonical and may fail. There is no
 padding, truncation or automatic reinterpretation to bytes. Dynamic bytes/text
-schema source admission remains a separate task, although those codecs are
-already available to independently authored HIR/native graphs.
+schema source admission is provided by ADR 0506, using those same existing
+HIR/native codecs without changing this byte-oriented view contract.
 
 ## Windows evidence
 
@@ -67,7 +68,7 @@ snapshot path for the helper and borrow sources, including exact costs 12/16.
 
 The source AST remains detached, original ordinary/single-cell admissions stay
 closed and native execution uses actual generated C. The call-only projection
-is not Complete/source-cache authority. Linux, dynamic bytes/text source,
+is not Complete/source-cache authority. Linux,
 Complete/artifact/cache/ordinary-CLI and final acceptance gates remain queued.
 No stable language revision/CLI/SDK ABI, DB/provider, dependency, default limit,
 runtime ABI, repository-policy or runner changes occur here.

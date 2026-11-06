@@ -21,7 +21,7 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	analysis, err := AnalyzePackages(semantic.PackageInput{Files: []semantic.File{skeleton}})
+	analysis, err := analyzeStateGraphSource(skeleton)
 	if err != nil {
 		return Result{}, err
 	}
@@ -63,7 +63,7 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 		// Graph control and storage actions remain in the checked state side
 		// table; this projection is not an executable replacement for that graph.
 		projection := stateGraphCallProjection(skeleton, transactions, owners)
-		analysis, err = AnalyzePackages(semantic.PackageInput{Files: []semantic.File{projection}})
+		analysis, err = analyzeStateGraphSource(projection)
 		if err != nil {
 			return Result{}, err
 		}
@@ -82,6 +82,14 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 		return Result{}, fmt.Errorf("experimental state source requires exactly one root transaction")
 	}
 	return result, err
+}
+
+func analyzeStateGraphSource(file semantic.File) (Analysis, error) {
+	checked, err := semantic.AnalyzeExperimentalStatePackages(semantic.PackageInput{Files: []semantic.File{file}})
+	if err != nil {
+		return Analysis{}, &Error{Stage: StagePackageInput, Cause: err}
+	}
+	return Analysis{Semantic: checked}, nil
 }
 
 type stateGraphBinding struct {
