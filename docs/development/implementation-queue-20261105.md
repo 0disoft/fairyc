@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- The SDK/user-aggregate acceptance now includes SDK Vec calls from a concrete
+  user-resource cleanup and generic functions returning a concrete user struct.
+  Actual production-loaded maps retain the independent Go oracle's fourteen
+  SDK/three user specializations, cleanup endpoints, provenance, exact facts and
+  explicit completeness; root/SDK impact queries pass Windows low/optimized
+  (570.128s). Existing bounded admission was already implemented; this records
+  stronger production acceptance and a shared `load`/query boundary, not a new
+  language family. The wider Atlas row and full authored-main/MCP/editor/Linux/
+  final gates remain open. See `candidate-atlas-sdk-aggregate-20261107.md`.
+
 - The explicit Fairy source-graph prerequisite now has seven-codec declarations,
   isolated `FYSTATE1` layout artifacts and exact current-source layout matching.
   Independent Go canonical bytes, source/framing/current/budget controls pass

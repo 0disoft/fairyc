@@ -63,6 +63,13 @@ uncollected relations retain the existing explicit completeness omissions.
   Linux execution remains batched; self-build/distribution/hosted gates remain
   part of the original queue.
 
+The combined user-resource-cleanup/SDK Vec case now has actual production-loaded
+map and root/SDK impact acceptance in both Windows profiles; see
+`candidate-atlas-sdk-aggregate-20261107.md`. Existing bounded combination admission
+was already present. This further coverage retains exact fourteen SDK/three user
+implementations and current source/provenance; it does not close the final
+authored-main or broader combination/consumer gates in the row above.
+
 ## Windows evidence
 
 ```powershell
