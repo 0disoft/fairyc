@@ -72,8 +72,9 @@ authorized by this queue.
   CLI groups pass in 179.891s. The ordinary/generic/SDK Vec production roots
   pass both profiles in 929.227s. Both three-group low CLI parents exceeded
   their aggregate 20-minute test budget; those commands remain failed, with
-  completed group assertions recorded separately. Unfinished source/SDK packs
-  have separate running 15-minute replays against the same authenticated image;
+  completed group assertions recorded separately. Source/SDK packs now pass
+  separate 15-minute replays in 312.971s/449.408s against the same authenticated
+  image. Four earlier low groups still lack separate zero-exit parents, so
   complete low command acceptance remains pending. Authored check/locked pass (674
   files, 8,384 MIR functions), as do Go atlasmap/contextpack regressions and
   scoped vet/hygiene. See the observed-relations plan and

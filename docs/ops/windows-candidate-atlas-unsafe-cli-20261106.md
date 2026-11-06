@@ -18,8 +18,8 @@ No Go fallback or companion is installed, and child PATH is empty.
 | impact-sdk-vector | completed assertions before parent timeout | PASS, 15.23s |
 | catalog-ordinary | completed 44 invocations before parent timeout | PASS, 7.37s |
 | pack-ordinary | completed 48 invocations before parent timeout | PASS, 8.52s |
-| pack-sources | pending | PASS, 5.50s |
-| pack-sdk | pending | PASS, 19.58s |
+| pack-sources | PASS, 295.33s | PASS, 5.50s |
+| pack-sdk | PASS, 430.96s | PASS, 19.58s |
 
 The completed optimized parent passes in 179.891s. Its catalog and ordinary,
 source and SDK packs retain respectively 44, 48, 33 and six native invocations.
@@ -73,14 +73,21 @@ prefix's `-timeout 20m` with `-timeout 15m` for these exact selections:
 | `^TestCandidateAtlasCLI$/low/pack-sources$` | `.cache/atlas-unsafe-production-cli-low-pack-sources-20261106.log` |
 | `^TestCandidateAtlasCLI$/low/pack-sdk$` | `.cache/atlas-unsafe-production-cli-low-pack-sdk-20261106.log` |
 
-Replays are still running. No test/product timeout, warning, work/count limit,
+Both isolated low replays pass: source pack in 312.971s and SDK pack in
+449.408s. They retain 33 and six native invocations, respectively, with no
+selected skips. The authenticated source/image pair is identical to the
+original parents. The four earlier completed low groups still have no separate
+zero-exit parent receipt; their original combined commands remain failed.
+No test/product timeout, warning, work/count limit,
 source fixture, expected fact or command assertion was relaxed. Orphan cleanup
 checks were restricted to the terminated parents' children and the exact retained
 image path. Linux, hosted CI and all unselected groups remain separate gates.
 
 ## Remaining scope
 
-Low replay is still running; no complete low selection pass is claimed here. The other 35
+Only source/SDK packs have completed passing low selections; the four other
+low groups retain completed assertions from failed aggregate parents. A complete
+six-group zero-exit low replay remains open. The other 35
 registered CLI groups, remaining move/allocation/error/borrow collection,
 broader source/editor coverage, generated consumers, complete Go/Fairy
 comparison, consecutive self-build, Windows distribution/clean-machine

@@ -29,7 +29,10 @@ Native Linux remains batched; no push, dispatch or release is authorized here.
   A private collector or map comparison alone is not command evidence.
 - [x] Verified unsafe-site collector with independent ordinary, specialized,
   concrete cleanup and pinned SDK helper observations and exact budget controls.
-- [ ] Complete-bound unsafe production and both-profile actual command replay.
+- [x] Complete-bound unsafe production with independent source/current/join
+  comparisons under both profiles.
+- [ ] Complete passing both-profile selections for the six actual unsafe CLI
+  groups; four low groups retain assertions only from failed aggregate parents.
 - [ ] Remaining move, Region allocation, error-propagation and borrow collectors,
   each with independent verified Go facts and production evidence.
 - [ ] Remaining source families and final full-CLI/generated-consumer/self-build/
@@ -452,10 +455,11 @@ and the existing refusal controls. The exact selection is
 Log: `.cache/atlas-unsafe-production-roots-20261106.log`. Both initial low CLI
 parents hit their aggregate 20-minute test alarm, after completing catalog/
 ordinary pack or the two impact groups. They remain failed commands. Source
-pack and SDK pack now have separate running 15-minute replays with identical
-authenticated inputs and unchanged product policies. Actual low CLI acceptance
-stays pending; the unsafe command receipt distinguishes retained assertions,
-failed parents and the unfinished replay.
+pack and SDK pack pass separate 15-minute replays in 312.971s and 449.408s,
+with identical authenticated inputs and unchanged product policies. The four
+other low groups still lack separate zero-exit parents. Complete low CLI
+acceptance stays pending; the unsafe command receipt distinguishes retained
+assertions, failed parents and completed isolated selections.
 
 ## Move-site Go prerequisite
 
