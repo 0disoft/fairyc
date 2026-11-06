@@ -67,6 +67,12 @@ authorized by this queue.
 
 ## Progress
 
+- The Fairy native graph plan preserves Go slot order, independent borrow
+  slots, global 4096-slot preflight and canonical copied trap IDs/JSON. Windows
+  low/optimized and sealed-owner checks pass 39 cases in 22.052s. This detached
+  prerequisite has no execution authority; native C/transport/CAS and all final
+  gates remain open. See ADR 0528 and `candidate-state-graph-native-plan-20261107.md`.
+
 - The explicit Fairy graph runtime input now has a deterministic distribution
   packager and sealed size/SHA256-pinned Bundle. Windows low/optimized compare
   complete declarations/runtime against current Go and execute linked graph

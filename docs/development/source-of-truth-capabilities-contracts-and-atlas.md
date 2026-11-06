@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Fairy native graph slot/trap preparation**: `examples/lexer_candidate/src/module_state_graph_native_plan.fy`, `internal/cli/candidate_state_graph_native_plan_test.go`; detached owner, sparse identities and 4096-slot admission: ADR 0528 and `docs/development/candidate-state-graph-native-plan-20261107.md`.
+
 - **Explicit Fairy graph runtime distribution input**: `tools/package-candidate-state-graph-runtime.py`, `examples/lexer_candidate/src/module_state_graph_native_assets.fy`, `module_state_graph_native_asset_pin.fy`; full live-Go byte and linked native comparisons: `internal/cli/candidate_state_graph_native_assets_test.go`. Admission and exact Windows scope: ADR 0527 and `docs/development/candidate-state-graph-native-assets-20261107.md`.
 
 ## Bounded Atlas tools
