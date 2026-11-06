@@ -39,6 +39,8 @@ actual aggregate limit; no production limit or refusal was weakened.
 
 ```powershell
 go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestCandidateStateGraphLayouts$'
+# The compiler-sized original-layout replay uses the existing opt-in:
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
 go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^TestCandidateOriginalStateLayouts$'
 go test -mod=readonly -count=1 -timeout 5m -failfast -v ./internal/cli -run '^(TestCandidateCompleteCacheKeysV5|TestCandidateCacheKeyV5Parity)$'
 ```
@@ -50,6 +52,12 @@ diagnostic ordering and linked-IR rejection, pass unchanged assertions in
 closure; it does not replace their logic. The first isolated attempt omitted
 the diagnostic module dependency and failed before execution; that dependency
 is now included.
+
+That original-layout execution preceded the integration opt-in guard added
+after observing its two-minute cost. Default runs still execute the focused
+new graph/ordinary codec matrix, and explicitly skip the compiler-sized legacy
+replay. The recorded native result remains valid for its unchanged assertions
+and product inputs; no new CI job or runner is required.
 
 Ordinary and generic cache-key parity pass in 33.592s. The separately gated
 Complete key replay is explicitly skipped because its integration opt-in is

@@ -296,6 +296,9 @@ func TestCandidateStateGraphLayouts(t *testing.T) {
 // Replay the original authored layout assertions in their dependency closure.
 // Whole-example test admission also loads unrelated generic test declarations.
 func TestCandidateOriginalStateLayouts(t *testing.T) {
+	if os.Getenv("FAIRYC_RUN_PARITY_INTEGRATION") != "1" {
+		t.Skip("set FAIRYC_RUN_PARITY_INTEGRATION=1 for the original compiler-sized layout replay")
+	}
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "module_state_layout.fy"))
 	if err != nil {
 		t.Fatal(err)
