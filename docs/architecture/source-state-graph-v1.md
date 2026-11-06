@@ -86,3 +86,24 @@ The explicit mode completes developer selection for the currently admitted
 source subset. Source helper/borrow and dynamic byte/text admission, trusted
 current-source/Complete binding, package artifacts/cache, ordinary compiler CLI
 selection, Linux execution and every final acceptance gate remain required.
+
+## Source helper continuation
+
+[ADR 0504](../adr/0504-source-state-graph-helpers.md) now connects up to 32
+acyclic source helpers, including branch-local call sites, shared-root overlay,
+return/reject/trap and checked ordinary call-only owner projections. The
+projection is not the executed storage body or trusted Complete/cache evidence.
+The graph and native route retain their independent checks. Source borrows,
+dynamic byte/text schemas and the remaining queue above stay open.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 3m ./internal/compiler -run '^TestExperimentalStateGraphSourceHelper'
+go test -mod=readonly -count=1 -timeout 2m ./internal/contractstatemir
+go test -mod=readonly -count=1 -timeout 3m -v ./internal/contractstatenative -run '^TestGraphSourceNativeHelpers$'
+go vet -mod=readonly ./internal/compiler ./internal/contractstatemir ./internal/contractstatenative
+```
+
+The helper native root passes in 4.808s, with twelve actual executions and no
+selected skips. The first harness build failed on an unused test import; it
+was removed. No compiler-warning or policy relaxation was used. Existing
+linear and graph callers retain their exact original bounds and result policies.

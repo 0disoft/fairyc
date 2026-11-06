@@ -62,6 +62,9 @@ func (lower *stateGraphSource) binding(statement ast.Statement, current int, env
 	if _, exists := stateGraphLookup(binding.Name, environment); exists {
 		return nil, lower.fail(statement.Span, "duplicate or shadowed storage local")
 	}
+	if _, exists := lower.callees[binding.Name]; exists {
+		return nil, lower.fail(statement.Span, "storage local cannot shadow a transaction function")
+	}
 	value := stateGraphBinding{name: binding.Name}
 	name, _, ok := stateGraphCall(binding.Expression)
 	if ok && name == "storage::read" {
@@ -104,6 +107,9 @@ func (lower *stateGraphSource) statement(statement ast.Statement, current int, e
 			return -1, lower.fail(statement.Span, "commit/reject takes no arguments")
 		}
 		if name == "storage::commit" {
+			if lower.helper {
+				return -1, lower.fail(statement.Span, "helper cannot commit the root transaction")
+			}
 			term.Kind = hir.StateTerminatorCommit
 		} else {
 			term.Kind = hir.StateTerminatorReject
@@ -118,6 +124,12 @@ func (lower *stateGraphSource) statement(statement ast.Statement, current int, e
 		}
 		term.Kind, term.TrapCategory = hir.StateTerminatorTrap, category
 	default:
+		if callee, found := lower.callees[name]; found {
+			if name == "transaction" || len(args) != 0 {
+				return -1, lower.fail(statement.Span, "helper calls require no arguments and cannot call the root")
+			}
+			return current, lower.appendAccess(current, hir.StateAccess{Kind: hir.StateAccessCall, Callee: callee, Cost: 1, Span: lower.span(statement.Span)})
+		}
 		access, err := lower.access(statement.Expression, environment)
 		if err != nil {
 			return -1, err
@@ -129,10 +141,10 @@ func (lower *stateGraphSource) statement(statement ast.Statement, current int, e
 }
 
 func (lower *stateGraphSource) appendAccess(current int, access hir.StateAccess) error {
-	if lower.operations >= stateSourceMaxOperations {
+	if *lower.operations >= stateSourceMaxOperations {
 		return fmt.Errorf("experimental state graph exceeds 1024 operations")
 	}
-	lower.operations++
+	(*lower.operations)++
 	lower.blocks[current].Accesses = append(lower.blocks[current].Accesses, access)
 	return nil
 }

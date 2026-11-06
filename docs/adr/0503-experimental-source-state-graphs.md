@@ -3,6 +3,10 @@
 - Status: Accepted for a compiler-private source entry point
 - Extends: ADRs 0378, 0383 and 0502
 
+The subsequent [ADR 0504](0504-source-state-graph-helpers.md) adds bounded
+source helpers and graph call admission; the original single-root checkpoint
+below retains its scope. Source borrows and the full integration queue remain open.
+
 `compiler.CheckExperimentalStateGraph` admits one parsed source file containing
 one state declaration and one private, safe, nongeneric, parameterless
 `fn void transaction()`. The original `CheckExperimentalState`, ordinary

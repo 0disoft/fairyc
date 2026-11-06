@@ -95,6 +95,16 @@ func verifyGraph(program Program, bound boundLayout, helperEffects map[string][]
 				if detail := verifyCallOperation(operation); detail != "" {
 					failures = append(failures, VerificationError{Code: "CSM1009", Entity: entity, Detail: detail})
 				}
+				// Helper effects are transitive. A storage-writing call may
+				// replace any key, so no earlier borrow may be used afterward.
+				for _, effect := range effects {
+					if effect == hir.EffectStorageWrite {
+						for id, borrow := range borrows {
+							borrow.valid = false
+							borrows[id] = borrow
+						}
+					}
+				}
 				continue
 			}
 			if isBorrowOperation(operation.Kind) {

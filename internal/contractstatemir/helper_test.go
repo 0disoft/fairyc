@@ -105,11 +105,12 @@ func TestLowerHIRTransactionsRejectsHelperGraphDrift(t *testing.T) {
 		}, contains: "no root transaction"},
 		{name: "root misses transitive effect", mutate: func(input *hir.Package) { input.Modules[0].Functions[0].Effects = nil }, contains: "missing required effects"},
 		{name: "call expression effect drift", mutate: func(input *hir.Package) { input.Modules[0].Functions[0].Body.Tail.Effects = nil }, contains: "call effects do not match"},
-		{name: "graph call remains closed", mutate: func(input *hir.Package) {
+		{name: "graph call projection drift", mutate: func(input *hir.Package) {
 			input.StateTransactions[0].Accesses = nil
 			input.StateTransactions[0].Exit = ""
 			input.StateTransactions[0].Blocks = []hir.StateBlock{{ID: 0, Accesses: []hir.StateAccess{{Kind: hir.StateAccessCall, Callee: 8, Cost: 1}}, Terminator: hir.StateTerminator{Kind: hir.StateTerminatorCommit, Cost: 1}}}
-		}, contains: "graph helper calls are not admitted"},
+			input.Modules[0].Functions[0].Body.Tail = nil
+		}, contains: "helper calls do not match"},
 		{name: "helper has parameter", mutate: func(input *hir.Package) {
 			input.Modules[0].Functions[1].Parameters = []hir.Parameter{{Type: hir.TypeU32}}
 		}, contains: "must be void and have no parameters"},

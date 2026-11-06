@@ -371,6 +371,11 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `tools/dev/fairyc-state/native.go`, `native_test.go`, `native_windows_test.go`, `main.go`
   - `internal/contractstatenative/graph_transport.go`: immutable body/framing-program receipt identities
   - `docs/adr/0500-local-contract-state-execution-and-persistence.md`, `docs/architecture/source-state-graph-v1.md`
+- **Source graph helper admission, checked ordinary call projections and write-effect borrow invalidation**
+  - `internal/compiler/state_graph_helpers.go`, `state_graph_helpers_test.go`
+  - `internal/contractstatemir/lower.go`, `graph_verify.go`, `graph_helper_test.go`
+  - `internal/contractstatenative/graph_source_helpers_windows_test.go`
+  - `examples/contract_state_graph/helpers/transaction.fy`, `docs/adr/0504-source-state-graph-helpers.md`
 - **Source-declared or compiler-constructed HIR contract-state layout plus public-interface v5 and whole-package cache-key v3 layout identity**
   - `internal/hir/state.go`
   - `internal/contractstatemir/lower.go`

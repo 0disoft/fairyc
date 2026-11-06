@@ -17,31 +17,11 @@ const stateSourceMaxBlocks, stateSourceMaxOperations = 64, 1024
 // CheckExperimentalStateGraph selects the explicit graph source admission.
 // Neither ordinary Check nor the original single-cell admission is widened.
 func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
-	module := file.Module
-	if module == nil || len(module.Functions) != 1 || len(module.States) != 1 ||
-		len(module.Imports)+len(module.Constants)+len(module.StaticAssertions)+len(module.Structs)+len(module.Resources)+len(module.Enums)+len(module.ForeignFunctions) != 0 {
-		return Result{}, fmt.Errorf("experimental state graph requires one state layout and one transaction function")
+	skeleton, err := stateGraphSkeleton(file)
+	if err != nil {
+		return Result{}, err
 	}
-	function := module.Functions[0]
-	if function.Name != "transaction" || function.Owner != "" || function.Public || function.Unsafe ||
-		len(function.TypeParameters)+len(function.Parameters) != 0 || function.ResultType.Kind != ast.TypeKindNamed ||
-		function.ResultType.Path != "void" || len(function.ResultType.Arguments) != 0 || function.Body == nil {
-		return Result{}, fmt.Errorf("experimental state graph requires a private safe parameterless void transaction")
-	}
-	for _, attribute := range function.Attributes {
-		if attribute.Name != "effects" {
-			return Result{}, fmt.Errorf("experimental state graph only admits transaction effects attributes")
-		}
-	}
-	// Normal semantics owns the schema, package, signature and declared effects.
-	// Every executable source statement is admitted below into the state side
-	// table; no body, binding or caller-owned AST slice is mutated or skipped.
-	copyModule, copyFunction := *module, function
-	copyFunction.Body = &ast.Block{Span: function.Body.Span}
-	copyModule.Functions = []ast.Function{copyFunction}
-	copyFile := file
-	copyFile.Module = &copyModule
-	analysis, err := AnalyzePackages(semantic.PackageInput{Files: []semantic.File{copyFile}})
+	analysis, err := AnalyzePackages(semantic.PackageInput{Files: []semantic.File{skeleton}})
 	if err != nil {
 		return Result{}, err
 	}
@@ -50,30 +30,58 @@ func CheckExperimentalStateGraph(file semantic.File) (Result, error) {
 		len(checked.Diagnostics)+len(checked.Unsupported) != 0 {
 		return Result{Semantic: checked}, nil
 	}
-	if len(checked.HIR.Modules) != 1 || len(checked.HIR.Modules[0].Functions) != 1 || len(checked.HIR.StateLayouts) != 1 {
-		return Result{}, fmt.Errorf("experimental state graph requires one semantic owner and layout")
+	if len(checked.HIR.Modules) != 1 || len(checked.HIR.Modules[0].Functions) != len(file.Module.Functions) || len(checked.HIR.StateLayouts) != 1 {
+		return Result{}, fmt.Errorf("experimental state graph requires exact semantic owners and layout")
 	}
-	owner := checked.HIR.Modules[0]
-	lower := stateGraphSource{file: file, fields: make(map[string]hir.StateField)}
+	owners := make(map[string]hir.SymbolID)
+	for _, owner := range checked.HIR.Modules[0].Functions {
+		owners[owner.Name] = owner.Symbol
+	}
+	fields := make(map[string]hir.StateField)
 	for _, field := range checked.HIR.StateLayouts[0].Fields {
-		lower.fields[field.Name] = field
+		fields[field.Name] = field
 	}
-	_, _, err = lower.newBlock(nil)
-	if err != nil {
+	work := 0
+	transactions := make([]hir.StateTransaction, 0, len(file.Module.Functions))
+	for _, function := range file.Module.Functions {
+		lower := stateGraphSource{file: file, fields: fields, callees: owners, helper: function.Name != "transaction", operations: &work}
+		if _, _, err := lower.newBlock(nil); err != nil {
+			return Result{}, err
+		}
+		if end, _, err := lower.block(function.Body, 0, nil); err != nil {
+			return Result{}, err
+		} else if end >= 0 {
+			return Result{}, lower.fail(function.Body.Span, "every root/helper path requires an explicit transaction exit or helper return")
+		}
+		transactions = append(transactions, hir.StateTransaction{Package: checked.HIR.Modules[0].Package, Function: owners[function.Name], Entry: 0, Blocks: lower.blocks, Span: lower.span(function.Body.Span)})
+	}
+	if err := stateGraphHelperReachability(transactions, owners["transaction"]); err != nil {
 		return Result{}, err
 	}
-	if end, _, err := lower.block(function.Body, 0, nil); err != nil {
-		return Result{}, err
-	} else if end >= 0 {
-		return Result{}, lower.fail(function.Body.Span, "every transaction path must commit, reject or trap")
+	if len(transactions) > 1 {
+		// Resolve the call-only ordinary projection through normal semantics.
+		// Graph control and storage actions remain in the checked state side
+		// table; this projection is not an executable replacement for that graph.
+		projection := stateGraphCallProjection(skeleton, transactions, owners)
+		analysis, err = AnalyzePackages(semantic.PackageInput{Files: []semantic.File{projection}})
+		if err != nil {
+			return Result{}, err
+		}
+		if analysis.Semantic.CompletedThrough != semantic.PhaseFlow || analysis.Semantic.FailedPhase != semantic.PhaseNone || len(analysis.Semantic.Diagnostics)+len(analysis.Semantic.Unsupported) != 0 {
+			return Result{Semantic: analysis.Semantic}, nil
+		}
+		if err := rebindStateGraphOwners(transactions, file.Module.Functions, owners, analysis.Semantic.HIR); err != nil {
+			return Result{}, err
+		}
 	}
-	analysis.Semantic.HIR.StateTransactions = []hir.StateTransaction{{
-		Package: owner.Package, Function: owner.Functions[0].Symbol, Entry: 0,
-		Blocks: lower.blocks, Span: lower.span(function.Body.Span),
-	}}
+	analysis.Semantic.HIR.StateTransactions = transactions
 	// Re-enter the existing atomic ordinary/state publication and independent
 	// state-MIR checks, including effects, types, edges, cost and codec validity.
-	return LowerAnalyzed(analysis)
+	result, err := LowerAnalyzed(analysis)
+	if result.Verified && len(result.StateTransactions) != 1 {
+		return Result{}, fmt.Errorf("experimental state source requires exactly one root transaction")
+	}
+	return result, err
 }
 
 type stateGraphBinding struct {
@@ -86,7 +94,9 @@ type stateGraphSource struct {
 	fields     map[string]hir.StateField
 	blocks     []hir.StateBlock
 	values     hir.StateValueID
-	operations int
+	operations *int
+	callees    map[string]hir.SymbolID
+	helper     bool
 }
 
 func (lower *stateGraphSource) span(span diagnostic.Span) hir.Span {
@@ -155,6 +165,13 @@ func (lower *stateGraphSource) block(body *ast.Block, current int, environment [
 				current, environment, err = lower.branch(statement.Expression, current, environment)
 			} else {
 				current, err = lower.statement(statement, current, environment)
+			}
+		case syntax.KindReturn:
+			if !lower.helper || statement.Expression != nil {
+				err = lower.fail(statement.Span, "only void helpers may return")
+			} else {
+				lower.blocks[current].Terminator = hir.StateTerminator{Kind: hir.StateTerminatorReturn, Cost: 1}
+				current = -1
 			}
 		default:
 			err = lower.fail(statement.Span, "only immutable storage reads, storage operations and if statements are admitted")

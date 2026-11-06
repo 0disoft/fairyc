@@ -425,3 +425,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0502: One-attempt native state execution and CAS publication](0502-native-state-one-attempt-cas.md)
 
 - [0503: Explicit source admission for state graphs](0503-experimental-source-state-graphs.md)
+
+- [0504: Source state graph helpers and checked call projections](0504-source-state-graph-helpers.md)

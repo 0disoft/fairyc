@@ -148,9 +148,6 @@ func lowerHIRTransactions(input hir.Package, owners *transactionOwnerIndex) ([]L
 			return nil, fmt.Errorf("package %d function %d: %w", transaction.Package, transaction.Function, err)
 		}
 		stateCalls := hirStateTransactionCalls(transaction)
-		if len(transaction.Blocks) != 0 && len(stateCalls) != 0 {
-			return nil, fmt.Errorf("package %d function %d graph helper calls are not admitted", transaction.Package, transaction.Function)
-		}
 		if !slices.Equal(hirCalls, stateCalls) {
 			return nil, fmt.Errorf("package %d function %d helper calls do not match the transaction body", transaction.Package, transaction.Function)
 		}
