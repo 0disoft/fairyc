@@ -18,6 +18,7 @@ pub struct Span{usize start;usize end;}
 pub struct Owner{usize module_index;usize package;usize declaration;usize identity;Span declaration_span;Span body_span;Span effects_span;}
 pub resource Produced{v::Vec<syntax::Parsed> sources;verified::Verified proof;Owner owner;v::Vec<context::Span> spans;Span exit;cleanup{}}
 pub fn ref u8[] source(ref Produced p){return syntax::source_view(v::at<syntax::Parsed>(ref p.sources,0));}
+pub fn ref syntax::Parsed parsed(ref Produced p){return v::at<syntax::Parsed>(ref p.sources,0);}
 pub fn Owner owner(ref Produced p){return p.owner;}
 pub fn ref u8[] body(ref Produced p){return source(p)[p.owner.body_span.start..p.owner.body_span.end];}
 pub fn Span operation_span(ref Produced p,usize index){let s=*v::at<context::Span>(ref p.spans,index);return Span{.start=s.start,.end=s.end};}

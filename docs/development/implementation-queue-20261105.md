@@ -1766,3 +1766,14 @@ authorized by this queue.
   `candidate-state-source-limits-20261107.md`. This closes boundary acceptance,
   not ordinary Complete/cache/command/native persistence. Linux stays batched;
   no push or dispatch. The full implementation objective remains active.
+
+- Current-source state body identity now derives the actual descriptor and
+  selected package coordinate instead of accepting caller descriptors. Explicit
+  seven-codec public/source interface APIs preserve default five-codec admission.
+  Disjoint Sol high workers pass 134 Windows native processes and seven sealed
+  ownership refusals, with independent Go source/body/interface expectations.
+  The existing graph layout and Go moduleinterface regressions also pass;
+  original-layout heavy replay remains explicitly gated. See ADRs 0518/0519
+  and `candidate-state-graph-package-20261107.md`. Complete ownership is the
+  integration step in progress; cache/native/commands/final gates remain open.
+  Linux stays batched; no push or dispatch. The full objective remains active.

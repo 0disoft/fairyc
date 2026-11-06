@@ -420,6 +420,14 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_body_hash.fy`, `module_state_graph_hash_context.fy`, `module_state_graph_hash_encoding.fy`
   - `internal/cli/candidate_state_graph_body_hash_test.go`
   - `docs/adr/0516-candidate-state-graph-body-hash.md`, `docs/development/candidate-state-graph-body-hash-20261107.md`
+- **Fairy source-derived state function descriptors and selected package coordinate/body identity; owning Complete/cache publication remains separate**
+  - `examples/lexer_candidate/src/module_state_graph_source_identity.fy`
+  - `internal/cli/candidate_state_graph_source_identity_test.go`
+  - `docs/adr/0518-candidate-source-bound-state-body-identity.md`, `docs/development/candidate-state-graph-package-20261107.md`
+- **Explicit seven-codec graph public/source interface bytes; default five-codec admission is preserved**
+  - `examples/lexer_candidate/src/module_state_interface.fy`, `module_public_interface.fy`, `module_generic_interface.fy`
+  - `internal/cli/candidate_state_graph_interface_test.go`
+  - `docs/adr/0519-candidate-graph-public-interface-profile.md`, `docs/development/candidate-state-graph-package-20261107.md`
 - **Fairy exact current-source envelope and full canonical graph comparison before independent artifact revalidation; ordinary Complete/cache remains separate**
   - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
   - `internal/cli/candidate_state_graph_source_artifact_test.go`
