@@ -12,6 +12,7 @@ import module_identified_ir as identified;
 import generic_source_plan as source_plan;
 import syntax as syntax;
 import std::vec as v;
+import module_borrow_observations as observations;
 
 // Stages: 1 grouping, 2 binding, 3 closure, 4 values, 5 moves, 6 owned IR,
 // 7 borrows, 8 source identity attachment, 9 Result obligations.
@@ -41,7 +42,9 @@ pub fn Result<ir::Program,Problem> range(ref v::Vec<syntax::Parsed> sources,ref 
 pub fn Result<identified::Program,Problem> range_identified(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref source_plan::Plan plan,usize first,usize stop,ref mut usize work){
     let p=switch(check_range(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let program=switch(lowered(sources,metadata,ref p)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return switch(identified::build(program,plan,sources,metadata,checked_interfaces(ref p),work)){case .ok(p):{.ok(p)}case .err(e):{.err(failed(8,e.code,e.module_index,e.start,e.end,first,stop,e.kind as usize,e.id))}};
+    let current=switch(identified::prepare(program,plan,sources,metadata,checked_interfaces(ref p),work)){case .ok(p):{p}case .err(e):{return .err(failed(8,e.code,e.module_index,e.start,e.end,first,stop,e.kind as usize,e.id));}};
+    let rows=switch(observations::from_sites(checking::checked_borrows(ref p.checked),work)){case .ok(p):{p}case .err(code):{return .err(failed(8,if(code==3){10}else if(code==2){11}else{9},first,0,0,first,stop,0,0));}};
+    return switch(identified::observed(current,rows)){case .ok(p):{.ok(p)}case .err(_):{.err(failed(8,9,first,0,0,first,stop,0,0))}};
 }
 // Cleanup policy retains raw code 10 through the owned-IR lowerer; later
 // IR construction and verification use 1002 for the same capacity class.

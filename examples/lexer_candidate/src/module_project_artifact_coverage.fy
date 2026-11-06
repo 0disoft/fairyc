@@ -13,15 +13,25 @@ import module_signatures as signatures;
 import module_program_artifact_wire as budget;
 import syntax as syntax;
 import std::vec as v;
+import module_borrow_observations as observations;
+import module_artifact_borrow_observations as observation_work;
+import module_unit_checked_bodies as checking;
+import module_unit_borrow_sites as borrow_sites;
 
 pub struct Problem {u32 stage;u32 code;compile::Problem source;}
 pub struct Stats {usize files;usize units;usize retries;usize frames;usize types;usize layouts;usize fields;usize cleanup_fields;usize callables;usize parameters;usize names;}
 // Published only after every source range and every retained table is covered.
 // State/SDK matching and a same-owner Complete/cache factory still follow.
-pub resource Covered {Stats stats;cleanup{}}
+pub resource Covered {Stats stats;observations::Table borrows;cleanup{}}
 pub fn Stats stats(ref Covered p){return p.stats;}
+pub fn ref observations::Table borrows(ref Covered p){return ref p.borrows;}
 struct Domains {usize frames;usize types;usize layouts;usize fields;usize cleanup_fields;usize callables;usize parameters;usize names;usize end;}
 struct Progress {usize files;usize units;usize retries;}
+fn u32 observation_code(u32 code){return if(code==3){1002}else if(code==2){1003}else{1001};}
+fn u32 retain_borrows(ref mut v::Vec<borrow_sites::Site> sites,ref mut v::Vec<borrow_sites::Range> ranges,ref mut v::Vec<u8> seen,ref matching::Matched matched,ref compile::CheckedBodies checked,ref mut usize work){
+    let map=matching::frame_mapping(matched);let rows=checking::checked_borrows(compile::checked_state(checked));var usize i=1;
+    while(i<=frames::unit_count(map)){switch(observation_work::add_sites(sites,ranges,seen,frames::mapped(map,i),rows,i,work)){case .ok(_):{}case .err(code):{return observation_code(code);}};i+=1;}return 0;
+}
 fn Problem fail(u32 stage,u32 code,usize first,usize stop){return Problem{.stage,.code,.source=compile::Problem{.stage=0,.code=0,.module_index=first,.start=0,.end=0,.first,.stop,.expected=0,.actual=0,.declaration_start=0,.declaration_end=0,.move_start=0,.move_end=0,.header_start=0,.header_end=0,.field_module=0,.field_start=0,.field_end=0}};}
 fn Domains domains(ref ir::Program p){let c=ir::cleanup_ir(p);let types=ir::count(p);let layouts=types+clean::type_count(c);let fields=layouts+ir::layout_count(p);let cleanup_fields=fields+ir::field_count(p);let callables=cleanup_fields+clean::field_count(c);let parameters=callables+ir::callable_count(p);let names=parameters+ir::parameter_count(p);return Domains{.frames=0,.types,.layouts,.fields,.cleanup_fields,.callables,.parameters,.names,.end=names+ir::name_bytes(p)};}
 fn u32 mark(ref mut v::Vec<u8> seen,usize base,usize id,usize count,ref mut usize work){if(!budget::charge(work,1)){return 1002;}if(id==0 || id>count || base>v::len<u8>(seen) || count>v::len<u8>(seen)-base){return 1001;}let cell=v::at_mut<u8>(seen,base+id-1);*cell=1;return 0;}
@@ -32,18 +42,19 @@ fn u32 unit(ref ir::Program p,ref matching::Matched matched,Domains d,ref mut v:
     i=0;while(i<matching::layout_count(matched)){let code=mark(seen,d.layouts,matching::layout_at(matched,i),ir::layout_count(p),work);if(code!=0){return code;}i+=1;}
     i=0;while(i<matching::callable_count(matched)){let code=mark(seen,d.callables,matching::callable_at(matched,i),ir::callable_count(p),work);if(code!=0){return code;}i+=1;}return 0;
 }
-fn Problem append(ref ir::Program p,ref identities::Snapshot ids,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,Domains d,ref mut v::Vec<u8> seen,ref mut Progress progress,ref mut usize work){
+fn Problem append(ref ir::Program p,ref identities::Snapshot ids,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize first,usize stop,usize depth,Domains d,ref mut v::Vec<u8> seen,ref mut v::Vec<borrow_sites::Site> sites,ref mut v::Vec<borrow_sites::Range> ranges,ref mut v::Vec<u8> borrow_seen,ref mut Progress progress,ref mut usize work){
     if(!budget::charge(work,1)){return fail(2,1002,first,stop);}if(first!=progress.files || first>=stop || stop>v::len<syntax::Parsed>(sources) || progress.units>=256){return fail(2,if(progress.units>=256){1002}else{1001},first,stop);}
     switch(compile::check_range(sources,metadata,first,stop)){
         case .ok(checked):{
             let matched=switch(matching::match(p,ids,compile::checked_state(ref checked),plan,sources,metadata,work)){case .ok(p):{p}case .err(code):{return fail(3,code,first,stop);}};
-            let code=unit(p,ref matched,d,seen,work);if(code!=0){return fail(3,code,first,stop);}progress.files=stop;progress.units+=1;return fail(0,0,first,stop);
+            let code=unit(p,ref matched,d,seen,work);if(code!=0){return fail(3,code,first,stop);}
+            let observed=retain_borrows(sites,ranges,borrow_seen,ref matched,ref checked,work);if(observed!=0){return fail(3,observed,first,stop);}progress.files=stop;progress.units+=1;return fail(0,0,first,stop);
         }
         case .err(e):{
             // Reuse the cold compiler's source-check capacity policy. Comparison
             // failures never split or reset the shared caller-owned history.
             if(!compile::capacity_failure(e) || stop-first<=1 || depth>=8){return Problem{.stage=2,.code=e.code,.source=e};};progress.retries+=1;let middle=first+(stop-first)/2;
-            let left=append(p,ids,plan,sources,metadata,first,middle,depth+1,d,seen,progress,work);if(left.code!=0){return left;}return append(p,ids,plan,sources,metadata,middle,stop,depth+1,d,seen,progress,work);
+            let left=append(p,ids,plan,sources,metadata,first,middle,depth+1,d,seen,sites,ranges,borrow_seen,progress,work);if(left.code!=0){return left;}return append(p,ids,plan,sources,metadata,middle,stop,depth+1,d,seen,sites,ranges,borrow_seen,progress,work);
         }
     };return fail(2,1001,first,stop);
 }
@@ -68,13 +79,18 @@ pub fn Result<Covered,Problem> checked_range(ref ir::Program p,ref identities::S
     let d=domains(p);var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<d.end){if(!budget::charge(work,1)){return .err(fail(1,1002,r.first,r.stop));}if(!v::push<u8>(ref mut seen,0).is_ok){return .err(fail(1,1003,r.first,r.stop));}i+=1;}
     let matched=switch(matching::match_unit(p,ids,compile::checked_state(checked),plan,sources,metadata,work)){case .ok(p):{p}case .err(code):{return .err(fail(3,code,r.first,r.stop));}};
     let covered=unit(p,ref matched,d,ref mut seen,work);if(covered!=0){return .err(fail(3,covered,r.first,r.stop));}let code=tables(p,d,ref mut seen,work);if(code!=0){return .err(fail(4,code,r.first,r.stop));}
-    return .ok(Covered{.stats=Stats{.files=r.stop-r.first,.units=1,.retries=0,.frames=ir::count(p),.types=clean::type_count(ir::cleanup_ir(p)),.layouts=ir::layout_count(p),.fields=ir::field_count(p),.cleanup_fields=clean::field_count(ir::cleanup_ir(p)),.callables=ir::callable_count(p),.parameters=ir::parameter_count(p),.names=ir::name_bytes(p)}});
+    var sites=v::empty<borrow_sites::Site>();var ranges=v::empty<borrow_sites::Range>();var borrow_seen=v::empty<u8>();switch(observation_work::initialize(ir::count(p),ref mut ranges,ref mut borrow_seen,work)){case .ok(_):{}case .err(code):{return .err(fail(3,observation_code(code),r.first,r.stop));}};
+    let observed=retain_borrows(ref mut sites,ref mut ranges,ref mut borrow_seen,ref matched,checked,work);if(observed!=0){return .err(fail(3,observed,r.first,r.stop));}
+    let borrows=switch(observation_work::seal(sites,ranges,ref borrow_seen,work)){case .ok(p):{p}case .err(code):{return .err(fail(3,observation_code(code),r.first,r.stop));}};
+    return .ok(Covered{.borrows,.stats=Stats{.files=r.stop-r.first,.units=1,.retries=0,.frames=ir::count(p),.types=clean::type_count(ir::cleanup_ir(p)),.layouts=ir::layout_count(p),.fields=ir::field_count(p),.cleanup_fields=clean::field_count(ir::cleanup_ir(p)),.callables=ir::callable_count(p),.parameters=ir::parameter_count(p),.names=ir::name_bytes(p)}});
 }
 pub fn Result<Covered,Problem> build(ref ir::Program p,ref identities::Snapshot ids,ref source::Plan plan,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut usize work){
     if(!budget::charge(work,0)){return .err(fail(1,1002,0,0));}var usize measured=0;let valid=proof::check_metered(p,ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,0,0));}if(valid.code!=0){return .err(fail(1,valid.code,0,0));}
     measured=0;let original=identities::check(ids,ir::cleanup_ir(p),ref mut measured);if(!budget::charge(work,measured)){return .err(fail(1,1002,0,0));}if(original!=0){return .err(fail(1,original,0,0));}
     let grouped=switch(grouping::build(sources)){case .ok(p):{p}case .err(e):{var problem=fail(1,e.code,0,v::len<syntax::Parsed>(sources));problem.source.module_index=e.module_index;problem.source.start=e.start;problem.source.end=e.end;return .err(problem);}};
     let d=domains(p);var v::Vec<u8> seen=v::empty<u8>();var usize i=0;while(i<d.end){if(!budget::charge(work,1)){return .err(fail(1,1002,0,0));}if(!v::push<u8>(ref mut seen,0).is_ok){return .err(fail(1,1003,0,0));}i+=1;}var progress=Progress{.files=0,.units=0,.retries=0};i=0;
-    while(i<grouping::count(ref grouped)){let u=grouping::at(ref grouped,i);let problem=append(p,ids,plan,sources,metadata,u.first,u.stop,0,d,ref mut seen,ref mut progress,work);if(problem.code!=0){return .err(problem);}i+=1;}if(progress.files!=v::len<syntax::Parsed>(sources)){return .err(fail(4,1001,0,progress.files));}
-    let code=tables(p,d,ref mut seen,work);if(code!=0){return .err(fail(4,code,0,progress.files));}return .ok(Covered{.stats=Stats{.files=progress.files,.units=progress.units,.retries=progress.retries,.frames=ir::count(p),.types=clean::type_count(ir::cleanup_ir(p)),.layouts=ir::layout_count(p),.fields=ir::field_count(p),.cleanup_fields=clean::field_count(ir::cleanup_ir(p)),.callables=ir::callable_count(p),.parameters=ir::parameter_count(p),.names=ir::name_bytes(p)}});
+    var sites=v::empty<borrow_sites::Site>();var ranges=v::empty<borrow_sites::Range>();var borrow_seen=v::empty<u8>();switch(observation_work::initialize(ir::count(p),ref mut ranges,ref mut borrow_seen,work)){case .ok(_):{}case .err(code):{return .err(fail(3,observation_code(code),0,0));}};
+    while(i<grouping::count(ref grouped)){let u=grouping::at(ref grouped,i);let problem=append(p,ids,plan,sources,metadata,u.first,u.stop,0,d,ref mut seen,ref mut sites,ref mut ranges,ref mut borrow_seen,ref mut progress,work);if(problem.code!=0){return .err(problem);}i+=1;}if(progress.files!=v::len<syntax::Parsed>(sources)){return .err(fail(4,1001,0,progress.files));}
+    let code=tables(p,d,ref mut seen,work);if(code!=0){return .err(fail(4,code,0,progress.files));}
+    let borrows=switch(observation_work::seal(sites,ranges,ref borrow_seen,work)){case .ok(p):{p}case .err(code):{return .err(fail(4,observation_code(code),0,progress.files));}};return .ok(Covered{.borrows,.stats=Stats{.files=progress.files,.units=progress.units,.retries=progress.retries,.frames=ir::count(p),.types=clean::type_count(ir::cleanup_ir(p)),.layouts=ir::layout_count(p),.fields=ir::field_count(p),.cleanup_fields=clean::field_count(ir::cleanup_ir(p)),.callables=ir::callable_count(p),.parameters=ir::parameter_count(p),.names=ir::name_bytes(p)}});
 }

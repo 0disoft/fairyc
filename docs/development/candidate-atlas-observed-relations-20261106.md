@@ -888,3 +888,15 @@ source pack cases under both profiles pass: 42 new commands without selected
 skips. The linked plan records source/image hashes and separate validation scope.
 Borrows, broader source/command work and every original final gate remain open.
 Native Linux stays batched; no push or dispatch.
+
+## Complete-owned borrow prerequisite
+
+The checked-body borrow collector now feeds immutable per-frame observations into
+the actual unit/project Complete owner and exact linker alias map. Unit and whole
+project artifact admission reconstruct them from current source checks rather than
+serializing trusted semantic metadata. Separate work histories and joined-project
+capacity controls preserve the existing compiler/artifact limits. The independent
+twenty-eight-family cold/restore source matrix and exact Windows results are in
+`candidate-atlas-borrow-observations-20261106.md`. This closes retention and source
+restoration only; final borrow map/count/completeness/commands, the complete broader
+implementation queue and all final acceptance gates remain open. Linux stays batched.

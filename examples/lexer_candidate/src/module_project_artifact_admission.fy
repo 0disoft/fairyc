@@ -17,12 +17,15 @@ import module_program_artifact_wire as budget;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
+import module_borrow_observations as observations;
+import module_artifact_borrow_observations as observation_work;
 
 pub struct Problem {u32 stage;u32 code;compile::Problem source;}
 pub struct Stats {coverage::Stats coverage;usize states;usize sdk_units;usize sdk_bytes;}
 // One retained IR owner passes every source/body/state/SDK gate before escaping.
 // It is still separate from Complete's public interfaces and cache publication.
-pub resource Admitted {ir::Program program;identities::Snapshot identities;bindings::Bindings provenance;Stats stats;cleanup{}}
+pub resource Admitted {ir::Program program;identities::Snapshot identities;bindings::Bindings provenance;observations::Table borrows;Stats stats;cleanup{}}
+pub fn ref observations::Table borrows(ref Admitted p){return ref p.borrows;}
 pub fn ref ir::Program program(ref Admitted p){return ref p.program;}
 pub fn ref identities::Snapshot source_identities(ref Admitted p){return ref p.identities;}
 pub fn ref bindings::Bindings source_provenance(ref Admitted p){return ref p.provenance;}
@@ -49,5 +52,6 @@ pub fn Result<Admitted,Problem> build(ir::Program program,ref current::Rebound s
     let ids=switch(copy_ids(current::source_identities(selected),ir::cleanup_ir(ref program),work)){case .ok(p):{p}case .err(code):{return .err(fail(5,code));}};
     measured=0;let stamps=switch(bindings::copy(current::provenance(selected),ref mut measured)){case .ok(p):{p}case .err(code):{if(!budget::charge(work,measured)){return .err(fail(5,1002));}return .err(fail(5,translated(code)));}};if(!budget::charge(work,measured)){return .err(fail(5,1002));}
     let sdk_stats=sdk::stats(ref sdk);let stats=Stats{.coverage=coverage::stats(ref covered),.states=states::count(ref state),.sdk_units=sdk_stats.units,.sdk_bytes=sdk_stats.bytes};
-    if(!budget::charge(work,1)){return .err(fail(6,1002));}return .ok(Admitted{.program,.identities=ids,.provenance=stamps,.stats});
+    let borrows=switch(observation_work::copy(coverage::borrows(ref covered),work)){case .ok(p):{p}case .err(code):{return .err(fail(6,if(code==3){1002}else if(code==2){1003}else{1001}));}};
+    if(!budget::charge(work,1)){return .err(fail(6,1002));}return .ok(Admitted{.program,.identities=ids,.provenance=stamps,.borrows,.stats});
 }

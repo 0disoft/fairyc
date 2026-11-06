@@ -95,3 +95,8 @@ owner is private and is not added to the serialized IR or cache wire format.
 Complete-bound ordinary/generic/cleanup publication, cache/restoration metadata,
 counts/completeness and actual commands remain required. All broader and final
 acceptance work remains open; native Linux stays batched.
+
+The subsequent [Complete/restore prerequisite](candidate-atlas-borrow-observations-20261106.md)
+retains exact observations through unit/project frame remapping and fresh artifact
+admission. Its separate receipt supersedes only the Complete-bound retention gap;
+final borrow map/count/completeness and actual command acceptance remain open.

@@ -56,6 +56,15 @@ authorized by this queue.
 
 ## Progress
 
+- Borrow observations now attach to the actual Complete owner, follow every linker
+  alias and reconstruct from current checks on unit/project artifact restoration.
+  The independent twenty-eight-family source matrix checks exact ordinary/generic/
+  cleanup facts, cold/restored equality and executable unit re-encoding. Work-fold
+  boundaries and an accidental 65,536 cumulative-project cap are covered separately;
+  see `candidate-atlas-borrow-observations-20261106.md` for final Windows receipts.
+  Borrow map/count/completeness/commands, broader implementation and every final
+  gate remain open. Native Linux stays batched; no push or dispatch.
+
 - Fairy checked-body semantic borrow retention and private single/batch collection
   pass twenty-seven independent Go source families and twenty controls per Windows
   profile in 77.221s: ninety-four native processes without selected skips. Exact

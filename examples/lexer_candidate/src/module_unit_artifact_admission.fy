@@ -13,6 +13,8 @@ import module_catalog as catalog;
 import generic_source_plan as source;
 import syntax as syntax;
 import std::vec as v;
+import module_borrow_observations as observations;
+import module_artifact_borrow_observations as observation_work;
 
 // A saved unit never skips current body/Flow checking. It can skip lowering
 // only after complete source-recipe, metadata, state and SDK comparison.
@@ -28,10 +30,11 @@ fn Result<identified::Program,u32> restore_mode(ref u8[] raw,ref v::Vec<syntax::
     let saved=switch(if(aggregates){decoder::decode_aggregates(raw,artifact_work)}else{decoder::decode(raw,artifact_work)}){case .ok(p):{p}case .err(code):{return .err(code);}};
     if(clean::project(ir::cleanup_ir(ref saved)) || clean::aggregates(ir::cleanup_ir(ref saved))!=signatures::aggregate_types(metadata)){return .err(1001);}
     let checked=switch(compile::check_range(sources,metadata,first,stop)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
-    let current=switch(identified::build(saved,plan,sources,metadata,compile::checked_interfaces(ref checked),source_work)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
-    let snapshot=switch(ids::extract(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let program=identified::ir_program(ref current);
-    switch(coverage::checked_range(program,ref snapshot,plan,ref checked,sources,metadata,artifact_work)){case .ok(_):{}case .err(e):{return .err(e.code);}};
+    let current=switch(identified::prepare(saved,plan,sources,metadata,compile::checked_interfaces(ref checked),source_work)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
+    let snapshot=switch(ids::extract_core(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let program=identified::core_program(ref current);
+    let covered=switch(coverage::checked_range(program,ref snapshot,plan,ref checked,sources,metadata,artifact_work)){case .ok(p):{p}case .err(e):{return .err(e.code);}};
     switch(states::build(ir::state_layouts(program),sources,scope,artifact_work)){case .ok(_):{}case .err(code):{return .err(code);}};
     switch(sdk::build(ir::sdk_units(program),sources,scope,artifact_work)){case .ok(_):{}case .err(code):{return .err(code);}};
-    return .ok(current);
+    let rows=switch(observation_work::copy(coverage::borrows(ref covered),artifact_work)){case .ok(p):{p}case .err(code):{return .err(if(code==3){1002}else if(code==2){1003}else{1001});}};
+    return switch(identified::observed(current,rows)){case .ok(p):{.ok(p)}case .err(_):{.err(1001)}};
 }
