@@ -418,6 +418,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_body_hash.fy`, `module_state_graph_hash_context.fy`, `module_state_graph_hash_encoding.fy`
   - `internal/cli/candidate_state_graph_body_hash_test.go`
   - `docs/adr/0516-candidate-state-graph-body-hash.md`, `docs/development/candidate-state-graph-body-hash-20261107.md`
+- **Fairy exact current-source envelope and full canonical graph comparison before independent artifact revalidation; ordinary Complete/cache remains separate**
+  - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
+  - `internal/cli/candidate_state_graph_source_artifact_test.go`
+  - `docs/adr/0517-candidate-source-graph-artifact-binding.md`, `docs/development/candidate-state-graph-source-artifact-20261107.md`
 - **Explicit Fairy seven-codec layout declarations, isolated graph wire and current-source layout matching; Complete/cache admission remains separate**
   - `examples/lexer_candidate/src/module_state_layout.fy`, `module_state_declarations.fy`, `module_state_artifact.fy`, `module_project_artifact_state.fy`
   - `internal/cli/candidate_state_graph_layout_test.go`: independent Go canonical bytes, source/current/corruption/budget and original authored-layout replay

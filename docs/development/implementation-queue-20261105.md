@@ -1722,3 +1722,17 @@ authorized by this queue.
   signature/body ownership nor Complete/cache/commands/execution. Zero/multiple
   transaction hashing and every final gate remain separate. Linux stays batched;
   no push or dispatch. The full objective remains active.
+
+- The first Fairy source graph envelope now binds exact current source bytes
+  and freshly regenerated canonical graph facts before independent detached
+  decode/verification. The Windows low/optimized run passes in 21.633s: 80 native
+  requests and three owner refusals, covering stale source, valid graph splices,
+  corrupted/bounded framing, exact/one-short work and immutable caller lifetime.
+  Fresh whole-source `check` and `check --locked` pass 712 files / 8,866 MIR
+  functions; current source bytes match the checked copy. Final scoped vet,
+  formatting and hygiene pass. Six new slices plus the original graph regression
+  total 1,380 native processes and 20 ownership refusals; native helper skips remain
+  explicitly excluded. Receipt: `candidate-state-graph-source-artifact-20261107.md`.
+  Wider source locals/control/helpers/borrows, ordinary Complete/package/cache
+  binding, command/native persistence and all final gates remain open. Linux
+  stays batched; no push or dispatch. The complete objective remains active.
