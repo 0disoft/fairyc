@@ -110,3 +110,88 @@ pub fn Result<request::Snapshot,u32> snapshot(ref State state,ref mut Work work)
     var entries=v::empty<request::Entry>();var usize i=0;while(i<count(state)){let e=*v::at<Entry>(ref state.entries,i);if(!v::push<request::Entry>(ref mut entries,request::Entry{.key=e.key,.start=e.start,.end=e.end}).is_ok){return .err(1003);}i+=1;}
     return .ok(request::snapshot_of(state.identity.hash,state.identity.version,copied,entries));
 }
+
+pub struct Mutation{u32[8] key;usize start;usize end;bool deleted;bool was_null;}
+pub resource Mutations{bytes::Buffer data;v::Vec<Mutation> rows;cleanup{}}
+pub fn Mutations mutations_of(bytes::Buffer data,v::Vec<Mutation> rows){return Mutations{.data,.rows};}
+// Canonical owns a compact detached copy. Callers cannot forge its sortedness.
+pub resource Canonical{bytes::Buffer data;v::Vec<Mutation> rows;cleanup{}}
+pub fn usize mutation_count(ref Canonical writes){return v::len<Mutation>(ref writes.rows);}
+fn void index_swap(ref mut v::Vec<usize> indices,usize a,usize b){
+    let left=*v::at<usize>(indices,a);let right=*v::at<usize>(indices,b);
+    {let slot=v::at_mut<usize>(indices,a);*slot=right;}{let slot=v::at_mut<usize>(indices,b);*slot=left;}
+}
+fn i32 index_compare(ref Mutations writes,ref v::Vec<usize> indices,usize a,usize b){return compare(v::at<Mutation>(ref writes.rows,*v::at<usize>(indices,a)).key,v::at<Mutation>(ref writes.rows,*v::at<usize>(indices,b)).key);}
+fn bool sift(ref Mutations writes,ref mut v::Vec<usize> indices,usize root,usize end,ref mut Work work){
+    var usize at=root;while(at<end/2){if(!charge(work,1)){return false;}var usize child=at*2+1;
+        if(child+1<end && index_compare(writes,indices,child,child+1)<0){child+=1;}
+        if(index_compare(writes,indices,at,child)>=0){break;}index_swap(indices,at,child);at=child;
+    }return true;
+}
+pub fn Result<Canonical,u32> canonical(ref Mutations writes,Limits limits,ref mut Work work){
+    let code=ready(limits,work);if(code!=0){return .err(code);}let n=v::len<Mutation>(ref writes.rows);if(n>limits.entries){return .err(1002);}
+    var usize total=0;var usize i=0;
+    // Admit every span and aggregate bound before allocating or copying payloads.
+    while(i<n){if(!charge(work,1)){return .err(1002);}let e=*v::at<Mutation>(ref writes.rows,i);
+        if(e.start>e.end || e.end>bytes::len(ref writes.data) || (e.deleted || e.was_null) && e.start!=e.end){return .err(1001);}
+        let size=e.end-e.start;if(size>limits.value || size>limits.bytes-total){return .err(1002);}total+=size;i+=1;
+    }
+    var indices=v::empty<usize>();i=0;while(i<n){if(!charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut indices,i).is_ok){return .err(1003);}i+=1;}
+    // Bounded heapsort of indices: O(N log N), O(N) metadata, no caller mutation.
+    i=n/2;while(i>0){i-=1;if(!sift(writes,ref mut indices,i,n,work)){return .err(1002);}}
+    i=n;while(i>1){i-=1;if(!charge(work,1)){return .err(1002);}index_swap(ref mut indices,0,i);if(!sift(writes,ref mut indices,0,i,work)){return .err(1002);}}
+    i=1;while(i<n){if(!charge(work,1)){return .err(1002);}if(index_compare(writes,ref indices,i-1,i)==0){return .err(1001);}i+=1;}
+    if(!byte_charge(work,total)){return .err(1002);}var data=bytes::empty();var rows=v::empty<Mutation>();i=0;
+    while(i<n){if(!charge(work,1)){return .err(1002);}let e=*v::at<Mutation>(ref writes.rows,*v::at<usize>(ref indices,i));let start=bytes::len(ref data);
+        if(!bytes::append(ref mut data,bytes::view(ref writes.data)[e.start..e.end]).is_ok || !v::push<Mutation>(ref mut rows,Mutation{.key=e.key,.start,.end=start+(e.end-e.start),.deleted=e.deleted,.was_null=e.was_null}).is_ok){return .err(1003);}i+=1;
+    }return .ok(Canonical{.data,.rows});
+}
+fn Result<bytes::Buffer,u32> copied(ref u8[] raw,ref mut Work work){
+    if(!byte_charge(work,raw.len)){return .err(1002);}return switch(bytes::copy(raw)){case .ok(p):{.ok(p)}case .err(_):{.err(1003)}};
+}
+fn Result<usize,u32> entry_copy(ref mut bytes::Buffer data,ref mut v::Vec<Entry> entries,u32[8] key,ref u8[] raw,bool was_null,Limits limits,ref mut Work work){
+    if(!charge(work,1) || v::len<Entry>(entries)>=limits.entries || raw.len>limits.value || bytes::len(data)>limits.bytes || raw.len>limits.bytes-bytes::len(data) || !byte_charge(work,raw.len)){return .err(1002);}
+    let start=bytes::len(data);if(!bytes::append(data,raw).is_ok || !v::push<Entry>(entries,Entry{.key,.start,.end=start+raw.len,.was_null}).is_ok){return .err(1003);}return .ok(v::len<Entry>(entries));
+}
+fn Result<State,u32> cloned(ref State current,bytes::Buffer head,u32[8] hash,usize generation,Limits limits,ref mut Work work){
+    var data=bytes::empty();var entries=v::empty<Entry>();var usize i=0;
+    while(i<count(current)){discard entry_copy(ref mut data,ref mut entries,key(current,i),value(current,i),is_null(current,i),limits,work)?;i+=1;}
+    let out=State{.prefix=head,.identity=Identity{.hash,.version=generation},.data,.entries};
+    discard encode(ref out,limits,work)?;return .ok(out);
+}
+pub fn Result<State,u32> apply(ref State current,u32[8] expected_layout,usize expected_version,ref Canonical writes,Limits limits,ref mut Work work){
+    let code=ready(limits,work);if(code!=0){return .err(code);}let n=mutation_count(writes);if(n>limits.entries || bytes::len(ref writes.data)>limits.bytes){return .err(1002);}
+    var usize j=0;while(j<n){if(!charge(work,1)){return .err(1002);}let e=*v::at<Mutation>(ref writes.rows,j);if(e.end-e.start>limits.value){return .err(1002);}j+=1;}
+    if(compare(expected_layout,current.identity.hash)!=0){return .err(1004);}if(expected_version!=version(current)){return .err(1005);}
+    if(n!=0 && expected_version==18446744073709551615){return .err(1006);}let head=copied(bytes::view(ref current.prefix),work)?;
+    if(n==0){return cloned(current,head,current.identity.hash,version(current),limits,work);}
+    var data=bytes::empty();var entries=v::empty<Entry>();var usize i=0;j=0;
+    while(i<count(current) || j<n){if(!charge(work,1)){return .err(1002);}var i32 order=1;
+        if(i<count(current)){order=if(j<n){compare(key(current,i),v::at<Mutation>(ref writes.rows,j).key)}else{-1};}
+        if(order<0){discard entry_copy(ref mut data,ref mut entries,key(current,i),value(current,i),is_null(current,i),limits,work)?;i+=1;}
+        else{let e=*v::at<Mutation>(ref writes.rows,j);if(!e.deleted){discard entry_copy(ref mut data,ref mut entries,e.key,bytes::view(ref writes.data)[e.start..e.end],e.was_null,limits,work)?;}j+=1;if(order==0){i+=1;}}
+    }
+    // Admission includes JSON/base64/checksum expansion, not just raw value size.
+    let out=State{.prefix=head,.identity=Identity{.hash=current.identity.hash,.version=expected_version+1},.data,.entries};
+    discard encode(ref out,limits,work)?;return .ok(out);
+}
+fn usize marker(ref u8[] raw,ref u8[] text,usize start){var usize i=start;while(i<=raw.len && text.len<=raw.len-i){if(bytes::equal(raw[i..i+text.len],text)){return i;}i+=1;}return raw.len;}
+fn bool extends_prefix(ref u8[] old,ref u8[] next){
+    // Both inputs are privately generated canonical prefixes. Skip only layoutHash;
+    // all ordered field bytes (including derived Prefix and Index) must match.
+    let a=marker(old,b",\"layoutHash\":",0);let b=marker(next,b",\"layoutHash\":",0);
+    if(a==old.len || b!=a || !bytes::equal(old[..a],next[..b])){return false;}
+    let x=marker(old,b",\"fields\":",a);let y=marker(next,b",\"fields\":",b);if(x==old.len || y==next.len || old.len<11 || next.len<11){return false;}
+    let fields=old[x+10..old.len-11];let after=next[y+10..next.len-11];
+    if(bytes::equal(fields,b"null")){return true;}if(fields.len<2 || after.len<fields.len || after[0]!=91){return false;}
+    let end=fields.len-1;return bytes::equal(fields[..end],after[..end]) && (after[end]==93 || after[end]==44);
+}
+pub fn Result<State,u32> upgrade(ref State current,u32[8] expected_layout,usize expected_version,ref layout::Plan next,usize selected,Limits limits,ref mut Work work){
+    let code=ready(limits,work);if(code!=0){return .err(code);}let head=prefix(next,selected,limits,work)?;
+    if(compare(expected_layout,current.identity.hash)!=0){return .err(1004);}if(expected_version!=version(current)){return .err(1005);}
+    let hash=layout::at(next,selected).hash;if(compare(hash,current.identity.hash)==0){return cloned(current,head,hash,expected_version,limits,work);}
+    // Charge separately so ledger exhaustion is never reported as incompatibility.
+    if(!byte_charge(work,bytes::len(ref current.prefix)+bytes::len(ref head))){return .err(1002);}
+    if(!extends_prefix(bytes::view(ref current.prefix),bytes::view(ref head))){return .err(1007);}
+    if(expected_version==18446744073709551615){return .err(1006);}return cloned(current,head,hash,expected_version+1,limits,work);
+}

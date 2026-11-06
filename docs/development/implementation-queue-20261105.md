@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy local-state canonical mutation preparation now accepts unsorted rows
+  without caller mutation, rejects duplicates before I/O and merges in linear
+  time after bounded index sorting. Nil/empty values, exact no-op/nonempty/MAX
+  version behavior and append-only schemas match the Go oracle. Independent
+  current-schema reconstruction retains structural-only authority until full
+  record decode. Parallel worker evidence includes 65,536-row sorting and
+  89 header fixtures/profile with an over-8MiB record; final record/schema
+  regressions and exact commit-scope check/locked check pass at 746 files /
+  9,377 MIR functions. See ADR 0537 and
+  `candidate-local-state-mutations-20261107.md`. Actual Windows provider/native
+  orchestration and final gates remain open. Linux stays batched; no push or
+  dispatch. Full objective remains active.
+
 - Fairy now retains a fixed rooted local-state lock authority and acquires
   independent nonblocking one-byte Windows leases against the same file/volume
   identity. Parallel worker evidence covers Go/Fairy/process contention, normal/

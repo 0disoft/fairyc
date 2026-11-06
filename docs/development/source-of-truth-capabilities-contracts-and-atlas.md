@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Fairy canonical local-state mutations and current schema**: `examples/lexer_candidate/src/module_state_local_codec.fy`, `module_state_local_schema.fy`, `internal/cli/candidate_state_local_overlay_test.go`, `candidate_state_local_schema_test.go`. Unsorted canonical mutation ownership, linear merge, append-only versioning and structural-only header admission: ADR 0537 and `docs/development/candidate-local-state-mutations-20261107.md`.
+
 - **Fairy rooted Windows state-lock authority**: `examples/lexer_candidate/src/windows_rooted_file.fy`, `native_runtime_contract.fy`, `native_runtime_asset_pin.fy`, `internal/candidatehost/windows_rooted_file.c` and its closed selector; actual contention/process-death/identity/cleanup and legacy-rooted tests in `internal/cli/candidate_state_local_lock_test.go`, full runtime byte comparisons in `candidate_https_windows_test.go`. Lock-only scope and actual remaining provider/CAS: ADR 0536 and `docs/development/candidate-local-state-lock-20261107.md`.
 
 - **Fairy local-state canonical record compatibility**: `examples/lexer_candidate/src/module_state_local_codec.fy`, `module_state_local_base64.fy`, immutable Snapshot accessors in `module_state_graph_request.fy`; independent Go disk-byte, base64, limits and owner checks in `internal/cli/candidate_state_local_codec_test.go`, `candidate_state_local_base64_test.go`. Record-only authority and remaining actual storage/CAS: ADR 0535 and `docs/development/candidate-local-state-codec-20261107.md`.
