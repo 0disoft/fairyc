@@ -1839,3 +1839,14 @@ authorized by this queue.
   for this family. Actual graph disk file lookup/publication/retention, ordinary
   workspace commands, native execution/persistence and final gates remain open.
   Linux stays batched; no push or dispatch. Full objective stays active.
+
+- The existing rooted raw disk store now transports FYSGCAC0 alongside unchanged
+  ordinary/aggregate markers. Sol high sidecar work passes eight Windows native
+  transport cases in 8.293s plus the existing two-profile ordinary cache replay
+  in 22.994s. Actual byte/generation integrity, no-replace collision repair,
+  retention and handle/stage cleanup pass. Complete-source check/locked check
+  pass 721 files / 9,013 MIR functions. Receipt
+  `candidate-state-graph-disk-transport-20261107.md` records preparation failures.
+  Raw transport grants no graph admission; route binding and actual graph cache
+  integration remain separate. Linux stays batched; no push or dispatch. The
+  full implementation objective remains active.

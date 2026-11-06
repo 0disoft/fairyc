@@ -432,6 +432,10 @@ Part 3 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_state_graph_source_artifact.fy`
   - `internal/cli/candidate_state_graph_source_artifact_test.go`
   - `docs/adr/0517-candidate-source-graph-artifact-binding.md`, `docs/development/candidate-state-graph-source-artifact-20261107.md`
+- **Existing rooted byte store transports ordinary/aggregate/graph envelopes with unchanged publication and retention**
+  - `examples/lexer_candidate/src/project_cache_disk.fy`
+  - `internal/cli/candidate_state_graph_disk_transport_test.go`
+  - `docs/adr/0524-candidate-state-graph-disk-transport.md`, `docs/development/candidate-state-graph-disk-transport-20261107.md`
 - **Key-bound state-graph cache transport; current-source Complete restoration and fresh complete-key comparison**
   - `examples/lexer_candidate/src/project_state_graph_cache_artifact.fy`
   - `internal/cli/candidate_state_graph_cache_artifact_test.go`
