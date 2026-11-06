@@ -67,6 +67,14 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy now encodes copied immutable graph requests with whole-request SHA256,
+  canonical known cells, opaque other keys and exact Go wire bytes. Windows
+  low/optimized cover all seven codecs, full-width limits, exact 65,536-entry/
+  16 MiB payload ceilings and work/ownership controls. The structural packet
+  confers no execution authority; prepared-owner wrapping, response admission
+  and persistent CAS retain separate gates. See ADR 0531 and
+  `candidate-state-graph-request-20261107.md`.
+
 - Fairy graph framing now has memoized saturated work/literal bounds and the
   sorted native-codec cell table, plus an exact hash-pinned C-frame bundle.
   Windows low/optimized pass independent plan/source/ownership controls. These
