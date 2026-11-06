@@ -67,6 +67,15 @@ authorized by this queue.
 
 ## Progress
 
+- Native state step 3 now has a real multi-key physical overlay C core with all
+  seven canonical codec validators. Windows low/optimized match 9,556 independent
+  Go codec decisions and 26 complete multi-field/map overlay scenarios, including
+  exact policy failures, repeated replacement, immutable snapshots, self-view/key
+  aliases, close/abort and SIZE_MAX refusal (1.727s). The compiler emitter, wider
+  transport/CAS, graph/helper/borrow and source/native CLI/cache integrations are
+  still required. This does not complete the native-state row or replace the full
+  queue with runtime-only acceptance. See `architecture/native-state-overlay-v1.md`.
+
 - Single-cell native state now executes through the existing persistence port:
   opaque compilation, one snapshot, one actual C execution and at most one CAS,
   with complete response/receipt checks, explicit conflicts and no retry. Real
