@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Authored state developer command argument admission**: `examples/lexer_candidate/src/module_state_command_options.fy`, `internal/cli/candidate_state_command_options_test.go`; pure existing native-graph syntax, detached scalar choices and bounded pre-I/O refusal in `docs/development/candidate-state-command-options-20261107.md`. Actual authored command entry/reporting remains separate.
+
 - **Fairy Windows one-attempt persistent graph execution**: `examples/lexer_candidate/src/module_state_graph_windows_persistent.fy`, `internal/cli/candidate_state_graph_windows_persistent_test.go`. Real Built-backed execution and rooted CAS, owned response/error causes, Go reopen: ADR 0539 and `docs/development/candidate-windows-persistent-state-graphs-20261107.md`. Ordinary CLI, cancellation and broader final acceptance remain separate.
 
 - **Fairy Windows local-state persistence provider**: `examples/lexer_candidate/src/module_state_local_windows.fy`, `internal/cli/candidate_state_local_windows_test.go`. Actual rooted snapshot/overlay/layout CAS, sync/rename decision, Go reopen and two-process conflict: ADR 0538 and `docs/development/candidate-windows-local-state-provider-20261107.md`. Compiled graph binding and cancellation remain separate.

@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- The authored state developer command now has pure bounded admission for the
+  existing explicit seven-argument native-graph invocation and standalone help.
+  Scalar options survive argv destruction; unsupported Go-MIR defaults cannot
+  silently become native execution. Parallel Windows low/optimized tests pass
+  232 independent parser cases. Exact commit-scope source/lock checks pass 749
+  files / 9,433 MIR functions. See
+  `candidate-state-command-options-20261107.md`. Actual entry, source/report
+  binding, cancellation and final acceptance remain required; no public main
+  CLI surface or completed native-state row is inferred. Linux stays batched.
+
 - A separate parallel worker adds a bounded Linux replay planner/collector over
   existing concrete Go test roots. Default planning invokes no subprocess;
   explicit Linux execution records raw argv/output/exit and skip/partial/error
