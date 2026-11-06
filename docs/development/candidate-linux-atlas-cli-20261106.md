@@ -261,3 +261,48 @@ Pack/edit selection, native Linux filesystem/lock/publication, pipe/signal
 behavior, broader source-family parity and every final acceptance gate remain
 open. Public CLI policies, SDK ABI, DB, dependency, timeout, CI/runner and
 repository rules remain unchanged; no push, hosted dispatch, release or deployment.
+
+## Context pack command
+
+Linux experimental mode 5 selects `project_pack_cli::arguments_with_help`.
+The original `arguments()` continues to select default help. Overview/show/around
+share the existing current-source producer, v1/v2/v3 schema selection, exact
+package/symbol identity, direction/relation filters, traversal/selection/output
+budgets and lock policy. Linux help carries the three exact Go-owned command
+lines, checked by `TestLinuxCLIHelp` independently of the Fairy output data.
+
+`TestLinuxAtlasPackCommand` reuses the existing independent Go partition/pack
+oracle and ordinary command fixture. Both default and Linux-help entries are
+checked in the same per-profile Windows image through a test-only prefix, with
+all three help aliases at direct and overview/show/around positions. The prefix
+is absent from production dispatch. The actual query checks retain v1/v2/v3,
+all directions, exact/one-short/one-over output ceilings, invalid selectors,
+selection/depth/relation policy, source-lock preservation/refusal and unlocked
+refresh. `checkLinuxAtlasPack` attaches the same verifier to the existing native
+Linux full-CLI image without adding a compiler or companion build.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 15m -v ./internal/cli -run '^(TestLinuxAtlasPackCommand|TestLinuxCLIHelp)$'
+go test -mod=readonly -count=1 -timeout 5m -v ./internal/cli -run '^(TestLinuxFileCLI|TestLinuxFetchCommand)$'
+python -B tools/prepare-candidate-linux-cli.py --output .cache/linux-atlas-pack-20261106
+```
+
+Current original check/locked passes 698 files / 8,643 MIR functions; freshly
+prepared Linux check/locked passes 698 / 8,644. Both-target full-entry emission
+and closed Linux support selection pass with 25 C partitions and a 2,032,407-byte
+header. Portable dispatch passes in 5.67s; the outer full-entry test takes 32.22s
+and explicitly skips native Linux execution. Its combined fetch/full-entry
+regression command exits 0 in 62.466s; fetch passes both profiles in 29.92s.
+
+The final pack/help command exits 0 in 419.539s. Pack takes 419.42s: low
+336.66s and optimized 69.86s. Each profile executes 48 independent Go-oracle
+query/error/lock cases, twelve Linux-help cases and twelve default-help cases:
+144 generated command executions with empty PATH, without selected command
+skips. The independent command-help contract comparison also passes. Scoped
+vet, Go formatting, UTF-8/LF/final-newline and diff checks pass. No product
+compilation or runtime deadline is relaxed.
+
+Edit selection, native Linux filesystem/lock/publication and stdio/signal
+behavior, broader source-family parity and every final acceptance gate remain
+open. Public CLI policy, SDK ABI, DB, dependencies, product deadlines, CI/runners
+and repository policy remain unchanged; no push, dispatch, release or deployment.

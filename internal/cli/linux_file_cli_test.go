@@ -48,6 +48,8 @@ fn i32 cli_probe() {
     assert(linux_experimental::command(b"atlas-symbols")==3 && linux_experimental::command(b"atlas-symbols-extra")==0);
     assert(linux_experimental::command(b"atlas-symbols\n")==0 && linux_experimental::command(b"atlas-calls")==4);
     assert(linux_experimental::command(b"atlas-calls-extra")==0 && linux_experimental::command(b"atlas-calls\n")==0);
+    assert(linux_experimental::command(b"atlas-pack")==5 && linux_experimental::command(b"atlas-pack-extra")==0);
+    assert(linux_experimental::command(b"atlas-pack\n")==0 && linux_experimental::command(b"atlas-edit")==0);
     assert(linux_experimental::command(b"atlas-impact-extra")==0 && linux_experimental::command(b"atlas-impact\n")==0);
     assert(file_cli::command(b"--c-file",3)==4 && file_cli::command(b"unknown",2)==0);
     assert(file_cli::command(b"--c-file",2)==0 && file_cli::command(b"--c-file",4)==0);
@@ -209,6 +211,7 @@ fn i32 cli_probe() {
 			checkLinuxAtlasMCP(t, artifact)
 			checkLinuxAtlasSymbols(t, artifact)
 			checkLinuxAtlasCalls(t, artifact)
+			checkLinuxAtlasPack(t, artifact)
 			checkLinuxCEmission(t, toolchain, artifact)
 		})
 	}

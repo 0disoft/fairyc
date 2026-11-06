@@ -30,11 +30,11 @@ authorized by this queue.
   match in Windows low/optimized, including feature macro/source order. Native
   compilation, trusted TLS and consecutive Linux self-build remain pending. See
   `candidate-linux-runtime-sync-20261106.md`.
-- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols to the
+- [ ] Linux experimental Atlas command selection: connect impact/MCP/edit/symbols/calls/pack to the
   Linux entry and select compatible host facades before the combined native replay.
-  Impact/MCP/symbol/call dispatch, Linux help and shared current-source queries are connected;
+  Impact/MCP/symbol/call/pack dispatch, Linux help and shared current-source queries are connected;
   Windows command/full-entry evidence and the authored native replay are in
-  `candidate-linux-atlas-cli-20261106.md`. Pack/edit remain open;
+  `candidate-linux-atlas-cli-20261106.md`. Edit remains open;
   native stdio/default-SIGPIPE/closed-pipe behavior also needs explicit replay.
 - [ ] Generated-C/native persistent state execution through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
@@ -66,6 +66,16 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Linux pack now selects the shared current-source overview/show/around owner
+  with Linux help. Both Windows profiles pass 48 independent Go-oracle query/
+  error/lock cases plus 24 help cases each: 144 generated command executions.
+  Exact v1/v2/v3, direction/relation, byte/depth limits, locked preservation and
+  actual unlocked refresh retain the existing policy. Current full entry emits
+  both targets and passes portable dispatch; fetch regression, original/prepared
+  check/locked, independent Go help policy and scoped vet pass. Exact accounting
+  is in `candidate-linux-atlas-cli-20261106.md`. Edit, native Linux replay,
+  broader source-family parity and every final gate remain open.
 
 - Linux calls now selects the shared current-source call owner and injected Linux
   help, preserving default entry signatures and query policy. Both Windows
