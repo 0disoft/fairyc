@@ -116,6 +116,9 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	} {
 		fixtures = append(fixtures, fixture{"reachable-" + call.name, writeWorkspaceSessionFixture(t, call.source), 1, nil})
 	}
+	for _, allocation := range atlasAllocationProductionFixtures() {
+		fixtures = append(fixtures, fixture{"sdk-allocations-" + allocation.name, writeWorkspaceSessionFixture(t, allocation.source), allocation.minimum, nil})
+	}
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {
@@ -231,6 +234,18 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 						}
 						if !foundMoves || slices.Contains(h.Omissions, "moves:unavailable:candidate-atlas-not-collected") {
 							t.Fatal("source move completeness missing or omitted")
+						}
+						foundAllocations := false
+						for _, r := range got.Completeness() {
+							if r.Relation == "allocates" {
+								foundAllocations = true
+								if r.Status != semanticsnapshot.CompletenessExact || r.Resolved != 0 || r.External != 0 || r.Unknown != 0 || len(r.Reasons) != 0 {
+									t.Fatalf("incorrect source allocation completeness: %+v", r)
+								}
+							}
+						}
+						if !foundAllocations || slices.Contains(h.Omissions, "allocates:unavailable:candidate-atlas-not-collected") {
+							t.Fatal("source allocation completeness missing or omitted")
 						}
 						if !reflect.DeepEqual(got.Declarations(), want.Declarations()) || !reflect.DeepEqual(got.Symbols(), want.Symbols()) {
 							a, b := got.Declarations(), want.Declarations()

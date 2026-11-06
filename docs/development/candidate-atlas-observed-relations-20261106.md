@@ -1,7 +1,7 @@
 # Fairy Atlas observed relations, 2026-11-06
 
 Part of the complete implementation queue. Current source production collects
-calls, drops, trap categories, unsafe sites and moves and declares other families unavailable. A
+calls, drops, trap categories, unsafe sites, moves and Region allocations and declares other families unavailable. A
 checked collector alone must not promote that production/completeness scope or
 finish the broader queue.
 Native Linux remains batched; no push, dispatch or release is authorized here.
@@ -806,3 +806,58 @@ UTF-8/LF/final-newline and diff checks pass. Source-call multiplicity is clarifi
 in the snapshot contract; no schema/API/ABI, cache format, dependency, DB,
 timeout, runner or repository-policy change. Fairy collector/production and
 every broader/final gate remain open; native Linux stays batched, no push/dispatch.
+
+## Complete-bound allocation production
+
+`project_atlas_calls` collects verified Region allocation sites for the complete
+program and retains each frame's canonical range in ordinary, specialized and
+concrete cleanup summaries. Source coordinates use the frame owner's original
+module and the full written Region call expression, including zero-byte and
+byte-copy calls. A completed allocation operand survives a later trapping
+argument; an allocation after an earlier terminal operand does not appear.
+Arena/SystemHeap creation does not become a Region allocation observation.
+
+`project_atlas_produce` includes these sites in header relation counts.
+`project_atlas_header` marks only `allocates` newly exact and removes only its
+unavailable omission. Non-call completeness counters remain zero under the
+existing map contract; error propagation, borrows and other uncollected classes
+remain explicitly unavailable. There is no map schema or checksum change.
+
+The independent Go source inventory has five families: ordinary (four sites),
+partial operand order (one), concrete generic (two), concrete cleanup (three),
+and loop/Result (two). The first, second and fifth admit v1/v2/v3; generic needs
+v2 and cleanup needs v3. `TestAtlasAllocationProductionSources` freezes all
+fifteen admission/count observations before any Fairy map is read. The source
+version producer then compares exact original Go spans, declarations, symbols,
+specializations and relation counts, checks current-source and join admission,
+and rejects unsupported older schemas without changing source bytes.
+
+The pack oracle retains original Go allocation sites rather than replacing them
+with empty arrays or learning counts from candidate output. Five new SDK pack
+fixtures select ordinary, partially evaluated, generic, cleanup and loop/Result
+owners through the real authored main. Each compares overview/show/around
+against independently scoped Go encoders and checks unchanged workspace bytes.
+
+The standalone Go source inventory passes in 1.375s. Full optimized source/version
+production passes in 147.252s: 113 native processes and 183 independently checked
+current maps, including all five allocation families. The six selected actual
+optimized CLI groups pass in 267.342s, including all fifteen new allocation pack
+commands. Logs: `.cache/atlas-allocation-production-sources-20261106.log`,
+`atlas-allocation-production-optimized-20261106.log` and
+`atlas-allocation-cli-optimized-20261106.log` in the same cache directory.
+
+The same five allocation source families pass every v1/v2/v3 selection under
+low, with no selected skips: bounded parents finish in 692.323s and 711.491s,
+fifteen native processes and 36 current maps. Combined source production proves
+128 native processes and 219 current maps; only the optimized parent includes
+the full pre-existing source corpus. Low actual allocation pack replay remains
+in progress, separately from map/current/join admission. Exact commands, scope,
+image digests and interrupted-run accounting:
+`docs/ops/windows-candidate-atlas-allocations-20261106.md`.
+
+Full Go atlasmap/contextpack/semanticsnapshot suites pass (2.284s/0.253s/0.210s),
+and scoped CLI vet passes. Both-profile source and command scope is recorded in
+the allocation command receipt. Broader source/CLI/generated-consumer work,
+remaining collectors, consecutive self-build, distribution/clean-machine,
+same-commit hosted and native Linux acceptance remain separate open gates.
+Native Linux stays batched; no push or dispatch.

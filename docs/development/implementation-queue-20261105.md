@@ -56,6 +56,18 @@ authorized by this queue.
 
 ## Progress
 
+- Complete-bound Region allocation production retains original full-call spans
+  in ordinary, generic and concrete cleanup summaries, relation counts and exact
+  allocates completeness. Windows source/version/current/join comparisons pass
+  128 native processes and 219 independent maps; all five allocation source
+  families pass every version selection under both profiles, while optimized
+  also replays the full existing source corpus. Six selected actual optimized
+  CLI groups pass, including fifteen new allocation pack commands. Low actual
+  pack acceptance is still running and is not included in those passes. See
+  `docs/ops/windows-candidate-atlas-allocations-20261106.md`. Error/borrow
+  collectors, broader source/command work and every original final gate stay
+  open; native Linux remains batched, no push or dispatch.
+
 - Fairy verified CFG Region allocation collection now retains full original
   call spans and terminal-operand reachability in ordinary, generic and cleanup
   frames. Twenty independent source cases and twenty frame/work/count controls

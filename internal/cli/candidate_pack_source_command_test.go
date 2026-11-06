@@ -60,18 +60,32 @@ func verifyCandidatePackSourceCommand(t *testing.T, image string) {
 
 func verifyCandidatePackSDKCommand(t *testing.T, image string) {
 	t.Helper()
-	for _, fixture := range []struct {
-		name, source string
-		version      int
-	}{
-		{"ordinary-sdk", atlasSDKCommandSource, 1},
-		{"used-vector", candidateAtlasSDKVectorUsedSource, 3},
-	} {
+	type fixture struct {
+		name, source, subject string
+		version               int
+	}
+	fixtures := []fixture{
+		{"ordinary-sdk", atlasSDKCommandSource, "main", 1},
+		{"used-vector", candidateAtlasSDKVectorUsedSource, "main", 3},
+	}
+	for _, allocation := range atlasAllocationProductionFixtures() {
+		subject := "exercise"
+		switch allocation.name {
+		case "operand-order":
+			subject = "before"
+		case "generic":
+			subject = "put"
+		case "cleanup":
+			subject = "Wrap"
+		}
+		fixtures = append(fixtures, fixture{"allocations-" + allocation.name, allocation.source, subject, allocation.minimum})
+	}
+	for _, fixture := range fixtures {
 		t.Run(fixture.name, func(t *testing.T) {
 			root := writeWorkspaceSessionFixture(t, fixture.source)
 			candidateCallsCommandSetup(t, root)
 			f := candidatePackCommandFixture(t, image, root, fixture.version)
-			q := candidatePackCommandControls(t, f, "main")
+			q := candidatePackCommandControls(t, f, fixture.subject)
 			before := remoteTree(t, root)
 			for _, action := range []string{"overview", "show", "around"} {
 				checkCandidatePackCommand(t, image, root, f, q, action, true)

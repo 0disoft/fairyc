@@ -13,10 +13,10 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 )
 
-// The source producer currently collects calls, drops, trap categories, unsafe sites and moves. Catalog/call output never
-// exposed the Go oracle's other body facts, but packs expose their counts and
-// node summaries too. Project that explicitly declared scope before querying;
-// retain every original Go declaration, call, drop, trap category, unsafe span, move span and specialization identity.
+// The producer collects calls, drops, traps, unsafe sites, moves and allocations.
+// Packs expose these counts and summaries. Project only the explicitly declared
+// collection scope before querying; retain the original Go declarations, calls,
+// observed spans, trap categories and specialization identities.
 func candidatePackCommandFixture(t *testing.T, image, root string, version int) candidateCatalogFixture {
 	t.Helper()
 	prepared := candidateCallsCommandFixture(t, image, root, version-1).prepared
@@ -71,8 +71,12 @@ func candidatePackCommandFixture(t *testing.T, image, root string, version int) 
 		if err := json.Unmarshal(fields["move_sites"], &moves); err != nil {
 			t.Fatal(err)
 		}
-		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves)
-		for _, field := range []string{"allocation_sites", "return_error_sites", "borrows"} {
+		var allocations []json.RawMessage
+		if err := json.Unmarshal(fields["allocation_sites"], &allocations); err != nil {
+			t.Fatal(err)
+		}
+		count += len(calls) + len(drops) + len(traps) + len(unsafeSites) + len(moves) + len(allocations)
+		for _, field := range []string{"return_error_sites", "borrows"} {
 			if _, ok := fields[field]; !ok {
 				t.Fatalf("missing independent body field %s", field)
 			}
@@ -83,7 +87,7 @@ func candidatePackCommandFixture(t *testing.T, image, root string, version int) 
 	data = bytes.Replace(data, []byte(fmt.Sprintf(`"relations":%d`, p.Header().Counts.Relations)), []byte(fmt.Sprintf(`"relations":%d`, count)), 1)
 	p, err = []func([]byte, uint64) (atlasmap.Partition, error){atlasmap.Decode, atlasmap.DecodeV2, atlasmap.DecodeV3}[version-1](atlasRechecksum(t, data), 4<<20)
 	if err != nil {
-		t.Fatal("independent call/drop pack partition", err)
+		t.Fatal("independent observed-relation pack partition", err)
 	}
 	index, err := []func(atlasmap.Partition, atlasmap.LoadExpectation) (*atlasmap.QueryIndex, error){atlasmap.NewQueryIndex, atlasmap.NewQueryIndexV2, atlasmap.NewQueryIndexV3}[version-1](p, prepared.expectations[p.Header().PackageInstance])
 	if err != nil {
