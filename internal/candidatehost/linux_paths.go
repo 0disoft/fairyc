@@ -25,6 +25,9 @@ var linuxRootedFile string
 //go:embed linux_directory.c
 var linuxDirectory string
 
+//go:embed linux_package_directory.c
+var linuxPackageDirectory string
+
 //go:embed linux_retention.c
 var linuxRetention string
 
@@ -53,8 +56,12 @@ func LinuxSource(header string) (string, error) {
 	testInput := false
 	starter := false
 	gnu := false
+	packageDirectory := false
 	for _, match := range matches {
 		switch match[1] {
+		case "fairyc_private_linux_package_directory_create_v1", "fairyc_private_linux_package_directory_edit_v1",
+			"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_directory_erase_v1":
+			rooted, packageDirectory = true, true
 		case "fairyc_private_linux_gnu_stage_v1", "fairyc_private_linux_gnu_write_v1", "fairyc_private_linux_gnu_read_v1",
 			"fairyc_private_linux_gnu_find_v1", "fairyc_private_linux_gnu_run_v1", "fairyc_private_linux_gnu_publish_v1":
 			rooted, process, capture, gnu = true, true, true, true
@@ -116,6 +123,9 @@ func LinuxSource(header string) (string, error) {
 	}
 	if directory {
 		source += "\n" + linuxDirectory
+	}
+	if packageDirectory {
+		source += "\n" + linuxPackageDirectory
 	}
 	if retention {
 		source += "\n" + linuxRetention

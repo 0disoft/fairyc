@@ -56,6 +56,13 @@ authorized by this queue.
 
 ## Progress
 
+- The Linux package-directory native prerequisite now selects retained parent/
+  child creation/edit, identity-checked empty removal and no-replace rename.
+  Independent Windows low/optimized boundary probes and existing Linux adapter
+  regressions pass; GCC/Clang native replay is authored but remains batched.
+  Fairy capabilities, package/cache publication, HTTPS and CLI integration still
+  remain. See `candidate-linux-package-fetch-20261106.md`; no broad queue closes.
+
 - Named implicit shared/exclusive owner receivers now enter the existing
   argument, move, origin, detached-body, C and interpreter owners. The Go
   returned-borrow prerequisite is committed as `ecab5f4f`; Atlas move collection
