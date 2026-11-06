@@ -42,7 +42,7 @@ fn child::Problem fail(u32 kind,u32 os_code,u32 pid){return child::Problem{.kind
 }
 // Drain one bounded chunk per stream per round, even after the retention limit.
 // Discarding excess matches the existing runner: the child can finish its writes
-// before the caller reports output failure. stdout/stderr share one 64KiB ledger.
+// before the caller reports output failure. stdout/stderr share one retention ledger.
 @effects(filesystem) fn Result<bool,child::Problem> pump(ref Pipe input,ref mut bytes::Buffer output,ref mut bytes::Buffer scratch,ref mut usize retained,usize limit,ref mut bool truncated,u32 pid){
     var u32 available=0;if(unsafe{peek(input.reader,ref mut available as ptr mut u32)}==0){return .err(fail(9,unsafe{last_error()},pid));}if(available==0){return .ok(false);}
     let u32 count=if(available>4096){4096}else{available};var u32 copied=0;if(unsafe{read(input.reader,bytes::view_mut(scratch) as ptr mut u8,count,ref mut copied as ptr mut u32)}==0 || copied==0 || copied>count){return .err(fail(9,unsafe{last_error()},pid));}
@@ -55,26 +55,41 @@ pub fn Result<Captured,child::Problem> run(ref u8[] program,ref v::Vec<bytes::Bu
 }
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run_input(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path){
-    if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
+    return run_input_limit(program,arguments,directory,timeout,input_mode,input_path,65536);
+}
+// Explicit stdout/stderr allowance: 1..64MiB shared, checked before snapshotting.
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_input_limit(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,usize output_limit){
+    if(timeout==0 || timeout>600000 || output_limit==0 || output_limit>67108864){return .err(fail(1,0,0));}
     let inherited=switch(control::snapshot()){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return run_environment(program,arguments,directory,timeout,input_mode,input_path,bytes::view(ref inherited));
+    return run_environment_limit(program,arguments,directory,timeout,input_mode,input_path,bytes::view(ref inherited),output_limit);
 }
 // Compiler commands use a private child environment; the parent stays intact.
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run_environment(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,ref u8[] inherited){
-    if(timeout==0 || timeout>600000){return .err(fail(1,0,0));}
+    return run_environment_limit(program,arguments,directory,timeout,input_mode,input_path,inherited,65536);
+}
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_environment_limit(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,ref u8[] inherited,usize output_limit){
+    if(timeout==0 || timeout>600000 || output_limit==0 || output_limit>67108864){return .err(fail(1,0,0));}
     let output=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let error=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let receipt=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};
     let environment=switch(control::with_handle(inherited,unsafe{handle_value(receipt.writer)})){case .ok(p):{p}case .err(e):{return .err(e);}};
     var bytes::Buffer scratch=bytes::empty();if(!bytes::resize_zeroed(ref mut scratch,4096).is_ok){return .err(fail(2,0,0));}var bytes::Buffer out=bytes::empty();var bytes::Buffer err=bytes::empty();var bytes::Buffer signal=bytes::empty();var usize retained=0;var usize signal_retained=0;var bool truncated=false;var bool signal_truncated=false;
     let standard=switch(input(input_mode,input_path)){case .ok(p):{p}case .err(e):{return .err(e);}};let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.raw,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
     let id=child::pid(ref running);var bool stopped=false;var child::Outcome completed=child::Outcome{.exit_code=0,.pid=id};var usize collected=0;
     while(true){
-        let a=switch(pump(ref output,ref mut out,ref mut scratch,ref mut retained,65536,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
-        let b=switch(pump(ref error,ref mut err,ref mut scratch,ref mut retained,65536,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
+        let a=switch(pump(ref output,ref mut out,ref mut scratch,ref mut retained,output_limit,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
+        let b=switch(pump(ref error,ref mut err,ref mut scratch,ref mut retained,output_limit,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let c=switch(pump(ref receipt,ref mut signal,ref mut scratch,ref mut signal_retained,control::max_receipt_bytes(),ref mut signal_truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let now=unsafe{ticks()};if(!stopped && (now<started || now-started>=timeout as usize)){child::terminate(ref running);return .err(fail(8,0,id));}
         if(stopped){if(!a && !b && !c){break;}if(now<collected || now-collected>=2000){return .err(fail(9,0,id));}}
-        else{switch(child::poll(ref running,1)){case .ok(done):{if(done){completed=switch(child::result(ref running)){case .ok(p):{p}case .err(e):{return .err(e);}};child::terminate(ref running);stopped=true;collected=unsafe{ticks()};}}case .err(e):{child::terminate(ref running);return .err(e);}};}
+        else{
+            // A successful read already made progress. Waiting on a still-live
+            // process after every 4KiB chunk throttles large bounded responses.
+            // Idle rounds retain the wait; deadlines still run every round.
+            let u32 wait_ms=if(a || b || c){0}else{1};
+            switch(child::poll(ref running,wait_ms)){case .ok(done):{if(done){completed=switch(child::result(ref running)){case .ok(p):{p}case .err(e):{return .err(e);}};child::terminate(ref running);stopped=true;collected=unsafe{ticks()};}}case .err(e):{child::terminate(ref running);return .err(e);}};
+        }
     }
     if(truncated){return .err(fail(11,0,id));}if(signal_truncated){return .err(fail(10,0,id));}
     let classified=switch(control::classify(completed.exit_code,bytes::view(ref signal),id)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,id));}};

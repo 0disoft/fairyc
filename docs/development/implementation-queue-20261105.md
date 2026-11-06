@@ -67,6 +67,20 @@ authorized by this queue.
 
 ## Progress
 
+- Explicit Fairy graph execution now consumes sealed Prepared/runtime owners,
+  builds and validates two actual Windows COFF objects and their PE, encodes
+  the same-owner request, executes that image and admits actual received stdout.
+  Disjoint worker implementation and coordinator integration pass 16 graphs in
+  both profiles (32 native invocations), including 2MiB reads, helper/borrow/
+  branch paths, exact/one-short work and scratch/owner controls. Explicit capture
+  limits pass 50 boundary cases; defaults stay 64KiB. Progress polling removes
+  a reproduced 120-second exact-64MiB capture timeout. Fresh complete-source
+  check/locked check pass 743 files / 9,300 MIR functions. See ADR 0534 and
+  `candidate-state-graph-native-orchestration-20261107.md`. One-attempt persistent
+  layout/version CAS, ordinary command selection and all final gates remain
+  open; the native-persistence row is intentionally unchecked. Linux stays
+  batched; no push or dispatch. Full objective remains active.
+
 - Complete-bound Fairy graph response admission now checks the immutable request
   digest, actual Verified CFG/helper continuations, operation/cost/trap counters,
   canonical original map keys, snapshot/preceding-overlay reads and exact sorted
