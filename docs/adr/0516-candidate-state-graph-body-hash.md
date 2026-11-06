@@ -32,3 +32,7 @@ stability and semantic hash changes are covered. Full details are in
 Linux and allocator failure injection remain unexecuted. Stable CLI/SDK/runtime
 ABI, DB/provider, dependencies, ordinary budgets, repository rules and runners
 are unchanged. No push or dispatch accompanies this slice.
+
+Current-source/package association is now supplied by ADR 0518's source-derived
+identity adapter and ADR 0520's explicit Complete graph factory. The detached
+encoding API itself still grants no cache or execution authority.

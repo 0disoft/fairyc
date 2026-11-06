@@ -36,7 +36,7 @@ pub fn Result<Bound,u32> derive(ref source::Produced produced,ref coordinates::C
     let module_decl=syntax::declaration_at(parsed,0);let root=syntax::declaration_at(parsed,target.declaration-1);let raw=syntax::source_view(parsed);
     if(module_decl.kind!=1 || module_decl.name_start>=module_decl.name_end || module_decl.name_end>raw.len || root.kind!=3 || root.public || root.unsafe_end!=0 || root.owner_end!=0 || root.generic_parameters!=0 || root.body==0 || root.result_type==0){return .err(1001);}
     if(!bytes::equal(syntax::declaration_name(parsed,target.declaration),b"transaction") || syntax::type_at(parsed,root.result_type).kind!=1 || !bytes::equal(syntax::type_text(parsed,root.result_type),b"void")){return .err(1001);}
-    var usize i=0;while(i<root.entry_count){if(!budget::charge(work,1)){return .err(1002);}if(syntax::entry_at(parsed,root.entry_start+i).kind==1){return .err(1001);}i+=1;}
+    var usize i=0;while(i<root.entry_count){if(!budget::charge(work,syntax::entry_count(parsed)+1)){return .err(1002);}if(syntax::entry_at(parsed,root.entry_start+i).kind==1){return .err(1001);}i+=1;}
     if(!budget::charge(work,module_decl.name_end-module_decl.name_start+1)){return .err(1002);}
     var bytes::Buffer name=bytes::empty();let normalized=paths::normalize(raw[module_decl.name_start..module_decl.name_end],ref mut name);if(normalized!=0){return .err(mapped(normalized));}
     let appended=budget::raw(ref mut name,b"::transaction",work);if(appended!=0){return .err(if(appended==4){1003}else{1002});}

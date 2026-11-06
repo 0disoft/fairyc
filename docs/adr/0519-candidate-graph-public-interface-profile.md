@@ -17,3 +17,7 @@ source owner must still bind these facts before cache or execution authority.
 
 See `docs/development/candidate-state-graph-package-20261107.md`. Public CLI/SDK
 ABI, database, dependencies, runner settings and default limits are unchanged.
+
+ADR 0520 now binds these checked interface records to current source and the
+selected package through the common Complete graph owner. Cache admission and
+native execution remain separate.

@@ -19,3 +19,6 @@ an owning integration factory. No ordinary/default source admission is widened.
 Windows low/optimized independently check 46 cases each and seven ownership
 refusals. Commands, exclusions and the companion interface prerequisite are in
 `docs/development/candidate-state-graph-package-20261107.md`.
+
+ADR 0520 now publishes this source-derived identity through the common Complete
+graph mode. Memory/disk cache admission and native execution remain separate.

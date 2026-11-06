@@ -1777,3 +1777,22 @@ authorized by this queue.
   and `candidate-state-graph-package-20261107.md`. Complete ownership is the
   integration step in progress; cache/native/commands/final gates remain open.
   Linux stays batched; no push or dispatch. The full objective remains active.
+
+- The common Complete owner now has an explicit checked state-graph mode. Cold
+  and exact-source restored graph sources publish only after actual descriptor,
+  coordinate, portable body identity and original public/source interfaces all
+  succeed. All seven graph codecs are retained; ordinary factories keep their
+  mode and signatures. Final Windows low/optimized Complete/decoded-identity
+  checks pass 142 native processes and seven owner refusals in 71.717s. Expanded old
+  consumer guards add four native processes in 95.011s; their six owner refusals
+  are included in the final seven above and are not counted twice;
+  unchanged ordinary Complete acceptance passes in 110.162s. The aggregate unit-
+  cache regression passes both profiles in 344.008s; units publish only after
+  common Complete construction succeeds. Fresh complete source check/locked
+  check pass 718 files / 8,975 MIR functions, and all 1,188
+  authored files match the checked copy. Scoped vet/format/hygiene pass. See
+  ADR 0520 and `candidate-state-graph-complete-20261107.md` for failed
+  preparation, admission boundaries and exact accounting. Memory/disk graph
+  cache admission and workspace binding, native lowering/persistence, actual
+  command selection and all final gates remain open. Linux stays batched;
+  no push or dispatch. The full implementation objective remains active.

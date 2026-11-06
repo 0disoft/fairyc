@@ -23,6 +23,7 @@ pub fn Result<Selection,u32> collect(ref core::Complete p,usize owner,ref mut us
 }
 pub fn Result<Selection,u32> collect_aggregates(ref core::Complete p,usize owner,ref mut usize work){return collect_mode(p,owner,true,work);}
 fn Result<Selection,u32> collect_mode(ref core::Complete p,usize owner,bool aggregates,ref mut usize work){
+    if(core::is_state_graph(p)){return .err(9);}
     if(clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(p))))!=aggregates){return .err(9);}
     if(owner>=512){return .err(9);}if(!budget::charge(work,0)){return .err(10);}let records=core::public_interfaces(p);var usize found=interfaces::count(records);var usize i=0;
     while(i<interfaces::count(records)){if(!budget::charge(work,1)){return .err(10);}if(interfaces::owner(interfaces::at(records,i))==owner){if(found!=interfaces::count(records)){return .err(9);}found=i;}i+=1;}if(found==interfaces::count(records)){return .err(9);}let ids=interfaces::source_specializations(interfaces::at(records,found));

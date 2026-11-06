@@ -11,11 +11,20 @@ import module_state_layout as budget;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
+import module_state_graph_source as authored;
 
 // Ordinary declarations only; templates require a separate identity before cache reuse.
 pub resource Projection{model::Descriptor descriptor;bool templates;cleanup{}}
 pub fn ref model::Descriptor descriptor(ref Projection p){return ref p.descriptor;}
 pub fn bool has_templates(ref Projection p){return p.templates;}
+// The sealed graph producer checks every declaration and admits private,
+// nongeneric void functions only. Its original module has no public items.
+pub fn Result<Projection,u32> extract_state_graph(ref authored::Produced current,ref mut usize work){
+    if(!budget::charge(work,1)){return .err(10);}let p=authored::parsed(current);let d=syntax::declaration_at(p,0);
+    if(!budget::charge(work,d.name_end-d.name_start+1)){return .err(10);}var path=bytes::empty();let code=registry::normalize(syntax::source_view(p)[d.name_start..d.name_end],ref mut path);if(code!=0){return .err(code);}
+    var modules=v::empty<model::Module>();if(!v::push<model::Module>(ref mut modules,model::Module{.path=model::Text{.start=0,.end=bytes::len(ref path)},.items=model::Range{.first=0,.count=0}}).is_ok){return .err(11);}
+    return .ok(Projection{.descriptor=model::assemble(path,v::empty<model::Text>(),v::empty<model::Field>(),v::empty<model::Variant>(),v::empty<model::Item>(),modules),.templates=false});
+}
 fn model::Text blank(){return model::Text{.start=0,.end=0};}
 fn model::Range none(){return model::Range{.first=0,.count=0};}
 fn Result<model::Text,u32> text(ref mut bytes::Buffer names,ref u8[] value,ref mut usize work){let start=bytes::len(names);let code=write::raw(names,value,work);return if(code!=0){.err(code)}else{.ok(model::Text{.start,.end=bytes::len(names)})};}

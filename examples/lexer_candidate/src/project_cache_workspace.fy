@@ -60,6 +60,7 @@ fn Result<v::Vec<usize>,u32> dependencies(ref graph::Graph g,usize owner,ref mut
     var v::Vec<usize> out=v::empty<usize>();i=0;while(i<graph::node_count(g)){if(!budget::charge(work,1)){return .err(10);}if(seen[i] && !v::push<usize>(ref mut out,i).is_ok){return .err(11);}i+=1;}return .ok(out);
 }
 pub fn Result<Facts,u32> collect(ref visibility::Resolved loaded,ref core::Complete complete,ref mut usize work){
+    if(core::is_state_graph(complete)){return .err(9);}
     if(!budget::charge(work,0)){return .err(10);}let g=visibility::workspace_graph(loaded);let total=graph::node_count(g);if(total==0 || total>512){return .err(9);}
     let ids=switch(coordinates::collect(g,work)){case .ok(p):{p}case .err(p):{return .err(if(p.code==6){10}else if(p.code==5){11}else{9});}};
     let code=current(loaded,complete,ref ids,work);if(code!=0){return .err(code);}var v::Vec<Package> packages=v::empty<Package>();var bytes::Buffer sdk_instance=bytes::empty();var usize owner=0;

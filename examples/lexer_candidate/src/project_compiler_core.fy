@@ -1,5 +1,6 @@
 module project_compiler_core;
 import project_compiler_input as input;
+import project_compiler_state_graph as state_graph;
 import module_project_artifact_model as artifacts;
 import module_project_artifact_current as rebinding;
 import module_project_artifact_rebase as rebasing;
@@ -53,9 +54,16 @@ fn Result<identified::Program,Problem> link_identified(ref v::Vec<syntax::Parsed
     return switch(identified::build(metadata,ref units,link_work)){case .ok(p):{.ok(p)}case .err(e):{.err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0))}};
 }
 
-pub resource Complete{identified::Program program;interfaces::Records interfaces;cleanup{}}
-pub fn ref identified::Program checked_program(ref Complete p){return ref p.program;}
-pub fn ref interfaces::Records public_interfaces(ref Complete p){return ref p.interfaces;}
+pub resource Complete{v::Vec<identified::Program> program;v::Vec<interfaces::Records> interfaces;v::Vec<state_graph::Complete> state_graphs;cleanup{}}
+pub fn bool is_state_graph(ref Complete p){return v::len<state_graph::Complete>(ref p.state_graphs)==1;}
+// The explicit graph profile has its own verified IR, never an empty ordinary body.
+pub fn ref identified::Program checked_program(ref Complete p){assert(!is_state_graph(p));return v::at<identified::Program>(ref p.program,0);}
+pub fn ref state_graph::Complete checked_state_graph(ref Complete p){assert(is_state_graph(p));return v::at<state_graph::Complete>(ref p.state_graphs,0);}
+pub fn ref interfaces::Records public_interfaces(ref Complete p){return if(is_state_graph(p)){state_graph::public_interfaces(checked_state_graph(p))}else{v::at<interfaces::Records>(ref p.interfaces,0)};}
+fn Result<Complete,Problem> ordinary_complete(identified::Program program,interfaces::Records interfaces){var programs=v::empty<identified::Program>();var records=v::empty<interfaces::Records>();if(!v::push<identified::Program>(ref mut programs,program).is_ok){return .err(fail(6,0,11,0,0,0,0,0));}if(!v::push<interfaces::Records>(ref mut records,interfaces).is_ok){return .err(fail(6,0,11,0,0,0,0,0));}return .ok(Complete{.program=programs,.interfaces=records,.state_graphs=v::empty<state_graph::Complete>()});}
+fn Result<Complete,Problem> graph_complete(state_graph::Complete graph){var graphs=v::empty<state_graph::Complete>();if(!v::push<state_graph::Complete>(ref mut graphs,graph).is_ok){return .err(fail(8,3,1003,0,0,0,0,0));}return .ok(Complete{.program=v::empty<identified::Program>(),.interfaces=v::empty<interfaces::Records>(),.state_graphs=graphs});}
+pub fn Result<Complete,Problem> build_complete_state_graph(ref u8[] actual,ref coordinates::Coordinates table,usize owner,ref mut usize work){return switch(state_graph::build(actual,table,owner,work)){case .ok(p):{graph_complete(p)}case .err(code):{.err(fail(8,1,code,0,0,0,0,0))}};}
+pub fn Result<Complete,Problem> restore_complete_state_graph(ref u8[] saved,ref u8[] actual,ref coordinates::Coordinates table,usize owner,ref mut usize work){return switch(state_graph::restore(saved,actual,table,owner,work)){case .ok(p):{graph_complete(p)}case .err(code):{.err(fail(8,2,code,0,0,0,0,0))}};}
 // Phase 6 rejects interface publication. Planning, body/Flow verification,
 // rebinding and all package interfaces must finish before either member escapes.
 pub fn Result<Complete,Problem> build_complete(ref input::Input sources,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize link_work){return build_complete_sources(input::sources(sources),input::owners(sources),input::bindings(sources),table,source_work,link_work);}
@@ -73,7 +81,7 @@ pub fn Result<Complete,Problem> build_complete_aggregate_sources(ref v::Vec<synt
     let original=aggregate_types::source_plan(signatures::aggregate_source(ref metadata));
     let program=switch(link_identified(sources,ref metadata,original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let interfaces=switch(interfaces::build(ref program,original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
-    return .ok(Complete{.program,.interfaces});
+    return ordinary_complete(program,interfaces);
 }
 // An initially empty error-only sink receives one detached report owner only
 // for an unsupported signature. Normal and other failed builds leave it empty.
@@ -87,7 +95,7 @@ pub fn Result<Complete,Problem> build_complete_reporting_sources(ref v::Vec<synt
     if(diagnostics::count(ref unsupported)!=0){let first=diagnostics::at(ref unsupported,0);if(!v::push<diagnostics::Reports>(reports,unsupported).is_ok){return .err(fail(5,6,11,0,0,0,0,0));}return .err(fail(5,6,4505,first.module_index,first.start,first.end,0,0));}
     let program=switch(link_identified(sources,ref metadata,ref original,source_work,link_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(6,0,e,0,0,0,0,0));}};
-    return .ok(Complete{.program,.interfaces});
+    return ordinary_complete(program,interfaces);
 }
 // Package units are admitted or cold-lowered independently, then passed through
 // the same whole-project linker and interface factory. No unit is published
@@ -104,7 +112,7 @@ pub fn Result<Complete,Problem> build_complete_mixed(ref disk::Store store,ref e
     let units=switch(identified_units::build_cached(store,env,input,ref scope,ref metadata,ref original,source_work,cache_work)){case .ok(p):{p}case .err(e):{var p=fail(3,e.stage,e.code,e.module_index,e.start,e.end,e.expected,e.actual);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}};
     let program=switch(identified::build(ref metadata,ref units,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};
     let interfaces=switch(interfaces::build(ref program,ref original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
-    identified_units::publish_cached(store,env,input,ref original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
+    let complete=switch(ordinary_complete(program,interfaces)){case .ok(p):{p}case .err(e):{return .err(e);}};identified_units::publish_cached(store,env,input,ref original,ref units,cache_work);return .ok(complete);
 }
 // Explicit aggregate unit-cache composition. Reuse still runs fresh checking;
 // no successful unit prefix is published before linked Complete/interfaces.
@@ -118,7 +126,7 @@ pub fn Result<Complete,Problem> build_complete_aggregate_mixed(ref disk::Store s
     let units=switch(identified_units::build_cached(store,env,input,ref scope,ref metadata,original,source_work,cache_work)){case .ok(p):{p}case .err(e):{var p=fail(3,e.stage,e.code,e.module_index,e.start,e.end,e.expected,e.actual);p.declaration_start=e.declaration_start;p.declaration_end=e.declaration_end;p.move_start=e.move_start;p.move_end=e.move_end;p.header_start=e.header_start;p.header_end=e.header_end;p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}};
     let program=switch(identified::build(ref metadata,ref units,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};
     let interfaces=switch(interfaces::build(ref program,original,sources,ref metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
-    identified_units::publish_cached_aggregates(store,env,input,original,ref units,cache_work);return .ok(Complete{.program,.interfaces});
+    let complete=switch(ordinary_complete(program,interfaces)){case .ok(p):{p}case .err(e):{return .err(e);}};identified_units::publish_cached_aggregates(store,env,input,original,ref units,cache_work);return .ok(complete);
 }
 // Restore keeps independent 16MiB source, aggregate artifact and 16MiB link
 // histories. Neither IR nor interfaces escape until their same-owner result is complete.
@@ -143,5 +151,5 @@ fn Result<Complete,Problem> restore_current(rebinding::Rebound current,ref v::Ve
     let raw=switch(rebasing::build(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,2,code,0,0,0,0,0));}};
     let admitted=switch(admission::build(raw,ref current,sources,scope,metadata,table,artifact_work)){case .ok(p):{p}case .err(e):{if(e.source.stage!=0){var Problem p=fail(3,e.source.stage,e.source.code,e.source.module_index,e.source.start,e.source.end,e.source.expected,e.source.actual);p.declaration_start=e.source.declaration_start;p.declaration_end=e.source.declaration_end;p.move_start=e.source.move_start;p.move_end=e.source.move_end;p.header_start=e.source.header_start;p.header_end=e.source.header_end;p.field_module=e.source.field_module;p.field_start=e.source.field_start;p.field_end=e.source.field_end;return .err(p);}return .err(fail(7,2+e.stage,e.code,0,0,0,0,0));}};
     let interfaces=switch(interfaces::build_admitted(ref admitted,rebinding::source_plan(ref current),sources,metadata,table,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(6,0,code,0,0,0,0,0));}};
-    let program=switch(identified::from_admitted(admitted,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};return .ok(Complete{.program,.interfaces});
+    let program=switch(identified::from_admitted(admitted,link_work)){case .ok(p):{p}case .err(e):{return .err(fail(4,0,e.code,e.module_index,e.start,e.end,0,0));}};return ordinary_complete(program,interfaces);
 }

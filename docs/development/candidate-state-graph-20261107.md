@@ -93,3 +93,14 @@ committed or treated as source authority.
 Other source families/deferred language/package/backend/provider designs in the
 full queue remain required. This slice changes no stable public API, SDK/runtime
 ABI, database/provider, dependency, default bound, runner or repository policy.
+
+## Current explicit Complete integration
+
+The source graph, current-source envelope, source-derived portable body identity
+and seven-codec interface prerequisites now compose through the common Complete
+owner's explicit graph mode (ADR 0520). This closes steps 1 and 2 for the admitted
+single-module graph family and current-source restoration, including all its
+source codecs, helpers, branches and borrows. Steps 3-5 remain open. It does not
+select graph mode through ordinary workspace commands or publish cache hits.
+See `candidate-state-graph-complete-20261107.md` for current evidence; the earlier
+layout-only acceptance and failures above remain historical records.

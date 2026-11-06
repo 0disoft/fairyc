@@ -32,6 +32,7 @@ pub fn Result<Package,u32> package_complete(facts::Facts facts,ref input::Input 
 // Explicit source-backed schemas bind the executable program to Complete here.
 // Existing package/package_generics factories retain their v3-only behavior.
 pub fn Result<Package,u32> package_version(facts::Facts facts,ref input::Input source,ref coordinates::Coordinates table,ref compiler::Complete complete,ref signatures::Program metadata,ref mut v::Vec<types::Type> type_rows,ref instances::Instances context,usize owner,u32 version,ref mut usize meter){
+    if(compiler::is_state_graph(complete)){return .err(7);}
  discard source_version::admit(source,table,complete,metadata,version,meter)?;
  if(version==1 && (instances::template_count(context)!=0 || instances::count(context)!=0)){return .err(101);}
  return package_mode(facts,source,identified::ir_program(compiler::checked_program(complete)),table,metadata,type_rows,context,identified::borrows(compiler::checked_program(complete)),owner,version,meter);

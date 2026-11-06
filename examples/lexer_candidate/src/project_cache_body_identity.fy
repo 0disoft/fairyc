@@ -1,5 +1,9 @@
 module project_cache_body_identity;
 import project_compiler_core as core;
+import project_compiler_state_graph as graph_complete;
+import module_state_graph_source_identity as graph_identity;
+import module_state_graph_body_hash as graph_hash;
+import module_state_graph_hash_context as graph_context;
 import module_project_identified_ir as checked;
 import module_project_interfaces as interfaces;
 import module_unit_body_ir_model as ir;
@@ -23,10 +27,17 @@ fn Result<bytes::Buffer,u32> namespace(ref checked::Program p,usize owner,ref mu
 // The ordinary Complete factory admits state declarations, never transaction
 // operations. Its immutable checked IR carries the revalidated layout plan.
 // This computes the exact zero-transaction member of the Go body-hash contract;
-// it cannot be used for future transaction-bearing or experimental-state IR.
+// The explicit Complete graph variant carries its separately checked identity.
 pub fn Result<Identity,u32> derive(ref core::Complete p,usize owner,ref mut usize work){
     if(owner>=512){return .err(9);}if(!enc::charge(work,0)){return .err(10);}let records=core::public_interfaces(p);var bool published=false;var usize at=0;
     while(at<interfaces::count(records)){if(!enc::charge(work,1)){return .err(10);}if(interfaces::owner(interfaces::at(records,at))==owner){if(published){return .err(9);}published=true;}at+=1;}if(!published){return .err(9);}
+    if(core::is_state_graph(p)){
+        let graph=core::checked_state_graph(p);if(graph_complete::owner(graph)!=owner){return .err(9);}let bound=graph_complete::body_identity(graph);let identity=graph_identity::identity(bound);let context=graph_identity::context(bound);
+        let coordinate=graph_context::coordinate(context);let canonical=graph_hash::canonical(identity);let digest=graph_hash::digest(identity);
+        if(!enc::charge(work,coordinate.len+canonical.len+digest.len+3)){return .err(10);}
+        let coord=switch(bytes::copy(coordinate)){case .ok(b):{b}case .err(_):{return .err(11);}};let encoded=switch(bytes::copy(canonical)){case .ok(b):{b}case .err(_):{return .err(11);}};let saved=switch(bytes::copy(digest)){case .ok(b):{b}case .err(_):{return .err(11);}};
+        return .ok(Identity{.coordinate=coord,.canonical=encoded,.digest=saved});
+    }
     let program=core::checked_program(p);let coord=switch(namespace(program,owner,work)){case .ok(b):{b}case .err(code):{return .err(code);}};let layouts=ir::state_layouts(checked::ir_program(program));var usize selected=state::count(layouts);at=0;
     while(at<state::count(layouts)){if(!enc::charge(work,1)){return .err(10);}if(state::at(layouts,at).owner==owner){if(selected!=state::count(layouts)){return .err(9);}selected=at;}at+=1;}
     var bytes::Buffer encoded=bytes::empty();var u32 code=enc::raw(ref mut encoded,b"fairyc.contract-state-package-body\x00\x01",work);if(code!=0){return .err(mapped(code));}code=enc::raw(ref mut encoded,bytes::view(ref coord),work);if(code!=0){return .err(mapped(code));}

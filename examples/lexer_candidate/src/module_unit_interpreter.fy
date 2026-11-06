@@ -166,6 +166,7 @@ pub fn runtime::Outcome execute_void(ref identified::Program owned,ref Plan plan
 
 @effects(console) fn i32 report_failure(ref str message,i32 code){return if(io::write_stderr(message).is_ok){code}else{4};}
 @effects(console) pub fn i32 tests(ref compiler::Complete complete,ref test_options::TestOptions options,ref v::Vec<test_options::TestIdentity> tests,ref v::Vec<usize> chosen,ref input::Input projected,u32 lock_code){
+    if(compiler::is_state_graph(complete)){return report_failure("fairyc: state graph semantic execution is not connected\n",2);}
     var v::Vec<u32> traps=v::empty<u32>();if(v::len<usize>(chosen)==0){return test_options::test_semantic_report(options,tests,chosen,projected,ref traps,lock_code);}
     let owned=compiler::checked_program(complete);let p=identified::ir_program(owned);let plan=switch(prepare_sources(p,projected)){case .ok(p):{p}case .err(code):{return report_failure(if(code==4){"fairyc: internal semantic test preparation failed\n"}else{"fairyc: requested workspace is outside the semantic test interpreter subset: candidate interpreter CFG preparation limit exceeded\n"},if(code==4){4}else{2});}};
     var usize i=0;while(i<v::len<usize>(chosen)){let test=v::at<test_options::TestIdentity>(tests,*v::at<usize>(chosen,i));var usize frame=1;while(frame<=ir::count(p)){let f=clean::frame_at(ir::cleanup_ir(p),frame);if(f.kind==3 && f.module_index==test_options::test_module(test) && f.declaration==test_options::test_declaration(test)+1){break;}frame+=1;}

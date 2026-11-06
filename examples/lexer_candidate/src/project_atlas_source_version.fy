@@ -11,6 +11,7 @@ import syntax as syntax;
 // a map family. Filtering one package/symbol cannot hide unsupported templates
 // in another package, including unused generic aggregates and SDK templates.
 pub fn Result<bool,u32> admit(ref input::Input source,ref coordinates::Coordinates table,ref compiler::Complete complete,ref signatures::Program metadata,u32 version,ref mut usize meter){
+    if(compiler::is_state_graph(complete)){return .err(7);}
     if(version<1 || version>3){return .err(101);}
     let code=identified::current(compiler::checked_program(complete),input::sources(source),metadata,table,meter);
     if(code!=0){return .err(if(code==10){3}else{7});}

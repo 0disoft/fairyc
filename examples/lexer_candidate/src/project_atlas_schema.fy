@@ -24,6 +24,7 @@ import module_unit_cleanup_mir_model as clean;
 // signature table preserves unused foreign declarations and source-only types;
 // the executable callable table cannot stand in for that declaration inventory.
 pub fn Result<signatures::Program,u32> prepare(ref input::Input source,ref coordinates::Coordinates table,ref compiler::Complete complete,ref mut usize meter){
+    if(compiler::is_state_graph(complete)){return .err(7);}
     let metadata=prepare_declarations(source,meter)?;
     let current=identified::current(compiler::checked_program(complete),input::sources(source),ref metadata,table,meter);
     if(current!=0){return .err(if(current==10){3}else{7});}
@@ -32,6 +33,7 @@ pub fn Result<signatures::Program,u32> prepare(ref input::Input source,ref coord
 // Re-enter the source/type owner before projecting an aggregate Complete. The
 // ordinary projection remains closed; detached type rows cannot select this mode.
 pub fn Result<signatures::Program,u32> prepare_aggregates(ref input::Input source,ref coordinates::Coordinates table,ref compiler::Complete complete,ref mut usize meter){
+    if(compiler::is_state_graph(complete)){return .err(7);}
     if(!clean::aggregates(ir::cleanup_ir(identified::ir_program(compiler::checked_program(complete))))){return .err(7);}
     let original=switch(planner::build_aggregate_sources(input::sources(source),input::owners(source),input::bindings(source),table,meter)){case .ok(p):{p}case .err(e):{return .err(if(e.code==10){3}else if(e.code==11){2}else{7});}};
     let prepared=switch(aggregates::build(original,input::sources(source),meter)){case .ok(p):{p}case .err(e):{return .err(if(e.code==10){3}else if(e.code==11){2}else{7});}};

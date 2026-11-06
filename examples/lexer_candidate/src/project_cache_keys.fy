@@ -70,6 +70,7 @@ pub fn Result<Keys,u32> collect(ref visibility::Resolved loaded,ref core::Comple
 }
 pub fn Result<Keys,u32> collect_aggregates(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){return collect_mode(loaded,complete,env,true,work);}
 fn Result<Keys,u32> collect_mode(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,bool aggregates,ref mut usize work){
+    if(core::is_state_graph(complete)){return .err(9);}
     if(clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))!=aggregates){return .err(9);}
     if(!budget::charge(work,0)){return .err(10);}let facts=switch(workspace::collect(loaded,complete,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(interfaces::count(core::public_interfaces(complete))!=workspace::count(ref facts)){return .err(9);}
     let standard_library=switch(digest(environment::standard_library(env),b"fypi1-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};var v::Vec<Record> packages=v::empty<Record>();var usize owner=0;

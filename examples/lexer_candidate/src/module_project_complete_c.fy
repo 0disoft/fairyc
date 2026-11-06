@@ -9,10 +9,11 @@ import candidate_limits as limits;
 
 // Keep the checked IR and detached interfaces together without adding the
 // complete publication adapters to the large per-body C emitter source unit.
-fn Result<c::Bundle,clean::Problem> partition_scoped(compiler::Complete program,usize entry,usize max_frames,bool entry_only){if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::partition_scoped(owned,named,entry,max_frames,entry_only);}
+fn Result<c::Bundle,clean::Problem> partition_scoped(compiler::Complete program,usize entry,usize max_frames,bool entry_only){if(compiler::is_state_graph(ref program) || max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::partition_scoped(owned,named,entry,max_frames,entry_only);}
 pub fn Result<c::Bundle,clean::Problem> partition(compiler::Complete program,usize entry,usize max_frames){return partition_scoped(program,entry,max_frames,false);}
 pub fn Result<c::Bundle,clean::Problem> partition_entry(compiler::Complete program,usize entry,usize max_frames){return partition_scoped(program,entry,max_frames,true);}
 pub fn Result<c::Bundle,clean::Problem> partition_test(compiler::Complete program,usize entry,usize max_frames){
+    if(compiler::is_state_graph(ref program)){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::partition_test(owned,named,entry,max_frames);
 }
@@ -20,6 +21,7 @@ pub fn bool has_complete(ref c::Bundle p){return owner::has_complete(c::project_
 pub fn ref compiler::Complete complete(ref c::Bundle p){return owner::complete_project(c::project_owner(p));}
 // A native test emits from a live Complete without consuming its checked IR.
 pub fn Result<c::Emission,clean::Problem> emit_test(ref compiler::Complete program,usize entry,usize max_frames){
+    if(compiler::is_state_graph(program)){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     var usize work=0;let named=switch(names::build_project(compiler::checked_program(program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
     return c::emit_test(identified::ir_program(compiler::checked_program(program)),named,entry,max_frames);
