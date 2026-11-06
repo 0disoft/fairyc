@@ -56,12 +56,20 @@ authorized by this queue.
 
 ## Progress
 
+- Fairy retained package-directory capabilities now bind the native prerequisite
+  to owned child/parent handles, retained names and publication/removal phases.
+  Independent malformed/partial output, borrowed-root preservation and lifetime
+  probes pass Windows low/optimized; rooted/directory/retention/cache regressions
+  and reference full-source check pass. See the Linux fetch receipt. Package
+  filesystem/cache/HTTPS/CLI integration and native Linux remain open.
+
 - The Linux package-directory native prerequisite now selects retained parent/
   child creation/edit, identity-checked empty removal and no-replace rename.
   Independent Windows low/optimized boundary probes and existing Linux adapter
   regressions pass; GCC/Clang native replay is authored but remains batched.
-  Fairy capabilities, package/cache publication, HTTPS and CLI integration still
-  remain. See `candidate-linux-package-fetch-20261106.md`; no broad queue closes.
+  The following capability slice is recorded separately; package/cache
+  publication, HTTPS and CLI remain open. See
+  `candidate-linux-package-fetch-20261106.md`; no broad queue closes.
 
 - Named implicit shared/exclusive owner receivers now enter the existing
   argument, move, origin, detached-body, C and interpreter owners. The Go

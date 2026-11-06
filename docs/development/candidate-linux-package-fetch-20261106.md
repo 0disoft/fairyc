@@ -65,6 +65,71 @@ redefines UCRT `ENOTEMPTY` and `EOPNOTSUPP` under warnings-as-errors. Conditiona
 definitions correct only that harness issue; subsequent focused and combined
 commands pass. Warning levels and product limits are unchanged.
 
+## Fairy retained-directory ownership
+
+`linux_package_directory.fy` now owns the child rooted-I/O capability, retained
+parent descriptor and terminated source name. The existing rooted module adds
+one unsafe private adoption function: ownership transfers, no descriptor is
+duplicated, and the caller must relinquish the adopted handle. Borrowed access
+to the child retains the containing resource's lifetime. Automatic resource
+cleanup closes both descriptors and releases the retained name; it does not
+implicitly remove a tree or promise to report implicit close errors.
+
+Native errors and first cleanup errors remain distinct. Malformed success,
+partial-error outputs, duplicate handles and output handles aliasing the
+borrowed original root reject; plausible owned outputs close at most once and
+the borrowed root is preserved. After successful publication/removal, the old
+name loses namespace authority. A failed mutation retains explicit cleanup
+authority without retrying the mutation automatically.
+
+`TestLinuxPackageDirectoryPolicy` compiles the authored Fairy module through
+the Go reference frontend, emits both Linux/Windows C profiles and executes
+independent native-result substitutes under Windows low/optimized. Four authored
+test functions cover ownership/automatic closure, input admission, partial and
+malformed outputs, borrowed-root preservation, no-repeat phase transitions and
+failed-operation cleanup. This is not real Linux syscall execution or a full
+Fairy-authored compiler CLI/self-build acceptance claim.
+
+The combined rooted-file/directory/retention/cache/package policy command passes
+both Windows profiles in 14.681s (five roots, ten generated native executions):
+
+```powershell
+go test -mod=readonly -count=1 -timeout 8m -v ./internal/cli -run '^TestLinux(PackageDirectoryPolicy|RootedFilePolicy|DirectoryPolicy|RetentionPolicy|CacheFilePolicy)$'
+go vet -mod=readonly ./internal/cli ./internal/candidatehost
+# From examples/lexer_candidate:
+go run -mod=readonly ../../cmd/fairyc check
+go run -mod=readonly ../../cmd/fairyc check --locked
+```
+
+The full Go-reference source check passes 687 files / 8,570 MIR functions and
+refreshes the example lock. After comment-only finalization, both full check and
+locked check pass again against the current source; the focused policy command
+with the final process-PATH observation passes in 3.099s. Scoped vet, Go formatting
+and UTF-8/LF/final-newline checks pass.
+The first policy attempt fails on the reserved word `cleanup` in native parameter
+and local names; `cleanup_code` corrects those names. The next attempt correctly
+rejects direct shared resource-field projections through a mutable reference.
+Separate shared-observation helpers shorten that reborrow before changing phase,
+without widening compiler admission; the following focused and combined probes
+pass. Warning levels, budgets and language/ABI contracts are unchanged.
+
+The common Linux fixture runner now sets an empty PATH only after compilation,
+inside each execution subtest; test cleanup restores it before the next build.
+The expanded Windows command passes fifteen selected roots / thirty generated
+native executions in 40.777s, without selected skips. Fourteen roots use that
+runner; host-path emission uses its separate runner. The package substitute
+also observes the actual process PATH rather than assuming environment setup.
+
+```powershell
+go test -mod=readonly -count=1 -timeout 10m -v ./internal/cli -run '^TestLinux(HostPathsEmissionAndPolicy|CommandTransport|ProcessPolicy|CapturePolicy|RootedFilePolicy|PackageDirectoryPolicy|DirectoryPolicy|RetentionPolicy|WorkspaceFilePolicy|BuildScratchPolicy|RunCapturePolicy|TestCapturePolicy|StarterPolicy|CacheFilePolicy|GNUCompanionOptions|GNUBuildPolicy|GNUPolicy)$'
+```
+
+Final local logs: `.cache/linux-package-directory-policy-empty-path-20261106.log`,
+`.cache/linux-package-directory-policy-20261106.log` and
+`.cache/linux-package-directory-check-20261106.log`. These are not staged. This
+does not add a CI job, select actual Linux execution or prove missing package
+filesystem/transport/CLI integration.
+
 ## Authored Linux replay and remaining implementation
 
 ```sh
@@ -76,8 +141,8 @@ checks real no-replace collisions, binary contents, empty-tree cleanup,
 symlink/replaced-inode refusal and continued use after closing the original
 parent and renaming its path. It remains required in the combined Linux replay.
 
-Next implementation: Fairy-owned directory capability/facade, package file and
-cache publication, offline restoration, verified HTTPS and online/offline Linux
+Next implementation: package filesystem facade, package file and cache
+publication, offline restoration, verified HTTPS and online/offline Linux
 CLI selection. The Windows substitute does not prove those paths. Complete
 Go/Fairy comparison, consecutive self-build, Windows clean-machine distribution
 and same-commit hosted acceptance remain open.

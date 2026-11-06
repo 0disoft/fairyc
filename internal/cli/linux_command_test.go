@@ -100,6 +100,9 @@ source = "src"
 			if err != nil {
 				t.Fatal(err)
 			}
+			// Discovery/build keep their toolchain environment; generated programs
+			// must run without finding ambient helpers. Subtest cleanup restores it.
+			t.Setenv("PATH", "")
 			outcome, err := tc.Execute(artifact, cdriver.NativeExecutionOptions{Timeout: 20 * time.Second})
 			if err != nil || outcome.ExitCode != 0 || outcome.TrapCategory != "" || outcome.Stdout != "" || outcome.Stderr != "" {
 				t.Fatalf("native argv transport: %+v %v", outcome, err)
