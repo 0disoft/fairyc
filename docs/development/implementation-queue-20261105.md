@@ -67,6 +67,15 @@ authorized by this queue.
 
 ## Progress
 
+- Linux existing-tree package reuse now compares the held file's device, inode,
+  size, complete mode and modification time with the earlier directory scan
+  before allocating or reading bytes. Same-byte replacements reject without a
+  body read. Four policy fixtures/eight Windows low/optimized executions and
+  actual Linux input-generation guards pass (143.943s); the authored real Linux
+  rename/replacement replay explicitly skips on Windows. Linux publication,
+  trusted TLS and full online/offline CLI acceptance remain in the batch. See
+  `candidate-linux-package-20261107.md`.
+
 - General inline expansion now admits up to sixteen immutable i32 locals under
   the shared 64-node expression budget. Go/Fairy source and detached-IR v2
   identities preserve initializer order, unused traps and unchanged v1 bodies.

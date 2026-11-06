@@ -47,10 +47,11 @@ fn bool valid_path(ref u8[] path){
 }
 pub fn usize split(ref u8[] path){var usize i=path.len;while(i>0){i-=1;if(path[i]==47){return i+1;}}return 0;}
 fn bool same(rooted::Metadata a,rooted::Metadata b){return a.device==b.device && a.identity==b.identity && a.size==b.size && a.modified_seconds==b.modified_seconds && a.modified_nanos==b.modified_nanos && a.mode==b.mode;}
-@effects(filesystem) fn Result<bytes::Buffer,u32> read_leaf(ref rooted::Directory root,ref u8[] name,usize maximum){
+@effects(filesystem) fn Result<bytes::Buffer,u32> read_leaf(ref rooted::Directory root,ref u8[] name,usize maximum,bool observed,rooted::Metadata expected){
     let existing=switch(kind(root,name)){case .ok(p):{p}case .err(p):{return .err(p);}};if(existing!=2){return .err(if(existing==0){5}else{4});}
     var file=switch(rooted::open_read(root,name)){case .ok(p):{p}case .err(_):{return .err(1);}};
-    let before=switch(file_policy::observe(ref file)){case .ok(p):{p}case .err(p):{return .err(if(p.kind==6 || p.kind==5){4}else{1});}};if(before.size>maximum){return .err(3);}
+    let before=switch(file_policy::observe(ref file)){case .ok(p):{p}case .err(p):{return .err(if(p.kind==6 || p.kind==5){4}else{1});}};
+    if(observed && !same(expected,before)){return .err(4);}if(before.size>maximum){return .err(3);}
     var output=bytes::empty();if(!bytes::resize_zeroed(ref mut output,before.size+1).is_ok){return .err(2);}var usize used=0;
     while(used<=before.size){let usize count=if(before.size+1-used>65536){65536}else{before.size+1-used};let copied=switch(rooted::read(ref mut file,bytes::view_mut(ref mut output)[used..used+count])){case .ok(p):{p}case .err(_):{return .err(1);}};if(copied==0){break;}used+=copied;}
     if(used!=before.size){return .err(3);}let after=switch(file_policy::observe(ref file)){case .ok(p):{p}case .err(_):{return .err(4);}};if(!same(before,after)){return .err(4);}
@@ -58,7 +59,16 @@ fn bool same(rooted::Metadata a,rooted::Metadata b){return a.device==b.device &&
 }
 @effects(filesystem) pub fn Result<bytes::Buffer,u32> read(ref rooted::Directory root,ref u8[] path,usize maximum){
     if(!valid_path(path)){return .err(4);}if(maximum>16777216){return .err(3);}let usize at=split(path);
-    if(at==0){return read_leaf(root,path,maximum);}let parent=switch(descend(root,path[..at-1],false)){case .ok(p):{p}case .err(p):{return .err(p);}};return read_leaf(ref parent,path[at..],maximum);
+    let unused=rooted::Metadata{.device=0,.identity=0,.size=0,.modified_seconds=0,.modified_nanos=0,.mode=0};
+    if(at==0){return read_leaf(root,path,maximum,false,unused);}let parent=switch(descend(root,path[..at-1],false)){case .ok(p):{p}case .err(p):{return .err(p);}};return read_leaf(ref parent,path[at..],maximum,false,unused);
+}
+// Reuse verification binds the held file to its earlier detached scan fact.
+// A different generation, even with identical bytes, fails before any read.
+// This is an observation check, not isolation against hostile namespace edits.
+@effects(filesystem) pub fn Result<bytes::Buffer,u32> read_observed(ref rooted::Directory root,ref u8[] name,rooted::Metadata expected,usize maximum){
+    if(!leaf(name) || !rooted::regular(expected) || expected.identity==0 || expected.modified_nanos>=1000000000){return .err(4);}
+    if(maximum>16777216 || expected.size>maximum){return .err(3);}
+    return read_leaf(root,name,maximum,true,expected);
 }
 @effects(filesystem) fn u32 write_leaf(ref rooted::Directory root,ref u8[] name,ref u8[] data){
     let existing=switch(kind(root,name)){case .ok(p):{p}case .err(p):{return p;}};if(existing!=0){return 4;}

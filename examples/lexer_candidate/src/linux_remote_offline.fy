@@ -34,7 +34,7 @@ fn usize find(ref archive::Bundle b,ref u8[] name){var usize i=0;while(i<archive
             let code=verify(ref child,b,bytes::view(ref path),depth+1,remaining,files,limit);if(code!=0){return code;}
         }else{
             if(kind!=2 || !host::regular(info)){return 4;}let at=find(b,bytes::view(ref path));if(at==archive::count(b)){return 4;}
-            let actual=switch(fs::read(root,leaf,8388608)){case .ok(p):{p}case .err(p):{return p;}};
+            let actual=switch(fs::read_observed(root,leaf,info,8388608)){case .ok(p):{p}case .err(p):{return p;}};
             if(!bytes::equal(bytes::view(ref actual),archive::contents(b,at))){return 4;};*files+=1;
         }i+=1;
     }return 0;
