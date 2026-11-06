@@ -689,6 +689,16 @@ func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtif
 const windowsExecutionPipeDrainTimeout = time.Second
 
 func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (outcome WindowsHostOutcome, err error) {
+	return executeWindowsMSVCArtifactWithContext(context.Background(), artifact, label, stdin, programArgs, timeout, workingDirectory)
+}
+
+func executeWindowsMSVCArtifactWithContext(parent context.Context, artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration, workingDirectory string) (outcome WindowsHostOutcome, err error) {
+	if parent == nil {
+		return WindowsHostOutcome{}, fmt.Errorf("%s execution context must not be nil", label)
+	}
+	if err := parent.Err(); err != nil {
+		return WindowsHostOutcome{}, fmt.Errorf("%s execution canceled before materialization: %w", label, err)
+	}
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
@@ -705,7 +715,7 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 	if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
 		return WindowsHostOutcome{}, fmt.Errorf("materialize MSVC host executable: %w", err)
 	}
-	contextValue, cancel := context.WithTimeout(context.Background(), timeout)
+	contextValue, cancel := context.WithTimeout(parent, timeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
 	// Descendants can retain stdout/stderr after this process exits or is killed.
@@ -731,7 +741,10 @@ func executeWindowsMSVCArtifactWithOptions(artifact WindowsHostArtifact, label s
 	}
 	trapControl, trapControlOverflow, err = runOwnedWindowsProcess(command, trapEnvironment)
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, timeout)
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s: %w", label, timeout, errors.Join(contextValue.Err(), err))
+	}
+	if contextValue.Err() != nil {
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable canceled: %w", label, errors.Join(contextValue.Err(), err))
 	}
 	if trapControlOverflow {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded the private trap control bound", label)
