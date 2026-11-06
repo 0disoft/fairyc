@@ -606,3 +606,39 @@ cases do not attest the complete pack group. Other full CLI groups, unsafe low
 replays, remaining collectors/source families and every original final acceptance
 gate remain open.
 Native Linux remains batched; no push, dispatch, release or deployment.
+
+## Region allocation Go prerequisite
+
+`TestAtlasAllocationSitesOracle` fixes original complete call spans from fourteen
+Go source/codec controls: empty, single/repeated placement, branches, loops,
+direct lexical ownership, zeroed/copy bytes, both partial argument orders and
+three trapped allocation operands. SystemHeap/Arena creation is not reported as
+a Region allocation. This selects Region placement operations, not all foreign
+or SDK allocation calls.
+
+The first lexical probe used a borrowed Arena alias, outside the current Go MIR
+source profile. Its failure remains in
+`.cache/atlas-allocation-go-oracle-first-20261106.log`; the positive lexical case
+uses the already admitted direct ref-mut owned local. This does not add alias
+or computed-Arena execution support.
+
+The corrected source corpus reproduced a separate real lowering defect:
+`r.place({assert(false);7})` returned internal compiler failure instead of
+preserving its already terminated operand. `lowerRegionPlace` now uses the same
+post-operand termination guard as ordinary calls, before requiring an executable
+value or creating a placement. The shared lowering also covers zeroed-byte count
+and copied-byte view operands. Nonterminated invalid operands still reject.
+Failure log: `.cache/atlas-allocation-go-oracle-direct-20261106.log`.
+
+All fourteen Go controls pass in 2.15s. Three actual Windows programs per
+low/optimized profile compile and execute: all six retain empty output and the
+original assertion-failed receipt/status. These are genuine generated SDK/Arena
+executions, not snapshot-only checks. Combined log:
+`.cache/atlas-allocation-go-oracle-native-20261106.log` (11.640s parent).
+The complete Go MIR package passes in 1.208s; scoped vet, format and diff pass.
+Native Linux stays batched. No API/ABI, grammar, SDK/version, cache format,
+dependency, default timeout, target, runner or repository-policy change.
+
+This prerequisite does not implement the Fairy allocation collector, promote
+allocation completeness or complete map/command parity. Those steps and every
+original wider/final gate remain required; no push or dispatch.

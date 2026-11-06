@@ -65,6 +65,9 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 	if err != nil {
 		return Operand{}, err
 	}
+	if l.blockTerminated(l.current) {
+		return Operand{}, nil
+	}
 	if value.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("Region.place value has no executable operand")
 	}

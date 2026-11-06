@@ -56,6 +56,17 @@ authorized by this queue.
 
 ## Progress
 
+- The Region allocation prerequisite now freezes fourteen original Go call-span
+  observations, including byte placements, partial argument order and heap-call
+  exclusions. It reproduces and fixes a Go MIR internal failure after a trapping
+  placement operand; place/zeroed-bytes/copy-bytes now preserve the original trap
+  without inventing a placement. All fourteen Go controls and six actual Windows
+  low/optimized SDK/Arena trap executions pass (11.640s combined), as do the full
+  Go MIR package (1.208s), scoped vet and hygiene. The observed-relations plan
+  retains the explicit direct-Arena source limit and failed probe commands.
+  Fairy allocation collection/production, low full-CLI replay and all remaining
+  original work stay open; native Linux stays batched, no push or dispatch.
+
 - Complete-bound move production now preserves original sites in ordinary,
   generic and concrete cleanup summaries, relation counts and exact moves
   completeness. An independent source case also fixes checked-but-unexecuted
