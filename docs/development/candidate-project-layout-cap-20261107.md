@@ -1,26 +1,27 @@
 # Project compiled-layout cap, 2026-11-07
 
 Base: `befb10d4e542152395b1e790f906dcf54dd3d751`, isolated worktree
-`.cache/parallel-project-layout-cap-20261107`. This slice changes five FY files,
+`.cache/parallel-project-layout-cap-20261107`. This slice changes six FY files,
 one focused native regression and its fixtures, plus the compilation-unit policy
 appendix and this note. No root checkout source, lock, route or metadata-map
 document is changed.
 
 ## Bounded policy and inventory
 
-`candidate_limits::project_layouts()` is 2048 and replaces exactly four compiled
+`candidate_limits::project_layouts()` is 2048 and replaces exactly five compiled
 layout gates: `module_project_metadata` before a new merged layout,
 `module_unit_body_ir_verify`, `module_metadata_artifact_model::bounded`, and
-`module_metadata_artifact_decode`'s 104-byte-row `count_from`.
+`module_metadata_artifact_decode`'s 104-byte-row `count_from`, and
+`module_project_public_view`'s compiled-IR projection guard.
 The merged-layout gate admits duplicates at capacity and refuses the next new
 layout. All other limits and validation rules retain their existing values.
 
-An additional compiled-IR metadata guard remains in
-`module_project_public_view.fy:83`: `ir::layout_count(program)>1024`. That file is
-outside this slice's authorized write set. Public-view extraction can therefore
-still refuse a larger verified program. State layout/transport/local-schema
-1024-field guards are separate storage contracts and were not changed. The
-inventory found no other production FY compiled-IR 1024-layout guards.
+The explicitly authorized public-view follow-up aligns its existing guard at
+`module_project_public_view.fy:83` with the same 2048 policy. All other public-view
+limits, error 9, validation order, current-source/provenance checks and copying
+remain unchanged. State layout/transport/local-schema 1024-field guards are
+separate storage contracts and were not changed. The updated inventory found no
+remaining production FY compiled-IR 1024-layout guards.
 
 ## Wire/version decision
 
@@ -108,3 +109,31 @@ Production hashes are logged **before** appending the test-only constructors:
 Linux execution is batched by the parent. Full suites, full source/lock checks,
 full self-build, CI and push are intentionally outside this bounded slice.
 No public API, DB, dependency, repository hygiene or runner files change.
+
+## Public-view policy follow-up
+
+The follow-up based on `3f10f0b2008bbb4b2caefb8bcfaa73ec46cf975a` changes only
+the public-view layout guard and these two policy documents. Both cold and
+admitted projections share that guard. The final public-view source SHA-256 is
+`bdc819117051b6f1256f04ef7ccf85d494cb8a2923c361fecd9014edcfbd129e`.
+
+The existing `TestCandidateGenericAggregatePublicInterfaces` exercises 12
+positive and four negative source/interface cases, independent Go descriptor and
+hash expectations, source/owner reorder, field/template/private-body edits,
+late concrete exports and the existing budget/ordering guards. Its shared native
+helper builds and executes both Windows MSVC low and optimized profiles.
+
+```powershell
+go test -mod=readonly ./internal/cli -run '^TestCandidateGenericAggregatePublicInterfaces$' -count=1 -timeout 8m -v
+```
+
+Windows AMD64 MSVC: **PASS**, Go package **109.742 s**, test 109.63 s;
+low **22.09 s**, optimized **74.93 s**. The untracked worktree-local log is
+`.cache-project-layout-public-view-test.log`. `git diff --check` passes.
+Durations describe this loaded host only.
+
+The earlier five FY files, focused layout regression and all its fixtures are
+unchanged from `3f10f0b2`; their low/optimized boundary and codec results above
+are reused. This existing public-interface test is a regression check, not an
+additional source-authenticated 2048-layout public projection fixture. No broad
+suite, full self-build, Linux execution, push or CI run is added.

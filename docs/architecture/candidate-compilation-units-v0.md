@@ -2590,15 +2590,16 @@ Runtime capability and validation are documented in
 ## Project compiled-layout admission (2026-11-07)
 
 `candidate_limits::project_layouts()` now bounds merged project metadata,
-compiled body-IR verification and metadata artifact model/decode at **2048**.
+compiled body-IR verification, metadata artifact model/decode and public-view
+projection at **2048**.
 The 2048th unique layout is admitted; the 2049th is refused with 1002.
 Duplicate recipes can still coalesce at capacity. Raw source/parser/joined AST
 bounds and the independent type, field, callable, parameter, name, work, cache
-identity and provenance rules are unchanged. The separate public-view adapter
-still has its existing 1024-layout bound; this change does not expand that route.
+identity and provenance rules are unchanged. Public-view projection retains its
+existing error 9, validation order and independent non-layout bounds.
 
 `FYMETA00` retains its field widths, ordering and bytes. It is private disposable
 exact-compiler transport, not a cross-version compatibility promise. The bounded
-admission extension and Windows evidence, including the remaining public-view
-guard, are recorded in
+admission extension and Windows evidence, including the public-view follow-up,
+are recorded in
 `docs/development/candidate-project-layout-cap-20261107.md`.
