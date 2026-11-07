@@ -8,6 +8,7 @@ import candidate_artifact_wire as common;
 // FYBODY00: frame, body/source-byte/start/end header; eight ordered tables;
 // exact byte text. Only a verified Program supplies the immutable body owner.
 pub fn Result<common::Payload,u32> encode(ref ir::Program p,usize frame,ref mut usize work){
+    if(clean::closures(ir::cleanup_ir(p))){return .err(1001);}
     if(!wire::charge(work,0)){return .err(1002);}if(frame==0 || frame>ir::count(p)){return .err(1001);}let b=ir::at(p,frame);var usize measured=0;let checked=proof::check_body(b,ir::cleanup_ir(p),frame,ref mut measured);if(!wire::charge(work,measured)){return .err(1002);}if(checked.code!=0){return .err(checked.code);}var wire::Status status=wire::Status{.code=0};var out=wire::writer(b"FYBODY00",ref mut status,work);wire::number(ref mut out,frame,ref mut status,work);
     wire::number(ref mut out,ir::body(b),ref mut status,work);
     wire::number(ref mut out,ir::source_bytes(b),ref mut status,work);

@@ -7,6 +7,7 @@ import project_cache_encoding as budget;
 // frame/field/operand/drop counts and rows. Every scalar occupies eight bytes.
 // Producer work is transient; decoding creates a fresh verifier history.
 pub fn Result<wire::Payload,u32> encode(ref ir::Program p,ref mut usize work){
+    if(ir::closures(p)){return .err(1001);}
     if(!budget::charge(work,0)){return .err(1002);}var usize measured=0;let checked=proof::check_metered(p,ref mut measured);if(!budget::charge(work,measured)){return .err(1002);}if(checked.code!=0){return .err(checked.code);}var wire::Status status=wire::Status{.code=0};var out=wire::writer(if(ir::aggregates(p)){b"FYCLEAN1"}else{b"FYCLEAN0"},ref mut status,work);wire::number(ref mut out,if(ir::project(p)){1}else{0},ref mut status,work);var usize i=0;
     wire::number(ref mut out,ir::type_count(p),ref mut status,work);
     i=0;while(i<ir::type_count(p)){let row=ir::type_at(p,i+1);

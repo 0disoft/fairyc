@@ -72,7 +72,7 @@ fn Result<usize,clean_ir::Problem> expression(ref ir::Program p,ref drop_index::
     if(e.kind==30){return result_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
     let op=ir::node_text(b,id-1);if(e.kind==5 && (bytes::equal(op,b"&&") || bytes::equal(op,b"||"))){return logical_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated,op);}
     after=evaluated;
-    if(e.kind==6 || e.kind==10 || e.kind==24){return argument_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
+    if(e.kind==6 || e.kind==10 || e.kind==24 || e.kind==36){return argument_expression(p,table,b,ref e,id,next,loop,depth,blocks,sites,captures,c,evaluated);}
     if(e.kind!=20 && e.kind!=23){after=switch(expression(p,table,e.right,after,loop,depth+1,blocks,sites,captures,c)){case .ok(n):{n}case .err(p):{return .err(p);}};}return expression(p,table,e.left,after,loop,depth+1,blocks,sites,captures,c);
 }
 fn Result<usize,clean_ir::Problem> statement(ref ir::Program p,ref drop_index::Table table,usize original,usize next,Loop loop,usize depth,ref mut v::Vec<cfg::Block> blocks,ref mut v::Vec<cfg::Deferred> sites,ref mut v::Vec<cfg::Capture> captures,ref mut Context c){
