@@ -29,11 +29,11 @@ def main():
     build = json.loads(build_path.read_text(encoding='utf-8'))
     assert build['schema'] == 'fairyc.candidate-native-probe-build/v1' and build['passed']
     assert not any(build.get(k) for k in ('goFrontendInvoked', 'commandsOnly', 'compilerOnly'))
+    proof.checked_lock(build)
     release = next(row for row in build['images'] if row['profile'] == 'release')
     compiler = Path(release['path'])
     assert proof.sha(compiler) == release['sha256']
-    for source in build['sources']:
-        assert proof.sha(ROOT / source['path']) == source['sha256'], source['path']
+    proof.checked_source_inputs(build['sources'])
     companion = proof.checked_companion(build, release)
     assert companion['implementation'] == 'authored Fairy'
     output = args.output.resolve()
@@ -94,8 +94,8 @@ def main():
     assert proof.checked_companion(build, release) == companion
     assert proof.artifact(Path(__file__)) == verifier_identity
     assert proof.artifact(HELPER) == helper_identity
-    for source in build['sources']:
-        assert proof.sha(ROOT / source['path']) == source['sha256'], source['path']
+    proof.checked_source_inputs(build['sources'])
+    proof.checked_lock(build)
     report = dict(schema='fairyc.candidate-companion-fixed-point/v1', passed=True,
                   buildReceipt=build_identity, compiler=proof.artifact(compiler), companion=companion,
                   originalPacket=companion['packet'], renewedPacket=proof.artifact(packet),

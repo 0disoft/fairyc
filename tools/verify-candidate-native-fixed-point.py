@@ -38,6 +38,10 @@ def checked_source_inputs(inputs, root=ROOT):
     assert total <= MAX_SOURCE_SET_BYTES, 'source-set byte bound exceeded'
 
 
+def checked_lock(built, root=ROOT):
+    assert sha(root / 'examples/lexer_candidate/fairy.lock') == built['lockSHA256'], 'compiler project lock changed'
+
+
 def release_build_argv(builder, packet, image, reserve):
     flags = ['--stack-reserve-bytes', str(reserve)] if reserve else []
     return list(map(str, [builder, '--packet', packet, '--packet-sha256', sha(packet),
@@ -105,6 +109,7 @@ def main():
     built = json.loads(receipt_path.read_text(encoding='utf-8'))
     assert built['schema'] == 'fairyc.candidate-native-probe-build/v1' and built['passed']
     assert not any(built.get(k) for k in ('goFrontendInvoked', 'commandsOnly', 'compilerOnly', 'frontendReuse'))
+    checked_lock(built)
     inputs = built['sources']
     checked_source_inputs(inputs)
     version = built['buildVersion']
@@ -194,6 +199,7 @@ def main():
     assert artifact(receipt_path) == receipt_identity and artifact(stage1) == stage1_identity
     assert artifact(builder) == builder_identity and sha(packet1) == built['candidatePacketSHA256']
     assert checked_companion(built, release) == companion
+    checked_lock(built)
     save('receipt.json', dict(schema='fairyc.candidate-native-cli-fixed-point/v1', passed=True,
          scope='Consecutive full file_cli C-part generations; exact complete packet and optimized PE bytes',
          adoptedStage1Build=receipt_identity, sourceInputs=inputs, sourceFiles=len(inputs),
