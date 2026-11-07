@@ -81,11 +81,16 @@ fn usize intern(ref mut v::Vec<Type> graph,Type value){
 pub fn usize canonical(ref mut v::Vec<Type> graph,Type value){return intern(graph,value);}
 fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,usize start,usize end){let usize type=intern(graph,value);return if(type==0){fail(if(count(graph)>=4096){10}else{11},module_index,start,end)}else{Resolution{.type,.problem=Problem{.code=0,.module_index,.start=0,.end=0}}};}
 fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates){
+    return walk_type(c,p,module_index,root,graph,depth,declaration,substitutions,aggregates,false);
+}
+// Only the direct scalar payload of a root Option may use the transport lane.
+// Recursive wrappers call walk again, so this permission cannot escape its leaf.
+fn Resolution walk_type(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates,bool option_payload){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==1){let name=syntax::type_text(p,root);
         if(bytes::equal(name,b"Region")){return accepted(graph,node(19,0,0,0,0,0),module_index,n.start,n.end);}
-        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){if(depth!=0 && !aggregates){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,transport::named(arguments::name(id)),0,0,0,0),module_index,n.start,n.end);}if(depth!=0 && !aggregates && at(graph,id).kind==1 && transport::extended(at(graph,id).scalar)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
-        let u32 added=transport::named(name);if(added!=0){if(depth!=0 && !aggregates){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,added,0,0,0,0),module_index,n.start,n.end);}
+        if(declaration!=0){var usize i=0;while(i<v::len<usize>(substitutions)){let param=syntax::generic_parameter_at(p,declaration-1,i);if(bytes::equal(name,syntax::source_view(p)[param.start..param.end])){let id=*v::at<usize>(substitutions,i);if(arguments::descriptor(id)){if(depth!=0 && !aggregates && !option_payload){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,transport::named(arguments::name(id)),0,0,0,0),module_index,n.start,n.end);}if(depth!=0 && !aggregates && !option_payload && at(graph,id).kind==1 && transport::extended(at(graph,id).scalar)){return fail(5,module_index,n.start,n.end);}return Resolution{.type=id,.problem=Problem{.code=0,.module_index,.start=0,.end=0}};}i+=1;}}
+        let u32 added=transport::named(name);if(added!=0){if(depth!=0 && !aggregates && !option_payload){return fail(5,module_index,n.start,n.end);}return accepted(graph,node(1,added,0,0,0,0),module_index,n.start,n.end);}
         let u32 scalar=scalars::primitive(p,root);let u32 c_scalar=abi::resolve(p,root);
         if(scalar!=7 || bytes::equal(name,b"void")){return accepted(graph,node(1,scalar,0,0,0,0),module_index,n.start,n.end);}
         if(abi::valid(c_scalar)){return accepted(graph,node(1,c_scalar,0,0,0,0),module_index,n.start,n.end);}
@@ -125,7 +130,8 @@ fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_inde
             return accepted(graph,node(13,0,d.module_index,d.declaration,first.type,0),module_index,n.start,n.end);
         }
         if(!option && !bytes::equal(name,b"Result") || args!=if(option){1}else{2}){return fail(9,module_index,n.start,n.end);}
-        let first=walk(c,p,module_index,syntax::type_argument(p,root,0),graph,depth+1,declaration,substitutions,aggregates);if(first.problem.code!=0){return first;}var usize second=0;
+        let payload=syntax::type_argument(p,root,0);let flat_option=depth==0 && option && syntax::type_at(p,payload).kind==1;
+        let first=walk_type(c,p,module_index,payload,graph,depth+1,declaration,substitutions,aggregates,flat_option);if(first.problem.code!=0){return first;}var usize second=0;
         if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions,aggregates);if(last.problem.code!=0){return last;}second=last.type;}
         if(at(graph,first.type).kind==19 || second!=0 && at(graph,second).kind==19){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(option){5}else{6},0,0,0,first.type,second),module_index,n.start,n.end);
     }

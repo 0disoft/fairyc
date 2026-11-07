@@ -16,8 +16,27 @@ The private type graph assigns the extension tags 32 through 38 in that order.
 Existing void (7), callable, literal, slice and C ABI tags keep their meanings.
 Source argument handles 4097 through 4103 remain outside the 4096-node graph;
 direct substitution materializes a canonical value node. A nested substitution
-rejects without publishing a partial graph. References, pointers, views, arrays,
-Option/Result and storage generic forms containing the extension remain closed.
+rejects without publishing a partial graph, except for the direct payload of a
+root flat Option admitted by [ADR 0547](../adr/0547-flat-option-generic-transport.md).
+References, pointers, views, arrays, nested Option/Result and storage generic
+forms containing the extension retain their independent boundaries.
+
+The flat Option follow-up uses existing kind 5 and scalar tags 32-38. Only a root
+`Option<S>` with a direct named scalar payload receives the permission; recursive
+type traversal resets it. Written scalar leaves and descriptor/interned generic
+substitutions canonicalize to the same graph nodes. Generic arguments remain
+scalar, so this does not admit `id<Option<S>>`. Both ordinary resolution and
+specialization roll back an interned payload when wrapper publication fails.
+The separate aggregate-enabled resolver retains its previous policy.
+
+Some/None construction, inert copies, reassignment, ordinary and generic calls,
+returns and exhaustive extraction use the existing checked IR and tagged C
+emitter. No boxing, allocation, new ABI, scalar arithmetic or deferred Option
+capture is introduced. See the [Fairy execution record](../development/candidate-flat-option-transport-20261107.md)
+for graph/capacity, current-source artifact restoration, independent Go
+diagnostics and Windows generated-C observations. New Option-specific full CLI
+and persistent-cache execution remain separate from the earlier direct-scalar
+receipts below.
 
 `generic_transport_scalars.fy` owns the executable names and C spellings. Concrete
 type lookup, early signature diagnostics, detached cleanup type validation and

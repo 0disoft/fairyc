@@ -18,6 +18,32 @@ import (
 )
 
 func TestCandidateGenericTransportPipeline(t *testing.T) {
+	source, observer := candidateGenericTransportSource()
+	runCandidateGenericTransportPipeline(t, source, observer)
+}
+
+func TestCandidateCompositeOptionTransportPipeline(t *testing.T) {
+	source, observer := candidateGenericTransportSource()
+	const direct = "fn T id<T>(T value){var T copy=value;copy=value;return copy;}fn T relay<T>(T value){defer sink<T>(value);return id<T>(value);}"
+	const wrapped = `fn Option<T> id<T>(Option<T> value){let Option<T> copy=value;var Option<T> replaced=copy;replaced=value;let Option<T> empty=.none;return switch(empty){case .none:{replaced}case .some(_):{.none}};}
+fn T relay<T>(T value){let Option<T> original=.some(value);let Option<T> copy=id<T>(original);discard original;return switch(copy){case .some(actual):{actual}case .none:{assert(false);value}};}`
+	if strings.Count(source, direct) != 1 {
+		t.Fatal("missing direct transport fixture to adapt")
+	}
+	source = strings.Replace(source, direct, wrapped, 1)
+	root := writeWorkspaceSessionFixture(t, strings.Replace(source, "module root;", "module main;", 1))
+	if code, out, diagnostic := runForTest([]string{"check"}, root); code != ExitSuccess || diagnostic != "" {
+		t.Fatalf("independent Go Option source admission: %d %s %s", code, out, diagnostic)
+	}
+	observer = "#include <string.h>\n" + strings.Replace(observer, "return 42;}", `
+float floats[]={0.0f,-0.0f,1.25f};double doubles[]={0.0,-0.0,-3.5};
+for(size_t i=0;i<3;i++){float actual=fairyc_probe_f32(floats[i]);if(memcmp(&actual,&floats[i],sizeof actual)!=0)return 2;double wide=fairyc_probe_f64(doubles[i]);if(memcmp(&wide,&doubles[i],sizeof wide)!=0)return 3;}
+return 42;}`, 1)
+	runCandidateGenericTransportPipeline(t, source, observer)
+}
+
+func runCandidateGenericTransportPipeline(t *testing.T, source, observer string) {
+	t.Helper()
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private compiler-host replay currently requires Windows AMD64; Linux deferred")
 	}
@@ -31,7 +57,6 @@ func TestCandidateGenericTransportPipeline(t *testing.T) {
 		t.Fatal(err)
 	}
 	program := strings.Replace(string(data), "module tests::module_generic_transport;", "module main;", 1)
-	source, observer := candidateGenericTransportSource()
 	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console) fn i32 main(){extended_transport_keeps_operations_and_composite_signatures_closed();emit_transport(b" + strconv.Quote(source) + ");return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
 	copyCandidateParityModules(t, root, "project_compiler_core", "module_project_identified_ir", "module_public_type_text", "module_catalog", "module_unit_c_emit", "module_project_complete_c", "module_unit_body_ir_model", "module_unit_cleanup_mir_model", "module_project_artifact_encode", "module_project_artifact_decode", "candidate_artifact_wire", "generic_transport_scalars", "c_text", "syntax", "scanner")

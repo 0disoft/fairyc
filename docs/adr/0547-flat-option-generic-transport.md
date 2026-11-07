@@ -1,9 +1,10 @@
 # ADR 0547: Flat Option transport of extended scalars
 
-- Status: Accepted for the bounded Go implementation; Fairy acceptance tracked separately
+- Status: Accepted for bounded Go and Fairy source/artifact transport
 - Date: 2026-11-07
 - Extends ADR 0494's wrapper boundary; preserves ADR 0387 aggregate admissions
 - Go evidence: [execution record](../development/go-flat-option-transport-20261107.md)
+- Fairy evidence: [execution record](../development/candidate-flat-option-transport-20261107.md)
 - Preparation: [bounded implementation plan](../development/composite-generic-transport-plan-20261107.md)
 
 ## Decision
@@ -74,12 +75,11 @@ The C observer supplies signed minima, unsigned maxima, finite floats and both
 zero signs; source code does not synthesize new scalar literals or compare those
 scalars numerically.
 
-The coordinator separately reports Fairy graph tests and the restored
-source-to-artifact-to-C Option pipeline passed; the latter exercised four Windows
-producer/consumer combinations in 209.852s. These Fairy results are independent
-of the Go result and are recorded with attribution in the Go execution record;
-the parent owns exact integration evidence and the remaining diagnostic
-regression. Fresh-process Option cache/CLI execution, native Linux replay,
+Fairy's separate execution record establishes graph canonicalization/rollback,
+the current-source restored-artifact C pipeline in four Windows producer/consumer
+combinations, 24-case Go diagnostic comparison and complete source/locked checks.
+These are independently observed integration results, not consequences inferred
+from the Go result. Fresh-process Option cache/CLI execution, native Linux replay,
 full-main Atlas, consecutive self-build, distribution refresh and hosted CI are
 not claimed by this ADR. Existing cache/interface encodings remain unchanged;
 their existing source/compiler identity checks remain required.

@@ -68,7 +68,11 @@ authorized by this queue.
   calls also need transitive body dependency/identity rules.
 - [ ] Composite generic transport: preserve already implemented scalar-parameter
   structs/resources; the seven extended scalar types inside further wrappers
-  retain their separate copy/borrow/transport admission boundaries.
+  retain their separate copy/borrow/transport admission boundaries. ADR 0547's
+  flat Option family now passes Go and Fairy source/artifact/native execution,
+  including four Fairy producer/consumer combinations and 24-case independent
+  diagnostics. See `candidate-flat-option-transport-20261107.md`. Its full CLI/
+  fresh-process cache and the other wrapper families remain open.
 - [ ] Multi-operation static interfaces: independent operation selection already
   works. A grouped interface still needs its representation, complete-provider
   admission and partial-implementation/error-location contract.
@@ -112,6 +116,17 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- A Sol High worker and coordinator implement the exact flat Option extension
+  for seven transport scalars. Go source/immutable AST/target-layout and real
+  C11/C17 consumers pass; Fairy descriptor/interned/written graph identity,
+  exact capacity/rollback, source-owned restored artifacts, generated-C values
+  and independent 24-case diagnostics pass Windows low/optimized. Complete
+  source/locked checks pass 755 files / 9,543 MIR functions with all 1,226 Fairy
+  files matching. See ADR 0547 and both linked execution records. No new scalar
+  arithmetic, nested-wrapper/generic-argument/FFI family, cache wire, policy,
+  bound or timeout is added. Full Option CLI/cache and broader final work remain
+  open; Linux is batched, no remote action, full goal active.
 
 - The coordinator connects the existing explicit compiler-host builder to the
   full Atlas main harness after reproducing ordinary-header refusal. Both new

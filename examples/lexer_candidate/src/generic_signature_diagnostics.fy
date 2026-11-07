@@ -26,6 +26,9 @@ fn Result<bool,u32> contains(ref plan::Plan original,plan::Node selected,ref syn
     if(n.kind==1){let templates=input::templates(plan::input(original));let row=catalog::template_at(templates,selected.template_index);let text=syntax::type_text(p,root);let param=switch(parameter(templates,row,text,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
         if(param!=0){if(param>selected.count){return .err(9);}let types=input::types(plan::input(original));let id=selected.arguments[param-1];if(id==0 || id>concrete::count(types)){return .err(9);}let t=concrete::at(types,id-1);return .ok(t.kind==1 && transport::extended(t.scalar) && depth!=0);}return .ok(unsupported(text) && depth!=0);
     }
+    if(depth==0 && n.kind==6 && bytes::equal(syntax::type_text(p,n.left),b"Option") && syntax::type_argument_count(p,root)==1){
+        let payload=syntax::type_argument(p,root,0);if(payload!=0 && payload<=syntax::type_count(p) && syntax::type_at(p,payload).kind==1){return contains(original,selected,p,payload,0,work);}
+    }
     let left=switch(contains(original,selected,p,n.left,depth+1,work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(left){return .ok(true);}
     // Array lengths are expressions, not signature type arguments.
     if(n.kind==8){return .ok(false);}return contains(original,selected,p,n.right,depth+1,work);

@@ -25,7 +25,9 @@ def main():
         ('UnusedParameter', {'root': 'fn i32 constant<T>(){return 42;}fn i32 main(){return constant<u16>();}'}),
         ('Reference', {'root': 'fn ref T id<T>(ref T x){return x;}fn void main(){discard id<u16>(42);}'}),
         ('Pointer', {'root': 'fn ptr T id<T>(ptr T x){return x;}fn void main(){discard id<u16>(42);}'}),
-        ('Option', {'root': 'fn Option<T> id<T>(Option<T> x){return x;}fn void main(){discard id<u16>(42);}'}),
+        ('Option', {'root': 'fn Option<T> id<T>(Option<T> x){return x;}fn void main(){discard id<u16>(.none);}'}),
+        ('NestedOption', {'root': 'fn Option<Option<T>> id<T>(Option<Option<T>> x){return x;}fn void main(){discard id<u16>(.none);}'}),
+        ('Result', {'root': 'fn Result<T,i32> id<T>(Result<T,i32> x){return x;}fn void main(){discard id<u16>(.err(1));}'}),
         ('Array', {'root': 'fn T[2] id<T>(T[2] x){return x;}fn void main(){discard id<u16>(42);}'}),
         ('Forward', {'root': 'import helper as h;fn T outer<T>(T x){return h::id<T>(x);}fn void main(){discard outer<u16>(42);}',
                      'helper': 'pub fn T id<T>(T x){return x;}'}),
@@ -59,7 +61,7 @@ def main():
             if match:
                 feature, module, start, end = match.groups()
                 diagnostics.append(dict(module=module, feature=feature, start=int(start), end=int(end)))
-        expected = 2 if label in {'Reference', 'Pointer', 'Option', 'Array'} else 0
+        expected = 2 if label in {'Reference', 'Pointer', 'NestedOption', 'Result', 'Array'} else 0
         assert len(diagnostics) == expected, (label, stderr)
         if expected:
             assert result.returncode == 3 and not result.stdout and len(stderr.splitlines()) == expected, (label, result)
