@@ -63,12 +63,27 @@ authorized by this queue.
   Exact committed source ZIP, checksums, portable six-group plan and actual
   clean original-commit receiver reconstruction are verified in
   `linux-validation-handoff-20261107.md`.
-- [ ] Prepare and locally verify the current Windows distribution ZIP and
-  clean-environment verifier. Clean-machine execution needs an actual environment.
+- [x] Prepare and locally verify the current Windows distribution ZIP and
+  clean-environment verifier. Clean `a8a3e499` public Go compiler/LSP packaging
+  passes all 16 steps and 15 outside-checkout minimal-PATH steps; see
+  `../ops/windows-preview-readiness-20261107.md` for exact artifact identity.
+- [ ] Execute the Windows distribution on an actual clean machine; the local
+  minimal-PATH verifier is same-host evidence only.
 - [ ] Keep same-commit hosted CI acceptance pending until an authorized push or
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Current Windows release acceptance at compiler-source revision `d0b84329`
+  passes normal full CLI self-build, exact native packet/PE fixed point and
+  three-generation companion equality. The five comparison suites execute
+  342 exact matches; four explicit exclusions remain coverage gaps, not passes.
+  See `current-compiler-acceptance-route-20261107.md`. Public Go compiler/LSP
+  distribution preparation is separately refreshed at clean `a8a3e499`, with
+  16 packaging and 15 external steps passing. Earlier failed attempts below
+  remain historical observations. Broader implementation, development-profile
+  self-build, actual clean-machine execution, batched Linux and authorized
+  hosted CI remain open. No push, dispatch or publication; full goal stays active.
 
 - Compiler-host Windows C units now use at most two workers (one on one CPU),
   with standalone runtime compilation, ordered failure, owned-process-tree

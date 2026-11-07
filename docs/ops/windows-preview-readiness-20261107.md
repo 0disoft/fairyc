@@ -131,3 +131,32 @@ the aggregate receipt. This is same-host public Go ZIP evidence. It does not
 establish a clean machine, Fairy-authored self-build, native Linux or hosted CI.
 No source, lock, dependency, runner or policy change, publication or push occurs
 in this refresh. This later documentation does not alter the archived revision.
+
+## Current-source refresh at a8a3e499
+
+The public Go Stage 0 compiler/LSP ZIP is rebuilt at clean
+`a8a3e49978fcb5a3e0675364362d8bb030fd076e`. All 16 packaging steps pass in
+24.683s. Retained-artifact verification and all 15 outside-checkout smoke steps
+also pass; the external workflow takes 12.866s with only Windows/System32 on
+the child PATH. Both development/release build, direct execution, run and native
+test, locked checks and LSP protocol are observed. HEAD and clean status are
+unchanged throughout those commands.
+
+The archive is
+`.cache/starter-smoke-TQXsRl/fairyc-windows-amd64-preview-candidate.zip`,
+9,781,531 bytes, SHA-256
+`9c06075674930c974b8fdb8a6007f526012ac0fff10e5c75aa85790c26038635`.
+Exact commands, input/output receipt hashes, timings and a copied external
+receipt are retained in
+`.cache/current-windows-preview-a8a3e499-20261107/receipt.json` (SHA-256
+`c03f0c7dd20a8929e98f1f892ec87318afffc62c6031e1cff81a6855793c4427`).
+The prior 25 passing Node checks are reused: Git comparison confirms every
+tracked `tools/windows-preview` input is unchanged since `6270e367`. Those
+tests were not rerun or counted as new observations.
+
+This closes local preparation and same-host execution of this exact public ZIP;
+actual clean-machine execution remains pending. The separate Fairy release
+self-build/fixed-point checkpoint is recorded in
+`../development/current-compiler-acceptance-route-20261107.md`; this public ZIP
+does not substitute for it. No source/API/ABI, lock, dependency, repository-policy
+or runner change, release, publishing, hosted dispatch or push occurs.
