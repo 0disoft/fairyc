@@ -49,9 +49,9 @@ pub fn Result<bytes::Buffer,Problem> digest(ref u8[] raw,ref mut usize work){
     var out=bytes::empty();let digits=b"0123456789abcdef";var usize i=0;var u32 shift=28;while(i<64){if(!bytes::append_byte(ref mut out,digits[((h[i/8]>>shift)&15) as usize]).is_ok){return .err(fail(8));}i+=1;if(i%8==0){shift=28;}else{shift-=4;}}return .ok(out);
 }
 pub fn Result<bytes::Buffer,Problem> generation(ref u8[] route,ref u8[] raw,ref mut usize work){if(!valid_route(route)){return .err(fail(1));}let hash=switch(digest(raw,work)){case .ok(p):{p}case .err(e):{return .err(e);}};if(!charge(work,145)){return .err(fail(9));}var out=bytes::empty();if(!bytes::append(ref mut out,b"fyproject0-").is_ok || !bytes::append(ref mut out,route[17..]).is_ok || !bytes::append_byte(ref mut out,45).is_ok || !bytes::append(ref mut out,bytes::view(ref hash)).is_ok || !bytes::append(ref mut out,b".fyc").is_ok){return .err(fail(8));}return .ok(out);}
-// The raw store transports ordinary, aggregate and graph private envelopes. Semantic readers
+// The raw store transports ordinary, aggregate, closure and graph private envelopes. Semantic readers
 // still require their exact version, key domain and freshly admitted owner.
-fn bool envelope(ref u8[] raw){return raw.len>=8 && (bytes::equal(raw[..8],b"FYCACHE0") || bytes::equal(raw[..8],b"FYCACHE1") || bytes::equal(raw[..8],b"FYSGCAC0"));}
+fn bool envelope(ref u8[] raw){return raw.len>=8 && (bytes::equal(raw[..8],b"FYCACHE0") || bytes::equal(raw[..8],b"FYCACHE1") || bytes::equal(raw[..8],b"FYCACHE2") || bytes::equal(raw[..8],b"FYSGCAC0"));}
 fn void set(ref mut v::Vec<usize> order,usize at,usize value){let slot=v::at_mut<usize>(order,at);*slot=value;}
 fn bool before(ref u8[] a,ref u8[] b){var usize i=0;while(i<a.len && i<b.len){if(a[i]!=b[i]){return a[i]<b[i];}i+=1;}return a.len<b.len;}
 fn Result<v::Vec<usize>,Problem> ordered(ref rooted::Entries entries,ref mut usize work){var v::Vec<usize> order=v::empty<usize>();var usize i=0;

@@ -22,19 +22,44 @@ pub fn bool is_cold(ref Work p,usize index){assert(index<512);let usize mask=1<<
 // Share the bounded store and retention policy with whole-project generations.
 // Distinct route preimages and envelope members keep their admission isolated.
 pub fn Result<payload::Payload,u32> encode(ref keys::Identity key,ref identified::Program unit,ref mut usize work){
-    let context=ir::cleanup_ir(identified::ir_program(unit));if(clean::project(context) || keys::aggregates(key)!=clean::aggregates(context)){return .err(1001);}
-    let program=switch(encoder::encode(identified::ir_program(unit),work)){case .ok(p):{p}case .err(code):{return .err(code);}};var wire::Status status=wire::Status{.code=0};var out=wire::writer_marker(if(keys::aggregates(key)){b"FYCACHE1"}else{b"FYCACHE0"},ref mut status,work);wire::member(ref mut out,keys::canonical(key),ref mut status,work);wire::member(ref mut out,payload::content(ref program),ref mut status,work);return wire::finish(out,status);
+    return encode_mode(key,unit,false,work);
+}
+pub fn Result<payload::Payload,u32> encode_closures(ref keys::Identity key,ref identified::Program unit,ref mut usize work){
+    return encode_mode(key,unit,true,work);
+}
+fn Result<payload::Payload,u32> encode_mode(ref keys::Identity key,ref identified::Program unit,bool closures,ref mut usize work){
+    let context=ir::cleanup_ir(identified::ir_program(unit));if(clean::project(context) || keys::closures(key)!=closures || clean::closures(context)!=closures || keys::aggregates(key)!=clean::aggregates(context)){return .err(1001);}
+    let program=switch(if(closures){encoder::encode_closures(identified::ir_program(unit),work)}else{encoder::encode(identified::ir_program(unit),work)}){case .ok(p):{p}case .err(code):{return .err(code);}};var wire::Status status=wire::Status{.code=0};var out=wire::writer_marker(if(closures){b"FYCACHE2"}else if(keys::aggregates(key)){b"FYCACHE1"}else{b"FYCACHE0"},ref mut status,work);wire::member(ref mut out,keys::canonical(key),ref mut status,work);wire::member(ref mut out,payload::content(ref program),ref mut status,work);return wire::finish(out,status);
 }
 pub fn Result<identified::Program,u32> restore(ref u8[] raw,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut usize source_work,ref mut usize artifact_work){
+    return restore_mode(raw,key,sources,scope,metadata,original,first,stop,false,source_work,artifact_work);
+}
+// This source-bound admission rebuilds the current owner and exact-compares
+// FYPROG02. It does not skip lowering or grant detached bytes source authority.
+pub fn Result<identified::Program,u32> restore_closures(ref u8[] raw,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut usize source_work,ref mut usize artifact_work){
+    return restore_mode(raw,key,sources,scope,metadata,original,first,stop,true,source_work,artifact_work);
+}
+fn Result<identified::Program,u32> restore_mode(ref u8[] raw,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,bool closures,ref mut usize source_work,ref mut usize artifact_work){
+    if(keys::closures(key)!=closures){return .err(1001);}
     let aggregates=keys::aggregates(key);if(aggregates!=signatures::aggregate_types(metadata)){return .err(1001);}
-    var cursor=switch(wire::cursor_marker(raw,if(aggregates){b"FYCACHE1"}else{b"FYCACHE0"},artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let identity=wire::member_from(raw,ref mut cursor,16777216,if(aggregates){b"FYPUNIT1"}else{b"FYPUNIT0"},artifact_work);let program=wire::member_from(raw,ref mut cursor,wire::byte_limit(),if(aggregates){b"FYPROG01"}else{b"FYPROG00"},artifact_work);let code=wire::end(raw,ref mut cursor,artifact_work);if(code!=0){return .err(code);}let expected=keys::canonical(key);if(!wire::charge(artifact_work,expected.len+1)){return .err(1002);}if(!bytes::equal(raw[identity.start..identity.end],expected)){return .err(1001);}
+    var cursor=switch(wire::cursor_marker(raw,if(closures){b"FYCACHE2"}else if(aggregates){b"FYCACHE1"}else{b"FYCACHE0"},artifact_work)){case .ok(p):{p}case .err(code):{return .err(code);}};let identity=wire::member_from(raw,ref mut cursor,16777216,if(closures){b"FYPUNIT2"}else if(aggregates){b"FYPUNIT1"}else{b"FYPUNIT0"},artifact_work);let program=wire::member_from(raw,ref mut cursor,wire::byte_limit(),if(closures){b"FYPROG02"}else if(aggregates){b"FYPROG01"}else{b"FYPROG00"},artifact_work);let code=wire::end(raw,ref mut cursor,artifact_work);if(code!=0){return .err(code);}let expected=keys::canonical(key);if(!wire::charge(artifact_work,expected.len+1)){return .err(1002);}if(!bytes::equal(raw[identity.start..identity.end],expected)){return .err(1001);}
+    if(closures){return admission::restore_closures(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work);}
     return if(aggregates){admission::restore_aggregates(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work)}else{admission::restore(raw[program.start..program.end],sources,scope,metadata,original,first,stop,source_work,artifact_work)};
 }
 @effects(filesystem)
 pub fn Result<identified::Program,u32> load(ref disk::Store store,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut Work work){
+    return load_mode(store,key,sources,scope,metadata,original,first,stop,false,work);
+}
+@effects(filesystem)
+pub fn Result<identified::Program,u32> load_closures(ref disk::Store store,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,ref mut Work work){
+    return load_mode(store,key,sources,scope,metadata,original,first,stop,true,work);
+}
+@effects(filesystem)
+fn Result<identified::Program,u32> load_mode(ref disk::Store store,ref keys::Identity key,ref v::Vec<syntax::Parsed> sources,ref catalog::Catalog scope,ref signatures::Program metadata,ref plan::Plan original,usize first,usize stop,bool closures,ref mut Work work){
+    if(keys::closures(key)!=closures){return .err(1001);}
     var usize scan=work.scan;let result=disk::candidates(store,keys::route(key),ref mut scan);work.scan=scan;let cursor=switch(result){case .ok(p):{p}case .err(_):{return .err(1001);}};var usize index=disk::candidate_count(ref cursor);
     while(index>0){var usize io=work.io;let candidate_result=disk::next(store,ref cursor,ref mut index,ref mut io);work.io=io;let candidate=switch(candidate_result){case .ok(p):{p}case .err(_):{return .err(1001);}};
-        var usize source=work.source;var usize artifact=work.artifact;let result=restore(disk::candidate_bytes(ref candidate),key,sources,scope,metadata,original,first,stop,ref mut source,ref mut artifact);work.source=source;work.artifact=artifact;
+        var usize source=work.source;var usize artifact=work.artifact;let result=restore_mode(disk::candidate_bytes(ref candidate),key,sources,scope,metadata,original,first,stop,closures,ref mut source,ref mut artifact);work.source=source;work.artifact=artifact;
         switch(result){case .ok(p):{return .ok(p);}case .err(code):{if(code==10 || code==11 || code==1002 || code==1003){return .err(code);}}};
         // A valid old dependency contract may simply be incompatible today.
         // Do not delete that generation as if semantic mismatch meant corruption.
@@ -42,5 +67,13 @@ pub fn Result<identified::Program,u32> load(ref disk::Store store,ref keys::Iden
 }
 @effects(filesystem,clock)
 pub fn bool save(ref disk::Store store,ref keys::Identity key,ref identified::Program unit,ref mut Work work){
-    var usize artifact=work.artifact;let encoded=encode(key,unit,ref mut artifact);work.artifact=artifact;let data=switch(encoded){case .ok(p):{p}case .err(_):{return false;}};var usize io=work.io;var usize scan=work.scan;let result=disk::put(store,keys::route(key),payload::content(ref data),ref mut io,ref mut scan);work.io=io;work.scan=scan;return result.is_ok;
+    return save_mode(store,key,unit,false,work);
+}
+@effects(filesystem,clock)
+pub fn bool save_closures(ref disk::Store store,ref keys::Identity key,ref identified::Program unit,ref mut Work work){
+    return save_mode(store,key,unit,true,work);
+}
+@effects(filesystem,clock)
+fn bool save_mode(ref disk::Store store,ref keys::Identity key,ref identified::Program unit,bool closures,ref mut Work work){
+    var usize artifact=work.artifact;let encoded=encode_mode(key,unit,closures,ref mut artifact);work.artifact=artifact;let data=switch(encoded){case .ok(p):{p}case .err(_):{return false;}};var usize io=work.io;var usize scan=work.scan;let result=disk::put(store,keys::route(key),payload::content(ref data),ref mut io,ref mut scan);work.io=io;work.scan=scan;return result.is_ok;
 }
