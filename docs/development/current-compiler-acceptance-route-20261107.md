@@ -217,3 +217,38 @@ before this metadata refresh. Its earlier native results do not validate the
 updated explanation. Fresh authored emissions consume the updated source;
 subsequent CLI/fixed-point receipts must bind those bytes and their frozen version
 oracle rather than claim that the older seed itself contains the new metadata.
+
+## Global import admission follow-up
+
+The next real 646-input emission reaches the Fairy frontend and fails after
+14.957s: `project_edit_preview.fy:10`, phase 1/stage 0/code 10, span 347..391.
+The exact manifest contains 5052 imports; `module_catalog` still limited its
+shared import table to 4096. This is a reproduced catalog admission failure,
+not a native C compiler timeout. Evidence:
+`.cache/current-selfbuild-metadata-20261107/invocations.json`.
+
+`candidate_limits::project_imports` now bounds imports and scoped provider
+bindings at 8192. The catalog checks only the table selected by the incoming
+declaration kind, so a full import table no longer rejects an ordinary function
+that has capacity in the declaration table. Per-owner 128 items, source and
+joined-owner limits are unchanged. The manifest diagnostic now reports 1024
+files consistently with the file-count owner.
+
+The native regression admits exactly 8192 imports and matching scoped bindings,
+including an ordinary provider function after the import table fills; it rejects
+8193 imports with code 10 and 8193 bindings with the existing code 9. Windows
+low/optimized pass in 6.204s / 9.047s. Full isolated check/locked after this change
+pass in 14.424s / 14.883s, 755 files / 9501 MIR functions; all 1225 authored files
+match the checked snapshot. Logs: `.cache/current-import-admission-20261107.log`,
+`.cache/current-import-admission-optimized-20261107.log`, and
+`.cache/current-source-check-imports-20261107.log`.
+
+An earlier image with the old catalog limit cannot validate full 5052-import
+input. The next bootstrap stage must contain the new catalog implementation;
+no earlier full-CLI native pass is counted as a new self-build pass.
+
+The separately discovered parser fixture failure is also repaired: its main
+uses the actual syntax API, and its helper follows actual module dependencies.
+Both fixture checks and five borrow-boundary cases pass in 12.973s at
+`.cache/lexer-fixture-repair-20261107/after.log`. The earlier failed log remains
+retained; it is superseded only for these seven repaired cases.

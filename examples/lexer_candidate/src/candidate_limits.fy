@@ -17,6 +17,10 @@ pub fn usize manifest_bytes(){return 65536;}
 // This catalog bound is separate from executable callables, types and frames.
 pub fn usize project_declarations(){return 8192;}
 
+// Imports and scoped provider bindings share a project-wide table. Its capacity
+// is independent of ordinary declarations and each owner's 128-item limit.
+pub fn usize project_imports(){return 8192;}
+
 // Imported layouts combine fields from multiple original source owners.
 // The source parser and joined AST retain their separate 1024-field caps.
 pub fn usize metadata_fields(){return 2048;}

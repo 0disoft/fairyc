@@ -1,5 +1,16 @@
 # Bounded candidate compilation units
 
+## Shared import catalog budget (2026-11-07)
+
+`candidate_limits::project_imports` admits at most 8192 original imports and
+matching scoped provider bindings across the source set. The current complete
+CLI input has 5052 imports; the previous 4096 cap rejected its actual source.
+Imports and ordinary declarations charge their own tables, so an import table
+at capacity does not consume ordinary declaration capacity. The independent
+128-item owner, source, joined-unit, declaration and work bounds remain intact.
+Native low/optimized exact/overflow cases and the current whole-source checks
+are recorded in `../development/current-compiler-acceptance-route-20261107.md`.
+
 ## Explicit Windows compiler-host header budget (2026-11-07)
 
 ADR 0510 adds a separate native builder for verified private compiler-host C.
