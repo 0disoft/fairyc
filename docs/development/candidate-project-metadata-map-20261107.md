@@ -52,11 +52,22 @@ an authored frontend self-build result.
 
 ## Acceptance boundary
 
-The preceding normal full-source retry still refuses in phase 3/stage 0/code
-1002 with zero output. A frozen-input diagnostic identifies metadata preparation
-(33002), without establishing which internal bound failed. That is not a pass
-or proof that this optimization resolves the normal failure. A new full-source
-normal retry is running in `.cache/current-selfbuild-metadata-map-20261107`.
+The new normal 646-source retry exits 2 after 515.570s in phase 3/stage 0/code
+1002 with zero output. Its invocation is recorded in
+`.cache/current-selfbuild-metadata-map-20261107/invocations.json`.
+The frozen-input diagnostic finishes in 579.281s and isolates the independent
+1024-layout cap (diagnostic 34202 at 1024), not metadata work exhaustion.
+Its 157 checked IR units are saved in a detached diagnostic archive with
+authenticated source order, image and packet hashes; all frozen inputs remain
+unchanged. `.cache/current-project-metadata-focus-20261107/finalize.json`
+records complete IR capture, not a successful link or source-bound cache hit.
+
+Replaying the same 496065867 bytes of IR takes 24.075s with unchanged hashes.
+The isolated 2048-layout experiment prepares metadata successfully: 1116 unique
+layouts, 5708 fields, 5772 callables, 17685 parameters and work 266376. The next
+distinct refusal is cleanup assembly (44002). This experiment changes only
+ignored diagnostic copies, not product policy or normal acceptance. Evidence:
+`.cache/current-project-metadata-replay-20261107/run.json`.
 Normal self-build, fixed points and
 current-source full parity remain pending. Linux native checks stay batched;
 CI, clean-machine validation and push are unexecuted. API, DB, SDK ABI, runner

@@ -581,7 +581,14 @@ Windows low/optimized native regression passes in 113.530s; an 8192-cell ordered
 map reduces work 16384 to 8192, and real 8-unit IR reduces 14312 to 12264.
 Integrated source check/locked pass (755 files, 9530 MIR, 13.413s / 13.338s).
 A fresh optimized full CLI seed and help smoke pass in 131.862s (205 C parts).
-The new normal full-source retry and an isolated frozen-input metadata diagnosis
-are running with separate output paths; neither is claimed to pass. Fixed
-points, current-source full parity and Linux native remain pending. See
+The new normal retry exits 2 after 515.570s in phase 3/stage 0/code 1002,
+with zero output. The frozen-input diagnosis isolates the independent 1024-layout
+cap at exactly 1024; metadata work exhaustion is not the cause. It saves all
+157 checked IR units with authenticated frozen source/image/packet hashes.
+A 24.075s detached replay with an isolated 2048 cap prepares 1116 unique layouts
+(5708 fields, 5772 callables, 17685 parameters, metadata work 266376), then
+refuses in cleanup assembly (44002). This is diagnostic evidence, not normal
+acceptance or a source-bound cache hit. A bounded layout policy follow-up is in
+an isolated worker worktree. Fixed points, current-source full parity and Linux
+native remain pending. See
 `candidate-project-metadata-map-20261107.md` for evidence and scope.
