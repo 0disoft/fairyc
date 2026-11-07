@@ -13,6 +13,7 @@ type staticOperation struct {
 	capability genericplan.CapabilityID
 	providers  map[string]ast.Function
 	definition genericplan.Digest
+	group      string
 }
 
 func marker(fn ast.Function, name string) (ast.Attribute, bool, error) {
@@ -42,7 +43,14 @@ func (x *expander) declareStaticOperations(b *genericplan.Builder) error {
 		if !ok {
 			continue
 		}
-		valid := len(a.Arguments) == 0 && len(fn.Attributes) == 1 && len(fn.TypeParameters) == 1 && len(fn.Parameters) <= 4 && !fn.Unsafe && fn.Owner == "" && fn.Body != nil && len(fn.Body.Statements) == 0 && fn.Body.Tail == nil
+		group := ""
+		if len(a.Arguments) != 0 {
+			if len(a.Arguments) != 1 || !validStaticGroupLabel(a.Arguments[0].Raw) || !fn.Public {
+				return x.at(fn.Span, FailureDeclaration, fmt.Errorf("@interface(label) requires a public operation and a 1..64 byte ASCII identifier"))
+			}
+			group = a.Arguments[0].Raw
+		}
+		valid := len(fn.Attributes) == 1 && len(fn.TypeParameters) == 1 && len(fn.Parameters) <= 4 && !fn.Unsafe && fn.Owner == "" && fn.Body != nil && len(fn.Body.Statements) == 0 && fn.Body.Tail == nil
 		if valid {
 			valid = directType(fn.ResultType, fn.TypeParameters[0])
 			for _, p := range fn.Parameters {
@@ -52,7 +60,7 @@ func (x *expander) declareStaticOperations(b *genericplan.Builder) error {
 		if !valid {
 			return x.at(fn.Span, FailureDeclaration, fmt.Errorf("@interface requires one type parameter, T result, 0..4 T parameters and an empty safe body"))
 		}
-		x.operations[fn.Name] = &staticOperation{capability: genericplan.CapabilityID(string(x.id(fn.Name)) + "::operation"), providers: map[string]ast.Function{}}
+		x.operations[fn.Name] = &staticOperation{capability: genericplan.CapabilityID(string(x.id(fn.Name)) + "::operation"), providers: map[string]ast.Function{}, group: group}
 	}
 	for _, fn := range x.module.Functions {
 		a, ok, err := marker(fn, "implements")
@@ -87,6 +95,9 @@ func (x *expander) declareStaticOperations(b *genericplan.Builder) error {
 		}
 		op.providers[typ] = fn
 	}
+	if err := x.defineStaticGroups(); err != nil {
+		return err
+	}
 	names := make([]string, 0, len(x.operations))
 	for name := range x.operations {
 		names = append(names, name)
@@ -99,17 +110,19 @@ func (x *expander) declareStaticOperations(b *genericplan.Builder) error {
 			types = append(types, typ)
 		}
 		slices.Sort(types)
-		// Bind every explicitly supplied provider, including currently unused ones,
-		// into the exported operation's definition and public template closure.
-		defs := []ast.Function{x.templates[name]}
-		for _, typ := range types {
-			defs = append(defs, op.providers[typ])
+		if op.group == "" {
+			// Keep the legacy bytes and domain exact. Group members already
+			// bind all siblings and all tuples through their shared definition.
+			defs := []ast.Function{x.templates[name]}
+			for _, typ := range types {
+				defs = append(defs, op.providers[typ])
+			}
+			raw, err := json.Marshal(defs)
+			if err != nil {
+				return err
+			}
+			op.definition = genericplan.DigestText("source-static-operation-v1", string(raw))
 		}
-		raw, err := json.Marshal(defs)
-		if err != nil {
-			return err
-		}
-		op.definition = genericplan.DigestText("source-static-operation-v1", string(raw))
 		if err := b.AddCapability(genericplan.CapabilityDescriptor{ID: op.capability, Owner: x.owner, Arity: 1, Definition: op.definition}); err != nil {
 			return err
 		}
