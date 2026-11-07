@@ -176,3 +176,25 @@ its commit identity. The transferable handoff requirement is closed; Linux
 execution, trusted TLS and consecutive self-build/full acceptance remain open.
 No product API/ABI, DB/provider, dependency, CI/runner or repository-policy
 change, push, dispatch, release or deployment is introduced.
+
+## Current source handoff at 6270e367
+
+The source-only handoff is refreshed at clean
+`6270e3673e8a5551a927422550a853c3cbb109e9`, original Git tree
+`3c0757814438faf56e07e69994eb8da5b3aa3113`. The ZIP contains 7577 original
+source files and is 60976825 bytes. Artifact:
+`.cache/current-linux-handoff-6270e367-20261107/handoff.zip`, SHA-256
+`dcd1268372efd85b02892bfcf480f0a9396bf5783a10b5cfe6a38b02448ad4a6`.
+
+The existing packager and a fresh receiver verification each run once. All
+payload checksums, original blobs and file modes match; the receiver restores
+the exact commit/tree and remains clean. The portable collector's six groups
+and exact argv match the bundled plan. The original repository HEAD, tree,
+index and source bytes are unchanged. Evidence is `handoff-verification.json`
+and `receiver-verification.log` beside the artifact.
+
+No Go/compiler/native Linux execution, CI dispatch, installation or network
+download is part of this source-package proof. Unchanged tiny packager checks
+reuse their previous valid results. Native Linux and authored self-build/fixed-
+point remain pending; the later documentation commit does not change this
+snapshot's identity.

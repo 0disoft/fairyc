@@ -112,3 +112,22 @@ workflow, package script, repository hygiene rule, source-of-truth contract,
 queue/index or ADR changed. The only additions are the permanent verifier, its
 Node tests and this record. No commit, push, dispatch, release or publication
 was performed in this worker; parent owns integration and commits.
+
+## Current-source refresh at 6270e367
+
+The public Go Stage 0 compiler/LSP ZIP is rebuilt and verified at clean
+`6270e3673e8a5551a927422550a853c3cbb109e9`, with the same clean HEAD before
+and after. All 16 packaging steps, retained ZIP verification, 15 outside-checkout
+minimal-PATH smoke steps and 25 Node checks pass. Each of the four existing
+commands is run once; their exact argv and results are in
+`.cache/current-windows-preview-6270e367-20261107/receipt.json`.
+
+The ZIP is
+`.cache/starter-smoke-T4N5DW/fairyc-windows-amd64-preview-candidate.zip`,
+9781670 bytes, SHA-256
+`91b27a8e5a3d62cfdb6a14d3a72472029842245142902492098a6bcbb25fc7f1`.
+Raw package, retained-verifier, Node and external-smoke logs are retained beside
+the aggregate receipt. This is same-host public Go ZIP evidence. It does not
+establish a clean machine, Fairy-authored self-build, native Linux or hosted CI.
+No source, lock, dependency, runner or policy change, publication or push occurs
+in this refresh. This later documentation does not alter the archived revision.

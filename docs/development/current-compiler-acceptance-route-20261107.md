@@ -444,3 +444,30 @@ local boundary cases pass too. Evidence is
 fails two harness assumptions and is retained separately; only the corrected
 fixture has these passing results. Production hashes stay unchanged throughout.
 Scoped vet and diff checks pass; native Linux remains deferred.
+
+## Clean ordinary-AST reuse retry
+
+At clean commit `6270e3673e8a5551a927422550a853c3cbb109e9`, the normal
+646-source authored retry proceeds beyond the preceding interface/provider AST
+failure, then exits 2 after 306.889s with no packet:
+
+```text
+native_cli.fy:1:1: project phase 2 stage 4 code 10
+limit 1048576 attempted 1118812
+```
+
+Stage 4 is Values, not names. The rich pair comes from adding a completed body's
+work to the unit's value-work ledger. Evidence is
+`.cache/current-selfbuild-ordinary-ast-reuse-20261107/invocations.json` and its
+source snapshot. This is another capacity failure, not a timeout or self-build
+pass. A current-source, cache-only value-category diagnostic is being prepared
+before selecting another optimization; the product cap stays unchanged.
+
+`TestCandidateCopiedClosureCalls` independently passes at that clean commit in
+38.721s with no failures/skips and no source drift (2960 inputs authenticated
+before/after). Evidence is
+`.cache/ordinary-ast-reuse-20261107/copied-closure-calls-result.json` and its log.
+Public Go Windows ZIP and source-only Linux handoff validation are recorded in
+their own readiness documents and do not attest authored self-build. Fixed-point
+and full current-source parity remain pending because no normal build receipt
+has been produced.
