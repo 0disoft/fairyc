@@ -61,7 +61,30 @@ Implementation owners are `static_operation_declarations.fy`,
 `examples/lexer_candidate/tests/static_operation*.fy` and
 `internal/cli/candidate_static_operation*_test.go`.
 
-Dynamic or multi-method interfaces, inference, nominal/aggregate providers,
+## Grouped static operations
+
+[ADR 0549](../adr/0549-grouped-static-operation-interfaces.md) adds
+`@interface(Label)` groups of 2..16 public operations, with a 1..64-byte ASCII
+identifier label scoped to the original module. Existing per-operation provider
+syntax remains. Every scalar tuple supplied for any member must be complete for
+all members, including unused tuples. Operation declarations precede provider
+errors, then size precedes completeness. Group errors retain the original full
+declaration span; a partial tuple selects its earliest provider.
+
+Members share `source-static-operation-group-v1` over all original member ASTs
+and all providers, sorted by member then scalar name. Distinct capability and
+provider identities and bound-operation domains remain. Ungrouped identity bytes
+are unchanged. There is still no interface value or dynamic dispatch.
+
+Go source/native and memory/new-process disk-cache checks pass. Fairy admission,
+original-byte diagnostics, Go metadata/planner comparisons and restored-artifact
+C execution pass both Windows profiles; see
+[admission](../development/candidate-grouped-static-admission-20261107.md) and
+[metadata/native](../development/candidate-grouped-static-metadata-20261107.md).
+Grouped whole-CLI/cache acceptance runs separately and is not established by
+the older single-operation CLI receipt above.
+
+Dynamic interfaces, inference, nominal/aggregate providers,
 associated types, default/blanket/orphan implementations, boxing, allocation and
 retained/asynchronous callbacks remain outside this family. Copied local closure
 candidate parity remains a separate task. Native Linux, full `go test ./...`,

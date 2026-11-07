@@ -81,9 +81,12 @@ authorized by this queue.
   `candidate-flat-option-cli-cache-20261107.md`; other wrapper families stay open. The Go
   memory/new-session/new-process disk cache and restored C execution pass in
   `go-flat-option-cache-20261107.md` without a production cache change.
-- [ ] Multi-operation static interfaces: independent operation selection already
-  works. A grouped interface still needs its representation, complete-provider
-  admission and partial-implementation/error-location contract.
+- [ ] Multi-operation static interfaces: ADR 0549's bounded groups now have Go
+  and Fairy representation, complete-provider admission, exact declaration-error
+  location and shared sibling/provider identity. Go memory/new-process disk
+  cache, Fairy Go-oracle/restored-artifact C and both native profiles pass; see
+  the four `*-grouped-static-*20261107.md` records. Grouped full CLI/cache is in
+  progress; final acceptance remains below.
 - [ ] First-class closures: copied direct-call closures and view/vector loop
   calls already work. Closure value types, passing/return/storage, capture
   ownership/lifetime and environment representation remain separate designs.
@@ -128,6 +131,15 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Disjoint Sol High workers complete grouped static source/identity/native and
+  Go cache proofs. Twenty-four independent UTF-8/CRLF controls match exact Go
+  error byte spans in both Windows native profiles, including a reproduced and
+  corrected grouped operation/provider phase mismatch. Seven original-source
+  metadata/planner controls and four generated-C producer/consumer combinations
+  pass. Current main-source check/locked check pass 758 files / 9,593 MIR
+  functions with all 1,229 authored files and lock matched. Full CLI/cache runs
+  separately; Linux, final comparisons, packaging and remote gates remain open.
 
 - Fairy same-module inline calls now pass 23 source controls, all accepted
   declaration identities, preserved no-call v1/v2 vectors and four actual
