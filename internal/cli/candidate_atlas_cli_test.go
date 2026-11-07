@@ -53,7 +53,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			image := filepath.Join(imageDir, "atlas-cli-"+profile.Name+".exe")
 			digest := sha256.New()
 			policy, _ := json.Marshal(profile)
-			for _, part := range append([]string{string(policy), tc.Name, tc.Path, tc.Version, "stack-reserve=16777216", build.Header, support}, build.Sources...) {
+			for _, part := range append([]string{string(policy), tc.Name, tc.Path, tc.Version, "compiler-host-v1", "stack-reserve=16777216", build.Header, support}, build.Sources...) {
 				digest.Write([]byte(part))
 				digest.Write([]byte{0})
 			}
@@ -65,7 +65,9 @@ func TestCandidateAtlasCLI(t *testing.T) {
 			binary, _ := os.ReadFile(image)
 			hash := sha256.Sum256(binary)
 			if json.Unmarshal(data, &saved) != nil || len(binary) == 0 || saved.Source != sourceID || saved.Image != hex.EncodeToString(hash[:]) {
-				artifact, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(tc, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
+				// This is the full authored compiler, so select the explicit trusted
+				// compiler-host header role (ADR 0510), not ordinary project limits.
+				artifact, err := cdriver.BuildWindowsMSVCCompilerHostPartsWithStackReserve(tc, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
 				if err != nil {
 					t.Fatal(err)
 				}

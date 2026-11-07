@@ -27,8 +27,10 @@ authorized by this queue.
   `candidate-atlas-enum-owners-20261107.md`. Whole native-map comparison on the
   exact SDK/aggregate edited source also passes both profiles in
   `candidate-atlas-sdk-aggregate-edited-map-20261107.md`. The two newest
-  SDK/aggregate full-main command groups and broader current-source acceptance
-  remain open; do not reimplement already verified producers.
+  SDK/aggregate full-main command groups pass both profiles on their frozen
+  pre-Option source in `candidate-atlas-sdk-aggregate-full-main-20261107.md`.
+  Broader current-source acceptance remains open; do not reimplement already
+  verified producers or relabel the frozen images as later-source evidence.
 - [x] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
   Source selection and Windows models are verified in
@@ -110,6 +112,15 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The coordinator connects the existing explicit compiler-host builder to the
+  full Atlas main harness after reproducing ordinary-header refusal. Both new
+  SDK/aggregate cleanup groups pass low/optimized in 1166.271s, preserving
+  native command bounds, real stdio, edit freshness/refusals and independent
+  current Go queries. Exact frozen source/image identities and remaining gates
+  are in `candidate-atlas-sdk-aggregate-full-main-20261107.md`. This is pre-Option
+  image evidence, not a later-HEAD/full Atlas or self-build claim. Linux remains
+  batched; no remote action. The full objective stays active.
 
 - A disjoint Sol High worker and coordinator close exact edited-source whole-map
   verification for the SDK/user aggregate cleanup family. Both Windows profiles
