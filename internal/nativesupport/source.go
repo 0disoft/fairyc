@@ -15,7 +15,7 @@ import (
 type Options struct {
 	SDKStorage  bool
 	TrapReceipt bool
-	// CandidateHost admits the closed compiler-private Linux host adapters.
+	// CandidateHost admits the closed compiler-private adapters for this target.
 	CandidateHost bool
 }
 
@@ -36,9 +36,17 @@ func Source(id target.ID, symbols []string, options Options) (string, error) {
 		return "", fmt.Errorf("unsupported native support target %q", id)
 	}
 	standard, vector := symbols, false
+	var windowsHost string
+	if options.CandidateHost && id == target.X8664WindowsMSVC {
+		var err error
+		standard, windowsHost, err = splitWindowsHostSymbols(standard)
+		if err != nil {
+			return "", err
+		}
+	}
 	if options.SDKStorage {
 		var err error
-		standard, vector, err = splitVectorRuntimeSymbols(symbols)
+		standard, vector, err = splitVectorRuntimeSymbols(standard)
 		if err != nil {
 			return "", err
 		}
@@ -90,7 +98,42 @@ func Source(id target.ID, symbols []string, options Options) (string, error) {
 			support = host + "\n" + support
 		}
 	}
+	if windowsHost != "" {
+		support += "\n" + windowsHost
+	}
 	return support, nil
+}
+
+func splitWindowsHostSymbols(symbols []string) ([]string, string, error) {
+	const prefix = "fairyc_private_windows_"
+	standard := make([]string, 0, len(symbols))
+	var declarations strings.Builder
+	for _, symbol := range symbols {
+		if !strings.HasPrefix(symbol, prefix) {
+			standard = append(standard, symbol)
+			continue
+		}
+		// WindowsSource accepts C declaration text. Our input is a symbol list:
+		// validate the entire spelling before adapting it, so regex selection
+		// cannot silently ignore a bare prefix or parse only an injected suffix.
+		if len(symbol) == len(prefix) {
+			return nil, "", fmt.Errorf("invalid private Windows host symbol %q", symbol)
+		}
+		for i := range symbol {
+			c := symbol[i]
+			if c != '_' && !(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9') {
+				return nil, "", fmt.Errorf("invalid private Windows host symbol %q", symbol)
+			}
+		}
+		declarations.WriteString(symbol)
+		declarations.WriteString("(\n")
+	}
+	// Reuse the existing exact closed allowlist; never maintain a second list.
+	host, err := candidatehost.WindowsSource(declarations.String())
+	if err != nil {
+		return nil, "", err
+	}
+	return standard, host, nil
 }
 
 func splitVectorRuntimeSymbols(symbols []string) ([]string, bool, error) {

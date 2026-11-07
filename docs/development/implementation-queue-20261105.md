@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- The repeatable state developer build now uses fresh exact-byte prepared
+  workspaces and pinned sibling packs. Nine Python preparation checks pass;
+  actual native builds expose and fix missing Windows CandidateHost selection
+  through the existing exact allowlist. Source-selection/closed-host unit tests
+  and both real prepared images pass: low 19.184s / optimized 28.118s. Eight paired
+  actual prepared-Fairy/Go command observations preserve JSON/durable bytes.
+  ADR 0545 and `candidate-state-cli-preparation-20261107.md` retain failed builds
+  separately. Installed/clean-machine distribution, forced command boundaries
+  and all final gates remain open. Linux stays batched; no push/dispatch. The
+  full implementation objective remains active.
+
 - Disjoint workers and coordinator connect actual Windows console cancellation
   and developer build preparation. Native C low/optimized controls, duplicate
   lifetime, 512-cycle callback/close races per profile, headless/busy/poison and
