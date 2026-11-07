@@ -67,6 +67,21 @@ authorized by this queue.
 
 ## Progress
 
+- The actual authored Windows state developer main now reads argv/source/pinned
+  sibling bundles, fresh-checks basename-bound source, and runs init/snapshot or
+  sealed native build/execute/one-attempt CAS with Go-compatible result JSON.
+  Parallel file/formatter workers and coordinator integration pass 48 paired
+  actual Fairy/Go command observations (96 processes) in low/optimized, including
+  byte-identical JSON/durable files and pre-store refusal. Outcome retains its
+  exact 32-byte producer identity; different same-layout body metadata is refused.
+  Changed-representation persistence/cancellation/boundary regressions pass in
+  211.246s; 52 file-reader scenarios and 30 report scenarios also pass. Full source/
+  locked checks pass 755 files / 9,495 MIR functions, all 1,225 sources present.
+  See ADR 0543 and `candidate-windows-state-command-20261107.md`. Default process
+  token remains none. Console registration, developer packaging recipe, forced
+  command conflict/late cancellation/output boundaries and all final gates remain
+  open. Linux stays batched; no push/dispatch. Full objective remains active.
+
 - Disjoint parallel workers and coordinator add real OS argument admission,
   fresh source-owned developer coordinate/Complete and init/snapshot JSON.
   All 48 argv, 28 source and 16 report observations pass Windows low/optimized;

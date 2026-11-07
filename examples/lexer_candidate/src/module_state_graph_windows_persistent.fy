@@ -19,9 +19,15 @@ pub fn Work empty_work(){return Work{.local=codec::empty_work(),.execution=runne
 // Acknowledged is irrevocable, including when the provider's receipt disagrees.
 // In that case return Outcome with consistent=false, never a retryable error.
 pub struct Publication{bool acknowledged;bool consistent;store::Receipt receipt;}
-pub resource Outcome{response::Admitted admitted;Publication publication;cleanup{}}
+struct ProgramIdentity{u32[8] hash;}
+pub resource Outcome{response::Admitted admitted;Publication publication;ProgramIdentity program_identity;cleanup{}}
 pub fn ref response::Admitted admitted(ref Outcome outcome){return ref outcome.admitted;}
 pub fn Publication publication(ref Outcome outcome){return outcome.publication;}
+fn ProgramIdentity identity(ref transport::Prepared prepared){
+    let raw=transport::program_hash(prepared);assert(raw.len==32);var u32[8] hash=[0;8];var usize i=0;
+    while(i<8){let at=i*4;hash[i]=(raw[at] as u32)<<24|(raw[at+1] as u32)<<16|(raw[at+2] as u32)<<8|(raw[at+3] as u32);i+=1;}return ProgramIdentity{.hash};
+}
+pub fn bool matches(ref Outcome outcome,ref transport::Prepared prepared){let current=identity(prepared);return layout::equal(outcome.program_identity.hash,current.hash);}
 // 1 admission, 2 snapshot, 3 detached request, 4 runner, 5 mutation copy,
 // 6 version exhaustion, 7 CAS, 8 graph runtime status, 9 cancellation.
 // Original storage/runner/token causes remain available.
@@ -93,7 +99,7 @@ pub fn Result<Outcome,Failure> run_cancel(ref build::Built built,ref store::Stor
     }};
     let header=response::header(ref result);
     if(header.status!=0){var cause=cause_of(8,0);cause.runtime_status=header.status;return .err(Failure{.cause,.admitted=retained(retained_response,result),.execution=v::empty<runner::Failure>()});}
-    if(header.exit!=0){return .ok(Outcome{.admitted=result,.publication=Publication{.acknowledged=false,.consistent=true,.receipt=empty_receipt()}});}
+    if(header.exit!=0){return .ok(Outcome{.admitted=result,.publication=Publication{.acknowledged=false,.consistent=true,.receipt=empty_receipt()},.program_identity=identity(build::prepared(built))});}
     switch(checkpoint(token)){case .ok(_):{}case .err(cause):{return .err(canceled(cause,retained(retained_response,result)));}};
     let count=response::write_count(ref result);
     if(count!=0 && version==18446744073709551615){return .err(after_run(6,1006,retained_response,result));}
@@ -105,5 +111,5 @@ pub fn Result<Outcome,Failure> run_cancel(ref build::Built built,ref store::Stor
     let receipt=switch(store::compare_and_publish(store,hash,version,ref writes,ref mut work.local)){case .ok(p):{p}case .err(error):{return .err(storage_failure(7,error,retained(retained_response,result)));}};
     let next=if(count==0){version}else{version+1};
     let consistent=layout::equal(receipt.layout,hash) && receipt.version==next && receipt.writes==count;
-    return .ok(Outcome{.admitted=result,.publication=Publication{.acknowledged=true,.consistent,.receipt}});
+    return .ok(Outcome{.admitted=result,.publication=Publication{.acknowledged=true,.consistent,.receipt},.program_identity=identity(build::prepared(built))});
 }
