@@ -5,7 +5,6 @@ import module_unit_constants as constants;
 import module_unit_call_closure as closure;
 import module_unit_interfaces as interfaces;
 import module_unit_bodies as bodies;
-import module_unit_body_ast as ast;
 import module_unit_names as names;
 import module_unit_ordinary_names as ordinary;
 import module_unit_calls as calls;
@@ -18,9 +17,9 @@ import std::vec as v;
 pub resource Plan {v::Vec<m::Values> contexts;v::Vec<types::Type> graph;usize expressions;usize locals;usize returns;usize unresolved;usize inferred;usize checked_returns;usize invocations;usize arguments;usize checked_calls;usize checked_arguments;usize shared_arguments;usize work;cleanup{}}
 fn m::Problem failed(u32 code,usize module_index,usize start,usize end){return m::Problem{.code,.module_index,.start,.end,.expected=0,.actual=0};}
 fn Result<m::Values,m::Problem> original_body(ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed source,ref signatures::Program metadata,ref closure::Ready ready,m::Frame frame,usize offset,usize type_offset,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut usize cursor,ref mut usize work,ref constants::Plan constants){
-    let a=switch(ast::build(source,frame.declaration,work)){case .ok(a):{a}case .err(code):{return .err(m::fail(frame,code,0,0,0,0));}};
-    var table=switch(collect::seeds(ref a,frame)){case .ok(t):{t}case .err(p):{return .err(p);}};let seeded=collect::ordinary_seeds(ref a,source,closure::imported(ready),frame,offset,type_offset,ref mut table,work);if(seeded.code!=0){return .err(seeded);}
-    return collect::project(sources,metadata,closure::imported(ready),source,ref a,ordinary::resolved(ordinary::at(closure::original_names(ready),frame.context)),frame,closure::call_plan(ready),cursor,ref table,graph,atoms,constants);
+    let original=ordinary::at(closure::original_names(ready),frame.context);let a=ordinary::body_ast(original);
+    var table=switch(collect::seeds(a,frame)){case .ok(t):{t}case .err(p):{return .err(p);}};let seeded=collect::ordinary_seeds(a,source,closure::imported(ready),frame,offset,type_offset,ref mut table,work);if(seeded.code!=0){return .err(seeded);}
+    return collect::project(sources,metadata,closure::imported(ready),source,a,ordinary::resolved(original),frame,closure::call_plan(ready),cursor,ref table,graph,atoms,constants);
 }
 fn Result<m::Values,m::Problem> concrete_body(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref syntax::Parsed source,ref closure::Ready ready,m::Frame frame,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut usize cursor,ref mut usize work,ref constants::Plan constants){
     let owned=closure::owned(ready);let a=if(frame.kind==1){bodies::body_ast(bodies::at(owned,frame.context))}else{bodies::cleanup_ast(bodies::cleanup_at(owned,frame.context))};let resolved=if(frame.kind==1){names::function_at(closure::resolved_names(ready),frame.context)}else{names::cleanup_at(closure::resolved_names(ready),frame.context)};

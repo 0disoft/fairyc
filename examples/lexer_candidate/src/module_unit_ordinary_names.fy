@@ -11,9 +11,9 @@ import module_ast_join as join;
 import syntax as syntax;
 import std::vec as v;
 
-// Ordinary ASTs stay in the source owner. Only binding tables and source IDs
-// survive the temporary body projection used by the shared lexical walker.
-pub resource Function {usize module_index;usize declaration;m::Resolved names;v::Vec<usize> expressions;v::Vec<usize> entries;cleanup{}}
+// Keep the immutable projection used by name resolution for subsequent value
+// analysis. Source bytes and temporary reach/mapping buffers stay in their owners.
+pub resource Function {usize module_index;usize declaration;m::Resolved names;ast::Ast body;cleanup{}}
 pub resource Plan {v::Vec<Function> functions;usize symbols;usize references;usize work;cleanup{}}
 fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref binding::Bound bound,ref interfaces::Interfaces imported){
@@ -27,14 +27,12 @@ pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref s
         while(i<syntax::declaration_count(original)){let d=syntax::declaration_at(original,i);if(!ast::charge(ref mut work,1)){return .err(fail(10,module_index,d.start,d.end));}
             if(d.kind==3 && d.generic_parameters==0 && d.body!=0){
                 let a=switch(ast::build(original,i+1,ref mut work)){case .ok(a):{a}case .err(code):{return .err(fail(code,module_index,d.start,d.end));}};
-                var v::Vec<usize> roots=v::empty<usize>();var v::Vec<usize> expressions=v::empty<usize>();var v::Vec<usize> entries=v::empty<usize>();var usize n=1;
+                var v::Vec<usize> roots=v::empty<usize>();var usize n=1;
                 while(n<=ast::type_count(ref a)){if(!ast::charge(ref mut work,1)){return .err(fail(10,module_index,d.start,d.end));}let usize root=type_offset+ast::type_origin(ref a,n);let annotation=interfaces::annotation_at(imported,root);if(annotation.deferred || annotation.type>interfaces::type_count(imported)){return .err(fail(12,module_index,d.start,d.end));}if(!v::push<usize>(ref mut roots,annotation.type).is_ok){return .err(fail(11,module_index,d.start,d.end));}n+=1;}
-                n=1;while(n<=ast::expression_count(ref a)){if(!ast::charge(ref mut work,1)){return .err(fail(10,module_index,d.start,d.end));}if(!v::push<usize>(ref mut expressions,ast::expression_origin(ref a,n)).is_ok){return .err(fail(11,module_index,d.start,d.end));}n+=1;}
-                n=1;while(n<=ast::entry_count(ref a)){if(!ast::charge(ref mut work,1)){return .err(fail(10,module_index,d.start,d.end));}if(!v::push<usize>(ref mut entries,ast::entry_origin(ref a,n)).is_ok){return .err(fail(11,module_index,d.start,d.end));}n+=1;}
                 let frame=m::Frame{.kind=3,.id=v::len<Function>(ref functions)+1,.module_index,.declaration=i+1,.receiver_type=0,.unsafe_function=d.unsafe_end!=0,.sdk_vector=signatures::sdk_vector_source(metadata,module_index)};
                 let resolved=switch(walk::resolve(ref a,syntax::source_stream(original),metadata,frame,ref roots)){case .ok(p):{p}case .err(p):{return .err(p);}};
                 if(!ast::charge(ref mut work,m::work(ref resolved)) || symbols>16384-m::local_count(ref resolved) || references>16384-m::reference_count(ref resolved) || v::len<Function>(ref functions)>=512){return .err(fail(10,module_index,d.start,d.end));}symbols+=m::local_count(ref resolved);references+=m::reference_count(ref resolved);
-                if(!v::push<Function>(ref mut functions,Function{.module_index,.declaration=i+1,.names=resolved,.expressions,.entries}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
+                if(!v::push<Function>(ref mut functions,Function{.module_index,.declaration=i+1,.names=resolved,.body=a}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
             }i+=1;
         }type_offset+=syntax::type_count(original);module_index+=1;
     }if(type_offset!=interfaces::annotation_count(imported)){return .err(fail(12,binding::first(bound),0,0));}return .ok(Plan{.functions,.symbols,.references,.work});
@@ -44,8 +42,9 @@ pub fn ref Function at(ref Plan p,usize id){return v::at<Function>(ref p.functio
 pub fn usize module_index(ref Function p){return p.module_index;}
 pub fn usize declaration(ref Function p){return p.declaration;}
 pub fn ref m::Resolved resolved(ref Function p){return ref p.names;}
-pub fn usize expression_origin(ref Function p,usize id){return *v::at<usize>(ref p.expressions,id-1);}
-pub fn usize entry_origin(ref Function p,usize id){return *v::at<usize>(ref p.entries,id-1);}
+pub fn ref ast::Ast body_ast(ref Function p){return ref p.body;}
+pub fn usize expression_origin(ref Function p,usize id){return ast::expression_origin(ref p.body,id);}
+pub fn usize entry_origin(ref Function p,usize id){return ast::entry_origin(ref p.body,id);}
 pub fn usize symbols(ref Plan p){return p.symbols;}
 pub fn usize references(ref Plan p){return p.references;}
 pub fn usize work(ref Plan p){return p.work;}

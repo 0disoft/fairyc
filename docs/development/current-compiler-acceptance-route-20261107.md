@@ -332,3 +332,115 @@ Further work is diagnostic: split factory, value/AST, liveness, return inference
 publication and borrow-capture work before changing another capacity or loop.
 Generated-C instrumentation under `.cache/current-origin-trace-20261107` is a
 diagnostic image only. It cannot substitute for a normal authored build receipt.
+
+## Selected-row body AST projection
+
+The split diagnostic identifies the exhausted ledger inside
+`module_unit_body_ast::build`: `scope=7 work=1048576 amount=1`. The diagnostic
+run takes 91.141s, emits no packet and exits 2. Its image SHA-256 is
+`d6f264415b252f04b03077c5d90d085093745ac65ff4c85f10809b3fc2d45852`;
+the manifest SHA-256 is
+`b0ceb6b8888273154131e2cfc4bca88859d42c074f8849ec5c08cba872ee2f08`.
+
+Commit `7a2ac590` records selected original arena IDs while building dense lookup
+maps. The second pass visits only those selected rows. For N arena rows and K
+selected rows the charged projection work is N+K instead of 2N, with K<=N.
+Original source IDs, arena order, remapped links and the shared work cap remain.
+The actual public-builder regression performs 80 projections in a shared ledger:
+961520 work versus the old loops' analytic lower bound of 1920640. Both Windows
+profiles also cover exact-cap success/refusal, dense input, prepared closure reach
+and empty/nonempty cleanup. Details are in
+`candidate-body-ast-projection-20261107.md`.
+
+Full isolated source check/locked pass in 18.807s/17.246s (755 files, 9504 MIR
+functions, all 1225 authored source hashes matching). The optimized Go-seeded CLI
+regression passes in 238.220s with 205 C parts and 14 independent CLI processes.
+These timings are observations under concurrent host load, not speedup claims.
+The complete authored emission is a separate acceptance step; fixed-point and
+parity tools must consume a successful authenticated full-CLI build receipt.
+
+The normal complete-input retry still fails at phase 2/stage 7/code 10 after
+100.365s, with zero packet bytes. The recorded source version is clean
+`7a2ac59033db1e6578559980cc90bb2dcafa5a42`; evidence is
+`.cache/current-selfbuild-ast-projection-20261107/invocations.json` and its
+source snapshot. The selected-row optimization is verified independently but
+does not by itself resolve full self-build. The next diagnostic uses a fresh
+current-source instrumented image and records failed AST declaration/source
+identity plus work before/after, rather than raising a capacity.
+
+### Current selected-row diagnostic and ordinary AST reuse
+
+The fresh generated-C diagnostic reproduces the remaining failure against the
+646-input manifest from `.cache/current-selfbuild-ast-projection-20261107/sources.list`.
+Its export/build/run take 23.568s / 126.113s / 98.305s. The run exits 2 without a
+timeout or packet bytes. The final failure chain is:
+
+```text
+enter returns -> factory -> values
+failed-charge scope=7 work=1048576 amount=1
+ast-failure decl=45 before=1045958 after=1048576 expressions=2920 statements=788 entries=264 types=529 sourceBytes=20122
+exit values tag=1 -> factory tag=1 -> returns tag=1
+```
+
+The Parsed source identifies `module module_unit_interfaces`; declaration 45
+matches `field_measured` at source line 100 by written declaration order. This
+identifies the body being projected, not execution of that function's field
+lookup. Its original arenas contain N=4501 rows. Only 2618 work remains at AST
+entry, less than even the first 2920-row expression-mapping scan. Selected-row
+copying cannot remove this earlier full-arena scan. The exhausted ledger is the
+provider value phase's AST projection, not the factory-to-summary history charge.
+
+The diagnostic is pinned to `7a2ac59033db1e6578559980cc90bb2dcafa5a42`.
+Recorded SHA-256 identities are:
+
+- Diagnostic image: `b07416db6060815e916b7920fa6f7704ce6a36d1fe69661b6a52ea06b27965a7`.
+- Input manifest: `9387926174655e8541e29fd810889bee3a2242e7cf8a853d8c55ca7dfd6fe3bd`.
+- `module_unit_interfaces.fy`: `45df26b072fed2ec69d16414b7b9f34d25ec76286705af0e5620903e610f45e2`.
+- Trace stderr: `c24c01343ea15e71312eb5b0f4e2cc0d5150ff73535ade77a2eb9afb5d8664fc`.
+
+Full evidence is retained under `.cache/current-origin-trace-ast-20261107/`:
+`diagnostic-receipt.json`, `input-receipt.json`, `run.json`, `trace.stderr`,
+`export.log`, `build.log`, and the cache-only overlay/instrumentation sources.
+All captured export and manifest input hashes remained unchanged during this
+diagnostic. It is diagnostic-only generated C, not acceptance evidence, and does
+not validate the subsequent ordinary-AST reuse change.
+
+The current two-file production follow-up retains the ordinary projection in
+`module_unit_ordinary_names::Function` and borrows it from `module_unit_values`
+instead of projecting the same body again. Read-only review found no concrete
+regression: source/stamp and type-prefix validation still precede value use;
+the same retained projection supplies name resolution, original IDs and values;
+generic and cleanup AST paths remain unchanged. Retained projections remain
+within the existing 512-function, symbol/reference and shared-work admission
+boundaries; source bytes and temporary reach/mapping buffers are not retained.
+This is a static audit, not a native execution or peak-memory measurement.
+
+The parent's isolated source check/locked log records 14.040s / 12.623s PASS,
+755 checked files, 9505 MIR functions and all 1225 source hashes matching, with
+the lock copied after success:
+`.cache/current-source-check-ordinary-ast-reuse-20261107.log`.
+The optimized Go-seeded full CLI regression passes in 199.816s: 205 C parts,
+14 independent CLI processes, four cold/warm trap pairs and six exact Go-matching
+test reports. `TestCandidateOrdinarySourceIdentities` and
+`TestCandidateGenericAggregateValues` both pass in low/optimized (102.558s for
+the package); they cover original identities, stale source/work refusals and
+generic/cleanup/ordinary value routes. Evidence is
+`.cache/current-whole-cli-ordinary-ast-reuse-20261107.log` and
+`.cache/current-ordinary-ast-reuse-integration-20261107.log`.
+These are single-run durations under concurrent load. The permanent reuse probe
+is recorded separately in `candidate-ordinary-ast-reuse-20261107.md`.
+Full authored self-build, fixed point and current-source parity remain separate
+pending gates; no pass is inferred from the seed or narrow tests.
+
+The permanent ordinary-AST reuse regression also passes in both Windows
+profiles (117.767s package total, four native subtests). Its 80-function small
+and large inputs grow the source arena from 1044 to 11844 rows. Name-analysis
+work changes from 86083 to 950083, while value-analysis work stays exactly 4149;
+the removed second AST projection would cost 84560 and 948560 respectively.
+Original IDs, all remapped links, value/source coordinates and retained-owner
+readability are checked. Existing generic/cleanup, stale-source and 128-active-
+local boundary cases pass too. Evidence is
+`.cache/ordinary-ast-reuse-20261107/windows-rerun.log`. The first fixture run
+fails two harness assumptions and is retained separately; only the corrected
+fixture has these passing results. Production hashes stay unchanged throughout.
+Scoped vet and diff checks pass; native Linux remains deferred.
