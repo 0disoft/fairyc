@@ -45,13 +45,15 @@ type FunctionImport struct {
 // FunctionSignature is the body-free MIR signature needed to verify imported calls and resource
 // drop-glue links inside the current process.
 type FunctionSignature struct {
-	Symbol         hir.SymbolID
-	Name           string
-	Span           hir.Span
-	ParameterTypes []hir.Type
-	ResultType     hir.Type
-	Effects        []hir.Effect
-	DropGlueFor    hir.Type
+	ClosureTarget   bool  `json:",omitempty"`
+	ClosureCaptures uint8 `json:",omitempty"`
+	Symbol          hir.SymbolID
+	Name            string
+	Span            hir.Span
+	ParameterTypes  []hir.Type
+	ResultType      hir.Type
+	Effects         []hir.Effect
+	DropGlueFor     hir.Type
 }
 
 // ExtractAll slices every function-owning package from one closed, verified whole program.
@@ -76,9 +78,6 @@ func extractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Artifact, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Artifact{}, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
-	}
-	if err := rejectLegacyClosureValues(program); err != nil {
-		return Artifact{}, err
 	}
 	return extractVerified(program, packageID, identities, coordinates, mir.Verify, &extractionIndex{})
 }
@@ -121,7 +120,7 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	for _, record := range artifact.Functions {
 		for _, block := range record.Body.Blocks {
 			for _, op := range block.Operations {
-				if op.Kind == mir.OperationCCallback {
+				if op.Kind == mir.OperationCCallback || op.Kind == mir.OperationClosureCreate {
 					if _, owned := ownedSymbols[op.Symbol]; !owned {
 						importSymbols[op.Symbol] = struct{}{}
 					}
@@ -200,13 +199,7 @@ func verifyArtifact(artifact Artifact, verifyMIR func(mir.Program) []mir.Verific
 	seenSymbols := make(map[hir.SymbolID]string, len(artifact.Functions)+len(artifact.Imports))
 	seenIDs := make(map[FunctionID]string, len(artifact.Functions)+len(artifact.Imports))
 	program := mir.Clone(artifact.Context)
-	if err := rejectLegacyClosureValues(program); err != nil {
-		return err
-	}
 	for _, record := range artifact.Functions {
-		if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{record.Body}}); err != nil {
-			return err
-		}
 		if record.Body.Span.Package != artifact.PackageID {
 			return fmt.Errorf("owned function %q belongs to package %d, want %d", record.Body.Name, record.Body.Span.Package, artifact.PackageID)
 		}
@@ -220,9 +213,6 @@ func verifyArtifact(artifact Artifact, verifyMIR func(mir.Program) []mir.Verific
 	}
 	for _, imported := range artifact.Imports {
 		stub := imported.Signature.stub()
-		if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{stub}}); err != nil {
-			return err
-		}
 		if err := verifyBinding(imported.ID, imported.Descriptor, stub, artifact.PackageCoordinates); err != nil {
 			return fmt.Errorf("import %q: %w", imported.Signature.Name, err)
 		}
@@ -348,7 +338,7 @@ func reassemble(artifacts []Artifact, verifyMIR func(mir.Program) []mir.Verifica
 		for blockIndex := range function.Blocks {
 			for oi := range function.Blocks[blockIndex].Operations {
 				op := &function.Blocks[blockIndex].Operations[oi]
-				if op.Kind != mir.OperationCCallback {
+				if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 					continue
 				}
 				id, found := bindings[op.Symbol]
@@ -435,6 +425,7 @@ func recordBinding(symbols map[hir.SymbolID]string, ids map[FunctionID]string, s
 
 func signatureOf(function mir.Function) FunctionSignature {
 	return FunctionSignature{
+		ClosureTarget: function.ClosureTarget, ClosureCaptures: function.ClosureCaptures,
 		Symbol: function.Symbol, Name: function.Name, Span: function.Span,
 		ParameterTypes: slices.Clone(function.ParameterTypes), ResultType: function.ResultType,
 		Effects: slices.Clone(function.Effects), DropGlueFor: function.DropGlueFor,
@@ -443,6 +434,7 @@ func signatureOf(function mir.Function) FunctionSignature {
 
 func (signature FunctionSignature) stub() mir.Function {
 	function := mir.Function{
+		ClosureTarget: signature.ClosureTarget, ClosureCaptures: signature.ClosureCaptures,
 		Symbol: signature.Symbol, Name: signature.Name, Span: signature.Span,
 		ParameterTypes: slices.Clone(signature.ParameterTypes), ResultType: signature.ResultType,
 		Effects: slices.Clone(signature.Effects), DropGlueFor: signature.DropGlueFor,
@@ -450,6 +442,14 @@ func (signature FunctionSignature) stub() mir.Function {
 	}
 	if signature.DropGlueFor != hir.ParseType("") {
 		function.Parameters = []mir.LocalID{0}
+	}
+	if signature.ClosureTarget {
+		for i := range signature.ParameterTypes {
+			function.Parameters = append(function.Parameters, mir.LocalID(i))
+		}
+		// Verification-only import stubs never escape reassembly. A pure i32
+		// return retains target shape without fabricating the imported body.
+		function.Blocks[0].Terminator = mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32}}
 	}
 	return function
 }

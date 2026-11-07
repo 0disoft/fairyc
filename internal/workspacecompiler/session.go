@@ -258,6 +258,9 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
 		}
 		if reassemblyErr == nil {
+			reassemblyErr = verifyClosureValueSource(ctx, analysis.Semantic.HIR, program)
+		}
+		if reassemblyErr == nil {
 			var restored Result
 			restored, reassemblyErr = resultWithCurrentState(analysis, compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, report)
 			if reassemblyErr == nil && session.restore != nil {
@@ -279,6 +282,9 @@ func (session *Session) CheckContext(ctx context.Context, workspace workspaceloa
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
+	if err := verifyClosureValueSource(ctx, analysis.Semantic.HIR, compiled.MIR); err != nil {
+		return Result{}, err
+	}
 	err = visitOrdinaryArtifacts(ctx, compiled.MIR, identities, coordinates, owners, func(artifact packageartifact.Artifact) error {
 		packageID := artifact.PackageID
 		if err := session.cache.Put(keys[packageID], interfaces[packageID], artifact); err != nil {
@@ -355,6 +361,9 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		}
 		if reassemblyErr == nil {
 			reassemblyErr = inlinebody.VerifyProgram(analysis.Semantic.HIR, program)
+			if reassemblyErr == nil {
+				reassemblyErr = verifyClosureValueSource(ctx, analysis.Semantic.HIR, program)
+			}
 			if reassemblyErr == nil && session.restore != nil {
 				compiled, reassemblyErr = session.restore(compiled)
 			}
@@ -384,6 +393,9 @@ func (session *Session) checkPersistent(ctx context.Context, analysis compiler.A
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
+	if err := verifyClosureValueSource(ctx, analysis.Semantic.HIR, compiled.MIR); err != nil {
+		return Result{}, err
+	}
 	stateBodies, err := contractstatemir.DescribeStableHIRStateBodies(analysis.Semantic.HIR, owners, coordinates)
 	if err != nil {
 		return Result{}, fmt.Errorf("describe stable package contract-state bodies: %w", err)

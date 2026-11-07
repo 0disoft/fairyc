@@ -129,9 +129,6 @@ func DescribeContext(context mir.Program, coordinates map[hir.PackageID]packageg
 	if len(context.Functions) != 0 {
 		return ContextDescriptor{}, fmt.Errorf("stable type-context source contains executable functions")
 	}
-	if err := rejectLegacyClosureValues(context); err != nil {
-		return ContextDescriptor{}, err
-	}
 	result := ContextDescriptor{}
 	for _, value := range context.StructTypes {
 		typeName, err := stableType(value.Type, coordinates)
@@ -231,7 +228,8 @@ func EncodeContextDescriptor(value ContextDescriptor, maxBytes uint64) ([]byte, 
 	if err := ValidateContextDescriptor(value); err != nil {
 		return nil, err
 	}
-	encoded, err := json.Marshal(contextEnvelope{Schema: ContextSchema, Version: ContextVersion, Context: value})
+	schema, version := contextFormat(value)
+	encoded, err := json.Marshal(contextEnvelope{Schema: schema, Version: version, Context: value})
 	if err != nil {
 		return nil, fmt.Errorf("encode stable type-context artifact: %w", err)
 	}
@@ -262,11 +260,12 @@ func DecodeContextDescriptor(encoded []byte, maxBytes uint64) (ContextDescriptor
 	if hasTrailingJSON(encoded, decoder) {
 		return ContextDescriptor{}, fmt.Errorf("decode stable type-context artifact: trailing JSON value or invalid data")
 	}
-	if envelope.Schema != ContextSchema {
-		return ContextDescriptor{}, fmt.Errorf("stable type-context schema %q is incompatible with %q", envelope.Schema, ContextSchema)
+	schema, version := contextFormat(envelope.Context)
+	if envelope.Schema != schema {
+		return ContextDescriptor{}, fmt.Errorf("stable type-context schema %q is incompatible with %q", envelope.Schema, schema)
 	}
-	if envelope.Version != ContextVersion {
-		return ContextDescriptor{}, fmt.Errorf("stable type-context version %q is incompatible with %q", envelope.Version, ContextVersion)
+	if envelope.Version != version {
+		return ContextDescriptor{}, fmt.Errorf("stable type-context version %q is incompatible with %q", envelope.Version, version)
 	}
 	if err := ValidateContextDescriptor(envelope.Context); err != nil {
 		return ContextDescriptor{}, fmt.Errorf("verify decoded stable type-context artifact: %w", err)

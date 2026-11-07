@@ -20,8 +20,18 @@ func NewStorageTransferProcessCodec(maxBytes uint64) (*ProcessCodec, error) {
 }
 
 func (codec *ProcessCodec) contract() (string, string, func(Artifact) error) {
+	return codec.artifactContract(Artifact{})
+}
+
+func (codec *ProcessCodec) artifactContract(artifact Artifact) (string, string, func(Artifact) error) {
 	if codec.storageTransfers {
+		if processArtifactHasClosureValues(artifact) {
+			return ClosureStorageProcessCodecSchema, ClosureStorageProcessCodecVersion, VerifyStorageTransfers
+		}
 		return StorageProcessCodecSchema, StorageProcessCodecVersion, VerifyStorageTransfers
+	}
+	if processArtifactHasClosureValues(artifact) {
+		return ClosureProcessCodecSchema, ClosureProcessCodecVersion, Verify
 	}
 	return ProcessCodecSchema, ProcessCodecVersion, Verify
 }

@@ -90,9 +90,6 @@ func describeStableBody(record FunctionRecord, context ContextDescriptor, coordi
 }
 
 func describeStableBodyInContext(record FunctionRecord, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool) (StableBodyArtifact, error) {
-	if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{record.Body}}); err != nil {
-		return StableBodyArtifact{}, err
-	}
 	if err := verifyBinding(record.ID, record.Descriptor, record.Body, coordinates); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("verify function binding before stable body projection: %w", err)
 	}
@@ -108,7 +105,7 @@ func describeStableBodyInContext(record FunctionRecord, context *bodyContext, co
 	for blockIndex := range function.Blocks {
 		for oi := range function.Blocks[blockIndex].Operations {
 			op := &function.Blocks[blockIndex].Operations[oi]
-			if op.Kind != mir.OperationCCallback {
+			if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 				continue
 			}
 			if !allowCalls {
@@ -265,7 +262,7 @@ func rebindValidatedStableBodyInContext(body StableBodyArtifact, context *bodyCo
 	for bi := range function.Blocks {
 		for oi := range function.Blocks[bi].Operations {
 			op := &function.Blocks[bi].Operations[oi]
-			if op.Kind != mir.OperationCCallback {
+			if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 				continue
 			}
 			id, err := ParseFunctionID(op.Variant)
@@ -347,7 +344,8 @@ func EncodeStableBody(body StableBodyArtifact, maxBytes uint64) ([]byte, error) 
 	if err := ValidateStableBody(body); err != nil {
 		return nil, err
 	}
-	envelope := bodyEnvelope{Schema: BodySchema, Version: BodyVersion, Body: body}
+	schema, version := bodyFormat(body)
+	envelope := bodyEnvelope{Schema: schema, Version: version, Body: body}
 	tooLarge, err := stableJSONExceedsLimit(envelope, maxBytes)
 	if err != nil {
 		return nil, fmt.Errorf("encode stable function-body artifact: %w", err)
@@ -389,7 +387,8 @@ func DecodeStableBody(encoded []byte, maxBytes uint64) (StableBodyArtifact, erro
 	if hasTrailingJSON(encoded, decoder) {
 		return StableBodyArtifact{}, fmt.Errorf("decode stable function-body artifact: trailing JSON value or invalid data")
 	}
-	if envelope.Schema != BodySchema || envelope.Version != BodyVersion {
+	schema, version := bodyFormat(envelope.Body)
+	if envelope.Schema != schema || envelope.Version != version {
 		return StableBodyArtifact{}, fmt.Errorf("stable function-body schema or version is incompatible")
 	}
 	if err := ValidateStableBody(envelope.Body); err != nil {
@@ -407,7 +406,7 @@ func DecodeStableBody(encoded []byte, maxBytes uint64) (StableBodyArtifact, erro
 
 // ValidateStableBody checks every invariant available without a process-local type context.
 func ValidateStableBody(body StableBodyArtifact) error {
-	if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{body.Function}}); err != nil {
+	if err := validateStableClosureRecords(body.Function); err != nil {
 		return err
 	}
 	if body.ID == (FunctionID{}) || body.Package == (packagegraph.CoordinateID{}) || body.ContextID == (ContextID{}) {
@@ -430,7 +429,7 @@ func ValidateStableBody(body StableBodyArtifact) error {
 	callIndex := 0
 	for blockIndex, block := range body.Function.Blocks {
 		for _, op := range block.Operations {
-			if op.Kind != mir.OperationCCallback {
+			if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 				continue
 			}
 			if op.Symbol != hir.NoSymbol {

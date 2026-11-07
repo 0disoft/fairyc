@@ -266,7 +266,7 @@ func stableArtifactImports(artifact Artifact, context ContextDescriptor) ([]Func
 	for _, record := range artifact.Functions {
 		for _, block := range record.Body.Blocks {
 			for _, op := range block.Operations {
-				if op.Kind != mir.OperationCCallback {
+				if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 					continue
 				}
 				id, found := bindings[op.Symbol]

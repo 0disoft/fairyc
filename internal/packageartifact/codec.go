@@ -78,7 +78,7 @@ func (codec *ProcessCodec) Encode(artifact Artifact) ([]byte, error) {
 	if codec == nil || codec.maxBytes == 0 || codec.identity == ([32]byte{}) {
 		return nil, fmt.Errorf("process-local package artifact codec is not initialized")
 	}
-	schema, version, verify := codec.contract()
+	schema, version, verify := codec.artifactContract(artifact)
 	if err := verify(artifact); err != nil {
 		return nil, fmt.Errorf("verify process-local package artifact before encoding: %w", err)
 	}
@@ -127,7 +127,7 @@ func (codec *ProcessCodec) Decode(encoded []byte) (Artifact, error) {
 	if hasTrailingJSON(encoded, decoder) {
 		return Artifact{}, fmt.Errorf("decode process-local package artifact: trailing JSON value or invalid data")
 	}
-	schema, version, verify := codec.contract()
+	schema, version, verify := codec.artifactContract(envelope.Artifact)
 	if envelope.Schema != schema {
 		return Artifact{}, fmt.Errorf("process-local package artifact schema %q is incompatible with %q", envelope.Schema, schema)
 	}

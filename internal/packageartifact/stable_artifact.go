@@ -163,7 +163,7 @@ func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 	for _, body := range artifact.Functions {
 		for _, block := range body.Function.Blocks {
 			for _, op := range block.Operations {
-				if op.Kind != mir.OperationCCallback {
+				if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
 					continue
 				}
 				id, err := ParseFunctionID(op.Variant)
@@ -227,7 +227,7 @@ func encodeStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bo
 // marshalStableArtifact requires a validated artifact and a positive byte limit.
 // Decoding has already checked both before comparing canonical bytes.
 func marshalStableArtifact(artifact StableArtifact, maxBytes uint64, transfers bool) ([]byte, error) {
-	schema, version := stableArtifactContract(transfers)
+	schema, version := stableArtifactFormat(artifact, transfers)
 	envelope := stableArtifactEnvelope{Schema: schema, Version: version, Artifact: artifact}
 	tooLarge, err := stableJSONExceedsLimit(envelope, maxBytes)
 	if err != nil {
@@ -274,7 +274,7 @@ func decodeStableArtifact(encoded []byte, maxBytes uint64, transfers bool) (Stab
 	if hasTrailingJSON(encoded, decoder) {
 		return StableArtifact{}, fmt.Errorf("decode stable package MIR artifact: trailing JSON value or invalid data")
 	}
-	schema, version := stableArtifactContract(transfers)
+	schema, version := stableArtifactFormat(envelope.Artifact, transfers)
 	if envelope.Schema != schema || envelope.Version != version {
 		return StableArtifact{}, fmt.Errorf("stable package MIR artifact schema or version is incompatible")
 	}
