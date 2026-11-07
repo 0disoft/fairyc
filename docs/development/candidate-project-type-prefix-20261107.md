@@ -63,12 +63,18 @@ The generic 1002 refusal does not establish the 1048576-work cap as root cause.
 This prefix optimization is not evidence that the normal failure is fixed.
 
 The parent A/B probe `.cache/current-project-link-focus-20261107/run-ab.*`
-is running; no result is asserted here. It keeps the original 646 source bytes
+finishes in 577.746s with no source drift. It keeps the original 646 source bytes
 and order fixed, with exactly one frozenPathOverride for the old
 `module_project_types.fy` data input (index 209), allowing the engine's root
 implementation to advance independently. Its `ab-source-snapshot.json`
 authenticates original snapshot SHA-256
 `249cfdf022ff00f87185a8b4464c3fb8a80a53cd1cc7853368c11e61f5c56b45`.
+The same 157 input graphs contain 345531 type rows and a 2163-row signature
+prefix. The full-map baseline refuses at work 1048576 (diagnostic 22002);
+the shared-prefix plan succeeds with work 373752, 5940 retained map cells
+and 3359 canonical types. Linking then refuses in metadata preparation
+(diagnostic 33002). That stage label does not yet distinguish metadata work
+exhaustion from its independent row/name limits.
 This is an explicit diagnostic comparison, not current normal acceptance.
 
 ## Integration status
@@ -79,7 +85,10 @@ Integrated source check/locked pass: 755 files, 9528 MIR functions,
 The refreshed lock is integrated with this note. A fresh optimized build-only
 seed and help smoke pass in 132.660s (205 C parts), recorded at
 `.cache/current-project-type-prefix-seed-20261107/build.log`. The new normal
-retry follows; no result is claimed. Normal self-build acceptance,
+646-source retry exits 2 after 561.174s at phase 3/stage 0/code 1002, with
+zero output. Its invocation is recorded in
+`.cache/current-selfbuild-project-type-prefix-20261107/invocations.json`.
+Normal self-build acceptance,
 fixed points and full current-source parity remain pending. Native Linux is
 unexecuted and batched separately; CI and clean-machine validation are also
 unexecuted for this change. API, DB, SDK ABI, CI and runner behavior are unchanged.

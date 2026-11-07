@@ -561,8 +561,27 @@ replays pass in 23.350s / 61.337s; source check/locked pass (755 files, 9528 MIR
 The prior normal retry fails linking after 551.636s with zero output. The 157-unit
 diagnostic's 21157 input frames include duplicates; the exact limit is unresolved.
 The 256-input cap is not the cause; no 4096-type hit or work-cap cause is established.
-The frozen-input A/B is running; a fresh optimized build-only seed/help passes
-in 132.660s. A new normal retry follows, with no result claimed.
+The frozen-input A/B finishes in 577.746s without drift: the old full-map
+type plan hits work 1048576; the prefix plan succeeds at work 373752, with
+5940 retained maps and 3359 canonical types. The next refusal is metadata
+preparation (diagnostic 33002); its specific internal limit is unresolved.
+A fresh optimized build-only seed/help passes in 132.660s. The new normal
+646-source retry exits 2 after 561.174s at phase 3/stage 0/code 1002,
+with zero output.
 Normal acceptance, fixed points and current parity remain pending; Linux is batched.
 Contracts, ABI, limits and source validation stay unchanged. See
 `candidate-project-type-prefix-20261107.md` for evidence and comparison boundaries.
+
+## Project metadata field map follow-up
+
+Commit `8c2d5acb` integrates worker `2ca0cb9b`: ordered field visits append their
+target directly; holes and unused tails keep charged zero initialization. The
+completed dense map, duplicate-target checks and all limits remain unchanged.
+Windows low/optimized native regression passes in 113.530s; an 8192-cell ordered
+map reduces work 16384 to 8192, and real 8-unit IR reduces 14312 to 12264.
+Integrated source check/locked pass (755 files, 9530 MIR, 13.413s / 13.338s).
+A fresh optimized full CLI seed and help smoke pass in 131.862s (205 C parts).
+The new normal full-source retry and an isolated frozen-input metadata diagnosis
+are running with separate output paths; neither is claimed to pass. Fixed
+points, current-source full parity and Linux native remain pending. See
+`candidate-project-metadata-map-20261107.md` for evidence and scope.
