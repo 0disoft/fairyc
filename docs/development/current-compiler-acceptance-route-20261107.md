@@ -546,7 +546,9 @@ index (`df15a0a2`): the unchanged 646-input unit-471 comparison reduces cleanup
 work 948429 to 798289 and passes 197 owned-IR frames. This is diagnostic evidence.
 Windows low/optimized index and field-boundary replays pass (129.03s / 131.79s);
 integrated source check/locked pass (755 files, 9527 MIR, 18.419s / 19.598s).
-A fresh optimized build-only seed/help passes in 140.587s. The normal retry follows. Normal self-build,
-fixed points and latest-source parity remain pending; native Linux is batched.
+A fresh optimized build-only seed/help passes in 140.587s. The normal 646-source
+retry reaches linking, then fails after 551.636s at phase 3/stage 0/code 1002
+(bytes 0..0, zero output). Its specific linker limit remains under diagnosis.
+Normal self-build, fixed points and latest-source parity remain pending; Linux is batched.
 Contracts and work/field caps are unchanged. See
 `candidate-cleanup-recipe-index-20261107.md` for receipts, semantics and bounds.

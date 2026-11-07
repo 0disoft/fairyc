@@ -91,7 +91,12 @@ is resolved only by the separate parent diagnostic receipts above.
 At integrated `cd72aaef`, the parent reports unlocked/locked source checks
 passing: 755 files, 9527 MIR functions, 18.419s / 19.598s, then fairy.lock refresh.
 A fresh optimized build-only Go seed and help smoke pass in 140.587s (205 C
-parts). The normal authored retry follows. Full normal self-build, consecutive fixed points
-and latest-source full parity remain pending. Native Linux is unexecuted and
+parts). The normal 646-source retry then passes unit compilation and fails at
+project linking after 551.636s: phase 3, stage 0, code 1002, bytes 0..0, zero
+packet bytes. Its snapshot and original invocation are retained in
+`.cache/current-selfbuild-cleanup-index-20261107/`. The exact linker limit still
+requires diagnosis; this result does not identify it as work or a count cap.
+Full normal self-build, consecutive fixed points and latest-source parity remain pending.
+Native Linux is unexecuted and
 batched separately. No API, DB, SDK ABI, CI, runner or target-policy change is
 introduced. No push, release or broader queue completion is claimed.
