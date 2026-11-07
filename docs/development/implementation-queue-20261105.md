@@ -22,7 +22,9 @@ authorized by this queue.
   including SDK, aggregates, foreign declarations and generic facts; retain
   independent current-source expectations and explicit completeness.
   SDK/user aggregate, foreign and generic production already have Windows
-  evidence. Remaining concrete gaps include enum-owned associated functions,
+  evidence. Enum-owned associated functions and receiver modes now have
+  independent current-Go/native map and actual impact-command evidence in
+  `candidate-atlas-enum-owners-20261107.md`. Remaining concrete gaps include
   whole native-map comparison after edits and the two newest SDK/aggregate
   full-main command groups; do not reimplement already verified producers.
 - [x] Linux Fairy package fetch: retained-directory filesystem/cache publication,
@@ -106,6 +108,16 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Sol High independent Go/native map work plus coordinator signature/receiver
+  integration connects enum-owned functions to Atlas. Ten Go-positive/four
+  negative sources, eighty copied-fresh/restored maps and actual locked
+  visible/full impact commands pass Windows low/optimized, retaining wrong-owner
+  and unknown-selector refusal. Complete source/locked checks pass 755 files /
+  9,542 MIR functions with all 1,226 authored files and lock matching. See
+  `candidate-atlas-enum-owners-20261107.md`. The old unsupported enum control is
+  now positive; full-main and broader final gates stay open. Linux remains
+  batched; no push/dispatch/publication. Full objective remains active.
 
 - Disjoint Sol High Go and native-test workers plus coordinator Fairy work
   implement up to sixteen immutable i32 locals in copied direct-call closures.

@@ -47,7 +47,7 @@ pub fn usize type_count(ref Program p){return vectors::type_count(ref p.types);}
 pub fn usize owner_type(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration){
     if(module_index>=module_count(p) || declaration==0 || declaration>syntax::declaration_count(source)){return 0;}let d=syntax::declaration_at(source,declaration-1);if(d.owner_end==0){return 0;}
     let found=declaration_lookup(p,module_index,syntax::source_view(source)[d.owner_start..d.owner_end]);if(found.code!=0){return 0;}let nominal=declaration_at(p,found.item);var usize i=1;
-    while(i<=type_count(p)){let t=type_at(p,i);if((t.kind==2 || t.kind==3) && t.module_index==nominal.module_index && t.declaration==nominal.declaration){return i;}i+=1;}return 0;
+    while(i<=type_count(p)){let t=type_at(p,i);if((t.kind==2 || t.kind==3 || t.kind==4) && t.module_index==nominal.module_index && t.declaration==nominal.declaration){return i;}i+=1;}return 0;
 }
 // 0 associated/nonmethod; 1 shared; 2 exclusive; 3 consuming value.
 pub fn u32 receiver_kind(ref Program p,ref syntax::Parsed source,usize module_index,usize declaration){
@@ -88,11 +88,11 @@ pub fn ref aggregates::Prepared aggregate_source(ref Program p){assert(v::len<ag
 fn types::Resolution resolve_signature(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<types::Type> graph,bool aggregates){if(aggregates){let empty=v::empty<usize>();return types::aggregate_resolve(c,p,module_index,0,root,ref empty,graph);}return types::resolve(c,p,module_index,root,graph);}
 fn catalog::Problem check_owner(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,syntax::Declaration d,ref v::Vec<usize> parameters,usize start,ref mut v::Vec<types::Type> graph){
     if(d.owner_end==0){return fail(0,0,0,0);}let found=catalog::lookup(c,module_index,syntax::source_view(p)[d.owner_start..d.owner_end]);if(found.code!=0){return fail(4501,module_index,d.start,d.end);}let nominal=catalog::declaration_at(c,found.item);
-    if(nominal.parameters!=0 || nominal.module_index!=module_index || nominal.kind!=4 && nominal.kind!=6){return fail(4501,module_index,d.start,d.end);}
+    if(nominal.parameters!=0 || nominal.module_index!=module_index || nominal.kind!=4 && nominal.kind!=6 && nominal.kind!=11){return fail(4501,module_index,d.start,d.end);}
     let owner=types::declaration(c,module_index,nominal.declaration,graph);if(owner.problem.code!=0){return fail(owner.problem.code,module_index,d.start,d.end);}var usize i=0;var usize position=0;
     while(i<d.entry_count){let e=syntax::entry_at(p,d.entry_start+i);i+=1;if(e.kind!=1){continue;}if(bytes::equal(syntax::source_view(p)[e.name_start..e.name_end],b"this")){
         if(position!=0){return fail(4501,module_index,d.start,d.end);}let receiver=types::at(graph,*v::at<usize>(parameters,start));let target=if(receiver.kind==7 || receiver.kind==8){types::at(graph,receiver.first)}else{receiver};
-        if(target.kind!=if(nominal.kind==4){2}else{3} || target.module_index!=nominal.module_index || target.declaration!=nominal.declaration){return fail(4501,module_index,d.start,d.end);}
+        if(target.kind!=if(nominal.kind==4){2}else if(nominal.kind==6){3}else{4} || target.module_index!=nominal.module_index || target.declaration!=nominal.declaration){return fail(4501,module_index,d.start,d.end);}
     }position+=1;}return fail(0,0,0,0);
 }
 fn Result<Program,catalog::Problem> build_mode(ref v::Vec<syntax::Parsed> sources,catalog::Catalog c,v::Vec<types::Type> initial,v::Vec<aggregates::Prepared> prepared,bool aggregates){

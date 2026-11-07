@@ -1,9 +1,12 @@
 package cli
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"os"
 	"path/filepath"
@@ -23,7 +26,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 	if os.Getenv("FAIRYC_RUN_PARITY_INTEGRATION") != "1" {
 		t.Skip("set FAIRYC_RUN_PARITY_INTEGRATION=1 for full CLI replay")
 	}
-	unsupportedRoots := candidateAtlasUnsupportedFixtures(t)
+	enumRoots := candidateAtlasEnumOwnerFixtures(t)
 	root := t.TempDir()
 	copyLexerFileCLIExample(t, root)
 	build, support := candidateParityBuildPartsWithLimit(t, root, map[string]bool{"CloseHandle": true, "CreateFileW": true, "GetFileInformationByHandleEx": true, "GetFinalPathNameByHandleW": true, "GetLastError": true}, 2<<20)
@@ -101,7 +104,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 				{"edit-aggregates", verifyCandidateEditAggregateCommand},
 				{"edit-static-operations", verifyCandidateEditStaticOperationCommand},
 				{"edit-copied-closures", verifyCandidateEditCopiedClosureCommand},
-				{"unsupported", func(t *testing.T, image string) { verifyCandidateAtlasUnsupported(t, image, unsupportedRoots) }},
+				{"enum-owner", func(t *testing.T, image string) { verifyCandidateAtlasEnumOwners(t, image, enumRoots) }},
 				{"impact-generics", verifyCandidateAtlasGenericCommand},
 				{"impact-static-operations", verifyCandidateAtlasStaticOperationCommand},
 				{"impact-copied-closures", verifyCandidateAtlasCopiedClosureCommand},
@@ -163,13 +166,21 @@ func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 	}
 }
 
-func TestCandidateAtlasUnsupportedFixturesHaveValidSource(t *testing.T) {
-	if len(candidateAtlasUnsupportedFixtures(t)) == 0 {
-		t.Fatal("missing unsupported Atlas source controls")
+func TestCandidateAtlasEnumOwnerFixturesHaveValidSource(t *testing.T) {
+	if len(candidateAtlasEnumOwnerFixtures(t)) == 0 {
+		t.Fatal("missing enum-owned Atlas source controls")
 	}
 }
 
-func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
+func TestCandidateAtlasEnumOwnerCommand(t *testing.T) {
+	roots := candidateAtlasEnumOwnerFixtures(t)
+	const main = `module main;import project_atlas_cli as atlas;@effects(filesystem,console,environment)fn i32 main(){return atlas::arguments();}`
+	candidateAtlasProbeSize(t, "project_atlas_cli", main, 2<<20, func(t *testing.T, image string) {
+		verifyCandidateAtlasEnumOwners(t, image, roots)
+	})
+}
+
+func candidateAtlasEnumOwnerFixtures(t *testing.T) []string {
 	t.Helper()
 	var roots []string
 	for _, source := range []string{
@@ -177,20 +188,63 @@ func candidateAtlasUnsupportedFixtures(t *testing.T) []string {
 	} {
 		root := writeWorkspaceSessionFixture(t, source)
 		if code, _, diagnostic := runForTest([]string{"check"}, root); code != 0 {
-			t.Fatalf("unsupported source must be otherwise valid: %d %s", code, diagnostic)
+			t.Fatalf("enum-owned source must be valid: %d %s", code, diagnostic)
 		}
 		roots = append(roots, root)
 	}
 	return roots
 }
-func verifyCandidateAtlasUnsupported(t *testing.T, image string, roots []string) {
+func verifyCandidateAtlasEnumOwners(t *testing.T, image string, roots []string) {
 	t.Helper()
+	data, err := os.ReadFile(image)
+	if err != nil {
+		t.Fatal(err)
+	}
+	compiler := fmt.Sprintf("fairyc.compiler-executable-sha256/v1:%x", sha256.Sum256(data))
 	for _, root := range roots {
+		var diagnostics bytes.Buffer
+		prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostics, atlasmap.LogicalSchemaV3)
+		if code != ExitSuccess {
+			t.Fatalf("enum-owned Atlas oracle: %d %s", code, &diagnostics)
+		}
+		index, err := atlasmap.NewWorkspaceCallIndexV3(prepared.partitions, prepared.expectations, atlasmap.WorkspaceCallBudget{MaxPackages: 8, MaxCalls: 128})
+		if err != nil {
+			t.Fatal(err)
+		}
 		before := remoteTree(t, root)
+		selected := false
+		for _, partition := range prepared.partitions {
+			if partition.Header().PackageUID != "example.session.app" {
+				continue
+			}
+			for _, symbol := range partition.Symbols() {
+				if symbol.Declaration.Name != "State::answer" {
+					continue
+				}
+				selected = true
+				for _, selector := range []string{symbol.Visible, symbol.Full} {
+					args := append([]string{"experimental", "atlas-impact"}, impactArgs("example.session.app", selector)...)
+					args = append(args, "--locked")
+					code, out, diagnostic := fetchCLIProcess(t, image, root, args, "")
+					var got atlasmap.ImpactResult
+					if code != ExitSuccess || diagnostic != "" || json.Unmarshal([]byte(out), &got) != nil {
+						t.Fatalf("enum-owned query: %d %q %q", code, out, diagnostic)
+					}
+					want, err := index.Impact(partition.Header().PackageInstance, selector, 8, 64)
+					if err != nil {
+						t.Fatal(err)
+					}
+					compareCandidateAtlasAggregateImpact(t, got, want, compiler)
+				}
+			}
+		}
+		if !selected {
+			t.Fatal("missing independently prepared enum-owned subject")
+		}
 		args := append([]string{"experimental", "atlas-impact"}, impactArgs("example.session.app", "fysym1-sha256-128-"+strings.Repeat("a", 32))...)
 		code, out, diagnostic := fetchCLIProcess(t, image, root, args, "")
-		if code != 7 || out != "" || diagnostic == "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
-			t.Fatalf("unsupported source: %d %q %q", code, out, diagnostic)
+		if code != 2 || out != "" || diagnostic == "" || !reflect.DeepEqual(before, remoteTree(t, root)) {
+			t.Fatalf("enum-owned unknown selector or workspace mutation: %d %q %q", code, out, diagnostic)
 		}
 	}
 }

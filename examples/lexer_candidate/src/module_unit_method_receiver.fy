@@ -11,8 +11,8 @@ import syntax as syntax;
 fn bool charge(ref mut usize work){if(*work>=1048576){return false;};*work+=1;return true;}
 fn Result<types::Type,u32> nominal(ref interfaces::Interfaces imported,usize id){
     if(id==0 || id>interfaces::type_count(imported)){return .err(9);}let t=interfaces::type_at(imported,id);
-    if(t.kind==7 || t.kind==8){if(t.first==0 || t.first>=id){return .err(9);}let inner=interfaces::type_at(imported,t.first);if(inner.kind==2 || inner.kind==3){return .ok(inner);}return .err(9);}
-    return if(t.kind==2 || t.kind==3){.ok(t)}else{.err(9)};
+    if(t.kind==7 || t.kind==8){if(t.first==0 || t.first>=id){return .err(9);}let inner=interfaces::type_at(imported,t.first);if(inner.kind==2 || inner.kind==3 || inner.kind==4){return .ok(inner);}return .err(9);}
+    return if(t.kind==2 || t.kind==3 || t.kind==4){.ok(t)}else{.err(9)};
 }
 pub fn Result<types::Type,u32> resolve(ref syntax::Parsed source,ref signatures::Program metadata,ref interfaces::Interfaces imported,ref names::Resolved resolved,usize module_index,usize symbol,ref mut usize work){
     var usize selected=symbol;var usize depth=0;

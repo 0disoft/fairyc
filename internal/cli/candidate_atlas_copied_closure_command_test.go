@@ -14,11 +14,11 @@ import (
 )
 
 func TestCandidateAtlasCopiedClosureCommand(t *testing.T) {
-	unsupported := candidateAtlasUnsupportedFixtures(t)
+	enumRoots := candidateAtlasEnumOwnerFixtures(t)
 	main := `module main;import project_atlas_cli as atlas;@effects(filesystem,console,environment)fn i32 main(){return atlas::arguments();}`
 	candidateAtlasProbeSize(t, "project_atlas_cli", main, 2<<20, func(t *testing.T, image string) {
 		verifyCandidateAtlasCopiedClosureCommand(t, image)
-		verifyCandidateAtlasUnsupported(t, image, unsupported)
+		verifyCandidateAtlasEnumOwners(t, image, enumRoots)
 	})
 }
 
