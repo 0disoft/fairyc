@@ -19,7 +19,17 @@ pub struct Shape {usize type;usize module_index;usize declaration;usize field_st
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
 pub struct Callable {usize module_index;usize declaration;bool template;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub struct Annotation {usize type;bool required;bool deferred;}
-pub resource Interfaces {usize region_error;usize region_arena;types::Graph graph;v::Vec<Shape> shapes;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;usize first;usize stop;cleanup{}}
+pub resource Interfaces {usize region_error;usize region_arena;types::Graph graph;v::Vec<Shape> shapes;v::Vec<usize> shape_index;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;usize first;usize stop;cleanup{}}
+// Canonical type IDs address this owned index; shape/field order remains exact.
+// Keep the first matching shape, as the previous ordered scan did.
+fn Result<v::Vec<usize>,u32> index_shapes(usize count,ref v::Vec<Shape> shapes,ref mut meter::Budget work){
+    if(count>4096){return .err(10);}if(!meter::charge(work,count+1)){return .err(10);}
+    var v::Vec<usize> index=v::empty<usize>();if(!v::reserve<usize>(ref mut index,count+1).is_ok){return .err(11);}
+    var usize i=0;while(i<=count){if(!v::push<usize>(ref mut index,0).is_ok){return .err(11);}i+=1;}i=0;
+    while(i<v::len<Shape>(shapes)){if(!meter::charge(work,1)){return .err(10);}let shape=v::at<Shape>(shapes,i);if(shape.type==0 || shape.type>count){return .err(9);}
+        if(*v::at<usize>(ref index,shape.type)==0){let slot=v::at_mut<usize>(ref mut index,shape.type);*slot=i+1;}i+=1;}
+    return .ok(index);
+}
 fn join::Problem body_demands(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref generics::Plan specializations,u32 kind,usize id,ref mut v::Vec<types::Type> graph,ref mut v::Vec<body_types::Request> requests,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,ref mut meter::Budget work){
     var usize module_index=0;var usize declaration=0;var usize argument_start=0;var usize argument_count=0;
     if(kind==1){let c=generics::at(specializations,id);module_index=c.module_index;declaration=c.declaration;argument_start=c.argument_start;argument_count=c.argument_count;}
@@ -62,8 +72,9 @@ fn Result<Interfaces,join::Problem> build_mode(ref v::Vec<syntax::Parsed> source
         if(v::len<usize>(ref cleanup_seeds)==0){break;}let usize old_work=generics::work(ref specializations);specializations=switch(generics::extend_cleanups(sources,metadata,specializations,ref mut graph,ref cleanup_seeds)){case .ok(p):{p}case .err(p):{return .err(p);}};if(!meter::charge(ref mut budget,generics::work(ref specializations)-old_work)){return .err(meter::fail(4503,binding::first(bound),0,0));}
     }
     let fields_valid=if(signatures::aggregate_types(metadata)){contracts::aggregate_fields(sources,ref graph,ref shapes,ref fields,ref mut budget.work)}else{contracts::fields(sources,ref graph,ref shapes,ref fields,ref mut budget.work)};if(fields_valid.code!=0){return .err(fields_valid);}
+    let shape_index=switch(index_shapes(types::count(ref graph),ref shapes,ref mut budget)){case .ok(p):{p}case .err(code):{return .err(meter::fail(code,0,0,0));}};
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(meter::fail(code,0,0,0));}};
-    return .ok(Interfaces{.region_error,.region_arena,.graph=owned,.shapes,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
+    return .ok(Interfaces{.region_error,.region_arena,.graph=owned,.shapes,.shape_index,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
 }
 // Immutable declaration records shared by public descriptor consumers.
 pub fn ref v::Vec<types::Type> type_records(ref Interfaces p){return types::graph_records(ref p.graph);}
@@ -87,8 +98,11 @@ pub fn Annotation annotation_at(ref Interfaces p,usize root){assert(root>0 && ro
 pub fn ref generics::Plan specializations(ref Interfaces p){return ref p.specializations;}
 pub fn join::Problem validate_specializations(ref Interfaces p,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata){return generics::validate(ref p.specializations,sources,metadata,types::graph_records(ref p.graph));}
 pub fn Result<usize,u32> field_measured(ref Interfaces p,usize type,usize caller,ref u8[] name,ref mut usize probes){
-    if(type==0 || type>type_count(p)){return .err(18);}var usize owner=type;let t=type_at(p,owner);if(t.kind==7 || t.kind==8){owner=t.first;}
-    var usize i=0;while(i<shape_count(p)){*probes=*probes+1;let s=shape_at(p,i);if(s.type==owner){let inner=type_at(p,owner);if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13 && inner.kind!=20 && inner.kind!=21){return .err(18);}if((inner.kind==3 || inner.kind==13 || inner.kind==21) && caller!=s.module_index){return .err(6201);}var usize f=0;while(f<s.field_count){*probes=*probes+name.len+1;if(bytes::equal(field_name(p,s.field_start+f),name)){return .ok(s.field_start+f+1);}f+=1;}return .err(18);}i+=1;}return .err(18);
+    if(type==0 || type>type_count(p)){return .err(18);}var usize owner=type;let t=type_at(p,owner);*probes=*probes+1;
+    if(t.kind==7 || t.kind==8){owner=t.first;}
+    if(owner==0 || owner>=v::len<usize>(ref p.shape_index)){return .err(18);}let slot=*v::at<usize>(ref p.shape_index,owner);if(slot==0){return .err(18);}let s=shape_at(p,slot-1);
+    let inner=type_at(p,owner);if(inner.kind!=2 && inner.kind!=3 && inner.kind!=13 && inner.kind!=20 && inner.kind!=21){return .err(18);}if((inner.kind==3 || inner.kind==13 || inner.kind==21) && caller!=s.module_index){return .err(6201);}
+    var usize f=0;while(f<s.field_count){*probes=*probes+name.len+1;if(bytes::equal(field_name(p,s.field_start+f),name)){return .ok(s.field_start+f+1);}f+=1;}return .err(18);
 }
 pub fn Result<usize,u32> field(ref Interfaces p,usize type,usize caller,ref u8[] name){var usize probes=0;return field_measured(p,type,caller,name,ref mut probes);}
 pub fn usize body_type_count(ref Interfaces p){return v::len<body_types::Request>(ref p.body_types);}

@@ -287,3 +287,33 @@ Evidence: `.cache/current-whole-cli-sourcecards-20261107.log` and the
 `optimized/host.json` under that artifact directory. Durations are single-run
 observations with concurrent host work, not a speed comparison. The full authored
 emission is a subsequent step and is not included in this pass.
+
+## Provider value-work follow-up
+
+The source-cardinality-enabled seed reaches provider analysis, then fails in
+91.448s at phase 2/stage 7/code 10 while checking `module_unit_interfaces.fy`:
+limit 1048576, attempted 1048581. Stage 7 propagates the value checker failure
+through origin input construction: `origins -> input_factory -> provider ->
+values::build`. The failing charge aggregates completed body work. This is not
+the interface-construction stage or a timeout. The failed invocation remains in
+`.cache/current-selfbuild-sourcecards-20261107/invocations.json`.
+
+Nominal field lookup now indexes canonical type IDs instead of repeatedly
+scanning all shapes. The index is owned by the immutable Interfaces result;
+first-match/field order, permission errors and existing work/type caps remain.
+Index construction charges its actual bounded setup work. The real-builder
+regression checks 975 queries against the old ordered lookup in both native
+profiles; a last-field lookup needs 11 probes instead of 172. See
+`candidate-interface-shape-index-20261107.md` for exact scope and hashes.
+
+The integrated source check/locked pass in 23.341s / 19.488s, with 755 checked
+files and 9504 MIR functions; all 1225 authored files match the checked snapshot.
+The optimized Go seed also passes 205 C parts and 14 independent CLI processes
+in 247.553s. Concurrent host work makes these single-run times unsuitable for a
+wall-clock speedup claim. Logs: `.cache/current-source-check-shape-index-fixed-20261107.log`
+and `.cache/current-whole-cli-shape-index-20261107.log`. The initial source-check
+attempt exposed a Fairy statement/expression ambiguity and failed; only the
+corrected source hash in the regression record has these passing results.
+
+The full authored emission is being rechecked separately; neither the reduced
+probe counts nor the Go-seeded CLI regression establishes self-build acceptance.
