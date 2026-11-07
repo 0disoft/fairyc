@@ -32,6 +32,7 @@ type Options struct {
 	Timeout                                time.Duration
 	CompileTimeout                         time.Duration
 	StackReserveBytes                      uint64
+	CompilerHost                           bool
 }
 type Result struct {
 	PacketSHA256      string
@@ -255,7 +256,11 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" || options.Output == "" {
 		return Result{}, fmt.Errorf("candidate native bridge requires Windows x64 MSVC and output executable")
 	}
-	packet, err := Decode(data)
+	decoder := Decode
+	if options.CompilerHost {
+		decoder = DecodeCompilerHost
+	}
+	packet, err := decoder(data)
 	if err != nil {
 		return Result{}, fmt.Errorf("decode candidate output: %w", err)
 	}
@@ -273,7 +278,11 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	}
 	// Publication consumes only the image, so inspect and release each COFF
 	// object before linking instead of retaining the whole object set.
-	artifact, err := cdriver.BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
+	build := cdriver.BuildWindowsMSVCTargetPartsImageWithStackReserve
+	if options.CompilerHost {
+		build = cdriver.BuildWindowsMSVCCompilerHostPartsWithStackReserve
+	}
+	artifact, err := build(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
 	if err != nil {
 		return Result{}, err
 	}

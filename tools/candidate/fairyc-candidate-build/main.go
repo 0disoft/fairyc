@@ -30,6 +30,7 @@ func run(args []string) int {
 	frontendTimeout := flags.Duration("frontend-timeout", time.Minute, "candidate frontend deadline in (0,10m]")
 	compileTimeout := flags.Duration("compile-timeout", 2*time.Minute, "per-compiler/link deadline in (0,10m]")
 	stackReserve := flags.Uint64("stack-reserve-bytes", 0, "private compiler image stack reserve: zero/default or 64 KiB aligned, at most 16 MiB")
+	compilerHost := flags.Bool("compiler-host", false, "private compiler bootstrap only: admit an 8 MiB header; ordinary target limits remain unchanged")
 	if err := flags.Parse(args); err != nil {
 		if err == flag.ErrHelp {
 			return 0
@@ -64,7 +65,7 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
-	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, OutputRoot: *outputRoot, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout, StackReserveBytes: *stackReserve}
+	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, OutputRoot: *outputRoot, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout, StackReserveBytes: *stackReserve, CompilerHost: *compilerHost}
 	var result candidatebuild.Result
 	var err error
 	if *packetInput != "" {

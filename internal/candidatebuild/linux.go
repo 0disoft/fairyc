@@ -38,7 +38,7 @@ func linuxRuntimeSourceForRun(header string, run bool) (string, error) {
 // caller owns the private stage directory and process-group cleanup. No Fairy
 // parser/frontend, source discovery, cached artifact or MSVC fallback runs here.
 func BuildLinuxInput(options Options, input, stage, compiler string) (Result, error) {
-	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked || options.StackReserveBytes != 0 {
+	if options.Candidate != "" || options.Manifest != "" || options.Workspace != "" || options.Locked || options.StackReserveBytes != 0 || options.CompilerHost {
 		return Result{}, fmt.Errorf("Linux packet build cannot select frontend, cache or Windows stack options")
 	}
 	timeout := options.CompileTimeout

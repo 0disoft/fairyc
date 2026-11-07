@@ -13,6 +13,8 @@ import (
 )
 
 const maxPacket = 96 * 1024 * 1024
+const maxPacketPart = 2 << 20
+const maxCompilerHostHeader = 8 << 20
 
 // Matches candidate_limits::project_frames; C unit count is separately bounded.
 const maxProjectFrames = 16384
@@ -30,6 +32,16 @@ var (
 )
 
 func Decode(data []byte) (Packet, error) {
+	return decode(data, maxPacketPart)
+}
+
+// DecodeCompilerHost admits the private compiler's larger shared header only.
+// Literal/body, aggregate packet and all semantic checks remain identical.
+func DecodeCompilerHost(data []byte) (Packet, error) {
+	return decode(data, maxCompilerHostHeader)
+}
+
+func decode(data []byte, headerLimit int) (Packet, error) {
 	if len(data) > maxPacket || !bytes.HasPrefix(data, []byte("FYCPARTS1\n")) {
 		return Packet{}, fmt.Errorf("invalid bounded project packet")
 	}
@@ -52,23 +64,23 @@ func Decode(data []byte) (Packet, error) {
 		remaining = remaining[end+1:]
 		return n, err
 	}
-	part := func() (string, error) {
+	part := func(limit int) (string, error) {
 		n, err := number()
 		if err != nil {
 			return "", err
 		}
-		if n < 1 || n > 2097152 || n > len(remaining) {
+		if n < 1 || n > limit || n > len(remaining) {
 			return "", fmt.Errorf("truncated or oversized packet part")
 		}
 		text := string(remaining[:n])
 		remaining = remaining[n:]
 		return text, nil
 	}
-	header, err := part()
+	header, err := part(headerLimit)
 	if err != nil {
 		return Packet{}, err
 	}
-	literals, err := part()
+	literals, err := part(maxPacketPart)
 	if err != nil {
 		return Packet{}, err
 	}
@@ -78,7 +90,7 @@ func Decode(data []byte) (Packet, error) {
 	}
 	units := make([]string, count)
 	for i := range units {
-		units[i], err = part()
+		units[i], err = part(maxPacketPart)
 		if err != nil {
 			return Packet{}, err
 		}
