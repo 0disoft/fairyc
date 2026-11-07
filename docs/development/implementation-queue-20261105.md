@@ -67,6 +67,17 @@ authorized by this queue.
 
 ## Progress
 
+- The disjoint native worker closes six actual state-command publication
+  boundary observations: Windows low/optimized closed stdout, latched CAS-entry
+  cancellation and competing Go snapshot busy 7. All pass in 47.962s; every
+  owner preserves a single 7-to-8 publication, exact Go durable bytes, two real
+  provider reopens and no fourth lease/retry. Owned subprocess failure cleanup
+  is checked in the harness. See
+  `candidate-state-command-windows-boundaries-20261107.md`. Actual candidate
+  stale-version conflict remains separate from the observed peer busy result;
+  final full-source/self-build/distribution/clean-machine/hosted gates and native
+  Linux remain open. No push/dispatch. The full objective stays active.
+
 - The repeatable state developer build now uses fresh exact-byte prepared
   workspaces and pinned sibling packs. Nine Python preparation checks pass;
   actual native builds expose and fix missing Windows CandidateHost selection
