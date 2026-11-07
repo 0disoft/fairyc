@@ -552,3 +552,17 @@ retry reaches linking, then fails after 551.636s at phase 3/stage 0/code 1002
 Normal self-build, fixed points and latest-source parity remain pending; Linux is batched.
 Contracts and work/field caps are unchanged. See
 `candidate-cleanup-recipe-index-20261107.md` for receipts, semantics and bounds.
+
+## Project type prefix follow-up
+
+Commit `acd2cda3` integrates `2bfd4575`: validated shared-prefix IDs map directly,
+retaining only suffix maps. Windows both-profile prefix/existing-type package
+replays pass in 23.350s / 61.337s; source check/locked pass (755 files, 9528 MIR).
+The prior normal retry fails linking after 551.636s with zero output. The 157-unit
+diagnostic's 21157 input frames include duplicates; the exact limit is unresolved.
+The 256-input cap is not the cause; no 4096-type hit or work-cap cause is established.
+The frozen-input A/B is running; a fresh optimized build-only seed/help passes
+in 132.660s. A new normal retry follows, with no result claimed.
+Normal acceptance, fixed points and current parity remain pending; Linux is batched.
+Contracts, ABI, limits and source validation stay unchanged. See
+`candidate-project-type-prefix-20261107.md` for evidence and comparison boundaries.
