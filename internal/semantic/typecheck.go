@@ -82,6 +82,7 @@ func (a *analyzer) typeCheck() Result {
 			dropFunction.DropGlueFor = a.resources[resource].typ
 			hirModule.Functions = append(hirModule.Functions, dropFunction)
 		}
+		a.finalizeInlineFunctions(&hirModule)
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
 	}
 	return result

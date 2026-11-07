@@ -101,13 +101,10 @@ func (c *typeChecker) checkFunction() hir.Function {
 	} else if resultType != hir.TypeVoid && !blockAlwaysTerminates(c.function.Body) {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.Body.Span, "non-void function without a checked return value")
 	}
-	if inlineRequested {
-		id, err := hir.InlineFunctionID(result)
-		if err != nil {
-			c.analyzer.addUnsupported(c.module.file.Path, c.function.Span, err.Error())
-		} else {
-			result.InlineBody = id
-		}
+	if inlineRequested && len(c.function.TypeParameters) == 0 {
+		// Finalize identities only after all same-module bodies are typed, so
+		// forward calls and whole-graph admission use the same resolved symbols.
+		result.InlineBody = "pending"
 	}
 	return result
 }

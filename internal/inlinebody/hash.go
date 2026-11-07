@@ -55,12 +55,13 @@ func Compute(coordinate packagegraph.CoordinateID, entries []Entry) (Hash, error
 func HIR(value hir.Package, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]Hash, error) {
 	entries := map[hir.PackageID][]Entry{}
 	for _, m := range value.Modules {
+		resolve := hir.InlineModuleResolver(m)
 		for _, fn := range m.Functions {
 			if fn.InlineBody != "" {
 				if _, ok := coordinates[m.Package]; !ok {
 					return nil, fmt.Errorf("inline owner has no coordinate")
 				}
-				id, err := hir.InlineFunctionID(fn)
+				id, err := hir.InlineFunctionID(fn, resolve)
 				if err != nil || id != fn.InlineBody {
 					return nil, fmt.Errorf("inline body identity mismatch for %s::%s", m.Path, fn.Name)
 				}

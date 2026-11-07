@@ -114,7 +114,7 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		failures = appendVerificationErrors(failures, verifyInlineFunction(&program.Functions[index])...)
+		failures = appendVerificationErrors(failures, verifyInlineFunction(&program.Functions[index], functions)...)
 		if verificationReportsFull(failures) {
 			return canonicalVerificationErrors(failures), nil
 		}

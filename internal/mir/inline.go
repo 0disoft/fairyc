@@ -8,7 +8,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
-func verifyInlineFunction(fn *Function) []VerificationError {
+func verifyInlineFunction(fn *Function, functions map[hir.SymbolID]*Function) []VerificationError {
 	if fn.InlineBody == "" {
 		return nil
 	}
@@ -38,7 +38,7 @@ func verifyInlineFunction(fn *Function) []VerificationError {
 			}
 		}
 		switch block.Terminator.Kind {
-		case TerminatorReturn, TerminatorGoto, TerminatorSwitch, TerminatorTrap:
+		case TerminatorReturn, TerminatorGoto, TerminatorSwitch, TerminatorTrap, TerminatorCall:
 		default:
 			return reject("calls and resource/control-flow extensions are closed")
 		}
@@ -72,5 +72,44 @@ func verifyInlineFunction(fn *Function) []VerificationError {
 			return reject("cyclic or invalid control flow")
 		}
 	}
+	// Validate the whole declaration graph even when restoring executable
+	// artifacts. A well-formed identity string alone never grants call authority.
+	visited := make(map[hir.SymbolID]uint8)
+	var calls func(*Function) bool
+	calls = func(current *Function) bool {
+		if visited[current.Symbol] == 1 {
+			return false
+		}
+		if visited[current.Symbol] == 2 {
+			return true
+		}
+		if len(visited) >= 64 {
+			return false
+		}
+		visited[current.Symbol] = 1
+		for _, block := range current.Blocks {
+			term := block.Terminator
+			if term.Kind != TerminatorCall {
+				continue
+			}
+			target := functions[term.Callee]
+			if target == nil || target.InlineBody == "" || inlineModule(current.Name) == "" || inlineModule(target.Name) != inlineModule(current.Name) || len(target.Effects) != 0 || len(target.UnsafeOperations) != 0 || len(target.Resources) != 0 || target.ResultType != hir.TypeI32 || target.DropGlueFor != (hir.Type{}) || term.ForeignABI != "" || term.UnsafeScope != (hir.Span{}) || len(term.Arguments) != len(target.ParameterTypes) || !calls(target) {
+				return false
+			}
+		}
+		visited[current.Symbol] = 2
+		return true
+	}
+	if !calls(fn) {
+		return reject("calls require an acyclic graph of at most 64 same-module pure inline functions")
+	}
 	return nil
+}
+
+func inlineModule(name string) string {
+	i := strings.LastIndex(name, "::")
+	if i <= 0 {
+		return ""
+	}
+	return name[:i]
 }

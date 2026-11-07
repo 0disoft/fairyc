@@ -14,6 +14,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	calleeExpression := expression.Children[0]
+	if !c.checkInlineCallPath(calleeExpression) {
+		return hir.TypeInvalid
+	}
 	if calleeExpression != nil && calleeExpression.Kind == syntax.KindFieldExpr && !c.analyzer.isRegionAllocationCall(expression) {
 		return c.checkMethodCall(expression, result)
 	}
