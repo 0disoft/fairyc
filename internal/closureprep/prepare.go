@@ -282,12 +282,18 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 	}
 	body := c.Function.Body
 	value := body.Tail
-	if len(body.Statements) == 1 && body.Tail == nil && body.Statements[0].Kind == syntax.KindReturn {
-		value = body.Statements[0].Expression
-	} else if len(body.Statements) != 0 {
+	bindings := body.Statements
+	if len(bindings) > 0 && body.Tail == nil && bindings[len(bindings)-1].Kind == syntax.KindReturn {
+		value = bindings[len(bindings)-1].Expression
+		bindings = bindings[:len(bindings)-1]
+	}
+	if len(bindings) > 16 {
 		return reject()
 	}
 	nodes := 0
+	// Existing zero-local returns retain their original admission and diagnostics.
+	// Initializers must be i32 expressions even when their inferred value is unused.
+	initializing := false
 	var pure func(*ast.Expression) bool
 	pure = func(e *ast.Expression) bool {
 		nodes++
@@ -296,7 +302,18 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 		}
 		switch e.Kind {
 		case syntax.KindLiteral:
-			return len(e.Children) == 0
+			if len(e.Children) != 0 {
+				return false
+			}
+			if initializing {
+				// AST literals retain their original spelling, not a token kind.
+				// Syntax already validates digits/separators; discriminate integer
+				// tokens without moving contextual i32 range checking before typing.
+				raw := strings.ToLower(e.Text)
+				return len(raw) != 0 && raw[0] >= '0' && raw[0] <= '9' &&
+					(strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0b") || !strings.ContainsAny(raw, ".e"))
+			}
+			return true
 		case syntax.KindPath:
 			return allowed[e.Text]
 		case syntax.KindGroup:
@@ -308,6 +325,20 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 		}
 		return false
 	}
+	initializing = true
+	for _, statement := range bindings {
+		binding := statement.Binding
+		if statement.Kind != syntax.KindBinding || binding == nil || binding.Mutable ||
+			binding.Type != nil && !direct(*binding.Type) || allowed[binding.Name] || strings.HasPrefix(binding.Name, prefix) {
+			return reject()
+		}
+		// A name becomes visible only after its initializer has been checked.
+		if !pure(binding.Expression) {
+			return reject()
+		}
+		allowed[binding.Name] = true
+	}
+	initializing = false
 	if !pure(value) {
 		return reject()
 	}

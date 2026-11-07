@@ -32,7 +32,13 @@ fn usize literal(ref syntax::Parsed p,syntax::Statement binding,ref mut v::Vec<s
     var d=syntax::declaration_at(p,c.owner-1);var bytes::Buffer helper=bytes::empty();if(!bytes::append(ref mut helper,b"_fy_closure_").is_ok || !bytes::append(ref mut helper,syntax::source_view(p)[d.name_start..d.name_end]).is_ok || !bytes::append(ref mut helper,b"_").is_ok || !number(ref mut helper,c.ordinal)){c.code=11;return 0;}
     d.kind=3;d.start=n.start;d.end=n.end;d.name_start=entry.name_start;d.name_end=entry.name_end;d.public=false;d.public_start=0;d.public_end=0;d.unsafe_start=0;d.unsafe_end=0;d.owner_start=0;d.owner_end=0;d.generic_parameters=0;d.generic_start=0;d.generic_end=0;d.attribute_start=0;d.attribute_count=0;d.cleanup_attribute_start=0;d.cleanup_attribute_count=0;d.cleanup_start=0;d.cleanup_end=0;d.cleanup_body=0;d.field_start=0;d.field_count=0;d.expression=0;d.result_type=h.token;d.entry_start=v::len<entries::Entry>(locals);d.entry_count=count+parameters;d.body=n.left;
     i=0;while(i<count+parameters){let e=syntax::entry_at(p,h.left+i-1);let id=entry_add(locals,entries::Entry{.kind=1,.start=e.start,.end=e.end,.name_start=e.name_start,.name_end=e.name_end,.type_start=e.type_start,.type_end=e.type_end,.type_root=e.type_root,.expression=0,.id=0},c);if(id==0){return 0;}i+=1;}
-    let body=syntax::statement_at(p,n.left);if(body.expression!=0){let ret=statement_add(statements,ast::Statement{.kind=3,.start=body.start,.end=body.end,.expression=body.expression,.target=0,.first=0,.second=0,.entry=0,.operator=0},c);let items=link(statements,ret,0,c);d.body=statement_add(statements,ast::Statement{.kind=1,.start=body.start,.end=body.end,.expression=0,.target=0,.first=items,.second=1,.entry=0,.operator=0},c);}
+    let body=syntax::statement_at(p,n.left);if(body.expression!=0){
+        // Original local statements retain their original entry/expression IDs:
+        // preparation appends to, rather than replaces, those source tables.
+        // Keep every initializer in source order, including unused trapping ones.
+        var usize items=0;let count=syntax::block_statement_count(p,n.left);i=0;while(i<count){items=link(statements,syntax::block_statement(p,n.left,i),items,c);i+=1;}
+        let ret=statement_add(statements,ast::Statement{.kind=3,.start=body.start,.end=body.end,.expression=body.expression,.target=0,.first=0,.second=0,.entry=0,.operator=0},c);items=link(statements,ret,items,c);d.body=statement_add(statements,ast::Statement{.kind=1,.start=body.start,.end=body.end,.expression=0,.target=0,.first=items,.second=count+1,.entry=0,.operator=0},c);
+    }
     if(!v::push<syntax::Declaration>(declarations,d).is_ok){c.code=11;return 0;}let stored=tables::add(private_data,private_rows,info.helper,bytes::view(ref helper),b"");if(stored!=0){c.code=stored;return 0;}if(!bind(env,info,c)){return 0;}return count;
 }
 

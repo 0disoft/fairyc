@@ -21,8 +21,16 @@ authorized by this queue.
 - [ ] Broaden Fairy Atlas production to the Go-supported source families,
   including SDK, aggregates, foreign declarations and generic facts; retain
   independent current-source expectations and explicit completeness.
-- [ ] Linux Fairy package fetch: retained-directory filesystem/cache publication,
+  SDK/user aggregate, foreign and generic production already have Windows
+  evidence. Remaining concrete gaps include enum-owned associated functions,
+  whole native-map comparison after edits and the two newest SDK/aggregate
+  full-main command groups; do not reimplement already verified producers.
+- [x] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
+  Source selection and Windows models are verified in
+  `candidate-linux-package-fetch-20261106.md`,
+  `candidate-linux-fetch-cli-20261106.md` and `candidate-linux-package-20261107.md`.
+  Actual syscalls/TLS/CLI execution remains in the native Linux acceptance batch.
 - [x] Synchronize the Fairy GNU companion runtime selector and pinned source
   pack with the package-directory/file, clock and HTTPS host adapters; compare
   complete emitted C against live Go selection before Linux self-build acceptance.
@@ -36,15 +44,35 @@ authorized by this queue.
   Windows command/full-entry evidence and the authored native replay are in
   `candidate-linux-atlas-cli-20261106.md` and `candidate-linux-atlas-edit-20261106.md`;
   native stdio/default-SIGPIPE/closed-pipe behavior also needs explicit replay.
-- [ ] Generated-C/native persistent state execution through the existing exact
+- [x] Generated-C/native persistent state execution for the admitted graph family
+  through the existing exact
   layout/version compare-and-publish port, without weakening conflict/rollback
   or one-attempt behavior.
+  Explicit Windows developer-command execution, real durable bytes/provider
+  reopens, cancellation, stale-version conflict and local packaging are verified
+  in `candidate-windows-state-command-20261107.md`,
+  `candidate-state-command-windows-boundaries-20261107.md` and
+  `candidate-state-cli-package-20261107.md`. This closes that private Windows
+  family, without promoting an ordinary CLI default, a chain/provider or Linux.
 
 ## Deferred designs to resolve and implement
 
-- [ ] General inline bodies, composite generic transport, multi-operation static
-  interfaces and first-class closures: inspect current boundaries, specify each
-  expansion and implement in independent verified steps.
+- [ ] General inline bodies: sixteen immutable i32 locals already work. Calls,
+  mutation/control flow and other value families need independent contracts;
+  calls also need transitive body dependency/identity rules.
+- [ ] Composite generic transport: preserve already implemented scalar-parameter
+  structs/resources; the seven extended scalar types inside further wrappers
+  retain their separate copy/borrow/transport admission boundaries.
+- [ ] Multi-operation static interfaces: independent operation selection already
+  works. A grouped interface still needs its representation, complete-provider
+  admission and partial-implementation/error-location contract.
+- [ ] First-class closures: copied direct-call closures and view/vector loop
+  calls already work. Closure value types, passing/return/storage, capture
+  ownership/lifetime and environment representation remain separate designs.
+  The bounded immutable-i32-local follow-up now passes Go/Fairy Windows
+  admission, identity and restored-artifact generated-C execution; see
+  `copied-closure-locals-20261107.md`. Its whole CLI/disk-cache and final
+  acceptance are separate; this does not close first-class closures.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:
   prepare concrete contracts and local implementations; external registry or
   trust-provider selection requires the owner's actual choice.
@@ -63,16 +91,34 @@ authorized by this queue.
   Exact committed source ZIP, checksums, portable six-group plan and actual
   clean original-commit receiver reconstruction are verified in
   `linux-validation-handoff-20261107.md`.
-- [x] Prepare and locally verify the current Windows distribution ZIP and
+- [ ] Execute the consolidated native Linux batch, including filesystem/package
+  publication, trusted TLS, command transport and consecutive self-build. Windows
+  models and the transferable handoff do not establish these native results.
+- [x] Prepare and locally verify the Windows distribution ZIP checkpoint and
   clean-environment verifier. Clean `a8a3e499` public Go compiler/LSP packaging
   passes all 16 steps and 15 outside-checkout minimal-PATH steps; see
   `../ops/windows-preview-readiness-20261107.md` for exact artifact identity.
+- [ ] Refresh the exact Windows distribution after the remaining compiler
+  implementation; the `a8a3e499` checkpoint predates immutable closure locals.
 - [ ] Execute the Windows distribution on an actual clean machine; the local
   minimal-PATH verifier is same-host evidence only.
 - [ ] Keep same-commit hosted CI acceptance pending until an authorized push or
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Disjoint Sol High Go and native-test workers plus coordinator Fairy work
+  implement up to sixteen immutable i32 locals in copied direct-call closures.
+  Windows admission passes 39 cases in both profiles; twelve restored-artifact
+  generated-C executions preserve snapshots, repeated calls and exact trap
+  category/span. Go native/interpreter/boundary/identity checks, final existing
+  Calls replay, scoped vet and complete source/locked checks pass. All 1,226
+  authored files and the lock match the checked copy. See ADR 0546 and
+  `copied-closure-locals-20261107.md`. Full CLI/disk-cache and refreshed final
+  acceptance stay open; Linux stays batched, no push/dispatch/publication.
+  Historical queue rows now distinguish implemented Linux fetch source and
+  private Windows native persistence from their remaining platform/selection
+  gates. The full objective remains active.
 
 - Current Windows release acceptance at compiler-source revision `d0b84329`
   passes normal full CLI self-build, exact native packet/PE fixed point and

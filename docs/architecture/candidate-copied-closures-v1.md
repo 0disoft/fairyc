@@ -11,6 +11,12 @@ Later mutation of the original local does not change the snapshot. Calls remain
 direct and positional, including nested if/while/classic-for and otherwise
 admitted view/vector for-in scopes; ordinary
 local shadowing applies. Return and tail-expression bodies are accepted.
+The [immutable-local extension](../adr/0546-copied-closure-immutable-locals.md)
+admits up to sixteen immutable i32 bindings before the return, with a shared
+64-node budget over every initializer and the returned expression. Initializers
+execute in source order on every call, including unused values that trap. Local
+names are unique across the closure's captures, parameters and preceding locals;
+forward/self references and non-i32 initializers remain closed.
 
 `body_copied_closure.fy` retains written syntax and canonical Go AST JSON.
 `copied_closure_admission.fy` checks the bounds; `copied_closure_lower.fy` creates

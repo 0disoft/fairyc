@@ -17,6 +17,9 @@ to the original variable does not change the snapshot. Execution admits at most 
 captures, four i32 parameters, an i32 result and one returned pure arithmetic expression of
 at most 64 nodes. Literal, parameter/capture paths, grouping, unary +/- and binary +,-,*,/,%
 are the complete body family. Captures cannot be mutated or implicitly inferred.
+The bounded [immutable-local follow-up](0546-copied-closure-immutable-locals.md)
+adds up to sixteen immutable i32 bindings before that return, sharing the same
+64-node expression budget. It preserves the copied-capture and direct-call model.
 
 The initial execution path requires a direct untyped let binding in the function's outer
 body and direct positional calls within that local scope. Closure copying, passing, returning,
