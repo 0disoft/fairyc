@@ -22,6 +22,7 @@ pub fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state
             let state::Value actual = tc::expression(resolved,tables,problem,item.expression,expected,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return actual; }
             let syntax::Expression source = syntax::expression_at(parsed,item.expression);
+            if(actual.type==13 && symbol.kind!=3){return tc::error(problem,4502,source.start,source.end,0,actual.type);}
             if (actual.type == 7 || actual.type == 8) { return tc::error(problem,8,source.start,source.end,expected,actual.type); }
             if (expected != 0 && expected != actual.type) { return tc::error(problem,1,source.start,source.end,expected,actual.type); }
             state::set_symbols(tables,symbol_id - 1,actual.type); return tc::value(7,actual.terminates);
@@ -34,6 +35,7 @@ pub fn state::Value statement(ref names::Resolved resolved, ref mut v::Vec<state
             }
             return tc::value(7,true);
         } else if (item.kind == 4) {
+            if(item.target!=0 && syntax::expression_at(parsed,item.target).kind==2){let use=state::uses(tables,item.target-1);if(use!=0 && state::symbols(tables,use-1)==13){return tc::error(problem,4,item.start,item.end,0,13);}}
             let state::Value target = tc::expression(resolved,tables,problem,item.target,0,result_type,depth + 1,loop_depth);
             if (problem.code != 0) { return target; }
             var usize place_id = item.target;

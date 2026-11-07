@@ -47,7 +47,10 @@ pub fn Result<Plan,u32> build(ref m::Program p) {
                 let usize id = switch(v::pop<usize>(ref mut queue)) { case .some(value): { value } case .none: { 0 } };
                 if (id == 0) { return .err(1); }
                 let m::Block b = m::block_at(p,id); returns = returns || b.kind == 1;
-                if (b.kind != 5 || bytes::view(ref stopped)[b.callee] == 0) {
+                // Value calls retain their normal continuation conservatively;
+                // the chosen runtime target may differ for the same type.
+                if(b.kind==8){if(!enqueue(ref mut reached,ref mut queue,b.target)){return .err(3);}}
+                else if (b.kind != 5 || bytes::view(ref stopped)[b.callee] == 0) {
                     let usize edge = selected(p,b);
                     if (edge != 0) { if (!enqueue(ref mut reached,ref mut queue,edge)) { return .err(3); } }
                     else if (!enqueue(ref mut reached,ref mut queue,b.target) || !enqueue(ref mut reached,ref mut queue,b.alternative)) { return .err(3); }

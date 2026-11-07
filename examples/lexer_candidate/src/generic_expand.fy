@@ -1,6 +1,7 @@
 module generic_expand;
 import candidate_limits as limits;
 import syntax as syntax;
+import copied_closure_tables as private;
 import scanner as scanner;
 import records as records;
 import attributes as attributes;
@@ -137,5 +138,8 @@ pub fn syntax::Parsed expand(syntax::Parsed p){
     i=0;while(i<syntax::attribute_argument_count(ref p)){assert(v::push<attributes::Argument>(ref mut attribute_arguments,syntax::attribute_argument_at(ref p,i)).is_ok);i+=1;}
     var v::Vec<Instance> instances=v::empty<Instance>();var Plan plan=Plan{.problem=Problem{.code=0,.start=0,.end=0},.work=0,.expressions=v::len<ast::Node>(ref expressions),.statements=v::len<ast::Statement>(ref statements),.entries=v::len<bodies::Entry>(ref entries),.types=v::len<types::Node>(ref types),.fields=v::len<records::Field>(ref fields),.sdk_start=0,.sdk_end=0};let scopes=sdk::collect(ref p);switch(scopes){case .ok(scopes):{var usize j=0;while(j<v::len<sdk::Scope>(ref scopes)){let scope=*v::at<sdk::Scope>(ref scopes,j);if(scope.sdk_id==8){plan.sdk_start=scope.start;plan.sdk_end=scope.end;}j+=1;}}case .err(code):{plan.problem=Problem{.code,.start=0,.end=syntax::source_view(ref p).len};}};let Problem result=if(plan.problem.code!=0){plan.problem}else{prepare(syntax::source_view(ref p),ref mut declarations,ref mut expressions,ref mut statements,ref mut entries,ref mut types,ref mut fields,ref mut instances,ref mut plan)};
     if(result.code!=0){assert(v::push<syntax::Problem>(ref mut problems,syntax::Problem{.code=result.code,.start=result.start,.end=result.end,.expected=0,.token=0}).is_ok);}
-    return syntax::assemble(stream,declarations,problems,expressions,entries,statements,types,fields,attributes,attribute_arguments);
+    // Expansion appends declarations without changing existing helper IDs.
+    // Preserve their owned source receipts rather than discarding authority.
+    let private_names=switch(private::copy(syntax::private_names(ref p))){case .ok(value):{value}case .err(code):{assert(v::push<syntax::Problem>(ref mut problems,syntax::Problem{.code,.start=0,.end=0,.expected=0,.token=0}).is_ok);private::empty()}};
+    return syntax::assemble_private(stream,declarations,problems,expressions,entries,statements,types,fields,attributes,attribute_arguments,private_names);
 }

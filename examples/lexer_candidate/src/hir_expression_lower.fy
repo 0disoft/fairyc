@@ -70,6 +70,13 @@ pub fn usize expression(ref typing::Typed input, ref v::Vec<h::Binding> bindings
         e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,0),depth+1);
         e.right=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,1),depth+1);
         e.alternative=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,2),depth+1);
+    } else if(node.kind==36){
+        kind=.ClosureCreate;e.binding=state::use(links,node.left);if(e.binding==0){return state::fail(c,4,node.start,node.end);}
+        let callee=*v::at<h::Binding>(bindings,e.binding-1);let count=syntax::closure_value_captures(parsed,callee.declaration);
+        e.edge_count=syntax::call_argument_count(parsed,id);if(count==0 || e.edge_count+1!=count || e.edge_count>4 || h::type_code(type)!=13){return state::fail(c,4,node.start,node.end);}
+        e.edge_start=state::reserve_edges(edges,e.edge_count,c);var usize i=0;while(i<e.edge_count){let child=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,i),depth+1);if(child==0){return 0;}state::set_edge(edges,e.edge_start+i,child);i+=1;}
+    } else if(node.kind==6 && typing::expression_type(input,node.left)==13){
+        kind=.ClosureCall;e.left=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,node.left,depth+1);e.right=expression(input,bindings,links,c,expressions,statements,blocks,edges,payload,syntax::call_argument(parsed,id,0),depth+1);
     } else if (node.kind == 6) {
         kind = .Call; e.binding = state::use(links,node.left);
         if (e.binding == 0) { return state::fail(c,4,node.start,node.end); }

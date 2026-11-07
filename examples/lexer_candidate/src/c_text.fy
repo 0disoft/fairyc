@@ -22,6 +22,7 @@ pub fn bool number(ref mut bytes::Buffer out, ref mut State s, usize value) {
     if (!bytes::append_usize(out,value).is_ok) { s.code = 3; return false; } return true;
 }
 pub fn bool type(ref mut bytes::Buffer out, ref mut State s, u32 code) {
+    if(code==13){return text(out,s,b"struct fy_closure_i32");}
     if(transport::extended(code)){return text(out,s,transport::c_name(code));}
     if(c_types::valid(code)){return text(out,s,c_types::spelling(code));}
     if(pointers::valid(code)){return type(out,s,pointers::inner(code)) && text(out,s,if(pointers::mutable(code)){b" *"}else{b" const *"});}

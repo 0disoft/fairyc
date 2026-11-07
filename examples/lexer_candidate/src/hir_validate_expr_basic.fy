@@ -3,6 +3,7 @@ import hir_model as h;
 import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
+import hir_closure_values as closures;
 
 pub fn h::Problem check(ref bytes::Buffer source, ref bytes::Buffer payload, ref v::Vec<h::Function> functions, ref v::Vec<h::Binding> bindings, ref v::Vec<h::Expression> expressions, ref v::Vec<h::Block> blocks, ref v::Vec<usize> edges, ref v::Vec<h::Signature> signatures, ref shapes::Table nominal, h::Expression e, usize i){
     let usize ns=bytes::len(source);
@@ -24,6 +25,7 @@ pub fn h::Problem check(ref bytes::Buffer source, ref bytes::Buffer payload, ref
         if (h::expression_code(e.kind) == h::expression_code(.Binary) && e.right == 0) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }
         if ((h::expression_code(e.kind) == h::expression_code(.Block) || h::expression_code(e.kind) == h::expression_code(.If)) && e.block == 0) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }
         if (h::expression_code(e.kind) == h::expression_code(.If) && (e.left == 0 || h::type_code(v::at<h::Expression>(expressions,e.left - 1).type) != h::type_code(.Bool))) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }
+        if(kind==31 || kind==32){return closures::check(bindings,expressions,edges,signatures,e,i);}
         if (kind == 3 || kind == 24 || kind == 6) {
             let h::Binding b = *v::at<h::Binding>(bindings,e.binding - 1);
             if (h::type_code(e.type) != h::type_code(b.type) || ((kind == 3 || kind == 24) && (h::function_kind(b.kind) || (h::binding_code(b.kind) == h::binding_code(.External) || h::binding_code(b.kind)==11) || h::binding_code(b.kind) == h::binding_code(.Struct) || h::binding_code(b.kind) == 7 || h::binding_code(b.kind)==8)) || (h::expression_code(e.kind) == h::expression_code(.Call) && h::binding_code(b.kind) != h::binding_code(.Function) && h::binding_code(b.kind) != h::binding_code(.External) && h::binding_code(b.kind)!=11)) { return h::Problem { .code = 4, .start = e.start, .end = e.end }; }

@@ -8,6 +8,7 @@ import c_arrays as arrays;
 import c_literals as literals;
 import c_views as views;
 import c_resource as owned;
+import c_closure_values as closures;
 import std::bytes as bytes;
 
 pub fn bool cast_local(ref mut bytes::Buffer out, ref mut w::State s, usize id, u32 type) {
@@ -28,6 +29,7 @@ fn bool constant(ref m::Program p, usize id, m::Operation o, ref mut bytes::Buff
 }
 pub fn bool operation(ref m::Program p, usize id, ref mut bytes::Buffer out, ref mut w::State s) {
     let m::Operation o = m::operation_at(p,id);
+    if(o.kind==40){return closures::create(p,o,out,s);}
     if(o.kind==39){
         if(o.operator>=8){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::type(out,s,o.type) && w::text(out,s,b"){") && w::local(out,s,o.right) && w::text(out,s,b",") && w::local(out,s,m::edge_at(p,o.argument_start)) && w::text(out,s,b"};\n");}
         if(o.operator>=6){return w::text(out,s,b"    ") && w::local(out,s,o.result) && w::text(out,s,b"=(") && w::owned_type(m::nominal(p),m::source_view(p),out,s,o.type) && w::text(out,s,b")") && w::local(out,s,o.right) && w::text(out,s,b";\n");}

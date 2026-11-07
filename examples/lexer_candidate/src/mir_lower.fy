@@ -1,5 +1,6 @@
 module mir_lower;
 import mir_value_lower as values;
+import mir_closure_lower as closures;
 import mir_extended_lower as extended;
 import mir_view_lower as view;
 import mir_statement_lower as statements;
@@ -50,6 +51,7 @@ pub fn usize expression(ref h::Program input, ref mut v::Vec<m::Local> locals, r
     if (depth >= 64) { return state::fail(c,2,e.start,e.end); }
     // Keep aggregate temporaries on the selected lane, not on every recursive
     // expression frame. Helpers preserve the original source-depth accounting.
+    if(kind==31 || kind==32){return closures::expression(input,locals,blocks,operations,edges,payload,c,e,depth);}
     if(kind>=18 && kind!=25){return extended::extended_expression(input,locals,blocks,operations,edges,payload,c,id,e,kind,type,operator,depth);}
     if(kind<=3 || kind==15 || kind==16 || kind==17 || kind==25 ||
        kind==4 && operator==5 && refs::valid(h::type_code(h::expression_at(input,e.left).type)) ||
@@ -123,7 +125,8 @@ pub fn Result<m::Program,m::Problem> lower(h::Program input) {
     var v::Vec<m::Block> blocks = v::empty<m::Block>(); var v::Vec<m::Operation> operations = v::empty<m::Operation>(); var v::Vec<usize> edges = v::empty<usize>();
     let m::Problem lowered = lower_functions(ref input,ref mut c,ref mut source,ref mut payload,ref mut targets,ref mut signatures,ref mut drops,ref mut functions,ref mut locals,ref mut blocks,ref mut operations,ref mut edges);
     if (lowered.code != 0) { return .err(lowered); }
-    let m::Program result = switch(m::assemble_resources(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table,drops)) {
+    let closure_targets=switch(closures::targets(ref operations)){case .ok(p):{p}case .err(p):{return .err(p);}};
+    let m::Program result = switch(m::assemble_closures(source,payload,targets,signatures,functions,locals,blocks,operations,edges,h::module_index(ref input),table,drops,closure_targets)) {
         case .ok(value): { value } case .err(problem): { return .err(problem); }
     };
     let m::Problem problem = verify::check(ref result);

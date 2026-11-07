@@ -6,6 +6,7 @@ import std::vec as v;
 import type_expr_tagged as tagged_expr;
 import type_expr_scalar as scalar_expr;
 import type_expr_call as call_expr;
+import type_expr_closure_value as closure_values;
 import type_expr_access as access_expr;
 import type_expr_record as record_expr;
 import type_statement as statements;
@@ -27,6 +28,7 @@ pub fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<stat
     if (depth >= 64) { return error(problem,10,node.start,node.end,0,0); }
     if(node.kind==30 || node.kind==28 || node.kind==15 || node.kind==6 && syntax::expression_at(parsed,node.left).kind==28){return tagged_expr::expression(resolved,tables,problem,id,expected,result_type,depth,loop_depth);}
     if(node.kind==1 || node.kind==2 || node.kind==23 || node.kind==3 || node.kind==4 || node.kind==5){return scalar_expr::expression(resolved,tables,problem,id,expected,result_type,depth,loop_depth);}
+    if(node.kind==36){return closure_values::construct(resolved,tables,problem,id,result_type,depth,loop_depth);}
     if(node.kind==6){return call_expr::expression(resolved,tables,problem,id,expected,result_type,depth,loop_depth);}
     if(node.kind==24 || node.kind==29 || node.kind==21 || node.kind==22 || node.kind==26 || node.kind==9 || node.kind==8){return access_expr::expression(resolved,tables,problem,id,expected,result_type,depth,loop_depth);}
     if(node.kind==10 || node.kind==13 || node.kind==12 || node.kind==31){return record_expr::expression(resolved,tables,problem,id,expected,result_type,depth,loop_depth);}

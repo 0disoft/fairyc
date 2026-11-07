@@ -10,6 +10,7 @@ import type_state as state;
 import nominal_types as nominal;
 import std::vec as v;
 import type_check as tc;
+import type_expr_closure_value as closure_values;
 
 pub fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<state::Slot> tables, ref mut state::Problem problem, usize id, u32 expected, u32 result_type, usize depth, usize loop_depth) {
     let ref syntax::Parsed parsed = names::parsed(resolved);
@@ -42,6 +43,7 @@ pub fn state::Value expression(ref names::Resolved resolved, ref mut v::Vec<stat
             return tc::recorded(tables,id,tc::value(raw_type,terminates));
         }
         let usize callee_id = state::uses(tables,node.left - 1); let names::Symbol callee = names::symbol_at(resolved,callee_id);
+        if(state::symbols(tables,callee_id-1)==13 && callee.kind!=1 && callee.kind!=5 && callee.kind!=11){return closure_values::invoke(resolved,tables,problem,id,result_type,depth,loop_depth);}
         if (callee.kind != 1 && callee.kind != 5 && callee.kind!=11) { let syntax::Expression source = syntax::expression_at(parsed,node.left); return tc::error(problem,6,source.start,source.end,8,state::symbols(tables,callee_id - 1)); }
         state::set_expressions(tables,node.left - 1,8);
         if (callee.kind == 5) {
