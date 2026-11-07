@@ -116,10 +116,108 @@ and stderr, times out after two seconds, and is killed/waited by
 `subprocess.run`; the original timeout and exact output bytes are preserved.
 This improves failed-run evidence, not compiler throughput or acceptance.
 
+## Provider preparation and closure isolation
+
+Two Sol High workers independently inspect interface/generic preparation and
+body/name/call preparation; the parent owns profiling and product integration.
+The test worker subsequently owns only the new entry-lookup fixture and Go
+harness. Neither worker edits production sources, the lock, or this report.
+
+The provider/factory/solver probe in
+`.cache/current-origin-provider-split-20261107` builds in 154.701s and succeeds
+with unchanged source/image hashes. Its 35 providers spend 246.929ms binding,
+11000.325ms preparing closures, and 536.759ms checking values. Factory provider
+discovery/preparation takes 11807.861ms; storage/statics, allocation and liveness
+take 2.305ms, 0.486ms and 4.779ms. The origin solver's input factory takes
+11815.694ms, validation 5.353ms and inference/final checks only 15.867ms.
+Optimizing solver leaf construction is therefore not the measured priority.
+
+The next diagnostic, `.cache/current-closure-stage-split-20261107`, adds markers
+only around closure collection stages. It builds in 132.641s and executes the
+same frozen 646 inputs and [445,450) range successfully in 16.673s. Source and
+image hashes remain unchanged. Its 35 providers perform 70 collection passes:
+
+| Provider closure operation | Total wall time |
+| --- | --- |
+| Interfaces | 6504.853ms |
+| Concrete bodies | 4477.031ms |
+| Concrete names | 504.999ms |
+| Ordinary names | 927.265ms |
+| Calls | 556.516ms |
+| Drops | 43.612ms |
+
+These successive probes ran under different host conditions. Their different
+absolute times are not an optimization comparison. All are private diagnostic
+probes, not normal CLI acceptance.
+
+## Entry lookup candidate measured and rejected
+
+`module_unit_body_ast::mapping` visits every source entry for every projected
+body. `syntax::entry_at` searches from the start for each logical ID.
+For an ordered arena with E entries and B projections, that mapping alone makes
+B*E*(E+1)/2 ID comparisons. The proposed direct-position path makes B*E comparisons;
+ordered owner publication verifies the ID sequence once in O(E), without an
+allocation or work charge. The 408-entry/24-function fixture therefore changes
+the mapping count from 2002464 to 9792 comparisons. This is a structural count,
+not a measured instruction count or whole-compiler speedup.
+
+In the diagnostic variant, direct access is guarded by a private proof flag: successful parser results
+have a unique 1..len ID permutation; ordered assemblers prove that property
+with one scan; copies retain the proof. Nested initializers can reserve the
+outer ID before appending an inner entry, so position mismatches retain the
+original search. Arbitrary assembled duplicates, gaps and permutations also
+retain the original search and first-match behavior. Bounds assertions, record
+order, all Entry fields, work charges and error precedence are unchanged.
+
+The first flag-only diagnostic left every assembler untrusted and regressed
+the sampled range wall median by 34.4%. Its four observations and matching work
+are retained in `.cache/current-closure-stage-split-20261107/ab-summary.json`;
+that implementation is not accepted as a performance improvement. The second
+variant additionally verifies ordered publication. The regression does
+not isolate bool-copy overhead or establish a sole cause.
+
+The native fixture checks ordered and nested source records, projected origins,
+exact work 36/40 and 37200, exact/one-over work limits, invalid-declaration error
+precedence, duplicate first-match behavior and copied/ordered assembled owners.
+With the second variant it passes both Windows profiles (low 3.15s, optimized
+7.72s; package 12.906s). The copied-closure syntax/call regressions also pass in
+69.427s. The original
+fixture draft omitted return entries and failed before any product edit; the
+corrected baseline passes before the implementation is applied.
+
+The second variant's optimized probe builds in 130.556s. A separate four-run
+before/after/before/after comparison is retained in
+`.cache/current-entry-ordered-20261107/ab-summary.json` and its raw outputs.
+Both images read the same 646 source byte sequences in the same order; only
+the frozen syntax source's path is redirected to its unchanged private copy.
+All runs exit 0 with identical range work and body counts. The diagnostic
+variant differs from the proposed product source only by the test markers and
+an explanatory field comment; it is not normal-product acceptance.
+
+| Same-input diagnostic median | Original | Ordered-proof variant |
+| --- | --- | --- |
+| Entire checked range | 12850.870ms | 13006.410ms |
+| Range process CPU | 12718.750ms | 12929.688ms |
+| Ordinary-name preparation | 810.982ms | 719.235ms |
+
+There is no demonstrated whole-range improvement: wall time increases 1.21%
+and process CPU 1.66% in this small sample. The ordinary-name reduction does
+not justify claiming a full compiler speedup. Both production variants are
+discarded; `syntax.fy` and the lock are restored to their original bytes.
+Only the regression fixture and measured development evidence are retained.
+After restoration the complete new native fixture passes again on low 3.53s
+and optimized 7.17s (package 12.675s); 750 source/test/lock file hashes match
+before and after execution. The restored syntax source SHA-256 is
+`afc3e2aa3be27d8debc8f691525c4f6151d8d47ec09297139491bfa3ab3ff91c`.
+The transient variants' complete source checks pass (755 files, 9542 MIR
+functions, final check/locked 13.905s/12.856s), but do not establish a current
+normal self-build.
+
 ## Remaining work
 
-Separate provider preparation from the remaining origin factory/solver work
-inside the measured slow range before selecting a compiler change.
+Prepare a current-source optimized full-CLI seed and retry normal self-build
+under the unchanged watchdog after checking host load. Do not infer throughput
+from a structural micro-optimization that did not improve the measured range.
 The SDK layout index has a finite ownership graph and no newly detected cleanup
 cycle; its retention has not been proved to cause the observed delay. Opaque
 MSVC copy barriers remain unchanged. Latest-source normal self-build, native
