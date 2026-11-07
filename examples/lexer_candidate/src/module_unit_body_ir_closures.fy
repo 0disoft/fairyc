@@ -49,12 +49,12 @@ pub fn usize helper(ref ir::Program p,usize caller_frame,usize declaration,usize
 fn bool construction(ref ir::Program p,ref ir::Body b,usize frame,usize index,ref mut usize work){
     let n=ir::node_at(b,index);let e=n.value;let cleaned=ir::cleanup_ir(p);let callee=ir::node(b,e.left);
     if(!clean::closures(cleaned) || e.state!=1 || !leaf(cleaned,e.type) || e.expected!=0 && e.expected!=e.type || e.binding!=0 || e.builtin.kind!=0 || e.field.id!=0 || e.place.kind!=0 || callee==0 || e.target==0){return false;}
-    let target=ir::node_at(b,callee-1);if(target.value.kind!=2 || target.value.state!=2 || target.value.type!=0 || target.value.binding!=0 || target.syntax.token!=private::helper_flag()+e.target || !admission::reserved(ir::node_text(b,callee-1))){return false;}
+    let target=ir::node_at(b,callee-1);if(target.value.kind!=2 || target.value.state!=2 || target.value.type!=0 || target.value.binding!=0 || target.syntax.token<private::helper_flag() || target.syntax.token-private::helper_flag()!=e.target || !admission::reserved(ir::node_text(b,callee-1))){return false;}
     var usize count=0;var usize link=e.right;var usize previous=0;
     while(link!=0){if(count>=4 || !budget::charge(work,1)){return false;}let id=ir::node(b,link);if(id==0){return false;}let pair=ir::node_at(b,id-1).value;let child=ir::node(b,pair.left);
         if(pair.kind!=7 || pair.right>=link || child==0){return false;}let capture=ir::node_at(b,child-1);let v=capture.value;
         if(v.kind!=2 || v.state!=1 || !i32(cleaned,v.type) || v.binding==0 || v.binding>ir::local_count(b) || v.place.kind!=1 || v.place.root!=v.binding || v.place.mutable){return false;}
-        let local=ir::local_at(b,v.binding);if(local.kind!=2 || local.type!=v.type || local.initializer==0 || local.source_index==0 || capture.syntax.token!=private::snapshot_flag()+local.source_index || previous!=0 && local.source_index>=previous){return false;}previous=local.source_index;count+=1;link=pair.right;
+        let local=ir::local_at(b,v.binding);if(local.kind!=2 || local.type!=v.type || local.initializer==0 || local.source_index==0 || capture.syntax.token<private::snapshot_flag() || capture.syntax.token-private::snapshot_flag()!=local.source_index || previous!=0 && local.source_index>=previous){return false;}previous=local.source_index;count+=1;link=pair.right;
     }return helper(p,frame,e.target,count,work)!=0;
 }
 fn bool invocation(ref ir::Program p,ref ir::Body b,usize index,ref mut usize work){

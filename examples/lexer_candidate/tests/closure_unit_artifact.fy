@@ -95,6 +95,13 @@ fn void controls(ref ir::Program p){
     work=0;assert(switch(cd::decode(raw,ref mut work)){case .ok(_):{false}case .err(e):{e==1001}});work=0;assert(switch(cd::decode_aggregates(raw,ref mut work)){case .ok(_):{false}case .err(e):{e==1001}});
     var usize frame=1;while(frame<=ir::count(p)){cost=0;let packet=switch(be::encode_closures(p,frame,ref mut cost)){case .ok(p):{p}case .err(_):{assert(false);return;}};let raw=wire::content(ref packet);assert(bytes::equal(raw[..8],b"FYBODY01"));work=33554432-cost;assert(switch(be::encode_closures(p,frame,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==33554432);work=33554432-cost+1;assert(switch(be::encode_closures(p,frame,ref mut work)){case .ok(_):{false}case .err(e):{e==1002}});
         cost=0;assert(switch(bd::decode_closures(raw,p,frame,ref mut cost)){case .ok(_):{true}case .err(_):{false}});work=33554432-cost;assert(switch(bd::decode_closures(raw,p,frame,ref mut work)){case .ok(_):{true}case .err(_):{false}} && work==33554432);work=33554432-cost+1;assert(switch(bd::decode_closures(raw,p,frame,ref mut work)){case .ok(_):{false}case .err(e):{e==1002}});
+        // Rejection must remain an error, even where flag+untrusted ID would
+        // overflow usize. Test the last safe sum, first overflow and maximum.
+        let usize maximum=18446744073709551615;let b=ir::at(p,frame);var usize n=0;
+        while(n<ir::node_count(b)){let row=ir::node_at(b,n);var usize edge=0;while(edge<3){
+            if(row.value.kind==36){bad=copied(raw);word(ref mut bad,56+n*344+72,if(edge==2){maximum}else{maximum-private::helper_flag()+edge});assert(body_rejected(bytes::view(ref bad),p,frame)==1001);}
+            if(row.value.kind==2 && row.syntax.token>private::snapshot_flag()){assert(row.value.binding!=0);bad=copied(raw);word(ref mut bad,local_offset(b)+8+(row.value.binding-1)*144+24,if(edge==2){maximum}else{maximum-private::snapshot_flag()+edge});assert(body_rejected(bytes::view(ref bad),p,frame)==1001);}
+            edge+=1;}n+=1;}
         assert(body_rejected(raw[..raw.len-1],p,frame)!=0);bad=copied(raw);assert(bytes::append_byte(ref mut bad,0).is_ok && body_rejected(bytes::view(ref bad),p,frame)==1001);bad=copied(raw);bytes::view_mut(ref mut bad)[7]=48;assert(body_rejected(bytes::view(ref bad),p,frame)==1001);bad=copied(raw);word(ref mut bad,8,frame+1);assert(body_rejected(bytes::view(ref bad),p,frame)==1001);bad=copied(raw);word(ref mut bad,48,16385);assert(body_rejected(bytes::view(ref bad),p,frame)==1002);work=0;assert(switch(bd::decode(raw,ir::cleanup_ir(p),frame,ref mut work)){case .ok(_):{false}case .err(e):{e==1001}});frame+=1;
     }
 }
