@@ -123,8 +123,12 @@ authorized by this queue.
   native low/optimized parser probes pass; see
   `candidate-closure-value-types-20261108.md`. Combined-main check/locked also
   passes with an authenticated 1,231-file Fairy inventory.
-  Source/semantic, verified execution, artifacts/cache and Fairy parity are
-  separate ongoing stages; see `go-closure-value-types-20261108.md`.
+  Go source preparation and semantic admission now preserve real lifted targets,
+  immutable copied captures, monomorphic signatures and named value invocation,
+  while forbidden storage/generic/ABI families remain closed. The four complete
+  source packages pass in main; see `go-closure-value-semantics-20261108.md`.
+  Verified execution, artifacts/cache and Fairy parity remain separate stages;
+  see also `go-closure-value-types-20261108.md`.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:
   prepare concrete contracts and local implementations; external registry or
   trust-provider selection requires the owner's actual choice.

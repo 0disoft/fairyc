@@ -17,6 +17,11 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 	if !c.checkInlineCallPath(calleeExpression) {
 		return hir.TypeInvalid
 	}
+	if calleeExpression != nil && calleeExpression.Kind == syntax.KindPath {
+		if value := c.analyzer.resolved[calleeExpression]; value != nil && hir.IsClosureI32(value.typ) && (value.kind == "local" || value.kind == "parameter") {
+			return c.checkClosureCall(expression, result)
+		}
+	}
 	if calleeExpression != nil && calleeExpression.Kind == syntax.KindFieldExpr && !c.analyzer.isRegionAllocationCall(expression) {
 		return c.checkMethodCall(expression, result)
 	}

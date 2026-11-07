@@ -23,6 +23,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	}
 	var actual hir.Type
 	switch expression.Kind {
+	case syntax.KindClosure:
+		actual = c.checkClosureValue(expression, result, expected)
 	case ast.PrivateSharedReborrow:
 		child, sourceType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 		result.Children = appendExpression(result.Children, child)
@@ -129,6 +131,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "expression "+string(expression.Kind))
 		actual = hir.TypeInvalid
 	}
+	c.checkClosureExpressionUse(expression, result, actual)
 	result.Type = actual
 	c.analyzer.expressionTypes[expression] = actual
 	if actual != hir.TypeInvalid {

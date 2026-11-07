@@ -29,6 +29,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 		resultType = c.canonicalType(c.function.ResultType)
 	}
 	c.resultType = resultType
+	c.checkClosureMonomorphic(resultType, c.function.ResultType.Span)
 	functionSymbol.typ = resultType
 	if resultType == hir.TypeRegion {
 		c.analyzer.addDiagnostic("E3103", span(c.module.file.Path, c.function.ResultType.Span))
@@ -51,6 +52,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 		MustUse:           functionSymbol.mustUse,
 		ResultType:        resultType,
 	}
+	c.checkClosureTarget(&result)
 	if c.function.Owner != "" {
 		if owner := c.analyzer.ownerSymbol(c.module, c.function.Owner); owner != nil {
 			result.OwnerType = owner.typ
@@ -65,6 +67,10 @@ func (c *typeChecker) checkFunction() hir.Function {
 			continue
 		}
 		symbol.typ = c.canonicalType(parameter.Type)
+		c.checkClosureMonomorphic(symbol.typ, parameter.Span)
+		if parameter.Mutable && c.analyzer.closureBearing(symbol.typ) {
+			c.analyzer.addUnsupported(c.module.file.Path, parameter.Span, "mutable closure-bearing parameter")
+		}
 		if errorSpan, ok := resultFailureSpan(parameter.Type); ok {
 			symbol.resultError = errorSpan
 		}

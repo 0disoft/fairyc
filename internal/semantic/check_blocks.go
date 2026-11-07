@@ -75,6 +75,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				symbol.typ = actual
 			}
 			hirStatement.Binding = symbol.id
+			if binding.Mutable && c.analyzer.closureBearing(symbol.typ) {
+				c.analyzer.addUnsupported(c.module.file.Path, binding.Span, "mutable closure-bearing binding")
+			}
 			hirStatement.Expression = expression
 			localSpan := span(c.module.file.Path, binding.NameSpan)
 			if symbol.typ == hir.TypeRegion && actual != hir.TypeInvalid {
@@ -109,6 +112,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindAssignment:
 			target, targetType := c.checkExpression(statement.Target, hir.TypeInvalid)
 			value, actual := c.checkExpression(statement.Expression, targetType)
+			if c.analyzer.closureBearing(targetType) || c.analyzer.closureBearing(actual) {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "closure value reassignment")
+			}
 			if derefAssignmentTarget(statement.Target) &&
 				((!hir.FixedArrayScalarElement(targetType) && !c.analyzer.plainViewStruct(targetType)) || !directDerefBorrowPath(statement.Target.Children[0])) {
 				c.analyzer.addUnsupported(c.module.file.Path, statement.Target.Span, "dereference assignment requires a named mutable reference to an admitted scalar or plain struct")

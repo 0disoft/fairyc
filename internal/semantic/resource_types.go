@@ -356,7 +356,7 @@ func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {
 
 func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReference) hir.Type {
 	value, ok := a.canonicalTypeReference(module, reference, true)
-	if ok && validUnsizedTypeUse(value) && a.validStructViewUse(value) {
+	if ok && validUnsizedTypeUse(value) && a.validStructViewUse(value) && a.validClosureValueType(value) {
 		return value
 	}
 	a.addUnsupported(module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
@@ -365,6 +365,11 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 
 func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.TypeReference, allowFixedArray bool) (hir.Type, bool) {
 	switch reference.Kind {
+	case ast.TypeKindClosureFunction:
+		if closureValueSourceType(reference) {
+			return hir.TypeClosureI32, true
+		}
+		return hir.TypeInvalid, false
 	case ast.TypeKindBoundNominal:
 		return a.canonicalBoundNominal(reference)
 	case ast.TypeKindArray:

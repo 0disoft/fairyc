@@ -25,11 +25,13 @@ func fail(span diagnostic.Span, detail string) error { return &Error{span, detai
 type local struct {
 	helper   string
 	captures []string
+	value    bool
 }
 type lifter struct {
 	functions []ast.Function
 	next      int
 	rootNames map[string]bool
+	generic   bool
 }
 
 // Prepare leaves input syntax untouched; files without direct closure bindings take a fast path.
@@ -52,6 +54,7 @@ func Prepare(m *ast.Module) (*ast.Module, error) {
 			return nil, fail(fn.NameSpan, "reserved closure helper name")
 		}
 		x.rootNames = map[string]bool{}
+		x.generic = fn.SourceGeneric || len(fn.TypeParameters) != 0
 		for _, p := range fn.Parameters {
 			x.rootNames[p.Name] = true
 		}
@@ -77,8 +80,8 @@ func (x *lifter) block(b *ast.Block, env map[string]local, top bool, owner strin
 	}
 	for _, s := range b.Statements {
 		if s.Binding != nil && s.Binding.Expression != nil && s.Binding.Expression.Kind == syntax.KindClosure {
-			if !top || s.Binding.Mutable || s.Binding.Type != nil || declared[s.Binding.Name] {
-				return nil, fail(s.Span, "closure requires a unique untyped let in the outer function body")
+			if !top || s.Binding.Mutable || declared[s.Binding.Name] {
+				return nil, fail(s.Span, "closure requires a unique immutable let in the outer function body")
 			}
 			if strings.HasPrefix(s.Binding.Name, prefix) {
 				return nil, fail(s.Span, "reserved closure binding name")
@@ -86,6 +89,19 @@ func (x *lifter) block(b *ast.Block, env map[string]local, top bool, owner strin
 			c := s.Binding.Expression.Closure
 			if err := validate(c, s.Span); err != nil {
 				return nil, err
+			}
+			if s.Binding.Type != nil {
+				if x.generic || !ClosureValueType(*s.Binding.Type) || len(c.Function.Parameters) != 1 {
+					return nil, fail(s.Span, "closure value requires monomorphic fn i32(i32) binding and literal signature")
+				}
+				prepared, err := x.valueBinding(s, c, env, owner)
+				if err != nil {
+					return nil, err
+				}
+				out.Statements = append(out.Statements, prepared)
+				env[s.Binding.Name] = local{value: true}
+				declared[s.Binding.Name] = true
+				continue
 			}
 			x.next++
 			name := fmt.Sprintf("%s%s_%d", prefix, owner, x.next)
@@ -228,12 +244,12 @@ func (x *lifter) expr(e *ast.Expression, env map[string]local, owner string) (*a
 		if strings.HasPrefix(e.Text, prefix) {
 			return nil, fail(e.Span, "reserved closure name")
 		}
-		if _, ok := env[e.Text]; ok {
+		if v, ok := env[e.Text]; ok && !v.value {
 			return nil, fail(e.Span, "closure is callable locally but is not a first-class value")
 		}
 	}
 	if e.Kind == syntax.KindCall && len(e.Children) > 0 && e.Children[0].Kind == syntax.KindPath {
-		if v, ok := env[e.Children[0].Text]; ok {
+		if v, ok := env[e.Children[0].Text]; ok && !v.value {
 			if e.CallLabels != nil {
 				return nil, fail(e.Span, "closure calls require positional arguments")
 			}

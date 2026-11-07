@@ -102,9 +102,11 @@ const (
 	ExpressionViewSlice
 	ExpressionWhile
 	ExpressionCCallback
+	ExpressionClosureValue
+	ExpressionClosureCall
 )
 
-var expressionNames = [...]string{"", "array", "array-index", "array-length", "array-view-borrow", "binary", "block", "borrowed-view-from-raw-parts", "call", "cast", "enum-variant", "field-borrow", "field-expression", "group", "if", "literal", "match", "nominal-unwrap", "nominal-wrap", "omitted-range-bound", "option-variant", "path", "prefix", "propagate", "record", "region", "result-variant", "scalar-cast", "shared-reborrow", "storage-borrow", "storage-borrow-mut", "storage-element-address", "storage-layout", "storage-put", "storage-take", "unsafe", "view-element-borrow", "view-empty", "view-index", "view-length", "view-slice", "while", "c-callback"}
+var expressionNames = [...]string{"", "array", "array-index", "array-length", "array-view-borrow", "binary", "block", "borrowed-view-from-raw-parts", "call", "cast", "enum-variant", "field-borrow", "field-expression", "group", "if", "literal", "match", "nominal-unwrap", "nominal-wrap", "omitted-range-bound", "option-variant", "path", "prefix", "propagate", "record", "region", "result-variant", "scalar-cast", "shared-reborrow", "storage-borrow", "storage-borrow-mut", "storage-element-address", "storage-layout", "storage-put", "storage-take", "unsafe", "view-element-borrow", "view-empty", "view-index", "view-length", "view-slice", "while", "c-callback", "closure-value", "closure-call"}
 
 func (k ExpressionKind) String() string {
 	if int(k) < len(expressionNames) {

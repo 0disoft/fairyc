@@ -22,6 +22,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareResourceTypes()
 	a.prepareStructTypes()
 	a.prepareEnumTypes()
+	a.validateClosureValueTypes()
 	a.prepareCallableMustUse()
 	a.prepareCallableEffects()
 	a.prepareCompileTime()

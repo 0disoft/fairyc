@@ -160,6 +160,8 @@ type Import struct {
 
 // Function records a source function before name resolution and typing.
 type Function struct {
+	LiftedClosure     *LiftedClosure `json:"-"`
+	SourceGeneric     bool           `json:"-"`
 	TypeParameters    []string
 	Name              string
 	Owner             string
@@ -258,6 +260,7 @@ type Literal struct {
 
 // Expression is a structural AST expression used before name resolution and typing.
 type Expression struct {
+	ClosureValue  *ClosureValue       `json:"-"`
 	Closure       *Closure            `json:",omitempty"`
 	CallLabels    *CallArgumentLabels `json:",omitempty"`
 	TypeArguments []TypeReference
@@ -602,6 +605,7 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 			value.Body = lowerBlock(tree, child)
 		}
 	}
+	value.SourceGeneric = len(value.TypeParameters) != 0
 	return value
 }
 

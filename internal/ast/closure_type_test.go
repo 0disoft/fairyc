@@ -128,10 +128,8 @@ func TestClosureValueTypeASTPreservesLegacyTypeBytes(t *testing.T) {
 	}
 }
 
-func TestClosureValueTypeStageKeepsExecutionUnsupported(t *testing.T) {
+func TestClosureValueTypeKeepsUnsupportedShapesClosed(t *testing.T) {
 	for _, text := range []string{
-		`module main;fn i32 apply(fn i32(i32) action,i32 x){return action(x);}`,
-		`module main;fn fn i32(i32) make(i32 offset){let fn i32(i32) action=fn [i32 offset] i32(i32 x){return offset+x;};return action;}`,
 		`module main;fn void accept(fn bool(i32) action){discard action;}`,
 		`module main;fn void accept(Option<fn i32(i32)> action){discard action;}`,
 		`module main;fn void accept(Result<fn i32(i32),u32> action){discard action;}`,
@@ -145,7 +143,7 @@ func TestClosureValueTypeStageKeepsExecutionUnsupported(t *testing.T) {
 		before, _ := json.Marshal(module)
 		result := semantic.Analyze([]semantic.File{{Package: hir.DefaultPackage, Path: "main.fy", Module: module}})
 		if len(result.Unsupported) == 0 && len(result.Diagnostics) == 0 {
-			t.Fatalf("syntax-only stage admitted execution: unsupported=%+v diagnostics=%+v", result.Unsupported, result.Diagnostics)
+			t.Fatalf("unsupported closure shape admitted: unsupported=%+v diagnostics=%+v", result.Unsupported, result.Diagnostics)
 		}
 		after, _ := json.Marshal(module)
 		if string(before) != string(after) {
