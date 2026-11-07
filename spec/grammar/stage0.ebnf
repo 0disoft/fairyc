@@ -107,9 +107,13 @@ type_suffix = "[" const_expression? "]" ;
 type_atom = type_path
           | grouped_type
           | function_type
+          | closure_function_type
           ;
 grouped_type = "(" type ")" ;
 function_type = "unsafe" "extern" CONTEXT_C "fn" type "(" type_list? ")" ;
+(* Structural safe function types retain their signature; execution admission
+   is separately bounded by ADR 0551. *)
+closure_function_type = "fn" type "(" type_list? ")" ;
 type_list = type ("," type)* ","? ;
 type_path = path type_arguments? ;
 type_arguments = "<" type ("," type)* ","? ">" ;

@@ -175,6 +175,9 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 - **Shared constrained-C driver and scalar runtime**
   - `internal/cdriver/`
   - `internal/cruntime/`
+- **Copied closure value structural types (execution not admitted by this stage)**
+  - `docs/adr/0551-copied-closure-values.md`, `internal/syntax/closure_type_test.go`, `internal/ast/closure_type_test.go`, `internal/hir/closure_type.go`
+  - `docs/development/go-closure-value-types-20261108.md`
 - **Inline same-module call graphs and transitive package body closure**
   - `docs/adr/0548-inline-same-module-call-graphs.md`
   - `internal/hir/inline.go`, `internal/semantic/inline.go`, `internal/mir/inline.go`

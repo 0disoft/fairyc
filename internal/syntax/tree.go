@@ -32,6 +32,7 @@ const (
 	TypeFormArray           TypeForm = "array"
 	TypeFormGrouped         TypeForm = "grouped"
 	TypeFormForeignFunction TypeForm = "foreign-function"
+	TypeFormClosureFunction TypeForm = "closure-function"
 )
 
 const (

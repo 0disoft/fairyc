@@ -209,3 +209,10 @@ runner compares every expectation against a fresh full parse and rejects unliste
 local closures to the Go Stage 0 parser and semantic preparation. It supersedes closure
 exclusion only for that bounded arithmetic/local-call family, without a first-class callable
 type or SDK/candidate promotion.
+
+[ADR 0551](../adr/0551-copied-closure-values.md) additionally retains structural
+safe `fn result(parameter-types)` syntax. It is a separate closure-function
+type node, with ordered parameters and result, rather than an extern-C callback.
+This first stage supplies the canonical `fn i32(i32)` HIR leaf but still rejects
+executable use. Value construction, passing, return/storage, invocation and
+artifact/runtime admission remain the later verified implementation stages.

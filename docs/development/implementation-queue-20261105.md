@@ -110,6 +110,11 @@ authorized by this queue.
   return Go source-diagnostic exit 3 versus Fairy package-input exit 7; this is
   an unresolved diagnostic parity gap. Final acceptance and first-class
   closure representation remain open.
+  ADR 0551 now defines a bounded copied `fn i32(i32)` value with an inline
+  four-i32 environment. Go structural syntax/AST and a distinct canonical HIR
+  leaf are retained; execution stays unsupported at this type-only stage.
+  Source/semantic, verified execution, artifacts/cache and Fairy parity are
+  separate ongoing stages; see `go-closure-value-types-20261108.md`.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:
   prepare concrete contracts and local implementations; external registry or
   trust-provider selection requires the owner's actual choice.

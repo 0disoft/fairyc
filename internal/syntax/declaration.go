@@ -504,6 +504,19 @@ func (p *parser) parseType() NodeID {
 		child := p.parseType()
 		p.expect(")")
 		result = p.addTypeNode(start, []NodeID{child}, TypeFormGrouped)
+	case !p.isPreviousRevision() && p.match("fn"):
+		resultType := p.parseType()
+		p.expect("(")
+		var children []NodeID
+		for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+			children = append(children, p.parseType())
+			if !p.match(",") {
+				break
+			}
+		}
+		p.expect(")")
+		children = append(children, resultType)
+		result = p.addTypeNode(start, children, TypeFormClosureFunction)
 	case p.match("unsafe"):
 		p.expect("extern")
 		if p.at("C") {

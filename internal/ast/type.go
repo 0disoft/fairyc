@@ -19,6 +19,7 @@ const (
 	TypeKindArray           TypeKind = "array"
 	TypeKindGrouped         TypeKind = "grouped"
 	TypeKindForeignFunction TypeKind = "foreign-function"
+	TypeKindClosureFunction TypeKind = "closure-function"
 )
 
 // TypeLength preserves one fixed-array length expression without folding it during syntax
@@ -90,9 +91,12 @@ func lowerType(tree *syntax.Tree, node syntax.Node) TypeReference {
 	case syntax.TypeFormGrouped:
 		result.Kind = TypeKindGrouped
 		result.Element = lowerTypeElement(tree, node)
-	case syntax.TypeFormForeignFunction:
-		result.Kind = TypeKindForeignFunction
-		result.ABI = "C"
+	case syntax.TypeFormForeignFunction, syntax.TypeFormClosureFunction:
+		result.Kind = TypeKindClosureFunction
+		if syntax.TypeForm(node.Cooked) == syntax.TypeFormForeignFunction {
+			result.Kind = TypeKindForeignFunction
+			result.ABI = "C"
+		}
 		children := make([]TypeReference, 0, len(node.Children))
 		for _, childID := range node.Children {
 			if child, found := tree.Node(childID); found && child.Kind == syntax.KindType {
