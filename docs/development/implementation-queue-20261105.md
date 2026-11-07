@@ -69,7 +69,10 @@ authorized by this queue.
   `go-inline-calls-20261107.md` and `go-inline-calls-cache-20261107.md`.
   Fairy source/artifact/native-C now pass both Windows profiles; see
   `candidate-inline-calls-20261107.md` and
-  `candidate-inline-calls-artifact-20261107.md`. Full CLI/cache is in progress. Other-module/ordinary
+  `candidate-inline-calls-artifact-20261107.md`. The first family's full CLI/cache
+  now passes 216 fresh CLI processes and eight direct product executions on
+  authenticated pre-group low/optimized snapshots; see
+  `candidate-inline-calls-cli-cache-20261107.md`. Other-module/ordinary
   helpers, mutation/control flow and other value families remain separate.
 - [ ] Composite generic transport: preserve already implemented scalar-parameter
   structs/resources; the seven extended scalar types inside further wrappers
@@ -131,6 +134,15 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The inline CLI sidecar completes both frozen pre-group hosts: 216 fresh CLI
+  processes and eight direct product executions pass, including ordinary and
+  generic callers, all command engines, transitive leaf invalidation, exact
+  selected-generation repair and ordered unused-initializer traps. Its receipt
+  retains failed harness attempts and per-profile source/image scope rather
+  than claiming grouped/current whole-source coverage. Neither passed profile
+  was rerun. Broader inline bodies, complete-current comparisons and Linux
+  remain separate; no remote action occurs.
 
 - Disjoint Sol High workers complete grouped static source/identity/native and
   Go cache proofs. Twenty-four independent UTF-8/CRLF controls match exact Go

@@ -181,6 +181,7 @@ Part 1 of 3 of the [source index](source-of-truth.md).
   - `examples/lexer_candidate/src/module_inline_identity.fy`
   - `examples/lexer_candidate/src/module_inline_ir.fy`
   - `examples/lexer_candidate/src/module_inline_graph.fy`
+  - `internal/cli/candidate_inline_calls_cli_cache_test.go`; per-profile full CLI/cache evidence: `docs/development/candidate-inline-calls-cli-cache-20261107.md`
 - **Explicit private Windows compiler-host header admission with unchanged ordinary project bounds**
   - `internal/cdriver/windows_project.go`, `windows_project_limits.go`, `windows_project_limits_test.go`
   - `internal/cli/candidate_copied_closure_cli_host_test.go`: exact-source/image-bound full authored CLI builder
