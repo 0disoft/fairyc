@@ -34,6 +34,7 @@ pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p
 pub fn usize arena_type(ref Plan p){return p.arena;}
 pub fn usize byte_equal_frame(ref Plan p){return p.byte_equal;}
 pub fn usize allocation_error(ref Plan p){return p.alloc_error;}
+pub fn usize vector_layout(ref Plan p,usize type){return if(type==0 || type>v::len<usize>(ref p.vectors)){0}else{*v::at<usize>(ref p.vectors,type-1)};}
 pub fn usize status_field(ref ir::Program p,ref Plan plan){assert(plan.alloc_error!=0);return ir::layout_at(p,layout(plan,plan.alloc_error)-1).value.field_start+1;}
 // Other authenticated SDK components still need their storage/record bridges.
 pub fn bool admitted(usize code){return code>=1 && code<=32 || code==70 || code==71 || file_storage::admitted(code);}

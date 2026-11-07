@@ -14,6 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/candidatebuild"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 )
 
 func TestCandidateCopiedClosurePipeline(t *testing.T) {
@@ -37,11 +38,25 @@ func TestCandidateCopiedClosurePipeline(t *testing.T) {
 		t.Fatal(err)
 	}
 	viewFunction := strings.Replace(strings.TrimPrefix(string(view), "module main;"), "fn i32 main()", "fn i32 for_in()", 1)
-	source = strings.Replace(source, "module root;", "module root;"+viewFunction, 1)
-	source = strings.Replace(source, "return keep<i32>(add(2));", "assert(for_in()==42);return keep<i32>(add(2));", 1)
+	vector, err := os.ReadFile(filepath.Join("testdata", "copied_closure_for_in", "vector.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sdk, err := os.ReadFile(filepath.Join("..", "sdkstdlib", "sources", "optional", "std", "vec.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	vectorFunction := strings.Replace(string(vector), "module main;", "", 1)
+	vectorFunction = strings.Replace(vectorFunction, "import std::vec as v;", "", 1)
+	vectorFunction = strings.Replace(vectorFunction, "import std::bytes as bytes;", "", 1)
+	vectorFunction = strings.Replace(vectorFunction, "fn i32 main()", "fn i32 vector_for_in()", 1)
+	vectorFunction = strings.Replace(vectorFunction, "for(let ref i32 item in ref items){discard add(*item);assert(false);}", "{let ref v::Vec<i32> empty_view=ref items;for(let ref i32 item in empty_view){discard add(*item);assert(false);}}", 1)
+	vectorFunction = strings.Replace(vectorFunction, "for(let ref i32 item in ref items){", "let ref v::Vec<i32> loop_view=ref items;for(let ref i32 item in loop_view){", 1)
+	source = strings.Replace(source, "module root;", "module root;import std::vec as v;"+viewFunction+vectorFunction, 1)
+	source = strings.Replace(source, "return keep<i32>(add(2));", "assert(for_in()==42 && vector_for_in()==42);return keep<i32>(add(2));", 1)
 	observer := "static int32_t position=0;int32_t ordered(int32_t index){return ++position==index?index:-1000;}int32_t finished(void){return position;}"
 
-	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console,filesystem) fn i32 main(){emit_closures(b" + strconv.Quote(source) + ");return 0;}\n"
+	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console,filesystem) fn i32 main(){emit_closures(b" + strconv.Quote(source) + ",b" + strconv.Quote(string(sdk)) + ");return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
 	copyCandidateParityModules(t, root, "project_compiler_core", "module_project_identified_ir", "module_public_type_text", "module_catalog", "module_unit_c_emit", "module_project_complete_c", "module_unit_body_ir_model", "module_unit_cleanup_mir_model", "module_project_artifact_encode", "module_project_artifact_decode", "candidate_artifact_wire", "static_operation_declarations", "c_text", "syntax", "scanner")
 	build, support := candidateParityBuildParts(t, root)
@@ -49,10 +64,15 @@ func TestCandidateCopiedClosurePipeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	vectorRuntime, err := cstdlib.WindowsMSVCCandidateSourceForSymbols(nil, true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	runtimeSource, err := cruntime.ScalarSource(80)
 	if err != nil {
 		t.Fatal(err)
 	}
+	runtimeSource += "\n" + vectorRuntime
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Logf("private %s compiler: %d parts", profile.Name, len(build.Sources))
 		image, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
@@ -94,6 +114,7 @@ func TestCandidateCopiedClosurePipeline(t *testing.T) {
 			if !ok || exit.ExitCode() != 42 || len(output) != 0 {
 				t.Fatalf("generated %s/%s: %v %q", profile.Name, consumer.Name, err, output)
 			}
+			t.Logf("generated %s/%s: view + scalar vector, exit=42, output=empty", profile.Name, consumer.Name)
 		}
 	}
 }

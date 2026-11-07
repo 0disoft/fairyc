@@ -4,6 +4,7 @@ import module_unit_cfg_iteration as proof;
 import module_unit_body_ir_model as ir;
 import module_unit_c_scalar as scalar;
 import module_unit_c_aggregate as aggregate;
+import module_unit_c_sdk as sdk;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as m;
 import c_text as w;
@@ -18,15 +19,19 @@ pub fn bool locals(ref ir::Program p,ref cfg::Graph g,ref mut bytes::Buffer out,
         if(!aggregate::type(p,if(borrowed){t.first}else{l.type},out,s) || !w::text(out,s,if(t.kind==8){b" *"}else{b" const *"}) || !slot(out,s,n.target,b"data") || !w::text(out,s,b";uintptr_t ") || !slot(out,s,n.target,b"length") || !w::text(out,s,b",") || !slot(out,s,n.target,b"index") || !w::text(out,s,b";\n")){return false;}
     }i+=1;}return true;
 }
-pub fn bool block(ref ir::Program p,ref cfg::Graph g,cfg::Block n,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+pub fn bool block(ref ir::Program p,ref sdk::Plan plan,ref cfg::Graph g,cfg::Block n,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let b=ir::at(p,cfg::frame(g));let local=switch(proof::binding(p,b,cfg::frame(g),n.target,work)){case .ok(n):{n}case .err(e):{s.code=e.code;return false;}};
     let carrier=clean::type_at(ir::cleanup_ir(p),ir::node_at(b,n.source-1).value.type);
+    let vector=proof::vector_element(p,ir::node_at(b,n.source-1).value.type);var usize vector_fields=0;
+    if(vector!=0){let layout=sdk::vector_layout(plan,carrier.first);if(layout==0 || layout>ir::layout_count(p)){s.code=1001;return false;}let shape=ir::layout_at(p,layout-1).value;if(shape.type!=carrier.first || shape.field_count!=6){s.code=1001;return false;}vector_fields=shape.field_start;}
     if(n.kind==20){
         if(!slot(out,s,n.target,b"data") || !w::text(out,s,b"=")){return false;}
-        if(carrier.kind==16){if(!aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b".fy_items")){return false;}}
+        if(vector!=0){if(!w::text(out,s,b"(") || !aggregate::type(p,vector,out,s) || !w::text(out,s,b" const *)(") || !scalar::value(out,s,n.source) || !w::text(out,s,b"->") || !aggregate::field(out,s,vector_fields+1) || !w::text(out,s,b")")){return false;}}
+        else if(carrier.kind==16){if(!aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b".fy_items")){return false;}}
         else if(!scalar::value(out,s,n.source) || !w::text(out,s,b".fy_data")){return false;}
         if(!w::text(out,s,b";\n") || !slot(out,s,n.target,b"length") || !w::text(out,s,b"=")){return false;}
-        if(carrier.kind==16){if(!w::number(out,s,carrier.second)){return false;}}
+        if(vector!=0){if(!scalar::value(out,s,n.source) || !w::text(out,s,b"->") || !aggregate::field(out,s,vector_fields+4)){return false;}}
+        else if(carrier.kind==16){if(!w::number(out,s,carrier.second)){return false;}}
         else if(!scalar::value(out,s,n.source) || !w::text(out,s,b".fy_length")){return false;}
         return w::text(out,s,b";\n") && slot(out,s,n.target,b"index") && w::text(out,s,b"=0;\n");
     }

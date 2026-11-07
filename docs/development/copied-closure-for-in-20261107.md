@@ -57,10 +57,11 @@ memory/disk hits and reopened disk-session check.
 
 `TestCandidateCopiedClosureCalls` replays the actual authored parser, private
 lifting, names/calls and Values path for the view fixture. The vector fixture
-uses authentic `std::vec` source and reaches the resolved call plan. It also
+uses authentic `std::vec` source and now requires successful Values and checked
+bodies, including an ordinary-function control without closures. It also
 preserves the previous admission/refusal matrix and adds loop-specific
 scope/escape refusals.
-`TestCandidateCopiedClosurePipeline` includes the view fixture in its existing
+`TestCandidateCopiedClosurePipeline` includes the view and scalar vector fixtures in its existing
 complete compile, artifact encode/decode/restore and generated-C execution
 probe. This is a small purpose-built compiler host, not a full authored CLI or
 selfbuild/fixed-point run.
@@ -78,33 +79,35 @@ empty streams. Both source/SDK AST immutability checks and nine new negative
 subcases pass. Cache tests pass ordinary/generic, memory/disk and restored-session
 paths.
 
-## Existing Fairy vector execution boundary
+## Fairy vector continuation
 
-Go vector execution passes. The Fairy unit Values path still rejects a vector
-iterable with code 2, independently of copied closures. Initial diagnostics were
+At `efc51df3`, Fairy unit Values rejected a vector iterable with code 2,
+independently of copied closures. Initial diagnostics were
 module 0, bytes 208..217 (`ref items`); after using the existing explicitly typed
 shared descriptor form, bytes 243..247 (`view`). Both failures happened after
 private closure lifting and resolved call-plan construction.
 
-The regression compares the closure program with a no-closure control that
-replaces both literals with ordinary named arithmetic functions. Both must reach
-the call plan and either succeed together or refuse with code 2 at the named
-empty vector descriptor. The empty descriptor is scoped before pushes, so this
-control does not introduce an owner-mutation/borrow violation. The live
-descriptor for subsequent loops is created only after population. This proves
-the existing Values boundary is preserved; it is not authored vector native
-execution evidence. Completing Fairy vector Values/IR admission is a separate
-task, outside the closure-preparation/lowering write scope here.
+The [separate scalar vector continuation](copied-closure-vector-execution-20261107.md)
+now connects immutable named shared SDK vector descriptors through Values,
+CFG capture and C emission. Both the closure fixture and its ordinary-function
+control must succeed. Empty descriptor borrows end before population. The
+loop retains the existing owner holds and rejects mutation (2101) and local
+item escape (2102); mutable descriptors/items, general indexing and unrelated
+element families remain closed. No allocator, public ABI/header, timeout,
+ownership or cap policy is relaxed.
 
-No Values, vector type, ownership, native allocator, ABI/header, timeout or cap
-implementation was changed to make that control pass.
-
-The generated-C pipeline PASS (169.458s): one purpose-built compiler host,
+The original view-only generated-C pipeline PASS (169.458s): one purpose-built compiler host,
 101 C parts, low/optimized host profiles, artifact encode/decode/restore, and
 low/optimized generated consumers, all exit 42 with empty output. This validates
 the view execution path. The full authored CLI was not rebuilt.
 
-Final authored admission replay PASS, low and optimized (53.364s), after the
+The final combined view/vector pipeline PASS (179.891s), with 102 C parts,
+low/optimized hosts, artifact encode/decode/restore and all four host/consumer
+profile combinations exiting 42 with empty output. Checked-body replay passes
+low/optimized (60.187s). New logs and hashes are in `.cache/vector-for-in/`;
+the continuation record lists commands and the failed fixture attempt separately.
+
+Original authored admission replay PASS, low and optimized (53.364s), after the
 fixture descriptor scopes were adjusted to preserve owner holds. The earlier
 comparison replay passed in 35.972s. The first fixture/control attempts are
 retained as failure logs, including the control's initially misplaced import

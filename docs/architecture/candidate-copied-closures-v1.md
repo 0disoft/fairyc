@@ -41,11 +41,14 @@ owner loans and item lifetimes remain authoritative. Retained,
 asynchronous and cross-thread closures remain excluded.
 
 The [2026-11-07 for-in record](../development/copied-closure-for-in-20261107.md)
-distinguishes Go SDK vector native execution from Fairy private lifting and
-resolved-call acceptance. Fairy unit Values still rejects a vector iterable
-even in the no-closure control; this follow-up does not claim authored vector
-execution or relax that separate gate. Authored view execution has complete
-artifact restoration and generated-C evidence.
+and [scalar vector continuation](../development/copied-closure-vector-execution-20261107.md)
+cover complete artifact restoration and generated-C execution for views and
+immutable named `ref Vec<T>` descriptors with scalar elements. The latter uses
+the authenticated SDK layout, shared-reference items and existing owner holds.
+General Vec indexing, mutable descriptors/items, resource/nested-vector elements
+and retained item escapes are outside this new connection. Windows low and
+optimized hosts and consumers pass; this is purpose-built pipeline evidence,
+not a whole authored CLI or selfbuild/fixed-point result.
 
 [Windows evidence](../ops/windows-candidate-copied-closures-20261102.md) covers
 private C11 transport and artifact restoration. The [full CLI/cache receipt](../ops/windows-candidate-copied-closures-cli-cache-20261103.md)

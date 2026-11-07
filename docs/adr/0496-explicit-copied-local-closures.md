@@ -29,10 +29,13 @@ visible again after the loop. Iterable types, owner loans, mutation restrictions
 and item lifetimes remain governed by the existing for-in contracts. A closure
 literal still cannot be declared inside a loop. See the
 [implementation and Windows acceptance record](../development/copied-closure-for-in-20261107.md).
-The Go SDK vector lane executes this combination; the Fairy candidate retains
-its independent vector Values admission refusal, including without closures.
-Its vector evidence here is private lifting/resolved calls, while view evidence
-includes generated native execution.
+Both the Go SDK vector lane and the Fairy candidate execute this combination.
+The [scalar vector continuation](../development/copied-closure-vector-execution-20261107.md)
+connects the existing Fairy Values/CFG/C path for immutable named shared SDK
+vector descriptors with scalar reference items. Complete artifact restoration
+and Windows low/optimized generated execution pass. Mutable descriptors/items,
+resource/nested-vector elements and ordinary Vec indexing remain outside this
+connection; existing owner loans and lifetime checks still apply.
 Captured resources, borrows, raw pointers, asynchronous/retained calls and cross-thread delivery
 are excluded. A closure is not an extern-C callback or a public runtime/ABI value.
 

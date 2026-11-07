@@ -79,7 +79,7 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
         else if(n.kind==17){if(!snapshot(out,s,n.target) || !w::text(out,s,b"=") || !aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b";\n")){return false;}}
         else if(n.kind==18){if(!switches::branch(p,b,n,out,s,work)){return false;}}
         else if(n.kind==19){if(!switches::seed(p,b,n,out,s,work)){return false;}}
-        else if(n.kind==20 || n.kind==21){if(!iteration::block(p,g,n,out,s,work)){return false;}}
+        else if(n.kind==20 || n.kind==21){if(!iteration::block(p,plan,g,n,out,s,work)){return false;}}
         else if(n.kind!=7){s.code=1004;return false;}
         if(n.kind!=3 && n.kind!=4 && n.kind!=6 && n.kind!=9 && n.kind!=12 && n.kind!=18 && n.kind!=21 && !w::jump(out,s,n.first)){return false;}i+=1;
     }return w::text(out,s,b"}\n");
