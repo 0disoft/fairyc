@@ -88,6 +88,11 @@ The final harnesses use the existing bounded host partition builder.
 
 ## Remaining delivery boundary
 
+The subsequent [source/cache integration](fairy-closure-cache-integration-20261108.md)
+supersedes the completed source-call/project-envelope portions of this list and
+records the current remaining boundaries. The list below retains this commit's
+historical delivery boundary.
+
 This is not completion of the entire copied-closure delivery goal. Remaining:
 
 1. Source-bound project envelopes and the complete closure call/source recipe
