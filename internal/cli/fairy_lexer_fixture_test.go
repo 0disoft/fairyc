@@ -27,14 +27,23 @@ func TestLexerCandidateFixtureWorkspacesCheck(t *testing.T) {
 	for _, fixture := range []struct {
 		name string
 		copy func(*testing.T, string)
+		main string
 	}{
-		{"lexer", copyLexerExample},
-		{"parser", copyLexerStreamExample},
+		{"lexer", copyLexerExample, `module main;
+import scanner as scanner;
+fn usize count(ref scanner::Stream stream) { return scanner::token_count(stream); }
+fn i32 main() { return 0; }
+`},
+		{"parser", copyLexerStreamExample, `module main;
+import syntax as syntax;
+fn usize count(ref syntax::Parsed parsed) { return syntax::declaration_count(parsed); }
+fn i32 main() { return 0; }
+`},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			root := t.TempDir()
 			fixture.copy(t, root)
-			writeTestSource(t, root, "src/main.fy", "module main; import scanner as scanner; fn i32 main() { return 0; }\n")
+			writeTestSource(t, root, "src/main.fy", fixture.main)
 			code, stdout, stderr := runForTest([]string{"check"}, root)
 			if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok:") || stderr != "" {
 				t.Fatalf("candidate fixture check: code=%d stdout=%q stderr=%s", code, stdout, stderr)
