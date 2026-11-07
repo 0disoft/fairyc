@@ -76,6 +76,7 @@ pub fn Operation operation_at(ref Program p, usize id) { assert(id > 0 && id <= 
 pub fn u32 signature_at(ref Program p, usize index) { assert(index < signature_count(p)); return v::at<Signature>(ref p.signatures,index).type; }
 pub fn usize edge_at(ref Program p, usize index) { assert(index < edge_count(p)); return *v::at<usize>(ref p.edges,index); }
 pub fn ref u8[] source_view(ref Program p) { assert(p.success); return bytes::view(ref p.source); }
+pub fn ref u8[] payload_view(ref Program p) { assert(p.success); return bytes::view(ref p.payload); }
 pub fn ref u8[] foreign_text(ref Program p,usize id){let t=target_at(p,id);return source_view(p)[t.link_start..t.link_end];}
 pub fn ref u8[] target_text(ref Program p, usize id) { let Target t = target_at(p,id); return source_view(p)[t.start..t.end]; }
 pub fn ref u8[] literal_text(ref Program p, usize id) { let Operation o = operation_at(p,id); return bytes::view(ref p.payload)[o.payload_start..o.payload_end]; }
@@ -92,6 +93,9 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
 pub fn Result<Program,Problem> assemble_closures(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops,v::Vec<ClosureTarget> closures) {
     return assemble_family(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,drops,closures,true);
 }
+// An exact decoded family consumes every owned table through one path. The
+// same old-family refusal and new-family metadata checks remain authoritative.
+pub fn Result<Program,Problem> assemble_native_artifact(bytes::Buffer source,bytes::Buffer payload,v::Vec<Target> targets,v::Vec<Signature> signatures,v::Vec<Function> functions,v::Vec<Local> locals,v::Vec<Block> blocks,v::Vec<Operation> operations,v::Vec<usize> edges,usize module_index,shapes::Table nominal,v::Vec<Drop> drops,v::Vec<ClosureTarget> closures,bool closure_family){return assemble_family(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,drops,closures,closure_family);}
 fn Result<Program,Problem> assemble_family(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops,v::Vec<ClosureTarget> closures,bool closure_family) {
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
