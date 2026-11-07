@@ -111,8 +111,9 @@ copied back. The actual tools-side main is separately compiled/executed by the
 native command test above. Record `.cache/state-store-all-check.json`, log
 `.cache/state-command-windows-check.log`. Scoped Go vet, gofmt and diff hygiene
 pass. Linux native execution stays batched at the user's request.
-There is no claim of a console handler in the actual default main (it uses none),
-a supported installed distribution/build recipe, command-level forced conflict/
+The console-handler gap in this historical observation is subsequently closed
+by ADR 0544 and `candidate-windows-console-cancellation-20261107.md`.
+This receipt does not claim a supported installed distribution/build recipe, command-level forced conflict/
 late cancellation/broken-output coverage, full-source Go/Fairy self-build parity,
 clean-machine verification or hosted same-commit acceptance. The full queue is
 still active. No push/CI dispatch/release/deployment; no public CLI/SDK/native ABI,

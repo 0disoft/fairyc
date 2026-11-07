@@ -20,7 +20,7 @@ func TestPrivateWindowsHostSymbolSelection(t *testing.T) {
 }
 
 func TestPrivateWindowsCancelSymbolSelection(t *testing.T) {
-	for _, operation := range []string{"create", "open", "signal"} {
+	for _, operation := range []string{"create", "open", "signal", "local", "console_bind", "console_close"} {
 		name := "fairyc_private_windows_cancel_" + operation + "_v1"
 		for _, gap := range []string{"", " ", "\t", "\r\n"} {
 			t.Run(operation+fmt.Sprintf("/gap-%q", gap), func(t *testing.T) {
@@ -41,6 +41,8 @@ func TestPrivateWindowsCancelSymbolSelection(t *testing.T) {
 		"fairyc_private_windows_cancel_v1", "fairyc_private_windows_cancel_reset_v1",
 		"fairyc_private_windows_cancel_create_v2", "fairyc_private_windows_cancel_open_v1_extra",
 		"fairyc_private_windows_cancel_signal_v10",
+		"fairyc_private_windows_cancel_local_v2", "fairyc_private_windows_cancel_console_bind_v1_extra",
+		"fairyc_private_windows_cancel_console_close_v10",
 	} {
 		t.Run(name, func(t *testing.T) {
 			source, err := WindowsSource("fairyc_private_windows_cancel_create_v1( " + name + "(")

@@ -41,6 +41,99 @@ void *fairyc_private_windows_cancel_open_v1(const uint8_t *name) {
     return OpenEventW(SYNCHRONIZE | EVENT_MODIFY_STATE, FALSE, (LPCWSTR)name);
 }
 int32_t fairyc_private_windows_cancel_signal_v1(void *event) { return SetEvent(event); }
+
+/* A process owns at most one console registration. The shared lock covers the
+ * entire callback use of the duplicate. Close takes it exclusively to unpublish
+ * and drain all such uses before closing/freeing anything. No callback retains
+ * an owner pointer after releasing the lock. Console attach/alloc/free resets
+ * the OS handler table; callers must not change console attachment while bound.
+ * In particular, binding never changes the inherited CTRL+C ignore attribute. */
+struct fy_windows_console_cancel_registration { HANDLE event; };
+static SRWLOCK fy_windows_console_cancel_lock = SRWLOCK_INIT;
+static struct fy_windows_console_cancel_registration *fy_windows_console_cancel_active = NULL;
+static BOOL fy_windows_console_cancel_closing = FALSE;
+static BOOL fy_windows_console_cancel_poisoned = FALSE;
+
+static BOOL WINAPI fy_windows_console_cancel_handler(DWORD control) {
+    if (control != CTRL_C_EVENT && control != CTRL_BREAK_EVENT) { return FALSE; }
+    BOOL handled = FALSE;
+    AcquireSRWLockShared(&fy_windows_console_cancel_lock);
+    if (fy_windows_console_cancel_active != NULL) {
+        (void)SetEvent(fy_windows_console_cancel_active->event);
+        handled = TRUE;
+    }
+    ReleaseSRWLockShared(&fy_windows_console_cancel_lock);
+    return handled;
+}
+
+void *fairyc_private_windows_cancel_local_v1(void) {
+    return CreateEventW(NULL, TRUE, FALSE, NULL);
+}
+
+void *fairyc_private_windows_cancel_console_bind_v1(void *event) {
+    DWORD processes[1];
+    /* Headless is a real native ERROR_INVALID_HANDLE, before ownership changes
+     * or duplication. Other failures retain their own cause, never a no-op. */
+    if (GetConsoleProcessList(processes, 1) == 0) { return NULL; }
+    AcquireSRWLockExclusive(&fy_windows_console_cancel_lock);
+    if (fy_windows_console_cancel_active != NULL || fy_windows_console_cancel_closing ||
+        fy_windows_console_cancel_poisoned) {
+        ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+        SetLastError(ERROR_BUSY);
+        return NULL;
+    }
+    struct fy_windows_console_cancel_registration *owner = HeapAlloc(GetProcessHeap(), 0, sizeof(*owner));
+    if (owner == NULL) {
+        ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return NULL;
+    }
+    if (!DuplicateHandle(GetCurrentProcess(), event, GetCurrentProcess(), &owner->event,
+                         EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, 0)) {
+        DWORD error = GetLastError();
+        (void)HeapFree(GetProcessHeap(), 0, owner);
+        ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+        SetLastError(error);
+        return NULL;
+    }
+    if (!SetConsoleCtrlHandler(fy_windows_console_cancel_handler, TRUE)) {
+        DWORD error = GetLastError();
+        (void)CloseHandle(owner->event);
+        (void)HeapFree(GetProcessHeap(), 0, owner);
+        ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+        SetLastError(error);
+        return NULL;
+    }
+    fy_windows_console_cancel_active = owner;
+    ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+    return owner;
+}
+
+int32_t fairyc_private_windows_cancel_console_close_v1(void *registration) {
+    AcquireSRWLockExclusive(&fy_windows_console_cancel_lock);
+    if (registration == NULL || fy_windows_console_cancel_active != registration) {
+        ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+        SetLastError(ERROR_INVALID_HANDLE);
+        return 0;
+    }
+    struct fy_windows_console_cancel_registration *owner = fy_windows_console_cancel_active;
+    fy_windows_console_cancel_active = NULL;
+    fy_windows_console_cancel_closing = TRUE;
+    ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+    /* Do not hold the SRW lock inside unregister: any OS-delivered callbacks
+     * still arriving can finish, observe NULL, and touch no freed state. */
+    BOOL removed = SetConsoleCtrlHandler(fy_windows_console_cancel_handler, FALSE);
+    DWORD error = removed ? ERROR_SUCCESS : GetLastError();
+    if (!removed && error == ERROR_SUCCESS) { error = ERROR_INVALID_STATE; }
+    if (!CloseHandle(owner->event) && error == ERROR_SUCCESS) { error = GetLastError(); }
+    (void)HeapFree(GetProcessHeap(), 0, owner);
+    AcquireSRWLockExclusive(&fy_windows_console_cancel_lock);
+    if (!removed) { fy_windows_console_cancel_poisoned = TRUE; }
+    fy_windows_console_cancel_closing = FALSE;
+    ReleaseSRWLockExclusive(&fy_windows_console_cancel_lock);
+    if (error != ERROR_SUCCESS) { SetLastError(error); return 0; }
+    return 1;
+}
 int32_t fairyc_private_windows_create_env_v1(const uint8_t *app, uint8_t *line, const uint8_t *cwd,
                                    int32_t inherit, uint32_t flags, void *startup, void *process, const uint8_t *environment) {
     return CreateProcessW((LPCWSTR)app, (LPWSTR)line, NULL, NULL, inherit, flags,

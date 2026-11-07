@@ -213,7 +213,8 @@ func TestCandidateHTTPSRuntimePackaging(t *testing.T) {
 				t.Fatal(err)
 			}
 			for _, header := range []string{"fairyc_private_windows_root_file_link_new_v1(", "fairyc_private_windows_root_file_state_open_v1(", "fairyc_private_windows_root_file_state_same_v1(", "fairyc_private_windows_root_file_state_lock_v1(", "fairyc_private_windows_ticks_v1(", "fairyc_private_windows_root_file_read_v1(", "fairyc_private_windows_https_read_v1(", "fairyc_private_windows_root_file_read_v1( fairyc_private_windows_https_open_v1(", "fairyc_private_windows_ticks_v1( fairyc_private_windows_https_close_v1(",
-				"fairyc_private_windows_cancel_create_v1(", "fairyc_private_windows_cancel_open_v1(", "fairyc_private_windows_cancel_signal_v1(", "fairyc_private_windows_cancel_create_v1( fairyc_private_windows_cancel_open_v1( fairyc_private_windows_cancel_signal_v1("} {
+				"fairyc_private_windows_cancel_create_v1(", "fairyc_private_windows_cancel_open_v1(", "fairyc_private_windows_cancel_signal_v1(", "fairyc_private_windows_cancel_create_v1( fairyc_private_windows_cancel_open_v1( fairyc_private_windows_cancel_signal_v1(",
+				"fairyc_private_windows_cancel_local_v1(", "fairyc_private_windows_cancel_console_bind_v1(", "fairyc_private_windows_cancel_console_close_v1(", "fairyc_private_windows_cancel_local_v1( fairyc_private_windows_cancel_console_bind_v1( fairyc_private_windows_cancel_console_close_v1("} {
 				if err = os.WriteFile(filepath.Join(root, "header"), []byte(header), 0600); err != nil {
 					t.Fatal(err)
 				}

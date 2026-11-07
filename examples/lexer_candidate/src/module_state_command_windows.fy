@@ -122,8 +122,15 @@ fn i32 run_native(ref arguments::Invocation invocation,command::Options options,
 @effects(filesystem,console,environment,clock) pub fn i32 run_process(){
     let invocation=switch(arguments::read()){case .ok(p):{p}case .err(e):{return arguments_problem(e);}};
     switch(arguments::parsed(ref invocation)){case .Help:{return help();}case .Native{.options=p}:{}};
+    let token=switch(cancellation::local()){case .ok(p):{p}case .err(e):{return problem(4,b"cancel event",e.kind,0,e.os_code);}};
+    let console=switch(cancellation::console(ref token)){case .ok(p):{p}case .err(e):{return problem(4,b"console registration",e.kind,0,e.os_code);}};
     let image=switch(paths::executable()){case .ok(p):{p}case .err(e):{return problem(4,b"image path",e.kind,0,e.os_code);}};
     let runtime=switch(paths::sibling(bytes::view(ref image),runtime_leaf())){case .ok(p):{p}case .err(e):{return problem(4,b"runtime path",e.kind,0,e.os_code);}};
     let frame=switch(paths::sibling(bytes::view(ref image),frame_leaf())){case .ok(p):{p}case .err(e):{return problem(4,b"frame path",e.kind,0,e.os_code);}};
-    let token=cancellation::none();return run(ref invocation,bytes::view(ref runtime),bytes::view(ref frame),ref token);
+    let result=run(ref invocation,bytes::view(ref runtime),bytes::view(ref frame),ref token);
+    // Registration cleanup is required, but cannot reinterpret known state
+    // publication as cancellation or trigger any retry.
+    return switch(cancellation::close_console(console)){case .ok(_):{result}case .err(e):{
+        discard io::write_stderr_bytes(b"fairyc-state: console cleanup failed; state may already be published\n");problem(4,b"console cleanup",e.kind,0,e.os_code)
+    }};
 }

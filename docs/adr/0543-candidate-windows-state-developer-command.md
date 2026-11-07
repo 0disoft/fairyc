@@ -51,8 +51,8 @@ the existing Go warning text; output/construction failures warn that an executed
 commit may already be published. Init's create/snapshot/report phase is likewise
 not revoked by a token arriving after entry. No automatic retry exists.
 
-The explicit `run` borrows a token. The actual default process entry currently
-uses none; console Ctrl-C registration is still separate mandatory work. A
+The explicit `run` borrows a token. ADR 0544 subsequently connects the actual
+default process entry to a local event and console Ctrl-C/Break registration. A
 repeatable developer build/distribution recipe, forced command-level conflict/
 late cancellation/broken-output observations, broader path/source admission and
 all final queue gates remain open. Public CLI/SDK/native ABI, database/provider,

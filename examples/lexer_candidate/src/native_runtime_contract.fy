@@ -117,6 +117,9 @@ pub fn u32 host(ref u8[] name){
     if(bytes::equal(name,b"fairyc_private_windows_cancel_create_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_cancel_open_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_cancel_signal_v1")){return 1;}
+    if(bytes::equal(name,b"fairyc_private_windows_cancel_local_v1")){return 1;}
+    if(bytes::equal(name,b"fairyc_private_windows_cancel_console_bind_v1")){return 1;}
+    if(bytes::equal(name,b"fairyc_private_windows_cancel_console_close_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_close_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_compare_name_v1")){return 1;}
     if(bytes::equal(name,b"fairyc_private_windows_create_env_v1")){return 1;}

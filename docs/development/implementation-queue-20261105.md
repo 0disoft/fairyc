@@ -67,6 +67,20 @@ authorized by this queue.
 
 ## Progress
 
+- Disjoint workers and coordinator connect actual Windows console cancellation
+  and developer build preparation. Native C low/optimized controls, duplicate
+  lifetime, 512-cycle callback/close races per profile, headless/busy/poison and
+  stable handles pass in 5.033s. Final authored owner/main/Go-command regressions
+  pass in 159.482s: four owner processes, four actual-main isolated-console
+  cancellation processes and 48 paired Go/Fairy command observations. Whole
+  source check/locked check pass 755 files / 9,500 MIR functions, with all 1,225
+  sources matching. ADR 0544 and `candidate-windows-console-cancellation-20261107.md`
+  close actual console selection. Independent preparation has nine passing
+  Python checks; the real native build exposed missing Windows private-host
+  support selection and remains in progress. Forced command conflict/late
+  cancellation/output boundaries and all final gates remain open. Linux stays
+  batched; no push/dispatch. Full objective remains active.
+
 - The actual authored Windows state developer main now reads argv/source/pinned
   sibling bundles, fresh-checks basename-bound source, and runs init/snapshot or
   sealed native build/execute/one-attempt CAS with Go-compatible result JSON.
@@ -77,8 +91,8 @@ authorized by this queue.
   Changed-representation persistence/cancellation/boundary regressions pass in
   211.246s; 52 file-reader scenarios and 30 report scenarios also pass. Full source/
   locked checks pass 755 files / 9,495 MIR functions, all 1,225 sources present.
-  See ADR 0543 and `candidate-windows-state-command-20261107.md`. Default process
-  token remains none. Console registration, developer packaging recipe, forced
+  See ADR 0543 and `candidate-windows-state-command-20261107.md`. ADR 0544 now
+  connects the process token and console registration. Developer packaging recipe, forced
   command conflict/late cancellation/output boundaries and all final gates remain
   open. Linux stays batched; no push/dispatch. Full objective remains active.
 
