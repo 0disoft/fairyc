@@ -687,3 +687,23 @@ The prior successful normal build belongs to `b4008e0e`; a new combined-source
 normal build, fixed points and full parity remain pending. See
 `candidate-c-enum-layout-lookup-20261107.md` for evidence and restrictions.
 Linux native stays batched; no CI, push, publishing or runner changes occur.
+
+## Latest-source timeout and parallel investigation
+
+The combined 7237dd67 source is attempted with both the b4008e0e Fairy-emitted
+native image and the Go-emitted C seed. Both exceed the unchanged 900s frontend
+watchdog before publishing a C packet or successful receipt. Their 646 source
+byte sequences, order, lock and frozen version match; only generated wrapper
+paths differ. These are failed attempts, not current-source acceptance.
+
+The subsequent host CPU samples are 91-100% while unrelated compilation is
+active. Contention has not been isolated as the cause, nor has a code-generation
+slowdown been established. A bounded 24-observation microbenchmark has matching
+checksums/exits and no major scalar/Vec runtime regression; its POD case is
+noisy and cannot explain the complete workload. Existing opaque copy barriers
+remain intact. No third expensive retry starts under the observed load.
+
+Latest-source normal acceptance, fixed points and full parity remain pending.
+See `candidate-parallel-acceptance-20261107.md` for complete attempt boundaries,
+static findings, microbenchmark evidence and the distinction from the successful
+b4008e0e build. Linux remains batched; default time/work bounds are unchanged.
