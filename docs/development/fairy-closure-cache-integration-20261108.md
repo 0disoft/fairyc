@@ -56,6 +56,11 @@ on success and failure. No assertion was removed to accommodate the failure.
 
 ## Remaining delivery boundary
 
+The subsequent [project/mixed-cache and semantic-interpreter closeout](fairy-handoff-20261108.md)
+supersedes items 1 and 2 below with Windows low/optimized execution evidence.
+The list retains this commit's historical boundary; full CLI/self-host,
+distribution, hosted CI and batched Linux are still separate.
+
 1. Route closure unit keys/load/save through mixed project compilation and
    publish cold units only after the linked Complete and interfaces succeed.
    The unit disk fixture alone does not establish project publication atomicity.
