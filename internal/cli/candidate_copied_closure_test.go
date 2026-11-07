@@ -93,6 +93,19 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 	control = strings.Replace(control, "let adjacent=fn [] i32(i32 value){return value;};", "", 1)
 	control = strings.Replace(control, "fn i32 main()", "fn i32 add(i32 value){return 40+value;}fn i32 adjacent(i32 value){return value;}fn i32 main()", 1)
 	calls += "assert(checked_vector(b" + strconv.Quote(vectorSource) + ",b" + strconv.Quote(string(sdk)) + ")==checked_vector(b" + strconv.Quote(control) + ",b" + strconv.Quote(string(sdk)) + "));"
+	for _, bad := range []struct {
+		source string
+		code   int
+	}{
+		{strings.Replace(vectorSource, "total+=add(adjacent(*item));", "assert(v::push<i32>(ref mut items,3).is_ok);total+=add(adjacent(*item));", 1), 2101},
+		{strings.Replace(vectorSource, "let ref v::Vec<i32> loop_view=ref items;", "var ref v::Vec<i32> loop_view=ref items;", 1), 2},
+		{strings.Replace(vectorSource, "for(let ref i32 item in loop_view)", "for(let ref mut i32 item in loop_view)", 1), 2},
+		{strings.Replace(vectorSource, "for(let ref i32 item in loop_view)", "for(let ref i64 item in loop_view)", 1), 2},
+		{strings.Replace(vectorSource, "return add(2);", "return view[0];", 1), 2},
+		{`module main;import std::vec as v;fn ref i32 leak(){var items=v::empty<i32>();let ref v::Vec<i32> view=ref items;for(let ref i32 item in view){return item;}return v::at<i32>(ref items,0);}`, 2102},
+	} {
+		calls += fmt.Sprintf("rejected_vector(b%s,b%s,%d);", strconv.Quote(bad.source), strconv.Quote(string(sdk)), bad.code)
+	}
 	const loopPrefix = `module root;fn i32 main(){let i32[1] data=[1];let ref i32[] view=ref data[..];let add=fn [] i32(i32 n){return n;};`
 	for _, body := range []string{
 		`for(let i32 item in view){discard add(item);}return item;`,
@@ -109,7 +122,7 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 	}
 	program := strings.Replace(string(raw), "module tests::copied_closure_calls;", "module main;", 1) + "\n@effects(console) fn i32 main(){" + calls + "return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
-	copyCandidateParityModules(t, root, "scanner", "syntax", "module_signatures", "module_unit_bind", "module_unit_call_closure", "module_unit_values")
+	copyCandidateParityModules(t, root, "scanner", "syntax", "module_signatures", "module_unit_bind", "module_unit_call_closure", "module_unit_values", "module_unit_checked_bodies")
 	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
 		code, out, diagnostics := runForTest(args, root)
 		if code != ExitSuccess || out != "" || diagnostics != "" {
