@@ -63,9 +63,12 @@ authorized by this queue.
 
 ## Deferred designs to resolve and implement
 
-- [ ] General inline bodies: sixteen immutable i32 locals already work. Calls,
-  mutation/control flow and other value families need independent contracts;
-  calls also need transitive body dependency/identity rules.
+- [ ] General inline bodies: sixteen immutable i32 locals already work. The
+  first same-module public-inline call graph family now has ADR 0548, Go
+  source/MIR/native execution and memory/new-process disk-cache evidence in
+  `go-inline-calls-20261107.md` and `go-inline-calls-cache-20261107.md`.
+  Fairy source/artifact integration is in progress. Other-module/ordinary
+  helpers, mutation/control flow and other value families remain separate.
 - [ ] Composite generic transport: preserve already implemented scalar-parameter
   structs/resources; the seven extended scalar types inside further wrappers
   retain their separate copy/borrow/transport admission boundaries. ADR 0547's
@@ -123,6 +126,16 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Disjoint Sol High workers and the coordinator implement Go same-module
+  inline calls and connect the existing package inline-class resolver. Source,
+  independent v3 identities, forward/reverse 64/65-function DAGs, maximal
+  64/65-node nested calls, MIR forgery refusal, twelve C11/C17 native products
+  and existing inline C regressions pass. Memory/disk/fresh-process cache tests
+  prove leaf-only invalidation, no-lowering hits, inner marker repair and four
+  restored native products. Failed test-only lowering assumptions stay in the
+  cache receipt. Fairy integration/final gates remain open; Linux stays batched
+  and no remote action occurs.
 
 - The disjoint closure integration worker completes both full-main profiles
   and all four ordinary/generic persistent-cache combinations: 172 actual CLI
