@@ -35,7 +35,7 @@ resource Unit {usize first;usize stop;bytes::Buffer text;cleanup{}}
 pub resource Emission {Prepared prepared;v::Vec<Unit> units;usize frames;usize work;usize retries;cleanup{}}
 pub resource Bundle {owner::Program program;Emission emission;cleanup{}}
 fn u32 error_code(w::State s){return if(s.code<1000){if(s.code==3){1003}else{1002}}else{s.code};}
-fn clean::Problem project_entry(ref ir::Program raw,usize entry,bool test_entry,u32 mode){let scope=if(mode==2){clean::closures(ir::cleanup_ir(raw)) && !clean::aggregates(ir::cleanup_ir(raw)) && !clean::project(ir::cleanup_ir(raw))}else if(mode==1){clean::aggregates(ir::cleanup_ir(raw)) && !clean::project(ir::cleanup_ir(raw)) && !clean::closures(ir::cleanup_ir(raw))}else{clean::project(ir::cleanup_ir(raw)) && !clean::closures(ir::cleanup_ir(raw))};if(!scope || entry==0 || entry>ir::count(raw)){return fail(1001,0,0,0);}let f=clean::frame_at(ir::cleanup_ir(raw),entry);return fail(if(scalar::scalar(raw,f.result)!=if(test_entry){7}else{1} || calls::parameters(ir::at(raw,entry))!=0){1001}else{0},f.module_index,0,0);}
+fn clean::Problem project_entry(ref ir::Program raw,usize entry,bool test_entry,u32 mode){let scope=if(mode==3){clean::closures(ir::cleanup_ir(raw)) && clean::project(ir::cleanup_ir(raw))}else if(mode==2){clean::closures(ir::cleanup_ir(raw)) && !clean::aggregates(ir::cleanup_ir(raw)) && !clean::project(ir::cleanup_ir(raw))}else if(mode==1){clean::aggregates(ir::cleanup_ir(raw)) && !clean::project(ir::cleanup_ir(raw)) && !clean::closures(ir::cleanup_ir(raw))}else{clean::project(ir::cleanup_ir(raw)) && !clean::closures(ir::cleanup_ir(raw))};if(mode>3 || !scope || entry==0 || entry>ir::count(raw)){return fail(1001,0,0,0);}let f=clean::frame_at(ir::cleanup_ir(raw),entry);return fail(if(scalar::scalar(raw,f.result)!=if(test_entry){7}else{1} || calls::parameters(ir::at(raw,entry))!=0){1001}else{0},f.module_index,0,0);}
 fn Result<Prepared,clean::Problem> prepare_project(ref ir::Program raw,ref v::Vec<cfg::Graph> graphs,ref sdk::Plan sdk_plan,usize preparation_work,names::Table named,usize entry,bool entry_only,bool test_entry,u32 mode){
     let checked=project_entry(raw,entry,test_entry,mode);if(checked.code!=0){return .err(checked);}
     // Replay the same graph/SDK preparation cost on every image, including hits.
@@ -82,6 +82,9 @@ fn Result<Bundle,clean::Problem> partition_mode(owner::Program program,names::Ta
 // It grants neither project linking nor artifact restoration admission.
 pub fn Result<Emission,clean::Problem> emit_aggregates(ref ir::Program raw,usize entry,usize max_frames,bool entry_only){return emit_mode(raw,names::empty(),entry,max_frames,entry_only,false,1);}
 pub fn Result<Emission,clean::Problem> emit_closures(ref ir::Program raw,usize entry,usize max_frames,bool entry_only){return emit_mode(raw,names::empty(),entry,max_frames,entry_only,false,2);}
+// An explicitly linked closure project retains its independently proved
+// aggregate bit; ordinary project and unit entry points keep their own gates.
+pub fn Result<Emission,clean::Problem> emit_project_closures(ref ir::Program raw,names::Table named,usize entry,usize max_frames,bool entry_only){return emit_mode(raw,named,entry,max_frames,entry_only,false,3);}
 // The caller retains the checked IR. Every returned field owns its storage;
 // no IR reference or owner is retained across test images.
 pub fn Result<Emission,clean::Problem> emit_test(ref ir::Program raw,names::Table named,usize entry,usize max_frames){return emit_mode(raw,named,entry,max_frames,true,true,0);}
