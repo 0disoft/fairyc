@@ -537,3 +537,16 @@ raw-source and linked-project bounds remain separate. See
 `candidate-cleanup-recipe-fields-20261107.md` for the original and frozen-input
 receipts, source checks and native boundary results. No normal build, fixed
 point or latest-source parity pass follows merely from this change.
+
+## Cleanup recipe lookup follow-up
+
+The `121035cc` normal retry exits 2 after 427.558s at phase 2 stage 6 code 1002,
+Vec bytes 104..122, with zero output. Commit `cd72aaef` integrates the cleanup
+index (`df15a0a2`): the unchanged 646-input unit-471 comparison reduces cleanup
+work 948429 to 798289 and passes 197 owned-IR frames. This is diagnostic evidence.
+Windows low/optimized index and field-boundary replays pass (129.03s / 131.79s);
+integrated source check/locked pass (755 files, 9527 MIR, 18.419s / 19.598s).
+A fresh optimized build-only seed/help passes in 140.587s. The normal retry follows. Normal self-build,
+fixed points and latest-source parity remain pending; native Linux is batched.
+Contracts and work/field caps are unchanged. See
+`candidate-cleanup-recipe-index-20261107.md` for receipts, semantics and bounds.
