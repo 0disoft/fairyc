@@ -6,6 +6,7 @@ import module_unit_checked_bodies as checking;
 import module_unit_values as values;
 import module_unit_value_model as m;
 import module_unit_body_ir_model as ir;
+import module_unit_body_ir_closures as closures;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_interfaces as interfaces;
 import module_unit_generics as generics;
@@ -31,8 +32,24 @@ fn Result<usize,u32> ordinary(ref ir::Program program,ref contracts::Index index
     if(!budget::charge(work,name.len+1)){return .err(1002);}if(saved.template || saved.result!=types::mapped(map,expected.result) || saved.parameter_count!=expected.parameter_count || saved.parameter_count!=c.argument_count || saved.effects!=expected.effects || saved.must_use!=expected.must_use || saved.unsafe_call!=expected.unsafe_call || saved.foreign!=expected.foreign || !bytes::equal(name,ir::linker_name(program,found-1))){return .err(1001);}
     var usize i=0;while(i<expected.parameter_count){if(!budget::charge(work,1)){return .err(1002);}if(types::mapped(map,signatures::parameter_at(metadata,expected.parameter_start+i))!=ir::parameter_at(program,saved.parameter_start+i)){return .err(1001);}i+=1;}return .ok(original);
 }
+// bodies::match already compares every source-owned node/local, including the
+// literal target and ordered snapshot operands. Its fresh Program proof binds
+// each real pure helper. A value call has no static provider or frame target:
+// authenticate the named operand and mapped signature without inventing one.
+fn u32 closure(ref ir::Program program,ref types::Mapping map,ref ir::Body saved,ref m::Values fresh,usize at,ref mut usize work){
+    if(!budget::charge(work,1)){return 1002;}let expected=m::call_at(fresh,at);let old=ir::call_at(saved,at);let cleaned=ir::cleanup_ir(program);
+    if(!clean::closures(cleaned) || !equal::call_same(expected,old) || old.kind!=4 || old.target_module!=0 || old.target_declaration!=0 || old.instance!=0 || old.argument_count!=1 || old.expression==0 || old.expression>ir::node_count(saved) || old.argument_start>=ir::argument_count(saved)){return 1001;}
+    let e=ir::node_at(saved,old.expression-1).value;let current=m::expression_at(fresh,expected.expression);if(e.kind!=6 || e.state!=1 || e.target!=0 || !closures::i32(cleaned,e.type) || types::mapped(map,current.type)!=e.type){return 1001;}
+    var usize low=0;var usize high=ir::node_count(saved);while(low<high){if(!budget::charge(work,1)){return 1002;}let mid=low+(high-low)/2;if(ir::node_at(saved,mid).value.source_index<e.left){low=mid+1;}else{high=mid;}}
+    // bodies::match proves equal table counts and source_index at every dense
+    // ordinal, so this saved lookup also names the fresh checked expression.
+    if(!budget::charge(work,1)){return 1002;}if(low>=ir::node_count(saved)){return 1001;}let callee=ir::node_at(saved,low).value;let named=m::expression_at(fresh,low+1);
+    if(callee.source_index!=e.left || callee.kind!=2 || callee.state!=1 || !closures::leaf(cleaned,callee.type) || types::mapped(map,named.type)!=callee.type || callee.binding==0 || callee.binding>ir::local_count(saved) || callee.binding!=named.binding || callee.place.kind!=1 || callee.place.root!=callee.binding || callee.place.mutable){return 1001;}
+    let local=ir::local_at(saved,callee.binding);if((local.kind!=1 && local.kind!=2) || local.type!=callee.type || types::mapped(map,m::local_at(fresh,named.binding).type)!=local.type || local.scope!=callee.place.scope || local.kind==2 && (local.initializer==0 || callee.start<local.end)){return 1001;}
+    let argument=ir::argument_at(saved,old.argument_start);return if(argument.invocation==at+1 && argument.position==0 && argument.checked && !argument.shared && argument.expected==e.type && argument.actual==e.type && argument.label_start==0 && argument.label_end==0){0}else{1001};
+}
 fn u32 invocation(ref ir::Program program,ref identities::Snapshot ids,ref contracts::Index callables,ref targets::Index indexed,ref signatures::Program metadata,ref interfaces::Interfaces imported,ref frames::Mapping map,ref ir::Body saved,ref m::Values fresh,usize at,bool partial,ref mut usize work){
-    if(!budget::charge(work,1)){return 1002;}var expected=m::call_at(fresh,at);let old=ir::call_at(saved,at);if(!expected.checked || !old.checked || expected.kind!=1 && expected.kind!=2){return 1001;}let selected=frames::selected(map);let type_map=frames::type_mapping(map);var usize result=0;var u32 effects=0;var bool foreign=false;
+    if(!budget::charge(work,1)){return 1002;}var expected=m::call_at(fresh,at);let old=ir::call_at(saved,at);if(!expected.checked || !old.checked){return 1001;}if(expected.kind==4){return closure(program,frames::type_mapping(map),saved,fresh,at,work);}if(expected.kind!=1 && expected.kind!=2){return 1001;}let selected=frames::selected(map);let type_map=frames::type_mapping(map);var usize result=0;var u32 effects=0;var bool foreign=false;
     if(expected.kind==2){if(expected.instance==0 || expected.instance>selection::function_count(selected) || expected.instance>generics::count(interfaces::specializations(imported))){return 1001;}let signature=generics::at(interfaces::specializations(imported),expected.instance);if(signature.module_index!=expected.target_module || signature.declaration!=expected.target_declaration || signature.parameter_count!=expected.argument_count){return 1001;}result=types::mapped(type_map,signature.result);effects=signature.effects;}
     else{if(expected.instance!=0 || old.instance!=0){return 1001;}let status=switch(ordinary(program,callables,metadata,expected,type_map,work)){case .ok(p):{p}case .err(code):{return code;}};let signature=signatures::at(metadata,status);foreign=signature.foreign;result=types::mapped(type_map,signature.result);effects=signature.effects;}
     // The producer's specialization number may differ. Authenticate that number

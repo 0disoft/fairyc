@@ -19,6 +19,9 @@ import std::vec as v;
 // Compare source-derived recipes directly; no replacement cleanup MIR is built.
 // Signature-only unused resources may have no shape in this source unit. Their
 // recipes belong to other checked units; whole-project coverage remains later.
+// Copied closure kind23 is trivial kind-0 glue, already checked by the fresh
+// Program proof reached through drops/calls/bodies. Helpers and snapshots are
+// source-owned body facts; a closure never adds a resource recipe or drop.
 fn Result<v::Vec<usize>,u32> shapes(ref values::Plan typed,ref interfaces::Interfaces imported,ref mut usize work){
     var v::Vec<usize> slots=v::empty<usize>();var usize i=0;
     while(i<=values::type_count(typed)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut slots,0).is_ok){return .err(1003);}i+=1;}
