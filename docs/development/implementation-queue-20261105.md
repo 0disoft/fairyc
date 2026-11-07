@@ -88,8 +88,13 @@ authorized by this queue.
   memory/disk/new-process cache checks, plus Fairy type-graph rollback, 105 Go
   source/diagnostic controls and four restored-artifact native-C products. See
   `go-flat-result-transport-20261107.md`, `go-flat-result-cache-20261107.md` and
-  `candidate-flat-result-transport-20261107.md`. Whole CLI/cache is in progress;
-  broader error payloads/nesting remain separate.
+  `candidate-flat-result-transport-20261107.md`. Whole CLI/cache has completed
+  the low lifecycle and representative invalidation/repair/refusal vectors:
+  18 fresh processes, two standalone products and seven-scalar active payload
+  observation. The optimized host was deliberately stopped before publication;
+  the broad optimized mutation matrix and whole-test pass remain open. See
+  `candidate-flat-result-cli-cache-20261108.md`. Broader error payloads/nesting
+  remain separate.
 - [x] Multi-operation static interfaces: ADR 0549's bounded groups now have Go
   and Fairy representation, complete-provider admission, exact declaration-error
   location and shared sibling/provider identity. Go memory/new-process disk
