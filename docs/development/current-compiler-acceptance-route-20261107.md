@@ -504,3 +504,25 @@ Full source check/locked, scoped vet and diff checks pass. See
 `candidate-borrow-type-index-20261107.md` for exact tested hashes, extra setup
 cost and reserved-memory bounds. A new seed and normal full authored self-build
 remain required; no fixed point or full parity pass is claimed yet.
+
+## Integrated parallel follow-up
+
+The new reference-index seed passes optimized full CLI in 244.666s (14 independent
+processes). The three ordinary-source, generic-aggregate and shape-index regressions
+also pass both Windows profiles in 174.788s. The normal 646-source authored build
+then exits 2 after 342.601s at imported project_source_modules cleanup, phase 2
+stage 3 code 10. No packet or normal build receipt exists.
+
+The selected-unit diagnosis identifies caller project_atlas_source and work
+exhaustion while copying an imported cleanup provider's tokens. An experiment
+retaining only source text for empty-cleanup-only providers passes with the same
+646 inputs; the complete production retry remains pending. Details and corrected
+diagnostic labels are in
+`candidate-empty-cleanup-sources-20261107.md`.
+
+Parallel closure/view/vector work is integrated in four separate commits. Its
+bounded Windows generated-C and artifact-restoration executions pass; the
+integrated source checks pass with 755 files and 9515 MIR functions. These checks
+do not replace normal self-build or current-source parity. The fixed-point tools
+also reject empty source receipts and recheck the compiler lock at entry/exit;
+eight focused Python regressions pass. Native Linux remains batched separately.

@@ -425,6 +425,13 @@ pub fn Storage storage(ref Stream stream) {
 
 // Explicit owned snapshot for AST compaction: preserve revision-specific token
 // kinds, trivia, spans and private cooked bytes without rescanning the source.
+// Empty cleanup ASTs have no token/cooked references. Keep their full source
+// bytes independently owned without retaining unrelated lexical arenas.
+pub fn Result<Stream,u32> copy_text_only(ref Stream original) {
+    if(bytes::len(ref original.source)>limits::program_bytes()){return .err(10);}
+    let source=switch(bytes::copy(bytes::view(ref original.source))){case .ok(b):{b}case .err(_):{return .err(11);}};
+    return .ok(Stream{.source,.tokens=v::empty<Token>(),.cooked=v::empty<bytes::Buffer>(),.errors=v::empty<diagnostics::Entry>()});
+}
 pub fn Result<Stream,u32> copy(ref Stream original,ref mut usize work) {
     if(bytes::len(ref original.source)>limits::program_bytes() || v::len<Token>(ref original.tokens)>1048576 || v::len<diagnostics::Entry>(ref original.errors)>257){return .err(10);}
     let source=switch(bytes::copy(bytes::view(ref original.source))){case .ok(b):{b}case .err(_):{return .err(11);}};

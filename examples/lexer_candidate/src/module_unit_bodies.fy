@@ -35,10 +35,20 @@ fn Result<v::Vec<Edge>,join::Problem> edges(ref generics::Plan instances,ref ast
     var v::Vec<Edge> result=v::empty<Edge>();let usize count=if(cleaning){generics::cleanup_dependency_count(instances)}else{generics::dependency_count(instances)};var usize i=0;while(i<count){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}let target=if(cleaning){generics::cleanup_dependency_at(instances,i)}else{generics::dependency_at(instances,i)};if(target.owner==owner){var usize expression=1;while(expression<=ast::expression_count(body) && ast::expression_origin(body,expression)!=target.source_index){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}expression+=1;}if(expression>ast::expression_count(body) || ast::expression_at(body,expression).kind!=20){return .err(fail(9,module_index,start,end));}if(!v::push<Edge>(ref mut result,Edge{.expression,.target}).is_ok){return .err(fail(11,module_index,start,end));}}i+=1;}
     i=1;while(i<=ast::expression_count(body)){if(ast::expression_at(body,i).kind==20){var usize e=0;var usize found=0;while(e<v::len<Edge>(ref result)){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}if(v::at<Edge>(ref result,e).expression==i){found+=1;}e+=1;}if(found!=1){let n=ast::expression_at(body,i);return .err(fail(9,module_index,n.start,n.end));}}i+=1;}return .ok(result);
 }
-fn Result<usize,u32> source(ref mut v::Vec<Source> owned,ref syntax::Parsed original,usize module_index,ref mut units::Usage usage,ref mut usize cooked,ref mut usize work){
+// Generic bodies are collected before cleanups. On a cleanup-only cache miss,
+// retain tokens if any cleanup in that provider might need them later.
+fn Result<bool,u32> cleanup_tokens(ref syntax::Parsed original,ref mut usize work){
+    var usize i=0;while(i<syntax::declaration_count(original)){if(!ast::charge(work,1)){return .err(10);}let d=syntax::declaration_at(original,i);
+        if(d.cleanup_body!=0){if(d.kind!=6 || d.attribute_count!=0 || d.cleanup_attribute_count!=0 || d.entry_count!=0 || d.expression!=0 || d.body!=0 || d.result_type!=0 || d.generic_parameters!=0){return .ok(true);}let b=syntax::statement_at(original,d.cleanup_body);
+            if(b.kind!=1 || b.expression!=0 || b.target!=0 || b.first!=0 || b.second!=0 || b.entry!=0 || b.operator!=0){return .ok(true);}}
+        i+=1;
+    }return .ok(false);
+}
+fn Result<usize,u32> source(ref mut v::Vec<Source> owned,ref syntax::Parsed original,usize module_index,bool keep_tokens,ref mut units::Usage usage,ref mut usize cooked,ref mut usize work){
     var usize i=0;while(i<v::len<Source>(owned)){if(!ast::charge(work,1)){return .err(10);}if(v::at<Source>(owned,i).module_index==module_index){return .ok(i);}i+=1;}
     let usize bytes=syntax::source_view(original).len;if(bytes>65536 || usage.bytes>1048576 || bytes>1048576-usage.bytes || !ast::charge(work,bytes)){return .err(10);}usage.bytes+=bytes;
-    let stream=switch(syntax::copy_source(original,work)){case .ok(s):{s}case .err(c):{return .err(c);}};
+    let full=if(keep_tokens){true}else{switch(cleanup_tokens(original,work)){case .ok(full):{full}case .err(code):{return .err(code);}}};
+    let stream=switch(if(full){syntax::copy_source(original,work)}else{scanner::copy_text_only(syntax::source_stream(original))}){case .ok(s):{s}case .err(c):{return .err(c);}};
     let usize stored=scanner::storage(ref stream).cooked_bytes;if(*cooked>65536 || stored>65536-*cooked || !ast::charge(work,stored)){return .err(10);};*cooked=*cooked+stored;
     if(!v::push<Source>(owned,Source{.module_index,.stream}).is_ok){return .err(11);}return .ok(v::len<Source>(owned)-1);
 }
@@ -49,7 +59,7 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
     var v::Vec<types::Type> graph=graph_input;
     let valid=generics::validate(instances,sources,metadata,ref graph);if(valid.code!=0){return .err(valid);}var v::Vec<Source> owned=v::empty<Source>();var v::Vec<Body> bodies=v::empty<Body>();var usize work=0;var usize cooked=0;var units::Usage usage=units::Usage{.bytes=0,.declarations=0,.expressions=0,.statements=0,.entries=0,.types=0,.fields=0,.attributes=0,.arguments=0};var usize id=1;
     while(id<=generics::count(instances)){var instance=generics::at(instances,id);let original=v::at<syntax::Parsed>(sources,instance.module_index);let d=syntax::declaration_at(original,instance.declaration-1);
-        let source_index=switch(source(ref mut owned,original,instance.module_index,ref mut usage,ref mut cooked,ref mut work)){case .ok(i):{i}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
+        let source_index=switch(source(ref mut owned,original,instance.module_index,true,ref mut usage,ref mut cooked,ref mut work)){case .ok(i):{i}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
         var usize provider_token=0;if(operations::operation(original,instance.declaration).kind==1){let type=types::at(ref graph,instance.result);let provider=switch(operations::select(original,instance.declaration,type.scalar,ref mut work)){case .ok(n):{n}case .err(code):{return .err(fail(code,instance.module_index,d.start,d.end));}};provider_token=operation_syntax::provider_token(original,provider);}
         let body=switch(if(provider_token==0){ast::build(original,instance.declaration,ref mut work)}else{ast::build_operation(original,instance.declaration,provider_token,ref mut work)}){case .ok(p):{p}case .err(c):{return .err(fail(c,instance.module_index,d.start,d.end));}};
         if(!measure(ref body,ref mut usage)){return .err(fail(10,instance.module_index,d.start,d.end));}
@@ -62,7 +72,7 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
         let requests=switch(edges(instances,ref body,id,false,instance.module_index,d.start,d.end,ref mut work)){case .ok(p):{p}case .err(p):{return .err(p);}};
         instance.argument_start=0;instance.parameter_start=0;if(!v::push<Body>(ref mut bodies,Body{.signature=instance,.source=source_index,.ast=body,.arguments,.parameters,.annotations=roots,.edges=requests}).is_ok){return .err(fail(11,instance.module_index,d.start,d.end));}id+=1;
     }
-    var v::Vec<Cleaning> cleanups=v::empty<Cleaning>();id=1;while(id<=generics::cleanup_count(instances)){var info=generics::cleanup_at(instances,id);let original=v::at<syntax::Parsed>(sources,info.module_index);let source_index=switch(source(ref mut owned,original,info.module_index,ref mut usage,ref mut cooked,ref mut work)){case .ok(i):{i}case .err(c):{return .err(fail(c,info.module_index,info.start,info.end));}};
+    var v::Vec<Cleaning> cleanups=v::empty<Cleaning>();id=1;while(id<=generics::cleanup_count(instances)){var info=generics::cleanup_at(instances,id);let original=v::at<syntax::Parsed>(sources,info.module_index);let source_index=switch(source(ref mut owned,original,info.module_index,false,ref mut usage,ref mut cooked,ref mut work)){case .ok(i):{i}case .err(c):{return .err(fail(c,info.module_index,info.start,info.end));}};
         let body=switch(ast::build_cleanup(original,info.declaration,ref mut work)){case .ok(p):{p}case .err(c):{return .err(fail(c,info.module_index,info.start,info.end));}};if(!measure(ref body,ref mut usage)){return .err(fail(10,info.module_index,info.start,info.end));}
         var v::Vec<usize> arguments=v::empty<usize>();var usize i=0;while(i<info.argument_count){if(!v::push<usize>(ref mut arguments,generics::argument_at(instances,info.argument_start+i)).is_ok){return .err(fail(11,info.module_index,info.start,info.end));}i+=1;}
         let context=generics::Instance{.module_index=info.module_index,.declaration=info.declaration,.argument_start=0,.argument_count=info.argument_count,.result=0,.parameter_start=0,.parameter_count=0,.effects=info.effects,.must_use=false,.unsafe_call=false};
