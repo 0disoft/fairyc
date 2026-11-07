@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-const closureDependency = `module answer;pub fn i32 value(){let i32 offset=40;let add=fn [i32 offset] i32(i32 n){return offset+n;};return add(2);}`
+const closureDependency = `module answer;pub fn i32 value(){let i32 offset=40;let add=fn [i32 offset] i32(i32 n){return offset+n;};let i32[2] data=[1,2];var i32 result=0;for(let i32 item in data){result=add(item);}return result;}`
 
 func TestCopiedClosureCache(t *testing.T) {
 	for _, family := range []string{"ordinary", "generic"} {

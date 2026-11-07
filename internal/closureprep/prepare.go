@@ -186,15 +186,16 @@ func (x *lifter) statement(s ast.Statement, env map[string]local, owner string) 
 		s.For = &v
 	}
 	if s.ByteFor != nil {
-		if len(env) != 0 {
-			return s, fail(s.Span, "view/vector for-in and copied closures require separate admission")
-		}
 		v := *s.ByteFor
 		v.View, err = x.expr(v.View, env, owner)
 		if err != nil {
 			return s, err
 		}
-		v.Body, err = x.block(v.Body, env, false, owner)
+		// The iterable sees the enclosing scope. The written item binding shadows
+		// a closure only inside the body, just like the generated scalar loop.
+		bodyEnv := maps.Clone(env)
+		delete(bodyEnv, v.Name)
+		v.Body, err = x.block(v.Body, bodyEnv, false, owner)
 		if err != nil {
 			return s, err
 		}
