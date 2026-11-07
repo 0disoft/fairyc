@@ -16,6 +16,18 @@ fn m::Problem label(ref syntax::Parsed caller,ref syntax::Parsed target,m::Frame
     let e=syntax::expression_at(caller,row);let token=scanner::token_info(syntax::source_stream(caller),e.token);let d=syntax::declaration_at(target,declaration-1);var usize ordinal=0;var usize i=d.entry_start;
     while(i<d.entry_start+d.entry_count){if(!m::charge(work,1)){return m::fail(frame,10,token.start,token.end,0,0);}let p=syntax::entry_at(target,i);if(p.kind==1){if(ordinal==position){return if(bytes::equal(syntax::expression_text(caller,row),syntax::source_view(target)[p.name_start..p.name_end])){m::fail(frame,0,0,0,0,0)}else{m::fail(frame,1014,e.start,e.end,0,0)};}ordinal+=1;}i+=1;}return m::fail(frame,12,token.start,token.end,0,0);
 }
+// Value calls retain their original named callable in Expression.left. They
+// never manufacture a provider declaration or a generic instance identity.
+pub fn m::Problem closure(ref syntax::Parsed source,m::Frame frame,usize expression,usize source_index,ref v::Vec<types::Type> graph,ref v::Vec<m::Expression> expressions,ref mut v::Vec<m::Invocation> calls,ref mut v::Vec<m::Argument> arguments,ref mut usize work){
+    let e=syntax::expression_at(source,source_index);let callee=syntax::expression_at(source,e.left);let expected=m::find(graph,1,1);
+    if(e.kind!=6 || callee.kind!=2 || expected==0){return m::fail(frame,12,e.start,e.end,0,0);}
+    let labels=switch(labeled(source,frame,source_index,work)){case .ok(b):{b}case .err(p):{return p;}};if(labels){return m::fail(frame,1014,e.start,e.end,0,0);}
+    let count=syntax::call_argument_count(source,source_index);if(count!=1){return m::fail(frame,1010,e.start,e.end,1,count);}
+    let selected=syntax::call_argument(source,source_index,0);let node=syntax::expression_at(source,selected);let local=m::index(expressions,selected);if(local==0){return m::fail(frame,12,node.start,node.end,0,0);}
+    if(!m::charge(work,2) || v::len<m::Invocation>(calls)>=16384 || v::len<m::Argument>(arguments)>=16384){return m::fail(frame,10,e.start,e.end,0,0);}
+    let invocation=v::len<m::Invocation>(calls)+1;let argument_start=v::len<m::Argument>(arguments);
+    if(!v::push<m::Argument>(arguments,m::Argument{.invocation,.position=0,.expression=local,.source_index=selected,.expected,.actual=0,.start=node.start,.end=node.end,.label_start=0,.label_end=0,.checked=false,.shared=false}).is_ok || !v::push<m::Invocation>(calls,m::Invocation{.kind=4,.expression,.source_index,.target_module=0,.target_declaration=0,.instance=0,.argument_start,.argument_count=1,.start=e.start,.end=e.end,.checked=false}).is_ok){return m::fail(frame,11,e.start,e.end,0,0);}return m::fail(frame,0,0,0,0,0);
+}
 pub fn m::Problem record(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref interfaces::Interfaces imported,m::Frame frame,usize expression,usize source_index,u32 kind,usize target_module,usize target_declaration,usize instance,usize parameter_start,usize parameter_count,ref v::Vec<types::Type> graph,ref v::Vec<m::Expression> expressions,ref mut v::Vec<m::Invocation> calls,ref mut v::Vec<m::Argument> arguments,ref mut usize work){
     let source=v::at<syntax::Parsed>(sources,frame.module_index);let e=syntax::expression_at(source,source_index);let target=v::at<syntax::Parsed>(sources,target_module);let d=syntax::declaration_at(target,target_declaration-1);let has_labels=switch(labeled(source,frame,source_index,work)){case .ok(b):{b}case .err(p):{return p;}};
     if(has_labels && (kind!=1 || target_module!=frame.module_index || d.kind!=3 || d.public || d.generic_parameters!=0 || d.owner_end!=0)){return m::fail(frame,1014,e.start,e.end,0,0);}

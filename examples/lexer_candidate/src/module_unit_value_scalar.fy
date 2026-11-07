@@ -17,6 +17,7 @@ import module_unit_value_result as results;
 import module_unit_value_region as regions;
 import module_unit_value_builtin as builtins;
 import module_unit_value_view as views;
+import module_unit_value_closure as closures;
 import syntax as syntax;
 import std::bytes as bytes;
 import std::vec as v;
@@ -80,7 +81,8 @@ fn m::Problem cast(ref syntax::Parsed source,m::Frame frame,usize id,usize expec
 }
 
 pub fn m::Problem evaluate(ref syntax::Parsed source,m::Frame frame,usize id,usize expected,ref interfaces::Interfaces imported,ref mut v::Vec<types::Type> graph,ref m::Atoms atoms,ref mut v::Vec<m::Expression> expressions,ref mut usize work,usize depth){
-    if(id==0){return ok(frame);}let e=v::at<m::Expression>(expressions,id-1);if(depth>=64 || !m::charge(work,1)){return m::fail(frame,10,e.start,e.end,0,0);}if(expected>types::count(graph)){return m::fail(frame,12,e.start,e.end,0,expected);}if(e.state==2){return ok(frame);}
+    if(id==0){return ok(frame);}let e=v::at<m::Expression>(expressions,id-1);if(depth>=64 || !m::charge(work,1)){return m::fail(frame,10,e.start,e.end,0,0);}if(expected>types::count(graph)){return m::fail(frame,12,e.start,e.end,0,expected);}
+    if(e.kind==36){return closures::evaluate(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}if(e.state==2){return ok(frame);}
     if(e.kind==1){return literal(source,frame,id,expected,imported,graph,atoms,expressions,work);}if(e.state==1 && (!e.flexible || e.expected==expected)){return ok(frame);}
     if(e.kind==3){return group(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}
     if(e.kind==8){return field(source,frame,id,expected,imported,graph,atoms,expressions,work,depth);}

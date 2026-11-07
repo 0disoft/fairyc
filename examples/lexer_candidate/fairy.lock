@@ -3,40 +3,40 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-c4f736e5875569518f98da379e7dbc0866c96175a431da6b47ceef3cda0f432c",
+  "root": "fypi1-sha256-75fb43b9545fe255761ad49ce58e74334dfac63986f648be491466e546057f8f",
   "packages": [
     {
-      "id": "fypi1-sha256-c4f736e5875569518f98da379e7dbc0866c96175a431da6b47ceef3cda0f432c",
+      "id": "fypi1-sha256-75fb43b9545fe255761ad49ce58e74334dfac63986f648be491466e546057f8f",
       "role": "root",
       "packageUid": "example.lexer-candidate",
       "sourceKind": "local",
       "localPath": ".",
       "sdkIdentity": "",
       "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-fc6784d90c0a52531e65e3ee3bf5eefeda4dd9b4ab2867596434ef09558de802",
-      "sourceDigest": "fysrc1-sha256-fc6784d90c0a52531e65e3ee3bf5eefeda4dd9b4ab2867596434ef09558de802",
+      "sourceIdentity": "fysrc1-sha256-448bcd0a5191170ca59632f94a0a5eb2407d34f9bd998922e55da1b9986cbd38",
+      "sourceDigest": "fysrc1-sha256-448bcd0a5191170ca59632f94a0a5eb2407d34f9bd998922e55da1b9986cbd38",
       "version": "0.71.0",
       "features": []
     },
     {
-      "id": "fypi1-sha256-eb3f63d50ef081a07981b6aa8e10489929b687dcacc46b8024f4fadedc62e467",
+      "id": "fypi1-sha256-ecfcf0f8cd3bfe8193f6844080101e60058de89db5dfbbfa2ce901ba2bcb2f0d",
       "role": "standard-library",
       "packageUid": "fairyc.std",
       "sourceKind": "sdk",
       "localPath": "",
       "sdkIdentity": "fairyc-sdk-stdlib/0",
       "runtimeAbi": "fairyc-runtime/0",
-      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-e256aabfe2a16a603f947d4ef5b55b5a4ae80915fdd855e18c6016910fbcc597",
-      "sourceDigest": "fysrc1-sha256-e256aabfe2a16a603f947d4ef5b55b5a4ae80915fdd855e18c6016910fbcc597",
+      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-e520912752e09ae0a1d4f26540e3f377b276ca23ab40ab23c54baf162edc2e11",
+      "sourceDigest": "fysrc1-sha256-e520912752e09ae0a1d4f26540e3f377b276ca23ab40ab23c54baf162edc2e11",
       "version": "0.0.0-stage0.87",
       "features": []
     }
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-c4f736e5875569518f98da379e7dbc0866c96175a431da6b47ceef3cda0f432c",
+      "owner": "fypi1-sha256-75fb43b9545fe255761ad49ce58e74334dfac63986f648be491466e546057f8f",
       "binding": "stdlib",
-      "target": "fypi1-sha256-eb3f63d50ef081a07981b6aa8e10489929b687dcacc46b8024f4fadedc62e467"
+      "target": "fypi1-sha256-ecfcf0f8cd3bfe8193f6844080101e60058de89db5dfbbfa2ce901ba2bcb2f0d"
     }
   ]
 }
