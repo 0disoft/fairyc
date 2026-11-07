@@ -17,6 +17,7 @@ import effect_declarations as effects;
 import foreign_declarations as foreign;
 import repr_c_declarations as repr;
 import ffi_symbols as ffi;
+import closure_value_source_set as closure_values;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -121,6 +122,7 @@ fn Result<Program,catalog::Problem> build_mode(ref v::Vec<syntax::Parsed> source
             if(!v::push<Signature>(ref mut signatures,Signature{.module_index,.declaration=index+1,.public=d.public,.result=result.type,.parameter_start,.parameter_count,.effects=contract.bits,.must_use=contract.must_use,.unsafe_call=d.unsafe_end!=0,.foreign=d.kind==9,.link_start,.link_end}).is_ok){return .err(fail(11,module_index,d.start,d.end));}
         }index+=1;}module_index+=1;
     }
+    let closure_policy=closure_values::validate_current(sources,ref c);if(closure_policy.code!=0){return .err(closure_policy);}
     let owned=switch(if(aggregates){types::assemble_aggregates(ref c,graph)}else{types::assemble(ref c,graph)}){case .ok(g):{g}case .err(code):{return .err(fail(code,0,0,0));}};
     let planned=switch(vectors::build(c,owned)){case .ok(p):{p}case .err(code):{return .err(fail(code,0,0,0));}};
     return .ok(Program{.states,.types=planned,.signatures,.parameters,.vector_sources,.links,.aggregates=prepared});

@@ -36,6 +36,9 @@ fn u32 nominal(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metada
 }
 fn u32 walk(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref v::Vec<types::Type> graph,ref Coordinates coordinates,ref identities::Table named,usize owner,usize id,usize depth,bool source_current,ref mut bytes::Buffer out,ref mut usize work){
     if(depth>=64){return 10;}if(id==0 || id>types::count(graph)){return 9;}if(!budget::charge(work,1)){return 10;}let t=types::at(graph,id);var u32 code=0;
+    // ADR0551 exposes only the exact safe closure leaf at a direct type position.
+    // Recursive transport and every payload word remain outside this spelling.
+    if(t.kind==23){if(depth!=0 || t.scalar!=0 || t.module_index!=0 || t.declaration!=0 || t.first!=0 || t.second!=0){return 9;}return write::raw(out,b"fn i32(i32)",work);}
     if(t.kind==1){if(c::valid(t.scalar)){code=write::raw(out,b"c::",work);return if(code!=0){code}else{write::raw(out,c_scalar(t.scalar),work)};}let text=scalar(t.scalar);return if(text.len==0){9}else{write::raw(out,text,work)};}
     if(t.kind>=2 && t.kind<=4){return nominal(sources,metadata,coordinates,owner,t.module_index,t.declaration,t.kind,source_current,out,work);}
     if(t.kind==9 || t.kind==14 || t.kind==19){return write::raw(out,if(t.kind==9){b"ref str"}else if(t.kind==14){b"ref CStr"}else{b"Region"},work);}
