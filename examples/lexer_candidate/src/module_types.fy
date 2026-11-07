@@ -83,7 +83,7 @@ fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,
 fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates){
     return walk_type(c,p,module_index,root,graph,depth,declaration,substitutions,aggregates,false);
 }
-// Only the direct scalar payload of a root Option may use the transport lane.
+// Only a root Option or Result<S,u32> direct success leaf may use transport.
 // Recursive wrappers call walk again, so this permission cannot escape its leaf.
 fn Resolution walk_type(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates,bool option_payload){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
@@ -130,9 +130,10 @@ fn Resolution walk_type(ref catalog::Catalog c,ref syntax::Parsed p,usize module
             return accepted(graph,node(13,0,d.module_index,d.declaration,first.type,0),module_index,n.start,n.end);
         }
         if(!option && !bytes::equal(name,b"Result") || args!=if(option){1}else{2}){return fail(9,module_index,n.start,n.end);}
-        let payload=syntax::type_argument(p,root,0);let flat_option=depth==0 && option && syntax::type_at(p,payload).kind==1;
-        let first=walk_type(c,p,module_index,payload,graph,depth+1,declaration,substitutions,aggregates,flat_option);if(first.problem.code!=0){return first;}var usize second=0;
+        let payload=syntax::type_argument(p,root,0);let flat_payload=depth==0 && syntax::type_at(p,payload).kind==1;
+        let first=walk_type(c,p,module_index,payload,graph,depth+1,declaration,substitutions,aggregates,flat_payload);if(first.problem.code!=0){return first;}var usize second=0;
         if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions,aggregates);if(last.problem.code!=0){return last;}second=last.type;}
+        if(!aggregates && !option && at(graph,first.type).kind==1 && transport::extended(at(graph,first.type).scalar) && (at(graph,second).kind!=1 || at(graph,second).scalar!=4)){let leaf=syntax::type_at(p,payload);return fail(5,module_index,leaf.start,leaf.end);}
         if(at(graph,first.type).kind==19 || second!=0 && at(graph,second).kind==19){return fail(9,module_index,n.start,n.end);}return accepted(graph,node(if(option){5}else{6},0,0,0,first.type,second),module_index,n.start,n.end);
     }
     return fail(9,module_index,n.start,n.end);

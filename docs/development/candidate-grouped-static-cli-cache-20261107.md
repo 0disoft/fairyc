@@ -325,3 +325,9 @@ bound increase, source-of-truth change or commit is performed by this worker.
 Full host/native outcome is recorded above. Both assigned files remain
 uncommitted for coordinator review. Sessions 34733 (interrupted) and 43163
 (exit0) are closed; no live process/session or blocker remains.
+
+After integration, the coordinator verified every changed worktree file was
+copied to main (the admission receipt has an added main-source check), moved its
+entire ignored `.cache` to `.cache/grouped-static-evidence-20261107/` in main,
+then removed the detached worktree. Historical artifact paths above now resolve
+under that evidence root; no failed log or host image was discarded.

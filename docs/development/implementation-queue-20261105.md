@@ -84,6 +84,12 @@ authorized by this queue.
   `candidate-flat-option-cli-cache-20261107.md`; other wrapper families stay open. The Go
   memory/new-session/new-process disk cache and restored C execution pass in
   `go-flat-option-cache-20261107.md` without a production cache change.
+  ADR 0550's flat `Result<S,u32>` now passes Go source/restored MIR/native and
+  memory/disk/new-process cache checks, plus Fairy type-graph rollback, 105 Go
+  source/diagnostic controls and four restored-artifact native-C products. See
+  `go-flat-result-transport-20261107.md`, `go-flat-result-cache-20261107.md` and
+  `candidate-flat-result-transport-20261107.md`. Whole CLI/cache is in progress;
+  broader error payloads/nesting remain separate.
 - [x] Multi-operation static interfaces: ADR 0549's bounded groups now have Go
   and Fairy representation, complete-provider admission, exact declaration-error
   location and shared sibling/provider identity. Go memory/new-process disk
@@ -141,6 +147,15 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Flat Result success transport closes the bounded Go/Fairy source/artifact
+  family without widening other error payloads, wrappers or FFI. Seven scalar
+  success families preserve active bits, signed zero, copied must-handle and
+  once-only propagation. Fairy independently matches 84 signature and 21 body
+  controls; four actual producer/consumer products pass. Go fresh-process cache
+  restoration forbids lowering on hits and heals forged metadata. Main-source
+  check/locked check pass 758 files / 9,594 functions with all 1,230 authored
+  files and lock matched. Full CLI/cache and final gates remain open.
 
 - Grouped full-CLI/cache acceptance passes both compiler profiles. Low reuses
   the completed baseline/mutation prefix and authenticates the image for a

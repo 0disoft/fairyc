@@ -3,6 +3,9 @@
 - Status: Accepted for bounded prototype
 - Date: 2026-11-07
 - Extends: [ADR 0547](0547-flat-option-generic-transport.md)
+- Go execution: [receipt](../development/go-flat-result-transport-20261107.md)
+- Go cache: [receipt](../development/go-flat-result-cache-20261107.md)
+- Fairy source/artifact/native: [receipt](../development/candidate-flat-result-transport-20261107.md)
 
 ## Scope
 

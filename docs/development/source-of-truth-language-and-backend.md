@@ -56,6 +56,7 @@ Part 1 of 3 of the [source index](source-of-truth.md).
   - `internal/closureprep/`
   - `docs/adr/0494-broader-scalar-generic-transport.md`
   - `docs/adr/0547-flat-option-generic-transport.md`
+  - `docs/adr/0550-flat-result-success-generic-transport.md`; Go/Fairy flat Result evidence: `docs/development/go-flat-result-transport-20261107.md`, `go-flat-result-cache-20261107.md`, `candidate-flat-result-transport-20261107.md`
   - `docs/adr/0495-explicit-static-operation-interfaces.md`
   - `docs/adr/0496-explicit-copied-local-closures.md`
   - `internal/semantic/`

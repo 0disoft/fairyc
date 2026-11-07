@@ -29,6 +29,24 @@ scalar, so this does not admit `id<Option<S>>`. Both ordinary resolution and
 specialization roll back an interned payload when wrapper publication fails.
 The separate aggregate-enabled resolver retains its previous policy.
 
+[ADR 0550](../adr/0550-flat-result-success-generic-transport.md) additionally
+admits a root `Result<S,u32>` with one direct success scalar from the seven
+extension types. A scalar-bound error parameter may resolve to exactly u32;
+arbitrary error payloads and nested wrappers remain closed. Result copies keep
+their existing must-handle obligations. Construction, reassignment, parameter/
+result forwarding, switch and once-only `?` use the existing tag/value machinery.
+The private leaf permission is provisional until the resolved error is verified;
+failure rolls back every newly interned record. No new aggregate/FFI/defer or
+generic-argument admission follows from a flat success leaf.
+
+Go source/restored MIR, target layout and Windows C11/C17 low/optimized execution
+pass, as do memory/new-process disk-cache restoration and forged-metadata repair.
+Fairy graph, 105 independent source controls and restored-artifact C execution
+pass both profiles; see the
+[Fairy receipt](../development/candidate-flat-result-transport-20261107.md).
+The direct declaration-spelling and scalar-substitution paths converge on the
+same existing kind-6 Result record. Whole authored CLI/cache runs separately.
+
 Some/None construction, inert copies, reassignment, ordinary and generic calls,
 returns and exhaustive extraction use the existing checked IR and tagged C
 emitter. No boxing, allocation, new ABI, scalar arithmetic or deferred Option

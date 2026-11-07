@@ -21,6 +21,10 @@ pub fn ref u8[] name(ref Reports p,usize index){let d=at(p,index);return bytes::
 pub fn Reports empty(){return Reports{.names=bytes::empty(),.rows=v::empty<Diagnostic>()};}
 fn bool unsupported(ref u8[] name){return bytes::equal(name,b"i8") || bytes::equal(name,b"i16") || bytes::equal(name,b"isize") || bytes::equal(name,b"u16") || bytes::equal(name,b"u64") || bytes::equal(name,b"f32") || bytes::equal(name,b"f64");}
 fn Result<usize,u32> parameter(ref catalog::Catalog templates,catalog::Template row,ref u8[] name,ref mut usize work){var usize i=0;while(i<row.count){let p=catalog::parameter_at(templates,row.first+i);let text=catalog::text(templates,p.name);if(!budget::charge(work,name.len+text.len+1)){return .err(10);}if(bytes::equal(name,text)){return .ok(i+1);}i+=1;}return .ok(0);}
+fn Result<bool,u32> u32_error(ref plan::Plan original,plan::Node selected,ref syntax::Parsed p,usize root,ref mut usize work){
+    if(!budget::charge(work,1)){return .err(10);}if(root==0 || root>syntax::type_count(p)){return .err(9);}if(syntax::type_at(p,root).kind!=1){return .ok(false);}let text=syntax::type_text(p,root);let templates=input::templates(plan::input(original));let row=catalog::template_at(templates,selected.template_index);let param=switch(parameter(templates,row,text,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
+    if(param==0){return .ok(bytes::equal(text,b"u32"));}if(param>selected.count){return .err(9);}let types=input::types(plan::input(original));let id=selected.arguments[param-1];if(id==0 || id>concrete::count(types)){return .err(9);}let t=concrete::at(types,id-1);return .ok(t.kind==1 && t.scalar==4);
+}
 fn Result<bool,u32> contains(ref plan::Plan original,plan::Node selected,ref syntax::Parsed p,usize root,usize depth,ref mut usize work){
     if(!budget::charge(work,1)){return .err(10);}if(root==0){return .ok(false);}if(root>syntax::type_count(p)){return .err(9);}if(depth>=64){return .err(10);}let n=syntax::type_at(p,root);
     if(n.kind==1){let templates=input::templates(plan::input(original));let row=catalog::template_at(templates,selected.template_index);let text=syntax::type_text(p,root);let param=switch(parameter(templates,row,text,work)){case .ok(value):{value}case .err(code):{return .err(code);}};
@@ -28,6 +32,9 @@ fn Result<bool,u32> contains(ref plan::Plan original,plan::Node selected,ref syn
     }
     if(depth==0 && n.kind==6 && bytes::equal(syntax::type_text(p,n.left),b"Option") && syntax::type_argument_count(p,root)==1){
         let payload=syntax::type_argument(p,root,0);if(payload!=0 && payload<=syntax::type_count(p) && syntax::type_at(p,payload).kind==1){return contains(original,selected,p,payload,0,work);}
+    }
+    if(depth==0 && n.kind==6 && bytes::equal(syntax::type_text(p,n.left),b"Result") && syntax::type_argument_count(p,root)==2){
+        let payload=syntax::type_argument(p,root,0);if(payload!=0 && payload<=syntax::type_count(p) && syntax::type_at(p,payload).kind==1){let allowed=switch(u32_error(original,selected,p,syntax::type_argument(p,root,1),work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(allowed){return contains(original,selected,p,payload,0,work);}}
     }
     let left=switch(contains(original,selected,p,n.left,depth+1,work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(left){return .ok(true);}
     // Array lengths are expressions, not signature type arguments.
