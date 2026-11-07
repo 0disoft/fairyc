@@ -86,3 +86,26 @@ Linux native checks stay batched. No CI, push, deployment or publishing occurs.
 Public API/SDK ABI, DB, dependencies, repository hygiene and runners are unchanged.
 Only private emitter implementation, focused tests, the lock and the documented
 compilation-unit contract changed in the implementation commits.
+
+## Later current-source verification
+
+The later `d0b84329` source checkpoint passes normal full-dispatcher release
+construction: authored frontend 512.243s and release native compile/link
+633.650s, each within its existing 900s stage watchdog. The subsequent native
+fixed point passes with 821.298s frontend and 632.728s fresh native build;
+both complete C packets and optimized PE images are exactly equal, with no
+excluded image bytes. The authored companion passes three-generation equality
+and scratch cleanup. This supersedes the pending Windows release/fixed-point
+state above; it does not erase either earlier timeout.
+
+Five Go/Fairy suites execute 342 exact-matching comparisons with no workspace
+native-contract failures. Four observations remain explicitly excluded;
+therefore only the two CLI suite reports have unqualified `parity=true`.
+The unsuccessful entry-lookup optimization was discarded, and only its
+regression fixture/evidence is retained. Both Sol High workers and all observed
+verification processes have exited without conflicting production edits.
+
+See `current-compiler-acceptance-route-20261107.md` for current receipt paths,
+checksums, timings, scope and exclusion reasons. Linux, clean-machine execution,
+development self-build, full `go test ./...`, CI and remote actions remain
+outside this completed local release slice.

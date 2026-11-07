@@ -246,16 +246,26 @@ that host contention alone explains the earlier failures. The previous Go seed
 was also optimized; this is not a low-to-optimized profile comparison. Neither
 rejected entry-lookup variant contributes to this successful product build.
 
-## Remaining work
+## Follow-up verification and remaining scope
 
-Run the native/companion fixed points and current Go/Fairy comparisons against
-the successful release receipt, using disjoint output directories. Do not infer
-throughput from a structural micro-optimization that did not improve the range.
+The native fixed point completes with 821.298s frontend and 632.728s fresh
+release compile/link: complete consecutive C packets and 7788544-byte PE
+images are exactly equal. Both stage watchdogs remain 900s. The companion also
+passes exact packet/three-generation image equality and scratch cleanup.
+All 342 executed Go/Fairy observations match, with four explicit exclusions
+and no workspace native-contract failures. Source inputs and the lock remain
+unchanged. Details and all receipt paths are in
+`current-compiler-acceptance-route-20261107.md`.
+
+Do not infer throughput from a structural micro-optimization that did not
+improve the range, or count excluded observations as successful comparisons.
 The SDK layout index has a finite ownership graph and no newly detected cleanup
 cycle; its retention has not been proved to cause the observed delay. Opaque
-MSVC copy barriers remain unchanged. Normal release self-build now passes;
-native and companion fixed points and full Go/Fairy behavior comparisons remain
-incomplete. Linux remains batched; CI and push are unexecuted.
+MSVC copy barriers remain unchanged. Normal release construction, native and
+companion fixed points and the five comparison runs now complete. Original
+fixture coverage exclusions, development-profile self-build, Linux and
+clean-machine acceptance remain separate. Linux stays batched; CI and push
+are unexecuted.
 
 Public API/SDK ABI, DB, dependencies, repository hygiene and runners are
 unchanged. This changes private verification tooling and development evidence,

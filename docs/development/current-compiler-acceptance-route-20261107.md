@@ -752,8 +752,68 @@ entry scope, no runtime Go builder and no product timeout change. The installed
 Fairy companion/assets reuse is authenticated against all 59 source hashes.
 The failed entry-lookup optimization was discarded before this build.
 
-This establishes normal release construction; native/companion fixed points
-and full current Go/Fairy comparisons still require their separate gates.
+This establishes normal release construction. The separate fixed-point and
+comparison gates are recorded below, including their exclusions.
 See `candidate-body-phase-diagnosis-20261107.md` for the seed identity, packet
 and image hashes, invocation timings and varying host CPU samples. Linux stays
 batched; CI, push and release/publishing are unexecuted.
+
+## Parallel follow-up verification
+
+The normal release receipt above feeds three independent jobs with disjoint
+directories under `.cache/current-post-selfbuild-d0b84329-20261107`: native fixed
+point, authored-companion fixed point, and the five serial comparison suites.
+Each native builder retains the existing two-CL admission limit. No product
+source, compiler option, deadline, public API, SDK ABI or runner is changed.
+
+The companion verifier passes in 51.409s: the current compiler reproduces the
+exact 2037976-byte C packet, and three 401920-byte companion generations have
+the same SHA-256 `11b0a82552e785529d015bdb5479aec2bae395478b35749e942308d8e79fe960`.
+`packetBytesEqual`, `optimizedImageBytesEqual` and `scratchDirectoryRemoved`
+are true; no image bytes are excluded, no bootstrap builder or Go frontend is
+invoked. Evidence: `companion-fixed/receipt.json`.
+
+| Release Go/Fairy suite | Executed / exact matches | Excluded | Seconds |
+| --- | --- | --- | --- |
+| Behavior check | 173 / 173 | 1 | 56.115 |
+| Behavior run | 54 / 54 | 2 | 167.343 |
+| Behavior CLI | 7 / 7 | 0 | 4.130 |
+| Workspace CLI | 30 / 30 | 0 | 10.973 |
+| Shipped examples | 78 / 78 | 1 | 414.328 |
+
+All 342 executed comparisons match acceptance, exit status, diagnostics, stdout
+and stderr. Both workspace suites have `nativeContractFailures=[]`. The two
+CLI suite receipts have `parity=true`; check/run/examples retain `parity=false`
+because their exclusions are not silently converted into passing cases:
+
+- `fail.flow.local-region-escape` uses a direct fixture packageGraph with a
+  synthetic standard-library provider. CLI workspaces reject local `std::*`
+  providers and inject the bundled SDK. Substituting its Arena would change
+  provider source/identity and is not a graph-equivalent adapter.
+- `pass.c-emission.fixed-array-bounds` and
+  `pass.c-emission.mutable-fixed-array-byte-view-bounds` do not meet this run
+  suite's passing `main::main` entry condition.
+- `lexer_candidate` self-source belongs to the separate normal/fixed-point
+  gates, not the shipped-example workspace adapter.
+
+Receipts and every observation remain in each suite's separate output folder.
+The reference is the authenticated, frozen-version `source-version.exe` from
+the normal build. The synthetic-stdlib fixture remains an original-fixture
+coverage gap; an adapted real-SDK check must be labelled separately.
+
+The native fixed point also passes: frontend 821.298s, fresh Stage2 release
+compile/link 632.728s and version execution 0.048s, all exit 0 with empty stderr.
+The complete verifier takes 1455.800s. Each frontend/build stage retains its
+default 900s watchdog. Both complete 55063498-byte C packets have the original
+packet hash, and both complete 7788544-byte PE images have the original
+`8a5e2e0d0522dc12a6c0c90c54c5d0b5efd85ce50131bf20aa9050a93128cc40`
+hash. No image byte is excluded. `native-fixed/receipt.json` has `passed=true`,
+`packetBytesEqual=true` and `optimizedImageBytesEqual=true`, with the inherited
+16MiB stack and no Go frontend or product timeout change.
+
+All follow-up commands have exited, and no observed verification/child PID
+remains. This completes the current Windows release construction/fixed-point
+slice and the five comparison runs; it does not turn four excluded comparisons
+into passes or establish development-profile self-build, Linux, clean-machine
+distribution, complete `go test ./...` or CI acceptance. Linux remains batched;
+no push, publishing, dependency, repository-policy or runner change occurs.
