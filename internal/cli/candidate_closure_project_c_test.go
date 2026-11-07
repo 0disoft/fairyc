@@ -129,6 +129,11 @@ func TestCandidateClosureProjectCNative(t *testing.T) {
 	previous := runtime.GOMAXPROCS(1)
 	t.Cleanup(func() { runtime.GOMAXPROCS(previous) })
 	root, cases := candidateClosureProjectCWorkspace(t)
+	candidateClosureProjectCNativeFixture(t, root, cases)
+}
+
+func candidateClosureProjectCNativeFixture(t *testing.T, root string, cases []closureProjectCCase) {
+	t.Helper()
 	build, support := candidateParityBuildParts(t, root)
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {

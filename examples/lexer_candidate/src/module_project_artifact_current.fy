@@ -66,14 +66,15 @@ fn Result<identities::Snapshot,u32> select(ref artifact::Restored saved,ref sour
 }
 pub fn Result<Rebound,u32> build(artifact::Restored saved,ref input::Input current,ref coordinates::Coordinates table,ref mut usize work){return build_sources(saved,input::sources(current),input::owners(current),input::bindings(current),table,work);}
 pub fn Result<Rebound,u32> build_sources(artifact::Restored saved,ref v::Vec<syntax::Parsed> parsed,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,ref mut usize work){
-    return build_mode(saved,parsed,owners,imports,table,false,work);
+    return build_mode(saved,parsed,owners,imports,table,false,false,work);
 }
 pub fn Result<Rebound,u32> build_aggregate_sources(artifact::Restored saved,ref v::Vec<syntax::Parsed> parsed,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,ref mut usize work){
-    return build_mode(saved,parsed,owners,imports,table,true,work);
+    return build_mode(saved,parsed,owners,imports,table,true,false,work);
 }
-fn Result<Rebound,u32> build_mode(artifact::Restored saved,ref v::Vec<syntax::Parsed> parsed,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,bool aggregates,ref mut usize work){
+pub fn Result<Rebound,u32> build_closure_sources(artifact::Restored saved,ref v::Vec<syntax::Parsed> parsed,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,bool aggregates,ref mut usize work){return build_mode(saved,parsed,owners,imports,table,aggregates,true,work);}
+fn Result<Rebound,u32> build_mode(artifact::Restored saved,ref v::Vec<syntax::Parsed> parsed,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> imports,ref coordinates::Coordinates table,bool aggregates,bool closures,ref mut usize work){
     if(!budget::charge(work,0)){return .err(10);}var usize measured=0;let shape=artifact::check(artifact::program(ref saved),artifact::source_provenance(ref saved),artifact::source_identities(ref saved),ref mut measured);if(!budget::charge(work,measured)){return .err(10);}if(shape!=0){return .err(if(shape==1002){10}else if(shape==1003){11}else{9});}
-    if(clean::aggregates(ir::cleanup_ir(artifact::program(ref saved)))!=aggregates){return .err(9);}
+    if(clean::aggregates(ir::cleanup_ir(artifact::program(ref saved)))!=aggregates || clean::closures(ir::cleanup_ir(artifact::program(ref saved)))!=closures || closures && !clean::project(ir::cleanup_ir(artifact::program(ref saved)))){return .err(9);}
     let current=switch(sources::rebind(artifact::source_provenance(ref saved),parsed,owners,imports,table,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let plan=switch(if(aggregates){planning::build_aggregate_sources(parsed,owners,imports,table,work)}else{planning::build_sources(parsed,owners,imports,table,work)}){case .ok(p):{p}case .err(e):{return .err(e.code);}};let mapping=switch(map(artifact::source_provenance(ref saved),ref current,work)){case .ok(p):{p}case .err(code):{return .err(code);}};let index=switch(indexing::build(ref plan,work)){case .ok(p):{p}case .err(code):{return .err(code);}};
     let ids=switch(select(ref saved,ref plan,ref index,ref mapping,parsed,work)){case .ok(p):{p}case .err(code):{return .err(code);}};return .ok(Rebound{.artifact=saved,.provenance=current,.plan,.identities=ids,.mapping});

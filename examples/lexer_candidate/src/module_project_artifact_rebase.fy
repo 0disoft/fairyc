@@ -5,6 +5,7 @@ import module_project_artifact_rebase_cleanup as cleanup_builder;
 import module_project_artifact_rebase_aux as auxiliary;
 import module_project_artifact_rebase_body as body_builder;
 import module_unit_body_ir_model as ir;
+import module_unit_cleanup_mir_model as clean;
 import module_unit_interfaces as interfaces;
 import module_program_artifact_wire as work;
 import std::bytes as bytes;
@@ -17,5 +18,5 @@ pub fn Result<ir::Program,u32> build(ref current::Rebound input,ref mut usize us
     while(i<ir::layout_count(p)){if(!work::charge(used,1)){return .err(1002);}var row=ir::layout_at(p,i);if(row.value.module_index>=current::module_count(input)){return .err(1001);}row.value.module_index=current::module_at(input,row.value.module_index);if(!v::push<ir::Layout>(ref mut layouts,row).is_ok){return .err(1003);}i+=1;}i=0;
     while(i<ir::field_count(p)){if(!work::charge(used,1)){return .err(1002);}var row=ir::field_at(p,i);if(row.module_index>=current::module_count(input)){return .err(1001);}row.module_index=current::module_at(input,row.module_index);if(!v::push<interfaces::Field>(ref mut fields,row).is_ok){return .err(1003);}i+=1;}i=0;
     while(i<ir::callable_count(p)){if(!work::charge(used,1)){return .err(1002);}var row=ir::callable_at(p,i);if(row.module_index>=current::module_count(input)){return .err(1001);}row.module_index=current::module_at(input,row.module_index);if(!v::push<interfaces::Callable>(ref mut callables,row).is_ok){return .err(1003);}i+=1;}i=0;while(i<ir::parameter_count(p)){if(!work::charge(used,1)){return .err(1002);}if(!v::push<usize>(ref mut parameters,ir::parameter_at(p,i)).is_ok){return .err(1003);}i+=1;}
-    if(!work::charge(used,ir::name_bytes(p)+1)){return .err(1002);}let names=switch(bytes::copy(ir::names_view(p))){case .ok(p):{p}case .err(_):{return .err(1003);}};var usize measured=0;let result=switch(ir::assemble_artifact(states,sdk,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)){case .ok(p):{p}case .err(e):{if(!work::charge(used,measured)){return .err(1002);}return .err(e.code);}};if(!work::charge(used,measured)){return .err(1002);}return .ok(result);
+    if(!work::charge(used,ir::name_bytes(p)+1)){return .err(1002);}let names=switch(bytes::copy(ir::names_view(p))){case .ok(p):{p}case .err(_):{return .err(1003);}};var usize measured=0;let result=switch(if(clean::closures(ref cleaned)){ir::assemble_artifact_closures(states,sdk,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)}else{ir::assemble_artifact(states,sdk,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)}){case .ok(p):{p}case .err(e):{if(!work::charge(used,measured)){return .err(1002);}return .err(e.code);}};if(!work::charge(used,measured)){return .err(1002);}return .ok(result);
 }

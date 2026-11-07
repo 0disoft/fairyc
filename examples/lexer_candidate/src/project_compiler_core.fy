@@ -147,6 +147,23 @@ pub fn Result<Complete,Problem> restore_complete_aggregate_sources(artifacts::Re
     let metadata=switch(signatures::build_aggregates(sources,prepared,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
     return restore_current(current,sources,ref scope,ref metadata,table,source_work,artifact_work,link_work);
 }
+// Closure restore uses current source rebind, full recipes and fresh proof of
+// the saved graph. It does not replace a cache hit with cold lowering.
+pub fn Result<Complete,Problem> restore_complete_closure_sources(artifacts::Restored saved,ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,bool aggregates,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
+    let current=switch(rebinding::build_closure_sources(saved,sources,owners,imports,table,aggregates,source_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,1,code,0,0,0,0,0));}};
+    let scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    let metadata=switch(if(aggregates){closure_aggregate_metadata(sources,owners,imports,table,source_work)}else{closure_scalar_metadata(sources,owners,imports)}){case .ok(p):{p}case .err(e):{return .err(e);}};
+    return restore_current(current,sources,ref scope,ref metadata,table,source_work,artifact_work,link_work);
+}
+fn Result<signatures::Program,Problem> closure_scalar_metadata(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports){
+    let scope=switch(modules::build_scoped(sources,owners,imports)){case .ok(p):{p}case .err(e):{return .err(fail(1,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    return switch(signatures::build_catalog(sources,scope)){case .ok(p):{.ok(p)}case .err(e):{.err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0))}};
+}
+fn Result<signatures::Program,Problem> closure_aggregate_metadata(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<modules::Binding> imports,ref coordinates::Coordinates table,ref mut usize source_work){
+    let plan=switch(source_plan::build_aggregate_sources(sources,owners,imports,table,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.stage,e.code,e.module_index,e.start,e.end,0,0));}};
+    let prepared=switch(aggregate_types::build(plan,sources,source_work)){case .ok(p):{p}case .err(e):{return .err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0));}};
+    return switch(signatures::build_aggregates(sources,prepared,source_work)){case .ok(p):{.ok(p)}case .err(e):{.err(fail(2,0,e.code,e.module_index,e.start,e.end,0,0))}};
+}
 fn Result<Complete,Problem> restore_current(rebinding::Rebound current,ref v::Vec<syntax::Parsed> sources,ref modules::Catalog scope,ref signatures::Program metadata,ref coordinates::Coordinates table,ref mut usize source_work,ref mut usize artifact_work,ref mut usize link_work){
     let raw=switch(rebasing::build(ref current,artifact_work)){case .ok(p):{p}case .err(code):{return .err(fail(7,2,code,0,0,0,0,0));}};
     let admitted=switch(admission::build(raw,ref current,sources,scope,metadata,table,artifact_work)){case .ok(p):{p}case .err(e):{if(e.source.stage!=0){var Problem p=fail(3,e.source.stage,e.source.code,e.source.module_index,e.source.start,e.source.end,e.source.expected,e.source.actual);p.declaration_start=e.source.declaration_start;p.declaration_end=e.source.declaration_end;p.move_start=e.source.move_start;p.move_end=e.source.move_end;p.header_start=e.source.header_start;p.header_end=e.source.header_end;p.field_module=e.source.field_module;p.field_start=e.source.field_start;p.field_end=e.source.field_end;return .err(p);}return .err(fail(7,2+e.stage,e.code,0,0,0,0,0));}};
