@@ -1,6 +1,7 @@
 module copied_closure_lower;
 import copied_closure_admission as admission;
 import copied_closure_tables as tables;
+import closure_value_type_source as closure_values;
 import generic_source_function_json as functions;
 import static_operation_declarations as operations;
 import syntax as syntax;
@@ -10,7 +11,7 @@ import bodies as entries;
 import std::bytes as bytes;
 import std::vec as v;
 
-struct Binding{usize start;usize end;usize helper;usize count;usize[4] snapshots;usize scope;}
+struct Binding{usize start;usize end;usize helper;bool value;usize count;usize[4] snapshots;usize scope;}
 struct State{u32 code;usize work;usize scope;usize owner;usize ordinal;usize seen;}
 fn bool charge(ref mut State c){if(c.code!=0){return false;}if(c.work>=1048576){c.code=10;return false;}c.work+=1;return true;}
 fn usize expression_add(ref mut v::Vec<ast::Node> out,ast::Node n,ref mut State c){if(!charge(c)){return 0;}if(v::len<ast::Node>(out)>=16384){c.code=10;return 0;}if(!v::push<ast::Node>(out,n).is_ok){c.code=11;return 0;}return v::len<ast::Node>(out);}
@@ -24,9 +25,9 @@ fn bool number(ref mut bytes::Buffer out,usize value){var u8[20] digits=[0;20];v
 fn usize link(ref mut v::Vec<ast::Statement> statements,usize first,usize previous,ref mut State c){if(first==0){return previous;}let s=*v::at<ast::Statement>(statements,first-1);return statement_add(statements,ast::Statement{.kind=7,.start=s.start,.end=s.end,.expression=0,.target=0,.first,.second=previous,.entry=0,.operator=0},c);}
 
 fn usize literal(ref syntax::Parsed p,syntax::Statement binding,ref mut v::Vec<syntax::Declaration> declarations,ref mut v::Vec<ast::Node> expressions,ref mut v::Vec<entries::Entry> locals,ref mut v::Vec<ast::Statement> statements,ref mut bytes::Buffer private_data,ref mut v::Vec<tables::Row> private_rows,ref mut v::Vec<Binding> env,ref mut State c,ref mut usize tail){
-    let entry=syntax::entry_at(p,binding.entry-1);let name=syntax::source_view(p)[entry.name_start..entry.name_end];let old=find(p,env,name);if(c.scope!=1 || entry.kind!=2 || entry.type_root!=0 || admission::reserved(name) || old!=0 && v::at<Binding>(env,old-1).scope==c.scope){c.code=3;return 0;}
-    let code=admission::validate(p,binding.expression);if(code!=0){c.code=code;return 0;}let n=syntax::expression_at(p,binding.expression);let h=syntax::expression_at(p,n.right);let count=h.right/129;let parameters=h.right%129;c.ordinal+=1;c.seen+=1;var Binding info=Binding{.start=entry.name_start,.end=entry.name_end,.helper=v::len<syntax::Declaration>(declarations)+1,.count,.snapshots=[0;4],.scope=c.scope};
-    var usize i=0;while(i<count){let cap=syntax::entry_at(p,h.left+i-1);let captured=find(p,env,syntax::source_view(p)[cap.name_start..cap.name_end]);if(captured!=0 && v::at<Binding>(env,captured-1).helper!=0){c.code=3;return 0;}let value=expression_add(expressions,ast::node_value(2,cap.name_start,cap.name_end,token(p,cap.name_start),0,0),c);var snapshot=entries::Entry{.kind=102,.start=cap.start,.end=cap.end,.name_start=cap.name_start,.name_end=cap.name_end,.type_start=cap.type_start,.type_end=cap.type_end,.type_root=cap.type_root,.expression=value,.id=0};let id=entry_add(locals,snapshot,c);info.snapshots[i]=id;
+    let entry=syntax::entry_at(p,binding.entry-1);let name=syntax::source_view(p)[entry.name_start..entry.name_end];let old=find(p,env,name);let value=entry.type_root!=0;if(c.scope!=1 || entry.kind!=2 || value && !closure_values::signature(p,entry.type_root) || admission::reserved(name) || old!=0 && v::at<Binding>(env,old-1).scope==c.scope){c.code=3;return 0;}
+    let code=admission::validate(p,binding.expression);if(code!=0){c.code=code;return 0;}let n=syntax::expression_at(p,binding.expression);let h=syntax::expression_at(p,n.right);let count=h.right/129;let parameters=h.right%129;if(value && parameters!=1){c.code=3;return 0;}c.ordinal+=1;c.seen+=1;var Binding info=Binding{.start=entry.name_start,.end=entry.name_end,.helper=v::len<syntax::Declaration>(declarations)+1,.value,.count,.snapshots=[0;4],.scope=c.scope};
+    var usize i=0;while(i<count){let cap=syntax::entry_at(p,h.left+i-1);let captured=find(p,env,syntax::source_view(p)[cap.name_start..cap.name_end]);if(captured!=0 && (v::at<Binding>(env,captured-1).helper!=0 || v::at<Binding>(env,captured-1).value)){c.code=3;return 0;}let value=expression_add(expressions,ast::node_value(2,cap.name_start,cap.name_end,token(p,cap.name_start),0,0),c);var snapshot=entries::Entry{.kind=102,.start=cap.start,.end=cap.end,.name_start=cap.name_start,.name_end=cap.name_end,.type_start=cap.type_start,.type_end=cap.type_end,.type_root=cap.type_root,.expression=value,.id=0};let id=entry_add(locals,snapshot,c);info.snapshots[i]=id;
         let statement=statement_add(statements,ast::Statement{.kind=2,.start=cap.start,.end=cap.end,.expression=value,.target=0,.first=0,.second=0,.entry=id,.operator=0},c);*tail=link(statements,statement,*tail,c);i+=1;
     }
     var d=syntax::declaration_at(p,c.owner-1);var bytes::Buffer helper=bytes::empty();if(!bytes::append(ref mut helper,b"_fy_closure_").is_ok || !bytes::append(ref mut helper,syntax::source_view(p)[d.name_start..d.name_end]).is_ok || !bytes::append(ref mut helper,b"_").is_ok || !number(ref mut helper,c.ordinal)){c.code=11;return 0;}
@@ -39,7 +40,17 @@ fn usize literal(ref syntax::Parsed p,syntax::Statement binding,ref mut v::Vec<s
         var usize items=0;let count=syntax::block_statement_count(p,n.left);i=0;while(i<count){items=link(statements,syntax::block_statement(p,n.left,i),items,c);i+=1;}
         let ret=statement_add(statements,ast::Statement{.kind=3,.start=body.start,.end=body.end,.expression=body.expression,.target=0,.first=0,.second=0,.entry=0,.operator=0},c);items=link(statements,ret,items,c);d.body=statement_add(statements,ast::Statement{.kind=1,.start=body.start,.end=body.end,.expression=0,.target=0,.first=items,.second=count+1,.entry=0,.operator=0},c);
     }
-    if(!v::push<syntax::Declaration>(declarations,d).is_ok){c.code=11;return 0;}let stored=tables::add(private_data,private_rows,info.helper,bytes::view(ref helper),b"");if(stored!=0){c.code=stored;return 0;}if(!bind(env,info,c)){return 0;}return count;
+    if(!v::push<syntax::Declaration>(declarations,d).is_ok){c.code=11;return 0;}let stored=if(value){tables::add_value(private_data,private_rows,info.helper,bytes::view(ref helper),b"",count)}else{tables::add(private_data,private_rows,info.helper,bytes::view(ref helper),b"")};if(stored!=0){c.code=stored;return 0;}
+    if(value){
+        // Keep a real immutable value binding. Only the creation node names the
+        // lifted target; later copies and calls retain their written names.
+        let target=expression_add(expressions,ast::node_value(2,entry.name_start,entry.name_end,tables::helper_flag()+info.helper,0,0),c);var usize args=0;i=0;
+        while(i<count){let cap=syntax::entry_at(p,h.left+i-1);let at=token(p,cap.name_start);let snapshot=expression_add(expressions,ast::node_value(2,cap.name_start,cap.name_end,tables::snapshot_flag()+info.snapshots[i],0,0),c);args=expression_add(expressions,ast::node_value(7,cap.name_start,cap.name_end,at,snapshot,args),c);i+=1;}
+        let create=expression_add(expressions,ast::node_value(36,n.start,n.end,n.token,target,args),c);
+        let id=entry_add(locals,entries::Entry{.kind=entry.kind,.start=entry.start,.end=entry.end,.name_start=entry.name_start,.name_end=entry.name_end,.type_start=entry.type_start,.type_end=entry.type_end,.type_root=entry.type_root,.expression=create,.id=0},c);
+        let statement=statement_add(statements,ast::Statement{.kind=binding.kind,.start=binding.start,.end=binding.end,.expression=create,.target=0,.first=0,.second=0,.entry=id,.operator=0},c);*tail=link(statements,statement,*tail,c);info.helper=0;
+    }
+    if(!bind(env,info,c)){return 0;}return count+if(value){1}else{0};
 }
 
 fn usize expression(ref syntax::Parsed p,ref mut v::Vec<syntax::Declaration> declarations,ref mut v::Vec<ast::Node> expressions,ref mut v::Vec<entries::Entry> locals,ref mut v::Vec<ast::Statement> statements,ref mut bytes::Buffer private_data,ref mut v::Vec<tables::Row> private_rows,ref mut v::Vec<Binding> env,ref mut State c,usize id,usize depth){
@@ -63,11 +74,11 @@ fn usize statement(ref syntax::Parsed p,ref mut v::Vec<syntax::Declaration> decl
         // outer closure only while rewriting the loop body.
         row.expression=expression(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.expression,depth+1);row.target=expression(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.target,depth+1);
         let length=v::len<Binding>(env);let scope=c.scope;c.scope+=1;let item=syntax::expression_at(p,s.target);
-        if(!bind(env,Binding{.start=item.start,.end=item.end,.helper=0,.count=0,.snapshots=[0;4],.scope=c.scope},c)){return 0;}
+        if(!bind(env,Binding{.start=item.start,.end=item.end,.helper=0,.value=false,.count=0,.snapshots=[0;4],.scope=c.scope},c)){return 0;}
         row.first=block(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.first,depth+1);restore(env,length);c.scope=scope;return statement_add(statements,row,c);
     }
     row.expression=expression(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.expression,depth+1);row.target=expression(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.target,depth+1);if(s.first!=0){row.first=statement(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.first,depth+1);}if(s.kind==7 || s.kind==15){row.second=statement(p,declarations,expressions,locals,statements,private_data,private_rows,env,c,s.second,depth+1);}
-    if(s.kind==2){let e=syntax::entry_at(p,s.entry-1);let name=syntax::source_view(p)[e.name_start..e.name_end];let old=find(p,env,name);if(admission::reserved(name) || old!=0 && v::at<Binding>(env,old-1).scope==c.scope && v::at<Binding>(env,old-1).helper!=0){c.code=3;return 0;}row.entry=entry_add(locals,entries::Entry{.kind=e.kind,.start=e.start,.end=e.end,.name_start=e.name_start,.name_end=e.name_end,.type_start=e.type_start,.type_end=e.type_end,.type_root=e.type_root,.expression=row.expression,.id=0},c);discard bind(env,Binding{.start=e.name_start,.end=e.name_end,.helper=0,.count=0,.snapshots=[0;4],.scope=c.scope},c);}
+    if(s.kind==2){let e=syntax::entry_at(p,s.entry-1);let name=syntax::source_view(p)[e.name_start..e.name_end];let old=find(p,env,name);if(admission::reserved(name) || old!=0 && v::at<Binding>(env,old-1).scope==c.scope && v::at<Binding>(env,old-1).helper!=0){c.code=3;return 0;}row.entry=entry_add(locals,entries::Entry{.kind=e.kind,.start=e.start,.end=e.end,.name_start=e.name_start,.name_end=e.name_end,.type_start=e.type_start,.type_end=e.type_end,.type_root=e.type_root,.expression=row.expression,.id=0},c);let usize copied=if(s.expression!=0 && syntax::expression_at(p,s.expression).kind==2){find(p,env,syntax::expression_text(p,s.expression))}else{0};let closure=closure_values::signature(p,e.type_root) || copied!=0 && (v::at<Binding>(env,copied-1).value || v::at<Binding>(env,copied-1).helper!=0);discard bind(env,Binding{.start=e.name_start,.end=e.name_end,.helper=0,.value=closure,.count=0,.snapshots=[0;4],.scope=c.scope},c);}
     if(s.kind!=2 && s.entry!=0){let e=syntax::entry_at(p,s.entry-1);row.entry=entry_add(locals,entries::Entry{.kind=e.kind,.start=e.start,.end=e.end,.name_start=e.name_start,.name_end=e.name_end,.type_start=e.type_start,.type_end=e.type_end,.type_root=e.type_root,.expression=row.expression,.id=0},c);}
     return statement_add(statements,row,c);
 }
@@ -79,7 +90,7 @@ fn usize block(ref syntax::Parsed p,ref mut v::Vec<syntax::Declaration> declarat
 pub fn u32 prepare(ref syntax::Parsed p,ref mut v::Vec<syntax::Declaration> declarations,ref mut v::Vec<ast::Node> expressions,ref mut v::Vec<entries::Entry> locals,ref mut v::Vec<ast::Statement> statements,ref mut bytes::Buffer private_data,ref mut v::Vec<tables::Row> private_rows){
     if(!admission::needed(p) || syntax::problem_count(p)!=0){return 0;}var State c=State{.code=0,.work=0,.scope=0,.owner=0,.ordinal=0,.seen=0};var v::Vec<Binding> env=v::empty<Binding>();var usize i=1;
     while(i<syntax::declaration_count(p)){let d=syntax::declaration_at(p,i);if(d.kind==3){if(admission::reserved(syntax::source_view(p)[d.name_start..d.name_end])){return 3;}if(operations::operation(p,i+1).kind==1){i+=1;continue;}if(admission::function(p,d)){var usize work=0;let written=switch(functions::encode(p,i,ref mut work)){case .ok(p):{p}case .err(code):{return code;}};let code=tables::add(private_data,private_rows,i+1,b"",bytes::view(ref written));if(code!=0){return code;}}
-        discard v::clear<Binding>(ref mut env);c.owner=i+1;var usize j=d.entry_start;while(j<d.entry_start+d.entry_count){let e=syntax::entry_at(p,j);if(e.kind==1){discard bind(ref mut env,Binding{.start=e.name_start,.end=e.name_end,.helper=0,.count=0,.snapshots=[0;4],.scope=1},ref mut c);}j+=1;}
+        discard v::clear<Binding>(ref mut env);c.owner=i+1;var usize j=d.entry_start;while(j<d.entry_start+d.entry_count){let e=syntax::entry_at(p,j);if(e.kind==1){discard bind(ref mut env,Binding{.start=e.name_start,.end=e.name_end,.helper=0,.value=closure_values::signature(p,e.type_root),.count=0,.snapshots=[0;4],.scope=1},ref mut c);}j+=1;}
         let body=block(p,declarations,expressions,locals,statements,private_data,private_rows,ref mut env,ref mut c,d.body,0);if(c.code!=0){return c.code;}{let changed=v::at_mut<syntax::Declaration>(declarations,i);changed.body=body;changed.expression=0;}
     }i+=1;}var usize expected=0;i=1;while(i<=syntax::expression_count(p)){if(syntax::expression_at(p,i).kind==34){expected+=1;}i+=1;}return if(expected==c.seen){0}else{3};
 }

@@ -1,5 +1,7 @@
 module name_resolution;
 import syntax as syntax;
+import copied_closure_tables as private;
+import closure_value_type_source as closure_values;
 import raw_view_intrinsics as raw;
 import storage_intrinsics as storage;
 import effect_declarations as effects;
@@ -47,12 +49,12 @@ fn usize known(ref syntax::Parsed parsed, ref Context context,ref v::Vec<Symbol>
         let Name name = context.locals[index];
         if (name.symbol == context.receiver && context.receiver != 0) {
             if (bytes::equal(source[start..end],b"this")) { return name.symbol; }
-        } else if (same(source,name,start,end)) { return name.symbol; }
+        } else if ((v::at<Symbol>(symbols,name.symbol-1).entry==0 || syntax::entry_at(parsed,v::at<Symbol>(symbols,name.symbol-1).entry-1).kind!=102) && same(source,name,start,end)) { return name.symbol; }
     }
     index = 0;
     while (index < v::len<Symbol>(symbols)) {
         let Symbol s=*v::at<Symbol>(symbols,index);
-        if(global_symbol(s) && syntax::module_index(parsed,s.start)==syntax::module_index(parsed,start) && bytes::equal(source[s.start..s.end],source[start..end])){return index+1;}index+=1;
+        if(global_symbol(s) && private::name(syntax::private_names(parsed),s.declaration).len==0 && syntax::module_index(parsed,s.start)==syntax::module_index(parsed,start) && bytes::equal(source[s.start..s.end],source[start..end])){return index+1;}index+=1;
     }
     return 0;
 }
@@ -63,14 +65,14 @@ fn Problem local(ref syntax::Parsed parsed, ref mut Context context, syntax::Ent
     var usize index = context.local_count;
     while (index > 0) {
         index -= 1;
-        if (context.locals[index].scope == context.scope && same(source, context.locals[index], start, end)) {
+        if (entry.kind!=102 && context.locals[index].scope == context.scope && (v::at<Symbol>(symbols,context.locals[index].symbol-1).entry==0 || syntax::entry_at(parsed,v::at<Symbol>(symbols,context.locals[index].symbol-1).entry-1).kind!=102) && same(source, context.locals[index], start, end)) {
             return fail(2, start, end);
         }
     }
     if (context.local_count >= 128) { return fail(4, start, end); }
     let usize slot = context.local_count;
     let usize scope = context.scope;
-    let Symbol value = Symbol { .kind = if (entry.kind == 1) { 2 } else if (entry.kind == 2) { 3 } else { 4 },
+    let Symbol value = Symbol { .kind = if (entry.kind == 1) { 2 } else if (entry.kind == 2 || entry.kind==102) { 3 } else { 4 },
         .start, .end, .scope, .owner = context.owner, .type_root = entry.type_root, .entry = entry_id, .declaration = 0 };
     if (!v::push<Symbol>(symbols,value).is_ok) { return fail(5,start,end); }
     let usize symbol = v::len<Symbol>(symbols);
@@ -79,6 +81,7 @@ fn Problem local(ref syntax::Parsed parsed, ref mut Context context, syntax::Ent
 }
 fn bool scalar_type(ref syntax::Parsed parsed, usize id, bool result) {
     if (id == 0) { return true; } // Inferred local: resolution does not infer its type.
+    if(closure_values::signature(parsed,id)){return closure_values::root(parsed,id);}
     let u32 type = nominal::resolve(parsed,id);
     return type != 0 && (result || type != 7);
 }
@@ -98,7 +101,11 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         }
         if (!simple(spelling) && node.right==0) { return fail(3,node.start,node.end); }
         var usize symbol=0;
-        if(node.right!=0){var usize n=0;while(n<v::len<Symbol>(symbols)){if((v::at<Symbol>(symbols,n).kind==1 || v::at<Symbol>(symbols,n).kind==6 || v::at<Symbol>(symbols,n).kind==7 || v::at<Symbol>(symbols,n).kind==9 || v::at<Symbol>(symbols,n).kind==11) && v::at<Symbol>(symbols,n).declaration==node.right){symbol=n+1;}n+=1;}}
+        if(node.token>=private::snapshot_flag()){
+            let entry=node.token-private::snapshot_flag();var usize at=context.local_count;while(at>0){at-=1;let candidate=context.locals[at].symbol;if(v::at<Symbol>(symbols,candidate-1).entry==entry){symbol=candidate;break;}}
+        }else if(node.token>=private::helper_flag()){
+            let declaration=node.token-private::helper_flag();var usize at=0;while(at<v::len<Symbol>(symbols)){let candidate=*v::at<Symbol>(symbols,at);if(candidate.kind==1 && candidate.declaration==declaration && private::name(syntax::private_names(parsed),declaration).len!=0){symbol=at+1;break;}at+=1;}
+        }else if(node.right!=0){var usize n=0;while(n<v::len<Symbol>(symbols)){if((v::at<Symbol>(symbols,n).kind==1 || v::at<Symbol>(symbols,n).kind==6 || v::at<Symbol>(symbols,n).kind==7 || v::at<Symbol>(symbols,n).kind==9 || v::at<Symbol>(symbols,n).kind==11) && v::at<Symbol>(symbols,n).declaration==node.right){symbol=n+1;}n+=1;}}
         else{symbol=known(parsed,context,symbols,node.start,node.end);if(symbol==0 || v::at<Symbol>(symbols,symbol-1).kind==1){var usize n=0;while(n<syntax::declaration_count(parsed)){let d=syntax::declaration_at(parsed,n);if(d.kind==12 && bytes::equal(source_name(parsed,d),spelling)){return fail(4501,node.start,node.end);}n+=1;}}}
         if (symbol == 0) { return fail(1,node.start,node.end); }
         let Reference value = Reference { .expression = id, .start = node.start, .end = node.end, .symbol };
@@ -111,10 +118,10 @@ fn Problem expression(ref syntax::Parsed parsed, ref mut Context context, usize 
         if (left.code != 0) { return left; }
         return if (node.kind == 5) { expression(parsed,context,node.right,depth + 1,symbols,references) } else { ok() };
     }
-    if (node.kind == 6) {
+    if (node.kind == 6 || node.kind==36) {
         let u32 callee_kind=syntax::expression_at(parsed,node.left).kind;
         if (callee_kind != 2 && callee_kind != 28 && storage::call(parsed,id)==0) { return fail(3,node.start,node.end); }
-        if(callee_kind==2 && raw::call(parsed,id)==0){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
+        if(callee_kind==2 && (node.kind==36 || raw::call(parsed,id)==0)){let Problem callee = expression(parsed,context,node.left,depth + 1,symbols,references);if (callee.code != 0) { return callee; }}
         var usize index = 0;
         while (index < syntax::call_argument_count(parsed,id)) {
             let usize entry_id = syntax::call_argument_entry(parsed,id,index);
@@ -269,7 +276,7 @@ fn Problem collect(ref syntax::Parsed parsed, ref mut Context context, ref mut v
             var usize previous=0;
             while(previous<v::len<Symbol>(symbols)){
                 let Symbol found=*v::at<Symbol>(symbols,previous);
-                if(global_symbol(found) && syntax::module_index(parsed,found.start)==syntax::module_index(parsed,item.start) && bytes::equal(source[found.start..found.end],source[item.name_start..item.name_end])){
+                if(global_symbol(found) && syntax::module_index(parsed,found.start)==syntax::module_index(parsed,item.start) && bytes::equal(syntax::declaration_name(parsed,found.declaration),syntax::declaration_name(parsed,index+1))){
                     let old=syntax::declaration_at(parsed,found.declaration-1);if(item.generic_start==0 || item.generic_start!=old.generic_start || item.generic_end==0 || old.generic_end==0){return fail(2,item.name_start,item.name_end);}
                 }previous+=1;
             }

@@ -47,6 +47,7 @@ pub fn Result<Parsed,i32> parse_diagnostics(scanner::Stream input,usize max_item
 // Re-scan is unnecessary: duplicate the owned scanner and parse its original bytes.
 pub fn Result<Parsed,u32> written_copy(ref Parsed p,ref mut usize work){let stream=switch(copy_source(p,work)){case .ok(value):{value}case .err(code):{return .err(code);}};return switch(driver::parse_diagnostics(stream,512)){case .ok(value):{.ok(value)}case .err(_):{.err(9)}};}
 pub fn ref private::Table private_names(ref Parsed p){return ref p.private_names;}
+pub fn usize closure_value_captures(ref Parsed p,usize declaration){return private::value_captures(ref p.private_names,declaration);}
 pub fn bool closure_prepared(ref Parsed p){return private::count(ref p.private_names)!=0;}
 pub fn ref u8[] written_function(ref Parsed p,usize declaration){return private::written(ref p.private_names,declaration);}
 pub fn ref u8[] declaration_name(ref Parsed p,usize declaration){let generated=private::name(ref p.private_names,declaration);if(generated.len!=0){return generated;}let d=declaration_at(p,declaration-1);return source_view(p)[d.name_start..d.name_end];}
@@ -131,8 +132,15 @@ pub fn ref u8[] expression_text(ref Parsed parsed, usize id) {
     if (node.kind == 2) { return scanner::source_view(ref parsed.source)[node.start..node.end]; }
     return scanner::token_raw(ref parsed.source, node.token);
 }
+// Kind 36 is compiler-owned, never accepted as an arbitrary call-shaped node.
+fn bool private_closure_create(ref Parsed p,Expression node){
+    if(node.kind!=36 || node.left==0 || node.left>expression_count(p)){return false;}let target=expression_at(p,node.left);
+    if(target.kind!=2 || target.token<=private::helper_flag() || target.token>=private::snapshot_flag()){return false;}
+    let declaration=target.token-private::helper_flag();if(declaration>declaration_count(p)){return false;}let encoded=closure_value_captures(p,declaration);if(encoded==0 || encoded>5){return false;}
+    var usize count=0;var usize link=node.right;while(link!=0){if(link>expression_count(p) || count>=4){return false;}let argument=expression_at(p,link);if(argument.kind!=7 || argument.left==0 || argument.left>expression_count(p)){return false;}let capture=expression_at(p,argument.left);if(capture.kind!=2 || capture.token<=private::snapshot_flag() || capture.token-private::snapshot_flag()>entry_count(p)){return false;}if(entry_at(p,capture.token-private::snapshot_flag()-1).kind!=102){return false;}count+=1;link=argument.right;}return count+1==encoded;
+}
 pub fn usize call_argument_count(ref Parsed parsed, usize call) {
-    let Expression node = expression_at(parsed, call); assert(node.kind == 6);
+    let Expression node = expression_at(parsed, call); assert(node.kind == 6 || private_closure_create(parsed,node));
     var usize link = node.right; var usize count = 0;
     while (link != 0) { count += 1; link = expression_at(parsed, link).right; }
     return count;
