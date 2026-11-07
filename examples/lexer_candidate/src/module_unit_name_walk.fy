@@ -4,6 +4,7 @@ import module_unit_body_ast as ast;
 import module_signatures as signatures;
 import module_ast_join as join;
 import scanner as scanner;
+import copied_closure_tables as private;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -24,8 +25,31 @@ fn join::Problem bind_pattern(ref ast::Ast a,ref scanner::Stream source,usize id
     if(id==0){return m::fail(c,0,0,0);}let p=ast::expression_at(a,id);if(p.kind==17){return pattern(a,source,id,kind,type,c,symbols,patterns);}if(p.kind==16){return if(p.left==0){m::fail(c,0,0,0)}else{pattern(a,source,p.left,kind,type,c,symbols,patterns)};}
     if(p.kind!=32){return m::fail(c,3,p.start,p.end);}var usize link=p.right;while(link!=0){if(!m::charge(c,1)){return m::fail(c,10,p.start,p.end);}let field=ast::expression_at(a,link);let result=pattern(a,source,field.left,kind,type,c,symbols,patterns);if(result.code!=0){return result;}link=field.right;}return m::fail(c,0,0,0);
 }
+// Preparation owns these private operands. Do not resolve a construction's
+// target or captures through ordinary spelling (which can name a provider).
+fn join::Problem construction(ref ast::Ast a,ref scanner::Stream source,ref signatures::Program metadata,usize id,ref mut m::Context c,ref v::Vec<m::Symbol> symbols,ref mut v::Vec<m::Reference> references,ref mut v::Vec<usize> uses){
+    let n=ast::expression_at(a,id);let size=ast::expression_count(a);if(n.left==0 || n.left>size){return m::fail(c,1,n.start,n.end);}let target=ast::expression_at(a,n.left);
+    if(target.kind!=2 || target.token<=private::helper_flag() || target.token>=private::snapshot_flag()){return m::fail(c,1,target.start,target.end);}
+    let declaration=target.token-private::helper_flag();let signature=signatures::identity(metadata,c.frame.module_index,declaration);if(signature==0 || signatures::at(metadata,signature).public){return m::fail(c,1,target.start,target.end);}
+    // A current lifted helper owns exactly this literal's source span. A real
+    // private ordinary function or another literal is not a substitute target.
+    var bool owned=false;var usize i=1;while(i<=signatures::declaration_count(metadata)){if(!m::charge(c,1)){return m::fail(c,10,n.start,n.end);}let d=signatures::declaration_at(metadata,i);if(d.module_index==c.frame.module_index && d.declaration==declaration){owned=d.kind==3 && d.parameters==0 && !d.public && d.source_start==n.start && d.source_end==n.end;break;}i+=1;}
+    if(!owned){return m::fail(c,1,target.start,target.end);}
+    var usize[4] captures=[0;4];var usize count=0;var usize link=n.right;
+    while(link!=0){if(!m::charge(c,1)){return m::fail(c,10,n.start,n.end);}if(link>size || count>=4){return m::fail(c,3,n.start,n.end);}let row=ast::expression_at(a,link);if(row.kind!=7 || row.left==0 || row.left>size || row.right>=link){return m::fail(c,3,row.start,row.end);}let captured=ast::expression_at(a,row.left);
+        if(captured.kind!=2 || captured.token<=private::snapshot_flag()){return m::fail(c,1,captured.start,captured.end);}captures[count]=row.left;count+=1;link=row.right;
+    }
+    if(signatures::at(metadata,signature).parameter_count!=count+1){return m::fail(c,3,n.start,n.end);}
+    let p=m::reference(a,source,metadata,n.left,c,symbols,references,uses);if(p.code!=0){return p;}
+    // Argument links are prepended. Visit the captured snapshots in written
+    // order after the helper, retaining the existing hidden-entry lookup.
+    var usize previous=0;while(count>0){count-=1;let capture=captures[count];let q=m::reference(a,source,metadata,capture,c,symbols,references,uses);if(q.code!=0){return q;}let r=*v::at<m::Reference>(references,v::len<m::Reference>(references)-1);let symbol=*v::at<m::Symbol>(symbols,r.symbol-1);let operand=ast::expression_at(a,capture);
+        if(symbol.kind!=2 || symbol.entry==0 || ast::entry_at(a,symbol.entry-1).kind!=102 || symbol.pattern<=previous || symbol.start!=operand.start || symbol.end!=operand.end){return m::fail(c,1,operand.start,operand.end);}previous=symbol.pattern;
+    }return m::fail(c,0,0,0);
+}
 fn join::Problem expression(ref ast::Ast a,ref scanner::Stream source,ref signatures::Program metadata,usize id,usize depth,ref v::Vec<usize> annotations,ref mut m::Context c,ref mut v::Vec<m::Symbol> symbols,ref mut v::Vec<m::Reference> references,ref mut v::Vec<usize> uses,ref mut v::Vec<usize> entries,ref mut v::Vec<usize> patterns){
     if(id==0){return m::fail(c,0,0,0);}let n=ast::expression_at(a,id);if(depth>=64 || !m::charge(c,1)){return m::fail(c,10,n.start,n.end);}if(n.kind==1 || n.kind==28){return m::fail(c,0,0,0);}if(n.kind==2){return m::reference(a,source,metadata,id,c,symbols,references,uses);}
+    if(n.kind==36){return construction(a,source,metadata,id,c,symbols,references,uses);}
     // Region is a compiler-owned type, so its constructor has a language
     // diagnostic before ordinary declaration lookup can reject its name.
     if(n.kind==10 && n.left!=0 && ast::expression_at(a,n.left).kind==2 && bytes::equal(m::spelling(a,source,n.left),b"Region")){return m::fail(c,3104,n.start,n.end);}
