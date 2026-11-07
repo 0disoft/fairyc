@@ -12,7 +12,7 @@ import (
 )
 
 // Direct ordinary scalar transport now shares the generic executable subset.
-// Composite transport signatures retain their separate admission boundary.
+// Only flat Option transport shares that extension; other wrappers remain closed.
 // Use authenticated expansion origins, never a generated-name prefix. Ordinary
 // functions keep their transport types, and unused type arguments remain valid.
 func restrictGenericSignatures(checked semantic.Result, files []semantic.File, expansion genericsource.PackageExpansion) semantic.Result {
@@ -96,6 +96,12 @@ type genericUnsupportedKey struct {
 func unadmittedGenericScalar(reference ast.TypeReference) bool {
 	if reference.Kind == ast.TypeKindNamed && len(reference.Arguments) == 0 {
 		return false
+	}
+	if reference.Kind == ast.TypeKindNamed && reference.Path == "Option" && len(reference.Arguments) == 1 {
+		payload := reference.Arguments[0]
+		if payload.Kind == ast.TypeKindNamed && len(payload.Arguments) == 0 && containsTransportScalar(payload) {
+			return false
+		}
 	}
 	return containsTransportScalar(reference)
 }

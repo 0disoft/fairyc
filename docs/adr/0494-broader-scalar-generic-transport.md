@@ -14,6 +14,10 @@ conversion, new arithmetic, inference, aggregate admission or runtime boxing is 
 Composite signatures containing these seven transport scalars retain their previous
 closed boundary. Existing source spans and name-resolution diagnostics are preserved.
 
+[ADR 0547](0547-flat-option-generic-transport.md) subsequently admits flat
+`Option<S>` value transport for these seven scalars. Its exact shape and separate
+Go/Fairy evidence supersede only that portion of the wrapper boundary.
+
 The user-requested wider generics slice makes an identity/forwarding algorithm useful
 for all thirteen existing scalar types without seven manually duplicated overloads.
 The new native fixture transports seven boundary values through two generic functions

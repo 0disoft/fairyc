@@ -409,6 +409,7 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0493: Cross-package inline bodies and cache v5](0493-cross-package-inline-bodies-and-cache-v5.md)
 
 - [0494: Broader direct scalar generic transport](0494-broader-scalar-generic-transport.md)
+- [0547: Flat Option transport of extended scalars](0547-flat-option-generic-transport.md)
 
 - [0495: Explicit static operation interfaces](0495-explicit-static-operation-interfaces.md)
 

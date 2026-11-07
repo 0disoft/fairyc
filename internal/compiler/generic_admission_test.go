@@ -56,25 +56,30 @@ fn i32 main(){return constant<u16>();}`)
 }
 
 func TestGenericSignatureAdmissionPreservesCompositeSpellingAndResolution(t *testing.T) {
-	for _, shape := range []string{"ref T", "ptr T", "Option<T>", "T[2]"} {
-		t.Run(shape, func(t *testing.T) {
-			text := fmt.Sprintf("module main;fn %s id<T>(%s value){return value;}fn void main(){discard id<u16>(42);discard id<u16>(43);}", shape, shape)
-			file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
-			result, err := compiler.CheckExplicitFiles([]semantic.File{file})
-			if err != nil || result.Verified || len(result.Semantic.Unsupported) != 2 || len(result.Semantic.Diagnostics) != 0 {
-				t.Fatalf("composite signature: %v %+v", err, result.Semantic)
-			}
-			for _, row := range result.Semantic.Unsupported {
-				if row.Feature != "type "+shape || text[row.Span.StartByte:row.Span.EndByte] != shape {
-					t.Fatalf("changed composite spelling: %+v", row)
+	for _, scalar := range []string{"i8", "i16", "isize", "u16", "u64", "f32", "f64"} {
+		for _, shape := range []string{"ref T", "ptr T", "Result<T,i32>", "T[2]", "Option<Option<T>>", "ref Option<T>", "Option<ref T>", "Result<Option<T>,i32>", "Option<Result<T,i32>>", "ref T[]"} {
+			t.Run(scalar+"/"+shape, func(t *testing.T) {
+				// Typed forwarding has valid call arity and argument types: the two
+				// rejections must belong to the specialized signature, not a bad call.
+				concrete := strings.ReplaceAll(shape, "T", scalar)
+				text := fmt.Sprintf("module main;fn %[1]s id<T>(%[1]s value){return value;}fn %[2]s forward(%[2]s value){discard id<%[3]s>(value);return id<%[3]s>(value);}", shape, concrete, scalar)
+				file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
+				result, err := compiler.CheckExplicitFiles([]semantic.File{file})
+				if err != nil || result.Verified || len(result.Semantic.Unsupported) != 2 || len(result.Semantic.Diagnostics) != 0 {
+					t.Fatalf("composite signature: %v %+v", err, result.Semantic)
 				}
-			}
-			file = parseCompilerFile(t, hir.DefaultPackage, "main.fy", strings.Replace(text, "return value;", "return missing;", 1))
-			result, err = compiler.CheckExplicitFiles([]semantic.File{file})
-			if err != nil || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) == 0 {
-				t.Fatalf("signature check hid name-resolution failure: %v %+v", err, result.Semantic)
-			}
-		})
+				for _, row := range result.Semantic.Unsupported {
+					if row.Feature != "type "+shape || text[row.Span.StartByte:row.Span.EndByte] != shape {
+						t.Fatalf("changed composite spelling: %+v", row)
+					}
+				}
+				file = parseCompilerFile(t, hir.DefaultPackage, "main.fy", strings.Replace(text, "return value;", "return missing;", 1))
+				result, err = compiler.CheckExplicitFiles([]semantic.File{file})
+				if err != nil || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) == 0 {
+					t.Fatalf("signature check hid name-resolution failure: %v %+v", err, result.Semantic)
+				}
+			})
+		}
 	}
 }
 

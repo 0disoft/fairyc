@@ -11,9 +11,9 @@ import (
 
 func TestEmitStillRejectsUnsupportedFloatingTaggedPayload(t *testing.T) {
 	program := lowerSource(t, `module main;
-fn Option<f64> choose() { return .none; }
+fn Option<Option<f64>> choose() { return .none; }
 fn i32 main() {
-    let Option<f64> value = choose();
+    let Option<Option<f64>> value = choose();
     return 42;
 }
 `)
@@ -23,7 +23,7 @@ fn i32 main() {
 	}
 	_, err = cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `"Option<f64>"`) {
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `"Option<Option<f64>>"`) {
 		t.Fatalf("unsupported payload rejection changed: %v", err)
 	}
 }

@@ -20,8 +20,9 @@ func TestRestrictGenericSignaturesPreservesReportExhaustion(t *testing.T) {
 	}
 	module := &ast.Module{Functions: []ast.Function{{
 		Name: "generated",
-		ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Option", Arguments: []ast.TypeReference{
+		ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Result", Arguments: []ast.TypeReference{
 			{Kind: ast.TypeKindNamed, Path: "u64"},
+			{Kind: ast.TypeKindNamed, Path: "i32"},
 		}},
 	}}}
 	expansion := genericsource.PackageExpansion{Origins: []genericsource.SpecializationOrigin{{GeneratedName: "generated"}}}
@@ -39,10 +40,10 @@ func TestRestrictGenericSignaturesBoundsTransportUnsupportedAtCollection(t *test
 		name := fmt.Sprintf("generated%d", index)
 		functions = append(functions, ast.Function{
 			Name: name,
-			ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Option",
+			ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Result",
 				Span: diagnosticSpan(index), Arguments: []ast.TypeReference{{
 					Kind: ast.TypeKindNamed, Path: "u64",
-				}}},
+				}, {Kind: ast.TypeKindNamed, Path: "i32"}}},
 		})
 		origins = append(origins, genericsource.SpecializationOrigin{GeneratedName: name})
 	}

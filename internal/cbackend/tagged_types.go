@@ -67,12 +67,18 @@ func prepareTaggedTypes(
 			return
 		}
 		considered[value] = struct{}{}
+		// New scalar payloads belong only to a flat Option. In particular, the
+		// recursive candidate fallback must not admit Result<Option<S>, ...>.
+		_, flatTransport := flatTransportOptionPayload(value)
+		if !flatTransport && hir.ContainsTaggedType(value, extendedOptionScalar) {
+			return
+		}
 		if element, option := hir.OptionElement(value); option {
 			if isOptionI32(value) {
 				return
 			}
 			element = canonicalCValueType(element)
-			supported := supportedTaggedPayload(element, true, structByType, enumByType, resourceByType, arrayByType)
+			supported := flatTransport || supportedTaggedPayload(element, true, structByType, enumByType, resourceByType, arrayByType)
 			_, needsDrop := resourceByType[element]
 			if !supported {
 				consider(element)
@@ -203,6 +209,9 @@ func prepareTaggedTypes(
 					return layout.Type{}, err
 				}
 				ok = true
+			} else if element, flat := flatTransportOptionPayload(value); flat && element == payload {
+				// Keep the shared Result/aggregate payload layout predicates closed.
+				payloadType, ok = layout.Type{Kind: layout.KindLanguageScalar, Name: payload.String()}, true
 			} else {
 				payloadType, ok = taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType, arrayByType)
 			}
@@ -231,6 +240,15 @@ func prepareTaggedTypes(
 		result = append(result, candidate)
 	}
 	return result, byType, nil
+}
+
+func extendedOptionScalar(value hir.Type) bool {
+	return hir.IsIntegerTransportScalar(value) || hir.IsFloatScalar(value)
+}
+
+func flatTransportOptionPayload(value hir.Type) (hir.Type, bool) {
+	payload, option := hir.OptionElement(value)
+	return payload, option && extendedOptionScalar(payload)
 }
 
 func copyScalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {
