@@ -8,6 +8,7 @@ import std::vec as v;
 // 11 raw pointer, 12 mutable raw pointer; prefix constructors retain the child.
 // 13 generic parameter name, 14 ordered parameter link; neither is a value type.
 // 15 C function (left result, right parameter tail), 16 ordered function parameter.
+// 17 safe closure function (left result, right kind-16 parameter tail).
 // Shared across the enclosing Parsed owner; IDs are one-based, zero absent.
 pub struct Node { u32 kind; usize start; usize end; usize left; usize right; }
 pub struct Attempt { usize next; usize end; usize count; usize root; i32 status; u32 expected; }
@@ -69,9 +70,10 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
         if (child == 0) { return 0; }
         if (!take(stream,cursor,b")")) { cursor.expected = 5; return 0; }
         root = append(nodes,cursor,5,start,child,0);
-    } else if (take(stream,cursor,b"unsafe")) {
-        if (!take(stream,cursor,b"extern")) { cursor.expected = 19; return 0; }
-        if (!take(stream,cursor,b"C")) { cursor.expected = 20; return 0; }
+    } else if (word(stream,cursor.index,b"fn") || word(stream,cursor.index,b"unsafe")) {
+        let bool foreign = take(stream,cursor,b"unsafe");
+        if (foreign && !take(stream,cursor,b"extern")) { cursor.expected = 19; return 0; }
+        if (foreign && !take(stream,cursor,b"C")) { cursor.expected = 20; return 0; }
         if (!take(stream,cursor,b"fn")) { cursor.expected = 21; return 0; }
         let usize result = type_node(stream,cursor,nodes,depth + 1);
         if (result == 0) { return 0; }
@@ -86,7 +88,7 @@ fn usize type_node(ref scanner::Stream stream, ref mut Cursor cursor, ref mut v:
             if (!take(stream,cursor,b",")) { break; }
         }
         if (!take(stream,cursor,b")")) { cursor.expected = 5; return 0; }
-        root = append(nodes,cursor,15,start,result,tail);
+        root = append(nodes,cursor,if(foreign){15}else{17},start,result,tail);
     } else if (named(stream,cursor.index)) {
         advance(stream,cursor);
         while (take(stream,cursor,b"::")) {

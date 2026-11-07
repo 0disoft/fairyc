@@ -3,18 +3,18 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-37841bc85eda02e82a1cc57b56d2277a19db1ea5402194b5e1454b9ffde02037",
+  "root": "fypi1-sha256-3df57b9cc74042e3053cdd6bfb5569296eaf379eb5cf667c8c2e6459dc7085ab",
   "packages": [
     {
-      "id": "fypi1-sha256-37841bc85eda02e82a1cc57b56d2277a19db1ea5402194b5e1454b9ffde02037",
+      "id": "fypi1-sha256-3df57b9cc74042e3053cdd6bfb5569296eaf379eb5cf667c8c2e6459dc7085ab",
       "role": "root",
       "packageUid": "example.lexer-candidate",
       "sourceKind": "local",
       "localPath": ".",
       "sdkIdentity": "",
       "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-4e859749ee25082cbb951d37a123803b331ce778ca2dcf05387a3a917bbe27c8",
-      "sourceDigest": "fysrc1-sha256-4e859749ee25082cbb951d37a123803b331ce778ca2dcf05387a3a917bbe27c8",
+      "sourceIdentity": "fysrc1-sha256-aefda6c56adb4dd06969d9909f957247a4cd3d9a113646450b9296a1e8858c97",
+      "sourceDigest": "fysrc1-sha256-aefda6c56adb4dd06969d9909f957247a4cd3d9a113646450b9296a1e8858c97",
       "version": "0.71.0",
       "features": []
     },
@@ -34,7 +34,7 @@
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-37841bc85eda02e82a1cc57b56d2277a19db1ea5402194b5e1454b9ffde02037",
+      "owner": "fypi1-sha256-3df57b9cc74042e3053cdd6bfb5569296eaf379eb5cf667c8c2e6459dc7085ab",
       "binding": "stdlib",
       "target": "fypi1-sha256-eb3f63d50ef081a07981b6aa8e10489929b687dcacc46b8024f4fadedc62e467"
     }

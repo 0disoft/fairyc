@@ -118,6 +118,11 @@ authorized by this queue.
   ADR 0551 now defines a bounded copied `fn i32(i32)` value with an inline
   four-i32 environment. Go structural syntax/AST and a distinct canonical HIR
   leaf are retained; execution stays unsupported at this type-only stage.
+  Fairy now retains the same structural type JSON and byte spans, keeping the
+  C callback tag separate. Its 141 type and 25 signature Go comparisons and
+  native low/optimized parser probes pass; see
+  `candidate-closure-value-types-20261108.md`. Combined-main check/locked also
+  passes with an authenticated 1,231-file Fairy inventory.
   Source/semantic, verified execution, artifacts/cache and Fairy parity are
   separate ongoing stages; see `go-closure-value-types-20261108.md`.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:

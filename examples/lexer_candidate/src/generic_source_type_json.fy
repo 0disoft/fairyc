@@ -6,7 +6,7 @@ import std::bytes as bytes;
 fn ref u8[] kind(u32 code) {
     if(code==1 || code==6){return b"named";}if(code==2 || code==3){return b"reference";}
     if(code==11 || code==12){return b"raw-pointer";}if(code==4){return b"slice";}
-    if(code==5){return b"grouped";}if(code==8){return b"array";}if(code==15){return b"foreign-function";}return b"";
+    if(code==5){return b"grouped";}if(code==8){return b"array";}if(code==15){return b"foreign-function";}if(code==17){return b"closure-function";}return b"";
 }
 fn bool path(ref syntax::Parsed p,usize id,ref mut bytes::Buffer out,ref mut json::Ledger work) {
     let n=syntax::type_at(p,id);if(n.start>n.end || n.end>syntax::source_view(p).len){return json::reject(work,9);}
@@ -40,10 +40,10 @@ pub fn bool value(ref syntax::Parsed p,usize id,usize depth,ref mut bytes::Buffe
     else if(n.kind==6){if(n.left==0 || n.left>=id || syntax::type_at(p,n.left).kind!=1){return json::reject(work,9);}if(!path(p,n.left,out,work)){return false;}}
     else if(!json::quoted(out,b"",work)){return false;}
     if(!json::raw(out,b",\"Mutable\":",work) || !json::flag(out,n.kind==3 || n.kind==12,work) || !json::raw(out,b",\"Element\":",work)){return false;}
-    if(n.kind==1 || n.kind==6 || n.kind==15){if(!json::raw(out,b"null",work)){return false;}}
+    if(n.kind==1 || n.kind==6 || n.kind==15 || n.kind==17){if(!json::raw(out,b"null",work)){return false;}}
     else{if(n.left==0 || n.left>=id){return json::reject(work,9);}if(!value(p,n.left,depth+1,out,work)){return false;}}
-    if(!json::raw(out,b",\"Arguments\":",work) || !list(p,if(n.kind==6){n.right}else{0},7,depth,out,work) || !json::raw(out,b",\"Parameters\":",work) || !list(p,if(n.kind==15){n.right}else{0},16,depth,out,work) || !json::raw(out,b",\"Result\":",work)){return false;}
-    if(n.kind==15){if(n.left==0 || n.left>=id){return json::reject(work,9);}if(!value(p,n.left,depth+1,out,work)){return false;}}
+    if(!json::raw(out,b",\"Arguments\":",work) || !list(p,if(n.kind==6){n.right}else{0},7,depth,out,work) || !json::raw(out,b",\"Parameters\":",work) || !list(p,if(n.kind==15 || n.kind==17){n.right}else{0},16,depth,out,work) || !json::raw(out,b",\"Result\":",work)){return false;}
+    if(n.kind==15 || n.kind==17){if(n.left==0 || n.left>=id){return json::reject(work,9);}if(!value(p,n.left,depth+1,out,work)){return false;}}
     else if(!json::raw(out,b"null",work)){return false;}
     if(!json::raw(out,b",\"Length\":",work)){return false;}
     if(n.kind==8){if(n.right==0 || n.right>=id){return json::reject(work,9);}let length=syntax::type_at(p,n.right);
