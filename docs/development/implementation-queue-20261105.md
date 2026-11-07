@@ -67,6 +67,18 @@ authorized by this queue.
 
 ## Progress
 
+- Disjoint parallel workers and coordinator add real OS argument admission,
+  fresh source-owned developer coordinate/Complete and init/snapshot JSON.
+  All 48 argv, 28 source and 16 report observations pass Windows low/optimized;
+  source identities match the actual Go compiler/native handoff and complete
+  report bytes match actual Go provider snapshots, including MAX versions and
+  binary/null/empty state. Complete source/locked checks pass 753 files / 9,467
+  MIR functions, with all 1,223 authored files present. See ADR 0542 and
+  `candidate-state-command-inputs-20261107.md`. Actual authored command entry,
+  source/asset file loading, execute/error reporting, console selection and all
+  final gates remain open. No main CLI/provider/default-engine promotion is
+  inferred. Linux stays batched; no push/dispatch. Full objective remains active.
+
 - The explicit Fairy Windows graph builder, runner and one-attempt persistence
   binding now borrow cancellation tokens. Existing signatures delegate with none;
   invalid options/work retain precedence and valid pre-cancellation preserves
