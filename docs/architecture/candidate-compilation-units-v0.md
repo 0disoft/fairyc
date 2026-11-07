@@ -2618,3 +2618,20 @@ Windows low/optimized tests cover the 32768/32769 project boundary, the retained
 16384/16385 unit boundary, selected/discarded remapping, artifact round trips,
 independent golden bytes, malformed/truncated input and work refusal. See
 `docs/development/candidate-project-drop-cap-20261107.md`.
+
+## Checked CFG drop projection for C reachability (2026-11-07)
+
+CFG construction records original drop-block IDs during the same charged block
+validation walk, before moving the input vectors into their immutable graph.
+The existing iteration, switch, defer and Region checks complete before any
+graph is published. Public graph checking keeps its signature, validation order
+and ledger and independently validates all blocks without collecting a table.
+
+C reachability visits the recorded drop sites in original CFG order rather
+than scanning non-drop blocks again. Calls, frame checks, per-site charging,
+repeated marks and nested cleanup fixed points remain intact. The projection is
+private derived storage with no artifact/cache/proof authority. Allocation
+failure returns 1003 without publishing a prefix; all existing work, block and
+project bounds remain unchanged. The detached 157-unit replay now links and
+emits successfully. Its scope and subsequent Windows evidence are recorded in
+`docs/development/candidate-reachability-drop-projection-20261107.md`.

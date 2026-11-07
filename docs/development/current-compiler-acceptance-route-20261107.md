@@ -636,3 +636,29 @@ source snapshot and stderr in `.cache/current-selfbuild-capacity-20261107.log`.
 There is no successful normal build receipt, current-source fixed point or
 full parity result. The authenticated detached IR archive remains available
 for bounded emitter diagnosis without repeating the original frontend pass.
+
+## C reachability drop projection follow-up
+
+The test-only profiler isolates the next failure: reachability exhausts its
+1048576 work ledger after 8299 frames, with 637322 CFG-block visits and 278010
+target-lookup work. A specialization-only lookup change did not remove it.
+The checked CFG now records drop-block IDs in its existing block-validation
+walk; reachability reads that immutable projection in the same order, retaining
+per-site/mark charges and all independent graph checks and existing bounds.
+
+Source check/locked pass with 755 files and 9536 MIR functions in
+19.681s / 15.707s. A fresh optimized diagnostic probe builds in 68.861s.
+The original authenticated 157-unit IR replay then links and fully emits in
+40.790s: 10292 frames, 81 C units, header 1842785 bytes, project work 9989821,
+empty stderr and unchanged input/archive/image/changed-source hashes. Evidence:
+`.cache/current-project-reach-drop-replay-20261107/run.json`. This remains
+detached diagnostic evidence from the frozen 646-source snapshot, not a normal
+current-source build, cache hit, executable publication or fixed point.
+
+The focused `TestCandidateReachabilityWork` passes Windows low and optimized
+(2/2), including independent reachability sets, ordered summaries and exact
+work-bound refusal. Its checked production-file hashes match this checkout.
+A fresh full CLI seed/normal retry follows separately.
+Linux native, CI and push remain unexecuted. See
+`candidate-reachability-drop-projection-20261107.md` for the projection contract
+and precise acceptance boundary.
