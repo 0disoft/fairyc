@@ -67,6 +67,41 @@ unnecessarily rebuilding a cold Go cache. Its failed log is retained. The
 corrected diagnostic uses existing shared Go caches and passes in 93.962s
 overall (51.836s package time); this is not a product-source repair.
 
+## Single checked-range phase isolation
+
+`.cache/parallel-body-stage-cost-20261107` records a single [445,450) range
+under an optimized private Windows probe. It loads the same frozen 646 inputs
+and adds markers without changing gate order, diagnostics, work or limits.
+The shared-cache build takes 221.316s overall (184.029s package time); the native
+run takes 26.304s including parse/signatures and completes within its 90s bound.
+All source, original overlay-source and image hashes match after execution.
+
+| Range operation | Wall time |
+| --- | --- |
+| Binding | 20.463ms |
+| Closure preparation | 853.152ms |
+| Primary value checking | 45.575ms |
+| Moves and diagnostics | 10.741ms |
+| Origins, including provider checking | **21869.924ms** |
+| Origin diagnostics | 0.124ms |
+| Cleanup policy | 2.441ms |
+| Result flow | 3.174ms |
+| Borrow capture and source stamps | 0.242ms |
+| Checked return/destruction, lowering and checked-plan destruction | 79.676ms |
+| Entire checked range | **22885.588ms** |
+
+Origins accounts for 95.56% of that range, with 19375ms process CPU. Its
+constant-build counter increases from 1 to 36: one primary build precedes it,
+and 35 distinct provider modules construct value plans inside it. This is not
+35 frames or an isolated measurement of provider preparation. The shared
+factory and convergence/liveness costs are not separated yet; no cross-range
+provider cache is implemented on this observation alone.
+
+All gates succeed and origin diagnostics are empty. Values work is 631959,
+move work 96587, origin work 675838, cleanup-policy work 196705 and final IR work
+423711. These are independent histories, not additive work. Short CPU samples
+are quantized to 15.625ms; a zero CPU delta does not mean no computation.
+
 ## Failed invocation evidence preservation
 
 `tools/build-candidate-native-probe.py` now uses
@@ -83,7 +118,8 @@ This improves failed-run evidence, not compiler throughput or acceptance.
 
 ## Remaining work
 
-Measure the stages inside one slow checked range before changing the compiler.
+Separate provider preparation from the remaining origin factory/solver work
+inside the measured slow range before selecting a compiler change.
 The SDK layout index has a finite ownership graph and no newly detected cleanup
 cycle; its retention has not been proved to cause the observed delay. Opaque
 MSVC copy barriers remain unchanged. Latest-source normal self-build, native

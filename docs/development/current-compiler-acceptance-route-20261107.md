@@ -728,3 +728,10 @@ nine focused tests and an actual two-second Windows child timeout pass.
 See `candidate-body-phase-diagnosis-20261107.md` for phase markers, failed-probe
 boundaries and remaining acceptance. This is not normal CLI, fixed-point or
 full-parity evidence. Product limits and MSVC aliasing barriers remain intact.
+
+The subsequent single-range [445,450) probe succeeds with unchanged source/image
+hashes: 22.886s checking/lowering, of which 21.870s (95.56%) is origin analysis
+including 35 provider value-plan builds. Primary closure takes 853.152ms;
+primary values take 45.575ms. Provider preparation and the remaining origin
+factory/solver costs are not yet separated. No provider cache is implemented;
+this is a bounded diagnostic, not full compiler acceptance.
