@@ -2,6 +2,7 @@ package cdriver
 
 import (
 	"bytes"
+	"context"
 	"debug/pe"
 	"fmt"
 	"os"
@@ -57,6 +58,8 @@ func BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain WindowsHostToolc
 // retain their 2MiB header limit. All other source, stack, timeout, COFF and image
 // policies are unchanged. Each object is inspected and released before linking;
 // the result contains the image without retaining the complete object set.
+// Compiler-host partitions use at most two concurrent CL commands; the runtime
+// remains serial and ordinary target project builds retain serial compilation.
 func BuildWindowsMSVCCompilerHostPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
 	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, true)
 }
@@ -113,35 +116,43 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 	objects := make([]WindowsHostObject, 0, len(sources))
 	objectNames := make([]string, 0, len(sources))
 	retainedBytes := 0
-	for _, source := range sources {
-		sourcePath := filepath.Join(directory, source.Name)
-		if err := os.WriteFile(sourcePath, []byte(source.Contents), 0o600); err != nil {
-			return WindowsHostArtifact{}, fmt.Errorf("write project source %s: %w", source.Name, err)
-		}
-		objectName := strings.TrimSuffix(source.Name, ".c") + ".obj"
-		objectPath := filepath.Join(directory, objectName)
-		// Candidate partitions retain their existing consumer flags. Stable
-		// single-unit target builders keep their separate /W4 /WX policy.
-		if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
-			"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
-			return WindowsHostArtifact{}, fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
-		}
-		contents, err := readArtifact(objectPath)
+	if compilerHost {
+		objectNames, err = compileWindowsCompilerHostProject(context.Background(), toolchain, directory, sources, optimization, timeout,
+			windowsProjectCompileWorkers(min(runtime.GOMAXPROCS(0), runtime.NumCPU())))
 		if err != nil {
-			return WindowsHostArtifact{}, fmt.Errorf("read project object %s: %w", objectName, err)
+			return WindowsHostArtifact{}, err
 		}
-		if err := inspectProjectObject(contents); err != nil {
-			return WindowsHostArtifact{}, fmt.Errorf("inspect project object %s: %w", objectName, err)
-		}
-		// The link consumes the files on disk, so an image-only build can let
-		// each inspected object drop before the next compile starts.
-		if retainObjects {
-			objects, retainedBytes, err = retainProjectObject(objects, retainedBytes, WindowsHostObject{Name: objectName, Bytes: contents})
-			if err != nil {
-				return WindowsHostArtifact{}, fmt.Errorf("retain project object %s: %w", objectName, err)
+	} else {
+		for _, source := range sources {
+			sourcePath := filepath.Join(directory, source.Name)
+			if err := os.WriteFile(sourcePath, []byte(source.Contents), 0o600); err != nil {
+				return WindowsHostArtifact{}, fmt.Errorf("write project source %s: %w", source.Name, err)
 			}
+			objectName := strings.TrimSuffix(source.Name, ".c") + ".obj"
+			objectPath := filepath.Join(directory, objectName)
+			// Candidate partitions retain their existing consumer flags. Stable
+			// single-unit target builders keep their separate /W4 /WX policy.
+			if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
+				"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
+				return WindowsHostArtifact{}, fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
+			}
+			contents, err := readArtifact(objectPath)
+			if err != nil {
+				return WindowsHostArtifact{}, fmt.Errorf("read project object %s: %w", objectName, err)
+			}
+			if err := inspectProjectObject(contents); err != nil {
+				return WindowsHostArtifact{}, fmt.Errorf("inspect project object %s: %w", objectName, err)
+			}
+			// The link consumes the files on disk, so an image-only build can let
+			// each inspected object drop before the next compile starts.
+			if retainObjects {
+				objects, retainedBytes, err = retainProjectObject(objects, retainedBytes, WindowsHostObject{Name: objectName, Bytes: contents})
+				if err != nil {
+					return WindowsHostArtifact{}, fmt.Errorf("retain project object %s: %w", objectName, err)
+				}
+			}
+			objectNames = append(objectNames, objectName)
 		}
-		objectNames = append(objectNames, objectName)
 	}
 	executable := filepath.Join(directory, "program.exe")
 	if err := linkWindowsMSVCProject(toolchain, directory, objectNames, timeout, reserve); err != nil {

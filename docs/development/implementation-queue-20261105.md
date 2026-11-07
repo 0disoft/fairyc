@@ -70,6 +70,13 @@ authorized by this queue.
 
 ## Progress
 
+- Compiler-host Windows C units now use at most two workers (one on one CPU),
+  with standalone runtime compilation, ordered failure, owned-process-tree
+  cancellation/Wait and exact serial/parallel PE equality in both profiles.
+  See `windows-compiler-host-parallel-20261107.md`. The low seed's 491-source
+  authored emission timed out at 900s; an optimized current-source seed and
+  actual full CLI/fixed-point acceptance remain open. No Linux/remote execution.
+
 - Parallel Windows integration on 2026-11-07 retains an exact clean public
   compiler/LSP ZIP at `b1ce7d5f`: 16 packaging steps, 15 real outside-checkout
   minimal-PATH steps and 25 Node checks pass. The permanent verifier and exact
