@@ -37,7 +37,7 @@ fn i32 write_slot<T>(ptr mut void slot, T value) { return unsafe { storage_put<T
 
 /// Constructs an empty vector without allocating.
 pub fn Vec<T> empty<T>() {
-    var Vec<T> value = Vec<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
+    var value = Vec<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
     assert(unsafe { initialize_raw(ref mut value as ptr mut void, storage_size<T>(), storage_alignment<T>()) } == 0);
     return value;
 }
@@ -122,7 +122,7 @@ pub fn ref mut T[] view_mut<T>(ref mut Vec<T> value) {
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {
     assert(index < value.length);
-    let ptr mut void slot = unsafe { storage_element_address<T>(value.data, index) };
+    let slot = unsafe { storage_element_address<T>(value.data, index) };
     assert(slot != null);
     return unsafe { storage_borrow<T>(value, slot) };
 }
@@ -131,7 +131,7 @@ pub fn ref T at<T>(ref Vec<T> value, usize index) {
 /// The vector cannot be borrowed again, mutated or moved while the reference is live.
 pub fn ref mut T at_mut<T>(ref mut Vec<T> value, usize index) {
     assert(index < value.length);
-    let ptr mut void slot = unsafe { storage_element_address<T>(value.data, index) };
+    let slot = unsafe { storage_element_address<T>(value.data, index) };
     assert(slot != null);
     return unsafe { storage_borrow_mut<T>(value, slot) };
 }
