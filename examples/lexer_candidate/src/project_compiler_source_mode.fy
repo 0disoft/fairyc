@@ -26,3 +26,13 @@ pub fn Result<bool,u32> aggregates(ref input::Input source,ref mut usize meter){
   }module_index+=1;
  }return .ok(found);
 }
+
+// A safe function type in the current retained source selects only the
+// closure cache route. Artifact headers never supply this command decision.
+pub fn Result<bool,u32> closures(ref input::Input source,ref mut usize meter){
+ var usize module_index=0;while(module_index<input::count(source)){
+  let p=input::source(source,module_index);var usize i=1;while(i<=syntax::type_count(p)){
+   if(!work::charge(meter,1)){return .err(3);}if(syntax::type_at(p,i).kind==17){return .ok(true);}i+=1;
+  }module_index+=1;
+ }return .ok(false);
+}

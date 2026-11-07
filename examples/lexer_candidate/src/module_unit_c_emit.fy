@@ -78,6 +78,12 @@ pub fn Result<Bundle,clean::Problem> partition_test(owner::Program program,names
 fn Result<Bundle,clean::Problem> partition_mode(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
     let emission=switch(emit_mode(owner::ir_program(ref program),named,entry,max_frames,entry_only,test_entry,0)){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(Bundle{.program,.emission});
 }
+// Only a retained source-authenticated Complete owner can use this Bundle
+// publisher. Plain and identified raw project APIs retain their old gates.
+pub fn Result<Bundle,clean::Problem> partition_complete_closures(owner::Program program,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry){
+    if(!owner::has_complete(ref program)){return .err(fail(1001,0,0,0));}
+    let emission=switch(emit_mode(owner::ir_program(ref program),named,entry,max_frames,entry_only,test_entry,3)){case .ok(p):{p}case .err(e):{return .err(e);}};return .ok(Bundle{.program,.emission});
+}
 // Compiler-private aggregate unit emission preserves the bounded unit owner.
 // It grants neither project linking nor artifact restoration admission.
 pub fn Result<Emission,clean::Problem> emit_aggregates(ref ir::Program raw,usize entry,usize max_frames,bool entry_only){return emit_mode(raw,names::empty(),entry,max_frames,entry_only,false,1);}
@@ -89,6 +95,11 @@ pub fn Result<Emission,clean::Problem> emit_project_closures(ref ir::Program raw
 // no IR reference or owner is retained across test images.
 pub fn Result<Emission,clean::Problem> emit_test(ref ir::Program raw,names::Table named,usize entry,usize max_frames){return emit_mode(raw,named,entry,max_frames,true,true,0);}
 pub fn Result<Emission,clean::Problem> emit_lowered_test(ref owner::Lowered program,names::Table named,usize entry,usize max_frames){return emit_graphs(owner::ir_program(owner::lowered_program(program)),owner::lowered_graphs(program),owner::lowered_sdk(program),owner::lowered_work(program),named,entry,max_frames,true,true,0);}
+pub fn Result<Emission,clean::Problem> emit_project_closure_test(ref ir::Program raw,names::Table named,usize entry,usize max_frames){return emit_mode(raw,named,entry,max_frames,true,true,3);}
+pub fn Result<Emission,clean::Problem> emit_lowered_closure_test(ref owner::Lowered program,names::Table named,usize entry,usize max_frames){
+    if(!owner::has_complete(owner::lowered_program(program))){return .err(fail(1001,0,0,0));}
+    return emit_graphs(owner::ir_program(owner::lowered_program(program)),owner::lowered_graphs(program),owner::lowered_sdk(program),owner::lowered_work(program),named,entry,max_frames,true,true,3);
+}
 fn Result<Emission,clean::Problem> emit_mode(ref ir::Program raw,names::Table named,usize entry,usize max_frames,bool entry_only,bool test_entry,u32 mode){
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(fail(1001,0,0,0));}let checked=proof::check(raw);if(checked.code!=0){return .err(checked);}let valid=project_entry(raw,entry,test_entry,mode);if(valid.code!=0){return .err(valid);}let graphs=switch(flow::lower_all(raw)){case .ok(p):{p}case .err(e):{return .err(e);}};var usize work=0;var usize i=0;while(i<v::len<cfg::Graph>(ref graphs)){if(!budget::charge(ref mut work,cfg::count(v::at<cfg::Graph>(ref graphs,i)))){return .err(fail(1002,0,0,0));}i+=1;}let sdk_plan=switch(sdk::build(raw,ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};return emit_graphs(raw,ref graphs,ref sdk_plan,work,named,entry,max_frames,entry_only,test_entry,mode);
 }

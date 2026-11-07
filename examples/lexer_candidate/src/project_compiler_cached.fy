@@ -24,7 +24,8 @@ pub fn Result<core::Complete,core::Problem> build(ref disk::Store store,ref envi
     *observed=empty();
     if(v::len<diagnostics::Reports>(reports)!=0){return core::build_complete_reporting(sources,table,reports,source_work,link_work);}
     let aggregate=switch(command::aggregates(sources,source_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    switch(if(aggregate){artifacts::from_disk_aggregates(store,loaded,env,cache_work)}else{artifacts::from_disk(store,loaded,env,cache_work)}){
+    let closures=switch(command::closures(sources,source_work)){case .ok(p):{p}case .err(e):{return .err(e);}};
+    switch(if(closures){artifacts::from_disk_closures(store,loaded,env,aggregate,cache_work)}else if(aggregate){artifacts::from_disk_aggregates(store,loaded,env,cache_work)}else{artifacts::from_disk(store,loaded,env,cache_work)}){
         case .ok(complete):{observed.path=2;return .ok(complete);}
         case .err(e):{observed.lookup_phase=e.phase;observed.lookup_code=e.code;}
     };
@@ -35,7 +36,7 @@ pub fn Result<core::Complete,core::Problem> build(ref disk::Store store,ref envi
         case .ok(p):{p}case .err(e):{return .err(e);}
     };
     if(unit_work.hits>0){observed.path=if(unit_work.misses>0){3}else{4};}
-    switch(if(aggregate){artifacts::to_disk_aggregates(store,loaded,ref complete,env,cache_work)}else{artifacts::to_disk(store,loaded,ref complete,env,cache_work)}){
+    switch(if(closures){artifacts::to_disk_closures(store,loaded,ref complete,env,aggregate,cache_work)}else if(aggregate){artifacts::to_disk_aggregates(store,loaded,ref complete,env,cache_work)}else{artifacts::to_disk(store,loaded,ref complete,env,cache_work)}){
         case .ok(_):{observed.stored=true;}
         case .err(e):{observed.store_phase=e.phase;observed.store_code=e.code;}
     };

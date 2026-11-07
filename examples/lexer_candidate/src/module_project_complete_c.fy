@@ -4,18 +4,19 @@ import module_project_c_owner as owner;
 import module_unit_c_names as names;
 import module_project_identified_ir as identified;
 import module_unit_cleanup_mir_model as clean;
+import module_unit_body_ir_model as ir;
 import project_compiler_core as compiler;
 import candidate_limits as limits;
 
 // Keep the checked IR and detached interfaces together without adding the
 // complete publication adapters to the large per-body C emitter source unit.
-fn Result<c::Bundle,clean::Problem> partition_scoped(compiler::Complete program,usize entry,usize max_frames,bool entry_only){if(compiler::is_state_graph(ref program) || max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::partition_scoped(owned,named,entry,max_frames,entry_only);}
+fn Result<c::Bundle,clean::Problem> partition_scoped(compiler::Complete program,usize entry,usize max_frames,bool entry_only){if(compiler::is_state_graph(ref program) || max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};let closures=clean::closures(ir::cleanup_ir(identified::ir_program(compiler::checked_program(ref program))));let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(closures){c::partition_complete_closures(owned,named,entry,max_frames,entry_only,false)}else{c::partition_scoped(owned,named,entry,max_frames,entry_only)};}
 pub fn Result<c::Bundle,clean::Problem> partition(compiler::Complete program,usize entry,usize max_frames){return partition_scoped(program,entry,max_frames,false);}
 pub fn Result<c::Bundle,clean::Problem> partition_entry(compiler::Complete program,usize entry,usize max_frames){return partition_scoped(program,entry,max_frames,true);}
 pub fn Result<c::Bundle,clean::Problem> partition_test(compiler::Complete program,usize entry,usize max_frames){
     if(compiler::is_state_graph(ref program)){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     var usize work=0;let named=switch(names::build_project(compiler::checked_program(ref program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::partition_test(owned,named,entry,max_frames);
+    let closures=clean::closures(ir::cleanup_ir(identified::ir_program(compiler::checked_program(ref program))));let owned=switch(owner::complete(program)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(closures){c::partition_complete_closures(owned,named,entry,max_frames,true,true)}else{c::partition_test(owned,named,entry,max_frames)};
 }
 pub fn bool has_complete(ref c::Bundle p){return owner::has_complete(c::project_owner(p));}
 pub fn ref compiler::Complete complete(ref c::Bundle p){return owner::complete_project(c::project_owner(p));}
@@ -24,7 +25,7 @@ pub fn Result<c::Emission,clean::Problem> emit_test(ref compiler::Complete progr
     if(compiler::is_state_graph(program)){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
     var usize work=0;let named=switch(names::build_project(compiler::checked_program(program),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return c::emit_test(identified::ir_program(compiler::checked_program(program)),named,entry,max_frames);
+    let raw=identified::ir_program(compiler::checked_program(program));return if(clean::closures(ir::cleanup_ir(raw))){c::emit_project_closure_test(raw,named,entry,max_frames)}else{c::emit_test(raw,named,entry,max_frames)};
 }
 
 // A test invocation owns one immutable program, proven CFGs and SDK plan. No
@@ -34,5 +35,5 @@ pub fn Result<TestSession,clean::Problem> prepare_tests(compiler::Complete progr
 pub fn ref compiler::Complete test_program(ref TestSession p){return owner::complete_project(owner::lowered_program(ref p.lowered));}
 pub fn Result<c::Emission,clean::Problem> emit_prepared_test(ref TestSession p,usize entry,usize max_frames){
     if(max_frames==0 || max_frames>limits::project_frames()){return .err(clean::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
-    var usize work=0;let named=switch(names::build_project(compiler::checked_program(test_program(p)),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};return c::emit_lowered_test(ref p.lowered,named,entry,max_frames);
+    var usize work=0;let named=switch(names::build_project(compiler::checked_program(test_program(p)),ref mut work)){case .ok(p):{p}case .err(e):{return .err(e);}};return if(clean::closures(ir::cleanup_ir(identified::ir_program(compiler::checked_program(test_program(p)))))){c::emit_lowered_closure_test(ref p.lowered,named,entry,max_frames)}else{c::emit_lowered_test(ref p.lowered,named,entry,max_frames)};
 }

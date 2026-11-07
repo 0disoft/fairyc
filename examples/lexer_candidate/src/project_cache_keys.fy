@@ -17,8 +17,9 @@ import std::bytes as bytes;
 import std::vec as v;
 
 pub resource Record{usize owner;bytes::Buffer instance;bytes::Buffer coordinate;ordinary::Identity ordinary;generic::Identity generic;cleanup{}}
-pub resource Keys{v::Vec<Record> packages;bool aggregates;cleanup{}}
+pub resource Keys{v::Vec<Record> packages;bool aggregates;bool closures;cleanup{}}
 pub fn bool aggregates(ref Keys p){return p.aggregates;}
+pub fn bool closures(ref Keys p){return p.closures;}
 struct Dependency{ordinary::Dependency ordinary;generic::Dependency generic;}
 pub fn usize count(ref Keys p){return v::len<Record>(ref p.packages);}
 pub fn ref Record at(ref Keys p,usize index){return v::at<Record>(ref p.packages,index);}
@@ -66,13 +67,14 @@ fn Result<Record,u32> package(ref workspace::Facts facts,ref core::Complete comp
 // specialization sets, environment strings or partial key vector are admitted.
 // The keys are compatibility facts, not artifact verification or cache hits.
 pub fn Result<Keys,u32> collect(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){
-    return collect_mode(loaded,complete,env,false,work);
+    return collect_mode(loaded,complete,env,false,false,work);
 }
-pub fn Result<Keys,u32> collect_aggregates(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){return collect_mode(loaded,complete,env,true,work);}
-fn Result<Keys,u32> collect_mode(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,bool aggregates,ref mut usize work){
+pub fn Result<Keys,u32> collect_aggregates(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,ref mut usize work){return collect_mode(loaded,complete,env,true,false,work);}
+pub fn Result<Keys,u32> collect_closures(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,bool aggregates,ref mut usize work){return collect_mode(loaded,complete,env,aggregates,true,work);}
+fn Result<Keys,u32> collect_mode(ref visibility::Resolved loaded,ref core::Complete complete,ref environment::Environment env,bool aggregates,bool closures,ref mut usize work){
     if(core::is_state_graph(complete)){return .err(9);}
-    if(clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))!=aggregates){return .err(9);}
+    if(clean::closures(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))!=closures || clean::aggregates(ir::cleanup_ir(checked::ir_program(core::checked_program(complete))))!=aggregates){return .err(9);}
     if(!budget::charge(work,0)){return .err(10);}let facts=switch(workspace::collect(loaded,complete,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(interfaces::count(core::public_interfaces(complete))!=workspace::count(ref facts)){return .err(9);}
     let standard_library=switch(digest(environment::standard_library(env),b"fypi1-sha256-",work)){case .ok(p):{p}case .err(code):{return .err(code);}};var v::Vec<Record> packages=v::empty<Record>();var usize owner=0;
-    while(owner<workspace::count(ref facts)){if(!budget::charge(work,1)){return .err(10);}let p=switch(package(ref facts,complete,env,standard_library,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<Record>(ref mut packages,p).is_ok){return .err(11);}owner+=1;}return .ok(Keys{.packages,.aggregates});
+    while(owner<workspace::count(ref facts)){if(!budget::charge(work,1)){return .err(10);}let p=switch(package(ref facts,complete,env,standard_library,owner,work)){case .ok(p):{p}case .err(code):{return .err(code);}};if(!v::push<Record>(ref mut packages,p).is_ok){return .err(11);}owner+=1;}return .ok(Keys{.packages,.aggregates,.closures});
 }
