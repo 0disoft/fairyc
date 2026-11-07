@@ -2,6 +2,7 @@ module windows_run_capture;
 import windows_process as child;
 import windows_command as command;
 import windows_run_control as control;
+import windows_cancel as cancellation;
 import std::bytes as bytes;
 import std::vec as v;
 
@@ -36,6 +37,11 @@ pub fn ref u8[] stderr(ref Captured result){return bytes::view(ref result.error)
 fn i32 positive(u32 magnitude){var u32 remaining=magnitude;var i32 out=0;var i32 weight=1073741824;var u32 bit=1073741824;while(bit!=0){if(remaining>=bit){remaining-=bit;out+=weight;}bit/=2;weight/=2;}return out;}
 pub fn i32 exit_bits(u32 status){return if(status<=2147483647){positive(status)}else{-2147483648+positive(status-2147483648)};}
 fn child::Problem fail(u32 kind,u32 os_code,u32 pid){return child::Problem{.kind,.os_code,.pid};}
+// 12 is an observed cancellation, 13 a failed token observation. Neither is a
+// timeout or a completed process result. Existing entry points use none().
+@effects(filesystem) fn Result<bool,child::Problem> checkpoint(ref cancellation::Token token,u32 pid){
+    return switch(cancellation::requested(token)){case .ok(stop):{if(stop){.err(fail(12,0,pid))}else{.ok(false)}}case .err(e):{.err(fail(13,e.os_code,pid))}};
+}
 @effects(filesystem) fn Result<Pipe,child::Problem> pipe(){
     var ptr mut void reader=null;var ptr mut void writer=null;let made=unsafe{create_pipe(ref mut reader as ptr mut void,ref mut writer as ptr mut void)};let result=Pipe{.reader,.writer};if(made==0){return .err(fail(9,unsafe{last_error()},0));}
     if(unsafe{inherit(result.writer,1)}==0){return .err(fail(9,unsafe{last_error()},0));}return .ok(result);
@@ -60,9 +66,14 @@ pub fn Result<Captured,child::Problem> run_input(ref u8[] program,ref v::Vec<byt
 // Explicit stdout/stderr allowance: 1..64MiB shared, checked before snapshotting.
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run_input_limit(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,usize output_limit){
+    let token=cancellation::none();return run_input_cancel(program,arguments,directory,timeout,input_mode,input_path,output_limit,ref token);
+}
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_input_cancel(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,usize output_limit,ref cancellation::Token token){
     if(timeout==0 || timeout>600000 || output_limit==0 || output_limit>67108864){return .err(fail(1,0,0));}
+    discard checkpoint(token,0)?;
     let inherited=switch(control::snapshot()){case .ok(p):{p}case .err(e):{return .err(e);}};
-    return run_environment_limit(program,arguments,directory,timeout,input_mode,input_path,bytes::view(ref inherited),output_limit);
+    return run_environment_cancel(program,arguments,directory,timeout,input_mode,input_path,bytes::view(ref inherited),output_limit,token);
 }
 // Compiler commands use a private child environment; the parent stays intact.
 @effects(filesystem,console,environment,clock)
@@ -71,13 +82,20 @@ pub fn Result<Captured,child::Problem> run_environment(ref u8[] program,ref v::V
 }
 @effects(filesystem,console,environment,clock)
 pub fn Result<Captured,child::Problem> run_environment_limit(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,ref u8[] inherited,usize output_limit){
+    let token=cancellation::none();return run_environment_cancel(program,arguments,directory,timeout,input_mode,input_path,inherited,output_limit,ref token);
+}
+@effects(filesystem,console,environment,clock)
+pub fn Result<Captured,child::Problem> run_environment_cancel(ref u8[] program,ref v::Vec<bytes::Buffer> arguments,ref u8[] directory,u32 timeout,u32 input_mode,ref u8[] input_path,ref u8[] inherited,usize output_limit,ref cancellation::Token token){
     if(timeout==0 || timeout>600000 || output_limit==0 || output_limit>67108864){return .err(fail(1,0,0));}
+    discard checkpoint(token,0)?;
     let output=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let error=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};let receipt=switch(pipe()){case .ok(p):{p}case .err(e):{return .err(e);}};
     let environment=switch(control::with_handle(inherited,unsafe{handle_value(receipt.writer)})){case .ok(p):{p}case .err(e):{return .err(e);}};
     var bytes::Buffer scratch=bytes::empty();if(!bytes::resize_zeroed(ref mut scratch,4096).is_ok){return .err(fail(2,0,0));}var bytes::Buffer out=bytes::empty();var bytes::Buffer err=bytes::empty();var bytes::Buffer signal=bytes::empty();var usize retained=0;var usize signal_retained=0;var bool truncated=false;var bool signal_truncated=false;
-    let standard=switch(input(input_mode,input_path)){case .ok(p):{p}case .err(e):{return .err(e);}};let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.raw,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
+    let standard=switch(input(input_mode,input_path)){case .ok(p):{p}case .err(e):{return .err(e);}};discard checkpoint(token,0)?;
+    let started=unsafe{ticks()};let running=switch(child::start(program,arguments,directory,bytes::view(ref environment),child::Handles{.input=standard.raw,.output=output.writer,.error=error.writer})){case .ok(p):{p}case .err(e):{return .err(e);}};
     let id=child::pid(ref running);var bool stopped=false;var child::Outcome completed=child::Outcome{.exit_code=0,.pid=id};var usize collected=0;
     while(true){
+        switch(checkpoint(token,id)){case .ok(_):{}case .err(e):{child::terminate(ref running);return .err(e);}};
         let a=switch(pump(ref output,ref mut out,ref mut scratch,ref mut retained,output_limit,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let b=switch(pump(ref error,ref mut err,ref mut scratch,ref mut retained,output_limit,ref mut truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};
         let c=switch(pump(ref receipt,ref mut signal,ref mut scratch,ref mut signal_retained,control::max_receipt_bytes(),ref mut signal_truncated,id)){case .ok(p):{p}case .err(e):{child::terminate(ref running);return .err(e);}};

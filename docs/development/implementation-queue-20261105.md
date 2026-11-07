@@ -67,6 +67,19 @@ authorized by this queue.
 
 ## Progress
 
+- Explicit Fairy Windows cancellation now owns sealed manual-reset OS events
+  and flows through new captured-process entry points. Existing calls retain
+  their signatures/default none token. Native clear/latched/collision/cleanup,
+  independent Go events, live parent+leaf termination and stable handle counts
+  pass low/optimized. The 52.949s combined command also preserves the five
+  authored capture tests and 50 output-limit cases. Closed private host adapters,
+  both selectors and runtime pin are synchronized; 26 full runtime C comparisons
+  match live Go, with unknown operations refused. Full source/lock checks pass
+  750 files / 9,445 MIR functions. See ADR 0540 and
+  `candidate-windows-cancellation-20261107.md`. Graph builder/runner/CAS token
+  plumbing, console/actual command selection and all final gates remain required.
+  Linux stays batched; no push/dispatch. Full objective remains active.
+
 - The authored state developer command now has pure bounded admission for the
   existing explicit seven-argument native-graph invocation and standalone help.
   Scalar options survive argv destruction; unsupported Go-MIR defaults cannot

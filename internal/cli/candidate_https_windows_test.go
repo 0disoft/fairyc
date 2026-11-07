@@ -212,7 +212,8 @@ func TestCandidateHTTPSRuntimePackaging(t *testing.T) {
 			if err = os.WriteFile(path, image.Bytes, 0700); err != nil {
 				t.Fatal(err)
 			}
-			for _, header := range []string{"fairyc_private_windows_root_file_link_new_v1(", "fairyc_private_windows_root_file_state_open_v1(", "fairyc_private_windows_root_file_state_same_v1(", "fairyc_private_windows_root_file_state_lock_v1(", "fairyc_private_windows_ticks_v1(", "fairyc_private_windows_root_file_read_v1(", "fairyc_private_windows_https_read_v1(", "fairyc_private_windows_root_file_read_v1( fairyc_private_windows_https_open_v1(", "fairyc_private_windows_ticks_v1( fairyc_private_windows_https_close_v1("} {
+			for _, header := range []string{"fairyc_private_windows_root_file_link_new_v1(", "fairyc_private_windows_root_file_state_open_v1(", "fairyc_private_windows_root_file_state_same_v1(", "fairyc_private_windows_root_file_state_lock_v1(", "fairyc_private_windows_ticks_v1(", "fairyc_private_windows_root_file_read_v1(", "fairyc_private_windows_https_read_v1(", "fairyc_private_windows_root_file_read_v1( fairyc_private_windows_https_open_v1(", "fairyc_private_windows_ticks_v1( fairyc_private_windows_https_close_v1(",
+				"fairyc_private_windows_cancel_create_v1(", "fairyc_private_windows_cancel_open_v1(", "fairyc_private_windows_cancel_signal_v1(", "fairyc_private_windows_cancel_create_v1( fairyc_private_windows_cancel_open_v1( fairyc_private_windows_cancel_signal_v1("} {
 				if err = os.WriteFile(filepath.Join(root, "header"), []byte(header), 0600); err != nil {
 					t.Fatal(err)
 				}
@@ -225,6 +226,12 @@ func TestCandidateHTTPSRuntimePackaging(t *testing.T) {
 				if code != 0 || out != want || diagnostic != "" {
 					t.Fatalf("%s: %d %s %q", header, code, fetchCLITextDiff(out, want), diagnostic)
 				}
+			}
+			if err = os.WriteFile(filepath.Join(root, "header"), []byte("fairyc_private_windows_cancel_reset_v1("), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if code, out, diagnostic := fetchCLIProcess(t, path, root, []string{pack}, ""); code != 5 || out != "" || diagnostic != "" {
+				t.Fatalf("unknown cancellation operation admitted: %d %q %q", code, out, diagnostic)
 			}
 		})
 	}

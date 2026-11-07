@@ -1,6 +1,7 @@
 package candidatehost
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -15,6 +16,38 @@ func TestPrivateWindowsHostSymbolSelection(t *testing.T) {
 	source, err := WindowsSource("extern int32_t fairyc_private_windows_create_v1 \n (")
 	if err != nil || !strings.Contains(source, "return CreateProcessW(") {
 		t.Fatalf("missing ABI adapter: %v", err)
+	}
+}
+
+func TestPrivateWindowsCancelSymbolSelection(t *testing.T) {
+	for _, operation := range []string{"create", "open", "signal"} {
+		name := "fairyc_private_windows_cancel_" + operation + "_v1"
+		for _, gap := range []string{"", " ", "\t", "\r\n"} {
+			t.Run(operation+fmt.Sprintf("/gap-%q", gap), func(t *testing.T) {
+				source, err := WindowsSource("extern void *" + name + gap + "(void);")
+				if err != nil || source != windowsProcess {
+					t.Fatalf("cancel adapter %s: error=%v, selected process=%v", name, err, source == windowsProcess)
+				}
+			})
+		}
+		// Cancellation composes with existing optional hosts without selecting
+		// either unrelated component when used alone.
+		source, err := WindowsSource(name + "( fairyc_private_windows_root_file_close_v1( fairyc_private_windows_https_read_v1(")
+		if err != nil || source != windowsProcess+"\n"+windowsRootedFile+"\n"+windowsHTTPS {
+			t.Fatalf("combined cancel adapter %s: %v", name, err)
+		}
+	}
+	for _, name := range []string{
+		"fairyc_private_windows_cancel_v1", "fairyc_private_windows_cancel_reset_v1",
+		"fairyc_private_windows_cancel_create_v2", "fairyc_private_windows_cancel_open_v1_extra",
+		"fairyc_private_windows_cancel_signal_v10",
+	} {
+		t.Run(name, func(t *testing.T) {
+			source, err := WindowsSource("fairyc_private_windows_cancel_create_v1( " + name + "(")
+			if err == nil || source != "" || !strings.Contains(err.Error(), name) {
+				t.Fatalf("unknown cancellation operation did not fail closed: source bytes=%d error=%v", len(source), err)
+			}
+		})
 	}
 }
 

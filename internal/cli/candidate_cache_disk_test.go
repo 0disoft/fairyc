@@ -58,7 +58,7 @@ func TestCandidateCacheDiskWindows(t *testing.T) {
 	}
 }
 
-func windowsCandidateProbe(t *testing.T, root string) (cbackend.Unit, string, cdriver.NativeToolchain) {
+func windowsCandidateProbe(t *testing.T, root string, systemImports ...string) (cbackend.Unit, string, cdriver.NativeToolchain) {
 	t.Helper()
 	workspace, err := workspaceloader.LoadVectorCandidate(root)
 	if err != nil {
@@ -74,8 +74,12 @@ func windowsCandidateProbe(t *testing.T, root string) (cbackend.Unit, string, cd
 		t.Fatal(err)
 	}
 	var standard []string
+	imports := make(map[string]bool, len(systemImports))
+	for _, symbol := range systemImports {
+		imports[symbol] = true
+	}
 	for _, symbol := range unit.ForeignSymbols {
-		if !strings.HasPrefix(symbol, "fairyc_private_windows_") {
+		if !strings.HasPrefix(symbol, "fairyc_private_windows_") && !imports[symbol] {
 			standard = append(standard, symbol)
 		}
 	}

@@ -2,6 +2,8 @@
 
 Part 3 of 3 of the [source index](source-of-truth.md).
 
+- **Explicit Fairy Windows cancellation and captured job cleanup**: `examples/lexer_candidate/src/windows_cancel.fy`, `windows_run_capture.fy`, `native_runtime_contract.fy`, `native_runtime_asset_pin.fy`, `internal/candidatehost/windows_process.c`, `runtime.go`. Actual event/tree/handle and complete runtime-C comparison: `internal/cli/candidate_windows_cancel_test.go`, `candidate_windows_capture_cancel_test.go`, `candidate_https_windows_test.go`; ADR 0540 and `docs/development/candidate-windows-cancellation-20261107.md`. Graph/CAS token plumbing and console/CLI selection remain separate.
+
 - **Authored state developer command argument admission**: `examples/lexer_candidate/src/module_state_command_options.fy`, `internal/cli/candidate_state_command_options_test.go`; pure existing native-graph syntax, detached scalar choices and bounded pre-I/O refusal in `docs/development/candidate-state-command-options-20261107.md`. Actual authored command entry/reporting remains separate.
 
 - **Fairy Windows one-attempt persistent graph execution**: `examples/lexer_candidate/src/module_state_graph_windows_persistent.fy`, `internal/cli/candidate_state_graph_windows_persistent_test.go`. Real Built-backed execution and rooted CAS, owned response/error causes, Go reopen: ADR 0539 and `docs/development/candidate-windows-persistent-state-graphs-20261107.md`. Ordinary CLI, cancellation and broader final acceptance remain separate.
