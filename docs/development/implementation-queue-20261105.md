@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- The Sol high Linux handoff worker adds exact clean-commit source/blob/mode
+  packaging, an existing six-group portable collector plan and explicit pending
+  runtime observations. Fifteen Windows tiny-repository checks pass in 52.092s,
+  including deterministic payloads, dirty/unsafe refusal, original tree/HEAD
+  reconstruction and verified executable modes. See
+  `linux-validation-handoff-20261107.md`. The coordinator will build/verify the
+  actual repository ZIP only after these changes are committed. No Go/compiler
+  or native Linux is executed by packaging; all native/final gates stay open.
+  No push/dispatch. The full objective remains active.
+
 - A Sol high packaging worker and coordinator create actual private Windows state
   developer ZIPs, validate exact current source/build/image/pack bytes and execute
   both extracted profiles in fresh directories. Packaging/preparation has 30
