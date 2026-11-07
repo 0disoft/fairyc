@@ -2586,3 +2586,19 @@ private C-project transport when the available seed predates this frame limit.
 Its receipt identifies that restricted scope and is rejected by full CLI checks.
 Runtime capability and validation are documented in
 `docs/ops/candidate-semantic-tests-20261017.md`.
+
+## Project compiled-layout admission (2026-11-07)
+
+`candidate_limits::project_layouts()` now bounds merged project metadata,
+compiled body-IR verification and metadata artifact model/decode at **2048**.
+The 2048th unique layout is admitted; the 2049th is refused with 1002.
+Duplicate recipes can still coalesce at capacity. Raw source/parser/joined AST
+bounds and the independent type, field, callable, parameter, name, work, cache
+identity and provenance rules are unchanged. The separate public-view adapter
+still has its existing 1024-layout bound; this change does not expand that route.
+
+`FYMETA00` retains its field widths, ordering and bytes. It is private disposable
+exact-compiler transport, not a cross-version compatibility promise. The bounded
+admission extension and Windows evidence, including the remaining public-view
+guard, are recorded in
+`docs/development/candidate-project-layout-cap-20261107.md`.

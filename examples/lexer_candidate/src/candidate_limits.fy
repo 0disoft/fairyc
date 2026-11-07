@@ -29,6 +29,10 @@ pub fn usize metadata_fields(){return 2048;}
 // their combined table; each independently checked unit retains its 2048 cap.
 pub fn usize project_fields(){return 8192;}
 
+// Whole-project metadata coalesces layouts from independently checked units.
+// This bounds compiled IR only; source and joined AST limits stay separate.
+pub fn usize project_layouts(){return 2048;}
+
 // Joined bodies include original modules plus authenticated SDK specializations.
 // Per-file parser limits remain separate; all downstream consumers share this cap.
 pub fn usize program_expressions(){return 16384;}

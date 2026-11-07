@@ -113,7 +113,7 @@ pub fn clean_ir::Problem check_metered(ref ir::Program p,ref mut usize verificat
     if(!charge_verification(verification_work,extra)){return fail(1002,0,0,0);}return checked;
 }
 fn clean_ir::Problem check_parts(ref ir::Program p,usize state_work,ref mut usize work,ref mut usize total){
-    if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>clean_ir::work_limit(ir::cleanup_ir(p)) || ir::name_bytes(p)>1048576 || ir::layout_count(p)>1024 || ir::field_count(p)>limits::project_fields() || ir::callable_count(p)>limits::project_callables()){return fail(1002,0,0,0);}
+    if(ir::count(p)!=clean_ir::frame_count(ir::cleanup_ir(p))){return fail(1001,0,0,0);}if(ir::work(p)>clean_ir::work_limit(ir::cleanup_ir(p)) || ir::name_bytes(p)>1048576 || ir::layout_count(p)>limits::project_layouts() || ir::field_count(p)>limits::project_fields() || ir::callable_count(p)>limits::project_callables()){return fail(1002,0,0,0);}
     // Producer work remains capped above. Revalidation has its own bounded
     // traversal, so its capacity does not depend on the producer's history.
     let project=clean_ir::project(ir::cleanup_ir(p));if(!(if(project){limits::project_charge(total,state_work)}else{budget::charge(work,state_work)})){return fail(1002,0,0,0);}var usize i=1;let nt=clean_ir::type_count(ir::cleanup_ir(p));

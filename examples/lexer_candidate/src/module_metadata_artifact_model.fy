@@ -21,7 +21,7 @@ pub fn usize parameter_count(ref Metadata p){return v::len<usize>(ref p.paramete
 pub fn usize parameter_at(ref Metadata p,usize i){return *v::at<usize>(ref p.parameters,i);}
 pub fn ref u8[] names(ref Metadata p){return bytes::view(ref p.names);}
 fn bool span(usize start,usize end,usize size){return start<=end && end<=size;}
-fn bool bounded(usize layouts,usize fields,usize callables,usize parameters,usize names){return layouts<=1024 && fields<=limits::project_fields() && callables<=limits::project_callables() && parameters<=32768 && names<=1048576;}
+fn bool bounded(usize layouts,usize fields,usize callables,usize parameters,usize names){return layouts<=limits::project_layouts() && fields<=limits::project_fields() && callables<=limits::project_callables() && parameters<=32768 && names<=1048576;}
 pub fn u32 check(ref Metadata p,ref clean::Program cleaned,usize modules,ref mut usize work){
     if(!budget::charge(work,1)){return 1002;}if(modules>limits::source_files() || !bounded(layout_count(p),field_count(p),callable_count(p),parameter_count(p),names(p).len)){return 1002;}
     let nt=clean::type_count(cleaned);let owners=if(modules==0){limits::source_files()}else{modules};var usize i=0;
