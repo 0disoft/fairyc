@@ -1,4 +1,5 @@
 module generic_package_bindings;
+import candidate_limits as limits;
 import project_compiler_input as input;
 import module_catalog as catalog;
 import module_public_type_text as coordinates;
@@ -32,7 +33,7 @@ pub fn Bindings empty(){return Bindings{.names=bytes::empty(),.modules=v::empty<
 // Detached provenance keeps exact source stamps and resolved import/namespace
 // records without retaining parser arenas or source bytes.
 pub fn Result<Bindings,u32> copy(ref Bindings input,ref mut usize meter){
-    if(count(input)>512 || import_count(input)>32768 || bytes::len(ref input.names)>1048576){return .err(9);}if(!budget::charge(meter,bytes::len(ref input.names)+1)){return .err(10);}let names=switch(bytes::copy(bytes::view(ref input.names))){case .ok(p):{p}case .err(_):{return .err(11);}};var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Import> imports=v::empty<Import>();var usize i=0;
+    if(count(input)>limits::source_files() || import_count(input)>32768 || bytes::len(ref input.names)>1048576){return .err(9);}if(!budget::charge(meter,bytes::len(ref input.names)+1)){return .err(10);}let names=switch(bytes::copy(bytes::view(ref input.names))){case .ok(p):{p}case .err(_):{return .err(11);}};var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Import> imports=v::empty<Import>();var usize i=0;
     while(i<count(input)){if(!budget::charge(meter,1)){return .err(10);}if(!v::push<Module>(ref mut modules,module_at(input,i)).is_ok){return .err(11);}i+=1;}i=0;while(i<import_count(input)){if(!budget::charge(meter,1)){return .err(10);}if(!v::push<Import>(ref mut imports,import_at(input,i)).is_ok){return .err(11);}i+=1;}return .ok(Bindings{.names,.modules,.imports});
 }
 fn Result<Text,u32> retain(ref mut bytes::Buffer names,ref u8[] data,ref mut usize meter){if(data.len>1048576 || bytes::len(names)>1048576-data.len || !budget::charge(meter,data.len+1)){return .err(10);}let start=bytes::len(names);if(!bytes::append(names,data).is_ok){return .err(11);}return .ok(Text{.start,.end=bytes::len(names)});}
@@ -49,7 +50,7 @@ fn Result<bool,u32> less(ref bytes::Buffer names,Text left,Text right,ref mut us
 fn u32 sort(ref mut v::Vec<Import> rows,ref bytes::Buffer names,usize first,usize end,ref mut usize meter){var usize i=first+1;while(i<end){let value=*v::at<Import>(rows,i);var usize at=i;while(at>first){if(!budget::charge(meter,1)){return 10;}let previous=*v::at<Import>(rows,at-1);let before=switch(less(names,value.binding,previous.binding,meter)){case .ok(value):{value}case .err(code):{return code;}};if(!before){break;}let slot=v::at_mut<Import>(rows,at);*slot=previous;at-=1;}let slot=v::at_mut<Import>(rows,at);*slot=value;i+=1;}return 0;}
 // Workspace collection uses the existing 16MiB ledger; each definition/JSON
 // request keeps the existing independent 1MiB source-identity ledger.
-pub fn Result<Bindings,Problem> build(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> resolved,ref coordinates::Coordinates table,ref mut usize meter){let total=v::len<syntax::Parsed>(sources);if(total==0 || total>512 || v::len<usize>(owners)!=total || v::len<catalog::Binding>(resolved)>4096){return .err(fail(9,0,0));}if(!budget::charge(meter,total+1)){return .err(fail(10,0,0));}
+pub fn Result<Bindings,Problem> build(ref v::Vec<syntax::Parsed> sources,ref v::Vec<usize> owners,ref v::Vec<catalog::Binding> resolved,ref coordinates::Coordinates table,ref mut usize meter){let total=v::len<syntax::Parsed>(sources);if(total==0 || total>limits::source_files() || v::len<usize>(owners)!=total || v::len<catalog::Binding>(resolved)>limits::project_imports()){return .err(fail(9,0,0));}if(!budget::charge(meter,total+1)){return .err(fail(10,0,0));}
     var bytes::Buffer names=bytes::empty();var v::Vec<Module> modules=v::empty<Module>();var v::Vec<Import> rows=v::empty<Import>();var usize module_index=0;
     while(module_index<total){let owner=*v::at<usize>(owners,module_index);if(owner>=512){return .err(fail(9,module_index,0));}let p=v::at<syntax::Parsed>(sources,module_index);let source=syntax::source_view(p);if(source.len>8388608 || !budget::charge(meter,source.len+1)){return .err(fail(10,module_index,0));}
         let owner_text=switch(namespace(table,owner,meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,module_index,0));}};let path=switch(module_path(p,meter)){case .ok(value):{value}case .err(code):{return .err(fail(code,module_index,0));}};var usize i=0;

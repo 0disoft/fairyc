@@ -252,3 +252,27 @@ uses the actual syntax API, and its helper follows actual module dependencies.
 Both fixture checks and five borrow-boundary cases pass in 12.973s at
 `.cache/lexer-fixture-repair-20261107/after.log`. The earlier failed log remains
 retained; it is superseded only for these seven repaired cases.
+
+## Source-cardinality consumers follow-up
+
+The optimized import-enabled seed passed its full CLI regression (205 C parts,
+14 independent CLI processes, 213.942s), then rejected the actual 646-source
+emission in 1.705s with phase 2/stage 3/code 9. This reaches the region-demand
+source-selection gate, which still used 512 instead of the shared 1024-source
+bound. It is a frontend rejection; no full self-build packet was emitted.
+
+Source-selection and checked-body stamps, generic bindings/context, public type
+stamps, provenance and cache source mappings now share source cardinality.
+Source-index masks/mappings own bounded buffers/vectors. Package-owner admission
+remains 512, and detached/artifact import admission remains 32768 independently
+of active project imports. Details and boundary evidence are in
+`candidate-region-source-bounds-20261107.md`,
+`candidate-source-stamp-bounds-20261107.md` and
+`candidate-source-artifact-bounds-20261107.md` in this directory.
+
+The integrated full-source snapshot passes check/locked in 14.316s / 13.330s:
+755 checked files, 9503 MIR functions; all 1225 authored files match the checked
+snapshot. Its lock is copied only after both successful commands and that hash
+comparison. Evidence: `.cache/current-source-check-sourcecards-20261107.log`.
+The fresh seed and authored self-build remain separate acceptance steps; these
+source and narrow native checks do not establish a fixed point or full parity.

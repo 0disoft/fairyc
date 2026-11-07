@@ -1,4 +1,5 @@
 module generic_package_context;
+import candidate_limits as limits;
 import generic_package_bindings as bindings;
 import generic_source_module_json as modules;
 import generic_source_function_json as functions;
@@ -63,7 +64,7 @@ fn bool entry(ref bindings::Bindings table,usize at,ref syntax::Parsed p,ref mut
     while(i<m.count){if(i!=0 && !raw(s,b",",b)){return false;}let row=bindings::import_at(table,*v::at<usize>(ref imports,i));let provider=bindings::module_at(table,row.target);if(!quoted(s,bindings::text(table,row.alias),b) || !raw(s,b":",b) || !quoted(s,bindings::text(table,provider.namespace),b)){return false;}i+=1;}return raw(s,b"}}",b);
 }
 fn bool graph_value(ref v::Vec<syntax::Parsed> sources,ref bindings::Bindings table,ref v::Vec<usize> sorted,ref mut Stream s,ref mut Budget b){if(!raw(s,b"[",b)){return false;}var usize i=0;while(i<v::len<usize>(sorted)){if(i!=0 && !raw(s,b",",b)){return false;}let at=*v::at<usize>(sorted,i);if(!entry(table,at,v::at<syntax::Parsed>(sources,at),s,b)){return false;}i+=1;}return raw(s,b"]",b);}
-pub fn Result<Context,u32> compute(ref v::Vec<syntax::Parsed> sources,ref bindings::Bindings table,ref mut Budget b){if(!valid(b)){return .err(b.code);}let count=bindings::count(table);if(count==0 || count>512 || count!=v::len<syntax::Parsed>(sources)){discard reject(b,9);return .err(b.code);}let sorted=switch(order(table,0,count,false,b)){case .ok(value):{value}case .err(code):{return .err(code);}};var v::Vec<Stamp> stamps=v::empty<Stamp>();var usize i=0;
+pub fn Result<Context,u32> compute(ref v::Vec<syntax::Parsed> sources,ref bindings::Bindings table,ref mut Budget b){if(!valid(b)){return .err(b.code);}let count=bindings::count(table);if(count==0 || count>limits::source_files() || count!=v::len<syntax::Parsed>(sources)){discard reject(b,9);return .err(b.code);}let sorted=switch(order(table,0,count,false,b)){case .ok(value):{value}case .err(code):{return .err(code);}};var v::Vec<Stamp> stamps=v::empty<Stamp>();var usize i=0;
     while(i<count){let m=bindings::module_at(table,i);if(!matches(m,v::at<syntax::Parsed>(sources,i),b)){return .err(b.code);}if(!v::push<Stamp>(ref mut stamps,Stamp{.size=m.source_size,.digest=m.digest}).is_ok){discard reject(b,11);return .err(b.code);}i+=1;}
     var Stream first=stream(false);if(!graph_value(sources,table,ref sorted,ref mut first,b)){return .err(b.code);}var Stream second=stream(true);if(!begin(ref mut second.state,b"source-nominal-closed-graph-v0",first.length,b)){if(b.code==0){discard reject(b,10);}return .err(b.code);}if(!graph_value(sources,table,ref sorted,ref mut second,b)){return .err(b.code);}if(first.length!=second.length){discard reject(b,9);return .err(b.code);}let digest=switch(finish(ref second.state,b)){case .ok(value):{value}case .err(code):{return .err(code);}};return .ok(Context{.digest,.sources=stamps,.json_bytes=first.length,.peak_chunk_bytes=first.peak_bytes,.peak_chunk_work=first.peak_work});
 }

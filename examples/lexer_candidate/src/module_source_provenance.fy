@@ -1,4 +1,5 @@
 module module_source_provenance;
+import candidate_limits as limits;
 import generic_package_bindings as bindings;
 import module_signatures as signatures;
 import module_public_type_text as coordinates;
@@ -12,7 +13,7 @@ import std::vec as v;
 // checking folds that history into the existing 16MiB caller ledger once.
 // 9 rejects owner/import/coordinate drift, 12 stale exact source bytes.
 pub fn u32 match_metadata(ref bindings::Bindings input,ref signatures::Program metadata,ref mut usize work){
-    let count=bindings::count(input);if(count==0 || count>512 || count!=signatures::module_count(metadata)){return 9;}var usize i=0;
+    let count=bindings::count(input);if(count==0 || count>limits::source_files() || count!=signatures::module_count(metadata)){return 9;}var usize i=0;
     while(i<count){if(!phase::charge(work,9)){return 10;}let stamp=bindings::module_at(input,i);if(stamp.owner>=512 || stamp.owner!=signatures::module_owner(metadata,i)){return 9;}let digest=signatures::source_digest(metadata,i);var usize j=0;while(j<8){if(stamp.digest[j]!=digest[j]){return 12;}j+=1;}i+=1;}
     i=0;while(i<bindings::import_count(input)){let row=bindings::import_at(input,i);if(row.module_index>=count || row.target>=count){return 9;}var usize measured=0;let target=signatures::import_target_measured(metadata,row.module_index,bindings::text(input,row.alias),ref mut measured);if(!phase::charge(work,measured+1)){return 10;}if(target.code!=0 || target.item!=row.target+1){return 9;}i+=1;}return 0;
 }

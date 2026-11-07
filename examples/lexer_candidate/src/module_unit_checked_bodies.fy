@@ -1,4 +1,5 @@
 module module_unit_checked_bodies;
+import candidate_limits as limits;
 import module_unit_bind as binding;
 import module_unit_call_closure as closure;
 import module_unit_values as values;
@@ -54,7 +55,7 @@ pub fn Result<Plan,Problem> build(ref v::Vec<syntax::Parsed> sources,ref signatu
     if(policy::count(ref checked)!=0){let e=policy::at(ref checked,0);var Problem p=failed(6,e.code,e.module_index,e.start,e.end,0,0);p.field_module=e.field_module;p.field_start=e.field_start;p.field_end=e.field_end;return .err(p);}
     let result_flow=results::check(sources,ref typed);if(result_flow.code!=0){return .err(failed(9,result_flow.code,result_flow.module_index,result_flow.start,result_flow.end,0,0));}
     let borrows=switch(borrow_sites::capture(sources,ref typed,ref inferred)){case .ok(p):{p}case .err(e):{return .err(failed(7,e.code,e.module_index,e.start,e.end,e.expected,e.actual));}};
-    if(v::len<syntax::Parsed>(sources)>512){return .err(failed(6,10,0,0,0,0,0));}var v::Vec<Stamp> stamps=v::empty<Stamp>();i=0;
+    if(v::len<syntax::Parsed>(sources)>limits::source_files()){return .err(failed(6,10,0,0,0,0,0));}var v::Vec<Stamp> stamps=v::empty<Stamp>();i=0;
     while(i<v::len<syntax::Parsed>(sources)){if(!v::push<Stamp>(ref mut stamps,Stamp{.bytes=syntax::source_view(v::at<syntax::Parsed>(sources,i)).len,.digest=signatures::source_digest(metadata,i)}).is_ok){return .err(failed(6,11,i,0,0,0,0));}i+=1;}
     return .ok(Plan{.ready,.typed,.moved,.cleanup_policy=checked,.borrows,.sources=stamps});
 }
