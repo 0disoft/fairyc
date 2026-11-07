@@ -5,6 +5,7 @@ import pointer_types as pointers;
 import mir_model as m;
 import hir_shapes as shapes;
 import mir_verify as verify;
+import mir_closure_values as closures;
 import c_text as w;
 import c_scalar as scalar;
 import c_guard as guard;
@@ -90,6 +91,8 @@ fn bool function(ref m::Program p, ref flow::Plan plan, m::Function f, ref mut b
 // symbols use numeric IDs; foreign linker names pass independent C validation.
 pub fn u32 render(ref m::Program p, ref mut bytes::Buffer out) {
     let m::Problem problem = verify::check(p); if (problem.code != 0) { return problem.code; }
+    // The separate closure C transport stage owns execution of this family.
+    if(closures::present(p)){return 4;}
     var usize entry = 0; var usize id = 1;
     while (id <= m::target_count(p)) {
         let m::Target t = m::target_at(p,id);

@@ -6,12 +6,14 @@ import mir_verify_arrays as arrays;
 import mir_verify_literals as literals;
 import mir_verify_views as views;
 import mir_verify_resources as resources;
+import mir_closure_values as closures;
 
 // Scalar invariants V1001, V1002 and V1501. Ownership/borrow/Region/unsafe
 // invariants remain closed until the corresponding value forms are admitted.
 pub fn m::Problem check(ref m::Program p) {
     let m::Problem structural = shape::check(p);
     if (structural.code != 0) { return structural; }
+    let m::Problem closure=closures::check(p);if(closure.code!=0){return closure;}
     let m::Problem indexes = arrays::check(p); if (indexes.code != 0) { return indexes; }
     let m::Problem views = literals::check(p); if (views.code != 0) { return views; }
     var flow::Budget budget = flow::Budget { .work = 0 }; var usize fid = 1;

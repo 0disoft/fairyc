@@ -15,6 +15,7 @@ import mir_verify_views as views;
 import mir_verify_enums as enums;
 import ffi_symbols as ffi;
 import sdk_scopes as sdk;
+import mir_closure_values as closures;
 
 pub fn m::Problem problem(u32 code, usize start, usize end) { return m::Problem { .code, .start, .end }; }
 pub fn bool local(ref m::Program p, usize id, usize function, u32 type) {
@@ -56,6 +57,7 @@ fn bool integer(ref u8[] text, u32 type) {
     return true;
 }
 fn bool operation(ref m::Program p, usize id, m::Operation o) {
+    if(o.kind==40){return closures::operation(p,o);}
     if(o.kind==39){let usize args=storage::arguments(o.operator);
         return shapes::valid_type(m::nominal(p),o.owner_type,false) && storage::result(o.operator,o.owner_type)==o.type && o.boolean && (if(args==3){o.argument_count==1 && local(p,m::edge_at(p,o.argument_start),o.function,5) && o.result!=m::edge_at(p,o.argument_start)}else{o.argument_start==0 && o.argument_count==0}) && o.payload_start==0 && o.payload_end==0
             && shapes::storage_rule(m::nominal(p),m::source_view(p),o.start,o.end,o.operator)
@@ -166,7 +168,7 @@ pub fn m::Problem check(ref m::Program p) {
             let m::Operation o = m::operation_at(p,op);
             if (!mark(ref mut ops,op) || !operation(p,op,o) || o.kind == 5 && (op != b.last || b.kind != 4 || b.check != op)) { return problem(1001,o.start,o.end); }
             if(o.kind==26 || o.kind==25){let u32 required=m::required_drop_effects(p,o.type);if((m::target_at(p,f.target).effects&required)!=required){return problem(7102,o.start,o.end);}}
-            if (o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20 || o.kind==38 || o.kind==39)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
+            if (o.kind == 40 || o.kind == 6 || o.kind == 21 || o.kind == 9 || o.kind == 11 || (o.kind == 19 || o.kind == 20 || o.kind==38 || o.kind==39)) { var usize j = 0; while (j < o.argument_count) { if (!mark(ref mut edges,o.argument_start + j)) { return problem(1001,o.start,o.end); } j += 1; } }
             if (o.result != 0) { let ref mut usize count = v::at_mut<usize>(ref mut definitions,o.result); *count += 1; }
             if (o.kind == 1 && o.type == 6 && !o.boolean) { let ref mut u8[] flags = bytes::view_mut(ref mut false_constants); flags[o.result] = 1; }
             op = o.next;
@@ -191,6 +193,9 @@ pub fn m::Problem check(ref m::Program p) {
                 let m::Operation actual = m::operation_at(p,normal.first);
                 if (actual.kind != if (o.right == 0) { 3 } else { 4 } || actual.left != o.left || actual.right != o.right || actual.operator != o.operator || actual.owner_type != o.owner_type) { return problem(1501,actual.start,actual.end); }
             }
+        } else if(b.kind==8){
+            if(!closures::invocation(p,b)){return problem(1001,b.start,b.end);}
+            let ref mut usize count=v::at_mut<usize>(ref mut definitions,b.destination);*count+=1;
         } else if (b.kind == 5) {
             let m::Target t = m::target_at(p,b.callee);
             if(b.unsafe_call!=t.unsafe_call){return problem(5101,b.start,b.end);}

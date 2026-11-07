@@ -8,6 +8,7 @@ import std::bytes as bytes;
 import std::vec as v;
 import hir_shapes as shapes;
 import resource_identity as resources;
+import mir_closure_values as closures;
 
 // Private model notes: docs/architecture/candidate-mir-model-v0.md.
 pub struct Problem { u32 code; usize start; usize end; }
@@ -16,11 +17,13 @@ pub struct Target { bool foreign; usize link_start; usize link_end; bool unsafe_
 pub struct Function { usize target; usize entry; usize local_start; usize local_count; usize block_start; usize block_count; usize parameter_start; usize parameter_count; usize start; usize end; bool public; }
 pub struct Local { usize function; usize binding; u32 type; bool parameter; bool mutable; usize start; usize end; }
 pub struct Drop { u32 abilities; u32 type; usize target; bool nonempty; }
+pub struct ClosureTarget { usize target; usize captures; }
 pub struct Operation { usize function; usize block; u32 kind; usize result; u32 type; u32 owner_type; u32 operator; usize left; usize right; usize next; usize payload_start; usize payload_end; bool boolean; usize start; usize end; usize argument_start; usize argument_count; }
 pub struct Block { bool unsafe_call; usize function; usize first; usize last; u32 kind; usize value; usize left; usize right; u32 operator; u32 type; usize target; usize alternative; usize check; usize callee; usize destination; usize argument_start; usize argument_count; u32 trap_mask; usize start; usize end; }
 pub resource Program {
     shapes::Table nominal;
     v::Vec<Drop> drops;
+    v::Vec<ClosureTarget> closures;
     bytes::Buffer source; bytes::Buffer payload;
     v::Vec<Target> targets; v::Vec<Signature> signatures;
     v::Vec<Function> functions; v::Vec<Local> locals; v::Vec<Block> blocks;
@@ -30,6 +33,9 @@ pub resource Program {
 }
 pub fn usize target_count(ref Program p) { assert(p.success); return v::len<Target>(ref p.targets); }
 pub fn usize drop_count(ref Program p) { assert(p.success); return v::len<Drop>(ref p.drops); }
+pub fn usize closure_count(ref Program p) { assert(p.success); return v::len<ClosureTarget>(ref p.closures); }
+pub fn ClosureTarget closure_at(ref Program p,usize index) { assert(index<closure_count(p)); return *v::at<ClosureTarget>(ref p.closures,index); }
+pub fn bool has_closures(ref Program p) { return closures::present(p); }
 pub fn Drop drop_at(ref Program p,usize index) { assert(index<drop_count(p)); return *v::at<Drop>(ref p.drops,index); }
 pub fn bool burnable(ref Program p,u32 type){let usize at=drop_index(p,type);if(at==0 || (drop_at(p,at-1).abilities&1)!=0){return false;}let sh=shapes::at(nominal(p),shapes::find(nominal(p),type)-1);var usize i=0;while(i<sh.field_count){if(shapes::needs_drop(shapes::field_at(nominal(p),sh.field_start+i+1).type)){return false;}i+=1;}return true;}
 pub fn bool may_drop(ref Program p,u32 type,usize depth){if(depth>=64){return false;}if(!shapes::needs_drop(type)){return true;}
@@ -81,11 +87,17 @@ pub fn Result<Program,Problem> assemble_nominal(bytes::Buffer source, bytes::Buf
     return assemble_resources(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,v::empty<Drop>());
 }
 pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops) {
+    return assemble_family(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,drops,v::empty<ClosureTarget>(),false);
+}
+pub fn Result<Program,Problem> assemble_closures(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops,v::Vec<ClosureTarget> closures) {
+    return assemble_family(source,payload,targets,signatures,functions,locals,blocks,operations,edges,module_index,nominal,drops,closures,true);
+}
+fn Result<Program,Problem> assemble_family(bytes::Buffer source, bytes::Buffer payload, v::Vec<Target> targets, v::Vec<Signature> signatures, v::Vec<Function> functions, v::Vec<Local> locals, v::Vec<Block> blocks, v::Vec<Operation> operations, v::Vec<usize> edges, usize module_index, shapes::Table nominal,v::Vec<Drop> drops,v::Vec<ClosureTarget> closures,bool closure_family) {
     let usize ns = bytes::len(ref source); let usize np = bytes::len(ref payload);
     let usize nt = v::len<Target>(ref targets); let usize ng = v::len<Signature>(ref signatures); let usize nf = v::len<Function>(ref functions);
     let usize nl = v::len<Local>(ref locals); let usize nb = v::len<Block>(ref blocks); let usize no = v::len<Operation>(ref operations); let usize ne = v::len<usize>(ref edges);
     if (ns > limits::program_bytes() || np > 688128 || nt > 512 || nf > 512 || nl > 16384 || nb > 16384 || no > 32768 || ne > 65536 || ng > 65536) { return .err(Problem { .code = 2, .start = 0, .end = ns }); }
-    if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
+    if (!shapes::valid(ref nominal,ns,1152) || v::len<Drop>(ref drops)>512 || v::len<ClosureTarget>(ref closures)>512) { return .err(Problem { .code = 4, .start = 0, .end = ns }); }
     if(!shapes::abi_valid(ref nominal,bytes::view(ref source))){return .err(Problem{.code=5102,.start=0,.end=ns});}
     var usize resource_count=0;var usize shape_index=0;
     while(shape_index<shapes::count(ref nominal)){let shape=shapes::at(ref nominal,shape_index);if(resources::valid(shape.type)){resource_count+=1;}
@@ -131,11 +143,11 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     i = 0;
     while (i < nb) {
         let Block b = *v::at<Block>(ref blocks,i);
-        if (b.function == 0 || b.function > nf || b.kind < 1 || b.kind > 7 || b.first > no || b.last > no || (b.first == 0) != (b.last == 0) || b.start > b.end || b.end > ns || b.value > nl || b.left > nl || b.right > nl || b.target > nb || b.alternative > nb || b.check > no || b.callee > nt || b.destination > nl || b.argument_start > ne || b.argument_count > ne - b.argument_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if (b.function == 0 || b.function > nf || b.kind < 1 || b.kind > if(closure_family){8}else{7} || b.first > no || b.last > no || (b.first == 0) != (b.last == 0) || b.start > b.end || b.end > ns || b.value > nl || b.left > nl || b.right > nl || b.target > nb || b.alternative > nb || b.check > no || b.callee > nt || b.destination > nl || b.argument_start > ne || b.argument_count > ne - b.argument_start) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         let Function f = *v::at<Function>(ref functions,b.function - 1);
         if (i < f.block_start || i >= f.block_start + f.block_count) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((b.kind == 1 || b.kind == 6 || b.kind == 7) && (b.target != 0 || b.alternative != 0)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
-        if ((b.kind >= 2 && b.kind <= 5) && (b.target <= f.block_start || b.target > f.block_start + f.block_count)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
+        if ((b.kind >= 2 && b.kind <= 5 || b.kind==8) && (b.target <= f.block_start || b.target > f.block_start + f.block_count)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if ((b.kind == 3 || b.kind == 4) && (b.alternative <= f.block_start || b.alternative > f.block_start + f.block_count || b.target == b.alternative)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (b.kind == 2 && b.alternative != 0) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
         if (b.kind == 3 && (b.value == 0 || b.type != 6 || v::at<Local>(ref locals,b.value - 1).type != 6 || v::at<Local>(ref locals,b.value - 1).function != b.function)) { return .err(Problem { .code = 4, .start = b.start, .end = b.end }); }
@@ -151,8 +163,10 @@ pub fn Result<Program,Problem> assemble_resources(bytes::Buffer source, bytes::B
     i = 0;
     while (i < no) {
         let Operation o = *v::at<Operation>(ref operations,i);
-        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > 39 || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
+        if (o.function == 0 || o.function > nf || o.block == 0 || o.block > nb || o.kind < 1 || o.kind > if(closure_family){40}else{39} || o.result > nl || o.left > nl || o.right > nl || o.next > no || (o.next != 0 && o.next <= i + 1) || o.start >= o.end || o.end > ns || o.payload_start > o.payload_end || o.payload_end > np || o.argument_start > ne || o.argument_count > ne - o.argument_start || v::at<Block>(ref blocks,o.block - 1).function != o.function) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); }
         if ((o.kind != 5 && o.kind != 20 && o.kind!=25 && o.kind!=26 && o.kind!=27 && o.kind!=30 && !(o.kind==39 && o.operator==4) && (o.result == 0 || !shapes::valid_type(ref nominal,o.type,false))) || ((o.kind == 5 || o.kind == 20 || o.kind==25 || o.kind==26 || o.kind==27 || o.kind==30 || o.kind==39 && o.operator==4) && o.result != 0)) { return .err(Problem { .code = 4, .start = o.start, .end = o.end }); } i += 1;
     }
-    return .ok(Program { .nominal, .drops, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true });
+    let Program p=Program { .nominal, .drops, .closures, .source, .payload, .targets, .signatures, .functions, .locals, .blocks, .operations, .edges, .module_index, .success = true };
+    if(!closures::assembly(ref p,closure_family)){return .err(Problem{.code=4,.start=0,.end=ns});}
+    return .ok(p);
 }
