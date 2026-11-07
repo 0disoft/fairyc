@@ -50,7 +50,13 @@ fn u32 typ(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax:
         return if(n.kind==6){list(p,n.right,7,pending,work)}else{0};
     }
     if(n.kind==2 || n.kind==3 || n.kind==4 || n.kind==5 || n.kind==8 || n.kind==11 || n.kind==12){return push(pending,1,n.left,work);}
-    if(n.kind==15){let code=push(pending,1,n.left,work);return if(code!=0){code}else{list(p,n.right,16,pending,work)};}return 9;
+    // Safe function types own the same result/parameter children as callbacks.
+    // This is dependency traversal, not executable signature admission. Keep
+    // executable signature policy with its source owner and visit every child.
+    if(n.kind==15 || n.kind==17){
+        if(n.kind==17 && (n.left==0 || n.left>=id || n.right>=id)){return 9;}
+        let code=push(pending,1,n.left,work);return if(code!=0){code}else{list(p,n.right,16,pending,work)};
+    }return 9;
 }
 fn u32 expr_list(ref syntax::Parsed p,usize tail,u32 kind,bool entries,ref mut v::Vec<Task> pending,ref mut usize work){var usize link=tail;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::expression_count(p)){return 9;}let n=syntax::expression_at(p,link);if(n.kind!=kind || n.left==0 || n.left>=link || n.right>=link){return 9;}let code=push(pending,2,if(entries){link}else{n.left},work);if(code!=0){return code;}link=n.right;}return 0;}
 fn u32 expression(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut v::Vec<Task> pending,ref mut usize work){
