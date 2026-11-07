@@ -1,6 +1,7 @@
 module module_unit_interpreter_values;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
+import module_unit_body_ir_closures as closures;
 import module_constant_arithmetic as math;
 import std::bytes as bytes;
 import std::vec as v;
@@ -13,7 +14,7 @@ pub fn Outcome failure(u32 error){return Outcome{.error,.trap=0,.bits=0};}
 pub fn Outcome trapped(u32 trap){return Outcome{.error=0,.trap,.bits=0};}
 pub fn u32 scalar(ref ir::Program p,usize type){let t=clean::type_at(ir::cleanup_ir(p),type);return if(t.kind==1){t.scalar}else{0};}
 pub fn bool record(ref ir::Program p,usize type){let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==2 || t.kind==3 || (t.kind==20 || t.kind==21) && clean::aggregates(ir::cleanup_ir(p));}
-pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type) || record(p,type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16 || t.kind==19;}
+pub fn bool admitted(ref ir::Program p,usize type){if(rx_reference(p,type) || rx_view(p,type) || record(p,type) || closures::leaf(ir::cleanup_ir(p),type)){return true;}let t=clean::type_at(ir::cleanup_ir(p),type);return t.kind==1 && t.scalar<=7 || t.kind>=2 && t.kind<=6 || t.kind==16 || t.kind==19;}
 pub fn Outcome allocate(ref mut v::Vec<usize> heap,usize count,ref mut usize steps){
     if(count>999999 || *steps<count+1 || v::len<usize>(heap)>1000000-count-1){return failure(2);};
     *steps=*steps-count-1;let id=v::len<usize>(heap)+1;

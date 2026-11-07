@@ -1,6 +1,7 @@
 module module_unit_interpreter;
 import module_unit_region_builtin as region_builtin;
 import module_unit_interpreter_values as runtime;
+import module_unit_interpreter_closures as closures;
 import module_unit_sdk_authority as sdk_authority;
 import module_unit_body_ir_model as ir;
 import module_unit_body_ir_receiver as receiver;
@@ -82,6 +83,10 @@ fn runtime::Outcome drop_value(ref identified::Program owned,ref Plan plan,usize
 
 fn runtime::Outcome invoke(ref identified::Program owned,ref Plan plan,usize frame,usize invocation,usize site,ref v::Vec<usize> values,ref v::Vec<usize> locals,ref v::Vec<usize> captures,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
     let p=identified::ir_program(owned);let b=ir::at(p,frame);if(invocation==0 || invocation>ir::call_count(b)){return runtime::failure(4);}let call=ir::call_at(b,invocation-1);var usize work=0;
+    if(call.kind==4){
+        if(site!=0){return runtime::failure(1);}let ready=switch(closures::invocation(p,b,invocation,values,heap,steps)){case .ok(p):{p}case .err(e):{return runtime::failure(e);}};
+        return execute(owned,plan,closures::frame(ref ready),closures::arguments(ref ready),heap,steps,depth+1);
+    }
     let target=switch(identified::call_frame(owned,frame,invocation-1,ref mut work)){case .ok(n):{n}case .err(_):{return runtime::failure(4);}};if(target==0){return runtime::failure(1);}
     var v::Vec<usize> arguments=v::empty<usize>();var usize i=0;while(i<call.argument_count){let a=ir::argument_at(b,call.argument_start+i);if(!runtime::admitted(p,a.actual)){return runtime::failure(1);}let value=if(site==0 && receiver::implicit(ir::cleanup_ir(p),b,a)){let borrowed=runtime::rx_place(p,b,a.expression,locals,values,heap,steps,0);if(borrowed.error!=0 || borrowed.trap!=0){return borrowed;}borrowed.bits}else if(site==0){*v::at<usize>(values,a.expression)}else{*v::at<usize>(captures,cfg::deferred_at(v::at<cfg::Graph>(ref plan.graphs,frame-1),site).capture_start+i+1)};if(!v::push<usize>(ref mut arguments,value).is_ok){return runtime::failure(4);}i+=1;}
     return execute(owned,plan,target,ref arguments,heap,steps,depth+1);
@@ -89,6 +94,7 @@ fn runtime::Outcome invoke(ref identified::Program owned,ref Plan plan,usize fra
 fn runtime::Outcome expression(ref identified::Program owned,ref Plan plan,usize frame,usize id,ref v::Vec<usize> values,ref v::Vec<usize> locals,ref v::Vec<usize> captures,ref mut v::Vec<usize> heap,ref mut usize steps,usize depth){
     let p=identified::ir_program(owned);let b=ir::at(p,frame);let e=ir::node_at(b,id-1).value;let type=runtime::scalar(p,e.type);if(!runtime::admitted(p,e.type)){return runtime::failure(1);}let left=ir::node(b,e.left);let right=ir::node(b,e.right);let op=ir::node_text(b,id-1);
     let rx_type=clean::type_at(ir::cleanup_ir(p),e.type);
+    if(e.kind==36){return closures::construct(p,frame,id,values,heap,steps);}
     if(e.kind==1 && (rx_type.kind==9 || rx_type.kind==10)){return runtime::rx_literal(b,id,heap,steps);}
     if(e.kind==21 || e.kind==22){return if(runtime::rx_view(p,e.type)){runtime::rx_array_view(p,b,left,locals,values,heap,steps)}else{runtime::rx_place(p,b,left,locals,values,heap,steps,0)};}
     if(e.kind==26){return runtime::rx_slice(p,b,id,locals,values,heap,steps);}
