@@ -24,9 +24,11 @@ authorized by this queue.
   SDK/user aggregate, foreign and generic production already have Windows
   evidence. Enum-owned associated functions and receiver modes now have
   independent current-Go/native map and actual impact-command evidence in
-  `candidate-atlas-enum-owners-20261107.md`. Remaining concrete gaps include
-  whole native-map comparison after edits and the two newest SDK/aggregate
-  full-main command groups; do not reimplement already verified producers.
+  `candidate-atlas-enum-owners-20261107.md`. Whole native-map comparison on the
+  exact SDK/aggregate edited source also passes both profiles in
+  `candidate-atlas-sdk-aggregate-edited-map-20261107.md`. The two newest
+  SDK/aggregate full-main command groups and broader current-source acceptance
+  remain open; do not reimplement already verified producers.
 - [x] Linux Fairy package fetch: retained-directory filesystem/cache publication,
   verified HTTPS transport, online/offline CLI selection and authored Linux tests.
   Source selection and Windows models are verified in
@@ -108,6 +110,16 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- A disjoint Sol High worker and coordinator close exact edited-source whole-map
+  verification for the SDK/user aggregate cleanup family. Both Windows profiles
+  produce all three admitted package maps, comparing declarations/functions/
+  specializations/cleanup facts, file/module records and actual compiler hash.
+  All fourteen completeness rows preserve their scope, old source refuses and
+  workspace bytes stay unchanged. Final strengthened matrix passes in 205.413s;
+  see `candidate-atlas-sdk-aggregate-edited-map-20261107.md`. No production fix,
+  source-lock refresh or broad repeat is needed. Full-main/final gates stay
+  open; Linux is batched and no remote action occurs. Full goal stays active.
 
 - Sol High independent Go/native map work plus coordinator signature/receiver
   integration connects enum-owned functions to Atlas. Ten Go-positive/four
