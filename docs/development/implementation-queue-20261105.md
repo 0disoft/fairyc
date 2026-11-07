@@ -58,14 +58,28 @@ authorized by this queue.
 
 - [ ] Refresh complete current-source Go/Fairy comparisons and consecutive
   self-build equality after implementation.
-- [ ] Collect the authored Linux commands and remaining runtime observations into
+- [x] Collect the authored Linux commands and remaining runtime observations into
   one transferable source/validation handoff; native execution remains deferred.
+  Exact committed source ZIP, checksums, portable six-group plan and actual
+  clean original-commit receiver reconstruction are verified in
+  `linux-validation-handoff-20261107.md`.
 - [ ] Prepare and locally verify the current Windows distribution ZIP and
   clean-environment verifier. Clean-machine execution needs an actual environment.
 - [ ] Keep same-commit hosted CI acceptance pending until an authorized push or
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The coordinator builds and independently verifies the actual clean source
+  handoff at `14862b70`: 7,547 original Git blobs, 60,890,523-byte compressed ZIP,
+  exact source checksums/modes, original HEAD/tree restoration and identical
+  six-group portable collector plan in a clean new receiver. The first stored
+  217,487,231-byte artifact led to DEFLATE level 6, reducing transfer size about
+  72%; targeted compression/blob/receiver checks pass. See
+  `linux-validation-handoff-20261107.md` for exact hashes and receipts. The
+  transferable handoff row is now closed, with native Linux, trusted TLS,
+  consecutive self-build, broader implementation and all other final gates
+  still open. No push/dispatch. The full objective remains active.
 
 - The Sol high Linux handoff worker adds exact clean-commit source/blob/mode
   packaging, an existing six-group portable collector plan and explicit pending

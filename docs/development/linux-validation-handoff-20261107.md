@@ -142,3 +142,37 @@ original-commit restoration tests pass: **three checks in 10.027s**, no skips,
 log `.cache/linux-handoff-compression-tests.log`. Other snapshot/plan/safety
 logic is unchanged from the 15-check worker run. The final compressed repository
 ZIP and receiver verification are recorded separately after the clean commit.
+
+## Actual committed repository handoff and receiver
+
+The coordinator builds the final compressed snapshot from clean commit
+`14862b709530b750230d8bb25b6001e6f3bebfe9`, tree
+`981d9a0318e028093ac63b28dd65343ee9c94e24`:
+
+```text
+python -B tools/package-linux-validation-handoff.py --output .cache/linux-validation-handoff-compressed-20261107
+```
+
+Exit 0. The ZIP contains **7,547 exact committed source blobs / 7,553 entries**,
+is **60,890,523 bytes**, about **72% smaller** than the first stored archive.
+SHA-256 `d960553fc4c0cb3cdd33bb89d4e263a54a8a9dcbe9d8fbeb61b0fcca1df97bfe`.
+Artifact `.cache/linux-validation-handoff-compressed-20261107/handoff.zip` and
+its adjacent checksum file. Build log
+`.cache/linux-validation-handoff-compressed-build.log` records exact revision,
+tree, sizes and the explicit `linuxNativeExecuted:false`.
+
+The coordinator independently checks ZIP member/path/mode facts, every payload
+checksum and each source's original Git blob hash, then extracts into a new
+`.cache/linux-handoff-extracted-20261107` receiver. Executing only the README's
+Git/Python restoration code reproduces exact original HEAD/tree and a clean
+source tree. The extracted collector runs in plan mode only; its six groups,
+source-owner paths and exact command argv match the bundled portable plan.
+The receiver stays clean. No Go command, compiler, native Linux test or network
+installation is invoked. Log `.cache/linux-handoff-receiver-verification.log`;
+record `receiver-verification.json` beside the final ZIP.
+
+This subsequent documentation receipt does not change the archived snapshot or
+its commit identity. The transferable handoff requirement is closed; Linux
+execution, trusted TLS and consecutive self-build/full acceptance remain open.
+No product API/ABI, DB/provider, dependency, CI/runner or repository-policy
+change, push, dispatch, release or deployment is introduced.
