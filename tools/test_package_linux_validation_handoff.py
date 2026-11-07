@@ -38,6 +38,23 @@ EXPECTED = {
 }
 
 
+class ArchiveCompressionTests(unittest.TestCase):
+    def test_text_compression_preserves_bytes_modes_and_repeatability(self):
+        source = b'compiler source repeated across authored fixtures\n' * 22000
+        payload = {'source/fixture.txt': source, 'README.md': b'Unexecuted Linux plan\n'}
+        entries = {'fixture.txt': {'mode': '100644'}}
+        first = handoff.zip_bytes(payload, entries)
+        self.assertEqual(first, handoff.zip_bytes(payload, entries))
+        self.assertLess(len(first), len(source) // 10)
+        with zipfile.ZipFile(io.BytesIO(first)) as archive:
+            self.assertIsNone(archive.testzip())
+            self.assertEqual(set(archive.namelist()), {handoff.PREFIX + path for path in payload})
+            for name, body in payload.items():
+                self.assertEqual(archive.read(handoff.PREFIX + name), body)
+            self.assertEqual(archive.getinfo(handoff.PREFIX + 'source/fixture.txt').external_attr >> 16,
+                             0o100644)
+
+
 class HandoffTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()

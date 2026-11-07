@@ -69,8 +69,10 @@ The ZIP has a single `fairyc-linux-validation/` root:
 - `SHA256SUMS`: checks every other payload, including `manifest.json`.
 
 ZIP entries are sorted, have a fixed timestamp and Unix file modes, and use
-stored bytes so compression-library versions cannot affect repeatability.
-Identical revision and timeout produce identical ZIP bytes, counts and hashes.
+standard DEFLATE level 6 to reduce source transfer size while preserving every
+payload byte. Identical revision, timeout and Python/zlib implementation produce
+identical ZIP bytes, counts and hashes; different compression implementations
+may produce different ZIP bytes with the same verified source contents.
 The external SHA-256 sidecar covers the entire ZIP.
 
 The receiver must use a new extraction directory and verify the fixed ZIP and
@@ -127,3 +129,16 @@ No source-of-truth contract, collector, queue, index, ADR, product API, DB,
 dependency, CI workflow or runner is changed. Native Linux execution and actual
 repository ZIP/blob/hash/receiver reconstruction remain the coordinator's
 separate authorized batch. This worker makes no commit or remote operation.
+
+## Coordinator transfer-size correction
+
+The first real clean-source ZIP at `06d5bb23` contains 7,547 committed files
+and is 217,487,231 bytes with stored entries. The coordinator changes only ZIP
+encoding to standard DEFLATE level 6, retaining exact payload/blob hashes,
+fixed metadata and original file modes. A new repetitive-source test verifies
+over 90% size reduction, exact decoded bytes, modes, CRC and repeatability.
+The new compression test plus existing complete-blob/determinism and README
+original-commit restoration tests pass: **three checks in 10.027s**, no skips,
+log `.cache/linux-handoff-compression-tests.log`. Other snapshot/plan/safety
+logic is unchanged from the 15-check worker run. The final compressed repository
+ZIP and receiver verification are recorded separately after the clean commit.

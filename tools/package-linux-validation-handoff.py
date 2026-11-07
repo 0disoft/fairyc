@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PREFIX = 'fairyc-linux-validation/'
 COLLECTOR = 'tools/collect-linux-native-validation.py'
 GROUPS = ('candidatebuild', 'trap-runtime', 'runtime', 'fetch-host', 'fetch-native', 'cli')
+ZIP_COMPRESSION_LEVEL = 6
 RECEIPTS = (
     'docs/development/linux-native-batch-20261107.md',
     'docs/development/candidate-linux-package-20261107.md',
@@ -364,14 +365,15 @@ No push, dispatch, release, provisioning or Linux execution occurs during packag
 
 def zip_bytes(payload, entries):
     result = io.BytesIO()
-    with zipfile.ZipFile(result, 'w', compression=zipfile.ZIP_STORED) as archive:
+    with zipfile.ZipFile(result, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         for name in sorted(payload):
             safe_path(name)
             info = zipfile.ZipInfo(PREFIX + name, date_time=(1980, 1, 1, 0, 0, 0))
             info.create_system = 3
             mode = int(entries[name[7:]]['mode'], 8) if name.startswith('source/') else 0o100644
             info.external_attr = mode << 16
-            archive.writestr(info, payload[name])
+            archive.writestr(info, payload[name], compress_type=zipfile.ZIP_DEFLATED,
+                             compresslevel=ZIP_COMPRESSION_LEVEL)
     return result.getvalue()
 
 
