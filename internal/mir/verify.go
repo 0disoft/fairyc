@@ -105,6 +105,10 @@ func VerifyWithCapabilitiesContext(ctx context.Context, program Program, capabil
 	if verificationReportsFull(failures) {
 		return canonicalVerificationErrors(failures), nil
 	}
+	failures = appendVerificationErrors(failures, verifyClosureValueTransport(program, functions, foreignFunctions)...)
+	if verificationReportsFull(failures) {
+		return canonicalVerificationErrors(failures), nil
+	}
 	properties := newTypeProperties(program.ResourceTypes, program.StructTypes, program.EnumTypes)
 	// Resource definitions are immutable within this verification. Reuse required
 	// cleanup effects across functions; each caller still checks its own authority.

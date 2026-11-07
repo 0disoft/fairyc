@@ -129,6 +129,9 @@ func DescribeContext(context mir.Program, coordinates map[hir.PackageID]packageg
 	if len(context.Functions) != 0 {
 		return ContextDescriptor{}, fmt.Errorf("stable type-context source contains executable functions")
 	}
+	if err := rejectLegacyClosureValues(context); err != nil {
+		return ContextDescriptor{}, err
+	}
 	result := ContextDescriptor{}
 	for _, value := range context.StructTypes {
 		typeName, err := stableType(value.Type, coordinates)

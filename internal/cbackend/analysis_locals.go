@@ -65,7 +65,7 @@ func (e *emissionAnalysis) inferLocalTypes(functionIndex int) (map[mir.LocalID]h
 				mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 				mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 				mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
-				mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+				mir.OperationClosureCreate, mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
 				mir.OperationRegionPlace:
 				inferred = operation.Type
 			}
@@ -77,6 +77,11 @@ func (e *emissionAnalysis) inferLocalTypes(functionIndex int) (map[mir.LocalID]h
 			}
 		}
 		terminator := block.Terminator
+		if terminator.Kind == mir.TerminatorClosureCall && terminator.DestinationLocal != mir.NoLocal {
+			if err := assign(terminator.DestinationLocal, hir.TypeI32); err != nil {
+				return nil, err
+			}
+		}
 		if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
 			resultType, found := e.callResultType(terminator.Callee)
 			if !found {
@@ -252,7 +257,7 @@ func collectLocals(function mir.Function) []mir.LocalID {
 			}
 		}
 		terminator := block.Terminator
-		if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
+		if (terminator.Kind == mir.TerminatorCall || terminator.Kind == mir.TerminatorClosureCall) && terminator.DestinationLocal != mir.NoLocal {
 			values[terminator.DestinationLocal] = struct{}{}
 		}
 		for _, operand := range terminator.Arguments {
@@ -323,7 +328,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationFieldBorrow, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewElementBorrow, mir.OperationViewSlice,
-		mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationClosureCreate, mir.OperationCCallback, mir.OperationStorageLayout, mir.OperationStorageTake, mir.OperationStorageBorrow, mir.OperationStorageBorrowMut, mir.OperationStorageElementAddress, mir.OperationScalarCast, mir.OperationSharedReborrow, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

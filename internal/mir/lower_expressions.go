@@ -18,6 +18,10 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return Operand{}, nil
 	}
 	switch expression.Kind {
+	case hir.ExpressionClosureValue:
+		return l.lowerClosureValue(expression)
+	case hir.ExpressionClosureCall:
+		return l.lowerClosureCall(expression)
 	case hir.ExpressionLiteral:
 		if expression.Type == hir.SharedBorrow(hir.TypeStr) && strings.HasPrefix(expression.Value, "\"") {
 			decoded, err := hex.DecodeString(expression.Cooked)

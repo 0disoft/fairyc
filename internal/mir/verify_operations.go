@@ -11,6 +11,7 @@ import (
 // is passed separately; operation checks update its existing maps in evaluation order.
 type operationVerifier struct {
 	function         *Function
+	functions        map[hir.SymbolID]*Function
 	structTypes      map[hir.Type]*StructType
 	enumTypes        map[hir.Type]*EnumType
 	resourceTypes    map[hir.Type]*ResourceType
@@ -56,6 +57,12 @@ func (v *operationVerifier) verifyOperation(state verificationState, operation O
 	}
 	failures = appendVerificationErrors(failures, v.verifyOwningPayload(operation, entity)...)
 	switch operation.Kind {
+	case OperationClosureCreate:
+		failures = appendVerificationErrors(failures, verifyOperands(state, operation.Operands, entity)...)
+		if detail := verifyClosureConstruction(operation, v.functions, storeTypes); detail != "" {
+			failures = appendVerificationErrors(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: detail})
+		}
+		state.live[hir.SymbolID(operation.DestinationLocal)] = true
 	case OperationCCallback:
 		if operation.DestinationLocal < 0 || operation.Symbol == hir.NoSymbol || !hir.IsCCallback(operation.Type) || len(operation.Operands) != 0 || operation.Variant != "" {
 			failures = appendVerificationErrors(failures, VerificationError{Code: CodeOperationShape, Entity: entity, Detail: "invalid bounded callback construction"})

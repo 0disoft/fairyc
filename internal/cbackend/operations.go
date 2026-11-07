@@ -16,6 +16,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 	}
 	function := e.analysis.functions[functionIndex].Name
 	switch operation.Kind {
+	case mir.OperationClosureCreate:
+		return e.emitClosureCreate(output, operation)
 	case mir.OperationCCallback:
 		index, found := e.analysis.bySymbol[operation.Symbol]
 		if !found {

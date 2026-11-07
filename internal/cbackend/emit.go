@@ -57,6 +57,7 @@ func (value *emitter) emitUnit() (Unit, error) {
 			return Unit{}, err
 		}
 	}
+	value.emitClosureAdapters(output)
 	if err := value.emitCallbackAdapters(output); err != nil {
 		return Unit{}, err
 	}
@@ -155,6 +156,7 @@ func (value *emitter) emitUnitFromBodies(bodies unitBodies) (Unit, error) {
 		output.WriteString("static ")
 		output.WriteString(body)
 	}
+	value.emitClosureAdapters(output)
 	if err := value.emitCallbackAdapters(output); err != nil {
 		return Unit{}, err
 	}

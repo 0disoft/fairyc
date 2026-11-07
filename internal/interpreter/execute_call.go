@@ -380,6 +380,12 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 					return callCompletion{}, fmt.Errorf("enum payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
+			case mir.OperationClosureCreate:
+				value, err := r.createClosure(locals, operation)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				locals[operation.DestinationLocal] = value
 			case mir.OperationCCallback:
 				return callCompletion{}, capabilityErrorKind("bounded-c-callback", "C callback in %q requires a native backend", function.Name)
 			case mir.OperationRawAddress, mir.OperationRawBorrowPointer:
@@ -555,6 +561,23 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 		terminator := block.Terminator
 		switch terminator.Kind {
 		case mir.TerminatorGoto:
+			next, err := oneSuccessor(terminator)
+			if err != nil {
+				return callCompletion{}, err
+			}
+			current = next
+		case mir.TerminatorClosureCall:
+			completion, err := r.callClosure(locals, terminator, depth)
+			if err != nil || completion.trapCategory != "" {
+				return completion, err
+			}
+			if terminator.DestinationLocal != mir.NoLocal {
+				copied, err := r.cloneForValueCopy(completion.value)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				locals[terminator.DestinationLocal] = copied
+			}
 			next, err := oneSuccessor(terminator)
 			if err != nil {
 				return callCompletion{}, err

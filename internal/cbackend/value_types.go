@@ -39,7 +39,7 @@ func (e *emissionAnalysis) supportedCValueType(value hir.Type) bool {
 	if _, borrow := e.safeBorrowCType(value); borrow {
 		return true
 	}
-	if hir.IsCCallback(value) || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
+	if hir.IsClosureI32(value) || hir.IsCCallback(value) || value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeI64 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || hir.IsFloatScalar(value) || hir.IsIntegerTransportScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if _, array := e.arrayByType[value]; array {
@@ -69,6 +69,9 @@ func (e *emissionAnalysis) cValueType(value hir.Type) (string, error) {
 		// Only verified internal parameters use this representation; Region is
 		// deliberately absent from supportedCValueType for ordinary value storage.
 		return "fy_region *", nil
+	}
+	if hir.IsClosureI32(value) {
+		return "fy_closure_i32", nil
 	}
 	if hir.IsCCallback(value) {
 		return callbackTypeName(value), nil
@@ -159,6 +162,9 @@ func (e *emissionAnalysis) safeBorrowCType(value hir.Type) (string, bool) {
 	} else if index, found := e.arrayByType[canonical]; found {
 		pointee = e.arrayCTypeName(index)
 	} else if index, found := e.structByType[canonical]; found {
+		if structHasClosureField(e.structTypes[index].definition) {
+			return "", false
+		}
 		pointee = e.structCTypeName(index)
 	} else {
 		switch canonical {

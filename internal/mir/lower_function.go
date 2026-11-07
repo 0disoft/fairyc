@@ -89,6 +89,13 @@ func newFunctionLowerer(module string, function *hir.Function, properties typePr
 }
 
 func (l *functionLowerer) lower() (Function, error) {
+	if target := l.source.ClosureTarget; target != nil {
+		if target.CaptureCount < 0 || target.CaptureCount > 4 {
+			return Function{}, fmt.Errorf("closure target capture count is outside 0..4")
+		}
+		l.result.ClosureTarget = true
+		l.result.ClosureCaptures = uint8(target.CaptureCount)
+	}
 	l.newBlock()
 	maximumSymbol := hir.SymbolID(0)
 	for index, parameter := range l.source.Parameters {

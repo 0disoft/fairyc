@@ -90,6 +90,9 @@ func describeStableBody(record FunctionRecord, context ContextDescriptor, coordi
 }
 
 func describeStableBodyInContext(record FunctionRecord, context *bodyContext, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool) (StableBodyArtifact, error) {
+	if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{record.Body}}); err != nil {
+		return StableBodyArtifact{}, err
+	}
 	if err := verifyBinding(record.ID, record.Descriptor, record.Body, coordinates); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("verify function binding before stable body projection: %w", err)
 	}
@@ -404,6 +407,9 @@ func DecodeStableBody(encoded []byte, maxBytes uint64) (StableBodyArtifact, erro
 
 // ValidateStableBody checks every invariant available without a process-local type context.
 func ValidateStableBody(body StableBodyArtifact) error {
+	if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{body.Function}}); err != nil {
+		return err
+	}
 	if body.ID == (FunctionID{}) || body.Package == (packagegraph.CoordinateID{}) || body.ContextID == (ContextID{}) {
 		return fmt.Errorf("stable function-body identity is incomplete")
 	}

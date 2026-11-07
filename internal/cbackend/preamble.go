@@ -36,6 +36,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
+	e.emitClosureValueType(output)
 	if err := e.emitCallbackType(output); err != nil {
 		return err
 	}

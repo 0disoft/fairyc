@@ -28,6 +28,9 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine,
 		for index, field := range definition.Fields {
 			fieldType, ok := resourceFieldLayoutType(field.Type)
 			if structure, found := structByType[field.Type]; !ok && found {
+				if structHasClosureField(structures[structure].definition) {
+					return nil, nil, CapabilityError{Feature: "resource field containing closure"}
+				}
 				fieldType, ok = structures[structure].layoutType, true
 				nestedCopy = true
 			}

@@ -29,6 +29,7 @@ type executionState struct {
 	stdout            []byte
 	stderr            []byte
 	ioTrace           []IOEvent
+	closures          []closureValueState
 }
 
 func (r *executionState) configureTestIntrinsics(entry string, options Options) error {

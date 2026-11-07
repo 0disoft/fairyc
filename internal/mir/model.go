@@ -165,6 +165,8 @@ type ResourceField struct {
 // Function is one mutable-local control-flow graph and its source-linked facts.
 type Function struct {
 	InlineBody         string `json:",omitempty"`
+	ClosureTarget      bool   `json:",omitempty"`
+	ClosureCaptures    uint8  `json:",omitempty"`
 	Symbol             hir.SymbolID
 	Name               string
 	Span               hir.Span
@@ -359,6 +361,7 @@ type TerminatorKind string
 const (
 	TerminatorGoto        TerminatorKind = "goto"
 	TerminatorCall        TerminatorKind = "call"
+	TerminatorClosureCall TerminatorKind = "closure-call"
 	TerminatorSwitch      TerminatorKind = "switch"
 	TerminatorReturn      TerminatorKind = "return"
 	TerminatorTrap        TerminatorKind = "trap"

@@ -77,6 +77,9 @@ func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.Pa
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Artifact{}, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
+	if err := rejectLegacyClosureValues(program); err != nil {
+		return Artifact{}, err
+	}
 	return extractVerified(program, packageID, identities, coordinates, mir.Verify, &extractionIndex{})
 }
 
@@ -197,7 +200,13 @@ func verifyArtifact(artifact Artifact, verifyMIR func(mir.Program) []mir.Verific
 	seenSymbols := make(map[hir.SymbolID]string, len(artifact.Functions)+len(artifact.Imports))
 	seenIDs := make(map[FunctionID]string, len(artifact.Functions)+len(artifact.Imports))
 	program := mir.Clone(artifact.Context)
+	if err := rejectLegacyClosureValues(program); err != nil {
+		return err
+	}
 	for _, record := range artifact.Functions {
+		if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{record.Body}}); err != nil {
+			return err
+		}
 		if record.Body.Span.Package != artifact.PackageID {
 			return fmt.Errorf("owned function %q belongs to package %d, want %d", record.Body.Name, record.Body.Span.Package, artifact.PackageID)
 		}
@@ -211,6 +220,9 @@ func verifyArtifact(artifact Artifact, verifyMIR func(mir.Program) []mir.Verific
 	}
 	for _, imported := range artifact.Imports {
 		stub := imported.Signature.stub()
+		if err := rejectLegacyClosureValues(mir.Program{Functions: []mir.Function{stub}}); err != nil {
+			return err
+		}
 		if err := verifyBinding(imported.ID, imported.Descriptor, stub, artifact.PackageCoordinates); err != nil {
 			return fmt.Errorf("import %q: %w", imported.Signature.Name, err)
 		}

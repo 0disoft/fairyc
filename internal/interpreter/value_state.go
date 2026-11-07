@@ -22,6 +22,7 @@ const (
 	valueResource
 	valueVoid
 	valueRegion
+	valueClosure
 )
 
 type structState struct {

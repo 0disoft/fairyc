@@ -86,6 +86,9 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 		}
 		header.WriteString(prototype + ";\n")
 	}
+	for _, index := range e.closureTargets() {
+		header.WriteString(closureAdapterPrototype(index) + ";\n")
+	}
 	e.emitDropHelperPrototypes(&header)
 	var literals []string
 	for _, storage := range []map[string]string{plan.byteStringStorage, plan.stringStorage, plan.cStringStorage} {
@@ -125,6 +128,7 @@ func emitBuild(ctx context.Context, program mir.Program, entry string, profile P
 	appendGroups(sourceBodies)
 	appendGroups(literals)
 	var entrySource strings.Builder
+	e.emitClosureAdapters(&entrySource)
 	if err := e.emitCallbackAdapters(&entrySource); err != nil {
 		return BuildUnit{}, err
 	}

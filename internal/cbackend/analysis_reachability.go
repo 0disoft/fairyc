@@ -92,7 +92,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 		}
 		for _, block := range function.Blocks {
 			for _, operation := range block.Operations {
-				if operation.Kind == mir.OperationCCallback {
+				if operation.Kind == mir.OperationCCallback || operation.Kind == mir.OperationClosureCreate {
 					target, found := bySymbol[operation.Symbol]
 					if !found {
 						return nil, nil, fmt.Errorf("missing callback target %d", operation.Symbol)

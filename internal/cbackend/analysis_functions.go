@@ -71,6 +71,10 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 				return err
 			}
 			switch operation.Kind {
+			case mir.OperationClosureCreate:
+				if err := e.inspectClosureCreate(functionIndex, *operation); err != nil {
+					return err
+				}
 			case mir.OperationCCallback:
 				e.features["bounded-c-callback"] = struct{}{}
 			case mir.OperationAssign:
@@ -369,6 +373,10 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 		switch terminator.Kind {
 		case mir.TerminatorGoto:
 			e.features["scalar-control-flow"] = struct{}{}
+		case mir.TerminatorClosureCall:
+			if err := e.inspectClosureCall(functionIndex, terminator); err != nil {
+				return err
+			}
 		case mir.TerminatorCall:
 			e.features["scalar-call"] = struct{}{}
 			calleeResult, calleeParameters, foreign, found := e.callSignature(terminator.Callee)
@@ -454,6 +462,16 @@ func (e *analysisBuilder) inspectFunction(functionIndex int) error {
 }
 
 func (e *analysisBuilder) recordCValueTypeRequirements(value hir.Type) {
+	if hir.IsClosureI32(value) {
+		e.features["copied-closure-value"] = struct{}{}
+	}
+	if index, found := e.structByType[value]; found {
+		for _, field := range e.structTypes[index].definition.Fields {
+			if hir.IsClosureI32(field.Type) {
+				e.features["copied-closure-value"] = struct{}{}
+			}
+		}
+	}
 	e.recordScalarTaggedFeature(value)
 	if tagged, found := e.taggedType(value); found {
 		prefix := "copy-"

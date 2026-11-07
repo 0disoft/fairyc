@@ -179,6 +179,12 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		return layout.Type{}, fmt.Errorf("Fairy bool is not a repr(C) field; use c::bool")
 	}
 	value = canonicalCValueType(value)
+	if hir.IsClosureI32(value) {
+		if reprC {
+			return layout.Type{}, fmt.Errorf("closure is not a repr(C) field")
+		}
+		return closureValueLayout(), nil
+	}
 	if reprC && (hir.CEnumArray(value, r.cEnumBase) || r.cRecordArray(value)) {
 		element, length, _ := hir.FixedArrayParts(value)
 		resolved, err := r.resolve(element)
@@ -193,7 +199,10 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 	}
 	if element, length, array := hir.FixedArrayParts(value); !reprC && array && hir.ExecutableFixedArrayShape(element, length) {
-		if _, found := r.structures[element]; found {
+		if definition, found := r.structures[element]; found {
+			if structHasClosureField(definition) {
+				return layout.Type{}, fmt.Errorf("array of closure structs")
+			}
 			resolved, err := r.resolve(element)
 			if err != nil {
 				return layout.Type{}, err
@@ -202,6 +211,11 @@ func (r *aggregateLayoutResolver) resolveStructField(value hir.Type, reprC bool)
 		}
 	}
 	if nested, found := r.structures[value]; found {
+		for _, field := range nested.Fields {
+			if hir.IsClosureI32(field.Type) {
+				return layout.Type{}, fmt.Errorf("nested closure struct is unsupported")
+			}
+		}
 		if reprC && !nested.ReprC {
 			return layout.Type{}, fmt.Errorf("nested struct type %q is not repr(C)", value)
 		}
@@ -278,7 +292,10 @@ func (r *aggregateLayoutResolver) resolveEnum(definition mir.EnumType) (layout.T
 
 func (r *aggregateLayoutResolver) resolveEnumField(value hir.Type) (layout.Type, error) {
 	value = canonicalCValueType(value)
-	if _, found := r.structures[value]; found {
+	if definition, found := r.structures[value]; found {
+		if structHasClosureField(definition) {
+			return layout.Type{}, fmt.Errorf("enum field containing closure struct")
+		}
 		return r.resolve(value)
 	}
 	if _, found := r.enumerations[value]; found {
@@ -358,7 +375,10 @@ func (r *aggregateLayoutResolver) resolveAggregateTaggedPayload(value hir.Type) 
 	case hir.TypeU8, hir.TypeI32, hir.TypeI64, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: value.String()}, true, nil
 	}
-	if _, found := r.structures[value]; found {
+	if definition, found := r.structures[value]; found {
+		if structHasClosureField(definition) {
+			return layout.Type{}, false, fmt.Errorf("tagged payload containing closure struct")
+		}
 		resolved, err := r.resolve(value)
 		return resolved, true, err
 	}

@@ -43,6 +43,9 @@ func visitAll(ctx context.Context, program mir.Program, identities map[hir.Packa
 	if failures := verifyMIR(program); len(failures) != 0 {
 		return fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
+	if err := rejectLegacyClosureValues(program); err != nil {
+		return err
+	}
 	packages := make(map[hir.PackageID]struct{})
 	for _, function := range program.Functions {
 		packages[function.Span.Package] = struct{}{}

@@ -56,6 +56,7 @@ func prepareTaggedTypes(
 	arrayByType map[hir.Type]int,
 	engine *layout.Engine,
 ) ([]taggedCType, map[hir.Type]int, error) {
+	structByType = closureFreeStructIndex(structures, structByType)
 	candidates := make(map[hir.Type]taggedCType)
 	// Payload support is fixed for this preparation pass. Remember rejected types
 	// too: shared Result branches must not repeatedly expand an unsupported graph.

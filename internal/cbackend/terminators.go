@@ -18,6 +18,8 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 			return fmt.Errorf("goto in %s: %w", function.Name, err)
 		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", target)
+	case mir.TerminatorClosureCall:
+		return e.emitClosureCall(output, terminator)
 	case mir.TerminatorCall:
 		target, err := oneSuccessor(terminator)
 		if err != nil {

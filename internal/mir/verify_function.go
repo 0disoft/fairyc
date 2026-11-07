@@ -13,6 +13,9 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 }
 
 func verifyFunctionContext(ctx context.Context, function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function, dropEffects map[hir.Type][]hir.Effect, fields *aggregateFieldIndex) []VerificationError {
+	if detail := verifyClosureTarget(function); detail != "" {
+		return []VerificationError{{Code: CodeFunctionIdentity, Entity: function.Name, Detail: detail}}
+	}
 	storeTypes, err := fieldStoreLocalTypes(function, functions, foreignFunctions)
 	if err != nil {
 		return []VerificationError{{Code: CodeOperationType, Entity: function.Name, Detail: err.Error()}}
@@ -72,6 +75,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 	}
 	verifier := operationVerifier{
 		function:       function,
+		functions:      functions,
 		structTypes:    structTypes,
 		enumTypes:      enumTypes,
 		resourceTypes:  resourceTypes,
@@ -137,6 +141,14 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		}
 
 		terminator := block.Terminator
+		if terminator.Kind == TerminatorClosureCall {
+			entity := terminatorEntity(item.id, terminator)
+			failures = appendVerificationErrors(failures, verifyOperands(state, terminator.Arguments, entity)...)
+			if detail := verifyClosureInvocation(terminator, storeTypes); detail != "" {
+				failures = appendVerificationErrors(failures, VerificationError{Code: CodeCallSignature, Entity: entity, Detail: detail})
+			}
+			state.live[hir.SymbolID(terminator.DestinationLocal)] = true
+		}
 		if terminator.Kind == "" {
 			failures = appendVerificationErrors(failures, VerificationError{Code: CodeControlFlow, Entity: blockEntityFor(function, item.id), Detail: "reachable block has no terminator"})
 			continue
@@ -200,6 +212,9 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 				}
 			} else {
 				failures = appendVerificationErrors(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
+				if (function.ResultType == hir.TypeClosureI32 || fieldStoreOperandType(terminator.ReturnValue, storeTypes) == hir.TypeClosureI32) && fieldStoreOperandType(terminator.ReturnValue, storeTypes) != function.ResultType {
+					failures = appendVerificationErrors(failures, VerificationError{Code: CodeReturnShape, Entity: function.Name, Detail: "closure return does not match the declared result"})
+				}
 				if detail := verifyStorageViewReturn(function, terminator.ReturnValue, storeTypes); detail != "" {
 					failures = appendVerificationErrors(failures, VerificationError{Code: CodeStorageReturn, Entity: terminatorEntity(item.id, terminator), Detail: detail})
 				}

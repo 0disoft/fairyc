@@ -9,12 +9,18 @@ import (
 // Operand annotations alone cannot grant writes to an unrelated local.
 // Conflicts are errors: an absent type map would disable Region/type checks.
 func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction) (map[LocalID]hir.Type, error) {
-	needed := false
+	return fieldStoreLocalTypesMode(function, functions, foreign, false)
+}
+
+func fieldStoreLocalTypesMode(function *Function, functions map[hir.SymbolID]*Function, foreign map[hir.SymbolID]*ForeignFunction, force bool) (map[LocalID]hir.Type, error) {
+	needed := force || hir.IsClosureI32(function.ResultType)
 	for _, typ := range function.ParameterTypes {
-		needed = needed || typ == hir.TypeRegion
+		needed = needed || typ == hir.TypeRegion || hir.IsClosureI32(typ)
 	}
 	for _, block := range function.Blocks {
+		needed = needed || block.Terminator.Kind == TerminatorClosureCall
 		for _, op := range block.Operations {
+			needed = needed || op.Kind == OperationClosureCreate
 			needed = needed || op.Kind == OperationOptionPayload || op.Kind == OperationResultPayload || op.Kind == OperationCCallback || op.Kind == OperationArrayConstruct || op.Kind == OperationArrayIndex || op.Kind == OperationArrayIndexStore || op.Kind == OperationArrayIndexCheck || op.Kind == OperationArrayLength || op.Kind == OperationFieldBorrow || op.Kind == OperationFieldStore || op.Kind == OperationDerefStore || op.Kind == OperationStorageElementAddress || op.Kind == OperationStorageBorrow || op.Kind == OperationStorageBorrowMut || op.Kind == OperationSharedReborrow || op.Kind == OperationViewSlice || op.Kind == OperationArrayBorrowView || op.Kind == OperationViewIndex || op.Kind == OperationViewElementBorrow || op.Kind == OperationViewIndexStore || op.Kind == OperationViewIndexCheck || op.Kind == OperationViewSliceCheck || op.Kind == OperationViewLength || op.Kind == OperationViewEmpty || op.Kind == OperationRegionPlace
 		}
 	}
@@ -68,7 +74,7 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 						copies = append(copies, localCopy{source: operand.Local, destination: op.DestinationLocal})
 					}
 				}
-			case OperationRawAddress, OperationRawBorrowPointer, OperationCCallback, OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
+			case OperationRawAddress, OperationRawBorrowPointer, OperationCCallback, OperationClosureCreate, OperationUnary, OperationBinary, OperationScalarCast, OperationSharedReborrow,
 				OperationResultConstruct, OperationResultPayload, OperationOptionConstruct, OperationOptionPayload,
 				OperationEnumConstruct, OperationEnumPayload, OperationStructConstruct, OperationResourceConstruct,
 				OperationFieldRead, OperationFieldBorrow, OperationArrayConstruct, OperationArrayBorrowView,
@@ -80,6 +86,9 @@ func fieldStoreLocalTypes(function *Function, functions map[hir.SymbolID]*Functi
 			set(op.DestinationLocal, typ)
 		}
 		term := block.Terminator
+		if term.Kind == TerminatorClosureCall {
+			set(term.DestinationLocal, hir.TypeI32)
+		}
 		if term.Kind == TerminatorCall {
 			if callee := functions[term.Callee]; callee != nil {
 				set(term.DestinationLocal, callee.ResultType)

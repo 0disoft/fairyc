@@ -14,6 +14,9 @@ import (
 const (
 	Schema     = "fairyc.mir-artifact/v0"
 	MIRVersion = "fairyc-mir/2"
+	// ClosureMIRVersion admits copied closure records only in programs that
+	// contain the feature. Ordinary programs retain their original wire bytes.
+	ClosureMIRVersion = "fairyc-mir-closure-values/1"
 )
 
 var (
@@ -25,6 +28,13 @@ type envelope struct {
 	Schema     string      `json:"schema"`
 	MIRVersion string      `json:"mirVersion"`
 	Program    mir.Program `json:"program"`
+}
+
+func programMIRVersion(program mir.Program) string {
+	if mir.HasCopiedClosureValues(program) {
+		return ClosureMIRVersion
+	}
+	return MIRVersion
 }
 
 // Encode verifies program and returns its deterministic exact-version JSON bytes. The caller must
@@ -40,7 +50,7 @@ func encode(program mir.Program, maxBytes uint64, schema string, verify func(mir
 	if failures := verify(program); len(failures) != 0 {
 		return nil, fmt.Errorf("verify MIR before encoding: %w", failures[0])
 	}
-	encoded, err := json.Marshal(envelope{Schema: schema, MIRVersion: MIRVersion, Program: program})
+	encoded, err := json.Marshal(envelope{Schema: schema, MIRVersion: programMIRVersion(program), Program: program})
 	if err != nil {
 		return nil, fmt.Errorf("encode MIR artifact: %w", err)
 	}
@@ -83,8 +93,8 @@ func decode(encoded []byte, maxBytes uint64, schema string, verify func(mir.Prog
 	if artifact.Schema != schema {
 		return mir.Program{}, fmt.Errorf("MIR artifact schema %q is incompatible with %q", artifact.Schema, schema)
 	}
-	if artifact.MIRVersion != MIRVersion {
-		return mir.Program{}, fmt.Errorf("MIR artifact version %q is incompatible with %q", artifact.MIRVersion, MIRVersion)
+	if expected := programMIRVersion(artifact.Program); artifact.MIRVersion != expected {
+		return mir.Program{}, fmt.Errorf("MIR artifact version %q is incompatible with %q", artifact.MIRVersion, expected)
 	}
 	if failures := verify(artifact.Program); len(failures) != 0 {
 		return mir.Program{}, fmt.Errorf("verify decoded MIR artifact: %w", failures[0])

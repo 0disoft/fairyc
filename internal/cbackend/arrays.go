@@ -70,6 +70,13 @@ func prepareScalarArrayTypes(functions []mir.Function, structures ...[]structCTy
 		if !hir.ExecutableFixedArrayShape(element, length) && !hir.TransportOnlyArray(value) {
 			return fmt.Errorf("fixed array %q is outside the bounded executable C subset", value)
 		}
+		for _, definitions := range structures {
+			for _, definition := range definitions {
+				if definition.definition.Type == element && structHasClosureField(definition.definition) {
+					return fmt.Errorf("array of closure structs is unsupported")
+				}
+			}
+		}
 		seen[value] = arrayCType{typ: value, element: element, length: length}
 		return nil
 	}

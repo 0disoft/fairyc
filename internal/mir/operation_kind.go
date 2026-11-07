@@ -67,10 +67,12 @@ const (
 	OperationStoragePut
 	OperationStorageTake
 	OperationCCallback
+	OperationClosureCreate
 	operationKindCount
 )
 
 var operationNames = [operationKindCount]string{
+	OperationClosureCreate:            "closure-create",
 	OperationCCallback:                "c-callback",
 	OperationInvalid:                  "",
 	OperationInitialize:               "initialize",

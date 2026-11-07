@@ -105,8 +105,8 @@ authorized by this queue.
   spans do not close the existing module-wide workspace-CLI generic error
   presentation gap; keep that alongside final diagnostic parity below.
 - [ ] First-class closures: copied direct-call closures and view/vector loop
-  calls already work. Closure value types, passing/return/storage, capture
-  ownership/lifetime and environment representation remain separate designs.
+  calls already work. ADR 0551 now supplies the first bounded value contract;
+  broader signatures, captures, lifetime/storage families remain separate.
   The bounded immutable-i32-local follow-up now passes Go/Fairy Windows
   admission, identity and restored-artifact generated-C execution; see
   `copied-closure-locals-20261107.md`. Its whole CLI and ordinary/generic
@@ -117,7 +117,7 @@ authorized by this queue.
   closure representation remain open.
   ADR 0551 now defines a bounded copied `fn i32(i32)` value with an inline
   four-i32 environment. Go structural syntax/AST and a distinct canonical HIR
-  leaf are retained; execution stays unsupported at this type-only stage.
+  leaf are retained. Fairy execution stays unsupported at its type-only stage.
   Fairy now retains the same structural type JSON and byte spans, keeping the
   C callback tag separate. Its 141 type and 25 signature Go comparisons and
   native low/optimized parser probes pass; see
@@ -127,8 +127,17 @@ authorized by this queue.
   immutable copied captures, monomorphic signatures and named value invocation,
   while forbidden storage/generic/ABI families remain closed. The four complete
   source packages pass in main; see `go-closure-value-semantics-20261108.md`.
-  Verified execution, artifacts/cache and Fairy parity remain separate stages;
-  see also `go-closure-value-types-20261108.md`.
+  Go MIR now verifies construction, immutable carriers, exact target/call
+  contracts and pure checked bodies; interpreter and C11/C17/partitioned native
+  execution pass. Whole-program MIR has an exact closure-only codec version,
+  with unchanged legacy bytes and 440 structural version controls. See
+  `go-closure-value-mir-20261108.md`, `go-closure-value-codec-20261108.md`,
+  `go-closure-value-runtime-20261108.md` and the combined-main receipt
+  `go-closure-value-integration-20261108.md`. Legacy package formats explicitly
+  reject this family before publishing artifacts: stable helper identities,
+  source-owned package/cache restoration, complete workspace CLI and executable
+  Fairy parity remain open. Whole-program MIR round trips do not close those
+  package-cache gates. Broader value families and final acceptance stay open.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:
   prepare concrete contracts and local implementations; external registry or
   trust-provider selection requires the owner's actual choice.
