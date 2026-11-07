@@ -174,6 +174,13 @@ Part 1 of 3 of the [source index](source-of-truth.md).
 - **Shared constrained-C driver and scalar runtime**
   - `internal/cdriver/`
   - `internal/cruntime/`
+- **Inline same-module call graphs and transitive package body closure**
+  - `docs/adr/0548-inline-same-module-call-graphs.md`
+  - `internal/hir/inline.go`, `internal/semantic/inline.go`, `internal/mir/inline.go`
+  - `examples/lexer_candidate/src/module_inline_declarations.fy`
+  - `examples/lexer_candidate/src/module_inline_identity.fy`
+  - `examples/lexer_candidate/src/module_inline_ir.fy`
+  - `examples/lexer_candidate/src/module_inline_graph.fy`
 - **Explicit private Windows compiler-host header admission with unchanged ordinary project bounds**
   - `internal/cdriver/windows_project.go`, `windows_project_limits.go`, `windows_project_limits_test.go`
   - `internal/cli/candidate_copied_closure_cli_host_test.go`: exact-source/image-bound full authored CLI builder

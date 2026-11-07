@@ -67,7 +67,9 @@ authorized by this queue.
   first same-module public-inline call graph family now has ADR 0548, Go
   source/MIR/native execution and memory/new-process disk-cache evidence in
   `go-inline-calls-20261107.md` and `go-inline-calls-cache-20261107.md`.
-  Fairy source/artifact integration is in progress. Other-module/ordinary
+  Fairy source/artifact/native-C now pass both Windows profiles; see
+  `candidate-inline-calls-20261107.md` and
+  `candidate-inline-calls-artifact-20261107.md`. Full CLI/cache is in progress. Other-module/ordinary
   helpers, mutation/control flow and other value families remain separate.
 - [ ] Composite generic transport: preserve already implemented scalar-parameter
   structs/resources; the seven extended scalar types inside further wrappers
@@ -126,6 +128,17 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Fairy same-module inline calls now pass 23 source controls, all accepted
+  declaration identities, preserved no-call v1/v2 vectors and four actual
+  producer/consumer native-C combinations. Nine artifact mutations retain
+  detached/Program/current-source authority boundaries, and exact C symbol
+  membership distinguishes eleven stored exports from ten reachable bodies.
+  The source graph uses an iterative bounded worklist after a real 64-chain
+  native stack overflow was reproduced; no stack/policy limit was raised.
+  Source/locked checks pass 756 files / 9,563 MIR functions with all 1,227 Fairy
+  files and lock matching. Full CLI/cache runs separately; broader/final gates,
+  batched Linux and remote actions remain open or deferred.
 
 - Disjoint Sol High workers and the coordinator implement Go same-module
   inline calls and connect the existing package inline-class resolver. Source,

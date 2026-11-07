@@ -3,6 +3,7 @@ import module_unit_region_builtin as region_builtin;
 import module_unit_body_ir_model as ir;
 import module_unit_body_ir_receiver as receiver;
 import module_inline_ir as inline;
+import module_inline_graph as inline_graph;
 import candidate_limits as limits;
 import literal_types as literals;
 import module_unit_body_ir_enums as enums;
@@ -131,6 +132,7 @@ fn clean_ir::Problem check_parts(ref ir::Program p,usize state_work,ref mut usiz
     i=0;while(i<ir::layout_count(p)){if(!budget::charge(work,1)){return fail(1002,0,0,0);}let row=ir::layout_at(p,i);let s=row.value;if(s.type==0 || s.type>nt || s.field_start>ir::field_count(p) || s.field_count>ir::field_count(p)-s.field_start || !span(row.name_start,row.name_end,ir::name_bytes(p))){return fail(1001,s.module_index,s.start,s.end);}let t=clean_ir::type_at(ir::cleanup_ir(p),s.type);if(t.kind==22 || t.module_index!=s.module_index || t.declaration!=s.declaration){return fail(1001,s.module_index,s.start,s.end);}i+=1;}
     i=0;while(i<ir::field_count(p)){if(!budget::charge(work,1)){return fail(1002,0,0,0);}let f=ir::field_at(p,i);if(f.type>nt || tuple(ir::cleanup_ir(p),f.type) || f.payload_start>ir::field_count(p) || f.payload_count>ir::field_count(p)-f.payload_start || !span(f.name_start,f.name_end,ir::name_bytes(p))){return fail(1001,f.module_index,f.start,f.end);}i+=1;}
     i=0;while(i<ir::callable_count(p)){if(!budget::charge(work,1)){return fail(1002,0,0,0);}let c=ir::callable_at(p,i);if(c.result>nt || tuple(ir::cleanup_ir(p),c.result) || c.parameter_start>ir::parameter_count(p) || c.parameter_count>ir::parameter_count(p)-c.parameter_start || !span(c.link_start,c.link_end,ir::name_bytes(p))){return fail(1001,c.module_index,0,0);}var usize j=0;while(j<c.parameter_count){if(!budget::charge(work,1)){return fail(1002,c.module_index,0,0);}if(ir::parameter_at(p,c.parameter_start+j)>nt || tuple(ir::cleanup_ir(p),ir::parameter_at(p,c.parameter_start+j))){return fail(1001,c.module_index,0,0);}j+=1;}i+=1;}
+    if(!checkpoint(project,work,total)){return fail(1002,0,0,0);}let inline_code=inline_graph::check(p,work,total);if(inline_code!=0){return fail(inline_code,0,0,0);}if(!checkpoint(project,work,total)){return fail(1002,0,0,0);}
     let authenticated=sdk_authority::check(p,work);if(authenticated.code!=0){return authenticated;}
     let enum_proof=enums::check_metered(p,work,total);if(enum_proof.code!=0){return enum_proof;}
     if(!checkpoint(project,work,total)){return fail(1002,0,0,0);}let matched=switches::check(p,work,total);if(matched.code!=0){return matched;}

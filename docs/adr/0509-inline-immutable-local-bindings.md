@@ -5,6 +5,8 @@
 - Extends: [ADR 0493](0493-cross-package-inline-bodies-and-cache-v5.md) and
   [candidate inline v1](../architecture/candidate-inline-v1.md)
 - Evidence: [Windows local-binding receipt](../development/candidate-inline-locals-20261107.md)
+- Call-family extension: [ADR 0548](0548-inline-same-module-call-graphs.md);
+  the no-call v1/v2 identity and local sequencing below remain unchanged.
 
 ## Source contract
 

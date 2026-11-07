@@ -1,8 +1,10 @@
 # Fairy candidate inline bodies v1
 
-- Status: Implemented bounded prototype with Windows full-CLI and persistent-cache
-  evidence for generic/nongeneric callers under both profiles; native Linux deferred.
+- Status: Implemented bounded prototype. Existing no-call families have Windows
+  full-CLI/cache evidence; ADR 0548 calls have source/artifact/native-C evidence,
+  with their full-CLI/cache follow-up in progress. Native Linux is deferred.
 - Owner: [ADR 0493](../adr/0493-cross-package-inline-bodies-and-cache-v5.md),
+  [same-module calls](../adr/0548-inline-same-module-call-graphs.md),
   [cache v5](../package/whole-package-cache-v5.md), and the existing Stage 0 grammar.
 - Evidence: [source/artifact and native-C receipt](../ops/windows-candidate-inline-20261102.md),
   [nongeneric CLI/cache receipt](../ops/windows-candidate-inline-cli-cache-20261103.md),
@@ -16,7 +18,11 @@ nongeneric ordinary function returning i32, with zero through four immutable i32
 parameters and no effects or owner. ADR 0509 also admits zero through sixteen
 immutable i32 local bindings followed by the returned expression. Initializers
 and return share the existing 64-node budget: integer literals, parameter or
-preceding-local paths, grouping, unary +/- and binary +,-,*,/,%. Calls, mutation,
+preceding-local paths, grouping, unary +/- and binary +,-,*,/,%. ADR 0548 adds
+positional direct calls to admitted public inline functions in the same module,
+including forward, nested and repeated calls. Root graphs are acyclic and
+contain at most 64 distinct declarations; ordinary/private/generic/foreign and
+other-module callees remain closed. Mutation,
 control flow, unsafe/effectful bodies,
 aggregates, resources, generic functions and cleanup annotations remain closed.
 The current source grammar uses an explicit `return` in a function statement
@@ -32,6 +38,14 @@ cache and Windows native evidence is in
 run/test commands and persistent-cache restoration pass both host profiles in
 `docs/development/candidate-inline-locals-full-cli-20261107.md`. The private
 compiler-host header policy (ADR 0510) does not widen ordinary C packet limits.
+
+Call-bearing bodies use the v3 canonical tuple from ADR 0548, retaining ordered
+actuals and the callee's unqualified declaration name. No-call v1/v2 bytes stay
+unchanged. All targets belong to the same module's exported inline class, so
+the existing package class includes every reachable body; leaf edits invalidate
+cross-package dependents even when the caller's text and function marker do not
+change. Complete program verification also checks actual call target membership
+and graph closure; an individual detached body is not that publication boundary.
 
 `module_inline_declarations` validates annotations, including declarations not
 selected for ordinary signatures. Its canonical JSON and SHA-256 agree with
