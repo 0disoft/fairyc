@@ -5,6 +5,7 @@ import module_state_graph_request as request;
 import module_state_graph_response as response;
 import module_state_graph_response_common as admission;
 import windows_run_capture as child;
+import windows_cancel as cancellation;
 import windows_host_paths as host;
 import windows_msvc_toolchain as paths;
 import native_scratch as scratch;
@@ -17,9 +18,13 @@ pub struct Options{u32 timeout_ms;}
 pub struct Work{usize request_structure;usize request_bytes;usize response_structure;usize response_bytes;}
 pub fn Work empty_work(){return Work{.request_structure=0,.request_bytes=0,.response_structure=0,.response_bytes=0};}
 // 1 options/work, 2 request, 3 scratch/path, 4 file I/O, 5 child transport,
-// 6 process outcome, 7 response admission, 8 successful-run scratch removal.
+// 6 process outcome, 7 response admission, 8 successful-run scratch removal,
+// 9 cancellation (1009) or token observation failure (1010 + OS cause).
 pub resource Failure{u32 stage;u32 status;u32 os_code;bytes::Buffer diagnostics;cleanup{}}
 fn Failure fail(u32 stage,u32 status,u32 os_code){return Failure{.stage,.status,.os_code,.diagnostics=bytes::empty()};}
+@effects(filesystem) fn Result<bool,Failure> checkpoint(ref cancellation::Token token){
+    return switch(cancellation::requested(token)){case .ok(stop):{if(stop){.err(fail(9,1009,0))}else{.ok(false)}}case .err(e):{.err(fail(9,1010,e.os_code))}};
+}
 pub fn u32 stage(ref Failure e){return e.stage;}
 pub fn u32 status(ref Failure e){return e.status;}
 pub fn u32 os_code(ref Failure e){return e.os_code;}
@@ -39,22 +44,29 @@ fn Result<bytes::Buffer,Failure> joined(ref u8[] root,ref u8[] leaf){return swit
 // image/path/response can substitute for that pair. This API grants no CAS.
 @effects(filesystem,console,environment,clock)
 pub fn Result<response::Admitted,Failure> run(ref build::Built executable,ref request::Snapshot snapshot,request::Limits limits,Options options,ref mut Work work){
+    let token=cancellation::none();return run_cancel(executable,snapshot,limits,options,ref token,work);
+}
+@effects(filesystem,console,environment,clock)
+pub fn Result<response::Admitted,Failure> run_cancel(ref build::Built executable,ref request::Snapshot snapshot,request::Limits limits,Options options,ref cancellation::Token token,ref mut Work work){
     if(!valid(options)){return .err(fail(1,1001,0));}
     if(work.request_structure>16777216 || work.request_bytes>1073741824 || work.response_structure>16777216 || work.response_bytes>1073741824){return .err(fail(1,1002,0));}
+    discard checkpoint(token)?;
     var request_work=request::Work{.structure=work.request_structure,.bytes=work.request_bytes};
     let encoded=input::encode(build::prepared(executable),snapshot,limits,ref mut request_work);
     work.request_structure=request_work.structure;work.request_bytes=request_work.bytes;
     let packet=switch(encoded){case .ok(p):{p}case .err(code):{return .err(fail(2,code,0));}};
+    discard checkpoint(token)?;
     let temporary=switch(host::temporary()){case .ok(p):{p}case .err(e):{return .err(fail(3,e.kind,e.os_code));}};
     let directory=switch(scratch::create(bytes::view(ref temporary))){case .ok(p):{p}case .err(e):{return .err(fail(3,e.status,e.os_code));}};
     let root=scratch::path(ref directory);let image=joined(root,b"graph.exe")?;let replay=joined(root,b"request.bin")?;
     discard write(bytes::view(ref image),build::data(executable))?;discard write(bytes::view(ref replay),input::content(ref packet))?;
     let args=v::empty<bytes::Buffer>();
-    let captured=switch(child::run_input_limit(bytes::view(ref image),ref args,root,options.timeout_ms,2,bytes::view(ref replay),67108864)){case .ok(p):{p}case .err(e):{return .err(fail(5,e.kind,e.os_code));}};
+    let captured=switch(child::run_input_cancel(bytes::view(ref image),ref args,root,options.timeout_ms,2,bytes::view(ref replay),67108864,token)){case .ok(p):{p}case .err(e):{return .err(if(e.kind==12){fail(9,1009,e.os_code)}else if(e.kind==13){fail(9,1010,e.os_code)}else{fail(5,e.kind,e.os_code)});}};
     if(child::status(ref captured)!=0 || child::trap(ref captured)!=0 || child::stderr(ref captured).len!=0){
         let diagnostics=switch(bytes::copy(child::stderr(ref captured))){case .ok(p):{p}case .err(_):{return .err(fail(6,1003,0));}};
         return .err(Failure{.stage=6,.status=if(child::trap(ref captured)!=0){child::trap(ref captured)}else{child::status(ref captured)},.os_code=0,.diagnostics});
     }
+    discard checkpoint(token)?;
     var response_work=admission::Work{.structure=work.response_structure,.bytes=work.response_bytes};
     let decoded=response::decode(build::prepared(executable),ref packet,child::stdout(ref captured),ref mut response_work);
     work.response_structure=response_work.structure;work.response_bytes=response_work.bytes;

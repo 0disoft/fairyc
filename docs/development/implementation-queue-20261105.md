@@ -67,6 +67,20 @@ authorized by this queue.
 
 ## Progress
 
+- The explicit Fairy Windows graph builder, runner and one-attempt persistence
+  binding now borrow cancellation tokens. Existing signatures delegate with none;
+  invalid options/work retain precedence and valid pre-cancellation preserves
+  ledgers/counters/durable bytes before I/O. Actual compiler/linker and graph
+  capture observe the token. Post-run cancellation retains the admitted owner;
+  after entering atomic CAS, a signal cannot revoke acknowledged publication.
+  Windows low/optimized builder/sealed-owner and 52 cancellation/admission checks,
+  six deterministic native snapshot/post-run/CAS-entry boundary observations,
+  plus all 20 existing persistence scenarios, pass. Complete source/locked checks
+  pass 750 files / 9,452 MIR functions. See ADR 0541 and
+  `candidate-state-graph-cancellation-20261107.md`. Actual authored command entry,
+  console selection, forced conflict and all final gates remain required. Linux
+  stays batched; no push/dispatch. Full objective remains active.
+
 - Explicit Fairy Windows cancellation now owns sealed manual-reset OS events
   and flows through new captured-process entry points. Existing calls retain
   their signatures/default none token. Native clear/latched/collision/cleanup,
