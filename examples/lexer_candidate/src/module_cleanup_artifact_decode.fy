@@ -32,7 +32,7 @@ fn Result<ir::Program,u32> decode_mode(ref u8[] raw,bool aggregates,ref mut usiz
     if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}
     var v::Vec<ir::Operand> operands=v::empty<ir::Operand>();i=0;while(i<operands_count){let row=ir::Operand{.frame=wire::number_from(raw,ref mut cursor,work),.kind=wire::word_from(raw,ref mut cursor,work),.id=wire::number_from(raw,ref mut cursor,work),.type=wire::number_from(raw,ref mut cursor,work),.start=wire::number_from(raw,ref mut cursor,work),.end=wire::number_from(raw,ref mut cursor,work)};
         if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!v::push<ir::Operand>(ref mut operands,row).is_ok){return .err(1003);}i+=1;}
-    let drops_count=wire::count_from(raw,ref mut cursor,16384,32,work);
+    let drops_count=wire::count_from(raw,ref mut cursor,ir::drop_limit(project),32,work);
     if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}
     var v::Vec<ir::Drop> drops=v::empty<ir::Drop>();i=0;while(i<drops_count){let row=ir::Drop{.operand=wire::number_from(raw,ref mut cursor,work),.exit=wire::word_from(raw,ref mut cursor,work),.start=wire::number_from(raw,ref mut cursor,work),.end=wire::number_from(raw,ref mut cursor,work)};
         if(wire::status(ref cursor)!=0){return .err(wire::status(ref cursor));}if(!v::push<ir::Drop>(ref mut drops,row).is_ok){return .err(1003);}i+=1;}

@@ -19,7 +19,7 @@ pub fn m::Problem check(ref m::Program p){var usize work=0;return check_metered(
 // The artifact codec folds this independent verifier traversal into its ledger.
 pub fn m::Problem check_metered(ref m::Program p,ref mut usize work){
     if(m::glue_count(p)!=m::type_count(p)){return fail(1001,0,0,0);}
-    let nt=m::type_count(p);let nf=m::frame_count(p);let no=m::operand_count(p);if(nt==0 || nt>4096 || nf>limits::project_frames() || no>16384 || m::drop_count(p)>16384 || m::field_count(p)>limits::project_fields() || m::work(p)>m::work_limit(p)){return fail(1002,0,0,0);}
+    let nt=m::type_count(p);let nf=m::frame_count(p);let no=m::operand_count(p);if(nt==0 || nt>4096 || nf>limits::project_frames() || no>16384 || m::drop_count(p)>m::drop_limit(m::project(p)) || m::field_count(p)>limits::project_fields() || m::work(p)>m::work_limit(p)){return fail(1002,0,0,0);}
     // Stored producer work and the verifier's own traversal are independent.
     var v::Vec<u8> state=v::empty<u8>();var v::Vec<Requirement> cache=v::empty<Requirement>();var v::Vec<usize> canonical=v::empty<usize>();var usize i=0;
     while(i<8192){if(!v::push<usize>(ref mut canonical,0).is_ok){return fail(1003,0,0,0);}i+=1;}if(!budget::charge(work,8192)){return fail(1002,0,0,0);}i=1;

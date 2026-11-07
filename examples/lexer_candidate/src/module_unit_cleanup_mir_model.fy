@@ -28,6 +28,8 @@ pub fn Field field_at(ref Program p,usize index){return *v::at<Field>(ref p.fiel
 pub fn usize operand_count(ref Program p){return v::len<Operand>(ref p.operands);}
 pub fn Operand operand_at(ref Program p,usize id){assert(id!=0 && id<=operand_count(p));return *v::at<Operand>(ref p.operands,id-1);}
 pub fn usize drop_count(ref Program p){return v::len<Drop>(ref p.drops);}
+// Linked projects combine selected unit sites; operand identity stays unit-sized.
+pub fn usize drop_limit(bool project){return if(project){32768}else{16384};}
 pub fn Drop drop_at(ref Program p,usize index){return *v::at<Drop>(ref p.drops,index);}
 pub fn usize work(ref Program p){return p.work;}
 pub fn bool project(ref Program p){return p.project;}
