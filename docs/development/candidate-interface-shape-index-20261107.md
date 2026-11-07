@@ -89,3 +89,57 @@ separately and are not passes. Successful images are temporary Go test outputs.
 `worker-freeze.json` records the final three owned file hashes and
 `windows-native.log` hash. Production and lock changes belong to the parent and
 are deliberately excluded from the owned files.
+
+## Helper relocation follow-up
+
+After core/test integration at `329f611be676396ba5243d67b7872e869b7e7a90`, the
+parent moved `index_shapes` from `module_unit_interfaces` to the smaller
+`module_unit_interface_work`. The latter now qualifies `interfaces::Shape` and
+uses its own `charge`; Interfaces calls `meter::index_shapes`. A read-only
+comparison with the committed helper, normalizing only those namespace
+qualifications, found an identical function signature/body after the function
+name. The graph cap, initialization charge `count + 1`, per-shape charge, first
+matching slot, allocation failures and returned error codes are unchanged.
+
+The existing `TestCandidateInterfaceShapeIndex` and testdata were rerun unchanged
+with the command above: **low and optimized PASS**, package 47.154s (test 46.94s),
+low subtest 10.13s, optimized subtest 30.93s. Both profiles again produced:
+
+```text
+shapes=162 types=487 work=10611 indexed=11 linear=172 queries=975
+ok
+```
+
+Production SHA-256 before and after this run:
+
+| Production input | SHA-256 |
+| --- | --- |
+| `module_unit_interfaces.fy` | `0f4a7aee3072df53cd61aacf901dbd414e74dd046e3e30f8cddb722325da2e81` |
+| `module_unit_interface_work.fy` | `a013a3c357a5819f4f926559bce4eb6d0e969a536ba93bbf14a6f31d30252065` |
+
+The test log directly records the Interfaces hash. Separate
+`relocation-production-before.json` / `relocation-production-after.json` record
+both production files; they are identical. The Go test and FY fixture still have
+the hashes in the earlier table. No production, test, fixture or lock changes
+were made by this worker; this document append is the only tracked edit.
+
+Evidence under `.cache/interface-shape-index-20261107/`:
+
+- `windows-relocation-native.log`: passing low/optimized run.
+- `relocation-freeze.json`: final doc, log, production and unchanged test hashes.
+- Low temporary PE: `919be6268ef08fd5ceb8a3350c9604840f7f222a8bbc0cdba8fa60f2de262ded`.
+- Optimized temporary PE: `a9bd02862bf6fbab9e1c37e9b8b72676414bd41bfe563ef86aac5de04d734c92`.
+
+`git diff --check` passes. Full source/locked checks, same-seed authored emission
+and fixed-point acceptance remain parent-owned; this regression does not claim
+that the reported whole-selfbuild stage-7 failure is resolved. Linux was not
+rerun. No commit or amend was made.
+
+The parent's complete-input retry still rejects phase 2/stage 7/code 10 after
+98.604 seconds (`.cache/current-selfbuild-shape-owner-20261107/invocations.json`).
+The relocation did not establish a self-build improvement and was reverted,
+including its lock changes, to `329f611b`. The verified direct index remains in
+Interfaces. The trial diff is retained in
+`.cache/failed-helper-relocation-20261107.patch`; the relocation results above
+are historical diagnostic evidence, not the current implementation or a pass
+for full self-build. Further changes need subphase/work measurements.

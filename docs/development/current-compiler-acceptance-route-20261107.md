@@ -317,3 +317,18 @@ corrected source hash in the regression record has these passing results.
 
 The full authored emission is being rechecked separately; neither the reduced
 probe counts nor the Go-seeded CLI regression establishes self-build acceptance.
+
+The new seed's complete-input retry still fails after 115.495s with phase
+2/stage 7/code 10 at `module_unit_interfaces.fy`, now without the earlier rich
+expected/actual pair. A source-owner relocation trial preserves all 975 lookup
+results in both profiles and passes full-source check/locked, but its complete
+retry also fails the same stage after 98.604s. The relocation and its lock were
+reverted to `329f611b`; no self-build improvement is claimed from that trial.
+Its scope and hashes remain in the shape-index regression record. The three
+failed full retries emit no packet and cannot establish C linking, self-build,
+consecutive-generation equality or current-source parity.
+
+Further work is diagnostic: split factory, value/AST, liveness, return inference,
+publication and borrow-capture work before changing another capacity or loop.
+Generated-C instrumentation under `.cache/current-origin-trace-20261107` is a
+diagnostic image only. It cannot substitute for a normal authored build receipt.
