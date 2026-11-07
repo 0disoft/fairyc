@@ -19,7 +19,7 @@ pub struct Shape {usize type;usize module_index;usize declaration;usize field_st
 pub struct Field {u32 kind;usize type;usize module_index;usize declaration;usize source_index;usize start;usize end;usize name_start;usize name_end;usize payload_start;usize payload_count;}
 pub struct Callable {usize module_index;usize declaration;bool template;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;bool foreign;usize link_start;usize link_end;}
 pub struct Annotation {usize type;bool required;bool deferred;}
-pub resource Interfaces {usize region_error;usize region_arena;types::Graph graph;v::Vec<Shape> shapes;v::Vec<usize> shape_index;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;usize first;usize stop;cleanup{}}
+pub resource Interfaces {usize region_error;usize region_arena;types::Graph graph;v::Vec<Shape> shapes;v::Vec<usize> shape_index;v::Vec<usize> borrow_index;v::Vec<Field> fields;v::Vec<Callable> callables;v::Vec<usize> parameters;v::Vec<Annotation> annotations;generics::Plan specializations;v::Vec<body_types::Request> body_types;bytes::Buffer names;usize work;usize first;usize stop;cleanup{}}
 // Canonical type IDs address this owned index; shape/field order remains exact.
 // Keep the first matching shape, as the previous ordered scan did.
 fn Result<v::Vec<usize>,u32> index_shapes(usize count,ref v::Vec<Shape> shapes,ref mut meter::Budget work){
@@ -29,6 +29,16 @@ fn Result<v::Vec<usize>,u32> index_shapes(usize count,ref v::Vec<Shape> shapes,r
     while(i<v::len<Shape>(shapes)){if(!meter::charge(work,1)){return .err(10);}let shape=v::at<Shape>(shapes,i);if(shape.type==0 || shape.type>count){return .err(9);}
         if(*v::at<usize>(ref index,shape.type)==0){let slot=v::at_mut<usize>(ref mut index,shape.type);*slot=i+1;}i+=1;}
     return .ok(index);
+}
+// The immutable graph is the exact prefix later cloned by Values. Index only
+// canonical shared/mutable references; value-created types retain linear interning.
+fn Result<v::Vec<usize>,u32> index_borrows(ref v::Vec<types::Type> graph,ref mut meter::Budget work){
+    let count=types::count(graph);if(count>4096 || !meter::charge(work,2*(count+1))){return .err(10);}
+    var v::Vec<usize> index=v::empty<usize>();if(!v::reserve<usize>(ref mut index,2*(count+1)).is_ok){return .err(11);}
+    var usize i=0;while(i<2*(count+1)){if(!v::push<usize>(ref mut index,0).is_ok){return .err(11);}i+=1;}i=1;
+    while(i<=count){if(!meter::charge(work,1)){return .err(10);}let t=types::at(graph,i);
+        if((t.kind==7 || t.kind==8) && t.scalar==0 && t.module_index==0 && t.declaration==0 && t.second==0 && t.first!=0 && t.first<=count){let offset=2*t.first+if(t.kind==8){1}else{0};if(*v::at<usize>(ref index,offset)==0){let slot=v::at_mut<usize>(ref mut index,offset);*slot=i;}}i+=1;
+    }return .ok(index);
 }
 fn join::Problem body_demands(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref generics::Plan specializations,u32 kind,usize id,ref mut v::Vec<types::Type> graph,ref mut v::Vec<body_types::Request> requests,ref mut v::Vec<usize> pending,ref mut bytes::Buffer seen,ref mut meter::Budget work){
     var usize module_index=0;var usize declaration=0;var usize argument_start=0;var usize argument_count=0;
@@ -74,10 +84,12 @@ fn Result<Interfaces,join::Problem> build_mode(ref v::Vec<syntax::Parsed> source
     let fields_valid=if(signatures::aggregate_types(metadata)){contracts::aggregate_fields(sources,ref graph,ref shapes,ref fields,ref mut budget.work)}else{contracts::fields(sources,ref graph,ref shapes,ref fields,ref mut budget.work)};if(fields_valid.code!=0){return .err(fields_valid);}
     let shape_index=switch(index_shapes(types::count(ref graph),ref shapes,ref mut budget)){case .ok(p):{p}case .err(code):{return .err(meter::fail(code,0,0,0));}};
     let owned=switch(signatures::own_types(metadata,graph)){case .ok(g):{g}case .err(code):{return .err(meter::fail(code,0,0,0));}};
-    return .ok(Interfaces{.region_error,.region_arena,.graph=owned,.shapes,.shape_index,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
+    let borrow_index=switch(index_borrows(types::graph_records(ref owned),ref mut budget)){case .ok(p):{p}case .err(code):{return .err(meter::fail(code,0,0,0));}};
+    return .ok(Interfaces{.region_error,.region_arena,.graph=owned,.shapes,.shape_index,.borrow_index,.fields,.callables,.parameters,.annotations=roots,.specializations,.body_types=demanded,.names,.work=budget.work,.first=binding::first(bound),.stop=binding::stop(bound)});
 }
 // Immutable declaration records shared by public descriptor consumers.
 pub fn ref v::Vec<types::Type> type_records(ref Interfaces p){return types::graph_records(ref p.graph);}
+pub fn usize borrow_type(ref Interfaces p,usize target,bool mutable){if(target==0 || target>types::graph_count(ref p.graph)){return 0;}return *v::at<usize>(ref p.borrow_index,2*target+if(mutable){1}else{0});}
 pub fn ref v::Vec<Shape> shape_records(ref Interfaces p){return ref p.shapes;}
 pub fn ref v::Vec<Field> field_records(ref Interfaces p){return ref p.fields;}
 pub fn ref bytes::Buffer name_records(ref Interfaces p){return ref p.names;}

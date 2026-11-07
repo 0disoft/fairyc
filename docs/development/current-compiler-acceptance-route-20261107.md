@@ -471,3 +471,36 @@ Public Go Windows ZIP and source-only Linux handoff validation are recorded in
 their own readiness documents and do not attest authored self-build. Fixed-point
 and full current-source parity remain pending because no normal build receipt
 has been produced.
+
+## Reference type lookup index
+
+The completed value-category diagnostic preserves all 646 inputs and the exact
+failure above (389.337s, exit 2, no packet). The failed last ordinary body is
+module 391, declaration 44: 73822 work, including 58162 in 26 place-borrow calls.
+Across the failing Values build, place borrow accounts for 726613 charged work
+and builtin canonicalization another 252369. These are accounting categories,
+not CPU-time percentages. Full trace/hash evidence is in
+`.cache/current-value-trace-20261107/analysis.json` and `run.json`.
+
+An independent focused probe keeps the complete source/metadata closure but
+selects only the native_cli unit. It reproduces the identical 1118812 attempted
+work in 2.568s. This accelerates diagnosis; it is not a smaller-source acceptance
+substitute. Both focused receipts authenticate source snapshot SHA-256
+`95efe98ad91d455badcc7074fadee07a7e4a08f4bf3b5893d31124898708ed8c`
+and manifest SHA-256
+`9c4928f4c13298f480f706cfdc01facf67f6afa4eb1a33c7652d934681969586`.
+
+The new Interfaces index maps each original target type ID and shared/mutable
+reference kind to its first canonical ID in the validated immutable type prefix.
+Scalar borrowing uses that index; the legacy signature/validation and linear
+fallback remain. For prefix hits, O(Q*G) worst-case searches become O(G+Q),
+including charged setup. The complete focused Values run now succeeds with
+606196 work and 216 contexts in 2.337s, with no input drift. Single-run times
+under concurrent host load are not compiler speedup claims.
+
+The actual builder/oracle regression passes 310 queries and budget, permission,
+fallback and 4096-ValueGraph boundaries in both Windows profiles (36.530s).
+Full source check/locked, scoped vet and diff checks pass. See
+`candidate-borrow-type-index-20261107.md` for exact tested hashes, extra setup
+cost and reserved-memory bounds. A new seed and normal full authored self-build
+remain required; no fixed point or full parity pass is claimed yet.
