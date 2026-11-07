@@ -20,3 +20,9 @@ pub fn Result<model::Snapshot,u32> extract_core(ref unit::Core p,ref mut usize w
         if(i<=clean::type_count(context)){if(!v::push<selection::Row>(ref mut types,row).is_ok){return .err(1003);}}else{if(!v::push<selection::Row>(ref mut frames,row).is_ok){return .err(1003);}}i+=1;
     }return model::assemble(names,types,frames,context,work);
 }
+
+// Only current original-source unit owners reach this closure-specific gate.
+// A canonical leaf has an empty specialization row, never a helper/type alias.
+pub fn Result<model::Snapshot,u32> extract_closures(ref unit::Program p,ref mut usize work){
+    var usize measured=0;let context=ir::cleanup_ir(unit::ir_program(p));let code=clean::closure_artifact_status(context,ref mut measured);if(!budget::charge(work,measured)){return .err(1002);}if(code!=0){return .err(code);}return extract(p,work);
+}
