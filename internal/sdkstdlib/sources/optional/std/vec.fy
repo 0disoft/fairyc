@@ -11,12 +11,9 @@ pub resource Vec<T> {
 
     cleanup {
         while (this.length > 0) {
-            let ptr mut void slot = unsafe { pop_slot_raw(ref mut this as ptr mut void, this.element_size) };
-            assert(slot != null);
-            let T value = take_slot<T>(slot);
+            let T value = take_slot<T>(unsafe { pop_slot(ref mut this as ptr mut void, this.element_size) });
         }
-        let u32 released = unsafe { release_raw(ref mut this as ptr mut void) };
-        assert(released == 0);
+        unsafe { release(ref mut this as ptr mut void); };
     }
 }
 
@@ -32,13 +29,30 @@ unsafe extern C fn u32 prepare_raw(ptr mut void storage, usize size, ptr mut voi
 unsafe extern C fn u32 commit_raw(ptr mut void storage, ptr mut void slot, usize size);
 @link_name("fy_private_vector_pop_slot_v0")
 unsafe extern C fn ptr mut void pop_slot_raw(ptr mut void storage, usize size);
+// Keep raw checks shared instead of cloning them for every element type.
+fn void initialize(ptr mut void storage, usize size, usize alignment) {
+    assert(unsafe { initialize_raw(storage, size, alignment) } == 0);
+}
+fn void commit(ptr mut void storage, ptr mut void slot, usize size) {
+    assert(unsafe { commit_raw(storage, slot, size) } == 0);
+}
+fn void release(ptr mut void storage) {
+    assert(unsafe { release_raw(storage) } == 0);
+}
+fn ptr mut void nonnull(ptr mut void slot) {
+    assert(slot != null);
+    return slot;
+}
+fn ptr mut void pop_slot(ptr mut void storage, usize size) {
+    return nonnull(unsafe { pop_slot_raw(storage, size) });
+}
 fn T take_slot<T>(ptr mut void slot) { return unsafe { storage_take<T>(slot) }; }
 fn i32 write_slot<T>(ptr mut void slot, T value) { return unsafe { storage_put<T>(slot, value); 1 }; }
 
 /// Constructs an empty vector without allocating.
 pub fn Vec<T> empty<T>() {
     var value = Vec<T> { .data = null, .bytes = 0, .alignment = 0, .length = 0, .element_size = 0, .element_alignment = 0 };
-    assert(unsafe { initialize_raw(ref mut value as ptr mut void, storage_size<T>(), storage_alignment<T>()) } == 0);
+    unsafe { initialize(ref mut value as ptr mut void, storage_size<T>(), storage_alignment<T>()); };
     return value;
 }
 
@@ -122,18 +136,14 @@ pub fn ref mut T[] view_mut<T>(ref mut Vec<T> value) {
 /// The vector cannot be mutated or moved while the returned reference is live.
 pub fn ref T at<T>(ref Vec<T> value, usize index) {
     assert(index < value.length);
-    let slot = unsafe { storage_element_address<T>(value.data, index) };
-    assert(slot != null);
-    return unsafe { storage_borrow<T>(value, slot) };
+    return unsafe { storage_borrow<T>(value, nonnull(storage_element_address<T>(value.data, index))) };
 }
 
 /// Exclusively borrows an initialized element without moving it. An out-of-range index traps.
 /// The vector cannot be borrowed again, mutated or moved while the reference is live.
 pub fn ref mut T at_mut<T>(ref mut Vec<T> value, usize index) {
     assert(index < value.length);
-    let slot = unsafe { storage_element_address<T>(value.data, index) };
-    assert(slot != null);
-    return unsafe { storage_borrow_mut<T>(value, slot) };
+    return unsafe { storage_borrow_mut<T>(value, nonnull(storage_element_address<T>(value.data, index))) };
 }
 
 /// Returns how many elements fit without growing the allocation.
@@ -144,7 +154,7 @@ pub fn bool is_empty<T>(ref Vec<T> value) { return value.length == 0; }
 
 /// Grows capacity without consuming elements; an error leaves the vector unchanged.
 pub fn Result<usize, u32> reserve<T>(ref mut Vec<T> value, usize minimum_capacity) {
-    let u32 status = unsafe { reserve_raw(value as ptr mut void, minimum_capacity) };
+    let status = unsafe { reserve_raw(value as ptr mut void, minimum_capacity) };
     return if (status == 0) { .ok(value.bytes / value.element_size) } else { .err(status) };
 }
 
@@ -152,11 +162,11 @@ pub fn Result<usize, u32> reserve<T>(ref mut Vec<T> value, usize minimum_capacit
 /// failure the original element is returned and the vector remains unchanged.
 pub fn Result<usize, T> push<T>(ref mut Vec<T> value, T element) {
     var ptr mut void slot = null;
-    let u32 status = unsafe { prepare_raw(value as ptr mut void, value.element_size, ref mut slot as ptr mut void) };
+    let status = unsafe { prepare_raw(value as ptr mut void, value.element_size, ref mut slot as ptr mut void) };
     return if (status == 0) {
         assert(slot != null);
         assert(write_slot<T>(slot, element) == 1);
-        assert(unsafe { commit_raw(value as ptr mut void, slot, value.element_size) } == 0);
+        unsafe { commit(value as ptr mut void, slot, value.element_size); };
         .ok(value.length)
     } else { .err(element) };
 }
@@ -164,20 +174,16 @@ pub fn Result<usize, T> push<T>(ref mut Vec<T> value, T element) {
 /// Removes the last element and transfers ownership to the caller.
 pub fn Option<T> pop<T>(ref mut Vec<T> value) {
     return if (value.length == 0) { .none } else {
-        let ptr mut void slot = unsafe { pop_slot_raw(value as ptr mut void, value.element_size) };
-        assert(slot != null);
-        .some(take_slot<T>(slot))
+        .some(take_slot<T>(unsafe { pop_slot(value as ptr mut void, value.element_size) }))
     };
 }
 
 /// Destroys the tail in reverse order and returns the number of removed elements.
 /// Retains capacity. A length at or above the current length changes nothing.
 pub fn usize truncate<T>(ref mut Vec<T> value, usize new_length) {
-    let usize count = value.length;
+    let count = value.length;
     while (value.length > new_length) {
-        let ptr mut void slot = unsafe { pop_slot_raw(value as ptr mut void, value.element_size) };
-        assert(slot != null);
-        let T element = take_slot<T>(slot);
+        let T element = take_slot<T>(unsafe { pop_slot(value as ptr mut void, value.element_size) });
     }
     return count - value.length;
 }
