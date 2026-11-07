@@ -662,3 +662,28 @@ A fresh full CLI seed/normal retry follows separately.
 Linux native, CI and push remain unexecuted. See
 `candidate-reachability-drop-projection-20261107.md` for the projection contract
 and precise acceptance boundary.
+
+The seed/help passes in 239.176s. The normal build now succeeds at revision
+`b4008e0e`: `.cache/current-selfbuild-reach-drop-20261107/receipt.json` has
+`passed=true`, full authored CLI scope, both development/release images and no
+Go frontend/runtime builder requirement. Its fresh 646-source C emission takes
+522.053s (55072792 bytes), followed by development/release native builds in
+48.709s / 663.291s and frozen-version checks. This serial, one-CL run is not a
+parallel compilation benchmark. Fixed point and full behavior parity remain
+unexecuted; this is not a later-revision acceptance claim.
+
+## Shared enum/switch layout lookup follow-up
+
+The already charged and duplicate-checked SDK layout index is now retained and
+shared by enum values and switch emission. Standalone scanner entry points,
+member checks, C bytes, ordering and all bounds remain unchanged. The focused
+2048-layout fixture reduces 4194304 scanner visits to 2048 index queries and
+passes Windows low/optimized separately in 18.070s / 23.337s.
+
+The combined drop-projection/layout-lookup tree passes source check/locked
+(755 files, 9541 MIR, 14.270s / 13.959s) and the both-profile native regression
+in 32.064s. Its exact production source and refreshed lock are integrated.
+The prior successful normal build belongs to `b4008e0e`; a new combined-source
+normal build, fixed points and full parity remain pending. See
+`candidate-c-enum-layout-lookup-20261107.md` for evidence and restrictions.
+Linux native stays batched; no CI, push, publishing or runner changes occur.

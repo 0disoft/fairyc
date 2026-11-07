@@ -2635,3 +2635,15 @@ failure returns 1003 without publishing a prefix; all existing work, block and
 project bounds remain unchanged. The detached 157-unit replay now links and
 emits successfully. Its scope and subsequent Windows evidence are recorded in
 `docs/development/candidate-reachability-drop-projection-20261107.md`.
+
+## Shared enum layout lookup during C emission (2026-11-07)
+
+The SDK emission plan retains its existing, charged, duplicate-checked layout
+index. Enum construction and switch branches share that immutable index across
+rendered bodies and partition retries, preserving original layout rows, field
+membership checks, C bytes and order. Standalone scanner entry points remain
+available. No second index build, admission extension or budget increase is
+introduced. Missing/invalid layouts and members retain 1001; exhausted work
+retains 1002. The private plan change does not alter a public ABI or an artifact
+format. Focused and integrated Windows evidence is recorded in
+`docs/development/candidate-c-enum-layout-lookup-20261107.md`.

@@ -12,6 +12,7 @@ import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
 import module_unit_c_aggregate as aggregate;
 import module_unit_c_literals as literals;
+import module_unit_c_enums as enums;
 import module_unit_c_switches as switches;
 import module_unit_c_sdk as sdk;
 import module_unit_c_bytes as byte_compare;
@@ -62,6 +63,7 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
             else if(clean::type_at(ir::cleanup_ir(p),e.type).kind==19){if(!lifecycle::value(b,n.source,out,s,work)){return false;}}
             else if(e.kind==6 && !variant){if(e.builtin.kind!=0){s.code=1004;return false;}if(!calls::call(p,named,plan,indexed,body_index,ref invocations,g,n.source,0,out,s,work)){return false;}}
             else if(e.kind==1 && literals::descriptor(clean::type_at(ir::cleanup_ir(p),e.type))){if(!literals::expression(p,b,n.source,out,s,work)){return false;}}
+            else if((e.kind==28 || e.kind==10) && clean::type_at(ir::cleanup_ir(p),e.type).kind==4){if(!enums::expression_indexed(p,sdk::layout_lookup(plan),b,n.source,out,s,work)){return false;}}
             else if((e.kind==1 || e.kind==23) && clean::type_at(ir::cleanup_ir(p),e.type).kind==12 || e.kind==2 || e.kind==3 || e.kind==8 || e.kind==9 || e.kind==10 || e.kind==21 || e.kind==22 || e.kind==24 || e.kind==26 || e.kind==28 || e.kind==29 || e.kind==30 || e.kind==4 && bytes::equal(ir::node_text(b,n.source-1),b"*") || variant){if(!aggregate::expression(p,b,n.source,out,s,work)){return false;}}
             else if(!scalar::expression(p,b,n.source,out,s)){return false;}}
         else if(n.kind==2){if(!store(p,b,n,out,s)){return false;}}
@@ -77,7 +79,7 @@ pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,r
         else if(n.kind==14){if(!calls::call(p,named,plan,indexed,body_index,ref invocations,g,n.source,n.target,out,s,work)){return false;}}
         else if(n.kind==15 || n.kind==16){if(!lifecycle::block(b,n,out,s)){return false;}}
         else if(n.kind==17){if(!snapshot(out,s,n.target) || !w::text(out,s,b"=") || !aggregate::place(p,b,n.source,out,s,0) || !w::text(out,s,b";\n")){return false;}}
-        else if(n.kind==18){if(!switches::branch(p,b,n,out,s,work)){return false;}}
+        else if(n.kind==18){if(!switches::branch_indexed(p,sdk::layout_lookup(plan),b,n,out,s,work)){return false;}}
         else if(n.kind==19){if(!switches::seed(p,b,n,out,s,work)){return false;}}
         else if(n.kind==20 || n.kind==21){if(!iteration::block(p,plan,g,n,out,s,work)){return false;}}
         else if(n.kind!=7){s.code=1004;return false;}

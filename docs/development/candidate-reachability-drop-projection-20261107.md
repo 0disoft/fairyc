@@ -50,7 +50,27 @@ whole-project ledger are unchanged. No CFG wire format exists to change.
   stderr is empty. The unchanged bounds are 1 MiB per C phase and 16 MiB total.
 
 The detached replay uses the original frozen 646-source snapshot. It is
-diagnostic evidence, not current-source normal acceptance, an executable build,
-a cache hit, a fixed point or full Go/Fairy parity. The current-source normal
-retry is recorded separately when completed.
-Linux native checks remain batched. CI, push and release are not run here.
+diagnostic evidence, not source-bound acceptance, a cache hit or a fixed point.
+
+## Normal source-bound build at b4008e0e
+
+The fresh full CLI seed/help passes in 239.176s (205 Go-emitted C parts).
+`.cache/current-selfbuild-reach-drop-20261107/receipt.json` then records
+`passed=true`, full `file_cli::run` scope, both development/release images,
+`goFrontendInvoked=false` and `runtimeGoBuilderRequired=false`. The authored
+companion's prior receipt is reused only after all its source/runtime hashes
+are checked; neither changed module is in that 36-source closure.
+
+The normal, uninstrumented 646-source compiler emits a 55072792-byte C packet
+in 522.053s with empty stderr. Development compilation takes 48.709s and
+release compilation 663.291s, both followed by exact frozen-version checks.
+Packet SHA-256 is
+`9142ab65d252d51cde0e7ed3695ca21bb8e8795f422164f34236b969154ff54f`.
+This deliberately runs with `GOMAXPROCS=1` while a separate native worker uses
+the other CPU slot; its serial release time is not a two-worker benchmark.
+
+The build revision is exactly `b4008e0ebf7ecfc777eea62502cbdab687508b87` with
+`modified=false`. This proves the drop-projection source revision, before the
+later enum/switch layout-lookup integration. It does not prove a fixed point
+or full Go/Fairy behavioral parity for either revision. Linux native checks
+remain batched; CI, push, publishing and release packaging are not run here.

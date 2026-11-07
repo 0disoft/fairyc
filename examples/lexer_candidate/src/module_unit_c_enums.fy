@@ -5,6 +5,7 @@ import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_c_aggregate as aggregate;
 import module_unit_c_scalar as scalar;
+import module_unit_c_layout_index as layouts;
 import c_text as w;
 import std::bytes as bytes;
 
@@ -19,8 +20,16 @@ pub fn bool definition(ref ir::Program p,usize type,usize index,ref mut bytes::B
     }return w::text(out,s,b"}fy_payload;};\n");
 }
 pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
-    let e=ir::node_at(b,id-1).value;let index=proof::layout(p,e.type,work,ref mut s.code);if(index==0 || (e.kind!=28 && e.kind!=10) || !proof::member(p,e.field,e.type,3)){if(s.code==0){s.code=1001;}return false;}
-    let shape=ir::layout_at(p,index-1).value;var usize tag=0;var usize i=shape.field_start;while(i+1<e.field.id){if(!budget::charge(work,1)){s.code=1002;return false;}if(ir::field_at(p,i).kind==3){tag+=1;}i+=1;}
+    let index=proof::layout(p,ir::node_at(b,id-1).value.type,work,ref mut s.code);return expression_at(p,b,id,index,out,s,work);
+}
+// Production emission shares the plan's original one-based layout rows. The
+// legacy entry point keeps its scanner for standalone callers.
+pub fn bool expression_indexed(ref ir::Program p,ref layouts::Index indexed,ref ir::Body b,usize id,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let index=layouts::find(indexed,ir::node_at(b,id-1).value.type,work,ref mut s.code);return expression_at(p,b,id,index,out,s,work);
+}
+fn bool expression_at(ref ir::Program p,ref ir::Body b,usize id,usize index,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
+    let e=ir::node_at(b,id-1).value;if(index==0 || index>ir::layout_count(p) || (e.kind!=28 && e.kind!=10) || !proof::member(p,e.field,e.type,3)){if(s.code==0){s.code=1001;}return false;}
+    let shape=ir::layout_at(p,index-1).value;if(shape.type!=e.type){s.code=1001;return false;}var usize tag=0;var usize i=shape.field_start;while(i+1<e.field.id){if(!budget::charge(work,1)){s.code=1002;return false;}if(ir::field_at(p,i).kind==3){tag+=1;}i+=1;}
     if(!scalar::value(out,s,id) || !w::text(out,s,b"=(") || !aggregate::type(p,e.type,out,s) || !w::text(out,s,b"){.fy_tag=") || !w::number(out,s,tag) || !w::text(out,s,b"};\n")){return false;}
     var usize link=e.right;while(link!=0){if(!budget::charge(work,1)){s.code=1002;return false;}let pair=ir::node(b,link);if(pair==0){s.code=1001;return false;}let row=ir::node_at(b,pair-1).value;let child=ir::node(b,row.left);if(child==0 || !proof::member(p,row.field,e.type,4)){s.code=1001;return false;}
         if(!scalar::value(out,s,id) || !w::text(out,s,b".fy_payload.") || !variant(out,s,e.field.id) || !w::text(out,s,b".") || !aggregate::field(out,s,row.field.id) || !w::text(out,s,b"=") || !scalar::value(out,s,child) || !w::text(out,s,b";\n")){return false;}link=row.right;

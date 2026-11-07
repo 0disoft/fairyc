@@ -21,7 +21,7 @@ import std::vec as v;
 
 // Closed runtime records use their real C tags. Internal nominal fields remain
 // distinct, and adapters copy fields instead of claiming compatible C types.
-pub resource Plan {v::Vec<usize> rules;v::Vec<usize> records;v::Vec<usize> layouts;v::Vec<usize> vectors;usize byte_equal;usize arena;usize alloc_error;usize buffer;usize string;usize cstring;usize file;usize read_dir;cleanup{}}
+pub resource Plan {layout_index::Index indexed;v::Vec<usize> rules;v::Vec<usize> records;v::Vec<usize> layouts;v::Vec<usize> vectors;usize byte_equal;usize arena;usize alloc_error;usize buffer;usize string;usize cstring;usize file;usize read_dir;cleanup{}}
 fn clean::Problem fail(u32 code,usize module_index,usize start,usize end){return clean::Problem{.code,.module_index,.start,.end};}
 fn ref u8[] slot(ref u8[] pool,usize index,usize count){if(index==0 || index>count){return pool[..0];}var usize start=0;var usize i=1;while(i<index){while(pool[start]!=0){start+=1;}start+=1;i+=1;}var usize end=start;while(pool[end]!=0){end+=1;}return pool[start..end];}
 fn ref u8[] source_name(usize record){if(file_storage::fields(record)!=0){return file_rules::record_name(record);}let pool=b"raw_process_args_result\0raw_text_result\0raw_text_view\0raw_console_write_result\0raw_console_read_result\0";return slot(pool,record,5);}
@@ -34,6 +34,9 @@ pub fn usize rule(ref Plan p,usize callable){assert(callable<v::len<usize>(ref p
 pub fn usize arena_type(ref Plan p){return p.arena;}
 pub fn usize byte_equal_frame(ref Plan p){return p.byte_equal;}
 pub fn usize allocation_error(ref Plan p){return p.alloc_error;}
+// The immutable emission plan retains the already charged, duplicate-checked
+// index. Enum values and switches share it across every rendered body.
+pub fn ref layout_index::Index layout_lookup(ref Plan p){return ref p.indexed;}
 pub fn usize vector_layout(ref Plan p,usize type){return if(type==0 || type>v::len<usize>(ref p.vectors)){0}else{*v::at<usize>(ref p.vectors,type-1)};}
 pub fn usize status_field(ref ir::Program p,ref Plan plan){assert(plan.alloc_error!=0);return ir::layout_at(p,layout(plan,plan.alloc_error)-1).value.field_start+1;}
 // Other authenticated SDK components still need their storage/record bridges.
@@ -68,7 +71,7 @@ pub fn Result<Plan,clean::Problem> build(ref ir::Program p,ref mut usize work){l
                 }
             }i+=1;
         }u+=1;
-    }i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(clean::type_at(ir::cleanup_ir(p),i).kind==13 && *v::at<usize>(ref vectors,i-1)==0){return .err(fail(1001,clean::type_at(ir::cleanup_ir(p),i).module_index,0,0));}i+=1;}return .ok(Plan{.rules,.records,.layouts,.vectors,.byte_equal,.arena,.alloc_error,.buffer,.string,.cstring,.file,.read_dir});
+    }i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(fail(1002,0,0,0));}if(clean::type_at(ir::cleanup_ir(p),i).kind==13 && *v::at<usize>(ref vectors,i-1)==0){return .err(fail(1001,clean::type_at(ir::cleanup_ir(p),i).module_index,0,0));}i+=1;}return .ok(Plan{.indexed,.rules,.records,.layouts,.vectors,.byte_equal,.arena,.alloc_error,.buffer,.string,.cstring,.file,.read_dir});
 }
 pub fn bool type(ref ir::Program p,ref Plan plan,usize id,ref mut bytes::Buffer out,ref mut w::State s){let wire=record(plan,id);if(wire!=0){return w::text(out,s,b"struct ") && w::text(out,s,wire_name(wire));}let t=clean::type_at(ir::cleanup_ir(p),id);if((t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0){return type(p,plan,t.first,out,s) && w::text(out,s,if(t.kind==8 || t.kind==12 && t.scalar==1){b" *"}else{b" const *"});}return aggregate::type(p,id,out,s);}
 pub fn bool allowed(ref ir::Program p,ref Plan plan,usize id,bool result){if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){return false;}let t=clean::type_at(ir::cleanup_ir(p),id);if(record(plan,id)!=0){return result;}return !result && (t.kind==7 || t.kind==8 || t.kind==12) && t.first!=0 && record(plan,t.first)!=0;}
