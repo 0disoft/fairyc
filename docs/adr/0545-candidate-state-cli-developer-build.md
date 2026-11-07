@@ -33,3 +33,12 @@ one-attempt state publication. Neither profile implies public CLI promotion,
 installed distribution support, clean-machine acceptance or a completed queue.
 
 Evidence: `docs/development/candidate-state-cli-preparation-20261107.md`.
+
+The follow-up `tools/package-candidate-state-cli.py` consumes only an already
+verified preparation/build record and exact current image/packs. It creates a
+fresh deterministic seven-file local developer ZIP with relative metadata,
+license, instructions and checksums; it never builds, executes or installs a
+toolchain. Source hashes attest a byte snapshot, not a commit or signed release.
+Actual extracted execution and negative packaging checks are recorded in
+`docs/development/candidate-state-cli-package-20261107.md`. Clean-machine,
+installed and public compiler distribution acceptance remain separate.
