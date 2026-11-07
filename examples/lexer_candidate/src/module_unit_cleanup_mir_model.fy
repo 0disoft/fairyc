@@ -3,6 +3,7 @@ import module_types as types;
 import candidate_limits as limits;
 import module_unit_cleanup_mir_verify as proof;
 import std::vec as v;
+import module_unit_value_model as budget;
 
 // Source-independent cleanup MIR. Frame IDs qualify all binding and expression
 // operands; canonical type IDs never become temporary joined declaration IDs.
@@ -63,14 +64,22 @@ pub fn Result<Program,Problem> assemble_closures(v::Vec<types::Type> types,v::Ve
 // verifier. Fresh verification work is returned even on rejection; this owner
 // alone grants neither source checking nor whole-package cache-hit authority.
 pub fn Result<Program,Problem> assemble_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,ref mut usize verification_work){
-    return artifact_mode(types,frames,glues,fields,operands,drops,project,false,verification_work);
+    return artifact_mode(types,frames,glues,fields,operands,drops,project,false,false,verification_work);
 }
 // Explicit detached aggregate reconstruction. Fresh verification grants no
 // current-source, Complete, cache-hit or executable publication authority.
 pub fn Result<Program,Problem> assemble_aggregate_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,ref mut usize verification_work){
-    return artifact_mode(types,frames,glues,fields,operands,drops,project,true,verification_work);
+    return artifact_mode(types,frames,glues,fields,operands,drops,project,true,false,verification_work);
 }
-fn Result<Program,Problem> artifact_mode(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,bool aggregates,ref mut usize verification_work){
+fn Result<Program,Problem> artifact_mode(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,bool aggregates,bool closures,ref mut usize verification_work){
     if(v::len<Glue>(ref glues)!=v::len<types::Type>(ref types)){return .err(Problem{.code=1001,.module_index=0,.start=0,.end=0});}
-    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work=0,.project,.aggregates,.closures=false};let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
+    let p=Program{.types,.frames,.glues,.fields,.operands,.drops,.work=0,.project,.aggregates,.closures};let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}if(closures){let code=closure_artifact_status(ref p,verification_work);if(code!=0){return .err(Problem{.code,.module_index=0,.start=0,.end=0});}}return .ok(p);
+}
+
+// Explicit detached closure components: independent flags, zero producer work.
+pub fn Result<Program,Problem> assemble_closure_artifact(v::Vec<types::Type> types,v::Vec<Frame> frames,v::Vec<Glue> glues,v::Vec<Field> fields,v::Vec<Operand> operands,v::Vec<Drop> drops,bool project,bool aggregates,ref mut usize verification_work){return artifact_mode(types,frames,glues,fields,operands,drops,project,aggregates,true,verification_work);}
+// A format bit alone cannot turn a scalar-only table into a closure family.
+// Ordinary cleanup verification additionally proves uniqueness and all records.
+pub fn u32 closure_artifact_status(ref Program p,ref mut usize work){
+    if(!closures(p)){return 1001;}var usize i=1;while(i<=type_count(p)){if(!budget::charge(work,1)){return 1002;}let t=type_at(p,i);if(t.kind==23 && t.scalar==0 && t.module_index==0 && t.declaration==0 && t.first==0 && t.second==0){return 0;}i+=1;}return 1001;
 }

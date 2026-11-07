@@ -90,7 +90,15 @@ pub fn Result<Program,clean_ir::Problem> assemble(clean_ir::Program cleanup_ir,v
 // Fresh component reconstruction still passes the complete ordinary verifier.
 // This owner is not the source-authenticated Complete publication boundary.
 pub fn Result<Program,clean_ir::Problem> assemble_artifact(state::Plan states,sdk_sources::Sources sdk_sources,clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,ref mut usize verification_work){
-    if(clean_ir::closures(ref cleanup_ir)){return .err(clean_ir::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
+    return artifact_mode(states,sdk_sources,cleanup_ir,bodies,layouts,fields,callables,parameters,names,false,verification_work);
+}
+// Closure admission is explicit; the complete proof rechecks helpers and calls.
+pub fn Result<Program,clean_ir::Problem> assemble_artifact_closures(state::Plan states,sdk_sources::Sources sdk_sources,clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,ref mut usize verification_work){
+    return artifact_mode(states,sdk_sources,cleanup_ir,bodies,layouts,fields,callables,parameters,names,true,verification_work);
+}
+fn Result<Program,clean_ir::Problem> artifact_mode(state::Plan states,sdk_sources::Sources sdk_sources,clean_ir::Program cleanup_ir,v::Vec<Body> bodies,v::Vec<Layout> layouts,v::Vec<interfaces::Field> fields,v::Vec<interfaces::Callable> callables,v::Vec<usize> parameters,bytes::Buffer names,bool closures,ref mut usize verification_work){
+    if(clean_ir::closures(ref cleanup_ir)!=closures){return .err(clean_ir::Problem{.code=1001,.module_index=0,.start=0,.end=0});}
+    if(closures){let code=clean_ir::closure_artifact_status(ref cleanup_ir,verification_work);if(code!=0){return .err(clean_ir::Problem{.code,.module_index=0,.start=0,.end=0});}}
     let p=Program{.states,.sdk_sources,.cleanup_ir,.bodies,.layouts,.fields,.callables,.parameters,.names,.work=0};
     let checked=proof::check_metered(ref p,verification_work);if(checked.code!=0){return .err(checked);}return .ok(p);
 }
