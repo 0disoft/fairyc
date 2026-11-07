@@ -617,3 +617,22 @@ Integrated source check/locked pass with 755 files and 9532 MIR functions in
 `.cache/current-project-capacity-source-check-20261107.log`. A fresh seed and
 normal current-source retry follow separately. Native Linux remains batched;
 CI, push, fixed points and full current-source parity are unexecuted here.
+
+The integrated capacity seed/help passes in 130.092s (205 C parts). A fresh
+36-source authored companion also builds development and release, with receipt
+`passed=true`, at `.cache/current-authored-driver-capacity-20261107/receipt.json`.
+The old companion receipt is not reused across the candidate-limits source
+change. Evidence for the seed is
+`.cache/current-project-capacity-seed-20261107/build.log`.
+
+The normal current-source retry now passes linking and entry selection, then
+exits 2 after 527.361s at **phase 5/stage 0/code 1002**, bytes 0..0, with zero
+output. This is a new C-emission failure from `module_unit_c_emit::partition_entry`
+(128 frames per initial partition), not the prior layout/drop link refusal.
+Its exact internal guard is unresolved; no work, output-byte, CFG, SDK or
+partition-count limit is asserted as the cause. The invocation is recorded in
+`.cache/current-selfbuild-capacity-20261107/invocations.json`, with adjacent
+source snapshot and stderr in `.cache/current-selfbuild-capacity-20261107.log`.
+There is no successful normal build receipt, current-source fixed point or
+full parity result. The authenticated detached IR archive remains available
+for bounded emitter diagnosis without repeating the original frontend pass.
