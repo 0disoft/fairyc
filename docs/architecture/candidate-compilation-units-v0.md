@@ -2603,3 +2603,18 @@ exact-compiler transport, not a cross-version compatibility promise. The bounded
 admission extension and Windows evidence, including the public-view follow-up,
 are recorded in
 `docs/development/candidate-project-layout-cap-20261107.md`.
+
+## Linked-project cleanup drop capacity (2026-11-07)
+
+The cleanup model's `drop_limit(project)` admits 32768 drop sites for a linked
+project and retains 16384 for a unit/raw owner. The builder's selected-drop
+append, cleanup verifier and artifact decoder share that policy; unit lowerers
+and the operand count/local-ID bounds remain unchanged. The existing project
+flag controls the distinction, without granting source/cache/publication
+authority. Project work remains 16 MiB, unit work remains 1 MiB, and all other
+budgets, representation and provenance checks remain unchanged.
+
+Windows low/optimized tests cover the 32768/32769 project boundary, the retained
+16384/16385 unit boundary, selected/discarded remapping, artifact round trips,
+independent golden bytes, malformed/truncated input and work refusal. See
+`docs/development/candidate-project-drop-cap-20261107.md`.

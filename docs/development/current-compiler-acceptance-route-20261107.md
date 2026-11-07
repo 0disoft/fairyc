@@ -592,3 +592,28 @@ acceptance or a source-bound cache hit. A bounded layout policy follow-up is in
 an isolated worker worktree. Fixed points, current-source full parity and Linux
 native remain pending. See
 `candidate-project-metadata-map-20261107.md` for evidence and scope.
+
+## Linked layout and drop capacity follow-up
+
+Commits `88d59a6e` and `830f4d14` integrate a shared 2048 compiled-layout limit,
+including public-view projection. Boundary/codec tests pass Windows low and
+optimized in 27.800s; existing generic aggregate public-interface regressions
+pass both profiles in 109.742s. Raw/parser/AST limits remain separate.
+Commit `c5b3646c` admits 32768 cleanup drops for linked projects while units
+retain 16384. Its Windows both-profile tests pass in 19.298s, with independent
+golden bytes, transport/structural checks and selected/unselected remapping.
+
+Frozen-input diagnosis identifies the prior 44002 as the selected-drop 16384
+cap (44402). A bounded count-only experiment reaches 2950 selected operands and
+23100 selected drops in 24.565s; it intentionally stops before assembly.
+An isolated replay with both proposed caps passes full linking in 25.848s,
+retaining 10292 frames, with unchanged input/archive/image hashes and empty
+stderr. Evidence is `.cache/current-project-link-cap-replay-20261107/run.json`.
+This is detached diagnostic evidence from the original 646-source snapshot,
+not a current-source normal build, Complete owner, cache hit or fixed point.
+
+Integrated source check/locked pass with 755 files and 9532 MIR functions in
+13.400s / 12.965s; their source hashes agree and the lock is refreshed. Evidence:
+`.cache/current-project-capacity-source-check-20261107.log`. A fresh seed and
+normal current-source retry follow separately. Native Linux remains batched;
+CI, push, fixed points and full current-source parity are unexecuted here.
