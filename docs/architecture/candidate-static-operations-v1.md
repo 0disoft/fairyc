@@ -81,8 +81,14 @@ original-byte diagnostics, Go metadata/planner comparisons and restored-artifact
 C execution pass both Windows profiles; see
 [admission](../development/candidate-grouped-static-admission-20261107.md) and
 [metadata/native](../development/candidate-grouped-static-metadata-20261107.md).
-Grouped whole-CLI/cache acceptance runs separately and is not established by
-the older single-operation CLI receipt above.
+The [grouped CLI/cache receipt](../development/candidate-grouped-static-cli-cache-20261107.md)
+adds actual baseline commands, mutation/invalidation, rejection and project
+repair. Low evidence composes completed steps from an interrupted run with its
+authenticated resumed tail; optimized runs the full matrix. The reduced low
+default was not rerun from cold. The workspace CLI retains its existing
+module-wide E4501 presentation; exact original declaration spans above belong
+to the source admission API. Native Linux and final whole-source gates remain
+separate.
 
 Dynamic interfaces, inference, nominal/aggregate providers,
 associated types, default/blanket/orphan implementations, boxing, allocation and

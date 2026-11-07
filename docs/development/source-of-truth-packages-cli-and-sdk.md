@@ -426,6 +426,7 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 
 - Owner: `docs/adr/0495-explicit-static-operation-interfaces.md` and `docs/architecture/candidate-static-operations-v1.md`.
 - Grouped operations: `docs/adr/0549-grouped-static-operation-interfaces.md`, `static_operation_groups.fy`, `static_operation_group_identity.fy`, `internal/genericsource/static_interface_group.go` and the grouped source/cache/admission/pipeline tests. Windows evidence: `docs/development/go-grouped-static-interfaces-20261107.md`, `go-grouped-static-cache-20261107.md`, `candidate-grouped-static-admission-20261107.md` and `candidate-grouped-static-metadata-20261107.md`.
+- Grouped full CLI/cache: `internal/cli/candidate_grouped_static_cli_cache_test.go` and `docs/development/candidate-grouped-static-cli-cache-20261107.md`; composed/resumed low coverage and complete optimized mutation/refusal/repair evidence retain their separate accounting.
 - Declaration, wrapper and digest owners: `examples/lexer_candidate/src/static_operation_declarations.fy`, `static_operation_syntax.fy`, `static_operation_identity.fy` and the generic source/module-unit consumers named by the architecture page.
 - Native admission, cross-package Go identity oracle and restored-artifact C replay: `internal/cli/candidate_static_operation*_test.go` and `examples/lexer_candidate/tests/static_operation*.fy`.
 - Historical source/artifact evidence: `docs/ops/windows-candidate-static-operations-20261102.md`.

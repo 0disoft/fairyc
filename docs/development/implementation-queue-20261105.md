@@ -84,12 +84,15 @@ authorized by this queue.
   `candidate-flat-option-cli-cache-20261107.md`; other wrapper families stay open. The Go
   memory/new-session/new-process disk cache and restored C execution pass in
   `go-flat-option-cache-20261107.md` without a production cache change.
-- [ ] Multi-operation static interfaces: ADR 0549's bounded groups now have Go
+- [x] Multi-operation static interfaces: ADR 0549's bounded groups now have Go
   and Fairy representation, complete-provider admission, exact declaration-error
   location and shared sibling/provider identity. Go memory/new-process disk
   cache, Fairy Go-oracle/restored-artifact C and both native profiles pass; see
-  the four `*-grouped-static-*20261107.md` records. Grouped full CLI/cache is in
-  progress; final acceptance remains below.
+  the four `*-grouped-static-*20261107.md` records. Grouped full CLI/cache now
+  passes, with composed/resumed low evidence and full optimized vectors in
+  `candidate-grouped-static-cli-cache-20261107.md`. Precise source admission
+  spans do not close the existing module-wide workspace-CLI generic error
+  presentation gap; keep that alongside final diagnostic parity below.
 - [ ] First-class closures: copied direct-call closures and view/vector loop
   calls already work. Closure value types, passing/return/storage, capture
   ownership/lifetime and environment representation remain separate designs.
@@ -112,6 +115,10 @@ authorized by this queue.
 
 ## Final acceptance work
 
+- [ ] Preserve original declaration-level generic preparation errors through
+  workspace CLI presentation; grouped direct source admission is precise, but
+  the current CLI still reports module-wide E4501 spans. Verify both Go and
+  Fairy presentation independently before claiming complete diagnostic parity.
 - [ ] Refresh complete current-source Go/Fairy comparisons and consecutive
   self-build equality after implementation.
 - [x] Collect the authored Linux commands and remaining runtime observations into
@@ -134,6 +141,14 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- Grouped full-CLI/cache acceptance passes both compiler profiles. Low reuses
+  the completed baseline/mutation prefix and authenticates the image for a
+  six-process repair/refusal tail; optimized executes all 45 CLI processes and
+  two standalone products. The unchanged valid image/input is not rebuilt
+  solely for a completed prefix. The reduced future low default is explicitly
+  not a fresh cold-run pass. Generic CLI error spans remain module-wide; precise
+  source API spans do not silently close that separate presentation gap.
 
 - The inline CLI sidecar completes both frozen pre-group hosts: 216 fresh CLI
   processes and eight direct product executions pass, including ordinary and
