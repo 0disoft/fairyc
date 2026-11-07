@@ -2,6 +2,7 @@ module generic_expand;
 import candidate_limits as limits;
 import syntax as syntax;
 import copied_closure_tables as private;
+import closure_value_source_policy as closure_policy;
 import scanner as scanner;
 import records as records;
 import attributes as attributes;
@@ -18,7 +19,7 @@ import std::vec as v;
 // cloning. Original source and templates remain owned; no textual substitution.
 pub struct Problem {u32 code;usize start;usize end;}
 struct Instance {usize declaration;usize instance;usize count;u32[8] types;u8 active;}
-struct Plan {Problem problem;usize work;usize expressions;usize statements;usize entries;usize types;usize fields;usize sdk_start;usize sdk_end;}
+struct Plan {Problem problem;bool closure_policy;usize work;usize expressions;usize statements;usize entries;usize types;usize fields;usize sdk_start;usize sdk_end;}
 fn bool fail(ref mut Plan plan,u32 code,usize start,usize end){if(plan.problem.code==0){plan.problem=Problem{.code,.start,.end};}return false;}
 fn v::Vec<usize> zero(usize count){var v::Vec<usize> result=v::empty<usize>();while(v::len<usize>(ref result)<=count){if(!v::push<usize>(ref mut result,0).is_ok){return v::empty<usize>();}}return result;}
 fn usize get(ref v::Vec<usize> map,usize id){return *v::at<usize>(map,id);}
@@ -70,6 +71,7 @@ fn usize instance(ref u8[] source,ref mut v::Vec<syntax::Declaration> declaratio
     while(i<v::len<syntax::Declaration>(declarations)){let d=*v::at<syntax::Declaration>(declarations,i);if(d.generic_parameters!=0 && (base.right!=0 && i+1==base.right || base.right==0 && module_at(declarations,d.start)==module_at(declarations,base.start) && bytes::equal(source[d.name_start..d.name_end],source[base.start..base.end]))){declaration=i+1;break;}i+=1;}
     if(declaration==0){discard fail(plan,4501,call.start,call.end);return 0;}
     let d=*v::at<syntax::Declaration>(declarations,declaration-1);
+    if(plan.closure_policy){let p=closure_policy::function(source,declarations,types,entries,fields,d,ref mut plan.work);if(p.code!=0){discard fail(plan,p.code,p.start,p.end);return 0;}}
     // Resolve a bare template call only in its caller's lexical declaration.
     // An unrelated extern parameter (Vec reserve_raw's capacity) cannot shadow it.
     if(base.right==0){var usize n=0;while(n<plan.entries){let entry=*v::at<bodies::Entry>(entries,n);
@@ -136,7 +138,7 @@ pub fn syntax::Parsed expand(syntax::Parsed p){
     i=0;while(i<syntax::field_count(ref p)){assert(v::push<records::Field>(ref mut fields,syntax::field_at(ref p,i)).is_ok);i+=1;}
     i=0;while(i<syntax::attribute_count(ref p)){assert(v::push<attributes::Attribute>(ref mut attributes,syntax::attribute_at(ref p,i)).is_ok);i+=1;}
     i=0;while(i<syntax::attribute_argument_count(ref p)){assert(v::push<attributes::Argument>(ref mut attribute_arguments,syntax::attribute_argument_at(ref p,i)).is_ok);i+=1;}
-    var v::Vec<Instance> instances=v::empty<Instance>();var Plan plan=Plan{.problem=Problem{.code=0,.start=0,.end=0},.work=0,.expressions=v::len<ast::Node>(ref expressions),.statements=v::len<ast::Statement>(ref statements),.entries=v::len<bodies::Entry>(ref entries),.types=v::len<types::Node>(ref types),.fields=v::len<records::Field>(ref fields),.sdk_start=0,.sdk_end=0};let scopes=sdk::collect(ref p);switch(scopes){case .ok(scopes):{var usize j=0;while(j<v::len<sdk::Scope>(ref scopes)){let scope=*v::at<sdk::Scope>(ref scopes,j);if(scope.sdk_id==8){plan.sdk_start=scope.start;plan.sdk_end=scope.end;}j+=1;}}case .err(code):{plan.problem=Problem{.code,.start=0,.end=syntax::source_view(ref p).len};}};let Problem result=if(plan.problem.code!=0){plan.problem}else{prepare(syntax::source_view(ref p),ref mut declarations,ref mut expressions,ref mut statements,ref mut entries,ref mut types,ref mut fields,ref mut instances,ref mut plan)};
+    var v::Vec<Instance> instances=v::empty<Instance>();var Plan plan=Plan{.problem=Problem{.code=0,.start=0,.end=0},.closure_policy=closure_policy::needed(ref types),.work=0,.expressions=v::len<ast::Node>(ref expressions),.statements=v::len<ast::Statement>(ref statements),.entries=v::len<bodies::Entry>(ref entries),.types=v::len<types::Node>(ref types),.fields=v::len<records::Field>(ref fields),.sdk_start=0,.sdk_end=0};let scopes=sdk::collect(ref p);switch(scopes){case .ok(scopes):{var usize j=0;while(j<v::len<sdk::Scope>(ref scopes)){let scope=*v::at<sdk::Scope>(ref scopes,j);if(scope.sdk_id==8){plan.sdk_start=scope.start;plan.sdk_end=scope.end;}j+=1;}}case .err(code):{plan.problem=Problem{.code,.start=0,.end=syntax::source_view(ref p).len};}};let Problem result=if(plan.problem.code!=0){plan.problem}else{prepare(syntax::source_view(ref p),ref mut declarations,ref mut expressions,ref mut statements,ref mut entries,ref mut types,ref mut fields,ref mut instances,ref mut plan)};
     if(result.code!=0){assert(v::push<syntax::Problem>(ref mut problems,syntax::Problem{.code=result.code,.start=result.start,.end=result.end,.expected=0,.token=0}).is_ok);}
     // Expansion appends declarations without changing existing helper IDs.
     // Preserve their owned source receipts rather than discarding authority.
