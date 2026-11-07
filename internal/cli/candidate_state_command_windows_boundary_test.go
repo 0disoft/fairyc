@@ -24,7 +24,8 @@ import (
 // The actual main, emitted units, runtime assets and provider remain unchanged.
 // Each wrapper calls its real OS adapter once and preserves rc/GetLastError.
 // This observer only retains the real local event and schedules notification or
-// cancellation after the real CAS lease succeeds (open=1, snapshot=2, CAS=3).
+// cancellation after the real CAS lease succeeds (open=1, snapshot=2, CAS=3),
+// or lets a real peer publish immediately before the CAS lease is acquired.
 func stateCommandBoundarySupport(t *testing.T, support string) string {
 	t.Helper()
 	local := "void *fairyc_private_windows_cancel_local_v1(void) {"
@@ -57,6 +58,23 @@ void *fairyc_private_windows_cancel_local_v1(void) {
     SetLastError(saved); return result;
 }
 int32_t fairyc_private_windows_root_file_state_lock_v1(size_t file) {
+    DWORD incoming_error = GetLastError();
+    WCHAR selected[16];
+    DWORD selected_size = GetEnvironmentVariableW(L"FAIRYC_TEST_COMMAND_BOUNDARY_MODE", selected, 16);
+    if (selected_size == 8 && lstrcmpW(selected, L"conflict") == 0 &&
+        InterlockedCompareExchange(&fairyc_test_command_leases, 0, 0) == 2) {
+        DWORD client[1];
+        if (GetConsoleProcessList(client, 1) != 1 || client[0] != GetCurrentProcessId()) { ExitProcess(92); }
+        // No lease is held here: the real peer can win the actual version CAS.
+        // Releasing this barrier invokes the original acquisition exactly once.
+        HANDLE release = fairyc_test_command_event(L"FAIRYC_TEST_COMMAND_BOUNDARY_RELEASE");
+        if (release == NULL) { ExitProcess(93); }
+        fairyc_test_command_notify(L"FAIRYC_TEST_COMMAND_BOUNDARY_READY");
+        DWORD waited = WaitForSingleObject(release, 15000);
+        (void)CloseHandle(release);
+        if (waited != WAIT_OBJECT_0) { ExitProcess(94); }
+    }
+    SetLastError(incoming_error);
     int32_t result = fairyc_test_command_original_lease(file);
     DWORD saved = GetLastError();
     if (result != 0) {
@@ -212,7 +230,7 @@ func TestCandidateStateCommandWindowsBoundary(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, mode := range []string{"closed-stdout", "cancel", "peer"} {
+		for _, mode := range []string{"closed-stdout", "cancel", "peer", "conflict"} {
 			t.Run(mode, func(t *testing.T) {
 				directory := seed(t)
 				newEvent := func(label string) (windows.Handle, string) {
@@ -284,24 +302,35 @@ func TestCandidateStateCommandWindowsBoundary(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				if mode == "peer" {
+				if mode == "peer" || mode == "conflict" {
 					status, waitErr := windows.WaitForSingleObject(ready, 15000)
 					if waitErr != nil || status != windows.WAIT_OBJECT_0 {
 						_ = windows.SetEvent(release)
 						_ = waitCommand(true)
 						t.Fatalf("actual CAS lease boundary unavailable: status=%d err=%v stdout=%s stderr=%s", status, waitErr, &stdout, &stderr)
 					}
-					peerCode, peerOut, peerErr := stateCommandProcess(t, peer, root, args("snapshot", directory)...)
+					action := "snapshot"
+					if mode == "conflict" {
+						action = "execute"
+					}
+					peerCode, peerOut, peerErr := stateCommandProcess(t, peer, root, args(action, directory)...)
 					// Release the actual lease owner before any assertion can exit.
 					if err = windows.SetEvent(release); err != nil {
 						_ = waitCommand(true)
 						t.Fatalf("release actual CAS lease: %v stdout=%s stderr=%s", err, &stdout, &stderr)
 					}
-					if peerCode != 7 || len(peerOut) != 0 || len(peerErr) == 0 {
+					if mode == "conflict" {
+						if peerCode != 0 || len(peerErr) != 0 || !bytes.Equal(peerOut, wantJSON) {
+							_ = waitCommand(true)
+							t.Fatalf("real peer publication code=%d stdout=%s stderr=%s", peerCode, peerOut, peerErr)
+						}
+						t.Log("real Go peer published version 8 after candidate snapshot 7 and before its CAS acquisition")
+					} else if peerCode != 7 || len(peerOut) != 0 || len(peerErr) == 0 {
 						_ = waitCommand(true)
 						t.Fatalf("actual Go peer busy code=%d stdout=%s stderr=%s", peerCode, peerOut, peerErr)
+					} else {
+						t.Logf("real Go peer snapshot refused with exit=7 while actual CAS lease held: %s", peerErr)
 					}
-					t.Logf("real Go peer snapshot refused with exit=7 while actual CAS lease held: %s", peerErr)
 				}
 				exitCode := 0
 				if err = waitCommand(false); err != nil {
@@ -311,7 +340,12 @@ func TestCandidateStateCommandWindowsBoundary(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
-				if mode == "closed-stdout" {
+				if mode == "conflict" {
+					if exitCode != 7 || stdout.Len() != 0 || !bytes.Contains(stderr.Bytes(), []byte("store stage=6 code=1005 os=0")) {
+						t.Fatalf("stale version code=%d stdout=%s stderr=%s", exitCode, &stdout, &stderr)
+					}
+					t.Logf("actual candidate refuses stale version without retry: %s", &stderr)
+				} else if mode == "closed-stdout" {
 					if exitCode != 4 || stdout.Len() != 0 || !bytes.Contains(stderr.Bytes(), []byte("report output failed")) || !bytes.Contains(stderr.Bytes(), []byte("may already be published")) {
 						t.Fatalf("broken stdout code=%d stdout=%s stderr=%s", exitCode, &stdout, &stderr)
 					}

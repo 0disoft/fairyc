@@ -67,6 +67,16 @@ authorized by this queue.
 
 ## Progress
 
+- Actual Fairy stale-version command conflict now has a real competing native
+  Go publication between its version-7 snapshot and CAS acquisition. Expanded
+  eight-case Windows low/optimized command boundaries pass in 64.478s: loser
+  exit 7/code 1005, empty stdout, no fourth acquisition/retry and exact retained
+  winner version-8 bytes through two independent provider reopens. Existing
+  closed-output/late-cancellation/peer-busy cases rerun on the new observer.
+  See `candidate-state-command-windows-boundaries-20261107.md`. No production
+  fix or source-lock update is needed. Native Linux and all broader final gates
+  remain open; no push/dispatch. The full objective stays active.
+
 - The disjoint native worker closes six actual state-command publication
   boundary observations: Windows low/optimized closed stdout, latched CAS-entry
   cancellation and competing Go snapshot busy 7. All pass in 47.962s; every
