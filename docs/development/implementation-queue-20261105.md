@@ -91,8 +91,12 @@ authorized by this queue.
   `candidate-flat-result-transport-20261107.md`. Whole CLI/cache has completed
   the low lifecycle and representative invalidation/repair/refusal vectors:
   18 fresh processes, two standalone products and seven-scalar active payload
-  observation. The optimized host was deliberately stopped before publication;
-  the broad optimized mutation matrix and whole-test pass remain open. See
+  observation. A fresh optimized host now completes the baseline and original
+  refusal/repair controls, but generic `return tail<T>(replaced)` fails with an
+  internal invariant even without cache; dependent mutation vectors remain
+  unaccepted. The error-contract fixture now uses an admitted outer Result so
+  it reaches E4103. The helper-call production fix and optimized replay remain
+  in progress; the whole-test pass remains open. See
   `candidate-flat-result-cli-cache-20261108.md`. Broader error payloads/nesting
   remain separate.
 - [x] Multi-operation static interfaces: ADR 0549's bounded groups now have Go

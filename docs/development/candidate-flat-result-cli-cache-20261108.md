@@ -18,7 +18,7 @@ Native execution is Windows/amd64 only. No Linux, remote action or commit.
 Hosts may be reused only after `copiedClosureCLIHost` validates both generated
 source digest and image SHA-256 against `host.json`.
 
-## Coverage
+## Coverage at the initial stop
 
 The two-package provider exports scalar-generic Result construction, copies,
 reassignment, error-parameter binding and propagation. Both success and error
@@ -143,7 +143,7 @@ hit unlocked and locked. Omitted low vectors in the table were not run.
 | Baseline observer executable | `a3224b1573da1187784162d13ff633ed7b997d9dc6adb98fc43064a5823699ce` |
 | Mutated-success observer executable | `51d88b9e274a9e6b3241d77db6fe0aece2de94c3fa91950438488cbdeafb7a03` |
 
-### Final verified stop
+### Initial verified stop
 
 At 2026-11-08T00:30:44+09:00 the coordinator redirected work to Fairy structural
 type retention only and requested a prompt stop without new runtime admission.
@@ -173,3 +173,175 @@ Earlier cheap-test failures are retained as explicitly transcribed tool output
 in `cheap-failures-transcribed.log`. Native log and completed low host,
 workspace/cache and packet artifacts remain in the evidence directory. Vet
 session63403 completed exit0; no owned live process/session remains.
+
+## Optimized continuation at current main 94eac0fc
+
+**Observed result: FAIL; whole optimized CLI/cache acceptance is not passed.**
+This continuation ran only on Windows/amd64 main
+`94eac0fc97e4c7b513313192aa31d2aa466138fe`. The earlier low-host 18-process
+completion remains historical evidence and was not rerun. Low/dev products
+below are consumers built by the new optimized host, not a second low-host run.
+
+### Independently authenticated admission
+
+At 2026-11-08T01:01:45+09:00, every current FY path and SHA-256 under
+`examples/lexer_candidate` was compared with the snapshot named by
+`.cache/closure-value-types-source-20261107-all-check.json`. Both inventories
+contained **1,231 files with zero differences**; manifest and lock also matched
+exactly. That receipt records successful check/locked exits0, empty stderr,
+16.0281113/19.4012367s, 758 compiled sources and 9594 MIR functions. Those check
+times belong to the prior receipt; this continuation authenticated its exact
+inputs rather than rerunning a source checker or refreshing the main lock.
+Only after this comparison and the independent Go fixture pass was the existing
+`FAIRYC_RESULT_CLI_MAIN_GATE=passed` set for the native child.
+
+| Authenticated input | SHA-256 |
+| --- | --- |
+| Prior combined check receipt | `bff5ddcb1fa1bb11b94975c41bdec7763cff5042ec0f469b6643ca9131f9f19e` |
+| Current and snapshot fairy.lock | `be58b365a33198123325fbe0be9d1285e795e08a9434bcf7e2dcc36f68d83f72` |
+| Current and snapshot fairy.toml | `5dd473fe42d35270b362d16d383627167d9981244761a925e42a45f57c8b737f` |
+| New per-file FY authentication JSON | `7a8d89be145eda87cc1530ec3ec884596fac0527b64e54f300698f160c5c33e0` |
+| Pre-run Go input inventory (2759 files including go.mod/go.sum) | `9dca94d97ee682153ae9b64cbd8c43a0c84da1b8f89f282843d6ca9df071a9f7` |
+
+All new evidence paths below are relative to
+`.cache/flat-result-cli-ded379fba8b0/`. Full FY hashes are retained in
+`optimized-current94eac0fc-source-authentication.json`; Go hashes in
+`optimized-current94eac0fc-go-inputs.json`.
+
+The current Go fixture control passed before native launch: package0.680s,
+test0.56s, Go PID30572, compiler/test executable identity
+`fairyc.compiler-executable-sha256/v1:6d66b5c36ab34627d6fac20d303d6d39d458beffdc155b996985bb81a8a7f982`.
+Provider/main/tests and five edit hashes match the earlier hash table. All six
+expected return values and three refusal controls passed. Log:
+`optimized-current94eac0fc-fixtures.log`.
+
+### Fresh optimized host and failed full test
+
+Initial process inspection found no live Go/test/compiler process for the
+interrupted parent attempt. Its optimized directory had neither a host image nor
+`host.json`; it was not accepted as reusable. `copiedClosureCLIHost` freshly
+generated the current C digest, then built all205 C partitions without changing
+its 256KiB partition limit, timeout or 16MiB stack reserve. Preparation took
+**4m23.8716796s**.
+
+| Host identity | SHA-256 |
+| --- | --- |
+| Generated optimized C input digest | `f78071eb637fe44f7b5c771233d5cd5250bc829bf3cf39c8ad5013e152daa893` |
+| Optimized host executable | `788b13e8038bfd41140c47b1f5b2911c7a80291e949826a806172bbe0b00a20b` |
+
+Exact native command and environment:
+
+```powershell
+$env:GOMAXPROCS='1'
+$env:GOFLAGS='-p=1'
+$env:FAIRYC_RUN_PARITY_INTEGRATION='1'
+$env:FAIRYC_RESULT_CLI_MAIN_GATE='passed'
+$env:FAIRYC_RESULT_CLI_REUSE_ARTIFACTS=Join-Path (Get-Location) '.cache/flat-result-cli-ded379fba8b0'
+$env:FAIRYC_CLOSURE_CLI_PROFILE='optimized'
+go test -mod=readonly ./internal/cli -run '^TestCandidateCompositeResultCLICache$/optimized$' -count=1 -parallel=1 -p=1 -timeout=45m -v
+```
+
+Go PID46252 launched at01:02:38+09:00; test PID16444 launched at01:02:43+09:00.
+The command completed exit1 at01:07:24+09:00, package280.664s,
+optimized subtest280.33s. The test performed **13 fresh CLI commands** before
+stopping. The exact Go executable identity was the one reported above.
+`optimized-current94eac0fc-processes.jsonl` records observed descendant PIDs,
+creation times and command lines; polling is not an exhaustive process trace.
+
+Preserved failure workspace: `workspace-1212925990`.
+Preserved full native log: `optimized-current94eac0fc-native-attempt2.log`, SHA-256
+`3eac26bd0db06a11e9edc97d2b7c661fa1685300a14dea1bd2e067b2967d165f`.
+Its separate stderr log is empty; the test's captured compiler stderr is in the
+full log. Earlier interrupted/failed logs remain intact.
+
+| Native vector under the optimized host | Observed outcome |
+| --- | --- |
+| Baseline cold store, locked check/release run; exact cache/lock bytes | PASS |
+| Dev/release builds, two standalone products and CLI runs | PASS, exit42 and empty streams |
+| Baseline low/optimized packet observers | PASS, 26 active-payload comparisons each, both copies, error77 and operand counters |
+| Test listing, interpreter, native dev and native release tests | PASS |
+| Helper mutation stale locked check | PASS, exit7 and exact stale-lock refusal |
+| Helper mutation ordinary run | FAIL, exit4 instead of42, cold uncached, internal compiler invariant failed |
+
+Both baseline standalone product hashes equal the earlier low-host product
+table. Baseline packet SHA-256:
+`0f175d5c0ec45a24ff7ee3d74d6dcb399d074b3aa0dd54b95fe45c8af99e5535`.
+New low observer SHA-256:
+`2d1c4a9ea375a6880d2c4b981024b1a683d1bd68a1f62cb69648ead7c29ba2cf`;
+optimized observer SHA-256:
+`a3224b1573da1187784162d13ff633ed7b997d9dc6adb98fc43064a5823699ce`.
+
+### Remaining matrix observations and actual fixture correction
+
+To preserve the failed workspace, supplementary commands used a full separate
+copy, `optimized-diagnostics-fb259731`. No fixture was truncated and no compiler
+budget was raised. Exact command PIDs, source hashes, exits, streams and timings
+for **21 additional CLI commands** are in
+`optimized-current94eac0fc-supplemental.jsonl`.
+
+The helper change is exactly `return replaced;` to
+`return tail<T>(replaced);` inside `relay<T>`. Uncached ordinary `check` also
+returned4 with the invariant failure, PID16904. The unchanged Go control accepts
+and executes that exact source. The production cause was not isolated or fixed
+in this lane; replacing that valid helper mutation to conceal the failure would
+not establish the requested acceptance.
+
+| Supplementary vector | Observed outcome |
+| --- | --- |
+| Success, payload type, error value and private body mutations | All stale-lock checks exit7; all ordinary runs exit4 with the same invariant message |
+| Good-cache preservation after all failed mutations | Exact names and SHA-256 bytes preserved |
+| Copy-pending and original-pending at final private-body mutation | Both exit4, not their expected E4101 |
+| Original error-contract fixture | Exit3 unsupported f32 signature, not E4103, on both final mutation and baseline |
+| Corrected error-contract at final private-body mutation | Exit4, invariant failure |
+| Restore baseline unlocked check | PASS, cache hit, lock refreshed only in scratch workspace |
+| Corrupt selected baseline FYCKEYS0 project envelope and repair | PASS, exit42, cache: units hit, every good cache name/digest restored exactly |
+| Baseline copy-pending and original-pending | PASS, exit3/E4101, good cache exact |
+| Corrected baseline error-contract | PASS, exit3/E4103, good cache exact |
+| Restored baseline unlocked and locked checks | PASS, cache hit and good cache exact |
+
+The initial error-contract helper used `Result<f32,i32>` as its enclosing return
+type. ADR0550 explicitly excludes this shape; the existing transport control
+already uses `Result<u32,i32>` to reach propagation checking without invoking
+that independent signature refusal. The **only test edit** therefore changes
+the enclosing type to `Result<u32,i32>`, discards the extracted f32 and returns
+`.ok(1)`. It preserves the f32 operand and the expected E4103. No helper mutation
+or acceptance expectation was weakened.
+
+Corrected baseline E4103: main.fy:29:998, bytes3338..3339; actual-error
+bytes3306..3309, expected-error bytes3281..3284. Corrected final-mutation source
+still fails before this diagnostic can be established. Baseline E4101 spans are
+bytes3336..3344 (copied) and3360..3368 (original).
+
+The repaired baseline selected-project SHA-256 is
+`4ecd038293d3b9ba35c3c8866f8fe718fb2b8c8c49a1728413deaaf85739b931`.
+This is **baseline repair evidence only**. There is no successful mutated
+generation to repair. Mutated generic-key stability/invalidation, warm-byte
+checks, changed-payload/error78 observers and the final mutated repair/refusal
+sequence remain unverified; the original full test did not reach them.
+
+After the one-line fixture fix, the same focused Go fixture command passed again:
+package0.585s, test0.49s. Corrected executable identity:
+`fairyc.compiler-executable-sha256/v1:c394029e52d9af7922b771fd3060c033f1333a9b8e3276403ef7d94c898e8cec`.
+`go vet -mod=readonly -p=1 ./internal/cli` passed with an empty retained log.
+The full native test was not rerun after this diagnostic-only correction because
+its earlier helper failure and all host inputs were unchanged.
+
+### Final ownership and remaining gate
+
+Final FY comparison at01:11:25+09:00 found **zero changes across all1231 files**;
+main lock and manifest hashes remained exact. Comparing the recorded2759 Go
+inputs found only the assigned test changed. Its final SHA-256 is
+`c9f63217f543e5f82c76a3e248060e43f4e0a4ced1fedd1a8ff68b562b8e93c7`.
+`optimized-current94eac0fc-final-inputs.json` retains that comparison;
+`optimized-current94eac0fc-evidence-summary.json` retains evidence-log hashes.
+Tracked changes are only the assigned test and this receipt. No FY, source lock,
+production implementation, API/ABI, DB, other shared test, dependency, runner,
+CI, limit, branch, commit or remote state was changed. Linux remains batched.
+Final scoped `git diff --check` passed.
+
+The native handle completed exit1 naturally; no duplicate run or forced host
+stop was needed. Recorded PID/creation-time recheck at01:11:30+09:00 found
+**zero live owned processes**, retained in
+`optimized-current94eac0fc-process-cleanup.json`. The remaining acceptance gate
+requires the parent/compiler owner to repair the valid helper-call invariant,
+then replay the full optimized test using current-source/digest admission.

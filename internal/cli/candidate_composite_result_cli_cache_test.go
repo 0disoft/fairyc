@@ -145,7 +145,7 @@ func compositeResultCLIRefusals() []struct{ name, extra, code string } {
 	return []struct{ name, extra, code string }{
 		{"copy-pending", "fn void pending(Result<f32,u32> original){let Result<f32,u32> copied=original;discard original;}", "E4101"},
 		{"original-pending", "fn void pending(Result<f32,u32> original){let Result<f32,u32> copied=original;discard copied;original;}", "E4101"},
-		{"error-contract", "fn Result<f32,i32> mismatch(Result<f32,u32> value){let f32 actual=value?;return .ok(actual);}", "E4103"},
+		{"error-contract", "fn Result<u32,i32> mismatch(Result<f32,u32> value){let f32 actual=value?;discard actual;return .ok(1);}", "E4103"},
 	}
 }
 
