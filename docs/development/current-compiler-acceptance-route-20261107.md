@@ -1,7 +1,7 @@
 # Current Windows authored compiler acceptance route, 2026-11-07
 
-This is the integration plan and bounded evidence record, not a claim that the
-current compiler has self-built. The parent owns the final isolated source
+This is the integration plan and bounded evidence record. The current-source
+normal release self-build now passes; see the latest observation below. The parent owns the final isolated source
 check, lock refresh, fresh Go-emitted seed, actual Fairy emission and native
 fixed-point execution. No Linux, network, remote or CI operation belongs here.
 
@@ -735,3 +735,25 @@ including 35 provider value-plan builds. Primary closure takes 853.152ms;
 primary values take 45.575ms. Provider preparation and the remaining origin
 factory/solver costs are not yet separated. No provider cache is implemented;
 this is a bounded diagnostic, not full compiler acceptance.
+
+## Current-source normal release success
+
+Revision `d0b84329` passes a fresh optimized full-CLI seed regression (205 C
+parts, 14 CLI processes) and a normal release self-build. The authored frontend
+reads 646 sources and emits a 55063498-byte C packet in 512.243s; release native
+compile/link takes 633.650s. Both retain their existing 900s stage watchdogs.
+Version equality, source/tool/image hashes and the inherited 16MiB PE stack
+pass. The complete wrapper takes 1151.378s, not less than 900s.
+
+The successful full-dispatcher receipt is
+`.cache/current-selfbuild-d0b84329-optimized-20261107/receipt.json`.
+It has `passed=true`, `goFrontendInvoked=false`, no frontend reuse, no narrowed
+entry scope, no runtime Go builder and no product timeout change. The installed
+Fairy companion/assets reuse is authenticated against all 59 source hashes.
+The failed entry-lookup optimization was discarded before this build.
+
+This establishes normal release construction; native/companion fixed points
+and full current Go/Fairy comparisons still require their separate gates.
+See `candidate-body-phase-diagnosis-20261107.md` for the seed identity, packet
+and image hashes, invocation timings and varying host CPU samples. Linux stays
+batched; CI, push and release/publishing are unexecuted.

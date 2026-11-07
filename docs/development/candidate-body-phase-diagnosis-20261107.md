@@ -1,8 +1,9 @@
 # Authored compiler body-phase diagnosis, 2026-11-07
 
-The latest-source normal builds remain unsuccessful. A new diagnostic isolates
-where their next investigation should focus; it does not replace a normal build,
-prove a fixed point, or attribute the failure solely to shared-host contention.
+The earlier normal builds timed out. The later current-source optimized-seed
+attempt completes successfully; see the final section. The intermediate
+diagnostics below neither prove a fixed point nor attribute the earlier failure
+solely to shared-host contention.
 
 ## Exact-input phase run
 
@@ -213,15 +214,47 @@ The transient variants' complete source checks pass (755 files, 9542 MIR
 functions, final check/locked 13.905s/12.856s), but do not establish a current
 normal self-build.
 
+## Current-source normal release build
+
+At `d0b84329`, a fresh Go-emitted optimized full-CLI seed passes
+`TestCandidateInlineLocalsFullCLI/optimized`: 205 C parts and 14 independent
+CLI/cache/trap processes, with six exact Go-matching test reports. The wrapper
+takes 175.735s. Evidence is under
+`.cache/current-source-optimized-seed-20261107`.
+
+The subsequent normal, uninstrumented build in
+`.cache/current-selfbuild-d0b84329-optimized-20261107` completes with:
+
+- 646 current sources and a freshly frozen version module;
+- 512.243s authored frontend, exit 0, empty stderr, 55063498 C packet bytes;
+- 633.650s release C compile/link, exit 0 and empty stderr;
+- successful version equality, source/tool/image hashes and 16MiB PE stack;
+- `passed=true`, full `file_cli::run`, no command/compiler-only scope, no frontend
+  reuse, no Go frontend, no runtime Go builder and no product timeout change.
+
+The packet SHA-256 is
+`351f2170ccdfa98d5497ab9757efa649d04ec371077a3851d2850ed3a5a8e753`;
+the release image SHA-256 is
+`8a5e2e0d0522dc12a6c0c90c54c5d0b5efd85ce50131bf20aa9050a93128cc40`.
+The authenticated Fairy companion/runtime assets are reused only after all 36
+Fairy and 23 runtime source hashes match. Source trees are clean before and
+after the 1151.378s wrapper. Each frontend/build stage retains its 900s bound;
+this is not a claim that the complete wrapper takes less than 900s.
+
+Host CPU samples vary from 10% to 80%, so this successful run does not establish
+that host contention alone explains the earlier failures. The previous Go seed
+was also optimized; this is not a low-to-optimized profile comparison. Neither
+rejected entry-lookup variant contributes to this successful product build.
+
 ## Remaining work
 
-Prepare a current-source optimized full-CLI seed and retry normal self-build
-under the unchanged watchdog after checking host load. Do not infer throughput
-from a structural micro-optimization that did not improve the measured range.
+Run the native/companion fixed points and current Go/Fairy comparisons against
+the successful release receipt, using disjoint output directories. Do not infer
+throughput from a structural micro-optimization that did not improve the range.
 The SDK layout index has a finite ownership graph and no newly detected cleanup
 cycle; its retention has not been proved to cause the observed delay. Opaque
-MSVC copy barriers remain unchanged. Latest-source normal self-build, native
-and companion fixed points, and full Go/Fairy behavior comparisons are still
+MSVC copy barriers remain unchanged. Normal release self-build now passes;
+native and companion fixed points and full Go/Fairy behavior comparisons remain
 incomplete. Linux remains batched; CI and push are unexecuted.
 
 Public API/SDK ABI, DB, dependencies, repository hygiene and runners are
