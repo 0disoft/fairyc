@@ -82,5 +82,19 @@ class CompanionTests(unittest.TestCase):
             self.assertEqual(checked['implementation'], 'historical bootstrap builder')
 
 
+class CompilerHostTests(unittest.TestCase):
+    def test_release_build_explicitly_selects_compiler_host(self):
+        with tempfile.TemporaryDirectory() as directory:
+            packet = Path(directory) / 'packet.bin'
+            packet.write_bytes(b'FYCPARTS1\npacket')
+            for reserve in (0, 16 << 20):
+                with self.subTest(reserve=reserve):
+                    expected = ['builder.exe', '--packet', str(packet), '--packet-sha256', fixed.sha(packet),
+                                '--output', 'stage.exe', '--compiler-host', '--release']
+                    if reserve:
+                        expected += ['--stack-reserve-bytes', str(reserve)]
+                    self.assertEqual(fixed.release_build_argv('builder.exe', packet, 'stage.exe', reserve), expected)
+
+
 if __name__ == '__main__':
     unittest.main()

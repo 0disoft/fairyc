@@ -14,10 +14,23 @@ from candidate_build_version import generate as generate_version
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / 'examples/lexer_candidate'
+MAX_SOURCE_FILES = 1024
+MAX_SOURCE_BYTES = 65536
+MAX_SOURCE_SET_BYTES = 8 * 1024 * 1024
+FULL_CLI_ENTRY = ('module main;\nimport file_cli as cli;\n'
+                  '@effects(filesystem,console,environment,network,clock) fn i32 main(){return cli::run();}\n')
 
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def source_snapshot(paths, root=ROOT):
+    assert 0 < len(paths) <= MAX_SOURCE_FILES, 'source file count exceeds compiler input bound'
+    rows = [dict(path=p.relative_to(root).as_posix(), sha256=sha(p), bytes=p.stat().st_size) for p in paths]
+    assert all(0 < row['bytes'] <= MAX_SOURCE_BYTES for row in rows), 'per-file source byte bound exceeded'
+    assert sum(row['bytes'] for row in rows) + len(rows) - 1 <= MAX_SOURCE_SET_BYTES, 'source-set byte bound exceeded'
+    return rows
 
 
 def main():
@@ -80,7 +93,7 @@ import std::bytes as bytes;
     let ref u8[] name=ref path;return project::run(name[..size]);
 }
 '''
-    entry.write_text(compiler_entry if args.compiler_only else command_entry if args.commands_only else 'module main;\nimport file_cli as cli;\n@effects(filesystem,console,environment,clock) fn i32 main(){return cli::run();}\n', encoding='utf-8', newline='\n')
+    entry.write_text(compiler_entry if args.compiler_only else command_entry if args.commands_only else FULL_CLI_ENTRY, encoding='utf-8', newline='\n')
     modules = {}
     for base in (PROJECT / 'src', ROOT / 'internal/sdkstdlib/sources'):
         for path in base.rglob('*.fy'):
@@ -98,7 +111,7 @@ import std::bytes as bytes;
             seen.add(name)
             pending.extend(re.findall(r'^import\s+([\w:]+)', modules[name].read_text(encoding='utf-8'), re.M))
     paths = [entry] + [modules[name] for name in sorted(seen - {'main'})]
-    sources = [dict(path=p.relative_to(ROOT).as_posix(), sha256=sha(p), bytes=p.stat().st_size) for p in paths]
+    sources = source_snapshot(paths)
     tools = {name: dict(path=str(p.resolve()), sha256=sha(p)) for name, p in [('candidate', args.candidate), ('builder', args.builder)]}
     # The explicit --builder bootstraps images only. Distributed commands use
     # the authored companion by default; a prior authenticated build is reusable.
@@ -202,7 +215,7 @@ import std::bytes as bytes;
         directory.mkdir()
         image = directory / 'fairyc.exe'
         reserve = ['--stack-reserve-bytes', str(args.stack_reserve_bytes)] if args.stack_reserve_bytes else []
-        run([args.builder.resolve(), '--packet', packet, '--packet-sha256', sha(packet), '--output', image, *flags, *reserve], 900)
+        run([args.builder.resolve(), '--packet', packet, '--packet-sha256', sha(packet), '--output', image, '--compiler-host', *flags, *reserve], 900)
         if build_version:
             assert run([image, '--version'], 30) == build_version['text'].encode('utf-8')
         if args.stack_reserve_bytes:

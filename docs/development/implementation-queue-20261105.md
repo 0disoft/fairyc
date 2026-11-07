@@ -70,6 +70,21 @@ authorized by this queue.
 
 ## Progress
 
+- Parallel Windows integration on 2026-11-07 retains an exact clean public
+  compiler/LSP ZIP at `b1ce7d5f`: 16 packaging steps, 15 real outside-checkout
+  minimal-PATH steps and 25 Node checks pass. The permanent verifier and exact
+  artifacts are recorded in `docs/ops/windows-preview-readiness-20261107.md`.
+  This is same-host evidence; it is not a clean-machine or later-HEAD result.
+- The coordinator connects explicit `--compiler-host` admission in the private
+  Go bootstrap bridge: only its header gains 8 MiB; ordinary target and authored
+  runtime-companion limits remain 2 MiB. Thirty decoder admissions plus real
+  Windows low/optimized opt-in builds/execution and scoped vet pass. See
+  `current-compiler-host-bridge-20261107.md`. The preceding 205-unit low CLI
+  baseline passes 14 independent processes in 252.092s. Source-capacity changes
+  require a new seed and full authored self-build/fixed-point acceptance remains
+  open; the current source-input integration is tracked separately in
+  `current-compiler-acceptance-route-20261107.md`.
+
 - The coordinator builds and independently verifies the actual clean source
   handoff at `14862b70`: 7,547 original Git blobs, 60,890,523-byte compressed ZIP,
   exact source checksums/modes, original HEAD/tree restoration and identical

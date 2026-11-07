@@ -55,15 +55,18 @@ and budget implementation; no source spelling is substituted. Ordinary `join`
 and `join_range` retain their aggregate refusal, and generic receiver methods
 remain closed. This is source preparation, not executable aggregate admission.
 
-Limits of the joined owner: 512 inputs, 1048576 joined bytes including separators,
+The full input vector admits up to 1024 files. Limits of each joined owner:
+1048576 joined bytes including separators,
 512 declarations, 16384 expressions, 8192 statements, 1024 entries, 4096 types,
 1024 fields and 4096 attributes and attribute arguments. The input cap is
-`candidate_limits::source_files()`, raised from 256 to 512 on 2026-10-11 so the
-complete 285-file dispatcher source set is admitted before grouping. The existing
-scanner token, diagnostic and work budgets apply to the joined source.
+`candidate_limits::source_files()`, raised to 1024 on 2026-11-07 for complete
+dispatcher source admission before grouping. The independent 512-declaration
+cap still rejects a full join of 513 module declarations; grouping retains
+separate bounded owners. The existing scanner token, diagnostic and work
+budgets apply to the joined source.
 
 The separate source catalog and compilation-unit grouping can admit a complete
-source set up to 2097152 bytes. That aggregate budget does not change this joined
+source set up to 8388608 bytes. That aggregate budget does not change this joined
 owner's 1048576-byte or arena limits. The parser expression arena shares the
 existing 16384-expression owner cap; its other parser limits remain unchanged.
 

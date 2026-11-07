@@ -13,6 +13,9 @@ import subprocess
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+MAX_SOURCE_FILES = 1024
+MAX_SOURCE_BYTES = 65536
+MAX_SOURCE_SET_BYTES = 8 * 1024 * 1024
 
 
 def sha(path):
@@ -21,6 +24,24 @@ def sha(path):
 
 def artifact(path):
     return dict(path=str(path.resolve()), bytes=path.stat().st_size, sha256=sha(path))
+
+
+def checked_source_inputs(inputs, root=ROOT):
+    assert 0 < len(inputs) <= MAX_SOURCE_FILES, 'source file count exceeds compiler input bound'
+    total = len(inputs) - 1
+    for row in inputs:
+        path = root / row['path']
+        assert sha(path) == row['sha256'], 'source changed: ' + row['path']
+        size = path.stat().st_size
+        assert 0 < size <= MAX_SOURCE_BYTES, 'per-file source byte bound exceeded'
+        total += size
+    assert total <= MAX_SOURCE_SET_BYTES, 'source-set byte bound exceeded'
+
+
+def release_build_argv(builder, packet, image, reserve):
+    flags = ['--stack-reserve-bytes', str(reserve)] if reserve else []
+    return list(map(str, [builder, '--packet', packet, '--packet-sha256', sha(packet),
+                          '--output', image, '--compiler-host', '--release', *flags]))
 
 
 def stack_reserve(path):
@@ -85,9 +106,7 @@ def main():
     assert built['schema'] == 'fairyc.candidate-native-probe-build/v1' and built['passed']
     assert not any(built.get(k) for k in ('goFrontendInvoked', 'commandsOnly', 'compilerOnly', 'frontendReuse'))
     inputs = built['sources']
-    assert 0 < len(inputs) <= 512
-    for row in inputs:
-        assert sha(ROOT / row['path']) == row['sha256'], 'source changed: ' + row['path']
+    checked_source_inputs(inputs)
     version = built['buildVersion']
     assert sha(ROOT / version['template']['path']) == version['template']['sha256']
     assert sha(Path(version['oracle']['path'])) == version['oracle']['sha256']
@@ -114,9 +133,7 @@ def main():
     assert build1['argv'][build1['argv'].index('--packet')+1] == str(packet1)
     assert build1['argv'][build1['argv'].index('--packet-sha256')+1] == sha(packet1)
     reserve = built['stackReserveBytes']
-    flags = ['--stack-reserve-bytes', str(reserve)] if reserve else []
-    assert build1['argv'] == list(map(str, [builder, '--packet', packet1, '--packet-sha256',
-                                           sha(packet1), '--output', stage1, '--release', *flags]))
+    assert build1['argv'] == release_build_argv(builder, packet1, stage1, reserve)
     assert not reserve or stack_reserve(stage1) == reserve
     output = args.output.resolve()
     assert output.is_relative_to(ROOT / '.cache') and not output.exists()
@@ -157,8 +174,7 @@ def main():
     assert packet2.read_bytes() == packet1.read_bytes(), 'consecutive C packets differ'
     print('consecutive C packets exactly equal', flush=True)
     stage2 = output / 'stage2.exe'
-    run([builder, '--packet', packet2, '--packet-sha256', sha(packet2), '--output', stage2,
-         '--release', *flags], args.compile_timeout)
+    run(release_build_argv(builder, packet2, stage2, reserve), args.compile_timeout)
     assert stage2.read_bytes() == stage1.read_bytes(), 'consecutive optimized PE images differ'
     assert stack_reserve(stage1) == stack_reserve(stage2)
     assert not reserve or stack_reserve(stage2) == reserve

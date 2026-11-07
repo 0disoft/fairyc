@@ -9,7 +9,9 @@ The explicit compiler-host entry admits at most 8MiB of header, while ordinary
 builders (including explicit-stack/image-only variants) retain 2MiB. Literal,
 body, runtime, total-source, timeout and stack policies remain unchanged.
 Every COFF object is inspected and released before link; only the image is
-retained. No packet decoder or ordinary companion gains a larger limit.
+retained. The Go bootstrap's explicit `--compiler-host` route selects
+`DecodeCompilerHost` with the same 8MiB header budget. The ordinary packet
+decoder and Fairy companion retain 2MiB.
 
 Role/shared-limit boundaries, the measured header size under both Windows
 profiles, and existing ordinary stack/compile/link regressions pass in 8.620s.
@@ -92,14 +94,14 @@ by itself is rejected; function-level subdivision is not implemented here.
 
 Every group retains the existing joined-owner caps: 512 declarations, 16384
 expressions, 8192 statements, 1024 entries, 4096 types, 1024 fields, and 4096
-attributes and attribute arguments. The entire input still has at most 512
+attributes and attribute arguments. The entire input has at most 1024
 files and at most 65536 bytes per file. The complete source set admits at most
-2097152 bytes including original separator newlines; each joined owner retains
+8388608 bytes including original separator newlines; each joined owner retains
 its 1048576-byte limit. `candidate_limits::source_files` owns the file/module
-identity cap (512 since 2026-10-11), `candidate_limits::source_set_bytes` owns
+identity cap (1024 since 2026-11-07), `candidate_limits::source_set_bytes` owns
 the aggregate limit, while `program_bytes` continues to bound each
 independently joined owner.
-The source catalog preserves at most 2097152 raw source bytes without separator
+The source catalog preserves at most 8388608 raw source bytes without separator
 bytes; its separate name pool remains bounded at 1048576 bytes.
 
 The original CLI entrypoint's current private/SDK import closure has 234 modules
