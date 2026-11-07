@@ -95,3 +95,19 @@ tests use the actual `main.fy` module path and existing lowercase `0b` grammar;
 neither failure required a product grammar or limit change. These failed runs
 are not counted as passing evidence. Native trap provenance, Fairy integration,
 full CLI and Linux execution are not established by these Go-focused checks.
+
+## Windows full CLI and persistent cache follow-up
+
+The dedicated integration tests in
+`internal/cli/candidate_copied_closure_locals_cli_cache_test.go` now pass the
+full authored CLI in low/optimized and ordinary/generic cross-package disk
+restoration in both profiles: 172 fresh CLI processes and four directly run
+products. The receipt
+[`copied-closure-locals-cli-cache-20261107.md`](../development/copied-closure-locals-cli-cache-20261107.md)
+retains exact source/image identities, failed harness attempts, corruption
+repair scope and the independent Go fixture checks.
+
+Invalid local shapes still return source diagnostics/exit 3 in Go and
+package-input failure/exit 7 in Fairy. This is an unresolved diagnostic parity
+gap, not an intentional diagnostic contract or broader language acceptance.
+Final current-source self-build, Linux and hosted CI remain separate.

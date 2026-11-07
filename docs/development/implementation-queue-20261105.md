@@ -84,8 +84,12 @@ authorized by this queue.
   ownership/lifetime and environment representation remain separate designs.
   The bounded immutable-i32-local follow-up now passes Go/Fairy Windows
   admission, identity and restored-artifact generated-C execution; see
-  `copied-closure-locals-20261107.md`. Its whole CLI/disk-cache and final
-  acceptance are separate; this does not close first-class closures.
+  `copied-closure-locals-20261107.md`. Its whole CLI and ordinary/generic
+  fresh-process disk cache now pass both Windows profiles; see
+  `copied-closure-locals-cli-cache-20261107.md`. Invalid local shapes still
+  return Go source-diagnostic exit 3 versus Fairy package-input exit 7; this is
+  an unresolved diagnostic parity gap. Final acceptance and first-class
+  closure representation remain open.
 - [ ] Remote registry/version selection, signing/trust, Git sources and updates:
   prepare concrete contracts and local implementations; external registry or
   trust-provider selection requires the owner's actual choice.
@@ -119,6 +123,18 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The disjoint closure integration worker completes both full-main profiles
+  and all four ordinary/generic persistent-cache combinations: 172 actual CLI
+  processes plus four direct built-product executions. Equal-width provider
+  edits, unused initializer order, locked byte stability, selected-generation
+  corruption repair and invalid-source refusal preserve valid cache bytes.
+  Failed harness assumptions and exact source/image hashes remain in
+  `copied-closure-locals-cli-cache-20261107.md`. Go exit 3 versus Fairy exit 7
+  for invalid closure shapes remains an explicit unresolved diagnostic gap;
+  successful rejection is not diagnostic parity. Scoped fixture/vet/format
+  checks pass. No production or policy change, Linux/remote execution or final
+  self-build claim; the full objective stays active.
 
 - The coordinator closes the flat Option Windows full-main CLI/cache family.
   Low/optimized pass 15 actual CLI processes each, development/release product
