@@ -67,10 +67,11 @@ func prepareTaggedTypes(
 			return
 		}
 		considered[value] = struct{}{}
-		// New scalar payloads belong only to a flat Option. In particular, the
-		// recursive candidate fallback must not admit Result<Option<S>, ...>.
+		// Extended scalars are admitted only at the permitted shallow roots;
+		// retained sibling candidates cannot authorize a nested wrapper.
 		_, flatTransport := flatTransportOptionPayload(value)
-		if !flatTransport && hir.ContainsTaggedType(value, extendedOptionScalar) {
+		_, flatResult := flatTransportResultPayload(value)
+		if !flatTransport && !flatResult && hir.ContainsTaggedType(value, extendedOptionScalar) {
 			return
 		}
 		if element, option := hir.OptionElement(value); option {
@@ -109,7 +110,7 @@ func prepareTaggedTypes(
 		}
 		success = canonicalCValueType(success)
 		failure = canonicalCValueType(failure)
-		successSupported := supportedTaggedPayload(success, true, structByType, enumByType, resourceByType, arrayByType)
+		successSupported := flatResult || supportedTaggedPayload(success, true, structByType, enumByType, resourceByType, arrayByType)
 		failureSupported := supportedTaggedPayload(failure, true, structByType, enumByType, resourceByType, arrayByType)
 		if !successSupported {
 			consider(success)
@@ -212,6 +213,9 @@ func prepareTaggedTypes(
 			} else if element, flat := flatTransportOptionPayload(value); flat && element == payload {
 				// Keep the shared Result/aggregate payload layout predicates closed.
 				payloadType, ok = layout.Type{Kind: layout.KindLanguageScalar, Name: payload.String()}, true
+			} else if success, flat := flatTransportResultPayload(value); flat && index == 0 && success == payload {
+				// This success leaf does not widen shared aggregate/error payloads.
+				payloadType, ok = layout.Type{Kind: layout.KindLanguageScalar, Name: payload.String()}, true
 			} else {
 				payloadType, ok = taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType, arrayByType)
 			}
@@ -249,6 +253,11 @@ func extendedOptionScalar(value hir.Type) bool {
 func flatTransportOptionPayload(value hir.Type) (hir.Type, bool) {
 	payload, option := hir.OptionElement(value)
 	return payload, option && extendedOptionScalar(payload)
+}
+
+func flatTransportResultPayload(value hir.Type) (hir.Type, bool) {
+	success, failure, result := hir.ResultElements(value)
+	return success, result && failure == hir.TypeU32 && extendedOptionScalar(success)
 }
 
 func copyScalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {
