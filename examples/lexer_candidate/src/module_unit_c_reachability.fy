@@ -4,6 +4,7 @@ import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
 import module_unit_c_frame_index as targets;
 import module_unit_c_callable_index as contracts;
+import module_unit_c_closure as closure;
 import module_unit_value_model as budget;
 import std::vec as v;
 
@@ -20,7 +21,8 @@ pub fn Result<Plan,u32> build(ref ir::Program p,ref v::Vec<cfg::Graph> graphs,re
     var v::Vec<usize> pending_frames=v::empty<usize>();var v::Vec<usize> pending_types=v::empty<usize>();let seeded=mark(ref mut frames,ref mut pending_frames,entry,work);if(seeded!=0){return .err(seeded);}var usize frame_cursor=0;var usize type_cursor=0;
     while(frame_cursor<v::len<usize>(ref pending_frames) || type_cursor<v::len<usize>(ref pending_types)){
         while(frame_cursor<v::len<usize>(ref pending_frames)){let frame=*v::at<usize>(ref pending_frames,frame_cursor);let b=ir::at(p,frame);let graph=v::at<cfg::Graph>(graphs,frame-1);if(cfg::frame(graph)!=frame){return .err(1001);}var usize i=0;
-            while(i<ir::call_count(b)){if(!budget::charge(work,1)){return .err(1002);}let call=ir::call_at(b,i);var u32 code=0;let found=targets::find(p,indexed,call.target_module,call.target_declaration,call.instance,call.kind==2,work,ref mut code);if(code!=0){return .err(code);}if(found!=0){let e=mark(ref mut frames,ref mut pending_frames,found,work);if(e!=0){return .err(e);}}else{let id=contracts::find(p,callables,call.target_module,call.target_declaration,work,ref mut code);if(code!=0){return .err(code);}if(id==0 || !ir::callable_at(p,id-1).foreign){return .err(1001);}}i+=1;}
+            while(i<ir::call_count(b)){if(!budget::charge(work,1)){return .err(1002);}let call=ir::call_at(b,i);if(call.kind==4){i+=1;continue;}var u32 code=0;let found=targets::find(p,indexed,call.target_module,call.target_declaration,call.instance,call.kind==2,work,ref mut code);if(code!=0){return .err(code);}if(found!=0){let e=mark(ref mut frames,ref mut pending_frames,found,work);if(e!=0){return .err(e);}}else{let id=contracts::find(p,callables,call.target_module,call.target_declaration,work,ref mut code);if(code!=0){return .err(code);}if(id==0 || !ir::callable_at(p,id-1).foreign){return .err(1001);}}i+=1;}
+            i=1;while(clean::closures(ir::cleanup_ir(p)) && i<=ir::node_count(b)){if(!budget::charge(work,1)){return .err(1002);}if(ir::node_at(b,i-1).value.kind==36){var u32 code=0;let found=closure::helper(p,frame,i,work,ref mut code);if(code!=0){return .err(code);}let e=mark(ref mut frames,ref mut pending_frames,found,work);if(e!=0){return .err(e);}}i+=1;}
             // CFG construction already checked every block and retained its
             // drop sites. Preserve that order without revisiting other nodes.
             i=0;while(i<cfg::drop_count(graph)){if(!budget::charge(work,1)){return .err(1002);}let n=cfg::at(graph,cfg::drop_block(graph,i));let d=clean::drop_at(ir::cleanup_ir(p),n.drop-1);let o=clean::operand_at(ir::cleanup_ir(p),d.operand);let e=mark(ref mut drops,ref mut pending_types,o.type,work);if(e!=0){return .err(e);}i+=1;}frame_cursor+=1;

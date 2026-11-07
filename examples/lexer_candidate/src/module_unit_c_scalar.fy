@@ -30,6 +30,8 @@ pub fn bool expression(ref ir::Program p,ref ir::Body b,usize id,ref mut bytes::
         if(!casts::allowed(source,type)){s.code=1004;return false;}
     }
     if(!value(out,s,id) || !w::text(out,s,b"=")){return false;}
+    // Widened helpers validate the result before this exact destination cast.
+    if(clean::closures(ir::cleanup_ir(p)) && (type==1 || type==3 || type==4) && (!w::text(out,s,b"(") || !w::type(out,s,type) || !w::text(out,s,b")"))){return false;}
     if(e.kind==1){if(!literal(b,id,type,out,s)){return false;}}
     else if(e.kind==2){if(e.binding==0 || e.binding>ir::local_count(b) || ir::local_at(b,e.binding).type!=e.type){s.code=1001;return false;}if(!w::local(out,s,e.binding)){return false;}}
     else if(e.kind==3){if(!value(out,s,left)){return false;}}

@@ -5,6 +5,7 @@ import module_unit_body_ir_receiver as receiver;
 import module_unit_cleanup_mir_model as clean;
 import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
+import module_unit_c_closure as closure;
 import module_unit_c_names as names;
 import c_text as w;
 import array_types as arrays;
@@ -48,7 +49,7 @@ pub fn bool type(ref ir::Program p,usize id,ref mut bytes::Buffer out,ref mut w:
     if(id==0 || id>clean::type_count(ir::cleanup_ir(p))){s.code=1001;return false;}let t=clean::type_at(ir::cleanup_ir(p),id);
     if(t.kind==19){return w::text(out,s,b"struct fy_unit_region_bridge *");}
     if(t.kind==12){return if(t.first==0){w::type(out,s,t.scalar)}else{type(p,t.first,out,s) && w::text(out,s,if(places::raw_mutable(t)){b" *"}else{b" const *"})};}
-    if(t.kind==1 && (t.scalar<=7 || transport::extended(t.scalar) || t.scalar==132 || t.scalar==138)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(t.kind!=2 && t.kind!=3 && t.kind!=13 && t.kind!=20 && t.kind!=21 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
+    if(t.kind==1 && (t.scalar<=7 || transport::extended(t.scalar) || t.scalar==132 || t.scalar==138)){return w::type(out,s,t.scalar);}if(t.kind==7 || t.kind==8){return type(p,t.first,out,s) && w::text(out,s,if(t.kind==7){b" const *"}else{b" *"});}if(!closure::leaf(p,id) && t.kind!=2 && t.kind!=3 && t.kind!=13 && t.kind!=20 && t.kind!=21 && t.kind!=4 && t.kind!=5 && t.kind!=6 && t.kind!=16 && !view(t) && !literals::descriptor(t)){s.code=1004;return false;}
     return w::text(out,s,b"struct fy_unit_t_") && w::number(out,s,id);
 }
 pub fn bool field(ref mut bytes::Buffer out,ref mut w::State s,usize id){return w::text(out,s,b"fy_f_") && w::number(out,s,id);}
@@ -62,6 +63,7 @@ fn bool define(ref ir::Program p,ref layouts::Index indexed,usize id,ref mut v::
     // A nominal raw pointee needs a forward declaration here, not its size.
     // Complete marked pointees after by-value layouts, allowing E -> ptr S -> E.
     else if(t.kind==12 || t.kind==19){}
+    else if(closure::leaf(p,id)){if(!type(p,id,out,s) || !w::text(out,s,b"{int32_t (*fy_invoke)(int32_t const *,int32_t);int32_t fy_captures[4];};\n")){return false;}}
     else if(t.kind==7 || t.kind==8){if(*v::at<u8>(marks,t.first-1)!=1 && !define(p,indexed,t.first,marks,out,s,work,depth+1)){return false;}}
     else if(t.kind==4){let index=layouts::find(indexed,id,work,ref mut s.code);if(index==0){if(s.code==0){s.code=1001;}return false;}let shape=ir::layout_at(p,index-1).value;var usize i=0;
         while(i<shape.field_count){let f=ir::field_at(p,shape.field_start+i);if(!budget::charge(work,1)){s.code=1002;return false;}if(f.kind==4 && !define(p,indexed,f.type,marks,out,s,work,depth+1)){return false;}i+=1;}
@@ -79,7 +81,7 @@ fn bool define(ref ir::Program p,ref layouts::Index indexed,usize id,ref mut v::
 pub fn Result<v::Vec<u8>,u32> definitions(ref ir::Program p,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
     let indexed=switch(layouts::build(p,work)){case .ok(index):{index}case .err(e):{s.code=e;return .err(e);}};
     if(!w::text(out,s,b"struct fy_unit_region_bridge;\n")){return .err(s.code);}
-    var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}let t=clean::type_at(ir::cleanup_ir(p),i+1);if((t.kind==2 || t.kind==3 || t.kind==13 || t.kind==20 || t.kind==21 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==16 || view(t) || literals::descriptor(t)) && (!type(p,i+1,out,s) || !w::text(out,s,b";\n"))){return .err(s.code);}i+=1;}i=1;
+    var v::Vec<u8> marks=v::empty<u8>();var usize i=0;while(i<clean::type_count(ir::cleanup_ir(p))){if(!v::push<u8>(ref mut marks,0).is_ok){return .err(1003);}let t=clean::type_at(ir::cleanup_ir(p),i+1);if((closure::leaf(p,i+1) || t.kind==2 || t.kind==3 || t.kind==13 || t.kind==20 || t.kind==21 || t.kind==4 || t.kind==5 || t.kind==6 || t.kind==16 || view(t) || literals::descriptor(t)) && (!type(p,i+1,out,s) || !w::text(out,s,b";\n"))){return .err(s.code);}i+=1;}i=1;
     while(i<=ir::count(p)){let b=ir::at(p,i);let f=clean::frame_at(ir::cleanup_ir(p),i);if(!define(p,ref indexed,f.result,ref mut marks,out,s,work,0)){return .err(s.code);}var usize j=1;while(j<=ir::local_count(b)){let local=ir::local_at(b,j);if(local.kind!=6 && !define(p,ref indexed,local.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}j=0;while(j<ir::node_count(b)){let e=ir::node_at(b,j).value;if(e.kind==6 && e.builtin.kind>=101 && e.builtin.kind<=107 && !define(p,ref indexed,e.builtin.element,ref mut marks,out,s,work,0)){return .err(s.code);}if(e.state==1 && !define(p,ref indexed,e.type,ref mut marks,out,s,work,0)){return .err(s.code);}j+=1;}i+=1;}
     var bool changed=true;while(changed){changed=false;i=1;while(i<=clean::type_count(ir::cleanup_ir(p))){if(!budget::charge(work,1)){return .err(1002);}let t=clean::type_at(ir::cleanup_ir(p),i);if(t.kind==12 && t.first!=0 && *v::at<u8>(ref marks,i-1)==2 && *v::at<u8>(ref marks,t.first-1)==0){if(!define(p,ref indexed,t.first,ref mut marks,out,s,work,0)){return .err(s.code);}changed=true;}i+=1;}}
     return .ok(marks);

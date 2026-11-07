@@ -25,6 +25,7 @@ import module_unit_c_iteration as iteration;
 import module_unit_c_borrowed_arrays as borrowed_arrays;
 import module_unit_c_names as names;
 import module_unit_c_calls as calls;
+import module_unit_c_closure as closure;
 import c_text as w;
 import std::bytes as bytes;
 
@@ -37,24 +38,47 @@ fn bool store(ref ir::Program p,ref ir::Body b,cfg::Block n,ref mut bytes::Buffe
     let op=ir::assignment_operator(b,n.target-1);let plain=stmt.kind==2 || bytes::equal(op,b"=");
     if(!(if(stmt.kind==2){w::local(out,s,local)}else{aggregate::place(p,b,target,out,s,0)}) || !w::text(out,s,b"=")){return false;}
     if(plain){if(!scalar::value(out,s,n.source)){return false;}}
-    else{if(op.len<2 || op[op.len-1]!=61){s.code=1001;return false;}let code=scalar::operator(op[..op.len-1]);if(code==0 || code==3 || code==4 || code>12 || type==0 || type==6){s.code=1004;return false;}if(!scalar::math_start(out,s,type,code) || !snapshot(out,s,n.target) || !w::text(out,s,b",") || !scalar::value(out,s,n.source) || !scalar::math_end(out,s,type,n.start,n.end)){return false;}}
+    else{if(op.len<2 || op[op.len-1]!=61){s.code=1001;return false;}let code=scalar::operator(op[..op.len-1]);if(code==0 || code==3 || code==4 || code>12 || type==0 || type==6){s.code=1004;return false;}if(clean::closures(ir::cleanup_ir(p)) && (type==1 || type==3 || type==4) && (!w::text(out,s,b"(") || !w::type(out,s,type) || !w::text(out,s,b")"))){return false;}if(!scalar::math_start(out,s,type,code) || !snapshot(out,s,n.target) || !w::text(out,s,b",") || !scalar::value(out,s,n.source) || !scalar::math_end(out,s,type,n.start,n.end)){return false;}}
     return w::text(out,s,b";\n");
 }
+// A lowered graph may retain dead completion blocks. Emit only the entry's
+// reachable graph, avoiding both unused labels and unreachable C (/W4 /WX).
+fn u32 label_pending(ref mut v::Vec<u8> marked,ref mut v::Vec<usize> pending,usize id,ref mut usize work){
+    if(id==0){return 0;}if(!budget::charge(work,1)){return 1002;}if(*v::at<u8>(marked,id)!=0){return 0;}
+    if(!v::push<usize>(pending,id).is_ok){return 1003;}let slot=v::at_mut<u8>(marked,id);*slot=1;return 0;
+}
+fn Result<v::Vec<u8>,u32> labels(ref cfg::Graph g,ref mut usize work){
+    var v::Vec<u8> marked=v::empty<u8>();var usize i=0;
+    while(i<=cfg::count(g)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<u8>(ref mut marked,0).is_ok){return .err(1003);}i+=1;}
+    var v::Vec<usize> pending=v::empty<usize>();let first=label_pending(ref mut marked,ref mut pending,cfg::entry(g),work);if(first!=0){return .err(first);}i=0;
+    while(i<v::len<usize>(ref pending)){let n=cfg::at(g,*v::at<usize>(ref pending,i));let a=label_pending(ref mut marked,ref mut pending,n.first,work);if(a!=0){return .err(a);}let b=label_pending(ref mut marked,ref mut pending,n.second,work);if(b!=0){return .err(b);}i+=1;}return .ok(marked);
+}
+// Assignment places are retained typed nodes, but have no temporary value.
+// Closure-family declarations follow actual reachable value-producing blocks.
+fn Result<v::Vec<u8>,u32> emitted_values(ref ir::Program p,ref cfg::Graph g,ref v::Vec<u8> marked,ref mut usize work){
+    var v::Vec<u8> emitted=v::empty<u8>();if(!clean::closures(ir::cleanup_ir(p))){return .ok(emitted);}var usize i=0;
+    while(i<=ir::node_count(ir::at(p,cfg::frame(g)))){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<u8>(ref mut emitted,0).is_ok){return .err(1003);}i+=1;}i=1;
+    while(i<=cfg::count(g)){if(!budget::charge(work,1)){return .err(1002);}let n=cfg::at(g,i);if(*v::at<u8>(marked,i)!=0 && (n.kind==1 || n.kind==10 || n.kind==11)){let slot=v::at_mut<u8>(ref mut emitted,n.source);*slot=1;}i+=1;}return .ok(emitted);
+}
 pub fn bool render(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref cfg::Graph g,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work,ref mut usize failed_start,ref mut usize failed_end,bool shared){
+    if(!closure::adapters(p,named,cfg::frame(g),out,s,work)){return false;}
     let frame=clean::frame_at(ir::cleanup_ir(p),cfg::frame(g));if(!names::source(named,frame.module_index,out,s)){return false;}let b=ir::at(p,cfg::frame(g));if(!calls::signature(p,named,cfg::frame(g),out,s,shared) || !w::text(out,s,b"{\n")){return false;}var usize i=1;
     if(cfg::frame(g)==sdk::byte_equal_frame(plan)){return byte_compare::body(b,out,s);}
     if(!calls::inline_arguments(b,out,s)){return false;}
     let invocations=switch(calls::invocation_index(b,work)){case .ok(p):{p}case .err(code):{s.code=code;return false;}};
     let arrays=switch(borrowed_arrays::build(p,b,g,work)){case .ok(a):{a}case .err(code):{s.code=code;return false;}};
+    let marked=switch(labels(g,work)){case .ok(m):{m}case .err(code):{s.code=code;return false;}};
+    let emitted=switch(emitted_values(p,g,ref marked,work)){case .ok(m):{m}case .err(code):{s.code=code;return false;}};
     while(i<=ir::local_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let l=ir::local_at(b,i);if(scalar::scalar(p,l.type)==7){s.code=1004;return false;}if(l.kind!=1 && l.kind!=10 && l.kind!=6 && (!aggregate::type(p,l.type,out,s) || !w::text(out,s,b" ") || !w::local(out,s,i) || !w::text(out,s,b";\n"))){return false;}i+=1;}
     if(!iteration::locals(p,g,out,s,work) || !lifecycle::locals(b,out,s,work)){return false;}
-    i=1;while(i<=ir::node_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let e=ir::node_at(b,i-1).value;if(e.state==1 && !borrowed_arrays::omitted(ref arrays,i)){let type=scalar::scalar(p,e.type);if(type!=7 && (!aggregate::type(p,e.type,out,s) || !w::text(out,s,b" ") || !scalar::value(out,s,i) || !w::text(out,s,b";\n"))){return false;}}i+=1;}
+    i=1;while(i<=ir::node_count(b)){if(!budget::charge(work,1)){s.code=1002;return false;}let e=ir::node_at(b,i-1).value;if(e.state==1 && !borrowed_arrays::omitted(ref arrays,i) && (!clean::closures(ir::cleanup_ir(p)) || *v::at<u8>(ref emitted,i)!=0)){let type=scalar::scalar(p,e.type);if(type!=7 && (!aggregate::type(p,e.type,out,s) || !w::text(out,s,b" ") || !scalar::value(out,s,i) || !w::text(out,s,b";\n"))){return false;}}i+=1;}
     i=1;while(i<=cfg::capture_count(g)){let c=cfg::capture_at(g,i);if(!w::type(out,s,scalar::scalar(p,c.type)) || !w::text(out,s,b" ") || !scalar::capture(out,s,i) || !w::text(out,s,b";\n")){return false;}i+=1;}
     i=1;while(i<=cfg::count(g)){let n=cfg::at(g,i);if(n.kind==17 && (!aggregate::type(p,ir::node_at(b,n.source-1).value.type,out,s) || !w::text(out,s,b" ") || !snapshot(out,s,n.target) || !w::text(out,s,b";\n"))){return false;}i+=1;}
     if(!w::jump(out,s,cfg::entry(g))){return false;}i=1;
-    while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}let n=cfg::at(g,i);*failed_start=n.start;*failed_end=n.end;if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
+    while(i<=cfg::count(g)){if(!budget::charge(work,1)){s.code=1002;return false;}if(*v::at<u8>(ref marked,i)==0){i+=1;continue;}let n=cfg::at(g,i);*failed_start=n.start;*failed_end=n.end;if(!w::text(out,s,b"fy_b_") || !w::number(out,s,i) || !w::text(out,s,b":;\n")){return false;}
         if(n.kind==1){let e=ir::node_at(b,n.source-1).value;let left=ir::node(b,e.left);let variant=e.kind==6 && left!=0 && ir::node_at(b,left-1).value.kind==28;
-            if(borrowed_arrays::omitted(ref arrays,n.source)){}
+            if(e.kind==36){if(!closure::construct(p,b,cfg::frame(g),n.source,out,s,work)){return false;}}
+            else if(borrowed_arrays::omitted(ref arrays,n.source)){}
             else if(e.kind==8 && borrowed_arrays::field_omitted(ref arrays,left)){if(!borrowed_arrays::read_field(p,b,n.source,out,s)){return false;}}
             else if(e.kind==9 && borrowed_arrays::omitted(ref arrays,left)){if(!borrowed_arrays::read(p,b,n.source,out,s)){return false;}}
             else if(e.kind==6 && e.builtin.kind>=101 && e.builtin.kind<=107){if(!storage::expression(p,b,n.source,out,s,work)){return false;}}

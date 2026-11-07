@@ -6,6 +6,7 @@ import module_unit_cleanup_mir_model as clean;
 import module_unit_cfg_model as cfg;
 import module_unit_value_model as budget;
 import module_unit_c_scalar as scalar;
+import module_unit_c_closure as closure;
 import module_unit_c_aggregate as aggregate;
 import module_unit_c_sdk as sdk;
 import module_unit_c_callable_index as contracts;
@@ -73,7 +74,7 @@ pub fn bool foreign_signatures_selected(ref ir::Program p,ref sdk::Plan plan,ref
             if(!duplicate){if(!v::push<usize>(ref mut seen,id).is_ok){s.code=1003;return false;}if(sdk::rule(plan,id-1)!=0){if(!sdk::signature(p,plan,id,out,s,work)){return false;}}else{if(!w::text(out,s,b"extern ") || !aggregate::type(p,c.result,out,s) || !w::text(out,s,b" ") || !w::text(out,s,ir::linker_name(p,id-1)) || !w::text(out,s,b"(")){return false;}j=0;while(j<c.parameter_count){if(j!=0 && !w::text(out,s,b",")){return false;}if(!aggregate::type(p,ir::parameter_at(p,c.parameter_start+j),out,s)){return false;}j+=1;}if(c.parameter_count==0 && !w::text(out,s,b"void")){return false;}if(!w::text(out,s,b");\n")){return false;}}}}i+=1;}frame+=1;}return true;
 }
 pub fn bool call(ref ir::Program p,ref names::Table named,ref sdk::Plan plan,ref contracts::Index indexed,ref targets::Index body_index,ref InvocationIndex invocations,ref cfg::Graph g,usize expression,usize site,ref mut bytes::Buffer out,ref mut w::State s,ref mut usize work){
-    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(invocations,b,expression,work,ref mut s.code)}else{cfg::deferred_at(g,site).invocation};let callee=target(p,body_index,b,cfg::frame(g),index,work,s);
+    let b=ir::at(p,cfg::frame(g));let index=if(site==0){invocation(invocations,b,expression,work,ref mut s.code)}else{cfg::deferred_at(g,site).invocation};if(index!=0 && ir::call_at(b,index-1).kind==4){if(site!=0){s.code=1004;return false;}return closure::invoke(p,b,expression,index,out,s);}let callee=target(p,body_index,b,cfg::frame(g),index,work,s);
     let usize external=if(callee==0){foreign(p,plan,indexed,b,cfg::frame(g),index,work,s)}else{0};
     if(s.code!=0){return false;}if(callee==0 && external==0){s.code=if(*work>=1048576){1002}else{1004};return false;}let c=ir::call_at(b,index-1);let type=scalar::scalar(p,ir::node_at(b,expression-1).value.type);
     if(site==0 && type!=7 && (!scalar::value(out,s,expression) || !w::text(out,s,b"="))){return false;}
