@@ -8,9 +8,9 @@ import shutil
 import struct
 import subprocess
 import sys
-import time
 
 from candidate_build_version import generate as generate_version
+from candidate_native_probe_invocation import run_invocation
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT = ROOT / 'examples/lexer_candidate'
@@ -191,12 +191,7 @@ import std::bytes as bytes;
         path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8', newline='\n')
 
     def run(argv, timeout):
-        started = time.monotonic()
-        result = subprocess.run(list(map(str, argv)), cwd=ROOT, capture_output=True, timeout=timeout)
-        calls.append(dict(argv=list(map(str, argv)), seconds=time.monotonic()-started, exit=result.returncode, stdoutBytes=len(result.stdout), stdoutSHA256=hashlib.sha256(result.stdout).hexdigest(), stderr=result.stderr.decode('utf-8', errors='replace')))
-        (output / 'invocations.json').write_text(json.dumps(calls, indent=2) + '\n', encoding='utf-8', newline='\n')
-        assert result.returncode == 0 and not result.stderr, calls[-1]
-        return result.stdout
+        return run_invocation(argv, timeout, cwd=ROOT, output=output, calls=calls)
 
     packet = output / 'candidate-packet.bin'
     if reused_packet:
