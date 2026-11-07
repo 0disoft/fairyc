@@ -707,3 +707,24 @@ Latest-source normal acceptance, fixed points and full parity remain pending.
 See `candidate-parallel-acceptance-20261107.md` for complete attempt boundaries,
 static findings, microbenchmark evidence and the distinction from the successful
 b4008e0e build. Linux remains batched; default time/work bounds are unchanged.
+
+## Body-phase isolation
+
+An exact-input, test-only optimized Windows probe reaches all 646 inputs in
+153 checked units after 88 capacity retries. Parsing/signatures take 3.416s,
+body checks and IR construction 860.413s, and linking 27.505s. C emission enters
+at 891.334s; the unchanged 900s diagnostic watchdog terminates it before a
+packet is published. The native process uses 786.453s CPU, all input/image
+hashes remain unchanged, and no successful normal receipt exists. The runner's
+exit 0 only records that it saved the failed diagnostic and verified hashes.
+
+A separate three-call constant-plan probe measures only 1.6228ms median
+removable computation, with 5.2553ms source/owner validation retained. Provider
+recurrence is unmeasured; project-wide constant caching is not implemented on
+that evidence. A single slow checked range is the next bounded measurement.
+The native-build helper now preserves timeout invocation/partial-output evidence;
+nine focused tests and an actual two-second Windows child timeout pass.
+
+See `candidate-body-phase-diagnosis-20261107.md` for phase markers, failed-probe
+boundaries and remaining acceptance. This is not normal CLI, fixed-point or
+full-parity evidence. Product limits and MSVC aliasing barriers remain intact.
