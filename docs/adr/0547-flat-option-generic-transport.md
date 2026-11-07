@@ -5,6 +5,7 @@
 - Extends ADR 0494's wrapper boundary; preserves ADR 0387 aggregate admissions
 - Go evidence: [execution record](../development/go-flat-option-transport-20261107.md)
 - Fairy evidence: [execution record](../development/candidate-flat-option-transport-20261107.md)
+- Go cache evidence: [execution record](../development/go-flat-option-cache-20261107.md)
 - Preparation: [bounded implementation plan](../development/composite-generic-transport-plan-20261107.md)
 
 ## Decision
@@ -79,7 +80,10 @@ Fairy's separate execution record establishes graph canonicalization/rollback,
 the current-source restored-artifact C pipeline in four Windows producer/consumer
 combinations, 24-case Go diagnostic comparison and complete source/locked checks.
 These are independently observed integration results, not consequences inferred
-from the Go result. Fresh-process Option cache/CLI execution, native Linux replay,
+from the Go result. The Go cache follow-up establishes memory/new-session and
+actual new-process disk restoration without lowering, source/helper/payload
+invalidation, inner-artifact rejection/repair and four restored C executions.
+Fairy Option full CLI/cache execution, native Linux replay,
 full-main Atlas, consecutive self-build, distribution refresh and hosted CI are
 not claimed by this ADR. Existing cache/interface encodings remain unchanged;
 their existing source/compiler identity checks remain required.

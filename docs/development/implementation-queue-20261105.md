@@ -71,8 +71,10 @@ authorized by this queue.
   retain their separate copy/borrow/transport admission boundaries. ADR 0547's
   flat Option family now passes Go and Fairy source/artifact/native execution,
   including four Fairy producer/consumer combinations and 24-case independent
-  diagnostics. See `candidate-flat-option-transport-20261107.md`. Its full CLI/
-  fresh-process cache and the other wrapper families remain open.
+  diagnostics. See `candidate-flat-option-transport-20261107.md`. Its Fairy full
+  CLI/fresh-process cache and the other wrapper families remain open. The Go
+  memory/new-session/new-process disk cache and restored C execution pass in
+  `go-flat-option-cache-20261107.md` without a production cache change.
 - [ ] Multi-operation static interfaces: independent operation selection already
   works. A grouped interface still needs its representation, complete-provider
   admission and partial-implementation/error-location contract.
@@ -116,6 +118,17 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The Sol High Go cache worker adds an all-seven flat Option workspace matrix.
+  Memory/new-session/new-process disk complete hits forbid ordinary lowering;
+  source/helper/payload changes invalidate current authority, and an inner
+  corrupt artifact with a valid outer checksum repairs from source. Four actual
+  restored Windows C products pass low/optimized, including 88 active payload
+  byte matches and signed zero. The targeted package run passes in 3.604s; the
+  child-only parent skip is explicit and the real child completes. See
+  `go-flat-option-cache-20261107.md`. No cache production/schema/policy/bound
+  change; Fairy CLI/cache and all broader gates remain separate. Linux stays
+  batched, no remote action, full objective active.
 
 - A Sol High worker and coordinator implement the exact flat Option extension
   for seven transport scalars. Go source/immutable AST/target-layout and real
