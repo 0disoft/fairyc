@@ -48,7 +48,10 @@ pub fn Result<Metadata,u32> extract(ref ir::Program p,ref mut usize work){
     if(!budget::charge(work,ir::name_bytes(p)+1)){return .err(1002);}let names=switch(bytes::copy(ir::names_view(p))){case .ok(p):{p}case .err(_):{return .err(1003);}};
     return assemble(layouts,fields,callables,parameters,names,ir::cleanup_ir(p),sdk::module_count(ir::sdk_units(p)),work);
 }
-pub fn Result<ir::Program,u32> restore(ref Metadata p,state::Plan states,sdk::Sources sdk_sources,clean::Program cleaned,v::Vec<ir::Body> bodies,ref mut usize work){
+pub fn Result<ir::Program,u32> restore(ref Metadata p,state::Plan states,sdk::Sources sdk_sources,clean::Program cleaned,v::Vec<ir::Body> bodies,ref mut usize work){return restore_mode(p,states,sdk_sources,cleaned,bodies,false,work);}
+pub fn Result<ir::Program,u32> restore_closures(ref Metadata p,state::Plan states,sdk::Sources sdk_sources,clean::Program cleaned,v::Vec<ir::Body> bodies,ref mut usize work){return restore_mode(p,states,sdk_sources,cleaned,bodies,true,work);}
+fn Result<ir::Program,u32> restore_mode(ref Metadata p,state::Plan states,sdk::Sources sdk_sources,clean::Program cleaned,v::Vec<ir::Body> bodies,bool closures,ref mut usize work){
+    if(clean::closures(ref cleaned)!=closures){return .err(1001);}
     let code=check(p,ref cleaned,sdk::module_count(ref sdk_sources),work);if(code!=0){return .err(code);}
     // Resource fields remain owned by p. Copy them explicitly into the fresh
     // Program; no partial resource move or retained borrow crosses this API.
@@ -58,6 +61,6 @@ pub fn Result<ir::Program,u32> restore(ref Metadata p,state::Plan states,sdk::So
     i=0;while(i<callable_count(p)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<interfaces::Callable>(ref mut callables,callable_at(p,i)).is_ok){return .err(1003);}i+=1;}
     i=0;while(i<parameter_count(p)){if(!budget::charge(work,1)){return .err(1002);}if(!v::push<usize>(ref mut parameters,parameter_at(p,i)).is_ok){return .err(1003);}i+=1;}
     if(!budget::charge(work,names(p).len+1)){return .err(1002);}let names=switch(bytes::copy(names(p))){case .ok(p):{p}case .err(_):{return .err(1003);}};
-    var usize measured=0;let restored=switch(ir::assemble_artifact(states,sdk_sources,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)){case .ok(p):{p}case .err(e):{if(!budget::charge(work,measured)){return .err(1002);}return .err(e.code);}};
+    var usize measured=0;let restored=switch(if(closures){ir::assemble_artifact_closures(states,sdk_sources,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)}else{ir::assemble_artifact(states,sdk_sources,cleaned,bodies,layouts,fields,callables,parameters,names,ref mut measured)}){case .ok(p):{p}case .err(e):{if(!budget::charge(work,measured)){return .err(1002);}return .err(e.code);}};
     if(!budget::charge(work,measured)){return .err(1002);}return .ok(restored);
 }

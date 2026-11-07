@@ -10,14 +10,18 @@ import module_body_artifact_encode as body;
 import candidate_artifact_wire as component;
 import module_program_artifact_wire as wire;
 
-pub fn Result<component::Payload,u32> encode(ref ir::Program p,ref mut usize work){
+pub fn Result<component::Payload,u32> encode(ref ir::Program p,ref mut usize work){return encode_mode(p,false,work);}
+// Explicit detached closure family; old callers do not acquire admission.
+pub fn Result<component::Payload,u32> encode_closures(ref ir::Program p,ref mut usize work){return encode_mode(p,true,work);}
+fn Result<component::Payload,u32> encode_mode(ref ir::Program p,bool closures,ref mut usize work){
+    if(clean::closures(ir::cleanup_ir(p))!=closures){return .err(1001);}
     if(!wire::charge(work,0)){return .err(1002);}var usize measured=0;let checked=proof::check_metered(p,ref mut measured);if(!wire::charge(work,measured)){return .err(1002);}if(checked.code!=0){return .err(checked.code);}
-    var wire::Status s=wire::Status{.code=0};var out=wire::writer_marker(if(clean::aggregates(ir::cleanup_ir(p))){b"FYPROG01"}else{b"FYPROG00"},ref mut s,work);
-    measured=0;let clean_data=switch(cleanup_codec::encode(ir::cleanup_ir(p),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref clean_data),ref mut s,work);if(s.code!=0){return .err(s.code);}
+    var wire::Status s=wire::Status{.code=0};var out=wire::writer_marker(if(closures){b"FYPROG02"}else if(clean::aggregates(ir::cleanup_ir(p))){b"FYPROG01"}else{b"FYPROG00"},ref mut s,work);
+    measured=0;let clean_data=switch(if(closures){cleanup_codec::encode_closures(ir::cleanup_ir(p),ref mut measured)}else{cleanup_codec::encode(ir::cleanup_ir(p),ref mut measured)}){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref clean_data),ref mut s,work);if(s.code!=0){return .err(s.code);}
     measured=0;let sdk_data=switch(sdk::encode(ir::sdk_units(p),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref sdk_data),ref mut s,work);if(s.code!=0){return .err(s.code);}
     measured=0;let meta_data=switch(metadata::program(p,ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref meta_data),ref mut s,work);if(s.code!=0){return .err(s.code);}
     measured=0;let state_data=switch(state::encode(ir::state_layouts(p),ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref state_data),ref mut s,work);if(s.code!=0){return .err(s.code);}
     wire::number(ref mut out,ir::count(p),ref mut s,work);if(s.code!=0){return .err(s.code);}var usize frame=1;
-    while(frame<=ir::count(p)){measured=0;let data=switch(body::encode(p,frame,ref mut measured)){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref data),ref mut s,work);if(s.code!=0){return .err(s.code);}frame+=1;}
+    while(frame<=ir::count(p)){measured=0;let data=switch(if(closures){body::encode_closures(p,frame,ref mut measured)}else{body::encode(p,frame,ref mut measured)}){case .ok(p):{p}case .err(code):{if(!wire::charge(work,measured)){return .err(1002);}return .err(code);}};if(!wire::charge(work,measured)){return .err(1002);}wire::member(ref mut out,component::content(ref data),ref mut s,work);if(s.code!=0){return .err(s.code);}frame+=1;}
     return wire::finish(out,s);
 }
