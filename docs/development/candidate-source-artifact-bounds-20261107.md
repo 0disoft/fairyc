@@ -100,3 +100,59 @@ Cache artifact hashes:
 `owned-files.json` and `worker-freeze.json` in the cache root record all six owned
 file hashes, reproducer hashes and the observed Git revision. Integration may
 change HEAD later; these hashes identify the exact worker result.
+
+## Permanent regression follow-up after core integration
+
+The parent integrated the core as
+`e7ab94bb074e4df92a39da708e7cf66c0d275b25`. This follow-up changes no production
+FY source, lock or source snapshot. The earlier cache-only/no-optimized statements
+describe the initial verification; the permanent regression now lives in:
+
+- `internal/cli/candidate_source_artifact_bounds_test.go` (7790 bytes).
+- `internal/cli/testdata/source_artifact_bounds/main.fy` (5533 bytes).
+- `internal/cli/testdata/source_artifact_bounds/legacy-golden.bin` (998 bytes),
+  the independent golden produced by the existing Python encoder.
+
+The test runs without a Go overlay or cache fixture dependency. Large import and
+over-limit wire fixtures are constructed independently in Go, byte-for-byte equal
+to the earlier Python fixtures. Existing authored codec regression functions are
+still reused. The appended test-only wrapper invokes the actual private `map` and
+`module_slot` in a temporary copy of the production module; it does not substitute
+a mapping implementation. Default execution covers low and optimized; selecting
+one profile avoids rebuilding the other.
+
+```powershell
+bun tools/run-go.ts test -mod=readonly ./internal/cli -run '^TestCandidateSourceArtifactBounds$/optimized' -count=1 -timeout 6m -v
+git diff --check
+```
+
+Windows optimized: **PASS**, package 22.151s, optimized subtest 15.22s, native
+regression 841.8066ms, 21 C partitions. All five original codec regression tests,
+source 512/513/1024 acceptance and 1025 refusal, 1024-source provenance/reverse
+rebind/production-map checks, detached import 8192/8193 acceptance, import 32769
+refusal and owner 512 refusal passed. Detached import admission remains 32768.
+The parent seed was building concurrently; no performance comparison is inferred.
+
+The optimized log records SHA-256 of the five **copied production files before**
+the temporary wrapper is appended. Every hash matches the frozen table above and
+the core commit, including final mapping
+`ff62dd0bd7fb270d5b6bf36485fdc693882babef6ec4c23109926c32ec43f724`.
+The old `ec74597...` value was an erroneous documentation draft value; it is not
+the tested source hash. Both the core document and its staged copy already had
+the corrected hash before this follow-up. The new optimized execution directly
+verifies the final frozen production source rather than relying on that correction.
+
+| Follow-up artifact | SHA-256 |
+| --- | --- |
+| Go regression | `70f6cbf9f95b6fbee52dfd8c7a8e3f7a9e0cab1300a1ad82eae4b0bef16db532` |
+| FY testdata fixture | `0d70677bc51285892f49ff44069e5e360e553dac930127701f07562eac5eaa2b` |
+| `windows-permanent-optimized.log` | `da6bdcf3d677d9dd00795cd5b5768ecc22b01b2743709178a9f22ee37c44047a` |
+| Optimized PE (temporary test output) | `2ff4212ca5ae238595d3a05f179c79807f2f01b105dd70ed9c2a50ac04b613b8` |
+
+Follow-up evidence is retained in the same cache directory, with exact changed
+file hashes in `permanent-test-freeze.json`. The original `worker-freeze.json`
+remains an immutable receipt for the initial result, including the pre-append doc
+hash. The promoted low profile was not rerun: its earlier native evidence remains
+separate. Linux, full artifact planner/selection execution and whole source/seed
+acceptance remain outside this narrow test; the parent owns integration checks.
+No commit or amend was made by this worker.

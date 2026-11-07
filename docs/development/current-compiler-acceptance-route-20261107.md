@@ -276,3 +276,14 @@ snapshot. Its lock is copied only after both successful commands and that hash
 comparison. Evidence: `.cache/current-source-check-sourcecards-20261107.log`.
 The fresh seed and authored self-build remain separate acceptance steps; these
 source and narrow native checks do not establish a fixed point or full parity.
+
+The source-cardinality-enabled optimized Go seed now passes the same full CLI
+regression: 205 C parts, 14 independent CLI processes, four cold/warm trap pairs
+and six Go-matching test reports in 185.300s. Its C/profile source digest is
+`863653e671bad05457fed030bbc29a60aa306bb9ad326fc446958e0a5442cf17`
+and its PE digest is
+`b792dea1742d2dcc04206be021990fb27385111284da36d69ea2baf4a39db388`.
+Evidence: `.cache/current-whole-cli-sourcecards-20261107.log` and the
+`optimized/host.json` under that artifact directory. Durations are single-run
+observations with concurrent host work, not a speed comparison. The full authored
+emission is a subsequent step and is not included in this pass.
