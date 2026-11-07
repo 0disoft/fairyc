@@ -288,9 +288,10 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 				fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { %sgoto fy_b_%d; }\n", leftValue, divisor, e.pendingTrapAssignment(functionIndex, failure, "FY_TRAP_SIGNED_DIVISION_OVERFLOW", terminator.Span), failure)
 			}
 		}
-		if function.InlineBody != "" && len(function.Parameters) == 0 && terminator.SwitchType == hir.TypeI32 {
-			// With no parameter to read back, keep the inline division guards
-			// opaque to MSVC through the existing private volatile divisor.
+		if terminator.SwitchType == hir.TypeI32 && (right.Kind == mir.OperandI32 || function.InlineBody != "" && len(function.Parameters) == 0 || function.ClosureTarget) {
+			// MSVC can infer an always-trapping closure or literal division and
+			// reject its caller's MIR continuation. Keep these guards, like a
+			// parameter-free inline body, opaque through the private divisor.
 			output.WriteString("#if defined(_MSC_VER)\n")
 			fmt.Fprintf(output, "    fy_checked_divisor_i32 = %s;\n", rightValue)
 			emitGuards("fy_checked_divisor_i32")
