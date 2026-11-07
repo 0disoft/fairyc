@@ -15,6 +15,10 @@ import effect_declarations as effects;
 import std::vec as v;
 
 fn ir::Problem fail(u32 code,usize module_index,usize start,usize end){return ir::Problem{.code,.module_index,.start,.end};}
+// These are generated cleanup recipe fields, not source AST fields. They are
+// a subset of the imported unit interface's 2048 fields; project IR has its
+// separate 8192-field bound after units are linked.
+fn usize recipe_field_limit(){return 2048;}
 // Signatures also describe resource types whose bodies were never selected.
 // They have no storage or destructor to materialize. Reject a
 // missing shape whenever a retained body actually carries that owner.
@@ -45,7 +49,7 @@ fn Result<ir::Program,ir::Problem> lower_policy(ref v::Vec<syntax::Parsed> sourc
     }
     i=1;while(i<=values::type_count(typed)){let t=values::type_at(typed,i);var ir::Glue g=ir::Glue{.kind=if(t.kind==3 || t.kind==13 || t.kind==21){1}else if(t.kind==5){2}else if(t.kind==6){3}else{0},.frame=0,.nonempty=false,.effects=0,.abilities=0,.field_start=0,.field_count=0};
         if(g.kind==1){var usize found=0;var usize j=0;while(j<interfaces::shape_count(imported)){if(!m::charge(ref mut work,1)){return .err(fail(1002,t.module_index,0,0));}let s=interfaces::shape_at(imported,j);if(s.type==i){found=j+1;}j+=1;}if(found==0){if((t.kind!=13 && t.kind!=3 && t.kind!=21) || *v::at<u8>(ref used_types,i)!=0){return .err(fail(if(work>=1048576){1002}else{1001},t.module_index,0,0));}if(!v::push<ir::Glue>(ref mut glues,g).is_ok){return .err(fail(1003,t.module_index,0,0));}i+=1;continue;}let s=interfaces::shape_at(imported,found-1);g.effects=s.cleanup_effects;g.abilities=s.abilities;g.nonempty=s.cleanup_nonempty;g.field_start=v::len<ir::Field>(ref fields);g.field_count=s.field_count;
-            if(s.module_index!=t.module_index || s.declaration!=t.declaration){return .err(fail(1001,t.module_index,s.start,s.end));}j=0;while(j<s.field_count){let f=interfaces::field_at(imported,s.field_start+j);if(!m::charge(ref mut work,1) || v::len<ir::Field>(ref fields)>=1024){return .err(fail(1002,t.module_index,s.start,s.end));}if(!v::push<ir::Field>(ref mut fields,ir::Field{.owner=i,.ordinal=j,.type=f.type}).is_ok){return .err(fail(1003,t.module_index,s.start,s.end));}j+=1;}
+            if(s.module_index!=t.module_index || s.declaration!=t.declaration){return .err(fail(1001,t.module_index,s.start,s.end));}j=0;while(j<s.field_count){let f=interfaces::field_at(imported,s.field_start+j);if(!m::charge(ref mut work,1) || v::len<ir::Field>(ref fields)>=recipe_field_limit()){return .err(fail(1002,t.module_index,s.start,s.end));}if(!v::push<ir::Field>(ref mut fields,ir::Field{.owner=i,.ordinal=j,.type=f.type}).is_ok){return .err(fail(1003,t.module_index,s.start,s.end));}j+=1;}
             if(g.nonempty){j=0;while(j<v::len<ir::Frame>(ref frames)){if(!m::charge(ref mut work,1)){return .err(fail(1002,t.module_index,s.start,s.end));}let f=*v::at<ir::Frame>(ref frames,j);if(f.kind==2 && f.receiver_type==i){if(g.frame!=0){return .err(fail(1001,t.module_index,s.start,s.end));}g.frame=j+1;}j+=1;}if(g.frame==0){return .err(fail(1001,t.module_index,s.start,s.end));}}
         }if(!v::push<ir::Glue>(ref mut glues,g).is_ok){return .err(fail(1003,t.module_index,0,0));}i+=1;
     }

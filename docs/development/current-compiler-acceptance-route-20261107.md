@@ -526,3 +526,14 @@ integrated source checks pass with 755 files and 9515 MIR functions. These check
 do not replace normal self-build or current-source parity. The fixed-point tools
 also reject empty source receipts and recheck the compiler lock at entry/exit;
 eight focused Python regressions pass. Native Linux remains batched separately.
+
+The empty-cleanup follow-up is committed as `83452419`, with four source-owner
+and fallback scenarios passing both Windows profiles. Its fresh optimized full
+CLI passes in 185.451s. The next normal build exits 2 after 372.375s, at owned IR
+stage 6 code 1002, before any C packet. A source-bound focused probe separates
+the cleanup field cap from work exhaustion: 1024 fields, work 647221. The unit
+recipe policy is explicitly extended to the imported interface's 2048 fields;
+raw-source and linked-project bounds remain separate. See
+`candidate-cleanup-recipe-fields-20261107.md` for the original and frozen-input
+receipts, source checks and native boundary results. No normal build, fixed
+point or latest-source parity pass follows merely from this change.

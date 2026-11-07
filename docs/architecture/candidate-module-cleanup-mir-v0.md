@@ -69,8 +69,14 @@ drop ability, duplicate qualified operand, recursive field cycle, invalid Result
 alternative, exceeded work budget, non-void cleanup result and duplicate canonical
 descriptor. Receipt: `docs/ops/evidence/candidate-module-cleanup-mir-20261010.json`.
 
-Invariants and limits. types 1..4096, frames 1024, operands 16384, drops 16384, fields
-1024, effects 4095, abilities 7, recursion depth 64, work 1048576.
+Invariants and limits. types 1..4096, frames 1024, operands 16384, drops 16384, unit
+cleanup recipe fields 2048, effects 4095, abilities 7, recursion depth 64, work
+1048576. The recipe-field bound follows the imported unit interface's 2048-field
+bound: these generated records include imported resource and vector
+specializations, rather than only fields written in the joined source AST. The
+source AST retains its separate 1024-field bound. Linked project cleanup IR has
+its separate 8192-field bound; this unit change does not promote that bound to
+individual source declarations or admit additional field/type forms.
 
 Sequencing ownership. Drop sites retain semantic request order in this cleanup-only
 fragment. The separate owned-body CFG consumer attaches them to blocks and orders

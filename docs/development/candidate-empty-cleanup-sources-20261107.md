@@ -85,7 +85,12 @@ body collector SHA-256 is
 `0532af4c9f0a5abfab727a9a64b03b4ec40549d680426c258f365366004c4ff5`.
 The separate test worktree matches these main inputs before and after execution.
 Its log is `.cache/parallel-fixed-point-receipts-20261107/.cache/empty-cleanup-sources-20261107/native.log`.
-The fresh optimized whole-CLI seed is being built.
+The fresh optimized whole-CLI regression passes in 185.451s, retaining all
+14 independent CLI processes, four cold/warm trap pairs and six exact
+Go-matching reports. A normal authored retry at clean `83452419` then fails
+after 372.375s in owned IR generation, stage 6 code 1002, with no C packet.
+The next capacity diagnosis is recorded in
+`candidate-cleanup-recipe-fields-20261107.md`.
 Normal authored self-build, fixed point and latest-source full parity remain
 pending. Native Linux, clean-machine distribution and hosted CI are unexecuted.
 No push, workflow dispatch, release or deployment is performed.
