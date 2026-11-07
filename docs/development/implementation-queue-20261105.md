@@ -72,7 +72,8 @@ authorized by this queue.
   flat Option family now passes Go and Fairy source/artifact/native execution,
   including four Fairy producer/consumer combinations and 24-case independent
   diagnostics. See `candidate-flat-option-transport-20261107.md`. Its Fairy full
-  CLI/fresh-process cache and the other wrapper families remain open. The Go
+  CLI/fresh-process cache now passes both Windows profiles in
+  `candidate-flat-option-cli-cache-20261107.md`; other wrapper families stay open. The Go
   memory/new-session/new-process disk cache and restored C execution pass in
   `go-flat-option-cache-20261107.md` without a production cache change.
 - [ ] Multi-operation static interfaces: independent operation selection already
@@ -118,6 +119,16 @@ authorized by this queue.
   dispatch. Existing historical receipts cannot attest the new commit.
 
 ## Progress
+
+- The coordinator closes the flat Option Windows full-main CLI/cache family.
+  Low/optimized pass 15 actual CLI processes each, development/release product
+  build/run and isolated native test, provider body invalidation, typed-source
+  rejection without cache mutation, selected-generation corruption repair and
+  five independent seven-scalar current-packet observations per profile. Exact
+  host identities, failed lock-recovery assumption and final 225.018s/50.900s
+  results are in `candidate-flat-option-cli-cache-20261107.md`. No production
+  cache/policy or source change; native Linux, broader language and final gates
+  remain open. No remote action; full objective remains active.
 
 - The Sol High Go cache worker adds an all-seven flat Option workspace matrix.
   Memory/new-session/new-process disk complete hits forbid ordinary lowering;

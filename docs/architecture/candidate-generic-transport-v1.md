@@ -34,9 +34,11 @@ returns and exhaustive extraction use the existing checked IR and tagged C
 emitter. No boxing, allocation, new ABI, scalar arithmetic or deferred Option
 capture is introduced. See the [Fairy execution record](../development/candidate-flat-option-transport-20261107.md)
 for graph/capacity, current-source artifact restoration, independent Go
-diagnostics and Windows generated-C observations. New Option-specific full CLI
-and persistent-cache execution remain separate from the earlier direct-scalar
-receipts below.
+diagnostics and Windows generated-C observations. The
+[flat Option CLI/cache record](../development/candidate-flat-option-cli-cache-20261107.md)
+adds both Windows profiles, actual product builds/run/native-test dispatch,
+fresh-process disk hits, current packet observations, body invalidation and
+repair. These are separate from the earlier direct-scalar receipts below.
 
 `generic_transport_scalars.fy` owns the executable names and C spellings. Concrete
 type lookup, early signature diagnostics, detached cleanup type validation and
