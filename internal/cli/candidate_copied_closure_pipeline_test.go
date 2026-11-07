@@ -32,6 +32,13 @@ func TestCandidateCopiedClosurePipeline(t *testing.T) {
 	program := strings.Replace(string(data), "module tests::copied_closure_pipeline;", "module main;", 1)
 	source := strings.Replace(candidateCopiedClosureProgram(), "module root;", "module root;unsafe extern C fn i32 ordered(i32 index);unsafe extern C fn i32 finished();fn T keep<T>(T value){let i32 base=40;let add=fn [i32 base] i32(i32 x){return base+x;};assert(add(2)==42);return value;}", 1)
 	source = strings.Replace(source, "return add(2);", "let i32 base=39;let sum=fn [i32 base] i32(i32 a,i32 b){return base+a+b;};assert(sum(unsafe{ordered(1)},unsafe{ordered(2)})==42);assert(unsafe{finished()}==2);assert(keep<i64>(42)==42);return keep<i32>(add(2));", 1)
+	view, err := os.ReadFile(filepath.Join("testdata", "copied_closure_for_in", "view.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	viewFunction := strings.Replace(strings.TrimPrefix(string(view), "module main;"), "fn i32 main()", "fn i32 for_in()", 1)
+	source = strings.Replace(source, "module root;", "module root;"+viewFunction, 1)
+	source = strings.Replace(source, "return keep<i32>(add(2));", "assert(for_in()==42);return keep<i32>(add(2));", 1)
 	observer := "static int32_t position=0;int32_t ordered(int32_t index){return ++position==index?index:-1000;}int32_t finished(void){return position;}"
 
 	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console,filesystem) fn i32 main(){emit_closures(b" + strconv.Quote(source) + ");return 0;}\n"

@@ -8,7 +8,8 @@ A unique, untyped outer-body `let` binds a closure with zero to four explicit i3
 captures, zero to four i32 parameters, an i32 result, and one pure arithmetic
 expression of at most 64 nodes. Captures copy when execution reaches the binding.
 Later mutation of the original local does not change the snapshot. Calls remain
-direct and positional, including nested if/while/classic-for scopes; ordinary
+direct and positional, including nested if/while/classic-for and otherwise
+admitted view/vector for-in scopes; ordinary
 local shadowing applies. Return and tail-expression bodies are accepted.
 
 `body_copied_closure.fy` retains written syntax and canonical Go AST JSON.
@@ -34,8 +35,17 @@ Whole-project encode/decode/restore rechecks current source before C publication
 
 Closure copy/pass/return/store, annotations, nested declarations, mutable or
 implicit captures, resources/borrows/pointers, labeled calls, impure or oversized
-bodies and view/vector for-in with an active closure remain closed. Retained,
+bodies remain closed. A for-in item shadows a same-named outer closure only in
+the loop body; iterable evaluation uses the enclosing scope. The loop's existing
+owner loans and item lifetimes remain authoritative. Retained,
 asynchronous and cross-thread closures remain excluded.
+
+The [2026-11-07 for-in record](../development/copied-closure-for-in-20261107.md)
+distinguishes Go SDK vector native execution from Fairy private lifting and
+resolved-call acceptance. Fairy unit Values still rejects a vector iterable
+even in the no-closure control; this follow-up does not claim authored vector
+execution or relax that separate gate. Authored view execution has complete
+artifact restoration and generated-C evidence.
 
 [Windows evidence](../ops/windows-candidate-copied-closures-20261102.md) covers
 private C11 transport and artifact restoration. The [full CLI/cache receipt](../ops/windows-candidate-copied-closures-cli-cache-20261103.md)

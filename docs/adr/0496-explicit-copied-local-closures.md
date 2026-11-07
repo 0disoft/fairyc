@@ -22,7 +22,17 @@ The initial execution path requires a direct untyped let binding in the function
 body and direct positional calls within that local scope. Closure copying, passing, returning,
 assignment, storing, type annotations, nested closure declarations and resource cleanup bodies
 remain closed. Calls may occur in nested if/while/classic-for scopes; ordinary local shadowing applies.
-View/vector for-in combined with an active copied closure remains separately closed.
+The 2026-11-07 bounded follow-up also admits direct calls to an already-bound
+copied local closure inside an otherwise admitted view/vector for-in. The item
+binding shadows an outer closure in the body only, and the outer binding is
+visible again after the loop. Iterable types, owner loans, mutation restrictions
+and item lifetimes remain governed by the existing for-in contracts. A closure
+literal still cannot be declared inside a loop. See the
+[implementation and Windows acceptance record](../development/copied-closure-for-in-20261107.md).
+The Go SDK vector lane executes this combination; the Fairy candidate retains
+its independent vector Values admission refusal, including without closures.
+Its vector evidence here is private lifting/resolved calls, while view evidence
+includes generated native execution.
 Captured resources, borrows, raw pointers, asynchronous/retained calls and cross-thread delivery
 are excluded. A closure is not an extern-C callback or a public runtime/ABI value.
 
