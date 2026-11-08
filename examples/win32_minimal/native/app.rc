@@ -1,0 +1,7 @@
+#include <windows.h>
+
+STRINGTABLE
+BEGIN
+    101 L"Fairy C - Win32"
+    102 L"A native window built with Fairy C."
+END
