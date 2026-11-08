@@ -52,6 +52,19 @@ class Session:
         if not isinstance(request, dict):
             raise ValueError('request must be an object')
         command = request.get('command')
+        if command in ('close-button', 'alt-f4') and set(request) == {'command'}:
+            from desktop_input import close_input
+            ready = self.wire(b'arm-close')
+            if not ready.get('ok') or ready.get('pid') != self.process.pid:
+                raise RuntimeError('GUI did not arm desktop close observation')
+            with close_input(self.process.pid, command) as receipt:
+                reply = self.receive()
+                if not reply.get('ok') or reply.get('systemClose') is not True:
+                    raise RuntimeError('desktop input did not reach native SC_CLOSE and Fairy close handling')
+                if reply.get('closed'):
+                    if self.process.wait(timeout=5) != 0:
+                        raise RuntimeError('desktop close did not exit successfully')
+                return dict(reply, desktopInput=receipt)
         if command in ('state', 'click', 'close') and set(request) == {'command'}:
             return self.wire(command.encode('ascii'))
         if command == 'input' and set(request) == {'command', 'text'}:
@@ -61,7 +74,7 @@ class Session:
             if len(text.encode('utf-16-le')) > 254:
                 raise ValueError('input exceeds 127 UTF-16 code units')
             return self.wire(b'input\t' + text.encode('utf-8'))
-        raise ValueError('expected state, input with text, click, or close')
+        raise ValueError('expected state, input with text, click, close, close-button, or alt-f4')
 
     def finish(self):
         if self.process.poll() is None:

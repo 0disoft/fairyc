@@ -11,6 +11,8 @@ typedef struct {
     int32_t pending_event;
     BOOL reply_pending;
     BOOL close_reply_pending;
+    BOOL desktop_close_armed;
+    BOOL system_close_seen;
     unsigned smoke_step;
     unsigned smoke_edits;
     int32_t exit_code;
@@ -239,6 +241,14 @@ static BOOL automation_command(HWND window, WindowState *state) {
         SendMessageW(window, WM_CLOSE, 0, 0);
         return TRUE;
     }
+    if (strcmp(state->command, "arm-close") == 0) {
+        state->close_reply_pending = TRUE;
+        state->desktop_close_armed = TRUE;
+        state->system_close_seen = FALSE;
+        ShowWindow(window, SW_RESTORE);
+        SetForegroundWindow(window);
+        return automation_state(window, state);
+    }
     if (strncmp(state->command, "input\t", 6) == 0) {
         WCHAR text[INPUT_LIMIT + 1];
         int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, state->command + 6,
@@ -326,10 +336,17 @@ int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
     if (!IsWindow(window) || allow > 1) { return 1; }
     if (allow != 0 && !DestroyWindow(window)) { return 1; }
     if (bridge_state.close_reply_pending) {
-        const char *reply = allow != 0 ? "{\"ok\":true,\"closed\":true}\n" :
-                                        "{\"ok\":true,\"closed\":false}\n";
+        Json reply = {{0}, 0, TRUE};
+        json_bytes(&reply, allow != 0 ? "{\"ok\":true,\"closed\":true" :
+                                       "{\"ok\":true,\"closed\":false");
+        if (bridge_state.desktop_close_armed) {
+            json_bytes(&reply, bridge_state.system_close_seen ? ",\"systemClose\":true" :
+                                                               ",\"systemClose\":false");
+        }
+        json_bytes(&reply, "}\n");
         bridge_state.close_reply_pending = FALSE;
-        if (!automation_write(&bridge_state, reply, strlen(reply))) { return 1; }
+        bridge_state.desktop_close_armed = FALSE;
+        if (!reply.valid || !automation_write(&bridge_state, reply.bytes, reply.size)) { return 1; }
     }
     return 0;
 }
@@ -423,6 +440,9 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
     case WM_CLOSE:
         state->pending_event = 3;
         return 0;
+    case WM_SYSCOMMAND:
+        if ((wparam & 0xFFF0) == SC_CLOSE) { state->system_close_seen = TRUE; }
+        break;
     case WM_TIMER:
         if (wparam == 2 && state->command_input != NULL) {
             automation_poll(window, state);
