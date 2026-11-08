@@ -615,7 +615,7 @@ and configuration precedence remain outside v1.
 
 `fairyc build [--release] [--locked]` is the stable native build for the current workspace. It
 accepts no positional source, output path, target, compiler, linker, profile value, cache, JSON,
-configuration, network, or stdin input. The validated root package name selects
+configuration flags, network, or stdin input. The validated root package name selects
 `build/<package-name>.exe` on Windows or `build/<package-name>` on Linux. Default mode uses the low-optimization development profile;
 `--release` selects the ordinary optimized profile without LTO.
 
@@ -624,6 +624,16 @@ The command applies the stable check lock policy, requires root `main::main` wit
 MSVC, PE, and unwind pipeline on Windows. Linux GNU amd64 with glibc uses the existing Linux C11 transport and GCC (preferred) or Clang from PATH. The complete new image is linked and inspected before a synced
 staging file replaces the previous default artifact. Failures before successful replacement retain
 the previous artifact and remove staging state.
+
+On Windows, the optional workspace-root `fairy.windows.json` adds the prototype
+native application inputs defined by [ADR 0552](../adr/0552-minimal-windows-gui-build.md):
+an explicit console/GUI subsystem, bare SDK libraries, C bridge files and `.rc`
+resources. GUI startup retains Fairy `main()` through CRT `mainCRTStartup`.
+`build` and `run` read these native inputs freshly, separately from source locks
+and frontend caches. Missing config retains the existing console path; native
+tests and compiler-host bootstrap do not acquire GUI settings implicitly.
+Native C and resource includes are trusted tool inputs. These inputs introduce
+no raw linker flags or public Fairy callback export contract.
 
 Success is exactly `built: <path> (<x86_64-windows-msvc|x86_64-linux-gnu>, <development|release>, lock
 <updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command

@@ -14,6 +14,16 @@
 copied-closure 입력의 Go/Fairy 진단·종료 코드 차이와 전체 self-host,
 Linux, CI, 배포 검증은 이 후속 검증으로 완료 처리하지 않는다.
 
+## 최소 Win32 GUI 후속 구현
+
+2026-11-08 후속으로 최소 GUI 빌드 경로도 완료했다.
+[GUI 실행 기록](windows-gui-build-20261108.md)과
+[실행 예제](../../examples/win32_minimal/README.md)를 우선한다.
+Go 및 실제 Fairy CLI/companion의 개발·릴리스 앱 빌드와 실행, `.rc` 리소스,
+실패 시 기존 실행 파일 보존, 설정 없는 콘솔 경로를 Windows에서 검증했다.
+Fairy CLI 호스트 검증은 low 프로파일이며, 전체 self-host·고정점·Linux·CI·
+배포 완료를 의미하지 않는다. 릴리스 예제 EXE는 111,104바이트였다.
+
 ## 이번 배치의 범위
 
 - 프로젝트 디스크 캐시: `FYCACHE2` / `FYCKEYS2` / `FYPRJ002`, 현재 소스에서

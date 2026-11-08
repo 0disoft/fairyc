@@ -10,6 +10,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 
 ## Current decisions
 
+- [0552: Minimal Windows GUI build inputs](0552-minimal-windows-gui-build.md): explicit subsystem, SDK libraries, C bridge and resource inputs for small native applications.
+
 - `0001-initial-architecture-boundaries.md`: Go Stage 0 compiler, explicit MIR, C reference backend, and deferred native backends.
 - `0002-contract-source-of-truth.md`: authority of product, specification, MIR, target, CLI, and generated surfaces.
 - `0003-stage-0-safety-boundary.md`: deliberately restricted ownership, borrowing, regions, traps, and FFI.

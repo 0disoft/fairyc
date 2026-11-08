@@ -43,6 +43,8 @@ This is a development harness for synchronous callbacks, not a source-export or 
 Fairy C does not yet offer pre-built public installers. To build the compiler from source, follow the [Windows compiler build guide](DEVELOPMENT.md#building-the-windows-compiler-binary). If you are using an experimental ZIP distribution, extract it and keep the license files together. Go and Bun are required only for building the compiler from source, not for running the built executable.
 
 The recommended environment is Windows (x86_64/AMD64) with MSVC and the Windows SDK.
+
+For a small native desktop application, see the [minimal Win32 GUI example](examples/win32_minimal/README.md). Its optional `fairy.windows.json` selects the GUI subsystem, C bridge files, SDK libraries and `.rc` resources while keeping Fairy's ordinary `main()` entry.
 Install Microsoft's [C++ Build Tools](https://learn.microsoft.com/en-us/cpp/overview/acquire-msvc)
 (Desktop development with C++ workload) to enable native compilation and testing.
 WSL2 or a virtual machine is not required; basic source checking and semantic analysis run independently of the C toolchain. Other targets and CI probes are experimental and not yet guaranteed for general use.

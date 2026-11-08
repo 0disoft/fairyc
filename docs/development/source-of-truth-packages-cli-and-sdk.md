@@ -433,6 +433,14 @@ Part 2 of 3 of the [source index](source-of-truth.md).
 - Full Windows CLI and cross-package fresh-process cache: `internal/cli/candidate_static_operation_cli_test.go`, `candidate_static_operation_cli_cache_test.go` and `docs/ops/windows-candidate-static-operations-cli-cache-20261103.md`; scalar packet observers reuse `internal/cli/candidate_generic_cli_observer_test.go`.
 - Deferred native Linux replay: `docs/development/ordered-work-20261031.md`.
 
+## Minimal Windows GUI native applications
+
+Windows GUI native build inputs are owned separately by
+`docs/adr/0552-minimal-windows-gui-build.md`, `internal/windowsbuild/`,
+`internal/cdriver/windows_application.go`, `native_windows_project.fy` and
+`native_msvc_build.fy`. The runnable application is `examples/win32_minimal/`;
+CLI regressions are `internal/cli/windows_gui*_windows_amd64_test.go`.
+
 ## Fairy candidate copied local closures
 
 - Owner: `docs/adr/0496-explicit-copied-local-closures.md` and `docs/architecture/candidate-copied-closures-v1.md`.

@@ -1,6 +1,6 @@
 # ADR 0552: Minimal Windows GUI build inputs
 
-- Status: Accepted for staged prototype implementation
+- Status: Accepted for the minimal Windows prototype
 - Date: 2026-11-08
 
 The optional workspace-root `fairy.windows.json` uses schema
@@ -37,6 +37,12 @@ message handling, called through the existing unsafe C import boundary. No
 retained Fairy callback, public export, raw Win32 SDK import generator or UI
 framework is introduced. Native Go and Fairy driver completion is recorded
 separately; a parser-only stage is not GUI execution evidence.
+
+The [runnable window example](../../examples/win32_minimal/README.md) and
+[local execution record](../development/windows-gui-build-20261108.md) cover
+Go CLI, authored Fairy CLI/companion, both target profiles, resource loading,
+console preservation and failed-build artifact preservation. Compiler-host
+bootstrap remains a separate boundary from application GUI configuration.
 
 References: Microsoft [subsystem](https://learn.microsoft.com/en-us/cpp/build/reference/subsystem-specify-subsystem),
 [CRT entry points](https://learn.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol),

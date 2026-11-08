@@ -21,3 +21,5 @@ callbacks to Windows or generate Win32 SDK bindings.
 See [ADR 0552](../../docs/adr/0552-minimal-windows-gui-build.md) for bounds and
 the native-code trust boundary. Headers and resource assets are build-time
 dependencies; the resulting example executable can run on its own.
+Local C includes and resource asset paths should be written relative to the
+project root; native source snapshots are compiled in temporary storage.
