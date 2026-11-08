@@ -38,7 +38,11 @@ type RuntimeFunction struct {
 // InspectAMD64Unwind validates the linked image's Microsoft x64 exception table
 // and the bounded UNWIND_INFO records it references.
 func InspectAMD64Unwind(image []byte) (UnwindReport, error) {
-	executable, err := InspectExecutable(image)
+	return InspectAMD64UnwindSubsystem(image, 3)
+}
+
+func InspectAMD64UnwindSubsystem(image []byte, subsystem uint16) (UnwindReport, error) {
+	executable, err := InspectExecutableSubsystem(image, subsystem)
 	if err != nil {
 		return UnwindReport{}, err
 	}

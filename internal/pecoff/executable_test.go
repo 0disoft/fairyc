@@ -13,6 +13,22 @@ const (
 	testSectionCharacteristics = testSectionHeaderOffset + 36
 )
 
+func TestExplicitGUIExecutableInspection(t *testing.T) {
+	image := minimalAMD64PE()
+	binary.LittleEndian.PutUint16(image[testOptionalHeaderOffset+68:], 2)
+	if _, err := InspectExecutable(image); err == nil {
+		t.Fatal("console inspection admitted GUI")
+	}
+	if _, err := InspectExecutableSubsystem(image, 2); err != nil {
+		t.Fatal(err)
+	}
+	image[0x200] = 0xc3
+	binary.LittleEndian.PutUint32(image[testOptionalHeaderOffset+16:], 0)
+	if _, err := InspectExecutableSubsystem(image, 2); err == nil {
+		t.Fatal("GUI bypassed entry validation")
+	}
+}
+
 func TestInspectExecutableAcceptsClosedAMD64PE32PlusImage(t *testing.T) {
 	t.Parallel()
 	report, err := InspectExecutable(minimalAMD64PE())

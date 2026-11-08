@@ -13,6 +13,8 @@ import (
 )
 
 type Options struct {
+	// ExternalC is selected only by explicit Windows native project settings.
+	ExternalC   bool
 	SDKStorage  bool
 	TrapReceipt bool
 	// CandidateHost admits the closed compiler-private adapters for this target.
@@ -36,6 +38,17 @@ func Source(id target.ID, symbols []string, options Options) (string, error) {
 		return "", fmt.Errorf("unsupported native support target %q", id)
 	}
 	standard, vector := symbols, false
+	if options.ExternalC {
+		if id != target.X8664WindowsMSVC {
+			return "", fmt.Errorf("project C linkage requires Windows")
+		}
+		standard = nil
+		for _, symbol := range symbols {
+			if strings.HasPrefix(symbol, "fy_") || strings.HasPrefix(symbol, "fairyc_") {
+				standard = append(standard, symbol)
+			}
+		}
+	}
 	var windowsHost string
 	if options.CandidateHost && id == target.X8664WindowsMSVC {
 		var err error

@@ -61,6 +61,15 @@ type Report struct {
 
 // InspectExecutable parses and validates one bounded AMD64 PE32+ console image.
 func InspectExecutable(image []byte) (Report, error) {
+	return InspectExecutableSubsystem(image, 3)
+}
+
+// InspectExecutableSubsystem retains all structural checks and requires the
+// caller's explicit console (3) or Windows GUI (2) subsystem.
+func InspectExecutableSubsystem(image []byte, subsystem uint16) (Report, error) {
+	if subsystem != 2 && subsystem != 3 {
+		return Report{}, fmt.Errorf("unsupported PE subsystem %d", subsystem)
+	}
 	if len(image) < 64 || len(image) > maxExecutableBytes {
 		return Report{}, fmt.Errorf("PE executable has invalid size %d", len(image))
 	}
@@ -95,8 +104,11 @@ func InspectExecutable(image []byte) (Report, error) {
 	if !ok || optional == nil || optional.Magic != optionalHeader64Magic {
 		return Report{}, fmt.Errorf("PE executable is not PE32+")
 	}
-	if optional.Subsystem != windowsConsoleSubsystem {
-		return Report{}, fmt.Errorf("PE executable subsystem is %d, want Windows console", optional.Subsystem)
+	if optional.Subsystem != subsystem {
+		if subsystem == 3 {
+			return Report{}, fmt.Errorf("PE executable subsystem is %d, want Windows console", optional.Subsystem)
+		}
+		return Report{}, fmt.Errorf("PE executable subsystem is %d, want Windows GUI", optional.Subsystem)
 	}
 	if optional.AddressOfEntryPoint == 0 {
 		return Report{}, fmt.Errorf("PE executable has no entry point")

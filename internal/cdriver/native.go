@@ -9,6 +9,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/target"
+	"github.com/0disoft/fairyc/internal/windowsbuild"
 )
 
 // NativeTarget describes command-facing conventions without discovering a local compiler.
@@ -78,6 +79,7 @@ type NativeToolchain interface {
 }
 
 type NativeBuildOptions struct {
+	Windows                   *windowsbuild.Project
 	Profile                   Profile
 	UnitSource, RuntimeSource string
 	TrapControl               bool

@@ -50,7 +50,7 @@ func prepareNativeProgram(program mir.Program, entry string, options workspaceTa
 	if unit.Target != string(options.targetID) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
 		return nativeBuildPlan{}, internalError(stderr)
 	}
-	support, err := nativesupport.Source(options.targetID, unit.ForeignSymbols, nativesupport.Options{SDKStorage: sdkStorage, TrapReceipt: policy.runTrapReceipt, CandidateHost: true})
+	support, err := nativesupport.Source(options.targetID, unit.ForeignSymbols, nativesupport.Options{ExternalC: options.windows != nil, SDKStorage: sdkStorage, TrapReceipt: policy.runTrapReceipt, CandidateHost: true})
 	if err != nil {
 		return nativeBuildPlan{}, workspaceSubsetCapabilityError(policy, stderr, native.EmissionLabel+" support linkage", err)
 	}

@@ -34,14 +34,19 @@ func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (resul
 	if options.Partitions != nil {
 		return NativeArtifact{}, fmt.Errorf("partitioned native builds require the Linux target")
 	}
-	artifact, err := BuildWindowsMSVCTargetCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
+	var artifact WindowsHostArtifact
+	if options.Windows != nil {
+		artifact, err = BuildWindowsApplicationParts(toolchain.toolchain, options.Profile, "/* application */\n", "typedef int fy_application_literals_unit;\n", []string{options.UnitSource}, options.RuntimeSource, commandTimeout, options.Windows)
+	} else {
+		artifact, err = BuildWindowsMSVCTargetCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
+	}
 	if err != nil {
 		return NativeArtifact{}, err
 	}
-	if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+	if _, err := pecoff.InspectExecutableSubsystem(artifact.Bytes, applicationSubsystem(options.Windows)); err != nil {
 		return NativeArtifact{}, fmt.Errorf("inspect Windows target PE: %w", err)
 	}
-	if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+	if _, err := pecoff.InspectAMD64UnwindSubsystem(artifact.Bytes, applicationSubsystem(options.Windows)); err != nil {
 		return NativeArtifact{}, fmt.Errorf("inspect Windows target unwind data: %w", err)
 	}
 	return NativeArtifact{Artifact: Artifact{

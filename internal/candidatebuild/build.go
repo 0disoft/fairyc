@@ -20,6 +20,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/windowsbuild"
 )
 
 type Options struct {
@@ -282,7 +283,19 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	if options.CompilerHost {
 		build = cdriver.BuildWindowsMSVCCompilerHostPartsWithStackReserve
 	}
-	artifact, err := build(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
+	var application *windowsbuild.Project
+	if !options.CompilerHost && options.OutputRoot != "" {
+		application, err = windowsbuild.Load(options.OutputRoot)
+		if err != nil {
+			return Result{}, err
+		}
+	}
+	var artifact cdriver.WindowsHostArtifact
+	if application != nil {
+		artifact, err = cdriver.BuildWindowsApplicationParts(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, application)
+	} else {
+		artifact, err = build(toolchain, profile, packet.Header, packet.Literals, packet.Units, support, compileTimeout, options.StackReserveBytes)
+	}
 	if err != nil {
 		return Result{}, err
 	}

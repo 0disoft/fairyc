@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/0disoft/fairyc/internal/pecoff"
+	"github.com/0disoft/fairyc/internal/windowsbuild"
 )
 
 // BuildWindowsMSVCTargetParts consumes already generated private C transport.
@@ -41,7 +42,7 @@ func ValidateWindowsProjectStackReserve(reserve uint64) error {
 // BuildWindowsMSVCTargetPartsWithStackReserve is for explicitly sized private
 // compiler images; ordinary project builds use the zero-reservation wrapper.
 func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, true, false)
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, true, false, nil)
 }
 
 // BuildWindowsMSVCTargetPartsImageWithStackReserve builds the same private
@@ -50,7 +51,7 @@ func BuildWindowsMSVCTargetPartsWithStackReserve(toolchain WindowsHostToolchain,
 // consume only Bytes keep one object resident at a time instead of the whole
 // object set; the returned artifact has no Objects.
 func BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, false)
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, false, nil)
 }
 
 // BuildWindowsMSVCCompilerHostPartsWithStackReserve consumes verified private
@@ -61,7 +62,7 @@ func BuildWindowsMSVCTargetPartsImageWithStackReserve(toolchain WindowsHostToolc
 // Compiler-host partitions use at most two concurrent CL commands; the runtime
 // remains serial and ordinary target project builds retain serial compilation.
 func BuildWindowsMSVCCompilerHostPartsWithStackReserve(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64) (WindowsHostArtifact, error) {
-	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, true)
+	return buildWindowsMSVCTargetParts(toolchain, profile, header, literals, units, runtimeSource, timeout, reserve, false, true, nil)
 }
 
 // maxProjectRetainedObjectBytes bounds the aggregate COFF bytes kept in
@@ -77,7 +78,7 @@ func retainProjectObject(objects []WindowsHostObject, retained int, object Windo
 	return append(objects, object), retained + len(object.Bytes), nil
 }
 
-func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64, retainObjects, compilerHost bool) (WindowsHostArtifact, error) {
+func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile, header, literals string, units []string, runtimeSource string, timeout time.Duration, reserve uint64, retainObjects, compilerHost bool, application *windowsbuild.Project) (WindowsHostArtifact, error) {
 	if err := ValidateWindowsProjectStackReserve(reserve); err != nil {
 		return WindowsHostArtifact{}, err
 	}
@@ -109,6 +110,14 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 		sources = append(sources, windowsMSVCSource{Name: fmt.Sprintf("fy_unit_%d.c", index), Contents: unit})
 	}
 	sources = append(sources, windowsMSVCSource{Name: "fy_runtime.c", Contents: runtimeSource})
+	if application != nil {
+		if err := application.Config.Validate(); err != nil {
+			return WindowsHostArtifact{}, err
+		}
+		for i, input := range application.CInputs {
+			sources = append(sources, windowsMSVCSource{Name: fmt.Sprintf("fy_bridge_%d.c", i), Contents: string(input.Data)})
+		}
+	}
 	optimization := "/Od"
 	if profile == OptimizedProfile {
 		optimization = "/O2"
@@ -132,8 +141,12 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 			objectPath := filepath.Join(directory, objectName)
 			// Candidate partitions retain their existing consumer flags. Stable
 			// single-unit target builders keep their separate /W4 /WX policy.
+			extra := []string{}
+			if application != nil {
+				extra = append(extra, "/W4", "/WX", "/I"+application.Root)
+			}
 			if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
-				"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
+				append([]string{"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:" + objectPath}, extra...)...); err != nil {
 				return WindowsHostArtifact{}, fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
 			}
 			contents, err := readArtifact(objectPath)
@@ -155,20 +168,23 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 		}
 	}
 	executable := filepath.Join(directory, "program.exe")
-	if err := linkWindowsMSVCProject(toolchain, directory, objectNames, timeout, reserve); err != nil {
+	if err := linkWindowsApplication(toolchain, directory, objectNames, timeout, reserve, application); err != nil {
 		return WindowsHostArtifact{}, err
 	}
 	contents, err := readArtifact(executable)
 	if err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("read project image: %w", err)
 	}
-	if _, err := pecoff.InspectExecutable(contents); err != nil {
+	if _, err := pecoff.InspectExecutableSubsystem(contents, applicationSubsystem(application)); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("inspect project image: %w", err)
 	}
 	return WindowsHostArtifact{Bytes: contents, Objects: objects, Toolchain: toolchain, Profile: profile, ConsumerMode: C11ConsumerMode}, nil
 }
 
 func linkWindowsMSVCProject(toolchain WindowsHostToolchain, directory string, objectNames []string, timeout time.Duration, reserve uint64) error {
+	return linkWindowsApplication(toolchain, directory, objectNames, timeout, reserve, nil)
+}
+func linkWindowsApplication(toolchain WindowsHostToolchain, directory string, objectNames []string, timeout time.Duration, reserve uint64, application *windowsbuild.Project) error {
 	// Names are fixed ASCII basenames generated by the project builder. Relative
 	// response-file entries avoid quoting and CreateProcess command-line growth.
 	if err := os.WriteFile(filepath.Join(directory, "fy_objects.rsp"), []byte(strings.Join(objectNames, "\n")+"\n"), 0o600); err != nil {
@@ -178,6 +194,12 @@ func linkWindowsMSVCProject(toolchain WindowsHostToolchain, directory string, ob
 	// Private bootstrap images must compare byte-for-byte across generations;
 	// timestamp bytes are reproducible inputs, never removed by the comparator.
 	arguments = append(arguments, "/Fe:program.exe", "/link", "/INCREMENTAL:NO", "/Brepro")
+	if application != nil {
+		arguments = append(arguments, application.Libraries...)
+		if application.Subsystem == "windows" {
+			arguments = append(arguments, "/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup")
+		}
+	}
 	if reserve != 0 {
 		arguments = append(arguments, fmt.Sprintf("/STACK:%d", reserve))
 	}

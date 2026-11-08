@@ -12,11 +12,13 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
+	"github.com/0disoft/fairyc/internal/windowsbuild"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 type workspaceTargetOptions struct {
+	windows      *windowsbuild.Project
 	targetID     target.ID
 	profile      cdriver.Profile
 	output       string
@@ -312,8 +314,16 @@ func prepareWorkspaceNativeBuild(sourceRoot string, options workspaceTargetOptio
 	if code != ExitSuccess {
 		return nativeBuildPlan{}, compiledNativeWorkspace{}, code
 	}
+	if options.targetID == target.X8664WindowsMSVC {
+		application, err := windowsbuild.Load(sourceRoot)
+		if err != nil {
+			return nativeBuildPlan{}, compiledNativeWorkspace{}, buildFailure(stderr, err)
+		}
+		options.windows = application
+	}
 	policy.packageTrapSources = policy.runTrapReceipt
 	plan, code := prepareNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)
+	plan.options.Windows = options.windows
 	return plan, compiledNativeWorkspace{lockState: lowered.lockState, rootPackageName: lowered.rootPackageName, trapSources: lowered.trapSources}, code
 }
 
