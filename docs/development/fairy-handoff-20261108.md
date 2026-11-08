@@ -4,6 +4,16 @@
 옮기기로 했다. 새 로드맵 기능에는 착수하지 않았다. 저장소는
 `projects/hobby/opensource/fairyc`, 작업 브랜치는 `main`이다.
 
+## 새 스레드의 CLI 후속 검증
+
+아래 본문은 인계 당시 상태를 보존한다. 이후 실제 Fairy CLI의 지원된
+클로저 값 실행은 [CLI 검증 기록](fairy-closure-value-cli-20261108.md),
+소스·패키지 ID 변경과 손상 복구 및 기존 scalar/aggregate 캐시는
+[CLI 캐시 검증 기록](fairy-closure-value-cli-cache-20261108.md)을 우선한다.
+실제 실행 프로필과 별도 미검증 경계는 각 기록에 명시했다. 기존 비지원
+copied-closure 입력의 Go/Fairy 진단·종료 코드 차이와 전체 self-host,
+Linux, CI, 배포 검증은 이 후속 검증으로 완료 처리하지 않는다.
+
 ## 이번 배치의 범위
 
 - 프로젝트 디스크 캐시: `FYCACHE2` / `FYCKEYS2` / `FYPRJ002`, 현재 소스에서

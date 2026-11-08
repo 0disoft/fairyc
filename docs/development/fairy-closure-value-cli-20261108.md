@@ -36,12 +36,18 @@ commands.
 | Existing Go CLI `StableSource`, `WindowsNative`, `WindowsRunTraps`, `PersistentCache`, `Refusals` | PASS, package 23.502 s; both native profiles, interpreter, fresh-process cache/repair and 13 rejected source shapes |
 | Fairy CLI low | PASS, 260.13 s including host preparation/build; 10 independent CLI processes and two directly executed build outputs |
 | Fairy CLI optimized, final harness | PASS, 306.85 s including host preparation/build; 13 independent CLI processes and two directly executed build outputs; includes three successful exact selections and locked-byte check |
+| Fairy CLI low, exact-selection follow-up | PASS; the same original source and exact-digest low host, interpreter plus development/release native selection, exit zero, schema/target/profile/streams and unchanged lock bytes |
 | `go vet -mod=readonly ./internal/cli` | PASS on both new test sources |
 
 The low run preceded the three extra exact-selection assertions and explicit
 lock snapshot. Its full four-test reports already included the successful
 value case in interpreter and both native modes. This receipt does not
-claim that those later assertions were executed in that low run.
+claim that those later assertions were executed in that low run. The separate
+follow-up above closes those specific low-profile observations without
+repeating the unchanged full command/cache sequence. The initial ad-hoc
+follow-up incorrectly expected interpreter schema v3; inspection of the
+owning `stableTestReportSchema` constant established v1. The final check
+requires v1 for interpreter and v4 for captured native reports.
 
 The failed tests inside the JSON reports are intentional fixture programs;
 the surrounding acceptance test passes only for their specified trap kinds,
@@ -62,6 +68,8 @@ The existing opt-in gate keeps this full CLI replay out of ordinary package
 tests; no CI job or default runner scope was added. Local logs are ignored
 `.cache/closure-cli-go-20261108.log`, `closure-cli-fairy-low-20261108.log`,
 `closure-cli-fairy-optimized-20261108.log` and `closure-cli-vet-20261108.log`.
+The low follow-up is `.cache/closure-cli-exact-low-20261108.log`; its disposable
+workspace was populated directly from the existing raw Go fixture constants.
 
 ## Boundaries
 
