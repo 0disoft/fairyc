@@ -67,6 +67,11 @@ class Session:
                 return dict(reply, desktopInput=receipt)
         if command in ('state', 'click', 'close') and set(request) == {'command'}:
             return self.wire(command.encode('ascii'))
+        if command == 'resize' and set(request) == {'command', 'width', 'height'}:
+            width, height = request['width'], request['height']
+            if any(type(value) is not int or not 1 <= value <= 4096 for value in (width, height)):
+                raise ValueError('resize width/height must be integers in 1..4096')
+            return self.wire(f'resize\t{width}\t{height}'.encode('ascii'))
         if command == 'input' and set(request) == {'command', 'text'}:
             text = request['text']
             if not isinstance(text, str) or any(c in text for c in '\r\n\0'):
@@ -74,7 +79,7 @@ class Session:
             if len(text.encode('utf-16-le')) > 254:
                 raise ValueError('input exceeds 127 UTF-16 code units')
             return self.wire(b'input\t' + text.encode('utf-8'))
-        raise ValueError('expected state, input with text, click, close, close-button, or alt-f4')
+        raise ValueError('expected state, input with text, resize with width/height, click, close, close-button, or alt-f4')
 
     def finish(self):
         if self.process.poll() is None:
@@ -139,6 +144,67 @@ def output(value):
     print(json.dumps(value, ensure_ascii=False), flush=True)
 
 
+def verify_resize(session):
+    rows = []
+
+    def check(condition, message):
+        if not condition:
+            raise RuntimeError(message)
+
+    def layout(row):
+        check(row.get('ok') and row['resizes'] >= 1, 'missing Fairy layout acknowledgement')
+        width = max(320, row['client']['width'])
+        expected = dict(label=(16, 16, width - 32, 20), input=(16, 44, width - 132, 28),
+                        apply=(width - 100, 44, 84, 28), result=(16, 94, width - 32, 48),
+                        status=(16, 154, width - 32, 24))
+        actual = {name: tuple(box[key] for key in ('x', 'y', 'width', 'height'))
+                  for name, box in row['layout'].items()}
+        check(actual == expected, 'actual Win32 control rectangles differ from the Fairy layout')
+        check(row['minimum'] == dict(width=400, height=240), 'Fairy minimum size changed')
+
+    layout(session.initial)
+    session.request(dict(command='input', text='크기를 바꿔도 유지 Ω'))
+    baseline = session.request(dict(command='click'))
+    check(baseline['result'] == 'Result: 크기를 바꿔도 유지 Ω', 'resize setup did not apply input')
+    prior = baseline
+    # Widen, narrow to minimum, change height only, repeat unchanged, restore.
+    for width, height in ((800, 480), (400, 240), (400, 480), (400, 480), (640, 360)):
+        row = session.request(dict(command='resize', width=width, height=height))
+        layout(row)
+        check(row['window']['width'] == width and row['window']['height'] == height, 'window was not resized')
+        check((row['window']['x'], row['window']['y']) ==
+              (baseline['window']['x'], baseline['window']['y']), 'resize moved the window')
+        for key in ('input', 'result', 'status', 'edits', 'clicks'):
+            check(row[key] == baseline[key], 'resize changed application state: ' + key)
+        changed = (width, height) != (prior['window']['width'], prior['window']['height'])
+        check(row['resizes'] > prior['resizes'] if changed else row['resizes'] >= prior['resizes'],
+              'actual size change did not reach Fairy')
+        if width == prior['window']['width']:
+            check(row['layout'] == prior['layout'], 'height-only resize changed fixed vertical layout')
+        rows.append(row)
+        prior = row
+    invalid = (b'resize\t0\t240', b'resize\t399\t240', b'resize\t400\t239',
+               b'resize\t4097\t240', b'resize\t400\t4097', b'resize\t-800\t480',
+               b'resize\t800\t480junk', b'resize\t800', b'resize\t800\t480\textra')
+    for command in invalid:
+        check(session.wire(command).get('ok') is False, 'invalid resize was accepted')
+    check(session.request(dict(command='state')) == prior, 'rejected resize changed window or state')
+    for bad in (True, 3.5, '800', 0, 4097):
+        try:
+            session.request(dict(command='resize', width=bad, height=480))
+        except ValueError:
+            continue
+        raise RuntimeError('invalid Python resize value was accepted')
+    check(session.request(dict(command='state')) == prior, 'rejected Python request changed state')
+    applied = session.request(dict(command='click'))
+    check(applied['clicks'] == prior['clicks'] + 1 and applied['result'] == prior['result'],
+          'button stopped working after resize')
+    check(session.request(dict(command='close')).get('closed') is True, 'resized GUI did not close')
+    check(session.process.wait(timeout=5) == 0, 'resized GUI did not exit successfully')
+    return dict(ok=True, verification='real-win32-resize', observations=rows,
+                rejectedNativeCommands=len(invalid), rejectedPythonCommands=5, processExited=True)
+
+
 def verify_desktop_close(image):
     rows = []
     for command in ('close-button', 'alt-f4'):
@@ -165,6 +231,7 @@ def main():
     mode.add_argument('--verify', action='store_true', help='verify events and close the owned GUI')
     mode.add_argument('--verify-desktop-close', action='store_true',
                       help='verify title-bar click and Alt+F4 via desktop input; requires an idle desktop')
+    mode.add_argument('--verify-resize', action='store_true', help='resize the real window and verify native control rectangles')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -176,6 +243,8 @@ def main():
         session = Session(args.exe.resolve())
         if args.verify:
             output(verify(session))
+        elif args.verify_resize:
+            output(verify_resize(session))
         else:
             output(session.initial)
             while True:

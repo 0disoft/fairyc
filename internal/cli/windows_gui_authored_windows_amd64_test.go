@@ -68,17 +68,22 @@ func TestWindowsGUIExample(t *testing.T) {
 			}
 			ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 			defer cancel()
-			out, err := exec.CommandContext(ctx, python, "-B", "../../examples/win32_minimal/control.py", "--exe", image, "--verify").CombinedOutput()
-			if err != nil {
-				t.Fatalf("CLI control events: %v %s", err, out)
-			}
-			var report struct {
-				OK            bool
-				Verification  string
-				ProcessExited bool
-			}
-			if err := json.Unmarshal(out, &report); err != nil || !report.OK || report.Verification != "real-win32-controls" || !report.ProcessExited {
-				t.Fatalf("invalid CLI control receipt: %v %s", err, out)
+			for _, mode := range []struct{ flag, verification string }{
+				{"--verify", "real-win32-controls"},
+				{"--verify-resize", "real-win32-resize"},
+			} {
+				out, err := exec.CommandContext(ctx, python, "-B", "../../examples/win32_minimal/control.py", "--exe", image, mode.flag).CombinedOutput()
+				if err != nil {
+					t.Fatalf("CLI control events: %v %s", err, out)
+				}
+				var report struct {
+					OK            bool
+					Verification  string
+					ProcessExited bool
+				}
+				if err := json.Unmarshal(out, &report); err != nil || !report.OK || report.Verification != mode.verification || !report.ProcessExited {
+					t.Fatalf("invalid CLI control receipt: %v %s", err, out)
+				}
 			}
 		})
 	}
@@ -90,6 +95,7 @@ func TestWindowsGUIEventFailure(t *testing.T) {
 		{"edit-count", "edits += 1;", "edits += 0;"},
 		{"edit-status", "fairy_win32_changed(window, edits, 105)", "fairy_win32_changed(window, edits, 104)"},
 		{"close-policy", "fairy_win32_resolve_close(window, 1)", "fairy_win32_resolve_close(window, 0)"},
+		{"layout-inset", "let i32 inset = 16;", "let i32 inset = 20;"},
 	} {
 		t.Run(mutation.name, func(t *testing.T) {
 			root := windowsGUIExample(t)
