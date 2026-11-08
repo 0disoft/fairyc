@@ -65,11 +65,25 @@ length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
-Fairy owns `main()`. A small C bridge owns the Win32 window procedure and
-message loop. The `.rc` string table is compiled by SDK `rc.exe`. No UI
+Fairy owns `main()`, the application event loop, click count and `on_click`
+handler in `src/main.fy`. That handler decides empty-input behavior and builds
+the UTF-8 result text. C owns the Win32 window procedure, message pump,
+control access, UTF-8/UTF-16 conversion and automation transport. The `.rc`
+string table is compiled by SDK `rc.exe`. No UI
 framework or browser runtime is bundled; the executable uses Windows system
 DLLs and the static CRT. This prototype does not expose arbitrary Fairy
 callbacks to Windows or generate Win32 SDK bindings.
+
+The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
+`fairy_win32_read_input`, `fairy_win32_present` and `fairy_win32_close`.
+`next` pumps Win32 messages and returns 1 for a click, or 0 on exit. Fairy
+handles the event and calls `present` with the result, count and status ID.
+The bridge then acknowledges a pending CLI click with the rendered state.
+`next` returns before Fairy processes the event; C retains no Fairy
+callback, context or input/output buffer. This single-window example uses the
+existing pointer/scalar FFI and introduces no public SDK or export contract.
+Application C bridge files keep `/W4 /WX`; generated C partitions keep their
+existing consumer warning policy in both native builders.
 
 `fairy.windows.json` selects the GUI subsystem and explicit native inputs.
 See [ADR 0552](../../docs/adr/0552-minimal-windows-gui-build.md) for bounds and

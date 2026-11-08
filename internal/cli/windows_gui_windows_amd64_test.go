@@ -45,6 +45,10 @@ func TestWindowsGUIWorkspaceBuild(t *testing.T) {
 	if code, _, _ := runForTest([]string{"build"}, root); code != ExitBuildFailure {
 		t.Fatalf("bad C exit=%d", code)
 	}
+	writeWorkspaceFile(t, root, "ui.c", "#include <stdint.h>\nint32_t ui_probe(void){int unused;return 42;}\n")
+	if code, _, _ := runForTest([]string{"build"}, root); code != ExitBuildFailure {
+		t.Fatalf("C bridge warning must remain an error: exit=%d", code)
+	}
 	after, err := os.ReadFile(filepath.Join(root, "build/app.exe"))
 	if err != nil || !bytes.Equal(before, after) {
 		t.Fatal("failed native build replaced executable", err)

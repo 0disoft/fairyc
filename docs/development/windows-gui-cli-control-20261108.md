@@ -1,5 +1,8 @@
 # Win32 controls and agent CLI, 2026-11-08
 
+Follow-up: [Fairy-owned event handling](windows-gui-fairy-events-20261109.md)
+moves application policy from C to Fairy while retaining this JSONL protocol.
+
 The [example README](../../examples/win32_minimal/README.md) owns this private
 application protocol. [ADR 0552](../adr/0552-minimal-windows-gui-build.md) still
 owns the compiler's native build inputs; its language/FFI boundary is unchanged.
