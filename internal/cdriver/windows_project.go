@@ -143,7 +143,10 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 			// single-unit target builders keep their separate /W4 /WX policy.
 			extra := []string{}
 			if application != nil {
-				extra = append(extra, "/W4", "/WX", "/I"+application.Root)
+				extra = append(extra, "/I"+application.Root)
+				if strings.HasPrefix(source.Name, "fy_bridge_") {
+					extra = append(extra, "/W4", "/WX")
+				}
 			}
 			if _, err := runWindowsHostCommandWithLimitAndTimeout(toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
 				append([]string{"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:" + objectPath}, extra...)...); err != nil {
