@@ -9,10 +9,11 @@ fairyc build --release
 
 `fairyc run --release` also opens the window. Close it normally, or use
 `fairyc run --release -- --smoke` to exercise creation, painting, the message
-loop and timer-driven destruction automatically. Smoke mode also verifies real
+loop and a timer-driven close request automatically. Smoke mode also verifies real
 edit notifications and button clicks, empty input, Unicode results, repeated
 edits, the input length limit and rejection of a command without its control
-handle. It exits with code 5 if an event check fails.
+handle. Closing passes through Fairy's `on_close`; smoke mode exits with code 5
+if an event check fails or Fairy declines its final close request.
 
 Type into **Message** and click **Apply**. The result displays the entered
 Unicode text; an empty message shows a prompt. The status line identifies
@@ -51,7 +52,8 @@ State replies use `fairyc.win32-example-control/v1` and include `ok`, `pid`,
 `visible`, `title`, `input`, `result`, `status`, `edits` and `clicks`. The input
 command updates the native EDIT via `SetWindowTextW`, which generates
 `EN_CHANGE`. Click sends the native BUTTON `BM_CLICK`, which generates
-`BN_CLICKED`. The ordinary WndProc handles both and the reply reads actual
+`BN_CLICKED`. Close sends `WM_CLOSE`, the same message used by the title-bar
+close button. The ordinary WndProc forwards these events to Fairy and replies read actual
 control text. This verifies programmatic control events; it does not certify
 physical keyboard/mouse delivery, IME, screen rendering or accessibility.
 
@@ -66,9 +68,11 @@ input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
 Fairy owns `main()`, the application event loop, edit/click counts and the
-`on_change` / `on_click` handlers in `src/main.fy`. `on_change` chooses the edit
+`on_change` / `on_click` / `on_close` handlers in `src/main.fy`. `on_change` chooses the edit
 status; `on_click` decides empty-input behavior and builds the UTF-8 result
 text. Editing leaves the last applied result intact until Apply is clicked.
+`on_close` allows closing in this example; changing its decision to 0 declines
+the request and leaves the window interactive.
 C owns the Win32 window procedure, message pump,
 control access, UTF-8/UTF-16 conversion and automation transport. The `.rc`
 string table is compiled by SDK `rc.exe`. No UI
@@ -77,12 +81,20 @@ DLLs and the static CRT. This prototype does not expose arbitrary Fairy
 callbacks to Windows or generate Win32 SDK bindings.
 
 The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
-`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed` and
-`fairy_win32_close`. `next` pumps Win32 messages and returns 1 for a click,
-2 for `EN_CHANGE`, or 0 on exit. Fairy handles the event and calls `present`
+`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
+`fairy_win32_resolve_close` and `fairy_win32_close`. `next` pumps Win32 messages
+and returns 1 for a click, 2 for `EN_CHANGE`, 3 for `WM_CLOSE`, or 0 on exit.
+Fairy handles the event and calls `present`
 with the click result/count/status, or `changed` with the edit count/status.
 C mirrors these counts for state replies and updates the controls. A notified
 CLI input or click is acknowledged after the corresponding Fairy handler.
+`WM_CLOSE` is intercepted before Windows' default destruction. Fairy calls
+`resolve_close` with 1 to destroy the window or 0 to keep it open. A pending
+CLI close receives `{"ok":true,"closed":true}` only after successful destruction,
+or `{"ok":true,"closed":false}` after denial. The controller remains usable on
+denial. Native `WM_DESTROY`/`WM_QUIT` still provide the exit notification;
+`fairy_win32_close` releases native resources when Fairy's loop ends. Native
+startup, transport failures/EOF and failing smoke checks retain forced cleanup.
 The edit count measures native change notifications, not characters or CLI
 commands; a replacement, clear or keyboard edit can produce a notification.
 `next` returns before Fairy processes the event; C retains no Fairy

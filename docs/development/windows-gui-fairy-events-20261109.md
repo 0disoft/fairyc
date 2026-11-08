@@ -1,4 +1,4 @@
-# Fairy-owned Win32 click and input-change handling, 2026-11-09
+# Fairy-owned Win32 click, input-change and close handling, 2026-11-09
 
 Owner: [example README](../../examples/win32_minimal/README.md) and the private
 FFI in `src/main.fy` / `native/window.c`. [ADR 0552](../adr/0552-minimal-windows-gui-build.md)
@@ -7,21 +7,32 @@ continues to own native application build inputs.
 ## Behavior and lifetime
 
 Fairy now owns the application loop, edit/click counts, edit status, empty-input
-decision and result string construction. Its `on_change` selects status 105;
+decision, close policy and result string construction. Its `on_change` selects status 105;
 `on_click` reads bounded UTF-8 and produces the text. Editing preserves the last
-applied result until the next click.
+applied result until the next click. `on_close` currently allows closing.
 C owns Win32 window/control operations, message pumping, character conversion,
 mirrored counts for observation and the existing JSONL transport.
 
 The private functions are `fairy_win32_open`, `fairy_win32_next`,
-`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed` and
-`fairy_win32_close`. `next` returns 1 for a click, 2 for `EN_CHANGE`, and 0 on
-exit. Fairy increments the corresponding count, then calls `present` or
+`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
+`fairy_win32_resolve_close` and `fairy_win32_close`. `next` returns 1 for a click,
+2 for `EN_CHANGE`, 3 for `WM_CLOSE`, and 0 on exit.
+Fairy increments the corresponding edit/click count, then calls `present` or
 `changed` to render and mirror its state. Only then does C acknowledge a pending
 CLI request. A CLI reply therefore observes the handled event. The edit count
 measures native change notifications, not characters or CLI commands. C retains no
 Fairy function or input/output buffer. The opaque window lives until close.
 The example remains single-window and single-threaded.
+
+`WM_CLOSE` returns from WndProc without default destruction. The CLI `close`
+command sends that same message. Fairy resolves the event with
+`fairy_win32_resolve_close(window, 1)` to destroy or 0 to decline; a pending CLI
+request is acknowledged only after that decision, with `closed:true` after
+successful destruction or `closed:false` on denial. `WM_DESTROY` posts `WM_QUIT`
+and Fairy's loop then releases the native resources. Startup/transport errors,
+pipe EOF and smoke assertion failures retain native forced cleanup; these are
+separate from the normal user close policy. The successful smoke path sends
+`WM_CLOSE` and fails on its next timer tick if Fairy declines closing.
 
 An initial synchronous callback implementation passed the Go frontend but was
 rejected by the authored Fairy CLI's function-parameter subset. It was replaced
@@ -121,3 +132,39 @@ Local receipts: `.cache/windows-gui-fairy-change-final-20261109.log`,
 `windows-gui-fairy-change-{development,release}-20261109.json`.
 Implementation commit: `6c4fa8a2`; strengthened CLI/regression checks:
 `4ca3e45b`. README and this execution note document the private bridge boundary.
+
+## WM_CLOSE follow-up verification
+
+- `go test -mod=readonly ./internal/cli -run '^TestWindowsGUIExample$'
+  -count=1 -v`: PASS, 8.308s, before the regression extension.
+- `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure)$' -count=1 -v`: PASS, 19.723s.
+  Development/release native smoke and JSONL control pass. The new negative
+  case changes only Fairy's `resolve_close(window, 1)` to `resolve_close(window, 0)`:
+  native smoke correctly fails with exit 5, and CLI requests twice receive
+  `closed:false` with unchanged state and a live process. Input and click still
+  work afterward. The existing three negative event cases also pass.
+- `go run -mod=readonly ../../cmd/fairyc check` in the example: PASS,
+  1 source / 4 MIR functions, lock refreshed.
+- The existing authored Fairy CLI/companion builds the current app using
+  `build --locked` and `build --locked --release`; each passes
+  `python -B control.py --verify` with ten observations, five rejected native
+  commands, `closed:true` and exit 0. The authored release app is 122,368 bytes;
+  the Go-built development/release images are 123,904 / 120,320 bytes.
+  Compiler source is unchanged; the authored compiler host was reused rather
+  than bootstrapped again.
+- A persistent CLI session on the authored release app sends Korean input,
+  observes `edits=1`, clicks and observes `clicks=1` plus the expected result,
+  then sends `close`, receives `{"ok":true,"closed":true}` and exits 0.
+- `gofmt` and scoped `git diff --check`: PASS.
+
+Receipts: `.cache/windows-gui-fairy-close-go-20261109.log` and
+`windows-gui-fairy-close-{development,release}-20261109.json`.
+Implementation: `c8153fa9`; regression: `209ff44d`.
+Only the private example bridge gains a close-resolution function; existing
+JSONL close replies retain the boolean `closed` field, including denial.
+No public compiler API, DB, dependency, hygiene, runner, version, push or deploy
+change. Full repository tests, Linux, hosted CI, compiler bootstrap/fixed point
+and physical title-bar/Alt+F4/IME delivery were skipped for this scoped example
+change. Normal close messages are exercised through real Win32 `WM_CLOSE`;
+physical input delivery remains unverified.
