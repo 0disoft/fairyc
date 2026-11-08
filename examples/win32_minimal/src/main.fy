@@ -1,6 +1,10 @@
 module main;
 
 unsafe extern C fn ptr mut void fairy_win32_open(i32 width, i32 height);
+unsafe extern C fn i32 fairy_win32_initialize_dpi();
+unsafe extern C fn i32 fairy_win32_dpi(ptr mut void window);
+unsafe extern C fn i32 fairy_win32_font(ptr mut void window, i32 height);
+unsafe extern C fn i32 fairy_win32_accept_dpi(ptr mut void window, u32 changes);
 unsafe extern C fn i32 fairy_win32_next(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_changed(ptr mut void window, u32 edits, u32 status_id);
 unsafe extern C fn i32 fairy_win32_resolve_close(ptr mut void window, u32 allow);
@@ -23,14 +27,24 @@ unsafe fn i32 on_size(ptr mut void window, u32 resizes) {
     let i32 actual_width = fairy_win32_client_extent(window, 0);
     let i32 actual_height = fairy_win32_client_extent(window, 1);
     if (actual_width < 0 || actual_height < 0) { return 1; }
-    let i32 width = if (actual_width < 320) { 320 } else { actual_width };
+    let i32 dpi = fairy_win32_dpi(window);
+    if (dpi < 1 || dpi > 960 || fairy_win32_font(window, scale(12, dpi)) != 0) { return 1; }
+    let i32 width = if (actual_width < scale(320, dpi)) { scale(320, dpi) } else { actual_width };
     let i32 inset = 16;
-    if (fairy_win32_move(window, 200, inset, 16, width - 2 * inset, 20) != 0) { return 1; }
-    if (fairy_win32_move(window, 201, inset, 44, width - 132, 28) != 0) { return 1; }
-    if (fairy_win32_move(window, 202, width - 100, 44, 84, 28) != 0) { return 1; }
-    if (fairy_win32_move(window, 203, inset, 94, width - 2 * inset, 48) != 0) { return 1; }
-    if (fairy_win32_move(window, 204, inset, 154, width - 2 * inset, 24) != 0) { return 1; }
-    return fairy_win32_layout_done(window, 400, 240, resizes);
+    let i32 left = scale(inset, dpi);
+    if (fairy_win32_move(window, 200, left, scale(16, dpi), width - 2 * left, scale(20, dpi)) != 0) { return 1; }
+    if (fairy_win32_move(window, 201, left, scale(44, dpi), width - scale(132, dpi), scale(28, dpi)) != 0) { return 1; }
+    if (fairy_win32_move(window, 202, width - scale(100, dpi), scale(44, dpi), scale(84, dpi), scale(28, dpi)) != 0) { return 1; }
+    if (fairy_win32_move(window, 203, left, scale(94, dpi), width - 2 * left, scale(48, dpi)) != 0) { return 1; }
+    if (fairy_win32_move(window, 204, left, scale(154, dpi), width - 2 * left, scale(24, dpi)) != 0) { return 1; }
+    return fairy_win32_layout_done(window, scale(400, dpi), scale(240, dpi), resizes);
+}
+
+fn i32 scale(i32 value, i32 dpi) { return (value * dpi + 48) / 96; }
+
+unsafe fn i32 on_dpi(ptr mut void window, u32 resizes, u32 dpi_changes) {
+    if (fairy_win32_accept_dpi(window, dpi_changes) != 0) { return 1; }
+    return on_size(window, resizes);
 }
 
 unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
@@ -55,11 +69,14 @@ unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
 }
 
 fn i32 main() {
-    let window = unsafe { fairy_win32_open(480, 240) };
+    let i32 initial_dpi = unsafe { fairy_win32_initialize_dpi() };
+    if (initial_dpi < 1 || initial_dpi > 960) { return 1; }
+    let window = unsafe { fairy_win32_open(scale(480, initial_dpi), scale(240, initial_dpi)) };
     if (window == null) { return 1; }
     var u32 clicks = 0;
     var u32 edits = 0;
     var u32 resizes = 0;
+    var u32 dpi_changes = 0;
     var i32 result = 0;
     while (true) {
         let i32 event = unsafe { fairy_win32_next(window) };
@@ -75,6 +92,10 @@ fn i32 main() {
         } else if (event == 4) {
             resizes += 1;
             result = unsafe { on_size(window, resizes) };
+        } else if (event == 5) {
+            dpi_changes += 1;
+            resizes += 1;
+            result = unsafe { on_dpi(window, resizes, dpi_changes) };
         } else {
             result = 1;
         }

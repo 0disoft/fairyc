@@ -150,16 +150,23 @@ def output(value):
 def check_layout(row):
     if not row.get('ok') or row['resizes'] < 1:
         raise RuntimeError('missing Fairy layout acknowledgement')
-    width = max(320, row['client']['width'])
-    expected = dict(label=(16, 16, width - 32, 20), input=(16, 44, width - 132, 28),
-                    apply=(width - 100, 44, 84, 28), result=(16, 94, width - 32, 48),
-                    status=(16, 154, width - 32, 24))
+    def scaled(value):
+        return (value * row['dpi'] + 48) // 96
+    width = max(scaled(320), row['client']['width'])
+    inset = scaled(16)
+    expected = dict(label=(inset, scaled(16), width - 2 * inset, scaled(20)),
+                    input=(inset, scaled(44), width - scaled(132), scaled(28)),
+                    apply=(width - scaled(100), scaled(44), scaled(84), scaled(28)),
+                    result=(inset, scaled(94), width - 2 * inset, scaled(48)),
+                    status=(inset, scaled(154), width - 2 * inset, scaled(24)))
     actual = {name: tuple(box[key] for key in ('x', 'y', 'width', 'height'))
               for name, box in row['layout'].items()}
     if actual != expected:
         raise RuntimeError('actual Win32 control rectangles differ from the Fairy layout')
-    if row['minimum'] != dict(width=400, height=240):
+    if row['minimum'] != dict(width=scaled(400), height=scaled(240)):
         raise RuntimeError('Fairy minimum size changed')
+    if not row['perMonitorV2'] or row['windowDpi'] <= 0 or row['fonts'] != {name: scaled(12) for name in expected}:
+        raise RuntimeError('DPI awareness or actual control font height is incorrect')
 
 
 def verify_resize(session):
@@ -175,7 +182,9 @@ def verify_resize(session):
     check(baseline['result'] == 'Result: 크기를 바꿔도 유지 Ω', 'resize setup did not apply input')
     prior = baseline
     # Widen, narrow to minimum, change height only, repeat unchanged, restore.
-    for width, height in ((800, 480), (400, 240), (400, 480), (400, 480), (640, 360)):
+    for dip_width, dip_height in ((800, 480), (400, 240), (400, 480), (400, 480), (640, 360)):
+        width = (dip_width * baseline['dpi'] + 48) // 96
+        height = (dip_height * baseline['dpi'] + 48) // 96
         row = session.request(dict(command='resize', width=width, height=height))
         check_layout(row)
         check(row['window']['width'] == width and row['window']['height'] == height, 'window was not resized')
@@ -190,7 +199,9 @@ def verify_resize(session):
             check(row['layout'] == prior['layout'], 'height-only resize changed fixed vertical layout')
         rows.append(row)
         prior = row
-    invalid = (b'resize\t0\t240', b'resize\t399\t240', b'resize\t400\t239',
+    minimum = baseline['minimum']
+    invalid = (b'resize\t0\t240', f'resize\t{minimum["width"] - 1}\t{minimum["height"]}'.encode(),
+               f'resize\t{minimum["width"]}\t{minimum["height"] - 1}'.encode(),
                b'resize\t4097\t240', b'resize\t400\t4097', b'resize\t-800\t480',
                b'resize\t800\t480junk', b'resize\t800', b'resize\t800\t480\textra')
     for command in invalid:

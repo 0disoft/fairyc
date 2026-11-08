@@ -10,6 +10,14 @@ enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_L
 typedef struct {
     int32_t pending_event;
     BOOL size_pending;
+    BOOL dpi_pending;
+    BOOL dpi_reply_pending;
+    UINT dpi;
+    unsigned dpi_changes;
+    RECT dpi_suggested;
+    RECT dpi_applied;
+    HFONT font;
+    int32_t font_height;
     BOOL initial_reply_pending;
     BOOL resize_reply_pending;
     int32_t min_width;
@@ -91,7 +99,7 @@ static void smoke_events(HWND window, WindowState *state) {
             RECT input;
             if (!GetWindowRect(state->input, &input)) { break; }
             MapWindowPoints(NULL, window, (POINT *)&input, 2);
-            if (input.left != 16) { break; }
+            if (input.left != MulDiv(16, (int)state->dpi, 96)) { break; }
         }
         if (!control_resource(window, 101) || state->clicks != 0 ||
             !control_resource(state->status, 104)) { break; }
@@ -216,6 +224,13 @@ static BOOL json_geometry(Json *json, HWND window, WindowState *state) {
     if (!GetClientRect(window, &rect)) { return FALSE; }
     json_bytes(json, ",\"client\":"); json_rect(json, &rect);
     json_bytes(json, ",\"resizes\":"); json_number(json, state->resizes);
+    json_bytes(json, ",\"dpi\":"); json_number(json, state->dpi);
+    json_bytes(json, ",\"windowDpi\":"); json_number(json, GetDpiForWindow(window));
+    json_bytes(json, AreDpiAwarenessContextsEqual(GetWindowDpiAwarenessContext(window),
+                DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) ? ",\"perMonitorV2\":true" : ",\"perMonitorV2\":false");
+    json_bytes(json, ",\"dpiChanges\":"); json_number(json, state->dpi_changes);
+    json_bytes(json, ",\"dpiSuggested\":"); json_rect(json, &state->dpi_suggested);
+    json_bytes(json, ",\"dpiApplied\":"); json_rect(json, &state->dpi_applied);
     json_bytes(json, state->sizing ? ",\"sizing\":true" : ",\"sizing\":false");
     json_bytes(json, (GetAsyncKeyState(VK_LBUTTON) & 0x8000) ? ",\"mouseDown\":true" : ",\"mouseDown\":false");
     json_bytes(json, ",\"sizeEntries\":"); json_number(json, state->size_entries);
@@ -231,6 +246,15 @@ static BOOL json_geometry(Json *json, HWND window, WindowState *state) {
         if (i != 0) { json_bytes(json, ","); }
         json_bytes(json, "\""); json_bytes(json, layout_names[i]); json_bytes(json, "\":");
         json_rect(json, &rect);
+    }
+    json_bytes(json, "},\"fonts\":{");
+    for (size_t i = 0; i < ARRAYSIZE(layout_ids); i++) {
+        LOGFONTW font;
+        HFONT handle = (HFONT)SendMessageW(GetDlgItem(window, layout_ids[i]), WM_GETFONT, 0, 0);
+        if (GetObjectW(handle, sizeof(font), &font) == 0) { return FALSE; }
+        if (i != 0) { json_bytes(json, ","); }
+        json_bytes(json, "\""); json_bytes(json, layout_names[i]); json_bytes(json, "\":");
+        json_signed(json, -font.lfHeight);
     }
     json_bytes(json, "}");
     return TRUE;
@@ -364,7 +388,7 @@ static void automation_poll(HWND window, WindowState *state) {
             BOOL sent = automation_command(window, state);
             state->command_size = 0;
             state->command_overflow = FALSE;
-            if (state->pending_event || state->size_pending || !IsWindow(window)) {
+            if (state->pending_event || state->size_pending || state->dpi_pending || !IsWindow(window)) {
                 return;
             }
             if (!sent) {
@@ -415,6 +439,47 @@ int32_t fairy_win32_client_extent(void *native_window, uint32_t axis) {
     return axis == 0 ? client.right : client.bottom;
 }
 
+int32_t fairy_win32_initialize_dpi(void) {
+    if (!SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) &&
+        !AreDpiAwarenessContextsEqual(GetThreadDpiAwarenessContext(), DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) { return -1; }
+    return (int32_t)GetDpiForSystem();
+}
+
+int32_t fairy_win32_dpi(void *native_window) {
+    return IsWindow((HWND)native_window) ? (int32_t)bridge_state.dpi : -1;
+}
+
+int32_t fairy_win32_font(void *native_window, int32_t height) {
+    HWND window = (HWND)native_window;
+    if (!IsWindow(window) || height <= 0 || height > 512) { return 1; }
+    if (bridge_state.font != NULL && bridge_state.font_height == height) { return 0; }
+    HFONT font = CreateFontW(-height, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+                            OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
+                            DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
+    if (font == NULL) { return 1; }
+    for (size_t i = 0; i < ARRAYSIZE(layout_ids); i++) {
+        SendMessageW(GetDlgItem(window, layout_ids[i]), WM_SETFONT, (WPARAM)font, TRUE);
+    }
+    if (bridge_state.font != NULL) { DeleteObject(bridge_state.font); }
+    bridge_state.font = font;
+    bridge_state.font_height = height;
+    return 0;
+}
+
+int32_t fairy_win32_accept_dpi(void *native_window, uint32_t changes) {
+    HWND window = (HWND)native_window;
+    RECT suggested = bridge_state.dpi_suggested;
+    if (suggested.right <= suggested.left || suggested.bottom <= suggested.top ||
+        !SetWindowPos(window, NULL, suggested.left, suggested.top,
+                      suggested.right - suggested.left, suggested.bottom - suggested.top,
+                      SWP_NOZORDER | SWP_NOACTIVATE)) { return 1; }
+    bridge_state.dpi_changes = changes;
+    bridge_state.dpi_applied = suggested;
+    // Fairy's on_dpi immediately runs on_size for this client size.
+    bridge_state.size_pending = FALSE;
+    return 0;
+}
+
 int32_t fairy_win32_move(void *native_window, uint32_t control_id, int32_t x, int32_t y,
                         int32_t width, int32_t height) {
     if (control_id < 200 || control_id > STATUS_ID || width < 0 || height < 0) { return 1; }
@@ -430,9 +495,11 @@ int32_t fairy_win32_layout_done(void *native_window, int32_t min_width, int32_t 
     if (bridge_state.sizing && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
         bridge_state.live_layouts++;
     }
-    if (bridge_state.initial_reply_pending || bridge_state.resize_reply_pending) {
+    if (!bridge_state.dpi_pending &&
+        (bridge_state.initial_reply_pending || bridge_state.resize_reply_pending || bridge_state.dpi_reply_pending)) {
         bridge_state.initial_reply_pending = FALSE;
         bridge_state.resize_reply_pending = FALSE;
+        bridge_state.dpi_reply_pending = FALSE;
         if (!automation_state(window, &bridge_state)) { return 1; }
     }
     return 0;
@@ -537,6 +604,16 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
             }
         }
         return 0;
+    case WM_DPICHANGED:
+        if (LOWORD(wparam) > 0 && LOWORD(wparam) <= 960 && LOWORD(wparam) == HIWORD(wparam) && lparam != 0) {
+            state->dpi = LOWORD(wparam);
+            state->dpi_suggested = *(const RECT *)lparam;
+            state->dpi_pending = TRUE;
+            if (state->pump_fiber && GetCurrentFiber() == state->pump_fiber) {
+                SwitchToFiber(state->app_fiber);
+            }
+        }
+        return 0;
     case WM_ENTERSIZEMOVE:
         state->sizing = TRUE;
         state->size_entries++;
@@ -623,6 +700,7 @@ void *fairy_win32_open(int32_t width, int32_t height) {
     if (window == NULL) {
         return NULL;
     }
+    state->dpi = GetDpiForWindow(window);
     if (argument(L"--smoke") && SetTimer(window, 1, 100, NULL) == 0) {
         DestroyWindow(window);
         return NULL;
@@ -659,6 +737,10 @@ void *fairy_win32_open(int32_t width, int32_t height) {
 int32_t fairy_win32_next(void *native_window) {
     if (native_window == NULL || bridge_state.pump_fiber == NULL) { return 0; }
     while (TRUE) {
+        if (bridge_state.dpi_pending) {
+            bridge_state.dpi_pending = FALSE;
+            return 5;
+        }
         if (bridge_state.size_pending) {
             bridge_state.size_pending = FALSE;
             return 4;
@@ -685,5 +767,6 @@ int32_t fairy_win32_close(void *native_window) {
         bridge_state.app_fiber = NULL;
     }
     UnregisterClassW(L"FairyMinimalWindow", GetModuleHandleW(NULL));
+    if (bridge_state.font != NULL) { DeleteObject(bridge_state.font); bridge_state.font = NULL; }
     return bridge_state.exit_code;
 }
