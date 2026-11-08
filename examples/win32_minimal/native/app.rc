@@ -3,5 +3,12 @@
 STRINGTABLE
 BEGIN
     101 L"Fairy C - Win32"
-    102 L"A native window built with Fairy C."
+    102 L"Your message will appear here."
+    103 L"Apply"
+    104 L"Ready"
+    105 L"WM_COMMAND: EN_CHANGE"
+    106 L"WM_COMMAND: BN_CLICKED"
+    107 L"Result: "
+    108 L"Enter a message first."
+    109 L"WM_COMMAND: BN_CLICKED (empty input)"
 END

@@ -11,6 +11,12 @@ fairyc build --release
 `fairyc run --release -- --smoke` to exercise creation, painting, the message
 loop and timer-driven destruction automatically.
 
+Type into **Message** and click **Apply**. The result displays the entered
+Unicode text; an empty message shows a prompt. The status line identifies
+`WM_COMMAND / EN_CHANGE` from editing and `WM_COMMAND / BN_CLICKED` from the
+button. Input is bounded to 127 UTF-16 code units. Tab moves between the edit
+and button controls, and the controls follow the window width when resized.
+
 Fairy owns `main()`. A small C bridge owns the Win32 window procedure and
 message loop. The `.rc` string table is compiled by SDK `rc.exe`. No UI
 framework or browser runtime is bundled; the executable uses Windows system
