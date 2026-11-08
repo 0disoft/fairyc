@@ -47,7 +47,6 @@ fn ptr mut void pop_slot(ptr mut void storage, usize size) {
     return nonnull(unsafe { pop_slot_raw(storage, size) });
 }
 fn T take_slot<T>(ptr mut void slot) { return unsafe { storage_take<T>(slot) }; }
-fn i32 write_slot<T>(ptr mut void slot, T value) { return unsafe { storage_put<T>(slot, value); 1 }; }
 
 /// Constructs an empty vector without allocating.
 pub fn Vec<T> empty<T>() {
@@ -165,7 +164,7 @@ pub fn Result<usize, T> push<T>(ref mut Vec<T> value, T element) {
     let status = unsafe { prepare_raw(value as ptr mut void, value.element_size, ref mut slot as ptr mut void) };
     return if (status == 0) {
         assert(slot != null);
-        assert(write_slot<T>(slot, element) == 1);
+        unsafe { storage_put<T>(slot, element); };
         unsafe { commit(value as ptr mut void, slot, value.element_size); };
         .ok(value.length)
     } else { .err(element) };
