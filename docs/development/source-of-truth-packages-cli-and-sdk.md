@@ -443,7 +443,7 @@ CLI regressions are `internal/cli/windows_gui*_windows_amd64_test.go`.
 The example's opt-in JSONL agent control is owned by
 `examples/win32_minimal/README.md`, `control.py` and `native/window.c` within
 that example. Execution: `docs/development/windows-gui-cli-control-20261108.md`.
-Fairy-owned click handling and the C event pump are recorded in
+Fairy-owned click/input-change handling and the C event pump are recorded in
 `docs/development/windows-gui-fairy-events-20261109.md`.
 
 ## Fairy candidate copied local closures

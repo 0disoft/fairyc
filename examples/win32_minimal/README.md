@@ -65,9 +65,11 @@ length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
-Fairy owns `main()`, the application event loop, click count and `on_click`
-handler in `src/main.fy`. That handler decides empty-input behavior and builds
-the UTF-8 result text. C owns the Win32 window procedure, message pump,
+Fairy owns `main()`, the application event loop, edit/click counts and the
+`on_change` / `on_click` handlers in `src/main.fy`. `on_change` chooses the edit
+status; `on_click` decides empty-input behavior and builds the UTF-8 result
+text. Editing leaves the last applied result intact until Apply is clicked.
+C owns the Win32 window procedure, message pump,
 control access, UTF-8/UTF-16 conversion and automation transport. The `.rc`
 string table is compiled by SDK `rc.exe`. No UI
 framework or browser runtime is bundled; the executable uses Windows system
@@ -75,10 +77,14 @@ DLLs and the static CRT. This prototype does not expose arbitrary Fairy
 callbacks to Windows or generate Win32 SDK bindings.
 
 The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
-`fairy_win32_read_input`, `fairy_win32_present` and `fairy_win32_close`.
-`next` pumps Win32 messages and returns 1 for a click, or 0 on exit. Fairy
-handles the event and calls `present` with the result, count and status ID.
-The bridge then acknowledges a pending CLI click with the rendered state.
+`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed` and
+`fairy_win32_close`. `next` pumps Win32 messages and returns 1 for a click,
+2 for `EN_CHANGE`, or 0 on exit. Fairy handles the event and calls `present`
+with the click result/count/status, or `changed` with the edit count/status.
+C mirrors these counts for state replies and updates the controls. A notified
+CLI input or click is acknowledged after the corresponding Fairy handler.
+The edit count measures native change notifications, not characters or CLI
+commands; a replacement, clear or keyboard edit can produce a notification.
 `next` returns before Fairy processes the event; C retains no Fairy
 callback, context or input/output buffer. This single-window example uses the
 existing pointer/scalar FFI and introduces no public SDK or export contract.

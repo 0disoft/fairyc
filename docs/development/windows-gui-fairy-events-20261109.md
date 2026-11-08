@@ -1,4 +1,4 @@
-# Fairy-owned Win32 click handling, 2026-11-09
+# Fairy-owned Win32 click and input-change handling, 2026-11-09
 
 Owner: [example README](../../examples/win32_minimal/README.md) and the private
 FFI in `src/main.fy` / `native/window.c`. [ADR 0552](../adr/0552-minimal-windows-gui-build.md)
@@ -6,16 +6,20 @@ continues to own native application build inputs.
 
 ## Behavior and lifetime
 
-Fairy now owns the application loop, click count, empty-input decision and result
-string construction. Its `on_click` reads bounded UTF-8 and produces the text.
+Fairy now owns the application loop, edit/click counts, edit status, empty-input
+decision and result string construction. Its `on_change` selects status 105;
+`on_click` reads bounded UTF-8 and produces the text. Editing preserves the last
+applied result until the next click.
 C owns Win32 window/control operations, message pumping, character conversion,
-native edit telemetry and the existing JSONL transport.
+mirrored counts for observation and the existing JSONL transport.
 
 The private functions are `fairy_win32_open`, `fairy_win32_next`,
-`fairy_win32_read_input`, `fairy_win32_present` and `fairy_win32_close`.
-`next` returns a click to Fairy; `present` renders Fairy's result and mirrored
-click count, then acknowledges a pending CLI request. A CLI reply therefore
-observes the rendered result, rather than racing the handler. C retains no
+`fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed` and
+`fairy_win32_close`. `next` returns 1 for a click, 2 for `EN_CHANGE`, and 0 on
+exit. Fairy increments the corresponding count, then calls `present` or
+`changed` to render and mirror its state. Only then does C acknowledge a pending
+CLI request. A CLI reply therefore observes the handled event. The edit count
+measures native change notifications, not characters or CLI commands. C retains no
 Fairy function or input/output buffer. The opaque window lives until close.
 The example remains single-window and single-threaded.
 
@@ -27,7 +31,7 @@ as errors. Both native builders now keep `/W4 /WX` for project C bridges and
 retain their existing partition-consumer flags for generated C. No emitter
 diagnostic, semantic check or compiler work budget was weakened or raised.
 
-## Executed verification
+## Earlier click-handling verification
 
 - `go test -mod=readonly ./internal/cli -run
   '^TestWindowsGUI(Example|EventFailure|Resources|WorkspaceBuild)$' -count=1 -v`:
@@ -81,6 +85,39 @@ consumer policy; this is not a warning-free emitter claim.
 Only the private example C bridge API changed; JSONL v1 and the compiler's
 public CLI/language/FFI contracts did not. No DB, dependencies, workflows/runners,
 repository-hygiene policy, version bump, push or deployment changes.
-Implementation commits: `2c574172` native warning scope, `153993c5` Fairy event
-handling and source-backed regression. Documentation and strict bridge warning
-regression follow separately.
+Earlier implementation commits: `2c574172` native warning scope and `153993c5`
+Fairy click handling and source-backed regression.
+
+## EN_CHANGE follow-up verification
+
+- `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure)$' -count=1 -v`: PASS, 18.512s.
+  Both profiles pass; the negative cases modify only Fairy's result prefix,
+  edit increment, or edit status and each correctly fails the native event smoke.
+- After tightening `control.py` to assert exact edit/click counts throughout,
+  `go test -mod=readonly ./internal/cli -run '^TestWindowsGUIExample$'
+  -count=1 -v`: PASS, 12.283s, including development/release JSONL control.
+- The previously authenticated authored Fairy CLI/companion builds the current
+  example with `build --locked` and `build --locked --release`. The strengthened
+  `control.py --verify` passes each resulting application: ten observations,
+  edit notifications 1/2/3, five rejected invalid native commands and clean exit.
+  This reuses the compiler host; it is not a fresh compiler bootstrap or fixed
+  point verification.
+- A persistent CLI session against the authored release app observes Korean
+  input with `edits=1`, `clicks=0`, status `WM_COMMAND: EN_CHANGE`, and the initial
+  result unchanged. Clicking yields `clicks=1` and the expected result. Replacing
+  the input yields `edits=2`, `clicks=1`, `EN_CHANGE` and the previous result
+  unchanged. The session then closes the application successfully.
+- Scoped `git diff --check`: PASS. No public contract or compiler source changed;
+  the limits above also apply to this follow-up.
+
+| Builder | Development app | Release app |
+|---|---:|---:|
+| Go CLI, EN_CHANGE follow-up | 123,392 bytes | 120,320 bytes |
+| Existing authored Fairy CLI/companion, low host | 138,752 bytes | 122,368 bytes |
+
+Local receipts: `.cache/windows-gui-fairy-change-final-20261109.log`,
+`windows-gui-fairy-change-control-final-20261109.log` and
+`windows-gui-fairy-change-{development,release}-20261109.json`.
+Implementation commit: `6c4fa8a2`; strengthened CLI/regression checks:
+`4ca3e45b`. README and this execution note document the private bridge boundary.
