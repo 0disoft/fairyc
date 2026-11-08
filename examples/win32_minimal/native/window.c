@@ -8,7 +8,7 @@
 enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_LIMIT = 127 };
 
 typedef struct {
-    BOOL click_pending;
+    int32_t pending_event;
     BOOL reply_pending;
     unsigned smoke_step;
     unsigned smoke_edits;
@@ -79,7 +79,7 @@ static void smoke_events(HWND window, WindowState *state) {
         if (!control_resource(window, 101) || state->clicks != 0 ||
             !control_resource(state->status, 104)) { break; }
         SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
-        if (state->click_pending) { break; }
+        if (state->pending_event) { break; }
         SendMessageW(state->apply, BM_CLICK, 0, 0);
         return;
     case 1:
@@ -243,6 +243,10 @@ static BOOL automation_command(HWND window, WindowState *state) {
             !SetWindowTextW(state->input, text)) {
             return automation_error(state);
         }
+        if (state->pending_event != 0) {
+            state->reply_pending = TRUE;
+            return TRUE;
+        }
         return automation_state(window, state);
     }
     return automation_error(state);
@@ -268,7 +272,7 @@ static void automation_poll(HWND window, WindowState *state) {
             BOOL sent = automation_command(window, state);
             state->command_size = 0;
             state->command_overflow = FALSE;
-            if (state->click_pending || !IsWindow(window)) {
+            if (state->pending_event || !IsWindow(window)) {
                 return;
             }
             if (!sent) {
@@ -294,6 +298,23 @@ static BOOL argument(LPCWSTR flag) {
     }
     while (*cursor == L' ' || *cursor == L'\t') { cursor++; }
     return wcscmp(cursor, flag) == 0;
+}
+
+static int32_t acknowledge(HWND window) {
+    if (bridge_state.reply_pending) {
+        bridge_state.reply_pending = FALSE;
+        if (!automation_state(window, &bridge_state)) { return 1; }
+    }
+    return 0;
+}
+
+int32_t fairy_win32_changed(void *native_window, uint32_t edits, uint32_t status_id) {
+    HWND window = (HWND)native_window;
+    HWND status = GetDlgItem(window, STATUS_ID);
+    if (status == NULL) { return 1; }
+    resource_text(status, status_id);
+    bridge_state.edits = edits;
+    return acknowledge(window);
 }
 
 size_t fairy_win32_read_input(void *native_window, uint8_t *output, size_t capacity) {
@@ -329,11 +350,7 @@ int32_t fairy_win32_present(void *native_window, const uint8_t *text, size_t len
     }
     resource_text(GetDlgItem(window, STATUS_ID), status_id);
     bridge_state.clicks = clicks;
-    if (bridge_state.reply_pending) {
-        bridge_state.reply_pending = FALSE;
-        if (!automation_state(window, &bridge_state)) { return 1; }
-    }
-    return 0;
+    return acknowledge(window);
 }
 
 static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
@@ -363,13 +380,12 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
     case WM_COMMAND:
         if (LOWORD(wparam) == INPUT_ID && HIWORD(wparam) == EN_CHANGE &&
             (HWND)lparam == state->input) {
-            state->edits++;
-            resource_text(state->status, 105);
+            state->pending_event = 2;
             return 0;
         }
         if (LOWORD(wparam) == APPLY_ID && HIWORD(wparam) == BN_CLICKED &&
             (HWND)lparam == state->apply) {
-            state->click_pending = TRUE;
+            state->pending_event = 1;
             return 0;
         }
         break;
@@ -455,6 +471,11 @@ int32_t fairy_win32_next(void *native_window) {
     HWND window = (HWND)native_window;
     MSG message;
     while (TRUE) {
+        if (bridge_state.pending_event != 0) {
+            int32_t event = bridge_state.pending_event;
+            bridge_state.pending_event = 0;
+            return event;
+        }
         int result = (int)GetMessageW(&message, NULL, 0, 0);
         if (result <= 0) {
             bridge_state.exit_code = result < 0 ? 4 : (int32_t)message.wParam;
@@ -463,10 +484,6 @@ int32_t fairy_win32_next(void *native_window) {
         if (!IsDialogMessageW(window, &message)) {
             TranslateMessage(&message);
             DispatchMessageW(&message);
-        }
-        if (bridge_state.click_pending) {
-            bridge_state.click_pending = FALSE;
-            return 1;
         }
     }
 }
