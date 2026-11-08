@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <stdint.h>
 #include <wchar.h>
+#include <string.h>
 
 enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_LIMIT = 127 };
 
@@ -13,6 +14,11 @@ typedef struct {
     HWND status;
     unsigned edits;
     unsigned clicks;
+    HANDLE command_input;
+    HANDLE command_output;
+    char command[1024];
+    size_t command_size;
+    BOOL command_overflow;
 } WindowState;
 
 static void resource_text(HWND control, UINT id) {
@@ -102,6 +108,178 @@ static BOOL smoke_events(HWND window, WindowState *state) {
            GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 8 + INPUT_LIMIT;
 }
 
+typedef struct {
+    char bytes[4096];
+    size_t size;
+    BOOL valid;
+} Json;
+
+static void json_bytes(Json *json, const char *value) {
+    size_t length = strlen(value);
+    if (length > sizeof(json->bytes) - json->size) {
+        json->valid = FALSE;
+        return;
+    }
+    memcpy(json->bytes + json->size, value, length);
+    json->size += length;
+}
+
+static void json_number(Json *json, unsigned value) {
+    char digits[11];
+    size_t at = sizeof(digits) - 1;
+    digits[at] = '\0';
+    do {
+        digits[--at] = (char)('0' + value % 10);
+        value /= 10;
+    } while (value != 0);
+    json_bytes(json, digits + at);
+}
+
+static void json_text(Json *json, HWND control) {
+    WCHAR text[160];
+    char utf8[640];
+    const char hex[] = "0123456789abcdef";
+    text[0] = L'\0';
+    GetWindowTextW(control, text, (int)ARRAYSIZE(text));
+    int length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, -1,
+                                    utf8, (int)sizeof(utf8), NULL, NULL);
+    if (length == 0) {
+        json->valid = FALSE;
+        return;
+    }
+    json_bytes(json, "\"");
+    for (int i = 0; i < length - 1; i++) {
+        unsigned char byte = (unsigned char)utf8[i];
+        if (byte == '"' || byte == '\\') {
+            char escaped[] = {'\\', (char)byte, '\0'};
+            json_bytes(json, escaped);
+        } else if (byte < 32) {
+            char escaped[] = {'\\', 'u', '0', '0', hex[byte >> 4], hex[byte & 15], '\0'};
+            json_bytes(json, escaped);
+        } else {
+            char raw[] = {(char)byte, '\0'};
+            json_bytes(json, raw);
+        }
+    }
+    json_bytes(json, "\"");
+}
+
+static BOOL automation_write(WindowState *state, const char *bytes, size_t length) {
+    while (length > 0) {
+        DWORD written = 0;
+        if (!WriteFile(state->command_output, bytes, (DWORD)length, &written, NULL) || written == 0) {
+            return FALSE;
+        }
+        bytes += written;
+        length -= written;
+    }
+    return TRUE;
+}
+
+static BOOL automation_state(HWND window, WindowState *state) {
+    Json json = {{0}, 0, TRUE};
+    json_bytes(&json, "{\"schema\":\"fairyc.win32-example-control/v1\",\"ok\":true,\"pid\":");
+    json_number(&json, (unsigned)GetCurrentProcessId());
+    json_bytes(&json, IsWindowVisible(window) ? ",\"visible\":true,\"title\":" : ",\"visible\":false,\"title\":");
+    json_text(&json, window);
+    json_bytes(&json, ",\"input\":");
+    json_text(&json, state->input);
+    json_bytes(&json, ",\"result\":");
+    json_text(&json, state->result);
+    json_bytes(&json, ",\"status\":");
+    json_text(&json, state->status);
+    json_bytes(&json, ",\"edits\":");
+    json_number(&json, state->edits);
+    json_bytes(&json, ",\"clicks\":");
+    json_number(&json, state->clicks);
+    json_bytes(&json, "}\n");
+    return json.valid && automation_write(state, json.bytes, json.size);
+}
+
+static BOOL automation_error(WindowState *state) {
+    const char error[] = "{\"ok\":false,\"error\":\"invalid_command_or_input\"}\n";
+    return automation_write(state, error, sizeof(error) - 1);
+}
+
+static BOOL automation_command(HWND window, WindowState *state) {
+    if (state->command_overflow || memchr(state->command, '\0', state->command_size) != NULL) {
+        return automation_error(state);
+    }
+    state->command[state->command_size] = '\0';
+    if (strcmp(state->command, "state") == 0) {
+        return automation_state(window, state);
+    }
+    if (strcmp(state->command, "click") == 0) {
+        SendMessageW(state->apply, BM_CLICK, 0, 0);
+        return automation_state(window, state);
+    }
+    if (strcmp(state->command, "close") == 0) {
+        const char reply[] = "{\"ok\":true,\"closed\":true}\n";
+        automation_write(state, reply, sizeof(reply) - 1);
+        DestroyWindow(window);
+        return TRUE;
+    }
+    if (strncmp(state->command, "input\t", 6) == 0) {
+        WCHAR text[INPUT_LIMIT + 1];
+        int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, state->command + 6,
+                                        -1, text, (int)ARRAYSIZE(text));
+        if (length == 0 || wcschr(text, L'\r') != NULL ||
+            !SetWindowTextW(state->input, text)) {
+            return automation_error(state);
+        }
+        return automation_state(window, state);
+    }
+    return automation_error(state);
+}
+
+static void automation_poll(HWND window, WindowState *state) {
+    DWORD available = 0;
+    if (!PeekNamedPipe(state->command_input, NULL, 0, NULL, &available, NULL)) {
+        DestroyWindow(window);
+        return;
+    }
+    if (available > sizeof(state->command)) {
+        available = (DWORD)sizeof(state->command);
+    }
+    while (available-- > 0) {
+        char byte;
+        DWORD count = 0;
+        if (!ReadFile(state->command_input, &byte, 1, &count, NULL) || count != 1) {
+            DestroyWindow(window);
+            return;
+        }
+        if (byte == '\n') {
+            BOOL sent = automation_command(window, state);
+            state->command_size = 0;
+            state->command_overflow = FALSE;
+            if (!IsWindow(window)) {
+                return;
+            }
+            if (!sent) {
+                DestroyWindow(window);
+                return;
+            }
+        } else if (state->command_size < sizeof(state->command) - 1) {
+            state->command[state->command_size++] = byte;
+        } else {
+            state->command_overflow = TRUE;
+        }
+    }
+}
+
+static BOOL argument(LPCWSTR flag) {
+    LPCWSTR cursor = GetCommandLineW();
+    if (*cursor == L'"') {
+        cursor++;
+        while (*cursor != L'\0' && *cursor != L'"') { cursor++; }
+        if (*cursor != L'\0') { cursor++; }
+    } else {
+        while (*cursor != L'\0' && *cursor != L' ' && *cursor != L'\t') { cursor++; }
+    }
+    while (*cursor == L' ' || *cursor == L'\t') { cursor++; }
+    return wcscmp(cursor, flag) == 0;
+}
+
 static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     WindowState *state = (WindowState *)GetWindowLongPtrW(window, GWLP_USERDATA);
     switch (message) {
@@ -164,6 +342,10 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         }
         return 0;
     case WM_TIMER:
+        if (wparam == 2 && state->command_input != NULL) {
+            automation_poll(window, state);
+            return 0;
+        }
         if (wparam == 1) {
             BOOL passed = smoke_events(window, state);
             KillTimer(window, 1);
@@ -202,12 +384,26 @@ int32_t fairy_win32_run(void) {
     if (window == NULL) {
         return 2;
     }
-    if (wcsstr(GetCommandLineW(), L"--smoke") != NULL && SetTimer(window, 1, 100, NULL) == 0) {
+    if (argument(L"--smoke") && SetTimer(window, 1, 100, NULL) == 0) {
         DestroyWindow(window);
         return 3;
     }
+    if (argument(L"--automation-stdio")) {
+        state.command_input = GetStdHandle(STD_INPUT_HANDLE);
+        state.command_output = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (GetFileType(state.command_input) != FILE_TYPE_PIPE ||
+            GetFileType(state.command_output) != FILE_TYPE_PIPE ||
+            SetTimer(window, 2, 20, NULL) == 0) {
+            DestroyWindow(window);
+            return 6;
+        }
+    }
     ShowWindow(window, SW_SHOWNORMAL);
     UpdateWindow(window);
+    if (state.command_input != NULL && !automation_state(window, &state)) {
+        DestroyWindow(window);
+        return 6;
+    }
     MSG message;
     int result;
     while ((result = (int)GetMessageW(&message, NULL, 0, 0)) > 0) {
