@@ -57,6 +57,44 @@ close button. The ordinary WndProc forwards these events to Fairy and replies re
 control text. This verifies programmatic control events; it does not certify
 physical keyboard/mouse delivery, IME, screen rendering or accessibility.
 
+### DPI changes and scaled layout
+
+The example sets Per-Monitor V2 awareness before creating any UI (Windows 10
+1703 or later). Fairy uses 96-DPI base units and rounds `(value * dpi + 48) / 96`.
+`on_size` scales margins, button size, vertical positions/heights, minimum size
+and font height. The native bridge creates/caches the requested Segoe UI font,
+selects it into all controls and releases replaced fonts.
+
+`WM_DPICHANGED` copies the new DPI and suggested rectangle into native storage
+and yields event 5 to Fairy. `on_dpi` supplies the new scaled minimum **before**
+accepting the suggested window rectangle, then runs layout at the new DPI.
+This ordering prevents an old high-DPI minimum from blocking a later shrink.
+Pending DPI work precedes resize work, including during the modal drag loop.
+
+```powershell
+python -B control.py --verify-dpi
+```
+
+This is explicitly an **injected `WM_DPICHANGED` test on a real GUI**, not a
+physical monitor transition or a display-setting change. It round-trips
+96 / 144 / 192 / 96 / the initial OS DPI and checks actual window/control
+rectangles, selected font heights, Fairy's event count, preserved text/click
+state and rejected malformed requests. Result JSON uses
+`verification:"injected-win32-dpi"`, includes the read-only monitor inventory
+from `dpi_inventory.py`, and reports `physicalMonitorTransitionTested:false`.
+It does not modify system display scaling.
+
+Interactive JSON supports
+`{"command":"dpi-test","dpi":144,"width":960,"height":540}`. DPI must be an
+integer in 96..384, and suggested outer dimensions in 1..4096. This private
+test command only exists in the opt-in automation session. State reports `dpi`
+(last message DPI), `windowDpi` (actual `GetDpiForWindow`), `perMonitorV2`,
+`dpiChanges` (Fairy-applied events), `dpiInjections`, `dpiSuggested`, `dpiApplied`
+and actual selected `fonts` heights. `dpiApplied` records the accepted rectangle;
+`window` independently measures the actual result. Injected message DPI can
+differ from OS DPI by design; a successful injected check does not certify
+physical cross-monitor or OS non-client scaling behavior.
+
 ### Resize and Fairy layout
 
 ```powershell
@@ -72,7 +110,8 @@ sizes must leave all state unchanged, and Apply must still work afterward.
 
 Interactive JSON accepts `{"command":"resize","width":800,"height":480}`.
 Dimensions are the **outer window** size in the application's Win32 coordinate
-space, including its frame/title bar. The current Fairy minimum is 400 by 240;
+space (physical pixels under PMv2), including its frame/title bar. The Fairy
+minimum is 400 by 240 at 96 DPI and scales with DPI (500 by 300 at 120 DPI);
 the example protocol caps each dimension at 4096. Booleans, non-integers,
 unknown fields, malformed native dimensions and below-minimum sizes reject.
 
@@ -84,8 +123,9 @@ coalesced notifications and unchanged-size requests need not each increment it.
 Initial readiness and resize replies wait until Fairy has applied all controls.
 
 Fairy owns initial window dimensions; `on_size` owns minimum dimensions, the
-16-unit inset, input/result widths and the right-aligned fixed-width Apply button. The
-existing vertical positions/heights stay fixed when only height changes.
+16-base-unit inset, input/result widths and the right-aligned fixed-base-width
+Apply button. Vertical positions/heights stay fixed when only height changes,
+and all base units scale when DPI changes.
 C only reads native client dimensions, moves the requested control and applies
 the supplied minimum tracking size. Size notifications are coalesced separately
 from input/click/close events. The native message pump runs on a separate Win32
@@ -170,14 +210,14 @@ and inherited pipe stdin/stdout. The Python controller owns that process and
 closes it on stdin EOF or error. It opens no socket, contacts no service and
 targets only its owned child process. Native requests use LF
 lines `state`, `input<TAB>UTF-8`, `resize<TAB>width<TAB>height`, `click`, `close`,
-`arm-close`; replies are JSON lines.
+`arm-close`, `dpi-test<TAB>dpi<TAB>width<TAB>height`; replies are JSON lines.
 The native buffer is bounded to 1023 bytes and validates UTF-8, NUL and input
 length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
-Fairy owns `main()`, the application event loop, edit/click/resize counts and the
-`on_change` / `on_click` / `on_close` / `on_size` handlers in `src/main.fy`.
+Fairy owns `main()`, the application event loop, edit/click/resize/DPI counts and the
+`on_change` / `on_click` / `on_close` / `on_size` / `on_dpi` handlers in `src/main.fy`.
 `on_change` chooses the edit
 status; `on_click` decides empty-input behavior and builds the UTF-8 result
 text. Editing leaves the last applied result intact until Apply is clicked.
@@ -193,9 +233,11 @@ callbacks to Windows or generate Win32 SDK bindings.
 The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
 `fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
-`fairy_win32_layout_done` and `fairy_win32_close`. `open` takes Fairy's initial
+`fairy_win32_layout_done`, `fairy_win32_initialize_dpi`, `fairy_win32_dpi`,
+`fairy_win32_font`, `fairy_win32_accept_dpi` and `fairy_win32_close`.
+`initialize_dpi` enables PMv2 and returns the system DPI. `open` takes Fairy's initial
 window dimensions. `next` pumps Win32 messages and returns 1 for a click,
-2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, or 0 on exit.
+2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, 5 for `WM_DPICHANGED`, or 0 on exit.
 Fairy handles the event and calls `present`
 with the click result/count/status, or `changed` with the edit count/status.
 C mirrors these counts for state replies and updates the controls. A notified

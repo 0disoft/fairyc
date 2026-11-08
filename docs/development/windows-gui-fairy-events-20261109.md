@@ -6,21 +6,26 @@ continues to own native application build inputs.
 
 ## Behavior and lifetime
 
-Fairy now owns the application loop, edit/click/resize counts, edit status, empty-input
-decision, close policy, layout and result string construction. Its `on_change` selects status 105;
+Fairy now owns the application loop, edit/click/resize/DPI counts, edit status, empty-input
+decision, close policy, DPI scaling, layout and result string construction. Its `on_change` selects status 105;
 `on_click` reads bounded UTF-8 and produces the text. Editing preserves the last
 applied result until the next click. `on_close` currently allows closing.
 `on_size` computes all five control rectangles, including horizontal anchoring,
-fixed vertical positions/heights and minimum window dimensions. Fairy also
-supplies initial outer dimensions to `open`.
+vertical positions/heights and minimum window dimensions. These use 96-DPI base
+units scaled by Fairy with rounding; font height is supplied by Fairy too.
+Fairy enables PMv2 before creating UI and supplies scaled initial dimensions to
+`open`. `on_dpi` supplies the new minimum before accepting the copied suggested
+rectangle, then runs `on_size`; this ordering allows high-to-low DPI shrink.
 C owns Win32 window/control operations, message pumping, character conversion,
 mirrored counts for observation and the existing JSONL transport.
 
 The private functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
 `fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
-`fairy_win32_layout_done` and `fairy_win32_close`. `next` returns 1 for a click,
-2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, and 0 on exit.
+`fairy_win32_layout_done`, `fairy_win32_initialize_dpi`, `fairy_win32_dpi`,
+`fairy_win32_font`, `fairy_win32_accept_dpi` and `fairy_win32_close`.
+`next` returns 1 for a click, 2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`,
+5 for `WM_DPICHANGED`, and 0 on exit.
 Fairy increments the corresponding edit/click count, then calls `present` or
 `changed` to render and mirror its state. Only then does C acknowledge a pending
 CLI request. A CLI reply therefore observes the handled event. The edit count
@@ -29,8 +34,8 @@ Fairy function or input/output buffer. The opaque window lives until close.
 The example remains single-window and single-threaded.
 
 Size notifications have a separate coalesced pending flag so they cannot
-overwrite input/click/close events. The pump delivers pending size work before
-other pending events. Fairy reads current client extents through scalar FFI,
+overwrite input/click/close events. The pump delivers pending DPI work first,
+then size work before other pending events. Fairy reads current client extents through scalar FFI,
 computes positions, calls native control moves, and completes with
 `layout_done`. C then mirrors the Fairy count/minimum and acknowledges initial
 readiness or a pending resize request. Other event acknowledgements are kept
@@ -38,7 +43,7 @@ separate. Geometry replies use `GetWindowRect`, `GetClientRect` and
 `MapWindowPoints` to observe actual rectangles rather than echo supplied boxes.
 
 The native pump now runs on a Win32 fiber on the same OS thread as Fairy. A
-`WM_SIZE` handler on the pump fiber yields to the application fiber, including
+`WM_SIZE` or `WM_DPICHANGED` handler on the pump fiber yields to the application fiber, including
 when Windows' default modal sizing loop is active. Fairy's existing `next` /
 `on_size` / `layout_done` path applies the geometry and resumes the suspended
 native frame. No Fairy callback/export, extra OS thread or C layout policy is
@@ -358,3 +363,83 @@ dragging, elevated/locked/headless targets and other monitor/DPI combinations
 were not certified by this Windows example task. The OS must deliver live
 `WM_SIZE` notifications for intermediate layout; the bridge does not replace
 the native drag behavior or change system-wide full-window-drag settings.
+
+## WM_DPICHANGED and scaled layout follow-up
+
+The example now enables Per-Monitor V2 before UI creation, using
+`SetProcessDpiAwarenessContext`; Windows 10 1703 or newer is required. Fairy's
+`scale` converts 96-DPI base units with integer rounding. `on_size` scales all
+five control rectangles, the minimum window size and the requested font height.
+The bridge caches the requested Segoe UI font and deletes replaced/final fonts.
+
+For [WM_DPICHANGED](https://learn.microsoft.com/en-us/windows/win32/hidpi/wm-dpichanged),
+C copies the new DPI and suggested RECT before yielding event 5. Fairy's
+`on_dpi` passes the scaled minimum to `accept_dpi` before native `SetWindowPos`,
+then runs layout. This fixes a reproduced 192-to-96 shrink where the old
+800x480 minimum otherwise prevented the suggested 640x360 size. DPI work
+precedes pending resize work; acknowledgement waits for completed layout.
+Other input/click/close events retain their existing pending channel.
+
+### Passed checks
+
+- `go run -mod=readonly ../../cmd/fairyc check`: PASS, 1 source / 7 MIR
+  functions, example lock refreshed.
+- Existing authored Fairy CLI/companion `build --locked` and
+  `build --locked --release`: PASS. Both images pass `control.py --verify-dpi`
+  on the real GUI. Explicitly injected DPI values are 96/144/192/96/120;
+  actual selected font heights are 12/18/24/12/15. Actual outer rectangles and
+  five native child rectangles match Fairy policy; state and text survive,
+  six malformed native requests leave state unchanged, Apply still works,
+  and close exits 0. The authored release resize baseline also passed.
+- With `GOMAXPROCS=1` and desktop injection disabled,
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure|DPI)$' -count=1 -v`:
+  PASS, 37.907s. Both Go-built profiles pass smoke, standard/resize and DPI
+  verification. Five existing Fairy mutation controls and a new Fairy-only
+  ignored-DPI-acceptance control pass. The latter builds successfully but
+  `--verify-dpi` exits 1, proving C does not apply the suggested rectangle
+  without Fairy's decision.
+- `gofmt` and scoped `git diff --check`: PASS.
+
+Go development/release images: 136,704 / 130,560 bytes. Authored images:
+155,648 / 132,608 bytes. The previously authenticated authored compiler host
+was reused; this is not a fresh bootstrap/fixed-point claim.
+Feature commit: `286c602b`; minimum-size ordering/test transport: `5fb6eeb0`;
+CLI and regression: `1f7236ff`.
+
+### Limits and failed desktop rechecks
+
+Inventory reads one monitor at 125%, physical bounds 1920x1080. PMv2 and
+initial `GetDpiForWindow=120` are observed. Controlled messages operate on real
+windows/fonts, but **do not change the OS DPI**: receipts use
+`verification:"injected-win32-dpi"` and `physicalMonitorTransitionTested:false`.
+`dpi` is the last message DPI; `windowDpi` independently reports the OS value.
+`dpiApplied` records the accepted rectangle, while `window` measures the actual
+result. No display settings were changed and no cross-monitor transition was
+performed. The reusable CLI inventories monitors but does not move the window
+between them automatically.
+
+The broader desktop-enabled command selecting
+`Example|EventFailure|DesktopClose|LiveDrag|DPI` **failed**, 69.667s: scoped DPI
+and ordinary checks passed, while release close/drag checks timed out or failed
+to enter sizing. A focused desktop recheck passed close in both profiles but
+still failed a drag case. Diagnostics later observed `AttachThreadInput` to
+the foreground thread failing with Windows error 5; attachment to the owned
+GUI thread succeeded, but foreground acquisition was denied. These outcomes
+do not establish a passing desktop-input regression run. Exploratory hover /
+button / input-queue probes were removed; the prior desktop helper and native
+input path are unchanged in the final patch. The targeted passing command
+above deliberately does not inject desktop input.
+
+Receipts: `.cache/windows-gui-dpi-scoped-20261109.log`,
+`windows-gui-dpi-{development,release}-20261109.json`,
+`windows-gui-dpi-baseline-20261109.json`, and the failed broader run
+`windows-gui-dpi-go-20261109.log` / focused `windows-gui-dpi-desktop-20261109.log`.
+Full repository tests, Linux, hosted CI, full compiler bootstrap/fixed point,
+physical cross-monitor/system-scale changes, visual raster/paint quality and
+other monitor/DPI combinations were not certified by this Windows example task.
+
+Only private example FFI/JSONL surfaces expand (`dpi-test`, DPI/selected-font
+telemetry and read-only `dpi_inventory.py`). Public compiler/language/SDK API,
+DB, dependencies, repository-hygiene policy, workflows/runners, versions, push
+and deployment are unchanged.
