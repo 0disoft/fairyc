@@ -139,15 +139,40 @@ def output(value):
     print(json.dumps(value, ensure_ascii=False), flush=True)
 
 
+def verify_desktop_close(image):
+    rows = []
+    for command in ('close-button', 'alt-f4'):
+        session = Session(image)
+        try:
+            session.request(dict(command='input', text='Fairy desktop close'))
+            applied = session.request(dict(command='click'))
+            if applied.get('result') != 'Result: Fairy desktop close':
+                raise RuntimeError('desktop close setup did not apply input')
+            reply = session.request(dict(command=command))
+            if reply.get('closed') is not True or session.process.poll() != 0:
+                raise RuntimeError('desktop close did not close the GUI with exit 0')
+            rows.append(reply)
+        finally:
+            session.finish()
+    return dict(ok=True, verification='win32-desktop-close', observations=rows,
+                processExited=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-minimal.exe')
-    parser.add_argument('--verify', action='store_true', help='verify events and close the owned GUI')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--verify', action='store_true', help='verify events and close the owned GUI')
+    mode.add_argument('--verify-desktop-close', action='store_true',
+                      help='verify title-bar click and Alt+F4 via desktop input; requires an idle desktop')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
     session = None
     try:
+        if args.verify_desktop_close:
+            output(verify_desktop_close(args.exe.resolve()))
+            return 0
         session = Session(args.exe.resolve())
         if args.verify:
             output(verify(session))

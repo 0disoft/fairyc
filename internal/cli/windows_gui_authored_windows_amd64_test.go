@@ -119,7 +119,8 @@ func TestWindowsGUIEventFailure(t *testing.T) {
 				}
 				// Change only Fairy policy: the same WM_CLOSE must now leave
 				// the window open and interactive, including repeated requests.
-				probe := `import sys
+				probe := `import os
+import sys
 sys.path.insert(0, sys.argv[1])
 from control import Session
 session = Session(sys.argv[2])
@@ -132,6 +133,17 @@ try:
     assert edited['edits'] == 1 and edited['status'] == 'WM_COMMAND: EN_CHANGE'
     applied = session.request({'command': 'click'})
     assert applied['clicks'] == 1 and applied['result'] == 'Result: after declined close'
+    if os.environ.get('FAIRYC_RUN_DESKTOP_INTEGRATION') == '1':
+        for command in ('close-button', 'alt-f4'):
+            denied = session.request({'command': command})
+            assert denied['closed'] is False and denied['systemClose'] is True
+            assert denied['desktopInput']['method'] == command
+            assert session.request({'command': 'state'}) == applied
+            assert session.process.poll() is None
+        edited = session.request({'command': 'input', 'text': 'after desktop close denial'})
+        assert edited['edits'] == 2
+        applied = session.request({'command': 'click'})
+        assert applied['clicks'] == 2 and applied['result'] == 'Result: after desktop close denial'
 finally:
     session.finish()
 `
