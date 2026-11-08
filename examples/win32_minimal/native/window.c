@@ -14,6 +14,7 @@ typedef struct {
     BOOL dpi_reply_pending;
     UINT dpi;
     unsigned dpi_changes;
+    unsigned dpi_injections;
     RECT dpi_suggested;
     RECT dpi_applied;
     HFONT font;
@@ -229,6 +230,7 @@ static BOOL json_geometry(Json *json, HWND window, WindowState *state) {
     json_bytes(json, AreDpiAwarenessContextsEqual(GetWindowDpiAwarenessContext(window),
                 DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) ? ",\"perMonitorV2\":true" : ",\"perMonitorV2\":false");
     json_bytes(json, ",\"dpiChanges\":"); json_number(json, state->dpi_changes);
+    json_bytes(json, ",\"dpiInjections\":"); json_number(json, state->dpi_injections);
     json_bytes(json, ",\"dpiSuggested\":"); json_rect(json, &state->dpi_suggested);
     json_bytes(json, ",\"dpiApplied\":"); json_rect(json, &state->dpi_applied);
     json_bytes(json, state->sizing ? ",\"sizing\":true" : ",\"sizing\":false");
@@ -351,6 +353,20 @@ static BOOL automation_command(HWND window, WindowState *state) {
         }
         return automation_state(window, state);
     }
+    if (strncmp(state->command, "dpi-test\t", 9) == 0) {
+        const char *cursor = state->command + 9;
+        int dpi, width, height;
+        RECT suggested;
+        if (!resize_dimension(&cursor, '\t', &dpi) || dpi < 96 || dpi > 384 ||
+            !resize_dimension(&cursor, '\t', &width) || !resize_dimension(&cursor, '\0', &height) ||
+            !GetWindowRect(window, &suggested)) { return automation_error(state); }
+        suggested.right = suggested.left + width;
+        suggested.bottom = suggested.top + height;
+        state->dpi_injections++;
+        state->dpi_reply_pending = TRUE;
+        SendMessageW(window, WM_DPICHANGED, MAKEWPARAM(dpi, dpi), (LPARAM)&suggested);
+        return TRUE;
+    }
     if (strncmp(state->command, "input\t", 6) == 0) {
         WCHAR text[INPUT_LIMIT + 1];
         int length = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, state->command + 6,
@@ -466,9 +482,12 @@ int32_t fairy_win32_font(void *native_window, int32_t height) {
     return 0;
 }
 
-int32_t fairy_win32_accept_dpi(void *native_window, uint32_t changes) {
+int32_t fairy_win32_accept_dpi(void *native_window, uint32_t changes, int32_t min_width, int32_t min_height) {
     HWND window = (HWND)native_window;
     RECT suggested = bridge_state.dpi_suggested;
+    if (min_width <= 0 || min_height <= 0) { return 1; }
+    bridge_state.min_width = min_width;
+    bridge_state.min_height = min_height;
     if (suggested.right <= suggested.left || suggested.bottom <= suggested.top ||
         !SetWindowPos(window, NULL, suggested.left, suggested.top,
                       suggested.right - suggested.left, suggested.bottom - suggested.top,

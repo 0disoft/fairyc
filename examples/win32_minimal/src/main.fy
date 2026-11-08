@@ -4,7 +4,7 @@ unsafe extern C fn ptr mut void fairy_win32_open(i32 width, i32 height);
 unsafe extern C fn i32 fairy_win32_initialize_dpi();
 unsafe extern C fn i32 fairy_win32_dpi(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_font(ptr mut void window, i32 height);
-unsafe extern C fn i32 fairy_win32_accept_dpi(ptr mut void window, u32 changes);
+unsafe extern C fn i32 fairy_win32_accept_dpi(ptr mut void window, u32 changes, i32 min_width, i32 min_height);
 unsafe extern C fn i32 fairy_win32_next(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_changed(ptr mut void window, u32 edits, u32 status_id);
 unsafe extern C fn i32 fairy_win32_resolve_close(ptr mut void window, u32 allow);
@@ -43,7 +43,9 @@ unsafe fn i32 on_size(ptr mut void window, u32 resizes) {
 fn i32 scale(i32 value, i32 dpi) { return (value * dpi + 48) / 96; }
 
 unsafe fn i32 on_dpi(ptr mut void window, u32 resizes, u32 dpi_changes) {
-    if (fairy_win32_accept_dpi(window, dpi_changes) != 0) { return 1; }
+    let i32 dpi = fairy_win32_dpi(window);
+    if (dpi < 1 || dpi > 960) { return 1; }
+    if (fairy_win32_accept_dpi(window, dpi_changes, scale(400, dpi), scale(240, dpi)) != 0) { return 1; }
     return on_size(window, resizes);
 }
 
