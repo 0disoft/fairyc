@@ -75,6 +75,13 @@ class Session:
             if any(type(value) is not int or not 1 <= value <= 4096 for value in (width, height)):
                 raise ValueError('resize width/height must be integers in 1..4096')
             return self.wire(f'resize\t{width}\t{height}'.encode('ascii'))
+        if command == 'dpi-test' and set(request) == {'command', 'dpi', 'width', 'height'}:
+            dpi, width, height = request['dpi'], request['width'], request['height']
+            if type(dpi) is not int or not 96 <= dpi <= 384:
+                raise ValueError('test DPI must be an integer in 96..384')
+            if any(type(value) is not int or not 1 <= value <= 4096 for value in (width, height)):
+                raise ValueError('suggested dimensions must be integers in 1..4096')
+            return self.wire(f'dpi-test\t{dpi}\t{width}\t{height}'.encode('ascii'))
         if command == 'input' and set(request) == {'command', 'text'}:
             text = request['text']
             if not isinstance(text, str) or any(c in text for c in '\r\n\0'):
@@ -82,7 +89,7 @@ class Session:
             if len(text.encode('utf-16-le')) > 254:
                 raise ValueError('input exceeds 127 UTF-16 code units')
             return self.wire(b'input\t' + text.encode('utf-8'))
-        raise ValueError('expected state, input with text, resize with width/height, drag-resize, click, close, close-button, or alt-f4')
+        raise ValueError('expected state, input, resize, dpi-test, drag-resize, click, close, close-button, or alt-f4')
 
     def finish(self):
         if self.process.poll() is None:
@@ -242,6 +249,49 @@ def verify_desktop_close(image):
                 processExited=True)
 
 
+def verify_dpi(session):
+    from dpi_inventory import monitors
+    baseline = session.initial
+    check_layout(baseline)
+    if baseline['dpi'] != baseline['windowDpi'] or baseline['dpiInjections'] != 0:
+        raise RuntimeError('initial OS DPI was not used')
+    session.request(dict(command='input', text='DPI를 바꿔도 유지 Ω'))
+    applied = session.request(dict(command='click'))
+    rows, prior = [], applied
+    for dpi in (96, 144, 192, 96, baseline['windowDpi']):
+        width, height = (640 * dpi + 48) // 96, (360 * dpi + 48) // 96
+        row = session.request(dict(command='dpi-test', dpi=dpi, width=width, height=height))
+        check_layout(row)
+        if row['dpi'] != dpi or row['dpiChanges'] != prior['dpiChanges'] + 1 or row['dpiInjections'] != prior['dpiInjections'] + 1:
+            raise RuntimeError('DPI event was not accepted by Fairy')
+        expected = dict(x=applied['window']['x'], y=applied['window']['y'], width=width, height=height)
+        if row['dpiSuggested'] != expected or row['dpiApplied'] != expected or row['window'] != expected:
+            raise RuntimeError('Fairy did not apply the suggested DPI rectangle')
+        if row['windowDpi'] != baseline['windowDpi']:
+            raise RuntimeError('OS DPI changed during the injected-message test')
+        for key in ('input', 'result', 'status', 'edits', 'clicks'):
+            if row[key] != applied[key]:
+                raise RuntimeError('DPI event changed application state: ' + key)
+        rows.append(row)
+        prior = row
+    for command in (b'dpi-test\t0\t640\t360', b'dpi-test\t95\t640\t360',
+                    b'dpi-test\t385\t640\t360', b'dpi-test\t144\t0\t360',
+                    b'dpi-test\t144\t640\t360junk', b'dpi-test\t144\t640'):
+        if session.wire(command).get('ok') is not False:
+            raise RuntimeError('invalid DPI test request was accepted')
+    if session.request(dict(command='state')) != prior:
+        raise RuntimeError('rejected DPI test request changed state')
+    clicked = session.request(dict(command='click'))
+    if clicked['clicks'] != applied['clicks'] + 1 or clicked['result'] != applied['result']:
+        raise RuntimeError('controls failed after DPI roundtrip')
+    if not session.request(dict(command='close')).get('closed') or session.process.wait(timeout=5) != 0:
+        raise RuntimeError('DPI test GUI did not exit successfully')
+    return dict(ok=True, verification='injected-win32-dpi', observations=rows,
+                monitors=monitors(), physicalMonitorTransitionTested=False,
+                physicalMonitorTransitionReason='message injection verifies the handler; no monitor move was performed',
+                rejectedNativeCommands=6, processExited=True)
+
+
 def drag_window(session):
     from desktop_input import drag_input
     baseline = session.request(dict(command='state'))
@@ -323,6 +373,7 @@ def main():
                       help='verify title-bar click and Alt+F4 via desktop input; requires an idle desktop')
     mode.add_argument('--verify-resize', action='store_true', help='resize the real window and verify native control rectangles')
     mode.add_argument('--verify-drag', action='store_true', help='verify live Fairy layout during actual border dragging; requires an idle desktop')
+    mode.add_argument('--verify-dpi', action='store_true', help='inject DPI messages and verify actual geometry/fonts; does not change display settings')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -338,6 +389,8 @@ def main():
             output(verify_resize(session))
         elif args.verify_drag:
             output(verify_drag(session))
+        elif args.verify_dpi:
+            output(verify_dpi(session))
         else:
             output(session.initial)
             while True:
