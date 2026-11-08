@@ -58,6 +58,29 @@ func TestWindowsGUIExample(t *testing.T) {
 	}
 }
 
+func TestWindowsGUIEventFailure(t *testing.T) {
+	root := windowsGUIExample(t)
+	path := filepath.Join(root, "native/window.c")
+	source, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	broken := strings.Replace(string(source), "state->clicks++;", "state->clicks += 0;", 1)
+	if broken == string(source) {
+		t.Fatal("missing button event mutation target")
+	}
+	writeWorkspaceFile(t, root, "native/window.c", broken)
+	if code, out, diag := runForTest([]string{"build", "--release"}, root); code != 0 || diag != "" {
+		t.Fatalf("build negative control: %d %s %s", code, out, diag)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, filepath.Join(root, "build/win32-minimal.exe"), "--smoke").CombinedOutput()
+	if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 5 || len(out) != 0 {
+		t.Fatalf("broken button event must fail smoke with 5: %v %s", err, out)
+	}
+}
+
 // Build only the companion's transitive authored modules with the Go bootstrap.
 // Application compilation/linking below executes the real Fairy companion.
 func windowsGUIAuthoredDriver(t *testing.T) string {

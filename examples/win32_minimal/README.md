@@ -9,7 +9,10 @@ fairyc build --release
 
 `fairyc run --release` also opens the window. Close it normally, or use
 `fairyc run --release -- --smoke` to exercise creation, painting, the message
-loop and timer-driven destruction automatically.
+loop and timer-driven destruction automatically. Smoke mode also verifies real
+edit notifications and button clicks, empty input, Unicode results, repeated
+edits, the input length limit and rejection of a command without its control
+handle. It exits with code 5 if an event check fails.
 
 Type into **Message** and click **Apply**. The result displays the entered
 Unicode text; an empty message shows a prompt. The status line identifies

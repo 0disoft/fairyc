@@ -44,6 +44,63 @@ static void layout(HWND window, WindowState *state) {
     MoveWindow(state->status, 16, 154, width - 32, 24, TRUE);
 }
 
+static BOOL control_resource(HWND control, UINT id) {
+    WCHAR actual[160];
+    WCHAR expected[160];
+    return GetWindowTextW(control, actual, (int)ARRAYSIZE(actual)) > 0 &&
+           LoadStringW(GetModuleHandleW(NULL), id, expected, (int)ARRAYSIZE(expected)) > 0 &&
+           wcscmp(actual, expected) == 0;
+}
+
+static BOOL smoke_events(HWND window, WindowState *state) {
+    WCHAR actual[160];
+    WCHAR long_input[201];
+    unsigned before = state->edits;
+    if (state->clicks != 0 || !control_resource(state->status, 104)) {
+        return FALSE;
+    }
+    SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
+    if (state->clicks != 0) {
+        return FALSE;
+    }
+    SendMessageW(state->apply, BM_CLICK, 0, 0);
+    if (state->clicks != 1 || !control_resource(state->result, 108) ||
+        !control_resource(state->status, 109)) {
+        return FALSE;
+    }
+    if (!SetWindowTextW(state->input, L"Fairy \uD55C\uAE00 \u03A9") ||
+        state->edits <= before || !control_resource(state->status, 105) ||
+        !control_resource(state->result, 108)) {
+        return FALSE;
+    }
+    SendMessageW(state->apply, BM_CLICK, 0, 0);
+    if (state->clicks != 2 || !control_resource(state->status, 106) ||
+        GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 0 ||
+        wcscmp(actual, L"Result: Fairy \uD55C\uAE00 \u03A9") != 0) {
+        return FALSE;
+    }
+    before = state->edits;
+    if (!SetWindowTextW(state->input, L"") || state->edits <= before) {
+        return FALSE;
+    }
+    SendMessageW(state->apply, BM_CLICK, 0, 0);
+    if (state->clicks != 3 || !control_resource(state->result, 108)) {
+        return FALSE;
+    }
+    for (int i = 0; i < 200; i++) {
+        long_input[i] = L'x';
+    }
+    long_input[200] = L'\0';
+    before = state->edits;
+    SendMessageW(state->input, EM_REPLACESEL, TRUE, (LPARAM)long_input);
+    if (state->edits <= before || GetWindowTextLengthW(state->input) != INPUT_LIMIT) {
+        return FALSE;
+    }
+    SendMessageW(state->apply, BM_CLICK, 0, 0);
+    return state->clicks == 4 && control_resource(state->status, 106) &&
+           GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 8 + INPUT_LIMIT;
+}
+
 static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     WindowState *state = (WindowState *)GetWindowLongPtrW(window, GWLP_USERDATA);
     switch (message) {
@@ -106,8 +163,14 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         }
         return 0;
     case WM_TIMER:
-        DestroyWindow(window);
-        return 0;
+        if (wparam == 1) {
+            BOOL passed = smoke_events(window, state);
+            KillTimer(window, 1);
+            DestroyWindow(window);
+            PostQuitMessage(passed ? 0 : 5);
+            return 0;
+        }
+        break;
     case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
