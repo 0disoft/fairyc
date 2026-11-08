@@ -86,16 +86,16 @@ func TestWindowsGUIExample(t *testing.T) {
 
 func TestWindowsGUIEventFailure(t *testing.T) {
 	root := windowsGUIExample(t)
-	path := filepath.Join(root, "native/window.c")
+	path := filepath.Join(root, "src/main.fy")
 	source, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	broken := strings.Replace(string(source), "state->clicks++;", "state->clicks += 0;", 1)
+	broken := strings.Replace(string(source), `b"Result: "`, `b"Broken: "`, 1)
 	if broken == string(source) {
-		t.Fatal("missing button event mutation target")
+		t.Fatal("missing Fairy result mutation target")
 	}
-	writeWorkspaceFile(t, root, "native/window.c", broken)
+	writeWorkspaceFile(t, root, "src/main.fy", broken)
 	if code, out, diag := runForTest([]string{"build", "--release"}, root); code != 0 || diag != "" {
 		t.Fatalf("build negative control: %d %s %s", code, out, diag)
 	}
@@ -183,9 +183,11 @@ func TestWindowsGUIAuthoredDriver(t *testing.T) {
 	}
 	driver := windowsGUIAuthoredDriver(t)
 	root := windowsGUIExample(t)
-	header := "#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n#include <stdint.h>\nextern int32_t fairy_win32_run(void);\n#endif\n"
+	// Raw packet construction is independent of the example application ABI.
+	// The public CLI section below exercises the real Fairy event handler.
+	header := "#ifndef FY_CANDIDATE_PROJECT_HEADER_V1\n#define FY_CANDIDATE_PROJECT_HEADER_V1\n#include <stdint.h>\n#endif\n"
 	literals := "/* fairyc.candidate-project-literals-c/v1 */\n#include \"fy_project.h\"\n"
-	unit := "/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\nextern int32_t fy_fn_1(void){return fairy_win32_run();}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\nint main(void){return (int)fy_candidate_entry();}\n"
+	unit := "/* fairyc.candidate-project-unit-c/v1 */\n#include \"fy_project.h\"\nextern int32_t fy_fn_1(void){return 0;}\nint32_t fy_candidate_entry(void){return fy_fn_1();}\nint main(void){return (int)fy_candidate_entry();}\n"
 	var packet bytes.Buffer
 	encode := func() {
 		packet.Reset()
@@ -217,7 +219,6 @@ func TestWindowsGUIAuthoredDriver(t *testing.T) {
 	}
 	// The same authored driver still consumes ordinary console packets when
 	// no Windows root is selected, even if its cwd contains GUI settings.
-	unit = strings.Replace(unit, "return fairy_win32_run();", "return 0;", 1)
 	encode()
 	command.run(0, args[:len(args)-2]...)
 	windowsGUIExecute(t, filepath.Join(root, "program.exe"), 3)

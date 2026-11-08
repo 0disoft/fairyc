@@ -8,6 +8,11 @@
 enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_LIMIT = 127 };
 
 typedef struct {
+    BOOL click_pending;
+    BOOL reply_pending;
+    unsigned smoke_step;
+    unsigned smoke_edits;
+    int32_t exit_code;
     HWND input;
     HWND apply;
     HWND result;
@@ -20,6 +25,8 @@ typedef struct {
     size_t command_size;
     BOOL command_overflow;
 } WindowState;
+
+static WindowState bridge_state;
 
 static void resource_text(HWND control, UINT id) {
     WCHAR text[160];
@@ -58,54 +65,62 @@ static BOOL control_resource(HWND control, UINT id) {
            wcscmp(actual, expected) == 0;
 }
 
-static BOOL smoke_events(HWND window, WindowState *state) {
+static void smoke_finish(HWND window, WindowState *state, BOOL passed) {
+    KillTimer(window, 1);
+    state->exit_code = passed ? 0 : 5;
+    DestroyWindow(window);
+}
+
+static void smoke_events(HWND window, WindowState *state) {
     WCHAR actual[160];
     WCHAR long_input[201];
-    unsigned before = state->edits;
-    if (!control_resource(window, 101) || state->clicks != 0 ||
-        !control_resource(state->status, 104)) {
-        return FALSE;
+    switch (state->smoke_step++) {
+    case 0:
+        if (!control_resource(window, 101) || state->clicks != 0 ||
+            !control_resource(state->status, 104)) { break; }
+        SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
+        if (state->click_pending) { break; }
+        SendMessageW(state->apply, BM_CLICK, 0, 0);
+        return;
+    case 1:
+        if (state->clicks != 1 || !control_resource(state->result, 108) ||
+            !control_resource(state->status, 109)) { break; }
+        state->smoke_edits = state->edits;
+        if (!SetWindowTextW(state->input, L"Fairy \uD55C\uAE00 \u03A9")) { break; }
+        return;
+    case 2:
+        if (state->edits <= state->smoke_edits || !control_resource(state->status, 105) ||
+            !control_resource(state->result, 108)) { break; }
+        SendMessageW(state->apply, BM_CLICK, 0, 0);
+        return;
+    case 3:
+        if (state->clicks != 2 || !control_resource(state->status, 106) ||
+            GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 0 ||
+            wcscmp(actual, L"Result: Fairy \uD55C\uAE00 \u03A9") != 0) { break; }
+        state->smoke_edits = state->edits;
+        if (!SetWindowTextW(state->input, L"")) { break; }
+        return;
+    case 4:
+        if (state->edits <= state->smoke_edits) { break; }
+        SendMessageW(state->apply, BM_CLICK, 0, 0);
+        return;
+    case 5:
+        if (state->clicks != 3 || !control_resource(state->result, 108)) { break; }
+        for (int i = 0; i < 200; i++) { long_input[i] = L'x'; }
+        long_input[200] = L'\0';
+        state->smoke_edits = state->edits;
+        SendMessageW(state->input, EM_REPLACESEL, TRUE, (LPARAM)long_input);
+        return;
+    case 6:
+        if (state->edits <= state->smoke_edits || GetWindowTextLengthW(state->input) != INPUT_LIMIT) { break; }
+        SendMessageW(state->apply, BM_CLICK, 0, 0);
+        return;
+    case 7:
+        smoke_finish(window, state, state->clicks == 4 && control_resource(state->status, 106) &&
+                     GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 8 + INPUT_LIMIT);
+        return;
     }
-    SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
-    if (state->clicks != 0) {
-        return FALSE;
-    }
-    SendMessageW(state->apply, BM_CLICK, 0, 0);
-    if (state->clicks != 1 || !control_resource(state->result, 108) ||
-        !control_resource(state->status, 109)) {
-        return FALSE;
-    }
-    if (!SetWindowTextW(state->input, L"Fairy \uD55C\uAE00 \u03A9") ||
-        state->edits <= before || !control_resource(state->status, 105) ||
-        !control_resource(state->result, 108)) {
-        return FALSE;
-    }
-    SendMessageW(state->apply, BM_CLICK, 0, 0);
-    if (state->clicks != 2 || !control_resource(state->status, 106) ||
-        GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 0 ||
-        wcscmp(actual, L"Result: Fairy \uD55C\uAE00 \u03A9") != 0) {
-        return FALSE;
-    }
-    before = state->edits;
-    if (!SetWindowTextW(state->input, L"") || state->edits <= before) {
-        return FALSE;
-    }
-    SendMessageW(state->apply, BM_CLICK, 0, 0);
-    if (state->clicks != 3 || !control_resource(state->result, 108)) {
-        return FALSE;
-    }
-    for (int i = 0; i < 200; i++) {
-        long_input[i] = L'x';
-    }
-    long_input[200] = L'\0';
-    before = state->edits;
-    SendMessageW(state->input, EM_REPLACESEL, TRUE, (LPARAM)long_input);
-    if (state->edits <= before || GetWindowTextLengthW(state->input) != INPUT_LIMIT) {
-        return FALSE;
-    }
-    SendMessageW(state->apply, BM_CLICK, 0, 0);
-    return state->clicks == 4 && control_resource(state->status, 106) &&
-           GetWindowTextW(state->result, actual, (int)ARRAYSIZE(actual)) == 8 + INPUT_LIMIT;
+    smoke_finish(window, state, FALSE);
 }
 
 typedef struct {
@@ -211,7 +226,8 @@ static BOOL automation_command(HWND window, WindowState *state) {
     }
     if (strcmp(state->command, "click") == 0) {
         SendMessageW(state->apply, BM_CLICK, 0, 0);
-        return automation_state(window, state);
+        state->reply_pending = TRUE;
+        return TRUE;
     }
     if (strcmp(state->command, "close") == 0) {
         const char reply[] = "{\"ok\":true,\"closed\":true}\n";
@@ -252,7 +268,7 @@ static void automation_poll(HWND window, WindowState *state) {
             BOOL sent = automation_command(window, state);
             state->command_size = 0;
             state->command_overflow = FALSE;
-            if (!IsWindow(window)) {
+            if (state->click_pending || !IsWindow(window)) {
                 return;
             }
             if (!sent) {
@@ -278,6 +294,46 @@ static BOOL argument(LPCWSTR flag) {
     }
     while (*cursor == L' ' || *cursor == L'\t') { cursor++; }
     return wcscmp(cursor, flag) == 0;
+}
+
+size_t fairy_win32_read_input(void *native_window, uint8_t *output, size_t capacity) {
+    WCHAR text[INPUT_LIMIT + 1];
+    HWND input = GetDlgItem((HWND)native_window, INPUT_ID);
+    if (input == NULL || output == NULL || capacity == 0 || capacity > 512) {
+        return (size_t)-1;
+    }
+    int length = GetWindowTextW(input, text, (int)ARRAYSIZE(text));
+    if (length == 0) {
+        return 0;
+    }
+    int bytes = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, length,
+                                   (char *)output, (int)capacity, NULL, NULL);
+    return bytes == 0 ? (size_t)-1 : (size_t)bytes;
+}
+
+int32_t fairy_win32_present(void *native_window, const uint8_t *text, size_t length, uint32_t clicks, uint32_t status_id) {
+    WCHAR wide[160];
+    HWND window = (HWND)native_window;
+    HWND result = GetDlgItem(window, RESULT_ID);
+    if (result == NULL || text == NULL || length == 0 || length > 512) {
+        return 1;
+    }
+    int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text,
+                                   (int)length, wide, (int)ARRAYSIZE(wide) - 1);
+    if (count == 0) {
+        return 1;
+    }
+    wide[count] = L'\0';
+    if (!SetWindowTextW(result, wide)) {
+        return 1;
+    }
+    resource_text(GetDlgItem(window, STATUS_ID), status_id);
+    bridge_state.clicks = clicks;
+    if (bridge_state.reply_pending) {
+        bridge_state.reply_pending = FALSE;
+        if (!automation_state(window, &bridge_state)) { return 1; }
+    }
+    return 0;
 }
 
 static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
@@ -313,17 +369,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         }
         if (LOWORD(wparam) == APPLY_ID && HIWORD(wparam) == BN_CLICKED &&
             (HWND)lparam == state->apply) {
-            WCHAR text[160];
-            int prefix = LoadStringW(GetModuleHandleW(NULL), 107, text, (int)ARRAYSIZE(text));
-            state->clicks++;
-            if (prefix > 0 && GetWindowTextW(state->input, text + prefix,
-                                            (int)ARRAYSIZE(text) - prefix) > 0) {
-                SetWindowTextW(state->result, text);
-                resource_text(state->status, 106);
-            } else {
-                resource_text(state->result, 108);
-                resource_text(state->status, 109);
-            }
+            state->click_pending = TRUE;
             return 0;
         }
         break;
@@ -347,15 +393,12 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
             return 0;
         }
         if (wparam == 1) {
-            BOOL passed = smoke_events(window, state);
-            KillTimer(window, 1);
-            DestroyWindow(window);
-            PostQuitMessage(passed ? 0 : 5);
+            smoke_events(window, state);
             return 0;
         }
         break;
     case WM_DESTROY:
-        PostQuitMessage(0);
+        PostQuitMessage(state->exit_code);
         return 0;
     case WM_NCDESTROY:
         SetWindowLongPtrW(window, GWLP_USERDATA, 0);
@@ -364,7 +407,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
     return DefWindowProcW(window, message, wparam, lparam);
 }
 
-int32_t fairy_win32_run(void) {
+void *fairy_win32_open(void) {
     HINSTANCE instance = GetModuleHandleW(NULL);
     WCHAR title[64];
     WNDCLASSW kind = {0};
@@ -375,42 +418,62 @@ int32_t fairy_win32_run(void) {
     kind.lpszClassName = L"FairyMinimalWindow";
     if (GetConsoleWindow() != NULL || LoadStringW(instance, 101, title, 64) == 0 ||
         RegisterClassW(&kind) == 0) {
-        return 1;
+        return NULL;
     }
-    WindowState state = {0};
+    WindowState *state = &bridge_state;
+    memset(state, 0, sizeof(*state));
     HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, kind.lpszClassName, title, WS_OVERLAPPEDWINDOW,
                                  CW_USEDEFAULT, CW_USEDEFAULT, 480, 240,
-                                 NULL, NULL, instance, &state);
+                                 NULL, NULL, instance, state);
     if (window == NULL) {
-        return 2;
+        return NULL;
     }
     if (argument(L"--smoke") && SetTimer(window, 1, 100, NULL) == 0) {
         DestroyWindow(window);
-        return 3;
+        return NULL;
     }
     if (argument(L"--automation-stdio")) {
-        state.command_input = GetStdHandle(STD_INPUT_HANDLE);
-        state.command_output = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (GetFileType(state.command_input) != FILE_TYPE_PIPE ||
-            GetFileType(state.command_output) != FILE_TYPE_PIPE ||
+        state->command_input = GetStdHandle(STD_INPUT_HANDLE);
+        state->command_output = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (GetFileType(state->command_input) != FILE_TYPE_PIPE ||
+            GetFileType(state->command_output) != FILE_TYPE_PIPE ||
             SetTimer(window, 2, 20, NULL) == 0) {
             DestroyWindow(window);
-            return 6;
+            return NULL;
         }
     }
     ShowWindow(window, SW_SHOWNORMAL);
     UpdateWindow(window);
-    if (state.command_input != NULL && !automation_state(window, &state)) {
+    if (state->command_input != NULL && !automation_state(window, state)) {
         DestroyWindow(window);
-        return 6;
+        return NULL;
     }
+    return window;
+}
+
+int32_t fairy_win32_next(void *native_window) {
+    HWND window = (HWND)native_window;
     MSG message;
-    int result;
-    while ((result = (int)GetMessageW(&message, NULL, 0, 0)) > 0) {
+    while (TRUE) {
+        int result = (int)GetMessageW(&message, NULL, 0, 0);
+        if (result <= 0) {
+            bridge_state.exit_code = result < 0 ? 4 : (int32_t)message.wParam;
+            return 0;
+        }
         if (!IsDialogMessageW(window, &message)) {
             TranslateMessage(&message);
             DispatchMessageW(&message);
         }
+        if (bridge_state.click_pending) {
+            bridge_state.click_pending = FALSE;
+            return 1;
+        }
     }
-    return result < 0 ? 4 : (int32_t)message.wParam;
+}
+
+int32_t fairy_win32_close(void *native_window) {
+    HWND window = (HWND)native_window;
+    if (IsWindow(window)) { DestroyWindow(window); }
+    UnregisterClassW(L"FairyMinimalWindow", GetModuleHandleW(NULL));
+    return bridge_state.exit_code;
 }
