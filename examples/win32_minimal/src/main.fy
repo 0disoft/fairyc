@@ -1,9 +1,12 @@
 module main;
 
-unsafe extern C fn ptr mut void fairy_win32_open();
+unsafe extern C fn ptr mut void fairy_win32_open(i32 width, i32 height);
 unsafe extern C fn i32 fairy_win32_next(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_changed(ptr mut void window, u32 edits, u32 status_id);
 unsafe extern C fn i32 fairy_win32_resolve_close(ptr mut void window, u32 allow);
+unsafe extern C fn i32 fairy_win32_client_extent(ptr mut void window, u32 axis);
+unsafe extern C fn i32 fairy_win32_move(ptr mut void window, u32 control_id, i32 x, i32 y, i32 width, i32 height);
+unsafe extern C fn i32 fairy_win32_layout_done(ptr mut void window, i32 min_width, i32 min_height, u32 resizes);
 unsafe extern C fn i32 fairy_win32_close(ptr mut void window);
 unsafe extern C fn usize fairy_win32_read_input(ptr mut void window, ptr mut u8 output, usize capacity);
 unsafe extern C fn i32 fairy_win32_present(ptr mut void window, ptr u8 text, usize length, u32 clicks, u32 status_id);
@@ -14,6 +17,20 @@ unsafe fn i32 on_change(ptr mut void window, u32 edits) {
 
 unsafe fn i32 on_close(ptr mut void window) {
     return fairy_win32_resolve_close(window, 1);
+}
+
+unsafe fn i32 on_size(ptr mut void window, u32 resizes) {
+    let i32 actual_width = fairy_win32_client_extent(window, 0);
+    let i32 actual_height = fairy_win32_client_extent(window, 1);
+    if (actual_width < 0 || actual_height < 0) { return 1; }
+    let i32 width = if (actual_width < 320) { 320 } else { actual_width };
+    let i32 inset = 16;
+    if (fairy_win32_move(window, 200, inset, 16, width - 2 * inset, 20) != 0) { return 1; }
+    if (fairy_win32_move(window, 201, inset, 44, width - 132, 28) != 0) { return 1; }
+    if (fairy_win32_move(window, 202, width - 100, 44, 84, 28) != 0) { return 1; }
+    if (fairy_win32_move(window, 203, inset, 94, width - 2 * inset, 48) != 0) { return 1; }
+    if (fairy_win32_move(window, 204, inset, 154, width - 2 * inset, 24) != 0) { return 1; }
+    return fairy_win32_layout_done(window, 400, 240, resizes);
 }
 
 unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
@@ -38,10 +55,11 @@ unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
 }
 
 fn i32 main() {
-    let window = unsafe { fairy_win32_open() };
+    let window = unsafe { fairy_win32_open(480, 240) };
     if (window == null) { return 1; }
     var u32 clicks = 0;
     var u32 edits = 0;
+    var u32 resizes = 0;
     var i32 result = 0;
     while (true) {
         let i32 event = unsafe { fairy_win32_next(window) };
@@ -54,6 +72,9 @@ fn i32 main() {
             result = unsafe { on_change(window, edits) };
         } else if (event == 3) {
             result = unsafe { on_close(window) };
+        } else if (event == 4) {
+            resizes += 1;
+            result = unsafe { on_size(window, resizes) };
         } else {
             result = 1;
         }

@@ -9,6 +9,12 @@ enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_L
 
 typedef struct {
     int32_t pending_event;
+    BOOL size_pending;
+    BOOL initial_reply_pending;
+    BOOL resize_reply_pending;
+    int32_t min_width;
+    int32_t min_height;
+    unsigned resizes;
     BOOL reply_pending;
     BOOL close_reply_pending;
     BOOL desktop_close_armed;
@@ -30,6 +36,8 @@ typedef struct {
 } WindowState;
 
 static WindowState bridge_state;
+static const int layout_ids[] = {200, INPUT_ID, APPLY_ID, RESULT_ID, STATUS_ID};
+static const char *layout_names[] = {"label", "input", "apply", "result", "status"};
 
 static void resource_text(HWND control, UINT id) {
     WCHAR text[160];
@@ -47,17 +55,6 @@ static HWND control(HWND parent, LPCWSTR kind, LPCWSTR text, DWORD style, int id
         SendMessageW(child, WM_SETFONT, (WPARAM)GetStockObject(DEFAULT_GUI_FONT), TRUE);
     }
     return child;
-}
-
-static void layout(HWND window, WindowState *state) {
-    RECT area;
-    GetClientRect(window, &area);
-    int width = area.right > 320 ? area.right : 320;
-    MoveWindow(GetDlgItem(window, 200), 16, 16, width - 32, 20, TRUE);
-    MoveWindow(state->input, 16, 44, width - 132, 28, TRUE);
-    MoveWindow(state->apply, width - 100, 44, 84, 28, TRUE);
-    MoveWindow(state->result, 16, 94, width - 32, 48, TRUE);
-    MoveWindow(state->status, 16, 154, width - 32, 24, TRUE);
 }
 
 static BOOL control_resource(HWND control, UINT id) {
@@ -83,6 +80,12 @@ static void smoke_events(HWND window, WindowState *state) {
     WCHAR long_input[201];
     switch (state->smoke_step++) {
     case 0:
+        {
+            RECT input;
+            if (!GetWindowRect(state->input, &input)) { break; }
+            MapWindowPoints(NULL, window, (POINT *)&input, 2);
+            if (input.left != 16) { break; }
+        }
         if (!control_resource(window, 101) || state->clicks != 0 ||
             !control_resource(state->status, 104)) { break; }
         SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
@@ -186,6 +189,41 @@ static void json_text(Json *json, HWND control) {
     json_bytes(json, "\"");
 }
 
+static void json_signed(Json *json, LONG value) {
+    if (value < 0) { json_bytes(json, "-"); }
+    json_number(json, value < 0 ? (unsigned)(-(int64_t)value) : (unsigned)value);
+}
+
+static void json_rect(Json *json, const RECT *rect) {
+    json_bytes(json, "{\"x\":"); json_signed(json, rect->left);
+    json_bytes(json, ",\"y\":"); json_signed(json, rect->top);
+    json_bytes(json, ",\"width\":"); json_signed(json, rect->right - rect->left);
+    json_bytes(json, ",\"height\":"); json_signed(json, rect->bottom - rect->top);
+    json_bytes(json, "}");
+}
+
+static BOOL json_geometry(Json *json, HWND window, WindowState *state) {
+    RECT rect;
+    if (!GetWindowRect(window, &rect)) { return FALSE; }
+    json_bytes(json, ",\"window\":"); json_rect(json, &rect);
+    if (!GetClientRect(window, &rect)) { return FALSE; }
+    json_bytes(json, ",\"client\":"); json_rect(json, &rect);
+    json_bytes(json, ",\"resizes\":"); json_number(json, state->resizes);
+    json_bytes(json, ",\"minimum\":{\"width\":"); json_signed(json, state->min_width);
+    json_bytes(json, ",\"height\":"); json_signed(json, state->min_height);
+    json_bytes(json, "},\"layout\":{");
+    for (size_t i = 0; i < ARRAYSIZE(layout_ids); i++) {
+        if (!GetWindowRect(GetDlgItem(window, layout_ids[i]), &rect)) { return FALSE; }
+        SetLastError(0);
+        if (MapWindowPoints(NULL, window, (POINT *)&rect, 2) == 0 && GetLastError() != 0) { return FALSE; }
+        if (i != 0) { json_bytes(json, ","); }
+        json_bytes(json, "\""); json_bytes(json, layout_names[i]); json_bytes(json, "\":");
+        json_rect(json, &rect);
+    }
+    json_bytes(json, "}");
+    return TRUE;
+}
+
 static BOOL automation_write(WindowState *state, const char *bytes, size_t length) {
     while (length > 0) {
         DWORD written = 0;
@@ -214,6 +252,7 @@ static BOOL automation_state(HWND window, WindowState *state) {
     json_number(&json, state->edits);
     json_bytes(&json, ",\"clicks\":");
     json_number(&json, state->clicks);
+    if (!json_geometry(&json, window, state)) { return FALSE; }
     json_bytes(&json, "}\n");
     return json.valid && automation_write(state, json.bytes, json.size);
 }
@@ -221,6 +260,19 @@ static BOOL automation_state(HWND window, WindowState *state) {
 static BOOL automation_error(WindowState *state) {
     const char error[] = "{\"ok\":false,\"error\":\"invalid_command_or_input\"}\n";
     return automation_write(state, error, sizeof(error) - 1);
+}
+
+static BOOL resize_dimension(const char **cursor, char delimiter, int *output) {
+    int value = 0;
+    if (**cursor < '1' || **cursor > '9') { return FALSE; }
+    while (**cursor >= '0' && **cursor <= '9') {
+        value = value * 10 + (*(*cursor)++ - '0');
+        if (value > 4096) { return FALSE; }
+    }
+    if (**cursor != delimiter) { return FALSE; }
+    if (delimiter != '\0') { (*cursor)++; }
+    *output = value;
+    return TRUE;
 }
 
 static BOOL automation_command(HWND window, WindowState *state) {
@@ -245,8 +297,22 @@ static BOOL automation_command(HWND window, WindowState *state) {
         state->close_reply_pending = TRUE;
         state->desktop_close_armed = TRUE;
         state->system_close_seen = FALSE;
-        ShowWindow(window, SW_RESTORE);
+        if (IsIconic(window) || IsZoomed(window)) { ShowWindow(window, SW_RESTORE); }
         SetForegroundWindow(window);
+        return automation_state(window, state);
+    }
+    if (strncmp(state->command, "resize\t", 7) == 0) {
+        const char *cursor = state->command + 7;
+        int width, height;
+        if (!resize_dimension(&cursor, '\t', &width) || !resize_dimension(&cursor, '\0', &height) ||
+            width < state->min_width || height < state->min_height) { return automation_error(state); }
+        if (IsIconic(window) || IsZoomed(window)) { ShowWindow(window, SW_RESTORE); }
+        if (!SetWindowPos(window, NULL, 0, 0, width, height,
+                          SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE)) { return automation_error(state); }
+        if (state->size_pending) {
+            state->resize_reply_pending = TRUE;
+            return TRUE;
+        }
         return automation_state(window, state);
     }
     if (strncmp(state->command, "input\t", 6) == 0) {
@@ -286,7 +352,7 @@ static void automation_poll(HWND window, WindowState *state) {
             BOOL sent = automation_command(window, state);
             state->command_size = 0;
             state->command_overflow = FALSE;
-            if (state->pending_event || !IsWindow(window)) {
+            if (state->pending_event || state->size_pending || !IsWindow(window)) {
                 return;
             }
             if (!sent) {
@@ -329,6 +395,32 @@ int32_t fairy_win32_changed(void *native_window, uint32_t edits, uint32_t status
     resource_text(status, status_id);
     bridge_state.edits = edits;
     return acknowledge(window);
+}
+
+int32_t fairy_win32_client_extent(void *native_window, uint32_t axis) {
+    RECT client;
+    if (axis > 1 || !GetClientRect((HWND)native_window, &client)) { return -1; }
+    return axis == 0 ? client.right : client.bottom;
+}
+
+int32_t fairy_win32_move(void *native_window, uint32_t control_id, int32_t x, int32_t y,
+                        int32_t width, int32_t height) {
+    if (control_id < 200 || control_id > STATUS_ID || width < 0 || height < 0) { return 1; }
+    return MoveWindow(GetDlgItem((HWND)native_window, (int)control_id), x, y, width, height, TRUE) ? 0 : 1;
+}
+
+int32_t fairy_win32_layout_done(void *native_window, int32_t min_width, int32_t min_height, uint32_t resizes) {
+    HWND window = (HWND)native_window;
+    if (!IsWindow(window) || min_width <= 0 || min_height <= 0) { return 1; }
+    bridge_state.min_width = min_width;
+    bridge_state.min_height = min_height;
+    bridge_state.resizes = resizes;
+    if (bridge_state.initial_reply_pending || bridge_state.resize_reply_pending) {
+        bridge_state.initial_reply_pending = FALSE;
+        bridge_state.resize_reply_pending = FALSE;
+        if (!automation_state(window, &bridge_state)) { return 1; }
+    }
+    return 0;
 }
 
 int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
@@ -409,7 +501,6 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         resource_text(state->apply, 103);
         resource_text(state->result, 102);
         resource_text(state->status, 104);
-        layout(window, state);
         return 0;
     case WM_COMMAND:
         if (LOWORD(wparam) == INPUT_ID && HIWORD(wparam) == EN_CHANGE &&
@@ -424,13 +515,13 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         }
         break;
     case WM_SIZE:
-        if (state && state->status) {
-            layout(window, state);
-        }
+        if (state) { state->size_pending = TRUE; }
         return 0;
     case WM_GETMINMAXINFO:
-        ((MINMAXINFO *)lparam)->ptMinTrackSize.x = 400;
-        ((MINMAXINFO *)lparam)->ptMinTrackSize.y = 240;
+        if (state && state->min_width > 0 && state->min_height > 0) {
+            ((MINMAXINFO *)lparam)->ptMinTrackSize.x = state->min_width;
+            ((MINMAXINFO *)lparam)->ptMinTrackSize.y = state->min_height;
+        }
         return 0;
     case WM_SETFOCUS:
         if (state && state->input) {
@@ -463,7 +554,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
     return DefWindowProcW(window, message, wparam, lparam);
 }
 
-void *fairy_win32_open(void) {
+void *fairy_win32_open(int32_t width, int32_t height) {
     HINSTANCE instance = GetModuleHandleW(NULL);
     WCHAR title[64];
     WNDCLASSW kind = {0};
@@ -479,7 +570,7 @@ void *fairy_win32_open(void) {
     WindowState *state = &bridge_state;
     memset(state, 0, sizeof(*state));
     HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, kind.lpszClassName, title, WS_OVERLAPPEDWINDOW,
-                                 CW_USEDEFAULT, CW_USEDEFAULT, 480, 240,
+                                 CW_USEDEFAULT, CW_USEDEFAULT, width, height,
                                  NULL, NULL, instance, state);
     if (window == NULL) {
         return NULL;
@@ -500,10 +591,8 @@ void *fairy_win32_open(void) {
     }
     ShowWindow(window, SW_SHOWNORMAL);
     UpdateWindow(window);
-    if (state->command_input != NULL && !automation_state(window, state)) {
-        DestroyWindow(window);
-        return NULL;
-    }
+    state->initial_reply_pending = state->command_input != NULL;
+    state->size_pending = TRUE;
     return window;
 }
 
@@ -511,6 +600,10 @@ int32_t fairy_win32_next(void *native_window) {
     HWND window = (HWND)native_window;
     MSG message;
     while (TRUE) {
+        if (bridge_state.size_pending) {
+            bridge_state.size_pending = FALSE;
+            return 4;
+        }
         if (bridge_state.pending_event != 0) {
             int32_t event = bridge_state.pending_event;
             bridge_state.pending_event = 0;
