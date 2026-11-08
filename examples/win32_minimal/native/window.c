@@ -15,6 +15,13 @@ typedef struct {
     int32_t min_width;
     int32_t min_height;
     unsigned resizes;
+    void *app_fiber;
+    void *pump_fiber;
+    BOOL pump_finished;
+    BOOL sizing;
+    unsigned size_entries;
+    unsigned size_exits;
+    unsigned live_layouts;
     BOOL reply_pending;
     BOOL close_reply_pending;
     BOOL desktop_close_armed;
@@ -209,6 +216,11 @@ static BOOL json_geometry(Json *json, HWND window, WindowState *state) {
     if (!GetClientRect(window, &rect)) { return FALSE; }
     json_bytes(json, ",\"client\":"); json_rect(json, &rect);
     json_bytes(json, ",\"resizes\":"); json_number(json, state->resizes);
+    json_bytes(json, state->sizing ? ",\"sizing\":true" : ",\"sizing\":false");
+    json_bytes(json, (GetAsyncKeyState(VK_LBUTTON) & 0x8000) ? ",\"mouseDown\":true" : ",\"mouseDown\":false");
+    json_bytes(json, ",\"sizeEntries\":"); json_number(json, state->size_entries);
+    json_bytes(json, ",\"sizeExits\":"); json_number(json, state->size_exits);
+    json_bytes(json, ",\"liveLayouts\":"); json_number(json, state->live_layouts);
     json_bytes(json, ",\"minimum\":{\"width\":"); json_signed(json, state->min_width);
     json_bytes(json, ",\"height\":"); json_signed(json, state->min_height);
     json_bytes(json, "},\"layout\":{");
@@ -415,6 +427,9 @@ int32_t fairy_win32_layout_done(void *native_window, int32_t min_width, int32_t 
     bridge_state.min_width = min_width;
     bridge_state.min_height = min_height;
     bridge_state.resizes = resizes;
+    if (bridge_state.sizing && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+        bridge_state.live_layouts++;
+    }
     if (bridge_state.initial_reply_pending || bridge_state.resize_reply_pending) {
         bridge_state.initial_reply_pending = FALSE;
         bridge_state.resize_reply_pending = FALSE;
@@ -515,7 +530,20 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         }
         break;
     case WM_SIZE:
-        if (state) { state->size_pending = TRUE; }
+        if (state) {
+            state->size_pending = TRUE;
+            if (state->pump_fiber && GetCurrentFiber() == state->pump_fiber) {
+                SwitchToFiber(state->app_fiber); /* live-size handoff */
+            }
+        }
+        return 0;
+    case WM_ENTERSIZEMOVE:
+        state->sizing = TRUE;
+        state->size_entries++;
+        return 0;
+    case WM_EXITSIZEMOVE:
+        state->sizing = FALSE;
+        state->size_exits++;
         return 0;
     case WM_GETMINMAXINFO:
         if (state && state->min_width > 0 && state->min_height > 0) {
@@ -552,6 +580,26 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         break;
     }
     return DefWindowProcW(window, message, wparam, lparam);
+}
+
+static VOID WINAPI message_fiber(void *native_window) {
+    HWND window = (HWND)native_window;
+    MSG message;
+    while (TRUE) {
+        int result = (int)GetMessageW(&message, NULL, 0, 0);
+        if (result <= 0) {
+            bridge_state.exit_code = result < 0 ? 4 : (int32_t)message.wParam;
+            bridge_state.pump_finished = TRUE;
+            break;
+        }
+        if (!IsDialogMessageW(window, &message)) {
+            TranslateMessage(&message);
+            DispatchMessageW(&message);
+        }
+        SwitchToFiber(bridge_state.app_fiber);
+    }
+    // A fiber procedure must never return (that would terminate the UI thread).
+    for (;;) { SwitchToFiber(bridge_state.app_fiber); }
 }
 
 void *fairy_win32_open(int32_t width, int32_t height) {
@@ -593,12 +641,23 @@ void *fairy_win32_open(int32_t width, int32_t height) {
     UpdateWindow(window);
     state->initial_reply_pending = state->command_input != NULL;
     state->size_pending = TRUE;
+    if (!IsThreadAFiber()) {
+        state->app_fiber = ConvertThreadToFiberEx(NULL, FIBER_FLAG_FLOAT_SWITCH);
+    }
+    if (state->app_fiber != NULL) {
+        state->pump_fiber = CreateFiberEx(0, 1024 * 1024, FIBER_FLAG_FLOAT_SWITCH, message_fiber, window);
+    }
+    if (state->pump_fiber == NULL) {
+        DestroyWindow(window);
+        UnregisterClassW(L"FairyMinimalWindow", instance);
+        if (state->app_fiber != NULL) { ConvertFiberToThread(); }
+        return NULL;
+    }
     return window;
 }
 
 int32_t fairy_win32_next(void *native_window) {
-    HWND window = (HWND)native_window;
-    MSG message;
+    if (native_window == NULL || bridge_state.pump_fiber == NULL) { return 0; }
     while (TRUE) {
         if (bridge_state.size_pending) {
             bridge_state.size_pending = FALSE;
@@ -609,21 +668,22 @@ int32_t fairy_win32_next(void *native_window) {
             bridge_state.pending_event = 0;
             return event;
         }
-        int result = (int)GetMessageW(&message, NULL, 0, 0);
-        if (result <= 0) {
-            bridge_state.exit_code = result < 0 ? 4 : (int32_t)message.wParam;
-            return 0;
-        }
-        if (!IsDialogMessageW(window, &message)) {
-            TranslateMessage(&message);
-            DispatchMessageW(&message);
-        }
+        if (bridge_state.pump_finished) { return 0; }
+        SwitchToFiber(bridge_state.pump_fiber);
     }
 }
 
 int32_t fairy_win32_close(void *native_window) {
     HWND window = (HWND)native_window;
     if (IsWindow(window)) { DestroyWindow(window); }
+    if (bridge_state.pump_fiber != NULL) {
+        // Resume any suspended WndProc/modal frames through WM_QUIT before deletion.
+        while (!bridge_state.pump_finished) { SwitchToFiber(bridge_state.pump_fiber); }
+        DeleteFiber(bridge_state.pump_fiber);
+        bridge_state.pump_fiber = NULL;
+        if (!ConvertFiberToThread() && bridge_state.exit_code == 0) { bridge_state.exit_code = 4; }
+        bridge_state.app_fiber = NULL;
+    }
     UnregisterClassW(L"FairyMinimalWindow", GetModuleHandleW(NULL));
     return bridge_state.exit_code;
 }
