@@ -57,6 +57,41 @@ close button. The ordinary WndProc forwards these events to Fairy and replies re
 control text. This verifies programmatic control events; it does not certify
 physical keyboard/mouse delivery, IME, screen rendering or accessibility.
 
+### Resize and Fairy layout
+
+```powershell
+python -B control.py --verify-resize
+```
+
+This changes the real window through Windows
+[SetWindowPos](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos),
+then verifies Fairy's layout using actual control rectangles. It widens the
+window, narrows to the minimum, changes height only, repeats the same size and
+resizes again. Unicode input/result and edit/click counts must survive; invalid
+sizes must leave all state unchanged, and Apply must still work afterward.
+
+Interactive JSON accepts `{"command":"resize","width":800,"height":480}`.
+Dimensions are the **outer window** size in the application's Win32 coordinate
+space, including its frame/title bar. The current Fairy minimum is 400 by 240;
+the example protocol caps each dimension at 4096. Booleans, non-integers,
+unknown fields, malformed native dimensions and below-minimum sizes reject.
+
+State replies additionally contain measured `window` and `client` rectangles,
+the five actual child rectangles under `layout`, Fairy's mirrored `resizes`
+counter and `minimum` size. Child positions are relative to the parent client
+area. `resizes` includes the initial layout and counts processed size events;
+coalesced notifications and unchanged-size requests need not each increment it.
+Initial readiness and resize replies wait until Fairy has applied all controls.
+
+Fairy owns initial window dimensions; `on_size` owns minimum dimensions, the
+16-unit inset, input/result widths and the right-aligned fixed-width Apply button. The
+existing vertical positions/heights stay fixed when only height changes.
+C only reads native client dimensions, moves the requested control and applies
+the supplied minimum tracking size. Size notifications are coalesced separately
+from input/click/close events. With the pull event pump, a Windows modal border
+drag may finish before Fairy regains control to apply the final layout; live
+layout at every intermediate drag step is not promised by this example.
+
 ### Title-bar close button and Alt+F4
 
 On an idle, unlocked interactive Windows desktop, run:
@@ -100,14 +135,16 @@ The GUI enables this private example protocol only with `--automation-stdio`
 and inherited pipe stdin/stdout. The Python controller owns that process and
 closes it on stdin EOF or error. It opens no socket, contacts no service and
 targets only its owned child process. Native requests use LF
-lines `state`, `input<TAB>UTF-8`, `click`, `close`, `arm-close`; replies are JSON lines.
+lines `state`, `input<TAB>UTF-8`, `resize<TAB>width<TAB>height`, `click`, `close`,
+`arm-close`; replies are JSON lines.
 The native buffer is bounded to 1023 bytes and validates UTF-8, NUL and input
 length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
-Fairy owns `main()`, the application event loop, edit/click counts and the
-`on_change` / `on_click` / `on_close` handlers in `src/main.fy`. `on_change` chooses the edit
+Fairy owns `main()`, the application event loop, edit/click/resize counts and the
+`on_change` / `on_click` / `on_close` / `on_size` handlers in `src/main.fy`.
+`on_change` chooses the edit
 status; `on_click` decides empty-input behavior and builds the UTF-8 result
 text. Editing leaves the last applied result intact until Apply is clicked.
 `on_close` allows closing in this example; changing its decision to 0 declines
@@ -121,8 +158,10 @@ callbacks to Windows or generate Win32 SDK bindings.
 
 The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
-`fairy_win32_resolve_close` and `fairy_win32_close`. `next` pumps Win32 messages
-and returns 1 for a click, 2 for `EN_CHANGE`, 3 for `WM_CLOSE`, or 0 on exit.
+`fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
+`fairy_win32_layout_done` and `fairy_win32_close`. `open` takes Fairy's initial
+window dimensions. `next` pumps Win32 messages and returns 1 for a click,
+2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, or 0 on exit.
 Fairy handles the event and calls `present`
 with the click result/count/status, or `changed` with the edit count/status.
 C mirrors these counts for state replies and updates the controls. A notified

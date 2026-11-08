@@ -1,4 +1,4 @@
-# Fairy-owned Win32 click, input-change and close handling, 2026-11-09
+# Fairy-owned Win32 events and layout, 2026-11-09
 
 Owner: [example README](../../examples/win32_minimal/README.md) and the private
 FFI in `src/main.fy` / `native/window.c`. [ADR 0552](../adr/0552-minimal-windows-gui-build.md)
@@ -6,23 +6,36 @@ continues to own native application build inputs.
 
 ## Behavior and lifetime
 
-Fairy now owns the application loop, edit/click counts, edit status, empty-input
-decision, close policy and result string construction. Its `on_change` selects status 105;
+Fairy now owns the application loop, edit/click/resize counts, edit status, empty-input
+decision, close policy, layout and result string construction. Its `on_change` selects status 105;
 `on_click` reads bounded UTF-8 and produces the text. Editing preserves the last
 applied result until the next click. `on_close` currently allows closing.
+`on_size` computes all five control rectangles, including horizontal anchoring,
+fixed vertical positions/heights and minimum window dimensions. Fairy also
+supplies initial outer dimensions to `open`.
 C owns Win32 window/control operations, message pumping, character conversion,
 mirrored counts for observation and the existing JSONL transport.
 
 The private functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
-`fairy_win32_resolve_close` and `fairy_win32_close`. `next` returns 1 for a click,
-2 for `EN_CHANGE`, 3 for `WM_CLOSE`, and 0 on exit.
+`fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
+`fairy_win32_layout_done` and `fairy_win32_close`. `next` returns 1 for a click,
+2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, and 0 on exit.
 Fairy increments the corresponding edit/click count, then calls `present` or
 `changed` to render and mirror its state. Only then does C acknowledge a pending
 CLI request. A CLI reply therefore observes the handled event. The edit count
 measures native change notifications, not characters or CLI commands. C retains no
 Fairy function or input/output buffer. The opaque window lives until close.
 The example remains single-window and single-threaded.
+
+Size notifications have a separate coalesced pending flag so they cannot
+overwrite input/click/close events. The pump delivers pending size work before
+other pending events. Fairy reads current client extents through scalar FFI,
+computes positions, calls native control moves, and completes with
+`layout_done`. C then mirrors the Fairy count/minimum and acknowledges initial
+readiness or a pending resize request. Other event acknowledgements are kept
+separate. Geometry replies use `GetWindowRect`, `GetClientRect` and
+`MapWindowPoints` to observe actual rectangles rather than echo supplied boxes.
 
 `WM_CLOSE` returns from WndProc without default destruction. The CLI `close`
 command sends that same message. Fairy resolves the event with
@@ -227,3 +240,54 @@ normal close replies and public compiler/language/FFI contracts are unchanged.
 No DB, dependencies, repository-hygiene policy, runner, version, push or deploy
 changes. The controller uses only Python's standard library; desktop input adds
 no runtime dependency to the GUI executable.
+
+## WM_SIZE and Fairy layout follow-up
+
+- `go run -mod=readonly ../../cmd/fairyc check` in the example: PASS,
+  1 source / 5 MIR functions, lock updated.
+- The existing authored Fairy CLI/companion builds both profiles with
+  `build --locked` / `build --locked --release`. Each image passes
+  `python -B control.py --verify-resize`. Actual outer sizes are
+  800x480, 400x240, 400x480, 400x480 and 640x360; processed resize counts are
+  2/3/4/4/5, including an initial count of 1. Five actual child rectangles match
+  Fairy's policy at every step. Height-only/repeated sizing preserves layout,
+  resizing preserves Unicode text, result, status and edit/click counts;
+  nine invalid native commands and five invalid Python values leave state
+  unchanged. Apply and normal close still work afterward, with process exit 0.
+- With `FAIRYC_RUN_DESKTOP_INTEGRATION=1` and `GOMAXPROCS=1`,
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure|DesktopClose)$' -count=1 -v`:
+  PASS, 26.930s. Both Go-built profiles pass native smoke, standard JSONL and
+  resize verification. Five Fairy-source mutations fail native smoke as
+  expected, including changing only `inset = 16` to 20. Existing close denial,
+  actual title-bar clicking and Alt+F4 checks also pass.
+- The standard `control.py --verify` passed the authored release layout
+  implementation before extending the resize-specific checks. `gofmt` and
+  scoped `git diff --check` pass.
+
+Receipts: `.cache/windows-gui-size-go-20261109.log`,
+`windows-gui-size-{development,release}-20261109.json` and
+`windows-gui-size-baseline-20261109.json`.
+Go development/release sizes are 129,024 / 124,416 bytes; authored sizes are
+148,480 / 126,976 bytes. The existing authored compiler host was reused.
+Implementation: `9525108a`; controller/regression: `fb37ab3b`.
+
+The bridge uses existing scalar FFI for extents, individual moves and completion.
+An integer-slice pointer-cast experiment was rejected; an indexed integer-borrow
+cast trial hit an internal bootstrap invariant. Those paths are absent from
+the final implementation; compiler source and language support were not changed.
+
+The private example protocol adds `resize` and measured geometry fields.
+Width/height describe the outer window, including its frame, in the app's
+Win32 coordinate space. Native code validates bounds and applies Fairy's
+supplied minimum; it performs no application layout calculation. The default
+resize verifier uses real `SetWindowPos` changes and actual `WM_SIZE` delivery,
+without injecting mouse/keyboard input. This is not a border-drag input test.
+Native modal border dragging can defer Fairy's pulled layout until the modal
+operation returns; continuous intermediate drag layout is not claimed.
+Vertical placement remains fixed, matching the prior example.
+
+Full repository tests, Linux, hosted CI, fresh compiler bootstrap/fixed point,
+physical border dragging, IME and multi-monitor/DPI combinations were skipped
+for this Windows example change. No public compiler API, DB, dependencies,
+repository-hygiene policy, runner, version bump, push or deployment changes.
