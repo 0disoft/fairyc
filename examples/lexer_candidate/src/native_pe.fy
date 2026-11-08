@@ -24,10 +24,12 @@ pub fn Result<Section,u32> section(ref u8[] data,Header h,usize index){
 pub fn bool named(ref u8[] data,Section s,ref u8[] name){return bytes::equal(data[s.name..s.name_end],name);}
 pub fn usize span(Section s){return if(s.virtual_size>s.size){s.virtual_size}else{s.size};}
 pub fn bool code(Section s){return (s.flags&32)!=0 && (s.flags&536870912)!=0;}
-pub fn Result<Header,u32> inspect(ref u8[] data){
+pub fn Result<Header,u32> inspect(ref u8[] data){return inspect_for(data,3);}
+pub fn Result<Header,u32> inspect_for(ref u8[] data,usize subsystem){
+    if(subsystem!=2 && subsystem!=3){return .err(2);}
     if(data.len<96 || data.len>67108864 || data[0]!=77 || data[1]!=90){return .err(1);}let usize pe=word(data,60);
     if(!range(data,pe,24) || !bytes::equal(data[pe..pe+4],b"PE\0\0") || half(data,pe+4)!=34404){return .err(1);}let usize optional=pe+24;let usize size=half(data,pe+20);let usize count=half(data,pe+6);let usize flags=half(data,pe+22);
-    if(size<112 || count==0 || count>96 || !range(data,optional,size+count*40) || half(data,optional)!=523 || flags&2==0 || flags&32==0 || flags&8192!=0 || half(data,optional+68)!=3){return .err(2);}
+    if(size<112 || count==0 || count>96 || !range(data,optional,size+count*40) || half(data,optional)!=523 || flags&2==0 || flags&32==0 || flags&8192!=0 || half(data,optional+68)!=subsystem){return .err(2);}
     let usize directories=word(data,optional+108);if(directories*8!=size-112){return .err(2);}
     let usize entry=word(data,optional+16);let usize alignment=word(data,optional+32);let usize file_alignment=word(data,optional+36);let usize headers=word(data,optional+60);let usize image=word(data,optional+56);
     if(entry==0 || word(data,optional+24)==0 && word(data,optional+28)==0 || word(data,optional+24)%65536!=0 || !power(alignment) || !power(file_alignment) || file_alignment<512 || file_alignment>65536 || alignment<file_alignment || headers==0 || headers>data.len || headers%file_alignment!=0 || image==0 || image%alignment!=0){return .err(2);}

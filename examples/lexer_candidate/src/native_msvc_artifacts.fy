@@ -20,8 +20,9 @@ pub fn bool object(ref u8[] data){return object_problem(data)==0;}
 pub fn u32 object_problem(ref u8[] data){return coff::project_problem(data);}
 // Full PE structure; validate unwind when either exception-directory field exists.
 // A leaf image with no exception directory remains admitted.
-pub fn bool executable(ref u8[] data){
-    let h=switch(pe::inspect(data)){case .ok(h):{h}case .err(_):{return false;}};
+pub fn bool executable(ref u8[] data){return executable_for(data,3);}
+pub fn bool executable_for(ref u8[] data,usize subsystem){
+    let h=switch(pe::inspect_for(data,subsystem)){case .ok(h):{h}case .err(_):{return false;}};
     if(pe::directory_rva(data,h,3)==0 && pe::directory_size(data,h,3)==0){return true;}
-    return switch(unwind::inspect(data)){case .ok(_):{true}case .err(_):{false}};
+    return switch(unwind::inspect_for(data,subsystem)){case .ok(_):{true}case .err(_):{false}};
 }

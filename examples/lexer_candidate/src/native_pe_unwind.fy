@@ -25,8 +25,9 @@ fn Result<Info,u32> info(ref u8[] data,pe::Header h,usize rva,usize function_siz
 }
 // PE parse failures keep codes 1..7; 8 info header, 9 op slots/order,
 // 10 handler/chain, 11 directory/functions, 12 allocation.
-pub fn Result<Report,u32> inspect(ref u8[] data){
-    let h=pe::inspect(data)?;let usize rva=pe::directory_rva(data,h,3);let usize size=pe::directory_size(data,h,3);if(rva==0 || size==0 || size%12!=0){return .err(11);}let directory=pe::map(data,h,rva,size)?;
+pub fn Result<Report,u32> inspect(ref u8[] data){return inspect_for(data,3);}
+pub fn Result<Report,u32> inspect_for(ref u8[] data,usize subsystem){
+    let h=pe::inspect_for(data,subsystem)?;let usize rva=pe::directory_rva(data,h,3);let usize size=pe::directory_size(data,h,3);if(rva==0 || size==0 || size%12!=0){return .err(11);}let directory=pe::map(data,h,rva,size)?;
     if(!pe::named(data,directory.section,b".pdata") || directory.section.flags&1073741824==0 || directory.section.flags&536870912!=0){return .err(11);}
     let usize count=size/12;var Report report=Report{.functions=count,.unique_infos=0,.handlers=0,.chains=0,.version2=0,.maximum_codes=0};var usize capacity=2;while(capacity<count*2){capacity*=2;}
     var v::Vec<usize> seen=v::empty<usize>();if(!v::reserve<usize>(ref mut seen,capacity).is_ok){return .err(12);}var usize i=0;while(i<capacity){if(!v::push<usize>(ref mut seen,0).is_ok){return .err(12);}i+=1;}
