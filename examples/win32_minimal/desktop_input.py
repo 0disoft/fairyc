@@ -3,6 +3,7 @@ import ctypes as c
 from ctypes import wintypes as w
 from contextlib import contextmanager
 import time
+from types import SimpleNamespace
 
 
 class Mouse(c.Structure):
@@ -33,10 +34,10 @@ class TitleBar(c.Structure):
 
 
 @contextmanager
-def close_input(pid, method):
-    """Require foreground ownership; return a receipt, never send WM_CLOSE."""
-    if method not in ('close-button', 'alt-f4'):
-        raise ValueError('unknown desktop close method')
+def window_input(pid, method, released=None):
+    """Require foreground ownership; inject input without synthesizing UI messages."""
+    if method not in ('close-button', 'alt-f4', 'drag-resize'):
+        raise ValueError('unknown desktop input method')
     user = c.WinDLL('user32', use_last_error=True)
     callback = c.WINFUNCTYPE(w.BOOL, w.HWND, w.LPARAM)
 
@@ -61,6 +62,7 @@ def close_input(pid, method):
     at_point = api('WindowFromPoint', w.HWND, w.POINT)
     ancestor = api('GetAncestor', w.HWND, w.HWND, w.UINT)
     metric = api('GetSystemMetrics', c.c_int, c.c_int)
+    window_rect = api('GetWindowRect', w.BOOL, w.HWND, c.POINTER(w.RECT))
     windows = []
 
     @callback
@@ -143,45 +145,82 @@ def close_input(pid, method):
         raise RuntimeError('cannot use physical desktop coordinates')
     old, current = w.POINT(), w.POINT()
     point = None
+    dragging = False
     try:
         if not cursor(c.byref(old)):
             raise RuntimeError('cannot read cursor position')
-        title = TitleBar()
-        title.size = c.sizeof(title)
         result = c.c_size_t()
-        if not message(hwnd, 0x033F, 0, c.addressof(title), 3, 2000, c.byref(result)):
-            raise RuntimeError('cannot query native title-bar buttons')
-        rect = title.rects[5]
-        if title.states[5] & (0x8000 | 0x10000 | 1) or rect.right <= rect.left or rect.bottom <= rect.top:
-            raise RuntimeError('native close button is unavailable')
-        x, y = (rect.left + rect.right) // 2, (rect.top + rect.bottom) // 2
+        if method == 'drag-resize':
+            rect = w.RECT()
+            if not window_rect(hwnd, c.byref(rect)):
+                raise RuntimeError('cannot query native resize border')
+            x, y = rect.right - 2, rect.bottom - 2
+            hit, hit_name = 17, 'HTBOTTOMRIGHT'
+        else:
+            title = TitleBar()
+            title.size = c.sizeof(title)
+            if not message(hwnd, 0x033F, 0, c.addressof(title), 3, 2000, c.byref(result)):
+                raise RuntimeError('cannot query native title-bar buttons')
+            rect = title.rects[5]
+            if title.states[5] & (0x8000 | 0x10000 | 1) or rect.right <= rect.left or rect.bottom <= rect.top:
+                raise RuntimeError('native close button is unavailable')
+            x, y = (rect.left + rect.right) // 2, (rect.top + rect.bottom) // 2
+            hit, hit_name = 20, 'HTCLOSE'
         left, top, width, height = [metric(index) for index in (76, 77, 78, 79)]
-        if width <= 1 or height <= 1 or not (left <= x < left + width and top <= y < top + height):
-            raise RuntimeError('close button lies outside the virtual desktop')
-        normalized_x = (x - left) * 65535 // (width - 1)
-        normalized_y = (y - top) * 65535 // (height - 1)
-        move = Input(0, Payload(mouse=Mouse(normalized_x, normalized_y, 0, 0xC001, 0, 0)))
         up = Input(0, Payload(mouse=Mouse(0, 0, 0, 4, 0, 0)))
-        submit([move], [up])
-        point = (x, y)
-        deadline = time.monotonic() + 1
-        while True:
-            cursor(c.byref(current))
-            if abs(current.x - x) <= 1 and abs(current.y - y) <= 1:
-                break
-            if time.monotonic() >= deadline:
-                raise RuntimeError('cursor did not reach the native close button')
-            time.sleep(0.01)
+
+        def move_to(x, y):
+            nonlocal point
+            if width <= 1 or height <= 1 or not (left <= x < left + width and top <= y < top + height):
+                raise RuntimeError('mouse target lies outside the virtual desktop')
+            normalized_x = (x - left) * 65535 // (width - 1)
+            normalized_y = (y - top) * 65535 // (height - 1)
+            move = Input(0, Payload(mouse=Mouse(normalized_x, normalized_y, 0, 0xC001, 0, 0)))
+            submit([move], [up])
+            point = (x, y)
+            deadline = time.monotonic() + 1
+            while True:
+                if not cursor(c.byref(current)):
+                    raise RuntimeError('cannot read cursor during desktop input')
+                if abs(current.x - x) <= 1 and abs(current.y - y) <= 1:
+                    break
+                if time.monotonic() >= deadline:
+                    raise RuntimeError(f'cursor did not reach native target {(x, y)}; observed {(current.x, current.y)}')
+                time.sleep(0.01)
+
+        move_to(x, y)
         if ancestor(at_point(current), 2) != hwnd:
-            raise RuntimeError('native close button is occluded; click aborted')
+            raise RuntimeError('native input target is occluded; mouse input aborted')
         packed = (current.x & 0xFFFF) | ((current.y & 0xFFFF) << 16)
-        if not message(hwnd, 0x0084, 0, packed, 3, 2000, c.byref(result)) or result.value != 20:
-            raise RuntimeError('native hit test did not identify HTCLOSE; click aborted')
+        if not message(hwnd, 0x0084, 0, packed, 3, 2000, c.byref(result)) or result.value != hit:
+            raise RuntimeError('native hit test did not identify ' + hit_name + '; mouse input aborted')
         down = Input(0, Payload(mouse=Mouse(0, 0, 0, 2, 0, 0)))
-        submit([down, up], [up])
-        yield dict(receipt, injectedEvents=3, closeButton=[x, y], hitTest='HTCLOSE')
+        if method == 'drag-resize':
+            submit([down], [up])
+            dragging = True
+            yield SimpleNamespace(receipt=dict(receipt, resizeBorder=[x, y], hitTest=hit_name),
+                                  move_to=move_to, start=(x, y))
+        else:
+            submit([down, up], [up])
+            yield dict(receipt, injectedEvents=3, closeButton=[x, y], hitTest=hit_name)
     finally:
-        if point is not None and cursor(c.byref(current)):
-            if abs(current.x - point[0]) <= 1 and abs(current.y - point[1]) <= 1:
-                restore(old.x, old.y)
-        dpi(previous_dpi)
+        try:
+            if dragging:
+                cleanup = (Input * 1)(up)
+                if send(1, cleanup, c.sizeof(Input)) != 1:
+                    raise RuntimeError('cannot release injected drag button')
+                if released is not None:
+                    released()
+        finally:
+            if point is not None and cursor(c.byref(current)):
+                if abs(current.x - point[0]) <= 1 and abs(current.y - point[1]) <= 1:
+                    restore(old.x, old.y)
+            dpi(previous_dpi)
+
+
+def close_input(pid, method):
+    return window_input(pid, method)
+
+
+def drag_input(pid, released):
+    return window_input(pid, 'drag-resize', released)

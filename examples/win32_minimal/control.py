@@ -6,6 +6,7 @@ from pathlib import Path
 from queue import Empty, Queue
 import subprocess
 import sys
+import time
 from threading import Thread
 
 
@@ -52,6 +53,8 @@ class Session:
         if not isinstance(request, dict):
             raise ValueError('request must be an object')
         command = request.get('command')
+        if command == 'drag-resize' and set(request) == {'command'}:
+            return drag_window(self)
         if command in ('close-button', 'alt-f4') and set(request) == {'command'}:
             from desktop_input import close_input
             ready = self.wire(b'arm-close')
@@ -79,7 +82,7 @@ class Session:
             if len(text.encode('utf-16-le')) > 254:
                 raise ValueError('input exceeds 127 UTF-16 code units')
             return self.wire(b'input\t' + text.encode('utf-8'))
-        raise ValueError('expected state, input with text, resize with width/height, click, close, close-button, or alt-f4')
+        raise ValueError('expected state, input with text, resize with width/height, drag-resize, click, close, close-button, or alt-f4')
 
     def finish(self):
         if self.process.poll() is None:
@@ -144,6 +147,21 @@ def output(value):
     print(json.dumps(value, ensure_ascii=False), flush=True)
 
 
+def check_layout(row):
+    if not row.get('ok') or row['resizes'] < 1:
+        raise RuntimeError('missing Fairy layout acknowledgement')
+    width = max(320, row['client']['width'])
+    expected = dict(label=(16, 16, width - 32, 20), input=(16, 44, width - 132, 28),
+                    apply=(width - 100, 44, 84, 28), result=(16, 94, width - 32, 48),
+                    status=(16, 154, width - 32, 24))
+    actual = {name: tuple(box[key] for key in ('x', 'y', 'width', 'height'))
+              for name, box in row['layout'].items()}
+    if actual != expected:
+        raise RuntimeError('actual Win32 control rectangles differ from the Fairy layout')
+    if row['minimum'] != dict(width=400, height=240):
+        raise RuntimeError('Fairy minimum size changed')
+
+
 def verify_resize(session):
     rows = []
 
@@ -151,18 +169,7 @@ def verify_resize(session):
         if not condition:
             raise RuntimeError(message)
 
-    def layout(row):
-        check(row.get('ok') and row['resizes'] >= 1, 'missing Fairy layout acknowledgement')
-        width = max(320, row['client']['width'])
-        expected = dict(label=(16, 16, width - 32, 20), input=(16, 44, width - 132, 28),
-                        apply=(width - 100, 44, 84, 28), result=(16, 94, width - 32, 48),
-                        status=(16, 154, width - 32, 24))
-        actual = {name: tuple(box[key] for key in ('x', 'y', 'width', 'height'))
-                  for name, box in row['layout'].items()}
-        check(actual == expected, 'actual Win32 control rectangles differ from the Fairy layout')
-        check(row['minimum'] == dict(width=400, height=240), 'Fairy minimum size changed')
-
-    layout(session.initial)
+    check_layout(session.initial)
     session.request(dict(command='input', text='크기를 바꿔도 유지 Ω'))
     baseline = session.request(dict(command='click'))
     check(baseline['result'] == 'Result: 크기를 바꿔도 유지 Ω', 'resize setup did not apply input')
@@ -170,7 +177,7 @@ def verify_resize(session):
     # Widen, narrow to minimum, change height only, repeat unchanged, restore.
     for width, height in ((800, 480), (400, 240), (400, 480), (400, 480), (640, 360)):
         row = session.request(dict(command='resize', width=width, height=height))
-        layout(row)
+        check_layout(row)
         check(row['window']['width'] == width and row['window']['height'] == height, 'window was not resized')
         check((row['window']['x'], row['window']['y']) ==
               (baseline['window']['x'], baseline['window']['y']), 'resize moved the window')
@@ -224,6 +231,78 @@ def verify_desktop_close(image):
                 processExited=True)
 
 
+def drag_window(session):
+    from desktop_input import drag_input
+    baseline = session.request(dict(command='state'))
+    check_layout(baseline)
+    rows, final = [], []
+
+    def wait_released():
+        deadline = time.monotonic() + 2
+        while True:
+            row = session.request(dict(command='state'))
+            if not row['sizing'] and not row['mouseDown']:
+                final.append(row)
+                return
+            if time.monotonic() >= deadline:
+                raise RuntimeError('native drag loop did not exit after button release')
+            time.sleep(0.02)
+
+    with drag_input(session.process.pid, wait_released) as drag:
+        deadline = time.monotonic() + 2
+        while True:
+            entered = session.request(dict(command='state'))
+            if entered['sizing'] and entered['mouseDown']:
+                break
+            if time.monotonic() >= deadline:
+                raise RuntimeError('mouse press did not enter the native sizing loop')
+            time.sleep(0.02)
+        prior, prior_dx = entered, 0
+        for dx, dy in ((64, 32), (128, 64), (192, 96), (96, 48)):
+            drag.move_to(drag.start[0] + dx, drag.start[1] + dy)
+            deadline = time.monotonic() + 2
+            while True:
+                row = session.request(dict(command='state'))
+                direction = 1 if dx > prior_dx else -1
+                if (row['window']['width'] - prior['window']['width']) * direction > 1:
+                    check_layout(row)
+                    if (not row['sizing'] or not row['mouseDown'] or
+                            row['liveLayouts'] <= prior['liveLayouts'] or row['resizes'] <= prior['resizes'] or
+                            row['sizeEntries'] <= baseline['sizeEntries'] or row['sizeExits'] != baseline['sizeExits']):
+                        raise RuntimeError('Fairy layout did not update while the mouse was held')
+                    for key in ('input', 'result', 'status', 'edits', 'clicks'):
+                        if row[key] != baseline[key]:
+                            raise RuntimeError('drag changed application state: ' + key)
+                    rows.append(row)
+                    prior = row
+                    prior_dx = dx
+                    break
+                if time.monotonic() >= deadline:
+                    raise RuntimeError('real border drag did not change the native window size')
+                time.sleep(0.02)
+        receipt = drag.receipt
+    check_layout(final[0])
+    if final[0]['sizeExits'] <= baseline['sizeExits']:
+        raise RuntimeError('native drag exit was not observed')
+    return dict(ok=True, verification='win32-live-drag', desktopInput=receipt,
+                observations=rows, finalState=final[0], released=True)
+
+
+def verify_drag(session):
+    session.request(dict(command='input', text='드래그 중에도 Fairy Ω'))
+    applied = session.request(dict(command='click'))
+    if applied['result'] != 'Result: 드래그 중에도 Fairy Ω':
+        raise RuntimeError('drag setup did not apply input')
+    report = drag_window(session)
+    edited = session.request(dict(command='input', text='드래그 완료'))
+    applied = session.request(dict(command='click'))
+    if edited['edits'] != 2 or applied['clicks'] != 2 or applied['result'] != 'Result: 드래그 완료':
+        raise RuntimeError('controls stopped working after live drag')
+    if not session.request(dict(command='close')).get('closed') or session.process.wait(timeout=5) != 0:
+        raise RuntimeError('live-drag GUI did not close with exit 0')
+    return dict(report, processExited=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-minimal.exe')
@@ -232,6 +311,7 @@ def main():
     mode.add_argument('--verify-desktop-close', action='store_true',
                       help='verify title-bar click and Alt+F4 via desktop input; requires an idle desktop')
     mode.add_argument('--verify-resize', action='store_true', help='resize the real window and verify native control rectangles')
+    mode.add_argument('--verify-drag', action='store_true', help='verify live Fairy layout during actual border dragging; requires an idle desktop')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -245,6 +325,8 @@ def main():
             output(verify(session))
         elif args.verify_resize:
             output(verify_resize(session))
+        elif args.verify_drag:
+            output(verify_drag(session))
         else:
             output(session.initial)
             while True:
