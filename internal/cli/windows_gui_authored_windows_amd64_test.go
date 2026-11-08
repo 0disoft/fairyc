@@ -85,25 +85,33 @@ func TestWindowsGUIExample(t *testing.T) {
 }
 
 func TestWindowsGUIEventFailure(t *testing.T) {
-	root := windowsGUIExample(t)
-	path := filepath.Join(root, "src/main.fy")
-	source, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	broken := strings.Replace(string(source), `b"Result: "`, `b"Broken: "`, 1)
-	if broken == string(source) {
-		t.Fatal("missing Fairy result mutation target")
-	}
-	writeWorkspaceFile(t, root, "src/main.fy", broken)
-	if code, out, diag := runForTest([]string{"build", "--release"}, root); code != 0 || diag != "" {
-		t.Fatalf("build negative control: %d %s %s", code, out, diag)
-	}
-	ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
-	defer cancel()
-	out, err := exec.CommandContext(ctx, filepath.Join(root, "build/win32-minimal.exe"), "--smoke").CombinedOutput()
-	if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 5 || len(out) != 0 {
-		t.Fatalf("broken button event must fail smoke with 5: %v %s", err, out)
+	for _, mutation := range []struct{ name, from, to string }{
+		{"click-result", `b"Result: "`, `b"Broken: "`},
+		{"edit-count", "edits += 1;", "edits += 0;"},
+		{"edit-status", "fairy_win32_changed(window, edits, 105)", "fairy_win32_changed(window, edits, 104)"},
+	} {
+		t.Run(mutation.name, func(t *testing.T) {
+			root := windowsGUIExample(t)
+			path := filepath.Join(root, "src/main.fy")
+			source, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			broken := strings.Replace(string(source), mutation.from, mutation.to, 1)
+			if broken == string(source) {
+				t.Fatal("missing Fairy event mutation target")
+			}
+			writeWorkspaceFile(t, root, "src/main.fy", broken)
+			if code, out, diag := runForTest([]string{"build", "--release"}, root); code != 0 || diag != "" {
+				t.Fatalf("build negative control: %d %s %s", code, out, diag)
+			}
+			ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
+			defer cancel()
+			out, err := exec.CommandContext(ctx, filepath.Join(root, "build/win32-minimal.exe"), "--smoke").CombinedOutput()
+			if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 5 || len(out) != 0 {
+				t.Fatalf("broken Fairy event must fail smoke with 5: %v %s", err, out)
+			}
+		})
 	}
 }
 
