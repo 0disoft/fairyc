@@ -34,6 +34,12 @@ pipe EOF and smoke assertion failures retain native forced cleanup; these are
 separate from the normal user close policy. The successful smoke path sends
 `WM_CLOSE` and fails on its next timer tick if Fairy declines closing.
 
+Optional desktop input is owned by the example's `desktop_input.py` and
+`control.py`. `arm-close` only prepares observation/foreground activation.
+`SendInput` performs the actual title-bar click or Alt+F4; WndProc records
+`SC_CLOSE` before default processing generates `WM_CLOSE`. Armed replies include
+`systemClose` and are still emitted only after Fairy's close decision.
+
 An initial synchronous callback implementation passed the Go frontend but was
 rejected by the authored Fairy CLI's function-parameter subset. It was replaced
 by the event pump before committing. No callback grammar or export support was
@@ -168,3 +174,56 @@ change. Full repository tests, Linux, hosted CI, compiler bootstrap/fixed point
 and physical title-bar/Alt+F4/IME delivery were skipped for this scoped example
 change. Normal close messages are exercised through real Win32 `WM_CLOSE`;
 physical input delivery remains unverified.
+
+## Desktop title-bar and Alt+F4 follow-up
+
+The previous step tested native close messages. This follow-up additionally
+exercises the Windows mouse/keyboard input stream through `SendInput`.
+
+- `go run -mod=readonly ../../cmd/fairyc check` in the example: PASS,
+  1 source / 4 MIR functions, lock unchanged (no Fairy source change).
+- Using the existing authored Fairy CLI/companion, `build --locked` and
+  `build --locked --release` both pass. Each image passes
+  `python -B control.py --verify-desktop-close`: the native close button and
+  Alt+F4 each report `systemClose:true`, Fairy approval, and process exit 0.
+  The mouse receipt records `HTCLOSE` and three injected events; the keyboard
+  receipt records four injected events. The standard `control.py --verify`
+  also passes the updated authored release app.
+- With `FAIRYC_RUN_DESKTOP_INTEGRATION=1` and `GOMAXPROCS=1`,
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure|DesktopClose)$' -count=1 -v`:
+  PASS, 28.018s. Go-built development/release apps pass both desktop actions
+  alongside the existing native smoke and control checks. Changing only Fairy
+  close policy to denial leaves the window open with unchanged state for both
+  actual desktop actions; subsequent input/click still work. All four source
+  mutation cases pass.
+- `TestWindowsGUIDesktopClose` and the desktop denial probe are explicitly
+  gated by `FAIRYC_RUN_DESKTOP_INTEGRATION=1`. Ordinary tests keep their existing
+  control-message checks without sending desktop input. No CI workflow or
+  runner was added or changed.
+- `gofmt` and scoped `git diff --check`: PASS.
+
+Local receipts: `.cache/windows-gui-desktop-go-20261109.log`,
+`windows-gui-desktop-{development,release}-20261109.json` and
+`windows-gui-desktop-baseline-20261109.json`.
+Go development/release images: 124,416 / 120,832 bytes; authored development/release:
+139,776 / 122,880 bytes. The authored compiler host was reused, not freshly bootstrapped.
+Implementation: `1f6ee5eb`; verification: `a5850e7e`.
+
+The desktop must be interactive, unlocked and idle. The helper restricts its
+target to the child PID and Fairy class, checks foreground ownership and held
+keys/buttons, obtains DPI-aware native title-bar rectangles, checks visibility
+and `HTCLOSE`, and restores the cursor after the reply when it has not moved.
+Background CLI activation may require briefly attaching and then detaching
+input queues. Global desktop input can still race concurrent user activity;
+foreground failure, blocked input or missing native observation fail instead
+of substituting direct close messages. Physical hardware input, IME, visual
+appearance, multi-monitor/DPI combinations and elevated/locked/headless targets
+are not certified. Full repository tests, Linux, hosted CI and full compiler
+bootstrap/fixed point were skipped for this Windows example/controller change.
+
+Only the private example protocol adds `arm-close` and desktop-close metadata;
+normal close replies and public compiler/language/FFI contracts are unchanged.
+No DB, dependencies, repository-hygiene policy, runner, version, push or deploy
+changes. The controller uses only Python's standard library; desktop input adds
+no runtime dependency to the GUI executable.

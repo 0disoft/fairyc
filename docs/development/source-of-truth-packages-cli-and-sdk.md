@@ -441,7 +441,7 @@ Windows GUI native build inputs are owned separately by
 `native_msvc_build.fy`. The runnable application is `examples/win32_minimal/`;
 CLI regressions are `internal/cli/windows_gui*_windows_amd64_test.go`.
 The example's opt-in JSONL agent control is owned by
-`examples/win32_minimal/README.md`, `control.py` and `native/window.c` within
+`examples/win32_minimal/README.md`, `control.py`, `desktop_input.py` and `native/window.c` within
 that example. Execution: `docs/development/windows-gui-cli-control-20261108.md`.
 Fairy-owned click/input-change/close handling and the C event pump are recorded in
 `docs/development/windows-gui-fairy-events-20261109.md`.

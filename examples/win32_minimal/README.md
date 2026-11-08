@@ -57,11 +57,50 @@ close button. The ordinary WndProc forwards these events to Fairy and replies re
 control text. This verifies programmatic control events; it does not certify
 physical keyboard/mouse delivery, IME, screen rendering or accessibility.
 
+### Title-bar close button and Alt+F4
+
+On an idle, unlocked interactive Windows desktop, run:
+
+```powershell
+python -B control.py --verify-desktop-close
+```
+
+This opens two owned GUI processes sequentially, applies input, then closes one
+by clicking its native title-bar close button and the other by Alt+F4. The
+controller uses Windows [SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)
+for mouse/keyboard input. It does not send `WM_CLOSE` or `SC_CLOSE` to simulate
+these two actions. A successful JSON receipt includes `systemClose:true`,
+`closed:true`, PID/HWND, input method, inserted event count and process exit 0.
+The mouse receipt also records the close-button center and `HTCLOSE` hit test.
+
+Interactive JSON requests support `{"command":"close-button"}` and
+`{"command":"alt-f4"}`. Either normally closes its session; start a new session
+for the other action. If Fairy declines, the reply instead has `closed:false`
+and the same session remains usable.
+
+Desktop actions take foreground focus and briefly move the mouse. The optional
+`desktop_input.py` helper locates only the spawned process's visible Fairy
+window, activates it (temporarily attaching input queues when needed), and
+checks foreground ownership before input. It queries `WM_GETTITLEBARINFOEX`
+under per-monitor DPI awareness, checks the mouse target is unobscured and
+hit-tests as `HTCLOSE`, then restores the cursor after the close reply if the
+user has not moved it. Held modifiers/buttons, unavailable foreground, blocked
+input or missing native close observation fail the request. Keep the desktop
+idle during these checks; concurrent user input can still race global input.
+Locked/headless desktops and elevated targets are not supported. These are OS
+injected input tests, not physical keyboard/mouse hardware or IME certification.
+
+The native `arm-close` request only arms observation and activates the owned
+window. The subsequent `SC_CLOSE` is recorded by WndProc before Windows maps it
+to `WM_CLOSE`, and Fairy decides whether to close. Only an armed desktop reply
+adds `systemClose`; ordinary `close` replies retain their existing shape.
+The GUI needs no Python or extra runtime dependency for normal use.
+
 The GUI enables this private example protocol only with `--automation-stdio`
 and inherited pipe stdin/stdout. The Python controller owns that process and
 closes it on stdin EOF or error. It opens no socket, contacts no service and
-does not discover or control other running windows. Native requests use LF
-lines `state`, `input<TAB>UTF-8`, `click`, `close`; replies are JSON lines.
+targets only its owned child process. Native requests use LF
+lines `state`, `input<TAB>UTF-8`, `click`, `close`, `arm-close`; replies are JSON lines.
 The native buffer is bounded to 1023 bytes and validates UTF-8, NUL and input
 length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
