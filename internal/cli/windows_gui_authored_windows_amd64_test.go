@@ -89,6 +89,7 @@ func TestWindowsGUIEventFailure(t *testing.T) {
 		{"click-result", `b"Result: "`, `b"Broken: "`},
 		{"edit-count", "edits += 1;", "edits += 0;"},
 		{"edit-status", "fairy_win32_changed(window, edits, 105)", "fairy_win32_changed(window, edits, 104)"},
+		{"close-policy", "fairy_win32_resolve_close(window, 1)", "fairy_win32_resolve_close(window, 0)"},
 	} {
 		t.Run(mutation.name, func(t *testing.T) {
 			root := windowsGUIExample(t)
@@ -110,6 +111,35 @@ func TestWindowsGUIEventFailure(t *testing.T) {
 			out, err := exec.CommandContext(ctx, filepath.Join(root, "build/win32-minimal.exe"), "--smoke").CombinedOutput()
 			if exit, ok := err.(*exec.ExitError); !ok || exit.ExitCode() != 5 || len(out) != 0 {
 				t.Fatalf("broken Fairy event must fail smoke with 5: %v %s", err, out)
+			}
+			if mutation.name == "close-policy" {
+				python, err := exec.LookPath("python")
+				if err != nil {
+					t.Skip("optional Win32 close-denial control requires Python 3")
+				}
+				// Change only Fairy policy: the same WM_CLOSE must now leave
+				// the window open and interactive, including repeated requests.
+				probe := `import sys
+sys.path.insert(0, sys.argv[1])
+from control import Session
+session = Session(sys.argv[2])
+try:
+    for _ in range(2):
+        assert session.request({'command': 'close'}) == {'ok': True, 'closed': False}
+        assert session.request({'command': 'state'}) == session.initial
+        assert session.process.poll() is None
+    edited = session.request({'command': 'input', 'text': 'after declined close'})
+    assert edited['edits'] == 1 and edited['status'] == 'WM_COMMAND: EN_CHANGE'
+    applied = session.request({'command': 'click'})
+    assert applied['clicks'] == 1 and applied['result'] == 'Result: after declined close'
+finally:
+    session.finish()
+`
+				out, err := exec.CommandContext(ctx, python, "-B", "-c", probe,
+					"../../examples/win32_minimal", filepath.Join(root, "build/win32-minimal.exe")).CombinedOutput()
+				if err != nil || len(out) != 0 {
+					t.Fatalf("Fairy close denial must preserve interactive GUI: %v %s", err, out)
+				}
 			}
 		})
 	}
