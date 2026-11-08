@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -54,7 +55,32 @@ func TestWindowsGUIExample(t *testing.T) {
 		if code, out, diag := runForTest(append([]string{"build"}, flags...), root); code != 0 || diag != "" {
 			t.Fatalf("build %v: %d %s %s", flags, code, out, diag)
 		}
-		windowsGUIExecute(t, filepath.Join(root, "build/win32-minimal.exe"), 2)
+		image := filepath.Join(root, "build/win32-minimal.exe")
+		windowsGUIExecute(t, image, 2)
+		name := "development-control"
+		if len(flags) != 0 {
+			name = "release-control"
+		}
+		t.Run(name, func(t *testing.T) {
+			python, err := exec.LookPath("python")
+			if err != nil {
+				t.Skip("optional Win32 JSONL controller requires Python 3")
+			}
+			ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
+			defer cancel()
+			out, err := exec.CommandContext(ctx, python, "-B", "../../examples/win32_minimal/control.py", "--exe", image, "--verify").CombinedOutput()
+			if err != nil {
+				t.Fatalf("CLI control events: %v %s", err, out)
+			}
+			var report struct {
+				OK            bool
+				Verification  string
+				ProcessExited bool
+			}
+			if err := json.Unmarshal(out, &report); err != nil || !report.OK || report.Verification != "real-win32-controls" || !report.ProcessExited {
+				t.Fatalf("invalid CLI control receipt: %v %s", err, out)
+			}
+		})
 	}
 }
 

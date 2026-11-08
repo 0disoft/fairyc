@@ -3,6 +3,10 @@
 Owner: [ADR 0552](../adr/0552-minimal-windows-gui-build.md) and
 [CLI command contract](../cli/command-contract.md).
 
+Later button/input, caption repair and programmatic agent control are recorded
+in [the control follow-up](windows-gui-cli-control-20261108.md). The image sizes
+below describe the initial window; the follow-up records the current example.
+
 ## Result
 
 Go CLI and the authored Fairy CLI/companion build and run the
