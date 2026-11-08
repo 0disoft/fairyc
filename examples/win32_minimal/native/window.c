@@ -56,7 +56,8 @@ static BOOL smoke_events(HWND window, WindowState *state) {
     WCHAR actual[160];
     WCHAR long_input[201];
     unsigned before = state->edits;
-    if (state->clicks != 0 || !control_resource(state->status, 104)) {
+    if (!control_resource(window, 101) || state->clicks != 0 ||
+        !control_resource(state->status, 104)) {
         return FALSE;
     }
     SendMessageW(window, WM_COMMAND, MAKEWPARAM(APPLY_ID, BN_CLICKED), 0);
@@ -107,7 +108,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
     case WM_NCCREATE:
         state = (WindowState *)((CREATESTRUCTW *)lparam)->lpCreateParams;
         SetWindowLongPtrW(window, GWLP_USERDATA, (LONG_PTR)state);
-        return TRUE;
+        return DefWindowProcW(window, message, wparam, lparam);
     case WM_CREATE:
         if (control(window, L"STATIC", L"&Message:", 0, 200) == NULL) {
             return -1;
