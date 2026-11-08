@@ -37,6 +37,17 @@ readiness or a pending resize request. Other event acknowledgements are kept
 separate. Geometry replies use `GetWindowRect`, `GetClientRect` and
 `MapWindowPoints` to observe actual rectangles rather than echo supplied boxes.
 
+The native pump now runs on a Win32 fiber on the same OS thread as Fairy. A
+`WM_SIZE` handler on the pump fiber yields to the application fiber, including
+when Windows' default modal sizing loop is active. Fairy's existing `next` /
+`on_size` / `layout_done` path applies the geometry and resumes the suspended
+native frame. No Fairy callback/export, extra OS thread or C layout policy is
+introduced. Both fibers preserve floating-point state; the pump reserves a
+1 MiB stack with the executable's default initial commit. Shutdown destroys
+the window, resumes suspended native frames through `WM_QUIT`, deletes the
+pump fiber and converts the application fiber back to a thread. Initialization
+failure returns failure instead of silently using delayed layout.
+
 `WM_CLOSE` returns from WndProc without default destruction. The CLI `close`
 command sends that same message. Fairy resolves the event with
 `fairy_win32_resolve_close(window, 1)` to destroy or 0 to decline; a pending CLI
@@ -291,3 +302,59 @@ Full repository tests, Linux, hosted CI, fresh compiler bootstrap/fixed point,
 physical border dragging, IME and multi-monitor/DPI combinations were skipped
 for this Windows example change. No public compiler API, DB, dependencies,
 repository-hygiene policy, runner, version bump, push or deployment changes.
+
+## Live modal border-drag follow-up
+
+This supersedes the prior restriction about waiting for modal dragging to end.
+The existing Fairy layout function is unchanged; only native scheduling and
+optional desktop verification change.
+
+- The existing authored Fairy CLI/companion builds development and release
+  with `build --locked` / `build --locked --release`. Both apps pass
+  `python -B control.py --verify-drag`: four actual bottom-right drag checkpoints
+  report `sizing:true`, `mouseDown:true`, increased Fairy resize counts and live
+  completions, correct actual child rectangles and preserved application state.
+  Release samples include widths 531/573/633/553; development samples include
+  531/582/633/557 in the app's coordinate space. Native entry/exit, post-release
+  input/click and process exit 0 pass. Sizes/timing may differ with DPI and
+  Windows' intermediate drag updates.
+- The authored release app also passes existing `control.py --verify` and
+  `--verify-resize` after the pump change.
+- With `FAIRYC_RUN_DESKTOP_INTEGRATION=1` and `GOMAXPROCS=1`,
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure|DesktopClose|LiveDrag)$' -count=1 -v`:
+  PASS, 39.542s. Both Go-built profiles pass existing smoke, standard/resize
+  JSONL checks, actual close-button/Alt+F4 input and actual live dragging.
+  Five existing Fairy-source mutation controls pass. A new native control
+  removes only the modal `SwitchToFiber` handoff: it builds successfully and
+  the drag verifier exits 1 on stale Fairy layout observed before mouse release.
+  This distinguishes live layout from a final update after the drag ends.
+- `gofmt` and scoped `git diff --check`: PASS.
+
+The CLI uses `SendInput` for the real mouse press/motions/release. It validates
+the border with `HTBOTTOMRIGHT`, waits for native sizing entry, polls actual
+geometry while held and observes sizing exit before cursor restoration. It
+releases the button in its failure path too. Earlier exploratory attempts
+stopped on lost foreground or cursor/entry synchronization; no such failure is
+counted as a pass. The final verifier synchronizes against native modal entry
+and samples distinct changes in the intended direction. Desktop tests remain
+opt-in and require an idle, unlocked interactive desktop.
+
+Receipts: `.cache/windows-gui-live-drag-go-20261109.log`,
+`windows-gui-live-drag-{development,release}-20261109.json`,
+`windows-gui-live-resize-baseline-20261109.json` and
+`windows-gui-live-events-baseline-20261109.json`.
+Go development/release images: 130,560 / 125,952 bytes.
+Authored development/release images: 149,504 / 128,512 bytes.
+Implementation: `1cb3e2dd`; controller/regression: `5e214196`.
+The authored compiler host was reused rather than bootstrapped again.
+
+Only the private example's telemetry and Python JSON command surface expand;
+native application FFI signatures and Fairy source/lock are unchanged. No public
+compiler/language API, DB, dependency, hygiene, runner, version, push or deploy
+change. Full repository tests, Linux, hosted CI, full compiler bootstrap/fixed
+point, physical mouse hardware, visual paint/frame-rate review, outline-only
+dragging, elevated/locked/headless targets and other monitor/DPI combinations
+were not certified by this Windows example task. The OS must deliver live
+`WM_SIZE` notifications for intermediate layout; the bridge does not replace
+the native drag behavior or change system-wide full-window-drag settings.

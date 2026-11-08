@@ -88,9 +88,43 @@ Fairy owns initial window dimensions; `on_size` owns minimum dimensions, the
 existing vertical positions/heights stay fixed when only height changes.
 C only reads native client dimensions, moves the requested control and applies
 the supplied minimum tracking size. Size notifications are coalesced separately
-from input/click/close events. With the pull event pump, a Windows modal border
-drag may finish before Fairy regains control to apply the final layout; live
-layout at every intermediate drag step is not promised by this example.
+from input/click/close events. The native message pump runs on a separate Win32
+fiber on the same UI thread. `WM_SIZE` yields to Fairy even inside the standard
+Windows modal border-drag loop, and resumes the native frame after Fairy has
+applied its layout. There is no extra OS thread or retained Fairy callback.
+
+### Live layout during real border dragging
+
+On an idle, unlocked interactive desktop:
+
+```powershell
+python -B control.py --verify-drag
+```
+
+The controller hit-tests the owned window's bottom-right border as
+`HTBOTTOMRIGHT`, presses the mouse button through `SendInput`, then moves
+outward three times and inward once while keeping the button down. It reads
+actual window/control rectangles at four intermediate sizes **before release**.
+Every checkpoint must show `sizing:true`, `mouseDown:true`, increasing Fairy
+`resizes` and `liveLayouts`, correct layout and unchanged text/edit/click state.
+After releasing, it verifies `WM_EXITSIZEMOVE`, further input/click and clean
+close. It never uses `SetWindowPos`, `SC_SIZE` or fabricated `WM_SIZE` messages
+to perform this drag.
+
+Interactive JSON `{"command":"drag-resize"}` performs the same bounded
+four-step drag on the existing owned session and returns its checkpoints; it
+leaves the session open. The dedicated `--verify-drag` mode also verifies setup,
+post-drag controls and close. Native state adds `sizing`, `mouseDown`,
+`sizeEntries`, `sizeExits` and `liveLayouts`. A live-layout completion is counted
+only inside the native move/size loop while the left button is down.
+
+The helper releases the injected button on success or failure and waits for the
+native loop to exit before restoring the cursor. PID/foreground checks and
+desktop limitations from the close-input section below also apply. Concurrent
+user activity, unavailable foreground, outline-only window dragging or an
+off-screen path fail rather than being reported as a successful live drag.
+Desktop Go tests require `FAIRYC_RUN_DESKTOP_INTEGRATION=1`; default checks do
+not inject desktop input.
 
 ### Title-bar close button and Alt+F4
 
