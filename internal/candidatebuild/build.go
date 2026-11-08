@@ -26,6 +26,7 @@ import (
 type Options struct {
 	Candidate, Manifest, Directory, Output string
 	Workspace                              string
+	WindowsRoot                            string
 	OutputRoot                             string
 	Locked                                 bool
 	Release                                bool
@@ -284,8 +285,8 @@ func buildPacket(options Options, data []byte) (Result, error) {
 		build = cdriver.BuildWindowsMSVCCompilerHostPartsWithStackReserve
 	}
 	var application *windowsbuild.Project
-	if !options.CompilerHost && options.OutputRoot != "" {
-		application, err = windowsbuild.Load(options.OutputRoot)
+	if !options.CompilerHost && options.WindowsRoot != "" {
+		application, err = windowsbuild.Load(options.WindowsRoot)
 		if err != nil {
 			return Result{}, err
 		}

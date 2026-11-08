@@ -167,6 +167,11 @@ func buildWindowsMSVCTargetParts(toolchain WindowsHostToolchain, profile Profile
 			objectNames = append(objectNames, objectName)
 		}
 	}
+	resources, err := compileWindowsApplicationResources(toolchain, directory, timeout, application)
+	if err != nil {
+		return WindowsHostArtifact{}, err
+	}
+	objectNames = append(objectNames, resources...)
 	executable := filepath.Join(directory, "program.exe")
 	if err := linkWindowsApplication(toolchain, directory, objectNames, timeout, reserve, application); err != nil {
 		return WindowsHostArtifact{}, err
@@ -196,6 +201,7 @@ func linkWindowsApplication(toolchain WindowsHostToolchain, directory string, ob
 	arguments = append(arguments, "/Fe:program.exe", "/link", "/INCREMENTAL:NO", "/Brepro")
 	if application != nil {
 		arguments = append(arguments, application.Libraries...)
+		arguments = append(arguments, "/MANIFEST:NO")
 		if application.Subsystem == "windows" {
 			arguments = append(arguments, "/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup")
 		}

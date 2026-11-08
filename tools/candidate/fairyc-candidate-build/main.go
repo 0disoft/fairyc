@@ -17,6 +17,7 @@ func run(args []string) int {
 	flags := flag.NewFlagSet("fairyc-candidate-build", flag.ContinueOnError)
 	candidate := flags.String("candidate", "", "candidate executable")
 	manifest := flags.String("manifest", "", "private source manifest")
+	windowsRoot := flags.String("windows-root", "", "explicit Windows application input root")
 	workspace := flags.String("workspace", "", "Fairy workspace root; candidate owns manifest/dependency loading")
 	locked := flags.Bool("locked", false, "verify workspace lock without writing")
 	packet := flags.String("packet", "", "previously emitted private C packet")
@@ -65,7 +66,7 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 		return 2
 	}
-	options := candidatebuild.Options{Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, OutputRoot: *outputRoot, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout, StackReserveBytes: *stackReserve, CompilerHost: *compilerHost}
+	options := candidatebuild.Options{WindowsRoot: *windowsRoot, Candidate: *candidate, Manifest: *manifest, Workspace: *workspace, Locked: *locked, Directory: *directory, Output: *output, OutputRoot: *outputRoot, Release: *release, RunTrapControl: *runTrapControl, Timeout: *frontendTimeout, CompileTimeout: *compileTimeout, StackReserveBytes: *stackReserve, CompilerHost: *compilerHost}
 	var result candidatebuild.Result
 	var err error
 	if *packetInput != "" {

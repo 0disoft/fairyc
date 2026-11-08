@@ -50,3 +50,19 @@ func TestWindowsGUIWorkspaceBuild(t *testing.T) {
 		t.Fatal("failed native build replaced executable", err)
 	}
 }
+
+func TestWindowsGUIResources(t *testing.T) {
+	root := writeWorkspaceSessionFixture(t, "module main;unsafe extern C fn i32 resource_probe();fn i32 main(){return unsafe{resource_probe()};}")
+	writeWorkspaceFile(t, root, "fairy.windows.json", `{"schema":"fairyc.windows-build/v1","subsystem":"windows","libraries":["user32.lib"],"sources":["ui.c"],"resources":["app.rc"]}`)
+	writeWorkspaceFile(t, root, "app.rc", "#include <windows.h>\nSTRINGTABLE\nBEGIN\n 101 L\"Fairy GUI\"\nEND\n")
+	writeWorkspaceFile(t, root, "ui.c", "#include <windows.h>\n#include <stdint.h>\nint32_t resource_probe(void){WCHAR text[32];return GetConsoleWindow()==NULL && LoadStringW(GetModuleHandleW(NULL),101,text,32)==9 ? 42:1;}\n")
+	for _, release := range []bool{false, true} {
+		args := []string{"run"}
+		if release {
+			args = append(args, "--release")
+		}
+		if code, out, diag := runForTest(args, root); code != 42 || out != "" || diag != "" {
+			t.Fatalf("resource %v: %d %s %s", args, code, out, diag)
+		}
+	}
+}
