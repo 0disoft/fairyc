@@ -10,6 +10,7 @@ enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_L
 typedef struct {
     int32_t pending_event;
     BOOL reply_pending;
+    BOOL close_reply_pending;
     unsigned smoke_step;
     unsigned smoke_edits;
     int32_t exit_code;
@@ -66,8 +67,12 @@ static BOOL control_resource(HWND control, UINT id) {
 }
 
 static void smoke_finish(HWND window, WindowState *state, BOOL passed) {
+    if (passed) {
+        SendMessageW(window, WM_CLOSE, 0, 0);
+        return;
+    }
     KillTimer(window, 1);
-    state->exit_code = passed ? 0 : 5;
+    state->exit_code = 5;
     DestroyWindow(window);
 }
 
@@ -230,9 +235,8 @@ static BOOL automation_command(HWND window, WindowState *state) {
         return TRUE;
     }
     if (strcmp(state->command, "close") == 0) {
-        const char reply[] = "{\"ok\":true,\"closed\":true}\n";
-        automation_write(state, reply, sizeof(reply) - 1);
-        DestroyWindow(window);
+        state->close_reply_pending = TRUE;
+        SendMessageW(window, WM_CLOSE, 0, 0);
         return TRUE;
     }
     if (strncmp(state->command, "input\t", 6) == 0) {
@@ -315,6 +319,19 @@ int32_t fairy_win32_changed(void *native_window, uint32_t edits, uint32_t status
     resource_text(status, status_id);
     bridge_state.edits = edits;
     return acknowledge(window);
+}
+
+int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
+    HWND window = (HWND)native_window;
+    if (!IsWindow(window) || allow > 1) { return 1; }
+    if (allow != 0 && !DestroyWindow(window)) { return 1; }
+    if (bridge_state.close_reply_pending) {
+        const char *reply = allow != 0 ? "{\"ok\":true,\"closed\":true}\n" :
+                                        "{\"ok\":true,\"closed\":false}\n";
+        bridge_state.close_reply_pending = FALSE;
+        if (!automation_write(&bridge_state, reply, strlen(reply))) { return 1; }
+    }
+    return 0;
 }
 
 size_t fairy_win32_read_input(void *native_window, uint8_t *output, size_t capacity) {
@@ -402,6 +419,9 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         if (state && state->input) {
             SetFocus(state->input);
         }
+        return 0;
+    case WM_CLOSE:
+        state->pending_event = 3;
         return 0;
     case WM_TIMER:
         if (wparam == 2 && state->command_input != NULL) {
