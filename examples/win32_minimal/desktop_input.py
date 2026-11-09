@@ -78,9 +78,17 @@ def window_input(pid, method, released=None):
     if not enum(visit, 0) or len(windows) != 1:
         raise RuntimeError('expected exactly one visible window owned by the GUI process')
     hwnd = windows[0]
-    for key in (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73):
-        if pressed(key) & 0x8000:
-            raise RuntimeError('a mouse button or modifier/F4 key is held; no desktop input sent')
+    def wait_idle():
+        # SendInput completion and OS key-state updates are asynchronous.
+        # Wait for release; never inject a release for a user's held input.
+        deadline = time.monotonic() + 2
+        keys = (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73)
+        while any(pressed(key) & 0x8000 for key in keys):
+            if time.monotonic() >= deadline:
+                raise RuntimeError('a mouse button or modifier/F4 key remains held; no desktop input sent')
+            time.sleep(0.02)
+
+    wait_idle()
     activate(hwnd)
     focus_attempts, attach_errors = 0, []
     deadline = time.monotonic() + 2
@@ -128,9 +136,7 @@ def window_input(pid, method, released=None):
             raise RuntimeError('owned GUI lost foreground during activation; no desktop input sent')
         time.sleep(0.01)
     # Do not combine our shortcut/click with keys or buttons held by the user.
-    for key in (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73):
-        if pressed(key) & 0x8000:
-            raise RuntimeError('a mouse button or modifier/F4 key is held; no desktop input sent')
+    wait_idle()
 
     def require_target():
         process = w.DWORD()
