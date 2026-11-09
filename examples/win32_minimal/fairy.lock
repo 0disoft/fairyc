@@ -3,18 +3,18 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-2b49ed4dc6f27a50d0ab8796c1fa6e2b3af747d0a99aa691cd48f4a5c191d09d",
+  "root": "fypi1-sha256-2c1bb4b269ce42d258031eb59e105c08d8badcc559f48fae3154bf0426101ee8",
   "packages": [
     {
-      "id": "fypi1-sha256-2b49ed4dc6f27a50d0ab8796c1fa6e2b3af747d0a99aa691cd48f4a5c191d09d",
+      "id": "fypi1-sha256-2c1bb4b269ce42d258031eb59e105c08d8badcc559f48fae3154bf0426101ee8",
       "role": "root",
       "packageUid": "example.win32-minimal",
       "sourceKind": "local",
       "localPath": ".",
       "sdkIdentity": "",
       "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-c6b01960b8de9559dc135144a2eaca583eefeeca57561f24983050ca36b51e33",
-      "sourceDigest": "fysrc1-sha256-c6b01960b8de9559dc135144a2eaca583eefeeca57561f24983050ca36b51e33",
+      "sourceIdentity": "fysrc1-sha256-422f27a08478e949cb4f4b55b760fb6c07593941a572ba0a4d6d5c3a8e37b7f6",
+      "sourceDigest": "fysrc1-sha256-422f27a08478e949cb4f4b55b760fb6c07593941a572ba0a4d6d5c3a8e37b7f6",
       "version": "0.1.0",
       "features": []
     }

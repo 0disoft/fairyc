@@ -24,6 +24,12 @@ typedef struct {
     UINT pointer_press_hit;
     unsigned pointer_moves;
     unsigned pointer_presses;
+    int32_t key_code;
+    int32_t key_flags;
+    int32_t key_focus;
+    int32_t key_action;
+    unsigned keys;
+    int key_expected;
     BOOL initial_reply_pending;
     BOOL resize_reply_pending;
     int32_t min_width;
@@ -296,6 +302,12 @@ static BOOL automation_state(HWND window, WindowState *state) {
     json_number(&json, state->edits);
     json_bytes(&json, ",\"clicks\":");
     json_number(&json, state->clicks);
+    json_bytes(&json, ",\"closed\":false,\"keyCode\":"); json_signed(&json, state->key_code);
+    json_bytes(&json, ",\"keyFlags\":"); json_signed(&json, state->key_flags);
+    json_bytes(&json, ",\"keyFocus\":"); json_signed(&json, state->key_focus);
+    json_bytes(&json, ",\"keyAction\":"); json_signed(&json, state->key_action);
+    json_bytes(&json, ",\"keys\":"); json_number(&json, state->keys);
+    json_bytes(&json, ",\"awaitingKey\":"); json_signed(&json, state->key_expected);
     if (!json_geometry(&json, window, state)) { return FALSE; }
     json_bytes(&json, "}\n");
     return json.valid && automation_write(state, json.bytes, json.size);
@@ -343,6 +355,18 @@ static BOOL automation_command(HWND window, WindowState *state) {
         state->system_close_seen = FALSE;
         if (IsIconic(window) || IsZoomed(window)) { ShowWindow(window, SW_RESTORE); }
         SetForegroundWindow(window);
+        return automation_state(window, state);
+    }
+    if (strncmp(state->command, "arm-key\t", 8) == 0) {
+        const char *cursor = state->command + 8;
+        int code, focus;
+        if (!resize_dimension(&cursor, '\t', &code) || (code != VK_RETURN && code != VK_ESCAPE) ||
+            !resize_dimension(&cursor, '\0', &focus) || (focus != INPUT_ID && focus != APPLY_ID) ||
+            state->key_expected != 0) { return automation_error(state); }
+        SetForegroundWindow(window);
+        SetFocus(GetDlgItem(window, focus));
+        if (GetFocus() != GetDlgItem(window, focus)) { return automation_error(state); }
+        state->key_expected = code;
         return automation_state(window, state);
     }
     if (strncmp(state->command, "resize\t", 7) == 0) {
@@ -551,6 +575,28 @@ int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
     return 0;
 }
 
+int32_t fairy_win32_key(void *native_window, uint32_t axis) {
+    if (native_window == NULL || axis > 1) { return -1; }
+    return axis == 0 ? bridge_state.key_code : bridge_state.key_flags;
+}
+
+int32_t fairy_win32_key_done(void *native_window, uint32_t keys, int32_t action) {
+    if (action != 0 && action != 1 && action != 3) { return 1; }
+    bridge_state.keys = keys;
+    bridge_state.key_action = action;
+    if (bridge_state.key_expected == 0) { return 0; }
+    bridge_state.key_expected = 0;
+    if (IsWindow((HWND)native_window)) { return automation_state((HWND)native_window, &bridge_state) ? 0 : 1; }
+    Json reply = {{0}, 0, TRUE};
+    json_bytes(&reply, "{\"ok\":true,\"closed\":true,\"keyCode\":"); json_signed(&reply, bridge_state.key_code);
+    json_bytes(&reply, ",\"keyFlags\":"); json_signed(&reply, bridge_state.key_flags);
+    json_bytes(&reply, ",\"keyFocus\":"); json_signed(&reply, bridge_state.key_focus);
+    json_bytes(&reply, ",\"keyAction\":"); json_signed(&reply, action);
+    json_bytes(&reply, ",\"keys\":"); json_number(&reply, keys);
+    json_bytes(&reply, "}\n");
+    return reply.valid && automation_write(&bridge_state, reply.bytes, reply.size) ? 0 : 1;
+}
+
 size_t fairy_win32_read_input(void *native_window, uint8_t *output, size_t capacity) {
     WCHAR text[INPUT_LIMIT + 1];
     HWND input = GetDlgItem((HWND)native_window, INPUT_ID);
@@ -651,6 +697,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         if (wparam == 4) { return state->pointer_press_hit; }
         if (wparam == 5) { return state->pointer_moves; }
         if (wparam == 6) { return (LRESULT)GetCapture(); }
+        if (wparam == 7) { return GetDlgCtrlID(GetFocus()); }
         return 0;
     case WM_DPICHANGED:
         if (LOWORD(wparam) > 0 && LOWORD(wparam) <= 960 && LOWORD(wparam) == HIWORD(wparam) && lparam != 0) {
@@ -722,7 +769,18 @@ static VOID WINAPI message_fiber(void *native_window) {
             bridge_state.pump_finished = TRUE;
             break;
         }
-        if (!IsDialogMessageW(window, &message)) {
+        if (message.message == WM_KEYDOWN && (message.hwnd == window || IsChild(window, message.hwnd)) &&
+            (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE)) {
+            // Capture native key data before IsDialogMessage can activate a default button.
+            bridge_state.key_code = (int32_t)message.wParam;
+            bridge_state.key_focus = GetDlgCtrlID(message.hwnd);
+            bridge_state.key_flags = ((GetKeyState(VK_SHIFT) & 0x8000) ? 1 : 0) |
+                ((GetKeyState(VK_CONTROL) & 0x8000) ? 2 : 0) |
+                ((GetKeyState(VK_MENU) & 0x8000) ? 4 : 0) |
+                (((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000) ? 8 : 0) |
+                ((message.lParam & ((LPARAM)1 << 30)) ? 16 : 0);
+            bridge_state.pending_event = 6;
+        } else if (!IsDialogMessageW(window, &message)) {
             TranslateMessage(&message);
             DispatchMessageW(&message);
         }

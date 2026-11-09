@@ -6,6 +6,8 @@ unsafe extern C fn i32 fairy_win32_dpi(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_font(ptr mut void window, i32 height);
 unsafe extern C fn i32 fairy_win32_accept_dpi(ptr mut void window, u32 changes, i32 min_width, i32 min_height);
 unsafe extern C fn i32 fairy_win32_next(ptr mut void window);
+unsafe extern C fn i32 fairy_win32_key(ptr mut void window, u32 axis);
+unsafe extern C fn i32 fairy_win32_key_done(ptr mut void window, u32 keys, i32 action);
 unsafe extern C fn i32 fairy_win32_changed(ptr mut void window, u32 edits, u32 status_id);
 unsafe extern C fn i32 fairy_win32_resolve_close(ptr mut void window, u32 allow);
 unsafe extern C fn i32 fairy_win32_client_extent(ptr mut void window, u32 axis);
@@ -21,6 +23,13 @@ unsafe fn i32 on_change(ptr mut void window, u32 edits) {
 
 unsafe fn i32 on_close(ptr mut void window) {
     return fairy_win32_resolve_close(window, 1);
+}
+
+fn i32 on_key(i32 code, i32 flags) {
+    if (flags != 0) { return 0; }
+    if (code == 13) { return 1; }
+    if (code == 27) { return 3; }
+    return 0;
 }
 
 unsafe fn i32 on_size(ptr mut void window, u32 resizes) {
@@ -79,6 +88,7 @@ fn i32 main() {
     var u32 edits = 0;
     var u32 resizes = 0;
     var u32 dpi_changes = 0;
+    var u32 keys = 0;
     var i32 result = 0;
     while (true) {
         let i32 event = unsafe { fairy_win32_next(window) };
@@ -98,6 +108,20 @@ fn i32 main() {
             dpi_changes += 1;
             resizes += 1;
             result = unsafe { on_dpi(window, resizes, dpi_changes) };
+        } else if (event == 6) {
+            keys += 1;
+            let i32 code = unsafe { fairy_win32_key(window, 0) };
+            let i32 flags = unsafe { fairy_win32_key(window, 1) };
+            let i32 action = on_key(code, flags);
+            if (action == 1) {
+                clicks += 1;
+                result = unsafe { on_click(window, clicks) };
+            } else if (action == 3) {
+                result = unsafe { on_close(window) };
+            }
+            if (result == 0) {
+                result = unsafe { fairy_win32_key_done(window, keys, action) };
+            }
         } else {
             result = 1;
         }
