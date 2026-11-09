@@ -82,23 +82,33 @@ def window_input(pid, method, released=None):
         if pressed(key) & 0x8000:
             raise RuntimeError('a mouse button or modifier/F4 key is held; no desktop input sent')
     activate(hwnd)
-    if foreground() != hwnd:
+    focus_attempts, attach_errors = 0, []
+    deadline = time.monotonic() + 2
+    while foreground() != hwnd and time.monotonic() < deadline:
         # A background CLI may need a temporary input-queue attachment to
         # activate its child. Always detach before sending desktop input.
         kernel = c.WinDLL('kernel32', use_last_error=True)
         kernel.GetCurrentThreadId.restype = w.DWORD
         kernel.GetCurrentThreadId.argtypes = []
         current_thread = kernel.GetCurrentThreadId()
+        queued = w.MSG()
+        peek = api('PeekMessageW', w.BOOL, c.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT)
+        peek(c.byref(queued), None, 0, 0, 0)
         active_thread = owner(foreground(), None)
         target_thread = owner(hwnd, None)
         attach = api('AttachThreadInput', w.BOOL, w.DWORD, w.DWORD, w.BOOL)
         bring_to_top = api('BringWindowToTop', w.BOOL, w.HWND)
         attached = []
+        focus_attempts += 1
         try:
             for thread in dict.fromkeys((active_thread, target_thread)):
                 if thread and thread != current_thread:
                     if not attach(current_thread, thread, True):
-                        raise RuntimeError('cannot attach temporary foreground input queue')
+                        # The foreground may have changed or be protected.
+                        # This must not prevent an independent owned-window
+                        # activation attempt; input still requires ownership.
+                        attach_errors.append(c.get_last_error())
+                        continue
                     attached.append(thread)
             bring_to_top(hwnd)
             activate(hwnd)
@@ -106,11 +116,10 @@ def window_input(pid, method, released=None):
             detached = [attach(current_thread, thread, False) for thread in reversed(attached)]
             if not all(detached):
                 raise RuntimeError('cannot detach temporary foreground input queue')
-    deadline = time.monotonic() + 2
-    while foreground() != hwnd:
-        if time.monotonic() >= deadline:
-            raise RuntimeError('owned GUI did not acquire foreground; no desktop input sent')
-        time.sleep(0.02)
+        if foreground() != hwnd:
+            time.sleep(0.05)
+    if foreground() != hwnd:
+        raise RuntimeError(f'owned GUI did not acquire foreground; attach errors={attach_errors}; no desktop input sent')
     # Do not combine our shortcut/click with keys or buttons held by the user.
     for key in (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73):
         if pressed(key) & 0x8000:
@@ -131,7 +140,8 @@ def window_input(pid, method, released=None):
             send(len(cleanup), cleanup, c.sizeof(Input))
             raise RuntimeError('SendInput did not insert every event')
 
-    receipt = dict(method=method, pid=pid, hwnd=hwnd, foregroundVerified=True)
+    receipt = dict(method=method, pid=pid, hwnd=hwnd, foregroundVerified=True,
+                   focusAttempts=focus_attempts, attachErrors=attach_errors)
     if method == 'alt-f4':
         def key(vk, flags=0):
             return Input(1, Payload(keyboard=Keyboard(vk, 0, flags, 0, 0)))
