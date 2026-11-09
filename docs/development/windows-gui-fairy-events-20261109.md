@@ -407,7 +407,7 @@ was reused; this is not a fresh bootstrap/fixed-point claim.
 Feature commit: `286c602b`; minimum-size ordering/test transport: `5fb6eeb0`;
 CLI and regression: `1f7236ff`.
 
-### Limits and failed desktop rechecks
+### Limits and earlier failed desktop rechecks
 
 Inventory reads one monitor at 125%, physical bounds 1920x1080. PMv2 and
 initial `GetDpiForWindow=120` are observed. Controlled messages operate on real
@@ -419,17 +419,18 @@ result. No display settings were changed and no cross-monitor transition was
 performed. The reusable CLI inventories monitors but does not move the window
 between them automatically.
 
-The broader desktop-enabled command selecting
+At the DPI checkpoint, the broader desktop-enabled command selecting
 `Example|EventFailure|DesktopClose|LiveDrag|DPI` **failed**, 69.667s: scoped DPI
 and ordinary checks passed, while release close/drag checks timed out or failed
 to enter sizing. A focused desktop recheck passed close in both profiles but
 still failed a drag case. Diagnostics later observed `AttachThreadInput` to
 the foreground thread failing with Windows error 5; attachment to the owned
 GUI thread succeeded, but foreground acquisition was denied. These outcomes
-do not establish a passing desktop-input regression run. Exploratory hover /
-button / input-queue probes were removed; the prior desktop helper and native
-input path are unchanged in the final patch. The targeted passing command
-above deliberately does not inject desktop input.
+did not establish a passing desktop-input regression run. At that checkpoint,
+exploratory hover / button / input-queue probes were removed and the prior
+desktop helper and native input path were unchanged. The targeted passing
+command above deliberately does not inject desktop input. The stabilization
+follow-up below supersedes these desktop-input failures.
 
 Receipts: `.cache/windows-gui-dpi-scoped-20261109.log`,
 `windows-gui-dpi-{development,release}-20261109.json`,
@@ -443,3 +444,71 @@ Only private example FFI/JSONL surfaces expand (`dpi-test`, DPI/selected-font
 telemetry and read-only `dpi_inventory.py`). Public compiler/language/SDK API,
 DB, dependencies, repository-hygiene policy, workflows/runners, versions, push
 and deployment are unchanged.
+
+## Desktop-input stabilization follow-up
+
+The close/drag helper now retries foreground activation for up to two seconds.
+An `AttachThreadInput` failure against an unrelated foreground queue is recorded
+and does not suppress the independent owned-window activation attempt. Every
+input still requires the expected PID/HWND and foreground; temporary queue
+attachments are detached before input. Activation must remain stable for 100 ms.
+Before activation and input, held buttons/modifiers/F4 may clear for up to two
+seconds. Persistent held input fails without injection; the helper never releases
+a user's held input. Receipts expose `focusAttempts` and `attachErrors`.
+
+Mouse input now waits for a fresh `WM_NCMOUSEMOVE` at the expected non-client
+hit and the subsequent native press before releasing or dragging. The read-only
+`WM_APP+1` probe observes a hover counter, hit code, press counter and message;
+it cannot initiate a close or resize. Receipts expose `hoverDelivered`,
+`pressDelivered`, `pressMessage` and `pressHit`. The native press hit must match
+`HTCLOSE` or `HTBOTTOMRIGHT`; a drag requires `WM_NCLBUTTONDOWN`. Missing probes
+reject stale executables with a rebuild instruction. Waits are bounded, and all
+failure paths release the helper's own injected mouse button. The existing
+four-point live layout and sizing-exit checks remain required.
+
+`WM_CLOSE` now hands control from the pump fiber to Fairy before returning to
+Windows, including during native caption-button tracking. Fairy still owns
+approval/denial and C performs the requested destruction. Armed desktop replies
+also require `closeHandoff:true`, observed while the native callback is active.
+This prevents a delayed close from being counted as a synchronous handoff.
+Ordinary `close` replies and the public compiler/SDK interfaces are unchanged.
+
+### Verification
+
+- With `GOMAXPROCS=1` and `FAIRYC_RUN_DESKTOP_INTEGRATION=1`, the final command
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUI(Example|EventFailure|DesktopClose|LiveDrag|DPI)$' -count=1 -v`
+  passed in **94.380s**. Development/release smoke, ordinary controls/resize,
+  real desktop close, live drag and injected DPI checks passed together.
+  Fairy close denial remained interactive after both real close methods.
+  Removing only the close handoff made the desktop verifier fail; the existing
+  missing-live-layout and Fairy policy/DPI mutation controls also passed.
+  Go-built development/release images: 137,216 / 130,560 bytes.
+  Receipt: `.cache/windows-gui-input-final-go-20261109.log`.
+- The reused authored Fairy CLI/companion successfully rebuilt the release
+  example with `build --locked --release` (133,120 bytes). Three consecutive
+  iterations passed real title-bar close, Alt+F4 and four-point live dragging.
+  Every close recorded `systemClose:true`, `closeHandoff:true` and process exit 0;
+  every drag observed correct Fairy layout while the button was still held.
+  Receipt: `.cache/windows-gui-input-stability-20261109.json`, including source,
+  image and compiler SHA-256 values; raw summary:
+  `.cache/windows-gui-input-stability-20261109.log`.
+
+The earlier broad DPI failure remains recorded above as history. During this
+follow-up, an intermediate combined run failed in 51.005s on close-denial press
+delivery and lost foreground. Fresh-hover observation and activation settling
+were added, after which the same combined suite passed in 55.100s. A subsequent
+authored desktop attempt stopped on held-input detection before injection;
+bounded key-release waiting was then added. These stopped attempts are not
+counted as passes. The three-iteration authored receipt uses the final helper.
+
+This remains OS-injected input on one unlocked interactive Windows desktop at
+125% scaling. Concurrent user input can still invalidate foreground ownership;
+locked/headless/elevated desktops, physical hardware and physical cross-monitor
+DPI transitions are not certified. Full repository tests, Linux, hosted CI and a
+fresh compiler bootstrap were not run because this task is limited to the Win32
+example/controller. No DB, dependency, hygiene-policy, runner/workflow, version,
+push or deployment change is included.
+
+Implementation commits: `beda2692` (foreground queue access), `0bed02ac`
+(native delivery and synchronous close), `afb9e3fe` (bounded key-release wait).

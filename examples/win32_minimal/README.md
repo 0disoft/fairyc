@@ -179,7 +179,9 @@ by clicking its native title-bar close button and the other by Alt+F4. The
 controller uses Windows [SendInput](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)
 for mouse/keyboard input. It does not send `WM_CLOSE` or `SC_CLOSE` to simulate
 these two actions. A successful JSON receipt includes `systemClose:true`,
-`closed:true`, PID/HWND, input method, inserted event count and process exit 0.
+`closed:true`, `closeHandoff:true`, PID/HWND, input method, inserted event count
+and process exit 0. `closeHandoff` confirms that Fairy resolved the close while
+the native `WM_CLOSE` callback was still active, including caption tracking.
 The mouse receipt also records the close-button center and `HTCLOSE` hit test.
 
 Interactive JSON requests support `{"command":"close-button"}` and
@@ -189,20 +191,37 @@ and the same session remains usable.
 
 Desktop actions take foreground focus and briefly move the mouse. The optional
 `desktop_input.py` helper locates only the spawned process's visible Fairy
-window, activates it (temporarily attaching input queues when needed), and
-checks foreground ownership before input. It queries `WM_GETTITLEBARINFOEX`
+window and retries activation for up to two seconds, temporarily attaching
+input queues when needed. Access denied on an unrelated foreground queue is
+recorded without preventing activation through the owned GUI thread; every
+input still requires verified foreground ownership. Receipts include
+`focusAttempts` and `attachErrors`. Activation must remain stable for 100 ms
+before input. It queries `WM_GETTITLEBARINFOEX`
 under per-monitor DPI awareness, checks the mouse target is unobscured and
 hit-tests as `HTCLOSE`, then restores the cursor after the close reply if the
-user has not moved it. Held modifiers/buttons, unavailable foreground, blocked
+user has not moved it. Before activation and input, the helper waits up to two
+seconds for held modifiers/buttons/F4 to be released; it does not release
+user-held input. Persistently held input, unavailable foreground, blocked
 input or missing native close observation fail the request. Keep the desktop
 idle during these checks; concurrent user input can still race global input.
 Locked/headless desktops and elevated targets are not supported. These are OS
 injected input tests, not physical keyboard/mouse hardware or IME certification.
 
+For mouse close and dragging, a read-only `WM_APP+1` probe waits for fresh
+native hover and press delivery before proceeding. A hover counter distinguishes
+the new movement from a prior notification. It observes notifications;
+it does not fabricate input or close/resize messages. Receipts record
+`hoverDelivered`, `pressDelivered`, `pressMessage` and `pressHit`; a stale image
+without the probe fails with a rebuild instruction. The press hit must match
+the target, and dragging requires `WM_NCLBUTTONDOWN` rather than a double-click.
+Waits are bounded and injected mouse presses are released on failure.
+
 The native `arm-close` request only arms observation and activates the owned
 window. The subsequent `SC_CLOSE` is recorded by WndProc before Windows maps it
-to `WM_CLOSE`, and Fairy decides whether to close. Only an armed desktop reply
-adds `systemClose`; ordinary `close` replies retain their existing shape.
+to `WM_CLOSE`, and Fairy decides whether to close. `WM_CLOSE` yields from the
+message-pump fiber to Fairy immediately, before returning to Windows. Only an
+armed desktop reply adds `systemClose` and `closeHandoff`; ordinary `close`
+replies retain their existing shape.
 The GUI needs no Python or extra runtime dependency for normal use.
 
 The GUI enables this private example protocol only with `--automation-stdio`
