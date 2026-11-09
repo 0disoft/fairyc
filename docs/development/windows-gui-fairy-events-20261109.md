@@ -4,6 +4,10 @@ Owner: [example README](../../examples/win32_minimal/README.md) and the private
 FFI in `src/main.fy` / `native/window.c`. [ADR 0552](../adr/0552-minimal-windows-gui-build.md)
 continues to own native application build inputs.
 
+Latest status: [mouse targeting and combined Win32 verification](windows-gui-input-stability-20261109.md)
+records all eleven Win32 tests passing in one run, including the authored
+driver. Earlier failed/scoped desktop observations below remain as history.
+
 ## Behavior and lifetime
 
 Fairy now owns the application loop, edit/click/key/resize/DPI counts, edit status, empty-input

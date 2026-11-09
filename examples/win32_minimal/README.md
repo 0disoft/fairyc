@@ -256,6 +256,24 @@ without the probe fails with a rebuild instruction. The press hit must match
 the target, and dragging requires `WM_NCLBUTTONDOWN` rather than a double-click.
 Waits are bounded and injected mouse presses are released on failure.
 
+The press includes absolute desktop coordinates in the same `MOUSEINPUT` as
+button-down; title-bar release likewise includes the target and button-up.
+The helper rechecks foreground, occlusion and hit-test at the intended point
+before pressing. It verifies the delivered native press rather than assuming
+the cursor stayed at an earlier observed position. Receipts additionally record
+`targetPoint`, `pressPoint`, `inputToken`, `pressToken` and `pressWindow`
+(`[x,y,width,height]` at delivery). The nonzero per-action token is correlation
+data from `dwExtraInfo`/`GetMessageExtraInfo`, not an authorization credential;
+native point/token must match the injected press. Moves use `MOVE_NOCOALESCE`
+for fresh delivery observation. Activation retries within the original bounded
+deadline until the owned foreground remains stable for 100 ms.
+
+`TestWindowsGUIMouseTarget` injects real cursor movement to the owned right
+border immediately before both button transitions. The targeted close must
+still succeed. Removing just press coordinates produces the wrong native hit;
+removing release coordinates cancels the close and times out. No synthetic
+close/input messages or retry-until-pass wrapper replace these actions.
+
 The native `arm-close` request only arms observation and activates the owned
 window. The subsequent `SC_CLOSE` is recorded by WndProc before Windows maps it
 to `WM_CLOSE`, and Fairy decides whether to close. `WM_CLOSE` yields from the
