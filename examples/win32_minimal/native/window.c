@@ -311,6 +311,7 @@ static BOOL automation_state(HWND window, WindowState *state) {
     json_bytes(&json, ",\"keyAction\":"); json_signed(&json, state->key_action);
     json_bytes(&json, ",\"keys\":"); json_number(&json, state->keys);
     json_bytes(&json, ",\"awaitingKey\":"); json_signed(&json, state->key_expected);
+    json_bytes(&json, ",\"focus\":"); json_signed(&json, GetDlgCtrlID(GetFocus()));
     if (!json_geometry(&json, window, state)) { return FALSE; }
     json_bytes(&json, "}\n");
     return json.valid && automation_write(state, json.bytes, json.size);
@@ -363,12 +364,17 @@ static BOOL automation_command(HWND window, WindowState *state) {
     if (strncmp(state->command, "arm-key\t", 8) == 0) {
         const char *cursor = state->command + 8;
         int code, focus;
-        if (!resize_dimension(&cursor, '\t', &code) || (code != VK_RETURN && code != VK_ESCAPE) ||
-            !resize_dimension(&cursor, '\0', &focus) || (focus != INPUT_ID && focus != APPLY_ID) ||
+        if (!resize_dimension(&cursor, '\t', &code) || (code != VK_RETURN && code != VK_ESCAPE && code != VK_TAB) ||
             state->key_expected != 0) { return automation_error(state); }
+        if (strcmp(cursor, "0") == 0) { focus = 0; }
+        else if (!resize_dimension(&cursor, '\0', &focus) || (focus != INPUT_ID && focus != APPLY_ID)) {
+            return automation_error(state);
+        }
         SetForegroundWindow(window);
-        SetFocus(GetDlgItem(window, focus));
-        if (GetFocus() != GetDlgItem(window, focus)) { return automation_error(state); }
+        if (focus != 0) {
+            SetFocus(GetDlgItem(window, focus));
+            if (GetFocus() != GetDlgItem(window, focus)) { return automation_error(state); }
+        }
         state->key_expected = code;
         return automation_state(window, state);
     }
@@ -579,12 +585,21 @@ int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
 }
 
 int32_t fairy_win32_key(void *native_window, uint32_t axis) {
-    if (native_window == NULL || axis > 1) { return -1; }
+    if (native_window == NULL || axis > 2) { return -1; }
+    if (axis == 2) { return bridge_state.key_focus; }
     return axis == 0 ? bridge_state.key_code : bridge_state.key_flags;
 }
 
+int32_t fairy_win32_focus(void *native_window, int32_t control_id) {
+    HWND child = GetDlgItem((HWND)native_window, control_id);
+    if (!child || !IsWindowVisible(child) || !IsWindowEnabled(child) ||
+        !(GetWindowLongPtrW(child, GWL_STYLE) & WS_TABSTOP)) { return 1; }
+    SetFocus(child);
+    return GetFocus() == child ? 0 : 1;
+}
+
 int32_t fairy_win32_key_done(void *native_window, uint32_t keys, int32_t action) {
-    if (action != 0 && action != 1 && action != 3) { return 1; }
+    if (action != 0 && action != 1 && action != 3 && action != 4) { return 1; }
     bridge_state.keys = keys;
     bridge_state.key_action = action;
     if (bridge_state.key_expected == 0) { return 0; }
@@ -782,7 +797,7 @@ static VOID WINAPI message_fiber(void *native_window) {
             break;
         }
         if (message.message == WM_KEYDOWN && (message.hwnd == window || IsChild(window, message.hwnd)) &&
-            (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE)) {
+            (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE || message.wParam == VK_TAB)) {
             // Capture native key data before IsDialogMessage can activate a default button.
             bridge_state.key_code = (int32_t)message.wParam;
             bridge_state.key_focus = GetDlgCtrlID(message.hwnd);

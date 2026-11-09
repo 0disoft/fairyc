@@ -8,6 +8,7 @@ unsafe extern C fn i32 fairy_win32_accept_dpi(ptr mut void window, u32 changes, 
 unsafe extern C fn i32 fairy_win32_next(ptr mut void window);
 unsafe extern C fn i32 fairy_win32_key(ptr mut void window, u32 axis);
 unsafe extern C fn i32 fairy_win32_key_done(ptr mut void window, u32 keys, i32 action);
+unsafe extern C fn i32 fairy_win32_focus(ptr mut void window, i32 control_id);
 unsafe extern C fn i32 fairy_win32_changed(ptr mut void window, u32 edits, u32 status_id);
 unsafe extern C fn i32 fairy_win32_resolve_close(ptr mut void window, u32 allow);
 unsafe extern C fn i32 fairy_win32_client_extent(ptr mut void window, u32 axis);
@@ -29,6 +30,16 @@ fn i32 on_key(i32 code, i32 flags) {
     if (flags != 0) { return 0; }
     if (code == 13) { return 1; }
     if (code == 27) { return 3; }
+    return 0;
+}
+
+fn i32 on_tab(i32 focused, i32 flags) {
+    if (flags == 0) {
+        return if (focused == 201) { 202 } else { 201 };
+    }
+    if (flags == 1) {
+        return if (focused == 202) { 201 } else { 202 };
+    }
     return 0;
 }
 
@@ -112,7 +123,15 @@ fn i32 main() {
             keys += 1;
             let i32 code = unsafe { fairy_win32_key(window, 0) };
             let i32 flags = unsafe { fairy_win32_key(window, 1) };
-            let i32 action = on_key(code, flags);
+            var i32 action = on_key(code, flags);
+            if (code == 9) {
+                let i32 focused = unsafe { fairy_win32_key(window, 2) };
+                let i32 target = on_tab(focused, flags);
+                if (target != 0) {
+                    result = unsafe { fairy_win32_focus(window, target) };
+                    action = 4;
+                }
+            }
             if (action == 1) {
                 clicks += 1;
                 result = unsafe { on_click(window, clicks, 110, 111) };
