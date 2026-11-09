@@ -19,6 +19,11 @@ typedef struct {
     RECT dpi_applied;
     HFONT font;
     int32_t font_height;
+    UINT pointer_hit;
+    UINT pointer_message;
+    UINT pointer_press_hit;
+    unsigned pointer_moves;
+    unsigned pointer_presses;
     BOOL initial_reply_pending;
     BOOL resize_reply_pending;
     int32_t min_width;
@@ -33,6 +38,7 @@ typedef struct {
     unsigned live_layouts;
     BOOL reply_pending;
     BOOL close_reply_pending;
+    BOOL close_in_flight;
     BOOL desktop_close_armed;
     BOOL system_close_seen;
     unsigned smoke_step;
@@ -535,6 +541,7 @@ int32_t fairy_win32_resolve_close(void *native_window, uint32_t allow) {
         if (bridge_state.desktop_close_armed) {
             json_bytes(&reply, bridge_state.system_close_seen ? ",\"systemClose\":true" :
                                                                ",\"systemClose\":false");
+            json_bytes(&reply, bridge_state.close_in_flight ? ",\"closeHandoff\":true" : ",\"closeHandoff\":false");
         }
         json_bytes(&reply, "}\n");
         bridge_state.close_reply_pending = FALSE;
@@ -623,6 +630,28 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
             }
         }
         return 0;
+    case WM_NCMOUSEMOVE:
+        if (state) { state->pointer_hit = (UINT)wparam; state->pointer_moves++; }
+        break;
+    case WM_NCLBUTTONDOWN:
+    case WM_NCLBUTTONDBLCLK:
+        if (state) {
+            state->pointer_message = message;
+            state->pointer_press_hit = (UINT)wparam;
+            state->pointer_presses++;
+        }
+        break;
+    case WM_APP + 1:
+        // Read-only delivery probe, scoped to the controller's owned HWND.
+        if (wparam == 0) { return 0x46594931; }
+        if (!state) { return 0; }
+        if (wparam == 1) { return state->pointer_hit; }
+        if (wparam == 2) { return state->pointer_presses; }
+        if (wparam == 3) { return state->pointer_message; }
+        if (wparam == 4) { return state->pointer_press_hit; }
+        if (wparam == 5) { return state->pointer_moves; }
+        if (wparam == 6) { return (LRESULT)GetCapture(); }
+        return 0;
     case WM_DPICHANGED:
         if (LOWORD(wparam) > 0 && LOWORD(wparam) <= 960 && LOWORD(wparam) == HIWORD(wparam) && lparam != 0) {
             state->dpi = LOWORD(wparam);
@@ -654,6 +683,11 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         return 0;
     case WM_CLOSE:
         state->pending_event = 3;
+        if (state->pump_fiber && GetCurrentFiber() == state->pump_fiber) {
+            state->close_in_flight = TRUE;
+            SwitchToFiber(state->app_fiber); /* close handoff */
+            state->close_in_flight = FALSE;
+        }
         return 0;
     case WM_SYSCOMMAND:
         if ((wparam & 0xFFF0) == SC_CLOSE) { state->system_close_seen = TRUE; }

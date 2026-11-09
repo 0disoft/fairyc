@@ -120,6 +120,13 @@ def window_input(pid, method, released=None):
             time.sleep(0.05)
     if foreground() != hwnd:
         raise RuntimeError(f'owned GUI did not acquire foreground; attach errors={attach_errors}; no desktop input sent')
+    # Queue detachment/activation can complete after SetForegroundWindow returns.
+    # Require a stable owned foreground before beginning any input sequence.
+    deadline = time.monotonic() + 0.1
+    while time.monotonic() < deadline:
+        if foreground() != hwnd:
+            raise RuntimeError('owned GUI lost foreground during activation; no desktop input sent')
+        time.sleep(0.01)
     # Do not combine our shortcut/click with keys or buttons held by the user.
     for key in (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73):
         if pressed(key) & 0x8000:
@@ -155,7 +162,7 @@ def window_input(pid, method, released=None):
         raise RuntimeError('cannot use physical desktop coordinates')
     old, current = w.POINT(), w.POINT()
     point = None
-    dragging = False
+    mouse_held = False
     try:
         if not cursor(c.byref(old)):
             raise RuntimeError('cannot read cursor position')
@@ -198,28 +205,57 @@ def window_input(pid, method, released=None):
                     raise RuntimeError(f'cursor did not reach native target {(x, y)}; observed {(current.x, current.y)}')
                 time.sleep(0.01)
 
+        def probe(index):
+            observed = c.c_size_t()
+            if not message(hwnd, 0x8001, index, 0, 3, 2000, c.byref(observed)):
+                raise RuntimeError('native input delivery probe failed')
+            return observed.value
+
+        if probe(0) != 0x46594931:
+            raise RuntimeError('rebuild this example for native desktop input observation')
+        before_hover = probe(5)
         move_to(x, y)
         if ancestor(at_point(current), 2) != hwnd:
             raise RuntimeError('native input target is occluded; mouse input aborted')
         packed = (current.x & 0xFFFF) | ((current.y & 0xFFFF) << 16)
         if not message(hwnd, 0x0084, 0, packed, 3, 2000, c.byref(result)) or result.value != hit:
             raise RuntimeError('native hit test did not identify ' + hit_name + '; mouse input aborted')
+
+        deadline = time.monotonic() + 2
+        while probe(5) <= before_hover or probe(1) != hit:
+            require_target()
+            if time.monotonic() >= deadline:
+                raise RuntimeError('native mouse hover was not delivered to ' + hit_name)
+            time.sleep(0.02)
+        before = probe(2)
         down = Input(0, Payload(mouse=Mouse(0, 0, 0, 2, 0, 0)))
+        submit([down], [up])
+        mouse_held = True
+        deadline = time.monotonic() + 2
+        while probe(2) <= before:
+            require_target()
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f'native non-client mouse press was not delivered; message={probe(3):#x}, hit={probe(4)}, capture={probe(6)}')
+            time.sleep(0.02)
+        receipt.update(hoverDelivered=True, pressDelivered=True, pressMessage=probe(3), pressHit=probe(4))
+        if receipt['pressHit'] != hit:
+            raise RuntimeError(f'native press hit {receipt["pressHit"]}, expected {hit_name}')
         if method == 'drag-resize':
-            submit([down], [up])
-            dragging = True
+            if receipt['pressMessage'] != 0x00A1:
+                raise RuntimeError(f'native drag press was not WM_NCLBUTTONDOWN: {receipt["pressMessage"]:#x}')
             yield SimpleNamespace(receipt=dict(receipt, resizeBorder=[x, y], hitTest=hit_name),
                                   move_to=move_to, start=(x, y))
         else:
-            submit([down, up], [up])
+            submit([up], [up])
+            mouse_held = False
             yield dict(receipt, injectedEvents=3, closeButton=[x, y], hitTest=hit_name)
     finally:
         try:
-            if dragging:
+            if mouse_held:
                 cleanup = (Input * 1)(up)
                 if send(1, cleanup, c.sizeof(Input)) != 1:
                     raise RuntimeError('cannot release injected drag button')
-                if released is not None:
+                if method == 'drag-resize' and released is not None:
                     released()
         finally:
             if point is not None and cursor(c.byref(current)):

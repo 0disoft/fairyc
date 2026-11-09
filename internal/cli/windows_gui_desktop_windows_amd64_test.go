@@ -13,7 +13,34 @@ import (
 
 // Desktop input is opt-in: ordinary CI must not manipulate foreground focus.
 func TestWindowsGUIDesktopClose(t *testing.T) {
-	windowsGUIDesktopProfiles(t, "--verify-desktop-close", "win32-desktop-close", 2)
+	root := windowsGUIDesktopProfiles(t, "--verify-desktop-close", "win32-desktop-close", 2)
+	// The close callback must yield while native caption tracking is still active.
+	path := filepath.Join(root, "native/window.c")
+	source, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	broken := strings.Replace(string(source), "SwitchToFiber(state->app_fiber); /* close handoff */", "/* delayed close notification */", 1)
+	if broken == string(source) {
+		t.Fatal("missing close handoff mutation target")
+	}
+	writeWorkspaceFile(t, root, "native/window.c", broken)
+	if code, out, diag := runForTest([]string{"build", "--release"}, root); code != 0 || diag != "" {
+		t.Fatalf("build delayed-close control: %d %s %s", code, out, diag)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "python", "-B", "../../examples/win32_minimal/control.py",
+		"--exe", filepath.Join(root, "build/win32-minimal.exe"), "--verify-desktop-close").CombinedOutput()
+	var report struct {
+		OK    bool
+		Error string
+	}
+	exit, exited := err.(*exec.ExitError)
+	if !exited || exit.ExitCode() != 1 || json.Unmarshal(out, &report) != nil || report.OK ||
+		(!strings.Contains(report.Error, "close notification") && !strings.Contains(report.Error, "GUI reply timed out")) {
+		t.Fatalf("delayed native close must fail: %v %s", err, out)
+	}
 }
 
 func windowsGUIDesktopProfiles(t *testing.T, flag, verification string, count int) string {
@@ -46,11 +73,12 @@ func windowsGUIDesktopProfiles(t *testing.T, flag, verification string, count in
 				Verification  string
 				ProcessExited bool
 				Observations  []struct {
-					Closed      bool
-					SystemClose bool
-					Sizing      bool
-					MouseDown   bool
-					LiveLayouts int
+					Closed       bool
+					SystemClose  bool
+					CloseHandoff bool
+					Sizing       bool
+					MouseDown    bool
+					LiveLayouts  int
 				}
 			}
 			if err := json.Unmarshal(out, &report); err != nil || !report.OK ||
@@ -58,8 +86,8 @@ func windowsGUIDesktopProfiles(t *testing.T, flag, verification string, count in
 				t.Fatalf("invalid desktop close receipt: %v %s", err, out)
 			}
 			for _, row := range report.Observations {
-				if flag == "--verify-desktop-close" && (!row.Closed || !row.SystemClose) {
-					t.Fatalf("missing SC_CLOSE or Fairy approval: %s", out)
+				if flag == "--verify-desktop-close" && (!row.Closed || !row.SystemClose || !row.CloseHandoff) {
+					t.Fatalf("missing SC_CLOSE or synchronous Fairy approval: %s", out)
 				}
 				if flag == "--verify-drag" && (!row.Sizing || !row.MouseDown || row.LiveLayouts == 0) {
 					t.Fatalf("layout must be observed before mouse release: %s", out)

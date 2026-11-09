@@ -64,6 +64,8 @@ class Session:
                 reply = self.receive()
                 if not reply.get('ok') or reply.get('systemClose') is not True:
                     raise RuntimeError('desktop input did not reach native SC_CLOSE and Fairy close handling')
+                if reply.get('closeHandoff') is not True:
+                    raise RuntimeError('close notification was not handled before native callback returned')
                 if reply.get('closed'):
                     if self.process.wait(timeout=5) != 0:
                         raise RuntimeError('desktop close did not exit successfully')
@@ -243,6 +245,8 @@ def verify_desktop_close(image):
             if reply.get('closed') is not True or session.process.poll() != 0:
                 raise RuntimeError('desktop close did not close the GUI with exit 0')
             rows.append(reply)
+        except (RuntimeError, subprocess.TimeoutExpired) as error:
+            raise RuntimeError(f'{command}: {error}') from error
         finally:
             session.finish()
     return dict(ok=True, verification='win32-desktop-close', observations=rows,
