@@ -94,7 +94,17 @@ def window_input(pid, method, released=None, focus_control=None):
     activate(hwnd)
     focus_attempts, attach_errors = 0, []
     deadline = time.monotonic() + 2
-    while foreground() != hwnd and time.monotonic() < deadline:
+    stable_since, focus_stable = None, False
+    while time.monotonic() < deadline:
+        if foreground() == hwnd:
+            if stable_since is None:
+                stable_since = time.monotonic()
+            if time.monotonic() - stable_since >= 0.1:
+                focus_stable = True
+                break
+            time.sleep(0.01)
+            continue
+        stable_since = None
         # A background CLI may need a temporary input-queue attachment to
         # activate its child. Always detach before sending desktop input.
         kernel = c.WinDLL('kernel32', use_last_error=True)
@@ -128,15 +138,8 @@ def window_input(pid, method, released=None, focus_control=None):
                 raise RuntimeError('cannot detach temporary foreground input queue')
         if foreground() != hwnd:
             time.sleep(0.05)
-    if foreground() != hwnd:
+    if not focus_stable:
         raise RuntimeError(f'owned GUI did not acquire foreground; attach errors={attach_errors}; no desktop input sent')
-    # Queue detachment/activation can complete after SetForegroundWindow returns.
-    # Require a stable owned foreground before beginning any input sequence.
-    deadline = time.monotonic() + 0.1
-    while time.monotonic() < deadline:
-        if foreground() != hwnd:
-            raise RuntimeError('owned GUI lost foreground during activation; no desktop input sent')
-        time.sleep(0.01)
     # Do not combine our shortcut/click with keys or buttons held by the user.
     wait_idle()
 
@@ -208,7 +211,7 @@ def window_input(pid, method, released=None, focus_control=None):
 
         def move_to(x, y):
             nonlocal point
-            move = pointer_input(x, y, 0xC001)
+            move = pointer_input(x, y, 0xE001)  # Do not coalesce the delivery observation.
             submit([move], [up])
             point = (x, y)
             deadline = time.monotonic() + 1
@@ -231,22 +234,28 @@ def window_input(pid, method, released=None, focus_control=None):
             raise RuntimeError('rebuild this example for native desktop input observation')
         before_hover = probe(5)
         move_to(x, y)
-        if ancestor(at_point(current), 2) != hwnd:
-            raise RuntimeError('native input target is occluded; mouse input aborted')
-        packed = (current.x & 0xFFFF) | ((current.y & 0xFFFF) << 16)
-        if not message(hwnd, 0x0084, 0, packed, 3, 2000, c.byref(result)) or result.value != hit:
-            raise RuntimeError('native hit test did not identify ' + hit_name + '; mouse input aborted')
+
+        def require_mouse_target():
+            require_target()
+            destination = w.POINT(x, y)
+            if ancestor(at_point(destination), 2) != hwnd:
+                raise RuntimeError('native input target is occluded; mouse input aborted')
+            packed = (x & 0xFFFF) | ((y & 0xFFFF) << 16)
+            if not message(hwnd, 0x0084, 0, packed, 3, 2000, c.byref(result)) or result.value != hit:
+                raise RuntimeError('native hit test did not identify ' + hit_name + '; mouse input aborted')
+
+        require_mouse_target()
 
         deadline = time.monotonic() + 2
         while probe(5) <= before_hover or probe(1) != hit:
             require_target()
             if time.monotonic() >= deadline:
-                raise RuntimeError('native mouse hover was not delivered to ' + hit_name)
+                cursor(c.byref(current))
+                raise RuntimeError(f'native mouse hover was not delivered to {hit_name}; target={(x, y)}, cursor={(current.x, current.y)}, hit={probe(1)}, moves={probe(5)}, capture={probe(6)}')
             time.sleep(0.02)
         before = probe(2)
         token = (time.monotonic_ns() & 0x7FFFFFFF) | 1
-        if not cursor(c.byref(current)) or abs(current.x - x) > 1 or abs(current.y - y) > 1:
-            raise RuntimeError('cursor moved away from verified mouse target; no press sent')
+        require_mouse_target()
         # Include absolute positioning in the press itself: an earlier move is
         # insufficient if the cursor changes between observation and SendInput.
         down = pointer_input(x, y, 0xC003, token)
