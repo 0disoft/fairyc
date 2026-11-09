@@ -6,7 +6,7 @@ continues to own native application build inputs.
 
 ## Behavior and lifetime
 
-Fairy now owns the application loop, edit/click/resize/DPI counts, edit status, empty-input
+Fairy now owns the application loop, edit/click/key/resize/DPI counts, edit status, empty-input
 decision, close policy, DPI scaling, layout and result string construction. Its `on_change` selects status 105;
 `on_click` reads bounded UTF-8 and produces the text. Editing preserves the last
 applied result until the next click. `on_close` currently allows closing.
@@ -23,9 +23,10 @@ The private functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
 `fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
 `fairy_win32_layout_done`, `fairy_win32_initialize_dpi`, `fairy_win32_dpi`,
-`fairy_win32_font`, `fairy_win32_accept_dpi` and `fairy_win32_close`.
+`fairy_win32_font`, `fairy_win32_accept_dpi`, `fairy_win32_key`,
+`fairy_win32_key_done` and `fairy_win32_close`.
 `next` returns 1 for a click, 2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`,
-5 for `WM_DPICHANGED`, and 0 on exit.
+5 for `WM_DPICHANGED`, 6 for Return/Esc key-down, and 0 on exit.
 Fairy increments the corresponding edit/click count, then calls `present` or
 `changed` to render and mirror its state. Only then does C acknowledge a pending
 CLI request. A CLI reply therefore observes the handled event. The edit count
@@ -512,3 +513,88 @@ push or deployment change is included.
 
 Implementation commits: `beda2692` (foreground queue access), `0bed02ac`
 (native delivery and synchronous close), `afb9e3fe` (bounded key-release wait).
+
+## Fairy keyboard policy: Enter and Esc
+
+The native pump captures Return/Esc `WM_KEYDOWN` for the window or its children
+before `IsDialogMessageW`, avoiding the default-button fallback. Event 6 passes
+the virtual key and modifier/previous-state flags to Fairy via `key(axis)`.
+Fairy's `on_key` maps plain Return to action 1 (the existing Apply handler) and
+plain Esc to action 3 (the existing close policy). Nonzero flags choose action 0.
+The counters and these decisions live in Fairy; C does not call `BM_CLICK` or
+destroy the window as a keyboard policy. Tab and other native keys retain their
+existing dialog handling. Input and Apply focus are supported.
+
+Enter shares empty-input/Unicode/result construction with mouse Apply while
+using status resources 110/111 (`WM_KEYDOWN: Enter`, including empty input).
+Mouse Apply retains 106/109. `key_done` mirrors Fairy's processed count/action
+and acknowledges only after the operation, including after Esc destruction or
+denial. State exposes `keyCode`, `keyFlags`, `keyFocus`, `keyAction`, `keys`,
+`awaitingKey` and `closed:false`; a closed key reply has `closed:true`.
+The flags are Shift=1, Ctrl=2, Alt=4, Windows=8 and previous-key-state=16.
+
+The private `arm-key<TAB>code<TAB>focus` command only arms observation and
+focuses input 201 or Apply 202; accepted codes are Return 13 and Esc 27. The
+controller then sends actual `SendInput` down/up pairs and verifies foreground,
+native focus, observed code/flags/count and completed Fairy processing. It
+never fabricates a keyboard/action message for these checks. The helper's held
+input guard now includes Return/Esc. Interactive JSON supports `command:"key"`
+with `key:"enter"`, `"escape"` or `"ctrl-enter"` and optional
+`focus:"input"|"apply"`. See the example README for commands.
+
+### Keyboard verification results
+
+- `go run -mod=readonly ../../cmd/fairyc check`: PASS, 1 source / 8 MIR
+  functions; the example lock was refreshed without changing package versions.
+- Reused authored Fairy CLI/companion `build --locked` and
+  `build --locked --release`: PASS. Both images passed
+  `python -B control.py --verify-keyboard`: empty Enter, Unicode Enter,
+  ignored Ctrl+Enter, Enter on Apply, no delayed duplicate action, and Esc exit
+  0. Development/release images: 161,280 / 138,240 bytes.
+- With `GOMAXPROCS=1` and `FAIRYC_RUN_DESKTOP_INTEGRATION=1`,
+  `go test -mod=readonly ./internal/cli -run
+  '^TestWindowsGUIKeyboard(Policy)?$' -count=1 -v`: PASS, **27.560s**.
+  Development/release key verification and three Fairy-only broken-policy
+  controls passed. Changing only Enter mapping, modifier policy or Esc mapping
+  makes the verifier fail for that behavior. A fourth Fairy-only close-denial
+  control keeps the window interactive after Esc from both controls, rejects
+  malformed native arm requests without mutation, and applies new input via
+  real Enter afterward. Go-built images: 141,312 / 135,168 bytes.
+- `gofmt` and scoped `git diff --check`: PASS.
+
+Receipts: `.cache/windows-gui-keyboard-focused-final-20261109.log`,
+`windows-gui-keyboard-authored-development-20261109.json`,
+`windows-gui-keyboard-authored-release-final-20261109.json` and
+`windows-gui-keyboard-summary-20261109.json` (source/compiler/image hashes).
+
+### Broader desktop observations and limits
+
+The intermediate combined selection
+`^TestWindowsGUI(Example|EventFailure|DesktopClose|LiveDrag|DPI|Keyboard|KeyboardPolicy)$`
+did not pass as a single run. The first attempt (68.976s) stopped ordinary smoke
+with exit 5; an isolated diagnostic copy then passed three smoke executions.
+The later attempt (78.502s) passed ordinary smoke/control, both desktop-close
+profiles, live drag, DPI and the keyboard tests, but the existing close-denial
+mouse probe observed native press hit 11 instead of `HTCLOSE` and aborted.
+No cause is claimed from these observations. Retesting only
+`^TestWindowsGUIEventFailure$/^close-policy$` with desktop input enabled passed
+in **4.259s**. Log: `.cache/windows-gui-keyboard-close-policy-recheck-20261109.log`.
+These scoped passes are not represented as a green combined run.
+
+One later authored release receipt-collection attempt also returned nonzero
+without preserving the controller JSON; its cause is unclassified. The direct
+final authored release command passed and its JSON is preserved above. No
+failed/stopped attempt is counted as a pass.
+
+The test desktop remains one monitor at 125%. Real OS-injected shortcuts were
+tested; physical keyboard hardware, held-key auto-repeat timing, IME composition,
+locked/headless/elevated desktops and physical monitor/DPI transitions were not
+certified. Full repository tests, Linux, hosted CI and a fresh compiler bootstrap
+were omitted because this task changes only the Windows example/controller.
+Desktop input still requires an idle, unlocked session.
+
+Only private example FFI/JSONL and resource strings expand. Public compiler,
+language and SDK API, DB, dependencies, hygiene policy and CI runners/workflows
+are unchanged; no push, deploy or version bump is included.
+Commits: `a128c1e2` (Fairy key policy), `76baac6e` (keyboard status),
+`99dd4b69` (actual-key CLI and policy regressions).

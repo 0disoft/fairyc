@@ -18,7 +18,8 @@ if an event check fails or Fairy declines its final close request.
 Type into **Message** and click **Apply**. The result displays the entered
 Unicode text; an empty message shows a prompt. The status line identifies
 `WM_COMMAND / EN_CHANGE` from editing and `WM_COMMAND / BN_CLICKED` from the
-button. Input is bounded to 127 UTF-16 code units. Tab moves between the edit
+button. Enter runs Apply through Fairy and reports `WM_KEYDOWN: Enter`;
+Esc asks Fairy to close. Input is bounded to 127 UTF-16 code units. Tab moves between the edit
 and button controls, and the controls follow the window width when resized.
 
 ## CLI control for agents
@@ -56,6 +57,45 @@ command updates the native EDIT via `SetWindowTextW`, which generates
 close button. The ordinary WndProc forwards these events to Fairy and replies read actual
 control text. This verifies programmatic control events; it does not certify
 physical keyboard/mouse delivery, IME, screen rendering or accessibility.
+
+### Enter and Esc through Fairy
+
+On an idle, unlocked interactive desktop:
+
+```powershell
+python -B control.py --verify-keyboard
+```
+
+This sends real `SendInput` key-down/key-up pairs to the owned window. It checks
+empty Enter, Unicode Enter, ignored Ctrl+Enter, Enter with Apply focused and
+Esc closing with exit 0. Every Enter must apply exactly once; a subsequent state
+read catches delayed/default-button duplication. No `BM_CLICK`, `WM_COMMAND`,
+`WM_KEYDOWN` or `WM_CLOSE` message is fabricated to perform these key actions.
+The existing desktop focus/held-input guards apply, including Return and Esc.
+
+Interactive requests accept `{"command":"key","key":"enter"}` and
+`{"command":"key","key":"escape"}`; optional `"focus":"input"` (default) or
+`"focus":"apply"` selects the owned child control. `"key":"ctrl-enter"` tests
+the ignored modified shortcut. The helper verifies actual native focus before
+injecting. `arm-key<TAB>13|27<TAB>201|202` only arms observation and sets focus;
+it cannot generate a key event or run an application action.
+
+The pump intercepts Return/Esc `WM_KEYDOWN` before `IsDialogMessage` can run a
+default button. Event 6 carries the native virtual key, modifiers and previous
+key-state bit through scalar FFI. Fairy's `on_key` maps plain Enter to Apply and
+plain Esc to `on_close`; modified/repeated key-downs choose no action. C has no
+Enter-to-click or Esc-to-destroy fallback. Other keys retain normal Win32 dialog
+handling. These tests do not certify IME composition or hardware auto-repeat.
+
+State adds `keyCode`, `keyFlags`, `keyFocus`, `keyAction`, `keys`, `awaitingKey`
+and `closed:false`. `keys` counts Fairy-processed key notifications, including
+ignored ones; `clicks` counts Apply actions from both clicks and Enter. Flag bits
+are Shift=1, Ctrl=2, Alt=4, Windows=8 and repeated key-down=16. `keyFocus` records
+the native destination control ID (input=201, Apply=202); `keyAction` is Fairy's
+decision (0=ignore, 1=Apply, 3=close request). The final key reply follows the
+Fairy action and confirms the key/count/focus. An accepted Esc returns
+`closed:true` after destruction; a declined Esc returns live state with
+`closed:false`, and input/Enter remain usable in that session.
 
 ### DPI changes and scaled layout
 
@@ -229,14 +269,15 @@ and inherited pipe stdin/stdout. The Python controller owns that process and
 closes it on stdin EOF or error. It opens no socket, contacts no service and
 targets only its owned child process. Native requests use LF
 lines `state`, `input<TAB>UTF-8`, `resize<TAB>width<TAB>height`, `click`, `close`,
-`arm-close`, `dpi-test<TAB>dpi<TAB>width<TAB>height`; replies are JSON lines.
+`arm-close`, `arm-key<TAB>code<TAB>focus`, `dpi-test<TAB>dpi<TAB>width<TAB>height`;
+replies are JSON lines.
 The native buffer is bounded to 1023 bytes and validates UTF-8, NUL and input
 length before mutation. The Python JSON request limit is 4096 bytes; multiline
 input and unknown fields reject. There is one outstanding request at a time.
 An alternate built example image can be selected with `--exe <path>`.
 
-Fairy owns `main()`, the application event loop, edit/click/resize/DPI counts and the
-`on_change` / `on_click` / `on_close` / `on_size` / `on_dpi` handlers in `src/main.fy`.
+Fairy owns `main()`, the application event loop, edit/click/key/resize/DPI counts and the
+`on_change` / `on_click` / `on_key` / `on_close` / `on_size` / `on_dpi` handlers in `src/main.fy`.
 `on_change` chooses the edit
 status; `on_click` decides empty-input behavior and builds the UTF-8 result
 text. Editing leaves the last applied result intact until Apply is clicked.
@@ -253,10 +294,13 @@ The private bridge functions are `fairy_win32_open`, `fairy_win32_next`,
 `fairy_win32_read_input`, `fairy_win32_present`, `fairy_win32_changed`,
 `fairy_win32_resolve_close`, `fairy_win32_client_extent`, `fairy_win32_move`,
 `fairy_win32_layout_done`, `fairy_win32_initialize_dpi`, `fairy_win32_dpi`,
-`fairy_win32_font`, `fairy_win32_accept_dpi` and `fairy_win32_close`.
+`fairy_win32_font`, `fairy_win32_accept_dpi`, `fairy_win32_key`,
+`fairy_win32_key_done` and `fairy_win32_close`.
 `initialize_dpi` enables PMv2 and returns the system DPI. `open` takes Fairy's initial
 window dimensions. `next` pumps Win32 messages and returns 1 for a click,
-2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, 5 for `WM_DPICHANGED`, or 0 on exit.
+2 for `EN_CHANGE`, 3 for `WM_CLOSE`, 4 for `WM_SIZE`, 5 for `WM_DPICHANGED`,
+6 for a Return/Esc key-down, or 0 on exit. `key` reads code/flags at axis 0/1;
+`key_done` acknowledges only after Fairy has applied its policy.
 Fairy handles the event and calls `present`
 with the click result/count/status, or `changed` with the edit count/status.
 C mirrors these counts for state replies and updates the controls. A notified
