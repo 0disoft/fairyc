@@ -53,6 +53,26 @@ class Session:
         if not isinstance(request, dict):
             raise ValueError('request must be an object')
         command = request.get('command')
+        if command == 'key':
+            from desktop_input import key_input
+            if not {'command', 'key'} <= set(request) or set(request) - {'command', 'key', 'focus'}:
+                raise ValueError('key requires key and optional focus')
+            key, focus = request['key'], request.get('focus', 'input')
+            if key not in ('enter', 'escape', 'ctrl-enter') or focus not in ('input', 'apply'):
+                raise ValueError('expected enter, escape, or ctrl-enter and input/apply focus')
+            code, flags = (27 if key == 'escape' else 13), (2 if key == 'ctrl-enter' else 0)
+            control = 201 if focus == 'input' else 202
+            ready = self.wire(f'arm-key\t{code}\t{control}'.encode('ascii'))
+            if not ready.get('ok') or ready.get('pid') != self.process.pid or ready.get('awaitingKey') != code:
+                raise RuntimeError('GUI did not arm native keyboard observation')
+            with key_input(self.process.pid, key, control) as receipt:
+                reply = self.receive()
+                if (not reply.get('ok') or reply.get('keyCode') != code or reply.get('keyFlags') != flags or
+                        reply.get('keyFocus') != control or reply.get('keys') != ready['keys'] + 1):
+                    raise RuntimeError('missing native key delivery or Fairy keyboard acknowledgement')
+                if reply.get('closed') and self.process.wait(timeout=5) != 0:
+                    raise RuntimeError('keyboard close did not exit successfully')
+                return dict(reply, desktopInput=receipt)
         if command == 'drag-resize' and set(request) == {'command'}:
             return drag_window(self)
         if command in ('close-button', 'alt-f4') and set(request) == {'command'}:
@@ -91,7 +111,7 @@ class Session:
             if len(text.encode('utf-16-le')) > 254:
                 raise ValueError('input exceeds 127 UTF-16 code units')
             return self.wire(b'input\t' + text.encode('utf-8'))
-        raise ValueError('expected state, input, resize, dpi-test, drag-resize, click, close, close-button, or alt-f4')
+        raise ValueError('expected state, input, resize, dpi-test, drag-resize, key, click, close, close-button, or alt-f4')
 
     def finish(self):
         if self.process.poll() is None:
@@ -368,6 +388,40 @@ def verify_drag(session):
     return dict(report, processExited=True)
 
 
+def verify_keyboard(session):
+    rows = []
+
+    def press(key, focus='input'):
+        row = session.request(dict(command='key', key=key, focus=focus))
+        rows.append(row)
+        return row
+
+    empty = press('enter')
+    if (empty['keyAction'] != 1 or empty['clicks'] != 1 or empty['result'] != 'Enter a message first.' or
+            empty['status'] != 'WM_KEYDOWN: Enter (empty input)'):
+        raise RuntimeError('Enter did not run Fairy empty-input policy exactly once')
+    sample = '키보드로 Fairy 실행 Ω'
+    edited = session.request(dict(command='input', text=sample))
+    applied = press('enter')
+    if (applied['keyAction'] != 1 or applied['clicks'] != 2 or applied['edits'] != edited['edits'] or
+            applied['input'] != sample or applied['result'] != 'Result: ' + sample or applied['status'] != 'WM_KEYDOWN: Enter'):
+        raise RuntimeError('Enter did not apply Unicode input through Fairy exactly once')
+    ignored = press('ctrl-enter')
+    if ignored['keyAction'] != 0 or any(ignored[k] != applied[k] for k in ('input', 'result', 'edits', 'clicks', 'status')):
+        raise RuntimeError('modified Enter must leave application state unchanged')
+    button = press('enter', 'apply')
+    if button['keyAction'] != 1 or button['clicks'] != 3 or button['result'] != applied['result']:
+        raise RuntimeError('Enter on the button did not invoke Fairy exactly once')
+    # Drain queued key-up/dialog messages and detect a second default-button click.
+    state = session.request(dict(command='state'))
+    if state != {k: v for k, v in button.items() if k != 'desktopInput'}:
+        raise RuntimeError('keyboard messages caused a duplicate or delayed application action')
+    closed = press('escape')
+    if closed.get('closed') is not True or closed['keyAction'] != 3 or session.process.poll() != 0:
+        raise RuntimeError('Escape did not follow Fairy close policy and exit 0')
+    return dict(ok=True, verification='win32-keyboard', observations=rows, processExited=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-minimal.exe')
@@ -378,6 +432,7 @@ def main():
     mode.add_argument('--verify-resize', action='store_true', help='resize the real window and verify native control rectangles')
     mode.add_argument('--verify-drag', action='store_true', help='verify live Fairy layout during actual border dragging; requires an idle desktop')
     mode.add_argument('--verify-dpi', action='store_true', help='inject DPI messages and verify actual geometry/fonts; does not change display settings')
+    mode.add_argument('--verify-keyboard', action='store_true', help='verify actual Enter/Escape input through Fairy; requires an idle desktop')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -395,6 +450,8 @@ def main():
             output(verify_drag(session))
         elif args.verify_dpi:
             output(verify_dpi(session))
+        elif args.verify_keyboard:
+            output(verify_keyboard(session))
         else:
             output(session.initial)
             while True:

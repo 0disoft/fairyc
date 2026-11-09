@@ -34,9 +34,11 @@ class TitleBar(c.Structure):
 
 
 @contextmanager
-def window_input(pid, method, released=None):
+def window_input(pid, method, released=None, focus_control=None):
     """Require foreground ownership; inject input without synthesizing UI messages."""
-    if method not in ('close-button', 'alt-f4', 'drag-resize'):
+    keyboard = {'alt-f4': (0x12, 0x73), 'enter': (0x0D,), 'escape': (0x1B,),
+                'ctrl-enter': (0x11, 0x0D)}
+    if method not in ('close-button', 'drag-resize', *keyboard):
         raise ValueError('unknown desktop input method')
     user = c.WinDLL('user32', use_last_error=True)
     callback = c.WINFUNCTYPE(w.BOOL, w.HWND, w.LPARAM)
@@ -82,10 +84,10 @@ def window_input(pid, method, released=None):
         # SendInput completion and OS key-state updates are asynchronous.
         # Wait for release; never inject a release for a user's held input.
         deadline = time.monotonic() + 2
-        keys = (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73)
+        keys = (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73, 0x0D, 0x1B)
         while any(pressed(key) & 0x8000 for key in keys):
             if time.monotonic() >= deadline:
-                raise RuntimeError('a mouse button or modifier/F4 key remains held; no desktop input sent')
+                raise RuntimeError('a mouse button, modifier, F4, Return or Esc remains held; no desktop input sent')
             time.sleep(0.02)
 
     wait_idle()
@@ -155,12 +157,17 @@ def window_input(pid, method, released=None):
 
     receipt = dict(method=method, pid=pid, hwnd=hwnd, foregroundVerified=True,
                    focusAttempts=focus_attempts, attachErrors=attach_errors)
-    if method == 'alt-f4':
+    if method in keyboard:
         def key(vk, flags=0):
             return Input(1, Payload(keyboard=Keyboard(vk, 0, flags, 0, 0)))
-        releases = [key(0x73, 2), key(0x12, 2)]
-        submit([key(0x12), key(0x73), *releases], releases)
-        yield dict(receipt, injectedEvents=4)
+        if focus_control is not None:
+            focus = c.c_size_t()
+            if not message(hwnd, 0x8001, 7, 0, 3, 2000, c.byref(focus)) or focus.value != focus_control:
+                raise RuntimeError('owned GUI keyboard focus does not match the requested control')
+        codes = keyboard[method]
+        releases = [key(vk, 2) for vk in reversed(codes)]
+        submit([key(vk) for vk in codes] + releases, releases)
+        yield dict(receipt, injectedEvents=2 * len(codes))
         return
 
     previous_dpi = dpi(c.c_void_p(-4))  # Per-monitor aware v2, physical pixels.
@@ -276,3 +283,7 @@ def close_input(pid, method):
 
 def drag_input(pid, released):
     return window_input(pid, 'drag-resize', released)
+
+
+def key_input(pid, method, focus_control):
+    return window_input(pid, method, focus_control=focus_control)
