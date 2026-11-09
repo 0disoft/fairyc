@@ -58,14 +58,14 @@ unsafe fn i32 on_dpi(ptr mut void window, u32 resizes, u32 dpi_changes) {
     return on_size(window, resizes);
 }
 
-unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
+unsafe fn i32 on_click(ptr mut void window, u32 clicks, u32 status_id, u32 empty_status_id) {
     var u8[512] input = [0;512];
     let ref mut u8[] writable = ref mut input;
     let usize count = fairy_win32_read_input(window, writable as ptr mut u8, writable.len);
     if (count > 511) { return 1; }
     if (count == 0) {
         let message = b"Enter a message first.";
-        return fairy_win32_present(window, message as ptr u8, message.len, clicks, 109);
+        return fairy_win32_present(window, message as ptr u8, message.len, clicks, empty_status_id);
     }
     let prefix = b"Result: ";
     if (count > 512 - prefix.len) { return 1; }
@@ -76,7 +76,7 @@ unsafe fn i32 on_click(ptr mut void window, u32 clicks) {
     i = 0;
     while (i < count) { output[prefix.len + i] = source[i]; i += 1; }
     let ref u8[] result = ref output;
-    return fairy_win32_present(window, result as ptr u8, prefix.len + count, clicks, 106);
+    return fairy_win32_present(window, result as ptr u8, prefix.len + count, clicks, status_id);
 }
 
 fn i32 main() {
@@ -95,7 +95,7 @@ fn i32 main() {
         if (event == 0) { break; }
         if (event == 1) {
             clicks += 1;
-            result = unsafe { on_click(window, clicks) };
+            result = unsafe { on_click(window, clicks, 106, 109) };
         } else if (event == 2) {
             edits += 1;
             result = unsafe { on_change(window, edits) };
@@ -115,7 +115,7 @@ fn i32 main() {
             let i32 action = on_key(code, flags);
             if (action == 1) {
                 clicks += 1;
-                result = unsafe { on_click(window, clicks) };
+                result = unsafe { on_click(window, clicks, 110, 111) };
             } else if (action == 3) {
                 result = unsafe { on_close(window) };
             }

@@ -11,4 +11,6 @@ BEGIN
     107 L"Result: "
     108 L"Enter a message first."
     109 L"WM_COMMAND: BN_CLICKED (empty input)"
+    110 L"WM_KEYDOWN: Enter"
+    111 L"WM_KEYDOWN: Enter (empty input)"
 END
