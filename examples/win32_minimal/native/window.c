@@ -24,6 +24,9 @@ typedef struct {
     UINT pointer_press_hit;
     unsigned pointer_moves;
     unsigned pointer_presses;
+    LPARAM pointer_press_point;
+    ULONG_PTR pointer_press_extra;
+    RECT pointer_press_window;
     int32_t key_code;
     int32_t key_flags;
     int32_t key_focus;
@@ -684,6 +687,9 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         if (state) {
             state->pointer_message = message;
             state->pointer_press_hit = (UINT)wparam;
+            state->pointer_press_point = lparam;
+            state->pointer_press_extra = (ULONG_PTR)GetMessageExtraInfo();
+            GetWindowRect(window, &state->pointer_press_window);
             state->pointer_presses++;
         }
         break;
@@ -698,6 +704,12 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         if (wparam == 5) { return state->pointer_moves; }
         if (wparam == 6) { return (LRESULT)GetCapture(); }
         if (wparam == 7) { return GetDlgCtrlID(GetFocus()); }
+        if (wparam == 8) { return (DWORD)state->pointer_press_point; }
+        if (wparam == 9) { return (LRESULT)state->pointer_press_extra; }
+        if (wparam == 10) { return state->pointer_press_window.left; }
+        if (wparam == 11) { return state->pointer_press_window.top; }
+        if (wparam == 12) { return state->pointer_press_window.right - state->pointer_press_window.left; }
+        if (wparam == 13) { return state->pointer_press_window.bottom - state->pointer_press_window.top; }
         return 0;
     case WM_DPICHANGED:
         if (LOWORD(wparam) > 0 && LOWORD(wparam) <= 960 && LOWORD(wparam) == HIWORD(wparam) && lparam != 0) {

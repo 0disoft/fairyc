@@ -199,13 +199,16 @@ def window_input(pid, method, released=None, focus_control=None):
         left, top, width, height = [metric(index) for index in (76, 77, 78, 79)]
         up = Input(0, Payload(mouse=Mouse(0, 0, 0, 4, 0, 0)))
 
-        def move_to(x, y):
-            nonlocal point
+        def pointer_input(x, y, flags, extra=0):
             if width <= 1 or height <= 1 or not (left <= x < left + width and top <= y < top + height):
                 raise RuntimeError('mouse target lies outside the virtual desktop')
             normalized_x = (x - left) * 65535 // (width - 1)
             normalized_y = (y - top) * 65535 // (height - 1)
-            move = Input(0, Payload(mouse=Mouse(normalized_x, normalized_y, 0, 0xC001, 0, 0)))
+            return Input(0, Payload(mouse=Mouse(normalized_x, normalized_y, 0, flags, 0, extra)))
+
+        def move_to(x, y):
+            nonlocal point
+            move = pointer_input(x, y, 0xC001)
             submit([move], [up])
             point = (x, y)
             deadline = time.monotonic() + 1
@@ -241,7 +244,12 @@ def window_input(pid, method, released=None, focus_control=None):
                 raise RuntimeError('native mouse hover was not delivered to ' + hit_name)
             time.sleep(0.02)
         before = probe(2)
-        down = Input(0, Payload(mouse=Mouse(0, 0, 0, 2, 0, 0)))
+        token = (time.monotonic_ns() & 0x7FFFFFFF) | 1
+        if not cursor(c.byref(current)) or abs(current.x - x) > 1 or abs(current.y - y) > 1:
+            raise RuntimeError('cursor moved away from verified mouse target; no press sent')
+        # Include absolute positioning in the press itself: an earlier move is
+        # insufficient if the cursor changes between observation and SendInput.
+        down = pointer_input(x, y, 0xC003, token)
         submit([down], [up])
         mouse_held = True
         deadline = time.monotonic() + 2
@@ -250,16 +258,23 @@ def window_input(pid, method, released=None, focus_control=None):
             if time.monotonic() >= deadline:
                 raise RuntimeError(f'native non-client mouse press was not delivered; message={probe(3):#x}, hit={probe(4)}, capture={probe(6)}')
             time.sleep(0.02)
-        receipt.update(hoverDelivered=True, pressDelivered=True, pressMessage=probe(3), pressHit=probe(4))
+        packed_press = probe(8)
+        receipt.update(hoverDelivered=True, pressDelivered=True, pressMessage=probe(3), pressHit=probe(4),
+                       targetPoint=[x, y], pressPoint=[c.c_short(packed_press & 0xFFFF).value, c.c_short((packed_press >> 16) & 0xFFFF).value],
+                       inputToken=token, pressToken=probe(9),
+                       pressWindow=[c.c_ssize_t(probe(i)).value for i in range(10, 14)])
         if receipt['pressHit'] != hit:
-            raise RuntimeError(f'native press hit {receipt["pressHit"]}, expected {hit_name}')
+            cursor(c.byref(current))
+            raise RuntimeError(f'native press hit {receipt["pressHit"]}, expected {hit_name}; cursor={[current.x, current.y]}; observation={receipt}')
+        if receipt['pressToken'] != token or any(abs(a - b) > 1 for a, b in zip(receipt['pressPoint'], (x, y))):
+            raise RuntimeError(f'native press does not match injected input; observation={receipt}')
         if method == 'drag-resize':
             if receipt['pressMessage'] != 0x00A1:
                 raise RuntimeError(f'native drag press was not WM_NCLBUTTONDOWN: {receipt["pressMessage"]:#x}')
             yield SimpleNamespace(receipt=dict(receipt, resizeBorder=[x, y], hitTest=hit_name),
                                   move_to=move_to, start=(x, y))
         else:
-            submit([up], [up])
+            submit([pointer_input(x, y, 0xC005, token)], [up])
             mouse_held = False
             yield dict(receipt, injectedEvents=3, closeButton=[x, y], hitTest=hit_name)
     finally:
