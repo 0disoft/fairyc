@@ -57,14 +57,18 @@ class Session:
             from desktop_input import key_input
             if not {'command', 'key'} <= set(request) or set(request) - {'command', 'key', 'focus'}:
                 raise ValueError('key requires key and optional focus')
-            key, focus = request['key'], request.get('focus', 'input')
-            if key not in ('enter', 'escape', 'ctrl-enter') or focus not in ('input', 'apply'):
-                raise ValueError('expected enter, escape, or ctrl-enter and input/apply focus')
-            code, flags = (27 if key == 'escape' else 13), (2 if key == 'ctrl-enter' else 0)
-            control = 201 if focus == 'input' else 202
+            key = request['key']
+            focus = request.get('focus', 'keep' if key in ('tab', 'shift-tab', 'ctrl-tab') else 'input')
+            if key not in ('enter', 'escape', 'ctrl-enter', 'tab', 'shift-tab', 'ctrl-tab') or focus not in ('input', 'apply', 'keep'):
+                raise ValueError('expected a supported key and input/apply/keep focus')
+            code = 9 if key in ('tab', 'shift-tab', 'ctrl-tab') else (27 if key == 'escape' else 13)
+            flags = 1 if key == 'shift-tab' else (2 if key in ('ctrl-enter', 'ctrl-tab') else 0)
+            control = 0 if focus == 'keep' else (201 if focus == 'input' else 202)
             ready = self.wire(f'arm-key\t{code}\t{control}'.encode('ascii'))
             if not ready.get('ok') or ready.get('pid') != self.process.pid or ready.get('awaitingKey') != code:
                 raise RuntimeError('GUI did not arm native keyboard observation')
+            if focus == 'keep':
+                control = ready['focus']
             with key_input(self.process.pid, key, control) as receipt:
                 reply = self.receive()
                 if (not reply.get('ok') or reply.get('keyCode') != code or reply.get('keyFlags') != flags or
@@ -422,6 +426,33 @@ def verify_keyboard(session):
     return dict(ok=True, verification='win32-keyboard', observations=rows, processExited=True)
 
 
+def verify_focus(session):
+    sample = '포커스 이동 Fairy Ω'
+    baseline = session.request(dict(command='input', text=sample))
+    rows = []
+    for key, start, target, action in (
+            ('tab', 'input', 202, 4), ('tab', 'keep', 201, 4),
+            ('shift-tab', 'keep', 202, 4), ('shift-tab', 'keep', 201, 4),
+            ('ctrl-tab', 'keep', 201, 0), ('tab', 'keep', 202, 4)):
+        row = session.request(dict(command='key', key=key, focus=start))
+        rows.append(row)
+        if row.get('focus') != target or row.get('keyAction') != action:
+            raise RuntimeError('Tab focus policy did not apply Fairy target: ' + key)
+        if any(row[k] != baseline[k] for k in ('input', 'result', 'status', 'edits', 'clicks')):
+            raise RuntimeError('Tab changed application data or ran Apply')
+        if session.request(dict(command='state')) != {k: v for k, v in row.items() if k != 'desktopInput'}:
+            raise RuntimeError('native dialog handling changed focus after Fairy acknowledgement')
+    applied = session.request(dict(command='key', key='enter', focus='keep'))
+    rows.append(applied)
+    if applied['keyFocus'] != 202 or applied['clicks'] != 1 or applied['result'] != 'Result: ' + sample:
+        raise RuntimeError('Enter stopped working after Fairy focus navigation')
+    closed = session.request(dict(command='key', key='escape', focus='keep'))
+    rows.append(closed)
+    if closed.get('closed') is not True or session.process.poll() != 0:
+        raise RuntimeError('Escape stopped working after Fairy focus navigation')
+    return dict(ok=True, verification='win32-focus', observations=rows, processExited=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-minimal.exe')
@@ -433,6 +464,7 @@ def main():
     mode.add_argument('--verify-drag', action='store_true', help='verify live Fairy layout during actual border dragging; requires an idle desktop')
     mode.add_argument('--verify-dpi', action='store_true', help='inject DPI messages and verify actual geometry/fonts; does not change display settings')
     mode.add_argument('--verify-keyboard', action='store_true', help='verify actual Enter/Escape input through Fairy; requires an idle desktop')
+    mode.add_argument('--verify-focus', action='store_true', help='verify actual Tab/Shift+Tab focus navigation through Fairy')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -452,6 +484,8 @@ def main():
             output(verify_dpi(session))
         elif args.verify_keyboard:
             output(verify_keyboard(session))
+        elif args.verify_focus:
+            output(verify_focus(session))
         else:
             output(session.initial)
             while True:

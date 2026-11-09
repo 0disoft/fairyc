@@ -37,7 +37,8 @@ class TitleBar(c.Structure):
 def window_input(pid, method, released=None, focus_control=None):
     """Require foreground ownership; inject input without synthesizing UI messages."""
     keyboard = {'alt-f4': (0x12, 0x73), 'enter': (0x0D,), 'escape': (0x1B,),
-                'ctrl-enter': (0x11, 0x0D)}
+                'ctrl-enter': (0x11, 0x0D), 'tab': (0x09,),
+                'shift-tab': (0x10, 0x09), 'ctrl-tab': (0x11, 0x09)}
     if method not in ('close-button', 'drag-resize', *keyboard):
         raise ValueError('unknown desktop input method')
     user = c.WinDLL('user32', use_last_error=True)
@@ -84,7 +85,7 @@ def window_input(pid, method, released=None, focus_control=None):
         # SendInput completion and OS key-state updates are asynchronous.
         # Wait for release; never inject a release for a user's held input.
         deadline = time.monotonic() + 2
-        keys = (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73, 0x0D, 0x1B)
+        keys = (0x01, 0x02, 0x04, 0x10, 0x11, 0x12, 0x5B, 0x5C, 0x73, 0x0D, 0x1B, 0x09)
         while any(pressed(key) & 0x8000 for key in keys):
             if time.monotonic() >= deadline:
                 raise RuntimeError('a mouse button, modifier, F4, Return or Esc remains held; no desktop input sent')
