@@ -502,7 +502,8 @@ def verify_ime(image):
             typed = session.request(dict(command='ime-strokes', keys=list('gksrmf')))
             if (typed['input'] != '한글' or typed['ime']['composition'] != '글' or
                     not typed['ime']['composing'] or typed['ime']['starts'] == 0 or typed['ime']['updates'] == 0):
-                raise RuntimeError('physical two-set strokes did not produce actual Korean composition')
+                raise RuntimeError('physical two-set strokes did not produce actual Korean composition: ' +
+                                   json.dumps(dict(input=typed['input'], ime=typed['ime']), ensure_ascii=True))
             revised = session.request(dict(command='ime-strokes', keys=['backspace']))
             if revised['input'] != '한그' or revised['ime']['composition'] != '그':
                 raise RuntimeError('physical Backspace did not revise the actual Hangul syllable')
@@ -533,9 +534,36 @@ def verify_ime(image):
             if not closed.get('closed') or session.process.poll() != 0:
                 raise RuntimeError('Escape did not close after IME completion')
             observations.append(dict(shortcut=shortcut, typed=typed, revised=revised, rebuilt=rebuilt,
-                                     compositionKey=first, applicationKey=second, closed=closed))
+                                     compositionKey=first, applicationKey=second, closeReply=closed))
         finally:
             session.finish()
+    # Focus loss may end composition reentrantly. Its boundary must not swallow
+    # a later ordinary Enter after returning to the edit control.
+    session = Session(image)
+    try:
+        initial_mode = bool(session.initial['ime']['open'] and session.initial['ime']['conversion'] & 1)
+        if not initial_mode:
+            enabled = session.request(dict(command='ime-strokes', keys=['hangul']))
+            if not enabled['ime']['open'] or not enabled['ime']['conversion'] & 1:
+                raise RuntimeError('focus-loss case did not enter Hangul mode')
+        typed = session.request(dict(command='ime-strokes', keys=list('gksrmf')))
+        if not typed['ime']['composing']:
+            raise RuntimeError('focus-loss case requires actual Korean composition')
+        applied = session.request(dict(command='key', key='enter', focus='apply'))
+        returned = session.request(dict(command='key', key='enter', focus='input'))
+        if (applied['clicks'] != 1 or returned['clicks'] != 2 or returned['keyFlags'] != 0 or
+                returned['result'] != 'Result: 한글'):
+            raise RuntimeError('stale IME boundary swallowed an ordinary key after focus loss')
+        if not initial_mode:
+            restored = session.request(dict(command='ime-strokes', keys=['hangul']))
+            if restored['ime']['open'] and restored['ime']['conversion'] & 1:
+                raise RuntimeError('focus-loss case did not restore owned IME mode')
+        closed = session.request(dict(command='key', key='escape', focus='keep'))
+        if not closed.get('closed'):
+            raise RuntimeError('focus-loss case did not close')
+        observations.append(dict(shortcut='focus-loss', typed=typed, applied=applied, returned=returned, closeReply=closed))
+    finally:
+        session.finish()
     return dict(ok=True, verification='actual-korean-ime', observations=observations,
                 inputMethod='physical-two-set-keys', syntheticComposition=False, processExited=True)
 

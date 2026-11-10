@@ -21,6 +21,8 @@ static LRESULT CALLBACK ime_proc(HWND window, UINT message, WPARAM wparam, LPARA
     }
     if (message == WM_KILLFOCUS || message == WM_LBUTTONDOWN || message == WM_SETTEXT) { boundary_pending = FALSE; }
     LRESULT result = CallWindowProcW(previous, window, message, wparam, lparam);
+    // The old edit procedure can end composition reentrantly during focus loss.
+    if (message == WM_KILLFOCUS || message == WM_LBUTTONDOWN || message == WM_SETTEXT) { boundary_pending = FALSE; }
     if (message == WM_NCDESTROY) { edit = NULL; original = NULL; }
     return result;
 }

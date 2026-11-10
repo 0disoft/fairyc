@@ -153,8 +153,13 @@ def window_input(pid, method, released=None, focus_control=None, strokes=None):
     def require_target():
         process = w.DWORD()
         owner(hwnd, c.byref(process))
-        if process.value != pid or foreground() != hwnd:
-            raise RuntimeError('owned GUI lost foreground; desktop input aborted')
+        active = foreground()
+        if process.value != pid or active != hwnd:
+            foreground_pid = w.DWORD()
+            owner(active, c.byref(foreground_pid))
+            foreground_class = c.create_unicode_buffer(128)
+            name(active, foreground_class, len(foreground_class))
+            raise RuntimeError(f'owned GUI lost foreground; foregroundPid={foreground_pid.value}, class={foreground_class.value}; desktop input aborted')
 
     def submit(events, releases):
         require_target()
