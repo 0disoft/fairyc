@@ -4,9 +4,10 @@ Owner: [example README](../../examples/win32_minimal/README.md) and the private
 FFI in `src/main.fy` / `native/window.c`. [ADR 0552](../adr/0552-minimal-windows-gui-build.md)
 continues to own native application build inputs.
 
-Latest status: [Korean IME and combined Win32 verification](windows-gui-ime-20261110.md)
-records all fifteen Win32 tests passing in one run, including actual Korean
-composition and the authored driver. The [Tab focus checkpoint](windows-gui-focus-20261110.md),
+Latest status: [distribution size and combined Win32 verification](windows-gui-slim-20261111.md)
+records all sixteen Win32 tests passing in one run, including the slim image
+and retained diagnostic CLI. The [Korean IME checkpoint](windows-gui-ime-20261110.md),
+[Tab focus checkpoint](windows-gui-focus-20261110.md),
 [mouse-target checkpoint](windows-gui-input-stability-20261109.md) and earlier
 failed/scoped observations below remain as history.
 

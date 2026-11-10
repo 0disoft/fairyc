@@ -23,6 +23,54 @@ Esc asks Fairy to close. Input is bounded to 127 UTF-16 code units. Tab moves be
 and button controls through Fairy's policy; Shift+Tab reverses direction.
 The controls follow the window width when resized.
 
+## Distribution image without verification code
+
+The ordinary `fairyc build` / `fairyc build --release` image retains the optional
+agent CLI and smoke scenarios. To build a separate distribution executable:
+
+```powershell
+python -B build_distribution.py --compiler fairyc
+.\build\win32-minimal-distribution.exe
+```
+
+`--compiler` can name an authored Fairy CLI or Go CLI executable. The helper
+copies the small example to a temporary workspace, keeps the same Fairy source
+and lock, and selects `native/window_distribution.c` / `ime_distribution.c`.
+These wrappers compile the shared native implementations with
+`FAIRY_WIN32_DIAGNOSTICS=0`. The original config and ordinary executable are
+untouched. Only a successfully built/inspected GUI image replaces the output.
+`--development` selects the development profile; release is the default.
+`--output <path>` selects a different output file.
+
+The distribution image excludes private JSONL/stdio handling, smoke scenarios,
+injected-DPI requests, diagnostic argument parsing, mouse delivery probes and
+IME state reporting. It retains the normal Fairy event policies, UTF conversion,
+native IME composition priority, live resize, DPI handling, resources and static
+CRT initialization. `--smoke` and `--automation-stdio` have no diagnostic effect
+on this image. Python is a build/verification helper only; the GUI runs alone.
+
+Verify the actual distribution executable using external native reads/input:
+
+```powershell
+python -B verify_distribution.py
+python -B size_report.py build/win32-minimal-distribution.exe
+```
+
+The first command requires an idle, unlocked Windows desktop with Korean
+two-set input selected. It reads native control text/focus/rectangles without
+the private protocol, exercises Unicode button activation, actual Enter/Tab/
+Shift+Tab, actual Hangul composition and Enter priority, resize and Esc exit.
+It also checks that private probe/argument markers and specific diagnostic
+imports are absent and that the app writes no pipe output. It uses native
+`WM_SETTEXT`/`BM_CLICK` for the initial programmatic button case; keyboard/IME
+actions use real `SendInput`. It does not certify physical keyboard hardware
+or physical cross-monitor DPI transitions. Existing `control.py` checks still
+target the ordinary diagnostic image.
+
+The [size and verification record](../../docs/development/windows-gui-slim-20261111.md)
+compares both builds under the same compiler/profile. Section sizes include
+CRT/runtime code; they do not independently attribute each CRT function.
+
 ## CLI control for agents
 
 Python 3 is needed only for this optional controller, not for the GUI executable.
