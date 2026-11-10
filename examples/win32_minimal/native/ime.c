@@ -3,21 +3,35 @@
 #include <windows.h>
 #include <imm.h>
 #include "native/ime.h"
+#include "native/profile.h"
 
 static HWND edit;
 static WNDPROC original;
+#if FAIRY_WIN32_DIAGNOSTICS
 static FairyIME observed;
+#else
+static struct { BOOL composing; } observed;
+#endif
 static BOOL boundary_pending, owns_key;
 
 static LRESULT CALLBACK ime_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     WNDPROC previous = original;
-    if (message == WM_IME_STARTCOMPOSITION) { observed.starts++; observed.composing = TRUE; }
+    if (message == WM_IME_STARTCOMPOSITION) {
+#if FAIRY_WIN32_DIAGNOSTICS
+        observed.starts++;
+#endif
+        observed.composing = TRUE; }
+#if FAIRY_WIN32_DIAGNOSTICS
     if (message == WM_IME_COMPOSITION) {
         observed.updates++;
         if (lparam & GCS_RESULTSTR) { observed.results++; }
     }
+#endif
     if (message == WM_IME_ENDCOMPOSITION) {
-        observed.ends++; observed.composing = FALSE; boundary_pending = TRUE;
+#if FAIRY_WIN32_DIAGNOSTICS
+        observed.ends++;
+#endif
+        observed.composing = FALSE; boundary_pending = TRUE;
     }
     if (message == WM_KILLFOCUS || message == WM_LBUTTONDOWN || message == WM_SETTEXT) { boundary_pending = FALSE; }
     LRESULT result = CallWindowProcW(previous, window, message, wparam, lparam);
@@ -37,6 +51,7 @@ BOOL fairy_ime_attach(HWND input) {
     return TRUE;
 }
 
+#if FAIRY_WIN32_DIAGNOSTICS
 void fairy_ime_snapshot(FairyIME *state) {
     *state = observed;
     state->language = LOWORD((UINT_PTR)GetKeyboardLayout(0));
@@ -56,18 +71,31 @@ void fairy_ime_snapshot(FairyIME *state) {
     ImmReleaseContext(edit, context);
 }
 
+#endif
+
 UINT fairy_ime_observe(const MSG *message) {
     owns_key = FALSE;
     if (message->hwnd != edit || message->message != WM_KEYDOWN) { return 0; }
+#if FAIRY_WIN32_DIAGNOSTICS
     FairyIME state;
     fairy_ime_snapshot(&state);
     observed.keys++;
     observed.raw_key = (UINT)message->wParam;
     observed.key = message->wParam == VK_PROCESSKEY ? ImmGetVirtualKey(edit) : (UINT)message->wParam;
     observed.during_key = state.composing;
+    UINT key = observed.key;
+#else
+    struct { BOOL composing; } state = {observed.composing};
+    HIMC context = ImmGetContext(edit);
+    if (context) {
+        state.composing = state.composing || ImmGetCompositionStringW(context, GCS_COMPSTR, NULL, 0) > 0;
+        ImmReleaseContext(edit, context);
+    }
+    UINT key = message->wParam == VK_PROCESSKEY ? ImmGetVirtualKey(edit) : (UINT)message->wParam;
+#endif
     owns_key = state.composing || boundary_pending;
     boundary_pending = FALSE;
-    return observed.key;
+    return key;
 }
 
 BOOL fairy_ime_owns_key(void) { return owns_key; }
