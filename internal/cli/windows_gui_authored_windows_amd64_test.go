@@ -21,7 +21,7 @@ import (
 func windowsGUIExample(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
-	for _, name := range []string{"fairy.toml", "fairy.windows.json", "src/main.fy", "native/window.c", "native/app.rc"} {
+	for _, name := range []string{"fairy.toml", "fairy.windows.json", "src/main.fy", "native/window.c", "native/ime.c", "native/ime.h", "native/app.rc"} {
 		data, err := os.ReadFile(filepath.Join("../../examples/win32_minimal", name))
 		if err != nil {
 			t.Fatal(err)

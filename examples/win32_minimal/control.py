@@ -53,6 +53,40 @@ class Session:
         if not isinstance(request, dict):
             raise ValueError('request must be an object')
         command = request.get('command')
+        if command == 'ime-strokes' and set(request) == {'command', 'keys'}:
+            from desktop_input import window_input
+            names = dict(backspace=8, tab=9, enter=13, hangul=21, escape=27, space=32)
+            values = request['keys']
+            if not isinstance(values, list) or not 1 <= len(values) <= 32:
+                raise ValueError('IME keys must be a list of 1..32 physical strokes')
+            strokes = []
+            for value in values:
+                if not isinstance(value, str) or not (value in names or len(value) == 1 and 'a' <= value <= 'z'):
+                    raise ValueError('unsupported physical IME stroke')
+                strokes.append(names[value] if value in names else ord(value.upper()))
+            ready = self.wire(b'ime-focus')
+            if not ready.get('ok') or ready['focus'] != 201:
+                raise RuntimeError('IME input did not acquire the owned edit control')
+            with window_input(self.process.pid, 'ime-strokes', focus_control=201, strokes=strokes) as delivery:
+                receipt = delivery.receipt
+                deadline, prior, unchanged = time.monotonic() + 6, None, 0
+                expected_keys = ready['ime']['nativeKeys'] + sum(v != 21 for v in strokes)
+                while True:
+                    if self.process.poll() is None:
+                        delivery.check_target()
+                    try:
+                        row = self.wire(b'state')
+                    except (OSError, RuntimeError):
+                        if self.process.poll() is not None:
+                            return dict(ok=True, closed=True, desktopInput=receipt)
+                        raise
+                    unchanged = unchanged + 1 if row == prior else 0
+                    if unchanged >= 4 and row['ime']['nativeKeys'] >= expected_keys:
+                        return dict(row, desktopInput=receipt)
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError('native IME input did not settle')
+                    prior = row
+                    time.sleep(0.04)
         if command == 'key':
             from desktop_input import key_input
             if not {'command', 'key'} <= set(request) or set(request) - {'command', 'key', 'focus'}:

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <wchar.h>
 #include <string.h>
+#include "native/ime.h"
 
 enum { INPUT_ID = 201, APPLY_ID = 202, RESULT_ID = 203, STATUS_ID = 204, INPUT_LIMIT = 127 };
 
@@ -191,12 +192,9 @@ static void json_number(Json *json, unsigned value) {
     json_bytes(json, digits + at);
 }
 
-static void json_text(Json *json, HWND control) {
-    WCHAR text[160];
+static void json_string(Json *json, const WCHAR *text) {
     char utf8[640];
     const char hex[] = "0123456789abcdef";
-    text[0] = L'\0';
-    GetWindowTextW(control, text, (int)ARRAYSIZE(text));
     int length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text, -1,
                                     utf8, (int)sizeof(utf8), NULL, NULL);
     if (length == 0) {
@@ -218,6 +216,12 @@ static void json_text(Json *json, HWND control) {
         }
     }
     json_bytes(json, "\"");
+}
+
+static void json_text(Json *json, HWND control) {
+    WCHAR text[160] = {0};
+    GetWindowTextW(control, text, (int)ARRAYSIZE(text));
+    json_string(json, text);
 }
 
 static void json_signed(Json *json, LONG value) {
@@ -312,6 +316,21 @@ static BOOL automation_state(HWND window, WindowState *state) {
     json_bytes(&json, ",\"keys\":"); json_number(&json, state->keys);
     json_bytes(&json, ",\"awaitingKey\":"); json_signed(&json, state->key_expected);
     json_bytes(&json, ",\"focus\":"); json_signed(&json, GetDlgCtrlID(GetFocus()));
+    FairyIME ime;
+    fairy_ime_snapshot(&ime);
+    json_bytes(&json, ",\"ime\":{\"language\":"); json_number(&json, ime.language);
+    json_bytes(&json, ime.open ? ",\"open\":true" : ",\"open\":false");
+    json_bytes(&json, ime.composing ? ",\"composing\":true" : ",\"composing\":false");
+    json_bytes(&json, ",\"conversion\":"); json_number(&json, ime.conversion);
+    json_bytes(&json, ",\"composition\":"); json_string(&json, ime.composition);
+    json_bytes(&json, ",\"starts\":"); json_number(&json, ime.starts);
+    json_bytes(&json, ",\"updates\":"); json_number(&json, ime.updates);
+    json_bytes(&json, ",\"ends\":"); json_number(&json, ime.ends);
+    json_bytes(&json, ",\"results\":"); json_number(&json, ime.results);
+    json_bytes(&json, ",\"nativeKeys\":"); json_number(&json, ime.keys);
+    json_bytes(&json, ",\"lastKey\":"); json_number(&json, ime.key);
+    json_bytes(&json, ",\"lastRawKey\":"); json_number(&json, ime.raw_key);
+    json_bytes(&json, ime.during_key ? ",\"keyDuringComposition\":true}" : ",\"keyDuringComposition\":false}");
     if (!json_geometry(&json, window, state)) { return FALSE; }
     json_bytes(&json, "}\n");
     return json.valid && automation_write(state, json.bytes, json.size);
@@ -341,6 +360,11 @@ static BOOL automation_command(HWND window, WindowState *state) {
     }
     state->command[state->command_size] = '\0';
     if (strcmp(state->command, "state") == 0) {
+        return automation_state(window, state);
+    }
+    if (strcmp(state->command, "ime-focus") == 0) {
+        SetForegroundWindow(window);
+        SetFocus(state->input);
         return automation_state(window, state);
     }
     if (strcmp(state->command, "click") == 0) {
@@ -669,6 +693,7 @@ static LRESULT CALLBACK window_proc(HWND window, UINT message, WPARAM wparam, LP
         if (!state->input || !state->apply || !state->result || !state->status) {
             return -1;
         }
+        if (!fairy_ime_attach(state->input)) { return -1; }
         SendMessageW(state->input, EM_SETLIMITTEXT, INPUT_LIMIT, 0);
         resource_text(state->apply, 103);
         resource_text(state->result, 102);
@@ -796,6 +821,7 @@ static VOID WINAPI message_fiber(void *native_window) {
             bridge_state.pump_finished = TRUE;
             break;
         }
+        fairy_ime_observe(&message);
         if (message.message == WM_KEYDOWN && (message.hwnd == window || IsChild(window, message.hwnd)) &&
             (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE || message.wParam == VK_TAB)) {
             // Capture native key data before IsDialogMessage can activate a default button.
