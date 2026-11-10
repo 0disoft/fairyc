@@ -34,6 +34,7 @@ typedef struct {
     int32_t key_action;
     unsigned keys;
     int key_expected;
+    BOOL key_pending;
     BOOL initial_reply_pending;
     BOOL resize_reply_pending;
     int32_t min_width;
@@ -821,18 +822,26 @@ static VOID WINAPI message_fiber(void *native_window) {
             bridge_state.pump_finished = TRUE;
             break;
         }
-        fairy_ime_observe(&message);
+        UINT original_key = fairy_ime_observe(&message);
+        BOOL ime_owns_key = fairy_ime_owns_key();
         if (message.message == WM_KEYDOWN && (message.hwnd == window || IsChild(window, message.hwnd)) &&
-            (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE || message.wParam == VK_TAB)) {
+            (message.wParam == VK_RETURN || message.wParam == VK_ESCAPE || message.wParam == VK_TAB ||
+             (ime_owns_key && (original_key == VK_RETURN || original_key == VK_ESCAPE || original_key == VK_TAB)))) {
             // Capture native key data before IsDialogMessage can activate a default button.
-            bridge_state.key_code = (int32_t)message.wParam;
+            bridge_state.key_code = original_key ? (int32_t)original_key : (int32_t)message.wParam;
             bridge_state.key_focus = GetDlgCtrlID(message.hwnd);
             bridge_state.key_flags = ((GetKeyState(VK_SHIFT) & 0x8000) ? 1 : 0) |
                 ((GetKeyState(VK_CONTROL) & 0x8000) ? 2 : 0) |
                 ((GetKeyState(VK_MENU) & 0x8000) ? 4 : 0) |
                 (((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000) ? 8 : 0) |
-                ((message.lParam & ((LPARAM)1 << 30)) ? 16 : 0);
-            bridge_state.pending_event = 6;
+                ((message.lParam & ((LPARAM)1 << 30)) ? 16 : 0) |
+                (ime_owns_key ? 32 : 0);
+            bridge_state.key_pending = TRUE;
+            if (ime_owns_key) {
+                // Let the native edit/IME process composition, bypassing dialog shortcuts.
+                TranslateMessage(&message);
+                DispatchMessageW(&message);
+            }
         } else if (!IsDialogMessageW(window, &message)) {
             TranslateMessage(&message);
             DispatchMessageW(&message);
@@ -913,6 +922,10 @@ int32_t fairy_win32_next(void *native_window) {
             int32_t event = bridge_state.pending_event;
             bridge_state.pending_event = 0;
             return event;
+        }
+        if (bridge_state.key_pending) {
+            bridge_state.key_pending = FALSE;
+            return 6;
         }
         if (bridge_state.pump_finished) { return 0; }
         SwitchToFiber(bridge_state.pump_fiber);

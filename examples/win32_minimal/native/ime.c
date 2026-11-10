@@ -7,6 +7,7 @@
 static HWND edit;
 static WNDPROC original;
 static FairyIME observed;
+static BOOL boundary_pending, owns_key;
 
 static LRESULT CALLBACK ime_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     WNDPROC previous = original;
@@ -15,7 +16,10 @@ static LRESULT CALLBACK ime_proc(HWND window, UINT message, WPARAM wparam, LPARA
         observed.updates++;
         if (lparam & GCS_RESULTSTR) { observed.results++; }
     }
-    if (message == WM_IME_ENDCOMPOSITION) { observed.ends++; observed.composing = FALSE; }
+    if (message == WM_IME_ENDCOMPOSITION) {
+        observed.ends++; observed.composing = FALSE; boundary_pending = TRUE;
+    }
+    if (message == WM_KILLFOCUS || message == WM_LBUTTONDOWN || message == WM_SETTEXT) { boundary_pending = FALSE; }
     LRESULT result = CallWindowProcW(previous, window, message, wparam, lparam);
     if (message == WM_NCDESTROY) { edit = NULL; original = NULL; }
     return result;
@@ -51,6 +55,7 @@ void fairy_ime_snapshot(FairyIME *state) {
 }
 
 UINT fairy_ime_observe(const MSG *message) {
+    owns_key = FALSE;
     if (message->hwnd != edit || message->message != WM_KEYDOWN) { return 0; }
     FairyIME state;
     fairy_ime_snapshot(&state);
@@ -58,5 +63,9 @@ UINT fairy_ime_observe(const MSG *message) {
     observed.raw_key = (UINT)message->wParam;
     observed.key = message->wParam == VK_PROCESSKEY ? ImmGetVirtualKey(edit) : (UINT)message->wParam;
     observed.during_key = state.composing;
+    owns_key = state.composing || boundary_pending;
+    boundary_pending = FALSE;
     return observed.key;
 }
+
+BOOL fairy_ime_owns_key(void) { return owns_key; }

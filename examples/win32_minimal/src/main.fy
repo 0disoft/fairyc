@@ -27,6 +27,7 @@ unsafe fn i32 on_close(ptr mut void window) {
 }
 
 fn i32 on_key(i32 code, i32 flags) {
+    if (flags >= 32) { return 0; }
     if (flags != 0) { return 0; }
     if (code == 13) { return 1; }
     if (code == 27) { return 3; }
@@ -34,6 +35,7 @@ fn i32 on_key(i32 code, i32 flags) {
 }
 
 fn i32 on_tab(i32 focused, i32 flags) {
+    if (flags >= 32) { return 0; }
     if (flags == 0) {
         return if (focused == 201) { 202 } else { 201 };
     }

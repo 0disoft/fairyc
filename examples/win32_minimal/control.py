@@ -105,7 +105,7 @@ class Session:
                 control = ready['focus']
             with key_input(self.process.pid, key, control) as receipt:
                 reply = self.receive()
-                if (not reply.get('ok') or reply.get('keyCode') != code or reply.get('keyFlags') != flags or
+                if (not reply.get('ok') or reply.get('keyCode') != code or reply.get('keyFlags') not in (flags, flags | 32) or
                         reply.get('keyFocus') != control or reply.get('keys') != ready['keys'] + 1):
                     raise RuntimeError('missing native key delivery or Fairy keyboard acknowledgement')
                 if reply.get('closed') and self.process.wait(timeout=5) != 0:
@@ -487,6 +487,59 @@ def verify_focus(session):
     return dict(ok=True, verification='win32-focus', observations=rows, processExited=True)
 
 
+def verify_ime(image):
+    observations = []
+    for shortcut in ('enter', 'escape', 'tab'):
+        session = Session(image)
+        initial_mode = bool(session.initial['ime']['open'] and session.initial['ime']['conversion'] & 1)
+        try:
+            if session.initial['ime']['language'] != 1042:
+                raise RuntimeError('actual Korean IME verification requires the installed Korean input layout')
+            if not initial_mode:
+                enabled = session.request(dict(command='ime-strokes', keys=['hangul']))
+                if not enabled['ime']['open'] or not enabled['ime']['conversion'] & 1:
+                    raise RuntimeError('actual Korean IME did not enter Hangul mode')
+            typed = session.request(dict(command='ime-strokes', keys=list('gksrmf')))
+            if (typed['input'] != '한글' or typed['ime']['composition'] != '글' or
+                    not typed['ime']['composing'] or typed['ime']['starts'] == 0 or typed['ime']['updates'] == 0):
+                raise RuntimeError('physical two-set strokes did not produce actual Korean composition')
+            revised = session.request(dict(command='ime-strokes', keys=['backspace']))
+            if revised['input'] != '한그' or revised['ime']['composition'] != '그':
+                raise RuntimeError('physical Backspace did not revise the actual Hangul syllable')
+            rebuilt = session.request(dict(command='ime-strokes', keys=['f']))
+            if rebuilt['input'] != '한글' or not rebuilt['ime']['composing']:
+                raise RuntimeError('physical final-consonant input did not rebuild Hangul')
+            first = session.request(dict(command='key', key=shortcut, focus='keep'))
+            if (first.get('closed') or first.get('clicks') != 0 or first.get('focus') != 201 or
+                    first.get('keyAction') != 0 or first.get('keyFlags') != 32):
+                raise RuntimeError('IME shortcut executed an application action during composition: ' + shortcut)
+            # Some IMEs commit on Esc, others cancel the uncommitted syllable.
+            if first['input'] not in (('한글', '한') if shortcut == 'escape' else ('한글',)):
+                raise RuntimeError('IME boundary unexpectedly changed committed Hangul')
+            if first['ime']['composing'] or first['ime']['ends'] <= rebuilt['ime']['ends']:
+                raise RuntimeError('IME shortcut did not finish native composition')
+            second = None
+            if shortcut in ('enter', 'tab'):
+                second = session.request(dict(command='key', key=shortcut, focus='keep'))
+                if shortcut == 'enter' and (second['clicks'] != 1 or second['result'] != 'Result: 한글'):
+                    raise RuntimeError('Enter did not apply after IME completion')
+                if shortcut == 'tab' and (second['focus'] != 202 or second['keyAction'] != 4):
+                    raise RuntimeError('Tab did not navigate after IME completion')
+            if not initial_mode:
+                restored = session.request(dict(command='ime-strokes', keys=['hangul']))
+                if restored['ime']['open'] and restored['ime']['conversion'] & 1:
+                    raise RuntimeError('owned IME mode did not restore')
+            closed = session.request(dict(command='key', key='escape', focus='keep'))
+            if not closed.get('closed') or session.process.poll() != 0:
+                raise RuntimeError('Escape did not close after IME completion')
+            observations.append(dict(shortcut=shortcut, typed=typed, revised=revised, rebuilt=rebuilt,
+                                     compositionKey=first, applicationKey=second, closed=closed))
+        finally:
+            session.finish()
+    return dict(ok=True, verification='actual-korean-ime', observations=observations,
+                inputMethod='physical-two-set-keys', syntheticComposition=False, processExited=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-minimal.exe')
@@ -499,6 +552,7 @@ def main():
     mode.add_argument('--verify-dpi', action='store_true', help='inject DPI messages and verify actual geometry/fonts; does not change display settings')
     mode.add_argument('--verify-keyboard', action='store_true', help='verify actual Enter/Escape input through Fairy; requires an idle desktop')
     mode.add_argument('--verify-focus', action='store_true', help='verify actual Tab/Shift+Tab focus navigation through Fairy')
+    mode.add_argument('--verify-ime', action='store_true', help='verify real Korean IME composition and Enter/Esc/Tab conflicts')
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('this example requires Windows')
@@ -506,6 +560,9 @@ def main():
     try:
         if args.verify_desktop_close:
             output(verify_desktop_close(args.exe.resolve()))
+            return 0
+        if args.verify_ime:
+            output(verify_ime(args.exe.resolve()))
             return 0
         session = Session(args.exe.resolve())
         if args.verify:

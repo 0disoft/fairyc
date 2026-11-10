@@ -11,4 +11,5 @@ typedef struct {
 BOOL fairy_ime_attach(HWND input);
 void fairy_ime_snapshot(FairyIME *state);
 UINT fairy_ime_observe(const MSG *message);
+BOOL fairy_ime_owns_key(void);
 #endif
