@@ -88,12 +88,14 @@ default button. Event 6 carries the native virtual key, modifiers and previous
 key-state bit through scalar FFI. Fairy's `on_key` maps plain Enter to Apply and
 plain Esc to `on_close`; modified/repeated key-downs choose no action. C has no
 Enter-to-click or Esc-to-destroy fallback. Other keys retain normal Win32 dialog
-handling. These tests do not certify IME composition or hardware auto-repeat.
+handling. This keyboard selection does not certify IME composition or hardware
+auto-repeat; the separate IME selection below exercises real Korean composition.
 
 State adds `keyCode`, `keyFlags`, `keyFocus`, `keyAction`, `keys`, `awaitingKey`
 and `closed:false`. `keys` counts Fairy-processed key notifications, including
 ignored ones; `clicks` counts Apply actions from both clicks and Enter. Flag bits
-are Shift=1, Ctrl=2, Alt=4, Windows=8 and repeated key-down=16. `keyFocus` records
+are Shift=1, Ctrl=2, Alt=4, Windows=8, repeated key-down=16 and IME ownership=32.
+`keyFocus` records
 the native destination control ID (input=201, Apply=202); `keyAction` is Fairy's
 decision (0=ignore, 1=Apply, 3=close request, 4=focus change). The live `focus`
 field independently reads current native focus. The final key reply follows the
@@ -124,6 +126,57 @@ control or invoke `GetNextDlgTabItem`/`IsDialogMessage` for Tab. With two eligib
 controls, both directions visit the same pair; separate Fairy-only policy
 mutations verify each branch. Repeated key-downs and modifiers other than plain
 Shift are ignored by this example's Tab policy.
+
+### Actual Korean IME composition
+
+With the Korean two-set input layout selected on an idle, unlocked Windows
+desktop:
+
+```powershell
+python -B control.py --verify-ime
+```
+
+This sends actual virtual-key down/up pairs through `SendInput`: `gksrmf`
+produces `한글` with `글` still composing, Backspace changes it to `한그`, and
+`f` restores `한글`. It checks native `WM_IME_*` notifications and reads the
+composition string from the edit's IME context. It does not use Unicode packet
+input, replace the text, or fabricate composition messages for these actions.
+
+This example reserves the first Enter/Esc/Tab ending composition for the IME:
+it must neither Apply, close, nor move focus. Pressing the key again performs
+the ordinary Fairy action. The installed IME decides whether Esc commits or
+cancels its uncommitted syllable. A fourth case leaves the edit while composing,
+then returns; ordinary Enter must work without a stale IME boundary swallowing
+it. Each owned session closes with exit 0. A layout mismatch or failed
+composition produces a failure rather than a skipped/passing receipt.
+
+Interactive requests support the same physical strokes (1..32 per request):
+
+```json
+{"command":"ime-strokes","keys":["hangul"]}
+{"command":"ime-strokes","keys":["g","k","s","r","m","f"]}
+{"command":"ime-strokes","keys":["backspace"]}
+{"command":"key","key":"enter","focus":"keep"}
+```
+
+`hangul` toggles the owned input mode; use it only if state reports non-Hangul
+mode. Supported strokes are lowercase a..z, `hangul`, `backspace`, `space`,
+`enter`, `escape` and `tab`. The private `ime-focus` native request only focuses
+the edit; the helper performs input after verifying foreground/control ownership.
+It waits for observed native keys and stable state before returning. The
+verification restores the owned session's initial Hangul mode on success.
+
+State's `ime` object reports layout `language`, `open`, `conversion`,
+`composing`, `composition`, `starts`, `updates`, `ends`, `results`, `nativeKeys`,
+`lastKey`, `lastRawKey` and `keyDuringComposition`. `native/ime.c` observes the
+native edit, including an end-composition boundary arriving before the original
+shortcut. The pump dispatches IME-owned shortcuts to the native edit first,
+then reports event 6 with flag bit 32. Fairy's `on_key`/`on_tab` choose no
+application action for that flag. C keeps no Apply/close/focus fallback.
+The executable adds only Windows' system `imm32.dll` dependency via
+`imm32.lib`; no IME engine is bundled. See the
+[IME verification record](../../docs/development/windows-gui-ime-20261110.md)
+for results and limits.
 
 ### DPI changes and scaled layout
 
@@ -315,7 +368,8 @@ and inherited pipe stdin/stdout. The Python controller owns that process and
 closes it on stdin EOF or error. It opens no socket, contacts no service and
 targets only its owned child process. Native requests use LF
 lines `state`, `input<TAB>UTF-8`, `resize<TAB>width<TAB>height`, `click`, `close`,
-`arm-close`, `arm-key<TAB>code<TAB>focus`, `dpi-test<TAB>dpi<TAB>width<TAB>height`;
+`arm-close`, `arm-key<TAB>code<TAB>focus`, `ime-focus`,
+`dpi-test<TAB>dpi<TAB>width<TAB>height`;
 replies are JSON lines.
 The native buffer is bounded to 1023 bytes and validates UTF-8, NUL and input
 length before mutation. The Python JSON request limit is 4096 bytes; multiline
