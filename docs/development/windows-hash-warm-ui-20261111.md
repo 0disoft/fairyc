@@ -149,3 +149,69 @@ bootstrap, physical input/cross-monitor DPI/high-contrast and hosted/Linux
 checks were omitted for this small C paint correction. The earlier execution
 record and its hashes describe the previous version, not this rebuilt EXE.
 No API, DB, repository hygiene or CI runner/workflow changes; no push.
+
+## Follow-up: bounded maximized layout, tooltips and late paint observations
+
+The form is centered and capped at 720 × 280 logical pixels in large windows.
+The digest stays 70 logical pixels high. Native wrapping tooltips provide the
+complete filename/path only when clipped, including Unicode and literal `&`.
+Callback storage outlives the notification and supports text beyond its inline
+80-character buffer. Standard Common Controls tracking messages exercise the
+existing registered tools; the probe restores the original TOOLINFO afterward.
+Optional `--desktop-hover` separately requires actual pointer movement.
+Implementation commits: `dd9a8f4a`, `665712c1`, `009aac7b`.
+
+The user subsequently observed solid black document-icon and byte-count areas
+late in verification, including after source-overwrite refusal. The earlier
+explanation attributing everything to closing-window animation was insufficient.
+The original image was not reproduced in the new baseline run, and the user
+also reported that recent runs no longer showed it. This is **repaint hardening,
+not a confirmed root-cause fix**; no GDI leak or compositor defect is claimed.
+
+`63459740` replaces per-control immediate repaint with one full owner/child
+erase-and-redraw after Fairy finishes submitting layout. It extends the earlier
+filename-only invalidation to all controls and uncovered parent areas. Native
+Open/Save return also redraws the owner on acceptance or cancellation, preserving
+the dialog error before the redraw. Layout arithmetic remains in Fairy; C only
+applies rectangles and performs Win32 painting.
+
+The verifier observes background pixels on icon 211 and byte label 209 at seven
+checkpoints: initial, two maximize/restore cycles, source protection, minimum and
+expanded sizes, and minimize/restore. It exposes the owned window once before
+the sequence rather than revealing it anew at each sample, which could repair
+stale paint. Occlusion produces an explicit diagnostic. These are sampled
+background checks, not certification of every pixel or every transient frame.
+The visible capture path now reads the composed desktop with `GetDC(NULL)` and
+`BitBlt`, without requesting application paint. A parent's `GetWindowDC` capture
+could contain stale child/nonclient backing pixels. Filename comparisons wait
+for consecutive matching frames after native-dialog composition, without
+sending any repaint request. `PrintWindow` remains a separate diagnostic capture.
+Restore sampling allows up to two seconds for the existing DWM animation to
+settle against the initial canvas color, without requesting a new application
+paint. An early strict sample saw desktop pixels in the moving canvas corner;
+that animation observation was not treated as a reproduction of black controls.
+
+Go development/release integration passed in **69.927s**, two profile subtests,
+zero skips, including 19 CLI cases and the complete GUI verifier per profile.
+The native/Fairy sources are unchanged since that run. The final desktop capture
+method is additionally checked on the authored release below. The reused authored
+CLI passed `check` and `build --locked --release`; its example source lock was
+refreshed without changing compiler or SDK pins.
+
+The rebuilt authored release is **178,688 bytes (174.5 KiB)**, unchanged from the
+preceding layout/tooltip image and 3,584 bytes above the original compact UI.
+SHA-256: `359ee46ab4749761b08a5ad2e97032d76730dab0c4558b462b0ce9ad4d881561`.
+It passes all 19 CLI reference cases. Logs, retained image, size report and
+optional diagnostic captures are under `.cache/windows-hash-paint-20261111/`.
+The usable release is `examples/win32_hash/build/win32-hash.exe`.
+The final authored-release GUI run passes all seven composed-background samples,
+two settled filename comparisons, ten tooltip text comparisons, native dialogs,
+source protection, Copy/Save, resize/restore and close-during-hash. Earlier
+capture-settling failures are not counted as passes. The final expanded visible
+capture was also inspected; no black document/byte regions were present.
+
+The unchanged hash unit suite, minimal-GUI suite, fresh compiler bootstrap,
+physical hover/cross-monitor DPI/high-contrast, Linux and hosted CI were omitted
+for this repaint follow-up. No external helper was terminated. No public
+compiler/language/SDK API, DB, dependency, repository-policy or CI runner changes;
+local commits only, no push/publication/deployment.

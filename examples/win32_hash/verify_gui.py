@@ -183,6 +183,24 @@ def verify(image, screenshot=None, desktop_hover=False):
                     return False
                 return abs(min(r.left for r in boxes) - (area.right - max(r.right for r in boxes))) <= 1
             wait(layout, bool, 'initial layout overlaps or clips controls')
+            paint_observations = []
+            def check_paint(stage):
+                from paint_probe import background_pixels
+                colors = background_pixels(main, [(n, child(main, n)) for n in (209, 211)])
+                expected_canvas = paint_observations[0]['colors']['canvas'] if paint_observations else colors['canvas']
+                deadline = time.monotonic() + 2
+                # Window hit testing already uses restored coordinates while
+                # DWM can still be animating the surface from its taskbar icon.
+                # Wait for composition only; never invalidate/reveal to repair.
+                while any(color != expected_canvas for color in colors.values()) and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    colors = background_pixels(main, [(n, child(main, n)) for n in (209, 211)])
+                paint_observations.append(dict(stage=stage, colors=colors))
+                if any(color != expected_canvas for color in colors.values()):
+                    if screenshot:
+                        from capture_window import capture
+                        capture(main, screenshot.with_name(f'{screenshot.stem}-paint-failure.png'), repaint=False)
+                    raise RuntimeError(f'control background differs from canvas: stage={stage}, colors={colors}')
             digest_bounds = w.RECT()
             window_rect(child(main, 203), c.byref(digest_bounds))
             digest_height = digest_bounds.bottom-digest_bounds.top
@@ -354,6 +372,12 @@ def verify(image, screenshot=None, desktop_hover=False):
                     if not post(confirmation, 0xF5, 0, 0):
                         raise RuntimeError('could not confirm owned fixture overwrite')
                 wait(lambda: windows('#32770'), lambda v: not v, 'file dialog did not accept path')
+            # Expose once, before the measured sequence. Revealing/activating
+            # again at each sample could itself repair stale window pixels.
+            activate_owned()
+            if not resize(main, w.HWND(-1), 0, 0, 0, 0, 0x13):
+                raise RuntimeError('cannot expose owned paint verification window')
+            check_paint('initial')
             cancel(202)
             if text(child(main, 201)) or text(child(main, 203)) or enabled(child(main, 204)):
                 raise RuntimeError('Open cancellation changed state')
@@ -410,9 +434,21 @@ def verify(image, screenshot=None, desktop_hover=False):
                     # Text-only checks miss cached ellipses left in native paint.
                     from capture_window import capture
                     title = child(main, 206)
-                    # Only this owned verifier window is temporarily topmost,
-                    # keeping visible-pixel reads independent of occlusion.
-                    resize(main, w.HWND(-1), 0, 0, 0, 0, 0x13)
+                    def settled_title(target):
+                        # Desktop composition can still be animating after a
+                        # native dialog closes. Compare settled visible frames,
+                        # without sending any repaint request to the app.
+                        previous = None
+                        deadline = time.monotonic() + 2
+                        while True:
+                            capture(title, target, repaint=False)
+                            current = target.read_bytes()
+                            if current == previous:
+                                return
+                            if time.monotonic() >= deadline:
+                                raise RuntimeError('filename composition did not settle')
+                            previous = current
+                            time.sleep(0.05)
                     for cycle in range(2):
                         time.sleep(0.1)
                         show(main, 3)
@@ -421,7 +457,7 @@ def verify(image, screenshot=None, desktop_hover=False):
                         tooltip(201, actual_path)
                         time.sleep(0.1)
                         before_title = root / 'expanded-title.png'
-                        capture(title, before_title, repaint=False)
+                        settled_title(before_title)
                         if screenshot:
                             capture(main, screenshot.with_name(f'{screenshot.stem}-maximized.png'), repaint=False)
                         # Change selection first so readiness cannot be mistaken
@@ -438,14 +474,17 @@ def verify(image, screenshot=None, desktop_hover=False):
                         wait(lambda: bool(enabled(child(main, 202))), bool, 'wide reselect not complete')
                         time.sleep(0.1)
                         fresh_title = root / 'fresh-title.png'
-                        capture(title, fresh_title, repaint=False)
+                        settled_title(fresh_title)
                         if before_title.read_bytes() != fresh_title.read_bytes():
+                            if screenshot:
+                                screenshot.with_name(f'{screenshot.stem}-expanded-title.png').write_bytes(before_title.read_bytes())
+                                screenshot.with_name(f'{screenshot.stem}-fresh-title.png').write_bytes(fresh_title.read_bytes())
                             raise RuntimeError('filename paint retains ellipsis from the previous window width')
                         if text(title) != source.name:
                             raise RuntimeError('filename text changed during ellipsis painting')
                         show(main, 9)
                         wait(layout, bool, 'restored filename layout invalid')
-                    resize(main, w.HWND(-2), 0, 0, 0, 0, 0x13)
+                        check_paint(f'filename-cycle-{cycle}')
                 if index == 1:
                     cancel(202)
                     cancel(204)
@@ -481,6 +520,11 @@ def verify(image, screenshot=None, desktop_hover=False):
             wait(lambda: text(child(main, 205)), lambda v: v == '원본 파일에는 덮어쓸 수 없어요.', 'source protection status')
             if source.read_bytes() != before:
                 raise RuntimeError('GUI save damaged the source')
+            check_paint('source-protection')
+            if screenshot:
+                from capture_window import capture
+                capture(main, screenshot.with_name(f'{screenshot.stem}-protected-visible.png'), repaint=False)
+                capture(main, screenshot.with_name(f'{screenshot.stem}-protected-repaint.png'))
             area, outer = w.RECT(), w.RECT()
             client_rect(main, c.byref(area))
             window_rect(main, c.byref(outer))
@@ -491,6 +535,10 @@ def verify(image, screenshot=None, desktop_hover=False):
                 if not resize(main, None, 0, 0, physical_width, physical_height, 0x16):
                     raise RuntimeError('GUI resize failed')
                 wait(layout, bool, 'resized layout overlaps or clips controls')
+                check_paint(f'resized-{width}x{height}')
+                if screenshot and width == 800:
+                    from capture_window import capture
+                    capture(main, screenshot.with_name(f'{screenshot.stem}-resized-visible.png'), repaint=False)
                 if text(child(main, 203)) != expected_display or message(child(main, 203), 0xBA) != 2:
                     raise RuntimeError('resize lost/wrapped the two-line digest')
             show(main, 6)  # Minimize must not make a zero-size layout terminate Fairy.
@@ -499,6 +547,7 @@ def verify(image, screenshot=None, desktop_hover=False):
                 raise RuntimeError('minimizing terminated the application')
             show(main, 9)
             wait(layout, bool, 'restore layout invalid')
+            check_paint('restored')
             # A close request must interrupt streaming and release its file.
             large = root / 'close-during-hash.bin'
             with large.open('wb') as stream:
@@ -530,6 +579,7 @@ def verify(image, screenshot=None, desktop_hover=False):
                 filenameResizeRepaint=True,
                 boundedDigestLayout=True,
                 nativeTooltips=True, desktopHoverVerified=desktop_hover,
+                controlBackgrounds=True, paintObservations=paint_observations,
                 tooltipInput='desktop' if desktop_hover else 'native-messages', tooltipObservations=tooltip_observations,
                 privateAutomationProtocol=False, processExited=True)
 

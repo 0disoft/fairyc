@@ -36,14 +36,17 @@ def capture(hwnd, target, repaint=True):
         else:
             # Preserve existing on-screen pixels when investigating stale paint;
             # PrintWindow would request a new draw and can hide that defect.
-            source_dc = api(user, 'GetWindowDC', w.HDC, w.HWND)(hwnd)
+            # A parent's window DC can contain stale child/nonclient backing
+            # pixels on a composed desktop. Read the exposed desktop rectangle.
+            api(c.WinDLL('dwmapi'), 'DwmFlush', c.c_long)()
+            source_dc = api(user, 'GetDC', w.HDC, w.HWND)(None)
             try:
                 if not source_dc or not api(gdi, 'BitBlt', w.BOOL, w.HDC, c.c_int, c.c_int, c.c_int, c.c_int,
-                                             w.HDC, c.c_int, c.c_int, w.DWORD)(dc, 0, 0, width, height, source_dc, 0, 0, 0x00CC0020):
+                                             w.HDC, c.c_int, c.c_int, w.DWORD)(dc, 0, 0, width, height, source_dc, rect.left, rect.top, 0x00CC0020):
                     raise RuntimeError('capture: visible window copy failed')
             finally:
                 if source_dc:
-                    api(user, 'ReleaseDC', c.c_int, w.HWND, w.HDC)(hwnd, source_dc)
+                    api(user, 'ReleaseDC', c.c_int, w.HWND, w.HDC)(None, source_dc)
         api(gdi, 'GdiFlush', w.BOOL)()
         bgra = c.string_at(pixels, width * height * 4)
         # DWM's invisible resize margins are not part of the visible window.

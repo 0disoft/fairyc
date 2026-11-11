@@ -69,12 +69,23 @@ nonoverlapping minimum/expanded layouts and minimize/restore. Long-filename
 checks compare actual visible pixels after maximize with a fresh selection at
 the same size, twice through maximize/restore. This catches stale ellipsis
 pixels that text reads or a repainting `PrintWindow` capture can miss. The
-verifier temporarily makes only its owned app topmost for those pixel reads.
+verifier keeps only its owned app exposed for the measured sequence, then closes
+it. Visible captures use the composed desktop rather than the parent's backing
+DC, and filename comparisons wait for native dialog composition to settle.
+Seven checkpoints cover initial paint, two maximize/restore cycles, source
+overwrite refusal, two final sizes and restoration. They compare background
+pixels of the document icon and byte label with the canvas without requesting
+a repaint; occlusion is a failure rather than a successful pixel observation.
+Fairy finishes each complete layout with one native full-child redraw. Returning
+from an Open/Save dialog also erases and redraws all owner controls, including
+on cancellation. This hardens repainting; the reported late black rectangles
+were intermittent and their original cause has not been confirmed.
 Default tooltip checks use standard Common Controls messages on the existing
 registered tool and read the actual popup. `tooltip_probe.py` temporarily enables
 tracking and restores the exact original TOOLINFO; text comes from the production
-callback, with no injected text/path/hash or app-specific command. This keeps CLI
-verification independent of desktop input helpers. `--desktop-hover` additionally
+callback, with no injected text/path/hash or app-specific command. Tooltip checks
+need no physical pointer movement. Visible paint checks require an exposed,
+unlocked desktop. `--desktop-hover` additionally
 requires actual pointer hover on an unobstructed desktop and restores the pointer
 at completion. No mouse button or keyboard events are injected. Results explicitly
 report `tooltipInput` and `desktopHoverVerified`. Fixtures include 103-character
