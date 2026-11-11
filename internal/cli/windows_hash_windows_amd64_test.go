@@ -16,7 +16,7 @@ func TestWindowsHashUtility(t *testing.T) {
 	}
 	root := t.TempDir()
 	for _, name := range []string{"fairy.toml", "fairy.windows.json", "src/main.fy", "src/hash_file.fy",
-		"src/sha256.fy", "src/sha256_stream.fy", "src/application.fy", "src/ui.fy", "native/window.c"} {
+		"src/sha256.fy", "src/sha256_stream.fy", "src/application.fy", "src/ui.fy", "native/window.c", "native/app.rc"} {
 		data, err := os.ReadFile(filepath.Join("../../examples/win32_hash", name))
 		if err != nil {
 			t.Fatal(err)

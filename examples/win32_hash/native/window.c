@@ -2,6 +2,7 @@
 #define _UNICODE
 #include <windows.h>
 #include <commdlg.h>
+#include <commctrl.h>
 #include <stdint.h>
 
 // Win32 operations only. Fairy owns file I/O, SHA-256, report bytes and policy.
@@ -64,6 +65,8 @@ static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
 }
 
 void *hash_ui_open(int32_t width, int32_t height) {
+    INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES};
+    if (!InitCommonControlsEx(&controls)) { return NULL; }
     WNDCLASSW type = {0};
     type.lpfnWndProc = procedure;
     type.hInstance = GetModuleHandleW(NULL);
