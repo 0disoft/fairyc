@@ -11,6 +11,11 @@ and retained diagnostic CLI. The [Korean IME checkpoint](windows-gui-ime-2026111
 [mouse-target checkpoint](windows-gui-input-stability-20261109.md) and earlier
 failed/scoped observations below remain as history.
 
+The independent [Fairy file-hash utility](windows-hash-utility-20261111.md)
+adds actual native file selection, Fairy SHA-256 and report saving with focused
+Go/authored development/release verification. It does not change this minimal
+example; the slim-build record above remains its latest complete regression run.
+
 ## Behavior and lifetime
 
 Fairy now owns the application loop, edit/click/key/resize/DPI counts, edit status, empty-input
