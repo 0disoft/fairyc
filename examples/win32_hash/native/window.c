@@ -187,13 +187,21 @@ int32_t hash_ui_system_dpi(void) {
     return (int32_t)GetDpiForSystem();
 }
 
+size_t hash_ui_ticks(void) { return (size_t)GetTickCount64(); }
+
+int32_t hash_ui_progress(void *window, size_t value) {
+    if ((HWND)window != state.window || value > 100) { return 1; }
+    SendDlgItemMessageW((HWND)window, 213, PBM_SETPOS, value, 0);
+    return 0;
+}
+
 static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
     return CreateWindowExW(0, kind, L"",
         WS_CHILD | WS_VISIBLE | style, 0, 0, 0, 0, window, (HMENU)(INT_PTR)id, GetModuleHandleW(NULL), NULL) != NULL;
 }
 
 void *hash_ui_open(int32_t width, int32_t height) {
-    INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES | ICC_BAR_CLASSES};
+    INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES | ICC_BAR_CLASSES | ICC_PROGRESS_CLASS};
     if (!InitCommonControlsEx(&controls)) { return NULL; }
     palette();
     WNDCLASSW type = {0};
@@ -215,8 +223,10 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, L"BUTTON", WS_TABSTOP, 208) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_OWNERDRAW, 204) &&
         child(window, L"STATIC", SS_NOPREFIX, 205) && child(window, L"STATIC", SS_NOPREFIX, 209) &&
-        child(window, L"STATIC", SS_ETCHEDHORZ, 210) && child(window, L"STATIC", SS_OWNERDRAW, 211)) {
+        child(window, L"STATIC", SS_ETCHEDHORZ, 210) && child(window, L"STATIC", SS_OWNERDRAW, 211) &&
+        child(window, PROGRESS_CLASSW, PBS_SMOOTH, 213)) {
         state.window = window;
+        SendDlgItemMessageW(window, 213, PBM_SETRANGE32, 0, 100);
         if (open_tooltip(window)) { return window; }
     }
     if (window) { DestroyWindow(window); }
@@ -243,7 +253,7 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 211)) || length > 131071) { return 1; }
+    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 213)) || length > 131071) { return 1; }
     WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
     if (!wide) { return 1; }
     int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
@@ -291,7 +301,7 @@ int32_t hash_ui_extent(void *window, uint32_t axis) {
 }
 
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
-    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 211) { return 1; }
+    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 213) { return 1; }
     HWND control = GetDlgItem((HWND)window, (int)id);
     // Fairy submits the entire layout before hash_ui_redraw erases and paints
     // all children. Do not paint intermediate, partially moved arrangements.
@@ -331,7 +341,7 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
         if (font) { DeleteObject(font); } if (heading) { DeleteObject(heading); } if (mono) { DeleteObject(mono); }
         return 1;
     }
-    for (int id = 201; id <= 211; id++) {
+    for (int id = 201; id <= 213; id++) {
         HFONT selected = id == 203 ? mono : id == 206 ? heading : font;
         SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)selected, TRUE);
     }

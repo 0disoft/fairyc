@@ -1,5 +1,8 @@
 module ui;
 import std::bytes as bytes;
+import progress as measure;
+@effects(clock) unsafe extern C fn usize hash_ui_ticks();
+unsafe extern C fn i32 hash_ui_progress(ptr mut void window,usize value);
 unsafe extern C fn i32 hash_ui_system_dpi();
 unsafe extern C fn ptr mut void hash_ui_open(i32 width,i32 height);
 unsafe extern C fn i32 hash_ui_poll(ptr mut void window,i32 wait);
@@ -41,6 +44,23 @@ pub fn bool count(ptr mut void window,usize length){
     return bytes::append_usize(ref mut label,length).is_ok && bytes::append(ref mut label,b" 바이트").is_ok &&
         text(window,209,bytes::view(ref label));
 }
+@effects(clock)
+pub fn usize ticks(){return unsafe{hash_ui_ticks()};}
+pub fn bool position(ptr mut void window,usize value){return unsafe{hash_ui_progress(window,value)}==0;}
+pub fn bool elapsed_status(ptr mut void window,ref u8[] prefix,usize elapsed,u32 tone){
+    var bytes::Buffer label=bytes::empty();
+    return bytes::append(ref mut label,prefix).is_ok && bytes::append(ref mut label,b" · 경과 ").is_ok &&
+        measure::elapsed(ref mut label,elapsed) && status(window,bytes::view(ref label),tone);
+}
+pub fn bool progress(ptr mut void window,usize done,usize total,usize elapsed){
+    var bytes::Buffer summary=bytes::empty();var bytes::Buffer label=bytes::empty();
+    let computed=measure::percent(done,total);let usize percent=if(computed>=100){99}else{computed};
+    return bytes::append_usize(ref mut summary,done).is_ok && bytes::append(ref mut summary,b" / ").is_ok &&
+        bytes::append_usize(ref mut summary,total).is_ok && bytes::append(ref mut summary,b" 바이트").is_ok &&
+        text(window,209,bytes::view(ref summary)) && bytes::append_usize(ref mut label,percent).is_ok &&
+        bytes::append_byte(ref mut label,37).is_ok && elapsed_status(window,bytes::view(ref label),elapsed,0) &&
+        position(window,percent);
+}
 pub fn bool digest(ptr mut void window,ref u8[] hex){
     if(hex.len!=64){return false;}
     var bytes::Buffer display=bytes::empty();
@@ -69,6 +89,7 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{hash_ui_move(window,210,left,origin_y+scale(101,dpi),right-left,scale(1,dpi))}==0 &&
         unsafe{hash_ui_move(window,207,left,origin_y+scale(114,dpi),right-left,scale(22,dpi))}==0 &&
         unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&
+        unsafe{hash_ui_move(window,213,left,origin_y+scale(216,dpi),right-left,scale(4,dpi))}==0 &&
         unsafe{hash_ui_move(window,208,right-button-gap-copy_width,footer,copy_width,height)}==0 &&
         unsafe{hash_ui_move(window,204,right-button,footer,button,height)}==0 &&
         unsafe{hash_ui_move(window,205,left,footer-scale(3,dpi),right-left-button-copy_width-gap*2,scale(40,dpi))}==0 &&

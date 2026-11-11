@@ -14,28 +14,32 @@ pub fn bool error(ptr mut void window,u32 code){
     return ui::status(window,b"파일을 읽을 수 없어요.",2);
 }
 
-@effects(filesystem)
+@effects(filesystem,clock)
 pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     var file=switch(hash::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    let total=switch(fs::size(ref file)){case .ok(v):{v}case .err(_):{return .err(2);}};
     var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
-    var usize displayed=0;
+    let usize started=if(window!=null){ui::ticks()}else{0};var usize displayed=started;
+    if(window!=null && !ui::progress(window,0,total,0)){return .err(5);}
     while(true) {
         let count=switch(hash::read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
         if(window!=null) {
             let event=ui::poll(window,0);if(event==3){return .err(8);}
             if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
-            if(state.length-displayed>=1048576 || count==0) {
-                if(!ui::count(window,state.length)){return .err(5);}displayed=state.length;
+            let now=ui::ticks();
+            if(now-displayed>=100 || count==0) {
+                if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
             }
         }
         if(count==0){break;}
     }
     let value=switch(hash::finish(ref file,ref state)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    if(value.length!=total){return .err(3);}
     if(!fs::close(file).is_ok){return .err(2);}return .ok(value);
 }
 
-@effects(filesystem)
+@effects(filesystem,clock)
 pub fn i32 run() {
     var bytes::Buffer path=bytes::empty();var bytes::Buffer selection=bytes::empty();
     var bytes::Buffer report=bytes::empty();var bytes::Buffer hex=bytes::empty();
@@ -44,7 +48,7 @@ pub fn i32 run() {
     let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
         ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
-        ui::enable(window,204,false) && ui::enable(window,208,false) && ui::layout(window,0);
+        ui::enable(window,204,false) && ui::enable(window,208,false) && ui::position(window,0) && ui::layout(window,0);
     if(!initialized){ui::destroy(window);return 1;}ui::show(window);
     var bool ready=false;var i32 result=0;
     var hash::Digest last=hash::Digest{.words=[0;8],.length=0,.identity=fs::FileId{.volume_low=0,.volume_high=0,.file_low_0=0,.file_low_1=0,.file_high_0=0,.file_high_1=0}};
@@ -58,14 +62,16 @@ pub fn i32 run() {
                 let bool disabled=ui::enable(window,202,false) && ui::enable(window,204,false) && ui::enable(window,208,false);
                 if(!disabled || !bytes::clear(ref mut path).is_ok || !bytes::append(ref mut path,bytes::view(ref selection)[..chosen]).is_ok){result=1;break;}
                 let bool shown=ui::selected(window,bytes::view(ref path)) && ui::text(window,203,b"") &&
-                    ui::text(window,209,b"") && ui::status(window,b"해시 계산 중…",0);
+                    ui::text(window,209,b"") && ui::position(window,0) && ui::status(window,b"해시 계산 중…",0);
                 if(!shown){result=1;break;}
+                let started=ui::ticks();
                 switch(compute(bytes::view(ref path),window)) {
                     case .ok(value): {
                         last=value;
                         if(!bytes::clear(ref mut hex).is_ok || !hash::append_hex(ref last,ref mut hex) ||
                             !hash::report(bytes::view(ref path),ref last,ref mut report) || !ui::digest(window,bytes::view(ref hex)) ||
-                            !ui::count(window,last.length) || !ui::status(window,b"✓ 계산 완료",1)){result=1;break;}
+                            !ui::count(window,last.length) || !ui::position(window,100) ||
+                            !ui::elapsed_status(window,b"✓ 계산 완료",ui::ticks()-started,1)){result=1;break;}
                         ready=true;
                     }
                     case .err(code): {let bool shown=error(window,code);}

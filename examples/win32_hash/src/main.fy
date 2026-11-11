@@ -11,7 +11,7 @@ fn i32 failure(u32 code) {
     let bool written=io::write_bytes(b"{\"ok\":false,\"errorCode\":").is_ok && io::write_u32(code).is_ok && io::write_bytes(b"}\n").is_ok;return 1;
 }
 
-@effects(console,filesystem)
+@effects(console,filesystem,clock)
 fn i32 main() {
     if(process::arg_count()==1){return app::run();}
     if(process::arg_count()!=3 && process::arg_count()!=4){return failure(1);}
