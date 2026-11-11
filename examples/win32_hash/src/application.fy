@@ -25,7 +25,7 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     while(true) {
         let count=switch(hash::read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
         if(window!=null) {
-            let event=ui::poll(window,0);if(event==3){return .err(8);}
+            let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
             if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
             let now=ui::ticks();
             if(now-displayed>=100 || count==0) {
@@ -47,6 +47,7 @@ pub fn i32 run() {
     let window=ui::open();if(window==null){return 1;}
     let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
+        ui::text(window,212,b"취소(&X)") && ui::enable(window,212,false) && ui::visible(window,212,false) &&
         ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
         ui::enable(window,204,false) && ui::enable(window,208,false) && ui::position(window,0) && ui::layout(window,0);
     if(!initialized){ui::destroy(window);return 1;}ui::show(window);
@@ -59,7 +60,7 @@ pub fn i32 run() {
             let chosen=ui::choose(window,false,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
                 ready=false;
-                let bool disabled=ui::enable(window,202,false) && ui::enable(window,204,false) && ui::enable(window,208,false);
+                let bool disabled=ui::busy(window,true) && ui::enable(window,204,false) && ui::enable(window,208,false);
                 if(!disabled || !bytes::clear(ref mut path).is_ok || !bytes::append(ref mut path,bytes::view(ref selection)[..chosen]).is_ok){result=1;break;}
                 let bool shown=ui::selected(window,bytes::view(ref path)) && ui::text(window,203,b"") &&
                     ui::text(window,209,b"") && ui::position(window,0) && ui::status(window,b"해시 계산 중…",0);
@@ -74,9 +75,12 @@ pub fn i32 run() {
                             !ui::elapsed_status(window,b"✓ 계산 완료",ui::ticks()-started,1)){result=1;break;}
                         ready=true;
                     }
-                    case .err(code): {let bool shown=error(window,code);}
+                    case .err(code): {
+                        let bool shown=if(code==8){ui::elapsed_status(window,b"취소됨",ui::ticks()-started,0)}else{error(window,code)};
+                        if(!shown){result=1;break;}
+                    }
                 };
-                let bool enabled=ui::enable(window,202,true) && ui::enable(window,204,ready) && ui::enable(window,208,ready);
+                let bool enabled=ui::busy(window,false) && ui::enable(window,204,ready) && ui::enable(window,208,ready);
                 if(!enabled){result=1;break;}
             }else if(chosen>131072){let bool shown=ui::status(window,b"파일 선택창을 열 수 없어요.",2);}
         }

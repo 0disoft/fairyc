@@ -44,3 +44,29 @@ An attempted Buffer-formatting interpreter test exceeded the authored semantic
 interpreter subset and was replaced by actual GUI elapsed-time observations;
 that failed attempt is not counted as a pass. Elapsed wall agreement is checked
 within two seconds because the observer starts after native dialog acceptance.
+
+## Cancel while keeping the window
+
+Fairy swaps Open for an enabled Cancel (Alt+X) during computation. Native code
+only latches its real button event; close has priority and pending resize/DPI
+events survive cancellation. Fairy abandons the owned file/hash state, preserves
+the window, leaves partial progress visible, disables Copy/Save and restores
+Open/focus. A new job clears partial state and resets progress. WM_CLOSE still
+terminates the window cooperatively.
+
+The authored release passed 19 CLI cases and the complete GUI suite with a
+64 MiB job, two independent 16 MiB cancellations and a successful `abc` job in
+the same HWND afterward. Cancellation response was **22.718ms / 23.298ms**,
+with the cancelled fixtures removed and no partial digest available. Native
+control enable/show operations are sequential; the observer waits for the full
+state transition instead of treating the first disabled Open query as readiness.
+The initial premature observer check was not counted as a functional failure or
+successful verification. Working and cancelled desktop captures were inspected.
+
+Final GUI observed busy time: **11.507s** on 64 MiB (5.562 MiB/s including
+observer pressure). 215 GUI pings: p95 **11.835ms**, max **16.135ms**; resize
+**50.474ms**. Percentage/time snapshots agree with independently calculated
+processed/total ratios and observed elapsed time. Progress snapshots are sampled
+every 150ms so cross-process reads do not dominate the workload. This differs
+from the baseline observer load; CLI paired measurements separately measure
+whole-process throughput without GUI observers.

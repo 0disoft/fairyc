@@ -8,6 +8,8 @@ unsafe extern C fn ptr mut void hash_ui_open(i32 width,i32 height);
 unsafe extern C fn i32 hash_ui_poll(ptr mut void window,i32 wait);
 unsafe extern C fn i32 hash_ui_text(ptr mut void window,u32 id,ptr u8 text,usize length);
 unsafe extern C fn i32 hash_ui_enable(ptr mut void window,u32 id,u32 enabled);
+unsafe extern C fn i32 hash_ui_visible(ptr mut void window,u32 id,u32 shown);
+unsafe extern C fn i32 hash_ui_focus(ptr mut void window,u32 id);
 unsafe extern C fn i32 hash_ui_extent(ptr mut void window,u32 axis);
 unsafe extern C fn i32 hash_ui_move(ptr mut void window,u32 id,i32 x,i32 y,i32 width,i32 height);
 unsafe extern C fn i32 hash_ui_redraw(ptr mut void window);
@@ -24,6 +26,12 @@ pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(dpi<96 || dpi
 pub fn i32 poll(ptr mut void window,i32 wait){return unsafe{hash_ui_poll(window,wait)};}
 pub fn bool text(ptr mut void window,u32 id,ref u8[] value){return unsafe{hash_ui_text(window,id,value as ptr u8,value.len)}==0;}
 pub fn bool enable(ptr mut void window,u32 id,bool enabled){return unsafe{hash_ui_enable(window,id,if(enabled){1}else{0})}==0;}
+pub fn bool visible(ptr mut void window,u32 id,bool shown){return unsafe{hash_ui_visible(window,id,if(shown){1}else{0})}==0;}
+pub fn bool busy(ptr mut void window,bool active){
+    return enable(window,202,!active) && enable(window,212,active) &&
+        visible(window,202,!active) && visible(window,212,active) &&
+        unsafe{hash_ui_focus(window,if(active){212}else{202})}==0;
+}
 pub fn usize choose(ptr mut void window,bool save,ref mut u8[] output){let initial=if(save){b"sha256.json"}else{b""};return unsafe{hash_ui_dialog(window,if(save){1}else{0},initial as ptr u8,initial.len,output as ptr mut u8,output.len)};}
 pub fn void show(ptr mut void window){unsafe{hash_ui_show(window)};}
 pub fn void destroy(ptr mut void window){unsafe{hash_ui_destroy(window)};}
@@ -86,6 +94,7 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{hash_ui_move(window,201,file_x,origin_y+scale(45,dpi),file_width,scale(22,dpi))}==0 &&
         unsafe{hash_ui_move(window,209,file_x,origin_y+scale(70,dpi),file_width,scale(20,dpi))}==0 &&
         unsafe{hash_ui_move(window,202,right-button,origin_y+scale(29,dpi),button,height)}==0 &&
+        unsafe{hash_ui_move(window,212,right-button,origin_y+scale(29,dpi),button,height)}==0 &&
         unsafe{hash_ui_move(window,210,left,origin_y+scale(101,dpi),right-left,scale(1,dpi))}==0 &&
         unsafe{hash_ui_move(window,207,left,origin_y+scale(114,dpi),right-left,scale(22,dpi))}==0 &&
         unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&

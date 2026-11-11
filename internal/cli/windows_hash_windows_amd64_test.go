@@ -40,7 +40,7 @@ func TestWindowsHashUtility(t *testing.T) {
 			for _, verifier := range []struct{ file, kind string }{
 				{"verify_cli.py", "fairy-file-sha256"}, {"verify_gui.py", "actual-win32-hash-dialogs"},
 			} {
-				ctx, cancel := context.WithTimeout(t.Context(), 90*time.Second)
+				ctx, cancel := context.WithTimeout(t.Context(), 120*time.Second)
 				out, err := exec.CommandContext(ctx, "python", "-B", "../../examples/win32_hash/"+verifier.file, "--exe", image).CombinedOutput()
 				cancel()
 				var report struct {
@@ -53,6 +53,9 @@ func TestWindowsHashUtility(t *testing.T) {
 					ControlBackgrounds                                                       bool
 					Verification                                                             string
 					Cases                                                                    int
+					LargeJob                                                                 struct {
+						ProgressObserved, CancelAndReuse bool
+					}
 				}
 				if err != nil || json.Unmarshal(out, &report) != nil || !report.OK || !report.ProcessExited || report.Verification != verifier.kind {
 					t.Fatalf("%s: %v %s", verifier.file, err, out)
@@ -60,7 +63,8 @@ func TestWindowsHashUtility(t *testing.T) {
 				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_gui.py" &&
 					(!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected ||
 						!report.TwoLineDigest || !report.ClipboardDigest || !report.ClipboardRestored || !report.ClipboardBusyRecovery ||
-						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore || !report.FilenameResizeRepaint || !report.BoundedDigestLayout || !report.NativeTooltips || !report.ControlBackgrounds) {
+						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore || !report.FilenameResizeRepaint || !report.BoundedDigestLayout || !report.NativeTooltips || !report.ControlBackgrounds ||
+						!report.LargeJob.ProgressObserved || !report.LargeJob.CancelAndReuse) {
 					t.Fatalf("incomplete utility verification: %s", out)
 				}
 			}

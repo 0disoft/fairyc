@@ -11,7 +11,7 @@ static struct {
     WCHAR *tooltip_text;
     HFONT font, heading, mono;
     HBRUSH background, paper;
-    BOOL high_contrast;
+    BOOL high_contrast, cancel_requested;
     uint32_t tone;
     int event;
     int minimum_width, minimum_height;
@@ -152,9 +152,10 @@ static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM l
         if (wp == 204 || wp == 211) { draw_control((const DRAWITEMSTRUCT *)lp); return TRUE; }
         break;
     case WM_COMMAND:
-        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208) &&
+        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208 || LOWORD(wp) == 212) &&
             (HWND)lp == GetDlgItem(window, LOWORD(wp)) && IsWindowEnabled((HWND)lp)) {
-            if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : LOWORD(wp) == 204 ? 2 : 6; }
+            if (LOWORD(wp) == 212) { state.cancel_requested = TRUE; }
+            else if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : LOWORD(wp) == 204 ? 2 : 6; }
             return 0;
         }
         break;
@@ -224,7 +225,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, L"BUTTON", WS_TABSTOP | BS_OWNERDRAW, 204) &&
         child(window, L"STATIC", SS_NOPREFIX, 205) && child(window, L"STATIC", SS_NOPREFIX, 209) &&
         child(window, L"STATIC", SS_ETCHEDHORZ, 210) && child(window, L"STATIC", SS_OWNERDRAW, 211) &&
-        child(window, PROGRESS_CLASSW, PBS_SMOOTH, 213)) {
+        child(window, PROGRESS_CLASSW, PBS_SMOOTH, 213) && child(window, L"BUTTON", WS_TABSTOP, 212)) {
         state.window = window;
         SendDlgItemMessageW(window, 213, PBM_SETRANGE32, 0, 100);
         if (open_tooltip(window)) { return window; }
@@ -237,7 +238,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
 int32_t hash_ui_poll(void *window, int32_t wait) {
     if ((HWND)window != state.window) { return 3; }
     MSG message;
-    while (!state.event) {
+    while (!state.event && !state.cancel_requested) {
         if (wait) {
             int code = (int)GetMessageW(&message, NULL, 0, 0);
             if (code <= 0) { state.event = 3; break; }
@@ -247,8 +248,11 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
         }
         dispatch(&message);
     }
-    int event = state.event;
-    if (event != 3) { state.event = 0; }
+    // Closing stays sticky and takes priority. Cancelling consumes only its
+    // own latch, retaining a pending size/DPI event for the next poll.
+    int event = state.event == 3 ? 3 : state.cancel_requested ? 7 : state.event;
+    if (event == 7) { state.cancel_requested = FALSE; }
+    else if (event != 3) { state.event = 0; }
     return event;
 }
 
@@ -292,6 +296,21 @@ int32_t hash_ui_enable(void *window, uint32_t id, uint32_t enabled) {
     if ((HWND)window != state.window || !control || enabled > 1) { return 1; }
     EnableWindow(control, enabled != 0);
     return IsWindowEnabled(control) == (enabled != 0) ? 0 : 1;
+}
+
+int32_t hash_ui_visible(void *window, uint32_t id, uint32_t shown) {
+    HWND control = GetDlgItem((HWND)window, (int)id);
+    if ((HWND)window != state.window || !control || shown > 1) { return 1; }
+    ShowWindow(control, shown ? SW_SHOWNA : SW_HIDE);
+    // Check the child style even before Fairy shows the parent window.
+    return !!(GetWindowLongW(control, GWL_STYLE) & WS_VISIBLE) == !!shown ? 0 : 1;
+}
+
+int32_t hash_ui_focus(void *window, uint32_t id) {
+    HWND control = GetDlgItem((HWND)window, (int)id);
+    if ((HWND)window != state.window || !control || !IsWindowEnabled(control)) { return 1; }
+    SetFocus(control);
+    return GetFocus() == control ? 0 : 1;
 }
 
 int32_t hash_ui_extent(void *window, uint32_t axis) {

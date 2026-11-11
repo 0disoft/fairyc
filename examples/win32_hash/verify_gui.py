@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -164,8 +164,8 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
                 area = w.RECT()
                 if not client_rect(main, c.byref(area)):
                     raise RuntimeError('missing client area')
-                boxes = []
-                for control_id in range(201, 212):
+                boxes = {}
+                for control_id in range(201, 214):
                     control = child(main, control_id)
                     r = w.RECT()
                     if not control or not window_rect(control, c.byref(r)):
@@ -173,15 +173,17 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
                     map_points(None, main, c.byref(r), 2)
                     if not (0 <= r.left < r.right <= area.right and 0 <= r.top < r.bottom <= area.bottom):
                         return False
-                    for other in boxes:
+                    for other_id, other in boxes.items():
+                        if not visible(control) or not visible(child(main, other_id)):
+                            continue
                         if max(r.left, other.left) < min(r.right, other.right) and max(r.top, other.top) < min(r.bottom, other.bottom):
                             return False
-                    boxes.append(r)
-                digest, save = boxes[2], boxes[3]  # IDs 203/204, not child order.
+                    boxes[control_id] = r
+                digest, save = boxes[203], boxes[204]
                 if digest_height is not None and (digest.bottom-digest.top != digest_height or
                         save.top-digest.bottom > round(24*window_dpi(main)/96)):
                     return False
-                return abs(min(r.left for r in boxes) - (area.right - max(r.right for r in boxes))) <= 1
+                return abs(min(r.left for r in boxes.values()) - (area.right - max(r.right for r in boxes.values()))) <= 1
             wait(layout, bool, 'initial layout overlaps or clips controls')
             paint_observations = []
             def check_paint(stage):
@@ -387,6 +389,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
                 from job_probe import measure
                 large_job = measure(SimpleNamespace(root=root, main=main, child=child, message=message,
                     choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
+                    visible=visible, process=process, screenshot=screenshot,
                     resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
             for index, data in enumerate((b'', b'abc', bytes(range(256)) * 4097)):
                 source = root / ('입력 Ω-' + str(index) + '-' + '긴이름' * 30 + '&끝.bin')
@@ -400,6 +403,8 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
                 wait(lambda: bool(enabled(child(main, 208))), bool, 'Copy did not enable')
                 if text(child(main, 206)) != source.name or text(child(main, 209)) != f'{len(data)} 바이트':
                     raise RuntimeError('Fairy file summary differs from selected source')
+                if message(child(main, 213), 0x400+8) != 100 or visible(child(main, 212)) or enabled(child(main, 212)):
+                    raise RuntimeError('completed/empty job progress or Cancel state invalid')
                 with preserve_clipboard():
                     open_clipboard = api('OpenClipboard', w.BOOL, w.HWND)
                     if index == 1:
@@ -597,7 +602,7 @@ if __name__ == '__main__':
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-hash.exe')
     parser.add_argument('--screenshot', type=Path, help='optional actual sample.txt window capture')
     parser.add_argument('--desktop-hover', action='store_true', help='also require physical cursor hover on an unobstructed desktop')
-    parser.add_argument('--job-mib', type=int, choices=range(16, 257), metavar='16..256', default=0,
+    parser.add_argument('--job-mib', type=int, choices=range(16, 257), metavar='16..256', default=16,
                         help='also measure a real large-file GUI job')
     args = parser.parse_args()
     try:
