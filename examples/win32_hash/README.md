@@ -57,6 +57,7 @@ python -B verify_gui.py --usability display
 python -B verify_gui.py --usability display --high-contrast
 python -B verify_gui.py --usability keyboard
 python -B benchmark_cli.py --mib 64
+python -B profile_costs.py --compiler <path-to-fairyc.exe> --mib 64
 fairyc test --locked --file tests/sha256.fy
 fairyc test --locked --file tests/progress.fy
 ```
@@ -87,6 +88,13 @@ materialized local-file fixture and checks Python's SHA-256 reference. Optional
 `--baseline <exe>` and `--reverse` allow paired measurements in either order.
 It includes process startup and filesystem caching; it does not measure disk
 bandwidth. Benchmark/GUI fixtures and owned processes are cleaned up.
+`profile_costs.py` copies the example into an owned temporary workspace and builds
+a separate profiling entry point with QPC clock calls. It attributes cached file
+reads, in-memory Fairy SHA, file+SHA and actual HWND message/progress work, checking
+all digests against Python. Component intervals exclude startup/dialogs/close;
+they are instrumented wall time, not CPU samples. Its repeating fixture permits
+the memory case to reuse one 64 KiB block. No profiler code or extra clock import
+is added to the production EXE. Compare production EXEs with `benchmark_cli.py`.
 The GUI verifier additionally checks
 actual side-by-side Common Controls loading, two-line digest display, exact
 64-character clipboard data, a locked clipboard followed by successful retry,
