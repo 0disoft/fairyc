@@ -37,7 +37,14 @@ class DesktopKeys:
             raise RuntimeError('keyboard target is not the owned native process')
         return thread
 
+    def describe_foreground(self):
+        pid, name = w.DWORD(), c.create_unicode_buffer(128)
+        self.owner(self.foreground(), c.byref(pid))
+        self.api('GetClassNameW', c.c_int, w.HWND, w.LPWSTR, c.c_int)(self.foreground(), name, len(name))
+        return dict(pid=pid.value, windowClass=name.value)
+
     def activate(self, hwnd):
+        self.idle(())
         target_thread = self.require_owned(hwnd)
         activate = self.api('SetForegroundWindow', w.BOOL, w.HWND)
         activate(hwnd)
@@ -72,19 +79,22 @@ class DesktopKeys:
         self.api('GetClassNameW', c.c_int, w.HWND, w.LPWSTR, c.c_int)(actual, name, len(name))
         raise RuntimeError(f'foreground denied: pid={pid.value}, class={name.value}; no keys sent')
 
-    def chord(self, hwnd, keys):
-        if not keys or any(key not in (9, 13, 16, 17, 18, 27, 32, 65, 67, 79, 83, 88) for key in keys):
-            raise ValueError('unsupported verification key chord')
-        self.activate(hwnd)
-        held = (1, 2, 4, 16, 17, 18, 91, 92, *keys)
+    def idle(self, keys):
+        held = (1, 2, 4, 5, 6, 9, 13, 16, 17, 18, 27, 91, 92, 115, *keys)
         deadline = time.monotonic()+2
         while any(self.pressed(key) & 0x8000 for key in held):
             if time.monotonic() >= deadline:
                 raise RuntimeError('user input remains held; no keys sent')
             time.sleep(0.02)
+
+    def chord(self, hwnd, keys):
+        if not keys or any(key not in (9, 13, 16, 17, 18, 27, 32, 65, 67, 78, 79, 83, 88) for key in keys):
+            raise ValueError('unsupported verification key chord')
+        self.activate(hwnd)
+        self.idle(keys)
         self.require_owned(hwnd)
         if self.foreground() != hwnd:
-            raise RuntimeError('owned window lost foreground; no keys sent')
+            raise RuntimeError(f'owned window lost foreground; actual={self.describe_foreground()}; no keys sent')
         def key(code, flags=0):
             return Input(1, Payload(keyboard=Keyboard(code, 0, flags, 0, 0)))
         releases = [key(code, 2) for code in reversed(keys)]

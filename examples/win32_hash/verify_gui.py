@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -180,7 +180,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                             return False
                     boxes[control_id] = r
                 digest, save = boxes[203], boxes[204]
-                if digest_height is not None and (digest.bottom-digest.top != digest_height or
+                if digest_height is not None and (digest.bottom-digest.top != (70*window_dpi(main)+48)//96 or
                         save.top-digest.bottom > round(24*window_dpi(main)/96)):
                     return False
                 return abs(min(r.left for r in boxes.values()) - (area.right - max(r.right for r in boxes.values()))) <= 1
@@ -208,24 +208,8 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
             digest_height = digest_bounds.bottom-digest_bounds.top
             tooltip_observations = []
             def activate_owned():
-                activate(main)
-                if foreground() == main:
-                    return
-                queued = w.MSG()
-                api('PeekMessageW', w.BOOL, c.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT)(c.byref(queued), None, 0, 0, 0)
-                current_thread = kernel.GetCurrentThreadId()
-                threads = dict.fromkeys((owner(foreground(), None), owner(main, None)))
-                attached = []
-                try:
-                    for thread in threads:
-                        if thread and thread != current_thread and attach_input(current_thread, thread, True):
-                            attached.append(thread)
-                    bring_to_top(main)
-                    activate(main)
-                finally:
-                    if not all([attach_input(current_thread, thread, False) for thread in reversed(attached)]):
-                        raise RuntimeError('cannot detach temporary owned-window input queues')
-                wait(foreground, lambda v: v == main, 'owned tooltip window cannot become foreground', seconds=3)
+                from native_keyboard import DesktopKeys
+                DesktopKeys(process.pid).activate(main)
             def tooltip(control_id, expected, clipped=True):
                 if not desktop_hover:
                     found = []
@@ -302,8 +286,8 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                 active = dialog(button)
                 click(child(active, 2))
                 wait(lambda: windows('#32770'), lambda v: not v, 'file dialog did not cancel')
-            def choose(button, path, overwrite=False):
-                active = dialog(button)
+            def choose(button, path, overwrite=False, active=None, accept=None):
+                active = active or dialog(button)
                 edit = child(active, 1152)
                 if kind(edit) != 'Edit':
                     combo = child(active, 1148)
@@ -339,7 +323,9 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                 # An OK click can synchronously enter the native overwrite
                 # confirmation. Post the real button click so this controller
                 # can observe/respond to that nested modal dialog.
-                if not post(child(active, 1), 0xF5, 0, 0):
+                if accept:
+                    accept(active)
+                elif not post(child(active, 1), 0xF5, 0, 0):
                     raise RuntimeError('could not click native dialog OK')
                 if overwrite:
                     def confirmations():
@@ -381,6 +367,20 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                     choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
                     visible=visible, process=process, screenshot=screenshot,
                     resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
+            if usability:
+                from types import SimpleNamespace
+                from usability_probe import run
+                result = run(SimpleNamespace(root=root, main=main, process=process, child=child,
+                    message=message, text=text, enabled=enabled, visible=visible, wait=wait,
+                    layout=layout, choose=choose, windows=windows, window_rect=window_rect,
+                    client_rect=client_rect, window_dpi=window_dpi, resize=resize), usability, high_contrast)
+                message(main, 0x10)
+                if process.wait(timeout=12) != 0:
+                    raise RuntimeError('usability window did not close cleanly')
+                stdout, stderr = process.communicate(timeout=2)
+                if stdout or stderr:
+                    raise RuntimeError('usability window wrote unexpected output')
+                return dict(ok=True, verification='actual-win32-hash-usability', processExited=True, **result)
             if job_only:
                 large_job = measure_job()
                 message(main, 0x10)
@@ -618,11 +618,17 @@ if __name__ == '__main__':
     parser.add_argument('--job-mib', type=int, choices=range(16, 257), metavar='16..256', default=16,
                         help='also measure a real large-file GUI job')
     parser.add_argument('--job-only', action='store_true', help='native job/cancel checks without foreground or pixel inspection')
+    parser.add_argument('--usability', choices=('keyboard', 'accessibility', 'display', 'all'))
+    parser.add_argument('--high-contrast', action='store_true', help='temporarily toggle OS high contrast and restore it')
     args = parser.parse_args()
     try:
         if args.job_only and (args.screenshot or args.desktop_hover):
             raise ValueError('--job-only cannot certify screenshots or desktop hover')
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only), ensure_ascii=True))
+        if args.usability and (args.job_only or args.screenshot or args.desktop_hover):
+            raise ValueError('--usability cannot be combined with --job-only, --screenshot or --desktop-hover')
+        if args.high_contrast and args.usability not in ('display', 'all'):
+            raise ValueError('--high-contrast requires --usability display or all')
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)

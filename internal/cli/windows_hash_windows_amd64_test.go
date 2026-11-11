@@ -16,6 +16,10 @@ func TestWindowsHashUtility(t *testing.T) {
 	}
 	root := t.TempDir()
 	jobOnly := os.Getenv("FAIRYC_HASH_JOB_ONLY") == "1"
+	usability := os.Getenv("FAIRYC_HASH_USABILITY")
+	if jobOnly && usability != "" {
+		t.Fatal("choose FAIRYC_HASH_JOB_ONLY or FAIRYC_HASH_USABILITY, not both")
+	}
 	guiKind := "actual-win32-hash-dialogs"
 	if jobOnly {
 		guiKind = "actual-win32-hash-job"
@@ -46,6 +50,10 @@ func TestWindowsHashUtility(t *testing.T) {
 			for _, verifier := range []struct{ file, kind string }{
 				{"verify_cli.py", "fairy-file-sha256"}, {"verify_gui.py", guiKind},
 			} {
+				if verifier.file == "verify_gui.py" && usability != "" {
+					verifyWindowsHashUsability(t, image, usability)
+					continue
+				}
 				ctx, cancel := context.WithTimeout(t.Context(), 120*time.Second)
 				args := []string{"-B", "../../examples/win32_hash/" + verifier.file, "--exe", image}
 				if jobOnly && verifier.file == "verify_gui.py" {
