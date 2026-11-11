@@ -1,0 +1,6 @@
+{
+  "schema": "fairyc.windows-build/v1",
+  "subsystem": "windows",
+  "libraries": ["user32.lib", "gdi32.lib", "comdlg32.lib"],
+  "sources": ["native/window.c"]
+}
