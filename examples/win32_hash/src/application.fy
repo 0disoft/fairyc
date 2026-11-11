@@ -6,18 +6,18 @@ import std::fs as fs;
 import std::bytes as bytes;
 
 pub fn bool error(ptr mut void window,u32 code){
-    if(code==7){return ui::text(window,205,b"Cannot overwrite the input file or its hard-link alias.");}
-    if(code==6){return ui::text(window,205,b"Could not save the report. Choose a writable file location.");}
-    if(code==5){return ui::text(window,205,b"Not enough memory.");}
-    if(code==3){return ui::text(window,205,b"Input size changed or the input is not a regular disk file.");}
-    if(code==8){return ui::text(window,205,b"Cancelled.");}
-    return ui::text(window,205,b"Could not read the selected file.");
+    if(code==7){return ui::status(window,b"원본 파일에는 덮어쓸 수 없어요.",2);}
+    if(code==6){return ui::status(window,b"저장 실패: 다른 위치를 선택하세요.",2);}
+    if(code==5){return ui::status(window,b"메모리가 부족해요.",2);}
+    if(code==3){return ui::status(window,b"파일 크기 또는 종류를 확인하세요.",2);}
+    if(code==8){return ui::status(window,b"취소됨",0);}
+    return ui::status(window,b"파일을 읽을 수 없어요.",2);
 }
 
 @effects(filesystem)
 pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     var file=switch(hash::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
-    var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();var bytes::Buffer status=bytes::empty();
+    var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
     var usize displayed=0;
     while(true) {
@@ -26,8 +26,7 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
             let event=ui::poll(window,0);if(event==3){return .err(8);}
             if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
             if(state.length-displayed>=1048576 || count==0) {
-                if(!bytes::clear(ref mut status).is_ok || !bytes::append(ref mut status,b"Bytes hashed: ").is_ok || !bytes::append_usize(ref mut status,state.length).is_ok){return .err(5);}
-                if(!ui::text(window,205,bytes::view(ref status))){return .err(5);}displayed=state.length;
+                if(!ui::count(window,state.length)){return .err(5);}displayed=state.length;
             }
         }
         if(count==0){break;}
@@ -42,9 +41,10 @@ pub fn i32 run() {
     var bytes::Buffer report=bytes::empty();var bytes::Buffer hex=bytes::empty();
     if(!bytes::resize_zeroed(ref mut selection,131072).is_ok){return 1;}
     let window=ui::open();if(window==null){return 1;}
-    let bool initialized=ui::text(window,206,b"File") && ui::text(window,207,b"SHA-256") &&
-        ui::text(window,202,b"&Open file...") && ui::text(window,204,b"&Save report...") &&
-        ui::text(window,205,b"Choose a file to calculate its SHA-256.") && ui::enable(window,204,false) && ui::layout(window,0);
+    let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
+        ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
+        ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
+        ui::enable(window,204,false) && ui::enable(window,208,false) && ui::layout(window,0);
     if(!initialized){ui::destroy(window);return 1;}ui::show(window);
     var bool ready=false;var i32 result=0;
     var hash::Digest last=hash::Digest{.words=[0;8],.length=0,.identity=fs::FileId{.volume_low=0,.volume_high=0,.file_low_0=0,.file_low_1=0,.file_high_0=0,.file_high_1=0}};
@@ -55,31 +55,37 @@ pub fn i32 run() {
             let chosen=ui::choose(window,false,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
                 ready=false;
-                let bool disabled=ui::enable(window,202,false) && ui::enable(window,204,false);
+                let bool disabled=ui::enable(window,202,false) && ui::enable(window,204,false) && ui::enable(window,208,false);
                 if(!disabled || !bytes::clear(ref mut path).is_ok || !bytes::append(ref mut path,bytes::view(ref selection)[..chosen]).is_ok){result=1;break;}
-                let bool shown=ui::text(window,201,bytes::view(ref path)) && ui::text(window,203,b"") && ui::text(window,205,b"Calculating SHA-256...");
+                let bool shown=ui::selected(window,bytes::view(ref path)) && ui::text(window,203,b"") &&
+                    ui::text(window,209,b"") && ui::status(window,b"해시 계산 중…",0);
                 if(!shown){result=1;break;}
                 switch(compute(bytes::view(ref path),window)) {
                     case .ok(value): {
                         last=value;
                         if(!bytes::clear(ref mut hex).is_ok || !hash::append_hex(ref last,ref mut hex) ||
-                            !hash::report(bytes::view(ref path),ref last,ref mut report) || !ui::text(window,203,bytes::view(ref hex))){result=1;break;}
+                            !hash::report(bytes::view(ref path),ref last,ref mut report) || !ui::digest(window,bytes::view(ref hex)) ||
+                            !ui::count(window,last.length) || !ui::status(window,b"✓ 계산 완료",1)){result=1;break;}
                         ready=true;
                     }
                     case .err(code): {let bool shown=error(window,code);}
                 };
-                let bool enabled=ui::enable(window,202,true) && ui::enable(window,204,ready);
+                let bool enabled=ui::enable(window,202,true) && ui::enable(window,204,ready) && ui::enable(window,208,ready);
                 if(!enabled){result=1;break;}
-            }else if(chosen>131072){let bool shown=ui::text(window,205,b"Could not open the file chooser.");}
+            }else if(chosen>131072){let bool shown=ui::status(window,b"파일 선택창을 열 수 없어요.",2);}
         }
         if(event==2 && ready) {
             let chosen=ui::choose(window,true,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
                 switch(hash::save(bytes::view(ref selection)[..chosen],bytes::view(ref path),ref last,bytes::view(ref report))) {
-                    case .ok(_): {let bool shown=ui::text(window,205,b"Report saved.");}
+                    case .ok(_): {let bool shown=ui::status(window,b"✓ 결과 저장 완료",1);}
                     case .err(code): {let bool shown=error(window,code);}
                 };
-            }else if(chosen>131072){let bool shown=ui::text(window,205,b"Could not open the save dialog.");}
+            }else if(chosen>131072){let bool shown=ui::status(window,b"저장창을 열 수 없어요.",2);}
+        }
+        if(event==6 && ready) {
+            let bool copied=ui::copy(window,bytes::view(ref hex));
+            let bool shown=if(copied){ui::status(window,b"✓ 해시 복사 완료",1)}else{ui::status(window,b"복사 실패: 다시 시도하세요.",2)};
         }
     }
     ui::destroy(window);return result;

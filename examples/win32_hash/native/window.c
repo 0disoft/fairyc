@@ -8,11 +8,62 @@
 // Win32 operations only. Fairy owns file I/O, SHA-256, report bytes and policy.
 static struct {
     HWND window;
-    HFONT font;
+    HFONT font, heading, mono;
+    HBRUSH background, paper;
+    BOOL high_contrast;
+    uint32_t tone;
     int event;
     int minimum_width, minimum_height;
     RECT suggested;
 } state;
+
+static COLORREF ink(void) { return state.high_contrast ? GetSysColor(COLOR_WINDOWTEXT) : RGB(36, 35, 32); }
+static COLORREF canvas(void) { return state.high_contrast ? GetSysColor(COLOR_WINDOW) : RGB(246, 243, 237); }
+static COLORREF muted(void) { return state.high_contrast ? ink() : RGB(100, 96, 87); }
+
+static void palette(void) {
+    HIGHCONTRASTW contrast = {sizeof(contrast)};
+    state.high_contrast = SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(contrast), &contrast, 0) &&
+        (contrast.dwFlags & HCF_HIGHCONTRASTON);
+    HBRUSH background = CreateSolidBrush(canvas());
+    HBRUSH paper = CreateSolidBrush(state.high_contrast ? canvas() : RGB(255, 255, 253));
+    if (state.background) { DeleteObject(state.background); }
+    if (state.paper) { DeleteObject(state.paper); }
+    state.background = background; state.paper = paper;
+}
+
+static void draw_control(const DRAWITEMSTRUCT *item) {
+    HDC dc = item->hDC;
+    RECT r = item->rcItem;
+    if (item->CtlID == 211) {
+        FillRect(dc, &r, state.background);
+        int w = r.right, h = r.bottom, fold = w / 3;
+        HPEN pen = CreatePen(PS_SOLID, MulDiv(2, GetDpiForWindow(state.window), 96), muted());
+        HGDIOBJ previous = SelectObject(dc, pen);
+        POINT outline[] = {{2, 2}, {w-fold-2, 2}, {w-2, fold+2}, {w-2, h-2}, {2, h-2}, {2, 2}};
+        POINT corner[] = {{w-fold-2, 2}, {w-fold-2, fold+2}, {w-2, fold+2}};
+        Polyline(dc, outline, ARRAYSIZE(outline)); Polyline(dc, corner, ARRAYSIZE(corner));
+        for (int row = 0; row < 3; row++) {
+            MoveToEx(dc, w/4, h/2 + row*h/7, NULL); LineTo(dc, w*3/4, h/2 + row*h/7);
+        }
+        SelectObject(dc, previous); DeleteObject(pen);
+        return;
+    }
+    BOOL disabled = (item->itemState & ODS_DISABLED) != 0;
+    COLORREF fill = state.high_contrast ? GetSysColor(disabled ? COLOR_BTNFACE : COLOR_HIGHLIGHT) :
+        disabled ? RGB(223, 220, 214) : (item->itemState & ODS_SELECTED) ? RGB(73, 71, 66) : RGB(46, 45, 41);
+    HBRUSH brush = CreateSolidBrush(fill);
+    FillRect(dc, &r, brush); DeleteObject(brush);
+    SetBkMode(dc, TRANSPARENT);
+    SetTextColor(dc, state.high_contrast ? GetSysColor(disabled ? COLOR_GRAYTEXT : COLOR_HIGHLIGHTTEXT) :
+        disabled ? muted() : RGB(255, 255, 253));
+    HGDIOBJ previous = SelectObject(dc, state.font);
+    WCHAR text[64]; GetWindowTextW(item->hwndItem, text, ARRAYSIZE(text));
+    DrawTextW(dc, text, -1, &r, DT_SINGLELINE | DT_CENTER | DT_VCENTER |
+        ((item->itemState & ODS_NOACCEL) ? DT_HIDEPREFIX : 0));
+    if (item->itemState & ODS_FOCUS) { InflateRect(&r, -4, -4); DrawFocusRect(dc, &r); }
+    SelectObject(dc, previous);
+}
 
 static void dispatch(MSG *message) {
     if (!IsDialogMessageW(state.window, message)) {
@@ -23,10 +74,33 @@ static void dispatch(MSG *message) {
 
 static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM lp) {
     switch (message) {
+    case WM_SETTINGCHANGE:
+    case WM_SYSCOLORCHANGE:
+        palette(); InvalidateRect(window, NULL, TRUE);
+        if (state.event == 0) { state.event = 4; }
+        break;
+    case WM_ERASEBKGND: {
+        RECT r; GetClientRect(window, &r); FillRect((HDC)wp, &r, state.background);
+        return 1;
+    }
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLOREDIT: {
+        int id = GetDlgCtrlID((HWND)lp);
+        COLORREF color = id == 201 || id == 209 ? muted() : ink();
+        if (id == 205 && !state.high_contrast) {
+            color = state.tone == 1 ? RGB(68, 113, 47) : state.tone == 2 ? RGB(167, 45, 35) : muted();
+        }
+        SetTextColor((HDC)wp, color);
+        SetBkColor((HDC)wp, id == 203 && !state.high_contrast ? RGB(255, 255, 253) : canvas());
+        return (LRESULT)(id == 203 ? state.paper : state.background);
+    }
+    case WM_DRAWITEM:
+        if (wp == 204 || wp == 211) { draw_control((const DRAWITEMSTRUCT *)lp); return TRUE; }
+        break;
     case WM_COMMAND:
-        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204) &&
+        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208) &&
             (HWND)lp == GetDlgItem(window, LOWORD(wp)) && IsWindowEnabled((HWND)lp)) {
-            if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : 2; }
+            if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : LOWORD(wp) == 204 ? 2 : 6; }
             return 0;
         }
         break;
@@ -60,28 +134,34 @@ int32_t hash_ui_system_dpi(void) {
 }
 
 static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
-    return CreateWindowExW(id == 201 || id == 203 ? WS_EX_CLIENTEDGE : 0, kind, L"",
+    return CreateWindowExW(0, kind, L"",
         WS_CHILD | WS_VISIBLE | style, 0, 0, 0, 0, window, (HMENU)(INT_PTR)id, GetModuleHandleW(NULL), NULL) != NULL;
 }
 
 void *hash_ui_open(int32_t width, int32_t height) {
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES};
     if (!InitCommonControlsEx(&controls)) { return NULL; }
+    palette();
     WNDCLASSW type = {0};
     type.lpfnWndProc = procedure;
     type.hInstance = GetModuleHandleW(NULL);
     type.hCursor = LoadCursorW(NULL, IDC_ARROW);
-    type.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     type.lpszClassName = L"FairyHashWindow";
     if (!RegisterClassW(&type)) { return NULL; }
+    RECT bounds = {0, 0, width, height};
+    if (!AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_CONTROLPARENT, GetDpiForSystem())) { return NULL; }
     HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, type.lpszClassName, L"Fairy Hash",
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, type.hInstance, NULL);
-    if (window && child(window, L"STATIC", 0, 206) &&
-        child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 201) &&
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, bounds.right-bounds.left, bounds.bottom-bounds.top,
+        NULL, NULL, type.hInstance, NULL);
+    if (window && child(window, L"STATIC", SS_NOPREFIX | SS_ENDELLIPSIS, 206) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_DEFPUSHBUTTON, 202) &&
-        child(window, L"STATIC", 0, 207) &&
-        child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 203) &&
-        child(window, L"BUTTON", WS_TABSTOP, 204) && child(window, L"STATIC", SS_NOPREFIX, 205)) {
+        child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 201) &&
+        child(window, L"STATIC", SS_NOPREFIX, 207) &&
+        child(window, L"EDIT", WS_TABSTOP | WS_BORDER | ES_READONLY | ES_MULTILINE | ES_NOHIDESEL, 203) &&
+        child(window, L"BUTTON", WS_TABSTOP, 208) &&
+        child(window, L"BUTTON", WS_TABSTOP | BS_OWNERDRAW, 204) &&
+        child(window, L"STATIC", SS_NOPREFIX, 205) && child(window, L"STATIC", SS_NOPREFIX, 209) &&
+        child(window, L"STATIC", SS_ETCHEDHORZ, 210) && child(window, L"STATIC", SS_OWNERDRAW, 211)) {
         state.window = window;
         return window;
     }
@@ -109,7 +189,7 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 207)) || length > 131071) { return 1; }
+    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 211)) || length > 131071) { return 1; }
     WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
     if (!wide) { return 1; }
     int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
@@ -117,6 +197,28 @@ int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t leng
     wide[count] = 0;
     BOOL success = valid && SetWindowTextW(id ? GetDlgItem((HWND)window, (int)id) : (HWND)window, wide);
     HeapFree(GetProcessHeap(), 0, wide);
+    return success ? 0 : 1;
+}
+
+int32_t hash_ui_tone(void *window, uint32_t tone) {
+    if ((HWND)window != state.window || tone > 2) { return 1; }
+    state.tone = tone;
+    InvalidateRect(GetDlgItem((HWND)window, 205), NULL, TRUE);
+    return 0;
+}
+
+int32_t hash_ui_copy(void *window, const uint8_t *text, size_t length) {
+    if ((HWND)window != state.window || !text || length > 131071) { return 1; }
+    HGLOBAL data = GlobalAlloc(GMEM_MOVEABLE, (length + 1) * sizeof(WCHAR));
+    if (!data) { return 1; }
+    WCHAR *wide = GlobalLock(data);
+    if (!wide) { GlobalFree(data); return 1; }
+    int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length);
+    wide[count] = 0; GlobalUnlock(data);
+    if (!count || !OpenClipboard((HWND)window)) { GlobalFree(data); return 1; }
+    BOOL success = EmptyClipboard() && SetClipboardData(CF_UNICODETEXT, data) != NULL;
+    CloseClipboard();
+    if (!success) { GlobalFree(data); }
     return success ? 0 : 1;
 }
 
@@ -134,21 +236,42 @@ int32_t hash_ui_extent(void *window, uint32_t axis) {
 }
 
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
-    if (width < 0 || height < 0 || id < 201 || id > 207) { return 1; }
-    return MoveWindow(GetDlgItem((HWND)window, (int)id), x, y, width, height, TRUE) ? 0 : 1;
+    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 211) { return 1; }
+    HWND control = GetDlgItem((HWND)window, (int)id);
+    if (!MoveWindow(control, x, y, width, height, TRUE)) { return 1; }
+    if (id == 203) {
+        int inset = MulDiv(10, GetDpiForWindow((HWND)window), 96);
+        RECT area = {inset, inset, width-inset, height-inset};
+        SendMessageW(control, EM_SETRECT, 0, (LPARAM)&area);
+    }
+    return 0;
 }
 
 int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_height, int32_t font_height) {
     if ((HWND)window != state.window || minimum_width <= 0 || minimum_height <= 0 || font_height <= 0) { return 1; }
-    state.minimum_width = minimum_width; state.minimum_height = minimum_height;
+    RECT bounds = {0, 0, minimum_width, minimum_height};
+    if (!AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_CONTROLPARENT, GetDpiForWindow((HWND)window))) { return 1; }
+    state.minimum_width = bounds.right-bounds.left; state.minimum_height = bounds.bottom-bounds.top;
     LOGFONTW current = {0};
     if (state.font && GetObjectW(state.font, sizeof(current), &current) && current.lfHeight == -font_height) { return 0; }
     HFONT font = CreateFontW(-font_height, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
         OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
-    if (!font) { return 1; }
-    for (int id = 201; id <= 207; id++) { SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)font, TRUE); }
+    HFONT heading = CreateFontW(-MulDiv(font_height, 18, 14), 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
+    HFONT mono = CreateFontW(-MulDiv(font_height, 16, 14), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH, L"Consolas");
+    if (!font || !heading || !mono) {
+        if (font) { DeleteObject(font); } if (heading) { DeleteObject(heading); } if (mono) { DeleteObject(mono); }
+        return 1;
+    }
+    for (int id = 201; id <= 211; id++) {
+        HFONT selected = id == 203 ? mono : id == 206 ? heading : font;
+        SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)selected, TRUE);
+    }
     if (state.font) { DeleteObject(state.font); }
-    state.font = font;
+    if (state.heading) { DeleteObject(state.heading); }
+    if (state.mono) { DeleteObject(state.mono); }
+    state.font = font; state.heading = heading; state.mono = mono;
     return 0;
 }
 
@@ -188,6 +311,10 @@ void hash_ui_show(void *window) {
 void hash_ui_destroy(void *window) {
     if (IsWindow((HWND)window)) { DestroyWindow((HWND)window); }
     if (state.font) { DeleteObject(state.font); state.font = NULL; }
+    if (state.heading) { DeleteObject(state.heading); state.heading = NULL; }
+    if (state.mono) { DeleteObject(state.mono); state.mono = NULL; }
+    if (state.background) { DeleteObject(state.background); state.background = NULL; }
+    if (state.paper) { DeleteObject(state.paper); state.paper = NULL; }
     UnregisterClassW(L"FairyHashWindow", GetModuleHandleW(NULL));
     state.window = NULL;
 }

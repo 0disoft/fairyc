@@ -44,15 +44,19 @@ func TestWindowsHashUtility(t *testing.T) {
 				out, err := exec.CommandContext(ctx, "python", "-B", "../../examples/win32_hash/"+verifier.file, "--exe", image).CombinedOutput()
 				cancel()
 				var report struct {
-					OK, ProcessExited, NativeOpenAndSave, CloseDuringHash, SourceProtected bool
-					Verification                                                           string
-					Cases                                                                  int
+					OK, ProcessExited, NativeOpenAndSave, CloseDuringHash, SourceProtected   bool
+					TwoLineDigest, ClipboardDigest, ClipboardRestored, ClipboardBusyRecovery bool
+					NativeVisualStyles, ResponsiveLayout, MinimizeRestore                    bool
+					Verification                                                             string
+					Cases                                                                    int
 				}
 				if err != nil || json.Unmarshal(out, &report) != nil || !report.OK || !report.ProcessExited || report.Verification != verifier.kind {
 					t.Fatalf("%s: %v %s", verifier.file, err, out)
 				}
 				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_gui.py" &&
-					(!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected) {
+					(!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected ||
+						!report.TwoLineDigest || !report.ClipboardDigest || !report.ClipboardRestored || !report.ClipboardBusyRecovery ||
+						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore) {
 					t.Fatalf("incomplete utility verification: %s", out)
 				}
 			}
