@@ -3,21 +3,8 @@
   "packageInstanceAlgorithm": "fairyc.package-instance/v1",
   "sourceDigestAlgorithm": "fairyc.package-source/v1",
   "language": "fairyc-language/20",
-  "root": "fypi1-sha256-4cd200ae1f2259843a3a8650c2805b4dbd884cae5738d3a01b43e563c88b501e",
+  "root": "fypi1-sha256-ea05f4823f5ace551663d928e40d92dec623831880d2000114a7643a3fb87d67",
   "packages": [
-    {
-      "id": "fypi1-sha256-4cd200ae1f2259843a3a8650c2805b4dbd884cae5738d3a01b43e563c88b501e",
-      "role": "root",
-      "packageUid": "example.win32-hash",
-      "sourceKind": "local",
-      "localPath": ".",
-      "sdkIdentity": "",
-      "runtimeAbi": "",
-      "sourceIdentity": "fysrc1-sha256-ddb95d84c6680c8f7200deb23b0c8cc080a4c0f1bb29c24dfe5fa16578923f2b",
-      "sourceDigest": "fysrc1-sha256-ddb95d84c6680c8f7200deb23b0c8cc080a4c0f1bb29c24dfe5fa16578923f2b",
-      "version": "0.1.0",
-      "features": []
-    },
     {
       "id": "fypi1-sha256-674bab7b189dd71fd8e59dfdd36327d4f5ea5dd5698f9920c9cc6700f85c3bf2",
       "role": "standard-library",
@@ -30,11 +17,24 @@
       "sourceDigest": "fysrc1-sha256-c531e88e52b684a34cf9688eda19e5cafcc5788e7a4bbf7e5121e86874a7246a",
       "version": "0.0.0-stage0.87",
       "features": []
+    },
+    {
+      "id": "fypi1-sha256-ea05f4823f5ace551663d928e40d92dec623831880d2000114a7643a3fb87d67",
+      "role": "root",
+      "packageUid": "example.win32-hash",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-2a50a347b5a00d26b394776e5aa2972af1dafaa6a74dce794f32b319d86a102c",
+      "sourceDigest": "fysrc1-sha256-2a50a347b5a00d26b394776e5aa2972af1dafaa6a74dce794f32b319d86a102c",
+      "version": "0.1.0",
+      "features": []
     }
   ],
   "dependencies": [
     {
-      "owner": "fypi1-sha256-4cd200ae1f2259843a3a8650c2805b4dbd884cae5738d3a01b43e563c88b501e",
+      "owner": "fypi1-sha256-ea05f4823f5ace551663d928e40d92dec623831880d2000114a7643a3fb87d67",
       "binding": "stdlib",
       "target": "fypi1-sha256-674bab7b189dd71fd8e59dfdd36327d4f5ea5dd5698f9920c9cc6700f85c3bf2"
     }

@@ -4,7 +4,7 @@ import std::bytes as bytes;
 import std::text as text;
 import std::fs as fs;
 
-pub struct Digest { u32[8] words; usize length; fs::FileId identity; }
+pub struct Digest { usize[8] words; usize length; fs::FileId identity; }
 
 @effects(filesystem)
 pub fn Result<fs::File,u32> open(ref u8[] path) {
@@ -50,9 +50,9 @@ pub fn Result<Digest,u32> compute(ref u8[] path) {
 
 pub fn bool append_hex(ref Digest value,ref mut bytes::Buffer out) {
     let ref u8[] digits=b"0123456789abcdef";
-    var usize i=0; var u32 shift=28;
+    var usize i=0; var usize shift=28;
     while(i<64) {
-        if(!bytes::append_byte(out,digits[((value.words[i/8]>>shift)&15) as usize]).is_ok){return false;}
+        if(!bytes::append_byte(out,digits[(value.words[i/8]>>shift)&15]).is_ok){return false;}
         i+=1; if(i%8==0){shift=28;}else{shift-=4;}
     }
     return true;

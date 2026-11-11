@@ -48,7 +48,7 @@ func TestWindowsHashUtility(t *testing.T) {
 			}
 			t.Logf("hash utility: %d bytes", len(data))
 			for _, verifier := range []struct{ file, kind string }{
-				{"verify_cli.py", "fairy-file-sha256"}, {"verify_gui.py", guiKind},
+				{"verify_cli.py", "fairy-file-sha256"}, {"verify_sha.py", "fairy-sha256-vectors"}, {"verify_gui.py", guiKind},
 			} {
 				if verifier.file == "verify_gui.py" && usability != "" {
 					verifyWindowsHashUsability(t, image, usability)
@@ -78,7 +78,7 @@ func TestWindowsHashUtility(t *testing.T) {
 				if err != nil || json.Unmarshal(out, &report) != nil || !report.OK || !report.ProcessExited || report.Verification != verifier.kind {
 					t.Fatalf("%s: %v %s", verifier.file, err, out)
 				}
-				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_gui.py" &&
+				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_sha.py" && report.Cases != 24 || verifier.file == "verify_gui.py" &&
 					(!report.LargeJob.ProgressObserved || !report.LargeJob.CancelAndReuse || !jobOnly && (!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected ||
 						!report.TwoLineDigest || !report.ClipboardDigest || !report.ClipboardRestored || !report.ClipboardBusyRecovery ||
 						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore || !report.FilenameResizeRepaint || !report.BoundedDigestLayout || !report.NativeTooltips || !report.ControlBackgrounds)) {
