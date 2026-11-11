@@ -114,3 +114,38 @@ private bridge functions, focused regression and example documentation changed.
 Public compiler/language/SDK APIs, DB, repository hygiene, dependency versions
 and CI runners/workflows are unchanged. Local commits only; no push, release,
 publication or deployment.
+
+## Follow-up: stale filename ellipsis after maximizing
+
+The first compact release could show the old narrow-window `...` followed by
+the rest of the filename after maximizing. The stored filename was intact;
+the expanded native STATIC did not clear all of its old pixels. The bridge
+now invalidates the entire filename control, with background erasure, after
+moving/resizing it. Native `SS_ENDELLIPSIS` and the full stored filename remain.
+No Fairy source, hashing/report behavior or public API changes are needed.
+
+The regression reads existing visible pixels using `GetWindowDC`/`BitBlt`.
+`PrintWindow` requests a fresh draw and masked the issue during the first
+investigation. The verifier checks that narrow-to-maximized text looks exactly
+like a fresh selection at the same maximized size, over two maximize/restore
+cycles. It waits for right/left layout margins to settle and selects a distinct
+temporary file between equivalent renders to avoid stale readiness observations.
+The old retained authored release fails this regression; the fixed Go release
+passes it along with existing dialog/hash/copy/resize/close checks. Evidence is
+in `.cache/windows-hash-ellipsis-20261111/` (`before-gui.json`, `fixed-gui.json`
+and the maximized screenshots). No Windows style contract was redefined;
+[native static styles](https://learn.microsoft.com/en-us/windows/win32/controls/static-control-styles)
+still determine ellipsis and text behavior.
+
+Final verification: the Go development/release integration passed in 48.865s
+(two profile subtests, zero skips), including 19 CLI cases per profile and the
+new visible-pixel regression. The reused authored CLI's `build --locked
+--release` passed; that image passed the 19 CLI cases and the complete GUI
+verifier, including two maximize/restore comparisons. The updated release is
+still **175,104 bytes (171 KiB)**, SHA-256
+`4a44311f167b2577e14f4c58a17103f094fb932d8ea46b327b479812191d3093`.
+No test application processes remain. Authored development, a fresh compiler
+bootstrap, physical input/cross-monitor DPI/high-contrast and hosted/Linux
+checks were omitted for this small C paint correction. The earlier execution
+record and its hashes describe the previous version, not this rebuilt EXE.
+No API, DB, repository hygiene or CI runner/workflow changes; no push.

@@ -6,7 +6,7 @@ import struct
 import zlib
 
 
-def capture(hwnd, target):
+def capture(hwnd, target, repaint=True):
     user, gdi = c.WinDLL('user32', use_last_error=True), c.WinDLL('gdi32', use_last_error=True)
     def api(dll, name, result, *types):
         fn = getattr(dll, name)
@@ -30,8 +30,20 @@ def capture(hwnd, target):
         if not dc or not bitmap or not pixels:
             raise RuntimeError('capture: bitmap allocation failed')
         previous = select(dc, bitmap)
-        if not api(user, 'PrintWindow', w.BOOL, w.HWND, w.HDC, w.UINT)(hwnd, dc, 2):
-            raise RuntimeError('capture: PrintWindow failed')
+        if repaint:
+            if not api(user, 'PrintWindow', w.BOOL, w.HWND, w.HDC, w.UINT)(hwnd, dc, 2):
+                raise RuntimeError('capture: PrintWindow failed')
+        else:
+            # Preserve existing on-screen pixels when investigating stale paint;
+            # PrintWindow would request a new draw and can hide that defect.
+            source_dc = api(user, 'GetWindowDC', w.HDC, w.HWND)(hwnd)
+            try:
+                if not source_dc or not api(gdi, 'BitBlt', w.BOOL, w.HDC, c.c_int, c.c_int, c.c_int, c.c_int,
+                                             w.HDC, c.c_int, c.c_int, w.DWORD)(dc, 0, 0, width, height, source_dc, 0, 0, 0x00CC0020):
+                    raise RuntimeError('capture: visible window copy failed')
+            finally:
+                if source_dc:
+                    api(user, 'ReleaseDC', c.c_int, w.HWND, w.HDC)(hwnd, source_dc)
         api(gdi, 'GdiFlush', w.BOOL)()
         bgra = c.string_at(pixels, width * height * 4)
         # DWM's invisible resize margins are not part of the visible window.

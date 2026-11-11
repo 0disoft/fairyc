@@ -239,6 +239,9 @@ int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t wi
     if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 211) { return 1; }
     HWND control = GetDlgItem((HWND)window, (int)id);
     if (!MoveWindow(control, x, y, width, height, TRUE)) { return 1; }
+    // Growing a static label can preserve its old pixels and repaint only
+    // the newly exposed strip. Clear the old ellipsis before drawing anew.
+    if (id == 206) { InvalidateRect(control, NULL, TRUE); }
     if (id == 203) {
         int inset = MulDiv(10, GetDpiForWindow((HWND)window), 96);
         RECT area = {inset, inset, width-inset, height-inset};

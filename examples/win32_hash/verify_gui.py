@@ -166,7 +166,7 @@ def verify(image, screenshot=None):
                         if max(r.left, other.left) < min(r.right, other.right) and max(r.top, other.top) < min(r.bottom, other.bottom):
                             return False
                     boxes.append(r)
-                return True
+                return min(r.left for r in boxes) == area.right - max(r.right for r in boxes)
             wait(layout, bool, 'initial layout overlaps or clips controls')
             def dialog(button):
                 click(child(main, button))
@@ -296,6 +296,45 @@ def verify(image, screenshot=None):
                 if not os.path.samefile(actual_path, source):
                     raise RuntimeError('displayed path does not identify the selected file')
                 expected = dict(algorithm='SHA-256', file=actual_path, bytes=len(data), sha256=expected_hash)
+                if index == 0:
+                    # The same file at the same wide size must look identical
+                    # after expanding and after selecting it while already wide.
+                    # Text-only checks miss cached ellipses left in native paint.
+                    from capture_window import capture
+                    title = child(main, 206)
+                    # Only this owned verifier window is temporarily topmost,
+                    # keeping visible-pixel reads independent of occlusion.
+                    resize(main, w.HWND(-1), 0, 0, 0, 0, 0x13)
+                    for cycle in range(2):
+                        time.sleep(0.1)
+                        show(main, 3)
+                        wait(layout, bool, 'maximized layout invalid')
+                        time.sleep(0.1)
+                        before_title = root / 'expanded-title.png'
+                        capture(title, before_title, repaint=False)
+                        if screenshot:
+                            capture(main, screenshot.with_name(f'{screenshot.stem}-maximized.png'), repaint=False)
+                        # Change selection first so readiness cannot be mistaken
+                        # for the previous identical file/hash's completed state.
+                        reset = root / 'refresh.txt'
+                        reset.write_bytes(b'repaint')
+                        choose(202, reset)
+                        wait(lambda: text(child(main, 201)), lambda v: bool(v) and os.path.samefile(v, reset), 'refresh selection')
+                        wait(lambda: bool(enabled(child(main, 202))), bool, 'refresh hash not complete')
+                        choose(202, source)
+                        wait(lambda: text(child(main, 201)), lambda v: bool(v) and os.path.samefile(v, source), 'wide reselect path')
+                        wait(lambda: text(child(main, 203)), lambda v: v == expected_display, 'wide reselect hash')
+                        wait(lambda: bool(enabled(child(main, 202))), bool, 'wide reselect not complete')
+                        time.sleep(0.1)
+                        fresh_title = root / 'fresh-title.png'
+                        capture(title, fresh_title, repaint=False)
+                        if before_title.read_bytes() != fresh_title.read_bytes():
+                            raise RuntimeError('filename paint retains ellipsis from the previous window width')
+                        if text(title) != source.name:
+                            raise RuntimeError('filename text changed during ellipsis painting')
+                        show(main, 9)
+                        wait(layout, bool, 'restored filename layout invalid')
+                    resize(main, w.HWND(-2), 0, 0, 0, 0, 0x13)
                 if index == 1:
                     cancel(202)
                     cancel(204)
@@ -376,6 +415,7 @@ def verify(image, screenshot=None):
                 nativeOpenAndSave=True, cancellationPreservesResult=True, sourceProtected=True,
                 closeDuringHash=True, twoLineDigest=True, clipboardDigest=True, clipboardRestored=True,
                 clipboardBusyRecovery=True, nativeVisualStyles=True, responsiveLayout=True, minimizeRestore=True,
+                filenameResizeRepaint=True,
                 privateAutomationProtocol=False, processExited=True)
 
 

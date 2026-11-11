@@ -59,7 +59,12 @@ checks three reference files, paths longer than 127 characters, cancellation,
 overwrite confirmation, input protection and closing a 64 MiB job. It also checks
 actual side-by-side Common Controls loading, two-line digest display, exact
 64-character clipboard data, a locked clipboard followed by successful retry,
-nonoverlapping minimum/expanded layouts and minimize/restore. Clipboard checks
+nonoverlapping minimum/expanded layouts and minimize/restore. Long-filename
+checks compare actual visible pixels after maximize with a fresh selection at
+the same size, twice through maximize/restore. This catches stale ellipsis
+pixels that text reads or a repainting `PrintWindow` capture can miss. The
+verifier temporarily makes only its owned app topmost for those pixel reads.
+Clipboard checks
 retain/restore the original OLE clipboard data object. Optional `--screenshot`
 uses `capture_window.py` and Windows/GDI to capture the actual `sample.txt`
 result to PNG, without extra Python packages. It does not
