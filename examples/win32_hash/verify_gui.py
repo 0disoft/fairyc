@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=0):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -381,6 +381,13 @@ def verify(image, screenshot=None, desktop_hover=False):
             cancel(202)
             if text(child(main, 201)) or text(child(main, 203)) or enabled(child(main, 204)):
                 raise RuntimeError('Open cancellation changed state')
+            large_job = None
+            if job_mib:
+                from types import SimpleNamespace
+                from job_probe import measure
+                large_job = measure(SimpleNamespace(root=root, main=main, child=child, message=message,
+                    choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
+                    resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
             for index, data in enumerate((b'', b'abc', bytes(range(256)) * 4097)):
                 source = root / ('입력 Ω-' + str(index) + '-' + '긴이름' * 30 + '&끝.bin')
                 source.write_bytes(data)
@@ -580,6 +587,7 @@ def verify(image, screenshot=None, desktop_hover=False):
                 boundedDigestLayout=True,
                 nativeTooltips=True, desktopHoverVerified=desktop_hover,
                 controlBackgrounds=True, paintObservations=paint_observations,
+                largeJob=large_job,
                 tooltipInput='desktop' if desktop_hover else 'native-messages', tooltipObservations=tooltip_observations,
                 privateAutomationProtocol=False, processExited=True)
 
@@ -589,9 +597,11 @@ if __name__ == '__main__':
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-hash.exe')
     parser.add_argument('--screenshot', type=Path, help='optional actual sample.txt window capture')
     parser.add_argument('--desktop-hover', action='store_true', help='also require physical cursor hover on an unobstructed desktop')
+    parser.add_argument('--job-mib', type=int, choices=range(16, 257), metavar='16..256', default=0,
+                        help='also measure a real large-file GUI job')
     args = parser.parse_args()
     try:
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover), ensure_ascii=True))
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)
