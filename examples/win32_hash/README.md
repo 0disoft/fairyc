@@ -52,6 +52,10 @@ python -B verify_gui.py --screenshot build/fairy-hash.png
 python -B verify_gui.py --desktop-hover
 python -B verify_gui.py --job-mib 64
 python -B verify_gui.py --job-only --job-mib 256
+python -B verify_gui.py --usability accessibility
+python -B verify_gui.py --usability display
+python -B verify_gui.py --usability display --high-contrast
+python -B verify_gui.py --usability keyboard
 python -B benchmark_cli.py --mib 64
 fairyc test --locked --file tests/sha256.fy
 fairyc test --locked --file tests/progress.fy
@@ -108,7 +112,8 @@ callback, with no injected text/path/hash or app-specific command. Tooltip check
 need no physical pointer movement. Visible paint checks require an exposed,
 unlocked desktop. `--desktop-hover` additionally
 requires actual pointer hover on an unobstructed desktop and restores the pointer
-at completion. No mouse button or keyboard events are injected. Results explicitly
+at completion. Default dialog/tooltip checks inject no mouse button or keyboard
+events; `--usability keyboard` deliberately uses real SendInput. Results explicitly
 report `tooltipInput` and `desktopHoverVerified`. Fixtures include 103-character
 Unicode filenames and longer paths with literal ampersands, beyond the tooltip
 notification's 80-character inline buffer.
@@ -140,3 +145,43 @@ The [warm UI execution record](../../docs/development/windows-hash-warm-ui-20261
 records the theme/layout/copy changes and their size difference.
 The [progress execution record](../../docs/development/windows-hash-progress-20261111.md)
 records large-job timings, responsiveness, cancellation and build size.
+
+Usability checks emit `actual-win32-hash-usability` and close their owned window.
+`accessibility` reads native Windows UI Automation roles, accessible names,
+read-only values, progress range, action states and access keys. It also checks
+native forward/reverse tab order in initial/completed/busy states; this is not
+physical keyboard input or a screen-reader voice test. Path, digest and progress
+names come from Fairy through standard IAccPropServices annotations. OLE32 is a
+system DLL; the verifier and its Python runtime are not bundled with the app.
+
+`display` enumerates real monitors, moves only its own window, verifies PMv2,
+actual DPI, bounded digest geometry and font scaling, then restores its position.
+It reports a skipped physical transition when no different-DPI monitors exist.
+`--high-contrast` additionally toggles the real OS high-contrast setting, compares
+system colors with PrintWindow-rendered canvas/text pixels and restores original
+flags/colors and the app palette. A separate watchdog restores settings if the
+controller exits or stalls. High contrast is opt-in; no monitor driver or
+persistent scale preference is changed.
+
+`keyboard` requires stable foreground and released user keys/buttons. It exercises
+Tab/Shift+Tab loops, Enter on Open/Copy/Save/Cancel, Alt+O/C/S/X and Escape from a
+native Save dialog. File paths are populated through native dialog controls;
+these checks certify actual navigation/action keys, not typed path text or IME.
+Foreground denial/loss is a failure, never a synthetic-key fallback or a pass.
+`all` combines the three modes, including physical input; usability modes cannot
+be combined with job-only, screenshots or desktop hover.
+
+The existing opt-in Go desktop integration can select these checks instead of
+the full visual dialog suite, while retaining 19 CLI cases in both profiles:
+
+```powershell
+$env:FAIRYC_RUN_DESKTOP_INTEGRATION='1'
+$env:FAIRYC_HASH_USABILITY='accessibility,display'
+go test -mod=readonly ./internal/cli -run '^TestWindowsHashUtility$' -count=1 -v -timeout 5m
+```
+
+Unset `FAIRYC_HASH_JOB_ONLY` for usability checks. Optional
+`FAIRYC_HASH_HIGH_CONTRAST=1` adds the system contrast toggle only to display/all;
+it is never enabled by default. Select `keyboard` or `all` only on a desktop where
+the verifier can keep foreground. The [usability execution record](../../docs/development/windows-hash-usability-20261112.md)
+distinguishes passes, physical-input failures and monitor limitations.
