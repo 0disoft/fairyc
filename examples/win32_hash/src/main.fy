@@ -20,7 +20,7 @@ fn i32 main() {
     var bytes::Buffer path=bytes::empty();if(!bytes::resize_zeroed(ref mut path,131072).is_ok){return failure(5);}
     let n=switch(process::arg(2,bytes::view_mut(ref mut path))){case .ok(v):{v}case .err(_):{return failure(1);}};
     let ref u8[] path_view=bytes::view(ref path);
-    let value=switch(app::compute(path_view[..n],null)){case .ok(v):{v}case .err(e):{return failure(e);}};
+    let value=switch(hash::compute(path_view[..n])){case .ok(v):{v}case .err(e):{return failure(e);}};
     var bytes::Buffer report=bytes::empty();if(!hash::report(path_view[..n],ref value,ref mut report)){return failure(5);}
     if(process::arg_count()==4) {
         var bytes::Buffer target=bytes::empty();if(!bytes::resize_zeroed(ref mut target,131072).is_ok){return failure(5);}

@@ -31,6 +31,23 @@ pub fn Result<Digest,u32> finish(ref fs::File file,ref sha::State state) {
     return .ok(Digest{.words=sha::finish(state),.length=state.length,.identity});
 }
 
+// CLI orchestration has no UI/clock branches. Both paths share read/finish and
+// the same SHA implementation, rather than duplicating the hash algorithm.
+@effects(filesystem)
+pub fn Result<Digest,u32> compute(ref u8[] path) {
+    var file=switch(open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    let total=switch(fs::size(ref file)){case .ok(v):{v}case .err(_):{return .err(2);}};
+    var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
+    if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
+    while(true) {
+        let count=switch(read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
+        if(count==0){break;}
+    }
+    let value=switch(finish(ref file,ref state)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    if(value.length!=total){return .err(3);}
+    if(!fs::close(file).is_ok){return .err(2);}return .ok(value);
+}
+
 pub fn bool append_hex(ref Digest value,ref mut bytes::Buffer out) {
     let ref u8[] digits=b"0123456789abcdef";
     var usize i=0; var u32 shift=28;

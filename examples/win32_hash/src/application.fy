@@ -20,17 +20,15 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     let total=switch(fs::size(ref file)){case .ok(v):{v}case .err(_):{return .err(2);}};
     var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
-    let usize started=if(window!=null){ui::ticks()}else{0};var usize displayed=started;
-    if(window!=null && !ui::progress(window,0,total,0)){return .err(5);}
+    let started=ui::ticks();var usize displayed=started;
+    if(!ui::progress(window,0,total,0)){return .err(5);}
     while(true) {
         let count=switch(hash::read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
-        if(window!=null) {
-            let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
-            if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
-            let now=ui::ticks();
-            if(now-displayed>=100 || count==0) {
-                if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
-            }
+        let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
+        if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
+        let now=ui::ticks();
+        if(now-displayed>=100 || count==0) {
+            if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
         }
         if(count==0){break;}
     }
