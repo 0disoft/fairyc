@@ -20,6 +20,9 @@ Copy and Save enable only after successful hashing; a busy clipboard reports a
 retryable error. The input path and digest remain read-only text controls with
 native selection/copy support. Long filenames ellipsize visually while the path
 control retains the complete path and supports native horizontal scrolling.
+When a filename or path does not fit, hovering shows its complete Unicode text
+in a native, wrapping tooltip. It updates for each selected file and window
+size; short text that already fits has no tooltip. Ampersands are literal.
 Common Controls v6 comes from Windows via the embedded manifest; no UI framework,
 font, bitmap or additional runtime ships with the EXE. High contrast uses system
 colors. Fairy computes layout from DPI/client width and height, including resize
@@ -66,6 +69,12 @@ checks compare actual visible pixels after maximize with a fresh selection at
 the same size, twice through maximize/restore. This catches stale ellipsis
 pixels that text reads or a repainting `PrintWindow` capture can miss. The
 verifier temporarily makes only its owned app topmost for those pixel reads.
+Tooltip checks move the actual desktop pointer over the owned controls, read
+the visible native popup and restore the pointer at completion. They require
+an unlocked desktop with native mouse input available; no mouse buttons or
+keyboard events are injected. Fixtures include 103-character Unicode filenames
+and longer paths with literal ampersands, beyond the tooltip notification's
+80-character inline buffer.
 Clipboard checks
 eagerly copy/restore available clipboard data handles (including text and
 binary formats), without retaining a live OLE clipboard wrapper. Optional `--screenshot`

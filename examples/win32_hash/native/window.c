@@ -7,7 +7,8 @@
 
 // Win32 operations only. Fairy owns file I/O, SHA-256, report bytes and policy.
 static struct {
-    HWND window;
+    HWND window, tooltip;
+    WCHAR *tooltip_text;
     HFONT font, heading, mono;
     HBRUSH background, paper;
     BOOL high_contrast;
@@ -72,8 +73,61 @@ static void dispatch(MSG *message) {
     }
 }
 
+static LPCWSTR tooltip_text(HWND control) {
+    int length = GetWindowTextLengthW(control);
+    if (length <= 0 || length > 131071) { return L""; }
+    WCHAR *text = HeapAlloc(GetProcessHeap(), 0, ((size_t)length + 1) * sizeof(WCHAR));
+    if (!text) { return L""; }
+    int count = GetWindowTextW(control, text, length + 1);
+    HDC dc = GetDC(control);
+    HFONT font = (HFONT)SendMessageW(control, WM_GETFONT, 0, 0);
+    HGDIOBJ previous = dc && font ? SelectObject(dc, font) : NULL;
+    SIZE extent = {0}; RECT area = {0};
+    BOOL measured = dc && GetClientRect(control, &area) && GetTextExtentPoint32W(dc, text, count, &extent);
+    if (previous) { SelectObject(dc, previous); }
+    if (dc) { ReleaseDC(control, dc); }
+    int margins = GetDlgCtrlID(control) == 201 ? (int)SendMessageW(control, EM_GETMARGINS, 0, 0) : 0;
+    if (!measured || extent.cx <= area.right - LOWORD(margins) - HIWORD(margins)) {
+        HeapFree(GetProcessHeap(), 0, text);
+        return L"";
+    }
+    if (state.tooltip_text) { HeapFree(GetProcessHeap(), 0, state.tooltip_text); }
+    state.tooltip_text = text;
+    return text;
+}
+
+static BOOL open_tooltip(HWND window) {
+    state.tooltip = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, NULL, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, window, NULL, GetModuleHandleW(NULL), NULL);
+    if (!state.tooltip) { return FALSE; }
+    for (int index = 0; index < 2; index++) {
+        TOOLINFOW tool = {sizeof(tool)};
+        tool.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
+        tool.hwnd = window;
+        tool.uId = (UINT_PTR)GetDlgItem(window, index == 0 ? 206 : 201);
+        tool.lpszText = LPSTR_TEXTCALLBACKW;
+        if (!SendMessageW(state.tooltip, TTM_ADDTOOLW, 0, (LPARAM)&tool)) { return FALSE; }
+    }
+    SendMessageW(state.tooltip, TTM_SETDELAYTIME, TTDT_INITIAL, 400);
+    SendMessageW(state.tooltip, TTM_SETDELAYTIME, TTDT_RESHOW, 100);
+    SendMessageW(state.tooltip, TTM_SETDELAYTIME, TTDT_AUTOPOP, 20000);
+    return TRUE;
+}
+
 static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM lp) {
     switch (message) {
+    case WM_NOTIFY: {
+        NMTTDISPINFOW *info = (NMTTDISPINFOW *)lp;
+        if (info && info->hdr.hwndFrom == state.tooltip && info->hdr.code == TTN_GETDISPINFOW &&
+            (info->hdr.idFrom == (UINT_PTR)GetDlgItem(window, 206) || info->hdr.idFrom == (UINT_PTR)GetDlgItem(window, 201))) {
+            // Callback storage survives this message and is not limited to the
+            // notification's inline 80-character buffer. Never cache DI_SETITEM:
+            // a new file or a new width must re-evaluate text and clipping.
+            info->lpszText = (LPWSTR)tooltip_text((HWND)info->hdr.idFrom);
+            return 0;
+        }
+        break;
+    }
     case WM_SETTINGCHANGE:
     case WM_SYSCOLORCHANGE:
         palette(); InvalidateRect(window, NULL, TRUE);
@@ -139,7 +193,7 @@ static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
 }
 
 void *hash_ui_open(int32_t width, int32_t height) {
-    INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES};
+    INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES | ICC_BAR_CLASSES};
     if (!InitCommonControlsEx(&controls)) { return NULL; }
     palette();
     WNDCLASSW type = {0};
@@ -153,7 +207,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
     HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, type.lpszClassName, L"Fairy Hash",
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, bounds.right-bounds.left, bounds.bottom-bounds.top,
         NULL, NULL, type.hInstance, NULL);
-    if (window && child(window, L"STATIC", SS_NOPREFIX | SS_ENDELLIPSIS, 206) &&
+    if (window && child(window, L"STATIC", SS_NOPREFIX | SS_ENDELLIPSIS | SS_NOTIFY, 206) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_DEFPUSHBUTTON, 202) &&
         child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 201) &&
         child(window, L"STATIC", SS_NOPREFIX, 207) &&
@@ -163,7 +217,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, L"STATIC", SS_NOPREFIX, 205) && child(window, L"STATIC", SS_NOPREFIX, 209) &&
         child(window, L"STATIC", SS_ETCHEDHORZ, 210) && child(window, L"STATIC", SS_OWNERDRAW, 211)) {
         state.window = window;
-        return window;
+        if (open_tooltip(window)) { return window; }
     }
     if (window) { DestroyWindow(window); }
     UnregisterClassW(type.lpszClassName, type.hInstance);
@@ -195,6 +249,7 @@ int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t leng
     int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
     BOOL valid = length == 0 || count > 0;
     wide[count] = 0;
+    if (id == 201 || id == 206) { SendMessageW(state.tooltip, TTM_POP, 0, 0); }
     BOOL success = valid && SetWindowTextW(id ? GetDlgItem((HWND)window, (int)id) : (HWND)window, wide);
     HeapFree(GetProcessHeap(), 0, wide);
     return success ? 0 : 1;
@@ -255,6 +310,8 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
     RECT bounds = {0, 0, minimum_width, minimum_height};
     if (!AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_CONTROLPARENT, GetDpiForWindow((HWND)window))) { return 1; }
     state.minimum_width = bounds.right-bounds.left; state.minimum_height = bounds.bottom-bounds.top;
+    SendMessageW(state.tooltip, TTM_POP, 0, 0);
+    SendMessageW(state.tooltip, TTM_SETMAXTIPWIDTH, 0, MulDiv(600, GetDpiForWindow((HWND)window), 96));
     LOGFONTW current = {0};
     if (state.font && GetObjectW(state.font, sizeof(current), &current) && current.lfHeight == -font_height) { return 0; }
     HFONT font = CreateFontW(-font_height, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
@@ -271,6 +328,7 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
         HFONT selected = id == 203 ? mono : id == 206 ? heading : font;
         SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)selected, TRUE);
     }
+    SendMessageW(state.tooltip, WM_SETFONT, (WPARAM)font, TRUE);
     if (state.font) { DeleteObject(state.font); }
     if (state.heading) { DeleteObject(state.heading); }
     if (state.mono) { DeleteObject(state.mono); }
@@ -312,6 +370,9 @@ void hash_ui_show(void *window) {
 }
 
 void hash_ui_destroy(void *window) {
+    if (IsWindow(state.tooltip)) { DestroyWindow(state.tooltip); }
+    state.tooltip = NULL;
+    if (state.tooltip_text) { HeapFree(GetProcessHeap(), 0, state.tooltip_text); state.tooltip_text = NULL; }
     if (IsWindow((HWND)window)) { DestroyWindow((HWND)window); }
     if (state.font) { DeleteObject(state.font); state.font = NULL; }
     if (state.heading) { DeleteObject(state.heading); state.heading = NULL; }
