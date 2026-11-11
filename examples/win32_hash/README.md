@@ -2,9 +2,12 @@
 
 A small file SHA-256 utility. File reads, hashing, UTF-8 JSON formatting and
 prepared report publication are written in Fairy C. The private SHA algorithm
-is reused from `lexer_candidate`, with a SHA-256 length-overflow bound rather
+is adapted from `lexer_candidate`, with a SHA-256 length-overflow bound rather
 than that compiler example's 96 MiB source limit. Reads use a reusable 64 KiB
 buffer, independent of input size.
+The compression core uses bounded 32-bit words carried in 64-bit `usize`, explicit
+32-bit masks and borrowed schedule/constant views. Arithmetic remains checked;
+there is no native hashing library or C hash implementation.
 
 On Windows 10 1703+ x64 (PMv2) with MSVC/Windows SDK, launch without arguments for the native
 GUI. **파일 열기 (Alt+O)** selects a file using the actual Windows dialog. Fairy
@@ -47,6 +50,7 @@ fairyc build --release
 .\build\win32-hash.exe
 .\build\win32-hash.exe --hash C:\data\input.bin C:\data\result.json | Out-String
 python -B verify_cli.py
+python -B verify_sha.py
 python -B verify_gui.py
 python -B verify_gui.py --screenshot build/fairy-hash.png
 python -B verify_gui.py --desktop-hover
@@ -57,6 +61,7 @@ python -B verify_gui.py --usability display
 python -B verify_gui.py --usability display --high-contrast
 python -B verify_gui.py --usability keyboard
 python -B benchmark_cli.py --mib 64
+python -B benchmark_cli.py --baseline C:\data\previous.exe --pairs 3 --mib 64
 python -B profile_costs.py --compiler <path-to-fairyc.exe> --mib 64
 fairyc test --locked --file tests/sha256.fy
 fairyc test --locked --file tests/progress.fy
@@ -87,7 +92,11 @@ these are verification bounds, not guarantees for stalled devices or OS reads.
 materialized local-file fixture and checks Python's SHA-256 reference. Optional
 `--baseline <exe>` and `--reverse` allow paired measurements in either order.
 It includes process startup and filesystem caching; it does not measure disk
-bandwidth. Benchmark/GUI fixtures and owned processes are cleaned up.
+bandwidth. `--pairs 1..5` alternates run order and reports median times plus EXE
+identity/size, checking every run against the same Python SHA-256 reference.
+`verify_sha.py` adds 24 differential cases: padding/read boundaries, zero/FF data,
+one million `a` bytes and seeded nonrepeating binary input. Benchmark/GUI fixtures
+and owned processes are cleaned up.
 `profile_costs.py` copies the example into an owned temporary workspace and builds
 a separate profiling entry point with QPC clock calls. It attributes cached file
 reads, in-memory Fairy SHA, file+SHA and actual HWND message/progress work, checking
@@ -153,6 +162,8 @@ The [warm UI execution record](../../docs/development/windows-hash-warm-ui-20261
 records the theme/layout/copy changes and their size difference.
 The [progress execution record](../../docs/development/windows-hash-progress-20261111.md)
 records large-job timings, responsiveness, cancellation and build size.
+The [SHA performance record](../../docs/development/windows-hash-performance-20261112.md)
+records component costs and paired production-EXE speed/size measurements.
 
 Usability checks emit `actual-win32-hash-usability` and close their owned window.
 `accessibility` reads native Windows UI Automation roles, accessible names,
