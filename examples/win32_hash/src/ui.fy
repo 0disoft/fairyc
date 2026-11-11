@@ -52,19 +52,23 @@ pub fn bool layout(ptr mut void window,i32 event){
     let client_height=unsafe{hash_ui_extent(window,1)};
     if(dpi<96 || dpi>960 || width<0 || client_height<0){return false;}
     if(width==0 || client_height==0){return true;}
+    let form_width=if(width>scale(720,dpi)){scale(720,dpi)}else{width};
+    let form_height=if(client_height>scale(280,dpi)){scale(280,dpi)}else{client_height};
+    let origin_x=(width-form_width)/2;let origin_y=(client_height-form_height)/2;
     let inset=scale(18,dpi);let button=scale(110,dpi);let copy_width=scale(76,dpi);let gap=scale(10,dpi);
-    let height=scale(32,dpi);let footer=client_height-inset-height;let file_x=scale(62,dpi);
-    let file_width=width-file_x-inset-button-gap;
+    let height=scale(32,dpi);let footer=origin_y+form_height-inset-height;let file_x=origin_x+scale(62,dpi);
+    let left=origin_x+inset;let right=origin_x+form_width-inset;
+    let file_width=right-file_x-button-gap;
     return unsafe{hash_ui_layout(window,scale(520,dpi),scale(276,dpi),scale(14,dpi))}==0 &&
-        unsafe{hash_ui_move(window,211,inset,scale(24,dpi),scale(30,dpi),scale(38,dpi))}==0 &&
-        unsafe{hash_ui_move(window,206,file_x,scale(18,dpi),file_width,scale(24,dpi))}==0 &&
-        unsafe{hash_ui_move(window,201,file_x,scale(45,dpi),file_width,scale(22,dpi))}==0 &&
-        unsafe{hash_ui_move(window,209,file_x,scale(70,dpi),file_width,scale(20,dpi))}==0 &&
-        unsafe{hash_ui_move(window,202,width-inset-button,scale(29,dpi),button,height)}==0 &&
-        unsafe{hash_ui_move(window,210,inset,scale(101,dpi),width-inset*2,scale(1,dpi))}==0 &&
-        unsafe{hash_ui_move(window,207,inset,scale(114,dpi),width-inset*2,scale(22,dpi))}==0 &&
-        unsafe{hash_ui_move(window,203,inset,scale(142,dpi),width-inset*2,footer-scale(160,dpi))}==0 &&
-        unsafe{hash_ui_move(window,208,width-inset-button-gap-copy_width,footer,copy_width,height)}==0 &&
-        unsafe{hash_ui_move(window,204,width-inset-button,footer,button,height)}==0 &&
-        unsafe{hash_ui_move(window,205,inset,footer-scale(3,dpi),width-inset*2-button-copy_width-gap*2,scale(40,dpi))}==0;
+        unsafe{hash_ui_move(window,211,left,origin_y+scale(24,dpi),scale(30,dpi),scale(38,dpi))}==0 &&
+        unsafe{hash_ui_move(window,206,file_x,origin_y+scale(18,dpi),file_width,scale(24,dpi))}==0 &&
+        unsafe{hash_ui_move(window,201,file_x,origin_y+scale(45,dpi),file_width,scale(22,dpi))}==0 &&
+        unsafe{hash_ui_move(window,209,file_x,origin_y+scale(70,dpi),file_width,scale(20,dpi))}==0 &&
+        unsafe{hash_ui_move(window,202,right-button,origin_y+scale(29,dpi),button,height)}==0 &&
+        unsafe{hash_ui_move(window,210,left,origin_y+scale(101,dpi),right-left,scale(1,dpi))}==0 &&
+        unsafe{hash_ui_move(window,207,left,origin_y+scale(114,dpi),right-left,scale(22,dpi))}==0 &&
+        unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&
+        unsafe{hash_ui_move(window,208,right-button-gap-copy_width,footer,copy_width,height)}==0 &&
+        unsafe{hash_ui_move(window,204,right-button,footer,button,height)}==0 &&
+        unsafe{hash_ui_move(window,205,left,footer-scale(3,dpi),right-left-button-copy_width-gap*2,scale(40,dpi))}==0;
 }

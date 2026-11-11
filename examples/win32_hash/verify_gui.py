@@ -9,40 +9,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 import time
-from contextlib import ExitStack, contextmanager
-
-
-@contextmanager
-def preserve_clipboard():
-    """Retain the original OLE data object, including non-text formats."""
-    ole = c.OleDLL('ole32')
-    ole.OleInitialize.argtypes = [c.c_void_p]
-    ole.OleGetClipboard.argtypes = [c.POINTER(c.c_void_p)]
-    ole.OleSetClipboard.argtypes = [c.c_void_p]
-    ole.OleUninitialize.restype = None
-    ole.OleInitialize(None)
-    saved = c.c_void_p()
-    def request(operation, *args):
-        deadline = time.monotonic() + 3
-        while True:
-            try:
-                return operation(*args)
-            except OSError as error:
-                if time.monotonic() >= deadline:
-                    raise RuntimeError(f'{operation.__name__}: {error}') from error
-                time.sleep(0.02)
-    try:
-        request(ole.OleGetClipboard, c.byref(saved))
-        try:
-            yield
-        finally:
-            request(ole.OleSetClipboard, saved)
-            request(ole.OleFlushClipboard)
-    finally:
-        if saved:
-            table = c.cast(saved, c.POINTER(c.POINTER(c.c_void_p))).contents
-            c.WINFUNCTYPE(w.ULONG, c.c_void_p)(table[2])(saved)
-        ole.OleUninitialize()
+from contextlib import ExitStack
+from clipboard_snapshot import preserve_clipboard
 
 
 def themed_controls(pid):
@@ -149,6 +117,7 @@ def verify(image, screenshot=None):
                 raise RuntimeError('GUI did not load side-by-side Common Controls v6')
             if text(main) != 'Fairy Hash' or enabled(child(main, 204)) or enabled(child(main, 208)):
                 raise RuntimeError('initial title/save state invalid')
+            digest_height = None
             def layout():
                 area = w.RECT()
                 if not client_rect(main, c.byref(area)):
@@ -166,8 +135,15 @@ def verify(image, screenshot=None):
                         if max(r.left, other.left) < min(r.right, other.right) and max(r.top, other.top) < min(r.bottom, other.bottom):
                             return False
                     boxes.append(r)
-                return min(r.left for r in boxes) == area.right - max(r.right for r in boxes)
+                digest, save = boxes[2], boxes[3]  # IDs 203/204, not child order.
+                if digest_height is not None and (digest.bottom-digest.top != digest_height or
+                        save.top-digest.bottom > round(24*window_dpi(main)/96)):
+                    return False
+                return abs(min(r.left for r in boxes) - (area.right - max(r.right for r in boxes))) <= 1
             wait(layout, bool, 'initial layout overlaps or clips controls')
+            digest_bounds = w.RECT()
+            window_rect(child(main, 203), c.byref(digest_bounds))
+            digest_height = digest_bounds.bottom-digest_bounds.top
             def dialog(button):
                 click(child(main, button))
                 return wait(lambda: windows('#32770'), lambda v: len(v) == 1,
@@ -416,6 +392,7 @@ def verify(image, screenshot=None):
                 closeDuringHash=True, twoLineDigest=True, clipboardDigest=True, clipboardRestored=True,
                 clipboardBusyRecovery=True, nativeVisualStyles=True, responsiveLayout=True, minimizeRestore=True,
                 filenameResizeRepaint=True,
+                boundedDigestLayout=True,
                 privateAutomationProtocol=False, processExited=True)
 
 

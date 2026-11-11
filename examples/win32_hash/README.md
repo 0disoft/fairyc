@@ -13,7 +13,9 @@ native save dialog and writes the same UTF-8 JSON as the CLI. Cancelling either
 dialog preserves the previous result. Save is disabled until a hash completes.
 The warm, compact interface uses a 600 × 280 logical-pixel client area (minimum
 520 × 276), system fonts, a filename/path/size summary and a two-line monospaced
-digest. **복사 (Alt+C)** copies the original 64 hex digits without line breaks.
+digest. In larger windows the form is centered and capped at 720 × 280 logical
+pixels; the digest stays 70 logical pixels high with nearby Copy/Save actions.
+**복사 (Alt+C)** copies the original 64 hex digits without line breaks.
 Copy and Save enable only after successful hashing; a busy clipboard reports a
 retryable error. The input path and digest remain read-only text controls with
 native selection/copy support. Long filenames ellipsize visually while the path
@@ -65,7 +67,8 @@ the same size, twice through maximize/restore. This catches stale ellipsis
 pixels that text reads or a repainting `PrintWindow` capture can miss. The
 verifier temporarily makes only its owned app topmost for those pixel reads.
 Clipboard checks
-retain/restore the original OLE clipboard data object. Optional `--screenshot`
+eagerly copy/restore available clipboard data handles (including text and
+binary formats), without retaining a live OLE clipboard wrapper. Optional `--screenshot`
 uses `capture_window.py` and Windows/GDI to capture the actual `sample.txt`
 result to PNG, without extra Python packages. It does not
 inject precomputed hashes/paths into a private app protocol. The verifier knows
