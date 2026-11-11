@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=16):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -374,6 +374,24 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16):
                     if not post(confirmation, 0xF5, 0, 0):
                         raise RuntimeError('could not confirm owned fixture overwrite')
                 wait(lambda: windows('#32770'), lambda v: not v, 'file dialog did not accept path')
+            def measure_job():
+                from types import SimpleNamespace
+                from job_probe import measure
+                return measure(SimpleNamespace(root=root, main=main, child=child, message=message,
+                    choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
+                    visible=visible, process=process, screenshot=screenshot,
+                    resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
+            if job_only:
+                large_job = measure_job()
+                message(main, 0x10)
+                if process.wait(timeout=12) != 0:
+                    raise RuntimeError('owned job window did not close cleanly')
+                stdout, stderr = process.communicate(timeout=2)
+                if stdout or stderr:
+                    raise RuntimeError('ordinary job window wrote CLI output')
+                return dict(ok=True, verification='actual-win32-hash-job', largeJob=large_job,
+                            pixelInspection=False, physicalInput=False, privateAutomationProtocol=False,
+                            processExited=True)
             # Expose once, before the measured sequence. Revealing/activating
             # again at each sample could itself repair stale window pixels.
             activate_owned()
@@ -385,12 +403,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16):
                 raise RuntimeError('Open cancellation changed state')
             large_job = None
             if job_mib:
-                from types import SimpleNamespace
-                from job_probe import measure
-                large_job = measure(SimpleNamespace(root=root, main=main, child=child, message=message,
-                    choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
-                    visible=visible, process=process, screenshot=screenshot,
-                    resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
+                large_job = measure_job()
             for index, data in enumerate((b'', b'abc', bytes(range(256)) * 4097)):
                 source = root / ('입력 Ω-' + str(index) + '-' + '긴이름' * 30 + '&끝.bin')
                 source.write_bytes(data)
@@ -604,9 +617,12 @@ if __name__ == '__main__':
     parser.add_argument('--desktop-hover', action='store_true', help='also require physical cursor hover on an unobstructed desktop')
     parser.add_argument('--job-mib', type=int, choices=range(16, 257), metavar='16..256', default=16,
                         help='also measure a real large-file GUI job')
+    parser.add_argument('--job-only', action='store_true', help='native job/cancel checks without foreground or pixel inspection')
     args = parser.parse_args()
     try:
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib), ensure_ascii=True))
+        if args.job_only and (args.screenshot or args.desktop_hover):
+            raise ValueError('--job-only cannot certify screenshots or desktop hover')
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)

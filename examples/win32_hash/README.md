@@ -16,6 +16,12 @@ The warm, compact interface uses a 600 × 280 logical-pixel client area (minimum
 digest. In larger windows the form is centered and capped at 720 × 280 logical
 pixels; the digest stays 70 logical pixels high with nearby Copy/Save actions.
 **복사 (Alt+C)** copies the original 64 hex digits without line breaks.
+While hashing, processed/total bytes, percentage, a thin native progress bar and
+HH:MM:SS elapsed time update at most every 100ms. Time uses a monotonic clock.
+Open becomes **취소 (Alt+X)**: cancelling keeps the window, shows the partial
+progress/time and restores Open. Partial results cannot be copied or saved;
+the next file starts a fresh job. Progress reaches 100% only after successful
+final hash/size validation. Successful results retain elapsed time.
 Copy and Save enable only after successful hashing; a busy clipboard reports a
 retryable error. The input path and digest remain read-only text controls with
 native selection/copy support. Long filenames ellipsize visually while the path
@@ -27,7 +33,7 @@ Common Controls v6 comes from Windows via the embedded manifest; no UI framework
 font, bitmap or additional runtime ships with the EXE. High contrast uses system
 colors. Fairy computes layout from DPI/client width and height, including resize
 and minimize/restore. A bounded message poll between
-64 KiB reads permits repaint/resize and closing during a large hash; this is
+64 KiB reads permits repaint/resize, cancellation and closing during a large hash; this is
 cooperative processing on one UI thread, not a background worker.
 
 The C bridge only creates native controls, forwards events, opens dialogs and
@@ -44,7 +50,11 @@ python -B verify_cli.py
 python -B verify_gui.py
 python -B verify_gui.py --screenshot build/fairy-hash.png
 python -B verify_gui.py --desktop-hover
+python -B verify_gui.py --job-mib 64
+python -B verify_gui.py --job-only --job-mib 256
+python -B benchmark_cli.py --mib 64
 fairyc test --locked --file tests/sha256.fy
+fairyc test --locked --file tests/progress.fy
 ```
 
 The last path is optional. CLI stdout is the same UTF-8 JSON written to disk.
@@ -63,6 +73,17 @@ and exclusive temporary names. `verify_gui.py` opens the actual Windows
 Open/Save dialogs and controls only its own process using native messages. It
 checks three reference files, paths longer than 127 characters, cancellation,
 overwrite confirmation, input protection and closing a 64 MiB job. It also checks
+one completed 16 MiB job (or `--job-mib 16..256`), independent percentage/time
+observations, GUI-thread ping/resize latency, two actual Cancel button clicks,
+removal of cancelled inputs and successful reuse of the same window. The local
+fixture bounds are 500ms for ping/cancellation and 1s for programmatic resize;
+these are verification bounds, not guarantees for stalled devices or OS reads.
+`benchmark_cli.py` measures process wall time without a GUI observer on one
+materialized local-file fixture and checks Python's SHA-256 reference. Optional
+`--baseline <exe>` and `--reverse` allow paired measurements in either order.
+It includes process startup and filesystem caching; it does not measure disk
+bandwidth. Benchmark/GUI fixtures and owned processes are cleaned up.
+The GUI verifier additionally checks
 actual side-by-side Common Controls loading, two-line digest display, exact
 64-character clipboard data, a locked clipboard followed by successful retry,
 nonoverlapping minimum/expanded layouts and minimize/restore. Long-filename
@@ -91,6 +112,13 @@ at completion. No mouse button or keyboard events are injected. Results explicit
 report `tooltipInput` and `desktopHoverVerified`. Fixtures include 103-character
 Unicode filenames and longer paths with literal ampersands, beyond the tooltip
 notification's 80-character inline buffer.
+`--job-only` exercises the actual native Open dialogs, hash job, percentage/time,
+resize, two cancellations and window reuse without foreground activation or
+pixel inspection. It reports `actual-win32-hash-job`, `pixelInspection:false`
+and `physicalInput:false`; screenshots/desktop hover cannot be combined with
+that mode. The Go integration can select it with `FAIRYC_HASH_JOB_ONLY=1` when
+an input helper prevents foreground ownership. This does not certify the full
+visual/clipboard/Save-dialog suite.
 Clipboard checks
 eagerly copy/restore available clipboard data handles (including text and
 binary formats), without retaining a live OLE clipboard wrapper. Optional `--screenshot`
@@ -110,3 +138,5 @@ The [implementation and execution record](../../docs/development/windows-hash-ut
 contains exact compiler/profile sizes, verification commands and limits.
 The [warm UI execution record](../../docs/development/windows-hash-warm-ui-20261111.md)
 records the theme/layout/copy changes and their size difference.
+The [progress execution record](../../docs/development/windows-hash-progress-20261111.md)
+records large-job timings, responsiveness, cancellation and build size.
