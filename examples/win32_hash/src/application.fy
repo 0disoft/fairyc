@@ -46,6 +46,7 @@ pub fn i32 run() {
     let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
         ui::text(window,212,b"취소(&X)") && ui::enable(window,212,false) && ui::visible(window,212,false) &&
+        ui::name(window,201,b"파일 경로") && ui::name(window,203,b"SHA-256 해시") && ui::name(window,213,b"전체 진행률") &&
         ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
         ui::enable(window,204,false) && ui::enable(window,208,false) && ui::position(window,0) && ui::layout(window,0);
     if(!initialized){ui::destroy(window);return 1;}ui::show(window);

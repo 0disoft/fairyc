@@ -1,9 +1,12 @@
 #define UNICODE
 #define _UNICODE
+#define COBJMACROS
 #include <windows.h>
 #include <commdlg.h>
 #include <commctrl.h>
 #include <stdint.h>
+#include <initguid.h>
+#include <oleacc.h>
 
 // Win32 operations only. Fairy owns file I/O, SHA-256, report bytes and policy.
 static struct {
@@ -16,6 +19,9 @@ static struct {
     int event;
     int minimum_width, minimum_height;
     RECT suggested;
+    IAccPropServices *accessibility;
+    BOOL ole_initialized;
+    uint32_t named_controls;
 } state;
 
 static COLORREF ink(void) { return state.high_contrast ? GetSysColor(COLOR_WINDOWTEXT) : RGB(36, 35, 32); }
@@ -276,6 +282,31 @@ int32_t hash_ui_tone(void *window, uint32_t tone) {
     return 0;
 }
 
+int32_t hash_ui_name(void *window, uint32_t id, const uint8_t *text, size_t length) {
+    HWND control = GetDlgItem((HWND)window, (int)id);
+    if ((HWND)window != state.window || !control || id < 201 || id > 213 || !length || length > 131071) { return 1; }
+    if (!state.accessibility) {
+        HRESULT status = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+        if (FAILED(status) && status != RPC_E_CHANGED_MODE) { return 1; }
+        state.ole_initialized = SUCCEEDED(status);
+        status = CoCreateInstance(&CLSID_AccPropServices, NULL, CLSCTX_INPROC_SERVER,
+            &IID_IAccPropServices, (void **)&state.accessibility);
+        if (FAILED(status)) {
+            if (state.ole_initialized) { CoUninitialize(); state.ole_initialized = FALSE; }
+            return 1;
+        }
+    }
+    WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length+1)*sizeof(WCHAR));
+    if (!wide) { return 1; }
+    int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length);
+    wide[count] = 0;
+    HRESULT status = count ? IAccPropServices_SetHwndPropStr(state.accessibility, control,
+        (DWORD)OBJID_CLIENT, CHILDID_SELF, PROPID_ACC_NAME, wide) : E_INVALIDARG;
+    HeapFree(GetProcessHeap(), 0, wide);
+    if (SUCCEEDED(status)) { state.named_controls |= 1u << (id-201); }
+    return SUCCEEDED(status) ? 0 : 1;
+}
+
 int32_t hash_ui_copy(void *window, const uint8_t *text, size_t length) {
     if ((HWND)window != state.window || !text || length > 131071) { return 1; }
     HGLOBAL data = GlobalAlloc(GMEM_MOVEABLE, (length + 1) * sizeof(WCHAR));
@@ -410,6 +441,16 @@ void hash_ui_show(void *window) {
 }
 
 void hash_ui_destroy(void *window) {
+    if (state.accessibility) {
+        for (int id = 201; id <= 213; id++) {
+            if (state.named_controls & (1u << (id-201))) {
+                IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, id),
+                    (DWORD)OBJID_CLIENT, CHILDID_SELF, &PROPID_ACC_NAME, 1);
+            }
+        }
+        IAccPropServices_Release(state.accessibility); state.accessibility = NULL;
+        state.named_controls = 0;
+    }
     if (IsWindow(state.tooltip)) { DestroyWindow(state.tooltip); }
     state.tooltip = NULL;
     if (state.tooltip_text) { HeapFree(GetProcessHeap(), 0, state.tooltip_text); state.tooltip_text = NULL; }
@@ -421,4 +462,5 @@ void hash_ui_destroy(void *window) {
     if (state.paper) { DeleteObject(state.paper); state.paper = NULL; }
     UnregisterClassW(L"FairyHashWindow", GetModuleHandleW(NULL));
     state.window = NULL;
+    if (state.ole_initialized) { CoUninitialize(); state.ole_initialized = FALSE; }
 }
