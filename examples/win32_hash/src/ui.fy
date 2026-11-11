@@ -7,6 +7,7 @@ unsafe extern C fn i32 hash_ui_text(ptr mut void window,u32 id,ptr u8 text,usize
 unsafe extern C fn i32 hash_ui_enable(ptr mut void window,u32 id,u32 enabled);
 unsafe extern C fn i32 hash_ui_extent(ptr mut void window,u32 axis);
 unsafe extern C fn i32 hash_ui_move(ptr mut void window,u32 id,i32 x,i32 y,i32 width,i32 height);
+unsafe extern C fn i32 hash_ui_redraw(ptr mut void window);
 unsafe extern C fn i32 hash_ui_layout(ptr mut void window,i32 width,i32 height,i32 font);
 unsafe extern C fn i32 hash_ui_accept_dpi(ptr mut void window);
 unsafe extern C fn i32 hash_ui_tone(ptr mut void window,u32 tone);
@@ -70,5 +71,6 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&
         unsafe{hash_ui_move(window,208,right-button-gap-copy_width,footer,copy_width,height)}==0 &&
         unsafe{hash_ui_move(window,204,right-button,footer,button,height)}==0 &&
-        unsafe{hash_ui_move(window,205,left,footer-scale(3,dpi),right-left-button-copy_width-gap*2,scale(40,dpi))}==0;
+        unsafe{hash_ui_move(window,205,left,footer-scale(3,dpi),right-left-button-copy_width-gap*2,scale(40,dpi))}==0 &&
+        unsafe{hash_ui_redraw(window)}==0;
 }

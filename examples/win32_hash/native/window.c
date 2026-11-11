@@ -293,16 +293,23 @@ int32_t hash_ui_extent(void *window, uint32_t axis) {
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
     if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 211) { return 1; }
     HWND control = GetDlgItem((HWND)window, (int)id);
-    if (!MoveWindow(control, x, y, width, height, TRUE)) { return 1; }
-    // Growing a static label can preserve its old pixels and repaint only
-    // the newly exposed strip. Clear the old ellipsis before drawing anew.
-    if (id == 206) { InvalidateRect(control, NULL, TRUE); }
+    // Fairy submits the entire layout before hash_ui_redraw erases and paints
+    // all children. Do not paint intermediate, partially moved arrangements.
+    if (!MoveWindow(control, x, y, width, height, FALSE)) { return 1; }
     if (id == 203) {
         int inset = MulDiv(10, GetDpiForWindow((HWND)window), 96);
         RECT area = {inset, inset, width-inset, height-inset};
         SendMessageW(control, EM_SETRECT, 0, (LPARAM)&area);
     }
     return 0;
+}
+
+int32_t hash_ui_redraw(void *window) {
+    if ((HWND)window != state.window) { return 1; }
+    // Also invalidate existing child pixels, including the document icon and
+    // byte label. Growing/moving a child can otherwise preserve stale bits.
+    return RedrawWindow((HWND)window, NULL, NULL,
+        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW) ? 0 : 1;
 }
 
 int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_height, int32_t font_height) {
@@ -358,7 +365,11 @@ size_t hash_ui_dialog(void *window, uint32_t save, const uint8_t *initial, size_
     dialog.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_DONTADDTORECENT |
         (save ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
     BOOL selected = save ? GetSaveFileNameW(&dialog) : GetOpenFileNameW(&dialog);
-    if (!selected) { return CommDlgExtendedError() == 0 ? 0 : 131073; }
+    DWORD error = selected ? 0 : CommDlgExtendedError();
+    // Native modal dialogs can leave the owner exposed at new bounds. Repair
+    // its full child surface on accept and cancellation, before returning.
+    if (hash_ui_redraw(window) != 0) { return 131073; }
+    if (!selected) { return error == 0 ? 0 : 131073; }
     int count = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, path, -1, (char *)output, (int)capacity, NULL, NULL);
     return count > 0 ? count - 1 : 131073;
 }
