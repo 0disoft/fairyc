@@ -49,6 +49,7 @@ func TestWindowsHashUtility(t *testing.T) {
 					NativeVisualStyles, ResponsiveLayout, MinimizeRestore                    bool
 					FilenameResizeRepaint                                                    bool
 					BoundedDigestLayout                                                      bool
+					NativeTooltips                                                           bool
 					Verification                                                             string
 					Cases                                                                    int
 				}
@@ -58,7 +59,7 @@ func TestWindowsHashUtility(t *testing.T) {
 				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_gui.py" &&
 					(!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected ||
 						!report.TwoLineDigest || !report.ClipboardDigest || !report.ClipboardRestored || !report.ClipboardBusyRecovery ||
-						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore || !report.FilenameResizeRepaint || !report.BoundedDigestLayout) {
+						!report.NativeVisualStyles || !report.ResponsiveLayout || !report.MinimizeRestore || !report.FilenameResizeRepaint || !report.BoundedDigestLayout || !report.NativeTooltips) {
 					t.Fatalf("incomplete utility verification: %s", out)
 				}
 			}

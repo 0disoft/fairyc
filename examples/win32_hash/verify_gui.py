@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None):
+def verify(image, screenshot=None, desktop_hover=False):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -62,6 +62,43 @@ def verify(image, screenshot=None):
     map_points = api('MapWindowPoints', c.c_int, w.HWND, w.HWND, c.c_void_p, w.UINT)
     window_dpi = api('GetDpiForWindow', w.UINT, w.HWND)
     show = api('ShowWindow', w.BOOL, w.HWND, c.c_int)
+    get_cursor = api('GetCursorPos', w.BOOL, c.POINTER(w.POINT))
+    class Mouse(c.Structure):
+        _fields_ = [('dx', w.LONG), ('dy', w.LONG), ('data', w.DWORD),
+                    ('flags', w.DWORD), ('time', w.DWORD), ('extra', c.c_size_t)]
+    class Payload(c.Union):
+        _fields_ = [('mouse', Mouse)]
+    class Input(c.Structure):
+        _fields_ = [('kind', w.DWORD), ('payload', Payload)]
+    send_input = api('SendInput', w.UINT, w.UINT, c.POINTER(Input), c.c_int)
+    metric = api('GetSystemMetrics', c.c_int, c.c_int)
+    pressed = api('GetAsyncKeyState', w.SHORT, c.c_int)
+    def set_cursor(x, y):
+        # Real move-only input; never click, press or release a user's buttons.
+        left, top, width, height = (metric(n) for n in (76, 77, 78, 79))
+        if any(pressed(key) & 0x8000 for key in (1, 2, 4, 5, 6)):
+            return False
+        if not left <= x < left+width or not top <= y < top+height or min(width, height) <= 1:
+            return False
+        event = Input(0, Payload(Mouse(round((x-left)*65535/(width-1)), round((y-top)*65535/(height-1)), 0, 0xC001, 0, 0)))
+        if send_input(1, c.byref(event), c.sizeof(event)) != 1:
+            return False
+        deadline = time.monotonic() + 1
+        while time.monotonic() < deadline:
+            actual = w.POINT()
+            if get_cursor(c.byref(actual)) and abs(actual.x-x) <= 2 and abs(actual.y-y) <= 2:
+                return True
+            time.sleep(0.01)
+        return False
+    hit = api('WindowFromPoint', w.HWND, w.POINT)
+    ancestor = api('GetAncestor', w.HWND, w.HWND, w.UINT)
+    window_style = api('GetWindowLongW', c.c_long, w.HWND, c.c_int)
+    foreground = api('GetForegroundWindow', w.HWND)
+    activate = api('SetForegroundWindow', w.BOOL, w.HWND)
+    attach_input = api('AttachThreadInput', w.BOOL, w.DWORD, w.DWORD, w.BOOL)
+    bring_to_top = api('BringWindowToTop', w.BOOL, w.HWND)
+    kernel = c.WinDLL('kernel32')
+    kernel.GetCurrentThreadId.restype = w.DWORD
     dpi = api('SetThreadDpiAwarenessContext', c.c_void_p, c.c_void_p)
     previous = dpi(c.c_void_p(-4))
     if not previous:
@@ -77,6 +114,11 @@ def verify(image, screenshot=None):
                     process.terminate()
                     process.wait(timeout=5)
             cleanup.callback(stop_before_fixture_cleanup)
+            original_cursor = w.POINT()
+            if not get_cursor(c.byref(original_cursor)):
+                raise RuntimeError('cannot preserve cursor position')
+            if desktop_hover:
+                cleanup.callback(lambda: set_cursor(original_cursor.x, original_cursor.y))
             def wait(read, accept, label, seconds=12):
                 deadline = time.monotonic() + seconds
                 while True:
@@ -144,6 +186,94 @@ def verify(image, screenshot=None):
             digest_bounds = w.RECT()
             window_rect(child(main, 203), c.byref(digest_bounds))
             digest_height = digest_bounds.bottom-digest_bounds.top
+            tooltip_observations = []
+            def activate_owned():
+                activate(main)
+                if foreground() == main:
+                    return
+                queued = w.MSG()
+                api('PeekMessageW', w.BOOL, c.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT)(c.byref(queued), None, 0, 0, 0)
+                current_thread = kernel.GetCurrentThreadId()
+                threads = dict.fromkeys((owner(foreground(), None), owner(main, None)))
+                attached = []
+                try:
+                    for thread in threads:
+                        if thread and thread != current_thread and attach_input(current_thread, thread, True):
+                            attached.append(thread)
+                    bring_to_top(main)
+                    activate(main)
+                finally:
+                    if not all([attach_input(current_thread, thread, False) for thread in reversed(attached)]):
+                        raise RuntimeError('cannot detach temporary owned-window input queues')
+                wait(foreground, lambda v: v == main, 'owned tooltip window cannot become foreground', seconds=3)
+            def tooltip(control_id, expected, clipped=True):
+                if not desktop_hover:
+                    found = []
+                    @callback
+                    def visit_tip(hwnd, unused):
+                        pid = w.DWORD()
+                        owner(hwnd, c.byref(pid))
+                        if pid.value == process.pid and kind(hwnd) == 'tooltips_class32':
+                            found.append(hwnd)
+                        return True
+                    enum(visit_tip, 0)
+                    if len(found) != 1:
+                        raise RuntimeError('owned native tooltip missing')
+                    from tooltip_probe import probe
+                    probe(process.pid, main, found[0], child(main, control_id), message, wait, visible, text, expected, clipped)
+                    if clipped:
+                        tooltip_observations.append(dict(control=control_id, characters=len(expected), matchesFullText=True))
+                    return
+                r = w.RECT()
+                control = child(main, control_id)
+                was_topmost = bool(window_style(main, -20) & 8)
+                if not resize(main, w.HWND(-1), 0, 0, 0, 0, 0x13) or not window_rect(control, c.byref(r)):
+                    raise RuntimeError('cannot expose owned tooltip target')
+                try:
+                    activate_owned()
+                    # Move over an unregistered owned control first, so repeated
+                    # checks exercise a new hover, not a stale visible tooltip.
+                    away = w.RECT()
+                    window_rect(child(main, 207), c.byref(away))
+                    if not set_cursor(away.left + 3, away.top + 3):
+                        current = w.POINT()
+                        get_cursor(c.byref(current))
+                        raise RuntimeError(f'cannot move cursor within owned app: requested={(away.left+3,away.top+3)}, current={(current.x,current.y)}, desktop={tuple(metric(n) for n in (76,77,78,79))}, winError={c.get_last_error()}')
+                    time.sleep(0.15)  # Let native mouse-leave dispatch before a new move can coalesce it.
+                    wait(lambda: windows('tooltips_class32'), lambda v: not v, 'tooltip did not leave previous target')
+                    window_rect(control, c.byref(r))
+                    point = w.POINT((r.left+r.right)//2, (r.top+r.bottom)//2)
+                    # WindowFromPoint intentionally skips STATIC text controls.
+                    # Its root must still be this owned, nonoverlapping window.
+                    try:
+                        wait(lambda: ancestor(hit(point), 2), lambda v: v == main, 'owned tooltip target not exposed', seconds=3)
+                    except RuntimeError:
+                        covering = hit(point)
+                        covering_pid = w.DWORD()
+                        owner(covering, c.byref(covering_pid))
+                        raise RuntimeError(f'tooltip target is occluded: control={control_id}, point={(point.x, point.y)}, class={kind(covering)}, pid={covering_pid.value}, expectedPid={process.pid}')
+                    if not set_cursor(point.x, point.y):
+                        raise RuntimeError('native hover move failed')
+                    if not clipped:
+                        time.sleep(0.8)
+                        if windows('tooltips_class32'):
+                            raise RuntimeError('unclipped filename unexpectedly shows a tooltip')
+                        return
+                    def displayed():
+                        found = windows('tooltips_class32')
+                        return [(hwnd, text(hwnd)) for hwnd in found]
+                    popup, actual = wait(displayed, lambda v: len(v) == 1 and v[0][1] == expected,
+                                         f'native hover tooltip missing/truncated/stale: control={control_id}, characters={len(expected)}, completedHovers={len(tooltip_observations)}', seconds=5)[0]
+                    if screenshot:
+                        from capture_window import capture
+                        capture(popup, screenshot.with_name(f'{screenshot.stem}-tooltip-{control_id}.png'))
+                    tooltip_observations.append(dict(control=control_id, characters=len(actual), matchesFullText=True))
+                finally:
+                    # Pop through ordinary pointer leave, then restore user state.
+                    set_cursor(away.left + 3, away.top + 3)
+                    time.sleep(0.15)
+                    wait(lambda: windows('tooltips_class32'), lambda v: not v, 'tooltip did not dismiss on leave', seconds=3)
+                    resize(main, w.HWND(-1 if was_topmost else -2), 0, 0, 0, 0, 0x13)
             def dialog(button):
                 click(child(main, button))
                 return wait(lambda: windows('#32770'), lambda v: len(v) == 1,
@@ -228,7 +358,7 @@ def verify(image, screenshot=None):
             if text(child(main, 201)) or text(child(main, 203)) or enabled(child(main, 204)):
                 raise RuntimeError('Open cancellation changed state')
             for index, data in enumerate((b'', b'abc', bytes(range(256)) * 4097)):
-                source = root / ('입력 Ω-' + str(index) + '-' + '긴이름' * 20 + '.bin')
+                source = root / ('입력 Ω-' + str(index) + '-' + '긴이름' * 30 + '&끝.bin')
                 source.write_bytes(data)
                 choose(202, source)
                 expected_hash = hashlib.sha256(data).hexdigest()
@@ -271,6 +401,8 @@ def verify(image, screenshot=None):
                     raise RuntimeError('fixture did not exercise paths beyond the old edit limit')
                 if not os.path.samefile(actual_path, source):
                     raise RuntimeError('displayed path does not identify the selected file')
+                tooltip(206, source.name)
+                tooltip(201, actual_path)
                 expected = dict(algorithm='SHA-256', file=actual_path, bytes=len(data), sha256=expected_hash)
                 if index == 0:
                     # The same file at the same wide size must look identical
@@ -285,6 +417,8 @@ def verify(image, screenshot=None):
                         time.sleep(0.1)
                         show(main, 3)
                         wait(layout, bool, 'maximized layout invalid')
+                        tooltip(206, source.name)
+                        tooltip(201, actual_path)
                         time.sleep(0.1)
                         before_title = root / 'expanded-title.png'
                         capture(title, before_title, repaint=False)
@@ -297,6 +431,7 @@ def verify(image, screenshot=None):
                         choose(202, reset)
                         wait(lambda: text(child(main, 201)), lambda v: bool(v) and os.path.samefile(v, reset), 'refresh selection')
                         wait(lambda: bool(enabled(child(main, 202))), bool, 'refresh hash not complete')
+                        tooltip(206, 'refresh.txt', clipped=False)
                         choose(202, source)
                         wait(lambda: text(child(main, 201)), lambda v: bool(v) and os.path.samefile(v, source), 'wide reselect path')
                         wait(lambda: text(child(main, 203)), lambda v: v == expected_display, 'wide reselect hash')
@@ -325,6 +460,7 @@ def verify(image, screenshot=None):
                         wait(lambda: text(child(main, 201)), lambda v: bool(v) and os.path.samefile(v, sample), 'screenshot sample selection')
                         wait(lambda: text(child(main, 203)), lambda v: v == expected_display, 'screenshot sample hash')
                         wait(lambda: bool(enabled(child(main, 204))), bool, 'screenshot sample not ready')
+                        tooltip(206, 'sample.txt', clipped=False)
                         from capture_window import capture
                         capture(main, screenshot)
                         choose(202, source)
@@ -393,6 +529,8 @@ def verify(image, screenshot=None):
                 clipboardBusyRecovery=True, nativeVisualStyles=True, responsiveLayout=True, minimizeRestore=True,
                 filenameResizeRepaint=True,
                 boundedDigestLayout=True,
+                nativeTooltips=True, desktopHoverVerified=desktop_hover,
+                tooltipInput='desktop' if desktop_hover else 'native-messages', tooltipObservations=tooltip_observations,
                 privateAutomationProtocol=False, processExited=True)
 
 
@@ -400,9 +538,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--exe', type=Path, default=Path(__file__).parent / 'build/win32-hash.exe')
     parser.add_argument('--screenshot', type=Path, help='optional actual sample.txt window capture')
+    parser.add_argument('--desktop-hover', action='store_true', help='also require physical cursor hover on an unobstructed desktop')
     args = parser.parse_args()
     try:
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot), ensure_ascii=True))
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)

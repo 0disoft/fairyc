@@ -43,6 +43,7 @@ fairyc build --release
 python -B verify_cli.py
 python -B verify_gui.py
 python -B verify_gui.py --screenshot build/fairy-hash.png
+python -B verify_gui.py --desktop-hover
 fairyc test --locked --file tests/sha256.fy
 ```
 
@@ -69,12 +70,16 @@ checks compare actual visible pixels after maximize with a fresh selection at
 the same size, twice through maximize/restore. This catches stale ellipsis
 pixels that text reads or a repainting `PrintWindow` capture can miss. The
 verifier temporarily makes only its owned app topmost for those pixel reads.
-Tooltip checks move the actual desktop pointer over the owned controls, read
-the visible native popup and restore the pointer at completion. They require
-an unlocked desktop with native mouse input available; no mouse buttons or
-keyboard events are injected. Fixtures include 103-character Unicode filenames
-and longer paths with literal ampersands, beyond the tooltip notification's
-80-character inline buffer.
+Default tooltip checks use standard Common Controls messages on the existing
+registered tool and read the actual popup. `tooltip_probe.py` temporarily enables
+tracking and restores the exact original TOOLINFO; text comes from the production
+callback, with no injected text/path/hash or app-specific command. This keeps CLI
+verification independent of desktop input helpers. `--desktop-hover` additionally
+requires actual pointer hover on an unobstructed desktop and restores the pointer
+at completion. No mouse button or keyboard events are injected. Results explicitly
+report `tooltipInput` and `desktopHoverVerified`. Fixtures include 103-character
+Unicode filenames and longer paths with literal ampersands, beyond the tooltip
+notification's 80-character inline buffer.
 Clipboard checks
 eagerly copy/restore available clipboard data handles (including text and
 binary formats), without retaining a live OLE clipboard wrapper. Optional `--screenshot`
