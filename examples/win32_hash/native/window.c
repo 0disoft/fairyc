@@ -8,7 +8,7 @@
 #include <initguid.h>
 #include <oleacc.h>
 
-// Win32 operations only. Fairy owns file I/O, SHA-256, report bytes and policy.
+// Win32 operations only. Fairy owns file policy, SHA-256 and report bytes.
 static struct {
     HWND window, tooltip;
     WCHAR *tooltip_text;

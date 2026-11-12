@@ -14,7 +14,7 @@ typedef struct {
 
 typedef struct {
     LONG references, cancelled;
-    HANDLE request, ready, thread, file;
+    HANDLE request, ready, stop, thread, file;
     WCHAR *path;
     observation result;
     uint8_t buffer[65536];
@@ -26,6 +26,7 @@ static LONG live_readers;
 static void release(reader *value) {
     if (InterlockedDecrement(&value->references) != 0) { return; }
     CloseHandle(value->request); CloseHandle(value->ready);
+    CloseHandle(value->stop);
     if (value->thread) { CloseHandle(value->thread); }
     HeapFree(GetProcessHeap(), 0, value->path);
     HeapFree(GetProcessHeap(), 0, value);
@@ -81,6 +82,17 @@ failed:
     value->result.phase = 4; SetEvent(value->ready);
 finished:
     if (value->file != INVALID_HANDLE_VALUE) { CloseHandle(value->file); }
+    SetEvent(value->stop);
+    release(value);
+    return 0;
+}
+
+static DWORD WINAPI cancel_reader(void *context) {
+    reader *value = context;
+    WaitForSingleObject(value->stop, INFINITE);
+    // Even the cancellation request stays off the GUI thread. A driver may
+    // delay its cancellation routine or immediately reissue synchronous I/O.
+    if (cancelled(value)) { CancelSynchronousIo(value->thread); }
     release(value);
     return 0;
 }
@@ -94,13 +106,23 @@ void *hash_reader_open(const uint8_t *path, size_t length) {
     value->path = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
     value->request = CreateEventW(NULL, FALSE, FALSE, NULL);
     value->ready = CreateEventW(NULL, TRUE, FALSE, NULL);
-    if (!value->path || !value->request || !value->ready) { release(value); return NULL; }
+    value->stop = CreateEventW(NULL, TRUE, FALSE, NULL);
+    if (!value->path || !value->request || !value->ready || !value->stop) { release(value); return NULL; }
     int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path, (int)length, value->path, (int)length);
     if (!count) { release(value); return NULL; }
     value->path[count] = 0;
     value->references = 2;
     value->thread = CreateThread(NULL, 0, run_reader, value, 0, NULL);
     if (!value->thread) { value->references = 1; release(value); return NULL; }
+    InterlockedIncrement(&value->references);
+    HANDLE canceller = CreateThread(NULL, 0, cancel_reader, value, 0, NULL);
+    if (!canceller) {
+        release(value); // Cancel worker was not started.
+        InterlockedExchange(&value->cancelled, 1); SetEvent(value->request);
+        release(value); // Read worker keeps storage until its I/O returns.
+        return NULL;
+    }
+    CloseHandle(canceller);
     return value;
 }
 
@@ -111,6 +133,11 @@ observation hash_reader_observe(void *context) {
     observation empty = {0};
     if (!value || WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0) { return empty; }
     return value->result; // Immutable until the GUI acknowledges with next().
+}
+
+void hash_reader_snapshot(void *context, void *output) {
+    observation value = hash_reader_observe(context);
+    memcpy(output, &value, sizeof(value));
 }
 
 int32_t hash_reader_copy(void *context, uint8_t *output, size_t capacity) {
@@ -139,7 +166,7 @@ void hash_reader_drop(void *context) {
     if (!value) { return; }
     InterlockedExchange(&value->cancelled, 1);
     SetEvent(value->request);
-    // This requests cancellation, never joins the worker or frees its storage.
-    CancelSynchronousIo(value->thread);
+    SetEvent(value->stop);
+    // No file API, cancellation call or worker join runs on the GUI thread.
     release(value);
 }

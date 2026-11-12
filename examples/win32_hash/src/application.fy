@@ -2,10 +2,12 @@ module application;
 import hash_file as hash;
 import sha256_stream as sha;
 import ui as ui;
+import reader as reader;
 import std::fs as fs;
 import std::bytes as bytes;
 
 pub fn bool error(ptr mut void window,u32 code){
+    if(code==9){return ui::status(window,b"이전 파일 읽기가 아직 끝나지 않았어요. 잠시 후 다시 시도하세요.",2);}
     if(code==7){return ui::status(window,b"원본 파일에는 덮어쓸 수 없어요.",2);}
     if(code==6){return ui::status(window,b"저장 실패: 다른 위치를 선택하세요.",2);}
     if(code==5){return ui::status(window,b"메모리가 부족해요.",2);}
@@ -16,25 +18,40 @@ pub fn bool error(ptr mut void window,u32 code){
 
 @effects(filesystem,clock)
 pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
-    var file=switch(hash::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
-    let total=switch(fs::size(ref file)){case .ok(v):{v}case .err(_):{return .err(2);}};
+    let input=switch(reader::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    var usize total=0;var bool opened=false;
     var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
     let started=ui::ticks();var usize displayed=started;
     if(!ui::progress(window,0,total,0)){return .err(5);}
+    var observed=reader::observe(ref input);
     while(true) {
-        let count=switch(hash::read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
         let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
         if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
+        observed=reader::observe(ref input);
+        if(observed.phase==4){return .err(2);}
+        if(observed.phase==1){
+            if(observed.kind!=1 || observed.directory!=0){return .err(3);}
+            total=observed.size;opened=true;
+            if(!reader::next(ref input)){return .err(2);}
+        }
+        if(observed.phase==2){
+            if(!opened || observed.count>65536 || !reader::copy(ref input,bytes::view_mut(ref mut buffer))){return .err(2);}
+            let ref u8[] data=bytes::view(ref buffer);
+            if(!sha::update(ref mut state,data[..observed.count])){return .err(4);}
+            if(!reader::next(ref input)){return .err(2);}
+        }
         let now=ui::ticks();
-        if(now-displayed>=100 || count==0) {
+        if(now-displayed>=100 || observed.phase==3) {
             if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
         }
-        if(count==0){break;}
+        if(observed.phase==3){break;}
+        if(observed.phase==0){reader::wait(ref input);}
     }
-    let value=switch(hash::finish(ref file,ref state)){case .ok(v):{v}case .err(e):{return .err(e);}};
-    if(value.length!=total){return .err(3);}
-    if(!fs::close(file).is_ok){return .err(2);}return .ok(value);
+    if(!opened || state.length!=total || observed.size!=total){return .err(3);}
+    let identity=fs::FileId{.volume_low=observed.volume_low,.volume_high=observed.volume_high,
+        .file_low_0=observed.file_low_0,.file_low_1=observed.file_low_1,.file_high_0=observed.file_high_0,.file_high_1=observed.file_high_1};
+    return .ok(hash::Digest{.words=sha::finish(ref state),.length=state.length,.identity});
 }
 
 @effects(filesystem,clock)

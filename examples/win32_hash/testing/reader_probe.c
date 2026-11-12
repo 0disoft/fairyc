@@ -52,6 +52,8 @@ int wmain(int argc, WCHAR **argv) {
     ULONGLONG elapsed = GetTickCount64()-started;
     CHECK(elapsed < 500 && WaitForSingleObject(thread, 3000) == WAIT_OBJECT_0);
     CloseHandle(thread); CloseHandle(server);
+    deadline = GetTickCount64()+3000;
+    while (InterlockedCompareExchange(&live_readers, 0, 0) != 0 && GetTickCount64() < deadline) { Sleep(1); }
     CHECK(InterlockedCompareExchange(&live_readers, 0, 0) == 0);
     printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0}\n", total, elapsed);
     return 0;

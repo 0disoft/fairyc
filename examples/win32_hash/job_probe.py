@@ -41,7 +41,8 @@ def measure(driver, mib):
                 percent, hours, minutes, seconds = map(int, label.groups())
                 # Cross-process reads can straddle one real render update. Only
                 # retain coherent snapshots; never inject a synthetic revision.
-                if percent == position == min(99, done*100//total) and total == mib*1048576:
+                # Size is unknown until the background open/metadata completes.
+                if total == mib*1048576 and percent == position == min(99, done*100//total):
                     progress.append((done, percent, hours*3600+minutes*60+seconds))
                     if not saved_screenshot and percent >= 10 and getattr(driver, 'screenshot', None):
                         from capture_window import capture
