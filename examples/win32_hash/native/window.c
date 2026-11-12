@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <initguid.h>
 #include <oleacc.h>
+#include <UIAutomationCore.h>
+#include <UIAutomationCoreApi.h>
 
 // Win32 operations only. Fairy owns file policy, SHA-256 and report bytes.
 static struct {
@@ -305,6 +307,16 @@ int32_t hash_ui_tone(void *window, uint32_t tone) {
     return 0;
 }
 
+int32_t hash_ui_live(void *window, uint32_t setting, uint32_t notify) {
+    if ((HWND)window != state.window || !state.accessibility || setting > 2 || notify > 1) { return 1; }
+    HWND label = GetDlgItem((HWND)window, 205);
+    VARIANT value = {0}; value.vt = VT_I4; value.lVal = (LONG)setting;
+    if (FAILED(IAccPropServices_SetHwndProp(state.accessibility, label,
+        (DWORD)OBJID_CLIENT, CHILDID_SELF, LiveSetting_Property_GUID, value))) { return 1; }
+    if (notify && setting) { NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED, label, OBJID_CLIENT, CHILDID_SELF); }
+    return 0;
+}
+
 int32_t hash_ui_name(void *window, uint32_t id, const uint8_t *text, size_t length) {
     HWND control = GetDlgItem((HWND)window, (int)id);
     if ((HWND)window != state.window || !control || id < 201 || id > 213 || !length || length > 131071) { return 1; }
@@ -465,6 +477,8 @@ void hash_ui_show(void *window) {
 
 void hash_ui_destroy(void *window) {
     if (state.accessibility) {
+        IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 205),
+            (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
         for (int id = 201; id <= 213; id++) {
             if (state.named_controls & (1u << (id-201))) {
                 IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, id),

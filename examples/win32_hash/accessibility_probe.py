@@ -62,7 +62,7 @@ def inspect(hwnd, pid):
         properties = dict(id=30011, name=30005, type=30003, enabled=30010, focusable=30009,
                           focused=30008, accessKey=30007, value=30045, readOnly=30046,
                           valuePattern=30043, rangePattern=30033,
-                          rangeValue=30047, rangeMin=30049, rangeMax=30050)
+                          rangeValue=30047, rangeMin=30049, rangeMax=30050, liveSetting=30135)
         rows = []
         for index in range(count.value):
             element = c.c_void_p()
@@ -77,3 +77,35 @@ def inspect(hwnd, pid):
         for pointer in (elements, condition, root, client):
             release(pointer)
         ole.CoUninitialize()
+
+
+class StatusEvents:
+    """Observe real, process-filtered live-region WinEvents without UI actions."""
+    def __init__(self, driver):
+        self.driver, self.events = driver, []
+        self.user = c.WinDLL('user32', use_last_error=True)
+        callback = c.WINFUNCTYPE(None, w.HANDLE, w.DWORD, w.HWND, w.LONG, w.LONG, w.DWORD, w.DWORD)
+        def receive(hook, event, hwnd, object_id, child_id, thread, ticks):
+            if hwnd == driver.child(driver.main, 205) and object_id == -4 and child_id == 0:
+                self.events.append(dict(event=event, text=driver.text(hwnd)))
+        self.callback = callback(receive)
+
+    def __enter__(self):
+        install = self.user.SetWinEventHook
+        install.argtypes, install.restype = [w.DWORD, w.DWORD, w.HMODULE, c.c_void_p, w.DWORD, w.DWORD, w.DWORD], w.HANDLE
+        self.hook = install(0x8019, 0x8019, None, self.callback, self.driver.process.pid, 0, 0)
+        if not self.hook: raise OSError(c.get_last_error(), 'cannot observe status live events')
+        return self
+
+    def drain(self):
+        message = w.MSG()
+        peek = self.user.PeekMessageW
+        peek.argtypes, peek.restype = [c.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT], w.BOOL
+        while peek(c.byref(message), None, 0, 0, 1):
+            self.user.TranslateMessage(c.byref(message)); self.user.DispatchMessageW(c.byref(message))
+        return self.events
+
+    def __exit__(self, *error):
+        self.user.UnhookWinEvent.argtypes = [w.HANDLE]
+        if not self.user.UnhookWinEvent(self.hook):
+            raise OSError(c.get_last_error(), 'cannot release status observer')

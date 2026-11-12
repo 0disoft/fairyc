@@ -19,6 +19,7 @@ unsafe extern C fn i32 hash_ui_redraw(ptr mut void window);
 unsafe extern C fn i32 hash_ui_layout(ptr mut void window,i32 width,i32 height,i32 font);
 unsafe extern C fn i32 hash_ui_accept_dpi(ptr mut void window);
 unsafe extern C fn i32 hash_ui_tone(ptr mut void window,u32 tone);
+unsafe extern C fn i32 hash_ui_live(ptr mut void window,u32 setting,u32 notify);
 unsafe extern C fn i32 hash_ui_copy(ptr mut void window,ptr u8 text,usize length);
 unsafe extern C fn usize hash_ui_dialog(ptr mut void window,u32 save,ptr u8 initial,usize length,ptr mut u8 output,usize capacity);
 unsafe extern C fn void hash_ui_show(ptr mut void window);
@@ -49,7 +50,8 @@ pub fn usize choose(ptr mut void window,bool save,ref mut u8[] output){let initi
 pub fn void show(ptr mut void window){unsafe{hash_ui_show(window)};}
 pub fn void destroy(ptr mut void window){unsafe{hash_ui_destroy(window)};}
 pub fn bool status(ptr mut void window,ref u8[] value,u32 tone){
-    return text(window,205,value) && unsafe{hash_ui_tone(window,tone)}==0;
+    return text(window,205,value) && unsafe{hash_ui_tone(window,tone)}==0 &&
+        unsafe{hash_ui_live(window,if(tone==2){2}else{1},1)}==0;
 }
 pub fn bool copy(ptr mut void window,ref u8[] value){
     return unsafe{hash_ui_copy(window,value as ptr u8,value.len)}==0;
@@ -69,9 +71,15 @@ pub fn bool count(ptr mut void window,usize length){
 pub fn usize ticks(){return unsafe{hash_ui_ticks()};}
 pub fn bool position(ptr mut void window,usize value){return unsafe{hash_ui_progress(window,value)}==0;}
 pub fn bool elapsed_status(ptr mut void window,ref u8[] prefix,usize elapsed,u32 tone){
+    return elapsed_label(window,prefix,elapsed,tone,true);
+}
+fn bool elapsed_label(ptr mut void window,ref u8[] prefix,usize elapsed,u32 tone,bool announce){
     var bytes::Buffer label=bytes::empty();
     return bytes::append(ref mut label,prefix).is_ok && bytes::append(ref mut label,b" · 경과 ").is_ok &&
-        measure::elapsed(ref mut label,elapsed) && status(window,bytes::view(ref label),tone);
+        measure::elapsed(ref mut label,elapsed) &&
+        if(announce){status(window,bytes::view(ref label),tone)}else{
+            unsafe{hash_ui_live(window,0,0)}==0 && text(window,205,bytes::view(ref label)) && unsafe{hash_ui_tone(window,tone)}==0
+        };
 }
 pub fn bool progress(ptr mut void window,usize done,usize total,usize elapsed){
     var bytes::Buffer summary=bytes::empty();var bytes::Buffer label=bytes::empty();
@@ -79,7 +87,7 @@ pub fn bool progress(ptr mut void window,usize done,usize total,usize elapsed){
     return bytes::append_usize(ref mut summary,done).is_ok && bytes::append(ref mut summary,b" / ").is_ok &&
         bytes::append_usize(ref mut summary,total).is_ok && bytes::append(ref mut summary,b" 바이트").is_ok &&
         text(window,209,bytes::view(ref summary)) && bytes::append_usize(ref mut label,percent).is_ok &&
-        bytes::append_byte(ref mut label,37).is_ok && elapsed_status(window,bytes::view(ref label),elapsed,0) &&
+        bytes::append_byte(ref mut label,37).is_ok && elapsed_label(window,bytes::view(ref label),elapsed,0,false) &&
         position(window,percent);
 }
 pub fn bool digest(ptr mut void window,ref u8[] hex){

@@ -6,7 +6,7 @@ import json
 import time
 from native_keyboard import DesktopKeys
 from clipboard_snapshot import preserve_clipboard
-from accessibility_probe import inspect
+from accessibility_probe import inspect, StatusEvents
 
 
 def clipboard_text():
@@ -118,7 +118,7 @@ def keyboard(driver):
                 enterButtons=['Open', 'Copy', 'Save', 'Cancel'], receipts=keys.receipts)
 
 
-def accessibility(driver):
+def accessibility(driver, events):
     user = c.WinDLL('user32')
     next_tab = user.GetNextDlgTabItem
     next_tab.argtypes, next_tab.restype = [w.HWND, w.HWND, w.BOOL], w.HWND
@@ -158,11 +158,26 @@ def accessibility(driver):
         raise RuntimeError('accessible values do not match actual selected file/hash')
     if after['213']['rangeValue'] != 100 or not after['204']['enabled'] or not after['208']['enabled']:
         raise RuntimeError('accessible completed state invalid')
+    if after['205']['liveSetting'] != 1:
+        raise RuntimeError('completed status is not a polite live region')
+    driver.wait(events.drain, lambda rows: any(row['text'].startswith('✓ 계산 완료') for row in rows), 'completion live event missing')
+    # Hold the clipboard to exercise an actual error, without replacing data.
+    user.OpenClipboard.argtypes, user.OpenClipboard.restype = [w.HWND], w.BOOL
+    if not user.OpenClipboard(None): raise RuntimeError('cannot acquire clipboard error fixture')
+    try:
+        driver.message(driver.child(driver.main, 208), 0xf5)
+        driver.wait(lambda: driver.text(driver.child(driver.main, 205)), lambda value: value.startswith('복사 실패'), 'clipboard contention did not report an error')
+    finally:
+        user.CloseClipboard()
+    driver.wait(events.drain, lambda rows: any(row['text'].startswith('복사 실패') for row in rows), 'error live event missing')
+    error_rows = {row['id']: row for row in inspect(driver.main, driver.process.pid)['controls']}
+    if error_rows['205']['liveSetting'] != 2:
+        raise RuntimeError('error status is not an assertive live region')
     tab_orders['completed'] = order(202, [201, 203, 208, 204, 202])
     tab_orders['completedReverse'] = order(202, [204, 208, 203, 201, 202], True)
     large = driver.root/'accessible-busy.bin'
     with large.open('wb') as stream:
-        stream.seek(64*1048576-1)
+        stream.seek(256*1048576-1)
         stream.write(b'\0')
     driver.choose(202, large)
     driver.wait(lambda: bool(driver.visible(driver.child(driver.main, 212))), bool, 'accessible busy state missing')
@@ -172,15 +187,26 @@ def accessibility(driver):
         raise RuntimeError('Cancel accessible name/action missing')
     if active['204']['enabled'] or active['208']['enabled']:
         raise RuntimeError('accessible busy state exposed partial-result actions')
+    if active['205']['liveSetting'] != 0:
+        raise RuntimeError('progress announcements were not suppressed')
+    events.drain(); before = len(events.events)
+    until = time.monotonic()+0.25
+    while time.monotonic() < until:
+        time.sleep(0.02); events.drain()
+    if len(events.events) != before or not driver.visible(driver.child(driver.main, 212)):
+        raise RuntimeError('progress emitted repeated live events or busy fixture finished early')
     tab_orders['busy'] = order(212, [201, 203, 212])
     tab_orders['busyReverse'] = order(212, [203, 201, 212], True)
     driver.message(driver.child(driver.main, 212), 0xf5)
     driver.wait(lambda: bool(driver.enabled(driver.child(driver.main, 202))), bool, 'accessible cancel did not return to idle')
+    driver.wait(events.drain, lambda rows: any(row['text'].startswith('취소됨') for row in rows), 'cancellation live event missing')
     result['completed'] = ready['controls']
     result['busy'] = busy['controls']
     result['screenReaderVoiceTested'] = False
     result['nativeTabOrders'] = tab_orders
     result['nativeOrderIsPhysicalInput'] = False
+    result['statusLiveEvents'] = events.events
+    result['progressAnnouncementsSuppressed'] = True
     return result
 
 
@@ -189,7 +215,8 @@ def run(driver, mode, high_contrast=False):
     if mode in ('keyboard', 'all'):
         result['keyboard'] = keyboard(driver)
     if mode in ('accessibility', 'all'):
-        result['accessibility'] = accessibility(driver)
+        with StatusEvents(driver) as events:
+            result['accessibility'] = accessibility(driver, events)
     if mode in ('display', 'all'):
         from display_probe import verify
         result['display'] = verify(driver, high_contrast)
