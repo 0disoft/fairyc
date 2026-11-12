@@ -25,7 +25,11 @@ func prepareWindowsHashSlowIO(t *testing.T, root string) {
 		{"ReadFile(value->file,", "delayed_read(value->file,"},
 		{"GetFileInformationByHandleEx(file, FileIdInfo,", "delayed_metadata(file, FileIdInfo,"},
 	} {
-		if strings.Count(text, pair[0]) != 1 {
+		expected := 1
+		if pair[0] == "value->file = CreateFileW(" {
+			expected = 2 // The second open belongs to the synchronous CLI guard.
+		}
+		if strings.Count(text, pair[0]) != expected {
 			t.Fatalf("slow-I/O hook no longer matches transport: %s", pair[0])
 		}
 		text = strings.Replace(text, pair[0], pair[1], 1)

@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False, slow_io=False, slow_save=None):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False, slow_io=False, slow_save=None, source_changes=False):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -367,6 +367,15 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                     choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
                     visible=visible, process=process, screenshot=screenshot,
                     resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
+            if source_changes:
+                from types import SimpleNamespace
+                from source_change_probe import verify as verify_changes
+                result = verify_changes(SimpleNamespace(root=root, main=main, process=process, child=child,
+                    message=message, text=text, enabled=enabled, visible=visible, wait=wait, choose=choose, windows=windows))
+                stdout, stderr = process.communicate(timeout=3)
+                if stdout or stderr or process.returncode:
+                    raise RuntimeError('source-change window did not exit cleanly')
+                return dict(ok=True, verification='actual-win32-hash-source-changes', processExited=True, **result)
             if slow_save:
                 from types import SimpleNamespace
                 from slow_save_probe import verify as verify_save
@@ -646,6 +655,7 @@ if __name__ == '__main__':
     parser.add_argument('--high-contrast', action='store_true', help='temporarily toggle OS high contrast and restore it')
     parser.add_argument('--slow-io', action='store_true', help='verify pending I/O on the test-only gate build')
     parser.add_argument('--slow-save', choices=('main', 'close-write', 'close-publish', 'close-cleanup'), help='internal test-only save gate mode')
+    parser.add_argument('--source-changes', action='store_true', help='internal test-only source-change gate mode')
     args = parser.parse_args()
     try:
         if args.job_only and (args.screenshot or args.desktop_hover):
@@ -662,7 +672,11 @@ if __name__ == '__main__':
             raise ValueError('--slow-save cannot be combined with other verification modes')
         if args.slow_save and not os.environ.get('FAIRY_HASH_SAVE_TEST_PIPE'):
             raise ValueError('--slow-save requires the test-only gate build; run verify_slow_save.py --compiler <fairyc.exe>')
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast, args.slow_io, args.slow_save), ensure_ascii=True))
+        if args.source_changes and (args.slow_save or args.slow_io or args.job_only or args.usability or args.screenshot or args.desktop_hover or args.high_contrast):
+            raise ValueError('--source-changes cannot be combined with other modes')
+        if args.source_changes and not os.environ.get('FAIRY_HASH_CHANGE_PIPE'):
+            raise ValueError('--source-changes requires the test-only build; run verify_source_changes.py')
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast, args.slow_io, args.slow_save, args.source_changes), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)

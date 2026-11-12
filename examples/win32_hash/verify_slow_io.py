@@ -24,9 +24,10 @@ def verify(compiler):
         for before, after in (('value->file = CreateFileW(', 'value->file = delayed_open('),
                               ('ReadFile(value->file,', 'delayed_read(value->file,'),
                               ('GetFileInformationByHandleEx(file, FileIdInfo,', 'delayed_metadata(file, FileIdInfo,')):
-            if source.count(before) != 1:
+            expected = 2 if before == 'value->file = CreateFileW(' else 1
+            if source.count(before) != expected:
                 raise RuntimeError('slow-I/O test hook no longer matches production transport')
-            source = source.replace(before, after)
+            source = source.replace(before, after, 1)
         reader.write_text((example/'testing/delayed_reader.c').read_text(encoding='utf8')+'\n'+source, encoding='utf8')
         checked([compiler, 'check'], root)
         checked([compiler, 'build', '--locked', '--release'], root)
