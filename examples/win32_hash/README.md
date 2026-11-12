@@ -164,12 +164,52 @@ other dialog locales are not certified.
 
 Errors: 1=arguments/path text, 2=read/close, 3=kind/observed size mismatch,
 4=SHA length/state bound, 5=allocation/UI failure, 6=report save, 7=source/alias
-overwrite refused, 8=GUI cancellation, 9=GUI reader capacity temporarily exhausted.
+overwrite refused, 8=GUI cancellation, 9=GUI reader capacity temporarily exhausted,
+10=GUI save cleanup failure.
 Save failures remain interactive in the GUI. Cancel/Close abandons the job
 without waiting for its OS read to return; a pending worker may retain its file
 handle/storage until the OS operation finishes. The synchronous CLI uses the
-original `std::fs` path. Concurrent same-size writes are not snapshots. Saving
-and OS-native file dialogs are outside the background-reader change.
+original `std::fs` path. Concurrent same-size writes are not snapshots.
+
+GUI report saving also uses an owned native worker and a separate cancellation
+thread. Fairy chooses destination validation, exclusive sibling names (32 bounded
+attempts), write/sync sequencing, a second source-identity check and final publish.
+`native/writer.c` owns copied paths/report bytes and executes one Win32 operation
+per request. The completed hash stays visible; Open/Copy/Save are disabled during
+saving. Cancel is available before publication and retains the computed result.
+An owned temporary is marked with reversible `FileDispositionInfo` deletion;
+cleanup closes that handle rather than deleting a path that another process
+could reuse. Foreign temporary names are never truncated or removed.
+
+Publication clears the temporary's deletion disposition and renames the same
+open handle over the destination. Cancel is disabled before this boundary.
+Close before publication requests cancellation; Close during publication allows
+the complete result to settle. In both cases the window keeps pumping messages,
+painting and resizing until worker cleanup finishes, then exits. There is at
+most one save context, including cancelled cleanup; another save cannot overlap
+it. A driver that ignores cancellation can delay cleanup/exit indefinitely,
+without blocking the UI thread. Cleanup failure is reported as error 10 rather
+than success. Forced termination or power loss during disposition/rename is not
+covered by normal Close cleanup; no power-loss durability guarantee is made.
+OS-native file dialogs remain synchronous. CLI report saving retains `std::fs`.
+
+```powershell
+python -B verify_writer.py
+python -B verify_slow_save.py --compiler C:\tools\fairyc.exe
+```
+
+The writer probe uses production C with MSVC `/W4 /WX`, checking cancellation,
+read-only-destination publication failure, complete replacement and zero live
+contexts. The slow-save verifier builds an isolated test image with named-pipe
+`ReadFile` gates around destination checking, creation, writing, synchronization,
+publication and cleanup. It verifies 18 GUI cases including retained cancellation,
+Close in three stages, late source-alias detection and foreign temporary names.
+Disk-full errors are injected in that build; no real disk is filled. These gates
+are real pending OS I/O on an owned thread, not certification of slow physical
+disk/SMB behavior. They and their environment variable are absent from production.
+`--slow-save` is an internal verifier mode, separate from `--slow-io` and job-only.
+Optional `--gate-exe <path>` retains that test-only image for focused reruns.
+See the [save execution record](../../docs/development/windows-hash-save-20261112.md).
 
 The [implementation and execution record](../../docs/development/windows-hash-utility-20261111.md)
 contains exact compiler/profile sizes, verification commands and limits.
