@@ -309,6 +309,11 @@ TTS. On this machine Windows rejects that UIAccess launch with error 740.
 `speechHistoryTested:false` and `skipReason` explicitly mark the missing speech
 test; a successful harness restoration is not a successful Narrator speech test.
 No elevation prompt or alternative screen-reader installation is automated.
+`narrator_session.py` separately verifies normal-desktop launch using
+ShellExecuteExW with the `open` verb, without `runas`, and stops only the process
+returned by that launch. This launch smoke passed; it does not certify speech.
+The [normal-desktop Narrator record](../../docs/development/windows-hash-narrator-20261112.md)
+records partial speech observations and the remaining verification boundary.
 
 See the [keyboard/accessibility execution record](../../docs/development/windows-hash-input-accessibility-20261112.md)
 for verified keys, live-region events, physical-display limits and image size.
