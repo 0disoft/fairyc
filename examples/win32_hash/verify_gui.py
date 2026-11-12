@@ -645,6 +645,8 @@ if __name__ == '__main__':
             raise ValueError('--high-contrast requires --usability display or all')
         if args.slow_io and (args.job_only or args.usability or args.screenshot or args.desktop_hover or args.high_contrast):
             raise ValueError('--slow-io cannot be combined with other verification modes')
+        if args.slow_io and not os.environ.get('FAIRY_HASH_TEST_PIPE'):
+            raise ValueError('--slow-io requires the test-only gate build; run verify_slow_io.py --compiler <fairyc.exe>')
         print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast, args.slow_io), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))

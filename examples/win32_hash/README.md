@@ -1,7 +1,7 @@
 # Fairy Hash
 
-A small file SHA-256 utility. File reads, hashing, UTF-8 JSON formatting and
-prepared report publication are written in Fairy C. The private SHA algorithm
+A small file SHA-256 utility. Fairy C owns read sequencing, hashing, UTF-8 JSON
+formatting and prepared report publication. The private SHA algorithm
 is adapted from `lexer_candidate`, with a SHA-256 length-overflow bound rather
 than that compiler example's 96 MiB source limit. Reads use a reusable 64 KiB
 buffer, independent of input size.
@@ -35,13 +35,22 @@ size; short text that already fits has no tooltip. Ampersands are literal.
 Common Controls v6 comes from Windows via the embedded manifest; no UI framework,
 font, bitmap or additional runtime ships with the EXE. High contrast uses system
 colors. Fairy computes layout from DPI/client width and height, including resize
-and minimize/restore. A bounded message poll between
-64 KiB reads permits repaint/resize, cancellation and closing during a large hash; this is
-cooperative processing on one UI thread, not a background worker.
+and minimize/restore. GUI open/read/metadata system calls run on an owned native
+reader thread; a separate cancellation thread also keeps the cancellation API
+off the UI thread. Fairy hashes each 64 KiB chunk on the UI thread, processes
+events and waits for readiness/messages for at most 16ms. It never waits for a
+file operation or a cancellation routine to finish before responding to Cancel
+or Close. Elapsed progress keeps updating while reads are pending.
 
-The C bridge only creates native controls, forwards events, opens dialogs and
-converts UI text, draws small native decorations and transfers clipboard data.
-It never reads file contents, hashes data or writes a report. Fairy owns the
+`native/window.c` creates controls, forwards events, opens dialogs, converts UI
+text, draws small decorations and transfers clipboard data. `native/reader.c`
+performs Win32 file calls and transports copied chunks/metadata through events;
+it never hashes data or writes a report. Worker buffers/path storage stay owned
+until their workers finish; no Fairy borrow, callback or HWND escapes to them.
+At most two reader contexts (each with reader/canceller threads) may remain live.
+If both are waiting on unresponsive I/O, another selection gets a retry message;
+the window remains usable. Late cancelled results cannot update a new job.
+Fairy owns the
 filename/byte labels, digest line breaks, status colors and Copy action policy.
 There is no private automation socket/stdio protocol or bundled UI framework.
 
@@ -56,6 +65,8 @@ python -B verify_gui.py --screenshot build/fairy-hash.png
 python -B verify_gui.py --desktop-hover
 python -B verify_gui.py --job-mib 64
 python -B verify_gui.py --job-only --job-mib 256
+python -B verify_reader.py
+python -B verify_slow_io.py --compiler C:\tools\fairyc.exe
 python -B verify_gui.py --usability accessibility
 python -B verify_gui.py --usability display
 python -B verify_gui.py --usability display --high-contrast
@@ -134,13 +145,14 @@ events; `--usability keyboard` deliberately uses real SendInput. Results explici
 report `tooltipInput` and `desktopHoverVerified`. Fixtures include 103-character
 Unicode filenames and longer paths with literal ampersands, beyond the tooltip
 notification's 80-character inline buffer.
-`--job-only` exercises the actual native Open dialogs, hash job, percentage/time,
+`--job-only` exercises native Open/Save dialogs on empty/Unicode/binary files,
+saved reports and source/hard-link protection, then the hash job, percentage/time,
 resize, two cancellations and window reuse without foreground activation or
 pixel inspection. It reports `actual-win32-hash-job`, `pixelInspection:false`
 and `physicalInput:false`; screenshots/desktop hover cannot be combined with
 that mode. The Go integration can select it with `FAIRYC_HASH_JOB_ONLY=1` when
 an input helper prevents foreground ownership. This does not certify the full
-visual/clipboard/Save-dialog suite.
+visual/clipboard/tooltip suite.
 Clipboard checks
 eagerly copy/restore available clipboard data handles (including text and
 binary formats), without retaining a live OLE clipboard wrapper. Optional `--screenshot`
@@ -152,9 +164,12 @@ other dialog locales are not certified.
 
 Errors: 1=arguments/path text, 2=read/close, 3=kind/observed size mismatch,
 4=SHA length/state bound, 5=allocation/UI failure, 6=report save, 7=source/alias
-overwrite refused, 8=GUI cancellation. Save failures remain interactive in the
-GUI. Cancel-by-close is observed between reads; it cannot interrupt a stalled
-OS read. Concurrent same-size writes can change the byte stream being hashed.
+overwrite refused, 8=GUI cancellation, 9=GUI reader capacity temporarily exhausted.
+Save failures remain interactive in the GUI. Cancel/Close abandons the job
+without waiting for its OS read to return; a pending worker may retain its file
+handle/storage until the OS operation finishes. The synchronous CLI uses the
+original `std::fs` path. Concurrent same-size writes are not snapshots. Saving
+and OS-native file dialogs are outside the background-reader change.
 
 The [implementation and execution record](../../docs/development/windows-hash-utility-20261111.md)
 contains exact compiler/profile sizes, verification commands and limits.
@@ -164,6 +179,21 @@ The [progress execution record](../../docs/development/windows-hash-progress-202
 records large-job timings, responsiveness, cancellation and build size.
 The [SHA performance record](../../docs/development/windows-hash-performance-20261112.md)
 records component costs and paired production-EXE speed/size measurements.
+The [slow-I/O execution record](../../docs/development/windows-hash-slow-io-20261112.md)
+records pending-read cancellation/close, resource lifetime and integration checks.
+
+`verify_reader.py` compiles the unchanged native transport with MSVC and checks
+chunk contents/metadata, an actual pending named-pipe ReadFile, cancellation and
+zero live contexts after cleanup. `verify_slow_io.py` copies the app into a
+temporary workspace and adds test-only named-pipe gates before open/read/metadata.
+It observes GetThreadIOPendingFlag and the client's owned PID, then checks nine
+GUI cases including elapsed time, cancellation, close, delayed completion and
+the two-context limit. The probes use real OS pending I/O rather than a UI sleep;
+they do not certify a particular disk/network driver. Test hooks are not linked
+into the distributed EXE. `--slow-io` is an internal verifier mode for that build.
+Go desktop integration selects it with `FAIRYC_HASH_SLOW_IO=1`, exclusive with
+job-only/usability. Both modes retain CLI 19 and differential SHA 24 cases in
+development/release; defaults and CI workflows do not enable desktop tests.
 
 Usability checks emit `actual-win32-hash-usability` and close their owned window.
 `accessibility` reads native Windows UI Automation roles, accessible names,
