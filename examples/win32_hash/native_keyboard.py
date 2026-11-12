@@ -88,7 +88,7 @@ class DesktopKeys:
             time.sleep(0.02)
 
     def chord(self, hwnd, keys):
-        if not keys or any(key not in (9, 13, 16, 17, 18, 27, 32, 65, 67, 78, 79, 83, 88) for key in keys):
+        if not keys or any(key not in (9, 13, 16, 17, 18, 27, 32, 45, 65, 67, 78, 79, 83, 88) for key in keys):
             raise ValueError('unsupported verification key chord')
         self.activate(hwnd)
         self.idle(keys)

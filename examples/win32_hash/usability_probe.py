@@ -212,6 +212,9 @@ def accessibility(driver, events):
 
 def run(driver, mode, high_contrast=False):
     result = {}
+    if mode == 'narrator':
+        from narrator_probe import verify
+        result['narrator'] = verify(driver)
     if mode in ('keyboard', 'all'):
         result['keyboard'] = keyboard(driver)
     if mode in ('accessibility', 'all'):

@@ -166,7 +166,7 @@ if __name__ == '__main__':
         else:
             parser = argparse.ArgumentParser(description=__doc__)
             parser.add_argument('--exe', type=Path, default=Path(__file__).parent/'build/win32-hash.exe')
-            parser.add_argument('--mode', choices=('keyboard',), default='keyboard')
+            parser.add_argument('--mode', choices=('keyboard', 'narrator'), default='keyboard')
             args = parser.parse_args()
             print(json.dumps(verify(args.exe.resolve(), args.mode)))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
