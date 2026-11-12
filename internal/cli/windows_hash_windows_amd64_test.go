@@ -16,7 +16,11 @@ func TestWindowsHashUtility(t *testing.T) {
 	}
 	root := t.TempDir()
 	jobOnly := os.Getenv("FAIRYC_HASH_JOB_ONLY") == "1"
+	slowIO := os.Getenv("FAIRYC_HASH_SLOW_IO") == "1"
 	usability := os.Getenv("FAIRYC_HASH_USABILITY")
+	if slowIO && (jobOnly || usability != "") {
+		t.Fatal("FAIRYC_HASH_SLOW_IO cannot be combined with other GUI modes")
+	}
 	if jobOnly && usability != "" {
 		t.Fatal("choose FAIRYC_HASH_JOB_ONLY or FAIRYC_HASH_USABILITY, not both")
 	}
@@ -25,6 +29,9 @@ func TestWindowsHashUtility(t *testing.T) {
 		guiKind = "actual-win32-hash-job"
 		t.Log("job-only GUI verification: physical input and pixel inspection omitted")
 	}
+	if slowIO {
+		guiKind = "actual-win32-hash-slow-io"
+	}
 	for _, name := range []string{"fairy.toml", "fairy.windows.json", "src/main.fy", "src/hash_file.fy",
 		"src/sha256.fy", "src/sha256_stream.fy", "src/application.fy", "src/ui.fy", "src/progress.fy", "src/reader.fy", "native/reader.c", "native/window.c", "native/app.rc"} {
 		data, err := os.ReadFile(filepath.Join("../../examples/win32_hash", name))
@@ -32,6 +39,9 @@ func TestWindowsHashUtility(t *testing.T) {
 			t.Fatal(err)
 		}
 		writeWorkspaceFile(t, root, name, string(data))
+	}
+	if slowIO {
+		prepareWindowsHashSlowIO(t, root)
 	}
 	for _, variant := range []struct {
 		name  string
@@ -56,7 +66,9 @@ func TestWindowsHashUtility(t *testing.T) {
 				}
 				ctx, cancel := context.WithTimeout(t.Context(), 120*time.Second)
 				args := []string{"-B", "../../examples/win32_hash/" + verifier.file, "--exe", image}
-				if jobOnly && verifier.file == "verify_gui.py" {
+				if slowIO && verifier.file == "verify_gui.py" {
+					args = append(args, "--slow-io")
+				} else if jobOnly && verifier.file == "verify_gui.py" {
 					args = append(args, "--job-only")
 				}
 				out, err := exec.CommandContext(ctx, "python", args...).CombinedOutput()
@@ -71,12 +83,23 @@ func TestWindowsHashUtility(t *testing.T) {
 					ControlBackgrounds                                                       bool
 					Verification                                                             string
 					Cases                                                                    int
+					ActualPendingRead, CloseDuringPendingRead, StaleResultsIgnored           bool
+					CancelledWindowKept                                                      bool
+					WorkerLimit                                                              int
 					LargeJob                                                                 struct {
 						ProgressObserved, CancelAndReuse bool
 					}
 				}
 				if err != nil || json.Unmarshal(out, &report) != nil || !report.OK || !report.ProcessExited || report.Verification != verifier.kind {
 					t.Fatalf("%s: %v %s", verifier.file, err, out)
+				}
+				if slowIO && verifier.file == "verify_gui.py" {
+					if report.Cases != 9 || !report.ActualPendingRead || !report.CloseDuringPendingRead ||
+						!report.StaleResultsIgnored || !report.CancelledWindowKept || report.WorkerLimit != 2 {
+						t.Fatalf("incomplete pending-I/O verification: %s", out)
+					}
+					t.Logf("pending I/O GUI: %s", out)
+					continue
 				}
 				if verifier.file == "verify_cli.py" && report.Cases != 19 || verifier.file == "verify_sha.py" && report.Cases != 24 || verifier.file == "verify_gui.py" &&
 					(!report.LargeJob.ProgressObserved || !report.LargeJob.CancelAndReuse || !jobOnly && (!report.NativeOpenAndSave || !report.CloseDuringHash || !report.SourceProtected ||

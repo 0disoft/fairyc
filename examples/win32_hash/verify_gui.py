@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False, slow_io=False):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -367,6 +367,16 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                     choose=choose, text=text, enabled=enabled, wait=wait, layout=layout,
                     visible=visible, process=process, screenshot=screenshot,
                     resize=lambda: resize(main, None, 0, 0, 1000, 600, 0x16)), job_mib)
+            if slow_io:
+                from types import SimpleNamespace
+                from slow_io_probe import verify as verify_pending
+                result = verify_pending(SimpleNamespace(root=root, main=main, process=process, child=child,
+                    message=message, text=text, enabled=enabled, visible=visible, wait=wait,
+                    layout=layout, choose=choose, resize=resize))
+                stdout, stderr = process.communicate(timeout=2)
+                if stdout or stderr:
+                    raise RuntimeError('slow-I/O window wrote unexpected output')
+                return dict(ok=True, verification='actual-win32-hash-slow-io', processExited=True, **result)
             if usability:
                 from types import SimpleNamespace
                 from usability_probe import run
@@ -382,6 +392,10 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                     raise RuntimeError('usability window wrote unexpected output')
                 return dict(ok=True, verification='actual-win32-hash-usability', processExited=True, **result)
             if job_only:
+                from types import SimpleNamespace
+                from file_actions_probe import verify as verify_files
+                file_actions = verify_files(SimpleNamespace(root=root, main=main, child=child, message=message,
+                    choose=choose, text=text, enabled=enabled, wait=wait))
                 large_job = measure_job()
                 message(main, 0x10)
                 if process.wait(timeout=12) != 0:
@@ -389,7 +403,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
                 stdout, stderr = process.communicate(timeout=2)
                 if stdout or stderr:
                     raise RuntimeError('ordinary job window wrote CLI output')
-                return dict(ok=True, verification='actual-win32-hash-job', largeJob=large_job,
+                return dict(ok=True, verification='actual-win32-hash-job', largeJob=large_job, fileActions=file_actions,
                             pixelInspection=False, physicalInput=False, privateAutomationProtocol=False,
                             processExited=True)
             # Expose once, before the measured sequence. Revealing/activating
@@ -620,6 +634,7 @@ if __name__ == '__main__':
     parser.add_argument('--job-only', action='store_true', help='native job/cancel checks without foreground or pixel inspection')
     parser.add_argument('--usability', choices=('keyboard', 'accessibility', 'display', 'all'))
     parser.add_argument('--high-contrast', action='store_true', help='temporarily toggle OS high contrast and restore it')
+    parser.add_argument('--slow-io', action='store_true', help='verify pending I/O on the test-only gate build')
     args = parser.parse_args()
     try:
         if args.job_only and (args.screenshot or args.desktop_hover):
@@ -628,7 +643,9 @@ if __name__ == '__main__':
             raise ValueError('--usability cannot be combined with --job-only, --screenshot or --desktop-hover')
         if args.high_contrast and args.usability not in ('display', 'all'):
             raise ValueError('--high-contrast requires --usability display or all')
-        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast), ensure_ascii=True))
+        if args.slow_io and (args.job_only or args.usability or args.screenshot or args.desktop_hover or args.high_contrast):
+            raise ValueError('--slow-io cannot be combined with other verification modes')
+        print(json.dumps(verify(args.exe.resolve(), args.screenshot, args.desktop_hover, args.job_mib, args.job_only, args.usability, args.high_contrast, args.slow_io), ensure_ascii=True))
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False, error=str(error))))
         raise SystemExit(1)
