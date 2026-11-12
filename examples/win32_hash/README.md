@@ -71,6 +71,8 @@ python -B verify_gui.py --usability accessibility
 python -B verify_gui.py --usability display
 python -B verify_gui.py --usability display --high-contrast
 python -B verify_gui.py --usability keyboard
+python -B verify_desktop.py
+python -B verify_desktop.py --mode narrator
 python -B benchmark_cli.py --mib 64
 python -B benchmark_cli.py --baseline C:\data\previous.exe --pairs 3 --mib 64
 python -B profile_costs.py --compiler <path-to-fairyc.exe> --mib 64
@@ -273,6 +275,11 @@ native forward/reverse tab order in initial/completed/busy states; this is not
 physical keyboard input or a screen-reader voice test. Path, digest and progress
 names come from Fairy through standard IAccPropServices annotations. OLE32 is a
 system DLL; the verifier and its Python runtime are not bundled with the app.
+Status changes are live regions: Fairy requests polite completion/cancellation
+announcements and assertive errors. Frequent percentage/time updates turn the
+live setting off and do not emit live-region events. The accessibility probe
+checks the UIA LiveSetting property and real, PID-filtered WinEvents, including
+a deliberately busy clipboard error and silence during progress updates.
 
 `display` enumerates real monitors, moves only its own window, verifies PMv2,
 actual DPI, bounded digest geometry and font scaling, then restores its position.
@@ -288,6 +295,24 @@ Tab/Shift+Tab loops, Enter on Open/Copy/Save/Cancel, Alt+O/C/S/X and Escape from
 native Save dialog. File paths are populated through native dialog controls;
 these checks certify actual navigation/action keys, not typed path text or IME.
 Foreground denial/loss is a failure, never a synthetic-key fallback or a pass.
+Tab/Shift+Tab and focused Enter are forwarded to Fairy before the multiline
+digest Edit can consume them. Native file dialogs retain Windows key handling.
+
+`verify_desktop.py` runs the same real-key checks on a temporary input desktop.
+It briefly switches the screen, preserves/restores clipboard contents, contains
+owned workers in a kill-on-close Job Object, and restores the original desktop
+in `finally` with a separate restoration watchdog. Other input helpers need not
+be terminated. Do not interact with the temporary desktop during the test.
+`--mode narrator` attempts Windows Narrator on that desktop and reads its actual
+last-spoken phrase through Narrator+Ctrl+X; it does not synthesize speech using
+TTS. On this machine Windows rejects that UIAccess launch with error 740.
+`speechHistoryTested:false` and `skipReason` explicitly mark the missing speech
+test; a successful harness restoration is not a successful Narrator speech test.
+No elevation prompt or alternative screen-reader installation is automated.
+
+See the [keyboard/accessibility execution record](../../docs/development/windows-hash-input-accessibility-20261112.md)
+for verified keys, live-region events, physical-display limits and image size.
+
 `all` combines the three modes, including physical input; usability modes cannot
 be combined with job-only, screenshots or desktop hover.
 
