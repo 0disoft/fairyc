@@ -37,7 +37,7 @@ def themed_controls(pid):
         kernel.CloseHandle(process)
 
 
-def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False, slow_io=False, slow_save=None, source_changes=False):
+def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=False, usability=None, high_contrast=False, slow_io=False, slow_save=None, source_changes=False, process_factory=None):
     user = c.WinDLL('user32', use_last_error=True)
     def api(name, result, *types):
         fn = getattr(user, name)
@@ -108,7 +108,8 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
     try:
         with tempfile.TemporaryDirectory(prefix='fairy-hash-dialog-한글-') as directory, ExitStack() as cleanup:
             root = Path(directory)
-            process = subprocess.Popen([str(image)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            launch = process_factory or subprocess.Popen
+            process = launch([str(image)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             def stop_before_fixture_cleanup():
                 if process.poll() is None:
                     process.terminate()
@@ -116,7 +117,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
             cleanup.callback(stop_before_fixture_cleanup)
             original_cursor = w.POINT()
             if not get_cursor(c.byref(original_cursor)):
-                raise RuntimeError('cannot preserve cursor position')
+                raise RuntimeError(f'cannot preserve cursor position: winError={c.get_last_error()}')
             if desktop_hover:
                 cleanup.callback(lambda: set_cursor(original_cursor.x, original_cursor.y))
             def wait(read, accept, label, seconds=12):

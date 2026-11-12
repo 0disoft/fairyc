@@ -70,6 +70,7 @@ def keyboard(driver):
         for identifier in (201, 203, 208):
             focus_after([9], identifier)
         keys.chord(d.main, [13])  # Enter on focused Copy, not default Open.
+        d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 해시 복사 완료', 'Enter Copy status missing')
         d.wait(clipboard_text, lambda v: v == expected, 'Enter did not activate focused Copy')
         focus_after([16, 9], 203)
         keys.chord(d.main, [18, 67])
@@ -78,7 +79,8 @@ def keyboard(driver):
     target = d.root / '키보드-보고서.json'
     keys.chord(d.main, [18, 83])
     d.choose(204, target, active=opened(), accept=accept)
-    d.wait(lambda: target.exists(), bool, 'Alt+S/Enter did not save report')
+    d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 결과 저장 완료', 'Alt+S/Enter did not save report')
+    d.wait(lambda: bool(d.enabled(d.child(d.main, 204))), bool, 'keyboard report cleanup unfinished')
     if json.loads(target.read_bytes())['sha256'] != expected:
         raise RuntimeError('keyboard report differs from computed digest')
     # Reach owner-drawn Save with Tab, then Enter and real Escape cancellation.
@@ -97,15 +99,17 @@ def keyboard(driver):
     d.wait(lambda: d.windows('#32770'), lambda v: not v, 'Escape did not cancel native Save dialog')
     large = d.root / 'keyboard-cancel.bin'
     with large.open('wb') as stream:
-        for _ in range(64):
+        for _ in range(256):
             stream.write(bytes(range(256))*4096)
     for shortcut in ([13], [18, 88]):
         keys.chord(d.main, [18, 79])
         d.choose(202, large, active=opened(), accept=accept)
         d.wait(lambda: bool(d.visible(d.child(d.main, 212))), bool, 'keyboard Cancel not visible')
         d.wait(lambda: keys.focus(d.main), lambda v: v == 212, 'Cancel did not receive focus')
-        focus_after([16, 9], 203)
-        focus_after([9], 212)
+        for identifier in (201, 203, 212):
+            focus_after([9], identifier)
+        for identifier in (203, 201, 212):
+            focus_after([16, 9], identifier)
         keys.chord(d.main, shortcut)
         d.wait(lambda: bool(d.enabled(d.child(d.main, 202))), bool, 'keyboard cancellation did not restore Open')
         if not d.text(d.child(d.main, 205)).startswith('취소됨') or d.process.poll() is not None:
