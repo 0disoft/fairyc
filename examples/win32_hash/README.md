@@ -165,11 +165,42 @@ other dialog locales are not certified.
 Errors: 1=arguments/path text, 2=read/close, 3=kind/observed size mismatch,
 4=SHA length/state bound, 5=allocation/UI failure, 6=report save, 7=source/alias
 overwrite refused, 8=GUI cancellation, 9=GUI reader capacity temporarily exhausted,
-10=GUI save cleanup failure.
+10=GUI save cleanup failure, 11=source changed or final source observation failed.
 Save failures remain interactive in the GUI. Cancel/Close abandons the job
 without waiting for its OS read to return; a pending worker may retain its file
 handle/storage until the OS operation finishes. The synchronous CLI uses the
-original `std::fs` path. Concurrent same-size writes are not snapshots.
+original `std::fs` read/save path, with an additional owned native source guard.
+
+Both GUI and CLI retain read sharing without permitting ordinary write/delete
+handles during calculation. Fairy compares size, volume/file ID, creation time,
+last-write time and change time before/after the stream. After EOF it also checks
+the selected path again while the original handle is protected. Access time is
+ignored, since reading can update it. Metadata collection and the GUI's final
+path lookup run on its reader worker, preserving cancellation/close behavior.
+No second hash pass or per-chunk metadata query is added.
+
+An observed change or failed final path check returns error 11. The GUI leaves
+the digest blank, keeps Open available and disables Copy/Save, including when a
+previous selection had a valid result. The CLI emits only its error JSON, without
+a digest/report and without modifying an existing output. Selecting a stable
+file again restores normal calculation/copy/save. This compares observations;
+it is not a filesystem snapshot or continuous monitoring after completion.
+Coarse/stale metadata or a backend bypassing sharing and restoring all observed
+fields may escape detection. Real filesystem behavior governs those limits.
+
+```powershell
+python -B verify_source_changes.py --compiler C:\tools\fairyc.exe
+```
+
+The source-change verifier uses an isolated named-pipe-gated build. Production
+sharing stays in effect for protected/CLI cases. Only `change-*` fixtures in
+that test image allow write/delete sharing, so actual same-size overwrites,
+restored last-write timestamps, grow/truncate and EOF path replacement can
+exercise Fairy's comparisons. It reports this explicitly; production never
+relaxes sharing. Nine cases include actual disabled Copy/Save clicks, unchanged
+clipboard sequence, no Save dialog, CLI old-report protection and window reuse.
+Test gates/sharing overrides are absent from production. See the
+[source-change execution record](../../docs/development/windows-hash-source-changes-20261112.md).
 
 GUI report saving also uses an owned native worker and a separate cancellation
 thread. Fairy chooses destination validation, exclusive sibling names (32 bounded
