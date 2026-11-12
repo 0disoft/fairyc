@@ -70,18 +70,33 @@ static DWORD WINAPI run_reader(void *context) {
     if (value->file == INVALID_HANDLE_VALUE || !metadata(value)) { goto failed; }
     value->result.phase = 1; // Open/metadata complete; Fairy decides whether to read.
     SetEvent(value->ready);
+    BOOL ended = FALSE;
     for (;;) {
         if (WaitForSingleObject(value->request, INFINITE) != WAIT_OBJECT_0 || cancelled(value)) { break; }
+        if (ended) {
+            // Observe the selected name again, while the original handle is
+            // still protected. Fairy compares this observation with the first.
+            HANDLE named = CreateFileW(value->path, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL,
+                OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+            BOOL ok = named != INVALID_HANDLE_VALUE && stamp(named, &value->result);
+            DWORD error = ok ? 0 : GetLastError();
+            if (named != INVALID_HANDLE_VALUE && !CloseHandle(named)) { error = GetLastError(); ok = FALSE; }
+            if (!CloseHandle(value->file)) { error = GetLastError(); ok = FALSE; }
+            value->file = INVALID_HANDLE_VALUE;
+            value->result.error = error; value->result.phase = ok ? 5 : 6;
+            SetEvent(value->ready); break;
+        }
         DWORD count = 0;
         if (!ReadFile(value->file, value->buffer, sizeof(value->buffer), &count, NULL)) { goto failed; }
         if (cancelled(value)) { break; }
         value->result.count = count;
         if (count == 0) {
             if (!metadata(value)) { goto failed; }
-            CloseHandle(value->file); value->file = INVALID_HANDLE_VALUE;
-            value->result.phase = 3; SetEvent(value->ready); break;
+            ended = TRUE; value->result.phase = 3;
+        } else {
+            value->result.phase = 2;
         }
-        value->result.phase = 2; SetEvent(value->ready);
+        SetEvent(value->ready);
     }
     goto finished;
 failed:
@@ -159,7 +174,7 @@ int32_t hash_reader_copy(void *context, uint8_t *output, size_t capacity) {
 int32_t hash_reader_next(void *context) {
     reader *value = context;
     if (!value || WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0 ||
-        (value->result.phase != 1 && value->result.phase != 2)) { return 1; }
+        (value->result.phase != 1 && value->result.phase != 2 && value->result.phase != 3)) { return 1; }
     ResetEvent(value->ready);
     return SetEvent(value->request) ? 0 : 1;
 }

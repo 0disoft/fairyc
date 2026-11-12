@@ -8,6 +8,7 @@ import std::fs as fs;
 import std::bytes as bytes;
 
 pub fn bool error(ptr mut void window,u32 code){
+    if(code==11){return ui::status(window,b"계산 중 원본이 변경됐거나 확인할 수 없어요. 다시 계산하세요.",2);}
     if(code==10){return ui::status(window,b"임시 파일 정리에 실패했어요. 저장 위치를 확인하세요.",2);}
     if(code==9){return ui::status(window,b"이전 파일 읽기가 아직 끝나지 않았어요. 잠시 후 다시 시도하세요.",2);}
     if(code==7){return ui::status(window,b"원본 파일에는 덮어쓸 수 없어요.",2);}
@@ -27,14 +28,16 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     let started=ui::ticks();var usize displayed=started;
     if(!ui::progress(window,0,total,0)){return .err(5);}
     var observed=reader::observe(ref input);
+    var first=observed;
     while(true) {
         let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
         if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
         observed=reader::observe(ref input);
         if(observed.phase==4){return .err(2);}
+        if(observed.phase==6){return .err(11);}
         if(observed.phase==1){
             if(observed.kind!=1 || observed.directory!=0){return .err(3);}
-            total=observed.size;opened=true;
+            total=observed.size;opened=true;first=observed;
             if(!reader::next(ref input)){return .err(2);}
         }
         if(observed.phase==2){
@@ -47,10 +50,14 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
         if(now-displayed>=100 || observed.phase==3) {
             if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
         }
-        if(observed.phase==3){break;}
+        if(observed.phase==3){
+            if(!reader::unchanged(ref first,ref observed) || state.length!=total){return .err(11);}
+            if(!reader::next(ref input)){return .err(2);}
+        }
+        if(observed.phase==5){break;}
         if(observed.phase==0){reader::wait(ref input);}
     }
-    if(!opened || state.length!=total || observed.size!=total){return .err(3);}
+    if(!opened || state.length!=total || !reader::unchanged(ref first,ref observed)){return .err(11);}
     let identity=fs::FileId{.volume_low=observed.volume_low,.volume_high=observed.volume_high,
         .file_low_0=observed.file_low_0,.file_low_1=observed.file_low_1,.file_high_0=observed.file_high_0,.file_high_1=observed.file_high_1};
     return .ok(hash::Digest{.words=sha::finish(ref state),.length=state.length,.identity});

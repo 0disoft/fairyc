@@ -20,6 +20,11 @@ int wmain(int argc, WCHAR **argv) {
         if (next.phase == 3) {
             CHECK(next.size == first.size && total == first.size);
             CHECK(memcmp(&next.volume_low, &first.volume_low, 24) == 0);
+            continue;
+        }
+        if (next.phase == 5) {
+            CHECK(next.size == first.size && total == first.size && next.written == first.written && next.changed == first.changed);
+            CHECK(memcmp(&next.volume_low, &first.volume_low, 24) == 0);
             break;
         }
         CHECK(next.phase == 2 && next.count > 0 && next.count <= sizeof(output));

@@ -3,6 +3,7 @@ import sha256_stream as sha;
 import std::bytes as bytes;
 import std::text as text;
 import std::fs as fs;
+import reader as source;
 
 pub struct Digest { usize[8] words; usize length; fs::FileId identity; }
 
@@ -36,15 +37,23 @@ pub fn Result<Digest,u32> finish(ref fs::File file,ref sha::State state) {
 @effects(filesystem)
 pub fn Result<Digest,u32> compute(ref u8[] path) {
     var file=switch(open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    let guard=switch(source::protect(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
+    let first=source::sample(ref guard,0);if(first.phase==4){return .err(2);}
     let total=switch(fs::size(ref file)){case .ok(v):{v}case .err(_):{return .err(2);}};
+    if(total!=first.size){return .err(11);}
     var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
     while(true) {
         let count=switch(read(ref mut file,ref mut state,ref mut buffer)){case .ok(v):{v}case .err(e):{return .err(e);}};
         if(count==0){break;}
     }
+    let final_handle=source::sample(ref guard,1);let final_path=source::sample(ref guard,2);
+    if(final_handle.phase==4 || final_path.phase==4 || !source::unchanged(ref first,ref final_handle) ||
+        !source::unchanged(ref first,ref final_path) || state.length!=total){return .err(11);}
     let value=switch(finish(ref file,ref state)){case .ok(v):{v}case .err(e):{return .err(e);}};
-    if(value.length!=total){return .err(3);}
+    let original=fs::FileId{.volume_low=first.volume_low,.volume_high=first.volume_high,
+        .file_low_0=first.file_low_0,.file_low_1=first.file_low_1,.file_high_0=first.file_high_0,.file_high_1=first.file_high_1};
+    if(!fs::file_id_equal(ref original,ref value.identity)){return .err(11);}
     if(!fs::close(file).is_ok){return .err(2);}return .ok(value);
 }
 
