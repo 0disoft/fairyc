@@ -12,7 +12,8 @@ fn u32 await(ref writer::Writer output,ptr mut void window,bool cancellable,bool
     while(true){
         let event=ui::poll(window,0);
         if((event==3 || event==7) && cancellable){return 8;}
-        if(event==4 || event==5){if(!ui::layout(window,event)){return 5;}}
+        // Once cleanup starts, a layout error must not bypass its completion.
+        if(event==4 || event==5){if(!ui::layout(window,event) && !finished){return 5;}}
         if(event==3){let bool laid=ui::layout(window,0);}
         let observed=writer::observe(output);
         if((finished && observed.phase==2) || (!finished && observed.phase==1)){return 0;}
