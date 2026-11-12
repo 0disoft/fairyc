@@ -1,0 +1,58 @@
+#include "../native/reader.c"
+#include <stdio.h>
+
+#define CHECK(test) do { if (!(test)) { fprintf(stderr, "reader check failed at %d: %s\n", __LINE__, #test); return 1; } } while (0)
+
+int wmain(int argc, WCHAR **argv) {
+    CHECK(argc == 2);
+    uint8_t path[4096], output[65536];
+    int length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, argv[1], -1, (char *)path, sizeof(path), NULL, NULL);
+    CHECK(length > 0);
+    reader *value = hash_reader_open(path, (size_t)length-1);
+    CHECK(value != NULL && WaitForSingleObject(value->ready, 3000) == WAIT_OBJECT_0);
+    observation first = hash_reader_observe(value);
+    CHECK(first.phase == 1 && first.kind == FILE_TYPE_DISK && !first.directory && first.size == 1234567);
+    size_t total = 0;
+    for (;;) {
+        CHECK(hash_reader_next(value) == 0);
+        CHECK(WaitForSingleObject(value->ready, 3000) == WAIT_OBJECT_0);
+        observation next = hash_reader_observe(value);
+        if (next.phase == 3) {
+            CHECK(next.size == first.size && total == first.size);
+            CHECK(memcmp(&next.volume_low, &first.volume_low, 24) == 0);
+            break;
+        }
+        CHECK(next.phase == 2 && next.count > 0 && next.count <= sizeof(output));
+        CHECK(hash_reader_copy(value, output, next.count-1) == 1);
+        CHECK(hash_reader_copy(value, output, sizeof(output)) == 0);
+        for (size_t at = 0; at < next.count; at++) { CHECK(output[at] == (uint8_t)((total+at)%256)); }
+        total += next.count;
+    }
+    hash_reader_drop(value);
+    WCHAR pipe[128];
+    CHECK(swprintf_s(pipe, ARRAYSIZE(pipe), L"\\\\.\\pipe\\fairy-reader-%lu", GetCurrentProcessId()) > 0);
+    HANDLE server = CreateNamedPipeW(pipe, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE | PIPE_WAIT, 1, 4096, 4096, 0, NULL);
+    CHECK(server != INVALID_HANDLE_VALUE);
+    length = WideCharToMultiByte(CP_UTF8, 0, pipe, -1, (char *)path, sizeof(path), NULL, NULL);
+    value = hash_reader_open(path, (size_t)length-1);
+    CHECK(value != NULL);
+    CHECK(ConnectNamedPipe(server, NULL) || GetLastError() == ERROR_PIPE_CONNECTED);
+    CHECK(WaitForSingleObject(value->ready, 3000) == WAIT_OBJECT_0);
+    CHECK(hash_reader_observe(value).kind == FILE_TYPE_PIPE);
+    CHECK(hash_reader_next(value) == 0);
+    BOOL pending = FALSE; ULONGLONG deadline = GetTickCount64()+3000;
+    while (!pending && GetTickCount64() < deadline) {
+        CHECK(GetThreadIOPendingFlag(value->thread, &pending)); Sleep(1);
+    }
+    CHECK(pending);
+    HANDLE thread = NULL;
+    CHECK(DuplicateHandle(GetCurrentProcess(), value->thread, GetCurrentProcess(), &thread, SYNCHRONIZE, FALSE, 0));
+    ULONGLONG started = GetTickCount64();
+    hash_reader_drop(value);
+    ULONGLONG elapsed = GetTickCount64()-started;
+    CHECK(elapsed < 500 && WaitForSingleObject(thread, 3000) == WAIT_OBJECT_0);
+    CloseHandle(thread); CloseHandle(server);
+    CHECK(InterlockedCompareExchange(&live_readers, 0, 0) == 0);
+    printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0}\n", total, elapsed);
+    return 0;
+}
