@@ -244,7 +244,9 @@ void *hash_ui_open(int32_t width, int32_t height) {
 int32_t hash_ui_poll(void *window, int32_t wait) {
     if ((HWND)window != state.window) { return 3; }
     MSG message;
-    while (!state.event && !state.cancel_requested) {
+    // A deferred Close must still dispatch paint/input/sent messages while
+    // Fairy waits for a save commit or owned cleanup. Never block on GetMessage.
+    while ((!state.event && !state.cancel_requested) || (!wait && state.event == 3)) {
         if (wait) {
             int code = (int)GetMessageW(&message, NULL, 0, 0);
             if (code <= 0) { state.event = 3; break; }

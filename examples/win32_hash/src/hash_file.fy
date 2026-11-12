@@ -74,7 +74,7 @@ pub fn bool report(ref u8[] path,ref Digest value,ref mut bytes::Buffer out) {
         bytes::append(out,b",\"sha256\":\"").is_ok && append_hex(value,out) && bytes::append(out,b"\"}\n").is_ok;
 }
 
-fn bool same_path(ref u8[] a,ref u8[] b) {
+pub fn bool same_path(ref u8[] a,ref u8[] b) {
     if(a.len!=b.len){return false;} var usize i=0;
     while(i<a.len){var u8 x=a[i];var u8 y=b[i];if(x>=65 && x<=90){x+=32;}if(y>=65 && y<=90){y+=32;}if(x==47){x=92;}if(y==47){y=92;}if(x!=y){return false;}i+=1;}return true;
 }

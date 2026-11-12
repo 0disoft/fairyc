@@ -3,10 +3,12 @@ import hash_file as hash;
 import sha256_stream as sha;
 import ui as ui;
 import reader as reader;
+import saving as saving;
 import std::fs as fs;
 import std::bytes as bytes;
 
 pub fn bool error(ptr mut void window,u32 code){
+    if(code==10){return ui::status(window,b"임시 파일 정리에 실패했어요. 저장 위치를 확인하세요.",2);}
     if(code==9){return ui::status(window,b"이전 파일 읽기가 아직 끝나지 않았어요. 잠시 후 다시 시도하세요.",2);}
     if(code==7){return ui::status(window,b"원본 파일에는 덮어쓸 수 없어요.",2);}
     if(code==6){return ui::status(window,b"저장 실패: 다른 위치를 선택하세요.",2);}
@@ -103,10 +105,13 @@ pub fn i32 run() {
         if(event==2 && ready) {
             let chosen=ui::choose(window,true,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
-                switch(hash::save(bytes::view(ref selection)[..chosen],bytes::view(ref path),ref last,bytes::view(ref report))) {
+                if(!ui::busy(window,true) || !ui::enable(window,204,false) || !ui::enable(window,208,false) ||
+                    !ui::status(window,b"결과 저장 중…",0)){result=1;break;}
+                switch(saving::save(bytes::view(ref selection)[..chosen],bytes::view(ref path),ref last,bytes::view(ref report),window)) {
                     case .ok(_): {let bool shown=ui::status(window,b"✓ 결과 저장 완료",1);}
-                    case .err(code): {let bool shown=error(window,code);}
+                    case .err(code): {let bool shown=if(code==8){ui::status(window,b"저장 취소됨",0)}else{error(window,code)};}
                 };
+                if(!ui::busy(window,false) || !ui::enable(window,204,true) || !ui::enable(window,208,true)){result=1;break;}
             }else if(chosen>131072){let bool shown=ui::status(window,b"저장창을 열 수 없어요.",2);}
         }
         if(event==6 && ready) {

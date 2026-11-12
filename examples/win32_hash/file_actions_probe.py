@@ -19,7 +19,8 @@ def verify(driver):
             raise RuntimeError('background reader path/completion mismatch')
         target = d.root/f'보고서-{index}.json'
         d.choose(204, target)
-        d.wait(target.exists, bool, 'background result report not saved')
+        d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 결과 저장 완료', 'background result report not saved')
+        d.wait(lambda: bool(d.enabled(d.child(d.main, 204))), bool, 'background save cleanup did not finish')
         expected = dict(algorithm='SHA-256', file=actual_path, bytes=len(payload), sha256=expected_hash)
         if json.loads(target.read_bytes()) != expected:
             raise RuntimeError('background GUI report differs from source/reference')
@@ -27,9 +28,15 @@ def verify(driver):
             alias = d.root/'원본-하드링크.bin'
             os.link(source, alias)
             for destination in (source, alias):
+                # A repeated error text is not a completion barrier for the next
+                # asynchronous save. Start from a distinct, observed hash state.
+                d.choose(202, source)
+                d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v.startswith('✓ 계산 완료'), 'source protection hash state')
+                d.wait(lambda: bool(d.enabled(d.child(d.main, 204))), bool, 'source protection hash not ready')
                 d.choose(204, destination, overwrite=True)
                 d.wait(lambda: d.text(d.child(d.main, 205)),
                        lambda v: v == '원본 파일에는 덮어쓸 수 없어요.', 'background file identity did not protect source/alias')
+                d.wait(lambda: bool(d.enabled(d.child(d.main, 202))) and bool(d.enabled(d.child(d.main, 204))), bool, 'source protection cleanup not finished')
                 if destination.read_bytes() != payload or source.read_bytes() != payload:
                     raise RuntimeError('background source/alias was overwritten')
         rows.append(dict(bytes=len(payload), sha256=expected_hash, reportSaved=True))
