@@ -6,6 +6,8 @@ unsafe extern C fn i32 hash_ui_progress(ptr mut void window,usize value);
 unsafe extern C fn i32 hash_ui_system_dpi();
 unsafe extern C fn ptr mut void hash_ui_open(i32 width,i32 height);
 unsafe extern C fn i32 hash_ui_poll(ptr mut void window,i32 wait);
+unsafe extern C fn i32 hash_ui_focus_id(ptr mut void window);
+unsafe extern C fn i32 hash_ui_next_focus(ptr mut void window,u32 reverse);
 unsafe extern C fn i32 hash_ui_text(ptr mut void window,u32 id,ptr u8 text,usize length);
 unsafe extern C fn i32 hash_ui_name(ptr mut void window,u32 id,ptr u8 text,usize length);
 unsafe extern C fn i32 hash_ui_enable(ptr mut void window,u32 id,u32 enabled);
@@ -24,7 +26,16 @@ unsafe extern C fn void hash_ui_destroy(ptr mut void window);
 
 pub fn i32 scale(i32 value,i32 dpi){return (value*dpi+48)/96;}
 pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(dpi<96 || dpi>960){return null;}return unsafe{hash_ui_open(scale(600,dpi),scale(280,dpi))};}
-pub fn i32 poll(ptr mut void window,i32 wait){return unsafe{hash_ui_poll(window,wait)};}
+pub fn i32 poll(ptr mut void window,i32 wait){
+    let event=unsafe{hash_ui_poll(window,wait)};
+    if(event==8 || event==9){let moved=unsafe{hash_ui_next_focus(window,if(event==9){1}else{0})};return 0;}
+    if(event==10){
+        let focus=unsafe{hash_ui_focus_id(window)};
+        if(focus==202){return 1;}if(focus==204){return 2;}if(focus==208){return 6;}if(focus==212){return 7;}
+        return 0;
+    }
+    return event;
+}
 pub fn bool text(ptr mut void window,u32 id,ref u8[] value){return unsafe{hash_ui_text(window,id,value as ptr u8,value.len)}==0;}
 pub fn bool name(ptr mut void window,u32 id,ref u8[] value){return unsafe{hash_ui_name(window,id,value as ptr u8,value.len)}==0;}
 pub fn bool enable(ptr mut void window,u32 id,bool enabled){return unsafe{hash_ui_enable(window,id,if(enabled){1}else{0})}==0;}

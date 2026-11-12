@@ -73,6 +73,16 @@ static void draw_control(const DRAWITEMSTRUCT *item) {
 }
 
 static void dispatch(MSG *message) {
+    // Native multiline EDIT can consume Tab/Enter. Forward raw navigation keys
+    // before IsDialogMessage; Fairy chooses focus movement and action mapping.
+    if (message->message == WM_KEYDOWN && state.event != 3 &&
+        (message->hwnd == state.window || IsChild(state.window, message->hwnd)) &&
+        !(GetKeyState(VK_CONTROL) & 0x8000) && !(GetKeyState(VK_MENU) & 0x8000)) {
+        if (message->wParam == VK_TAB) {
+            state.event = GetKeyState(VK_SHIFT) & 0x8000 ? 9 : 8; return;
+        }
+        if (message->wParam == VK_RETURN) { state.event = 10; return; }
+    }
     if (!IsDialogMessageW(state.window, message)) {
         TranslateMessage(message);
         DispatchMessageW(message);
@@ -262,6 +272,17 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     if (event == 7) { state.cancel_requested = FALSE; }
     else if (event != 3) { state.event = 0; }
     return event;
+}
+
+int32_t hash_ui_focus_id(void *window) {
+    HWND focus = GetFocus();
+    return (HWND)window == state.window && focus && IsChild(state.window, focus) ? GetDlgCtrlID(focus) : 0;
+}
+int32_t hash_ui_next_focus(void *window, uint32_t reverse) {
+    if ((HWND)window != state.window || reverse > 1) { return 1; }
+    HWND next = GetNextDlgTabItem((HWND)window, GetFocus(), reverse != 0);
+    if (!next) { return 1; }
+    SetFocus(next); return GetFocus() == next ? 0 : 1;
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
