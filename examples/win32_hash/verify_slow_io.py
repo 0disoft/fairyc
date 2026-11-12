@@ -23,7 +23,7 @@ def verify(compiler):
         source = reader.read_text(encoding='utf8')
         for before, after in (('value->file = CreateFileW(', 'value->file = delayed_open('),
                               ('ReadFile(value->file,', 'delayed_read(value->file,'),
-                              ('GetFileInformationByHandleEx(value->file,', 'delayed_metadata(value->file,')):
+                              ('GetFileInformationByHandleEx(file, FileIdInfo,', 'delayed_metadata(file, FileIdInfo,')):
             if source.count(before) != 1:
                 raise RuntimeError('slow-I/O test hook no longer matches production transport')
             source = source.replace(before, after)

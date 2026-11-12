@@ -10,6 +10,7 @@ typedef struct {
     uint32_t phase, error, kind, directory;
     size_t count, size;
     uint32_t volume_low, volume_high, file_low_0, file_low_1, file_high_0, file_high_1;
+    size_t created, written, changed;
 } observation;
 
 typedef struct {
@@ -35,25 +36,32 @@ static void release(reader *value) {
 
 static BOOL cancelled(reader *value) { return InterlockedCompareExchange(&value->cancelled, 0, 0) != 0; }
 
-static BOOL metadata(reader *value) {
+static BOOL stamp(HANDLE file, observation *result) {
     LARGE_INTEGER size;
     FILE_ID_INFO id;
+    FILE_BASIC_INFO times;
     BY_HANDLE_FILE_INFORMATION basic;
-    value->result.kind = GetFileType(value->file);
-    if (value->result.kind != FILE_TYPE_DISK) { return TRUE; }
-    if (!GetFileInformationByHandle(value->file, &basic)) { return FALSE; }
-    value->result.directory = (basic.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-    if (value->result.directory) { return TRUE; }
-    if (!GetFileSizeEx(value->file, &size) || size.QuadPart < 0 ||
-        !GetFileInformationByHandleEx(value->file, FileIdInfo, &id, sizeof(id))) { return FALSE; }
-    value->result.size = (size_t)size.QuadPart;
-    value->result.volume_low = (uint32_t)id.VolumeSerialNumber;
-    value->result.volume_high = (uint32_t)(id.VolumeSerialNumber >> 32);
+    result->kind = GetFileType(file);
+    if (result->kind != FILE_TYPE_DISK) { return TRUE; }
+    if (!GetFileInformationByHandle(file, &basic)) { return FALSE; }
+    result->directory = (basic.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+    if (result->directory) { return TRUE; }
+    if (!GetFileSizeEx(file, &size) || size.QuadPart < 0 ||
+        !GetFileInformationByHandleEx(file, FileIdInfo, &id, sizeof(id))) { return FALSE; }
+    if (!GetFileInformationByHandleEx(file, FileBasicInfo, &times, sizeof(times))) { return FALSE; }
+    result->created = (size_t)times.CreationTime.QuadPart;
+    result->written = (size_t)times.LastWriteTime.QuadPart;
+    result->changed = (size_t)times.ChangeTime.QuadPart;
+    result->size = (size_t)size.QuadPart;
+    result->volume_low = (uint32_t)id.VolumeSerialNumber;
+    result->volume_high = (uint32_t)(id.VolumeSerialNumber >> 32);
     uint32_t words[4]; memcpy(words, id.FileId.Identifier, sizeof(words));
-    value->result.file_low_0 = words[0]; value->result.file_low_1 = words[1];
-    value->result.file_high_0 = words[2]; value->result.file_high_1 = words[3];
+    result->file_low_0 = words[0]; result->file_low_1 = words[1];
+    result->file_high_0 = words[2]; result->file_high_1 = words[3];
     return TRUE;
 }
+
+static BOOL metadata(reader *value) { return stamp(value->file, &value->result); }
 
 static DWORD WINAPI run_reader(void *context) {
     reader *value = context;
@@ -169,4 +177,41 @@ void hash_reader_drop(void *context) {
     SetEvent(value->stop);
     // No file API, cancellation call or worker join runs on the GUI thread.
     release(value);
+}
+
+// Synchronous CLI guard: use only owned Win32 handles, never std::fs internals.
+typedef struct { HANDLE file; WCHAR *path; observation initial; } source_guard;
+void hash_source_drop(void *context) {
+    source_guard *value = context;
+    if (!value) { return; }
+    if (value->file != INVALID_HANDLE_VALUE) { CloseHandle(value->file); }
+    HeapFree(GetProcessHeap(), 0, value->path); HeapFree(GetProcessHeap(), 0, value);
+}
+void *hash_source_open(const uint8_t *path, size_t length) {
+    if (!path || !length || length > 131071 || memchr(path, 0, length)) { return NULL; }
+    source_guard *value = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*value));
+    if (!value) { return NULL; }
+    value->file = INVALID_HANDLE_VALUE;
+    value->path = HeapAlloc(GetProcessHeap(), 0, (length+1)*sizeof(WCHAR));
+    if (!value->path) { hash_source_drop(value); return NULL; }
+    int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path, (int)length, value->path, (int)length);
+    if (!count) { hash_source_drop(value); return NULL; }
+    value->path[count] = 0;
+    value->file = CreateFileW(value->path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    value->initial.phase = 1;
+    if (value->file == INVALID_HANDLE_VALUE || !stamp(value->file, &value->initial)) {
+        value->initial.error = GetLastError(); value->initial.phase = 4;
+    }
+    return value;
+}
+void hash_source_snapshot(void *context, void *output, uint32_t refresh) {
+    source_guard *value = context;
+    observation result = value->initial;
+    if (refresh && result.phase != 4) {
+        HANDLE file = value->file;
+        if (refresh == 2) { file = CreateFileW(value->path, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL); }
+        if (file == INVALID_HANDLE_VALUE || !stamp(file, &result)) { result.error = GetLastError(); result.phase = 4; }
+        if (refresh == 2 && file != INVALID_HANDLE_VALUE && !CloseHandle(file)) { result.error = GetLastError(); result.phase = 4; }
+    }
+    memcpy(output, &result, sizeof(result));
 }

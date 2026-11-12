@@ -29,6 +29,25 @@ int wmain(int argc, WCHAR **argv) {
         total += next.count;
     }
     hash_reader_drop(value);
+    source_guard *guard = hash_source_open(path, (size_t)length-1);
+    CHECK(guard && guard->initial.phase == 1 && guard->initial.written && guard->initial.changed);
+    HANDLE writer = CreateFileW(argv[1], GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL, OPEN_EXISTING, 0, NULL);
+    CHECK(writer == INVALID_HANDLE_VALUE && GetLastError() == ERROR_SHARING_VIOLATION);
+    HANDLE attributes = CreateFileW(argv[1], FILE_WRITE_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL, OPEN_EXISTING, 0, NULL);
+    CHECK(attributes != INVALID_HANDLE_VALUE);
+    FILETIME original, touched;
+    CHECK(GetFileTime(attributes, NULL, NULL, &original));
+    ULARGE_INTEGER time; time.LowPart = original.dwLowDateTime; time.HighPart = original.dwHighDateTime;
+    time.QuadPart += 10000000; touched.dwLowDateTime = time.LowPart; touched.dwHighDateTime = time.HighPart;
+    CHECK(SetFileTime(attributes, NULL, NULL, &touched) && CloseHandle(attributes));
+    observation modified;
+    hash_source_snapshot(guard, &modified, 1);
+    CHECK(modified.phase == 1 && modified.size == guard->initial.size && modified.written != guard->initial.written);
+    hash_source_snapshot(guard, &modified, 2);
+    CHECK(modified.phase == 1 && modified.written != guard->initial.written);
+    hash_source_drop(guard);
     WCHAR pipe[128];
     CHECK(swprintf_s(pipe, ARRAYSIZE(pipe), L"\\\\.\\pipe\\fairy-reader-%lu", GetCurrentProcessId()) > 0);
     HANDLE server = CreateNamedPipeW(pipe, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE | PIPE_WAIT, 1, 4096, 4096, 0, NULL);
@@ -55,6 +74,6 @@ int wmain(int argc, WCHAR **argv) {
     deadline = GetTickCount64()+3000;
     while (InterlockedCompareExchange(&live_readers, 0, 0) != 0 && GetTickCount64() < deadline) { Sleep(1); }
     CHECK(InterlockedCompareExchange(&live_readers, 0, 0) == 0);
-    printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0}\n", total, elapsed);
+    printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0,\"overwriteDenied\":true,\"sameSizeMetadataChange\":true}\n", total, elapsed);
     return 0;
 }

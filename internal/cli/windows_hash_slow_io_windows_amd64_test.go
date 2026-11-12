@@ -23,7 +23,7 @@ func prepareWindowsHashSlowIO(t *testing.T, root string) {
 	for _, pair := range [][2]string{
 		{"value->file = CreateFileW(", "value->file = delayed_open("},
 		{"ReadFile(value->file,", "delayed_read(value->file,"},
-		{"GetFileInformationByHandleEx(value->file,", "delayed_metadata(value->file,"},
+		{"GetFileInformationByHandleEx(file, FileIdInfo,", "delayed_metadata(file, FileIdInfo,"},
 	} {
 		if strings.Count(text, pair[0]) != 1 {
 			t.Fatalf("slow-I/O hook no longer matches transport: %s", pair[0])
