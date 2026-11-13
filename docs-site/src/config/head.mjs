@@ -16,6 +16,7 @@ const languagePreferenceScript = `
 	const normalizeLocale = (value) => {
 		if (!value || typeof value !== 'string') return undefined;
 		const normalized = value.toLowerCase();
+		if (normalized.startsWith('zh')) return 'zh';
 		const base = normalized.split('-')[0];
 		return supportedLocales.has(base) ? base : undefined;
 	};

@@ -14,6 +14,20 @@ export const languageSelectorOptions = [
 		hasContent: true,
 	},
 	{
+		code: 'zh',
+		label: '简体中文',
+		lang: 'zh-CN',
+		starlightLocale: 'zh',
+		hasContent: true,
+	},
+	{
+		code: 'es',
+		label: 'Español',
+		lang: 'es',
+		starlightLocale: 'es',
+		hasContent: true,
+	},
+	{
 		code: 'ko',
 		label: '한국어',
 		lang: 'ko',
@@ -34,6 +48,14 @@ export const locales = {
 	en: {
 		label: 'English',
 		lang: 'en',
+	},
+	zh: {
+		label: '简体中文',
+		lang: 'zh-CN',
+	},
+	es: {
+		label: 'Español',
+		lang: 'es',
 	},
 	ko: {
 		label: '한국어',
