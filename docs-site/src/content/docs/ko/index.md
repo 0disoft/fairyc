@@ -10,7 +10,7 @@ Fairy C는 C 언어처럼 가볍고 빠른 네이티브 프로그램을 만들�
 ## 어디부터 볼까요?
 
 - **시작하기**: [소개](./start/introduction/) · [설치와 환경 준비](./start/installation/) · [첫 프로그램](./start/first-program/)
-- **문법 배우기**: [언어 기초](./language/basics/) · [메모리와 자원](./language/memory-and-resources/) · [프로젝트 구성, 모듈과 의존성](./language/modules-and-projects/)
+- **문법 배우기**: [변수, 타입, 연산자](./language/basics/) · [함수와 제어문](./language/control-flow-and-functions/) · [구조체, enum, switch](./language/structs-enums-and-errors/) · [배열, 슬라이스, 문자열 뷰](./language/arrays-and-slices/) · [소유권, 빌림, resource](./language/memory-and-resources/) · [모듈, 패키지, std](./language/modules-and-projects/)
 - **예제**: [C 연동과 Win32 데스크톱 앱 입문](./examples/c-interop-and-win32/)
 - **CLI와 지원 현황**: [CLI 사용법과 자주 만나는 오류](./cli/commands-and-errors/) · [현재 지원 범위와 제한 사항](./support/status-and-limits/)
 
