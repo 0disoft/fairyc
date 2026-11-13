@@ -12,13 +12,26 @@ there is no native hashing library or C hash implementation.
 On Windows 10 1703+ x64 (PMv2) with MSVC/Windows SDK, launch without arguments for the native
 GUI. **파일 열기 (Alt+O)** selects a file using the actual Windows dialog. Fairy
 calculates/displays its SHA-256 and byte count; **결과 저장 (Alt+S)** opens the
-native save dialog and writes the same UTF-8 JSON as the CLI. Cancelling either
+native save dialog and writes UTF-8 JSON. Cancelling either
 dialog preserves the previous result. Save is disabled until a hash completes.
-The warm, compact interface uses a 600 × 280 logical-pixel client area (minimum
-520 × 276), system fonts, a filename/path/size summary and a two-line monospaced
-digest. In larger windows the form is centered and capped at 720 × 280 logical
+The warm, compact interface uses a 600 × 380 logical-pixel client area (minimum
+520 × 376), system fonts, a filename/path/size summary and a two-line monospaced
+digest. In larger windows the form is centered and capped at 720 × 380 logical
 pixels; the digest stays 70 logical pixels high with nearby Copy/Save actions.
 **복사 (Alt+C)** copies the original 64 hex digits without line breaks.
+**예상 SHA-256 (Alt+E)** accepts a reference hash and displays a separate match,
+mismatch, invalid-input or waiting-for-file message. ASCII hex is case insensitive;
+only surrounding ASCII whitespace is trimmed. The field retains its text between
+files and is disabled during hashing/saving. A new selection, failed computation
+or cancellation cannot reuse a previous match. Valid expectations add
+`expectedSha256` and `matches` to the saved GUI report; empty/invalid expectations
+leave the ordinary hash report unchanged. Mismatch still permits copying/saving
+the actual calculated hash. Matching, normalization and report formatting live in
+Fairy C's `comparison.fy`; the C bridge only transports input/events and presents
+native controls. The comparison status has a polite live-region annotation;
+new match/mismatch states notify accessibility clients, without per-character
+invalid-input announcements. This wiring is compiled, but its desktop keyboard,
+layout and screen-reader behavior has not been rerun for this change.
 While hashing, processed/total bytes, percentage, a thin native progress bar and
 HH:MM:SS elapsed time update at most every 100ms. Time uses a monotonic clock.
 Open becomes **취소 (Alt+X)**: cancelling keeps the window, shows the partial
@@ -59,7 +72,9 @@ There is no private automation socket/stdio protocol or bundled UI framework.
 fairyc build --release
 .\build\win32-hash.exe
 .\build\win32-hash.exe --hash C:\data\input.bin C:\data\result.json | Out-String
+.\build\win32-hash.exe --compare C:\data\input.bin '<64-hex-expected-SHA256>' C:\data\compare.json | Out-String
 python -B verify_cli.py
+python -B verify_compare.py
 python -B verify_sha.py
 python -B verify_gui.py
 python -B verify_gui.py --screenshot build/fairy-hash.png
@@ -79,6 +94,7 @@ python -B benchmark_cli.py --baseline C:\data\previous.exe --pairs 3 --mib 64
 python -B profile_costs.py --compiler <path-to-fairyc.exe> --mib 64
 fairyc test --locked --file tests/sha256.fy
 fairyc test --locked --file tests/progress.fy
+fairyc test --locked --file tests/comparison.fy
 ```
 
 The last path is optional. CLI stdout is the same UTF-8 JSON written to disk.
@@ -86,6 +102,16 @@ Failure returns exit 1 and `{"ok":false,"errorCode":N}`. Save writes/syncs/close
 an exclusively created sibling, then publishes with `fs::replace_file`; it
 does not truncate the source, its hard-link aliases or existing temporary names.
 This is not a power-loss durability or concurrent-file snapshot guarantee.
+
+`--compare FILE EXPECTED_SHA256 [REPORT.json]` validates the expected value before
+file I/O and emits the ordinary hash JSON plus normalized `expectedSha256` and
+boolean `matches`. It exits **0 for match, 2 for mismatch, 1 for operational or
+argument errors**. A mismatch is a successful calculation and can save a report.
+Malformed expected values return `{"ok":false,"errorCode":12}` without touching
+the destination. Existing `--hash` JSON and exit codes are unchanged.
+`verify_compare.py` exercises 16 real CLI cases: matching, uppercase/whitespace,
+mismatch, both report outcomes, invalid lengths/characters/Unicode, early validation,
+existing-report preservation, missing input and source protection.
 
 This is a GUI-subsystem executable. CLI JSON uses inherited stdout: a capturing
 caller such as Python/Codex or a PowerShell pipeline can read it without a new
@@ -360,6 +386,7 @@ Packaging synchronizes `native/app.rc` from `app.toml` and `fairy.toml`, builds 
 `--locked --release`, then inspects x64/subsystem, VERSIONINFO, the themed manifest
 and all nine embedded icon frames. It extracts its ZIP into a temporary path
 containing Korean text and spaces and runs the actual hash/report CLI's 19 cases
+and comparison CLI's 16 cases
 before replacing the final ZIP. No window is launched, clipboard read, cursor
 moved or key sent. For unchanged payload bytes the ZIP has stable entry order,
 timestamps and compression settings; this is not a whole-toolchain reproducible
@@ -425,3 +452,6 @@ See the [release execution record](../../docs/development/windows-hash-package-2
 for sizes, checksums and the exact validation boundary.
 The [app-settings execution record](../../docs/development/windows-hash-app-settings-20261113.md)
 records the configurable build and custom-brand verification.
+
+The [comparison execution record](../../docs/development/windows-hash-comparison-20261113.md)
+records the shared comparison policy, CLI checks, updated package and desktop-test boundary.
