@@ -5,10 +5,13 @@ import ui as ui;
 import reader as reader;
 import saving as saving;
 import comparison as comparison;
+import checksum as checksum;
+import checksum_ui as checksum_ui;
 import std::fs as fs;
 import std::bytes as bytes;
 
 pub fn bool error(ptr mut void window,u32 code){
+    if(code==13){return ui::status(window,b"체크섬 파일 형식을 확인하세요. 한 항목만 지원해요.",2);}
     if(code==11){return ui::status(window,b"계산 중 원본이 변경됐거나 확인할 수 없어요. 다시 계산하세요.",2);}
     if(code==10){return ui::status(window,b"임시 파일 정리에 실패했어요. 저장 위치를 확인하세요.",2);}
     if(code==9){return ui::status(window,b"이전 파일 읽기가 아직 끝나지 않았어요. 잠시 후 다시 시도하세요.",2);}
@@ -87,6 +90,7 @@ pub fn i32 run(ref u8[] initial) {
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
         ui::text(window,212,b"취소(&X)") && ui::enable(window,212,false) && ui::visible(window,212,false) &&
         ui::text(window,215,b"예상 SHA-256(&E)") && ui::name(window,214,b"비교할 예상 SHA-256") &&
+        ui::text(window,217,b"체크섬 열기(&L)") &&
         ui::compare(window,b"",false) &&
         ui::name(window,201,b"파일 경로") && ui::name(window,203,b"SHA-256 해시") && ui::name(window,213,b"전체 진행률") &&
         ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
@@ -98,6 +102,18 @@ pub fn i32 run(ref u8[] initial) {
         let event=if(startup){12}else{ui::poll(window,1)};if(event==3){break;}
         if(event==4 || event==5){if(!ui::layout(window,event)){result=1;break;}}
         if(event==11 && !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
+        if(event==14){
+            let chosen=ui::choose_checksum(window,bytes::view_mut(ref mut selection));
+            if(chosen>0 && chosen<131072){
+                if(!ui::busy(window,true) || !ui::enable(window,204,false) || !ui::enable(window,208,false) || !ui::status(window,b"체크섬 읽는 중…",0)){result=1;break;}
+                var u8[64] expected=[0;64];
+                switch(checksum_ui::load(bytes::view(ref selection)[..chosen],window,ref mut expected)){
+                    case .ok(_):{if(!ui::text(window,214,ref expected) || !ui::status(window,b"✓ 예상 체크섬 불러옴",1)){result=1;break;}}
+                    case .err(code):{if(!error(window,code)){result=1;break;}}
+                };
+                if(!ui::busy(window,false) || !ui::enable(window,204,ready) || !ui::enable(window,208,ready) || !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
+            }else if(chosen>131072){let bool shown=ui::status(window,b"체크섬 선택창을 열 수 없어요.",2);}
+        }
         if(event==1 || event==12) {
             let chosen=if(startup){startup=false;length}else{
                 if(event==12){ui::dropped(window,bytes::view_mut(ref mut selection))}else{ui::choose(window,false,bytes::view_mut(ref mut selection))}
@@ -132,6 +148,9 @@ pub fn i32 run(ref u8[] initial) {
             if(!comparison_report(window,bytes::view(ref path),ref last,bytes::view(ref hex),ref mut report)){result=1;break;}
             let chosen=ui::choose(window,true,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
+                if(checksum::extension(bytes::view(ref selection)[..chosen]) && !checksum::format(bytes::view(ref path),ref last,ref mut report)){
+                    let bool shown=error(window,13);continue;
+                }
                 if(!ui::busy(window,true) || !ui::enable(window,204,false) || !ui::enable(window,208,false) ||
                     !ui::status(window,b"결과 저장 중…",0)){result=1;break;}
                 switch(saving::save(bytes::view(ref selection)[..chosen],bytes::view(ref path),ref last,bytes::view(ref report),window)) {

@@ -50,7 +50,7 @@ def verify(compiler):
         if not source_unchanged: raise RuntimeError('verification changed the original app settings')
         return dict(ok=True,verification='fairy-hash-app-settings',customTitle=result['resources']['windowTitle'],
             emptyPublisherRoundTrip=True,customIconSha256=hashlib.sha256(alternate).hexdigest(),
-            customNamesVerified=True,unicodeAndQuotesRoundTrip=True,cliCases=result['cliCases'],comparisonCases=result['comparisonCases'],
+            customNamesVerified=True,unicodeAndQuotesRoundTrip=True,cliCases=result['cliCases'],comparisonCases=result['comparisonCases'],checksumCases=result['checksumCases'],
             invalidPathRejected=True,priorArtifactsPreserved=True,sourceSettingsUnchanged=True,
             guiLaunched=False,inputInjected=False)
 

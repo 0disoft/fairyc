@@ -394,7 +394,7 @@ Packaging synchronizes `native/app.rc` from `app.toml` and `fairy.toml`, builds 
 `--locked --release`, then inspects x64/subsystem, VERSIONINFO, the themed manifest
 and all nine embedded icon frames. It extracts its ZIP into a temporary path
 containing Korean text and spaces and runs the actual hash/report CLI's 19 cases
-and comparison CLI's 16 cases
+and comparison CLI's 16 cases plus checksum import/export's 22 cases
 before replacing the final ZIP. No window is launched, clipboard read, cursor
 moved or key sent. For unchanged payload bytes the ZIP has stable entry order,
 timestamps and compression settings; this is not a whole-toolchain reproducible
@@ -463,3 +463,32 @@ records the configurable build and custom-brand verification.
 
 The [comparison execution record](../../docs/development/windows-hash-comparison-20261113.md)
 records the shared comparison policy, CLI checks, updated package and desktop-test boundary.
+
+## Single-entry `.sha256` files
+
+**체크섬 열기 (Alt+L)** loads one expected hash into the comparison field.
+Accepted UTF-8 formats are a bare 64-digit hash, GNU `hash  filename` /
+`hash *filename`, and BSD `SHA256 (filename) = hash`. UTF-8 BOM, CRLF and outer
+ASCII whitespace are supported. Escaped GNU records, UTF-16, multiple entries,
+NUL/newline inside a record and files over 64 KiB are rejected (error 13).
+The embedded filename is informational: choose the actual input explicitly;
+the app never opens paths from the checksum file. GUI reads use the existing
+asynchronous transport, process cancel/close/resize and preserve previous input
+on failure/cancellation. The GUI wiring has not been exercised on the desktop.
+
+Save with a `.sha256` filename (case insensitive) to export the actual digest as
+UTF-8 `hash  basename\n`; other save extensions retain JSON. The native save
+dialog defaults to `sha256.json`; type the `.sha256` extension explicitly.
+Saving uses the existing asynchronous safe publication and source protection.
+
+```powershell
+.\build\win32-hash.exe --checksum C:\data\input.bin C:\data\input.sha256 | Out-String
+.\build\win32-hash.exe --compare-file C:\data\input.bin C:\data\input.sha256 C:\data\compare.json | Out-String
+fairyc test --locked --file tests/checksum.fy
+python -B verify_checksum.py
+```
+
+Both final destination paths are optional. `--checksum` writes standard checksum
+text to stdout; `--compare-file` emits the same comparison JSON/0/2/1 exit codes
+as `--compare`. Checksum contents are validated before hashing the actual input.
+Malformed checksum files leave previous destination reports intact.

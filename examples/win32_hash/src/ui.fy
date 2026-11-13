@@ -38,6 +38,7 @@ pub fn i32 poll(ptr mut void window,i32 wait){
         let focus=unsafe{hash_ui_focus_id(window)};
         if(focus==202){return 1;}if(focus==204){return 2;}if(focus==208){return 6;}if(focus==212){return 7;}
         if(focus==214){return 11;}
+        if(focus==217){return 14;}
         return 0;
     }
     return event;
@@ -48,11 +49,12 @@ pub fn bool enable(ptr mut void window,u32 id,bool enabled){return unsafe{hash_u
 pub fn bool visible(ptr mut void window,u32 id,bool shown){return unsafe{hash_ui_visible(window,id,if(shown){1}else{0})}==0;}
 pub fn bool busy(ptr mut void window,bool active){
     return enable(window,202,!active) && enable(window,212,active) &&
-        enable(window,214,!active) &&
+        enable(window,214,!active) && enable(window,217,!active) &&
         visible(window,202,!active) && visible(window,212,active) &&
         unsafe{hash_ui_focus(window,if(active){212}else{202})}==0;
 }
 pub fn usize choose(ptr mut void window,bool save,ref mut u8[] output){let initial=if(save){b"sha256.json"}else{b""};return unsafe{hash_ui_dialog(window,if(save){1}else{0},initial as ptr u8,initial.len,output as ptr mut u8,output.len)};}
+pub fn usize choose_checksum(ptr mut void window,ref mut u8[] output){return unsafe{hash_ui_dialog(window,2,null,0,output as ptr mut u8,output.len)};}
 pub fn void show(ptr mut void window){unsafe{hash_ui_show(window)};}
 pub fn void destroy(ptr mut void window){unsafe{hash_ui_destroy(window)};}
 pub fn bool status(ptr mut void window,ref u8[] value,u32 tone){
@@ -148,7 +150,8 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&
         unsafe{hash_ui_move(window,213,left,origin_y+scale(216,dpi),right-left,scale(4,dpi))}==0 &&
         unsafe{hash_ui_move(window,215,left,origin_y+scale(232,dpi),right-left,scale(20,dpi))}==0 &&
-        unsafe{hash_ui_move(window,214,left,origin_y+scale(256,dpi),right-left,scale(28,dpi))}==0 &&
+        unsafe{hash_ui_move(window,214,left,origin_y+scale(256,dpi),right-left-button-gap,scale(28,dpi))}==0 &&
+        unsafe{hash_ui_move(window,217,right-button,origin_y+scale(254,dpi),button,height)}==0 &&
         unsafe{hash_ui_move(window,216,left,origin_y+scale(292,dpi),right-left,scale(24,dpi))}==0 &&
         unsafe{hash_ui_move(window,208,right-button-gap-copy_width,footer,copy_width,height)}==0 &&
         unsafe{hash_ui_move(window,204,right-button,footer,button,height)}==0 &&

@@ -43,9 +43,9 @@ def keyboard(driver):
             return keys.focus(d.main)
         actual = d.wait(observe, lambda v: v == expected, f'keyboard focus expected {expected}, trace={trace}')
         trace.append(actual)
-    for identifier in (201, 203, 214, 202):
+    for identifier in (201, 203, 214, 217, 202):
         focus_after([9], identifier)
-    for identifier in (214, 203, 201, 202):
+    for identifier in (217, 214, 203, 201, 202):
         focus_after([16, 9], identifier)
     def opened():
         return d.wait(lambda: d.windows('#32770'), lambda v: len(v) == 1, 'keyboard did not open native dialog')[0]
@@ -62,16 +62,17 @@ def keyboard(driver):
     keys.chord(d.main, [13])
     d.choose(202, source, active=opened(), accept=accept)
     ready(expected)
-    for identifier in (201, 203, 214, 208, 204, 202):
+    for identifier in (201, 203, 214, 217, 208, 204, 202):
         focus_after([9], identifier)
-    for identifier in (204, 208, 214, 203, 201, 202):
+    for identifier in (204, 208, 217, 214, 203, 201, 202):
         focus_after([16, 9], identifier)
     with preserve_clipboard():
-        for identifier in (201, 203, 214, 208):
+        for identifier in (201, 203, 214, 217, 208):
             focus_after([9], identifier)
         keys.chord(d.main, [13])  # Enter on focused Copy, not default Open.
         d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 해시 복사 완료', 'Enter Copy status missing')
         d.wait(clipboard_text, lambda v: v == expected, 'Enter did not activate focused Copy')
+        focus_after([16, 9], 217)
         focus_after([16, 9], 214)
         focus_after([16, 9], 203)
         keys.chord(d.main, [18, 67])
@@ -134,8 +135,8 @@ def accessibility(driver, events):
             raise RuntimeError(f'native tab order mismatch: {observed} expected {expected}')
         return observed
     result = inspect(driver.main, driver.process.pid)
-    tab_orders = dict(initial=order(202, [201, 203, 214, 202]),
-                      initialReverse=order(202, [214, 203, 201, 202], True))
+    tab_orders = dict(initial=order(202, [201, 203, 214, 217, 202]),
+                      initialReverse=order(202, [217, 214, 203, 201, 202], True))
     rows = {row['id']: row for row in result['controls']}
     for identifier, role in (('202', 50000), ('201', 50004), ('203', 50004), ('214', 50004), ('213', 50012)):
         if rows[identifier]['type'] != role or not rows[identifier]['name']:
@@ -176,8 +177,8 @@ def accessibility(driver, events):
     error_rows = {row['id']: row for row in inspect(driver.main, driver.process.pid)['controls']}
     if error_rows['205']['liveSetting'] != 2:
         raise RuntimeError('error status is not an assertive live region')
-    tab_orders['completed'] = order(202, [201, 203, 214, 208, 204, 202])
-    tab_orders['completedReverse'] = order(202, [204, 208, 214, 203, 201, 202], True)
+    tab_orders['completed'] = order(202, [201, 203, 214, 217, 208, 204, 202])
+    tab_orders['completedReverse'] = order(202, [204, 208, 217, 214, 203, 201, 202], True)
     large = driver.root/'accessible-busy.bin'
     with large.open('wb') as stream:
         stream.seek(256*1048576-1)
@@ -190,8 +191,8 @@ def accessibility(driver, events):
         raise RuntimeError('Cancel accessible name/action missing')
     if active['204']['enabled'] or active['208']['enabled']:
         raise RuntimeError('accessible busy state exposed partial-result actions')
-    if active['214']['enabled']:
-        raise RuntimeError('expected-hash input remained editable while busy')
+    if active['214']['enabled'] or active['217']['enabled']:
+        raise RuntimeError('expected-hash input/load remained enabled while busy')
     if active['205']['liveSetting'] != 0:
         raise RuntimeError('progress announcements were not suppressed')
     events.drain(); before = len(events.events)

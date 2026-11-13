@@ -11,6 +11,7 @@ from app_settings import load
 from verify_resources import verify as resources
 from verify_cli import verify as cli
 from verify_compare import verify as compare
+from verify_checksum import verify as checksum
 
 def package_files(root=ROOT):
     return (load(root).executable_name,'README.txt','LICENSE.txt')
@@ -54,10 +55,11 @@ def verify(archive, root=ROOT):
         target.write_bytes(files[names[0]])
         pe,commands = resources(target,root),cli(target)
         comparison = compare(target)
+        checksums = checksum(target)
     return dict(ok=True,verification='fairy-hash-portable-package',version=version,
                 files=list(files),zipBytes=archive.stat().st_size,exeBytes=len(files[names[0]]),
                 zipSha256=hashlib.sha256(archive.read_bytes()).hexdigest(),resources=pe,cliCases=commands['cases'],
-                comparisonCases=comparison['cases'],temporaryExtractionRemoved=True,guiLaunched=False,inputInjected=False)
+                comparisonCases=comparison['cases'],checksumCases=checksums['cases'],temporaryExtractionRemoved=True,guiLaunched=False,inputInjected=False)
 
 
 if __name__ == '__main__':

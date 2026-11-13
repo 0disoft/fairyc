@@ -185,10 +185,10 @@ static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM l
             state.compare_pending = TRUE;
             return 0;
         }
-        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208 || LOWORD(wp) == 212) &&
+        if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208 || LOWORD(wp) == 212 || LOWORD(wp) == 217) &&
             (HWND)lp == GetDlgItem(window, LOWORD(wp)) && IsWindowEnabled((HWND)lp)) {
             if (LOWORD(wp) == 212) { state.cancel_requested = TRUE; }
-            else if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : LOWORD(wp) == 204 ? 2 : 6; }
+            else if (state.event != 3) { state.event = LOWORD(wp) == 202 ? 1 : LOWORD(wp) == 204 ? 2 : LOWORD(wp) == 217 ? 14 : 6; }
             return 0;
         }
         break;
@@ -282,6 +282,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, L"EDIT", WS_TABSTOP | WS_BORDER | ES_READONLY | ES_MULTILINE | ES_NOHIDESEL, 203) &&
         child(window, L"STATIC", 0, 215) &&
         child(window, L"EDIT", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 214) &&
+        child(window, L"BUTTON", WS_TABSTOP, 217) &&
         child(window, L"STATIC", SS_NOPREFIX, 216) &&
         child(window, L"BUTTON", WS_TABSTOP, 208) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_OWNERDRAW, 204) &&
@@ -341,7 +342,7 @@ int32_t hash_ui_next_focus(void *window, uint32_t reverse) {
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 216)) || length > 131071) { return 1; }
+    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 217)) || length > 131071) { return 1; }
     WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
     if (!wide) { return 1; }
     int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
@@ -397,7 +398,7 @@ int32_t hash_ui_live(void *window, uint32_t setting, uint32_t notify) {
 
 int32_t hash_ui_name(void *window, uint32_t id, const uint8_t *text, size_t length) {
     HWND control = GetDlgItem((HWND)window, (int)id);
-    if ((HWND)window != state.window || !control || id < 201 || id > 216 || !length || length > 131071) { return 1; }
+    if ((HWND)window != state.window || !control || id < 201 || id > 217 || !length || length > 131071) { return 1; }
     if (!state.accessibility) {
         HRESULT status = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if (FAILED(status) && status != RPC_E_CHANGED_MODE) { return 1; }
@@ -468,7 +469,7 @@ int32_t hash_ui_extent(void *window, uint32_t axis) {
 }
 
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
-    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 216) { return 1; }
+    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 217) { return 1; }
     HWND control = GetDlgItem((HWND)window, (int)id);
     // Fairy submits the entire layout before hash_ui_redraw erases and paints
     // all children. Do not paint intermediate, partially moved arrangements.
@@ -508,7 +509,7 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
         if (font) { DeleteObject(font); } if (heading) { DeleteObject(heading); } if (mono) { DeleteObject(mono); }
         return 1;
     }
-    for (int id = 201; id <= 216; id++) {
+    for (int id = 201; id <= 217; id++) {
         HFONT selected = id == 203 || id == 214 ? mono : id == 206 ? heading : font;
         SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)selected, TRUE);
     }
@@ -529,7 +530,7 @@ int32_t hash_ui_accept_dpi(void *window) {
 
 size_t hash_ui_dialog(void *window, uint32_t save, const uint8_t *initial, size_t initial_length, uint8_t *output, size_t capacity) {
     WCHAR path[32768] = {0};
-    if ((HWND)window != state.window || save > 1 || !output || capacity > 131072 || capacity == 0 || initial_length > 32767) { return 131073; }
+    if ((HWND)window != state.window || save > 2 || !output || capacity > 131072 || capacity == 0 || initial_length > 32767) { return 131073; }
     if (initial_length) {
         int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)initial, (int)initial_length, path, 32767);
         if (!count) { return 131073; }
@@ -538,11 +539,12 @@ size_t hash_ui_dialog(void *window, uint32_t save, const uint8_t *initial, size_
     OPENFILENAMEW dialog = {0};
     dialog.lStructSize = sizeof(dialog); dialog.hwndOwner = (HWND)window;
     dialog.lpstrFile = path; dialog.nMaxFile = ARRAYSIZE(path);
-    dialog.lpstrFilter = save ? L"JSON report (*.json)\0*.json\0All files\0*.*\0" : L"All files\0*.*\0";
-    dialog.lpstrDefExt = save ? L"json" : NULL;
+    dialog.lpstrFilter = save == 1 ? L"JSON / SHA-256 (*.json;*.sha256)\0*.json;*.sha256\0All files\0*.*\0" :
+        save == 2 ? L"SHA-256 checksums (*.sha256)\0*.sha256\0All files\0*.*\0" : L"All files\0*.*\0";
+    dialog.lpstrDefExt = save == 1 ? L"json" : NULL;
     dialog.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_DONTADDTORECENT |
-        (save ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
-    BOOL selected = save ? GetSaveFileNameW(&dialog) : GetOpenFileNameW(&dialog);
+        (save == 1 ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+    BOOL selected = save == 1 ? GetSaveFileNameW(&dialog) : GetOpenFileNameW(&dialog);
     DWORD error = selected ? 0 : CommDlgExtendedError();
     // Native modal dialogs can leave the owner exposed at new bounds. Repair
     // its full child surface on accept and cancellation, before returning.
@@ -566,7 +568,7 @@ void hash_ui_destroy(void *window) {
         state.compare_live = FALSE;
         IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 205),
             (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
-        for (int id = 201; id <= 216; id++) {
+        for (int id = 201; id <= 217; id++) {
             if (state.named_controls & (1u << (id-201))) {
                 IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, id),
                     (DWORD)OBJID_CLIENT, CHILDID_SELF, &PROPID_ACC_NAME, 1);

@@ -13,10 +13,16 @@ Windows 10 1703 이상(x64)에서 사용할 수 있습니다. 설치는 필요�
    대소문자를 구분하지 않으며 앞뒤 ASCII 공백은 무시합니다. 64자리 16진수만
    허용합니다. 유효한 예상 해시가 있으면 저장 보고서에도 예상값과 일치 여부가
    포함됩니다. 불일치여도 계산된 실제 해시는 복사·저장할 수 있습니다.
+6. '체크섬 열기'로 .sha256 파일에서 예상값을 불러올 수 있습니다. UTF-8 단일
+   항목(해시만 / GNU / BSD 형식), 최대 64 KiB를 지원합니다. 여러 항목은 거부합니다.
+   체크섬 안의 파일명은 참고 정보이며 실제 계산할 파일은 직접 선택하세요.
+7. '결과 저장'에서 파일명을 input.sha256처럼 지정하면 실제 해시를 표준 체크섬
+   형식으로 저장합니다. 기본 파일명 sha256.json은 JSON 보고서입니다.
 
 단축키
 Alt+O: 파일 열기 / Alt+C: 해시 복사 / Alt+S: 결과 저장 / Alt+X: 취소
 Alt+E: 예상 SHA-256 입력창
+Alt+L: 체크섬 파일 열기
 Tab·Shift+Tab: 포커스 이동 / Enter: 포커스된 버튼 실행
 
 명령줄 사용 (PowerShell)
@@ -24,10 +30,14 @@ Tab·Shift+Tab: 포커스 이동 / Enter: 포커스된 버튼 실행
 & ".\@EXECUTABLE@" --hash "C:\data\input.bin"
 & ".\@EXECUTABLE@" --hash "C:\data\input.bin" "C:\data\result.json"
 & ".\@EXECUTABLE@" --compare "C:\data\input.bin" "64자리_예상_SHA256" "C:\data\compare.json"
+& ".\@EXECUTABLE@" --checksum "C:\data\input.bin" "C:\data\input.sha256"
+& ".\@EXECUTABLE@" --compare-file "C:\data\input.bin" "C:\data\input.sha256"
 
 --compare의 마지막 보고서 경로는 생략할 수 있습니다. JSON의 expectedSha256은
 소문자로 정규화된 예상값이고 matches는 일치 여부입니다. 종료 코드는 일치 0,
 불일치 2, 오류 1입니다. 예상값 형식 오류는 errorCode 12로 표시됩니다.
+체크섬 파일 형식·크기 오류는 errorCode 13입니다. --checksum의 성공 출력은
+JSON이 아닌 체크섬 텍스트이며, 마지막 저장 경로는 생략할 수 있습니다.
 GUI의 '복사'는 비교 결과와 관계없이 실제 계산된 SHA-256 값만 복사합니다.
 
 계산 중 원본 변경이 감지되면 결과 복사·저장을 막습니다. 파일 쓰기가 끝난 뒤

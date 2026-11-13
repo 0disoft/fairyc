@@ -2,6 +2,7 @@ module main;
 import hash_file as hash;
 import application as app;
 import comparison as comparison;
+import checksum as checksum;
 import std::fs as fs;
 import std::bytes as bytes;
 import std::process as process;
@@ -26,10 +27,16 @@ fn i32 main() {
     if(argc<3 || argc>5){return failure(1);}
     var u8[32] mode=[0;32];let m=switch(process::arg(1,ref mut mode)){case .ok(v):{v}case .err(_):{return failure(1);}};
     let ref u8[] mode_view=ref mode;
-    let compare=bytes::equal(mode_view[..m],b"--compare");
-    if((compare && argc!=4 && argc!=5) || (!compare && (!bytes::equal(mode_view[..m],b"--hash") || argc>4))){return failure(1);}
+    let from_file=bytes::equal(mode_view[..m],b"--compare-file");
+    let export=bytes::equal(mode_view[..m],b"--checksum");
+    let compare=from_file || bytes::equal(mode_view[..m],b"--compare");
+    if((compare && argc!=4 && argc!=5) || (!compare && ((!export && !bytes::equal(mode_view[..m],b"--hash")) || argc>4))){return failure(1);}
     var u8[64] expected=[0;64];
-    if(compare){
+    if(from_file){
+        var bytes::Buffer filename=bytes::empty();if(!bytes::resize_zeroed(ref mut filename,131072).is_ok){return failure(5);}
+        let count=switch(process::arg(3,bytes::view_mut(ref mut filename))){case .ok(v):{v}case .err(_):{return failure(1);}};
+        switch(checksum::read(bytes::view(ref filename)[..count],ref mut expected)){case .ok(_):{}case .err(e):{return failure(e);}};
+    }else if(compare){
         var u8[1024] raw=[0;1024];
         let count=switch(process::arg(3,ref mut raw)){case .ok(v):{v}case .err(_):{return failure(12);}};
         let ref u8[] input=ref raw;
@@ -39,7 +46,9 @@ fn i32 main() {
     let n=switch(process::arg(2,bytes::view_mut(ref mut path))){case .ok(v):{v}case .err(_):{return failure(1);}};
     let ref u8[] path_view=bytes::view(ref path);
     let value=switch(hash::compute(path_view[..n])){case .ok(v):{v}case .err(e):{return failure(e);}};
-    var bytes::Buffer report=bytes::empty();if(!hash::report(path_view[..n],ref value,ref mut report)){return failure(5);}
+    var bytes::Buffer report=bytes::empty();
+    let formatted=if(export){checksum::format(path_view[..n],ref value,ref mut report)}else{hash::report(path_view[..n],ref value,ref mut report)};
+    if(!formatted){return failure(5);}
     var bool matches=false;
     if(compare){
         var bytes::Buffer actual=bytes::empty();
