@@ -19,7 +19,7 @@ func TestStableNewWin32CreatesChecksAndTestsWithoutGUI(t *testing.T) {
 			t.Fatalf("new: %d %s %s", code, out, diag)
 		}
 		root := filepath.Join(parent, "desktop")
-		for _, command := range [][]string{{"check"}, {"check", "--locked"}, {"test", "--locked", "--file", "tests/domain.fy"}} {
+		for _, command := range [][]string{{"check"}, {"check", "--locked"}, {"test", "--locked"}} {
 			code, out, diag = runForTest(command, root)
 			if code != ExitSuccess || diag != "" {
 				t.Fatalf("%v: %d %s %s", command, code, out, diag)

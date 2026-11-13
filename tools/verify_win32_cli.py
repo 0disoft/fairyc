@@ -56,9 +56,9 @@ def verify(compiler):
                             .replace('executable_name = "cli-tool.exe"','executable_name = "CliTool.exe"'),encoding='utf-8',newline='\n')
         command([binary,'check'],project)
         command([binary,'check','--locked'],project)
-        command([binary,'test','--locked','--file','tests/domain.fy'],project)
+        command([binary,'test','--locked'],project)
         packaged=json.loads(command([sys.executable,'-B','package_release.py','--compiler',binary],project))
-        if not packaged['ok'] or packaged['cliCases']!=5 or packaged['files'][0]!='CliTool.exe' or packaged['resources']['windowTitle']!='CLI 검증 도구 Ω':
+        if not packaged['ok'] or packaged['cliCases']!=14 or packaged['asyncCases']!=9 or packaged['files'][0]!='CliTool.exe' or packaged['resources']['windowTitle']!='CLI 검증 도구 Ω':
             raise RuntimeError('generated build/package/branding incomplete')
         if packaged['resources']['strings']['CompanyName']!='' or packaged['version']!='0.1.0': raise RuntimeError('company/version changed')
         # Both forms of console creation remain byte-identical, through the copied EXE.
@@ -68,7 +68,7 @@ def verify(compiler):
         if snapshot(first/'basic')!=snapshot(second/'basic'): raise RuntimeError('console starter compatibility changed')
         command([binary,'check'],first/'basic');command([binary,'test','--locked'],first/'basic')
         return dict(ok=True,verification='embedded-win32-cli',standaloneCompiler=True,creationWithEmptyPath=True,
-            rejectedCreations=rejected,consoleBytesPreserved=True,lockedCheckAndPolicyTest=True,cliCases=packaged['cliCases'],
+            rejectedCreations=rejected,consoleBytesPreserved=True,lockedCheckAndPolicyTest=True,cliCases=packaged['cliCases'],asyncCases=packaged['asyncCases'],
             exeBytes=packaged['exeBytes'],zipBytes=packaged['zipBytes'],zipSha256=packaged['zipSha256'],resources=packaged['resources'],
             guiLaunched=False,inputInjected=False,published=False)
 

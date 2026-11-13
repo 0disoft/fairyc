@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'modules/win32_jobs'
 
 def files():
-    return sorted(p for directory in ('src','native') for p in (SOURCE/directory).rglob('*') if p.is_file())
+    return sorted(p for directory in ('src','native','tests') for p in (SOURCE/directory).rglob('*') if p.is_file())
 
 def install(target):
     for source in files():

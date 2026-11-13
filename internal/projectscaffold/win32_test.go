@@ -45,7 +45,7 @@ func TestWin32BundleTracksCanonicalSources(t *testing.T) {
 			t.Errorf("embedded starter input %s changed; run go generate ./internal/projectscaffold", source)
 		}
 	}
-	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app"} {
+	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app", "modules/win32_jobs"} {
 		err := filepath.WalkDir(filepath.Join("../..", filepath.FromSlash(directory)), func(name string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				return err

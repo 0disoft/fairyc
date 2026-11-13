@@ -3,6 +3,7 @@
 #define COBJMACROS
 #include <windows.h>
 #include <commctrl.h>
+#include <commdlg.h>
 #include <stdint.h>
 #include <initguid.h>
 #include <oleacc.h>
@@ -79,7 +80,7 @@ int32_t desktop_system_dpi(void) {
     return (int32_t)GetDpiForSystem();
 }
 void *desktop_open(int32_t width,int32_t height) {
-    INITCOMMONCONTROLSEX controls={sizeof(controls),ICC_STANDARD_CLASSES};
+    INITCOMMONCONTROLSEX controls={sizeof(controls),ICC_STANDARD_CLASSES|ICC_PROGRESS_CLASS};
     if (!InitCommonControlsEx(&controls)) { return NULL; } palette();
     WNDCLASSW type={0}; type.lpfnWndProc=procedure; type.hInstance=GetModuleHandleW(NULL);
     type.hCursor=LoadCursorW(NULL,IDC_ARROW); type.lpszClassName=L"FairyDesktopStarter";
@@ -92,14 +93,15 @@ void *desktop_open(int32_t width,int32_t height) {
     return state.window;
 }
 int32_t desktop_control(void *window,uint32_t kind,uint32_t id) {
-    if ((HWND)window!=state.window || id<101 || id>132 || kind<1 || kind>4) { return 1; }
+    if ((HWND)window!=state.window || id<101 || id>132 || kind<1 || kind>5) { return 1; }
     DWORD style=WS_CHILD|WS_VISIBLE;
     if (kind==1 || kind==4) { style|=WS_TABSTOP|WS_BORDER|ES_AUTOHSCROLL; }
-    if (kind==2) { style|=WS_TABSTOP|BS_DEFPUSHBUTTON; }
+    if (kind==2) { style|=WS_TABSTOP; if (id==103) { style|=BS_DEFPUSHBUTTON; } }
     if (kind==4) { style|=ES_READONLY|ES_MULTILINE; }
-    HWND control=CreateWindowExW(0,kind==1||kind==4?L"EDIT":kind==2?L"BUTTON":L"STATIC",L"",style,
+    HWND control=CreateWindowExW(0,kind==5?PROGRESS_CLASSW:kind==1||kind==4?L"EDIT":kind==2?L"BUTTON":L"STATIC",L"",style,
         0,0,0,0,(HWND)window,(HMENU)(INT_PTR)id,GetModuleHandleW(NULL),NULL);
     if (!control) { return 1; }
+    if (kind==5) { SendMessageW(control,PBM_SETRANGE32,0,100); }
     if (kind==1) { SendMessageW(control,EM_SETLIMITTEXT,511,0); return fairy_ime_attach(control)?0:1; }
     return 0;
 }
@@ -131,17 +133,19 @@ int32_t desktop_name(void *window,uint32_t id,const uint8_t *text,size_t length)
     if (FAILED(IAccPropServices_SetHwndPropStr(state.accessibility,GetDlgItem((HWND)window,id),(DWORD)OBJID_CLIENT,CHILDID_SELF,PROPID_ACC_NAME,wide))) { return 1; }
     state.named|=1u<<(id-101); return 0;
 }
-int32_t desktop_announce(void *window,uint32_t id) {
-    if ((HWND)window!=state.window || !state.accessibility || id<101 || id>132) { return 1; }
-    VARIANT value={0}; value.vt=VT_I4; value.lVal=1; HWND label=GetDlgItem((HWND)window,id);
+int32_t desktop_live(void *window,uint32_t id,uint32_t setting,uint32_t notify) {
+    if ((HWND)window!=state.window || !state.accessibility || id<101 || id>132 || setting>2 || notify>1) { return 1; }
+    VARIANT value={0}; value.vt=VT_I4; value.lVal=(LONG)setting; HWND label=GetDlgItem((HWND)window,id);
     if (FAILED(IAccPropServices_SetHwndProp(state.accessibility,label,(DWORD)OBJID_CLIENT,CHILDID_SELF,LiveSetting_Property_GUID,value))) { return 1; }
-    NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED,label,OBJID_CLIENT,CHILDID_SELF); return 0;
+    if (notify) { NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED,label,OBJID_CLIENT,CHILDID_SELF); } return 0;
 }
-int32_t desktop_poll(void *window) {
+int32_t desktop_announce(void *window,uint32_t id) { return desktop_live(window,id,1,1); }
+static int32_t poll_messages(void *window,BOOL wait) {
     if ((HWND)window!=state.window) { return 3; }
     while (!state.closed && !state.resized && !state.dpi_pending && !state.key && !state.clicked && !state.changed) {
-        MSG message; int status=(int)GetMessageW(&message,NULL,0,0);
-        if (status<=0) { state.closed=TRUE; break; }
+        MSG message;
+        if (wait) { if (GetMessageW(&message,NULL,0,0)<=0) { state.closed=TRUE; break; } }
+        else { if (!PeekMessageW(&message,NULL,0,0,PM_REMOVE)) { break; } if (message.message==WM_QUIT) { state.closed=TRUE; break; } }
         UINT key=fairy_ime_observe(&message);
         if (message.message==WM_KEYDOWN && (message.hwnd==state.window || IsChild(state.window,message.hwnd)) &&
             !fairy_ime_owns_key() && !(GetKeyState(VK_CONTROL)&0x8000) && !(GetKeyState(VK_MENU)&0x8000)) {
@@ -158,9 +162,25 @@ int32_t desktop_poll(void *window) {
     if (state.changed) { state.last_id=state.changed; state.changed=0; return 2; }
     return 0;
 }
+int32_t desktop_poll(void *window) { return poll_messages(window,TRUE); }
+int32_t desktop_poll_now(void *window) { return poll_messages(window,FALSE); }
 int32_t desktop_field(void *window,uint32_t axis) {
     if ((HWND)window!=state.window) { return -1; }
-    return axis==0?state.last_id:axis==1?state.last_key:axis==2?state.last_flags:-1;
+    return axis==0?state.last_id:axis==1?state.last_key:axis==2?state.last_flags:axis==3?GetDlgCtrlID(GetFocus()):-1;
+}
+int32_t desktop_enable(void *window,uint32_t id,uint32_t enabled) {
+    if ((HWND)window!=state.window || id<101 || id>132 || enabled>1) { return 1; }
+    HWND child=GetDlgItem((HWND)window,id);if (!child) { return 1; } EnableWindow(child,enabled!=0);
+    return IsWindowEnabled(child)==(enabled!=0)?0:1;
+}
+int32_t desktop_focus_to(void *window,uint32_t id) {
+    if ((HWND)window!=state.window || id<101 || id>132) { return 1; }
+    HWND child=GetDlgItem((HWND)window,id);if (!child || !IsWindowEnabled(child)) { return 1; }
+    SetFocus(child);return GetFocus()==child?0:1;
+}
+int32_t desktop_progress(void *window,size_t percent) {
+    if ((HWND)window!=state.window || percent>100) { return 1; }
+    SendDlgItemMessageW((HWND)window,108,PBM_SETPOS,percent,0);return 0;
 }
 int32_t desktop_extent(void *window,uint32_t axis) {
     RECT r; if ((HWND)window!=state.window || !GetClientRect((HWND)window,&r)) { return -1; }
@@ -191,6 +211,16 @@ int32_t desktop_move(void *window,uint32_t id,int32_t x,int32_t y,int32_t width,
 }
 int32_t desktop_redraw(void *window) {
     return (HWND)window==state.window && RedrawWindow((HWND)window,NULL,NULL,RDW_INVALIDATE|RDW_ERASE|RDW_ALLCHILDREN|RDW_UPDATENOW)?0:1;
+}
+size_t desktop_choose(void *window,uint8_t *output,size_t capacity) {
+    if ((HWND)window!=state.window || !output || !capacity || capacity>131072) { return 131073; }
+    WCHAR path[32768]={0};OPENFILENAMEW dialog={0};dialog.lStructSize=sizeof(dialog);dialog.hwndOwner=(HWND)window;
+    dialog.lpstrFile=path;dialog.nMaxFile=ARRAYSIZE(path);dialog.lpstrFilter=L"All files\0*.*\0";
+    dialog.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR|OFN_DONTADDTORECENT;
+    BOOL selected=GetOpenFileNameW(&dialog);DWORD error=selected?0:CommDlgExtendedError();
+    if (desktop_redraw(window)) { return 131073; } if (!selected) { return error?131073:0; }
+    int count=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,path,-1,(char *)output,(int)capacity,NULL,NULL);
+    return count>0?(size_t)count-1:131073;
 }
 int32_t desktop_focus_next(void *window,uint32_t reverse) {
     if ((HWND)window!=state.window || reverse>1) { return 1; }
