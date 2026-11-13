@@ -102,6 +102,12 @@ func unadmittedGenericScalar(reference ast.TypeReference) bool {
 		if payload.Kind == ast.TypeKindNamed && len(payload.Arguments) == 0 && containsTransportScalar(payload) {
 			return false
 		}
+		if payload.Kind == ast.TypeKindNamed && payload.Path == "Option" && len(payload.Arguments) == 1 {
+			leaf := payload.Arguments[0]
+			if leaf.Kind == ast.TypeKindNamed && len(leaf.Arguments) == 0 && containsTransportScalar(leaf) {
+				return false
+			}
+		}
 	}
 	if reference.Kind == ast.TypeKindNamed && reference.Path == "Result" && len(reference.Arguments) == 2 {
 		success, failure := reference.Arguments[0], reference.Arguments[1]

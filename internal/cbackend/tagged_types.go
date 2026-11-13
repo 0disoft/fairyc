@@ -72,7 +72,8 @@ func prepareTaggedTypes(
 		// retained sibling candidates cannot authorize a nested wrapper.
 		_, flatTransport := flatTransportOptionPayload(value)
 		_, flatResult := flatTransportResultPayload(value)
-		if !flatTransport && !flatResult && hir.ContainsTaggedType(value, extendedOptionScalar) {
+		_, nestedOption := nestedTransportOptionPayload(value)
+		if !flatTransport && !flatResult && !nestedOption && hir.ContainsTaggedType(value, extendedOptionScalar) {
 			return
 		}
 		if element, option := hir.OptionElement(value); option {
@@ -254,6 +255,12 @@ func extendedOptionScalar(value hir.Type) bool {
 func flatTransportOptionPayload(value hir.Type) (hir.Type, bool) {
 	payload, option := hir.OptionElement(value)
 	return payload, option && extendedOptionScalar(payload)
+}
+
+func nestedTransportOptionPayload(value hir.Type) (hir.Type, bool) {
+	inner, outerOption := hir.OptionElement(value)
+	leaf, innerOption := hir.OptionElement(inner)
+	return leaf, outerOption && innerOption && extendedOptionScalar(leaf)
 }
 
 func flatTransportResultPayload(value hir.Type) (hir.Type, bool) {
@@ -482,6 +489,11 @@ func (e *emitter) emitTaggedTypes(output *strings.Builder, directCopyScalar bool
 
 func (e *emissionAnalysis) taggedParticipatesInAggregateGraph(index int) bool {
 	tagged := e.taggedTypes[index]
+	// This root-only transport family contains a non-aggregate flat Option.
+	// Emit both through the tagged dependency visitor so the child is complete.
+	if _, nested := nestedTransportOptionPayload(tagged.typ); nested {
+		return false
+	}
 	if _, direct := copyScalarTaggedAggregateLayout(tagged.typ); direct || tagged.needsDrop {
 		return false
 	}

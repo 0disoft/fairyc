@@ -100,7 +100,7 @@ func TestCompositeOptionKeepsCompositeArgumentsClosed(t *testing.T) {
 
 func TestCompositeOptionEmitterKeepsOtherOrdinaryWrappersClosed(t *testing.T) {
 	for _, scalar := range []string{"i8", "i16", "isize", "u16", "u64", "f32", "f64"} {
-		for _, shape := range []string{"Option<Option<S>>", "Result<S,i64>", "Result<Option<S>,i32>", "Option<Result<S,i32>>"} {
+		for _, shape := range []string{"Option<Option<Option<S>>>", "Result<S,i64>", "Result<Option<S>,i32>", "Option<Result<S,i32>>"} {
 			t.Run(scalar+"/"+shape, func(t *testing.T) {
 				concrete := strings.ReplaceAll(shape, "S", scalar)
 				value := ".none"

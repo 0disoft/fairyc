@@ -12,7 +12,7 @@ func TestCompositeOptionCandidateBoundaries(t *testing.T) {
 	for _, scalar := range []hir.Type{hir.TypeI8, hir.TypeI16, hir.TypeISize, hir.TypeU16, hir.TypeU64, hir.TypeF32, hir.TypeF64} {
 		t.Run(scalar.String(), func(t *testing.T) {
 			flat := hir.Option(scalar)
-			blocked := []hir.Type{hir.Option(flat), hir.Result(scalar, hir.TypeI64), hir.Result(hir.TypeI32, scalar), hir.Result(flat, hir.TypeI32), hir.Option(hir.Result(scalar, hir.TypeI32)), hir.Option(hir.SharedBorrow(scalar))}
+			blocked := []hir.Type{hir.Option(hir.Option(flat)), hir.Result(scalar, hir.TypeI64), hir.Result(hir.TypeI32, scalar), hir.Result(flat, hir.TypeI32), hir.Option(hir.Result(scalar, hir.TypeI32)), hir.Option(hir.SharedBorrow(scalar))}
 			// Include the allowed sibling first: rejected roots must not inherit
 			// permission from a previously retained candidate.
 			params := append([]hir.Type{flat}, blocked...)
