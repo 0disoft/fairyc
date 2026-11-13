@@ -32,6 +32,16 @@ export const pages = {
 		en: 'Memory and Resources',
 		link: '/language/memory-and-resources/',
 	}),
+	modulesAndProjects: page({
+		label: '프로젝트·모듈·의존성',
+		en: 'Projects and Modules',
+		link: '/language/modules-and-projects/',
+	}),
+	cInteropAndWin32: page({
+		label: 'C 연동과 Win32 앱',
+		en: 'C Interop and Win32',
+		link: '/examples/c-interop-and-win32/',
+	}),
 	cliCommandsAndErrors: page({
 		label: 'CLI 사용법과 오류',
 		en: 'CLI and Errors',
@@ -56,7 +66,12 @@ export const sidebarSections = [
 	group({
 		label: '언어 배우기',
 		en: 'Learn Language',
-		items: [pages.languageBasics, pages.memoryAndResources],
+		items: [pages.languageBasics, pages.memoryAndResources, pages.modulesAndProjects],
+	}),
+	group({
+		label: '예제',
+		en: 'Examples',
+		items: [pages.cInteropAndWin32],
 	}),
 	group({
 		label: 'CLI와 지원 현황',
