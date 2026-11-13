@@ -42,4 +42,7 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   CLI/cache replay now passes 52 CLI processes and two standalone products;
   see `generic-limit-cli-cache-20261114.md`. Item 1 is complete for the stated
   flat-Result forwarding/cache scope; no specialization limit was increased.
-- 2–6: pending, in the order above.
+- 2: common desktop resource/receipt helpers extracted from the Go CLI without
+  changing command behavior. Existing package argument, containment/digest and
+  missing-Python tests pass. Candidate command wiring is next.
+- 3–6: pending, in the order above.
