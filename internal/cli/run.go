@@ -42,6 +42,9 @@ Usage:
   fairyc explain <diagnostic-code>
   fairyc targets
   fairyc experimental fetch-packages [--offline]
+  fairyc experimental registry-resolve <trust.json> <catalog.json> <signature.json> <requests.json>
+  fairyc experimental registry-update <trust.json> <catalog.json> <signature.json> <requests.json> <current-sources.json>
+  fairyc experimental git-snapshot <local-repository> <full-commit> <output.zip>
   fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file <workspace-file> --expected-source-sha256 <hash> [--apply]
   fairyc experimental atlas-mcp --allow-impact --max-packages <n> --max-calls <n> --max-depth <n> --max-symbols <n> --max-output-bytes <n> --max-requests <n>
   fairyc experimental atlas-impact --package-uid <uid> --symbol <symbol-id> --max-packages <n> --max-calls <n> --max-depth <0..64> --max-symbols <n> --max-output-bytes <n> [--locked]
@@ -243,6 +246,10 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runAtlasImpact(args[1:], sourceRoot, stdout, stderr)
 	case "fetch-packages":
 		return runPackageFetch(args[1:], sourceRoot, stdout, stderr)
+	case "registry-resolve", "registry-update":
+		return runPackageRegistry(command, args[1:], sourceRoot, stdout, stderr)
+	case "git-snapshot":
+		return runPackageGitSnapshot(args[1:], sourceRoot, stdout, stderr)
 	case "parse":
 		if len(args) != 2 {
 			return invocationError(stderr, fmt.Sprintf("experimental command %q expects exactly one source file", command))
