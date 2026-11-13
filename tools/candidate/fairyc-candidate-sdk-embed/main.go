@@ -114,6 +114,11 @@ func run(args []string) error {
 			}
 		}
 	}
+	if args[0] == "--check" {
+		if err := checkAuthority(dir); err != nil {
+			return err
+		}
+	}
 	fmt.Printf("PASS: %d exact SDK literal parts %s\n", len(files), args[0])
 	return nil
 }
