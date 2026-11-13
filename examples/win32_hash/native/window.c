@@ -17,8 +17,8 @@ static struct {
     HFONT font, heading, mono;
     HICON icon_large, icon_small;
     HBRUSH background, paper;
-    BOOL high_contrast, cancel_requested;
-    uint32_t tone;
+    BOOL high_contrast, cancel_requested, compare_pending, compare_live;
+    uint32_t tone, compare_tone;
     int event;
     int minimum_width, minimum_height;
     RECT suggested;
@@ -160,17 +160,22 @@ static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM l
     case WM_CTLCOLOREDIT: {
         int id = GetDlgCtrlID((HWND)lp);
         COLORREF color = id == 201 || id == 209 ? muted() : ink();
-        if (id == 205 && !state.high_contrast) {
-            color = state.tone == 1 ? RGB(68, 113, 47) : state.tone == 2 ? RGB(167, 45, 35) : muted();
+        if ((id == 205 || id == 216) && !state.high_contrast) {
+            uint32_t tone = id == 205 ? state.tone : state.compare_tone;
+            color = tone == 1 ? RGB(68, 113, 47) : tone == 2 ? RGB(167, 45, 35) : muted();
         }
         SetTextColor((HDC)wp, color);
-        SetBkColor((HDC)wp, id == 203 && !state.high_contrast ? RGB(255, 255, 253) : canvas());
-        return (LRESULT)(id == 203 ? state.paper : state.background);
+        SetBkColor((HDC)wp, (id == 203 || id == 214) && !state.high_contrast ? RGB(255, 255, 253) : canvas());
+        return (LRESULT)(id == 203 || id == 214 ? state.paper : state.background);
     }
     case WM_DRAWITEM:
         if (wp == 204 || wp == 211) { draw_control((const DRAWITEMSTRUCT *)lp); return TRUE; }
         break;
     case WM_COMMAND:
+        if (HIWORD(wp) == EN_CHANGE && LOWORD(wp) == 214 && (HWND)lp == GetDlgItem(window,214)) {
+            state.compare_pending = TRUE;
+            return 0;
+        }
         if (HIWORD(wp) == BN_CLICKED && (LOWORD(wp) == 202 || LOWORD(wp) == 204 || LOWORD(wp) == 208 || LOWORD(wp) == 212) &&
             (HWND)lp == GetDlgItem(window, LOWORD(wp)) && IsWindowEnabled((HWND)lp)) {
             if (LOWORD(wp) == 212) { state.cancel_requested = TRUE; }
@@ -266,6 +271,9 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 201) &&
         child(window, L"STATIC", SS_NOPREFIX, 207) &&
         child(window, L"EDIT", WS_TABSTOP | WS_BORDER | ES_READONLY | ES_MULTILINE | ES_NOHIDESEL, 203) &&
+        child(window, L"STATIC", 0, 215) &&
+        child(window, L"EDIT", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 214) &&
+        child(window, L"STATIC", SS_NOPREFIX, 216) &&
         child(window, L"BUTTON", WS_TABSTOP, 208) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_OWNERDRAW, 204) &&
         child(window, L"STATIC", SS_NOPREFIX, 205) && child(window, L"STATIC", SS_NOPREFIX, 209) &&
@@ -273,6 +281,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, PROGRESS_CLASSW, PBS_SMOOTH, 213) && child(window, L"BUTTON", WS_TABSTOP, 212)) {
         state.window = window;
         SendDlgItemMessageW(window, 213, PBM_SETRANGE32, 0, 100);
+        SendDlgItemMessageW(window, 214, EM_SETLIMITTEXT, 256, 0);
         if (open_tooltip(window) && window_icons(window)) { return window; }
     }
     if (window) { DestroyWindow(window); }
@@ -286,7 +295,7 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     MSG message;
     // A deferred Close must still dispatch paint/input/sent messages while
     // Fairy waits for a save commit or owned cleanup. Never block on GetMessage.
-    while ((!state.event && !state.cancel_requested) || (!wait && state.event == 3)) {
+    while ((!state.event && !state.cancel_requested && !state.compare_pending) || (!wait && state.event == 3)) {
         if (wait) {
             int code = (int)GetMessageW(&message, NULL, 0, 0);
             if (code <= 0) { state.event = 3; break; }
@@ -298,8 +307,9 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     }
     // Closing stays sticky and takes priority. Cancelling consumes only its
     // own latch, retaining a pending size/DPI event for the next poll.
-    int event = state.event == 3 ? 3 : state.cancel_requested ? 7 : state.event;
+    int event = state.event == 3 ? 3 : state.cancel_requested ? 7 : state.event ? state.event : state.compare_pending ? 11 : 0;
     if (event == 7) { state.cancel_requested = FALSE; }
+    else if (event == 11) { state.compare_pending = FALSE; }
     else if (event != 3) { state.event = 0; }
     return event;
 }
@@ -316,7 +326,7 @@ int32_t hash_ui_next_focus(void *window, uint32_t reverse) {
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 213)) || length > 131071) { return 1; }
+    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 216)) || length > 131071) { return 1; }
     WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
     if (!wide) { return 1; }
     int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
@@ -335,6 +345,31 @@ int32_t hash_ui_tone(void *window, uint32_t tone) {
     return 0;
 }
 
+size_t hash_ui_expected(void *window, uint8_t *output, size_t capacity) {
+    if ((HWND)window != state.window || !output || !capacity || capacity > 4096) { return 4097; }
+    WCHAR text[257];
+    int count = GetWindowTextW(GetDlgItem((HWND)window,214),text,ARRAYSIZE(text));
+    if (!count) { return 0; }
+    int written = WideCharToMultiByte(CP_UTF8,0,text,count,(char *)output,(int)capacity,NULL,NULL);
+    return written ? (size_t)written : 4097;
+}
+
+int32_t hash_ui_compare_tone(void *window, uint32_t tone) {
+    if ((HWND)window != state.window || tone > 2 || !state.accessibility) { return 1; }
+    HWND label = GetDlgItem((HWND)window,216);
+    if (!state.compare_live) {
+        VARIANT value = {0}; value.vt = VT_I4; value.lVal = 1;
+        if (FAILED(IAccPropServices_SetHwndProp(state.accessibility,label,
+            (DWORD)OBJID_CLIENT,CHILDID_SELF,LiveSetting_Property_GUID,value))) { return 1; }
+        state.compare_live = TRUE;
+    }
+    BOOL announce = tone != 0 && tone != state.compare_tone;
+    state.compare_tone = tone;
+    InvalidateRect(label,NULL,TRUE);
+    if (announce) { NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED,label,OBJID_CLIENT,CHILDID_SELF); }
+    return 0;
+}
+
 int32_t hash_ui_live(void *window, uint32_t setting, uint32_t notify) {
     if ((HWND)window != state.window || !state.accessibility || setting > 2 || notify > 1) { return 1; }
     HWND label = GetDlgItem((HWND)window, 205);
@@ -347,7 +382,7 @@ int32_t hash_ui_live(void *window, uint32_t setting, uint32_t notify) {
 
 int32_t hash_ui_name(void *window, uint32_t id, const uint8_t *text, size_t length) {
     HWND control = GetDlgItem((HWND)window, (int)id);
-    if ((HWND)window != state.window || !control || id < 201 || id > 213 || !length || length > 131071) { return 1; }
+    if ((HWND)window != state.window || !control || id < 201 || id > 216 || !length || length > 131071) { return 1; }
     if (!state.accessibility) {
         HRESULT status = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if (FAILED(status) && status != RPC_E_CHANGED_MODE) { return 1; }
@@ -414,7 +449,7 @@ int32_t hash_ui_extent(void *window, uint32_t axis) {
 }
 
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
-    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 213) { return 1; }
+    if ((HWND)window != state.window || width < 0 || height < 0 || id < 201 || id > 216) { return 1; }
     HWND control = GetDlgItem((HWND)window, (int)id);
     // Fairy submits the entire layout before hash_ui_redraw erases and paints
     // all children. Do not paint intermediate, partially moved arrangements.
@@ -454,8 +489,8 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
         if (font) { DeleteObject(font); } if (heading) { DeleteObject(heading); } if (mono) { DeleteObject(mono); }
         return 1;
     }
-    for (int id = 201; id <= 213; id++) {
-        HFONT selected = id == 203 ? mono : id == 206 ? heading : font;
+    for (int id = 201; id <= 216; id++) {
+        HFONT selected = id == 203 || id == 214 ? mono : id == 206 ? heading : font;
         SendMessageW(GetDlgItem((HWND)window, id), WM_SETFONT, (WPARAM)selected, TRUE);
     }
     SendMessageW(state.tooltip, WM_SETFONT, (WPARAM)font, TRUE);
@@ -506,9 +541,12 @@ void hash_ui_show(void *window) {
 
 void hash_ui_destroy(void *window) {
     if (state.accessibility) {
+        IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 216),
+            (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
+        state.compare_live = FALSE;
         IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 205),
             (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
-        for (int id = 201; id <= 213; id++) {
+        for (int id = 201; id <= 216; id++) {
             if (state.named_controls & (1u << (id-201))) {
                 IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, id),
                     (DWORD)OBJID_CLIENT, CHILDID_SELF, &PROPID_ACC_NAME, 1);

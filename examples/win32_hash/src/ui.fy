@@ -1,6 +1,9 @@
 module ui;
 import std::bytes as bytes;
 import progress as measure;
+import comparison as comparison;
+unsafe extern C fn usize hash_ui_expected(ptr mut void window,ptr mut u8 output,usize capacity);
+unsafe extern C fn i32 hash_ui_compare_tone(ptr mut void window,u32 tone);
 @effects(clock) unsafe extern C fn usize hash_ui_ticks();
 unsafe extern C fn i32 hash_ui_progress(ptr mut void window,usize value);
 unsafe extern C fn i32 hash_ui_system_dpi();
@@ -26,13 +29,14 @@ unsafe extern C fn void hash_ui_show(ptr mut void window);
 unsafe extern C fn void hash_ui_destroy(ptr mut void window);
 
 pub fn i32 scale(i32 value,i32 dpi){return (value*dpi+48)/96;}
-pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(dpi<96 || dpi>960){return null;}return unsafe{hash_ui_open(scale(600,dpi),scale(280,dpi))};}
+pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(dpi<96 || dpi>960){return null;}return unsafe{hash_ui_open(scale(600,dpi),scale(380,dpi))};}
 pub fn i32 poll(ptr mut void window,i32 wait){
     let event=unsafe{hash_ui_poll(window,wait)};
     if(event==8 || event==9){let moved=unsafe{hash_ui_next_focus(window,if(event==9){1}else{0})};return 0;}
     if(event==10){
         let focus=unsafe{hash_ui_focus_id(window)};
         if(focus==202){return 1;}if(focus==204){return 2;}if(focus==208){return 6;}if(focus==212){return 7;}
+        if(focus==214){return 11;}
         return 0;
     }
     return event;
@@ -43,6 +47,7 @@ pub fn bool enable(ptr mut void window,u32 id,bool enabled){return unsafe{hash_u
 pub fn bool visible(ptr mut void window,u32 id,bool shown){return unsafe{hash_ui_visible(window,id,if(shown){1}else{0})}==0;}
 pub fn bool busy(ptr mut void window,bool active){
     return enable(window,202,!active) && enable(window,212,active) &&
+        enable(window,214,!active) &&
         visible(window,202,!active) && visible(window,212,active) &&
         unsafe{hash_ui_focus(window,if(active){212}else{202})}==0;
 }
@@ -55,6 +60,24 @@ pub fn bool status(ptr mut void window,ref u8[] value,u32 tone){
 }
 pub fn bool copy(ptr mut void window,ref u8[] value){
     return unsafe{hash_ui_copy(window,value as ptr u8,value.len)}==0;
+}
+pub fn usize expected(ptr mut void window,ref mut u8[] output){
+    return unsafe{hash_ui_expected(window,output as ptr mut u8,output.len)};
+}
+pub fn bool compare(ptr mut void window,ref u8[] actual,bool ready){
+    var u8[1024] input=[0;1024];
+    let count=expected(window,ref mut input);
+    if(count>1024){return false;}
+    let ref u8[] value=ref input;
+    let result=comparison::classify(value[..count],actual,ready);
+    let ref u8[] message=if(result==0){b"예상 SHA-256을 입력하면 비교해요."}else{
+        if(result==1){b"64자리 16진수 SHA-256을 입력하세요."}else{
+            if(result==2){b"파일을 선택해 계산하면 비교해요."}else{
+                if(result==3){b"✓ 예상 해시와 일치해요."}else{b"예상 해시와 일치하지 않아요."}
+            }
+        }
+    };
+    return text(window,216,message) && unsafe{hash_ui_compare_tone(window,if(result==3){1}else{if(result==4){2}else{0}})}==0;
 }
 pub fn bool selected(ptr mut void window,ref u8[] path){
     var usize start=0;
@@ -103,13 +126,13 @@ pub fn bool layout(ptr mut void window,i32 event){
     if(dpi<96 || dpi>960 || width<0 || client_height<0){return false;}
     if(width==0 || client_height==0){return true;}
     let form_width=if(width>scale(720,dpi)){scale(720,dpi)}else{width};
-    let form_height=if(client_height>scale(280,dpi)){scale(280,dpi)}else{client_height};
+    let form_height=if(client_height>scale(380,dpi)){scale(380,dpi)}else{client_height};
     let origin_x=(width-form_width)/2;let origin_y=(client_height-form_height)/2;
     let inset=scale(18,dpi);let button=scale(110,dpi);let copy_width=scale(76,dpi);let gap=scale(10,dpi);
     let height=scale(32,dpi);let footer=origin_y+form_height-inset-height;let file_x=origin_x+scale(62,dpi);
     let left=origin_x+inset;let right=origin_x+form_width-inset;
     let file_width=right-file_x-button-gap;
-    return unsafe{hash_ui_layout(window,scale(520,dpi),scale(276,dpi),scale(14,dpi))}==0 &&
+    return unsafe{hash_ui_layout(window,scale(520,dpi),scale(376,dpi),scale(14,dpi))}==0 &&
         unsafe{hash_ui_move(window,211,left,origin_y+scale(24,dpi),scale(30,dpi),scale(38,dpi))}==0 &&
         unsafe{hash_ui_move(window,206,file_x,origin_y+scale(18,dpi),file_width,scale(24,dpi))}==0 &&
         unsafe{hash_ui_move(window,201,file_x,origin_y+scale(45,dpi),file_width,scale(22,dpi))}==0 &&
@@ -120,6 +143,9 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{hash_ui_move(window,207,left,origin_y+scale(114,dpi),right-left,scale(22,dpi))}==0 &&
         unsafe{hash_ui_move(window,203,left,origin_y+scale(142,dpi),right-left,scale(70,dpi))}==0 &&
         unsafe{hash_ui_move(window,213,left,origin_y+scale(216,dpi),right-left,scale(4,dpi))}==0 &&
+        unsafe{hash_ui_move(window,215,left,origin_y+scale(232,dpi),right-left,scale(20,dpi))}==0 &&
+        unsafe{hash_ui_move(window,214,left,origin_y+scale(256,dpi),right-left,scale(28,dpi))}==0 &&
+        unsafe{hash_ui_move(window,216,left,origin_y+scale(292,dpi),right-left,scale(24,dpi))}==0 &&
         unsafe{hash_ui_move(window,208,right-button-gap-copy_width,footer,copy_width,height)}==0 &&
         unsafe{hash_ui_move(window,204,right-button,footer,button,height)}==0 &&
         unsafe{hash_ui_move(window,205,left,footer-scale(3,dpi),right-left-button-copy_width-gap*2,scale(40,dpi))}==0 &&

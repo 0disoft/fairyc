@@ -588,7 +588,7 @@ def verify(image, screenshot=None, desktop_hover=False, job_mib=16, job_only=Fal
             client_rect(main, c.byref(area))
             window_rect(main, c.byref(outer))
             scale = window_dpi(main) / 96
-            for width, height in ((520, 276), (800, 450)):
+            for width, height in ((520, 376), (800, 450)):
                 physical_width = round(width*scale) + outer.right-outer.left-area.right
                 physical_height = round(height*scale) + outer.bottom-outer.top-area.bottom
                 if not resize(main, None, 0, 0, physical_width, physical_height, 0x16):

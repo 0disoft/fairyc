@@ -4,6 +4,7 @@ import sha256_stream as sha;
 import ui as ui;
 import reader as reader;
 import saving as saving;
+import comparison as comparison;
 import std::fs as fs;
 import std::bytes as bytes;
 
@@ -63,6 +64,15 @@ pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     return .ok(hash::Digest{.words=sha::finish(ref state),.length=state.length,.identity});
 }
 
+fn bool comparison_report(ptr mut void window,ref u8[] path,ref hash::Digest value,ref u8[] actual,ref mut bytes::Buffer report){
+    if(!hash::report(path,value,report)){return false;}
+    var u8[1024] input=[0;1024];var u8[64] expected=[0;64];
+    let count=ui::expected(window,ref mut input);if(count>1024){return false;}
+    let ref u8[] raw=ref input;
+    if(!comparison::normalize(raw[..count],ref mut expected)){return true;}
+    return comparison::append_report(report,ref expected,bytes::equal(actual,ref expected));
+}
+
 @effects(filesystem,clock)
 pub fn i32 run() {
     var bytes::Buffer path=bytes::empty();var bytes::Buffer selection=bytes::empty();
@@ -72,6 +82,8 @@ pub fn i32 run() {
     let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
         ui::text(window,212,b"취소(&X)") && ui::enable(window,212,false) && ui::visible(window,212,false) &&
+        ui::text(window,215,b"예상 SHA-256(&E)") && ui::name(window,214,b"비교할 예상 SHA-256") &&
+        ui::compare(window,b"",false) &&
         ui::name(window,201,b"파일 경로") && ui::name(window,203,b"SHA-256 해시") && ui::name(window,213,b"전체 진행률") &&
         ui::text(window,209,b"선택한 파일의 해시를 계산해요.") && ui::status(window,b"파일 선택 대기",0) &&
         ui::enable(window,204,false) && ui::enable(window,208,false) && ui::position(window,0) && ui::layout(window,0);
@@ -81,6 +93,7 @@ pub fn i32 run() {
     while(true) {
         let event=ui::poll(window,1);if(event==3){break;}
         if(event==4 || event==5){if(!ui::layout(window,event)){result=1;break;}}
+        if(event==11 && !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
         if(event==1) {
             let chosen=ui::choose(window,false,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
@@ -89,7 +102,7 @@ pub fn i32 run() {
                 if(!disabled || !bytes::clear(ref mut path).is_ok || !bytes::append(ref mut path,bytes::view(ref selection)[..chosen]).is_ok){result=1;break;}
                 let bool shown=ui::selected(window,bytes::view(ref path)) && ui::text(window,203,b"") &&
                     ui::text(window,209,b"") && ui::position(window,0) && ui::status(window,b"해시 계산 중…",0);
-                if(!shown){result=1;break;}
+                if(!shown || !ui::compare(window,b"",false)){result=1;break;}
                 let started=ui::ticks();
                 switch(compute(bytes::view(ref path),window)) {
                     case .ok(value): {
@@ -106,10 +119,11 @@ pub fn i32 run() {
                     }
                 };
                 let bool enabled=ui::busy(window,false) && ui::enable(window,204,ready) && ui::enable(window,208,ready);
-                if(!enabled){result=1;break;}
+                if(!enabled || !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
             }else if(chosen>131072){let bool shown=ui::status(window,b"파일 선택창을 열 수 없어요.",2);}
         }
         if(event==2 && ready) {
+            if(!comparison_report(window,bytes::view(ref path),ref last,bytes::view(ref hex),ref mut report)){result=1;break;}
             let chosen=ui::choose(window,true,bytes::view_mut(ref mut selection));
             if(chosen>0 && chosen<131072) {
                 if(!ui::busy(window,true) || !ui::enable(window,204,false) || !ui::enable(window,208,false) ||

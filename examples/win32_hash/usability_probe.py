@@ -43,9 +43,9 @@ def keyboard(driver):
             return keys.focus(d.main)
         actual = d.wait(observe, lambda v: v == expected, f'keyboard focus expected {expected}, trace={trace}')
         trace.append(actual)
-    for identifier in (201, 203, 202):
+    for identifier in (201, 203, 214, 202):
         focus_after([9], identifier)
-    for identifier in (203, 201, 202):
+    for identifier in (214, 203, 201, 202):
         focus_after([16, 9], identifier)
     def opened():
         return d.wait(lambda: d.windows('#32770'), lambda v: len(v) == 1, 'keyboard did not open native dialog')[0]
@@ -62,16 +62,17 @@ def keyboard(driver):
     keys.chord(d.main, [13])
     d.choose(202, source, active=opened(), accept=accept)
     ready(expected)
-    for identifier in (201, 203, 208, 204, 202):
+    for identifier in (201, 203, 214, 208, 204, 202):
         focus_after([9], identifier)
-    for identifier in (204, 208, 203, 201, 202):
+    for identifier in (204, 208, 214, 203, 201, 202):
         focus_after([16, 9], identifier)
     with preserve_clipboard():
-        for identifier in (201, 203, 208):
+        for identifier in (201, 203, 214, 208):
             focus_after([9], identifier)
         keys.chord(d.main, [13])  # Enter on focused Copy, not default Open.
         d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 해시 복사 완료', 'Enter Copy status missing')
         d.wait(clipboard_text, lambda v: v == expected, 'Enter did not activate focused Copy')
+        focus_after([16, 9], 214)
         focus_after([16, 9], 203)
         keys.chord(d.main, [18, 67])
         d.wait(lambda: d.text(d.child(d.main, 205)), lambda v: v == '✓ 해시 복사 완료', 'Alt+C did not copy')
@@ -133,14 +134,16 @@ def accessibility(driver, events):
             raise RuntimeError(f'native tab order mismatch: {observed} expected {expected}')
         return observed
     result = inspect(driver.main, driver.process.pid)
-    tab_orders = dict(initial=order(202, [201, 203, 202]),
-                      initialReverse=order(202, [203, 201, 202], True))
+    tab_orders = dict(initial=order(202, [201, 203, 214, 202]),
+                      initialReverse=order(202, [214, 203, 201, 202], True))
     rows = {row['id']: row for row in result['controls']}
-    for identifier, role in (('202', 50000), ('201', 50004), ('203', 50004), ('213', 50012)):
+    for identifier, role in (('202', 50000), ('201', 50004), ('203', 50004), ('214', 50004), ('213', 50012)):
         if rows[identifier]['type'] != role or not rows[identifier]['name']:
             raise RuntimeError(f'accessibility role/name missing: control={identifier}, observed={rows[identifier]}')
     if not rows['201']['valuePattern'] or not rows['203']['valuePattern'] or not rows['201']['readOnly'] or not rows['203']['readOnly']:
         raise RuntimeError('read-only UI fields were exposed as writable')
+    if not rows['214']['valuePattern'] or rows['214']['readOnly'] or not rows['214']['enabled']:
+        raise RuntimeError('expected-hash input was not exposed as editable')
     if not rows['213']['rangePattern'] or rows['213']['rangeMin'] != 0 or rows['213']['rangeMax'] != 100:
         raise RuntimeError('accessible progress range invalid')
     for identifier, shortcut in (('202', 'Alt+o'), ('204', 'Alt+s'), ('208', 'Alt+c')):
@@ -173,8 +176,8 @@ def accessibility(driver, events):
     error_rows = {row['id']: row for row in inspect(driver.main, driver.process.pid)['controls']}
     if error_rows['205']['liveSetting'] != 2:
         raise RuntimeError('error status is not an assertive live region')
-    tab_orders['completed'] = order(202, [201, 203, 208, 204, 202])
-    tab_orders['completedReverse'] = order(202, [204, 208, 203, 201, 202], True)
+    tab_orders['completed'] = order(202, [201, 203, 214, 208, 204, 202])
+    tab_orders['completedReverse'] = order(202, [204, 208, 214, 203, 201, 202], True)
     large = driver.root/'accessible-busy.bin'
     with large.open('wb') as stream:
         stream.seek(256*1048576-1)
@@ -187,6 +190,8 @@ def accessibility(driver, events):
         raise RuntimeError('Cancel accessible name/action missing')
     if active['204']['enabled'] or active['208']['enabled']:
         raise RuntimeError('accessible busy state exposed partial-result actions')
+    if active['214']['enabled']:
+        raise RuntimeError('expected-hash input remained editable while busy')
     if active['205']['liveSetting'] != 0:
         raise RuntimeError('progress announcements were not suppressed')
     events.drain(); before = len(events.events)
