@@ -1,5 +1,5 @@
 ---
-title: 4. 배열, 슬라이스, 문자열 뷰
+title: 배열, 슬라이스, 문자열 뷰
 description: Fairy C의 고정 배열 T[N], 슬라이스 뷰 ref T[] / ref mut T[], 범위 슬라이싱, 구조체 배열 필드, str/u8[]/CStr 차이를 배웁니다.
 ---
 
@@ -85,5 +85,5 @@ Fairy C에는 용도가 다른 세 가지 문자열·바이트 리터럴이 있�
 ---
 
 다음 장에서는 Fairy C의 가장 핵심 개념인 소유권 이동, `ref`/`ref mut` 빌림 규칙, 자동 소멸 `resource`, `region`, 그리고 `@abilities`/`@effects`/`unsafe`까지 한 번에 정리합니다.
-- 이전: [3. 구조체, enum, switch](../structs-enums-and-errors/)
-- 다음: [5. 소유권, 빌림, resource와 region](../memory-and-resources/)
+- 이전: [구조체, enum, switch](../structs-enums-and-errors/)
+- 다음: [소유권, 빌림, resource와 region](../memory-and-resources/)

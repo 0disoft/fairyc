@@ -1,5 +1,5 @@
 ---
-title: 3. Structs, Enums, and Switch
+title: Structs, Enums, and Switch
 description: Learn Fairy C structs, field shorthand, Type::method syntax, enums, exhaustive switch matching, and Option/Result/? error propagation.
 ---
 
@@ -121,5 +121,5 @@ fn usize bytes_written() {
 
 ---
 
-- Previous: [2. Functions and Control Flow](../control-flow-and-functions/)
-- Next: [4. Arrays, Slices, and Views](../arrays-and-slices/)
+- Previous: [Functions and Control Flow](../control-flow-and-functions/)
+- Next: [Arrays, Slices, and Views](../arrays-and-slices/)

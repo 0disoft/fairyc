@@ -1,5 +1,5 @@
 ---
-title: 4. Arrays, Slices, and Views
+title: Arrays, Slices, and Views
 description: Learn fixed arrays T[N], slice views ref T[] / ref mut T[], range slicing, inline struct array fields, and str/u8[]/CStr differences.
 ---
 
@@ -82,5 +82,5 @@ Invalid ranges (`start > end` or `end > len`) trap immediately with `bounds`.
 
 ---
 
-- Previous: [3. Structs, Enums, and Switch](../structs-enums-and-errors/)
-- Next: [5. Ownership, Borrows, and Resources](../memory-and-resources/)
+- Previous: [Structs, Enums, and Switch](../structs-enums-and-errors/)
+- Next: [Ownership, Borrows, and Resources](../memory-and-resources/)

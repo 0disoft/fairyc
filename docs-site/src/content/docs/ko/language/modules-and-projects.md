@@ -1,5 +1,5 @@
 ---
-title: 6. 모듈, 패키지, 표준 라이브러리
+title: 모듈, 패키지, 표준 라이브러리
 description: Fairy C의 module과 import, pub 가시성, fairy.toml 워크스페이스 구성, 그리고 std 표준 모듈 구성을 알아봅니다.
 ---
 
@@ -75,5 +75,5 @@ answer = { path = "../libs/answer" }
 
 이제 기본 문법부터 모듈 구성까지 모두 훑었으니, 실제 C 연동과 Win32 예제로 넘어가 보겠습니다!
 
-- 이전: [5. 소유권, 빌림, resource와 region](../memory-and-resources/)
+- 이전: [소유권, 빌림, resource와 region](../memory-and-resources/)
 - 다음: [C 연동과 Win32 앱](../../examples/c-interop-and-win32/)

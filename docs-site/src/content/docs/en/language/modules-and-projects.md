@@ -1,5 +1,5 @@
 ---
-title: 6. Modules, Packages, and std
+title: Modules, Packages, and std
 description: Learn Fairy C module and import syntax, pub visibility, fairy.toml workspaces, and the current std standard modules.
 ---
 
@@ -74,5 +74,5 @@ When a package links the `std` SDK root (as seen in repository examples), the fo
 
 ---
 
-- Previous: [5. Ownership, Borrows, and Resources](../memory-and-resources/)
+- Previous: [Ownership, Borrows, and Resources](../memory-and-resources/)
 - Next: [C Interop and Win32](../../examples/c-interop-and-win32/)

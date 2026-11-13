@@ -1,5 +1,5 @@
 ---
-title: 1. 변수, 타입, 연산자
+title: 변수, 타입, 연산자
 description: Fairy C의 let과 var, 컴파일 타임 const, 기본 타입, 리터럴, 오버플로 검사 연산자와 as 형변환을 알아봅니다.
 ---
 
@@ -85,4 +85,4 @@ let usize c = b as usize;         // u32 -> usize (가능)
 ---
 
 다음 장에서는 함수와 이름 있는 인자, 제네릭 함수, 그리고 표현식으로 쓰는 `if`와 두 가지 `for` 루프를 살펴봅니다.
-- 다음: [2. 함수와 제어문](../control-flow-and-functions/)
+- 다음: [함수와 제어문](../control-flow-and-functions/)

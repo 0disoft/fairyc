@@ -1,5 +1,5 @@
 ---
-title: 5. Ownership, Borrows, and Resources
+title: Ownership, Borrows, and Resources
 description: Understand Copy vs Move, ref/ref mut borrows, resource cleanup blocks, region arenas, @abilities/burn, @effects, and unsafe pointers.
 ---
 
@@ -104,5 +104,5 @@ Keep in mind that `unsafe` only unlocks raw pointer casts, dereferences, and for
 
 ---
 
-- Previous: [4. Arrays, Slices, and Views](../arrays-and-slices/)
-- Next: [6. Modules, Packages, and std](../modules-and-projects/)
+- Previous: [Arrays, Slices, and Views](../arrays-and-slices/)
+- Next: [Modules, Packages, and std](../modules-and-projects/)

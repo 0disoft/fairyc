@@ -1,5 +1,5 @@
 ---
-title: 2. 함수와 제어문
+title: 함수와 제어문
 description: Fairy C의 함수 선언, 이름 있는 인자, 제네릭 함수, if 표현식, C 스타일 for와 for-in 순회, defer 문법을 배웁니다.
 ---
 
@@ -116,5 +116,5 @@ for (let ref mut i32 item in items) {
 ---
 
 다음 장에서는 데이터를 묶는 `struct`, 상태를 구분하는 `enum`, 그리고 패턴 매칭 `switch`와 `Option`/`Result` 에러 처리를 배웁니다.
-- 이전: [1. 변수, 타입, 연산자](../basics/)
-- 다음: [3. 구조체, enum, switch](../structs-enums-and-errors/)
+- 이전: [변수, 타입, 연산자](../basics/)
+- 다음: [구조체, enum, switch](../structs-enums-and-errors/)

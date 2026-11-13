@@ -1,5 +1,5 @@
 ---
-title: 1. Variables, Types, and Operators
+title: Variables, Types, and Operators
 description: Learn let vs var, compile-time const, scalar and string types, literals, checked arithmetic, and explicit as casts in Fairy C.
 ---
 
@@ -82,4 +82,4 @@ Safe `as` currently covers widening pairs that never lose data (`u8 -> i32/u32/u
 
 ---
 
-Next: [2. Functions and Control Flow](../control-flow-and-functions/)
+Next: [Functions and Control Flow](../control-flow-and-functions/)

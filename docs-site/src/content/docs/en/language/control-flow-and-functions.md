@@ -1,5 +1,5 @@
 ---
-title: 2. Functions and Control Flow
+title: Functions and Control Flow
 description: Learn function declarations, argument labels, scalar generics, if-expressions, while, C-style for, for-in iteration, and defer in Fairy C.
 ---
 
@@ -115,5 +115,5 @@ You can also iterate over sub-ranges directly, such as `for (let u8 b in data[1.
 
 ---
 
-- Previous: [1. Variables, Types, and Operators](../basics/)
-- Next: [3. Structs, Enums, and Switch](../structs-enums-and-errors/)
+- Previous: [Variables, Types, and Operators](../basics/)
+- Next: [Structs, Enums, and Switch](../structs-enums-and-errors/)

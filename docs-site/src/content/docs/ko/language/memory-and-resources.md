@@ -1,5 +1,5 @@
 ---
-title: 5. 소유권, 빌림, resource와 region
+title: 소유권, 빌림, resource와 region
 description: Fairy C의 Move와 Copy, ref/ref mut 빌림, resource cleanup, region, @abilities/burn, @effects, unsafe/raw pointer를 이해합니다.
 ---
 
@@ -109,5 +109,5 @@ unsafe extern C fn void c_free(ptr mut void p);
 ---
 
 다음 장에서는 코드를 파일 여러 개로 나누는 `module`/`import`, `fairy.toml` 프로젝트 설정, 그리고 `std` 표준 라이브러리를 살펴봅니다.
-- 이전: [4. 배열, 슬라이스, 문자열 뷰](../arrays-and-slices/)
-- 다음: [6. 모듈, 패키지, 표준 라이브러리](../modules-and-projects/)
+- 이전: [배열, 슬라이스, 문자열 뷰](../arrays-and-slices/)
+- 다음: [모듈, 패키지, 표준 라이브러리](../modules-and-projects/)

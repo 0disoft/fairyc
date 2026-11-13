@@ -1,5 +1,5 @@
 ---
-title: 3. 구조체, enum, switch
+title: 구조체, enum, switch
 description: Fairy C의 struct와 필드 단축 초기화, 메서드(Type::method), enum, switch 패턴 매칭, Option/Result/? 전파를 익힙니다.
 ---
 
@@ -129,5 +129,5 @@ fn usize bytes_written() {
 ---
 
 다음 장에서는 고정 크기 배열과 안전하게 구간을 가리키는 슬라이스 뷰, 그리고 문자열 뷰의 차이를 알아봅니다.
-- 이전: [2. 함수와 제어문](../control-flow-and-functions/)
-- 다음: [4. 배열, 슬라이스, 문자열 뷰](../arrays-and-slices/)
+- 이전: [함수와 제어문](../control-flow-and-functions/)
+- 다음: [배열, 슬라이스, 문자열 뷰](../arrays-and-slices/)
