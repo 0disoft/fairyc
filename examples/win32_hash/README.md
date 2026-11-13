@@ -356,7 +356,7 @@ Apache 2.0 `LICENSE.txt`, and `SHA256SUMS.txt` for those three files. A sibling
 authenticate a publisher. The current template describes an unsigned build.
 Artifacts stay under ignored `dist/`; no installer or Python is distributed.
 
-Packaging synchronizes `native/app.rc` from `fairy.toml`, builds with
+Packaging synchronizes `native/app.rc` from `app.toml` and `fairy.toml`, builds with
 `--locked --release`, then inspects x64/subsystem, VERSIONINFO, the themed manifest
 and all nine embedded icon frames. It extracts its ZIP into a temporary path
 containing Korean text and spaces and runs the actual hash/report CLI's 19 cases
@@ -365,14 +365,48 @@ moved or key sent. For unchanged payload bytes the ZIP has stable entry order,
 timestamps and compression settings; this is not a whole-toolchain reproducible
 build claim. Failed verification leaves the previous ZIP intact.
 
-To customize another app, replace `native/app.ico` with a multi-resolution ICO
-(at least 16/32/48/256px), edit branding in `prepare_resources.py`, and regenerate:
+App identity is configured in `app.toml`; no Python/C source edit is needed to
+change the product/window title, company, description, distribution EXE name,
+ZIP prefix, assembly identity or ICO path:
+
+```toml
+[app]
+product_name = "Fairy Hash"
+company_name = "Rodisoft"
+description = "Fairy Hash - SHA-256 file utility"
+executable_name = "FairyHash.exe"
+package_name = "fairy-hash"
+assembly_name = "Fairy.Hash"
+icon = "native/app.ico"
+```
+
+`Rodisoft` is the existing editable default, not a required publisher name.
+Set `company_name = ""` to leave that VERSIONINFO field blank. The app version
+still comes only from `fairy.toml`; there is no second version to synchronize.
+Window titles/metadata accept Unicode and quotes. EXE names use ASCII without
+spaces/directories, ZIP prefixes use lowercase ASCII slugs, and the ICO must be
+an existing relative path within the project. Use at least 16/32/48/256px frames.
+
+After editing the settings, rebuild and package:
 
 ```powershell
 python -B prepare_resources.py
 fairyc build --locked --release
 python -B verify_resources.py
+python -B package_release.py --exe build/win32-hash.exe
 ```
+
+Or use `package_release.py --compiler C:\tools\fairyc.exe` to prepare resources,
+build and package in one command. The internal compiler output remains
+`build/win32-hash.exe`; the ZIP contains the configured distribution filename.
+Its guide and checksums use that filename too. Settings are embedded at build
+time: end users do not need `app.toml` alongside the EXE.
+
+`verify_app_settings.py --compiler C:\tools\fairyc.exe` makes a temporary branded
+copy, builds it and checks the generated PE and actual packaged CLI. It covers
+a quoted Korean title/description, blank company, alternate ICO path/content,
+EXE and ZIP renaming, and invalid-path rejection without changing the original
+settings. It launches no GUI or desktop input.
 
 The example's editable SVG is `native/app.svg`; `make_icon.py` regenerates its
 16/20/24/32/40/48/64/128/256px ICO using only the Python standard library. That
@@ -389,3 +423,5 @@ was not exercised in this release work.
 
 See the [release execution record](../../docs/development/windows-hash-package-20261113.md)
 for sizes, checksums and the exact validation boundary.
+The [app-settings execution record](../../docs/development/windows-hash-app-settings-20261113.md)
+records the configurable build and custom-brand verification.
