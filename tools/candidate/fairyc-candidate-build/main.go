@@ -14,6 +14,9 @@ import (
 
 func main() { os.Exit(run(os.Args[1:])) }
 func run(args []string) int {
+	if len(args) > 0 && args[0] == "--desktop" {
+		return runDesktop(args[1:], ".", os.Stdout, os.Stderr)
+	}
 	flags := flag.NewFlagSet("fairyc-candidate-build", flag.ContinueOnError)
 	candidate := flags.String("candidate", "", "candidate executable")
 	manifest := flags.String("manifest", "", "private source manifest")

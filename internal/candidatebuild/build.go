@@ -20,6 +20,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/desktopapp"
 	"github.com/0disoft/fairyc/internal/windowsbuild"
 )
 
@@ -286,6 +287,9 @@ func buildPacket(options Options, data []byte) (Result, error) {
 	}
 	var application *windowsbuild.Project
 	if !options.CompilerHost && options.WindowsRoot != "" {
+		if err := desktopapp.PrepareBuild(options.WindowsRoot); err != nil {
+			return Result{}, err
+		}
 		application, err = windowsbuild.Load(options.WindowsRoot)
 		if err != nil {
 			return Result{}, err
