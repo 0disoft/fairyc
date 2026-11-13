@@ -281,10 +281,10 @@ func (x *lifter) expr(e *ast.Expression, env map[string]local, owner string) (*a
 }
 func validate(c *ast.Closure, span diagnostic.Span) error {
 	reject := func() error {
-		return fail(span, "copied closure requires 0..4 i32 captures/parameters, i32 result and one pure arithmetic return of at most 64 nodes")
+		return fail(span, "copied closure requires 0..4 copied i32/u32 captures/parameters, i32/u32 result and one pure arithmetic return of at most 64 nodes")
 	}
 	direct := func(t ast.TypeReference) bool {
-		return t.Kind == ast.TypeKindNamed && t.Path == "i32" && len(t.Arguments) == 0
+		return t.Kind == ast.TypeKindNamed && (t.Path == "i32" || t.Path == "u32") && len(t.Arguments) == 0
 	}
 	if c == nil || c.Function.Unsafe || c.Function.Public || c.Function.Owner != "" || len(c.Function.Attributes) != 0 || len(c.Function.TypeParameters) != 0 || len(c.Captures) > 4 || len(c.Function.Parameters) > 4 || !direct(c.Function.ResultType) || c.Function.Body == nil {
 		return reject()
@@ -308,7 +308,7 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 	}
 	nodes := 0
 	// Existing zero-local returns retain their original admission and diagnostics.
-	// Initializers must be i32 expressions even when their inferred value is unused.
+	// Initializers must be integer expressions even when their inferred value is unused.
 	initializing := false
 	var pure func(*ast.Expression) bool
 	pure = func(e *ast.Expression) bool {
@@ -324,7 +324,7 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 			if initializing {
 				// AST literals retain their original spelling, not a token kind.
 				// Syntax already validates digits/separators; discriminate integer
-				// tokens without moving contextual i32 range checking before typing.
+				// tokens without moving contextual integer range checking before typing.
 				raw := strings.ToLower(e.Text)
 				return len(raw) != 0 && raw[0] >= '0' && raw[0] <= '9' &&
 					(strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0b") || !strings.ContainsAny(raw, ".e"))

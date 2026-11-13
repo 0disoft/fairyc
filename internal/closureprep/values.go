@@ -52,6 +52,21 @@ func ValidateValueTarget(fn ast.Function) error {
 	if count < 0 || count > 4 || len(fn.Parameters) != count+1 {
 		return fail(fn.Span, "closure value target capture/argument count")
 	}
+	// Direct copied closures have a wider scalar family than first-class values.
+	// Keep the existing descriptor and invocation ABI exactly fn i32(i32).
+	direct := func(t ast.TypeReference) bool {
+		return t.Kind == ast.TypeKindNamed && t.Path == "i32" && len(t.Arguments) == 0
+	}
+	if !direct(fn.ResultType) || slices.ContainsFunc(fn.Parameters, func(p ast.Parameter) bool { return !direct(p.Type) }) {
+		return fail(fn.Span, "closure value target requires copied i32 captures and fn i32(i32) signature")
+	}
+	if fn.Body != nil {
+		for _, statement := range fn.Body.Statements {
+			if b := statement.Binding; b != nil && b.Type != nil && !direct(*b.Type) {
+				return fail(fn.Span, "closure value target requires i32 local bindings")
+			}
+		}
+	}
 	captures := fn.Parameters[:count]
 	fn.Parameters = fn.Parameters[count:]
 	return validate(&ast.Closure{Captures: captures, Function: fn}, fn.Span)
