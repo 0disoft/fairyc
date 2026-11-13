@@ -1,83 +1,113 @@
 ---
-title: 메모리와 자원
-description: resource와 cleanup, 소유권 이동(Move), ref / ref mut 빌림 규칙을 직관적인 예제로 이해합니다.
+title: 5. 소유권, 빌림, resource와 region
+description: Fairy C의 Move와 Copy, ref/ref mut 빌림, resource cleanup, region, @abilities/burn, @effects, unsafe/raw pointer를 이해합니다.
 ---
 
-시스템 언어를 처음 배울 때 가장 낯선 부분이 바로 소유권과 빌림입니다. 어렵게 생각하지 말고, **"물건의 주인은 한 명뿐이고, 잠깐 빌려줄 때도 규칙이 있다"**고 생각하면 훨씬 쉬워집니다.
+Fairy C를 처음 볼 때 가장 낯설지만, 가장 큰 강점이기도 한 부분입니다. C처럼 메모리를 직접 다루면서도 "해제된 포인터 다시 쓰기"나 "정리 코드 깜빡하기"를 컴파일러가 막아 주는 장치들이 여기에 모여 있습니다.
 
-## 1. 일반 값(`struct`) vs. 자원(`resource`)
+## 1. 복사(Copy)와 소유권 이동(Move)
 
-정수(`i32`)나 숫자만 들어 있는 평범한 `struct`는 다른 변수에 대입하거나 함수에 넘기면 그냥 복사본이 생깁니다.
+정수(`i32`), `bool`, 작은 일반 `struct` 같은 값들은 다른 변수나 함수로 넘길 때 값이 그대로 복사(Copy)됩니다. 원래 변수를 계속 써도 문제없습니다.
 
-하지만 **파일 핸들이나 힙 메모리처럼 다 쓴 뒤 꼭 해제(`close`, `free`)해야 하는 값**은 복사되면 곤란합니다. 복사본 두 개가 똑같은 핸들을 각자 해제하려고 하면 이중 해제 버그가 나기 때문이죠.
+반대로 파일 핸들이나 동적 배열처럼 `resource`로 정의된 값은 단 하나의 변수만 주인(소유자)이 될 수 있습니다. 함수에 값으로 넘기면 소유권이 함께 이동(Move)하며, 넘긴 뒤 원래 변수를 다시 쓰려고 하면 컴파일러가 에러로 막습니다.
 
-그래서 Fairy C는 이런 타입을 `resource`로 선언하고 `cleanup { ... }` 블록을 붙입니다.
+## 2. 빌리기: `ref`와 `ref mut`
+
+주인이 가진 값을 넘겨주지 않고 잠시만 보거나 고치고 싶다면 **참조(빌림)**를 씁니다.
+
+- **`ref T` (읽기 전용 빌림)**: 여러 군데에 동시에 빌려 줄 수 있습니다.
+- **`ref mut T` (가변 빌림)**: 한 번에 딱 한 곳에만 빌려 줄 수 있습니다.
 
 ```c
-@repr(C)
-struct raw_text_result {
-    u32 status;
-    u32 allocation_status;
+fn i32 read_num(ref i32 n) {
+    return *n;
 }
 
-@link_name("fy_std_string_drop_storage_v0")
-unsafe extern C fn raw_text_result string_drop_storage_raw(ptr mut void value);
+fn void add_ten(ref mut i32 n) {
+    *n += 10;
+}
 
-pub resource String {
-    ptr mut void data;
-    usize capacity;
-    usize alignment;
-    usize length;
+fn i32 main() {
+    var i32 score = 32;
+    add_ten(ref mut score);
+    return read_num(ref score);   // 42
+}
+```
+
+참조를 통해 실제 값을 읽거나 고칠 때는 포인터처럼 `*n`을 씁니다. 함수가 빌려 받은 참조를 반환할 때는 "원래 주인보다 오래 살아남을 수 없다"는 수명(origin) 규칙이 적용되므로, 함수 내부 지역 변수의 참조를 바깥으로 return할 수는 없습니다.
+
+## 3. 자동 정리 블록: `resource`와 `cleanup`
+
+C에서는 `malloc`/`free`, `CreateFile`/`CloseHandle`을 짝지어야 해서, 중간에 `if (...) return;`으로 빠져나가면 정리를 놓치기 쉽습니다. Fairy C에서는 `resource` 안에 `cleanup { ... }` 블록을 한 번만 적어 두면 됩니다.
+
+```c
+resource Buffer {
+    ptr mut u8 data;
 
     cleanup {
-        let raw_text_result dropped = unsafe {
-            string_drop_storage_raw(ref mut this as ptr mut void)
-        };
+        // 변수가 스코프를 벗어나거나 early return할 때 자동 실행!
     }
 }
 ```
 
-이렇게 해 두면 `String` 변수가 블록(`{ ... }`)을 빠져나갈 때 컴파일러가 `cleanup`을 자동으로 호출해 줍니다. 개발자가 해제 코드를 깜빡할 여지가 없어집니다.
+- 소유자가 다른 곳으로 이동하지 않고 스코프 끝에 도달하면 컴파일러가 `cleanup`을 자동으로 끼워 넣어 줍니다.
+- `resource`의 내부 필드는 해당 모듈 밖에서는 비공개(private)로 보호되므로, 외부 코드가 핸들을 함부로 빼내 망가뜨릴 수 없습니다.
 
-## 2. 소유권 이동(Move) — 한 번 넘기면 끝
+## 4. `region`: 한꺼번에 빌리고 한꺼번에 비우기
 
-`resource` 변수를 다른 변수에 넣거나 함수에 값 그대로 넘기면, **소유권(정리할 책임)도 같이 넘어갑니다**. 내가 가진 열쇠를 친구에게 아예 줘 버린 것과 같습니다.
-
-- 열쇠를 넘긴 뒤 내가 또 그 변수를 쓰려고 하면 컴파일러가 `E1101` 에러로 막아 줍니다.
-- `if` 문 안쪽에서만 자원을 넘겨 버리고 `else`에서는 안 넘겼다면, 블록 뒤에서 그 자원이 아직 살아 있는지 애매해지므로 컴파일러가 알려 줍니다(`E1104`).
-- 일반 `struct` 안에는 `resource`를 필드로 넣을 수 없고(`E1002`), `resource`에서 필드 하나만 빼내 이동할 수도 없습니다(`E1103`).
-
-## 3. 빌려주기: `ref T`와 `ref mut T`
-
-함수를 부를 때마다 자원을 아예 넘겨 버리면 호출한 쪽에서 다시 못 쓰니 불편하겠죠? 이럴 때 소유권은 내가 쥔 채 **"잠깐 읽기만 해"(공유 빌림 `ref T`)** 또는 **"잠깐 고쳐도 돼"(배타 가변 빌림 `ref mut T`)**라고 빌려줍니다.
+잠깐 쓰고 버릴 임시 버퍼들을 매번 개별 해제하기 번거로울 때는 `region` 구문을 씁니다.
 
 ```c
-fn i32 read(ref i32 value) { return *value; }
-fn void edit(ref mut i32 value) { *value = *value + 1; }
-fn u8 first(ref u8[] view) { return view[0]; }
-fn void fill(ref mut u8[] view) { view[0] = 9; }
-
-fn i32 main() {
-    var i32 number = 41;
-    let ref mut i32 view = ref mut number;
-    edit(view);
-    read(view);
-
-    var u8[2] data = [3, 4];
-    let ref mut u8[] buffer = ref mut data;
-    fill(buffer);
-    return *view;
+fn Result<i32, MyError> parse_temp(Region arena, ref u8[] input) {
+    region scratch in arena {
+        // 이 블록 안에서 scratch로 할당한 임시 메모리는
+        // 블록을 빠져나갈 때 한꺼번에 정리됩니다.
+    }
+    return .ok(0);
 }
 ```
 
-빌림 규칙은 도서관 책 규칙과 똑같습니다.
+## 5. `@abilities`와 선형 자원 `burn`
 
-1. **읽기 전용(`ref`)은 여러 명이 동시에 빌릴 수 있습니다.** 대신 아무도 그 책을 고치거나 가져가면 안 됩니다.
-2. **수정용(`ref mut`)은 한 번에 한 명만 빌릴 수 있습니다.** 수정하는 동안 다른 사람이 동시에 읽거나 고치면 값이 꼬이기 때문입니다(`E2101`).
-3. **배열 일부(`view[lo..hi]`)를 빌려도 주인 전체 기준으로 검사합니다.** 앞부분을 빌려 수정하는 동안 뒷부분이라고 해서 또 다른 가변 참조를 동시에 겹쳐 잡을 수는 없습니다.
+기본 `resource`는 스코프를 벗어나면 자동으로 `cleanup`이 실행됩니다. 하지만 "절대로 그냥 사라지면 안 되는 티켓이나 영수증"처럼, 코드 흐름상 깜빡하고 버리는 것조차 막고 싶다면 `@abilities(...)`를 붙입니다.
 
-## 4. 함수에서 참조를 반환할 때 규칙
+```c
+@abilities(store, key)   // drop이 빠졌으므로 자동 폐기 금지!
+resource Receipt {
+    u32 amount;
+    cleanup {}
+}
+```
 
-함수 안에서 만든 지역 변수는 함수가 `return`하는 순간 스택에서 사라집니다. 그러니 지역 변수를 가리키는 `ref`를 반환할 수 없습니다(`E2102`).
+- `drop`이 빠진 `resource`는 반드시 다른 함수로 넘기거나 반환해야 하며, 그냥 블록 끝에 남겨 두면 `E1108` 컴파일 에러가 납니다.
+- 해당 자원을 선언한 모듈 안에서 명시적으로 없애야 할 때만 `burn receipt;` 구문을 써서 소멸시킵니다. (`@abilities`에는 `drop`, `store`, `key`를 지정할 수 있습니다.)
 
-또한 `ref`나 `ref u8[]`를 돌려줄 때는 **매개변수로 받은 참조 중 딱 한 군데 출처에서 온 것만** 돌려줄 수 있습니다(`if (flag) { return a; } else { return b; }`처럼 두 입력 중 하나를 섞어 반환하면 `E2103`). 이런 경우에는 참조 대신 새 값을 만들어 돌려주는 편이 훨씬 깔끔합니다.
+## 6. `@effects(...)`: 함수가 바깥세상에 닿는지 표시하기
+
+파일, 콘솔, 네트워크 같은 외부 권한을 건드리는 함수에는 `@effects(...)`를 적습니다.
+
+```c
+@effects(console)
+fn void greet() {
+    // 콘솔 출력 호출 가능
+}
+```
+
+자주 쓰이는 효과 이름은 `console`, `filesystem`, `environment`, `process`, `network`, `clock`, `random` 등입니다. `@effects(console)`이 붙은 함수를 부르는 상위 함수 역시 `@effects(console)`을 선언해야 합니다(`E7102` 검사). 아무것도 붙이지 않으면 외부 효과 없는 순수한(빈 집합) 함수로 취급됩니다.
+
+## 7. `unsafe`와 원시 포인터(`ptr` / `ptr mut`)
+
+Win32 API나 C 라이브러리를 부를 때는 컴파일러가 메모리 수명을 자동으로 증명할 수 없으므로 `unsafe { ... }` 블록과 원시 포인터(`ptr T`, `ptr mut T`)를 씁니다.
+
+```c
+unsafe extern C fn void c_free(ptr mut void p);
+```
+
+- 원시 포인터 역참조, `ptr`로의 캐스트, `extern C` 함수 호출은 반드시 `unsafe` 함수 또는 `unsafe { ... }` 안에서만 허용됩니다.
+- 주의: `unsafe`는 "메모리 안전 검사를 개발자가 직접 책임진다"는 표시일 뿐, `@effects(...)` 요구사항을 면제해 주지는 않습니다.
+
+---
+
+다음 장에서는 코드를 파일 여러 개로 나누는 `module`/`import`, `fairy.toml` 프로젝트 설정, 그리고 `std` 표준 라이브러리를 살펴봅니다.
+- 이전: [4. 배열, 슬라이스, 문자열 뷰](../arrays-and-slices/)
+- 다음: [6. 모듈, 패키지, 표준 라이브러리](../modules-and-projects/)

@@ -1,81 +1,108 @@
 ---
-title: Memory and Resources
-description: Understand resource cleanup, move semantics, ref/ref mut borrowing, and return-origin rules with clear examples.
+title: 5. Ownership, Borrows, and Resources
+description: Understand Copy vs Move, ref/ref mut borrows, resource cleanup blocks, region arenas, @abilities/burn, @effects, and unsafe pointers.
 ---
 
-Ownership and borrowing sound intimidating at first, yet the core intuition is simple: **every cleanup-needing value has one owner at a time, and lending it follows clear read/write rules.**
+This chapter covers Fairy C's defining ideas: preventing use-after-free and forgotten cleanup calls at compile time, while still letting you drop down to `unsafe` and C pointers when talking to the OS.
 
-## 1. Plain Values vs. `resource` Types
+## 1. Copy vs Move
 
-Plain structs containing integers or booleans copy by value. But if a value holds an OS file handle or heap allocation, copying it would cause two variables to free the same handle twice.
+Small inert values (`i32`, `bool`, plain `struct`s) copy automatically when assigned or passed to a function.
 
-Fairy C solves this with `resource` types and attached `cleanup { ... }` blocks:
+Values declared as a `resource`, however, represent unique ownership (such as an open file handle or allocated buffer). Passing a `resource` by value **moves** ownership to the callee—using the original variable afterward is rejected by the compiler.
+
+## 2. Borrowing with `ref` and `ref mut`
+
+To let another function read or modify data without giving away ownership, borrow it:
+
+- **`ref T` (shared borrow)**: Multiple readers may coexist.
+- **`ref mut T` (exclusive borrow)**: Only one mutable borrower can be active at a time.
 
 ```c
-@repr(C)
-struct raw_text_result {
-    u32 status;
-    u32 allocation_status;
+fn i32 read_num(ref i32 n) {
+    return *n;
 }
 
-@link_name("fy_std_string_drop_storage_v0")
-unsafe extern C fn raw_text_result string_drop_storage_raw(ptr mut void value);
+fn void add_ten(ref mut i32 n) {
+    *n += 10;
+}
 
-pub resource String {
-    ptr mut void data;
-    usize capacity;
-    usize alignment;
-    usize length;
+fn i32 main() {
+    var i32 score = 32;
+    add_ten(ref mut score);
+    return read_num(ref score);   // 42
+}
+```
+
+Read or update a scalar borrow via `*n`. Functions that return a borrowed reference must tie it back to an input parameter's origin—returning a reference to a local variable is rejected so dangling pointers cannot happen.
+
+## 3. Automatic Cleanup: `resource` and `cleanup`
+
+Instead of pairing every `CreateFile` or `malloc` manually across every early `return`, attach one `cleanup { ... }` block to a `resource`:
+
+```c
+resource Buffer {
+    ptr mut u8 data;
 
     cleanup {
-        let raw_text_result dropped = unsafe {
-            string_drop_storage_raw(ref mut this as ptr mut void)
-        };
+        // Runs automatically on scope exit, break, continue, or return!
     }
 }
 ```
 
-Whenever a live `String` leaves its scope (`{ ... }`), the compiler automatically calls its `cleanup` block in reverse declaration order.
+Resource fields stay private outside the defining module, keeping raw handles encapsulated behind safe factory and method APIs.
 
-## 2. Moving Ownership
+## 4. `region`: Bulk Arena Scopes
 
-Passing or assigning a `resource` by value transfers both the handle and cleanup responsibility to the receiver:
-
-- Touching the old variable after moving it is rejected (`E1101`).
-- Moving a resource in only one branch of an `if`/`else` leaves its state ambiguous afterward unless resolved (`E1104`).
-- Plain `struct` types cannot hold `resource` fields (`E1002`), and you cannot move one field out of a `resource` on its own (`E1103`).
-
-## 3. Borrowing with `ref T` and `ref mut T`
-
-When a helper function only needs temporary access, borrow instead of moving:
-
-- **`ref T` (shared borrow)**: Read-only access. Any number of readers can look at the same value as long as nobody mutates or moves the owner while they are active.
-- **`ref mut T` (mutable borrow)**: Exclusive read-write access. No other read, write, or move on that owner may overlap (`E2101`).
+When allocating many short-lived buffers that all share one lifetime, use a `region` block:
 
 ```c
-fn i32 read(ref i32 value) { return *value; }
-fn void edit(ref mut i32 value) { *value = *value + 1; }
-fn u8 first(ref u8[] view) { return view[0]; }
-fn void fill(ref mut u8[] view) { view[0] = 9; }
-
-fn i32 main() {
-    var i32 number = 41;
-    let ref mut i32 view = ref mut number;
-    edit(view);
-    read(view);
-
-    var u8[2] data = [3, 4];
-    let ref mut u8[] buffer = ref mut data;
-    fill(buffer);
-    return *view;
+fn Result<i32, MyError> parse_temp(Region arena, ref u8[] input) {
+    region scratch in arena {
+        // Temporary allocations inside scratch reset together at block exit
+    }
+    return .ok(0);
 }
 ```
 
-Even when borrowing a slice view (`view[lo..hi]`), the compiler tracks the underlying root owner consistently so aliasing mutable views cannot overlap.
+## 5. `@abilities` and Linear `burn`
 
-## 4. Returning Borrows
+By default, a `resource` drops automatically when its owner goes out of scope. If you want linear behavior where forgetting a value (an obligation ticket, token, receipt) is a compile error, declare `@abilities` without `drop`:
 
-Two practical rules keep returned references safe:
+```c
+@abilities(store, key)   // omitting drop forbids implicit cleanup!
+resource Receipt {
+    u32 amount;
+    cleanup {}
+}
+```
 
-1. **No returning locals (`E2102`)**: Local variables vanish when a function returns, so you cannot return a `ref` pointing to one.
-2. **Single input origin (`E2103`)**: A function returning `ref T` or `ref u8[]` must trace back to static data or a **single** input borrow parameter rather than choosing dynamically between two different inputs. Return an owned value if a function needs to pick between two sources.
+Such a value must be passed or returned (`E1108` if left live at scope exit), and can only be destroyed explicitly inside its declaring module using `burn receipt;`. (Valid abilities are `drop`, `store`, and `key`, where `key` requires `store`.)
+
+## 6. `@effects(...)`: Explicit External Authority
+
+Functions touching external I/O or host resources declare `@effects(...)`:
+
+```c
+@effects(console)
+fn void greet() {
+    // Allowed to call console functions
+}
+```
+
+Common names include `console`, `filesystem`, `environment`, `process`, `network`, `clock`, and `random`. Any caller invoking an `@effects(...)` function—or dropping a resource whose `cleanup` declares effects—must include those effects too (`E7102`).
+
+## 7. `unsafe` and Raw Pointers (`ptr` / `ptr mut`)
+
+When calling Win32 or C functions (`extern C`), use `ptr T`, `ptr mut T`, and an `unsafe` function or `unsafe { ... }` block:
+
+```c
+unsafe extern C fn void c_free(ptr mut void p);
+```
+
+Keep in mind that `unsafe` only unlocks raw pointer casts, dereferences, and foreign calls—it does **not** bypass `@effects(...)` checking.
+
+---
+
+- Previous: [4. Arrays, Slices, and Views](../arrays-and-slices/)
+- Next: [6. Modules, Packages, and std](../modules-and-projects/)

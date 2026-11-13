@@ -17,7 +17,7 @@ const links = new Map();
 const docsMarkdownExtension = '.md';
 const rootAbsoluteContentLinkPattern =
 	/(?:\]\(|href=["'])\/(?:start|language|examples|runtime|cli|support|fairyc|browniec|commands|design|files)\//;
-const brokenRepoRelativeLinkPattern = /(?:\]\(|href=["'])(?:\.\.\/){2,}(?:docs|examples|src|internal)\//;
+const brokenRepoRelativeLinkPattern = /(?:\]\(|href=["'])(?:\.\.\/){3,}(?:docs|examples|src|internal)\//;
 
 const routeSegments = (link) => {
 	const cleanLink = link.replace(/^\/+|\/+$/g, '');

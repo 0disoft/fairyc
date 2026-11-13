@@ -1,87 +1,79 @@
 ---
-title: 프로젝트 구성, 모듈과 의존성
-description: 코드가 커질 때 파일을 모듈로 나누는 방법, fairy.toml 구조, 로컬 워크스페이스, 테스트 작성법을 알아봅니다.
+title: 6. 모듈, 패키지, 표준 라이브러리
+description: Fairy C의 module과 import, pub 가시성, fairy.toml 워크스페이스 구성, 그리고 std 표준 모듈 구성을 알아봅니다.
 ---
 
-프로그램이 커지면 `src/main.fy` 한 파일에 다 넣지 않고 여러 파일과 패키지로 나누게 됩니다. Fairy C에서는 파일 경로, `module` 선언, `fairy.toml`이 서로 딱 맞아떨어지게 설계되어 있습니다.
+단일 파일 연습을 넘어가면 기능을 여러 파일과 패키지로 나누고, 표준 라이브러리를 가져다 쓰게 됩니다. Fairy C는 헤더 파일(`#include`)이나 매크로 전처리기 없이 깔끔한 모듈 시스템을 씁니다.
 
-## 1. 파일 나누기와 `module` / `import`
+## 1. 파일 경로가 곧 `module` 이름
 
-`src/` 폴더 아래에 새 파일을 만들었다면 파일 맨 위에 **경로에 맞는 `module` 선언**을 적습니다(`E0002` 방지).
+모든 `.fy` 파일 맨 위에는 `module` 선언이 하나 옵니다. 파일 경로가 `src/app/math.fy`라면 모듈 선언도 그 경로에 맞춰 씁니다.
 
-- `src/main.fy` → `module main;`
-- `src/helper.fy` → `module helper;` (하위 폴더 `src/net/http.fy`면 `module net::http;`)
+```c
+module app::math;
 
-다른 파일에서 함수를 가져다 쓸 때는 `import <모듈> as <별칭>;` 형태로 별칭을 꼭 붙여야 합니다. `import foo::*;` 같은 와일드카드 임포트는 어디서 온 이름인지 흐려지기 때문에 허용되지 않습니다(`E0003`).
+pub fn i32 add(i32 a, i32 b) {
+    return a + b;
+}
+```
+
+- **`pub`**: 다른 모듈에서 가져다 쓸 수 있게 열어 주는 키워드입니다. 안 붙이면 같은 파일/모듈 내부 전용입니다.
+- **전처리기 없음**: `#include`, `#define`, 매크로 치환 같은 전처리 단계가 전혀 없습니다.
+
+## 2. `import ... as ...`
+
+다른 모듈이나 패키지의 기능을 가져올 때는 항상 별칭(`as 이름`)을 지정합니다. 별칭으로 네임스페이스가 명확히 갈리기 때문에 이름 충돌이 일어나지 않습니다.
 
 ```c
 module main;
 
-import answer as answer;
+import app::math as math;
+import std::io as io;
 
+@effects(console)
 fn i32 main() {
-    return answer::value();
+    let i32 v = math::add(20, 22);
+    discard io::write_i32(v);
+    return 0;
 }
 ```
 
-또 하나 기억할 점은 **기본이 비공개(private)**라는 것입니다. 다른 모듈에서 부를 함수·구조체·리소스 앞에는 꼭 `pub`을 붙여 주세요(`pub fn`, `pub struct`, `pub resource`). `pub`이 빠지면 `E0103` 에러가 납니다.
+와일드카드 임포트(`import ...::*;`)나 순환 임포트는 허용되지 않습니다.
 
-## 2. `fairy.toml` 살펴보기
+## 3. `fairy.toml`과 `fairy.lock`
 
-프로젝트 루트의 `fairy.toml`은 정해진 필드만 허용합니다. 오타가 난 필드를 조용히 무시하지 않고 바로 알려 줍니다.
+패키지 설정은 `fairy.toml`에 적습니다. 직접 의존하는 로컬 경로나 표준 라이브러리를 `[dependencies]` 아래에 연결하면 됩니다.
 
 ```toml
-schema = "fairyc.manifest/v1"
-
 [package]
-uid = "example.hello-fairy"
-name = "hello-fairy"
+name = "my_app"
+uid = "example.my-app"
 version = "0.1.0"
-language = "fairyc-language/20"
-source = "src"
+
+[dependencies]
+answer = { path = "../libs/answer" }
 ```
 
-- `uid`: 점(`.`)으로 나뉜 소문자 고유 ID (예: `example.hello-fairy`)
-- `name`: 빌드 결과 파일(`build/<name>.exe`)에 쓰이는 소문자 이름
-- `version`: 정확한 `MAJOR.MINOR.PATCH` 버전
-- `language`: 현재 컴파일러 버전 문자열(`"fairyc-language/20"`)
-- `source`: 소스 코드가 들어 있는 디렉터리(`"src"`)
+- `[workspace]`를 루트 `fairy.toml`에 두면 여러 앱/라이브러리 패키지를 한 묶음으로 관리할 수 있습니다.
+- `fairyc check`나 `fairyc test`를 실행하면 해석된 패키지 그래프가 `fairy.lock`에 기록됩니다. 빌드 재현성이 필요할 때는 `--locked` 옵션을 붙여 잠금 파일과 다를 경우 즉시 멈추게 할 수 있습니다.
+- Windows GUI 앱처럼 링킹 설정이 필요할 때는 `fairy.windows.json` 매니페스트를 함께 둡니다.
 
-## 3. 같은 저장소 안의 다른 패키지 연결하기 (`[workspace]`)
+## 4. 현재 제공되는 `std` 표준 모듈
 
-예를 들어 `libs/answer` 폴더에 별도 라이브러리 패키지를 두고 메인 앱에서 쓰고 싶다면, 루트 `fairy.toml`에 `[workspace]`와 `[dependencies.<별칭>]`을 추가합니다(`examples/workspace_quickstart` 방식).
+현재 저장소의 `examples/`에서 실제 사용하는 주요 표준 모듈은 다음과 같습니다. (사용하려면 프로젝트에 `std` 의존성이나 해당 SDK 루트가 연결되어 있어야 합니다.)
 
-```toml
-[workspace]
-members = ["libs/answer"]
+| 모듈 | 주요 역할 | 대표 기능 감각 |
+| --- | --- | --- |
+| `std::io` | 콘솔 입출력 (`@effects(console)`) | `write`, `write_i32`, `write_i64`, `write_bytes`, `write_stderr` |
+| `std::vec` | 동적 가변 배열 `Vec<T>` | `empty<T>()`, `push<T>`, `pop<T>`, `at<T>`, `truncate<T>`, `clear<T>` |
+| `std::text` | UTF-8 문자열 & CString 도구 | `validate_utf8`, `copy`, `append`, `as_bytes`, `cstring_from_text` |
+| `std::bytes` | 바이트 버퍼와 슬라이스 도우미 | 바이트 비교/조작 유틸리티 |
+| `std::fs` | 파일 열기·읽기·쓰기 (`@effects(filesystem)`) | `open_read`, `create_truncate`, `read`, `write_all`, `seek_start`, `close` |
+| `std::num` | 안전한 문자열 파싱과 좁히기 변환 | `parse_i64_decimal`, `usize_from_i64`, `u8_from_i64` |
+| `std::process` | 실행 인자·프로세스 접근 | `process::arg(...)` 등 |
+| `std::alloc` | 명시적 메모리 할당 인터페이스 | 명시적 할당자 기반 버퍼/자원 관리 |
 
-[dependencies.answer]
-path = "libs/answer"
-version = "1.0.0"
-features = []
-```
+이제 기본 문법부터 모듈 구성까지 모두 훑었으니, 실제 C 연동과 Win32 예제로 넘어가 보겠습니다!
 
-현재 안정 CLI는 이렇게 **로컬 경로로 연결된 워크스페이스 의존성**만 다룹니다. 원격 패키지 다운로드나 C 컴파일 옵션(`cflags`, `defines`)은 `fairy.toml`에 들어가지 않습니다.
-
-## 4. `fairy.lock`과 `--locked`
-
-`fairyc check`, `build`, `run`을 실행하면 현재 패키지 구성이 `fairy.lock`에 기록됩니다. 그 뒤로 `--locked` 옵션을 붙여 실행하면 "내가 마지막으로 확인한 구성과 바뀐 게 없을 때만 통과시켜 달라"고 검사하므로 협업이나 CI 환경에서 유용합니다.
-
-## 5. `tests/` 폴더에 테스트 추가하기
-
-테스트 코드는 `src/`와 분리된 `tests/` 폴더 아래에 둡니다. 인자가 없고 `void`를 반환하는 비공개 함수 위에 `@test`를 붙이면 됩니다.
-
-```c
-module tests::main;
-
-import answer as answer;
-
-@test
-fn void answer_is_42() {
-    assert(answer::value() == 42);
-}
-```
-
-- `fairyc test --locked`: 인터프리터로 빠르게 실행
-- `fairyc test --native --locked`: 실제 네이티브 바이너리로 빌드해서 실행
-- `fairyc test --list --json --locked`: 등록된 테스트 목록 확인
+- 이전: [5. 소유권, 빌림, resource와 region](../memory-and-resources/)
+- 다음: [C 연동과 Win32 앱](../../examples/c-interop-and-win32/)

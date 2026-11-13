@@ -1,85 +1,78 @@
 ---
-title: Projects, Modules, and Dependencies
-description: Organize multi-file packages with module declarations, pub visibility, fairy.toml workspaces, and tests/.
+title: 6. Modules, Packages, and std
+description: Learn Fairy C module and import syntax, pub visibility, fairy.toml workspaces, and the current std standard modules.
 ---
 
-Once your program grows beyond a single `src/main.fy`, Fairy C splits code cleanly using `module` paths, `pub` visibility, and local workspace packages in `fairy.toml`.
+Once you split code across multiple files or bring in libraries, you will use Fairy C's module and package system. There are no header files (`#include`) or C preprocessor macros.
 
-## 1. Modules, Imports, and Visibility
+## 1. File Paths Match `module` Names
 
-Every `.fy` file begins with a `module` header matching its relative path under `source` (`E0002` otherwise):
+Every `.fy` file begins with one `module` declaration matching its path under the source root (`src/app/math.fy` -> `module app::math;`):
 
-- `src/main.fy` → `module main;`
-- `src/net/http.fy` → `module net::http;`
+```c
+module app::math;
 
-When importing another module, always give it an explicit alias (`import ... as ...;`). Wildcard imports (`*`) are disallowed (`E0003`) so you can always trace where a symbol came from:
+pub fn i32 add(i32 a, i32 b) {
+    return a + b;
+}
+```
+
+Only items marked `pub` are visible to other modules.
+
+## 2. Explicit Aliased Imports (`import ... as ...`)
+
+Every import requires an alias (`as name`), keeping all external names clearly qualified:
 
 ```c
 module main;
 
-import answer as answer;
+import app::math as math;
+import std::io as io;
 
+@effects(console)
 fn i32 main() {
-    return answer::value();
+    let i32 v = math::add(20, 22);
+    discard io::write_i32(v);
+    return 0;
 }
 ```
 
-Everything inside a module is **private by default**. Mark functions, structs, or resources with `pub` when another module needs to access them (`E0103` otherwise).
+Wildcard imports (`*`) and circular module dependencies are disallowed.
 
-## 2. Inside `fairy.toml`
+## 3. `fairy.toml`, Workspaces, and `fairy.lock`
 
-`fairy.toml` uses a strict schema so typos fail instead of being silently ignored:
+Define packages and direct dependencies in `fairy.toml`:
 
 ```toml
-schema = "fairyc.manifest/v1"
-
 [package]
-uid = "example.hello-fairy"
-name = "hello-fairy"
+name = "my_app"
+uid = "example.my-app"
 version = "0.1.0"
-language = "fairyc-language/20"
-source = "src"
+
+[dependencies]
+answer = { path = "../libs/answer" }
 ```
 
-- `uid`: Dot-separated lowercase identifier (`example.hello-fairy`)
-- `name`: Lowercase package name used for `build/<name>.exe`
-- `version`: Exact `MAJOR.MINOR.PATCH` version
-- `language`: Language revision (`"fairyc-language/20"`)
-- `source`: Source root directory (`"src"`)
+- A root `[workspace]` section lets you manage multiple packages together (`examples/workspace_quickstart` shows this layout).
+- Running `fairyc check` or `fairyc test` records the resolved package graph in `fairy.lock`. Pass `--locked` when you want builds to fail if dependencies drift.
+- Windows targets using extra linker settings pair with `fairy.windows.json`.
 
-## 3. Local Workspace Dependencies
+## 4. Available `std` Modules
 
-To depend on a local library package (such as `libs/answer` in `examples/workspace_quickstart`), list it under `[workspace]` and `[dependencies.<alias>]`:
+When a package links the `std` SDK root (as seen in repository examples), the following modules are available:
 
-```toml
-[workspace]
-members = ["libs/answer"]
+| Module | Purpose | Example Functions / Types |
+| --- | --- | --- |
+| `std::io` | Console I/O (`@effects(console)`) | `write`, `write_i32`, `write_i64`, `write_bytes`, `write_stderr` |
+| `std::vec` | Growable `Vec<T>` container | `empty<T>`, `push<T>`, `pop<T>`, `at<T>`, `truncate<T>`, `clear<T>` |
+| `std::text` | UTF-8 strings & `CString` helpers | `validate_utf8`, `copy`, `append`, `as_bytes`, `cstring_from_text` |
+| `std::bytes` | Byte slice and buffer helpers | Byte comparison and manipulation helpers |
+| `std::fs` | Filesystem operations (`@effects(filesystem)`) | `open_read`, `create_truncate`, `read`, `write_all`, `seek_start`, `close` |
+| `std::num` | Checked parsing & narrowing casts | `parse_i64_decimal`, `usize_from_i64`, `u8_from_i64` |
+| `std::process` | Process arguments & exit handling | `process::arg(...)` |
+| `std::alloc` | Explicit allocator interface | Explicit buffer/resource allocation primitives |
 
-[dependencies.answer]
-path = "libs/answer"
-version = "1.0.0"
-features = []
-```
+---
 
-Stable `fairyc` supports local path dependencies only—there is no automatic remote registry fetch or C compiler flags (`cflags` / `defines`) in `fairy.toml`.
-
-## 4. `fairy.lock` and `--locked`
-
-Running `fairyc check`, `build`, or `run` creates or updates `fairy.lock`. Adding `--locked` tells the compiler to fail (exit code `7`) if manifests or dependencies differ from the lockfile.
-
-## 5. Writing Tests in `tests/`
-
-Place unit tests in `tests/` using `@test` on zero-argument `fn void` functions:
-
-```c
-module tests::main;
-
-import answer as answer;
-
-@test
-fn void answer_is_42() {
-    assert(answer::value() == 42);
-}
-```
-
-Run them via `fairyc test --locked` (semantic interpreter) or `fairyc test --native --locked` (native compiled test binaries).
+- Previous: [5. Ownership, Borrows, and Resources](../memory-and-resources/)
+- Next: [C Interop and Win32](../../examples/c-interop-and-win32/)

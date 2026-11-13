@@ -26,15 +26,34 @@ export const pages = {
 		link: '/start/installation/',
 	}),
 	firstProgram: page({ label: '첫 프로그램', en: 'First Program', link: '/start/first-program/' }),
-	languageBasics: page({ label: '언어 기초', en: 'Language Basics', link: '/language/basics/' }),
+	languageBasics: page({
+		label: '1. 변수, 타입, 연산자',
+		en: '1. Variables, Types, and Operators',
+		link: '/language/basics/',
+	}),
+	controlFlowAndFunctions: page({
+		label: '2. 함수와 제어문',
+		en: '2. Functions and Control Flow',
+		link: '/language/control-flow-and-functions/',
+	}),
+	structsEnumsAndErrors: page({
+		label: '3. 구조체, enum, switch',
+		en: '3. Structs, Enums, and Switch',
+		link: '/language/structs-enums-and-errors/',
+	}),
+	arraysAndSlices: page({
+		label: '4. 배열, 슬라이스, 문자열 뷰',
+		en: '4. Arrays, Slices, and Views',
+		link: '/language/arrays-and-slices/',
+	}),
 	memoryAndResources: page({
-		label: '메모리와 자원',
-		en: 'Memory and Resources',
+		label: '5. 소유권, 빌림, resource',
+		en: '5. Ownership, Borrows, and Resources',
 		link: '/language/memory-and-resources/',
 	}),
 	modulesAndProjects: page({
-		label: '프로젝트·모듈·의존성',
-		en: 'Projects and Modules',
+		label: '6. 모듈, 패키지, std',
+		en: '6. Modules, Packages, and std',
 		link: '/language/modules-and-projects/',
 	}),
 	cInteropAndWin32: page({
@@ -66,7 +85,14 @@ export const sidebarSections = [
 	group({
 		label: '언어 배우기',
 		en: 'Learn Language',
-		items: [pages.languageBasics, pages.memoryAndResources, pages.modulesAndProjects],
+		items: [
+			pages.languageBasics,
+			pages.controlFlowAndFunctions,
+			pages.structsEnumsAndErrors,
+			pages.arraysAndSlices,
+			pages.memoryAndResources,
+			pages.modulesAndProjects,
+		],
 	}),
 	group({
 		label: '예제',
