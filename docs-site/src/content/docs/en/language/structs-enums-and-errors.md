@@ -45,7 +45,7 @@ fn void Counter::add(ref mut Counter this, i32 delta) {
 }
 
 fn i32 main() {
-    var Counter c = Counter { .value = 40 };
+    var Counter c = Counter { .value = 75 };
     c.add(2);
     return c.read();
 }

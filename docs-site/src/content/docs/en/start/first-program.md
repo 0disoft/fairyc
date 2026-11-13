@@ -69,7 +69,20 @@ fairyc check --locked
 
 ## 3. Run the Starter Test
 
-`tests/main.fy` already includes a test checking that `answer()` returns `42`:
+`tests/main.fy` already includes a starter test. To add more tests later, mark `fn void` functions with `@test`:
+
+```c
+module tests::main;
+
+import main as app;
+
+@test
+fn void answer_is_42() {
+    assert(app::answer() == 42);
+}
+```
+
+Run it with:
 
 ```powershell
 fairyc test --locked

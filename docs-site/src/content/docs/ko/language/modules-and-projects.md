@@ -32,7 +32,7 @@ import std::io as io;
 
 @effects(console)
 fn i32 main() {
-    let i32 v = math::add(20, 22);
+    let i32 v = math::add(70, 7);
     discard io::write_i32(v);
     return 0;
 }

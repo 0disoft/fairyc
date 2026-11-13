@@ -76,7 +76,20 @@ fairyc check --locked
 
 ## 3. 테스트 돌려보기 (`test`)
 
-`tests/main.fy`에는 이미 `answer() == 42`를 확인하는 테스트가 하나 들어 있습니다. 실행해 볼까요?
+`tests/main.fy`에는 이미 `answer() == 42`를 확인하는 테스트가 하나 들어 있습니다. 새 테스트를 추가할 때는 테스트 함수 위에 `@test`를 붙이면 됩니다.
+
+```c
+module tests::main;
+
+import main as app;
+
+@test
+fn void answer_is_42() {
+    assert(app::answer() == 42);
+}
+```
+
+테스트를 실행해 볼까요?
 
 ```powershell
 fairyc test --locked
