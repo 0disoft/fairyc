@@ -14,6 +14,7 @@ type Component string
 const (
 	ComponentLinuxConsole       Component = "linux-console"
 	ComponentLinuxFile          Component = "linux-file"
+	ComponentLinuxFilePaths     Component = "linux-file-paths"
 	ComponentLinuxFileBuffer    Component = "linux-file-buffer"
 	ComponentLinuxProcessArgs   Component = "linux-process-args"
 	ComponentWindowsConsole     Component = "windows-console"
@@ -30,6 +31,10 @@ const (
 )
 
 var symbolComponents = map[string]Component{
+	// Legacy ABI spellings exposed by the portable std::fs facade.
+	"fy_std_windows_file_copy_bytes_v0":    ComponentLinuxFilePaths,
+	"fy_std_windows_file_rename_v0":        ComponentLinuxFilePaths,
+	"fy_std_windows_file_hard_link_v0":     ComponentLinuxFilePaths,
 	"fy_std_file_read_append_v0":           ComponentLinuxFileBuffer,
 	"fy_std_stdout_write_all_v0":           ComponentLinuxConsole,
 	"fy_std_stdout_write_i32_v0":           ComponentLinuxConsole,
@@ -106,15 +111,12 @@ var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_remove_v0":       ComponentWindowsFile,
-	"fy_std_windows_file_copy_bytes_v0":   ComponentWindowsFile,
 	"fy_std_windows_directory_create_v0":  ComponentWindowsFile,
 	"fy_std_windows_directory_ensure_v0":  ComponentWindowsFile,
 	"fy_std_windows_directory_remove_v0":  ComponentWindowsFile,
 	"fy_std_windows_dir_remove_all_v0":    ComponentWindowsFile,
 	"fy_std_windows_directory_rename_v0":  ComponentWindowsFile,
-	"fy_std_windows_file_rename_v0":       ComponentWindowsFile,
 	"fy_std_windows_file_replace_v0":      ComponentWindowsFile,
-	"fy_std_windows_file_hard_link_v0":    ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":   ComponentWindowsFile,
 	"fy_std_windows_file_read_append_v0":  ComponentWindowsFileBuffer,
@@ -243,6 +245,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 var componentLinkOrder = []Component{
 	ComponentLinuxConsole,
 	ComponentLinuxFile,
+	ComponentLinuxFilePaths,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
 	ComponentWindowsDirectory,
@@ -340,6 +343,8 @@ func componentsInLinkOrder(required map[Component]struct{}) []Component {
 func addComponentClosure(required map[Component]struct{}, component Component) {
 	required[component] = struct{}{}
 	switch component {
+	case ComponentLinuxFilePaths:
+		required[ComponentLinuxFile] = struct{}{}
 	case ComponentLinuxProcessArgs:
 		required[ComponentTextView] = struct{}{}
 	case ComponentBuffer:

@@ -8,6 +8,22 @@ import (
 	"github.com/0disoft/fairyc/internal/target"
 )
 
+func TestPortableFilesystemPathSymbols(t *testing.T) {
+	for _, symbol := range []string{"fy_std_windows_file_copy_bytes_v0", "fy_std_windows_file_rename_v0", "fy_std_windows_file_hard_link_v0"} {
+		linux, err := ComponentsForSymbols([]string{symbol})
+		if err != nil || !slices.Equal(linux, []Component{ComponentLinuxFile, ComponentLinuxFilePaths}) {
+			t.Fatalf("Linux path closure %s: %v %v", symbol, linux, err)
+		}
+		windows, err := WindowsMSVCComponentsForSymbols([]string{symbol})
+		if err != nil || !slices.Equal(windows, []Component{ComponentWindowsFile}) {
+			t.Fatalf("Windows path closure %s: %v %v", symbol, windows, err)
+		}
+		if !AdmittedForTarget(symbol, target.X8664LinuxGNU) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+			t.Fatal("portable facade symbol rejected", symbol)
+		}
+	}
+}
+
 func TestFileBufferComponentsForBothTargets(t *testing.T) {
 	const symbol = "fy_std_file_read_append_v0"
 	if !AdmittedForTarget(symbol, target.X8664LinuxGNU) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {

@@ -444,3 +444,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0557: Inline straight-line local mutation](0557-inline-straight-line-mutation.md)
 
 - [0558: Copied closure u32 signatures and captures](0558-copied-closure-u32-scalars.md)
+
+- [0559: Linux portable filesystem extensions](0559-linux-portable-filesystem-extensions.md)
