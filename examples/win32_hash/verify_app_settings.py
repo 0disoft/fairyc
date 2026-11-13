@@ -18,6 +18,7 @@ def verify(compiler):
         root = Path(directory)/'repo/examples/win32_hash'
         root.mkdir(parents=True)
         for name in ('src','native','distribution'): shutil.copytree(ROOT/name,root/name)
+        shutil.copytree(ROOT.parents[1]/'tools/win32_app',root.parents[1]/'tools/win32_app')
         for name in ('fairy.toml','fairy.lock','fairy.windows.json'): shutil.copy2(ROOT/name,root/name)
         shutil.copy2(ROOT.parents[1]/'LICENSE',root.parents[1]/'LICENSE')
         settings = dict(product_name='검증 "해시" Ω',company_name='',description='테스트 "개발자" & 도구',

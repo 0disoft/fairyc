@@ -1,71 +1,17 @@
-"""Validate a portable ZIP using resource inspection and CLI hash/comparison cases."""
-import argparse
-import hashlib
-import json
-from pathlib import Path
-import tempfile
-import subprocess
-import zipfile
-from prepare_resources import ROOT,metadata
-from app_settings import load
-from verify_resources import verify as resources
+"""Validate portable resources and the Hash-specific CLI operations."""
+from prepare_resources import ROOT
+from win32_app.portable import verify as shared_verify
 from verify_cli import verify as cli
 from verify_compare import verify as compare
 from verify_checksum import verify as checksum
-
-def package_files(root=ROOT):
-    return (load(root).executable_name,'README.txt','LICENSE.txt')
-
-
-def instructions(root=ROOT):
-    app = load(root)
-    version,_,_ = metadata(root)
-    guide = (root/'distribution/README.ko.txt').read_text(encoding='utf-8')
-    for name,value in {'PRODUCT':app.product_name,'VERSION':version,'EXECUTABLE':app.executable_name}.items():
-        guide = guide.replace('@'+name+'@',value)
-    return guide.encode('utf-8-sig')
-
-
-def payload(image, root=ROOT):
-    names = package_files(root)
-    files = dict(zip(names,(image.read_bytes(),instructions(root),(root.parents[1]/'LICENSE').read_bytes())))
-    files['SHA256SUMS.txt'] = ''.join(f'{hashlib.sha256(files[name]).hexdigest()}  {name}\n' for name in names).encode('ascii')
-    return files
-
-
-def verify(archive, root=ROOT):
-    names = package_files(root)
-    with zipfile.ZipFile(archive) as package:
-        entries = package.infolist()
-        if len(entries) != 4 or {entry.filename for entry in entries} != {*names,'SHA256SUMS.txt'}:
-            raise RuntimeError('unexpected/duplicate files in portable ZIP')
-        if sum(entry.file_size for entry in entries) > 32*1024*1024:
-            raise RuntimeError('portable ZIP exceeds expected size bound')
-        if any(entry.flag_bits & 1 or (entry.external_attr >> 16) & 0o170000 == 0o120000 for entry in entries):
-            raise RuntimeError('encrypted/symlink archive entry is not supported')
-        if package.testzip() is not None: raise RuntimeError('ZIP CRC mismatch')
-        files = {entry.filename:package.read(entry) for entry in entries}
-    expected = ''.join(f'{hashlib.sha256(files[name]).hexdigest()}  {name}\n' for name in names).encode('ascii')
-    if files['SHA256SUMS.txt'] != expected: raise RuntimeError('package SHA-256 checksum mismatch')
-    if files['LICENSE.txt'] != (root.parents[1]/'LICENSE').read_bytes(): raise RuntimeError('license text mismatch')
-    version,_,_ = metadata(root)
-    if files['README.txt'] != instructions(root): raise RuntimeError('packaged instructions/version mismatch')
-    with tempfile.TemporaryDirectory(prefix='Fairy Hash 패키지-') as directory:
-        target = Path(directory)/names[0]
-        target.write_bytes(files[names[0]])
-        pe,commands = resources(target,root),cli(target)
-        comparison = compare(target)
-        checksums = checksum(target)
-    return dict(ok=True,verification='fairy-hash-portable-package',version=version,
-                files=list(files),zipBytes=archive.stat().st_size,exeBytes=len(files[names[0]]),
-                zipSha256=hashlib.sha256(archive.read_bytes()).hexdigest(),resources=pe,cliCases=commands['cases'],
-                comparisonCases=comparison['cases'],checksumCases=checksums['cases'],temporaryExtractionRemoved=True,guiLaunched=False,inputInjected=False)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('archive',type=Path)
-    args = parser.parse_args()
-    try: print(json.dumps(verify(args.archive.resolve())))
+import argparse,json,subprocess,zipfile
+from pathlib import Path
+def checks(image):
+    return dict(cliCases=cli(image)["cases"],comparisonCases=compare(image)["cases"],checksumCases=checksum(image)["cases"])
+def verify(archive,root=ROOT):
+    result=shared_verify(archive,root,checks); result["verification"]="fairy-hash-portable-package"; return result
+if __name__ == "__main__":
+    parser=argparse.ArgumentParser(description=__doc__); parser.add_argument("archive",type=Path)
+    try: print(json.dumps(verify(parser.parse_args().archive.resolve())))
     except (OSError,ValueError,RuntimeError,zipfile.BadZipFile,subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False,error=str(error)))); raise SystemExit(1)

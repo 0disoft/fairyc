@@ -1,42 +1,17 @@
 """Build or select a release EXE, verify its portable ZIP, and write a SHA-256 sidecar."""
 import argparse
 import json
-import os
 from pathlib import Path
 import subprocess
-import tempfile
 import zipfile
-from prepare_resources import ROOT,metadata,prepare
-from app_settings import load
-from verify_resources import verify as verify_resources
-from verify_package import payload,verify as verify_package
+from prepare_resources import ROOT,prepare
+from verify_package import checks
+from win32_app.portable import package as portable_package
 
 
 def package(image, output, root=ROOT):
-    app = load(root)
-    version,_,_ = metadata(root)
-    pe = verify_resources(image,root)
-    if pe['certificateTablePresent']:
-        raise RuntimeError('this unsigned-package template does not describe signed images; update distribution instructions first')
-    files = payload(image,root)
-    output.mkdir(parents=True,exist_ok=True)
-    archive = output/f'{app.package_name}-{version}-windows-x64.zip'
-    with tempfile.TemporaryDirectory(prefix='.fairy-package-',dir=output) as directory:
-        pending = Path(directory)/archive.name
-        with zipfile.ZipFile(pending,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as bundle:
-            for name,data in files.items():
-                entry = zipfile.ZipInfo(name,date_time=(1980,1,1,0,0,0))
-                entry.create_system = 3
-                entry.external_attr = (0o100755 if name.endswith('.exe') else 0o100644)<<16
-                entry.compress_type = zipfile.ZIP_DEFLATED
-                bundle.writestr(entry,data,compresslevel=9)
-        result = verify_package(pending,root)
-        checksum = archive.with_suffix(archive.suffix+'.sha256')
-        sidecar = Path(directory)/checksum.name
-        sidecar.write_text(f'{result["zipSha256"]}  {archive.name}\n',encoding='ascii',newline='\n')
-        os.replace(pending,archive)
-        os.replace(sidecar,checksum)
-    result.update(archive=str(archive),checksumFile=str(checksum),published=False,signed=False)
+    result=portable_package(image,output,root,checks)
+    result["verification"]="fairy-hash-portable-package"
     return result
 
 

@@ -373,6 +373,11 @@ distinguishes passes, physical-input failures and monitor limitations.
 
 ## Portable release, without desktop automation
 
+Reusable identity/resource/PE/portable packaging code lives in
+`tools/win32_app/`. The scripts here provide Hash defaults and the 57 app-specific
+CLI checks. Generated desktop starters bundle their own copy of that tooling;
+no shared module is required on an end user's machine.
+
 Python 3.11+ and the existing Fairy C/MSVC/Windows SDK toolchain can prepare a
 local release. This keeps the current `fairy.toml` version; it does not bump,
 sign, publish or upload it:
