@@ -19,6 +19,7 @@ import module_project_cli as projects;
 import project_check_cli as checking;
 import project_emit_cli as workspace_c;
 import native_cli as native;
+import desktop_cli as desktop;
 import c_cli as c;
 import std::bytes as bytes;
 import std::io as io;
@@ -57,7 +58,7 @@ pub fn i32 run() {
     if(bytes::equal(flag,b"experimental")){return experimental::arguments();}
     if(argc==2 && is_help(flag)){return public_output(public::help());}
     if(argc==3){var u8[4096] other=[0;4096];let n=switch(process::arg(2,ref mut other)){case .ok(p):{p}case .err(_):{return invocation("argument exceeds the supported byte limit");}};let ref u8[] value=ref other;
-        if(is_help(value[..n]) && (bytes::equal(flag,b"check") || bytes::equal(flag,b"build") || bytes::equal(flag,b"run") || bytes::equal(flag,b"new") || bytes::equal(flag,b"test") || bytes::equal(flag,b"explain") || bytes::equal(flag,b"targets") || bytes::equal(flag,b"experimental"))){return public_output(public::help());}
+        if(is_help(value[..n]) && (bytes::equal(flag,b"check") || bytes::equal(flag,b"build") || bytes::equal(flag,b"run") || bytes::equal(flag,b"package") || bytes::equal(flag,b"new") || bytes::equal(flag,b"test") || bytes::equal(flag,b"explain") || bytes::equal(flag,b"targets") || bytes::equal(flag,b"experimental"))){return public_output(public::help());}
         if(bytes::equal(flag,b"explain")){let code=value[..n];if(code.len!=5 || (code[0]!=69 && code[0]!=65 && code[0]!=86) || code[1]<48 || code[1]>57 || code[2]<48 || code[2]>57 || code[3]<48 || code[3]>57 || code[4]<48 || code[4]>57){return quoted_error("diagnostic code ",code," is not in canonical E0001, A2001, or V1001 form");}let message=public::explanation(code);if(message.len==0){return quoted_error("unknown diagnostic code ",code,"");}return public_output(message);}
     }
     if(bytes::equal(flag,b"--version")){return if(argc==2){public_output(public::version())}else{invocation("--version does not accept arguments")};}
@@ -68,6 +69,7 @@ pub fn i32 run() {
     if (bytes::equal(flag,b"check")) { if(argc==3){var u8[64] option=[0;64];let n=switch(process::arg(2,ref mut option)){case .ok(p):{p}case .err(_):{0}};let ref u8[] value=ref option;if(bytes::equal(value[..n],b"--cache-status")){return invocation("command \"check\" accepts only optional --locked");}}return check_status(checking::arguments()); }
     if (bytes::equal(flag,b"build")) { return native::run(false); }
     if (bytes::equal(flag,b"run")) { return native::run(true); }
+    if (bytes::equal(flag,b"package")) { return desktop::package(); }
     if (bytes::equal(flag,b"--c-workspace")) { return workspace_c::arguments(); }
     if(flag.len<2 || flag[0]!=45 || flag[1]!=45){return quoted_error("unknown command ",flag,"");}
     if (argc != 2 && argc != 3) { return error(usage()); }
@@ -279,16 +281,27 @@ fn ref CStr scaffold_native(ref sc_vec::Vec<bytes::Buffer> paths,usize slot){
     if(!closed){return .err(scaffold_rollback(ref paths,ref mut target,ref mut src,ref mut tests,directories,files,scaffold_problem(4,0)));}
     return .ok(true);
 }
-@effects(filesystem,console,environment) pub fn i32 scaffold(){
+@effects(filesystem,console,environment,clock) pub fn i32 scaffold(){
     let argc=process::arg_count();
     if(argc==3){let option=switch(scaffold_arg(2)){case .ok(p):{p}case .err(_):{return 4;}};if(scaffold_help(bytes::view(ref option))){return scaffold_output(sc_text::as_bytes(public::help()));}}
-    if(argc!=5){return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid>");}
-    let option=switch(scaffold_arg(3)){case .ok(p):{p}case .err(_):{return 4;}};
-    if(!bytes::equal(bytes::view(ref option),b"--uid")){return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid>");}
+    if(argc!=5 && argc!=7){return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid> [--template <console|win32>]");}
+    var usize uid_at=0;var usize template_at=0;var usize at=3;
+    while(at<argc){let option=switch(scaffold_arg(at)){case .ok(p):{p}case .err(_):{return 4;}};let value=bytes::view(ref option);
+        if(bytes::equal(value,b"--uid") && uid_at==0){uid_at=at+1;}
+        else if(bytes::equal(value,b"--template") && template_at==0){template_at=at+1;}
+        else{return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid> [--template <console|win32>]");}at+=2;
+    }
+    if(uid_at==0){return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid> [--template <console|win32>]");}
+    let template=if(template_at==0){bytes::empty()}else{switch(scaffold_arg(template_at)){case .ok(p):{p}case .err(_):{return 4;}}};
+    if(template_at!=0 && bytes::len(ref template)==0){return scaffold_invocation("command \"new\" expects <package-name> --uid <package-uid> [--template <console|win32>]");}
     let name=switch(scaffold_arg(2)){case .ok(p):{p}case .err(_):{return 4;}};let spelling=bytes::view(ref name);
     if(!sc_values::name(spelling) || !sc_values::segment(spelling)){return scaffold_invocation("command \"new\": package name must use portable lowercase kebab-case");}
-    let uid=switch(scaffold_arg(4)){case .ok(p):{p}case .err(_):{return 4;}};
+    let uid=switch(scaffold_arg(uid_at)){case .ok(p):{p}case .err(_):{return 4;}};
     if(!sc_values::uid(bytes::view(ref uid))){return scaffold_invocation("command \"new\": package UID must use at least two lowercase dot-separated segments");}
+    if(template_at!=0){let selected=bytes::view(ref template);
+        if(bytes::equal(selected,b"win32")){return desktop::create(spelling,bytes::view(ref uid));}
+        if(!bytes::equal(selected,b"console")){return scaffold_invocation("command \"new\": template must be console or win32");}
+    }
     switch(scaffold_create(spelling,bytes::view(ref uid))){case .ok(_):{}case .err(e):{return scaffold_diagnostic(e,spelling);}};
     var bytes::Buffer message=bytes::empty();if(!scaffold_append(ref mut message,b"created Fairy C package \"") || !scaffold_append(ref mut message,spelling) || !scaffold_append(ref mut message,b"\" at ") || !scaffold_append(ref mut message,spelling) || !scaffold_append(ref mut message,b"\n")){return 4;}
     return scaffold_output(bytes::view(ref message));

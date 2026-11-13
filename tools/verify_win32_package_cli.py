@@ -17,9 +17,10 @@ def command(args,cwd,expected=0,env=None):
     if expected and run.stdout: raise RuntimeError('failure emitted a success report')
     return run.stdout
 
-def verify(compiler):
+def verify(compiler,companion=None):
     with tempfile.TemporaryDirectory(prefix='package-cli-한글-') as temporary:
         parent=Path(temporary);binary=parent/'fairyc.exe';shutil.copy2(compiler,binary)
+        if companion is not None: shutil.copy2(companion,parent/'fairyc-candidate-build.exe')
         command([binary,'new','my-tool','--uid','example.my-tool','--template','win32'],parent,env=dict(os.environ,PATH=''))
         project=parent/'my-tool';command([binary,'check'],project);command([binary,'test','--locked'],project)
         settings=project/'app.toml';original=settings.read_text(encoding='utf-8')
@@ -56,8 +57,8 @@ def verify(compiler):
                     guiLaunched=False,inputInjected=False,published=False)
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--compiler',type=Path,required=True)
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--compiler',type=Path,required=True);parser.add_argument('--companion',type=Path)
     args=parser.parse_args()
-    try: print(json.dumps(verify(args.compiler.resolve())))
+    try: print(json.dumps(verify(args.compiler.resolve(),args.companion.resolve() if args.companion else None)))
     except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as error:
         print(json.dumps(dict(ok=False,error=str(error))));raise SystemExit(1)

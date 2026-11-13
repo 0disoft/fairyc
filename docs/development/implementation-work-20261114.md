@@ -44,5 +44,7 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   flat-Result forwarding/cache scope; no specialization limit was increased.
 - 2: common desktop resource/receipt helpers extracted from the Go CLI without
   changing command behavior. Existing package argument, containment/digest and
-  missing-Python tests pass. Candidate command wiring is next.
+  missing-Python tests pass. Candidate new/package wiring, metadata sync and
+  source/native-option checks are implemented; initial full low CLI acceptance
+  passes. Final optimized replay with exact invocation controls is in progress.
 - 3–6: pending, in the order above.

@@ -4,6 +4,7 @@ import std::vec as v;
 import std::process as process;
 
 pub resource Options{bool locked;bool release;bool status;bytes::Buffer cache;v::Vec<bytes::Buffer> arguments;cleanup{}}
+pub fn Options release_build(bool locked){return Options{.locked,.release=true,.status=false,.cache=bytes::empty(),.arguments=v::empty<bytes::Buffer>()};}
 // 1 unknown/compiler argument, 2 duplicate flag, 3 program NUL, 4 argv decode,
 // 5 allocation or inconsistent argv size, 6 invalid cache root, 7 status without
 // cache. Duplicate flags use 1 locked, 2 release, 3 cache root, 4 cache status.

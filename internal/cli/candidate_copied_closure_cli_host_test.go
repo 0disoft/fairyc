@@ -14,8 +14,8 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 )
 
-// The authored main and every command are retained. The Go companion consumes
-// fresh Fairy C packets only; it cannot substitute a Go frontend or cached AST.
+// The authored main and every command are retained. Native builds consume fresh
+// Fairy C packets; asset operations cannot substitute a Go frontend or cached AST.
 func copiedClosureCLIHost(t *testing.T, profile cdriver.Profile) string {
 	t.Helper()
 	return copiedClosureCLIHostWithLimit(t, profile, 256<<10)
