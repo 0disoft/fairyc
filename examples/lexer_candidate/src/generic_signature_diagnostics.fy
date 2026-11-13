@@ -32,6 +32,7 @@ fn Result<bool,u32> contains(ref plan::Plan original,plan::Node selected,ref syn
     }
     if(depth==0 && n.kind==6 && bytes::equal(syntax::type_text(p,n.left),b"Option") && syntax::type_argument_count(p,root)==1){
         let payload=syntax::type_argument(p,root,0);if(payload!=0 && payload<=syntax::type_count(p) && syntax::type_at(p,payload).kind==1){return contains(original,selected,p,payload,0,work);}
+        if(payload!=0 && payload<=syntax::type_count(p)){let child=syntax::type_at(p,payload);if(child.kind==6 && bytes::equal(syntax::type_text(p,child.left),b"Option") && syntax::type_argument_count(p,payload)==1){let leaf=syntax::type_argument(p,payload,0);if(leaf!=0 && leaf<=syntax::type_count(p) && syntax::type_at(p,leaf).kind==1){return contains(original,selected,p,leaf,0,work);}}}
     }
     if(depth==0 && n.kind==6 && bytes::equal(syntax::type_text(p,n.left),b"Result") && syntax::type_argument_count(p,root)==2){
         let payload=syntax::type_argument(p,root,0);if(payload!=0 && payload<=syntax::type_count(p) && syntax::type_at(p,payload).kind==1){let allowed=switch(result_error(original,selected,p,syntax::type_argument(p,root,1),work)){case .ok(value):{value}case .err(code):{return .err(code);}};if(allowed){return contains(original,selected,p,payload,0,work);}}

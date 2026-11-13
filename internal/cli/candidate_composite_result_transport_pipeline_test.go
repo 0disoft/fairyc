@@ -73,6 +73,11 @@ func runCandidateCompositeResultTransportPipeline(t *testing.T, signed bool) {
 	if signed {
 		raw = strings.NewReplacer(",u32>", ",i32>", "return .err(77)", "return .err(-77)", "error==77", "error==-77").Replace(raw)
 	}
+	runCandidateTaggedTransportPipeline(t, raw, observer)
+}
+
+func runCandidateTaggedTransportPipeline(t *testing.T, raw, observer string) {
+	candidateResultNativeGate(t)
 	if checked := candidateResultGoCheck(t, raw); !checked.Verified {
 		t.Fatalf("independent Go admission of exact Fairy input: %+v", checked.Semantic)
 	}
@@ -118,7 +123,7 @@ func runCandidateCompositeResultTransportPipeline(t *testing.T, signed bool) {
 		t.Fatal(err)
 	}
 	for _, producer := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		t.Logf("frozen Result compiler %s: %d C parts", producer.Name, len(build.Sources))
+		t.Logf("frozen tagged-value compiler %s: %d C parts", producer.Name, len(build.Sources))
 		image, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, producer, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, time.Minute, 16<<20)
 		if err != nil {
 			t.Fatal(err)
@@ -161,7 +166,7 @@ func runCandidateCompositeResultTransportPipeline(t *testing.T, signed bool) {
 			if !ok || exit.ExitCode() != 42 || len(output) != 0 {
 				t.Fatalf("Result %s/%s: %v %q", producer.Name, consumer.Name, err, output)
 			}
-			t.Logf("Result %s/%s: exit 42, empty output; 13 payload observations, 26 once-only operands", producer.Name, consumer.Name)
+			t.Logf("tagged values %s/%s: exit 42, empty output; independent C observer passed", producer.Name, consumer.Name)
 		}
 	}
 }

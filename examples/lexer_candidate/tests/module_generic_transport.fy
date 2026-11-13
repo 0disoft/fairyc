@@ -38,8 +38,8 @@ fn void append(ref mut bytes::Buffer raw,ref u8[] part){assert(bytes::append(raw
     var u32 scalar=32;while(scalar<=38){let name=transport::name(scalar);var usize shape=0;while(shape<8){
         var bytes::Buffer raw=bytes::empty();append(ref mut raw,b"module root;");
         if(shape==0){append(ref mut raw,b"fn T bad<T>(T a,T b){return a+b;}fn ");append(ref mut raw,name);append(ref mut raw,b" probe(");append(ref mut raw,name);append(ref mut raw,b" a,");append(ref mut raw,name);append(ref mut raw,b" b){return bad<");append(ref mut raw,name);append(ref mut raw,b">(a,b);}");}
-        else if(shape==1){append(ref mut raw,b"fn Option<Option<T>> bad<T>(){return .none;}");}
-        else if(shape==2){append(ref mut raw,b"fn Result<T,i32> bad<T>(){return .err(1);}");}
+        else if(shape==1){append(ref mut raw,b"fn Option<Option<Option<T>>> bad<T>(){return .none;}");}
+        else if(shape==2){append(ref mut raw,b"fn Result<T,i64> bad<T>(){return .err(1);}");}
         else if(shape==3){append(ref mut raw,b"fn ref T bad<T>(ref T p){return p;}");}
         else if(shape==4){append(ref mut raw,b"fn ref T[] bad<T>(ref T[] p){return p;}");}
         else if(shape==5){append(ref mut raw,b"fn ptr T bad<T>(ptr T p){return p;}");}

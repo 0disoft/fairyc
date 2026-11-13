@@ -91,8 +91,8 @@ fn Resolution accepted(ref mut v::Vec<Type> graph,Type value,usize module_index,
 fn Resolution walk(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates){
     return walk_type(c,p,module_index,root,graph,depth,declaration,substitutions,aggregates,false);
 }
-// Only a root Option or Result<S,u32/i32> direct success leaf may use transport.
-// Recursive wrappers call walk again, so this permission cannot escape its leaf.
+// Transport is limited to a direct root Option/Result success leaf, plus exactly
+// two root Option levels. Other recursive wrappers reset the leaf permission.
 fn Resolution walk_type(ref catalog::Catalog c,ref syntax::Parsed p,usize module_index,usize root,ref mut v::Vec<Type> graph,usize depth,usize declaration,ref v::Vec<usize> substitutions,bool aggregates,bool option_payload){
     if(root==0 || root>syntax::type_count(p)){return fail(9,module_index,0,0);}let n=syntax::type_at(p,root);if(depth>=64){return fail(10,module_index,n.start,n.end);}
     if(n.kind==17){
@@ -143,8 +143,10 @@ fn Resolution walk_type(ref catalog::Catalog c,ref syntax::Parsed p,usize module
             return accepted(graph,node(13,0,d.module_index,d.declaration,first.type,0),module_index,n.start,n.end);
         }
         if(!option && !bytes::equal(name,b"Result") || args!=if(option){1}else{2}){return fail(9,module_index,n.start,n.end);}
-        let payload=syntax::type_argument(p,root,0);let flat_payload=depth==0 && syntax::type_at(p,payload).kind==1;
-        let first=walk_type(c,p,module_index,payload,graph,depth+1,declaration,substitutions,aggregates,flat_payload);if(first.problem.code!=0){return first;}var usize second=0;
+        let payload=syntax::type_argument(p,root,0);var bool nested_payload=false;
+        if(depth==0 && option && syntax::type_at(p,payload).kind==6){let child=syntax::type_at(p,payload);if(bytes::equal(syntax::type_text(p,child.left),b"Option") && syntax::type_argument_count(p,payload)==1){let leaf=syntax::type_argument(p,payload,0);nested_payload=leaf!=0 && leaf<=syntax::type_count(p) && syntax::type_at(p,leaf).kind==1;}}
+        let flat_payload=(depth==0 || option_payload && depth==1 && option) && syntax::type_at(p,payload).kind==1;
+        let first=walk_type(c,p,module_index,payload,graph,depth+1,declaration,substitutions,aggregates,flat_payload || nested_payload);if(first.problem.code!=0){return first;}var usize second=0;
         if(!option){let last=walk(c,p,module_index,syntax::type_argument(p,root,1),graph,depth+1,declaration,substitutions,aggregates);if(last.problem.code!=0){return last;}second=last.type;}
         // Legacy scalar tags are i32=1 and u32=4 (type_state).
         if(!aggregates && !option && at(graph,first.type).kind==1 && transport::extended(at(graph,first.type).scalar) && (at(graph,second).kind!=1 || at(graph,second).scalar!=4 && at(graph,second).scalar!=1)){let leaf=syntax::type_at(p,payload);return fail(5,module_index,leaf.start,leaf.end);}

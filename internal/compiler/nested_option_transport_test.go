@@ -16,6 +16,7 @@ import (
 const nestedOptionHelpers = `
 fn Option<Option<T>> nested<T>(T value,i32 mode){if(mode==0){return .none;}if(mode==1){return .some(.none);}return .some(.some(value));}
 fn Option<Option<T>> relay_nested<T>(Option<Option<T>> value){let Option<Option<T>> copied=value;return copied;}
+fn i32 state_nested<T>(Option<Option<T>> value){return switch(value){case .none:{0}case .some(inner):{switch(inner){case .none:{1}case .some(_):{2}}}};}
 fn T choose_nested<T>(Option<Option<T>> value,T fallback){return switch(value){case .none:{fallback}case .some(inner):{switch(inner){case .none:{fallback}case .some(actual):{actual}}}};}
 `
 
@@ -54,7 +55,7 @@ func TestNestedOptionTransportNative(t *testing.T) {
 	}
 	for i, v := range values {
 		fmt.Fprintf(&source, `@repr(C) struct Pair%[1]d{%[2]s value;%[2]s fallback;}unsafe extern C fn Pair%[1]d seed%[1]d();unsafe extern C fn i32 observe%[1]d(Pair%[1]d value,i32 mode);`, i, v.fy)
-		fmt.Fprintf(&body, `let Pair%[1]d seed%[1]d=unsafe{seed%[1]d()};var i32 mode%[1]d=0;while(mode%[1]d<3){let Option<Option<%[2]s>> original=nested<%[2]s>(seed%[1]d.value,mode%[1]d);let Option<Option<%[2]s>> copied=relay_nested<%[2]s>(original);let %[2]s first=choose_nested<%[2]s>(original,seed%[1]d.fallback);let %[2]s second=choose_nested<%[2]s>(copied,seed%[1]d.fallback);assert(unsafe{observe%[1]d(Pair%[1]d{.value=first,.fallback=second},mode%[1]d)}==1);mode%[1]d+=1;}`, i, v.fy)
+		fmt.Fprintf(&body, `let Pair%[1]d seed%[1]d=unsafe{seed%[1]d()};var i32 mode%[1]d=0;while(mode%[1]d<3){let Option<Option<%[2]s>> original=nested<%[2]s>(seed%[1]d.value,mode%[1]d);let Option<Option<%[2]s>> copied=relay_nested<%[2]s>(original);assert(state_nested<%[2]s>(original)==mode%[1]d && state_nested<%[2]s>(copied)==mode%[1]d);let %[2]s first=choose_nested<%[2]s>(original,seed%[1]d.fallback);let %[2]s second=choose_nested<%[2]s>(copied,seed%[1]d.fallback);assert(unsafe{observe%[1]d(Pair%[1]d{.value=first,.fallback=second},mode%[1]d)}==1);mode%[1]d+=1;}`, i, v.fy)
 		fmt.Fprintf(&observer, "typedef struct{%[1]s value,fallback;}Pair%[2]d;Pair%[2]d seed%[2]d(void){Pair%[2]d p={%[3]s,%[4]s};return p;}int32_t observe%[2]d(Pair%[2]d p,int32_t mode){%[1]s expected=mode==2?(%[1]s)(%[3]s):(%[1]s)(%[4]s);calls++;return memcmp(&p.value,&expected,sizeof expected)==0&&memcmp(&p.fallback,&expected,sizeof expected)==0;}\n", v.c, i, v.value, v.fallback)
 	}
 	source.WriteString("unsafe extern C fn i32 observations();fn i32 main(){" + body.String() + "assert(unsafe{observations()}==33);return 42;}")
