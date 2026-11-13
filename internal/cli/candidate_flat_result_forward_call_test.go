@@ -109,7 +109,7 @@ func TestCandidateFlatResultForwardCall(t *testing.T) {
 			for _, vector := range []struct{ name, raw string }{
 				{"minimal", flatResultForwardMinimal},
 				{"full-baseline", "module root;" + strings.TrimPrefix(compositeResultCLIProvider, "module answer;") + strings.ReplaceAll(strings.TrimPrefix(compositeResultCLIMain(), "module main;import answer as a;"), "a::", "")},
-				{"full-helper", "module root;" + strings.TrimPrefix(compositeResultCLIEdits(true)[0].provider, "module answer;") + strings.ReplaceAll(strings.TrimPrefix(compositeResultCLIMain(), "module main;import answer as a;"), "a::", "")},
+				{"full-helper", "module root;" + strings.TrimPrefix(compositeResultCLIOverLimitHelper(), "module answer;") + strings.ReplaceAll(strings.TrimPrefix(compositeResultCLIMain(), "module main;import answer as a;"), "a::", "")},
 			} {
 				t.Run(vector.name, func(t *testing.T) {
 					checked := candidateResultGoCheck(t, vector.raw)

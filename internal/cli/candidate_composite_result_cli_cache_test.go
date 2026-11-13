@@ -121,13 +121,22 @@ type compositeResultCLIEdit struct {
 	errorCode            uint32
 }
 
+// Keep the original 68-specialization source as an independent refusal vector.
+func compositeResultCLIOverLimitHelper() string {
+	return strings.Replace(compositeResultCLIProvider, "return replaced;", "return tail<T>(replaced);", 1)
+}
+
 func compositeResultCLIEdits(full bool) []compositeResultCLIEdit {
 	provider, main := compositeResultCLIProvider, compositeResultCLIMain()
 	if !full {
 		provider = strings.Replace(provider, "return .ok(left);", "return .ok(rght);", 1)
 		return []compositeResultCLIEdit{{"success", provider, main, 43, true, 77}}
 	}
-	helper := strings.Replace(provider, "return replaced;", "return tail<T>(replaced);", 1)
+	// Exchange one identity family for another rather than admitting 68 instances
+	// into the documented 64-slot candidate unit. All seven scalar observers,
+	// original/copy handling and Result propagation remain active. The baseline
+	// still exercises bind<T,E>; the original over-limit helper stays a refusal.
+	helper := strings.Replace(compositeResultCLIOverLimitHelper(), "bind<T,u32>(relay<T>(original))", "relay<T>(original)", 1)
 	success := strings.Replace(helper, "return .ok(left);", "return .ok(rght);", 1)
 	payload := strings.ReplaceAll(strings.Replace(main, "Result<i8,u32> payload_choice", "Result<i16,u32> payload_choice", 1), "payload_choice=a::failure<i8>()", "payload_choice=a::failure<i16>()")
 	errorValue := strings.Replace(success, "error_code(){return 77;}", "error_code(){return 78;}", 1)
@@ -323,6 +332,9 @@ func compositeResultCLIAcceptance(t *testing.T, image, artifacts string, full bo
 			t.Fatalf("Result test flags=%v: %s %s", flags, out, diagnostic)
 		}
 	}
+	if full {
+		compositeResultCLICapacityRefusal(t, &command, root)
+	}
 	var valid compositeResultCLIEdit
 	for _, edit := range compositeResultCLIEdits(full) {
 		before := copiedClosureCacheSnapshot(t, root)
@@ -345,7 +357,10 @@ func compositeResultCLIAcceptance(t *testing.T, image, artifacts string, full bo
 			}
 		}
 		wantStable := 0
-		if edit.name == "payload" || edit.name == "private-body" {
+		// An ordinary public body is excluded from the dependent generic
+		// interface (ADR 0139/0384). Its defining package still changes; native
+		// value/error observers below must see the updated ordinary body.
+		if edit.name == "payload" || edit.name == "error-value" || edit.name == "private-body" {
 			wantStable = 1
 		}
 		if stable != wantStable || edit.name == "private-body" && diagnostic != "cache: mixed\n" {

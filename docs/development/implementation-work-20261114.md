@@ -38,6 +38,8 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
 - 1: current source reproduced: both producer profiles pass minimal/baseline
   forwarding and reject the 68-instance fixture at phase 3 / stage 3 / 4503.
   Source-stage classification now preserves E4503 and exit 3, with four
-  interpreter and four native diagnostic tests passing. Whole-CLI/cache
-  integration remains in progress; see `generic-limit-diagnostic-20261114.md`.
+  interpreter and four native diagnostic tests passing. Whole optimized authored
+  CLI/cache replay now passes 52 CLI processes and two standalone products;
+  see `generic-limit-cli-cache-20261114.md`. Item 1 is complete for the stated
+  flat-Result forwarding/cache scope; no specialization limit was increased.
 - 2–6: pending, in the order above.

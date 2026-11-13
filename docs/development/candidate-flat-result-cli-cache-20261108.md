@@ -1,5 +1,8 @@
 # Flat Result full CLI and persistent cache — 2026-11-08
 
+> Updated acceptance: [2026-11-14 completion](generic-limit-cli-cache-20261114.md).
+> The historical full-helper refusal below exceeded the documented generic cap.
+
 Authority: [ADR 0550](../adr/0550-flat-result-success-generic-transport.md).
 Test owner: `internal/cli/candidate_composite_result_cli_cache_test.go`.
 Only this receipt and that new test are owned by this task. No production,
