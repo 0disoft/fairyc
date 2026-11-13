@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import struct
 from prepare_resources import ROOT, metadata, resource_text
+from app_settings import load
+import xml.etree.ElementTree as xml
 
 
 def api(dll, name, result, *types):
@@ -14,6 +16,7 @@ def api(dll, name, result, *types):
 
 
 def verify(image, root=ROOT):
+    app = load(root)
     version, numbers, expected_strings = metadata(root)
     if (root/'native/app.rc').read_text(encoding='utf-8') != resource_text(root):
         raise RuntimeError('Windows metadata is stale; run prepare_resources.py')
@@ -38,7 +41,7 @@ def verify(image, root=ROOT):
             pointer = api(kernel,'LockResource',c.c_void_p,w.HANDLE)(loaded)
             if not pointer or not length: raise RuntimeError('invalid resource data')
             return c.string_at(pointer,length)
-        group, ico = resource(14,1),(root/'native/app.ico').read_bytes()
+        group, ico = resource(14,1),app.icon_path(root).read_bytes()
         reserved, kind, count = struct.unpack_from('<HHH',ico)
         if (reserved,kind) != (0,1) or not count or group[:6] != ico[:6]: raise RuntimeError('icon group mismatch')
         for index in range(count):
@@ -70,8 +73,12 @@ def verify(image, root=ROOT):
                     if bitmap_handle: api(gdi,'DeleteObject',w.BOOL,w.HANDLE)(bitmap_handle)
                 api(user,'DestroyIcon',w.BOOL,w.HANDLE)(handle)
         manifest = resource(24,1).decode('utf-8').rstrip('\0')
-        if '.'.join(map(str,numbers)) not in manifest or 'Microsoft.Windows.Common-Controls' not in manifest:
+        identity = xml.fromstring(manifest).find('{urn:schemas-microsoft-com:asm.v1}assemblyIdentity')
+        if identity is None or identity.get('version') != '.'.join(map(str,numbers)) or identity.get('name') != app.assembly_name or 'Microsoft.Windows.Common-Controls' not in manifest:
             raise RuntimeError('manifest version/theme dependency mismatch')
+        title = c.create_unicode_buffer(128)
+        if not api(user,'LoadStringW',c.c_int,w.HINSTANCE,w.UINT,w.LPWSTR,c.c_int)(module,101,title,len(title)) or title.value != app.product_name:
+            raise RuntimeError('window title resource differs from app.toml')
     finally:
         api(kernel,'FreeLibrary',w.BOOL,w.HMODULE)(module)
     length = api(versions,'GetFileVersionInfoSizeW',w.DWORD,w.LPCWSTR,c.POINTER(w.DWORD))(str(image),None)
@@ -95,7 +102,7 @@ def verify(image, root=ROOT):
         pointer,length = query('\\StringFileInfo\\040904b0\\'+name)
         strings[name] = c.wstring_at(pointer)
         if strings[name] != expected: raise RuntimeError(f'version text mismatch: {name}')
-    return dict(ok=True,verification='fairy-hash-pe-resources',version=version,strings=strings,
+    return dict(ok=True,verification='fairy-hash-pe-resources',version=version,strings=strings,windowTitle=title.value,
                 iconSizes=sizes,iconBytes=len(ico),exeBytes=len(binary),sha256=hashlib.sha256(binary).hexdigest(),
                 subsystem='windows',architecture='x64',certificateTablePresent=bool(certificate_offset or certificate_bytes),
                 guiLaunched=False,inputInjected=False)

@@ -253,10 +253,12 @@ void *hash_ui_open(int32_t width, int32_t height) {
     type.hInstance = GetModuleHandleW(NULL);
     type.hCursor = LoadCursorW(NULL, IDC_ARROW);
     type.lpszClassName = L"FairyHashWindow";
+    WCHAR title[128];
+    if (!LoadStringW(type.hInstance, 101, title, ARRAYSIZE(title))) { return NULL; }
     if (!RegisterClassW(&type)) { return NULL; }
     RECT bounds = {0, 0, width, height};
     if (!AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_CONTROLPARENT, GetDpiForSystem())) { return NULL; }
-    HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, type.lpszClassName, L"Fairy Hash",
+    HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, type.lpszClassName, title,
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, bounds.right-bounds.left, bounds.bottom-bounds.top,
         NULL, NULL, type.hInstance, NULL);
     if (window && child(window, L"STATIC", SS_NOPREFIX | SS_ENDELLIPSIS | SS_NOTIFY, 206) &&

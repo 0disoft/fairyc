@@ -1,0 +1,10 @@
+# Edit app identity here, then run package_release.py --compiler <fairyc.exe>.
+# Version stays in fairy.toml. An empty company_name omits publisher wording.
+[app]
+product_name = "Fairy Hash"
+company_name = "Rodisoft"
+description = "Fairy Hash - SHA-256 file utility"
+executable_name = "FairyHash.exe"
+package_name = "fairy-hash"
+assembly_name = "Fairy.Hash"
+icon = "native/app.ico"
