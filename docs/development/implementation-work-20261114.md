@@ -59,6 +59,11 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   restore and all four native producer/consumer combinations. A stale Vec SDK
   pin/data pair was also synchronized against the owning SDK. First-class
   descriptor ABI widening remains separate from this direct-call family.
-- 5: Linux portable filesystem implementation is next; WSL discovery timed out,
-  so native Linux execution cannot currently be claimed.
+- 5: twenty compatibility ABI operations now have Linux implementations: file
+  rename/link/exclusive copy, eight metadata/length operations, four ReadDir
+  resource operations, and five directory path/tree operations. Both Windows
+  POSIX-model profiles and the full component contract pass. Real gcc/clang
+  probes are added but skipped here after WSL discovery timed out; native Linux
+  execution and target promotion remain unclaimed. See the four Linux filesystem
+  receipts, ending with `linux-directory-paths-20261114.md`.
 - 6: pending, in the order above.

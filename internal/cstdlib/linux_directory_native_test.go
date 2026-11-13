@@ -17,14 +17,15 @@ func TestLinuxDirectoryNative(t *testing.T) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		t.Skip("actual Linux GNU amd64 required")
 	}
-	support, err := SourceForSymbols([]string{"fy_std_windows_read_dir_open_v0"})
+	support, err := SourceForSymbols([]string{"fy_std_windows_read_dir_open_v0", "fy_std_windows_directory_create_v0"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	source := support + `
 #define CHECK(x) do{if(!(x))return __LINE__;}while(0)
 int main(void){CHECK(symlink("file","root/link")==0&&symlink("root","alias")==0);struct fy_std_directory_v0 directory={NULL,0};uint8_t name[16];memset(name,85,sizeof name);CHECK(fy_std_windows_read_dir_open_v0((const uint8_t *)"root",4,&directory).status==0);struct fy_std_directory_entry_result_v0 e=fy_std_windows_read_dir_next_v0(&directory,NULL,0);CHECK(e.status==6&&e.name_length==4);unsigned seen=0;
-for(;;){e=fy_std_windows_read_dir_next_v0(&directory,name,sizeof name);CHECK(e.status==0);if(e.kind==0)break;CHECK(e.name_length==4&&name[4]==85);if(!memcmp(name,"file",4)){CHECK(e.kind==1&&e.size==3&&e.reparse==0);seen|=1;}else if(!memcmp(name,"link",4)){CHECK(e.kind==3&&e.reparse==1);seen|=2;}else{return 1;}}CHECK(seen==3);CHECK(fy_std_windows_read_dir_close_v0(&directory).status==0&&fy_std_windows_read_dir_drop_v0(&directory)==0);CHECK(fy_std_windows_read_dir_open_v0((const uint8_t *)"alias",5,&directory).status!=0&&directory.open==0);return 0;}
+for(;;){e=fy_std_windows_read_dir_next_v0(&directory,name,sizeof name);CHECK(e.status==0);if(e.kind==0)break;CHECK(e.name_length==4&&name[4]==85);if(!memcmp(name,"file",4)){CHECK(e.kind==1&&e.size==3&&e.reparse==0);seen|=1;}else if(!memcmp(name,"link",4)){CHECK(e.kind==3&&e.reparse==1);seen|=2;}else{return 1;}}CHECK(seen==3);CHECK(fy_std_windows_read_dir_close_v0(&directory).status==0&&fy_std_windows_read_dir_drop_v0(&directory)==0);CHECK(fy_std_windows_read_dir_open_v0((const uint8_t *)"alias",5,&directory).status!=0&&directory.open==0);
+CHECK(fy_std_windows_directory_create_v0((const uint8_t *)"new").status==0);CHECK(fy_std_windows_directory_create_v0((const uint8_t *)"new").status==1);CHECK(fy_std_windows_directory_ensure_v0((const uint8_t *)"new/deep").status==0);CHECK(fy_std_windows_directory_rename_v0((const uint8_t *)"new",(const uint8_t *)"root").status==1);CHECK(fy_std_windows_directory_rename_v0((const uint8_t *)"new",(const uint8_t *)"renamed").status==0);struct fy_std_file_result_v0 removed=fy_std_windows_dir_remove_all_v0((const uint8_t *)"renamed");CHECK(removed.status==0&&removed.count==2);CHECK(fy_std_windows_dir_remove_all_v0((const uint8_t *)"alias").status==2);removed=fy_std_windows_dir_remove_all_v0((const uint8_t *)"root");CHECK(removed.status==0&&removed.count==3);return 0;}
 `
 	for _, cc := range []string{"gcc", "clang"} {
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {

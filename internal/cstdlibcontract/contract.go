@@ -12,27 +12,33 @@ import (
 type Component string
 
 const (
-	ComponentLinuxConsole       Component = "linux-console"
-	ComponentLinuxFile          Component = "linux-file"
-	ComponentLinuxFilePaths     Component = "linux-file-paths"
-	ComponentLinuxFileMetadata  Component = "linux-file-metadata"
-	ComponentLinuxDirectory     Component = "linux-directory"
-	ComponentLinuxFileBuffer    Component = "linux-file-buffer"
-	ComponentLinuxProcessArgs   Component = "linux-process-args"
-	ComponentWindowsConsole     Component = "windows-console"
-	ComponentWindowsFile        Component = "windows-file"
-	ComponentWindowsDirectory   Component = "windows-directory"
-	ComponentWindowsFileBuffer  Component = "windows-file-buffer"
-	ComponentWindowsProcessArgs Component = "windows-process-args"
-	ComponentSystemHeap         Component = "system-heap"
-	ComponentByteCompare        Component = "byte-compare"
-	ComponentBuffer             Component = "buffer"
-	ComponentArena              Component = "arena"
-	ComponentTextView           Component = "text-view"
-	ComponentOwnedText          Component = "owned-text"
+	ComponentLinuxConsole        Component = "linux-console"
+	ComponentLinuxFile           Component = "linux-file"
+	ComponentLinuxFilePaths      Component = "linux-file-paths"
+	ComponentLinuxFileMetadata   Component = "linux-file-metadata"
+	ComponentLinuxDirectory      Component = "linux-directory"
+	ComponentLinuxDirectoryPaths Component = "linux-directory-paths"
+	ComponentLinuxFileBuffer     Component = "linux-file-buffer"
+	ComponentLinuxProcessArgs    Component = "linux-process-args"
+	ComponentWindowsConsole      Component = "windows-console"
+	ComponentWindowsFile         Component = "windows-file"
+	ComponentWindowsDirectory    Component = "windows-directory"
+	ComponentWindowsFileBuffer   Component = "windows-file-buffer"
+	ComponentWindowsProcessArgs  Component = "windows-process-args"
+	ComponentSystemHeap          Component = "system-heap"
+	ComponentByteCompare         Component = "byte-compare"
+	ComponentBuffer              Component = "buffer"
+	ComponentArena               Component = "arena"
+	ComponentTextView            Component = "text-view"
+	ComponentOwnedText           Component = "owned-text"
 )
 
 var symbolComponents = map[string]Component{
+	"fy_std_windows_directory_create_v0":  ComponentLinuxDirectoryPaths,
+	"fy_std_windows_directory_ensure_v0":  ComponentLinuxDirectoryPaths,
+	"fy_std_windows_directory_remove_v0":  ComponentLinuxDirectoryPaths,
+	"fy_std_windows_directory_rename_v0":  ComponentLinuxDirectoryPaths,
+	"fy_std_windows_dir_remove_all_v0":    ComponentLinuxDirectoryPaths,
 	"fy_std_windows_read_dir_open_v0":     ComponentLinuxDirectory,
 	"fy_std_windows_read_dir_next_v0":     ComponentLinuxDirectory,
 	"fy_std_windows_read_dir_close_v0":    ComponentLinuxDirectory,
@@ -121,11 +127,6 @@ var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_remove_v0":       ComponentWindowsFile,
-	"fy_std_windows_directory_create_v0":  ComponentWindowsFile,
-	"fy_std_windows_directory_ensure_v0":  ComponentWindowsFile,
-	"fy_std_windows_directory_remove_v0":  ComponentWindowsFile,
-	"fy_std_windows_dir_remove_all_v0":    ComponentWindowsFile,
-	"fy_std_windows_directory_rename_v0":  ComponentWindowsFile,
 	"fy_std_windows_file_replace_v0":      ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":   ComponentWindowsFile,
@@ -250,6 +251,7 @@ var componentLinkOrder = []Component{
 	ComponentLinuxFilePaths,
 	ComponentLinuxFileMetadata,
 	ComponentLinuxDirectory,
+	ComponentLinuxDirectoryPaths,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
 	ComponentWindowsDirectory,
@@ -347,6 +349,10 @@ func componentsInLinkOrder(required map[Component]struct{}) []Component {
 func addComponentClosure(required map[Component]struct{}, component Component) {
 	required[component] = struct{}{}
 	switch component {
+	case ComponentLinuxDirectoryPaths:
+		required[ComponentLinuxFile] = struct{}{}
+		required[ComponentLinuxDirectory] = struct{}{}
+		required[ComponentTextView] = struct{}{}
 	case ComponentLinuxDirectory:
 		required[ComponentLinuxFile] = struct{}{}
 		required[ComponentTextView] = struct{}{}
