@@ -11,6 +11,14 @@ there is no native hashing library or C hash implementation.
 
 On Windows 10 1703+ x64 (PMv2) with MSVC/Windows SDK, launch without arguments for the native
 GUI. **파일 열기 (Alt+O)** selects a file using the actual Windows dialog. Fairy
+also accepts one file dropped onto its idle window or passed as its sole command
+argument (`FairyHash.exe "C:\data\input.bin"`), including an Explorer drop onto
+the EXE. These inputs use the same Fairy C computation/cancellation flow.
+Multiple-file drops are rejected; drops are disabled/discarded while busy.
+The native drop transport consumes/frees each Shell payload and converts bounded
+UTF-16 paths to UTF-8. `python -B verify_drop.py` checks six production decoder
+cases without creating a window; actual desktop drops/startup are not exercised.
+Fairy
 calculates/displays its SHA-256 and byte count; **결과 저장 (Alt+S)** opens the
 native save dialog and writes UTF-8 JSON. Cancelling either
 dialog preserves the previous result. Save is disabled until a hash completes.

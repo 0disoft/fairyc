@@ -74,10 +74,14 @@ fn bool comparison_report(ptr mut void window,ref u8[] path,ref hash::Digest val
 }
 
 @effects(filesystem,clock)
-pub fn i32 run() {
+pub fn i32 run(ref u8[] initial) {
     var bytes::Buffer path=bytes::empty();var bytes::Buffer selection=bytes::empty();
     var bytes::Buffer report=bytes::empty();var bytes::Buffer hex=bytes::empty();
     if(!bytes::resize_zeroed(ref mut selection,131072).is_ok){return 1;}
+    if(initial.len>=131072){return 1;}
+    let length=initial.len;
+    for(var usize i=0;i<length;i+=1){bytes::view_mut(ref mut selection)[i]=initial[i];}
+    var bool startup=length>0;
     let window=ui::open();if(window==null){return 1;}
     let bool initialized=ui::text(window,206,b"파일을 선택하세요") && ui::text(window,207,b"SHA-256") &&
         ui::text(window,202,b"파일 열기(&O)") && ui::text(window,204,b"결과 저장(&S)") && ui::text(window,208,b"복사(&C)") &&
@@ -91,11 +95,13 @@ pub fn i32 run() {
     var bool ready=false;var i32 result=0;
     var hash::Digest last=hash::Digest{.words=[0;8],.length=0,.identity=fs::FileId{.volume_low=0,.volume_high=0,.file_low_0=0,.file_low_1=0,.file_high_0=0,.file_high_1=0}};
     while(true) {
-        let event=ui::poll(window,1);if(event==3){break;}
+        let event=if(startup){12}else{ui::poll(window,1)};if(event==3){break;}
         if(event==4 || event==5){if(!ui::layout(window,event)){result=1;break;}}
         if(event==11 && !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
-        if(event==1) {
-            let chosen=ui::choose(window,false,bytes::view_mut(ref mut selection));
+        if(event==1 || event==12) {
+            let chosen=if(startup){startup=false;length}else{
+                if(event==12){ui::dropped(window,bytes::view_mut(ref mut selection))}else{ui::choose(window,false,bytes::view_mut(ref mut selection))}
+            };
             if(chosen>0 && chosen<131072) {
                 ready=false;
                 let bool disabled=ui::busy(window,true) && ui::enable(window,204,false) && ui::enable(window,208,false);
@@ -120,7 +126,7 @@ pub fn i32 run() {
                 };
                 let bool enabled=ui::busy(window,false) && ui::enable(window,204,ready) && ui::enable(window,208,ready);
                 if(!enabled || !ui::compare(window,bytes::view(ref hex),ready)){result=1;break;}
-            }else if(chosen>131072){let bool shown=ui::status(window,b"파일 선택창을 열 수 없어요.",2);}
+            }else if(chosen>131072){let bool shown=ui::status(window,if(event==12){b"파일을 하나씩 놓아주세요. 경로도 확인하세요."}else{b"파일 선택창을 열 수 없어요."},2);}
         }
         if(event==2 && ready) {
             if(!comparison_report(window,bytes::view(ref path),ref last,bytes::view(ref hex),ref mut report)){result=1;break;}

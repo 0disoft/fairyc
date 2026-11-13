@@ -6,6 +6,7 @@ Windows 10 1703 이상(x64)에서 사용할 수 있습니다. 설치는 필요�
 사용 방법
 1. ZIP을 원하는 폴더에 모두 풀고 @EXECUTABLE@를 실행하세요.
 2. '파일 열기'에서 파일을 선택하면 해시와 파일 크기가 표시됩니다.
+   파일 하나를 창이나 EXE 아이콘 위에 놓아도 됩니다. 계산·저장 중에는 드롭을 받지 않습니다.
 3. '복사'는 SHA-256 값만 복사하고, '결과 저장'은 UTF-8 JSON 보고서를 저장합니다.
 4. 계산 중 '취소'를 누르면 창을 유지한 채 작업을 취소합니다.
 5. '예상 SHA-256'에 확인할 해시를 넣으면 일치 여부가 표시됩니다.
@@ -19,6 +20,7 @@ Alt+E: 예상 SHA-256 입력창
 Tab·Shift+Tab: 포커스 이동 / Enter: 포커스된 버튼 실행
 
 명령줄 사용 (PowerShell)
+& ".\@EXECUTABLE@" "C:\data\input.bin" # GUI로 바로 열기
 & ".\@EXECUTABLE@" --hash "C:\data\input.bin"
 & ".\@EXECUTABLE@" --hash "C:\data\input.bin" "C:\data\result.json"
 & ".\@EXECUTABLE@" --compare "C:\data\input.bin" "64자리_예상_SHA256" "C:\data\compare.json"

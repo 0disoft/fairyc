@@ -1,7 +1,7 @@
 {
   "schema": "fairyc.windows-build/v1",
   "subsystem": "windows",
-  "libraries": ["user32.lib", "gdi32.lib", "comdlg32.lib", "comctl32.lib", "ole32.lib"],
-  "sources": ["native/window.c", "native/reader.c", "native/writer.c"],
+  "libraries": ["user32.lib", "gdi32.lib", "comdlg32.lib", "comctl32.lib", "ole32.lib", "shell32.lib"],
+  "sources": ["native/window.c", "native/reader.c", "native/writer.c", "native/drop.c"],
   "resources": ["native/app.rc"]
 }

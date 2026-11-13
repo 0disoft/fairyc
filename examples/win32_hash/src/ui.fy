@@ -3,6 +3,7 @@ import std::bytes as bytes;
 import progress as measure;
 import comparison as comparison;
 unsafe extern C fn usize hash_ui_expected(ptr mut void window,ptr mut u8 output,usize capacity);
+unsafe extern C fn usize hash_ui_dropped(ptr mut void window,ptr mut u8 output,usize capacity);
 unsafe extern C fn i32 hash_ui_compare_tone(ptr mut void window,u32 tone);
 @effects(clock) unsafe extern C fn usize hash_ui_ticks();
 unsafe extern C fn i32 hash_ui_progress(ptr mut void window,usize value);
@@ -63,6 +64,9 @@ pub fn bool copy(ptr mut void window,ref u8[] value){
 }
 pub fn usize expected(ptr mut void window,ref mut u8[] output){
     return unsafe{hash_ui_expected(window,output as ptr mut u8,output.len)};
+}
+pub fn usize dropped(ptr mut void window,ref mut u8[] output){
+    return unsafe{hash_ui_dropped(window,output as ptr mut u8,output.len)};
 }
 pub fn bool compare(ptr mut void window,ref u8[] actual,bool ready){
     var u8[1024] input=[0;1024];

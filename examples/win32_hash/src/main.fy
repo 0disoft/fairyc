@@ -14,8 +14,15 @@ fn i32 failure(u32 code) {
 
 @effects(console,filesystem,clock)
 fn i32 main() {
-    if(process::arg_count()==1){return app::run();}
+    if(process::arg_count()==1){return app::run(b"");}
     let argc=process::arg_count();
+    if(argc==2){
+        var bytes::Buffer initial=bytes::empty();if(!bytes::resize_zeroed(ref mut initial,131072).is_ok){return failure(5);}
+        let count=switch(process::arg(1,bytes::view_mut(ref mut initial))){case .ok(v):{v}case .err(_):{return failure(1);}};
+        let ref u8[] path=bytes::view(ref initial);
+        if(count==0 || (count>=2 && bytes::equal(path[..2],b"--"))){return failure(1);}
+        return app::run(path[..count]);
+    }
     if(argc<3 || argc>5){return failure(1);}
     var u8[32] mode=[0;32];let m=switch(process::arg(1,ref mut mode)){case .ok(v):{v}case .err(_):{return failure(1);}};
     let ref u8[] mode_view=ref mode;

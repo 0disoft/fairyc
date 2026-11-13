@@ -5,6 +5,7 @@
 #include <commdlg.h>
 #include <commctrl.h>
 #include <stdint.h>
+#include <shellapi.h>
 #include <initguid.h>
 #include <oleacc.h>
 #include <UIAutomationCore.h>
@@ -12,6 +13,7 @@
 
 // Win32 operations only. Fairy owns file policy, SHA-256 and report bytes.
 static struct {
+    HDROP dropped;
     HWND window, tooltip;
     WCHAR *tooltip_text;
     HFONT font, heading, mono;
@@ -26,6 +28,8 @@ static struct {
     BOOL ole_initialized;
     uint32_t named_controls;
 } state;
+
+size_t hash_drop_read(void *payload, uint8_t *output, size_t capacity);
 
 static COLORREF ink(void) { return state.high_contrast ? GetSysColor(COLOR_WINDOWTEXT) : RGB(36, 35, 32); }
 static COLORREF canvas(void) { return state.high_contrast ? GetSysColor(COLOR_WINDOW) : RGB(246, 243, 237); }
@@ -135,6 +139,11 @@ static BOOL open_tooltip(HWND window) {
 
 static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM lp) {
     switch (message) {
+    case WM_DROPFILES:
+        if (state.event != 3 && !state.dropped && IsWindowEnabled(GetDlgItem(window,202))) {
+            state.dropped = (HDROP)wp;
+        } else { DragFinish((HDROP)wp); }
+        return 0;
     case WM_NOTIFY: {
         NMTTDISPINFOW *info = (NMTTDISPINFOW *)lp;
         if (info && info->hdr.hwndFrom == state.tooltip && info->hdr.code == TTN_GETDISPINFOW &&
@@ -282,7 +291,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
         state.window = window;
         SendDlgItemMessageW(window, 213, PBM_SETRANGE32, 0, 100);
         SendDlgItemMessageW(window, 214, EM_SETLIMITTEXT, 256, 0);
-        if (open_tooltip(window) && window_icons(window)) { return window; }
+        if (open_tooltip(window) && window_icons(window)) { DragAcceptFiles(window,TRUE); return window; }
     }
     if (window) { DestroyWindow(window); }
     close_icons();
@@ -295,7 +304,7 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     MSG message;
     // A deferred Close must still dispatch paint/input/sent messages while
     // Fairy waits for a save commit or owned cleanup. Never block on GetMessage.
-    while ((!state.event && !state.cancel_requested && !state.compare_pending) || (!wait && state.event == 3)) {
+    while ((!state.event && !state.cancel_requested && !state.compare_pending && !state.dropped) || (!wait && state.event == 3)) {
         if (wait) {
             int code = (int)GetMessageW(&message, NULL, 0, 0);
             if (code <= 0) { state.event = 3; break; }
@@ -307,11 +316,17 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     }
     // Closing stays sticky and takes priority. Cancelling consumes only its
     // own latch, retaining a pending size/DPI event for the next poll.
-    int event = state.event == 3 ? 3 : state.cancel_requested ? 7 : state.event ? state.event : state.compare_pending ? 11 : 0;
+    int event = state.event == 3 ? 3 : state.cancel_requested ? 7 : state.event ? state.event : state.compare_pending ? 11 : state.dropped ? 12 : 0;
     if (event == 7) { state.cancel_requested = FALSE; }
     else if (event == 11) { state.compare_pending = FALSE; }
     else if (event != 3) { state.event = 0; }
     return event;
+}
+
+size_t hash_ui_dropped(void *window, uint8_t *output, size_t capacity) {
+    if ((HWND)window != state.window) { return 131073; }
+    HDROP drop = state.dropped; state.dropped = NULL;
+    return hash_drop_read(drop,output,capacity);
 }
 
 int32_t hash_ui_focus_id(void *window) {
@@ -424,6 +439,10 @@ int32_t hash_ui_enable(void *window, uint32_t id, uint32_t enabled) {
     HWND control = GetDlgItem((HWND)window, (int)id);
     if ((HWND)window != state.window || !control || enabled > 1) { return 1; }
     EnableWindow(control, enabled != 0);
+    if (id == 202) {
+        DragAcceptFiles((HWND)window,enabled != 0);
+        if (!enabled && state.dropped) { DragFinish(state.dropped); state.dropped = NULL; }
+    }
     return IsWindowEnabled(control) == (enabled != 0) ? 0 : 1;
 }
 
@@ -540,6 +559,7 @@ void hash_ui_show(void *window) {
 }
 
 void hash_ui_destroy(void *window) {
+    if (state.dropped) { DragFinish(state.dropped); state.dropped = NULL; }
     if (state.accessibility) {
         IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 216),
             (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
