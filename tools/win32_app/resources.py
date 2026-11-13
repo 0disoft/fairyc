@@ -1,4 +1,5 @@
 """Synchronize Windows release metadata with the existing fairy.toml version."""
+from pathlib import Path
 import re
 import tomllib
 from .settings import load,resource_string

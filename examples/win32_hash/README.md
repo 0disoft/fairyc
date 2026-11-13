@@ -497,3 +497,12 @@ Both final destination paths are optional. `--checksum` writes standard checksum
 text to stdout; `--compare-file` emits the same comparison JSON/0/2/1 exit codes
 as `--compare`. Checksum contents are validated before hashing the actual input.
 Malformed checksum files leave previous destination reports intact.
+
+## Starting your own app
+
+For a hash-free GUI starter, run `tools/new_win32_app.py` from the repository
+root. See [shared desktop tooling](../../tools/win32_app/README.md). It generates
+a standalone project with editable title/icon/company, native input/button/result
+controls, Fairy C domain/event/layout code, a headless CLI and portable packaging.
+The existing `fairyc new` command is unchanged. Fairy Hash remains the richer
+reference for asynchronous file I/O, hashing, progress and safe publication.
