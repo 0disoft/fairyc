@@ -33,7 +33,8 @@ When a filename or path does not fit, hovering shows its complete Unicode text
 in a native, wrapping tooltip. It updates for each selected file and window
 size; short text that already fits has no tooltip. Ampersands are literal.
 Common Controls v6 comes from Windows via the embedded manifest; no UI framework,
-font, bitmap or additional runtime ships with the EXE. High contrast uses system
+font or additional runtime ships with the EXE. A small multi-resolution document/#
+icon is embedded for Explorer, the title bar and taskbar. High contrast uses system
 colors. Fairy computes layout from DPI/client width and height, including resize
 and minimize/restore. GUI open/read/metadata system calls run on an owned native
 reader thread; a separate cancellation thread also keeps the cancellation API
@@ -335,3 +336,56 @@ Unset `FAIRYC_HASH_JOB_ONLY` for usability checks. Optional
 it is never enabled by default. Select `keyboard` or `all` only on a desktop where
 the verifier can keep foreground. The [usability execution record](../../docs/development/windows-hash-usability-20261112.md)
 distinguishes passes, physical-input failures and monitor limitations.
+
+## Portable release, without desktop automation
+
+Python 3.11+ and the existing Fairy C/MSVC/Windows SDK toolchain can prepare a
+local release. This keeps the current `fairy.toml` version; it does not bump,
+sign, publish or upload it:
+
+```powershell
+python -B package_release.py --compiler C:\tools\fairyc.exe
+# Or select an existing matching release image without rebuilding:
+python -B package_release.py --exe build/win32-hash.exe
+python -B verify_package.py dist/fairy-hash-0.1.0-windows-x64.zip
+```
+
+The ZIP contains only `FairyHash.exe`, a Korean UTF-8 BOM `README.txt`, the full
+Apache 2.0 `LICENSE.txt`, and `SHA256SUMS.txt` for those three files. A sibling
+`.zip.sha256` checks the archive. Checksums detect changed bytes; they do not
+authenticate a publisher. The current template describes an unsigned build.
+Artifacts stay under ignored `dist/`; no installer or Python is distributed.
+
+Packaging synchronizes `native/app.rc` from `fairy.toml`, builds with
+`--locked --release`, then inspects x64/subsystem, VERSIONINFO, the themed manifest
+and all nine embedded icon frames. It extracts its ZIP into a temporary path
+containing Korean text and spaces and runs the actual hash/report CLI's 19 cases
+before replacing the final ZIP. No window is launched, clipboard read, cursor
+moved or key sent. For unchanged payload bytes the ZIP has stable entry order,
+timestamps and compression settings; this is not a whole-toolchain reproducible
+build claim. Failed verification leaves the previous ZIP intact.
+
+To customize another app, replace `native/app.ico` with a multi-resolution ICO
+(at least 16/32/48/256px), edit branding in `prepare_resources.py`, and regenerate:
+
+```powershell
+python -B prepare_resources.py
+fairyc build --locked --release
+python -B verify_resources.py
+```
+
+The example's editable SVG is `native/app.svg`; `make_icon.py` regenerates its
+16/20/24/32/40/48/64/128/256px ICO using only the Python standard library. That
+small renderer supports the example's filled rounded rectangles/polygons, not
+arbitrary SVG. Directly replacing the ICO does not require running the renderer.
+Normal builds use the checked-in ICO and RC without Python. Resource files and
+included assets are native build inputs, outside the Fairy frontend lock.
+
+Window code loads separate owned large/small icons at the current DPI and
+refreshes them after a DPI change. It releases old handles after replacement and
+at teardown. `verify_resources.py` maps the EXE as resource data and checks actual
+Windows icon decoding without executing its entry point; visible window wiring
+was not exercised in this release work.
+
+See the [release execution record](../../docs/development/windows-hash-package-20261113.md)
+for sizes, checksums and the exact validation boundary.
