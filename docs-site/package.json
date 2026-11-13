@@ -1,0 +1,31 @@
+{
+  "name": "fairyc-docs-site",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "check": "bun run check:navigation && astro build && bun run check:root-redirect",
+    "check:fast": "bun run check:navigation",
+    "check:navigation": "node scripts/check-navigation.mjs",
+    "check:root-redirect": "node scripts/check-root-redirect.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.5",
+    "@astrojs/starlight": "^0.42.8",
+    "astro": "^7.4.5",
+    "sharp": "^0.35.5"
+  },
+  "overrides": {
+    "devalue": "5",
+    "esbuild": "0.28",
+    "launch-editor": "2",
+    "postcss": "8",
+    "svgo": "4",
+    "vite": "8"
+  }
+}
