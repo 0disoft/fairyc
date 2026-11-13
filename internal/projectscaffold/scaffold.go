@@ -24,6 +24,8 @@ type FailureReason string
 const (
 	ReasonInvalidName       FailureReason = "invalid-name"
 	ReasonInvalidUID        FailureReason = "invalid-uid"
+	ReasonInvalidTemplate   FailureReason = "invalid-template"
+	ReasonWin32Identity     FailureReason = "win32-identity-too-long"
 	ReasonParentUnavailable FailureReason = "parent-unavailable"
 	ReasonTargetExists      FailureReason = "target-exists"
 	ReasonPermission        FailureReason = "permission-denied"
@@ -45,6 +47,10 @@ func (e *Error) Error() string {
 		return "package name must use portable lowercase kebab-case"
 	case ReasonInvalidUID:
 		return "package UID must use at least two lowercase dot-separated segments"
+	case ReasonInvalidTemplate:
+		return "template must be console or win32"
+	case ReasonWin32Identity:
+		return "win32 template requires a name of at most 127 ASCII bytes and UID of at most 255 ASCII bytes"
 	case ReasonParentUnavailable:
 		return "project parent directory is unavailable"
 	case ReasonTargetExists:
@@ -64,8 +70,9 @@ func (e *Error) Unwrap() error {
 
 // Spec is the complete caller-owned identity of one starter project.
 type Spec struct {
-	Name string
-	UID  string
+	Name     string
+	UID      string
+	Template string
 }
 
 // Validate rejects values that cannot be represented by manifest v1 or a single portable project
@@ -76,6 +83,12 @@ func Validate(spec Spec) error {
 	}
 	if !projectmanifest.ValidPackageUID(spec.UID) {
 		return &Error{Reason: ReasonInvalidUID}
+	}
+	if spec.Template != "" && spec.Template != "console" && spec.Template != "win32" {
+		return &Error{Reason: ReasonInvalidTemplate}
+	}
+	if spec.Template == "win32" && (len(spec.Name) > 127 || len(spec.UID) > 255) {
+		return &Error{Reason: ReasonWin32Identity}
 	}
 	return nil
 }
@@ -206,6 +219,15 @@ func Create(parentPath string, spec Spec) error {
 	if err := Validate(spec); err != nil {
 		return err
 	}
+	files := scaffoldFiles
+	directories := []string{"src", "tests"}
+	if spec.Template == "win32" {
+		var err error
+		files, directories, err = win32Files()
+		if err != nil {
+			return &Error{Reason: ReasonFilesystem, Path: "embedded win32 template", Cause: err}
+		}
+	}
 	parent, err := os.OpenRoot(parentPath)
 	if err != nil {
 		return &Error{Reason: ReasonParentUnavailable, Cause: err}
@@ -237,13 +259,13 @@ func Create(parentPath string, spec Spec) error {
 	}
 	defer closeProject()
 
-	for _, directory := range []string{"src", "tests"} {
-		if err := project.Mkdir(directory, 0o755); err != nil {
+	for _, directory := range directories {
+		if err := project.MkdirAll(filepath.FromSlash(directory), 0o755); err != nil {
 			closeErr := closeProject()
 			return rollback(parent, spec.Name, errors.Join(classifyCreateError(filepath.ToSlash(filepath.Join(spec.Name, directory)), err, false), closeErr))
 		}
 	}
-	for _, file := range scaffoldFiles {
+	for _, file := range files {
 		if err := writeExclusive(project, file.path, file.content(spec)); err != nil {
 			closeErr := closeProject()
 			return rollback(parent, spec.Name, errors.Join(classifyCreateError(filepath.ToSlash(filepath.Join(spec.Name, file.path)), err, false), closeErr))

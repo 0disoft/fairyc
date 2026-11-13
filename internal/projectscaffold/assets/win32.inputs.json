@@ -1,0 +1,33 @@
+{
+  "version": "0.1.0",
+  "language": "fairyc-language/20",
+  "bundleSha256": "dae4fcadf437de1c4f7a4ebac74d72e32b6990e82c09207a62170ea5f219d882",
+  "inputs": {
+    "examples/win32_hash/native/app.ico": "054792b6ded7801fa1a07391f73c4bf7cfc7b7e65f43b83e8d9b1cffd40ef694",
+    "examples/win32_minimal/native/ime.c": "856e17989bbdf3e9c6dfabe6248668e1208121ecde3e38836c4db6ae481953c0",
+    "examples/win32_minimal/native/ime.h": "4807c5a2761c501eb6d307ee3e157f331c43931bed01acee439fd4f06d5f8ba0",
+    "LICENSE": "3a0b32a74c46bdda3499ec9f39ab4f2a98fc2b239a1c1c1592086d26fdf76159",
+    "templates/win32_desktop/.gitignore": "d6e7778ecac0ed105b680bcfe8685e9f3127f7e89064b736686a6ab124612153",
+    "templates/win32_desktop/distribution/README.ko.txt": "dd1b0200fb631fd7cbf8e0496256744b75c936980b0420be2c670ee9d87f6233",
+    "templates/win32_desktop/fairy.windows.json": "75e1d01ca7b4160ae4a52bd75b86466f41c4da3683c0fe25f78ef0c1e398307d",
+    "templates/win32_desktop/native/profile.h": "ffb27ec5958b18a22763ac6b5b11d9ed12059520b8b19807e8993f13eae17523",
+    "templates/win32_desktop/native/window.c": "e53db8111dcc0f1284737d30738c7f5eb23286f28193fed1bf1084d068019119",
+    "templates/win32_desktop/package_release.py": "c094b3e5b39db5c346b61d746f588f663c32d858d5d309f46eebcb99fdc04451",
+    "templates/win32_desktop/prepare_resources.py": "cd8ac4d52cdc1c74e3c8636be2b803d23914651ecb7f5adb42e6e1a671418256",
+    "templates/win32_desktop/README.md": "97d24c0a710cb653a4e6285c53d6d2861c955cca1b723cb96628ba43b50a7c81",
+    "templates/win32_desktop/src/application.fy": "0b5565445eb2b15df94a5bc91a1bf54a6269b1b9f2da2142d07dca0f9e0b901a",
+    "templates/win32_desktop/src/domain.fy": "bb192b332ba828d64242eaec9316370903527b9101e257f320aa3d51b4207cee",
+    "templates/win32_desktop/src/main.fy": "13abff40723970d8e0ab29798f6eba0ecf4c1ae0bc8c54c8d237954770f7a1cf",
+    "templates/win32_desktop/src/ui.fy": "400379fd3f9fbd7aa2524d2c803a05a5eedd684d31bdb55512cf7715992b24e8",
+    "templates/win32_desktop/tests/domain.fy": "8d0f22c3354376176209071e0b9fd24de926f86c0ec3717930058fd62373fea1",
+    "templates/win32_desktop/verify_cli.py": "e11ceadd6d554f33141064434140fb98a9fbb62901ae143348bb779312b8bba5",
+    "tools/bundle_win32_starter.py": "be28ca2b18bf49a107b9d82f503429f63a5cdbee222ee28722bb536b36cee456",
+    "tools/new_win32_app.py": "0092a60f174471d81d74820db90a6fda8379f341a5f49ad5d8e82ae3f8a595e4",
+    "tools/win32_app/__init__.py": "79aca38925e9004c0d430d597f8e2ad2b0aae453a75e1d39edee3a3411715708",
+    "tools/win32_app/pe.py": "0e33c5d0bc9cc9b68148f5e4f6648f09f3acac6df9122c8268f5b7a131f48009",
+    "tools/win32_app/portable.py": "3cf019852a01faff7f9a6befe7597723beccf8561e811ffc1fab1cb23c41fbe7",
+    "tools/win32_app/README.md": "fae5345abb047910376aca4e1ed30c3613a0e5c48890aab6a79ca24b9a624afc",
+    "tools/win32_app/resources.py": "58323f195d26aca13d629f77fbd24ec96c1e9b12995f470e3cda27348d23e9d5",
+    "tools/win32_app/settings.py": "067a46b3f5620b9e3ef4eec43e531ffca1f3eef7ea837e3f0907602a22e3e776"
+  }
+}
