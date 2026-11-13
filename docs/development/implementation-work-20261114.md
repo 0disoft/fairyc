@@ -7,10 +7,11 @@ credential invention, external registry deployment or hosted CI is authorized.
 
 ## Execution order
 
-1. Reproduce the valid flat-Result generic helper-call invariant on current
-   source, isolate the first failing compiler layer, fix it and replay the
-   affected cache/invalidation controls. Go-reference success alone does not
-   establish Fairy candidate success.
+1. Recheck the flat-Result helper-call refusal on current source. The existing
+   forward-call receipt identifies the complete 68-instance helper fixture as
+   exceeding the unchanged 64-specialization limit, not a Result lowering bug.
+   Preserve that negative control, report its source limit accurately, and
+   replay forwarding/cache invalidation inside the admitted capacity.
 2. Reconcile candidate CLI/diagnostics with the Go additions: Win32 generation,
    resource preparation/local packaging and precise generic/closure diagnostics.
    Keep native transport separate from Fairy policy and preserve failure output.
@@ -34,5 +35,9 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
 
 ## Progress
 
-- 1: current-source reproduction in progress.
+- 1: current source reproduced: both producer profiles pass minimal/baseline
+  forwarding and reject the 68-instance fixture at phase 3 / stage 3 / 4503.
+  Source-stage classification now preserves E4503 and exit 3, with four
+  interpreter and four native diagnostic tests passing. Whole-CLI/cache
+  integration remains in progress; see `generic-limit-diagnostic-20261114.md`.
 - 2–6: pending, in the order above.

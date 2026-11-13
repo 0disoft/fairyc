@@ -3,6 +3,18 @@ import project_diagnostic_codes as diagnostics;
 import std::bytes as bytes;
 
 @test
+fn void generic_expansion_limits_are_source_diagnostics_at_the_owning_stage(){
+    assert(diagnostics::compiler_status(3,3,4503)==3);
+    assert(diagnostics::code(3,3,4503)==4503);
+    assert(diagnostics::summary(4503).len!=0);
+    assert(diagnostics::compiler_status(4,0,4503)==4);
+    assert(diagnostics::compiler_status(6,0,4503)==4);
+    assert(diagnostics::compiler_status(3,4,4503)==4);
+    assert(diagnostics::compiler_status(3,3,11)==4);
+    assert(diagnostics::compiler_status(3,4,4101)==3);
+}
+
+@test
 fn void overlapping_internal_statuses_do_not_become_resolution_diagnostics(){
     assert(diagnostics::code(1,0,2)==102);
     assert(diagnostics::code(3,2,5)==101);

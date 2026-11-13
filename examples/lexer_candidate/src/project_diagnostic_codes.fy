@@ -1,5 +1,13 @@
 module project_diagnostic_codes;
 
+// Generic discovery owns source expansion limits. The same raw code from
+// linking, restoration or publication must retain its invariant classification.
+pub fn i32 compiler_status(u32 phase,u32 stage,u32 raw){
+    if(phase==3 && stage==3 && raw==4503){return 3;}
+    if(phase==4 || phase==6 || phase==5 && raw==9 || raw==10 || raw==11 || raw==12 || raw==1001 || raw==1002 || raw==1003 || raw==4503){return 4;}
+    return 3;
+}
+
 // Catalog/name lookup codes overlap internal capacity and type statuses.
 // Translate them only at the phase that owns their resolution meaning.
 pub fn u32 code(u32 phase,u32 stage,u32 raw){
