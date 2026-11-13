@@ -44,6 +44,13 @@ func TestWin32BundleTracksCanonicalSources(t *testing.T) {
 		if hex.EncodeToString(digest[:]) != want {
 			t.Errorf("embedded starter input %s changed; run go generate ./internal/projectscaffold", source)
 		}
+		if strings.HasPrefix(source, "modules/win32_jobs/src/") || strings.HasPrefix(source, "modules/win32_jobs/native/") || strings.HasPrefix(source, "modules/win32_jobs/tests/") {
+			snapshot := filepath.Join("../../examples/win32_hash", filepath.FromSlash(strings.TrimPrefix(source, "modules/win32_jobs/")))
+			copied, err := os.ReadFile(snapshot)
+			if err != nil || !bytes.Equal(bytes.ReplaceAll(copied, []byte("\r\n"), []byte("\n")), data) {
+				t.Errorf("Hash worker snapshot %s is stale; run python -B tools/sync_win32_jobs.py", source)
+			}
+		}
 	}
 	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app", "modules/win32_jobs"} {
 		err := filepath.WalkDir(filepath.Join("../..", filepath.FromSlash(directory)), func(name string, entry fs.DirEntry, err error) error {

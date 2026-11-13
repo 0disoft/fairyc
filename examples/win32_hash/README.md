@@ -507,3 +507,12 @@ controls, Fairy C domain/event/layout code, a headless CLI and portable packagin
 Default console creation is unchanged; the repository Python generator remains
 available for initial branding options. Fairy Hash remains the richer
 reference for asynchronous file I/O, hashing, progress and safe publication.
+
+Reader/writer transport, elapsed/percent formatting and the file-job lifecycle
+now originate in [the shared Win32 jobs source bundle](../../modules/win32_jobs/README.md).
+The checked-in snapshots keep this example standalone; `tools/sync_win32_jobs.py --check`
+detects drift. GUI hashing uses the shared `jobs::poll` controller and consumes
+owned copied chunks before presenting progress. Native reads may read ahead;
+final source validation remains required before a usable hash. Safe-save policy
+stays in `saving.fy`, over the shared writer transport. These GUI changes were
+compiled; only headless jobs/native transport and existing CLI cases were run.

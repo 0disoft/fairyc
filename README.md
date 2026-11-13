@@ -107,6 +107,10 @@ The generated app shares its product function between GUI and `--process TEXT`
 CLI, and packages an unsigned portable ZIP after CLI/resource checks. Default
 `new` and `--template console` retain the existing console starter.
 See [desktop tooling](tools/win32_app/README.md) for configuration and limits.
+The starter also includes reusable [async I/O/job modules](modules/win32_jobs/README.md),
+a GUI file-read example with progress/Cancel, and a headless
+`--scan FILE [--cancel-after BYTES]` mode that emits JSON progress. Its worker
+owns native memory; Fairy C consumes copied chunks and controls completion.
 
 ### Project status and reporting issues
 

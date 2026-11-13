@@ -79,6 +79,17 @@ int wmain(int argc, WCHAR **argv) {
     deadline = GetTickCount64()+3000;
     while (InterlockedCompareExchange(&live_readers, 0, 0) != 0 && GetTickCount64() < deadline) { Sleep(1); }
     CHECK(InterlockedCompareExchange(&live_readers, 0, 0) == 0);
-    printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0,\"overwriteDenied\":true,\"sameSizeMetadataChange\":true}\n", total, elapsed);
+    // A cancelled worker must not poison the next job in the same process.
+    length = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, argv[1], -1, (char *)path, sizeof(path), NULL, NULL);
+    CHECK(length > 0 && job_reader_available());
+    value = job_reader_open(path, (size_t)length-1);
+    CHECK(value && WaitForSingleObject(value->ready,3000) == WAIT_OBJECT_0 && job_reader_next(value) == 0);
+    CHECK(WaitForSingleObject(value->ready,3000) == WAIT_OBJECT_0 && job_reader_copy(value,output,sizeof(output)) == 0);
+    CHECK(output[0] == 0 && output[255] == 255);
+    job_reader_drop(value);
+    deadline = GetTickCount64()+3000;
+    while (InterlockedCompareExchange(&live_readers,0,0) && GetTickCount64()<deadline) { Sleep(1); }
+    CHECK(!InterlockedCompareExchange(&live_readers,0,0));
+    printf("{\"ok\":true,\"verification\":\"native-reader-transport\",\"bytes\":%zu,\"actualPendingRead\":true,\"cancelMs\":%llu,\"liveReaders\":0,\"reusedAfterCancel\":true,\"overwriteDenied\":true,\"sameSizeMetadataChange\":true}\n", total, elapsed);
     return 0;
 }

@@ -49,6 +49,12 @@ python -B package_release.py --compiler C:\tools\fairyc.exe
 The source template is `templates/win32_desktop/`. The generator bundles the
 shared Python package, a snapshot of the existing minimal-example IME transport,
 an editable app configuration, the default multi-resolution icon and license.
+It also bundles `modules/win32_jobs`: copied-buffer async reader/writer transport,
+Fairy job/progress/cancel policy and a pure policy test. The GUI file-read example
+and `--scan FILE [--cancel-after BYTES]` CLI share that controller; packaging runs
+14 app CLI cases including 9 async cases. See the generated README for lifecycle,
+retirement bounds and writer commit responsibilities. No Fairy callback runs on
+a foreign worker thread; product chunk processing stays on the Fairy caller.
 It refuses existing destinations and publishes only after settings/resources
 are prepared. Generated projects own their snapshots; this is not an updater.
 The CLI bundle is refreshed from these same canonical inputs with
@@ -70,3 +76,5 @@ The CLI verifier copies only the compiler to an external temporary directory,
 creates with empty PATH, verifies invalid/existing-target rejection and console
 compatibility, then checks/builds/packages the generated app with normal build
 tools. It runs only the app's CLI and resource inspection.
+Canonical Hash worker snapshots are checked/refreshed using
+`python -B tools/sync_win32_jobs.py --check` / `python -B tools/sync_win32_jobs.py`.

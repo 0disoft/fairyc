@@ -103,6 +103,11 @@ MSVC/Windows SDK, and provided packaging scripts need Python 3.11+. New
 projects own their snapshot; creation never updates an existing app. Canonical
 source files and the deterministic embed refresh command are documented in
 ADR 0553; unit checks reject stale embedded inputs/defaults.
+The current Win32 snapshot also includes reusable asynchronous reader/writer
+transport, Fairy job/progress/cancel policy and a headless file-read example.
+These are starter application sources, not compiler/SDK runtime APIs or new
+compiler options. Its app CLI documents `--scan FILE [--cancel-after BYTES]`
+separately; creation still performs no native I/O job or GUI execution.
 
 ## Experimental explicit remote package preparation
 

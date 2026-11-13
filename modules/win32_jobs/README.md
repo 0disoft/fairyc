@@ -7,6 +7,8 @@ thread. Native readers/writers copy paths/data and keep their storage alive unti
 OS work completes. No callback or HWND is retained by a worker.
 
 `reader.fy` / `native/reader.c` expose bounded 64 KiB reads and protected metadata.
+`protect`/`sample` are synchronous CLI guard helpers; do not use them on a GUI
+thread when the filesystem may be slow. The asynchronous Reader is separate.
 `jobs.fy` sequences open/chunks/EOF/final-name validation, counts delivered bytes,
 keeps incomplete work below 100%, and makes completed/cancelled/failed states
 terminal. Call `poll`, consume a returned chunk in Fairy, update your UI, and
