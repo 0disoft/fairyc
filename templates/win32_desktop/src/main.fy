@@ -2,6 +2,7 @@ module main;
 import application as app;
 import domain as domain;
 import scan_cli as scan_cli;
+import save_cli as save_cli;
 import std::num as num;
 import std::process as process;
 import std::bytes as bytes;
@@ -9,9 +10,11 @@ import std::io as io;
 @effects(console,filesystem,clock)
 fn i32 main(){
     if(process::arg_count()==1){return app::run();}
-    let argc=process::arg_count();if(argc!=3 && argc!=5){return 1;}
+    let argc=process::arg_count();if(argc<3){return 1;}
     var u8[32] mode=[0;32];let count=switch(process::arg(1,ref mut mode)){case .ok(v):{v}case .err(_):{return 1;}};
     let ref u8[] flag=ref mode;
+    if(bytes::equal(flag[..count],b"--save")){return save_cli::run();}
+    if(argc!=3 && argc!=5){return 1;}
     if(bytes::equal(flag[..count],b"--scan")){
         var bytes::Buffer path=bytes::empty();if(!bytes::resize_zeroed(ref mut path,131072).is_ok){return 1;}
         let length=switch(process::arg(2,bytes::view_mut(ref mut path))){case .ok(v):{v}case .err(_):{return 1;}};

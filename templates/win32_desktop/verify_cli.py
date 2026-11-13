@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import tomllib
+from verify_save import verify as verify_saves
 ROOT=Path(__file__).resolve().parent
 
 def verify(image):
@@ -44,7 +45,8 @@ def verify(image):
         command=subprocess.run([str(image),'--scan',str(source),'--cancel-after','-1'],capture_output=True,timeout=15)
         if command.returncode!=1 or command.stdout: raise RuntimeError('invalid cancel threshold accepted')
         count+=1
-    return dict(ok=True,cliCases=count,asyncCases=9,guiLaunched=False,inputInjected=False)
+    saved=verify_saves(image)
+    return dict(ok=True,cliCases=count+saved,asyncCases=9,saveCases=saved,guiLaunched=False,inputInjected=False)
 
 if __name__=='__main__':
     name=tomllib.loads((ROOT/'fairy.toml').read_text(encoding='utf-8'))['package']['name']

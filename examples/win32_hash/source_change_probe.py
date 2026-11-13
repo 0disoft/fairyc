@@ -163,6 +163,6 @@ def verify_cli(image, root, prefix):
         out, err = process.communicate(timeout=5)
         if process.returncode != 1 or err or json.loads(out) != dict(ok=False, errorCode=11):
             raise RuntimeError(f'CLI emitted a digest after source change: {out!r} {err!r}')
-        if target.read_bytes() != b'previous report' or list(root.glob('*.fairy-hash-*.tmp')):
+        if target.read_bytes() != b'previous report' or list(root.glob('*.fairy-save-*.tmp')):
             raise RuntimeError('CLI source change altered an existing report/left temporaries')
     return dict(case='cli-source-change', errorCode=11, overwriteDenied=True, digestNotEmitted=True, oldReportPreserved=True)

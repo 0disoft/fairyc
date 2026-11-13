@@ -134,19 +134,19 @@ static DWORD WINAPI writer_cancel(void *context) {
     writer_release(value); return 0;
 }
 void *job_writer_open(const uint8_t *target, size_t length, const uint8_t *data, size_t count) {
-    if (!data || !count || count > 1048576) { return NULL; }
+    if ((!data && count) || count > 1048576) { return NULL; }
     if (InterlockedIncrement(&live_writers) != 1) { InterlockedDecrement(&live_writers); return NULL; }
     writer *value = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*value));
     if (!value) { InterlockedDecrement(&live_writers); return NULL; }
     value->references = 1; value->file = INVALID_HANDLE_VALUE;
     value->target = writer_path(target, length); value->length = count;
-    value->data = HeapAlloc(GetProcessHeap(), 0, count);
+    value->data = HeapAlloc(GetProcessHeap(), 0, count ? count : 1);
     value->request = CreateEventW(NULL, FALSE, FALSE, NULL);
     value->ready = CreateEventW(NULL, TRUE, TRUE, NULL);
     value->stop = CreateEventW(NULL, TRUE, FALSE, NULL);
     value->done = CreateEventW(NULL, TRUE, FALSE, NULL);
     if (!value->target || !value->data || !value->request || !value->ready || !value->stop || !value->done) { writer_release(value); return NULL; }
-    memcpy(value->data, data, count); value->result.phase = 1;
+    if (count) { memcpy(value->data, data, count); } value->result.phase = 1;
     value->references = 2; value->thread = CreateThread(NULL, 0, writer_run, value, 0, NULL);
     if (!value->thread) { value->references = 1; writer_release(value); return NULL; }
     InterlockedIncrement(&value->references);

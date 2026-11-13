@@ -15,3 +15,5 @@ CLI (PowerShell): & ".\@EXECUTABLE@" --process "내용"
 
 배포 파일: @EXECUTABLE@, README.txt, LICENSE.txt, SHA256SUMS.txt
 코드서명은 적용되지 않았습니다. 체크섬은 배포자 신원을 인증하지 않습니다.
+
+저장(Alt+S): 표시된 결과를 UTF-8로 저장합니다. 저장 확정 전 취소는 기존 결과를 유지하며, 확정 후에는 저장과 정리가 끝날 때까지 기다립니다.

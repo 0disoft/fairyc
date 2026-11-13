@@ -44,7 +44,7 @@ verified completion, 2 is cancellation, 1 is failure. Cancel threshold is checke
 at chunk boundaries (up to 64 KiB), and zero cancels before waiting for open/read.
 Active/cancelled work stays below 100%; an empty file reaches 100% only when
 verified. `--process TEXT` remains the original text example. `verify_cli.py`
-checks 14 cases, including 9 async/cancellation/error cases, without a window.
+checks 26 cases, including 9 read and 12 save cases, without a window.
 
 Shared sources `jobs.fy`, `reader.fy`, `writer.fy`, `progress.fy` and native
 reader/writer transport are copied from `modules/win32_jobs` during generation.
@@ -77,3 +77,20 @@ review licensing and replace the example product text before publishing.
 The portable ZIP includes only the EXE, guide, license and checksums. Packaging
 checks the actual extracted CLI and PE resources, keeps version unchanged and
 does not sign, publish, upload or automate desktop input.
+
+The Save button (Alt+S) saves the displayed UTF-8 result using the shared
+`publication.fy` policy and keeps pumping while writing/cleaning. Results from
+a read protect that input's file identity against overwrite, including hard
+links; a new text transformation clears this input identity. CLI equivalents:
+
+```powershell
+.\build\@PACKAGE@.exe --save C:\data\result.txt "한글 result"
+.\build\@PACKAGE@.exe --save C:\data\result.txt "discard" --cancel-before-commit
+.\build\@PACKAGE@.exe --save C:\data\result.txt "report" --protect-source C:\data\input.bin
+```
+
+Save exits 0/2/1 for success/cancel/error and emits `{ok,errorCode}` JSON.
+The source guard option is CLI-only and synchronous; GUI source protection
+comes from its asynchronous read. Save waits for owned temporary cleanup even
+on cancellation/Close; after authorization it waits for publication to finish.
+GUI dialog/focus behavior remains untested by the CLI checks.

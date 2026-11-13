@@ -4,6 +4,8 @@ import reader as reader;
 import progress as progress;
 import domain as domain;
 import ui as ui;
+import publication as publication;
+import std::fs as fs;
 import std::bytes as bytes;
 
 @effects(clock)
@@ -17,7 +19,7 @@ fn bool present(ptr mut void window,ref jobs::State state){
         ui::text(window,105,bytes::view(ref out)) && ui::position(window,jobs::percent(state));
 }
 @effects(filesystem,clock)
-pub fn Result<i32,u32> run(ref u8[] path,ptr mut void window){
+pub fn Result<i32,u32> run(ref u8[] path,ptr mut void window,ref mut publication::State protection){
     let input=switch(reader::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
     var jobs::State state=jobs::begin(reader::ticks());var usize displayed=state.started;var usize lines=0;
     var bytes::Buffer buffer=bytes::empty();if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
@@ -41,5 +43,6 @@ pub fn Result<i32,u32> run(ref u8[] path,ptr mut void window){
     if(!bytes::append(ref mut out,b"읽은 크기: ").is_ok || !bytes::append_usize(ref mut out,state.done).is_ok ||
         !bytes::append(ref mut out,b" 바이트\r\nLF 줄바꿈: ").is_ok || !bytes::append_usize(ref mut out,lines).is_ok ||
         !ui::text(window,104,bytes::view(ref out)) || !ui::announce(window)){return .err(5);}
+    protection.identity=fs::FileId{.volume_low=state.first.volume_low,.volume_high=state.first.volume_high,.file_low_0=state.first.file_low_0,.file_low_1=state.first.file_low_1,.file_high_0=state.first.file_high_0,.file_high_1=state.first.file_high_1};protection.protect=true;
     return .ok(0);
 }

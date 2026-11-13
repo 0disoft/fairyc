@@ -212,16 +212,18 @@ int32_t desktop_move(void *window,uint32_t id,int32_t x,int32_t y,int32_t width,
 int32_t desktop_redraw(void *window) {
     return (HWND)window==state.window && RedrawWindow((HWND)window,NULL,NULL,RDW_INVALIDATE|RDW_ERASE|RDW_ALLCHILDREN|RDW_UPDATENOW)?0:1;
 }
-size_t desktop_choose(void *window,uint8_t *output,size_t capacity) {
+static size_t choose_file(void *window,uint8_t *output,size_t capacity,BOOL saving) {
     if ((HWND)window!=state.window || !output || !capacity || capacity>131072) { return 131073; }
     WCHAR path[32768]={0};OPENFILENAMEW dialog={0};dialog.lStructSize=sizeof(dialog);dialog.hwndOwner=(HWND)window;
     dialog.lpstrFile=path;dialog.nMaxFile=ARRAYSIZE(path);dialog.lpstrFilter=L"All files\0*.*\0";
-    dialog.Flags=OFN_EXPLORER|OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR|OFN_DONTADDTORECENT;
-    BOOL selected=GetOpenFileNameW(&dialog);DWORD error=selected?0:CommDlgExtendedError();
+    dialog.Flags=OFN_EXPLORER|OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR|OFN_DONTADDTORECENT|(saving?OFN_OVERWRITEPROMPT:OFN_FILEMUSTEXIST);
+    BOOL selected=saving?GetSaveFileNameW(&dialog):GetOpenFileNameW(&dialog);DWORD error=selected?0:CommDlgExtendedError();
     if (desktop_redraw(window)) { return 131073; } if (!selected) { return error?131073:0; }
     int count=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,path,-1,(char *)output,(int)capacity,NULL,NULL);
     return count>0?(size_t)count-1:131073;
 }
+size_t desktop_choose(void *window,uint8_t *output,size_t capacity) { return choose_file(window,output,capacity,FALSE); }
+size_t desktop_choose_save(void *window,uint8_t *output,size_t capacity) { return choose_file(window,output,capacity,TRUE); }
 int32_t desktop_focus_next(void *window,uint32_t reverse) {
     if ((HWND)window!=state.window || reverse>1) { return 1; }
     HWND next=GetNextDlgTabItem((HWND)window,GetFocus(),reverse!=0); if (!next) { return 1; }

@@ -52,7 +52,7 @@ an editable app configuration, the default multi-resolution icon and license.
 It also bundles `modules/win32_jobs`: copied-buffer async reader/writer transport,
 Fairy job/progress/cancel policy and a pure policy test. The GUI file-read example
 and `--scan FILE [--cancel-after BYTES]` CLI share that controller; packaging runs
-14 app CLI cases including 9 async cases. See the generated README for lifecycle,
+26 app CLI cases including 9 read and 12 save cases. See the generated README for lifecycle,
 retirement bounds and writer commit responsibilities. No Fairy callback runs on
 a foreign worker thread; product chunk processing stays on the Fairy caller.
 It refuses existing destinations and publishes only after settings/resources

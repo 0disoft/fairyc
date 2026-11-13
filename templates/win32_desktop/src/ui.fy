@@ -13,6 +13,7 @@ unsafe extern C fn i32 desktop_enable(ptr mut void window,u32 id,u32 enabled);
 unsafe extern C fn i32 desktop_focus_to(ptr mut void window,u32 id);
 unsafe extern C fn i32 desktop_progress(ptr mut void window,usize percent);
 unsafe extern C fn usize desktop_choose(ptr mut void window,ptr mut u8 output,usize capacity);
+unsafe extern C fn usize desktop_choose_save(ptr mut void window,ptr mut u8 output,usize capacity);
 unsafe extern C fn i32 desktop_field(ptr mut void window,u32 axis);
 unsafe extern C fn i32 desktop_extent(ptr mut void window,u32 axis);
 unsafe extern C fn i32 desktop_apply_dpi(ptr mut void window);
@@ -31,11 +32,15 @@ pub fn usize read(ptr mut void window,ref mut u8[] output){return unsafe{desktop
 pub fn i32 poll(ptr mut void window){return unsafe{desktop_poll(window)};}
 pub fn i32 poll_now(ptr mut void window){return unsafe{desktop_poll_now(window)};}
 pub fn usize choose(ptr mut void window,ref mut u8[] output){return unsafe{desktop_choose(window,output as ptr mut u8,output.len)};}
+pub fn usize choose_save(ptr mut void window,ref mut u8[] output){return unsafe{desktop_choose_save(window,output as ptr mut u8,output.len)};}
+pub fn usize result(ptr mut void window,ref mut u8[] output){return unsafe{desktop_read(window,104,output as ptr mut u8,output.len)};}
+pub fn bool cancel_enabled(ptr mut void window,bool active){return unsafe{desktop_enable(window,107,if(active){1}else{0})}==0;}
 pub fn bool position(ptr mut void window,usize percent){return percent<=100 && unsafe{desktop_progress(window,percent)}==0;}
 pub fn bool working(ptr mut void window,bool active){
     return (!active || unsafe{desktop_live(window,105,0,0)}==0) && unsafe{desktop_enable(window,102,if(active){0}else{1})}==0 &&
         unsafe{desktop_enable(window,103,if(active){0}else{1})}==0 && unsafe{desktop_enable(window,106,if(active){0}else{1})}==0 &&
-        unsafe{desktop_enable(window,107,if(active){1}else{0})}==0 && unsafe{desktop_focus_to(window,if(active){107}else{102})}==0;
+        unsafe{desktop_enable(window,109,if(active){0}else{1})}==0 &&
+        cancel_enabled(window,active) && unsafe{desktop_focus_to(window,if(active){107}else{102})}==0;
 }
 pub fn i32 field(ptr mut void window,u32 axis){return unsafe{desktop_field(window,axis)};}
 pub fn bool focus(ptr mut void window,bool reverse){return unsafe{desktop_focus_next(window,if(reverse){1}else{0})}==0;}
@@ -55,14 +60,15 @@ pub fn bool layout(ptr mut void window,i32 event){
         unsafe{desktop_move(window,104,x+pad,y+scale(102,dpi),w-pad*2,scale(112,dpi))}==0 &&
         unsafe{desktop_move(window,108,x+pad,y+scale(220,dpi),w-pad*2,scale(5,dpi))}==0 &&
         unsafe{desktop_move(window,106,x+pad,y+scale(238,dpi),scale(120,dpi),scale(32,dpi))}==0 &&
+        unsafe{desktop_move(window,109,x+pad+scale(130,dpi),y+scale(238,dpi),scale(100,dpi),scale(32,dpi))}==0 &&
         unsafe{desktop_move(window,107,x+w-pad-button,y+scale(238,dpi),button,scale(32,dpi))}==0 &&
         unsafe{desktop_move(window,105,x+pad,y+scale(282,dpi),w-pad*2,scale(30,dpi))}==0 && unsafe{desktop_redraw(window)}==0;
 }
 pub fn bool initialize(ptr mut void window){
     return unsafe{desktop_control(window,3,101)}==0 && unsafe{desktop_control(window,1,102)}==0 &&
         unsafe{desktop_control(window,2,103)}==0 && unsafe{desktop_control(window,4,104)}==0 && unsafe{desktop_control(window,3,105)}==0 &&
-        unsafe{desktop_control(window,2,106)}==0 && unsafe{desktop_control(window,2,107)}==0 && unsafe{desktop_control(window,5,108)}==0 &&
+        unsafe{desktop_control(window,2,106)}==0 && unsafe{desktop_control(window,2,107)}==0 && unsafe{desktop_control(window,5,108)}==0 && unsafe{desktop_control(window,2,109)}==0 &&
         text(window,101,b"입력(&I)") && text(window,103,b"실행(&R)") && text(window,105,b"준비") &&
-        text(window,106,b"파일 읽기(&O)") && text(window,107,b"취소(&X)") && unsafe{desktop_enable(window,107,0)}==0 &&
+        text(window,106,b"파일 읽기(&O)") && text(window,107,b"취소(&X)") && text(window,109,b"저장(&S)") && unsafe{desktop_enable(window,107,0)}==0 &&
         name(window,102,b"입력 내용") && name(window,104,b"실행 결과") && name(window,105,b"작업 상태") && layout(window,0);
 }

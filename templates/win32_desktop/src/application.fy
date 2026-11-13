@@ -2,6 +2,8 @@ module application;
 import domain as domain;
 import ui as ui;
 import file_job as file_job;
+import save_job as save_job;
+import publication as publication;
 import std::bytes as bytes;
 fn bool execute(ptr mut void window){
     var u8[2048] input=[0;2048];let count=ui::read(window,ref mut input);if(count>2048){return false;}
@@ -10,12 +12,13 @@ fn bool execute(ptr mut void window){
         ui::text(window,105,b"완료") && ui::announce(window);
 }
 @effects(filesystem,clock)
-fn bool read_file(ptr mut void window){
+fn bool read_file(ptr mut void window,ref mut publication::State protection){
     var bytes::Buffer path=bytes::empty();if(!bytes::resize_zeroed(ref mut path,131072).is_ok){return false;}
     let count=ui::choose(window,bytes::view_mut(ref mut path));if(count==0){return true;}
     if(count>=131072){return ui::text(window,105,b"파일을 선택할 수 없어요.");}
     if(!ui::working(window,true) || !ui::text(window,104,b"")){return false;}
-    switch(file_job::run(bytes::view(ref path)[..count],window)){
+    protection.protect=false;
+    switch(file_job::run(bytes::view(ref path)[..count],window,protection)){
         case .ok(_):{}
         case .err(code):{
             if(!ui::text(window,105,if(code==8){b"취소됨"}else{if(code==9){b"이전 작업이 아직 끝나지 않았어요."}else{b"파일을 읽을 수 없어요."}}) || !ui::announce(window)){return false;}
@@ -24,24 +27,37 @@ fn bool read_file(ptr mut void window){
     return ui::working(window,false);
 }
 @effects(filesystem,clock)
+fn bool save_result(ptr mut void window,publication::State protection){
+    var bytes::Buffer path=bytes::empty();if(!bytes::resize_zeroed(ref mut path,131072).is_ok){return false;}
+    let count=ui::choose_save(window,bytes::view_mut(ref mut path));if(count==0){return true;}if(count>=131072){return false;}
+    var u8[4096] data=[0;4096];let length=ui::result(window,ref mut data);if(length>4096){return false;}
+    let ref u8[] view=ref data;
+    if(!ui::working(window,true) || !ui::text(window,105,b"저장 중…")){return false;}
+    var u32 error=0;
+    switch(save_job::run(bytes::view(ref path)[..count],view[..length],window,true,false,protection)){case .ok(_):{}case .err(e):{error=e;}};
+    return ui::working(window,false) && ui::text(window,105,if(error==0){b"저장 완료"}else{if(error==8){b"저장 취소됨"}else{if(error==7){b"원본 파일에는 덮어쓸 수 없어요."}else{b"저장할 수 없어요."}}}) && ui::announce(window);
+}
+@effects(filesystem,clock)
 pub fn i32 run(){
     let window=ui::open();if(window==null){return 1;}
     if(!ui::initialize(window)){ui::destroy(window);return 1;}ui::show(window);
-    var i32 result=0;
+    var i32 result=0;var publication::State protection=publication::unprotected();
     while(true){
         let event=ui::poll(window);if(event==3){break;}
         if((event==4 || event==5) && !ui::layout(window,event)){result=1;break;}
         var bool apply=event==1 && ui::field(window,0)==103;
         var bool file=event==1 && ui::field(window,0)==106;
+        var bool save=event==1 && ui::field(window,0)==109;
         if(event==6){
             let action=domain::key_action(ui::field(window,1),ui::field(window,2));
             if(action==4){break;}
             if((action==2 || action==3) && !ui::focus(window,action==3)){result=1;break;}
-            if(action==1){if(ui::field(window,3)==106){file=true;}else{apply=true;}}
+            if(action==1){if(ui::field(window,3)==106){file=true;}else{if(ui::field(window,3)==109){save=true;}else{apply=true;}}}
         }
         // EN_CHANGE (event 2) is available for your validation/preview policy.
-        if(apply && !execute(window)){result=1;break;}
-        if(file && !read_file(window)){result=1;break;}
+        if(apply){if(!execute(window)){result=1;break;}protection=publication::unprotected();}
+        if(file && !read_file(window,ref mut protection)){result=1;break;}
+        if(save && !save_result(window,protection)){result=1;break;}
     }
     ui::destroy(window);return result;
 }

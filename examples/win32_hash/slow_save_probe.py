@@ -59,7 +59,7 @@ def verify(d, mode):
             raise RuntimeError('pending/failed save changed existing data')
 
     def clean(target):
-        if list(d.root.glob(target.name+'.fairy-hash-*.tmp')):
+        if list(d.root.glob(target.name+'.fairy-save-*.tmp')):
             raise RuntimeError('owned save temporary survived completion')
         if d.text(d.child(d.main, 203)).replace('\r\n', '') != digest:
             raise RuntimeError('save changed the completed hash')
@@ -101,7 +101,7 @@ def verify(d, mode):
                 unchanged(target)
             elif json.loads(target.read_bytes()) != expected:
                 raise RuntimeError('Close during commit lost complete report')
-            if list(d.root.glob(target.name+'.fairy-hash-*.tmp')):
+            if list(d.root.glob(target.name+'.fairy-save-*.tmp')):
                 raise RuntimeError('Close leaked an owned temporary')
             rows.append(dict(case=mode, closeIncludingHeldGateMs=elapsed, resizeMs=resize_ms, deferredClose=True, temporaryRemoved=True))
         else:
@@ -145,7 +145,7 @@ def verify(d, mode):
                 raise RuntimeError('late hard-link change damaged source')
             rows.append(dict(case='source-alias-rechecked-before-commit', sourceProtected=True))
             target = d.root/'collision.json'; target.write_bytes(b'old report')
-            foreign = d.root/(target.name+'.fairy-hash-0.tmp'); foreign.write_bytes(b'foreign')
+            foreign = d.root/(target.name+'.fairy-save-0.tmp'); foreign.write_bytes(b'foreign')
             d.choose(204, target, overwrite=True); idle('✓ 결과 저장 완료')
             if foreign.read_bytes() != b'foreign' or json.loads(target.read_bytes()) != expected:
                 raise RuntimeError('exclusive save temporary collision damaged data')

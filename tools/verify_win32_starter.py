@@ -22,7 +22,7 @@ def verify(compiler):
         command([compiler,'check'],project)
         command([compiler,'test','--locked'],project)
         packaged=json.loads(command([sys.executable,'-B','package_release.py','--compiler',compiler],project))
-        if not packaged['ok'] or packaged['cliCases']!=14 or packaged['asyncCases']!=9 or packaged['resources']['windowTitle']!='검증 "도구" Ω':
+        if not packaged['ok'] or packaged['cliCases']!=26 or packaged['asyncCases']!=9 or packaged['saveCases']!=12 or packaged['resources']['windowTitle']!='검증 "도구" Ω':
             raise RuntimeError('standalone CLI/package/title verification incomplete')
         if packaged['resources']['strings']['CompanyName']!='': raise RuntimeError('starter invented a publisher')
         original={str(p.relative_to(project)):p.read_bytes() for p in project.rglob('*') if p.is_file()}
@@ -40,7 +40,7 @@ def verify(compiler):
             failed=subprocess.run([sys.executable,'-B',str(generator),str(invalid),*options],cwd=parent,capture_output=True,timeout=30)
             if failed.returncode!=1 or json.loads(failed.stdout)['ok'] or invalid.exists(): raise RuntimeError('invalid generation published a project')
             rejected+=1
-        return dict(ok=True,verification='standalone-win32-starter',cliCases=14,asyncCases=9,rejectedCreations=rejected,
+        return dict(ok=True,verification='standalone-win32-starter',cliCases=26,asyncCases=9,saveCases=12,rejectedCreations=rejected,
             purePolicyTestPassed=True,independentBuild=True,existingProjectPreserved=True,
             exeBytes=packaged['exeBytes'],zipBytes=packaged['zipBytes'],resources=packaged['resources'],
             guiLaunched=False,inputInjected=False,published=False)

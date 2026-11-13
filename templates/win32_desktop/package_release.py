@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parent
 
 def checks(image):
     result=verify(image)
-    return dict(cliCases=result['cliCases'],asyncCases=result['asyncCases'])
+    return dict(cliCases=result['cliCases'],asyncCases=result['asyncCases'],saveCases=result['saveCases'])
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
