@@ -19,7 +19,9 @@ import (
 	"github.com/0disoft/fairyc/internal/cruntime"
 )
 
-func TestCandidateInlineLocalsPipeline(t *testing.T) {
+func TestCandidateInlineLocalsPipeline(t *testing.T)   { runCandidateInlineLocalsPipeline(t, false) }
+func TestCandidateInlineMutationPipeline(t *testing.T) { runCandidateInlineLocalsPipeline(t, true) }
+func runCandidateInlineLocalsPipeline(t *testing.T, mutation bool) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private compiler-host replay currently requires Windows AMD64; Linux deferred")
 	}
@@ -38,6 +40,14 @@ func TestCandidateInlineLocalsPipeline(t *testing.T) {
 		"return -2147483648;", "let i32 minimum=-2147483648;return minimum;",
 		"return a/b;", "let i32 unused=10/b;let i32 numerator=a;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;",
 	).Replace(string(data)))
+	if mutation {
+		data = []byte(strings.NewReplacer(
+			"let i32 left=a*1000+b*100;let i32 right=c*10+d;return left+right;", "var i32 left=a*1000+b*100;let i32 right=c*10+d;left=left+right;return left;",
+			"let i32 added=x+2;let doubled=added*2;return doubled/2;", "var i32 added=x;let before=added;added=before+2;let copied=added;added=copied*2;return added/2;",
+			"let i32 minimum=-2147483648;return minimum;", "var i32 minimum=0;minimum=-2147483648;return minimum;",
+			"let i32 unused=10/b;let i32 numerator=a;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;", "var i32 numerator=a;let i32 unused=10/b;numerator=numerator;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;",
+		).Replace(string(data)))
+	}
 	program := strings.Replace(string(data), "module tests::module_inline_pipeline;", "module main;", 1)
 	// Emit three independently consumable target packets from one compiler image.
 	// The target traps execute unused initializers before the returned expression.
@@ -172,7 +182,7 @@ fn void forged_inline_rejects(ref ir::Body b,ref clean::Program p,usize frame){
         var v::Vec<ir::Statement> statements=v::empty<ir::Statement>();i=0;
         while(i<ir::statement_count(b)){var s=ir::statement_at(b,i);if(mode==3 && s.value.kind==2){s.value.kind=4;}assert(v::push<ir::Statement>(ref mut statements,s).is_ok);i+=1;}
         var v::Vec<values::Local> locals=v::empty<values::Local>();i=1;
-        while(i<=ir::local_count(b)){var l=ir::local_at(b,i);if(i==2){if(mode==0){l.kind=3;}if(mode==1){l.initializer=ir::local_at(b,3).initializer;}}assert(v::push<values::Local>(ref mut locals,l).is_ok);i+=1;}
+        while(i<=ir::local_count(b)){var l=ir::local_at(b,i);if(i==2){if(mode==0){l.kind=if(l.kind==2){3}else{2};}if(mode==1){l.initializer=ir::local_at(b,3).initializer;}}assert(v::push<values::Local>(ref mut locals,l).is_ok);i+=1;}
         let text=switch(bytes::copy(ir::text_view(b))){case .ok(p):{p}case .err(_):{assert(false);return;}};
         let forged=ir::mark_inline(ir::assemble_body_regions(ir::body(b),ir::source_bytes(b),ir::start(b),ir::end(b),nodes,statements,locals,v::empty<values::Invocation>(),v::empty<values::Argument>(),v::empty<regions::Scope>(),v::empty<regions::Placement>(),v::empty<regions::Exit>(),text),ir::inline_hash(b));
         assert(inline_proof::check(ref forged,p,frame)!=0);mode+=1;

@@ -17,6 +17,7 @@ import (
 func TestCandidateInlineLocalsIdentity(t *testing.T) {
 	var probe strings.Builder
 	for _, decl := range []string{
+		"@inline pub fn i32 add(i32 x){var i32 value=x;value=value+2;let old=value;value=old+value;return value/2;}",
 		"@inline pub fn i32 add(i32 x){let i32 a=x+2;let b=a*2;return b/2;}",
 		"@inline pub fn i32 add(i32 renamed){let left=(renamed+0x2);let i32 right=left*0b10;return (right/2);}",
 		"@inline pub fn i32 add(){let i32 minimum=-2147483648;return minimum;}",
@@ -57,7 +58,7 @@ func TestCandidateInlineLocalsIdentity(t *testing.T) {
 		"@inline pub fn i32 f(){let i32 x=x;return x;}",
 		"@inline fn i32 f(){return 1;}", "@inline @inline pub fn i32 f(){return 1;}", "@inline(1) pub fn i32 f(){return 1;}",
 		"@inline pub fn i64 f(){return 1;}", "@inline pub fn i32 f(i64 x){return 1;}", "@inline pub unsafe fn i32 f(){return 1;}",
-		"@inline @effects(console) pub fn i32 f(){return 1;}", "@inline pub fn i32 f(){var x=1;return x;}",
+		"@inline @effects(console) pub fn i32 f(){return 1;}", "@inline pub fn i32 f(){var x=1;x+=1;return x;}",
 		"@inline pub fn i32 f(){return f();}", "@inline pub fn i32 f(i32 x){return x<<1;}",
 		"@inline pub fn i32 f(i32 a,i32 b,i32 c,i32 d,i32 e){return a;}",
 		"@inline pub fn i32 f(i32 x){return " + strings.Repeat("x+", 32) + "x;}",

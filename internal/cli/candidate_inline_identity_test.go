@@ -72,7 +72,7 @@ func TestCandidateInlineIdentity(t *testing.T) {
 	for _, decl := range []string{
 		"@inline fn i32 f(){return 1;}", "@inline @inline pub fn i32 f(){return 1;}", "@inline(1) pub fn i32 f(){return 1;}",
 		"@inline pub fn i64 f(){return 1;}", "@inline pub fn i32 f(i64 x){return 1;}", "@inline pub unsafe fn i32 f(){return 1;}",
-		"@inline @effects(console) pub fn i32 f(){return 1;}", "@inline pub fn i32 f(){var x=1;return x;}",
+		"@inline @effects(console) pub fn i32 f(){return 1;}", "@inline pub fn i32 f(){var x=1;x+=1;return x;}",
 		"@inline pub fn i32 f(){return f();}", "@inline pub fn i32 f(i32 x){return x<<1;}",
 		"@inline pub fn i32 f(i32 a,i32 b,i32 c,i32 d,i32 e){return a;}",
 		"@inline pub fn i32 f(i32 x){return " + strings.Repeat("x+", 32) + "x;}",
