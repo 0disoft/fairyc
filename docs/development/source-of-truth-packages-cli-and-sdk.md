@@ -134,6 +134,9 @@ Part 2 of 3 of the [source index](source-of-truth.md).
   - `docs/adr/0206-starter-project-guide-v2.md`
   - `docs/adr/0208-starter-project-guide-v3.md`
   - `docs/adr/0266-starter-guide-native-test-v4.md`
+  - `docs/adr/0553-win32-starter-cli.md`
+  - `internal/projectscaffold/win32.go`
+  - `tools/bundle_win32_starter.py`
 - **Local workspace loader and fixtures**
   - `internal/workspaceloader/`
   - `internal/workspaceloaderfixture/`

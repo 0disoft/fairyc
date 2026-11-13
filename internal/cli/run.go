@@ -32,7 +32,7 @@ const (
 const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
-  fairyc new <package-name> --uid <package-uid>
+  fairyc new <package-name> --uid <package-uid> [--template <console|win32>]
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
@@ -77,7 +77,10 @@ Usage:
   fairyc --version
 
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
-an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
+an explicit package UID. --template win32 selects the embedded native Windows desktop starter;
+the default and --template console preserve the console starter. Generation does not invoke Python,
+a native toolchain or a GUI. Win32 builds need Windows x64/MSVC/SDK; packaging needs Python 3.11+.
+"fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.
 Linux builds require GCC or Clang on PATH. "fairyc run" builds and executes a temporary native
 image, forwards caller stdin, bounded program output, and any arguments after "--" as the

@@ -25,10 +25,35 @@ func runStableNew(arguments []string, sourceRoot string, stdout, stderr io.Write
 }
 
 func parseNewSpec(arguments []string) (projectscaffold.Spec, error) {
-	if len(arguments) != 3 || arguments[1] != "--uid" {
-		return projectscaffold.Spec{}, fmt.Errorf(`command "new" expects <package-name> --uid <package-uid>`)
+	invalid := func() (projectscaffold.Spec, error) {
+		return projectscaffold.Spec{}, fmt.Errorf(`command "new" expects <package-name> --uid <package-uid> [--template <console|win32>]`)
 	}
-	spec := projectscaffold.Spec{Name: arguments[0], UID: arguments[2]}
+	if len(arguments) != 3 && len(arguments) != 5 {
+		return invalid()
+	}
+	spec := projectscaffold.Spec{Name: arguments[0]}
+	seen := map[string]bool{}
+	for i := 1; i < len(arguments); i += 2 {
+		option := arguments[i]
+		if seen[option] {
+			return invalid()
+		}
+		seen[option] = true
+		switch option {
+		case "--uid":
+			spec.UID = arguments[i+1]
+		case "--template":
+			spec.Template = arguments[i+1]
+			if spec.Template == "" {
+				return invalid()
+			}
+		default:
+			return invalid()
+		}
+	}
+	if !seen["--uid"] {
+		return invalid()
+	}
 	if err := projectscaffold.Validate(spec); err != nil {
 		return projectscaffold.Spec{}, fmt.Errorf(`command "new": %w`, err)
 	}

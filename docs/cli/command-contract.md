@@ -49,22 +49,28 @@ missing embedded VCS metadata says `unknown`. The report is bounded plain text
 with a trailing newline. Extra arguments return exit 2 without a success report;
 output failure returns exit 4. No JSON mode is admitted in v1.
 
-## Stable starter project creation v4
+## Stable starter project creation v5
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
 current process source root. The name must be one portable lowercase kebab-case manifest name and
 directory segment. The UID is mandatory manifest-v1 identity with at least two lowercase
 dot-separated segments; it is never synthesized from the movable name.
+An optional `--template console|win32` selects the built-in starter (ADR 0553).
+The UID/template pairs may appear in either order after the package name;
+unknown, incomplete or duplicate options and unknown templates return exit 2
+before filesystem access. Omitting the option or selecting `console` retains
+the exact default starter below. This extension is implemented by the Go Stage 0
+CLI; it does not extend the private Fairy-authored candidate CLI.
 
 The target must not already exist as a file, directory, or symbolic link. The command accepts no
-destination path, current-directory mode, template, version, language, force, merge, target,
+destination path, current-directory mode, external template path, version, language, force, merge, target,
   toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
   `README.md`, `fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest
-  fixes version `0.1.0`, language `fairyc-language/14`, and source root `src`; public `answer()` returns
+  fixes version `0.1.0`, language `fairyc-language/20`, and source root `src`; public `answer()` returns
   42, private `main()` returns `answer() - 42`, and the semantic test imports and checks `answer`.
   `.gitignore` excludes only `/build/`.
 
-The generated README is exact compiler-owned starter content, not a selectable template. It labels
+The default generated README is exact compiler-owned console-starter content. It labels
 its commands as manual steps, explains first-check lock publication and stable run v2's stream and
 process-status behavior, distinguishes fast semantic testing from explicit isolated Windows native
 testing, substitutes the validated package name into the retained Windows executable path, and
@@ -81,6 +87,22 @@ Success is exactly `created Fairy C package "<name>" at <name>`. Codes are 0 for
 invocation or identity rejection, 4 for internal/output failure, and 7 for parent, target,
 permission, filesystem, or rollback failure. Output failure occurs after creation and cannot undo
 the project. No absolute parent path or raw operating-system error is part of stable output.
+
+`--template win32` applies the same identity/containment/no-overwrite/rollback,
+output and exit-code rules. Its embedded snapshot adds a hash-free native
+input/button/result app, pure navigation test, IME guard, Windows build config,
+prepared title/icon/version resources, `app.toml`, standalone Python resource/
+packaging/CLI-verification helpers, ignore rules and license. Generation does
+not invoke Python, inspect MSVC/SDK, fetch files or create a GUI. A repository
+checkout is unnecessary. Its initial product/EXE/ZIP names use the validated
+package name, assembly identity uses the UID, and company is blank. Name is
+bounded to 127 ASCII bytes and UID to 255 for resource compatibility. Edit
+`app.toml` after creation for branding; `fairy.toml` owns version/language.
+Creation is host-independent; native app builds require Windows x64 with
+MSVC/Windows SDK, and provided packaging scripts need Python 3.11+. New
+projects own their snapshot; creation never updates an existing app. Canonical
+source files and the deterministic embed refresh command are documented in
+ADR 0553; unit checks reject stale embedded inputs/defaults.
 
 ## Experimental explicit remote package preparation
 

@@ -672,9 +672,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   explicit isolated Windows native-test command, and carries
   one complete safe `std::io::write` source replacement plus the package-specific retained Windows
   executable path. The command never guesses identity, merges or upgrades an existing path,
-  generates a lockfile, accepts an arbitrary destination, or uses a selectable template, prompt,
+  generates a lockfile, accepts an arbitrary destination, or uses an external template, prompt,
   stdin, environment, config, process, toolchain, registry, or network. Ordinary creation failures
   attempt contained rollback; crash-left partial directories remain user-owned recovery.
+- The Go Stage 0 CLI additionally accepts `--template console|win32` (ADR 0553).
+  Console is the unchanged default; Win32 creates the embedded standalone desktop
+  starter without Python/repository/toolchain lookup or GUI execution. Its initial
+  identity comes from the explicit name/UID with blank company; creation retains
+  exclusive direct-child, rollback, output and exit-code behavior. Win32 native
+  build requires Windows x64/MSVC/SDK; provided packaging uses Python 3.11+.
 - Stable `fairyc check [--locked]` loads the current directory's strict manifest-owned local
   workspace, selects the compiler-bundled SDK only when imported, maintains canonical `fairy.lock`
   in ordinary mode or requires an exact no-write lock in `--locked` mode, and runs the complete
