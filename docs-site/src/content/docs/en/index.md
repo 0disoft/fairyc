@@ -7,9 +7,11 @@ Fairy C is an experimental native systems programming language with explicit res
 
 The current compiler (`fairyc`) is a Stage 0 prototype written in Go (`fairyc-language/20`). It compiles `.fy` packages to native executables through a C11 backend using your platform's C toolchain.
 
-## Where to Start
+## Quick Links
 
-- **Start**: [Introduction](./start/introduction/) · [Installation and Setup](./start/installation/) · [First Program](./start/first-program/)
+- **Getting Started**: [Introduction](./start/introduction/) · [Installation and Setup](./start/installation/) · [First Program](./start/first-program/)
+- **Learn the Language**: [Language Basics](./language/basics/) · [Memory and Resources](./language/memory-and-resources/)
+- **CLI & Status**: [CLI Usage and Common Errors](./cli/commands-and-errors/) · [Current Support and Limitations](./support/status-and-limits/)
 
 ## How Fairy C Relates to Brownie C
 

@@ -7,9 +7,11 @@ Fairy C는 명시적인 자원 소유권, 컴파일 타임 빌림 검사, 검사
 
 현재 `fairyc` 컴파일러는 Go로 작성된 Stage 0 프로토타입(`fairyc-language/20`)이며, C11 백엔드와 호스트 C 툴체인을 거쳐 네이티브 실행 파일을 생성합니다.
 
-## 시작하기
+## 빠른 이동
 
-- **시작**: [소개](./start/introduction/) · [설치와 환경 준비](./start/installation/) · [첫 프로그램](./start/first-program/)
+- **시작하기**: [소개](./start/introduction/) · [설치와 환경 준비](./start/installation/) · [첫 프로그램](./start/first-program/)
+- **언어 배우기**: [언어 기초](./language/basics/) · [메모리와 자원](./language/memory-and-resources/)
+- **CLI와 지원 현황**: [CLI 사용법과 자주 만나는 오류](./cli/commands-and-errors/) · [현재 지원 범위와 제한 사항](./support/status-and-limits/)
 
 ## Brownie C와의 관계
 

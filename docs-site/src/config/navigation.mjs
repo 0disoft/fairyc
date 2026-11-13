@@ -26,6 +26,22 @@ export const pages = {
 		link: '/start/installation/',
 	}),
 	firstProgram: page({ label: '첫 프로그램', en: 'First Program', link: '/start/first-program/' }),
+	languageBasics: page({ label: '언어 기초', en: 'Language Basics', link: '/language/basics/' }),
+	memoryAndResources: page({
+		label: '메모리와 자원',
+		en: 'Memory and Resources',
+		link: '/language/memory-and-resources/',
+	}),
+	cliCommandsAndErrors: page({
+		label: 'CLI 사용법과 오류',
+		en: 'CLI and Errors',
+		link: '/cli/commands-and-errors/',
+	}),
+	supportStatusAndLimits: page({
+		label: '지원 범위와 제한',
+		en: 'Support and Limits',
+		link: '/support/status-and-limits/',
+	}),
 };
 
 /** @type {string[]} */
@@ -36,5 +52,15 @@ export const sidebarSections = [
 		label: '시작',
 		en: 'Start',
 		items: [pages.overview, pages.introduction, pages.installation, pages.firstProgram],
+	}),
+	group({
+		label: '언어 배우기',
+		en: 'Learn Language',
+		items: [pages.languageBasics, pages.memoryAndResources],
+	}),
+	group({
+		label: 'CLI와 지원 현황',
+		en: 'CLI and Support',
+		items: [pages.cliCommandsAndErrors, pages.supportStatusAndLimits],
 	}),
 ];
