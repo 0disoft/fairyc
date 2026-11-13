@@ -6,10 +6,8 @@
 #include <commctrl.h>
 #include <stdint.h>
 #include <shellapi.h>
-#include <initguid.h>
 #include <oleacc.h>
-#include <UIAutomationCore.h>
-#include <UIAutomationCoreApi.h>
+#include "native/ui_core.h"
 
 // Win32 operations only. Fairy owns file policy, SHA-256 and report bytes.
 static struct {
@@ -196,8 +194,7 @@ static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM l
         if (state.event == 0) { state.event = 4; }
         return 0;
     case WM_DPICHANGED:
-        if (lp && LOWORD(wp) == HIWORD(wp) && LOWORD(wp) > 0) {
-            state.suggested = *(RECT *)lp;
+        if (fairy_ui_dpi_suggestion(wp,lp,&state.suggested)) {
             if (state.event != 3) { state.event = 5; }
         }
         return 0;
@@ -216,9 +213,7 @@ static LRESULT CALLBACK procedure(HWND window, UINT message, WPARAM wp, LPARAM l
 }
 
 int32_t hash_ui_system_dpi(void) {
-    if (!SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) &&
-        !AreDpiAwarenessContextsEqual(GetThreadDpiAwarenessContext(), DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) { return -1; }
-    return (int32_t)GetDpiForSystem();
+    return fairy_ui_system_dpi();
 }
 
 size_t hash_ui_ticks(void) { return (size_t)GetTickCount64(); }
@@ -230,51 +225,22 @@ int32_t hash_ui_progress(void *window, size_t value) {
 }
 
 static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
-    return CreateWindowExW(0, kind, L"",
-        WS_CHILD | WS_VISIBLE | style, 0, 0, 0, 0, window, (HMENU)(INT_PTR)id, GetModuleHandleW(NULL), NULL) != NULL;
+    return fairy_ui_create_child(window,kind,style,(uint32_t)id)!=NULL;
 }
 
 static BOOL window_icons(HWND window) {
-    UINT dpi = GetDpiForWindow(window);
-    HINSTANCE instance = GetModuleHandleW(NULL);
-    HICON icon_large = LoadImageW(instance, MAKEINTRESOURCEW(1), IMAGE_ICON,
-        GetSystemMetricsForDpi(SM_CXICON, dpi), GetSystemMetricsForDpi(SM_CYICON, dpi), 0);
-    HICON icon_small = LoadImageW(instance, MAKEINTRESOURCEW(1), IMAGE_ICON,
-        GetSystemMetricsForDpi(SM_CXSMICON, dpi), GetSystemMetricsForDpi(SM_CYSMICON, dpi), 0);
-    if (!icon_large || !icon_small) {
-        if (icon_large) { DestroyIcon(icon_large); } if (icon_small) { DestroyIcon(icon_small); }
-        return FALSE;
-    }
-    SendMessageW(window, WM_SETICON, ICON_BIG, (LPARAM)icon_large);
-    SendMessageW(window, WM_SETICON, ICON_SMALL, (LPARAM)icon_small);
-    if (state.icon_large) { DestroyIcon(state.icon_large); }
-    if (state.icon_small) { DestroyIcon(state.icon_small); }
-    state.icon_large = icon_large; state.icon_small = icon_small;
-    return TRUE;
+    return fairy_ui_icons(window,&state.icon_large,&state.icon_small);
 }
 
 static void close_icons(void) {
-    if (state.icon_large) { DestroyIcon(state.icon_large); state.icon_large = NULL; }
-    if (state.icon_small) { DestroyIcon(state.icon_small); state.icon_small = NULL; }
+    fairy_ui_close_icons(&state.icon_large,&state.icon_small);
 }
 
 void *hash_ui_open(int32_t width, int32_t height) {
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES | ICC_BAR_CLASSES | ICC_PROGRESS_CLASS};
     if (!InitCommonControlsEx(&controls)) { return NULL; }
     palette();
-    WNDCLASSW type = {0};
-    type.lpfnWndProc = procedure;
-    type.hInstance = GetModuleHandleW(NULL);
-    type.hCursor = LoadCursorW(NULL, IDC_ARROW);
-    type.lpszClassName = L"FairyHashWindow";
-    WCHAR title[128];
-    if (!LoadStringW(type.hInstance, 101, title, ARRAYSIZE(title))) { return NULL; }
-    if (!RegisterClassW(&type)) { return NULL; }
-    RECT bounds = {0, 0, width, height};
-    if (!AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_CONTROLPARENT, GetDpiForSystem())) { return NULL; }
-    HWND window = CreateWindowExW(WS_EX_CONTROLPARENT, type.lpszClassName, title,
-        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, bounds.right-bounds.left, bounds.bottom-bounds.top,
-        NULL, NULL, type.hInstance, NULL);
+    HWND window=fairy_ui_open(L"FairyHashWindow",procedure,width,height);
     if (window && child(window, L"STATIC", SS_NOPREFIX | SS_ENDELLIPSIS | SS_NOTIFY, 206) &&
         child(window, L"BUTTON", WS_TABSTOP | BS_DEFPUSHBUTTON, 202) &&
         child(window, L"EDIT", WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL, 201) &&
@@ -296,7 +262,7 @@ void *hash_ui_open(int32_t width, int32_t height) {
     }
     if (window) { DestroyWindow(window); }
     close_icons();
-    UnregisterClassW(type.lpszClassName, type.hInstance);
+    UnregisterClassW(L"FairyHashWindow",GetModuleHandleW(NULL));
     return NULL;
 }
 
@@ -305,7 +271,7 @@ int32_t hash_ui_poll(void *window, int32_t wait) {
     MSG message;
     // A deferred Close must still dispatch paint/input/sent messages while
     // Fairy waits for a save commit or owned cleanup. Never block on GetMessage.
-    while ((!state.event && !state.cancel_requested && !state.compare_pending && !state.dropped) || (!wait && state.event == 3)) {
+    while (fairy_ui_should_pump(wait,state.event==3,state.event || state.cancel_requested || state.compare_pending || state.dropped)) {
         if (wait) {
             int code = (int)GetMessageW(&message, NULL, 0, 0);
             if (code <= 0) { state.event = 3; break; }
@@ -335,23 +301,13 @@ int32_t hash_ui_focus_id(void *window) {
     return (HWND)window == state.window && focus && IsChild(state.window, focus) ? GetDlgCtrlID(focus) : 0;
 }
 int32_t hash_ui_next_focus(void *window, uint32_t reverse) {
-    if ((HWND)window != state.window || reverse > 1) { return 1; }
-    HWND next = GetNextDlgTabItem((HWND)window, GetFocus(), reverse != 0);
-    if (!next) { return 1; }
-    SetFocus(next); return GetFocus() == next ? 0 : 1;
+    return (HWND)window==state.window?fairy_ui_next_focus((HWND)window,reverse):1;
 }
 
 int32_t hash_ui_text(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    if ((HWND)window != state.window || (id != 0 && (id < 201 || id > 217)) || length > 131071) { return 1; }
-    WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length + 1) * sizeof(WCHAR));
-    if (!wide) { return 1; }
-    int count = length ? MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length) : 0;
-    BOOL valid = length == 0 || count > 0;
-    wide[count] = 0;
-    if (id == 201 || id == 206) { SendMessageW(state.tooltip, TTM_POP, 0, 0); }
-    BOOL success = valid && SetWindowTextW(id ? GetDlgItem((HWND)window, (int)id) : (HWND)window, wide);
-    HeapFree(GetProcessHeap(), 0, wide);
-    return success ? 0 : 1;
+    if ((HWND)window!=state.window || (id!=0 && (id<201 || id>217)) || length>131071) { return 1; }
+    if (id==201 || id==206) { SendMessageW(state.tooltip,TTM_POP,0,0); }
+    return fairy_ui_text(id?GetDlgItem((HWND)window,(int)id):(HWND)window,text,length);
 }
 
 int32_t hash_ui_tone(void *window, uint32_t tone) {
@@ -374,9 +330,7 @@ int32_t hash_ui_compare_tone(void *window, uint32_t tone) {
     if ((HWND)window != state.window || tone > 2 || !state.accessibility) { return 1; }
     HWND label = GetDlgItem((HWND)window,216);
     if (!state.compare_live) {
-        VARIANT value = {0}; value.vt = VT_I4; value.lVal = 1;
-        if (FAILED(IAccPropServices_SetHwndProp(state.accessibility,label,
-            (DWORD)OBJID_CLIENT,CHILDID_SELF,LiveSetting_Property_GUID,value))) { return 1; }
+        if (fairy_ui_live(state.accessibility,label,1,0)) { return 1; }
         state.compare_live = TRUE;
     }
     BOOL announce = tone != 0 && tone != state.compare_tone;
@@ -387,38 +341,14 @@ int32_t hash_ui_compare_tone(void *window, uint32_t tone) {
 }
 
 int32_t hash_ui_live(void *window, uint32_t setting, uint32_t notify) {
-    if ((HWND)window != state.window || !state.accessibility || setting > 2 || notify > 1) { return 1; }
-    HWND label = GetDlgItem((HWND)window, 205);
-    VARIANT value = {0}; value.vt = VT_I4; value.lVal = (LONG)setting;
-    if (FAILED(IAccPropServices_SetHwndProp(state.accessibility, label,
-        (DWORD)OBJID_CLIENT, CHILDID_SELF, LiveSetting_Property_GUID, value))) { return 1; }
-    if (notify && setting) { NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED, label, OBJID_CLIENT, CHILDID_SELF); }
-    return 0;
+    if ((HWND)window!=state.window) { return 1; }
+    return fairy_ui_live(state.accessibility,GetDlgItem((HWND)window,205),setting,notify);
 }
 
 int32_t hash_ui_name(void *window, uint32_t id, const uint8_t *text, size_t length) {
-    HWND control = GetDlgItem((HWND)window, (int)id);
-    if ((HWND)window != state.window || !control || id < 201 || id > 217 || !length || length > 131071) { return 1; }
-    if (!state.accessibility) {
-        HRESULT status = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-        if (FAILED(status) && status != RPC_E_CHANGED_MODE) { return 1; }
-        state.ole_initialized = SUCCEEDED(status);
-        status = CoCreateInstance(&CLSID_AccPropServices, NULL, CLSCTX_INPROC_SERVER,
-            &IID_IAccPropServices, (void **)&state.accessibility);
-        if (FAILED(status)) {
-            if (state.ole_initialized) { CoUninitialize(); state.ole_initialized = FALSE; }
-            return 1;
-        }
-    }
-    WCHAR *wide = HeapAlloc(GetProcessHeap(), 0, (length+1)*sizeof(WCHAR));
-    if (!wide) { return 1; }
-    int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)text, (int)length, wide, (int)length);
-    wide[count] = 0;
-    HRESULT status = count ? IAccPropServices_SetHwndPropStr(state.accessibility, control,
-        (DWORD)OBJID_CLIENT, CHILDID_SELF, PROPID_ACC_NAME, wide) : E_INVALIDARG;
-    HeapFree(GetProcessHeap(), 0, wide);
-    if (SUCCEEDED(status)) { state.named_controls |= 1u << (id-201); }
-    return SUCCEEDED(status) ? 0 : 1;
+    if ((HWND)window!=state.window || id<201 || id>217 || !length || length>131071) { return 1; }
+    int32_t code=fairy_ui_name(&state.accessibility,&state.ole_initialized,GetDlgItem((HWND)window,(int)id),text,length);
+    if (!code) { state.named_controls|=1u<<(id-201); }return code;
 }
 
 int32_t hash_ui_copy(void *window, const uint8_t *text, size_t length) {
@@ -439,7 +369,7 @@ int32_t hash_ui_copy(void *window, const uint8_t *text, size_t length) {
 int32_t hash_ui_enable(void *window, uint32_t id, uint32_t enabled) {
     HWND control = GetDlgItem((HWND)window, (int)id);
     if ((HWND)window != state.window || !control || enabled > 1) { return 1; }
-    EnableWindow(control, enabled != 0);
+    if (fairy_ui_enable(control,enabled)) { return 1; }
     if (id == 202) {
         DragAcceptFiles((HWND)window,enabled != 0);
         if (!enabled && state.dropped) { DragFinish(state.dropped); state.dropped = NULL; }
@@ -456,16 +386,11 @@ int32_t hash_ui_visible(void *window, uint32_t id, uint32_t shown) {
 }
 
 int32_t hash_ui_focus(void *window, uint32_t id) {
-    HWND control = GetDlgItem((HWND)window, (int)id);
-    if ((HWND)window != state.window || !control || !IsWindowEnabled(control)) { return 1; }
-    SetFocus(control);
-    return GetFocus() == control ? 0 : 1;
+    return (HWND)window==state.window?fairy_ui_focus(GetDlgItem((HWND)window,(int)id)):1;
 }
 
 int32_t hash_ui_extent(void *window, uint32_t axis) {
-    RECT client;
-    if (!GetClientRect((HWND)window, &client) || axis > 2) { return -1; }
-    return axis == 2 ? (int32_t)GetDpiForWindow((HWND)window) : axis == 0 ? client.right : client.bottom;
+    return (HWND)window==state.window?fairy_ui_extent((HWND)window,axis):-1;
 }
 
 int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t width, int32_t height) {
@@ -473,7 +398,7 @@ int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t wi
     HWND control = GetDlgItem((HWND)window, (int)id);
     // Fairy submits the entire layout before hash_ui_redraw erases and paints
     // all children. Do not paint intermediate, partially moved arrangements.
-    if (!MoveWindow(control, x, y, width, height, FALSE)) { return 1; }
+    if (fairy_ui_move(control,x,y,width,height)) { return 1; }
     if (id == 203) {
         int inset = MulDiv(10, GetDpiForWindow((HWND)window), 96);
         RECT area = {inset, inset, width-inset, height-inset};
@@ -483,11 +408,7 @@ int32_t hash_ui_move(void *window, uint32_t id, int32_t x, int32_t y, int32_t wi
 }
 
 int32_t hash_ui_redraw(void *window) {
-    if ((HWND)window != state.window) { return 1; }
-    // Also invalidate existing child pixels, including the document icon and
-    // byte label. Growing/moving a child can otherwise preserve stale bits.
-    return RedrawWindow((HWND)window, NULL, NULL,
-        RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW) ? 0 : 1;
+    return (HWND)window==state.window?fairy_ui_redraw((HWND)window):1;
 }
 
 int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_height, int32_t font_height) {
@@ -522,10 +443,7 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
 }
 
 int32_t hash_ui_accept_dpi(void *window) {
-    RECT r = state.suggested;
-    return r.right > r.left && r.bottom > r.top &&
-        SetWindowPos((HWND)window, NULL, r.left, r.top, r.right-r.left, r.bottom-r.top, SWP_NOZORDER | SWP_NOACTIVATE) &&
-        window_icons((HWND)window) ? 0 : 1;
+    return (HWND)window==state.window && fairy_ui_apply_dpi((HWND)window,&state.suggested) && window_icons((HWND)window)?0:1;
 }
 
 size_t hash_ui_dialog(void *window, uint32_t save, const uint8_t *initial, size_t initial_length, uint8_t *output, size_t capacity) {
@@ -563,15 +481,12 @@ void hash_ui_show(void *window) {
 void hash_ui_destroy(void *window) {
     if (state.dropped) { DragFinish(state.dropped); state.dropped = NULL; }
     if (state.accessibility) {
-        IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 216),
-            (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
+        fairy_ui_clear(state.accessibility,GetDlgItem((HWND)window,216),FALSE,TRUE);
         state.compare_live = FALSE;
-        IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, 205),
-            (DWORD)OBJID_CLIENT, CHILDID_SELF, &LiveSetting_Property_GUID, 1);
+        fairy_ui_clear(state.accessibility,GetDlgItem((HWND)window,205),FALSE,TRUE);
         for (int id = 201; id <= 217; id++) {
             if (state.named_controls & (1u << (id-201))) {
-                IAccPropServices_ClearHwndProps(state.accessibility, GetDlgItem((HWND)window, id),
-                    (DWORD)OBJID_CLIENT, CHILDID_SELF, &PROPID_ACC_NAME, 1);
+                fairy_ui_clear(state.accessibility,GetDlgItem((HWND)window,id),TRUE,FALSE);
             }
         }
         IAccPropServices_Release(state.accessibility); state.accessibility = NULL;

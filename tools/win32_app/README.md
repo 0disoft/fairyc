@@ -85,3 +85,10 @@ With ADR 0554-capable Go Stage 0 CLI, `fairyc build` prepares desktop resources
 and `fairyc package [--locked] [--json]` builds release and validates the local
 unsigned portable ZIP. Python helpers remain available for older compilers.
 The CLI still requires Python 3.11+ and MSVC/SDK; generated EXEs do not.
+
+Shared `modules/win32_ui` sources are copied into generated apps alongside jobs.
+`native_ui.fy` offers reusable control primitives; `window_metrics.fy` supplies
+DPI scaling/capped centering/navigation. The native UI core shares window/child,
+text, focus, DPI, icons and accessibility transport with Hash. Application-specific
+IDs, layout/event/paint/IME/drop behavior remain local. GUI behavior is compiled
+only; headless probes do not certify physical focus/DPI or screenreader speech.

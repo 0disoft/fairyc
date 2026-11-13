@@ -141,6 +141,9 @@ Part 2 of 3 of the [source index](source-of-truth.md).
   - `internal/projectscaffold/win32.go`
   - `tools/bundle_win32_starter.py`
   - `modules/win32_jobs/`
+  - `modules/win32_ui/`
+  - `tools/sync_win32_ui.py`
+  - `tools/verify_win32_ui.py`
   - `tools/sync_win32_jobs.py`
 - **Local workspace loader and fixtures**
   - `internal/workspaceloader/`

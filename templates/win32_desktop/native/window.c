@@ -5,11 +5,9 @@
 #include <commctrl.h>
 #include <commdlg.h>
 #include <stdint.h>
-#include <initguid.h>
 #include <oleacc.h>
-#include <UIAutomationCore.h>
-#include <UIAutomationCoreApi.h>
 #include "native/ime.h"
+#include "native/ui_core.h"
 
 // Private starter transport. Text, actions, key policy and layout belong to Fairy.
 static struct {
@@ -35,15 +33,7 @@ static void palette(void) {
     state.background=background; state.paper=paper;
 }
 static BOOL icons(HWND window) {
-    UINT dpi=GetDpiForWindow(window); HINSTANCE instance=GetModuleHandleW(NULL);
-    HICON icon_large=LoadImageW(instance,MAKEINTRESOURCEW(1),IMAGE_ICON,
-        GetSystemMetricsForDpi(SM_CXICON,dpi),GetSystemMetricsForDpi(SM_CYICON,dpi),0);
-    HICON icon_small=LoadImageW(instance,MAKEINTRESOURCEW(1),IMAGE_ICON,
-        GetSystemMetricsForDpi(SM_CXSMICON,dpi),GetSystemMetricsForDpi(SM_CYSMICON,dpi),0);
-    if (!icon_large || !icon_small) { if (icon_large) { DestroyIcon(icon_large); } if (icon_small) { DestroyIcon(icon_small); } return FALSE; }
-    SendMessageW(window,WM_SETICON,ICON_BIG,(LPARAM)icon_large); SendMessageW(window,WM_SETICON,ICON_SMALL,(LPARAM)icon_small);
-    if (state.icon_large) { DestroyIcon(state.icon_large); } if (state.icon_small) { DestroyIcon(state.icon_small); }
-    state.icon_large=icon_large; state.icon_small=icon_small; return TRUE;
+    return fairy_ui_icons(window,&state.icon_large,&state.icon_small);
 }
 static LRESULT CALLBACK procedure(HWND window,UINT message,WPARAM wp,LPARAM lp) {
     switch (message) {
@@ -55,7 +45,7 @@ static LRESULT CALLBACK procedure(HWND window,UINT message,WPARAM wp,LPARAM lp) 
         return 0;
     case WM_SIZE: state.resized=TRUE; return 0;
     case WM_DPICHANGED:
-        if (lp && LOWORD(wp)==HIWORD(wp)) { state.suggested=*(RECT *)lp; state.dpi_pending=TRUE; }
+        if (fairy_ui_dpi_suggestion(wp,lp,&state.suggested)) { state.dpi_pending=TRUE; }
         return 0;
     case WM_GETMINMAXINFO:
         ((MINMAXINFO *)lp)->ptMinTrackSize.x=state.min_width;
@@ -75,21 +65,13 @@ static LRESULT CALLBACK procedure(HWND window,UINT message,WPARAM wp,LPARAM lp) 
     return DefWindowProcW(window,message,wp,lp);
 }
 int32_t desktop_system_dpi(void) {
-    if (!SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2) &&
-        !AreDpiAwarenessContextsEqual(GetThreadDpiAwarenessContext(),DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) { return -1; }
-    return (int32_t)GetDpiForSystem();
+    return fairy_ui_system_dpi();
 }
 void *desktop_open(int32_t width,int32_t height) {
     INITCOMMONCONTROLSEX controls={sizeof(controls),ICC_STANDARD_CLASSES|ICC_PROGRESS_CLASS};
     if (!InitCommonControlsEx(&controls)) { return NULL; } palette();
-    WNDCLASSW type={0}; type.lpfnWndProc=procedure; type.hInstance=GetModuleHandleW(NULL);
-    type.hCursor=LoadCursorW(NULL,IDC_ARROW); type.lpszClassName=L"FairyDesktopStarter";
-    WCHAR title[128]; RECT bounds={0,0,width,height};
-    if (!LoadStringW(type.hInstance,101,title,128) || !RegisterClassW(&type) ||
-        !AdjustWindowRectExForDpi(&bounds,WS_OVERLAPPEDWINDOW,FALSE,WS_EX_CONTROLPARENT,GetDpiForSystem())) { return NULL; }
-    state.window=CreateWindowExW(WS_EX_CONTROLPARENT,type.lpszClassName,title,WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,
-        CW_USEDEFAULT,CW_USEDEFAULT,bounds.right-bounds.left,bounds.bottom-bounds.top,NULL,NULL,type.hInstance,NULL);
-    if (state.window && !icons(state.window)) { DestroyWindow(state.window); state.window=NULL; }
+    state.window=fairy_ui_open(L"FairyDesktopStarter",procedure,width,height);
+    if (state.window && !icons(state.window)) { DestroyWindow(state.window);state.window=NULL;UnregisterClassW(L"FairyDesktopStarter",GetModuleHandleW(NULL)); }
     return state.window;
 }
 int32_t desktop_control(void *window,uint32_t kind,uint32_t id) {
@@ -98,8 +80,7 @@ int32_t desktop_control(void *window,uint32_t kind,uint32_t id) {
     if (kind==1 || kind==4) { style|=WS_TABSTOP|WS_BORDER|ES_AUTOHSCROLL; }
     if (kind==2) { style|=WS_TABSTOP; if (id==103) { style|=BS_DEFPUSHBUTTON; } }
     if (kind==4) { style|=ES_READONLY|ES_MULTILINE; }
-    HWND control=CreateWindowExW(0,kind==5?PROGRESS_CLASSW:kind==1||kind==4?L"EDIT":kind==2?L"BUTTON":L"STATIC",L"",style,
-        0,0,0,0,(HWND)window,(HMENU)(INT_PTR)id,GetModuleHandleW(NULL),NULL);
+    HWND control=fairy_ui_create_child((HWND)window,kind==5?PROGRESS_CLASSW:kind==1||kind==4?L"EDIT":kind==2?L"BUTTON":L"STATIC",style,id);
     if (!control) { return 1; }
     if (kind==5) { SendMessageW(control,PBM_SETRANGE32,0,100); }
     if (kind==1) { SendMessageW(control,EM_SETLIMITTEXT,511,0); return fairy_ime_attach(control)?0:1; }
@@ -107,42 +88,26 @@ int32_t desktop_control(void *window,uint32_t kind,uint32_t id) {
 }
 int32_t desktop_text(void *window,uint32_t id,const uint8_t *text,size_t length) {
     if ((HWND)window!=state.window || id<101 || id>132 || length>4095) { return 1; }
-    WCHAR wide[4096]; int count=length?MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,(const char *)text,(int)length,wide,4095):0;
-    if (length && !count) { return 1; } wide[count]=0;
-    return SetWindowTextW(GetDlgItem((HWND)window,id),wide)?0:1;
+    return fairy_ui_text(GetDlgItem((HWND)window,id),text,length);
 }
 size_t desktop_read(void *window,uint32_t id,uint8_t *output,size_t capacity) {
-    if ((HWND)window!=state.window || id<101 || id>132 || !output || capacity>4096 || !capacity) { return 4097; }
-    WCHAR wide[1024]; HWND control=GetDlgItem((HWND)window,id);
-    int length=GetWindowTextLengthW(control); if (length>=1024 || length<0) { return 4097; }
-    if (!length) { return 0; }
-    if (GetWindowTextW(control,wide,1024)!=length) { return 4097; }
-    int count=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,wide,length,(char *)output,(int)capacity,NULL,NULL);
-    return count?(size_t)count:4097;
+    if ((HWND)window!=state.window || id<101 || id>132 || !capacity || capacity>4096) { return 4097; }
+    size_t count=fairy_ui_read(GetDlgItem((HWND)window,id),output,capacity);return count==SIZE_MAX?4097:count;
 }
 int32_t desktop_name(void *window,uint32_t id,const uint8_t *text,size_t length) {
     if ((HWND)window!=state.window || id<101 || id>132 || !length || length>4095) { return 1; }
-    if (!state.accessibility) {
-        HRESULT initialized=CoInitializeEx(NULL,COINIT_APARTMENTTHREADED);
-        if (FAILED(initialized) && initialized!=RPC_E_CHANGED_MODE) { return 1; }
-        state.com_owned=SUCCEEDED(initialized);
-        if (FAILED(CoCreateInstance(&CLSID_AccPropServices,NULL,CLSCTX_INPROC_SERVER,&IID_IAccPropServices,(void **)&state.accessibility))) { return 1; }
-    }
-    WCHAR wide[4096]; int count=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,(const char *)text,(int)length,wide,4095);
-    if (!count) { return 1; } wide[count]=0;
-    if (FAILED(IAccPropServices_SetHwndPropStr(state.accessibility,GetDlgItem((HWND)window,id),(DWORD)OBJID_CLIENT,CHILDID_SELF,PROPID_ACC_NAME,wide))) { return 1; }
-    state.named|=1u<<(id-101); return 0;
+    int32_t code=fairy_ui_name(&state.accessibility,&state.com_owned,GetDlgItem((HWND)window,id),text,length);
+    if (!code) { state.named|=1u<<(id-101); }return code;
 }
 int32_t desktop_live(void *window,uint32_t id,uint32_t setting,uint32_t notify) {
-    if ((HWND)window!=state.window || !state.accessibility || id<101 || id>132 || setting>2 || notify>1) { return 1; }
-    VARIANT value={0}; value.vt=VT_I4; value.lVal=(LONG)setting; HWND label=GetDlgItem((HWND)window,id);
-    if (FAILED(IAccPropServices_SetHwndProp(state.accessibility,label,(DWORD)OBJID_CLIENT,CHILDID_SELF,LiveSetting_Property_GUID,value))) { return 1; }
-    if (notify) { NotifyWinEvent(EVENT_OBJECT_LIVEREGIONCHANGED,label,OBJID_CLIENT,CHILDID_SELF); } return 0;
+    if ((HWND)window!=state.window || id<101 || id>132) { return 1; }
+    return fairy_ui_live(state.accessibility,GetDlgItem((HWND)window,id),setting,notify);
 }
 int32_t desktop_announce(void *window,uint32_t id) { return desktop_live(window,id,1,1); }
 static int32_t poll_messages(void *window,BOOL wait) {
     if ((HWND)window!=state.window) { return 3; }
-    while (!state.closed && !state.resized && !state.dpi_pending && !state.key && !state.clicked && !state.changed) {
+    // A sticky Close must keep draining messages during save commit/cleanup.
+    while (fairy_ui_should_pump(wait,state.closed,state.closed || state.resized || state.dpi_pending || state.key || state.clicked || state.changed)) {
         MSG message;
         if (wait) { if (GetMessageW(&message,NULL,0,0)<=0) { state.closed=TRUE; break; } }
         else { if (!PeekMessageW(&message,NULL,0,0,PM_REMOVE)) { break; } if (message.message==WM_QUIT) { state.closed=TRUE; break; } }
@@ -169,27 +134,22 @@ int32_t desktop_field(void *window,uint32_t axis) {
     return axis==0?state.last_id:axis==1?state.last_key:axis==2?state.last_flags:axis==3?GetDlgCtrlID(GetFocus()):-1;
 }
 int32_t desktop_enable(void *window,uint32_t id,uint32_t enabled) {
-    if ((HWND)window!=state.window || id<101 || id>132 || enabled>1) { return 1; }
-    HWND child=GetDlgItem((HWND)window,id);if (!child) { return 1; } EnableWindow(child,enabled!=0);
-    return IsWindowEnabled(child)==(enabled!=0)?0:1;
+    if ((HWND)window!=state.window || id<101 || id>132) { return 1; }
+    return fairy_ui_enable(GetDlgItem((HWND)window,id),enabled);
 }
 int32_t desktop_focus_to(void *window,uint32_t id) {
     if ((HWND)window!=state.window || id<101 || id>132) { return 1; }
-    HWND child=GetDlgItem((HWND)window,id);if (!child || !IsWindowEnabled(child)) { return 1; }
-    SetFocus(child);return GetFocus()==child?0:1;
+    return fairy_ui_focus(GetDlgItem((HWND)window,id));
 }
 int32_t desktop_progress(void *window,size_t percent) {
     if ((HWND)window!=state.window || percent>100) { return 1; }
     SendDlgItemMessageW((HWND)window,108,PBM_SETPOS,percent,0);return 0;
 }
 int32_t desktop_extent(void *window,uint32_t axis) {
-    RECT r; if ((HWND)window!=state.window || !GetClientRect((HWND)window,&r)) { return -1; }
-    return axis==0?r.right:axis==1?r.bottom:axis==2?(int32_t)GetDpiForWindow((HWND)window):-1;
+    return (HWND)window==state.window?fairy_ui_extent((HWND)window,axis):-1;
 }
 int32_t desktop_apply_dpi(void *window) {
-    RECT r=state.suggested;
-    return (HWND)window==state.window && r.right>r.left && r.bottom>r.top &&
-        SetWindowPos((HWND)window,NULL,r.left,r.top,r.right-r.left,r.bottom-r.top,SWP_NOZORDER|SWP_NOACTIVATE) && icons((HWND)window)?0:1;
+    return (HWND)window==state.window && fairy_ui_apply_dpi((HWND)window,&state.suggested) && icons((HWND)window)?0:1;
 }
 int32_t desktop_frame(void *window,int32_t width,int32_t height,int32_t font_height) {
     if ((HWND)window!=state.window || width<=0 || height<=0 || font_height<=0) { return 1; }
@@ -206,11 +166,11 @@ int32_t desktop_frame(void *window,int32_t width,int32_t height,int32_t font_hei
     return 0;
 }
 int32_t desktop_move(void *window,uint32_t id,int32_t x,int32_t y,int32_t width,int32_t height) {
-    if ((HWND)window!=state.window || id<101 || id>132 || width<0 || height<0) { return 1; }
-    return SetWindowPos(GetDlgItem((HWND)window,id),NULL,x,y,width,height,SWP_NOZORDER|SWP_NOACTIVATE|SWP_NOREDRAW)?0:1;
+    if ((HWND)window!=state.window || id<101 || id>132) { return 1; }
+    return fairy_ui_move(GetDlgItem((HWND)window,id),x,y,width,height);
 }
 int32_t desktop_redraw(void *window) {
-    return (HWND)window==state.window && RedrawWindow((HWND)window,NULL,NULL,RDW_INVALIDATE|RDW_ERASE|RDW_ALLCHILDREN|RDW_UPDATENOW)?0:1;
+    return (HWND)window==state.window?fairy_ui_redraw((HWND)window):1;
 }
 static size_t choose_file(void *window,uint8_t *output,size_t capacity,BOOL saving) {
     if ((HWND)window!=state.window || !output || !capacity || capacity>131072) { return 131073; }
@@ -225,9 +185,7 @@ static size_t choose_file(void *window,uint8_t *output,size_t capacity,BOOL savi
 size_t desktop_choose(void *window,uint8_t *output,size_t capacity) { return choose_file(window,output,capacity,FALSE); }
 size_t desktop_choose_save(void *window,uint8_t *output,size_t capacity) { return choose_file(window,output,capacity,TRUE); }
 int32_t desktop_focus_next(void *window,uint32_t reverse) {
-    if ((HWND)window!=state.window || reverse>1) { return 1; }
-    HWND next=GetNextDlgTabItem((HWND)window,GetFocus(),reverse!=0); if (!next) { return 1; }
-    SetFocus(next); return GetFocus()==next?0:1;
+    return (HWND)window==state.window?fairy_ui_next_focus((HWND)window,reverse):1;
 }
 void desktop_show(void *window) {
     ShowWindow((HWND)window,SW_SHOWNORMAL); UpdateWindow((HWND)window); SetFocus(GetDlgItem((HWND)window,102));
@@ -236,13 +194,12 @@ void desktop_destroy(void *window) {
     if (state.accessibility) {
         for (int id=101;id<=132;id++) {
             HWND child=GetDlgItem((HWND)window,id); if (!child) { continue; }
-            if (state.named&(1u<<(id-101))) { IAccPropServices_ClearHwndProps(state.accessibility,child,(DWORD)OBJID_CLIENT,CHILDID_SELF,&PROPID_ACC_NAME,1); }
-            IAccPropServices_ClearHwndProps(state.accessibility,child,(DWORD)OBJID_CLIENT,CHILDID_SELF,&LiveSetting_Property_GUID,1);
+            fairy_ui_clear(state.accessibility,child,(state.named&(1u<<(id-101)))!=0,TRUE);
         }
         IAccPropServices_Release(state.accessibility); state.accessibility=NULL;
     }
     if (window) { DestroyWindow((HWND)window); } if (state.font) { DeleteObject(state.font); }
-    if (state.icon_large) { DestroyIcon(state.icon_large); } if (state.icon_small) { DestroyIcon(state.icon_small); }
+    fairy_ui_close_icons(&state.icon_large,&state.icon_small);
     if (state.background) { DeleteObject(state.background); } if (state.paper) { DeleteObject(state.paper); }
     if (state.com_owned) { CoUninitialize(); }
     UnregisterClassW(L"FairyDesktopStarter",GetModuleHandleW(NULL)); state.window=NULL;

@@ -9,6 +9,7 @@ import tempfile
 from win32_app.settings import load
 from win32_app.resources import prepare
 from sync_win32_jobs import install as install_jobs
+from sync_win32_ui import install as install_ui
 ROOT=Path(__file__).resolve().parents[1]
 
 def create(destination,name,uid,title,company='',icon=None):
@@ -24,6 +25,7 @@ def create(destination,name,uid,title,company='',icon=None):
     with tempfile.TemporaryDirectory(prefix='.fairy-new-',dir=target.parent) as directory:
         stage=Path(directory)/'project'; shutil.copytree(ROOT/'templates/win32_desktop',stage,ignore=shutil.ignore_patterns('__pycache__'))
         install_jobs(stage)
+        install_ui(stage)
         shutil.copytree(ROOT/'tools/win32_app',stage/'win32_app',ignore=shutil.ignore_patterns('__pycache__'))
         for filename in ('ime.c','ime.h'): shutil.copy2(ROOT/'examples/win32_minimal/native'/filename,stage/'native'/filename)
         shutil.copy2(Path(icon).resolve() if icon else ROOT/'examples/win32_hash/native/app.ico',stage/'native/app.ico')

@@ -1,4 +1,5 @@
 module ui;
+import window_metrics as metrics;
 import std::bytes as bytes;
 import progress as measure;
 import comparison as comparison;
@@ -29,8 +30,8 @@ unsafe extern C fn usize hash_ui_dialog(ptr mut void window,u32 save,ptr u8 init
 unsafe extern C fn void hash_ui_show(ptr mut void window);
 unsafe extern C fn void hash_ui_destroy(ptr mut void window);
 
-pub fn i32 scale(i32 value,i32 dpi){return (value*dpi+48)/96;}
-pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(dpi<96 || dpi>960){return null;}return unsafe{hash_ui_open(scale(600,dpi),scale(380,dpi))};}
+pub fn i32 scale(i32 value,i32 dpi){return metrics::scale(value,dpi);}
+pub fn ptr mut void open(){let dpi=unsafe{hash_ui_system_dpi()};if(!metrics::valid_dpi(dpi)){return null;}return unsafe{hash_ui_open(scale(600,dpi),scale(380,dpi))};}
 pub fn i32 poll(ptr mut void window,i32 wait){
     let event=unsafe{hash_ui_poll(window,wait)};
     if(event==8 || event==9){let moved=unsafe{hash_ui_next_focus(window,if(event==9){1}else{0})};return 0;}
@@ -129,11 +130,11 @@ pub fn bool layout(ptr mut void window,i32 event){
     if(event==5 && unsafe{hash_ui_accept_dpi(window)}!=0){return false;}
     let dpi=unsafe{hash_ui_extent(window,2)};let width=unsafe{hash_ui_extent(window,0)};
     let client_height=unsafe{hash_ui_extent(window,1)};
-    if(dpi<96 || dpi>960 || width<0 || client_height<0){return false;}
+    if(!metrics::valid_dpi(dpi) || width<0 || client_height<0){return false;}
     if(width==0 || client_height==0){return true;}
-    let form_width=if(width>scale(720,dpi)){scale(720,dpi)}else{width};
-    let form_height=if(client_height>scale(380,dpi)){scale(380,dpi)}else{client_height};
-    let origin_x=(width-form_width)/2;let origin_y=(client_height-form_height)/2;
+    let form_width=metrics::cap(width,720,dpi);
+    let form_height=metrics::cap(client_height,380,dpi);
+    let origin_x=metrics::center(width,form_width);let origin_y=metrics::center(client_height,form_height);
     let inset=scale(18,dpi);let button=scale(110,dpi);let copy_width=scale(76,dpi);let gap=scale(10,dpi);
     let height=scale(32,dpi);let footer=origin_y+form_height-inset-height;let file_x=origin_x+scale(62,dpi);
     let left=origin_x+inset;let right=origin_x+form_width-inset;

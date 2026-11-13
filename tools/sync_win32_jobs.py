@@ -4,13 +4,13 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=ROOT/'modules/win32_jobs'
 
-def files():
-    return sorted(p for directory in ('src','native','tests') for p in (SOURCE/directory).rglob('*') if p.is_file())
+def files(source=SOURCE):
+    return sorted(p for directory in ('src','native','tests') for p in (source/directory).rglob('*') if p.is_file())
 
-def install(target):
-    for source in files():
-        output=target/source.relative_to(SOURCE);output.parent.mkdir(parents=True,exist_ok=True)
-        output.write_bytes(source.read_bytes().replace(b'\r\n',b'\n'))
+def install(target,source=SOURCE):
+    for item in files(source):
+        output=target/item.relative_to(source);output.parent.mkdir(parents=True,exist_ok=True)
+        output.write_bytes(item.read_bytes().replace(b'\r\n',b'\n'))
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--check',action='store_true');args=parser.parse_args()

@@ -44,15 +44,16 @@ func TestWin32BundleTracksCanonicalSources(t *testing.T) {
 		if hex.EncodeToString(digest[:]) != want {
 			t.Errorf("embedded starter input %s changed; run go generate ./internal/projectscaffold", source)
 		}
-		if strings.HasPrefix(source, "modules/win32_jobs/src/") || strings.HasPrefix(source, "modules/win32_jobs/native/") || strings.HasPrefix(source, "modules/win32_jobs/tests/") {
-			snapshot := filepath.Join("../../examples/win32_hash", filepath.FromSlash(strings.TrimPrefix(source, "modules/win32_jobs/")))
+		if (strings.HasPrefix(source, "modules/win32_jobs/") || strings.HasPrefix(source, "modules/win32_ui/")) && !strings.HasSuffix(source, "README.md") {
+			parts := strings.SplitN(source, "/", 3)
+			snapshot := filepath.Join("../../examples/win32_hash", filepath.FromSlash(parts[2]))
 			copied, err := os.ReadFile(snapshot)
 			if err != nil || !bytes.Equal(bytes.ReplaceAll(copied, []byte("\r\n"), []byte("\n")), data) {
-				t.Errorf("Hash worker snapshot %s is stale; run python -B tools/sync_win32_jobs.py", source)
+				t.Errorf("Hash source snapshot %s is stale; run python -B tools/sync_%s.py", source, parts[1])
 			}
 		}
 	}
-	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app", "modules/win32_jobs"} {
+	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app", "modules/win32_jobs", "modules/win32_ui"} {
 		err := filepath.WalkDir(filepath.Join("../..", filepath.FromSlash(directory)), func(name string, entry fs.DirEntry, err error) error {
 			if err != nil {
 				return err

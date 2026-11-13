@@ -516,3 +516,9 @@ owned copied chunks before presenting progress. Native reads may read ahead;
 final source validation remains required before a usable hash. Safe-save policy
 stays in `saving.fy`, over the shared writer transport. These GUI changes were
 compiled; only headless jobs/native transport and existing CLI cases were run.
+
+Common Win32 window/control/text/focus/DPI/icon/accessibility operations now use
+`modules/win32_ui` snapshots (`tools/sync_win32_ui.py --check`). Hash retains its
+paint/tooltips/drop/command policy and uses shared Fairy window metrics. The
+production common C probe is `python -B tools/verify_win32_ui.py`; it does not
+create a window or use foreground/keyboard/clipboard operations.

@@ -1,4 +1,5 @@
 module ui;
+import window_metrics as metrics;
 unsafe extern C fn i32 desktop_system_dpi();
 unsafe extern C fn ptr mut void desktop_open(i32 width,i32 height);
 unsafe extern C fn i32 desktop_control(ptr mut void window,u32 kind,u32 id);
@@ -24,8 +25,8 @@ unsafe extern C fn i32 desktop_focus_next(ptr mut void window,u32 reverse);
 unsafe extern C fn void desktop_show(ptr mut void window);
 unsafe extern C fn void desktop_destroy(ptr mut void window);
 
-pub fn i32 scale(i32 value,i32 dpi){return (value*dpi+48)/96;}
-pub fn ptr mut void open(){let dpi=unsafe{desktop_system_dpi()};return if(dpi<96 || dpi>960){null}else{unsafe{desktop_open(scale(560,dpi),scale(350,dpi))}};}
+pub fn i32 scale(i32 value,i32 dpi){return metrics::scale(value,dpi);}
+pub fn ptr mut void open(){let dpi=unsafe{desktop_system_dpi()};return if(!metrics::valid_dpi(dpi)){null}else{unsafe{desktop_open(scale(560,dpi),scale(350,dpi))}};}
 pub fn bool text(ptr mut void window,u32 id,ref u8[] value){return unsafe{desktop_text(window,id,value as ptr u8,value.len)}==0;}
 fn bool name(ptr mut void window,u32 id,ref u8[] value){return unsafe{desktop_name(window,id,value as ptr u8,value.len)}==0;}
 pub fn usize read(ptr mut void window,ref mut u8[] output){return unsafe{desktop_read(window,102,output as ptr mut u8,output.len)};}
@@ -50,9 +51,9 @@ pub fn void destroy(ptr mut void window){unsafe{desktop_destroy(window)};}
 pub fn bool layout(ptr mut void window,i32 event){
     if(event==5 && unsafe{desktop_apply_dpi(window)}!=0){return false;}
     let width=unsafe{desktop_extent(window,0)};let height=unsafe{desktop_extent(window,1)};let dpi=unsafe{desktop_extent(window,2)};
-    if(width<0 || height<0 || dpi<96 || dpi>960){return false;}if(width==0 || height==0){return true;}
-    let w=if(width>scale(640,dpi)){scale(640,dpi)}else{width};let h=if(height>scale(350,dpi)){scale(350,dpi)}else{height};
-    let x=(width-w)/2;let y=(height-h)/2;let pad=scale(18,dpi);let button=scale(100,dpi);let gap=scale(10,dpi);
+    if(width<0 || height<0 || !metrics::valid_dpi(dpi)){return false;}if(width==0 || height==0){return true;}
+    let w=metrics::cap(width,640,dpi);let h=metrics::cap(height,350,dpi);
+    let x=metrics::center(width,w);let y=metrics::center(height,h);let pad=scale(18,dpi);let button=scale(100,dpi);let gap=scale(10,dpi);
     return unsafe{desktop_frame(window,scale(400,dpi),scale(330,dpi),scale(15,dpi))}==0 &&
         unsafe{desktop_move(window,101,x+pad,y+pad,w-pad*2,scale(24,dpi))}==0 &&
         unsafe{desktop_move(window,102,x+pad,y+scale(50,dpi),w-pad*2-button-gap,scale(32,dpi))}==0 &&

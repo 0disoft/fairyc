@@ -33,7 +33,7 @@ func TestWindowsHashUtility(t *testing.T) {
 		guiKind = "actual-win32-hash-slow-io"
 	}
 	for _, name := range []string{"fairy.toml", "fairy.windows.json", "src/main.fy", "src/hash_file.fy",
-		"src/sha256.fy", "src/sha256_stream.fy", "src/comparison.fy", "src/checksum.fy", "src/checksum_ui.fy", "src/jobs.fy", "src/publication.fy", "src/application.fy", "src/ui.fy", "src/progress.fy", "src/reader.fy", "src/writer.fy", "src/saving.fy", "native/writer.c", "native/reader.c", "native/window.c", "native/drop.c", "native/app.rc", "native/app.ico"} {
+		"src/sha256.fy", "src/sha256_stream.fy", "src/comparison.fy", "src/checksum.fy", "src/checksum_ui.fy", "src/jobs.fy", "src/publication.fy", "src/window_metrics.fy", "src/native_ui.fy", "native/ui_core.c", "native/ui_core.h", "src/application.fy", "src/ui.fy", "src/progress.fy", "src/reader.fy", "src/writer.fy", "src/saving.fy", "native/writer.c", "native/reader.c", "native/window.c", "native/drop.c", "native/app.rc", "native/app.ico"} {
 		data, err := os.ReadFile(filepath.Join("../../examples/win32_hash", name))
 		if err != nil {
 			t.Fatal(err)
