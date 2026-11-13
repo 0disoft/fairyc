@@ -56,7 +56,8 @@ END
 
 def prepare(root=ROOT):
     target, expected = root/'native/app.rc', resource_text(root)
-    if target.read_text(encoding='utf-8') != expected: target.write_text(expected,encoding='utf-8',newline='\n')
+    if not target.exists() or target.read_text(encoding='utf-8') != expected:
+        target.write_text(expected,encoding='utf-8',newline='\n')
 
 
 if __name__ == '__main__':

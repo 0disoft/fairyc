@@ -22,6 +22,7 @@ def verify(image, root=ROOT):
     if binary[:2] != b'MZ' or binary[pe:pe+4] != b'PE\0\0': raise RuntimeError('invalid PE image')
     machine, magic = struct.unpack_from('<H',binary,pe+4)[0],struct.unpack_from('<H',binary,pe+24)[0]
     subsystem = struct.unpack_from('<H',binary,pe+24+68)[0]
+    certificate_offset,certificate_bytes = struct.unpack_from('<II',binary,pe+24+112+4*8)
     if (machine,magic,subsystem) != (0x8664,0x20b,2): raise RuntimeError('expected x64 Windows-subsystem image')
     kernel,user,gdi,versions = (c.WinDLL(name,use_last_error=True) for name in ('kernel32','user32','gdi32','version'))
     # Both flags map resources only: no app entry point, imports or windows.
@@ -84,9 +85,10 @@ def verify(image, root=ROOT):
             raise RuntimeError(f'version field missing: {path}')
         return pointer,count.value
     pointer,length = query('\\')
+    if length < 52: raise RuntimeError('truncated fixed version info')
     fixed = struct.unpack('<13I',c.string_at(pointer,52))
     words = (numbers[0]<<16|numbers[1], numbers[2]<<16|numbers[3])
-    if length < 52 or fixed[0] != 0xfeef04bd or fixed[2:4] != words or fixed[4:6] != words:
+    if fixed[0] != 0xfeef04bd or fixed[2:4] != words or fixed[4:6] != words:
         raise RuntimeError('fixed version differs from fairy.toml')
     strings = {}
     for name,expected in expected_strings.items():
@@ -95,7 +97,8 @@ def verify(image, root=ROOT):
         if strings[name] != expected: raise RuntimeError(f'version text mismatch: {name}')
     return dict(ok=True,verification='fairy-hash-pe-resources',version=version,strings=strings,
                 iconSizes=sizes,iconBytes=len(ico),exeBytes=len(binary),sha256=hashlib.sha256(binary).hexdigest(),
-                subsystem='windows',architecture='x64',guiLaunched=False,inputInjected=False)
+                subsystem='windows',architecture='x64',certificateTablePresent=bool(certificate_offset or certificate_bytes),
+                guiLaunched=False,inputInjected=False)
 
 
 if __name__ == '__main__':
