@@ -48,8 +48,13 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   source/native-option checks are implemented; initial full low CLI acceptance
   passes. Final optimized replay and all six exact Go/candidate invocation
   comparisons also pass; item 2 is complete for desktop command/metadata parity.
-- 3: flat Result signed i32 error transport passes Go source/C/native/restored
-  checks. Candidate source/artifact/native and precise diagnostic/rollback gates
-  also pass; common CLI/cache acceptance is batched. Nested/composite
-  generic and inline families will be tracked separately, not implied by it.
-- 4–6: pending, in the order above.
+- 3: three concrete families are implemented and committed: flat Result signed
+  i32 errors, two-level Option transport, and straight-line inline local mutation.
+  Both producer/consumer profiles pass source/artifact/native checks. The shared
+  complete optimized CLI/cache replay also passes 27 CLI processes and six
+  standalone products; see `extended-transport-cli-20261114.md`. Unrestricted
+  composite generic arguments, inline branches/loops and inline-to-inline calls
+  across modules remain explicitly outside these bounded contracts.
+- 4: direct copied-closure u32 signatures/captures are in progress. First-class
+  descriptor ABI widening is not implied by this direct-call family.
+- 5–6: pending, in the order above.
