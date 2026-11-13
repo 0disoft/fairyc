@@ -17,7 +17,9 @@ import (
 	"github.com/0disoft/fairyc/internal/cstdlib"
 )
 
-func TestCandidateCopiedClosurePipeline(t *testing.T) {
+func TestCandidateCopiedClosurePipeline(t *testing.T)    { runCandidateCopiedClosurePipeline(t, false) }
+func TestCandidateCopiedClosureU32Pipeline(t *testing.T) { runCandidateCopiedClosurePipeline(t, true) }
+func runCandidateCopiedClosurePipeline(t *testing.T, wide bool) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private compiler-host replay currently requires Windows AMD64; Linux deferred")
 	}
@@ -54,6 +56,13 @@ func TestCandidateCopiedClosurePipeline(t *testing.T) {
 	vectorFunction = strings.Replace(vectorFunction, "for(let ref i32 item in ref items){", "let ref v::Vec<i32> loop_view=ref items;for(let ref i32 item in loop_view){", 1)
 	source = strings.Replace(source, "module root;", "module root;import std::vec as v;"+viewFunction+vectorFunction, 1)
 	source = strings.Replace(source, "return keep<i32>(add(2));", "assert(for_in()==42 && vector_for_in()==42);return keep<i32>(add(2));", 1)
+	if wide {
+		source = strings.Replace(source, "return keep<i32>(add(2));", "assert(u32_captures()==42);return keep<i32>(add(2));", 1)
+		source += `fn i32 u32_captures(){var u32 offset=40;let add=fn [u32 offset] u32(u32 value){let u32 sum=offset+value;return sum;};offset=100;assert(add(1)==41 && add(2)==42);let identity=fn [] u32(u32 value){return value;};assert(identity(4294967295)==4294967295);let u32 a=1;let u32 b=2;let u32 c=3;let u32 d=4;let full=fn [u32 a,u32 b,u32 c,u32 d] u32(u32 w,u32 x,u32 y,u32 z){return a+b+c+d+w+x+y+z;};assert(full(5,6,7,14)==42);return 42;}`
+	}
+	if wide && !strings.Contains(source, "assert(u32_captures()==42);") {
+		t.Fatal("u32 runtime assertions are not reachable from main")
+	}
 	observer := "static int32_t position=0;int32_t ordered(int32_t index){return ++position==index?index:-1000;}int32_t finished(void){return position;}"
 
 	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console,filesystem) fn i32 main(){emit_closures(b" + strconv.Quote(source) + ",b" + strconv.Quote(string(sdk)) + ");return 0;}\n"

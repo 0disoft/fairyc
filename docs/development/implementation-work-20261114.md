@@ -55,6 +55,10 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   standalone products; see `extended-transport-cli-20261114.md`. Unrestricted
   composite generic arguments, inline branches/loops and inline-to-inline calls
   across modules remain explicitly outside these bounded contracts.
-- 4: direct copied-closure u32 signatures/captures are in progress. First-class
-  descriptor ABI widening is not implied by this direct-call family.
-- 5–6: pending, in the order above.
+- 4: direct copied-closure u32 signatures/captures pass Go and Fairy source,
+  restore and all four native producer/consumer combinations. A stale Vec SDK
+  pin/data pair was also synchronized against the owning SDK. First-class
+  descriptor ABI widening remains separate from this direct-call family.
+- 5: Linux portable filesystem implementation is next; WSL discovery timed out,
+  so native Linux execution cannot currently be claimed.
+- 6: pending, in the order above.
