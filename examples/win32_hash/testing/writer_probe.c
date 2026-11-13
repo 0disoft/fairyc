@@ -3,13 +3,13 @@
 
 #define CHECK(test) do { if (!(test)) { fprintf(stderr, "writer check failed at %d: %s (error=%lu)\n", __LINE__, #test, GetLastError()); return 1; } } while (0)
 static BOOL operation(writer *value, uint32_t code, const uint8_t *path, size_t count) {
-    if (hash_writer_submit(value, code, path, count) || WaitForSingleObject(value->ready, 3000)) { return FALSE; }
+    if (job_writer_submit(value, code, path, count) || WaitForSingleObject(value->ready, 3000)) { return FALSE; }
     return value->result.error == 0;
 }
 static BOOL finish(writer *value, BOOL cancel) {
-    hash_writer_finish(value, cancel);
+    job_writer_finish(value, cancel);
     if (WaitForSingleObject(value->done, 3000) || value->result.error) { return FALSE; }
-    hash_writer_drop(value); return TRUE;
+    job_writer_drop(value); return TRUE;
 }
 int wmain(int argc, WCHAR **argv) {
     CHECK(argc == 2);
@@ -20,9 +20,9 @@ int wmain(int argc, WCHAR **argv) {
     CHECK(tlength > 0);
     const uint8_t data[] = "prepared new report\n";
     for (int pass = 0; pass < 3; ++pass) {
-        writer *value = hash_writer_open(target, (size_t)length-1, data, sizeof(data)-1);
+        writer *value = job_writer_open(target, (size_t)length-1, data, sizeof(data)-1);
         CHECK(value != NULL);
-        CHECK(hash_writer_open(target, (size_t)length-1, data, sizeof(data)-1) == NULL);
+        CHECK(job_writer_open(target, (size_t)length-1, data, sizeof(data)-1) == NULL);
         CHECK(operation(value, 1, NULL, 0) && value->result.exists == 1);
         CHECK(operation(value, 2, temp, (size_t)tlength-1));
         CHECK(operation(value, 3, NULL, 0) && operation(value, 4, NULL, 0));

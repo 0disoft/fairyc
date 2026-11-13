@@ -3,6 +3,7 @@ import hash_file as hash;
 import sha256_stream as sha;
 import ui as ui;
 import reader as reader;
+import jobs as jobs;
 import saving as saving;
 import comparison as comparison;
 import checksum as checksum;
@@ -26,44 +27,29 @@ pub fn bool error(ptr mut void window,u32 code){
 @effects(filesystem,clock)
 pub fn Result<hash::Digest,u32> compute(ref u8[] path,ptr mut void window) {
     let input=switch(reader::open(path)){case .ok(v):{v}case .err(e):{return .err(e);}};
-    var usize total=0;var bool opened=false;
     var sha::State state=sha::empty();var bytes::Buffer buffer=bytes::empty();
     if(!bytes::resize_zeroed(ref mut buffer,65536).is_ok){return .err(5);}
-    let started=ui::ticks();var usize displayed=started;
-    if(!ui::progress(window,0,total,0)){return .err(5);}
-    var observed=reader::observe(ref input);
-    var first=observed;
+    let started=ui::ticks();var usize displayed=started;var jobs::State work=jobs::begin(started);
+    if(!ui::progress(window,0,0,0)){return .err(5);}
     while(true) {
-        let event=ui::poll(window,0);if(event==3 || event==7){return .err(8);}
+        let event=ui::poll(window,0);
+        if(event==3 || event==7){jobs::cancel(ref mut work);return .err(work.error);}
         if((event==4 || event==5) && !ui::layout(window,event)){return .err(5);}
-        observed=reader::observe(ref input);
-        if(observed.phase==4){return .err(2);}
-        if(observed.phase==6){return .err(11);}
-        if(observed.phase==1){
-            if(observed.kind!=1 || observed.directory!=0){return .err(3);}
-            total=observed.size;opened=true;first=observed;
-            if(!reader::next(ref input)){return .err(2);}
-        }
-        if(observed.phase==2){
-            if(!opened || observed.count>65536 || !reader::copy(ref input,bytes::view_mut(ref mut buffer))){return .err(2);}
-            let ref u8[] data=bytes::view(ref buffer);
-            if(!sha::update(ref mut state,data[..observed.count])){return .err(4);}
-            if(!reader::next(ref input)){return .err(2);}
+        let action=jobs::poll(ref input,ref mut work,bytes::view_mut(ref mut buffer));
+        if(action==4){return .err(work.error);}
+        if(action==2){
+            if(!sha::update(ref mut state,bytes::view(ref buffer)[..work.count])){return .err(4);}
         }
         let now=ui::ticks();
-        if(now-displayed>=100 || observed.phase==3) {
-            if(!ui::progress(window,state.length,total,now-started)){return .err(5);}displayed=now;
+        if(now-displayed>=100 || action==5){
+            if(!ui::progress(window,work.done,work.total,jobs::elapsed(ref work,now))){return .err(5);}displayed=now;
         }
-        if(observed.phase==3){
-            if(!reader::unchanged(ref first,ref observed) || state.length!=total){return .err(11);}
-            if(!reader::next(ref input)){return .err(2);}
-        }
-        if(observed.phase==5){break;}
-        if(observed.phase==0){reader::wait(ref input);}
+        if(action==5){break;}
+        if(action==0){reader::wait(ref input);}
     }
-    if(!opened || state.length!=total || !reader::unchanged(ref first,ref observed)){return .err(11);}
-    let identity=fs::FileId{.volume_low=observed.volume_low,.volume_high=observed.volume_high,
-        .file_low_0=observed.file_low_0,.file_low_1=observed.file_low_1,.file_high_0=observed.file_high_0,.file_high_1=observed.file_high_1};
+    if(state.length!=work.total){return .err(11);}
+    let identity=fs::FileId{.volume_low=work.first.volume_low,.volume_high=work.first.volume_high,
+        .file_low_0=work.first.file_low_0,.file_low_1=work.first.file_low_1,.file_high_0=work.first.file_high_0,.file_high_1=work.first.file_high_1};
     return .ok(hash::Digest{.words=sha::finish(ref state),.length=state.length,.identity});
 }
 

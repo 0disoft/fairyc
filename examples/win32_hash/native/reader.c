@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-// Win32 I/O transport only. Fairy owns chunk consumption, hashing and policy.
+// Win32 I/O transport only. Fairy owns chunk consumption and product policy.
 // The worker never holds a Fairy buffer, callback or window handle.
 typedef struct {
     uint32_t phase, error, kind, directory;
@@ -120,7 +120,7 @@ static DWORD WINAPI cancel_reader(void *context) {
     return 0;
 }
 
-void *hash_reader_open(const uint8_t *path, size_t length) {
+void *job_reader_open(const uint8_t *path, size_t length) {
     if (!path || !length || length > 131071 || memchr(path, 0, length)) { return NULL; }
     if (InterlockedIncrement(&live_readers) > 2) { InterlockedDecrement(&live_readers); return NULL; }
     reader *value = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*value));
@@ -149,21 +149,22 @@ void *hash_reader_open(const uint8_t *path, size_t length) {
     return value;
 }
 
-int32_t hash_reader_available(void) { return InterlockedCompareExchange(&live_readers, 0, 0) < 2; }
+int32_t job_reader_available(void) { return InterlockedCompareExchange(&live_readers, 0, 0) < 2; }
+size_t job_reader_ticks(void) { return (size_t)GetTickCount64(); }
 
-observation hash_reader_observe(void *context) {
+observation job_reader_observe(void *context) {
     reader *value = context;
     observation empty = {0};
     if (!value || WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0) { return empty; }
     return value->result; // Immutable until the GUI acknowledges with next().
 }
 
-void hash_reader_snapshot(void *context, void *output) {
-    observation value = hash_reader_observe(context);
+void job_reader_snapshot(void *context, void *output) {
+    observation value = job_reader_observe(context);
     memcpy(output, &value, sizeof(value));
 }
 
-int32_t hash_reader_copy(void *context, uint8_t *output, size_t capacity) {
+int32_t job_reader_copy(void *context, uint8_t *output, size_t capacity) {
     reader *value = context;
     if (!value || !output || WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0 ||
         value->result.phase != 2 || value->result.count > capacity) { return 1; }
@@ -171,7 +172,7 @@ int32_t hash_reader_copy(void *context, uint8_t *output, size_t capacity) {
     return 0;
 }
 
-int32_t hash_reader_next(void *context) {
+int32_t job_reader_next(void *context) {
     reader *value = context;
     if (!value || WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0 ||
         (value->result.phase != 1 && value->result.phase != 2 && value->result.phase != 3)) { return 1; }
@@ -179,12 +180,12 @@ int32_t hash_reader_next(void *context) {
     return SetEvent(value->request) ? 0 : 1;
 }
 
-void hash_reader_wait(void *context) {
+void job_reader_wait(void *context) {
     reader *value = context;
     if (value) { MsgWaitForMultipleObjectsEx(1, &value->ready, 16, QS_ALLINPUT, MWMO_INPUTAVAILABLE); }
 }
 
-void hash_reader_drop(void *context) {
+void job_reader_drop(void *context) {
     reader *value = context;
     if (!value) { return; }
     InterlockedExchange(&value->cancelled, 1);
@@ -196,21 +197,21 @@ void hash_reader_drop(void *context) {
 
 // Synchronous CLI guard: use only owned Win32 handles, never std::fs internals.
 typedef struct { HANDLE file; WCHAR *path; observation initial; } source_guard;
-void hash_source_drop(void *context) {
+void job_source_drop(void *context) {
     source_guard *value = context;
     if (!value) { return; }
     if (value->file != INVALID_HANDLE_VALUE) { CloseHandle(value->file); }
     HeapFree(GetProcessHeap(), 0, value->path); HeapFree(GetProcessHeap(), 0, value);
 }
-void *hash_source_open(const uint8_t *path, size_t length) {
+void *job_source_open(const uint8_t *path, size_t length) {
     if (!path || !length || length > 131071 || memchr(path, 0, length)) { return NULL; }
     source_guard *value = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*value));
     if (!value) { return NULL; }
     value->file = INVALID_HANDLE_VALUE;
     value->path = HeapAlloc(GetProcessHeap(), 0, (length+1)*sizeof(WCHAR));
-    if (!value->path) { hash_source_drop(value); return NULL; }
+    if (!value->path) { job_source_drop(value); return NULL; }
     int count = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (const char *)path, (int)length, value->path, (int)length);
-    if (!count) { hash_source_drop(value); return NULL; }
+    if (!count) { job_source_drop(value); return NULL; }
     value->path[count] = 0;
     value->file = CreateFileW(value->path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     value->initial.phase = 1;
@@ -219,7 +220,7 @@ void *hash_source_open(const uint8_t *path, size_t length) {
     }
     return value;
 }
-void hash_source_snapshot(void *context, void *output, uint32_t refresh) {
+void job_source_snapshot(void *context, void *output, uint32_t refresh) {
     source_guard *value = context;
     observation result = value->initial;
     if (refresh && result.phase != 4) {

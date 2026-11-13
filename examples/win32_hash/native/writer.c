@@ -133,7 +133,7 @@ static DWORD WINAPI writer_cancel(void *context) {
     if (writer_cancelled(value)) { CancelSynchronousIo(value->thread); }
     writer_release(value); return 0;
 }
-void *hash_writer_open(const uint8_t *target, size_t length, const uint8_t *data, size_t count) {
+void *job_writer_open(const uint8_t *target, size_t length, const uint8_t *data, size_t count) {
     if (!data || !count || count > 1048576) { return NULL; }
     if (InterlockedIncrement(&live_writers) != 1) { InterlockedDecrement(&live_writers); return NULL; }
     writer *value = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*value));
@@ -157,7 +157,7 @@ void *hash_writer_open(const uint8_t *target, size_t length, const uint8_t *data
     }
     CloseHandle(cancel); return value;
 }
-int32_t hash_writer_submit(void *context, uint32_t operation, const uint8_t *path, size_t length) {
+int32_t job_writer_submit(void *context, uint32_t operation, const uint8_t *path, size_t length) {
     writer *value = context;
     if (!value || operation < 1 || operation > 5 || InterlockedCompareExchange(&value->stopping, 0, 0) ||
         WaitForSingleObject(value->ready, 0) != WAIT_OBJECT_0) { return 1; }
@@ -169,23 +169,23 @@ int32_t hash_writer_submit(void *context, uint32_t operation, const uint8_t *pat
     memset(&value->result, 0, sizeof(value->result)); value->operation = operation;
     ResetEvent(value->ready); return SetEvent(value->request) ? 0 : 1;
 }
-void hash_writer_snapshot(void *context, void *output) {
+void job_writer_snapshot(void *context, void *output) {
     writer *value = context; writer_observation empty = {0};
     if (WaitForSingleObject(value->done, 0) == WAIT_OBJECT_0 ||
         (!InterlockedCompareExchange(&value->stopping, 0, 0) && WaitForSingleObject(value->ready, 0) == WAIT_OBJECT_0)) {
         memcpy(output, &value->result, sizeof(value->result));
     } else { memcpy(output, &empty, sizeof(empty)); }
 }
-void hash_writer_finish(void *context, uint32_t cancel) {
+void job_writer_finish(void *context, uint32_t cancel) {
     writer *value = context;
     if (cancel) { InterlockedExchange(&value->cancelled, 1); }
     InterlockedExchange(&value->stopping, 1); SetEvent(value->request); SetEvent(value->stop);
 }
-void hash_writer_wait(void *context) {
+void job_writer_wait(void *context) {
     writer *value = context;
     HANDLE event = InterlockedCompareExchange(&value->stopping, 0, 0) ? value->done : value->ready;
     MsgWaitForMultipleObjectsEx(1, &event, 16, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
 }
-void hash_writer_drop(void *context) {
-    if (context) { hash_writer_finish(context, 0); writer_release(context); }
+void job_writer_drop(void *context) {
+    if (context) { job_writer_finish(context, 0); writer_release(context); }
 }
