@@ -15,6 +15,7 @@ static struct {
     HWND window, tooltip;
     WCHAR *tooltip_text;
     HFONT font, heading, mono;
+    HICON icon_large, icon_small;
     HBRUSH background, paper;
     BOOL high_contrast, cancel_requested;
     uint32_t tone;
@@ -219,6 +220,30 @@ static BOOL child(HWND window, LPCWSTR kind, DWORD style, int id) {
         WS_CHILD | WS_VISIBLE | style, 0, 0, 0, 0, window, (HMENU)(INT_PTR)id, GetModuleHandleW(NULL), NULL) != NULL;
 }
 
+static BOOL window_icons(HWND window) {
+    UINT dpi = GetDpiForWindow(window);
+    HINSTANCE instance = GetModuleHandleW(NULL);
+    HICON icon_large = LoadImageW(instance, MAKEINTRESOURCEW(1), IMAGE_ICON,
+        GetSystemMetricsForDpi(SM_CXICON, dpi), GetSystemMetricsForDpi(SM_CYICON, dpi), 0);
+    HICON icon_small = LoadImageW(instance, MAKEINTRESOURCEW(1), IMAGE_ICON,
+        GetSystemMetricsForDpi(SM_CXSMICON, dpi), GetSystemMetricsForDpi(SM_CYSMICON, dpi), 0);
+    if (!icon_large || !icon_small) {
+        if (icon_large) { DestroyIcon(icon_large); } if (icon_small) { DestroyIcon(icon_small); }
+        return FALSE;
+    }
+    SendMessageW(window, WM_SETICON, ICON_BIG, (LPARAM)icon_large);
+    SendMessageW(window, WM_SETICON, ICON_SMALL, (LPARAM)icon_small);
+    if (state.icon_large) { DestroyIcon(state.icon_large); }
+    if (state.icon_small) { DestroyIcon(state.icon_small); }
+    state.icon_large = icon_large; state.icon_small = icon_small;
+    return TRUE;
+}
+
+static void close_icons(void) {
+    if (state.icon_large) { DestroyIcon(state.icon_large); state.icon_large = NULL; }
+    if (state.icon_small) { DestroyIcon(state.icon_small); state.icon_small = NULL; }
+}
+
 void *hash_ui_open(int32_t width, int32_t height) {
     INITCOMMONCONTROLSEX controls = {sizeof(controls), ICC_STANDARD_CLASSES | ICC_BAR_CLASSES | ICC_PROGRESS_CLASS};
     if (!InitCommonControlsEx(&controls)) { return NULL; }
@@ -246,9 +271,10 @@ void *hash_ui_open(int32_t width, int32_t height) {
         child(window, PROGRESS_CLASSW, PBS_SMOOTH, 213) && child(window, L"BUTTON", WS_TABSTOP, 212)) {
         state.window = window;
         SendDlgItemMessageW(window, 213, PBM_SETRANGE32, 0, 100);
-        if (open_tooltip(window)) { return window; }
+        if (open_tooltip(window) && window_icons(window)) { return window; }
     }
     if (window) { DestroyWindow(window); }
+    close_icons();
     UnregisterClassW(type.lpszClassName, type.hInstance);
     return NULL;
 }
@@ -441,7 +467,8 @@ int32_t hash_ui_layout(void *window, int32_t minimum_width, int32_t minimum_heig
 int32_t hash_ui_accept_dpi(void *window) {
     RECT r = state.suggested;
     return r.right > r.left && r.bottom > r.top &&
-        SetWindowPos((HWND)window, NULL, r.left, r.top, r.right-r.left, r.bottom-r.top, SWP_NOZORDER | SWP_NOACTIVATE) ? 0 : 1;
+        SetWindowPos((HWND)window, NULL, r.left, r.top, r.right-r.left, r.bottom-r.top, SWP_NOZORDER | SWP_NOACTIVATE) &&
+        window_icons((HWND)window) ? 0 : 1;
 }
 
 size_t hash_ui_dialog(void *window, uint32_t save, const uint8_t *initial, size_t initial_length, uint8_t *output, size_t capacity) {
@@ -492,6 +519,7 @@ void hash_ui_destroy(void *window) {
     state.tooltip = NULL;
     if (state.tooltip_text) { HeapFree(GetProcessHeap(), 0, state.tooltip_text); state.tooltip_text = NULL; }
     if (IsWindow((HWND)window)) { DestroyWindow((HWND)window); }
+    close_icons();
     if (state.font) { DeleteObject(state.font); state.font = NULL; }
     if (state.heading) { DeleteObject(state.heading); state.heading = NULL; }
     if (state.mono) { DeleteObject(state.mono); state.mono = NULL; }
