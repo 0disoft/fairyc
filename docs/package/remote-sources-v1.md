@@ -6,6 +6,11 @@
 - Source owner: `internal/packagesource/`; CLI: `fairyc experimental fetch-packages [--offline]`.
 - Does not change manifest v1, generated graph lock v1 or stable build networking.
 
+For the separate Go Stage 0 local signed-catalog resolver, read-only update
+proposals and immutable local Git ZIP preparation, see
+[local preparation v1](local-registry-preparation-v1.md). Their outputs still
+use the exact source-pin contract below; ordinary fetch does not query a registry.
+
 ## Source pins and resolution
 
 Commit a `fairy.sources.json` beside `fairy.toml`:

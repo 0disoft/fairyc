@@ -66,4 +66,12 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   probes are added but skipped here after WSL discovery timed out; native Linux
   execution and target promotion remain unclaimed. See the four Linux filesystem
   receipts, ending with `linux-directory-paths-20261114.md`.
-- 6: pending, in the order above.
+- 6: stable range selection, signed local catalog/trust verification, immutable
+  exact-pin resolution, read-only update proposals and local immutable Git ZIP
+  preparation are implemented in separate commits. Three Go Stage 0 experimental
+  commands pass seven actual CLI process replays, including generated ZIP
+  consumption through the existing offline fetcher. Full package-source and
+  component-contract suites pass. See `local-package-preparation-20261114.md`.
+  Fairy-authored candidate exposure of these new preparation commands, remote
+  registry/Git service transport, key distribution and automatic update application
+  remain separate from the completed local preparation contract.
