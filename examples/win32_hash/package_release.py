@@ -7,18 +7,20 @@ import subprocess
 import tempfile
 import zipfile
 from prepare_resources import ROOT,metadata,prepare
+from app_settings import load
 from verify_resources import verify as verify_resources
 from verify_package import payload,verify as verify_package
 
 
-def package(image, output):
-    version,_,_ = metadata()
-    pe = verify_resources(image)
+def package(image, output, root=ROOT):
+    app = load(root)
+    version,_,_ = metadata(root)
+    pe = verify_resources(image,root)
     if pe['certificateTablePresent']:
         raise RuntimeError('this unsigned-package template does not describe signed images; update distribution instructions first')
-    files = payload(image)
+    files = payload(image,root)
     output.mkdir(parents=True,exist_ok=True)
-    archive = output/f'fairy-hash-{version}-windows-x64.zip'
+    archive = output/f'{app.package_name}-{version}-windows-x64.zip'
     with tempfile.TemporaryDirectory(prefix='.fairy-package-',dir=output) as directory:
         pending = Path(directory)/archive.name
         with zipfile.ZipFile(pending,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as bundle:
@@ -28,7 +30,7 @@ def package(image, output):
                 entry.external_attr = (0o100755 if name.endswith('.exe') else 0o100644)<<16
                 entry.compress_type = zipfile.ZIP_DEFLATED
                 bundle.writestr(entry,data,compresslevel=9)
-        result = verify_package(pending)
+        result = verify_package(pending,root)
         checksum = archive.with_suffix(archive.suffix+'.sha256')
         sidecar = Path(directory)/checksum.name
         sidecar.write_text(f'{result["zipSha256"]}  {archive.name}\n',encoding='ascii',newline='\n')

@@ -1,10 +1,10 @@
-Fairy Hash @VERSION@ — Windows x64
+@PRODUCT@ @VERSION@ — Windows x64
 
 파일의 SHA-256 해시를 계산하는 작은 휴대용 프로그램입니다.
 Windows 10 1703 이상(x64)에서 사용할 수 있습니다. 설치는 필요하지 않습니다.
 
 사용 방법
-1. ZIP을 원하는 폴더에 모두 풀고 FairyHash.exe를 실행하세요.
+1. ZIP을 원하는 폴더에 모두 풀고 @EXECUTABLE@를 실행하세요.
 2. '파일 열기'에서 파일을 선택하면 해시와 파일 크기가 표시됩니다.
 3. '복사'는 SHA-256 값만 복사하고, '결과 저장'은 UTF-8 JSON 보고서를 저장합니다.
 4. 계산 중 '취소'를 누르면 창을 유지한 채 작업을 취소합니다.
@@ -14,15 +14,15 @@ Alt+O: 파일 열기 / Alt+C: 해시 복사 / Alt+S: 결과 저장 / Alt+X: 취�
 Tab·Shift+Tab: 포커스 이동 / Enter: 포커스된 버튼 실행
 
 명령줄 사용 (PowerShell)
-.\FairyHash.exe --hash "C:\data\input.bin"
-.\FairyHash.exe --hash "C:\data\input.bin" "C:\data\result.json"
+& ".\@EXECUTABLE@" --hash "C:\data\input.bin"
+& ".\@EXECUTABLE@" --hash "C:\data\input.bin" "C:\data\result.json"
 
 계산 중 원본 변경이 감지되면 결과 복사·저장을 막습니다. 파일 쓰기가 끝난 뒤
 다시 계산하세요. 원본 파일이나 같은 파일의 하드링크에는 보고서를 덮어쓰지 않습니다.
 저장할 수 없다면 쓰기 권한과 저장 위치를 확인하세요.
 
 배포 파일
-FairyHash.exe: 실행 파일
+@EXECUTABLE@: 실행 파일
 README.txt: 이 안내문
 LICENSE.txt: Apache License 2.0 전문
 SHA256SUMS.txt: 위 세 파일의 SHA-256 체크섬
