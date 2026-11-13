@@ -41,4 +41,11 @@ source/image identity retained in `low/host.json` in that directory.
 After that replay, empty `--template` validation was moved ahead of name/UID
 checks to match Go's invocation precedence. The optimized host replay includes
 six exact Go/candidate invocation comparisons before the same package verifier;
-that final replay is still in progress at this commit.
+that final replay passed in 568.2s. All six invocation stderr/stdout/exit results
+match the current Go CLI exactly. The repeated package verifier again passed all
+26 CLI / 12 save / 9 read cases, with the same 192000-byte EXE and 100200-byte ZIP.
+Final evidence is `.cache/candidate-desktop-cli-20261114.log` and
+`.cache/desktop-cli-20261114/acceptance.json`, with exact host C/image identity in
+`optimized/host.json`. Both native producer profiles have now exercised the full
+desktop workflow. Only the final optimized host includes the empty-template
+precedence correction. No screen, keyboard, clipboard or GUI launch was used.
