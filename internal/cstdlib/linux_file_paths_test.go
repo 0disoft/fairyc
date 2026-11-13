@@ -25,13 +25,18 @@ func TestLinuxFilePathsModel(t *testing.T) {
 			body.WriteString(line + "\n")
 		}
 	}
+	runWindowsFilesystemModel(t, linuxFilePathsModelPrelude+body.String()+linuxFilePathsModelMain)
+}
+
+func runWindowsFilesystemModel(t *testing.T, source string) {
+	t.Helper()
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		t.Run(profile.Name, func(t *testing.T) {
-			image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, linuxFilePathsModelPrelude+body.String()+linuxFilePathsModelMain)
+			image, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, source)
 			if err != nil {
 				t.Fatal(err)
 			}

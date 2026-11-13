@@ -54,6 +54,9 @@ var stage0LinuxFilePortable string
 //go:embed stage0_linux_file_paths.c
 var stage0LinuxFilePaths string
 
+//go:embed stage0_linux_file_metadata.c
+var stage0LinuxFileMetadata string
+
 //go:embed stage0_linux_file_probe.c
 var stage0LinuxFileProbe string
 
@@ -464,6 +467,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Linux File", source, err
 	case cstdlibcontract.ComponentLinuxFilePaths:
 		return "Linux File paths", stage0LinuxFilePaths, nil
+	case cstdlibcontract.ComponentLinuxFileMetadata:
+		return "Linux File metadata", stage0LinuxFileMetadata, nil
 	case cstdlibcontract.ComponentWindowsConsole:
 		return "Windows console", stage0WindowsConsole, nil
 	case cstdlibcontract.ComponentWindowsFile:

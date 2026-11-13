@@ -24,6 +24,20 @@ func TestPortableFilesystemPathSymbols(t *testing.T) {
 	}
 }
 
+func TestPortableFilesystemMetadataSymbols(t *testing.T) {
+	for _, name := range []string{"kind", "read_only", "set_readonly", "link_count", "alloc_size", "path_kind", "id", "set_len"} {
+		symbol := "fy_std_windows_file_" + name + "_v0"
+		linux, err := ComponentsForSymbols([]string{symbol})
+		if err != nil || !slices.Equal(linux, []Component{ComponentLinuxFile, ComponentLinuxFileMetadata}) {
+			t.Fatalf("Linux metadata closure %s: %v %v", symbol, linux, err)
+		}
+		windows, err := WindowsMSVCComponentsForSymbols([]string{symbol})
+		if err != nil || !slices.Equal(windows, []Component{ComponentWindowsFile}) {
+			t.Fatalf("Windows metadata closure %s: %v %v", symbol, windows, err)
+		}
+	}
+}
+
 func TestFileBufferComponentsForBothTargets(t *testing.T) {
 	const symbol = "fy_std_file_read_append_v0"
 	if !AdmittedForTarget(symbol, target.X8664LinuxGNU) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {

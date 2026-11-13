@@ -15,6 +15,7 @@ const (
 	ComponentLinuxConsole       Component = "linux-console"
 	ComponentLinuxFile          Component = "linux-file"
 	ComponentLinuxFilePaths     Component = "linux-file-paths"
+	ComponentLinuxFileMetadata  Component = "linux-file-metadata"
 	ComponentLinuxFileBuffer    Component = "linux-file-buffer"
 	ComponentLinuxProcessArgs   Component = "linux-process-args"
 	ComponentWindowsConsole     Component = "windows-console"
@@ -31,6 +32,14 @@ const (
 )
 
 var symbolComponents = map[string]Component{
+	"fy_std_windows_file_kind_v0":         ComponentLinuxFileMetadata,
+	"fy_std_windows_file_read_only_v0":    ComponentLinuxFileMetadata,
+	"fy_std_windows_file_set_readonly_v0": ComponentLinuxFileMetadata,
+	"fy_std_windows_file_link_count_v0":   ComponentLinuxFileMetadata,
+	"fy_std_windows_file_alloc_size_v0":   ComponentLinuxFileMetadata,
+	"fy_std_windows_file_path_kind_v0":    ComponentLinuxFileMetadata,
+	"fy_std_windows_file_id_v0":           ComponentLinuxFileMetadata,
+	"fy_std_windows_file_set_len_v0":      ComponentLinuxFileMetadata,
 	// Legacy ABI spellings exposed by the portable std::fs facade.
 	"fy_std_windows_file_copy_bytes_v0":    ComponentLinuxFilePaths,
 	"fy_std_windows_file_rename_v0":        ComponentLinuxFilePaths,
@@ -122,14 +131,6 @@ var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_file_read_append_v0":  ComponentWindowsFileBuffer,
 	"fy_std_windows_file_position_v0":     ComponentWindowsFile,
 	"fy_std_windows_file_size_v0":         ComponentWindowsFile,
-	"fy_std_windows_file_kind_v0":         ComponentWindowsFile,
-	"fy_std_windows_file_read_only_v0":    ComponentWindowsFile,
-	"fy_std_windows_file_set_readonly_v0": ComponentWindowsFile,
-	"fy_std_windows_file_link_count_v0":   ComponentWindowsFile,
-	"fy_std_windows_file_alloc_size_v0":   ComponentWindowsFile,
-	"fy_std_windows_file_path_kind_v0":    ComponentWindowsFile,
-	"fy_std_windows_file_id_v0":           ComponentWindowsFile,
-	"fy_std_windows_file_set_len_v0":      ComponentWindowsFile,
 	"fy_std_windows_file_seek_current_v0": ComponentWindowsFile,
 	"fy_std_windows_file_seek_end_v0":     ComponentWindowsFile,
 	"fy_std_windows_file_seek_start_v0":   ComponentWindowsFile,
@@ -246,6 +247,7 @@ var componentLinkOrder = []Component{
 	ComponentLinuxConsole,
 	ComponentLinuxFile,
 	ComponentLinuxFilePaths,
+	ComponentLinuxFileMetadata,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
 	ComponentWindowsDirectory,
@@ -343,7 +345,7 @@ func componentsInLinkOrder(required map[Component]struct{}) []Component {
 func addComponentClosure(required map[Component]struct{}, component Component) {
 	required[component] = struct{}{}
 	switch component {
-	case ComponentLinuxFilePaths:
+	case ComponentLinuxFilePaths, ComponentLinuxFileMetadata:
 		required[ComponentLinuxFile] = struct{}{}
 	case ComponentLinuxProcessArgs:
 		required[ComponentTextView] = struct{}{}
