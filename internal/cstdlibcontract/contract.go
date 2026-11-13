@@ -16,6 +16,7 @@ const (
 	ComponentLinuxFile          Component = "linux-file"
 	ComponentLinuxFilePaths     Component = "linux-file-paths"
 	ComponentLinuxFileMetadata  Component = "linux-file-metadata"
+	ComponentLinuxDirectory     Component = "linux-directory"
 	ComponentLinuxFileBuffer    Component = "linux-file-buffer"
 	ComponentLinuxProcessArgs   Component = "linux-process-args"
 	ComponentWindowsConsole     Component = "windows-console"
@@ -32,6 +33,10 @@ const (
 )
 
 var symbolComponents = map[string]Component{
+	"fy_std_windows_read_dir_open_v0":     ComponentLinuxDirectory,
+	"fy_std_windows_read_dir_next_v0":     ComponentLinuxDirectory,
+	"fy_std_windows_read_dir_close_v0":    ComponentLinuxDirectory,
+	"fy_std_windows_read_dir_drop_v0":     ComponentLinuxDirectory,
 	"fy_std_windows_file_kind_v0":         ComponentLinuxFileMetadata,
 	"fy_std_windows_file_read_only_v0":    ComponentLinuxFileMetadata,
 	"fy_std_windows_file_set_readonly_v0": ComponentLinuxFileMetadata,
@@ -113,10 +118,6 @@ var symbolComponents = map[string]Component{
 }
 
 var windowsOnlySymbolComponents = map[string]Component{
-	"fy_std_windows_read_dir_open_v0":     ComponentWindowsDirectory,
-	"fy_std_windows_read_dir_next_v0":     ComponentWindowsDirectory,
-	"fy_std_windows_read_dir_close_v0":    ComponentWindowsDirectory,
-	"fy_std_windows_read_dir_drop_v0":     ComponentWindowsDirectory,
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_remove_v0":       ComponentWindowsFile,
@@ -248,6 +249,7 @@ var componentLinkOrder = []Component{
 	ComponentLinuxFile,
 	ComponentLinuxFilePaths,
 	ComponentLinuxFileMetadata,
+	ComponentLinuxDirectory,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
 	ComponentWindowsDirectory,
@@ -345,6 +347,9 @@ func componentsInLinkOrder(required map[Component]struct{}) []Component {
 func addComponentClosure(required map[Component]struct{}, component Component) {
 	required[component] = struct{}{}
 	switch component {
+	case ComponentLinuxDirectory:
+		required[ComponentLinuxFile] = struct{}{}
+		required[ComponentTextView] = struct{}{}
 	case ComponentLinuxFilePaths, ComponentLinuxFileMetadata:
 		required[ComponentLinuxFile] = struct{}{}
 	case ComponentLinuxProcessArgs:
