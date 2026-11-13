@@ -28,9 +28,9 @@ fn void add_ten(ref mut i32 n) {
 }
 
 fn i32 main() {
-    var i32 score = 32;
+    var i32 score = 67;
     add_ten(ref mut score);
-    return read_num(ref score);   // 42
+    return read_num(ref score);   // 77
 }
 ```
 

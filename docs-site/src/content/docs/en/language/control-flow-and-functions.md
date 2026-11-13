@@ -28,7 +28,7 @@ Unlike Rust, **non-`void` function bodies do not implicitly return their final l
 When calling a non-generic module-local function, you can clarify arguments using `.parameter_name = value`:
 
 ```c
-let i32 result = clamp(42, .minimum = 0, .maximum = 100);
+let i32 result = clamp(77, .minimum = 0, .maximum = 100);
 ```
 
 Labels cannot reorder arguments or supply defaults—each label must match that parameter's exact position—so they serve strictly as readability guards.
@@ -43,7 +43,7 @@ fn T pick_first<T>(T first, T second) {
 }
 
 fn i32 main() {
-    return pick_first<i32>(42, 0);
+    return pick_first<i32>(77, 0);
 }
 ```
 

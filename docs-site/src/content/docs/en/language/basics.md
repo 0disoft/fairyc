@@ -12,7 +12,7 @@ Use `let` for bindings you do not reassign, and `var` for mutable variables.
 ```c
 let i32 limit = 100;      // cannot be reassigned later
 var i32 count = 0;        // can be updated with count = 1;
-let auto_inferred = 42;   // type can be omitted when clear from the value
+let auto_inferred = 77;   // type can be omitted when clear from the value
 ```
 
 - **Initialization is required**: Writing `var i32 count;` without a value is not allowed, eliminating uninitialized-read bugs.

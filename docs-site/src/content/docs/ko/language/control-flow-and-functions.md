@@ -28,7 +28,7 @@ C나 Rust와 달리 **함수 본문 마지막 줄에서 세미콜론을 빼고 �
 같은 모듈 안의 일반 함수를 부를 때는 인자가 헷갈리지 않게 매개변수 이름을 `.이름 = 값` 형태로 함께 적을 수 있습니다.
 
 ```c
-let i32 result = clamp(42, .minimum = 0, .maximum = 100);
+let i32 result = clamp(77, .minimum = 0, .maximum = 100);
 ```
 
 단, 순서를 뒤바꾸거나 일부 인자를 생략하는 기본값 기능은 없으며, 해당 위치의 매개변수 이름과 정확히 일치할 때 가독성 보조용으로 쓸 수 있습니다.
@@ -43,7 +43,7 @@ fn T pick_first<T>(T first, T second) {
 }
 
 fn i32 main() {
-    return pick_first<i32>(42, 0);
+    return pick_first<i32>(77, 0);
 }
 ```
 
