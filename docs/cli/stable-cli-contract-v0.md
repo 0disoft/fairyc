@@ -10,7 +10,7 @@ Accepted pre-1 command contract for the implemented stable `fairyc` surface. Exp
 
 The exact command and flag inventory is the compiler-owned `usage` value in `internal/cli/run.go`. A command or flag not present there is not admitted. `docs/cli/command-contract.md` owns human semantics and `docs/cli/output-and-exit-codes.md` owns byte/status semantics. Experimental subcommands are inventory-visible but do not gain compatibility merely by appearing in help.
 
-The stable top-level commands are `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`, with source-independent `--help` and `--version` inspection. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
+The stable top-level commands are `new`, `check`, `build`, `package`, `run`, `test`, `explain`, and `targets`, with source-independent `--help` and `--version` inspection. The removed `emit` spelling is a stable rejection/migration surface. Every command below `experimental` is owned by `internal/cli` but remains explicitly unstable.
 
 Flag tokenization, scalar/slice/switch multiplicity, value uniqueness and ordered
 required-option checks share the internal parser in `internal/cli/flags.go`.
@@ -128,3 +128,8 @@ Adding or removing experimental commands does not by itself revise this stable c
 ## Validation ownership
 
 `internal/cli` tests own invocation, help, stdout/stderr separation, JSON schemas, workspace failures, locks, and stable native behavior. `tools/dev/fairyc-windows-host-smoke` owns the hosted Windows native path. Repository CI runs Go vet/tests on Linux and Windows and the Windows native smoke before native CLI claims are accepted.
+
+Stable Windows desktop `package [--locked] [--json]` and automatic configured
+resource preparation during build are owned by ADR 0554. Packaging emits only
+relative-path `fairyc.package-report/v1` when --json is selected; it requires
+Windows amd64/Python 3.11+/MSVC/SDK and performs no signing or publication.

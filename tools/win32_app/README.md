@@ -24,7 +24,8 @@ fairyc new my-tool --uid example.my-tool --template win32
 cd my-tool
 fairyc check
 fairyc test --locked --file tests/domain.fy
-python -B package_release.py --compiler C:\tools\fairyc.exe
+fairyc build --locked --release
+fairyc package --locked --json
 ```
 
 Only creation is independent of Python/MSVC/Windows SDK. Native app build needs
@@ -43,7 +44,8 @@ python -B tools/new_win32_app.py C:\projects\my-tool --name my-tool --uid exampl
 cd C:\projects\my-tool
 fairyc check
 fairyc test --locked --file tests/domain.fy
-python -B package_release.py --compiler C:\tools\fairyc.exe
+fairyc build --locked --release
+fairyc package --locked --json
 ```
 
 The source template is `templates/win32_desktop/`. The generator bundles the
@@ -78,3 +80,8 @@ compatibility, then checks/builds/packages the generated app with normal build
 tools. It runs only the app's CLI and resource inspection.
 Canonical Hash worker snapshots are checked/refreshed using
 `python -B tools/sync_win32_jobs.py --check` / `python -B tools/sync_win32_jobs.py`.
+
+With ADR 0554-capable Go Stage 0 CLI, `fairyc build` prepares desktop resources
+and `fairyc package [--locked] [--json]` builds release and validates the local
+unsigned portable ZIP. Python helpers remain available for older compilers.
+The CLI still requires Python 3.11+ and MSVC/SDK; generated EXEs do not.

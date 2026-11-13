@@ -357,3 +357,8 @@ listing and `spec/cli/stable-test-report-v1.schema.json` for semantic or native 
 - A command changes without updating help, examples, output, and exit-code expectations.
 - JSON output exposes generated or existing file contents.
 - Runtime compatibility changes without smoke validation.
+
+`fairyc package [--locked] [--json]` uses statuses 0/2/3/4/6/7 and the exact plain
+line or `fairyc.package-report/v1` described in ADR 0554/command-contract.md.
+It suppresses helper/build success chatter and emits no success payload on failure.
+Output failure after successful local publication returns 4 without rollback.

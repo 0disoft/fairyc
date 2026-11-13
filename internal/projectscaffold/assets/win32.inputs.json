@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "language": "fairyc-language/20",
-  "bundleSha256": "c95e3ff1f4c52ba4173ed94f7e4a193c7cd67d6a5303793dfe2deeb02b7a1b2a",
+  "bundleSha256": "4052b8fd02507fdfef15daecf3e78427e9a5744cbf58f829c84d6775233c90a5",
   "inputs": {
     "examples/win32_hash/native/app.ico": "054792b6ded7801fa1a07391f73c4bf7cfc7b7e65f43b83e8d9b1cffd40ef694",
     "examples/win32_minimal/native/ime.c": "856e17989bbdf3e9c6dfabe6248668e1208121ecde3e38836c4db6ae481953c0",
@@ -24,7 +24,7 @@
     "templates/win32_desktop/native/window.c": "ae2850cdac6cfef06c1f44f870a111f6c1c37ae8a1282d259084365db67409fb",
     "templates/win32_desktop/package_release.py": "556327171d584e1fdb74125d7ba02859830a06ccde3ca018b255203785833ace",
     "templates/win32_desktop/prepare_resources.py": "cd8ac4d52cdc1c74e3c8636be2b803d23914651ecb7f5adb42e6e1a671418256",
-    "templates/win32_desktop/README.md": "a2e7c302f3a40fe23d42b0a856859fcafb8ebdada334c5cbf7178f8cfedc7450",
+    "templates/win32_desktop/README.md": "d8ae3dd9f788252bb60e6346d99c41178a5b110585a7b49752c6b6531e509007",
     "templates/win32_desktop/src/application.fy": "854c17089997eeea1290447ee7100bdd12cdc12ea62b7fa0a11b4713014d7a02",
     "templates/win32_desktop/src/domain.fy": "6100e90ca8c55bb7c80ca0b6f203ba32974ea2908be4535900123f5007d36025",
     "templates/win32_desktop/src/file_job.fy": "292a7ee86b2ddd815c32765e165c17dc5fbb53d3d3126c3db1e7e21028eb5f22",
@@ -42,7 +42,7 @@
     "tools/win32_app/__init__.py": "79aca38925e9004c0d430d597f8e2ad2b0aae453a75e1d39edee3a3411715708",
     "tools/win32_app/pe.py": "0e33c5d0bc9cc9b68148f5e4f6648f09f3acac6df9122c8268f5b7a131f48009",
     "tools/win32_app/portable.py": "3cf019852a01faff7f9a6befe7597723beccf8561e811ffc1fab1cb23c41fbe7",
-    "tools/win32_app/README.md": "09c295a74cb10c0ed5119697a98dcc1f3cded3739272a5e5d754739bf8e38e73",
+    "tools/win32_app/README.md": "1ac7de890fc06e3b90f79ff7114d0a3a64a011af2cb6cafd65594767ff03d481",
     "tools/win32_app/resources.py": "58323f195d26aca13d629f77fbd24ec96c1e9b12995f470e3cda27348d23e9d5",
     "tools/win32_app/settings.py": "067a46b3f5620b9e3ef4eec43e531ffca1f3eef7ea837e3f0907602a22e3e776"
   }

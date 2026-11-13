@@ -109,6 +109,34 @@ These are starter application sources, not compiler/SDK runtime APIs or new
 compiler options. Its app CLI documents `--scan FILE [--cancel-after BYTES]`
 separately; creation still performs no native I/O job or GUI execution.
 
+## Stable Win32 local packaging v1
+
+ADR 0554 admits `fairyc package [--locked] [--json]` in the Go Stage 0 CLI.
+It requires Windows amd64, the exact current root's `app.toml`, Windows-subsystem
+`fairy.windows.json` and its regular contained `package_release.py`. Duplicate,
+unknown or positional flags are rejected before filesystem access. There is no
+output override, signing/upload/version bump, prompt, network or stdin.
+
+A configured desktop `fairyc build` prepares resources from app/manifest settings
+with its contained `prepare_resources.py` before native compilation. Console and
+unconfigured Win32 builds retain the existing path. Python 3.11+ and x64 MSVC/SDK
+are build dependencies; neither is installed automatically. Project-owned Python
+helpers are executable build code. Generated/default helpers use only CLI/resource
+checks; custom helpers are not hostile-code isolated.
+
+Package always builds release, refreshes/verifies the lock according to --locked,
+and calls the existing helper with the built EXE and root/dist. The compiler
+bounds helper streams/time, validates its receipt and verifies the retained
+archive's SHA-256/size/containment before reporting success. Plain stdout is
+`packaged: dist/<archive>.zip (unsigned, release, local only)` plus newline.
+--json emits `fairyc.package-report/v1`: schema, archive (relative), sha256,
+exeBytes, zipBytes, signed=false, published=false. No absolute paths/helper chatter.
+Statuses are 0 success, 2 invocation/unsupported project or host, 3 source,
+4 internal/output, 6 tooling/resource/package validation, 7 workspace/manifest/
+lock or missing packaging helper. Failure emits no success report. A completed
+build may remain if later packaging fails; ZIP and checksum sidecar replacements
+are not a crash-atomic pair. Output failure cannot undo published local files.
+
 ## Experimental explicit remote package preparation
 
 ADR 0498 admits `fairyc experimental fetch-packages [--offline]` in the Go Stage 0 CLI.

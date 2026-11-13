@@ -11,7 +11,8 @@ that creation step uses embedded assets and needs no Python or repository.
 fairyc check
 fairyc test --locked --file tests/domain.fy
 fairyc test --locked --file tests/jobs.fy
-python -B package_release.py --compiler C:\tools\fairyc.exe
+fairyc build --locked --release
+fairyc package --locked --json
 python -B verify_cli.py
 # Launch manually when ready:
 .\build\@PACKAGE@.exe
@@ -94,3 +95,8 @@ The source guard option is CLI-only and synchronous; GUI source protection
 comes from its asynchronous read. Save waits for owned temporary cleanup even
 on cancellation/Close; after authorization it waits for publication to finish.
 GUI dialog/focus behavior remains untested by the CLI checks.
+
+With ADR 0554-capable Go Stage 0 CLI, `fairyc build` prepares desktop resources
+and `fairyc package [--locked] [--json]` builds release and validates the local
+unsigned portable ZIP. Python helpers remain available for older compilers.
+The CLI still requires Python 3.11+ and MSVC/SDK; generated EXEs do not.

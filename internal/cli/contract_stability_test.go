@@ -28,6 +28,7 @@ func TestStableHelpInventoryOwnsTopLevelCommands(t *testing.T) {
 		"fairyc new <package-name> --uid <package-uid>",
 		"fairyc check [--locked]",
 		"fairyc build [--release] [--locked]",
+		"fairyc package [--locked] [--json]",
 		"fairyc run [--release] [--locked] [-- <program-args...>]",
 		"fairyc test [--json]",
 		"fairyc explain <diagnostic-code>",

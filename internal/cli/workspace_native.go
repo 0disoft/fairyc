@@ -62,6 +62,9 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
+	if err := prepareDesktopBuild(sourceRoot); err != nil {
+		return desktopPackageFailure(stderr, err.Error(), ExitBuildFailure)
+	}
 	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
 	if code != ExitSuccess {
 		return code

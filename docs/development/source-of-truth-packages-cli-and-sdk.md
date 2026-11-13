@@ -135,6 +135,9 @@ Part 2 of 3 of the [source index](source-of-truth.md).
   - `docs/adr/0208-starter-project-guide-v3.md`
   - `docs/adr/0266-starter-guide-native-test-v4.md`
   - `docs/adr/0553-win32-starter-cli.md`
+  - `docs/adr/0554-win32-package-cli.md`
+  - `internal/cli/desktop_package.go`
+  - `tools/verify_win32_package_cli.py`
   - `internal/projectscaffold/win32.go`
   - `tools/bundle_win32_starter.py`
   - `modules/win32_jobs/`

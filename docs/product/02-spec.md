@@ -681,6 +681,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   identity comes from the explicit name/UID with blank company; creation retains
   exclusive direct-child, rollback, output and exit-code behavior. Win32 native
   build requires Windows x64/MSVC/SDK; provided packaging uses Python 3.11+.
+- ADR 0554 adds Windows amd64 desktop `fairyc package [--locked] [--json]`: a
+  release build plus verified unsigned local ZIP. Configured desktop build
+  prepares resources automatically using Python 3.11+; no signing/publication
+  or runtime dependency is added. Console build semantics remain unchanged.
 - Stable `fairyc check [--locked]` loads the current directory's strict manifest-owned local
   workspace, selects the compiler-bundled SDK only when imported, maintains canonical `fairy.lock`
   in ordinary mode or requires an exact no-write lock in `--locked` mode, and runs the complete

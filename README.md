@@ -182,3 +182,7 @@ Download the HTML report and open it locally; GitHub's file view does not run it
 - `fc` is not used as the executable name
 
 Repository hygiene and generated design-document ownership are governed by `AGENTS.md`, `VALIDATION.md`, and `.ssealed/manifest.json`.
+
+Configured Win32 apps can run `fairyc build --release` and
+`fairyc package --locked --json` for resource preparation and verified unsigned
+local ZIP output (Go Stage 0, Windows amd64; Python 3.11+/MSVC/SDK required).

@@ -35,6 +35,7 @@ Usage:
   fairyc new <package-name> --uid <package-uid> [--template <console|win32>]
   fairyc check [--locked]
   fairyc build [--release] [--locked]
+  fairyc package [--locked] [--json]
   fairyc run [--release] [--locked] [-- <program-args...>]
   fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
   fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]
@@ -79,7 +80,9 @@ Usage:
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
 an explicit package UID. --template win32 selects the embedded native Windows desktop starter;
 the default and --template console preserve the console starter. Generation does not invoke Python,
-a native toolchain or a GUI. Win32 builds need Windows x64/MSVC/SDK; packaging needs Python 3.11+.
+a native toolchain or a GUI. Win32 builds need Windows x64/MSVC/SDK; configured desktop resources and packaging need Python 3.11+.
+"fairyc package" builds a release and validates an unsigned local ZIP under dist (Windows amd64 desktop
+projects only). --json selects fairyc.package-report/v1; no signing, upload or version bump occurs.
 "fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows or build/<package-name> on Linux GNU amd64.
 Linux builds require GCC or Clang on PATH. "fairyc run" builds and executes a temporary native
@@ -98,7 +101,7 @@ Explicit --timeout-seconds bounds each isolated native test process and defaults
 "fairyc experimental emit-workspace-c" writes one private, explicitly targeted C11 bootstrap unit
 to stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a
 cross-release C API or standalone product artifact. Pass --release to build, run, or native test for
-optimization. All four stable workspace commands read fairy.toml and refresh fairy.lock unless
+optimization. Stable workspace commands read fairy.toml and refresh fairy.lock unless
 --locked is supplied.
 `
 
@@ -161,6 +164,12 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 			return writeHelp(stdout, stderr)
 		}
 		return runStableRun(args[1:], sourceRoot, stdin, stdout, stderr)
+	}
+	if args[0] == "package" {
+		if len(args) == 2 && isHelp(args[1]) {
+			return writeHelp(stdout, stderr)
+		}
+		return runStablePackage(args[1:], sourceRoot, stdout, stderr)
 	}
 	if args[0] == "test" {
 		if len(args) == 2 && isHelp(args[1]) {
