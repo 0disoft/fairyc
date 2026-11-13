@@ -141,7 +141,7 @@ fn Result<S,i32> mismatch(Result<S,u32> value){let S actual=value?;return .ok(ac
 
 func TestCompositeResultKeepsOtherGenericShapesClosed(t *testing.T) {
 	for _, scalar := range compositeResultScalars {
-		for _, shape := range []string{"Result<T,i32>", "Result<u32,T>", "Result<T,T>", "Result<Option<T>,u32>", "Result<Result<T,u32>,u32>", "Option<Result<T,u32>>", "ref Result<T,u32>", "ptr Result<T,u32>", "Result<T,u32>[2]"} {
+		for _, shape := range []string{"Result<T,i64>", "Result<u32,T>", "Result<T,T>", "Result<Option<T>,u32>", "Result<Result<T,u32>,u32>", "Option<Result<T,u32>>", "ref Result<T,u32>", "ptr Result<T,u32>", "Result<T,u32>[2]"} {
 			t.Run(scalar+"/"+shape, func(t *testing.T) {
 				concrete := strings.ReplaceAll(shape, "T", scalar)
 				text := fmt.Sprintf("module main;fn %[1]s id<T>(%[1]s value){return value;}fn %[2]s forward(%[2]s value){discard id<%[3]s>(value);return id<%[3]s>(value);}", shape, concrete, scalar)
@@ -177,7 +177,7 @@ func TestCompositeResultKeepsCompositeArgumentsClosed(t *testing.T) {
 
 func TestCompositeResultEmitterKeepsOtherOrdinaryWrappersClosed(t *testing.T) {
 	for _, scalar := range compositeResultScalars {
-		for _, shape := range []string{"Result<S,i32>", "Result<u32,S>", "Result<Option<S>,u32>", "Result<Result<S,u32>,u32>", "Option<Result<S,u32>>"} {
+		for _, shape := range []string{"Result<S,i64>", "Result<u32,S>", "Result<Option<S>,u32>", "Result<Result<S,u32>,u32>", "Option<Result<S,u32>>"} {
 			t.Run(scalar+"/"+shape, func(t *testing.T) {
 				concrete := strings.ReplaceAll(shape, "S", scalar)
 				value := ".err(1)"

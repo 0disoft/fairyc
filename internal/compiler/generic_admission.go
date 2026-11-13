@@ -106,7 +106,7 @@ func unadmittedGenericScalar(reference ast.TypeReference) bool {
 	if reference.Kind == ast.TypeKindNamed && reference.Path == "Result" && len(reference.Arguments) == 2 {
 		success, failure := reference.Arguments[0], reference.Arguments[1]
 		if success.Kind == ast.TypeKindNamed && len(success.Arguments) == 0 && containsTransportScalar(success) &&
-			failure.Kind == ast.TypeKindNamed && failure.Path == "u32" && len(failure.Arguments) == 0 {
+			failure.Kind == ast.TypeKindNamed && (failure.Path == "u32" || failure.Path == "i32") && len(failure.Arguments) == 0 {
 			return false
 		}
 	}

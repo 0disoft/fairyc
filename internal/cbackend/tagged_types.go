@@ -258,7 +258,7 @@ func flatTransportOptionPayload(value hir.Type) (hir.Type, bool) {
 
 func flatTransportResultPayload(value hir.Type) (hir.Type, bool) {
 	success, failure, result := hir.ResultElements(value)
-	return success, result && failure == hir.TypeU32 && extendedOptionScalar(success)
+	return success, result && (failure == hir.TypeU32 || failure == hir.TypeI32) && extendedOptionScalar(success)
 }
 
 func copyScalarTaggedAggregateLayout(value hir.Type) (layout.Type, bool) {

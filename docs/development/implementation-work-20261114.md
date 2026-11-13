@@ -48,6 +48,7 @@ and the shared Win32 modules must not be reimplemented from stale checklists.
   source/native-option checks are implemented; initial full low CLI acceptance
   passes. Final optimized replay and all six exact Go/candidate invocation
   comparisons also pass; item 2 is complete for desktop command/metadata parity.
-- 3: starting flat Result signed i32 error transport; remaining nested/composite
+- 3: flat Result signed i32 error transport passes Go source/C/native/restored
+  checks; candidate and common CLI/cache acceptance remain in progress. Nested/composite
   generic and inline families will be tracked separately, not implied by it.
 - 4–6: pending, in the order above.

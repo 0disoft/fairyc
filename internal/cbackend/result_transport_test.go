@@ -12,7 +12,7 @@ func TestCompositeResultCandidateBoundaries(t *testing.T) {
 	for _, scalar := range []hir.Type{hir.TypeI8, hir.TypeI16, hir.TypeISize, hir.TypeU16, hir.TypeU64, hir.TypeF32, hir.TypeF64} {
 		t.Run(scalar.String(), func(t *testing.T) {
 			flat := hir.Result(scalar, hir.TypeU32)
-			blocked := []hir.Type{hir.Result(scalar, hir.TypeI32), hir.Result(hir.TypeU32, scalar), hir.Result(scalar, scalar), hir.Result(hir.Option(scalar), hir.TypeU32), hir.Option(flat), hir.Result(flat, hir.TypeU32), hir.Result(hir.TypeU32, flat), hir.Result(hir.SharedBorrow(scalar), hir.TypeU32)}
+			blocked := []hir.Type{hir.Result(scalar, hir.TypeI64), hir.Result(hir.TypeU32, scalar), hir.Result(scalar, scalar), hir.Result(hir.Option(scalar), hir.TypeU32), hir.Option(flat), hir.Result(flat, hir.TypeU32), hir.Result(hir.TypeU32, flat), hir.Result(hir.SharedBorrow(scalar), hir.TypeU32)}
 			for _, first := range []bool{true, false} {
 				params := append([]hir.Type{}, blocked...)
 				if first {
