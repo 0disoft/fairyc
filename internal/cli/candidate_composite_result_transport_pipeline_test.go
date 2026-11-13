@@ -60,8 +60,19 @@ return result_ticks==26?42:4;}
 }
 
 func TestCandidateCompositeResultTransportPipeline(t *testing.T) {
+	runCandidateCompositeResultTransportPipeline(t, false)
+}
+
+func TestCandidateCompositeResultSignedErrorPipeline(t *testing.T) {
+	runCandidateCompositeResultTransportPipeline(t, true)
+}
+
+func runCandidateCompositeResultTransportPipeline(t *testing.T, signed bool) {
 	candidateResultNativeGate(t)
 	raw, observer := candidateCompositeResultSource()
+	if signed {
+		raw = strings.NewReplacer(",u32>", ",i32>", "return .err(77)", "return .err(-77)", "error==77", "error==-77").Replace(raw)
+	}
 	if checked := candidateResultGoCheck(t, raw); !checked.Verified {
 		t.Fatalf("independent Go admission of exact Fairy input: %+v", checked.Semantic)
 	}

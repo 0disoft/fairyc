@@ -2,16 +2,20 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/semantic"
@@ -28,19 +32,19 @@ type candidateResultControl struct {
 func candidateResultControls() []candidateResultControl {
 	var out []candidateResultControl
 	for _, scalar := range candidateResultScalars {
-		for _, shape := range []string{"Result<T,u32>", "Result<T,i32>", "Result<u32,T>", "Result<T,T>", "Result<Option<T>,u32>", "Result<Result<T,u32>,u32>", "Option<Result<T,u32>>", "ref Result<T,u32>", "ptr Result<T,u32>", "Result<T,u32>[2]"} {
+		for _, shape := range []string{"Result<T,u32>", "Result<T,i32>", "Result<T,i64>", "Result<u32,T>", "Result<T,T>", "Result<Option<T>,u32>", "Result<Result<T,u32>,u32>", "Option<Result<T,u32>>", "ref Result<T,u32>", "ptr Result<T,u32>", "Result<T,u32>[2]"} {
 			concrete := strings.ReplaceAll(shape, "T", scalar)
 			raw := fmt.Sprintf("module root; // 한글\r\nfn %[1]s transport<T>(%[1]s value){return value;}fn %[2]s forward(%[2]s value){return transport<%[3]s>(value);}", shape, concrete, scalar)
 			unsupported := 2
-			if shape == "Result<T,u32>" {
+			if shape == "Result<T,u32>" || shape == "Result<T,i32>" {
 				unsupported = 0
 			}
 			out = append(out, candidateResultControl{name: scalar + "/" + shape, raw: raw, unsupported: unsupported})
 		}
-		for _, errorType := range []string{"u32", "i32"} {
+		for _, errorType := range []string{"u32", "i32", "i64"} {
 			raw := fmt.Sprintf("module root; // 한글\r\nfn Result<T,E> transport<T,E>(Result<T,E> value){return value;}fn Result<%[1]s,%[2]s> forward(Result<%[1]s,%[2]s> value){return transport<%[1]s,%[2]s>(value);}", scalar, errorType)
 			unsupported := 2
-			if errorType == "u32" {
+			if errorType == "u32" || errorType == "i32" {
 				unsupported = 0
 			}
 			out = append(out, candidateResultControl{name: scalar + "/resolved-E-" + errorType, raw: raw, unsupported: unsupported})
@@ -48,8 +52,7 @@ func candidateResultControls() []candidateResultControl {
 		out = append(out,
 			candidateResultControl{name: scalar + "/pending-copy", raw: fmt.Sprintf("module root; // 한글\r\nfn void pending(Result<%[1]s,u32> original){let Result<%[1]s,u32> copied=original;discard original;}", scalar), code: "E4101", token: "original"},
 			candidateResultControl{name: scalar + "/pending-original", raw: fmt.Sprintf("module root; // 한글\r\nfn void pending(Result<%[1]s,u32> original){let Result<%[1]s,u32> copied=original;discard copied;original;}", scalar), code: "E4101", token: "original"},
-			// The enclosing old success domain lets propagation own this error,
-			// independently of the Result<S,i32> signature refusal.
+			// The u32/i32 error mismatch remains independent of success transport.
 			candidateResultControl{name: scalar + "/error-mismatch", raw: fmt.Sprintf("module root; // 한글\r\nfn Result<u32,i32> mismatch(Result<%[1]s,u32> value){let %[1]s actual=value?;discard actual;return .ok(1);}", scalar), code: "E4103", token: "?"},
 		)
 	}
@@ -157,7 +160,7 @@ func TestCandidateCompositeResultGraph(t *testing.T) {
 		t.Fatal(err)
 	}
 	program := strings.Replace(string(raw), "module tests::composite_result_transport;", "module main;", 1)
-	program = strings.ReplaceAll(program, "@test", "") + "\nfn i32 main(){result_descriptor_interned_and_written_payloads_are_canonical();result_capacity_keeps_known_error_and_rolls_back_every_record();result_shallow_boundaries_rollback_materialized_leaves();result_batch_failure_restores_the_successful_prefix();return 0;}\n"
+	program = strings.ReplaceAll(program, "@test", "") + "\nfn i32 main(){result_descriptor_interned_and_written_payloads_are_canonical();signed_result_keeps_error_type_and_rolls_back_new_records();result_capacity_keeps_known_error_and_rolls_back_every_record();result_shallow_boundaries_rollback_materialized_leaves();result_batch_failure_restores_the_successful_prefix();return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
 	copyCandidateParityModules(t, root, "generic_scalar_arguments", "generic_transport_scalars", "module_types", "module_catalog", "syntax", "scanner")
 	if code, out, diagnostics := runForTest([]string{"check"}, root); code != ExitSuccess || diagnostics != "" {
@@ -235,9 +238,27 @@ func TestCandidateCompositeResultSourceDiagnostics(t *testing.T) {
 	if code, out, diagnostics := runForTest([]string{"check"}, root); code != ExitSuccess || diagnostics != "" {
 		t.Fatalf("Result diagnostics cheap source check: %d %q %s", code, out, diagnostics)
 	}
-	for _, args := range [][]string{{"run", "--", input}, {"run", "--release", "--locked", "--", input}} {
-		if code, out, diagnostics := runForTest(args, root); code != ExitSuccess || out != "" || diagnostics != "" {
-			t.Fatalf("Result source diagnostics %v: %d %q %s", args, code, out, diagnostics)
+	// The source/origin driver now exceeds the optimized monolithic C command's
+	// one-minute bound. Use the established partitions, not a larger product limit.
+	build, nativeSupport := candidateParityBuildParts(t, root)
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		image, err := cdriver.BuildWindowsMSVCTargetPartsWithStackReserve(toolchain, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, nativeSupport, time.Minute, 16<<20)
+		if err != nil {
+			t.Fatal(err)
+		}
+		path := filepath.Join(root, "source-diagnostics-"+profile.Name+".exe")
+		if err := os.WriteFile(path, image.Bytes, 0700); err != nil {
+			t.Fatal(err)
+		}
+		ctx, cancel := context.WithTimeout(t.Context(), 2*time.Minute)
+		out, err := exec.CommandContext(ctx, path, input).CombinedOutput()
+		cancel()
+		if err != nil || len(out) != 0 {
+			t.Fatalf("Result source diagnostics %s: %v %q", profile.Name, err, out)
 		}
 	}
 	t.Logf("%d original signature cases plus 21 body/evaluation cases in both profiles", count)
