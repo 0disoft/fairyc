@@ -39,7 +39,7 @@ func TestInlineLocalsClosedForms(t *testing.T) {
 		fmt.Fprintf(&many, "let i32 v%d=%d;", i, i)
 	}
 	bodies := map[string]string{
-		"mutable": "var i32 x=1;return x;", "assign": "let i32 x=1;x=2;return x;",
+		"compound": "var i32 x=1;x+=1;return x;", "assign": "let i32 x=1;x=2;return x;",
 		"call": "let i32 x=h();return x;", "discard": "let i32 x=1;discard x;return x;",
 		"control": "let i32 x=1;return if(true){x}else{2};", "type": "let i64 x=1;return 42;",
 		"forward": "let i32 a=b;let i32 b=2;return a;", "self": "let i32 x=x;return x;",

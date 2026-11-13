@@ -81,7 +81,7 @@ func TestCrossPackageInlineIdentityCodecAndEmission(t *testing.T) {
 
 func TestCrossPackageInlineRejectsClosedForms(t *testing.T) {
 	for name, decl := range map[string]string{
-		"private": "@inline fn i32 f(){return 1;}", "unsafe": "@inline pub unsafe fn i32 f(){return 1;}", "argument": "@inline(1) pub fn i32 f(){return 1;}", "duplicate": "@inline @inline pub fn i32 f(){return 1;}", "generic": "@inline pub fn T f<T>(T x){return x;}", "call": "fn i32 h(){return 1;}@inline pub fn i32 f(){return h();}", "local": "@inline pub fn i32 f(){var i32 x=1;return x;}", "effects": "@inline @effects(console) pub fn i32 f(){return 1;}", "type": "@inline pub fn u32 f(){return 1;}", "mutable": "@inline pub fn i32 f(i32 x){x=2;return x;}", "arity": "@inline pub fn i32 f(i32 a,i32 b,i32 c,i32 d,i32 e){return a;}", "loop": "@inline pub fn i32 f(){while(true){}return 1;}",
+		"private": "@inline fn i32 f(){return 1;}", "unsafe": "@inline pub unsafe fn i32 f(){return 1;}", "argument": "@inline(1) pub fn i32 f(){return 1;}", "duplicate": "@inline @inline pub fn i32 f(){return 1;}", "generic": "@inline pub fn T f<T>(T x){return x;}", "call": "fn i32 h(){return 1;}@inline pub fn i32 f(){return h();}", "local": "@inline pub fn i32 f(){var i64 x=1;return 1;}", "effects": "@inline @effects(console) pub fn i32 f(){return 1;}", "type": "@inline pub fn u32 f(){return 1;}", "mutable": "@inline pub fn i32 f(i32 x){x=2;return x;}", "arity": "@inline pub fn i32 f(i32 a,i32 b,i32 c,i32 d,i32 e){return a;}", "loop": "@inline pub fn i32 f(){while(true){}return 1;}",
 	} {
 		t.Run(name, func(t *testing.T) {
 			r, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;"+decl+"fn i32 main(){return 0;}")})

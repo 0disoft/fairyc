@@ -440,3 +440,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0553: Embedded Win32 starter in the stable CLI](0553-win32-starter-cli.md)
 - [0555: Flat Result transport with signed i32 errors](0555-flat-result-signed-error-transport.md)
 - [0556: Two-level Option value transport](0556-two-level-option-transport.md)
+
+- [0557: Inline straight-line local mutation](0557-inline-straight-line-mutation.md)

@@ -69,7 +69,7 @@ func InlineFunctionID(fn Function, resolvers ...func(SymbolID) *Function) (strin
 
 func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]byte, []*Function, error) {
 	if !fn.Public || fn.Unsafe || len(fn.Effects) != 0 || fn.OwnerType != (Type{}) || fn.DropGlueFor != (Type{}) || fn.ResultType != TypeI32 || len(fn.Parameters) > 4 || len(fn.Locals) > 16 {
-		return nil, nil, fmt.Errorf("@inline requires a public safe i32 function with at most four i32 parameters and no effects or owner and at most 16 immutable i32 locals")
+		return nil, nil, fmt.Errorf("@inline requires a public safe i32 function with at most four i32 parameters and no effects or owner and at most 16 i32 locals")
 	}
 	parameters := make(map[SymbolID]int)
 	for i, p := range fn.Parameters {
@@ -84,13 +84,13 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 		expression = statements[len(statements)-1].Expression
 		statements = statements[:len(statements)-1]
 	}
-	if len(statements) != len(fn.Locals) {
-		return nil, nil, fmt.Errorf("@inline requires immutable bindings followed by one returned expression")
+	if len(statements) > 64 {
+		return nil, nil, fmt.Errorf("@inline requires at most 64 straight-line steps")
 	}
 	locals := make(map[SymbolID]Local)
 	for _, local := range fn.Locals {
-		if local.Mutable || local.Type != TypeI32 {
-			return nil, nil, fmt.Errorf("@inline requires immutable i32 locals")
+		if local.Type != TypeI32 {
+			return nil, nil, fmt.Errorf("@inline requires i32 locals")
 		}
 		locals[local.Symbol] = local
 	}
@@ -181,19 +181,38 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 		return n, nil
 	}
 	var initializers []node
+	mutating := false
+	declared := make(map[SymbolID]bool)
 	for i, statement := range statements {
-		_, ok := locals[statement.Binding]
-		_, duplicate := bound[statement.Binding]
-		_, parameter := parameters[statement.Binding]
-		if statement.Kind != StatementBinding || !ok || duplicate || parameter || statement.Target != nil || statement.For != nil {
-			return nil, nil, fmt.Errorf("@inline requires immutable i32 bindings in source order")
+		symbol := statement.Binding
+		if statement.Kind == StatementAssignment {
+			if statement.Operator != "=" || statement.Target == nil || statement.Target.Kind != ExpressionPath || statement.Target.Type != TypeI32 {
+				return nil, nil, fmt.Errorf("@inline assignment requires a mutable local path")
+			}
+			symbol = statement.Target.Symbol
+			local, ok := locals[symbol]
+			if !ok || !local.Mutable || !declared[symbol] || statement.For != nil {
+				return nil, nil, fmt.Errorf("@inline assignment requires a preceding mutable i32 local")
+			}
+			mutating = true
+		} else {
+			local, ok := locals[symbol]
+			_, parameter := parameters[symbol]
+			if statement.Kind != StatementBinding || !ok || declared[symbol] || parameter || statement.Target != nil || statement.For != nil {
+				return nil, nil, fmt.Errorf("@inline requires straight-line i32 local bindings and assignments")
+			}
+			mutating = mutating || local.Mutable
+			declared[symbol] = true
 		}
 		initializer, err := encode(statement.Expression)
 		if err != nil {
 			return nil, nil, err
 		}
 		initializers = append(initializers, initializer)
-		bound[statement.Binding] = i
+		bound[symbol] = i
+	}
+	if len(declared) != len(locals) {
+		return nil, nil, fmt.Errorf("@inline local declaration count mismatch")
 	}
 	root, err := encode(expression)
 	if err != nil {
@@ -206,6 +225,9 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 	}
 	if hasCalls {
 		version = "fairyc.inline-function/v3"
+	}
+	if mutating {
+		version = "fairyc.inline-function/v4"
 	}
 	data, err := json.Marshal(struct {
 		Version string
