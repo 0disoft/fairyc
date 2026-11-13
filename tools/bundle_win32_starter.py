@@ -21,7 +21,7 @@ def bundle():
             ROOT/'examples/win32_hash/native/app.ico',ROOT/'examples/win32_minimal/native/ime.c',
             ROOT/'examples/win32_minimal/native/ime.h']
     inputs.extend(p for p in (ROOT/'templates/win32_desktop').rglob('*') if p.is_file() and '__pycache__' not in p.parts)
-    inputs.extend(p for p in (ROOT/'tools/win32_app').iterdir() if p.suffix in ('.py','.md'))
+    inputs.extend(p for p in (ROOT/'tools/win32_app').rglob('*') if p.is_file() and '__pycache__' not in p.parts)
     with tempfile.TemporaryDirectory(prefix='fairy-starter-bundle-') as directory:
         project=Path(directory)/'project'; create(project,NAME,UID,TITLE)
         OUTPUT.mkdir(parents=True,exist_ok=True)

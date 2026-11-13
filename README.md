@@ -87,6 +87,27 @@ The test runner reports one passed test and no failures, and both run modes exit
 
 The first check validates the source files and generates `fairy.lock`. On Windows/amd64 with MSVC installed, `fairyc test --native --locked` compiles each test into an isolated binary image, while `fairyc run --locked` compiles the program through generated C and executes the resulting native binary with stdin attached. The generated `README.md` lists next steps and includes a `std::io::write` example. `fairyc new` never overwrites or merges into an existing directory.
 
+### Create a native Windows desktop app
+
+The Go Stage 0 CLI embeds a standalone Win32 starter:
+
+```powershell
+fairyc new my-tool --uid example.my-tool --template win32
+cd my-tool
+fairyc check
+fairyc test --locked --file tests/domain.fy
+python -B package_release.py --compiler C:\tools\fairyc.exe
+```
+
+Creation needs only `fairyc`; it does not launch a GUI or require this checkout,
+Python or a native toolchain. Building the app requires Windows x64 with MSVC/
+Windows SDK; the included resource/packaging helpers use Python 3.11+.
+Edit `app.toml` to change title/company/icon/EXE names. The company starts blank.
+The generated app shares its product function between GUI and `--process TEXT`
+CLI, and packages an unsigned portable ZIP after CLI/resource checks. Default
+`new` and `--template console` retain the existing console starter.
+See [desktop tooling](tools/win32_app/README.md) for configuration and limits.
+
 ### Project status and reporting issues
 
 This repository provides the Go-based Stage 0 prototype compiler, rather than a self-hosted or production-ready release. Background on verification is in [readiness evidence](docs/ops/parser-public-readiness.md) and the [CI run on `34fe041c`](https://github.com/0disoft/fairyc/actions/runs/35103049037).

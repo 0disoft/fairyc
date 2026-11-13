@@ -500,9 +500,10 @@ Malformed checksum files leave previous destination reports intact.
 
 ## Starting your own app
 
-For a hash-free GUI starter, run `tools/new_win32_app.py` from the repository
-root. See [shared desktop tooling](../../tools/win32_app/README.md). It generates
+For a hash-free GUI starter, use `fairyc new my-tool --uid example.my-tool --template win32`
+with the Go Stage 0 CLI. See [shared desktop tooling](../../tools/win32_app/README.md). It generates
 a standalone project with editable title/icon/company, native input/button/result
 controls, Fairy C domain/event/layout code, a headless CLI and portable packaging.
-The existing `fairyc new` command is unchanged. Fairy Hash remains the richer
+Default console creation is unchanged; the repository Python generator remains
+available for initial branding options. Fairy Hash remains the richer
 reference for asynchronous file I/O, hashing, progress and safe publication.

@@ -17,7 +17,25 @@ validator that raises on failure and returns extra receipt fields (e.g.
 Checksums detect changed bytes and do not authenticate a publisher. The current
 packager supports unsigned images only.
 
-Create a standalone app from the repository root (parent directory must exist):
+Create a standalone app from any directory using the Go Stage 0 CLI:
+
+```powershell
+fairyc new my-tool --uid example.my-tool --template win32
+cd my-tool
+fairyc check
+fairyc test --locked --file tests/domain.fy
+python -B package_release.py --compiler C:\tools\fairyc.exe
+```
+
+Only creation is independent of Python/MSVC/Windows SDK. Native app build needs
+Windows x64/MSVC/SDK; Python 3.11+ is used for the resource/packaging scripts.
+Edit `app.toml` after creation for custom branding. The default console starter
+is unchanged; `--template console` selects it explicitly. Existing destinations
+are refused. The generated project's files are embedded in `fairyc`, so the
+compiler EXE can be copied alone; it needs no repository checkout at runtime.
+
+The optional Python repository helper also accepts initial title/company/icon
+options and an arbitrary new destination (parent must exist):
 
 ```powershell
 python -B tools/new_win32_app.py C:\projects\my-tool --name my-tool --uid example.my-tool --title "내 도구"
@@ -33,14 +51,22 @@ shared Python package, a snapshot of the existing minimal-example IME transport,
 an editable app configuration, the default multi-resolution icon and license.
 It refuses existing destinations and publishes only after settings/resources
 are prepared. Generated projects own their snapshots; this is not an updater.
-`fairyc new` remains unchanged; this generator is invoked with Python.
+The CLI bundle is refreshed from these same canonical inputs with
+`python -B tools/bundle_win32_starter.py` (or `go generate ./internal/projectscaffold`).
+Source/default/archive checksum tests reject stale bundle contents. The
+repository helper is still available; it is not called by `fairyc new`.
 
 To validate creation, an independent native build, extracted CLI/resources and
 overwrite/invalid-setting rejection without interacting with the desktop:
 
 ```powershell
 python -B tools/verify_win32_starter.py --compiler C:\tools\fairyc.exe
+python -B tools/verify_win32_cli.py --compiler C:\tools\fairyc.exe
 ```
 
 No GUI, Narrator, clipboard, mouse, keyboard or monitor automation is run. New
 native UI wiring needs a separate manual check; CLI receipts do not certify it.
+The CLI verifier copies only the compiler to an external temporary directory,
+creates with empty PATH, verifies invalid/existing-target rejection and console
+compatibility, then checks/builds/packages the generated app with normal build
+tools. It runs only the app's CLI and resource inspection.

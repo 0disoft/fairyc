@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,6 +43,30 @@ func TestWin32BundleTracksCanonicalSources(t *testing.T) {
 		digest := sha256.Sum256(data)
 		if hex.EncodeToString(digest[:]) != want {
 			t.Errorf("embedded starter input %s changed; run go generate ./internal/projectscaffold", source)
+		}
+	}
+	for _, directory := range []string{"templates/win32_desktop", "tools/win32_app"} {
+		err := filepath.WalkDir(filepath.Join("../..", filepath.FromSlash(directory)), func(name string, entry fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if entry.IsDir() {
+				if entry.Name() == "__pycache__" {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			relative, err := filepath.Rel("../..", name)
+			if err != nil {
+				return err
+			}
+			if _, ok := receipt.Inputs[filepath.ToSlash(relative)]; !ok {
+				t.Errorf("new starter input %s is not bundled; run go generate ./internal/projectscaffold", relative)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
 		}
 	}
 	digest := sha256.Sum256(win32Bundle)

@@ -4,6 +4,8 @@ Fairy C + native Win32 desktop starter. Windows 10 1703+ x64, the Fairy C
 compiler and MSVC/Windows SDK are required to build. Python 3.11+ is used for
 resource generation and packaging; the distributed EXE needs no Python or UI
 framework. This directory can be moved outside the compiler repository.
+The Go Stage 0 CLI creates it with `fairyc new NAME --uid UID --template win32`;
+that creation step uses embedded assets and needs no Python or repository.
 
 ```powershell
 fairyc check
