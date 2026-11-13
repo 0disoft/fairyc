@@ -1,39 +1,37 @@
 ---
 title: 설치와 환경 준비
-description: 저장소 소스에서 Stage 0 fairyc 컴파일러를 빌드하고 네이티브 C 툴체인을 준비하는 방법입니다.
+description: 소스에서 fairyc를 빌드하고 C 툴체인을 연결하는 방법을 설명합니다.
 ---
 
-현재 Fairy C는 별도의 전역 설치 관리자나 사전 빌드 다운로드 링크를 제공하지 않습니다. 저장소 소스에서 `fairyc` CLI를 빌드한 뒤 운영체제의 C 컴파일러·SDK와 함께 사용합니다.
+아직 미리 빌드된 설치 파일(`.msi`, `.tar.gz` 등)은 따로 배포되지 않습니다. 대신 저장소에서 `fairyc` 실행 파일을 직접 빌드한 다음, 운영체제의 C 컴파일러와 함께 사용합니다.
 
-## 필요한 도구
+## 미리 준비할 것
 
-1. **Git, Go, Bun**: Stage 0 Go 컴파일러 프로토타입 빌드에 필요합니다(`tools/run-go.ts`가 Bun을 통해 Go 명령을 실행합니다).
-2. **네이티브 C 툴체인** (`fairyc build`, `fairyc run`, `fairyc test --native` 실행 시 필요):
-   - **Windows (`x86_64-windows-msvc`)**: Visual Studio 또는 Build Tools의 **MSVC x64 C/C++ 컴파일러**와 **Windows SDK**가 필요합니다.
-   - **Linux (`x86_64-linux-gnu`)**: `PATH`에서 `gcc` 또는 `clang`을 실행할 수 있어야 합니다.
+1. **Git, Go, Bun**: Stage 0 컴파일러가 Go로 작성되어 있어 빌드에 필요합니다.
+2. **운영체제 C 컴파일러** (`build`, `run`, `test --native` 실행 시 필요):
+   - **Windows**: Visual Studio 또는 Build Tools에서 **MSVC x64 C/C++ 컴파일러**와 **Windows SDK**를 설치해 주세요.
+   - **Linux**: `PATH`에서 `gcc` 또는 `clang`을 실행할 수 있어야 합니다.
 
-> **참고:** `fairyc check`와 인터프리터 기반 `fairyc test`는 네이티브 링킹 없이 동작하지만, 실제 실행 파일을 생성·실행하는 `build`, `run`, `test --native`에는 MSVC/Windows SDK 또는 GCC/Clang이 필요합니다.
+> **참고:** 문법이나 빌림만 검사하는 `fairyc check`와 인터프리터 모드 `fairyc test`는 C 컴파일러 없이도 돌아갑니다. 하지만 실제 실행 파일을 만들 때는 MSVC나 GCC/Clang이 꼭 필요합니다.
 
-## 컴파일러 CLI 빌드
+## `fairyc` 빌드하기
 
-`fairyc` 저장소 루트에서 다음 명령을 실행합니다.
+`fairyc` 저장소 루트 폴더에서 아래 명령을 실행합니다.
 
 ```powershell
 bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
 ```
 
-Linux에서는 출력 파일명을 `-o build/fairyc`로 지정합니다. 이후 `./build/fairyc.exe`를 직접 실행하거나 `build/` 폴더를 `PATH`에 추가합니다.
+Linux라면 파일 이름에서 `.exe`만 빼고 `-o build/fairyc`로 빌드하면 됩니다. 편하게 쓰려면 `build` 폴더를 `PATH`에 등록해 두세요.
 
-## 설치 확인
-
-빌드한 바이너리로 버전과 타깃 상태를 확인합니다.
+## 잘 설치됐는지 확인하기
 
 ```powershell
 ./build/fairyc.exe --version
 ./build/fairyc.exe targets
 ```
 
-현재 Stage 0에서 확인되는 출력 예시는 다음과 같습니다.
+`--version`을 실행하면 다음과 비슷한 버전 정보가 출력됩니다.
 
 ```text
 Fairy C Stage 0
@@ -45,10 +43,4 @@ revision: unknown
 modified: unknown
 ```
 
-`fairyc targets`는 `x86_64-linux-gnu`와 `x86_64-windows-msvc`를 표시하면서 현재 `supported: no` 및 미충족 근거(`complete-runtime`, `complete-standard-library` 등)를 함께 출력합니다. 이는 설치 오류가 아니라 공식 타깃 적합성 인증이 아직 미완성임을 뜻하는 정상 출력이며, 호스트 C 툴체인이 있으면 로컬 빌드와 실행은 바로 진행할 수 있습니다.
-
-## 준비 단계에서 자주 겪는 오류
-
-- **종료 코드 `6`으로 빌드 실패**: Windows에서 MSVC / Windows SDK를 찾지 못했거나 Linux `PATH`에 `gcc` / `clang`이 없을 때 발생합니다.
-- **작업 디렉터리 오류**: `check`, `build`, `run`, `test`는 현재 디렉터리에 있는 `fairy.toml`을 기준으로 동작합니다.
-- **다음 단계**: [첫 프로그램](../first-program/)으로 이동해 패키지를 생성하고 실행해 봅니다.
+`fairyc targets`를 실행해 보면 `x86_64-windows-msvc`와 `x86_64-linux-gnu` 항목 아래에 `supported: no`가 표시되는데, 설치가 잘못된 것은 아닙니다. 정식 사양 전체가 끝나기 전까지 프로토타입 상태로 표시해 둔 것뿐이며, C 툴체인이 준비되어 있다면 바로 다음 장의 첫 프로그램을 빌드하고 실행할 수 있습니다.

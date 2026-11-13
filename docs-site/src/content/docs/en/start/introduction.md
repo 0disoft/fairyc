@@ -1,38 +1,31 @@
 ---
 title: Introduction
-description: What Fairy C is for, how it compares to Brownie C, and what works in Stage 0 today.
+description: Why Fairy C exists, what syntax ideas it uses, and how it compares to Brownie C.
 ---
 
-Fairy C is an experimental systems programming language designed to give C-like native control while checking resource lifetimes, borrows, arithmetic overflow, and side-effect boundaries before runtime.
+Writing C gives you direct control over memory and OS APIs, but it is easy to forget a `free()`, touch freed data, or let an integer silently wrap around on overflow.
 
-## What Fairy C Focuses On
+Fairy C is an experimental systems programming language that keeps C-like native execution without garbage collection while letting the compiler catch ownership, borrowing, and arithmetic mistakes early.
 
-- **Explicit resource ownership**: Move-only `resource` types attach deterministic `cleanup` blocks instead of relying on garbage collection.
-- **Compile-time borrow checking**: Shared (`ref T`) and exclusive (`ref mut T`) references and slice views (`u8[]`) verify root lifetimes across scopes and calls.
-- **Checked integer operations**: Signed and unsigned integer overflow and division by zero trap instead of silently wrapping.
-- **Declared side-effect capabilities**: Functions interacting with external systems declare `@effects(...)` tags such as `console`, `filesystem`, `clock`, or `network`.
-- **Direct C interoperability**: `@repr(C)` structs, `unsafe extern C fn` declarations, and explicit `unsafe` blocks bridge directly to C libraries and OS APIs such as Win32.
+## Key Ideas in the Language
 
-## Good Fit vs. Not a Fit Yet
+- **Resources know how to clean themselves up**: Types holding handles or buffers can be declared as `resource` with a `cleanup { ... }` block. When a live resource leaves scope, the compiler schedules cleanup automatically.
+- **Move vs. borrow (`ref` and `ref mut`)**: You either transfer ownership of a resource or lend read-only (`ref T`) / exclusive mutable (`ref mut T`) access while the compiler checks for overlapping conflicts.
+- **Checked integer math**: Integer overflow and division by zero trap cleanly instead of wrapping silently.
+- **Explicit `@effects(...)` tags**: Functions that touch the console, filesystem, clock, or network list those effects in their signature.
+- **Direct C interop**: `@repr(C)` structs and `unsafe extern C fn` let Fairy C call existing C libraries and Win32 APIs directly.
 
-Fairy C fits well when you want to write small native CLI tools, low-overhead system bridges, or Win32/C-ABI wrappers with checked resource cleanup and static type/flow checks.
+## Where It Fits Today
 
-Because the compiler is still a **Stage 0 prototype**, it is not yet a drop-in replacement for a mature toolchain with full target conformance, user-defined generics, closures, or a public package registry.
+Fairy C is well suited for small native CLI tools, C ABI wrappers, and focused Win32 utilities.
+
+Because the compiler is a **Stage 0 prototype**, stick to the stable workspace commands (`new`, `check`, `build`, `run`, `test`, `explain`, `targets`) and treat `fairyc experimental ...` subcommands as internal compiler-development tools. Formal target conformance (`fairyc targets` currently shows `supported: no`) and a full standard library are still in progress.
 
 ## Fairy C vs. Brownie C
 
 | Aspect | Fairy C (`.fy`) | Brownie C (`.brc`) |
 | --- | --- | --- |
-| Role | Native systems programming language | Embedded rule and byte-transformation language |
-| Execution model | Compiles via C11 to native executables | Compiles to private bytecode inside a bounded VM |
-| Compiler host | Go Stage 0 compiler prototype (`fairyc`) | Implemented in Fairy C (`browniec`) |
-| OS & C access | Direct `unsafe extern C fn` and stdlib I/O | No arbitrary FFI or direct OS file/network access |
-| Best suited for | CLI utilities, Win32 apps, native engines | Deterministic rule evaluation under tight budgets |
-
-## Design Goals, Public CLI, and Internal Commands
-
-When exploring the repository, keep these three layers distinct:
-
-1. **Public stable CLI (`fairyc`)**: `new`, `check`, `build`, `run`, `test`, `explain`, and `targets`. These commands work on packages defined by `fairy.toml` and `fairy.lock`.
-2. **Internal / unstable commands (`fairyc experimental ...`)**: Subcommands such as `emit-c`, `run` (semantic interpreter), and `atlas-*` code-intelligence inspection commands exist for compiler development and tooling experiments, not as a stable user interface.
-3. **Target conformance goals**: `fairyc targets` lists `x86_64-windows-msvc` and `x86_64-linux-gnu` as **target prototypes** (`supported: no`), meaning formal target-spec conformance and full standard-library coverage remain incomplete even though local native builds succeed on configured toolchains.
+| Purpose | Standalone native programs and libraries | Embedded rule and byte checks inside a host |
+| Execution | Compiled via C11 to native executables | Run inside a bounded bytecode VM |
+| OS & C access | Direct `unsafe extern C fn` and stdlib I/O | No arbitrary C calls, files, or network access |
+| Budgeting | Normal native OS execution | Bounded by an instruction `--fuel` budget |

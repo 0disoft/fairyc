@@ -1,13 +1,15 @@
 ---
 title: Memory and Resources
-description: Whole-value affine resources, deterministic cleanup, shared vs. mutable borrows, and return origin tracking in Fairy C.
+description: Understand resource cleanup, move semantics, ref/ref mut borrowing, and return-origin rules with clear examples.
 ---
 
-Fairy C manages resources without a garbage collector by combining **move-only `resource` types** with **compile-time borrow and lifetime checking**.
+Ownership and borrowing sound intimidating at first, yet the core intuition is simple: **every cleanup-needing value has one owner at a time, and lending it follows clear read/write rules.**
 
-## Copyable Values vs. Affine `resource` Types
+## 1. Plain Values vs. `resource` Types
 
-Plain structs containing integers or booleans copy by value. In contrast, a `resource` declaration defines an affine (single-owner, move-only) handle whose `cleanup` block runs automatically when the value goes out of scope while still live:
+Plain structs containing integers or booleans copy by value. But if a value holds an OS file handle or heap allocation, copying it would cause two variables to free the same handle twice.
+
+Fairy C solves this with `resource` types and attached `cleanup { ... }` blocks:
 
 ```c
 @repr(C)
@@ -33,20 +35,22 @@ pub resource String {
 }
 ```
 
-Key ownership rules enforced at compile time:
+Whenever a live `String` leaves its scope (`{ ... }`), the compiler automatically calls its `cleanup` block in reverse declaration order.
 
-- **Move on pass or assign**: Moving a `resource` transfers responsibility for running `cleanup`. Reading it again afterward fails (`E1101`).
-- **No partial moves or inert containers**: You cannot move individual fields out of a `resource` (`E1103`), nor store a `resource` inside an ordinary inert `struct` (`E1002`).
-- **Branch join state**: If one `if`/`else` branch moves a resource and the other does not, the variable enters a `MaybeLive` state unless resolved before leaving the scope (`E1104`).
-- **Reverse drop order**: Live resources in a block clean up in reverse declaration order; `Option`/`Result` payloads clean up conditionally based on their tag.
+## 2. Moving Ownership
 
-## Shared (`ref T`) and Exclusive (`ref mut T`) Borrows
+Passing or assigning a `resource` by value transfers both the handle and cleanup responsibility to the receiver:
 
-Instead of transferring ownership, functions can borrow values safely:
+- Touching the old variable after moving it is rejected (`E1101`).
+- Moving a resource in only one branch of an `if`/`else` leaves its state ambiguous afterward unless resolved (`E1104`).
+- Plain `struct` types cannot hold `resource` fields (`E1002`), and you cannot move one field out of a `resource` on its own (`E1103`).
 
-- `ref T`: Shared read-only borrow. Multiple active shared borrows may coexist, provided the root owner is not mutated or moved while any loan is active.
-- `ref mut T`: Exclusive mutable borrow. Prevents any other read, write, or move through the root owner until the borrow finishes.
-- **Whole-root loan rule**: Borrowing a field or sub-slice (`view[lo..hi]`) locks the owning root consistently so no aliasing mutable access can overlap (`E2101`).
+## 3. Borrowing with `ref T` and `ref mut T`
+
+When a helper function only needs temporary access, borrow instead of moving:
+
+- **`ref T` (shared borrow)**: Read-only access. Any number of readers can look at the same value as long as nobody mutates or moves the owner while they are active.
+- **`ref mut T` (mutable borrow)**: Exclusive read-write access. No other read, write, or move on that owner may overlap (`E2101`).
 
 ```c
 fn i32 read(ref i32 value) { return *value; }
@@ -54,10 +58,12 @@ fn void edit(ref mut i32 value) { *value = *value + 1; }
 fn u8 first(ref u8[] view) { return view[0]; }
 fn void fill(ref mut u8[] view) { view[0] = 9; }
 
-fn i32 example() {
+fn i32 main() {
     var i32 number = 41;
     let ref mut i32 view = ref mut number;
     edit(view);
+    read(view);
+
     var u8[2] data = [3, 4];
     let ref mut u8[] buffer = ref mut data;
     fill(buffer);
@@ -65,16 +71,11 @@ fn i32 example() {
 }
 ```
 
-## Return-Origin Rules and `Region` Arenas
+Even when borrowing a slice view (`view[lo..hi]`), the compiler tracks the underlying root owner consistently so aliasing mutable views cannot overlap.
 
-When a function returns a borrow (`ref T` or `ref u8[]`), Stage 0 enforces the **single-origin rule**:
+## 4. Returning Borrows
 
-- The returned borrow must trace back either to static data or to **at most one** borrowed parameter origin (`E2103` if two different parameters could both be returned).
-- Returning a borrow pointing to a local stack variable is rejected (`E2102`).
-- Temporary region-based allocations (`Region`) prevent escaping the region scope (`E3101..E3104`) and forbid types that require `cleanup` in plain arenas (`E3102`).
+Two practical rules keep returned references safe:
 
-## Common Ownership & Borrow Errors
-
-- **`E1101` (Use after move)**: A `resource` was already passed by value or consumed. Pass `ref` / `ref mut` instead when the caller still needs it.
-- **`E2101` (Loan conflict)**: Mutating or moving a variable while a `ref` view still borrows from it later in the scope.
-- **`E2103` (Ambiguous return origin)**: A function returning `ref u8[]` chooses between two input borrows; pass/return an owned value or redesign to return from one parameter.
+1. **No returning locals (`E2102`)**: Local variables vanish when a function returns, so you cannot return a `ref` pointing to one.
+2. **Single input origin (`E2103`)**: A function returning `ref T` or `ref u8[]` must trace back to static data or a **single** input borrow parameter rather than choosing dynamically between two different inputs. Return an owned value if a function needs to pick between two sources.

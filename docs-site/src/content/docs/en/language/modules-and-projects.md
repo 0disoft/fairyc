@@ -1,13 +1,34 @@
 ---
 title: Projects, Modules, and Dependencies
-description: Managing fairy.toml manifests, fairy.lock, module visibility, local workspace dependencies, and package tests.
+description: Organize multi-file packages with module declarations, pub visibility, fairy.toml workspaces, and tests/.
 ---
 
-Every Fairy C package centers on a `fairy.toml` manifest at the package root, optional workspace path dependencies, and a `fairy.lock` lockfile.
+Once your program grows beyond a single `src/main.fy`, Fairy C splits code cleanly using `module` paths, `pub` visibility, and local workspace packages in `fairy.toml`.
 
-## The `fairy.toml` Manifest (`fairyc.manifest/v1`)
+## 1. Modules, Imports, and Visibility
 
-`fairy.toml` uses a strict closed schema—unknown fields or mismatched keys are rejected rather than ignored:
+Every `.fy` file begins with a `module` header matching its relative path under `source` (`E0002` otherwise):
+
+- `src/main.fy` → `module main;`
+- `src/net/http.fy` → `module net::http;`
+
+When importing another module, always give it an explicit alias (`import ... as ...;`). Wildcard imports (`*`) are disallowed (`E0003`) so you can always trace where a symbol came from:
+
+```c
+module main;
+
+import answer as answer;
+
+fn i32 main() {
+    return answer::value();
+}
+```
+
+Everything inside a module is **private by default**. Mark functions, structs, or resources with `pub` when another module needs to access them (`E0103` otherwise).
+
+## 2. Inside `fairy.toml`
+
+`fairy.toml` uses a strict schema so typos fail instead of being silently ignored:
 
 ```toml
 schema = "fairyc.manifest/v1"
@@ -20,43 +41,17 @@ language = "fairyc-language/20"
 source = "src"
 ```
 
-- **`uid`**: Permanent dot-separated lowercase kebab identifier (at least two segments).
-- **`name`**: Lowercase kebab CLI/package output name (`build/<name>.exe` on Windows).
-- **`version`**: Exact SemVer `MAJOR.MINOR.PATCH` string (ranges are rejected).
-- **`language`**: Exact language revision identifier (`fairyc-language/20` in current Stage 0).
-- **`source`**: Explicit relative source directory (such as `"src"`).
+- `uid`: Dot-separated lowercase identifier (`example.hello-fairy`)
+- `name`: Lowercase package name used for `build/<name>.exe`
+- `version`: Exact `MAJOR.MINOR.PATCH` version
+- `language`: Language revision (`"fairyc-language/20"`)
+- `source`: Source root directory (`"src"`)
 
-## Modules, Imports, and Visibility
+## 3. Local Workspace Dependencies
 
-- **File-to-module mapping**: Each `.fy` file begins with `module <name>;` matching its relative path inside `source` (`E0002` if mismatched).
-- **Explicit aliased imports**: Wildcard and glob imports are forbidden (`E0003`). Import packages or modules with an explicit alias:
-
-```c
-module main;
-
-import answer as answer;
-
-fn i32 main() {
-    return answer::value();
-}
-```
-
-- **Visibility**: Declarations are module-private unless marked `pub` (`pub fn`, `pub struct`, `pub resource`). Accessing non-public items from another module fails with `E0103`.
-
-## Local Workspaces and Path Dependencies
-
-Multi-package projects declare workspace members and explicit path dependencies in the root `fairy.toml` (`examples/workspace_quickstart`):
+To depend on a local library package (such as `libs/answer` in `examples/workspace_quickstart`), list it under `[workspace]` and `[dependencies.<alias>]`:
 
 ```toml
-schema = "fairyc.manifest/v1"
-
-[package]
-uid = "example.workspace-quickstart.app"
-name = "workspace-quickstart"
-version = "1.0.0"
-language = "fairyc-language/20"
-source = "src"
-
 [workspace]
 members = ["libs/answer"]
 
@@ -66,19 +61,15 @@ version = "1.0.0"
 features = []
 ```
 
-Workspace rules:
+Stable `fairyc` supports local path dependencies only—there is no automatic remote registry fetch or C compiler flags (`cflags` / `defines`) in `fairy.toml`.
 
-- `workspace.members` must be explicit, sorted, and unique; there is no parent-directory discovery.
-- Every `[dependencies.<alias>]` entry specifies `path`, exact expected `version`, and `features = [...]` (`features = []` is required when empty).
-- Stable `fairyc` resolves local workspace dependencies only—manifest v1 intentionally excludes C preprocessor `defines`, `include_paths`, `cflags`, and automatic remote registry downloads.
+## 4. `fairy.lock` and `--locked`
 
-## `fairy.lock` and `--locked`
+Running `fairyc check`, `build`, or `run` creates or updates `fairy.lock`. Adding `--locked` tells the compiler to fail (exit code `7`) if manifests or dependencies differ from the lockfile.
 
-Running `fairyc check`, `fairyc build`, or `fairyc run` without `--locked` creates or refreshes `fairy.lock`. Once locked, passing `--locked` (including in `fairyc test --locked`) fails with exit code `7` if any manifest or local dependency changed without re-checking.
+## 5. Writing Tests in `tests/`
 
-## Organizing Tests in `tests/`
-
-Put test functions in `.fy` files under `tests/` using `@test` on private safe zero-argument `fn void` functions (`E9001`):
+Place unit tests in `tests/` using `@test` on zero-argument `fn void` functions:
 
 ```c
 module tests::main;
@@ -91,8 +82,4 @@ fn void answer_is_42() {
 }
 ```
 
-Run tests with:
-
-- `fairyc test --locked` (semantic interpreter)
-- `fairyc test --native --locked` (isolated compiled native test binaries)
-- `fairyc test --list --json --locked` (inspect test identities)
+Run them via `fairyc test --locked` (semantic interpreter) or `fairyc test --native --locked` (native compiled test binaries).

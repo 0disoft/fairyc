@@ -1,27 +1,27 @@
 ---
 title: 첫 프로그램
-description: 새 Fairy C 패키지를 만들고, 정적 검사·테스트·네이티브 실행 및 빌드까지 순서대로 진행합니다.
+description: 새 Fairy C 프로젝트를 만들고, 생성된 코드를 읽어 보며 검사·테스트·실행까지 해 봅니다.
 ---
 
-이 가이드에서는 `fairyc new`로 시작 패키지를 만든 뒤, 정적 검사와 테스트를 실행하고 네이티브 바이너리로 실행·빌드하는 전체 흐름을 확인합니다.
+이제 직접 첫 번째 Fairy C 프로그램을 만들고 실행해 봅시다.
 
-## 1. 새 패키지 생성
+## 1. 새 프로젝트 만들기
 
-컴파일러 저장소 바깥의 깨끗한 작업 폴더에서 `--uid` 플래그를 포함해 `fairyc new`를 실행합니다.
+컴파일러 저장소 바깥의 빈 폴더로 이동한 뒤 `fairyc new`로 시작 프로젝트를 만듭니다. 이때 패키지를 구분하는 고유 이름(`--uid`)을 꼭 함께 적어 주어야 합니다.
 
 ```powershell
 fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 ```
 
-다음 다섯 파일이 생성됩니다.
+명령이 성공하면 폴더 안에 다섯 파일이 생깁니다.
 
-- `fairy.toml`: 패키지 매니페스트
-- `src/main.fy`: 프로그램 진입점 소스
-- `tests/main.fy`: 기본 테스트 모듈
+- `fairy.toml`: 프로젝트 설정 파일
+- `src/main.fy`: 실제 프로그램 코드가 들어가는 곳
+- `tests/main.fy`: 테스트 코드가 들어가는 곳
 - `.gitignore`, `README.md`
 
-`fairy.toml` 내용은 다음과 같습니다.
+먼저 `fairy.toml`을 열어 보면 이렇게 생겼습니다.
 
 ```toml
 schema = "fairyc.manifest/v1"
@@ -34,7 +34,7 @@ language = "fairyc-language/20"
 source = "src"
 ```
 
-`src/main.fy` 내용은 다음과 같습니다.
+그다음 `src/main.fy` 코드를 봅시다. 아주 간단합니다.
 
 ```c
 module main;
@@ -48,64 +48,66 @@ fn i32 main() {
 }
 ```
 
-실행 가능한 Fairy C 패키지는 `module main;`의 `fn i32 main()`에서 시작하며, 반환한 `i32` 값이 프로세스 종료 코드가 됩니다.
+한 줄씩 뜯어볼까요?
 
-## 2. 정적 검사 실행
+1. `module main;`: 이 파일의 모듈 이름입니다. 진입 파일인 `src/main.fy`는 `main` 모듈이어야 합니다.
+2. `pub fn i32 answer()`: C와 비슷하지만 함수 이름(`answer`) 앞에 반환 타입 `i32`가 오고, 앞에 `fn`이 붙습니다. `pub`은 테스트 파일 같은 다른 모듈에서도 이 함수를 부를 수 있게 열어 준다는 뜻입니다.
+3. `fn i32 main()`: 프로그램이 시작하는 지점입니다. 여기서 `return`한 `i32` 숫자가 운영체제에 돌려주는 프로세스 종료 코드(exit code)가 됩니다. `42 - 42`는 `0`이므로 정상 종료를 뜻하게 됩니다.
 
-문법, 타입, 소유권, 빌림 규칙을 검사하고 `fairy.lock`을 생성합니다.
+## 2. 문법·타입 검사하기 (`check`)
+
+실행 파일을 만들기 전에 먼저 코드에 문제가 없는지 검사해 봅시다.
 
 ```powershell
 fairyc check
 ```
 
-예상 출력:
+정상이라면 이런 문장이 나옵니다.
 
 ```text
 check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated
 ```
 
-`fairy.lock`이 만들어진 이후에는 `--locked` 옵션을 함께 전달해 의도치 않은 잠금 변경을 막을 수 있습니다.
+처음 `check`를 돌리면 폴더에 `fairy.lock` 파일이 자동으로 만들어집니다. 그다음부터는 `--locked`를 붙여 실행할 수 있는데, "잠금 파일에 기록된 구성 그대로 검사해 달라"는 뜻입니다.
 
 ```powershell
 fairyc check --locked
 ```
 
-## 3. 기본 테스트 실행
+## 3. 테스트 돌려보기 (`test`)
 
-시맨틱 인터프리터로 `tests/` 테스트를 실행합니다.
+`tests/main.fy`에는 이미 `answer() == 42`를 확인하는 테스트가 하나 들어 있습니다. 실행해 볼까요?
 
 ```powershell
 fairyc test --locked
 ```
 
-예상 출력:
+출력:
 
 ```text
 test tests::main::answer_is_42 ... ok
 test result: ok. 1 passed; 0 failed; lock verified
 ```
 
-실제 네이티브 실행 이미지로 테스트하려면 `fairyc test --native --locked`를 사용합니다.
+실제 네이티브 실행 파일로 컴파일해서 테스트하고 싶다면 `fairyc test --native --locked`를 쓰면 됩니다.
 
-## 4. 네이티브 실행 및 빌드
+## 4. 직접 실행하고 빌드 파일 남기기 (`run`, `build`)
 
-임시 네이티브 바이너리를 만들어 바로 실행합니다.
+임시 실행 파일을 만들어 곧바로 실행하고 치워 주려면 `run`을 씁니다.
 
 ```powershell
 fairyc run --locked
 ```
 
-`answer() - 42`의 결과가 `0`이므로 프로세스가 종료 코드 `0`으로 끝나며, 폴더에 임시 실행 파일을 남기지 않습니다.
-
-결과 실행 파일을 `build/hello-fairy.exe`(Windows) 또는 `build/hello-fairy`(Linux)로 남기려면 `build` 명령을 사용합니다.
+`main()`이 `0`을 반환했으니 아무 오류 없이 종료 코드 `0`으로 끝납니다. 만약 `build/hello-fairy.exe`(Linux는 `build/hello-fairy`)처럼 실행 파일을 폴더에 남겨 두고 싶다면 `build` 명령을 씁니다.
 
 ```powershell
 fairyc build --release --locked
 ```
 
-## 처음 시작할 때 자주 겪는 실수
+## 처음 해 볼 때 자주 걸리는 부분
 
-- **`fairyc new`에서 `--uid` 누락**: `--uid`는 필수이며, 소문자 케밥 세그먼트 두 개 이상을 점(`.`)으로 이어 적어야 합니다(예: `example.hello-fairy`).
-- **패키지 이름이나 `uid`의 대문자 사용**: 매니페스트 규칙상 소문자 케밥 표기만 허용됩니다.
-- **의존성이나 매니페스트 수정 후 바로 `--locked` 사용**: 변경 후 먼저 `fairyc check`로 `fairy.lock`을 갱신해야 `--locked`가 통과합니다.
-- **`run`/`build` 시 종료 코드 `6` 발생**: Windows의 MSVC/Windows SDK 또는 Linux의 `gcc`/`clang`이 셸에서 접근 가능한지 확인하세요.
+- **`--uid`를 빼먹은 경우**: `fairyc new`는 `--uid example.hello-fairy`처럼 점(`.`)으로 나뉜 두 단어 이상의 소문자 ID가 꼭 필요합니다.
+- **이름에 대문자를 쓴 경우**: 패키지 `name`과 `uid`는 모두 소문자와 하이픈(`-`)만 허용합니다.
+- **설정을 고친 직후 `--locked`를 쓴 경우**: `fairy.toml`을 고쳤다면 먼저 `--locked` 없이 `fairyc check`를 한 번 실행해 `fairy.lock`을 갱신해야 합니다.
+- **`run`/`build`에서 종료 코드 `6`이 난 경우**: C 컴파일러(Windows는 MSVC/SDK, Linux는 `gcc`/`clang`)를 찾지 못했다는 뜻이니 터미널 환경을 확인해 주세요.

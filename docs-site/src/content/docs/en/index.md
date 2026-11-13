@@ -1,21 +1,19 @@
 ---
 title: Fairy C
-description: Experimental native systems programming language with explicit ownership, borrow checking, and C interoperability.
+description: An experimental native systems programming language with explicit resource cleanup, borrow checking, and C interoperability.
 ---
 
-Fairy C is an experimental native systems programming language with explicit resource ownership, compile-time borrow checking, checked integer arithmetic, capability annotations (`@effects(...)`), and direct C ABI interoperability without garbage collection.
+Fairy C is an experimental systems programming language designed to build small native binaries like C while catching resource leaks, dangling borrows, and integer overflows at compile time.
 
-The current compiler (`fairyc`) is a Stage 0 prototype written in Go (`fairyc-language/20`). It compiles `.fy` packages to native executables through a C11 backend using your platform's C toolchain.
+The current `fairyc` compiler is a Stage 0 prototype written in Go. It compiles `.fy` packages through a C11 backend using your system C toolchain (MSVC + Windows SDK on Windows, or GCC/Clang on Linux).
 
-## Explore the Documentation
+## Where to Start
 
 - **Getting Started**: [Introduction](./start/introduction/) · [Installation and Setup](./start/installation/) · [First Program](./start/first-program/)
 - **Learn the Language**: [Language Basics](./language/basics/) · [Memory and Resources](./language/memory-and-resources/) · [Projects, Modules, and Dependencies](./language/modules-and-projects/)
-- **Examples**: [C Interop and Win32 Apps](./examples/c-interop-and-win32/) (`win32_minimal`, `win32_hash`)
-- **Support Status**: [Current Support and Limitations](./support/status-and-limits/) · [CLI Usage and Common Errors](./cli/commands-and-errors/)
+- **Examples**: [C Interop and Win32 Apps](./examples/c-interop-and-win32/)
+- **CLI & Status**: [CLI Usage and Common Errors](./cli/commands-and-errors/) · [Current Support and Limitations](./support/status-and-limits/)
 
-## How Fairy C Relates to Brownie C
+## Fairy C vs. Brownie C
 
-Fairy C is a general-purpose native systems language built for executables and libraries that interact with C and OS APIs.
-
-**Brownie C** is a separate embedded rule and byte-transformation language with a bounded virtual machine, and it is being implemented *in* Fairy C. If you want to build native programs, you are in the right place.
+While **Fairy C** builds standalone native executables and C/OS libraries, **Brownie C** is a separate embedded rule and byte-transformation language running inside a bounded VM. Brownie C's own compiler and VM are written in Fairy C.

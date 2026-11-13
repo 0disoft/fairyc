@@ -1,13 +1,14 @@
 ---
 title: C Interop and Win32 Apps
-description: Interfacing with C via @repr(C), unsafe extern C fn, callbacks, and real Win32 examples (win32_minimal and win32_hash).
+description: Call C functions with @repr(C) and unsafe extern C fn, and explore real Win32 examples (win32_minimal and win32_hash).
 ---
 
-Fairy C interfaces with C libraries and OS APIs directly through C-compatible data layouts, explicit `unsafe extern C fn` declarations, and native Win32 bridge builds.
+When you want to reuse existing C libraries or call Windows Win32 APIs directly, Fairy C provides explicit C-layout and foreign-function primitives.
 
-## C ABI Building Blocks
+## 1. Three C-Interop Building Blocks
 
-1. **C-compatible struct layout (`@repr(C)`)**: Ensures field order and alignment match the target C ABI (`examples/win32_hash/src/writer.fy`):
+### `@repr(C)` for Struct Layouts
+Normally the compiler is free to reorder fields in a struct. Add `@repr(C)` when sharing a struct across a C boundary so layout and alignment match C (`examples/win32_hash/src/writer.fy`):
 
 ```c
 @repr(C)
@@ -18,7 +19,8 @@ pub struct Observation {
 }
 ```
 
-2. **Foreign function declarations & `unsafe` blocks**: Raw pointer calls and foreign C functions require `unsafe extern C fn` (optionally with `@link_name("...")`) and must be called inside `unsafe { ... }` (`E5101`):
+### `unsafe extern C fn` and `unsafe { ... }`
+Declare foreign C functions with `unsafe extern C fn` and invoke them inside `unsafe { ... }`. Putting the `unsafe` call inside a `resource`'s `cleanup` block keeps the rest of your Fairy C code clean and safe:
 
 ```c
 @effects(filesystem)
@@ -31,7 +33,8 @@ pub resource Writer {
 }
 ```
 
-3. **Synchronous C callbacks (`examples/c_interop_callback`)**: Passing a synchronous Fairy callback to C works across raw pointer boundaries, while passing safe `ref T` borrows directly in `extern C` signatures (`E5102`) or letting C `longjmp`/exceptions unwind through Fairy frames (`E5103`) is forbidden.
+### Passing Callbacks to C (`examples/c_interop_callback`)
+Synchronous Fairy callbacks can be passed across raw pointer signatures (`unsafe extern C fn` cannot take safe `ref T` directly—`E5102`):
 
 ```c
 unsafe extern C fn i32 legacy_filter(
@@ -42,9 +45,9 @@ unsafe fn i32 keep_large(i32 value, ptr mut void data) {
 }
 ```
 
-## Windows GUI Bridge Configuration (`fairy.windows.json`)
+## 2. Win32 Bridge Setup (`fairy.windows.json`)
 
-For Win32 desktop applications, a `fairy.windows.json` file (`schema: "fairyc.windows-build/v1"`) pairs Fairy application code with native C Win32 loop/UI shims and `.rc` resources:
+Desktop examples use a `fairy.windows.json` configuration (`fairyc.windows-build/v1`) to link C shims, `.rc` resources, and Windows libraries:
 
 ```json
 {
@@ -56,14 +59,12 @@ For Win32 desktop applications, a `fairy.windows.json` file (`schema: "fairyc.wi
 }
 ```
 
-## Real Example 1: `examples/win32_minimal`
+## 3. Example 1: `examples/win32_minimal`
 
-`examples/win32_minimal` splits responsibilities cleanly:
+A minimal Win32 GUI splitting OS plumbing from application logic:
 
-- **Native C bridge (`native/window.c`, `native/ime.c`)**: Owns `HWND` creation, the Win32 message loop, `IMM32` Hangul/IME handling, and font/DPI APIs.
-- **Fairy application (`src/main.fy`)**: Owns DPI-scaled control layout (`on_size`, `on_dpi`), key/Tab navigation (`on_key`, `on_tab`), and message formatting (`on_click`) using fixed byte buffers and slices.
-
-Build and verify locally on Windows:
+- **C bridge (`native/window.c`, `native/ime.c`)**: Window creation, Win32 event loop, Hangul/IME composition, and DPI/font APIs.
+- **Fairy C (`src/main.fy`)**: DPI-scaled layout (`on_size`, `on_dpi`), keyboard/Tab handling (`on_key`, `on_tab`), and text processing (`on_click`).
 
 ```powershell
 cd examples/win32_minimal
@@ -71,23 +72,11 @@ fairyc build --release
 .\build\win32-minimal.exe
 ```
 
-### Measured Size Record (`windows-gui-slim-20261111`)
+In the `windows-gui-slim-20261111` distribution-wrapper measurement (stripping opt-in pipe/smoke test helpers while keeping static CRT and Windows DLL imports), the Windows x64 MSVC release binary measured `121,344` bytes with the Go CLI and `123,904` bytes (`121 KiB`) with the authored CLI.
 
-When stripping opt-in test/JSONL pipe diagnostics into separate distribution wrappers (`build_distribution.py`), the repository recorded these exact Windows x64 MSVC release sizes:
+## 4. Example 2: `examples/win32_hash` (Fairy Hash)
 
-| Compiler | Profile | Ordinary Image | Distribution Image |
-| --- | --- | ---: | ---: |
-| Go CLI | release | 141,824 B | 121,344 B |
-| Authored CLI | release | 144,384 B (141 KiB) | 123,904 B (121 KiB) |
-
-These distribution builds still link static CRT and import `USER32`, `GDI32`, `IMM32`, and `KERNEL32` system DLLs.
-
-## Real Example 2: `examples/win32_hash` (Fairy Hash)
-
-`examples/win32_hash` (Fairy Hash) is a desktop + CLI SHA-256 file integrity utility using `std::fs`, `std::bytes`, `std::process`, and `std::io` alongside a thin Win32 C shim (`native/window.c`, `native/reader.c`, `native/writer.c`).
-
-- **Effects in `src/main.fy`**: `main()` declares `@effects(console, filesystem, clock)`.
-- **CLI mode**: Outputs a UTF-8 JSON report without launching a GUI window:
+A combined desktop and `--hash <file> [report]` CLI SHA-256 integrity utility combining `std::fs`, `std::bytes`, `std::process`, `std::io`, and `@effects(console, filesystem, clock)` with a thin C bridge (`native/window.c`, `native/reader.c`, `native/writer.c`).
 
 ```powershell
 cd examples/win32_hash
@@ -95,11 +84,6 @@ fairyc build --release
 .\build\win32-hash.exe --hash path\to\file
 ```
 
-### Measured Size Record (`windows-hash-package-20261113`)
+In the `2026-11-13` Windows x64 locked release build (`fairyc-go.exe build --locked --release`, embedding a 9-size `.ico`, `VERSIONINFO`, and Common Controls v6 manifest), `FairyHash.exe` measured `196,096` bytes (`191.5 KiB`; `188,416` bytes prior to embedding those icon/version resources).
 
-In the `2026-11-13` portable release package verification (`fairyc-go.exe build --locked --release`, embedding a 9-size `.ico`, `VERSIONINFO`, and Common Controls v6 manifest while excluding test/dev scripts):
-
-- `FairyHash.exe` (with embedded icon/version resources): **196,096 bytes (191.5 KiB)** (up from **188,416 bytes** before adding those resources)
-- Portable unsigned ZIP (`fairy-hash-0.1.0-windows-x64.zip`): **105,640 bytes (103.16 KiB)**
-
-> **Important scope note:** These binary sizes (`121 KiB` and `191.5 KiB`) come from specific Windows x64 MSVC release builds of `win32_minimal` and `win32_hash` with their exact C bridges and static CRT. They are project measurements under those conditions—not a general size or performance guarantee for arbitrary Fairy C programs.
+> These size measurements apply to those specific Windows x64 MSVC release builds with their C shims and static CRT—they are concrete example figures, not a blanket guarantee for all Fairy C binaries.

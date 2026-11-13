@@ -1,56 +1,39 @@
 ---
 title: CLI Usage and Common Errors
-description: Stable fairyc workspace commands, flags, exit codes, and how to diagnose compiler and build failures.
+description: Everyday fairyc commands, exit codes, and quick fixes for common compiler errors.
 ---
 
-The stable `fairyc` CLI operates on packages configured by `fairy.toml` and `fairy.lock`.
+Here is a practical cheat sheet for the stable `fairyc` CLI commands and the compiler errors you are most likely to run into first.
 
-## Stable Commands
+## Everyday Commands
 
-| Command | Purpose |
+| Command | When to Use It |
 | --- | --- |
-| `fairyc new <name> --uid <uid>` | Create a starter package directory (`fairy.toml`, `src/main.fy`, `tests/main.fy`) |
-| `fairyc check [--locked]` | Parse, type-check, borrow-check, and update (or verify) `fairy.lock` |
-| `fairyc build [--release] [--locked]` | Compile and link `build/<package-name>.exe` (Windows) or `build/<package-name>` (Linux) |
-| `fairyc run [--release] [--locked] [-- <args...>]` | Build a temporary native binary, run it forwarding stdin/args, and remove the binary |
-| `fairyc test [options] [--locked]` | Run tests in the semantic interpreter, or natively with `--native` |
-| `fairyc explain <code>` | Print details for a diagnostic code such as `E2101` or `E7102` |
-| `fairyc targets` | Show registered target specifications and current conformance flags |
-| `fairyc --version` / `--help` | Print compiler identity and command help |
+| `fairyc new <name> --uid <uid>` | Create a new package folder |
+| `fairyc check [--locked]` | Fast syntax, type, and borrow check without compiling C |
+| `fairyc build [--release] [--locked]` | Produce `build/<name>.exe` (Windows) or `build/<name>` (Linux) |
+| `fairyc run [--release] [--locked] [-- <args...>]` | Compile and run a temporary binary right away |
+| `fairyc test [--native] [--locked]` | Run `tests/` in the interpreter or as native binaries (`--native`) |
+| `fairyc explain <code>` | Read details on a diagnostic code like `E2101` |
 
-> **Stable vs. Experimental:** Any `fairyc experimental ...` subcommand (such as `emit-c` or `atlas-*`) is an unstable compiler-development tool rather than a supported user workflow.
+Stick to these stable commands—`fairyc experimental ...` subcommands are internal tools for compiler development.
 
-## Useful Flags
+## Exit Codes at a Glance
 
-- `--locked`: Require an existing, up-to-date `fairy.lock` rather than modifying it. Recommended for repeatable local checks and CI.
-- `--release`: Enable optimized C backend compilation in `build`, `run`, and `test --native`.
-- `--json`: Machine-readable output for `fairyc test` and `fairyc test --list`.
-- `--native` (for `fairyc test`): Execute isolated native test binaries instead of the semantic interpreter. Accepts `--timeout-seconds <1..60>`, `--stdin-file <path>`, and `--capture-output` (with `--json`).
+- **`0`**: Success (`run` also forwards your `main()`'s non-zero return value if it doesn't trap)
+- **`2`**: Wrong CLI flags or invocation syntax
+- **`3`**: Compile error in your `.fy` source or manifest
+- **`5`**: Runtime trap (integer overflow, division by zero, failed `assert`)
+- **`6`**: Host C compiler / linker not found or failed
+- **`7`**: `fairy.toml` / `fairy.lock` mismatch (re-run `fairyc check`)
 
-## Process Exit Codes
+## Common Errors and How to Fix Them
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Success (for `fairyc run`, only when the compiled program itself exits `0`) |
-| `2` | Invalid CLI invocation or unsupported command option |
-| `3` | Source syntax, type, borrow, effect, or manifest validation failure |
-| `4` | Internal compiler failure |
-| `5` | Fairy program runtime trap (for example, integer overflow, division by zero, or failed `assert`) |
-| `6` | Native C toolchain, linker, or executable launch failure |
-| `7` | Workspace, manifest (`fairy.toml`), or lockfile (`fairy.lock`) mismatch |
+Run `fairyc explain <CODE>` for any code you see. Most beginner errors fall into one of these:
 
-During `fairyc run`, any non-zero `i32` returned normally by your `main()` function is forwarded as the process exit status, unless the program hit a Fairy trap (exit code `5`).
-
-## Looking Up and Fixing Common Errors
-
-Use `fairyc explain <code>` when a diagnostic reports a Stage 0 error code:
-
-| Code Family / Example | Meaning & Quick Fix |
-| --- | --- |
-| `E0001..E0011` | UTF-8, module path mismatch (`E0002`), wildcard/invalid import (`E0003`), or chained comparison (`E0009`). Check `module ...;` matches the file path and add parentheses around comparisons. |
-| `E1001..E1014` | Type mismatch, missing initializer (`E1001`), or explicit cast needed (`E1006`). Use `as` for scalar conversions and match exact labels. |
-| `E1101..E1109` | Move/cleanup violations (`resource` used after move `E1101`, `MaybeLive` join `E1104`). Borrow with `ref` instead of moving when keeping ownership. |
-| `E2101..E2105` | Borrow conflicts (`E2101`) or multi-origin returned borrow (`E2103`). End conflicting borrows before mutating or return an owned value. |
-| `E4101..E4202` | Unhandled `Result` (`E4101`) or ignored `@must_use` value (`E4202`). Handle with `switch`, `?`, or explicit `discard`. |
-| `E5101..E5106` | Unsafe/FFI boundary errors. Raw pointer operations and `extern C` calls must appear inside `unsafe { ... }`. |
-| `E7101..E7102` | Missing `@effects(...)` declaration (`E7102`). Add the callee's effect (such as `console` or `filesystem`) to the enclosing function. |
+1. **`E1001` (uninitialized variable)**: Write `var i32 count = 0;` instead of `var i32 count;`.
+2. **`E1006` / `E0009` (mixed integer types or chained comparisons)**: Cast explicitly with `as`, and write `(0 < x) && (x < 10)` instead of `0 < x < 10`.
+3. **`E1101` (use after move)**: You passed a `resource` by value and tried to use it again. Borrow with `ref` or `ref mut` if the caller still needs it.
+4. **`E2101` (borrow conflict)**: You mutated or moved a variable while a `ref` borrow was still used later in the block. Finish using the borrow before mutating.
+5. **`E4101` (ignored `Result`)**: Handle `Result` returns with `switch`, `?`, or explicit `discard`.
+6. **`E7102` (missing `@effects(...)`)**: Add the callee's effect (like `console` or `filesystem`) to your function's `@effects(...)` attribute.

@@ -1,35 +1,23 @@
 ---
 title: Current Support and Limitations
-description: Exact Stage 0 prototype scope, target-spec status from fairyc targets, and what is not supported yet.
+description: What works in Stage 0 Fairy C today, what is still incomplete, and what fairyc targets means.
 ---
 
-Fairy C is an active **Stage 0 compiler prototype** (`fairyc-language/20`, `fairyc-sdk-stdlib/0 0.0.0-stage0.87`). Knowing what works practically today versus what remains unverified keeps expectations realistic.
+Fairy C is an active **Stage 0 compiler prototype**. Knowing what works today versus what is still in progress helps set realistic expectations.
 
-## Target Status (`fairyc targets`)
+## What Works Today
 
-Running `fairyc targets` lists two registered targets, both marked `supported: no` at the formal target-specification level:
+- Packages and local `[workspace]` path dependencies (`fairy.toml` + `fairy.lock`)
+- `resource` ownership with `cleanup`, `ref`/`ref mut` borrows, slice views (`u8[]`), and single-origin borrow returns
+- Checked integer arithmetic, `Option<T>`, `Result<T, E>`, `?` propagation, and `@effects(...)`
+- Direct C ABI interop (`@repr(C)`, `unsafe extern C fn`, synchronous C callbacks, Win32 bridge examples)
+- Core Stage 0 SDK modules (`std::io`, `std::fs`, `std::bytes`, `std::alloc`, `std::text`, `std::vec`, `std::process`)
 
-- `x86_64-windows-msvc`: `emittable: no`, `conformant: no`, `supported: no`
-- `x86_64-linux-gnu`: `emittable: no`, `conformant: no`, `supported: no`
+With MSVC + Windows SDK on Windows or GCC/Clang on Linux, you can build and run console tools and Win32 examples within this subset. Note that `fairyc targets` currently prints `supported: no` for both `x86_64-windows-msvc` and `x86_64-linux-gnu` because formal target-spec conformance and full stdlib coverage are not finished yet.
 
-In practice, this means:
+## Current Limitations
 
-- **What works**: On a host with a configured C toolchain (MSVC + Windows SDK on Windows, or GCC/Clang on Linux), `fairyc check`, `fairyc build`, `fairyc run`, and `fairyc test` compile and run real packages, Win32/C-interop apps, and standard-library examples within the implemented Stage 0 subset.
-- **What `supported: no` reflects**: Formal bidirectional C ABI layout conformance suites, complete Windows x64 unwind fixtures, full standard library coverage, complete runtime ABI coverage, and packaged toolchain provisioning are not finished yet.
-
-## Supported Features Today
-
-- Single-package and local path-based `[workspace]` projects defined by `fairy.toml` + `fairy.lock`.
-- Move-only `resource` types with deterministic `cleanup`, whole-root borrow checking (`ref` / `ref mut` / slice views), and single-origin borrow returns.
-- Checked integer arithmetic (`+`, `-`, `*`, `/`, shifts) and explicit `as` casts.
-- `Option<T>`, `Result<T, E>` (with `?` propagation and unused-`Result` checking), `@must_use`, `@const_eval`, `static_assert`, `defer`, and `@effects(...)`.
-- Direct C ABI interoperability (`@repr(C)`, `@link_name`, `unsafe extern C fn`, synchronous C callbacks).
-- Stage 0 standard modules used across examples (`std::io`, `std::fs`, `std::bytes`, `std::alloc`, `std::text`, `std::vec`, `std::process`).
-
-## Known Limitations and Exclusions
-
-- **No finished universal compatibility claim**: Do not assume all target platforms, C compilers, or arbitrary C++ libraries work out of the box.
-- **Partial standard library**: Only the existing `std::*` modules implemented in the Stage 0 SDK are available; rich networking, async executors, or general cross-platform GUI frameworks are not part of the standard library.
-- **No remote package registry or automatic downloads**: `fairy.toml` resolves local workspace members and explicit dependencies; remote registry fetching is not part of stable `fairyc`.
-- **Stage 0 generic & callback limits**: Generics follow strict explicit scalar constraints (`E45xx`), safe closures/higher-order borrow-returning callbacks are restricted (`E2104`, `E5104`), and `f32`/`f64` stay limited to C ABI representation structs.
-- **Experimental subcommands are unstable**: Commands under `fairyc experimental` exist for internal compiler and tooling workflows and may change or be removed without notice.
+- **Not a finished universal toolchain**: Full platform coverage, arbitrary C++ compatibility, and general performance guarantees are not claimed.
+- **Partial standard library**: Async runtimes, HTTP clients/servers, and cross-platform GUI toolkits are not included.
+- **Local dependencies only**: There is no remote package registry or automatic downloader.
+- **Language restrictions**: Generics are limited to constrained scalar uses, borrow-returning callbacks/closures are restricted (`E2104`, `E5104`), and `f32`/`f64` are primarily for `@repr(C)` C layouts.

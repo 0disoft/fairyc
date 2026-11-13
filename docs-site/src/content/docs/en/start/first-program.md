@@ -1,27 +1,22 @@
 ---
 title: First Program
-description: Create a new Fairy C package, check its types and borrows, run tests, and build a native binary.
+description: Create your first Fairy C package, read through the generated code, and run checks, tests, and native builds.
 ---
 
-This walkthrough uses `fairyc new` to create a starter package, inspect the generated files, run static checks and unit tests, and execute the compiled native binary.
+Let's create a starter Fairy C package, read the generated files line by line, and run it.
 
-## 1. Create a Package
+## 1. Create a New Package
 
-Choose a directory outside the compiler repository (or a clean workspace folder) and run `fairyc new` with a required `--uid`:
+Pick an empty directory outside the compiler repository and run `fairyc new` with a unique `--uid`:
 
 ```powershell
 fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 ```
 
-This creates five files:
+This generates five files: `fairy.toml`, `src/main.fy`, `tests/main.fy`, `.gitignore`, and `README.md`.
 
-- `fairy.toml`: package manifest
-- `src/main.fy`: application entry source
-- `tests/main.fy`: starter unit test module
-- `.gitignore` and `README.md`
-
-Inspect `fairy.toml`:
+Look at `fairy.toml`:
 
 ```toml
 schema = "fairyc.manifest/v1"
@@ -34,7 +29,7 @@ language = "fairyc-language/20"
 source = "src"
 ```
 
-Inspect `src/main.fy`:
+And look at `src/main.fy`:
 
 ```c
 module main;
@@ -48,11 +43,13 @@ fn i32 main() {
 }
 ```
 
-Every executable Fairy C package starts in `module main;` with `fn i32 main()`. The returned `i32` becomes the process exit code.
+A quick breakdown:
 
-## 2. Run Static Check
+- `module main;` declares this file's module name. The entry file `src/main.fy` must be `module main;`.
+- `pub fn i32 answer()` puts the return type (`i32`) before the function name, and `pub` lets other modules (such as `tests/main.fy`) call it.
+- `fn i32 main()` is the entry point. Whatever `i32` it returns becomes the process exit code (`42 - 42` returns `0`).
 
-Validate syntax, types, ownership, and borrows, and generate `fairy.lock`:
+## 2. Check Syntax, Types, and Borrows
 
 ```powershell
 fairyc check
@@ -64,7 +61,7 @@ Expected output:
 check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated
 ```
 
-Once `fairy.lock` exists, pass `--locked` to ensure builds fail if manifest or source dependencies drift unexpectedly:
+The first `check` creates `fairy.lock`. After that, you can pass `--locked` so future runs verify the manifest hasn't drifted unexpectedly:
 
 ```powershell
 fairyc check --locked
@@ -72,7 +69,7 @@ fairyc check --locked
 
 ## 3. Run the Starter Test
 
-Execute tests in `tests/` using the semantic interpreter:
+`tests/main.fy` already includes a test checking that `answer()` returns `42`:
 
 ```powershell
 fairyc test --locked
@@ -85,27 +82,25 @@ test tests::main::answer_is_42 ... ok
 test result: ok. 1 passed; 0 failed; lock verified
 ```
 
-You can also compile and run tests as isolated native binaries with `fairyc test --native --locked`.
+Pass `--native` (`fairyc test --native --locked`) if you want tests compiled into native binaries instead of run in the interpreter.
 
 ## 4. Run and Build Natively
 
-Run the program directly as a temporary native binary:
+Compile and run a temporary native binary:
 
 ```powershell
 fairyc run --locked
 ```
 
-Because `answer() - 42` evaluates to `0`, `fairyc run --locked` finishes with exit status `0` and produces no leftover artifact in the folder.
-
-To keep the compiled executable under `build/hello-fairy.exe` (Windows) or `build/hello-fairy` (Linux):
+Since `main()` returns `0`, the process finishes cleanly with exit status `0`. To keep the compiled executable at `build/hello-fairy.exe` (Windows) or `build/hello-fairy` (Linux):
 
 ```powershell
 fairyc build --release --locked
 ```
 
-## Common Beginner Mistakes
+## Common Beginner Gotchas
 
-- **Omitting `--uid` in `fairyc new`**: `--uid` is mandatory and must contain at least two lowercase dot-separated kebab segments (for example, `example.hello-fairy`).
-- **Capital letters in package `name` or `uid`**: Manifest validation rejects uppercase letters. Keep both lowercase kebab-case.
-- **Running `check --locked` right after editing dependencies**: Update `fairy.lock` first with `fairyc check` before locking CI/local runs again.
-- **Exit code `6` during `run` or `build`**: Verify MSVC + Windows SDK (Windows) or `gcc`/`clang` (Linux) is accessible in your shell environment.
+- **Forgetting `--uid` in `fairyc new`**: `--uid` is required and needs at least two lowercase dot-separated kebab segments (like `example.hello-fairy`).
+- **Uppercase letters in `name` or `uid`**: Manifest validation allows lowercase kebab-case only.
+- **Running `--locked` right after editing `fairy.toml`**: Run `fairyc check` once without `--locked` to refresh `fairy.lock`.
+- **Exit code `6` on `build` or `run`**: Your host C compiler (MSVC + Windows SDK on Windows, or `gcc`/`clang` on Linux) was not found or failed to link.

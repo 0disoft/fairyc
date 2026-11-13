@@ -1,35 +1,44 @@
 ---
 title: 언어 기초
-description: Fairy C의 변수 선언, 타입 체계, 함수, 제어문, 검사 산술, @effects 표기를 설명합니다.
+description: Fairy C의 변수 선언, 타입, 함수, 조건문·반복문, Result 처리와 @effects 문법을 차근차근 배웁니다.
 ---
 
-Fairy C는 C와 유사한 문법에 명시적 타입, 중괄호 블록, 오버플로를 잡아내는 검사 산술(checked arithmetic), 그리고 부수 효과 표기(`@effects(...)`)를 결합한 언어입니다.
+Fairy C 문법은 C와 아주 비슷해서 C, Java, JavaScript를 조금이라도 본 적이 있다면 금방 눈에 들어옵니다. 다만 "실수로 넘어가기 쉬운 부분"을 문법에서 몇 가지 더 엄격하게 잡아 줍니다.
 
-## 바인딩: `let`과 `var`
+## 1. 변수 선언: `let`과 `var`
 
-- `let`은 불변 바인딩, `var`는 가변 바인딩을 선언합니다.
-- 지역 변수는 선언 시 반드시 초기화해야 합니다(`E1001`).
-- 정수 리터럴은 지정된 스칼라 타입 범위 안에 있을 때 문맥에 맞게 타입이 결정됩니다.
+변수를 만들 때는 값을 바꿀 수 있는지 없는지에 따라 `let`과 `var`를 구분해서 씁니다. JavaScript의 `const`/`let`과 비슷하지만, Fairy C에서는 **선언할 때 반드시 초기값을 넣어야 합니다**. 초기화하지 않은 쓰레기 값으로 사고가 나는 걸 막기 위해서입니다.
 
 ```c
-let i32 limit = 10;
-var i32 total = 0;
+let i32 limit = 10;       // 나중에 값을 바꿀 수 없음
+var i32 total = 0;        // 나중에 total = ... 으로 바꿀 수 있음
 var u8[3] bytes = [1, 2, 3];
 ```
 
-## 기본 타입과 복합 타입
+## 2. 기본 타입과 명시적 형변환 (`as`)
 
-- **정수 및 불리언**: `i8`, `i16`, `i32`, `i64`, `u8`, `u16`, `u32`, `u64`, `isize`, `usize`, `bool`.
-- **부동소수점**: `f32`, `f64`는 Stage 0에서 `@repr(C)` 레이아웃 연동용으로만 쓰며 일반 안전 산술 타입으로는 제한됩니다.
-- **바이트와 문자열**:
-  - `b"..."`는 바이트 리터럴, `"..."`는 UTF-8 `str`, `c"..."`는 C 연동용 NUL 종료 `CStr` 리터럴입니다.
-  - 배열과 슬라이스 뷰에서는 `.len`과 인덱스 접근(`bytes[0]`)을 지원합니다.
-- **고정 배열·구조체·열거형**: `T[N]` (`[0; 512]` 반복 초기화 또는 `[1, 2, 3]` 목록), 명목형 `struct`, `enum`.
-- **태그 유니온**: `Option<T>` (`.some(v)` / `.none`) 및 `Result<T, E>` (`.ok(v)` / `.err(e)`).
+- **정수**: 부호 있는 `i8`, `i16`, `i32`, `i64`, `isize` / 부호 없는 `u8`, `u16`, `u32`, `u64`, `usize`
+- **참/거짓**: `bool` (`true`, `false`)
+- **문자열과 바이트**:
+  - `"hello"`: UTF-8 문자열(`str`)
+  - `b"hello"`: 바이트 배열/슬라이스
+  - `c"hello"`: C 함수에 넘길 때 쓰는 NUL(`\0`) 종료 C 문자열(`CStr`)
+- **고정 배열·구조체·열거형**: `T[N]` (`[0; 10]`처럼 같은 값으로 채울 수도 있습니다), `struct`, `enum`
 
-## 함수, 제어문, 검사된 산술
+여기서 C와 다른 중요한 점이 두 가지 있습니다.
 
-함수 반환 타입은 이름 앞에 오며, `void`가 아닌 모든 경로는 `return`으로 끝나야 합니다.
+첫째, **서로 다른 숫자 타입을 자동으로 섞어 주지 않습니다**. `u8` 값과 `i32` 값을 더하려면 아래처럼 `as`로 직접 타입을 맞춰 주어야 합니다.
+
+```c
+let u8 byte_val = 40;
+let i32 total = (byte_val as i32) + 2;
+```
+
+둘째, **정수 오버플로가 나면 멈춥니다**. C에서는 `i32` 최댓값에 `1`을 더하면 조용히 음수로 뒤집히지만, Fairy C는 실행을 즉시 중단(trap)해서 잘못된 계산 결과가 퍼지는 걸 막아 줍니다.
+
+## 3. 함수, `if`, `switch`, 반복문
+
+함수는 `fn 반환타입 이름(매개변수)` 형태로 적습니다. 구조체 뒤에 `::`를 붙여 메서드처럼 만들 수도 있습니다.
 
 ```c
 struct State { i32 number; }
@@ -39,40 +48,47 @@ fn i32 State::read(ref State this) {
 }
 
 fn i32 classify(i32 x) {
+    // if-else 자체가 값을 돌려주는 표현식으로도 쓰입니다.
     return if (x > 0) { 1 } else { 0 };
 }
 ```
 
-- **분기와 반복**: `if` / `else`, `switch`, `while`, C 스타일 `for`, 뷰 순회 `for-in`.
-- **`defer`**: 스코프를 빠져나가기 직전에 정리 코드를 실행합니다.
-- **검사 산술**: 정수 `+`, `-`, `*`, `/`, 시프트 연산은 오버플로나 0으로 나누기가 발생하면 조용히 넘치지 않고 런타임 트랩(종료 코드 `5`)으로 중단됩니다.
-- **명시적 형변환**: 암묵적 숫자 승격이 없으므로 `value as i32`처럼 `as`를 명시해야 합니다.
+- **반복문**: `while (조건) { ... }`, C 스타일 `for (var usize i = 0; i < n; i += 1) { ... }`, 그리고 슬라이스를 순회하는 `for-in`을 지원합니다.
+- **비교 연산 주의**: `0 < x < 10`처럼 비교를 연달아 쓰면 컴파일 에러(`E0009`)가 납니다. `(0 < x) && (x < 10)`처럼 괄호로 명확하게 묶어 주세요.
+- **`defer`**: Go의 `defer`처럼, 현재 블록을 빠져나가기 직전에 꼭 실행할 정리 코드를 미리 예약할 때 씁니다.
 
-## `Result<T, E>` 처리와 `@effects(...)`
+## 4. `Option<T>`와 `Result<T, E>`
 
-Fairy C에서는 `Result` 반환값을 무시할 수 없습니다. `switch`로 분기하거나 `?`로 전파하거나 `discard`로 명시적 폐기해야 합니다(`E4101`).
+Fairy C에는 빈 포인터 `null` 대신, "값이 있을 수도 없을 수도 있음"을 표현하는 `Option<T>`(`.some(값)` / `.none`)와, "성공 또는 실패"를 표현하는 `Result<T, E>`(`.ok(값)` / `.err(오류)`)가 있습니다.
+
+특히 함수가 `Result`를 돌려줬는데 호출한 쪽에서 **그 결과를 확인하지 않고 그냥 넘어가면 컴파일 에러(`E4101`)가 납니다**. 에러를 꼭 처리하거나, 정말 버려도 될 때는 `discard`를 적어 의도를 분명히 해야 합니다.
 
 ```c
 enum Error { Failed; }
 
-fn Result<i32, Error> propagate(Result<i32, Error> input, Error fallback) {
+fn Result<i32, Error> add_positive(Result<i32, Error> input) {
+    // input이 .err(...)면 여기서 곧바로 에러를 돌려주고 함수가 끝납니다.
     let i32 value = input?;
-    return .err(fallback);
+    return .ok(value + 1);
 }
 
-fn i32 ignore(Result<i32, Error> input) {
-    discard input;
+fn i32 ignore_result(Result<i32, Error> input) {
+    discard input; // "이 결과는 일부러 안 쓰겠다"는 표시
     return 0;
 }
 ```
 
-콘솔 출력, 파일시스템, 환경 변수, 프로세스 인자, 네트워크, 시계, 난수에 접근하는 함수는 `@effects(...)`에 해당 권한(`console`, `filesystem`, `environment`, `process`, `network`, `clock`, `random`)을 선언해야 합니다.
+`?` 연산자 덕분에 `switch`를 길게 중첩하지 않고도 실패를 깔끔하게 바깥으로 전달할 수 있습니다.
+
+## 5. `@effects(...)` 이름표
+
+화면에 글자를 출력하거나(`console`), 파일을 읽고 쓰거나(`filesystem`), 시계를 보거나(`clock`), 프로그램 인자를 읽는(`process`) 함수들은 선언 위에 `@effects(...)`를 적어야 합니다.
 
 ```c
 import std::io as io;
 
 @effects(console)
-fn bool print_number(u32 value) {
+fn bool print_u32(u32 value) {
     return switch (io::write_u32(value)) {
         case .ok(_): { true }
         case .err(_): { false }
@@ -80,10 +96,4 @@ fn bool print_number(u32 value) {
 }
 ```
 
-호출한 함수나 암묵적으로 정리되는 `resource`가 요구하는 효과를 호출자 함수에 빠뜨리면 `E7102` 컴파일 오류가 발생합니다.
-
-## 자주 하는 실수
-
-- **`i32`와 `usize` 혼합**: 암묵적 승격이 없으므로 `as`로 명시적 변환이 필요합니다.
-- **연속 비교식 생략**: `a < b < c`는 허용되지 않으며 `(a < b) && (b < c)`처럼 써야 합니다(`E0009`).
-- **`Result` 또는 `@must_use` 반환값 방치**: `switch`, `?`, 또는 `discard expr;`로 처리해야 합니다.
+만약 `@effects(console)`이 붙은 함수를 부르면서, 부르는 쪽 함수 선언에 `console`을 빼먹으면 컴파일러가 `E7102` 에러로 알려 줍니다. 어떤 코드가 파일이나 콘솔을 건드리는지 함수 선언부만 봐도 바로 알 수 있게 해 주는 장치입니다.

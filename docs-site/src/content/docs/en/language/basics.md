@@ -1,15 +1,13 @@
 ---
 title: Language Basics
-description: Core Fairy C syntax, bindings, primitive and composite types, functions, control flow, and effect annotations.
+description: Learn Fairy C bindings, types, functions, control flow, Option/Result handling, and @effects tags step by step.
 ---
 
-Fairy C uses a C-shaped syntax with explicit types on declarations, block braces on control flow, checked integer arithmetic, and explicit side-effect annotations.
+If you have written any C, Java, or TypeScript, Fairy C syntax will feel familiar right away. The main difference is that Fairy C refuses a few common shortcuts—like uninitialized variables, implicit integer mixing, or silently ignored errors—so bugs show up at compile time instead.
 
-## Bindings: `let` and `var`
+## 1. Bindings: `let` and `var`
 
-- `let` declares an immutable binding; `var` declares a mutable binding.
-- Local variables must be initialized at declaration (`E1001` if omitted).
-- Integer literals adopt the annotated scalar type when in range.
+Use `let` for values that do not change and `var` for mutable ones. Every local variable must be initialized when declared:
 
 ```c
 let i32 limit = 10;
@@ -17,19 +15,27 @@ var i32 total = 0;
 var u8[3] bytes = [1, 2, 3];
 ```
 
-## Scalar, String, and Composite Types
+## 2. Types and Explicit `as` Casts
 
-- **Integers and booleans**: `i8`, `i16`, `i32`, `i64`, `u8`, `u16`, `u32`, `u64`, `isize`, `usize`, and `bool`.
-- **Floating point**: `f32` and `f64` exist for C-layout interop (`@repr(C)`), not as general safe-code arithmetic types in Stage 0.
-- **Bytes and strings**:
-  - `b"..."` produces byte arrays/slices; `"..."` produces UTF-8 string values (`str`); `c"..."` produces NUL-terminated `CStr` literals for C interop.
-  - Indexing or length checks work directly on arrays and slice views (`bytes.len`, `bytes[0]`).
-- **Fixed arrays and aggregates**: `T[N]` (`[0; 512]` repeat initializer or `[1, 2, 3]` element list), nominal `struct`, and `enum`.
-- **Tagged option/error types**: `Option<T>` (`.some(value)` / `.none`) and `Result<T, E>` (`.ok(value)` / `.err(error)`).
+- **Integers**: Signed `i8`, `i16`, `i32`, `i64`, `isize` and unsigned `u8`, `u16`, `u32`, `u64`, `usize`.
+- **Booleans**: `bool` (`true`, `false`).
+- **Text and bytes**: `"..."` for UTF-8 strings (`str`), `b"..."` for byte arrays/slices, and `c"..."` for NUL-terminated C strings (`CStr`).
+- **Arrays, structs, enums**: `T[N]` (including repeat syntax `[0; 10]`), nominal `struct`, and `enum`.
 
-## Functions, Control Flow, and Checked Arithmetic
+Two things catch newcomers coming from C:
 
-Functions declare their return type before the name, and non-`void` paths must explicitly `return`:
+1. **No implicit integer promotions**: Adding a `u8` to an `i32` requires an explicit `as` cast:
+
+```c
+let u8 byte_val = 40;
+let i32 total = (byte_val as i32) + 2;
+```
+
+2. **Overflow traps instead of wrapping**: If integer math overflows or divides by zero, the program traps immediately (exit code `5`) rather than wrapping into a bogus number.
+
+## 3. Functions and Control Flow
+
+Functions place the return type before the name, and structs can define methods with `Type::method`:
 
 ```c
 struct State { i32 number; }
@@ -43,36 +49,38 @@ fn i32 classify(i32 x) {
 }
 ```
 
-- **Branches and loops**: `if` / `else`, `switch` over enums/tags/scalars, `while`, classic C-style `for (var usize i = 0; i < n; i += 1)`, and `for-in` over views.
-- **`defer`**: Schedules cleanup expressions before scope exit.
-- **Checked arithmetic**: Integer `+`, `-`, `*`, `/`, and shifts trap on overflow or division by zero (exit code `5` at runtime) instead of wrapping silently.
-- **Explicit casts**: Use `value as TargetType`; there are no implicit numeric widening promotions.
+- **Loops & `defer`**: `while`, C-style `for`, `for-in` over views, and `defer` to run cleanup statements before leaving a block.
+- **No chained comparisons**: Write `(0 < x) && (x < 10)` rather than `0 < x < 10` (`E0009`).
 
-## Handling `Result<T, E>` and `@effects(...)`
+## 4. `Option<T>` and `Result<T, E>`
 
-Fairy C treats `Result` obligations strictly: you must match (`switch`), propagate (`?`), return, or explicitly `discard` them (`E4101` otherwise):
+Instead of null pointers, Fairy C uses `Option<T>` (`.some(v)` / `.none`) for optional values and `Result<T, E>` (`.ok(v)` / `.err(e)`) for operations that can fail.
+
+You cannot accidentally forget to check a `Result` (`E4101`). Match it with `switch`, propagate it upward with `?`, or intentionally opt out with `discard`:
 
 ```c
 enum Error { Failed; }
 
-fn Result<i32, Error> propagate(Result<i32, Error> input, Error fallback) {
-    let i32 value = input?;
-    return .err(fallback);
+fn Result<i32, Error> add_positive(Result<i32, Error> input) {
+    let i32 value = input?; // Returns .err(...) immediately if input failed
+    return .ok(value + 1);
 }
 
-fn i32 ignore(Result<i32, Error> input) {
+fn i32 ignore_result(Result<i32, Error> input) {
     discard input;
     return 0;
 }
 ```
 
-Functions that touch console I/O, files, environment variables, process args, network, clocks, or randomness declare `@effects(...)` from the Stage 0 capability set (`console`, `filesystem`, `environment`, `process`, `network`, `clock`, `random`):
+## 5. `@effects(...)` Tags
+
+Functions that perform console I/O, touch files, read clocks, or inspect process arguments declare those side effects with `@effects(...)` (`console`, `filesystem`, `environment`, `process`, `network`, `clock`, `random`):
 
 ```c
 import std::io as io;
 
 @effects(console)
-fn bool print_number(u32 value) {
+fn bool print_u32(u32 value) {
     return switch (io::write_u32(value)) {
         case .ok(_): { true }
         case .err(_): { false }
@@ -80,10 +88,4 @@ fn bool print_number(u32 value) {
 }
 ```
 
-If a function calls an effectful callee—or triggers compiler-scheduled cleanup on an effectful `resource`—without listing that effect, the compiler fails with `E7102`.
-
-## Common Mistakes
-
-- **Mixing `i32` and `usize` without `as`**: Write `index as i32` or annotate consistently.
-- **Chained comparisons without parentheses**: Write `(a < b) && (b < c)`, not `a < b < c` (`E0009`).
-- **Ignoring a `Result` or `@must_use` value**: Handle it or write `discard expr;`.
+Calling an effectful function from a function that forgot to list that effect triggers `E7102`—making side effects obvious directly from function signatures.
