@@ -98,7 +98,7 @@ fn i32 code_of(ParseError err) {
 값이 있을 수도 없을 수도 있을 때는 `Option<T>`, 작업이 성공하거나 오류를 돌려줄 때는 `Result<T, E>`를 씁니다.
 
 - **`Option<T>`**: `.some(값)` 또는 `.none`
-- **`Result<T, E>`**: `.ok(값)` 또는 `.err(오류)`
+- **`Result<T, E>`**: `.ok(값)` 또는 `.err(오류)` (`result.is_ok`로 `bool` 성공 여부를 바로 확인할 수도 있습니다)
 
 함수가 실패하면 바로 바깥으로 오류를 전달하고 싶을 때는 `switch`를 길게 쓰는 대신 식 뒤에 `?`를 붙이면 됩니다.
 

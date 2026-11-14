@@ -95,7 +95,7 @@ fn i32 code_of(ParseError err) {
 ## 4. `Option<T>`, `Result<T, E>` y `?`
 
 - **`Option<T>`**: `.some(value)` o `.none`
-- **`Result<T, E>`**: `.ok(value)` o `.err(error)`
+- **`Result<T, E>`**: `.ok(value)` o `.err(error)` (`result.is_ok` también devuelve un `bool` con el estado de éxito)
 
 Para propagar errores hacia arriba sin escribir `switch` repetitivos, añade el sufijo `?`:
 

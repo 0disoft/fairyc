@@ -33,6 +33,17 @@ let i32 result = clamp(77, .minimum = 0, .maximum = 100);
 
 Labels cannot reorder arguments or supply defaults—each label must match that parameter's exact position—so they serve strictly as readability guards.
 
+### `@inline` Function Hint
+
+Non-generic helper functions can carry `@inline` (at most once, with no arguments) to permit cross-module or local inline expansion; calls inside an `@inline` body must use bare same-module names without `::`.
+
+```c
+@inline
+pub fn i32 combine(i32 a, i32 b) {
+    return a + b;
+}
+```
+
 ## 2. Generic Scalar Functions (`<T>`)
 
 Ordinary functions can take explicit scalar type parameters `<T>` and be called as `fn_name<i32>(...)`:
@@ -85,7 +96,7 @@ let i32 grade = if (score >= 90) {
 };
 ```
 
-Both branches must produce the exact same type.
+Both branches must produce the exact same type. Likewise, standalone `{ let i32 a = 70; a + 7 }` blocks act as expressions when they end with an expression without `;`.
 
 ## 4. `while` and Two Forms of `for`
 
@@ -126,7 +137,7 @@ for (let ref mut i32 item in items) {
 }
 ```
 
-You can also iterate over sub-ranges directly, such as `for (let u8 b in data[1..4]) { ... }`.
+You can also iterate over sub-ranges directly, such as `for (let u8 b in data[1..4]) { ... }`, as well as read-only SDK `Vec<T>` values with `for (let ref i32 item in vec) { ... }`.
 
 ## 5. `assert`, `defer`, and `source_location()`
 

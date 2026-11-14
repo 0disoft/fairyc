@@ -95,7 +95,7 @@ fn i32 code_of(ParseError err) {
 ## 4. `Option<T>`、`Result<T, E>` 与 `?`
 
 - <strong>`Option<T>`</strong>：`.some(value)` 或 `.none`
-- <strong>`Result<T, E>`</strong>：`.ok(value)` 或 `.err(error)`
+- <strong>`Result<T, E>`</strong>：`.ok(value)` 或 `.err(error)`（也可以通过 `result.is_ok` 直接获取 `bool` 类型的成功状态）
 
 为了把错误向上传递而不必手写重复的 `switch` 样板代码，可以在表达式后面加上后缀 `?`：
 

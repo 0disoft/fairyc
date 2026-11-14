@@ -33,6 +33,17 @@ let i32 result = clamp(77, .minimum = 0, .maximum = 100);
 
 Las etiquetas no pueden reordenar argumentos ni proporcionar valores por defecto —cada etiqueta debe coincidir con la posición exacta de ese parámetro—, por lo que sirven estrictamente como guía de legibilidad.
 
+### Indicación `@inline` en funciones
+
+Las funciones auxiliares no genéricas pueden llevar `@inline` una sola vez (sin argumentos) para permitir la expansión en línea local o entre módulos; dentro de su cuerpo solo se admiten llamadas simples del mismo módulo sin `::`.
+
+```c
+@inline
+pub fn i32 combine(i32 a, i32 b) {
+    return a + b;
+}
+```
+
 ## 2. Funciones genéricas escalares (`<T>`)
 
 Las funciones ordinarias pueden aceptar parámetros de tipo escalar explícitos `<T>` y llamarse como `fn_name<i32>(...)`:
@@ -85,7 +96,7 @@ let i32 grade = if (score >= 90) {
 };
 ```
 
-Ambas ramas deben producir exactamente el mismo tipo.
+Ambas ramas deben producir exactamente el mismo tipo. De igual modo, los bloques independientes `{ let i32 a = 70; a + 7 }` también actúan como expresiones cuando terminan con una expresión sin `;`.
 
 ## 4. `while` y dos formas de `for`
 
@@ -126,7 +137,7 @@ for (let ref mut i32 item in items) {
 }
 ```
 
-También puedes iterar directamente sobre subrangos, como `for (let u8 b in data[1..4]) { ... }`.
+También puedes iterar directamente sobre subrangos, como `for (let u8 b in data[1..4]) { ... }`, o recorrer un `Vec<T>` del SDK en solo lectura mediante `for (let ref i32 item in vec) { ... }`.
 
 ## 5. `assert`, `defer` y `source_location()`
 
