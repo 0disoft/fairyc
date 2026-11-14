@@ -76,6 +76,7 @@ func (snapshot *FileSnapshot) Matches(ctx context.Context, overlays map[string][
 	budget := &limits{ctx: ctx, root: root}
 	directories := newDirectoryResolver()
 	directories.root, directories.budget = root, budget
+	var comparisonBuffer []byte
 	for _, pkg := range workspace.Packages {
 		if pkg.SourceKind != SourceKindLocal {
 			continue
@@ -98,7 +99,7 @@ func (snapshot *FileSnapshot) Matches(ctx context.Context, overlays map[string][
 		if err != nil {
 			return false, err
 		}
-		if err := matchPackageFiles(root, sourceRoot, pkg.Sources, overlays, budget); err != nil {
+		if err := matchPackageFiles(root, sourceRoot, pkg.Sources, overlays, budget, &comparisonBuffer); err != nil {
 			if errors.Is(err, errInputsChanged) {
 				return false, nil
 			}
@@ -133,7 +134,7 @@ func overlayFingerprint(overlays map[string][]byte) [sha256.Size]byte {
 	return result
 }
 
-func matchPackageFiles(root *os.Root, sourceRoot string, sources []SourceFile, overlays map[string][]byte, budget *limits) error {
+func matchPackageFiles(root *os.Root, sourceRoot string, sources []SourceFile, overlays map[string][]byte, budget *limits, comparisonBuffer *[]byte) error {
 	boundary, err := openContainedDirectory(root, sourceRoot)
 	if err != nil {
 		return err
@@ -174,14 +175,22 @@ func matchPackageFiles(root *os.Root, sourceRoot string, sources []SourceFile, o
 		}
 		absolute := filepath.Join(sourceRoot, filepath.FromSlash(name))
 		data, overlay := overlays[absolute]
-		if !overlay {
-			var err error
-			data, err = readBoundedRootFile(boundary, filepath.FromSlash(name), source.DefaultLimits().MaxBytes)
-			if err != nil {
-				return err
-			}
+		if overlay {
+			return check(name, data)
 		}
-		return check(name, data)
+		if *comparisonBuffer == nil {
+			*comparisonBuffer = make([]byte, snapshotCompareBufferBytes)
+		}
+		want, found := expected[name]
+		same, err := matchBoundedRootFile(budget.ctx, boundary, filepath.FromSlash(name), source.DefaultLimits().MaxBytes, want, *comparisonBuffer)
+		if err != nil {
+			return err
+		}
+		if !found || !same {
+			return errInputsChanged
+		}
+		seen[name] = true
+		return nil
 	})
 	if err != nil {
 		return err

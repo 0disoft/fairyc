@@ -75,18 +75,11 @@ func openContainedDirectory(root *os.Root, absolute string) (*os.Root, error) {
 }
 
 func readBoundedRootFile(root *os.Root, name string, maximum int) ([]byte, error) {
-	file, err := durablefile.OpenRegular(root, name)
+	file, err := openBoundedRootFile(root, name, maximum)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-	info, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if info.Size() > int64(maximum) {
-		return nil, fmt.Errorf("file exceeds %d-byte implementation guard", maximum)
-	}
 	contents, err := io.ReadAll(io.LimitReader(file, int64(maximum)+1))
 	if err != nil {
 		return nil, err
@@ -95,4 +88,21 @@ func readBoundedRootFile(root *os.Root, name string, maximum int) ([]byte, error
 		return nil, fmt.Errorf("file exceeds %d-byte implementation guard", maximum)
 	}
 	return contents, nil
+}
+
+func openBoundedRootFile(root *os.Root, name string, maximum int) (*os.File, error) {
+	file, err := durablefile.OpenRegular(root, name)
+	if err != nil {
+		return nil, err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, err
+	}
+	if info.Size() > int64(maximum) {
+		file.Close()
+		return nil, fmt.Errorf("file exceeds %d-byte implementation guard", maximum)
+	}
+	return file, nil
 }
