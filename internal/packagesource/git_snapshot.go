@@ -5,10 +5,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -40,7 +40,7 @@ func (b *boundedGitBuffer) Write(p []byte) (int, error) {
 	return b.data.Write(p)
 }
 
-func gitObjectCommand(ctx context.Context, repository string, input []byte, limit int, args ...string) ([]byte, error) {
+func configuredGitObjectCommand(ctx context.Context, repository string, input []byte, args ...string) *exec.Cmd {
 	command := exec.CommandContext(ctx, "git", append([]string{"--no-optional-locks", "-C", repository}, args...)...)
 	for _, entry := range os.Environ() {
 		key, _, _ := strings.Cut(entry, "=")
@@ -50,11 +50,16 @@ func gitObjectCommand(ctx context.Context, repository string, input []byte, limi
 	}
 	command.Env = append(command.Env, "GIT_CONFIG_NOSYSTEM=1", "GIT_CONFIG_GLOBAL="+os.DevNull, "GIT_NO_REPLACE_OBJECTS=1", "GIT_NO_LAZY_FETCH=1", "GIT_TERMINAL_PROMPT=0")
 	command.Stdin = bytes.NewReader(input)
+	command.WaitDelay = time.Second
+	return command
+}
+
+func gitObjectCommand(ctx context.Context, repository string, input []byte, limit int, args ...string) ([]byte, error) {
+	command := configuredGitObjectCommand(ctx, repository, input, args...)
 	out := &boundedGitBuffer{limit: limit}
 	stderr := &boundedGitBuffer{limit: 4096}
 	command.Stdout = out
 	command.Stderr = stderr
-	command.WaitDelay = time.Second
 	if err := command.Run(); err != nil {
 		return nil, fmt.Errorf("local Git object command failed: %w", err)
 	}
@@ -122,50 +127,16 @@ func PrepareGitSnapshot(ctx context.Context, repository, commit string) (GitSnap
 	if len(entries) == 0 {
 		return GitSnapshot{}, fmt.Errorf("empty Git snapshot")
 	}
-	blobs, err := gitObjectCommand(ctx, absolute, []byte(input.String()), MaxTotalBytes+MaxFiles*128, "cat-file", "--batch")
-	if err != nil {
-		return GitSnapshot{}, err
-	}
 	archive := &boundedGitBuffer{limit: MaxArchiveBytes}
 	writer := zip.NewWriter(archive)
 	var manifestBytes []byte
-	expanded := 0
-	for _, entry := range entries {
-		if err := ctx.Err(); err != nil {
-			return GitSnapshot{}, err
-		}
-		end := bytes.IndexByte(blobs, '\n')
-		if end < 0 || end > 128 {
-			return GitSnapshot{}, fmt.Errorf("invalid Git blob framing")
-		}
-		header := strings.Split(string(blobs[:end]), " ")
-		blobs = blobs[end+1:]
-		if len(header) != 3 || header[0] != entry.object || header[1] != "blob" {
-			return GitSnapshot{}, fmt.Errorf("missing or mismatched Git blob")
-		}
-		size, err := strconv.ParseUint(header[2], 10, 32)
-		if err != nil || strconv.FormatUint(size, 10) != header[2] || size > MaxFileBytes || int(size) > MaxTotalBytes-expanded || uint64(len(blobs)) <= size || blobs[size] != '\n' {
-			return GitSnapshot{}, fmt.Errorf("Git blob byte bound or framing")
-		}
-		data := blobs[:size]
-		blobs = blobs[size+1:]
-		expanded += int(size)
-		if entry.name == projectmanifest.FileName {
-			manifestBytes = data
-		}
-		fileHeader := &zip.FileHeader{Name: entry.name, Method: zip.Deflate}
-		fileHeader.SetMode(0644)
-		fileHeader.SetModTime(time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC))
-		file, err := writer.CreateHeader(fileHeader)
-		if err != nil {
-			return GitSnapshot{}, err
-		}
-		if _, err = file.Write(data); err != nil {
-			return GitSnapshot{}, err
-		}
-	}
-	if len(blobs) != 0 {
-		return GitSnapshot{}, fmt.Errorf("trailing Git blob data")
+	err = streamGitObjectCommand(ctx, absolute, []byte(input.String()), func(reader io.Reader) error {
+		var readErr error
+		manifestBytes, readErr = writeGitSnapshotBlobs(ctx, reader, entries, writer)
+		return readErr
+	}, "cat-file", "--batch")
+	if err != nil {
+		return GitSnapshot{}, err
 	}
 	if err = writer.Close(); err != nil {
 		return GitSnapshot{}, err
