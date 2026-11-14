@@ -49,6 +49,27 @@ fn i32 main() {
 
 지금 단계에서는 `bool`, `u8`, `i32`, `u32`, `usize` 같은 기본 스칼라 타입을 제네릭 인자로 넣어서 컴파일 타임에 특수화(specialization)하는 용도로 사용할 수 있습니다. (사용자 정의 `struct<T>`나 타입 추론 생략은 아직 지원하지 않습니다.)
 
+### 함수 값과 제한된 클로저 (`fn i32(i32)`)
+
+현재 Stage 0에서는 `i32` 인자 1개를 받아 `i32`를 반환하는 제한된 함수 값과 값 캡처 클로저를 지원합니다.
+
+```c
+fn i32 apply_once(fn i32(i32) f, i32 x) {
+    return f(x);
+}
+
+fn i32 make_result() {
+    i32 offset = 7;
+    fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
+        return x + offset;
+    };
+    return apply_once(add_offset, 70);
+}
+```
+
+- 캡처 목록(`[i32 offset]`)은 최대 4개의 불변 `i32` 값 복사 캡처를 지원하며, 매개변수로 넘기거나 반환할 수 있고 일반 `struct` 필드에 저장할 수도 있습니다.
+- 클로저 본문은 순수하게 유지되며(`var`, 효과, 외부 호출 불가), `Option`, `Result`, `ref`, `ptr`, 배열, `@repr(C)` 구조체, `resource`, `extern C` 안에는 클로저 타입을 넣을 수 없습니다.
+
 ## 3. 표현식으로 쓰는 `if / else`
 
 조건문은 괄호 `(...)`가 필수입니다. 그리고 블록 마지막에 세미콜론 없는 식을 남기면 `if` 자체가 하나의 값(표현식)이 됩니다.

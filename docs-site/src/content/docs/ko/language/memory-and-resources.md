@@ -52,6 +52,7 @@ resource Buffer {
 
 - 소유자가 다른 곳으로 이동하지 않고 스코프 끝에 도달하면 컴파일러가 `cleanup`을 자동으로 끼워 넣어 줍니다.
 - `resource`의 내부 필드는 해당 모듈 밖에서는 비공개(private)로 보호되므로, 외부 코드가 핸들을 함부로 빼내 망가뜨릴 수 없습니다.
+- 정리 코드 자체가 파일 닫기나 잠금 해제 같은 효과를 일으킨다면 `@effects(...) cleanup { ... }`처럼 `cleanup`에도 효과를 붙일 수 있으며, 이 `resource`를 사용하는 호출자도 해당 효과를 함께 선언해야 합니다(`E7102`).
 
 ## 4. `region`: 한꺼번에 빌리고 한꺼번에 비우기
 
@@ -105,6 +106,7 @@ unsafe extern C fn void c_free(ptr mut void p);
 
 - 원시 포인터 역참조, `ptr`로의 캐스트, `extern C` 함수 호출은 반드시 `unsafe` 함수 또는 `unsafe { ... }` 안에서만 허용됩니다.
 - 주의: `unsafe`는 "메모리 안전 검사를 개발자가 직접 책임진다"는 표시일 뿐, `@effects(...)` 요구사항을 면제해 주지는 않습니다.
+- `null` 리터럴은 `ptr T`, `ptr mut T`, `unsafe extern C fn` 타입을 초기화하거나 `p == null`, `p != null`로 비교할 때만 사용할 수 있으며, 안전한 `ref T` / `ref mut T`에는 `null`을 넣을 수 없습니다.
 
 ---
 

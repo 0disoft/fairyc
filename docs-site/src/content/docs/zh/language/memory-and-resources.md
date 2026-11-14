@@ -50,7 +50,7 @@ resource Buffer {
 }
 ```
 
-资源字段在定义模块之外保持私有，从而将原始句柄安全地封装在工厂函数和方法 API 之后。
+资源字段在定义模块之外保持私有，从而将原始句柄安全地封装在工厂函数和方法 API 之后。如果清理代码本身也会执行外部效果，还可以写 `@effects(...) cleanup { ... }`；持有并销毁该资源的调用方也必须声明相应的效果（`E7102`）。
 
 ## 4. `region`：批量内存区域作用域
 
@@ -100,7 +100,7 @@ fn void greet() {
 unsafe extern C fn void c_free(ptr mut void p);
 ```
 
-请记住，`unsafe` 仅用于解锁原始指针转换、解引用和外部函数调用——它 <strong>不会</strong> 绕过 `@effects(...)` 检查。
+请记住，`unsafe` 仅用于解锁原始指针转换、解引用和外部函数调用——它 <strong>不会</strong> 绕过 `@effects(...)` 检查。`null` 字面量只能用于初始化或比较（`p == null`、`p != null`）原始的 `ptr T`、`ptr mut T` 或 `unsafe extern C fn` 指针，绝不能用于安全的 `ref T` 或 `ref mut T` 借用。
 
 ---
 

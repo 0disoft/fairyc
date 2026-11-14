@@ -33,6 +33,13 @@ pub resource Writer {
 }
 ```
 
+Cuando el símbolo exportado en C tenga un nombre distinto al declarado en Fairy C, añade `@link_name("c_symbol")`:
+
+```c
+@link_name("strlen")
+unsafe extern C fn usize c_strlen(ptr u8 text);
+```
+
 ### Pasar callbacks a C (`examples/c_interop_callback`)
 Se pueden pasar callbacks síncronos de Fairy a través de firmas con punteros sin procesar (`unsafe extern C fn` no puede aceptar directamente `ref T` seguro — `E5102`):
 

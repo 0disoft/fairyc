@@ -26,7 +26,7 @@ Because the compiler is a **Stage 0 prototype**, stick to the stable workspace c
 If you are coming from another systems language, here is the quick mental model:
 
 - **Compared to C++**: Fairy C drops `#include` headers, preprocessor macros, exceptions, class inheritance, and operator overloading. It uses explicit `module`/`import` declarations, `Result` + `?` error handling, explicit `resource cleanup` blocks, compile-time `ref`/`ref mut` borrow checks, and checked integer/bounds arithmetic instead of silent wraparound or undefined behavior.
-- **Compared to Rust**: Fairy C aims for a much smaller, C-shaped surface compiled through a host C11 toolchain. Current Stage 0 has no traits, closures, macros, `async`, or explicit `'a` lifetime annotations in user code. Instead of a general `Drop` trait on arbitrary structs, Fairy C separates plain copyable `struct` values from move-only `resource` types with explicit `cleanup { ... }` blocks, and tracks I/O capabilities with `@effects(...)`.
+- **Compared to Rust**: Fairy C aims for a much smaller, C-shaped surface compiled through a host C11 toolchain. Current Stage 0 has no traits, macros, `async`, or explicit `'a` lifetime annotations in user code (only narrow value-capturing `fn i32(i32)` closures are supported). Instead of a general `Drop` trait on arbitrary structs, Fairy C separates plain copyable `struct` values from move-only `resource` types with explicit `cleanup { ... }` blocks, and tracks I/O capabilities with `@effects(...)`.
 - **Maturity**: Unlike C++ and Rust, which are mature production ecosystems, Fairy C is still an experimental **Stage 0 prototype** with a small standard library and narrow target scope.
 
 ## Fairy C vs. Brownie C

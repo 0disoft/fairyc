@@ -35,6 +35,13 @@ pub resource Writer {
 
 이렇게 `resource`의 `cleanup` 안에 `unsafe` 해제를 감싸 두면, 바깥쪽 Fairy C 코드는 `unsafe` 없이 안전하게 자원을 쓸 수 있습니다.
 
+C 쪽 심볼 이름이 Fairy C 함수 이름과 다르다면 `@link_name("c_symbol")`로 실제 링크 심볼을 지정할 수 있습니다.
+
+```c
+@link_name("strlen")
+unsafe extern C fn usize c_strlen(ptr u8 text);
+```
+
 ### C 콜백 넘기기 (`examples/c_interop_callback`)
 C 함수에 Fairy C 함수를 콜백으로 넘기는 것도 가능합니다. 다만 안전 참조(`ref T`)를 `extern C` 시그니처에 그대로 넣을 수는 없고(`E5102`), 원시 포인터(`ptr mut void`)를 통해 주고받습니다.
 

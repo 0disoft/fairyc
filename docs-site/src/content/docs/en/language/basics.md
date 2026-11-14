@@ -18,14 +18,17 @@ let auto_inferred = 77;   // type can be omitted when clear from the value
 - **Initialization is required**: Writing `var i32 count;` without a value is not allowed, eliminating uninitialized-read bugs.
 - **`let` only locks rebinding**: Even if a `resource` is bound with `let`, you can still transfer (move) its ownership to another function.
 
-For module-level compile-time constants, use `const` (currently private scalar constants of type `bool`, `u8`, `i32`, or `u32`):
+For module-level compile-time constants, use `const` (currently private scalar constants of type `bool`, `u8`, `i32`, or `u32`). Pure scalar helper functions annotated with `@const_eval` can also run inside `const` initializers and `static_assert(...)`:
 
 ```c
-const i32 MAX_RETRY = 3;
-static_assert(MAX_RETRY > 0);
+@const_eval
+fn i32 square(i32 n) { return n * n; }
+
+const i32 MAX_RETRY = square(2) + 3;
+static_assert(MAX_RETRY == 7);
 ```
 
-`static_assert(...)` checks a pure compile-time condition during compilation.
+`static_assert(...)` checks a pure compile-time condition during compilation. Comments support `//` line comments, `///` doc comments, and nested `/* ... */` block comments.
 
 ## 2. Core Types and Literals
 

@@ -26,7 +26,7 @@ Fairy C 非常适合用来编写小巧的原生命令行工具、C ABI 封装层
 如果你已经熟悉其他系统级语言，可以通过下面几点快速建立印象：
 
 - <strong>与 C++ 的区别</strong>：Fairy C 没有 `#include` 头文件、预处理器宏、异常（`try`/`catch`）、类继承和运算符重载；它改用明确的 `module`/`import`、`Result` + `?` 错误传播和 `resource` 下的 `cleanup` 代码块来管理资源，并在编译期检查 `ref`/`ref mut` 借用冲突，同时在运行时拦截整数溢出与数组越界。
-- <strong>与 Rust 的区别</strong>：Fairy C 有意把语法和特性保持得更小、更接近 C，并通过宿主 C11 工具链编译。当前 Stage 0 没有 trait、闭包、宏系统、`async` 或需要手写的 `'a` 生命周期标注；它也不在普通结构体上使用通用 `Drop`，而是把可复制的普通 `struct` 与带 `cleanup { ... }` 的独占 `resource` 分开，并用 `@effects(...)` 显式标记外部 I/O 权限。
+- <strong>与 Rust 的区别</strong>：Fairy C 有意把语法和特性保持得更小、更接近 C，并通过宿主 C11 工具链编译。当前 Stage 0 没有 trait、宏系统、`async` 或需要手写的 `'a` 生命周期标注（闭包目前也只提供受限的 `fn i32(i32)` 按值捕获形式）；它也不在普通结构体上使用通用 `Drop`，而是把可复制的普通 `struct` 与带 `cleanup { ... }` 的独占 `resource` 分开，并用 `@effects(...)` 显式标记外部 I/O 权限。
 - <strong>成熟度</strong>：C++ 和 Rust 已经拥有成熟的生产级生态，而 Fairy C 目前仍处于验证核心理念的 <strong>Stage 0 原型阶段</strong>。
 
 ## Fairy C 与 Brownie C

@@ -49,6 +49,27 @@ fn i32 main() {
 
 Actualmente los argumentos de tipo cubren los escalares básicos (`bool`, `u8`, `i32`, `u32`, `usize`) y se especializan en tiempo de compilación. (La inferencia de tipos en las llamadas y los `struct`/`enum` genéricos definidos por el usuario no forman parte de Stage 0.)
 
+### Valores de función y cierres acotados (`fn i32(i32)`)
+
+Stage 0 admite valores de función acotados y cierres que capturan valores por copia con la firma `fn i32(i32)`.
+
+```c
+fn i32 apply_once(fn i32(i32) f, i32 x) {
+    return f(x);
+}
+
+fn i32 make_result() {
+    i32 offset = 7;
+    fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
+        return x + offset;
+    };
+    return apply_once(add_offset, 70);
+}
+```
+
+- Las listas de captura (`[i32 offset]`) permiten capturar por copia hasta 4 valores `i32` inmutables; estos cierres se pueden pasar, devolver y guardar en campos de un `struct` normal.
+- El cuerpo del cierre debe ser puro (sin `var`, efectos ni llamadas externas) y el tipo de cierre no puede usarse dentro de `Option`, `Result`, `ref`, `ptr`, arreglos, `struct` `@repr(C)`, `resource` ni firmas `extern C`.
+
 ## 3. `if / else` como expresiones
 
 Las condiciones siempre requieren paréntesis `(...)`. Si cada rama termina con una expresión sin punto y coma, `if` se evalúa directamente a un valor:

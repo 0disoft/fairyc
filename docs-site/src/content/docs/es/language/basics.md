@@ -18,14 +18,17 @@ let auto_inferred = 77;   // se puede omitir el tipo si queda claro por el valor
 - **La inicialización es obligatoria**: Escribir `var i32 count;` sin un valor no está permitido, lo que elimina los errores de lectura sin inicializar.
 - **`let` solo bloquea la reasignación**: Aunque un `resource` esté enlazado con `let`, aún puedes transferir (mover) su propiedad a otra función.
 
-Para constantes de módulo en tiempo de compilación, usa `const` (actualmente constantes escalares privadas de tipo `bool`, `u8`, `i32` o `u32`):
+Para constantes de módulo en tiempo de compilación, usa `const` (actualmente constantes escalares privadas de tipo `bool`, `u8`, `i32` o `u32`). Las funciones escalares puras marcadas con `@const_eval` también pueden evaluarse en `const` y `static_assert(...)`:
 
 ```c
-const i32 MAX_RETRY = 3;
-static_assert(MAX_RETRY > 0);
+@const_eval
+fn i32 square(i32 n) { return n * n; }
+
+const i32 MAX_RETRY = square(2) + 3;
+static_assert(MAX_RETRY == 7);
 ```
 
-`static_assert(...)` comprueba una condición pura en tiempo de compilación mientras se compila el programa.
+`static_assert(...)` comprueba una condición pura en tiempo de compilación mientras se compila el programa. Se admiten comentarios de línea `//`, de documentación `///` y de bloque anidados `/* ... */`.
 
 ## 2. Tipos principales y literales
 

@@ -50,7 +50,7 @@ resource Buffer {
 }
 ```
 
-Resource fields stay private outside the defining module, keeping raw handles encapsulated behind safe factory and method APIs.
+Resource fields stay private outside the defining module, keeping raw handles encapsulated behind safe factory and method APIs. If the teardown work itself performs an effect, annotate `@effects(...) cleanup { ... }` as well; callers that own the resource must declare those effects (`E7102`).
 
 ## 4. `region`: Bulk Arena Scopes
 
@@ -100,7 +100,7 @@ When calling Win32 or C functions (`extern C`), use `ptr T`, `ptr mut T`, and an
 unsafe extern C fn void c_free(ptr mut void p);
 ```
 
-Keep in mind that `unsafe` only unlocks raw pointer casts, dereferences, and foreign calls—it does **not** bypass `@effects(...)` checking.
+Keep in mind that `unsafe` only unlocks raw pointer casts, dereferences, and foreign calls—it does **not** bypass `@effects(...)` checking. The `null` literal may be used only to initialize or compare (`p == null`, `p != null`) raw `ptr T`, `ptr mut T`, or `unsafe extern C fn` pointers—never safe `ref T` or `ref mut T` borrows.
 
 ---
 

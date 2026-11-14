@@ -33,6 +33,13 @@ pub resource Writer {
 }
 ```
 
+When the exported C symbol name differs from the Fairy C declaration name, attach `@link_name("c_symbol")`:
+
+```c
+@link_name("strlen")
+unsafe extern C fn usize c_strlen(ptr u8 text);
+```
+
 ### Passing Callbacks to C (`examples/c_interop_callback`)
 Synchronous Fairy callbacks can be passed across raw pointer signatures (`unsafe extern C fn` cannot take safe `ref T` directly—`E5102`):
 

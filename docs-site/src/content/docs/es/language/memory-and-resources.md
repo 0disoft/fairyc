@@ -50,7 +50,7 @@ resource Buffer {
 }
 ```
 
-Los campos de un recurso permanecen privados fuera del módulo que lo define, manteniendo los manejadores sin procesar encapsulados detrás de funciones fábrica y métodos seguros.
+Los campos de un recurso permanecen privados fuera del módulo que lo define, manteniendo los manejadores sin procesar encapsulados detrás de funciones fábrica y métodos seguros. Si el propio bloque de limpieza realiza un efecto, también puedes anotarlo como `@effects(...) cleanup { ... }`; quienes posean el recurso deberán declarar esos mismos efectos (`E7102`).
 
 ## 4. `region`: Ámbitos de arena en bloque
 
@@ -100,7 +100,7 @@ Al llamar a funciones de Win32 o C (`extern C`), usa `ptr T`, `ptr mut T` y una 
 unsafe extern C fn void c_free(ptr mut void p);
 ```
 
-Ten en cuenta que `unsafe` solo habilita conversiones de punteros sin procesar, desreferencias y llamadas externas; **no** omite la comprobación de `@effects(...)`.
+Ten en cuenta que `unsafe` solo habilita conversiones de punteros sin procesar, desreferencias y llamadas externas; **no** omite la comprobación de `@effects(...)`. El literal `null` solo puede usarse para inicializar o comparar (`p == null`, `p != null`) punteros sin procesar `ptr T`, `ptr mut T` o `unsafe extern C fn`; nunca con préstamos seguros `ref T` ni `ref mut T`.
 
 ---
 

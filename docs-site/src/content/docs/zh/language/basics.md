@@ -18,14 +18,17 @@ let auto_inferred = 77;   // 当值类型明确时可省略类型注解
 - <strong>必须初始化</strong>：不允许写出没有初始值的 `var i32 count;`，从而从源头上消除读取未初始化数据的 bug。
 - <strong>`let` 仅锁定重新绑定</strong>：即使某个 `resource` 是用 `let` 绑定的，你依然可以将其所有权转移（移动）给另一个函数。
 
-对于模块级的编译期常量，请使用 `const`（目前支持类型为 `bool`、`u8`、`i32` 或 `u32` 的私有标量常量）：
+对于模块级的编译期常量，请使用 `const`（目前支持类型为 `bool`、`u8`、`i32` 或 `u32` 的私有标量常量）。使用 `@const_eval` 标注的纯标量辅助函数也可以直接用于 `const` 和 `static_assert(...)` 计算：
 
 ```c
-const i32 MAX_RETRY = 3;
-static_assert(MAX_RETRY > 0);
+@const_eval
+fn i32 square(i32 n) { return n * n; }
+
+const i32 MAX_RETRY = square(2) + 3;
+static_assert(MAX_RETRY == 7);
 ```
 
-`static_assert(...)` 会在编译期间检查纯编译期条件是否成立。
+`static_assert(...)` 会在编译期间检查纯编译期条件是否成立；注释支持单行 `//`、文档注释 `///` 以及可嵌套的块注释 `/* ... */`。
 
 ## 2. 核心类型与字面量
 

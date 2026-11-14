@@ -18,14 +18,17 @@ let auto_inferred = 77;   // 초기값에서 타입이 분명하면 타입 생�
 - **반드시 초기화해야 합니다**: `var i32 count;`처럼 값 없이 선언하는 문법은 없습니다. 쓰레기 값이 들어간 변수를 읽는 버그를 원천 차단하기 위해서입니다.
 - **`let`은 재할당만 막습니다**: `let`으로 받은 자원(`resource`)이라도 다른 함수로 소유권을 넘기는(move) 것은 가능합니다.
 
-모듈 맨 바깥에서 컴파일 타임 상수를 두고 싶다면 `const`를 씁니다. 아직은 `bool`, `u8`, `i32`, `u32` 스칼라 상수만 지원하며 `pub const`는 허용되지 않습니다.
+모듈 맨 바깥에서 컴파일 타임 상수를 두고 싶다면 `const`를 씁니다. 아직은 `bool`, `u8`, `i32`, `u32` 스칼라 상수만 지원하며 `pub const`는 허용되지 않습니다. 순수 스칼라 도우미 함수에 `@const_eval`을 붙이면 `const`나 `static_assert(...)` 계산에도 쓸 수 있습니다.
 
 ```c
-const i32 MAX_RETRY = 3;
-static_assert(MAX_RETRY > 0);
+@const_eval
+fn i32 square(i32 n) { return n * n; }
+
+const i32 MAX_RETRY = square(2) + 3;
+static_assert(MAX_RETRY == 7);
 ```
 
-`static_assert(...)`를 적어 두면 컴파일할 때 조건이 참인지 바로 검증해 줍니다.
+`static_assert(...)`를 적어 두면 컴파일할 때 조건이 참인지 바로 검증해 주며, 주석은 한 줄 주석 `//`, 문서 주석 `///`, 중첩 가능한 블록 주석 `/* ... */`을 지원합니다.
 
 ## 2. 기본 타입과 리터럴
 

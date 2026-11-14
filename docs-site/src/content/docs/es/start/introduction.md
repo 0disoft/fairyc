@@ -26,7 +26,7 @@ Dado que el compilador es un **prototipo Stage 0**, utiliza los comandos estable
 Si ya vienes de otro lenguaje de sistemas, estas diferencias te ayudarán a situarte rápido:
 
 - **Frente a C++**: Fairy C prescinde de cabeceras `#include`, macros de preprocesador, excepciones (`try`/`catch`), herencia de clases y sobrecarga de operadores. En su lugar usa módulos `module`/`import`, manejo de errores con `Result` + `?`, bloques explícitos `resource cleanup`, comprobación de préstamos `ref`/`ref mut` en compilación y aritmética/límites verificados.
-- **Frente a Rust**: Fairy C busca una superficie mucho más pequeña y cercana a C, compilando a través de una cadena de herramientas C11 del host. En Stage 0 no incluye traits, cierres, macros, `async` ni anotaciones explícitas de tiempo de vida `'a`. En lugar de un trait `Drop` general, separa los `struct` simples copiables de los tipos `resource` (solo movimiento con bloque `cleanup { ... }`) y expone la E/S externa mediante `@effects(...)`.
+- **Frente a Rust**: Fairy C busca una superficie mucho más pequeña y cercana a C, compilando a través de una cadena de herramientas C11 del host. En Stage 0 no incluye traits, macros, `async` ni anotaciones explícitas de tiempo de vida `'a` (solo admite cierres acotados `fn i32(i32)` por copia de valor). En lugar de un trait `Drop` general, separa los `struct` simples copiables de los tipos `resource` (solo movimiento con bloque `cleanup { ... }`) y expone la E/S externa mediante `@effects(...)`.
 - **Madurez**: A diferencia de C++ y Rust, que cuentan con ecosistemas maduros de producción, Fairy C sigue siendo un **prototipo experimental Stage 0**.
 
 ## Fairy C vs. Brownie C

@@ -49,6 +49,27 @@ fn i32 main() {
 
 Type arguments currently cover core scalars (`bool`, `u8`, `i32`, `u32`, `usize`) and are specialized at compile time. (Type inference at call sites and user-defined generic structs/enums are not part of Stage 0.)
 
+### Function Values and Narrow Closures (`fn i32(i32)`)
+
+Stage 0 supports narrow first-class function values and value-capturing closures of shape `fn i32(i32)`.
+
+```c
+fn i32 apply_once(fn i32(i32) f, i32 x) {
+    return f(x);
+}
+
+fn i32 make_result() {
+    i32 offset = 7;
+    fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
+        return x + offset;
+    };
+    return apply_once(add_offset, 70);
+}
+```
+
+- Capture lists (`[i32 offset]`) capture up to 4 immutable `i32` values by copy. Closure values can be passed, returned, and stored in plain `struct` fields.
+- Closure bodies stay pure (no `var`, no effects, and no external calls), and closure types cannot be placed inside `Option`, `Result`, `ref`, `ptr`, arrays, `@repr(C)` structs, `resource`, or `extern C` signatures.
+
 ## 3. `if / else` as Expressions
 
 Conditions always require parentheses `(...)`. If each branch ends with an expression without a semicolon, `if` evaluates directly to a value:

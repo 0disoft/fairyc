@@ -49,6 +49,27 @@ fn i32 main() {
 
 目前类型参数涵盖核心标量类型（`bool`、`u8`、`i32`、`u32`、`usize`），并在编译期进行特化。（Stage 0 暂不支持调用处的类型推断以及用户自定义的泛型结构体/枚举。）
 
+### 函数值与受限闭包（`fn i32(i32)`）
+
+Stage 0 支持形如 `fn i32(i32)` 的受限一等函数值和按值捕获的闭包。
+
+```c
+fn i32 apply_once(fn i32(i32) f, i32 x) {
+    return f(x);
+}
+
+fn i32 make_result() {
+    i32 offset = 7;
+    fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
+        return x + offset;
+    };
+    return apply_once(add_offset, 70);
+}
+```
+
+- 捕获列表（`[i32 offset]`）最多可按值复制捕获 4 个不可变 `i32` 值；闭包值可以传参、返回，也可以存放在普通 `struct` 字段中。
+- 闭包函数体保持纯函数约束（不能包含 `var`、效果或外部调用），且闭包类型不能放入 `Option`、`Result`、`ref`、`ptr`、数组、`@repr(C)` 结构体、`resource` 或 `extern C` 签名中。
+
 ## 3. 作为表达式的 `if / else`
 
 条件表达式始终需要圆括号 `(...)`。如果每个分支都以不带分号的表达式结尾，`if` 会直接求值为一个结果：

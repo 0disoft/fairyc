@@ -33,6 +33,13 @@ pub resource Writer {
 }
 ```
 
+当外部 C 符号名与 Fairy C 中的声明名称不同时，可以使用 `@link_name("c_symbol")` 指定实际链接符号：
+
+```c
+@link_name("strlen")
+unsafe extern C fn usize c_strlen(ptr u8 text);
+```
+
 ### 向 C 传递回调函数（`examples/c_interop_callback`）
 可以通过原始指针签名向 C 传递同步的 Fairy 回调函数（`unsafe extern C fn` 不能直接接收安全的 `ref T`——否则会报 `E5102`）：
 
