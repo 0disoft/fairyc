@@ -18,6 +18,10 @@ type Fetcher struct{ Client *http.Client }
 
 const sourceDownloadTimeout = 30 * time.Second
 
+func newSourceHTTPClient() *http.Client {
+	return &http.Client{Transport: &http.Transport{DialContext: (&net.Dialer{Timeout: 10 * time.Second}).DialContext, ForceAttemptHTTP2: true, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 15 * time.Second, DisableCompression: true}}
+}
+
 func (f Fetcher) download(ctx context.Context, pin Pin) ([]byte, error) {
 	return f.downloadWithin(ctx, pin, MaxArchiveBytes)
 }
@@ -32,15 +36,14 @@ func (f Fetcher) downloadWithin(ctx context.Context, pin Pin, limit int) ([]byte
 	// One budget covers every GET attempt, backoff and the final body read.
 	ctx, cancel := context.WithTimeout(ctx, sourceDownloadTimeout)
 	defer cancel()
-	client := http.Client{Transport: &http.Transport{DialContext: (&net.Dialer{Timeout: 10 * time.Second}).DialContext, ForceAttemptHTTP2: true, TLSHandshakeTimeout: 10 * time.Second, ResponseHeaderTimeout: 15 * time.Second, DisableCompression: true}}
-	if f.Client != nil {
-		client = *f.Client
+	shared := f.Client
+	if shared == nil {
+		shared = newSourceHTTPClient()
+		defer shared.CloseIdleConnections()
 	}
+	client := *shared
 	client.Timeout = sourceDownloadTimeout
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	if f.Client == nil {
-		defer client.CloseIdleConnections()
-	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, pin.URL, nil)
 	if err != nil {
 		return nil, err

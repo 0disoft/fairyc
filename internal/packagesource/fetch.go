@@ -58,6 +58,12 @@ func (f Fetcher) Fetch(ctx context.Context, workspace string, offline bool) (res
 		return result, fmt.Errorf("cannot acquire exclusive package fetch lock: %w", err)
 	}
 	defer func() { err = errors.Join(err, root.Remove(fetchLock)) }()
+	// The value receiver owns this operation's default connection pool. Reuse it
+	// across package downloads, then close it once; never close caller clients.
+	if !offline && f.Client == nil {
+		f.Client = newSourceHTTPClient()
+		defer f.Client.CloseIdleConnections()
+	}
 	var compressed, expanded, files int
 	for _, pin := range plan.Packages {
 		if err := ctx.Err(); err != nil {
