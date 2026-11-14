@@ -169,7 +169,7 @@ func queueMessages(ctx context.Context, reader *bufio.Reader, control *requestCo
 		if ctx.Err() != nil {
 			return
 		}
-		m, err := readMessage(reader)
+		m, err := readMessageWithOptions(reader, messageReadOptions{Context: ctx})
 		if err != nil {
 			select {
 			case queued <- incomingMessage{err: err}:

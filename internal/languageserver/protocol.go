@@ -22,11 +22,30 @@ type message struct {
 }
 
 func readMessage(in *bufio.Reader) (message, error) {
+	return readMessageWithOptions(in)
+}
+
+func readMessageWithOptions(in *bufio.Reader, options ...messageReadOptions) (message, error) {
+	policy, err := resolveMessageReadOptions(options)
+	if err != nil {
+		return message{}, err
+	}
+	ctx := policy.Context
 	length := -1
+	lengthSeen := false
 	headerBytes := 0
 	for {
+		if err := ctx.Err(); err != nil {
+			return message{}, err
+		}
 		rawLine, err := in.ReadSlice('\n')
+		if canceled := ctx.Err(); canceled != nil {
+			return message{}, canceled
+		}
 		if err != nil {
+			if errors.Is(err, io.EOF) && (headerBytes > 0 || len(rawLine) > 0) {
+				return message{}, io.ErrUnexpectedEOF
+			}
 			return message{}, err
 		}
 		line := string(rawLine)
@@ -42,21 +61,32 @@ func readMessage(in *bufio.Reader) (message, error) {
 			return message{}, errors.New("invalid LSP header")
 		}
 		if strings.EqualFold(key, "Content-Length") {
-			if length != -1 {
+			if lengthSeen {
 				return message{}, errors.New("duplicate Content-Length")
 			}
+			lengthSeen = true
 			length, err = strconv.Atoi(strings.TrimSpace(value))
 			if err != nil {
 				return message{}, err
 			}
 		}
 	}
-	if length < 0 || length > maxMessage {
+	if !lengthSeen || length < 0 || length > maxMessage {
 		return message{}, errors.New("invalid LSP message length")
 	}
 	bytes := make([]byte, length)
-	if _, err := io.ReadFull(in, bytes); err != nil {
+	count, err := policy.ReadFull(ctx, &messageBodyReader{ctx: ctx, reader: in}, bytes)
+	if canceled := ctx.Err(); canceled != nil {
+		return message{}, canceled
+	}
+	if errors.Is(err, io.EOF) {
+		err = io.ErrUnexpectedEOF
+	}
+	if err != nil {
 		return message{}, err
+	}
+	if count != length {
+		return message{}, io.ErrUnexpectedEOF
 	}
 	var m message
 	if err := json.Unmarshal(bytes, &m); err != nil {
@@ -64,6 +94,9 @@ func readMessage(in *bufio.Reader) (message, error) {
 	}
 	if m.JSONRPC != "2.0" || m.Method == "" {
 		return message{}, errors.New("invalid JSON-RPC request")
+	}
+	if err := ctx.Err(); err != nil {
+		return message{}, err
 	}
 	return m, nil
 }

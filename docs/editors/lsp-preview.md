@@ -5,6 +5,13 @@ Build `go build -o .cache/fairyc-lsp.exe ./cmd/fairyc-lsp` on Windows (omit
 JSON-RPC over stdio. Protocol output is isolated from stderr.
 No project builds, execution, downloads, lockfile writes or source writes occur.
 
+Clean EOF is accepted only between frames. EOF after any header byte or before
+the declared body is complete is `io.ErrUnexpectedEOF` and terminates the session
+with exit code 1. Headers are bounded to 8 KiB, bodies to 9 MiB; duplicate
+`Content-Length` fields reject even when the first value is negative. Frame
+reads share the session context and check cancellation around body reads of at
+most 32 KiB. A blocked reader still needs to be closed by its owner to unblock.
+
 ## Capabilities
 
 - Full document synchronization with monotonically increasing versions.
