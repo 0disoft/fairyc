@@ -4,6 +4,7 @@ package durablefile
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -42,14 +43,20 @@ func CreateTemporary(root *os.Root, directory string) (*os.File, string, error) 
 // same-directory opened-root rename. An existing identical destination converges. Any different
 // bytes under the same content-derived name are replaced and independently reverified by readers.
 func PublishImmutable(root *os.Root, temporaryPath, finalPath string, expected []byte) error {
-	return publishImmutable(root, temporaryPath, finalPath, expected, rename, syncPublished)
+	return PublishImmutableWithOptions(root, temporaryPath, finalPath, expected)
 }
 
-// The two filesystem actions are injected privately for deterministic failure
-// and concurrent-publication tests; callers always use the host implementations.
+// Retain the private action adapter used by existing concurrent-publication
+// tests. Default publication uses host actions; options may override them.
 type publicationAction func(*os.Root, string, string) error
 
 func publishImmutable(root *os.Root, temporaryPath, finalPath string, expected []byte, move, flush publicationAction) error {
+	return PublishImmutableWithOptions(root, temporaryPath, finalPath, expected, PublicationOptions{Move: publicationActionWithContext(move), Flush: publicationActionWithContext(flush)})
+}
+
+// PublishImmutableWithOptions preserves the default publication contract while
+// allowing deterministic I/O failures and cooperative cancellation.
+func PublishImmutableWithOptions(root *os.Root, temporaryPath, finalPath string, expected []byte, options ...PublicationOptions) error {
 	if root == nil {
 		return fmt.Errorf("durable file root must be initialized")
 	}
@@ -60,34 +67,78 @@ func publishImmutable(root *os.Root, temporaryPath, finalPath string, expected [
 		filepath.Dir(temporaryPath) != filepath.Dir(finalPath) {
 		return fmt.Errorf("durable file publication paths must be canonical and share one directory")
 	}
+	policy, err := publicationOptions(options)
+	if err != nil {
+		return err
+	}
+	ctx := policy.Context
 	directory := filepath.Dir(finalPath)
-	if err := move(root, temporaryPath, finalPath); err != nil && !matchesFile(root, finalPath, expected) {
-		if removeErr := root.Remove(finalPath); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
-			return fmt.Errorf("publish immutable durable file: destination conflict")
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return err
 		}
-		if err := move(root, temporaryPath, finalPath); err != nil && !matchesFile(root, finalPath, expected) {
-			return fmt.Errorf("publish immutable durable file: destination conflict")
+		moveErr := policy.Move(ctx, root, temporaryPath, finalPath)
+		if err := ctx.Err(); err != nil {
+			return errors.Join(moveErr, err)
+		}
+		if moveErr == nil {
+			break
+		}
+		matched, compareErr := policy.Compare(ctx, root, finalPath, expected)
+		if err := errors.Join(compareErr, ctx.Err()); err != nil {
+			return fmt.Errorf("inspect durable file destination: %w", errors.Join(moveErr, err))
+		}
+		if matched {
+			break
+		}
+		if attempt == 1 {
+			return fmt.Errorf("publish immutable durable file: destination conflict: %w", moveErr)
+		}
+		if removeErr := policy.Remove(ctx, root, finalPath); removeErr != nil && !errors.Is(removeErr, os.ErrNotExist) {
+			return fmt.Errorf("remove conflicting durable file: %w", errors.Join(moveErr, removeErr))
 		}
 	}
 	// Every successful publication, including a concurrent publisher's win,
 	// must cross the same host sync boundary before success is reported.
-	if syncErr := flush(root, finalPath, directory); syncErr != nil {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if syncErr := policy.Flush(ctx, root, finalPath, directory); syncErr != nil {
 		return fmt.Errorf("sync published durable file: %w", syncErr)
 	}
-	return nil
+	return ctx.Err()
 }
 
 func matchesFile(root *os.Root, path string, expected []byte) bool {
-	file, err := root.Open(path)
+	same, err := compareFile(context.Background(), root, path, expected)
+	return same && err == nil
+}
+
+func compareFile(ctx context.Context, root *os.Root, path string, expected []byte) (same bool, err error) {
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	file, err := OpenRegular(root, path)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
 	if err != nil {
-		return false
+		return false, err
 	}
-	defer file.Close()
+	defer func() {
+		err = errors.Join(err, file.Close(), ctx.Err())
+		if err != nil {
+			same = false
+		}
+	}()
 	info, err := file.Stat()
-	if err != nil || !info.Mode().IsRegular() || info.Size() != int64(len(expected)) {
-		return false
+	if err != nil {
+		return false, err
 	}
-	return matchesReader(file, expected)
+	if info.Size() != int64(len(expected)) {
+		return false, nil
+	}
+	return compareReader(ctx, file, expected)
 }
 
 const compareChunkBytes = 32 << 10
@@ -95,17 +146,76 @@ const compareChunkBytes = 32 << 10
 // Never trust a destination's length to size an allocation. The final byte
 // check also rejects a file that grows after matchesFile's size inspection.
 func matchesReader(reader io.Reader, expected []byte) bool {
+	same, err := compareReader(context.Background(), reader, expected)
+	return same && err == nil
+}
+
+func compareReader(ctx context.Context, reader io.Reader, expected []byte) (bool, error) {
+	checked := &contextComparisonReader{ctx: ctx, reader: reader}
+	reader = checked
 	chunk := make([]byte, min(len(expected), compareChunkBytes))
 	for len(expected) > 0 {
 		size := min(len(expected), len(chunk))
-		if _, err := io.ReadFull(reader, chunk[:size]); err != nil || !bytes.Equal(chunk[:size], expected[:size]) {
-			return false
+		_, err := io.ReadFull(reader, chunk[:size])
+		if ctx.Err() != nil {
+			return false, ctx.Err()
+		}
+		if checked.failure != nil {
+			return false, checked.failure
+		}
+		if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		if !bytes.Equal(chunk[:size], expected[:size]) {
+			return false, nil
 		}
 		expected = expected[size:]
 	}
 	var extra [1]byte
-	count, err := reader.Read(extra[:])
-	return count == 0 && errors.Is(err, io.EOF)
+	count, err := io.ReadFull(reader, extra[:])
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+	if checked.failure != nil {
+		return false, checked.failure
+	}
+	if err != nil && !errors.Is(err, io.EOF) {
+		return false, err
+	}
+	return count == 0 && errors.Is(err, io.EOF), nil
+}
+
+type contextComparisonReader struct {
+	ctx        context.Context
+	reader     io.Reader
+	failure    error
+	emptyReads int
+}
+
+const maxComparisonEmptyReads = 100
+
+func (reader *contextComparisonReader) Read(buffer []byte) (int, error) {
+	if err := reader.ctx.Err(); err != nil {
+		return 0, err
+	}
+	count, err := reader.reader.Read(buffer)
+	if count == 0 && err == nil {
+		reader.emptyReads++
+		if reader.emptyReads >= maxComparisonEmptyReads {
+			err = io.ErrNoProgress
+		}
+	} else {
+		reader.emptyReads = 0
+	}
+	// ReadFull discards errors accompanying a full buffer. Retain non-EOF
+	// failures so an exact chunk boundary cannot authorize convergence/removal.
+	if err != nil && !errors.Is(err, io.EOF) {
+		reader.failure = err
+	}
+	return count, err
 }
 
 // SyncDirectory persists a newly created directory entry where the host exposes such a contract.

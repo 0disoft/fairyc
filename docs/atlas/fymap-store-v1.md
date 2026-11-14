@@ -37,6 +37,11 @@ platform post-publication sync. Concurrent identical writers converge. A differe
 the same checksum-derived filename is removed and repaired because no valid different payload can
 own that name.
 
+Failure to inspect, read, or close the existing destination is not proof of different bytes and
+never authorizes its removal. Shared publication propagates that error. Optional per-operation
+I/O callbacks and a context permit deterministic failure/cancellation checks; cancellation is
+cooperative and does not undo a completed rename or interrupt an already blocked host syscall.
+
 ## Mandatory bounds
 
 Every store requires:
