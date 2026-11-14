@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/fs"
 	"path"
 	"strings"
@@ -101,7 +100,7 @@ func unpackArchiveFiles(ctx context.Context, files []*zip.File, expandedLimit, f
 		if err != nil {
 			return bundle{}, err
 		}
-		contents, err := readArchiveEntry(f, remaining)
+		contents, err := readArchiveEntry(f, remaining, archiveReadOptions{Context: ctx})
 		if err != nil {
 			return bundle{}, err
 		}
@@ -110,6 +109,9 @@ func unpackArchiveFiles(ctx context.Context, files []*zip.File, expandedLimit, f
 			return bundle{}, fmt.Errorf("ZIP expanded byte limit exceeded")
 		}
 		b.files[name] = contents
+	}
+	if err := ctx.Err(); err != nil {
+		return bundle{}, err
 	}
 	return b, nil
 }
@@ -166,19 +168,6 @@ func archiveRemainingBudget(size uint64, fileCount, expanded, expandedLimit, fil
 		return 0, fmt.Errorf("ZIP file limit exceeded")
 	}
 	return remaining, nil
-}
-
-func readArchiveEntry(f *zip.File, remaining int) ([]byte, error) {
-	file, err := f.Open()
-	if err != nil {
-		return nil, err
-	}
-	contents, readErr := io.ReadAll(io.LimitReader(file, int64(remaining)+1))
-	closeErr := file.Close()
-	if readErr != nil || closeErr != nil || len(contents) > remaining || uint64(len(contents)) != f.UncompressedSize64 {
-		return nil, fmt.Errorf("ZIP entry integrity or byte limit failed")
-	}
-	return contents, nil
 }
 
 func validateArchiveBundle(b bundle, pin Pin, language string) (bundle, error) {

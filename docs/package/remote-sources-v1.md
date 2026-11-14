@@ -86,6 +86,12 @@ the named cache blob and retry. Downloads are limited to 30 seconds per request,
 one fetch is limited to 64 MiB compressed and 64 MiB expanded bytes, 4,096 files and 8 MiB/file. Each archive also limits explicit/implicit path entries to 8,192 and path depth to 32 components. Remaining operation budgets apply before reading/decompressing the next archive.
 The operation has a two-minute context. Cache retention is manual, not an unbounded background job. Immutable cache publication requires filesystem hard-link support; unsupported filesystems fail rather than falling back to replacement.
 
+ZIP entry reads check that context before and after each read of at most 32 KiB and again after
+closing the entry, including the last file. Cancellation rejects the result without exposing
+partial bytes. CRC, read and close errors retain their causes. One hundred consecutive reads
+without bytes or an error fail with `io.ErrNoProgress`. A blocked decompressor or host syscall
+itself cannot be interrupted by these cooperative checks.
+
 Before the Go ZIP reader allocates per-entry metadata, a framing-only admission
 walk checks the declared and actual central-directory entry counts against the
 8,192-entry limit. ZIP32/ZIP64 end records and prefix adjustment are recognized;
