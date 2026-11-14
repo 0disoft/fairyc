@@ -257,9 +257,20 @@ func (store *MapStore) publishGeneration(partition Partition, hooks mapPublishHo
 
 // LoadCurrent returns exactly one compatible, current-source-validated generation.
 func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool, error) {
+	return store.LoadCurrentWithOptions(expectation)
+}
+
+// LoadCurrentWithOptions preserves LoadCurrent's call shape and result contract
+// while allowing deterministic I/O failures and cooperative cancellation.
+func (store *MapStore) LoadCurrentWithOptions(expectation LoadExpectation, options ...MapLoadOptions) (Partition, bool, error) {
 	if store == nil || store.root == nil {
 		return Partition{}, false, fmt.Errorf(".fymap store is not initialized")
 	}
+	policy, err := store.loadOptions(options)
+	if err != nil {
+		return Partition{}, false, err
+	}
+	ctx := policy.Context
 	if err := validateLoadExpectation(expectation); err != nil {
 		return Partition{}, false, err
 	}
@@ -269,16 +280,30 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 	sawStale := false
 	sawIncompatible := false
 	sawCorrupt := false
-	err := visitMapDirectory(store.root, directory, func(entry os.DirEntry) error {
+	err = policy.VisitDirectory(ctx, directory, func(entry os.DirEntry) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if entry.IsDir() || !validMapGenerationName(entry.Name()) {
 			return nil
 		}
 		path := filepath.Join(directory, entry.Name())
-		partition, readErr := store.readGeneration(path, entry.Name(), directory)
+		partition, readErr := policy.ReadGeneration(ctx, path, entry.Name(), directory)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if errors.Is(readErr, os.ErrNotExist) {
+			return nil
+		}
 		if readErr != nil {
+			// A reader limit, failed read/close or inaccessible path is not
+			// evidence of corruption. Preserve the file for another reader.
+			if !errors.Is(readErr, ErrStoredMapCorrupt) {
+				return readErr
+			}
 			sawCorrupt = true
 			store.recordRejected()
-			_ = store.root.Remove(path)
+			_ = policy.Remove(ctx, path) // Corrupt-file cleanup remains best-effort.
 			return nil
 		}
 		if compatibilityErr := compatibilityError(partition, expectation); compatibilityErr != nil {
@@ -303,6 +328,9 @@ func (store *MapStore) LoadCurrent(expectation LoadExpectation) (Partition, bool
 		}
 		return nil
 	})
+	if err := ctx.Err(); err != nil {
+		return Partition{}, false, err
+	}
 	if errors.Is(err, os.ErrNotExist) {
 		store.recordMiss()
 		return Partition{}, false, nil
@@ -350,17 +378,20 @@ func (store *MapStore) readGeneration(path, name, expectedInstance string) (Part
 	schema, encoding, logical := store.transportVersion()
 	partition, err := decodeVersion(encoded, store.limits.MaxMapBytes, schema, encoding, logical)
 	if err != nil {
-		return Partition{}, err
+		if errors.Is(err, ErrMapTooLarge) {
+			return Partition{}, err
+		}
+		return Partition{}, fmt.Errorf("%w: %w", ErrStoredMapCorrupt, err)
 	}
 	checksum, err := computeVersionChecksum(documentFromPartition(partition), schema, encoding)
 	if err != nil {
-		return Partition{}, err
+		return Partition{}, fmt.Errorf("%w: %w", ErrStoredMapCorrupt, err)
 	}
 	if mapGenerationName(checksum) != name {
-		return Partition{}, fmt.Errorf(".fymap checksum does not match generation name")
+		return Partition{}, fmt.Errorf("%w: .fymap checksum does not match generation name", ErrStoredMapCorrupt)
 	}
 	if partition.Header().PackageInstance != expectedInstance {
-		return Partition{}, fmt.Errorf(".fymap package does not match its directory")
+		return Partition{}, fmt.Errorf("%w: .fymap package does not match its directory", ErrStoredMapCorrupt)
 	}
 	return partition, nil
 }

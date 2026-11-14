@@ -82,6 +82,12 @@ size-bounded, canonically decoded, semantically revalidated, matched to its file
 then checked against current compatibility. Corrupt generations are removed best-effort. Invalid
 unrelated names are ignored and never interpreted as maps.
 
+Load-time byte-limit, filesystem read/close, and cancellation failures do not establish corruption:
+they return an error without deleting that generation. A candidate that disappears during reading
+is skipped. `LoadCurrentWithOptions` accepts optional per-load I/O callbacks and a context; omitted
+fields retain the opened-root host operations and a background context. Cancellation is cooperative
+and cannot interrupt an already blocked host filesystem syscall.
+
 Exactly one compatible current generation is a hit. Zero generations is a miss. More than one valid
 compatible generation is `ErrMapConflict`, because silently selecting one would hide compiler
 nondeterminism or contradictory fact production.
