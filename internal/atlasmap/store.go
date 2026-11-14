@@ -22,6 +22,7 @@ const mapStoreLayoutDirectoryV3 = "fymap-v3"
 const maxReadableMapBytes = uint64(1<<63 - 2)
 
 // MapStoreLimits are mandatory caller policy for retained immutable map generations.
+// MaxMapBytes bounds encoding/decoding; retention counts larger sibling maps too.
 type MapStoreLimits struct {
 	MaxGenerations int
 	MaxBytes       uint64
@@ -398,12 +399,25 @@ func (store *MapStore) readGeneration(path, name, expectedInstance string) (Part
 
 // Sweep removes expired temporaries and oldest generations until both caller bounds hold.
 func (store *MapStore) Sweep() error {
+	return store.SweepWithOptions()
+}
+
+// SweepWithOptions permits deterministic time/I/O and per-operation cancellation
+// without changing Sweep's signature or the store's persistent policy.
+func (store *MapStore) SweepWithOptions(options ...MapSweepOptions) error {
 	if store == nil || store.root == nil {
 		return fmt.Errorf(".fymap store is not initialized")
 	}
+	policy, err := store.sweepOptions(options)
+	if err != nil {
+		return err
+	}
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	generations, err := store.scan(true)
+	if err := policy.Context.Err(); err != nil {
+		return err
+	}
+	generations, err := store.scanWithOptions(true, policy)
 	if err != nil {
 		return err
 	}
@@ -415,9 +429,12 @@ func (store *MapStore) Sweep() error {
 	})
 	total := generationBytes(generations)
 	for len(generations) > store.limits.MaxGenerations || total > store.limits.MaxBytes {
+		if err := policy.Context.Err(); err != nil {
+			return err
+		}
 		oldest := generations[0]
 		generations = generations[1:]
-		if err := store.root.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := policy.Remove(policy.Context, oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("evict .fymap generation: %w", err)
 		}
 		if total >= oldest.size {
@@ -427,7 +444,7 @@ func (store *MapStore) Sweep() error {
 		}
 		store.evicted++
 	}
-	return nil
+	return policy.Context.Err()
 }
 
 func (store *MapStore) Stats() (MapStoreStats, error) {
@@ -447,39 +464,69 @@ func (store *MapStore) Stats() (MapStoreStats, error) {
 }
 
 func (store *MapStore) scan(clean bool) ([]mapGeneration, error) {
-	now := time.Now()
+	policy, err := store.sweepOptions(nil)
+	if err != nil {
+		return nil, err
+	}
+	return store.scanWithOptions(clean, policy)
+}
+
+func (store *MapStore) scanWithOptions(clean bool, policy MapSweepOptions) ([]mapGeneration, error) {
+	ctx := policy.Context
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	now := policy.Now()
 	result := make([]mapGeneration, 0)
-	err := visitMapDirectory(store.root, ".", func(directory os.DirEntry) error {
+	err := policy.VisitDirectory(ctx, ".", func(directory os.DirEntry) error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		if !directory.IsDir() || !validMapPackageDirectory(directory.Name()) {
 			return nil
 		}
-		readErr := visitMapDirectory(store.root, directory.Name(), func(entry os.DirEntry) error {
+		readErr := policy.VisitDirectory(ctx, directory.Name(), func(entry os.DirEntry) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
 			if entry.IsDir() {
 				return nil
 			}
 			path := filepath.Join(directory.Name(), entry.Name())
-			info, infoErr := entry.Info()
+			info, infoErr := policy.Info(ctx, entry)
+			if err := ctx.Err(); err != nil {
+				return err
+			}
 			if infoErr != nil {
 				if errors.Is(infoErr, os.ErrNotExist) {
 					return nil
 				}
 				return infoErr
 			}
+			if info == nil {
+				return fmt.Errorf(".fymap entry metadata is missing")
+			}
 			if !info.Mode().IsRegular() {
 				return nil
 			}
 			if strings.HasPrefix(entry.Name(), ".tmp-") {
 				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
-					_ = store.root.Remove(path)
+					if err := policy.Remove(ctx, path); err != nil && !errors.Is(err, os.ErrNotExist) {
+						return fmt.Errorf("remove expired .fymap temporary: %w", err)
+					}
 				}
 				return nil
 			}
 			if !validMapGenerationName(entry.Name()) {
 				return nil
 			}
-			if info.Size() <= 0 || uint64(info.Size()) > store.limits.MaxMapBytes {
+			// MaxMapBytes bounds this caller's encoder/reader, not sibling
+			// publications. Count all positive-size generations for retention.
+			if info.Size() <= 0 {
 				if clean {
-					_ = store.root.Remove(path)
+					if err := policy.Remove(ctx, path); err != nil && !errors.Is(err, os.ErrNotExist) {
+						return fmt.Errorf("remove empty .fymap generation: %w", err)
+					}
 					store.rejected++
 				}
 				return nil
@@ -492,6 +539,9 @@ func (store *MapStore) scan(clean bool) ([]mapGeneration, error) {
 		}
 		return readErr
 	})
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if err != nil {
 		return nil, fmt.Errorf("scan .fymap store: %w", err)
 	}

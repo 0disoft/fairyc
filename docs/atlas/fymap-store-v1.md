@@ -51,6 +51,14 @@ before decoding. Sweep orders valid generations by modification time then relati
 expired temporaries, and evicts oldest generations until both limits hold. Time controls retention
 only; it never decides compatibility or truth.
 
+`MaxMapBytes` bounds this caller's encoding and decoding, not the validity of another caller's
+publication. Sweep and Stats count every positive-size regular generation with a recognized name,
+including generations above that per-map limit. Such files are evicted only when the retained
+generation count or total byte bound requires it; exceeding a local read bound is not corruption.
+`SweepWithOptions` optionally injects a clock, directory/metadata/removal operations and a context.
+Omitted fields use the host defaults; one clock sample governs each scan. Cancellation is
+cooperative and does not roll back completed cleanup or interrupt a blocked syscall or mutex wait.
+
 ## Current-source acceptance
 
 `CurrentWorkspacePackages` requests exact semantic package and file metadata from the validated
