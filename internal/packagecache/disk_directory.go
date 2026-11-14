@@ -1,6 +1,7 @@
 package packagecache
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -10,14 +11,23 @@ import (
 )
 
 func removeEmptyKeyDirectory(root *os.Root, name string) {
+	removeEmptyKeyDirectoryUsing(name, context.Background(), root.Lstat, root.Remove)
+}
+
+func removeEmptyKeyDirectoryUsing(name string, ctx context.Context, stat func(string) (os.FileInfo, error), remove func(string) error) {
+	if ctx.Err() != nil {
+		return
+	}
 	if !validDigestDirectory(filepath.Base(name)) {
 		return
 	}
-	info, err := root.Lstat(name)
+	info, err := stat(name)
 	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 		return
 	}
-	_ = root.Remove(name) // Nonrecursive; a concurrent temporary keeps it nonempty.
+	if ctx.Err() == nil {
+		_ = remove(name) // Nonrecursive; a concurrent temporary keeps it nonempty.
+	}
 }
 
 func (store *DiskStore) prepareKeyDirectory(name string) error {

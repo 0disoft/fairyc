@@ -360,24 +360,38 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 
 // Sweep removes expired temporary files and oldest immutable generations until both caller bounds
 // hold. Creation/modification time is only an eviction hint; cache correctness never depends on it.
-func (store *DiskStore) Sweep() (err error) {
+func (store *DiskStore) Sweep() error { return store.SweepWithOptions() }
+
+// SweepWithOptions retains Sweep's behavior while allowing per-operation clock,
+// filesystem and cancellation dependencies. It never mutates store policy.
+func (store *DiskStore) SweepWithOptions(options ...SweepOptions) (err error) {
 	defer func() { err = cacheError(ErrorIO, err) }()
 	if store == nil {
 		return fmt.Errorf("package cache disk store is not initialized")
 	}
+	policy, err := store.sweepPolicy(options)
+	if err != nil {
+		return err
+	}
 	store.mu.Lock()
 	defer store.mu.Unlock()
-	scanResult, err := store.scan(true)
+	if err := policy.Context.Err(); err != nil {
+		return err
+	}
+	scanResult, err := store.scanWithPolicy(true, policy)
 	if err != nil {
 		return store.scanError(err)
 	}
-	for _, path := range scanResult.expiredTemps {
-		if err := store.retentionRoot.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("remove expired cache temporary file: %w", err)
+	for _, candidate := range scanResult.expiredTemps {
+		if err := store.removeExpiredTemporary(candidate, policy); err != nil {
+			return err
 		}
 	}
 	for _, directory := range scanResult.cleanupDirectories {
-		removeEmptyKeyDirectory(store.retentionRoot, directory)
+		if err := policy.Context.Err(); err != nil {
+			return err
+		}
+		removeEmptyKeyDirectoryUsing(directory, policy.Context, policy.Lstat, policy.Remove)
 	}
 	generations := scanResult.generations
 	slices.SortFunc(generations, func(left, right diskGeneration) int {
@@ -395,12 +409,15 @@ func (store *DiskStore) Sweep() (err error) {
 		}
 	}
 	for len(generations) > store.limits.MaxEntries || total > store.limits.MaxBytes {
+		if err := policy.Context.Err(); err != nil {
+			return err
+		}
 		oldest := generations[0]
 		generations = generations[1:]
-		if err := store.retentionRoot.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := policy.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("evict package cache generation: %w", err)
 		}
-		removeEmptyKeyDirectory(store.retentionRoot, filepath.Dir(oldest.path))
+		removeEmptyKeyDirectoryUsing(filepath.Dir(oldest.path), policy.Context, policy.Lstat, policy.Remove)
 		if total >= oldest.size {
 			total -= oldest.size
 		} else {
@@ -408,7 +425,7 @@ func (store *DiskStore) Sweep() (err error) {
 		}
 		store.evicted++
 	}
-	return nil
+	return policy.Context.Err()
 }
 
 // Stats scans retained state so other-process writes are visible, then adds local counters.

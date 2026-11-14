@@ -6,25 +6,36 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/0disoft/fairyc/internal/directoryscan"
 )
 
 type diskScanResult struct {
 	generations        []diskGeneration
-	expiredTemps       []string
+	expiredTemps       []diskTemporary
 	cleanupDirectories []string
 }
 
 // Collection visits only compiler-owned, current-format namespaces. Unknown
 // versions and unrelated files are preserved; this is not recursive cleanup.
 func (store *DiskStore) scan(clean bool) (diskScanResult, error) {
+	policy, err := store.sweepPolicy(nil)
+	if err != nil {
+		return diskScanResult{}, err
+	}
+	return store.scanWithPolicy(clean, policy)
+}
+
+func (store *DiskStore) scanWithPolicy(clean bool, policy sweepPolicy) (diskScanResult, error) {
 	budget := store.newScanBudget()
+	budget.Context = policy.Context
 	var result diskScanResult
 	for _, namespace := range []string{".", "generic-v0", "storage-transfer-v0"} {
+		if err := policy.Context.Err(); err != nil {
+			return diskScanResult{}, err
+		}
 		if namespace != "." {
-			info, err := store.retentionRoot.Lstat(namespace)
+			info, err := policy.Lstat(namespace)
 			if errors.Is(err, os.ErrNotExist) {
 				continue
 			}
@@ -36,7 +47,7 @@ func (store *DiskStore) scan(clean bool) (diskScanResult, error) {
 			}
 		}
 		versionPath := filepath.Join(namespace, diskLayoutDirectory)
-		info, err := store.retentionRoot.Lstat(versionPath)
+		info, err := policy.Lstat(versionPath)
 		if errors.Is(err, os.ErrNotExist) {
 			continue
 		}
@@ -46,7 +57,7 @@ func (store *DiskStore) scan(clean bool) (diskScanResult, error) {
 		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 			continue
 		}
-		namespaceResult, err := store.scanNamespace(versionPath, clean, budget)
+		namespaceResult, err := store.scanNamespace(versionPath, clean, budget, policy)
 		if err != nil {
 			return diskScanResult{}, err
 		}
@@ -57,19 +68,21 @@ func (store *DiskStore) scan(clean bool) (diskScanResult, error) {
 	return result, nil
 }
 
-func (store *DiskStore) scanNamespace(versionPath string, clean bool, budget *directoryscan.Budget) (diskScanResult, error) {
-	keyDirectories, err := readCacheDirectoryWithBudget(store.retentionRoot, versionPath, budget)
+func (store *DiskStore) scanNamespace(versionPath string, clean bool, budget *directoryscan.Budget, policy sweepPolicy) (diskScanResult, error) {
+	keyDirectories, err := policy.ReadDirectory(versionPath, budget)
 	if err != nil {
 		return diskScanResult{}, fmt.Errorf("scan package cache root: %w", err)
 	}
-	now := time.Now()
 	var result diskScanResult
 	for _, keyDirectory := range keyDirectories {
+		if err := policy.Context.Err(); err != nil {
+			return diskScanResult{}, err
+		}
 		if !keyDirectory.IsDir() || !validDigestDirectory(keyDirectory.Name()) {
 			continue
 		}
 		directoryPath := filepath.Join(versionPath, keyDirectory.Name())
-		entries, err := readCacheDirectoryWithBudget(store.retentionRoot, directoryPath, budget)
+		entries, err := policy.ReadDirectory(directoryPath, budget)
 		if errors.Is(err, os.ErrNotExist) {
 			continue // Another collector removed this empty key directory.
 		}
@@ -77,8 +90,11 @@ func (store *DiskStore) scanNamespace(versionPath string, clean bool, budget *di
 			return diskScanResult{}, fmt.Errorf("scan package cache key directory: %w", err)
 		}
 		for _, entry := range entries {
+			if err := policy.Context.Err(); err != nil {
+				return diskScanResult{}, err
+			}
 			path := filepath.Join(directoryPath, entry.Name())
-			info, err := store.retentionRoot.Lstat(path)
+			info, err := policy.Lstat(path)
 			if errors.Is(err, os.ErrNotExist) {
 				continue
 			}
@@ -89,8 +105,8 @@ func (store *DiskStore) scanNamespace(versionPath string, clean bool, budget *di
 				continue
 			}
 			if strings.HasPrefix(entry.Name(), ".tmp-") {
-				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
-					result.expiredTemps = append(result.expiredTemps, path)
+				if clean && policy.instant.Sub(info.ModTime()) >= store.limits.TempMaxAge {
+					result.expiredTemps = append(result.expiredTemps, diskTemporary{path: path, identity: info})
 				}
 				continue
 			}
