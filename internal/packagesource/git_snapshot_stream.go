@@ -49,7 +49,21 @@ func consumeGitProcess(command *exec.Cmd, cancel context.CancelFunc, consume fun
 }
 
 func writeGitSnapshotBlobs(ctx context.Context, input io.Reader, entries []gitTreeBlob, writer *zip.Writer) ([]byte, error) {
-	reader := bufio.NewReaderSize(input, 128)
+	return writeGitSnapshotBlobsWithOptions(ctx, input, entries, writer)
+}
+
+func writeGitSnapshotBlobsWithOptions(ctx context.Context, input io.Reader, entries []gitTreeBlob, writer *zip.Writer, options ...gitBlobOptions) ([]byte, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	policy, err := resolveGitBlobOptions(writer, options)
+	if err != nil {
+		return nil, err
+	}
+	reader := bufio.NewReaderSize(&gitBlobReader{ctx: ctx, input: input}, 128)
 	var scratch, manifest []byte
 	expanded := 0
 	for _, entry := range entries {
@@ -75,11 +89,28 @@ func writeGitSnapshotBlobs(ctx context.Context, input io.Reader, entries []gitTr
 			scratch = make([]byte, max(int(size), min(MaxFileBytes, 2*cap(scratch))))
 		}
 		data := scratch[:int(size)]
-		if _, err = io.ReadFull(reader, data); err != nil {
+		count, err := policy.ReadFull(ctx, reader, data)
+		if canceled := ctx.Err(); canceled != nil {
+			return nil, canceled
+		}
+		if err != nil {
 			return nil, fmt.Errorf("truncated Git blob: %w", err)
 		}
-		if terminator, err := reader.ReadByte(); err != nil || terminator != '\n' {
+		if count != len(data) {
+			return nil, fmt.Errorf("truncated Git blob: %w", io.ErrUnexpectedEOF)
+		}
+		terminator, err := reader.ReadByte()
+		if canceled := ctx.Err(); canceled != nil {
+			return nil, canceled
+		}
+		if err != nil {
+			return nil, fmt.Errorf("read Git blob terminator: %w", err)
+		}
+		if terminator != '\n' {
 			return nil, fmt.Errorf("invalid Git blob terminator")
+		}
+		if err := verifyGitBlob(ctx, entry.object, data); err != nil {
+			return nil, err
 		}
 		expanded += int(size)
 		if entry.name == projectmanifest.FileName {
@@ -88,15 +119,35 @@ func writeGitSnapshotBlobs(ctx context.Context, input io.Reader, entries []gitTr
 		fileHeader := &zip.FileHeader{Name: entry.name, Method: zip.Deflate}
 		fileHeader.SetMode(0644)
 		fileHeader.SetModTime(time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC))
-		file, err := writer.CreateHeader(fileHeader)
+		file, err := policy.CreateEntry(ctx, fileHeader)
+		if canceled := ctx.Err(); canceled != nil {
+			return nil, canceled
+		}
 		if err != nil {
 			return nil, err
 		}
-		if _, err = file.Write(data); err != nil {
+		if file == nil {
+			return nil, fmt.Errorf("Git ZIP entry writer is missing")
+		}
+		count, err = file.Write(data)
+		if canceled := ctx.Err(); canceled != nil {
+			return nil, canceled
+		}
+		if err != nil {
 			return nil, err
 		}
+		if count != len(data) {
+			return nil, io.ErrShortWrite
+		}
 	}
-	if _, err := reader.ReadByte(); err != io.EOF {
+	_, err = reader.ReadByte()
+	if canceled := ctx.Err(); canceled != nil {
+		return nil, canceled
+	}
+	if err != io.EOF {
+		if err != nil {
+			return nil, fmt.Errorf("read Git blob tail: %w", err)
+		}
 		return nil, fmt.Errorf("trailing Git blob data or read failure")
 	}
 	return manifest, nil

@@ -65,7 +65,7 @@ func TestGitSnapshotStreamAggregateBudget(t *testing.T) {
 
 func TestGitSnapshotStreamReapsRejectedProducer(t *testing.T) {
 	if os.Getenv("FAIRYC_TEST_REJECTED_BLOB_PRODUCER") == "exit-after-eof" {
-		fmt.Fprintf(os.Stdout, "%s blob 0\n\n", strings.Repeat("a", 40))
+		fmt.Fprintf(os.Stdout, "%s blob 0\n\n", "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391")
 		os.Exit(7)
 	}
 	if os.Getenv("FAIRYC_TEST_REJECTED_BLOB_PRODUCER") == "1" {
@@ -100,7 +100,7 @@ func TestGitSnapshotStreamPropagatesProducerFailureAfterEOF(t *testing.T) {
 	command.Env = append(os.Environ(), "FAIRYC_TEST_REJECTED_BLOB_PRODUCER=exit-after-eof")
 	command.WaitDelay = time.Second
 	err := consumeGitProcess(command, cancel, func(reader io.Reader) error {
-		_, err := writeGitSnapshotBlobs(ctx, reader, []gitTreeBlob{{name: "src/main.fy", object: strings.Repeat("a", 40)}}, zip.NewWriter(io.Discard))
+		_, err := writeGitSnapshotBlobs(ctx, reader, []gitTreeBlob{{name: "src/main.fy", object: "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"}}, zip.NewWriter(io.Discard))
 		return err
 	})
 	if err == nil || !strings.Contains(err.Error(), "local Git object command failed") {

@@ -4,6 +4,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"io"
@@ -69,8 +71,11 @@ func (gitSnapshotZeros) Read(p []byte) (int, error) { clear(p); return len(p), n
 func snapshotBlobWorkload(count, size int) ([]gitTreeBlob, io.Reader) {
 	var entries []gitTreeBlob
 	var readers []io.Reader
+	digest := sha1.New()
+	fmt.Fprintf(digest, "blob %d%c", size, 0)
+	io.CopyN(digest, gitSnapshotZeros{}, int64(size))
+	object := hex.EncodeToString(digest.Sum(nil))
 	for i := 0; i < count; i++ {
-		object := fmt.Sprintf("%040x", i+1)
 		entries = append(entries, gitTreeBlob{name: fmt.Sprintf("chunk%d.fy", i), object: object})
 		readers = append(readers, strings.NewReader(fmt.Sprintf("%s blob %d\n", object, size)), io.LimitReader(gitSnapshotZeros{}, int64(size)), strings.NewReader("\n"))
 	}
@@ -98,10 +103,11 @@ func BenchmarkGitSnapshotBlobStaging(b *testing.B) {
 	}
 }
 func TestGitSnapshotStreamMatchesPreviousZIP(t *testing.T) {
-	object := strings.Repeat("a", 40)
-	entries := []gitTreeBlob{{name: "fairy.toml", object: object}, {name: "src/main.fy", object: object}, {name: "empty", object: object}}
+	entries := []gitTreeBlob{{name: "fairy.toml"}, {name: "src/main.fy"}, {name: "empty"}}
 	raw := ""
-	for _, body := range []string{gitSnapshotFixtureManifest, "fn main() -> i32 { return 1; }\n", ""} {
+	for i, body := range []string{gitSnapshotFixtureManifest, "fn main() -> i32 { return 1; }\n", ""} {
+		object := testGitBlobObject([]byte(body), 40)
+		entries[i].object = object
 		raw += fmt.Sprintf("%s blob %d\n%s\n", object, len(body), body)
 	}
 	var previous []byte

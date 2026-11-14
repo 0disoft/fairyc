@@ -92,6 +92,15 @@ cannot change the selected committed bytes. Ambient Git environment, replacement
 objects and lazy fetching are disabled. The local Git executable/object database
 remains the object reader; this is not a forensic verifier of a hostile database.
 
+Before ZIP entry creation, each blob is rehashed over Git's `blob <size>` header,
+NUL and actual bytes, using SHA-1 for 40-digit IDs or SHA-256 for 64-digit IDs.
+A matching batch header alone does not establish content identity. Digest
+mismatch rejects the snapshot, including same-size substitutions. Commit/tree
+object interpretation still trusts the local Git reader. This does not add
+publisher authentication. Optional per-operation blob I/O callbacks retain host
+defaults; the existing context is checked during reads, hashing and ZIP writes.
+Cancellation is cooperative and cannot interrupt an already blocked host call.
+
 Only regular blob modes are accepted; symlinks/gitlinks/submodules, nested VCS
 metadata, unsafe/case-colliding paths, invalid package manifests and nested
 workspaces reject through the existing archive validator. Bounds remain 4,096
