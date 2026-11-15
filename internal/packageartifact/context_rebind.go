@@ -21,129 +21,14 @@ func rebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 	if err := ValidateContextDescriptor(descriptor); err != nil {
 		return mir.Program{}, err
 	}
-	if firstForeignSymbol == hir.NoSymbol {
-		return mir.Program{}, fmt.Errorf("stable type-context rebind requires a foreign symbol base")
+	boundSymbols, err := contextRebindFunctionSymbols(functionSymbols, firstForeignSymbol)
+	if err != nil {
+		return mir.Program{}, err
 	}
-	usedSymbols := make(map[hir.SymbolID]string, len(functionSymbols)+len(descriptor.ForeignFunctions))
-	for id, symbol := range functionSymbols {
-		if id == (FunctionID{}) || symbol == hir.NoSymbol {
-			return mir.Program{}, fmt.Errorf("stable type-context rebind has an invalid function symbol binding")
-		}
-		if previous, duplicate := usedSymbols[symbol]; duplicate {
-			return mir.Program{}, fmt.Errorf("function symbol %d is duplicated by %s", symbol, previous)
-		}
-		usedSymbols[symbol] = id.String()
+	program, bindings, err := rebindContextDeclarations(descriptor, resolvePackage, functionSymbols, boundSymbols, firstForeignSymbol)
+	if err != nil {
+		return mir.Program{}, err
 	}
-
-	program := mir.Program{}
-	for _, item := range descriptor.Structs {
-		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, fmt.Errorf("rebind struct %q type: %w", item.Type, err)
-		}
-		owner, err := packageForStableNominal(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, err
-		}
-		structure := mir.StructType{Type: typeRef, Name: item.Name, Span: hir.Span{Package: owner}, ReprC: item.ReprC}
-		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
-			if fieldErr != nil {
-				return mir.Program{}, fmt.Errorf("rebind struct %q field %q: %w", item.Type, field.Name, fieldErr)
-			}
-			structure.Fields = append(structure.Fields, mir.StructField{Name: field.Name, Type: fieldType, Span: hir.Span{Package: owner}})
-		}
-		program.StructTypes = append(program.StructTypes, structure)
-	}
-	for _, item := range descriptor.Enums {
-		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, fmt.Errorf("rebind enum %q type: %w", item.Type, err)
-		}
-		owner, err := packageForStableNominal(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, err
-		}
-		enumeration := mir.EnumType{Type: typeRef, Name: item.Name, CBase: item.CBase, Span: hir.Span{Package: owner}}
-		for _, variant := range item.Variants {
-			reboundVariant := mir.EnumVariant{Name: variant.Name, Span: hir.Span{Package: owner}}
-			for _, field := range variant.Fields {
-				fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
-				if fieldErr != nil {
-					return mir.Program{}, fmt.Errorf("rebind enum %q variant %q field %q: %w", item.Type, variant.Name, field.Name, fieldErr)
-				}
-				reboundVariant.Fields = append(reboundVariant.Fields, mir.EnumField{Name: field.Name, Type: fieldType, Span: hir.Span{Package: owner}})
-			}
-			enumeration.Variants = append(enumeration.Variants, reboundVariant)
-		}
-		program.EnumTypes = append(program.EnumTypes, enumeration)
-	}
-	bindings := make(map[hir.SymbolID]FunctionID, len(descriptor.Resources))
-	for _, item := range descriptor.Resources {
-		typeRef, err := rebindStableTypeWithResolver(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, fmt.Errorf("rebind resource %q type: %w", item.Type, err)
-		}
-		owner, err := packageForStableNominal(item.Type, resolvePackage)
-		if err != nil {
-			return mir.Program{}, err
-		}
-		resource := mir.ResourceType{Type: typeRef, Span: hir.Span{Package: owner}, DropKind: hir.ResourceDropKind(item.DropKind), DropSymbol: hir.NoSymbol}
-		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableTypeWithResolver(field.Type, resolvePackage)
-			if fieldErr != nil {
-				return mir.Program{}, fmt.Errorf("rebind resource %q field %q: %w", item.Type, field.Name, fieldErr)
-			}
-			resource.Fields = append(resource.Fields, mir.ResourceField{Name: field.Name, Type: fieldType, Span: hir.Span{Package: owner}})
-		}
-		for _, effect := range item.DropEffects {
-			parsed, ok := hir.ParseEffect(effect)
-			if !ok {
-				return mir.Program{}, fmt.Errorf("rebind resource %q has unknown effect %q", item.Type, effect)
-			}
-			resource.DropEffects = append(resource.DropEffects, parsed)
-		}
-		if item.DropFunctionID != (FunctionID{}) {
-			symbol, found := functionSymbols[item.DropFunctionID]
-			if !found || symbol == hir.NoSymbol {
-				return mir.Program{}, fmt.Errorf("stable resource %q drop target %s is unresolved", item.Type, item.DropFunctionID)
-			}
-			resource.DropSymbol = symbol
-			bindings[symbol] = item.DropFunctionID
-		}
-		program.ResourceTypes = append(program.ResourceTypes, resource)
-	}
-	for index, item := range descriptor.ForeignFunctions {
-		owner, err := packageForCoordinateWithResolver(item.Package, resolvePackage)
-		if err != nil {
-			return mir.Program{}, err
-		}
-		symbol := firstForeignSymbol + hir.SymbolID(index)
-		if symbol < firstForeignSymbol {
-			return mir.Program{}, fmt.Errorf("stable foreign function symbol namespace overflows")
-		}
-		if previous, collision := usedSymbols[symbol]; collision {
-			return mir.Program{}, fmt.Errorf("foreign symbol %d collides with %s", symbol, previous)
-		}
-		usedSymbols[symbol] = item.Name
-		foreign := mir.ForeignFunction{
-			Symbol: symbol, Name: hir.QualifiedModulePath(owner, item.Name), LinkName: item.LinkName,
-			ABI: item.ABI, Span: hir.Span{Package: owner}, ResultType: hir.TypeInvalid,
-		}
-		for _, parameterType := range item.ParameterTypes {
-			rebound, parameterErr := rebindStableTypeWithResolver(parameterType, resolvePackage)
-			if parameterErr != nil {
-				return mir.Program{}, fmt.Errorf("rebind foreign function %q parameter: %w", item.Name, parameterErr)
-			}
-			foreign.ParameterTypes = append(foreign.ParameterTypes, rebound)
-		}
-		foreign.ResultType, err = rebindStableTypeWithResolver(item.ResultType, resolvePackage)
-		if err != nil {
-			return mir.Program{}, fmt.Errorf("rebind foreign function %q result: %w", item.Name, err)
-		}
-		program.ForeignFunctions = append(program.ForeignFunctions, foreign)
-	}
-
 	roundTrip, err := DescribeContext(program, coordinates, bindings)
 	if err != nil {
 		return mir.Program{}, fmt.Errorf("describe rebound stable type context: %w", err)
@@ -152,6 +37,23 @@ func rebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.P
 		return mir.Program{}, fmt.Errorf("rebound stable type context does not round-trip")
 	}
 	return program, nil
+}
+
+func contextRebindFunctionSymbols(functionSymbols map[FunctionID]hir.SymbolID, firstForeignSymbol hir.SymbolID) (map[hir.SymbolID]string, error) {
+	if firstForeignSymbol == hir.NoSymbol {
+		return nil, fmt.Errorf("stable type-context rebind requires a foreign symbol base")
+	}
+	boundSymbols := make(map[hir.SymbolID]string, len(functionSymbols))
+	for id, symbol := range functionSymbols {
+		if id == (FunctionID{}) || symbol == hir.NoSymbol {
+			return nil, fmt.Errorf("stable type-context rebind has an invalid function symbol binding")
+		}
+		if previous, duplicate := boundSymbols[symbol]; duplicate {
+			return nil, fmt.Errorf("function symbol %d is duplicated by %s", symbol, previous)
+		}
+		boundSymbols[symbol] = id.String()
+	}
+	return boundSymbols, nil
 }
 
 func packageForStableNominal(value string, resolve packageResolver) (hir.PackageID, error) {
