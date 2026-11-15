@@ -251,6 +251,9 @@ temp cleanup. Large splits use fresh objects/runtime C with no runtime-object ca
 small builds retain it. The companion's sequential `FYCPARTS1` route keeps its
 per-invocation 60-second limits.
 
+Host `MemAvailable: 0 kB` is a known zero budget: a larger remaining cgroup allowance
+cannot raise it. Invalid or overflowing KiB-to-byte conversions supply no host observation.
+
 The workspace frontend returns a C-only build plan before invoking the native
 driver, keeping MIR out of the frame that needs lock/trap metadata after building.
 For partition inputs larger than 2 MiB, the driver collects unreachable Go objects

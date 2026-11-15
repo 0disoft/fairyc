@@ -1,6 +1,7 @@
 package cdriver
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,21 +20,60 @@ func linuxCompileWorkers(cpus int, available uint64) int {
 // Unknown limits choose one worker. Never infer parallelism from host RAM alone
 // when the current process is constrained by a lower cgroup allowance.
 func availableCompileMemory() uint64 {
+	return availableCompileMemoryWithOptions()
+}
+
+// Nil fields retain Background and os.ReadFile. A canceled observation returns
+// the existing unknown-budget value (zero), which admits only one worker.
+// Cancellation is cooperative between reads, not syscall preemption.
+type compileMemoryOptions struct {
+	Context  context.Context
+	ReadFile func(string) ([]byte, error)
+}
+
+func availableCompileMemoryWithOptions(options ...compileMemoryOptions) uint64 {
+	if len(options) > 1 {
+		return 0
+	}
+	var policy compileMemoryOptions
+	if len(options) == 1 {
+		policy = options[0]
+	}
+	if policy.Context == nil {
+		policy.Context = context.Background()
+	}
+	if policy.ReadFile == nil {
+		policy.ReadFile = os.ReadFile
+	}
+	readFile := func(name string) ([]byte, error) {
+		if err := policy.Context.Err(); err != nil {
+			return nil, err
+		}
+		data, err := policy.ReadFile(name)
+		if stop := policy.Context.Err(); stop != nil {
+			return nil, stop
+		}
+		return data, err
+	}
 	var available uint64
 	known := false
-	if data, err := os.ReadFile("/proc/meminfo"); err == nil {
+	if data, err := readFile("/proc/meminfo"); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			fields := strings.Fields(line)
 			if len(fields) >= 2 && fields[0] == "MemAvailable:" {
-				n, _ := strconv.ParseUint(fields[1], 10, 64)
-				available = n * 1024
-				known = n != 0
+				n, parseErr := strconv.ParseUint(fields[1], 10, 64)
+				// Zero is a valid observation of exhausted host memory. Only
+				// a parse/conversion failure makes this budget unknown.
+				if parseErr == nil && n <= ^uint64(0)/1024 {
+					available = n * 1024
+					known = true
+				}
 				break
 			}
 		}
 	}
 	pairs := [][2]string{{"/sys/fs/cgroup/memory.max", "/sys/fs/cgroup/memory.current"}, {"/sys/fs/cgroup/memory/memory.limit_in_bytes", "/sys/fs/cgroup/memory/memory.usage_in_bytes"}}
-	if data, err := os.ReadFile("/proc/self/cgroup"); err == nil {
+	if data, err := readFile("/proc/self/cgroup"); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			fields := strings.SplitN(line, ":", 3)
 			if len(fields) != 3 || fields[0] != "0" || fields[1] != "" {
@@ -51,8 +91,14 @@ func availableCompileMemory() uint64 {
 		}
 	}
 	for _, pair := range pairs {
-		limitBytes, e1 := os.ReadFile(pair[0])
-		usedBytes, e2 := os.ReadFile(pair[1])
+		if policy.Context.Err() != nil {
+			return 0
+		}
+		limitBytes, e1 := readFile(pair[0])
+		usedBytes, e2 := readFile(pair[1])
+		if policy.Context.Err() != nil {
+			return 0
+		}
 		if e1 != nil || e2 != nil {
 			continue
 		}
@@ -69,6 +115,9 @@ func availableCompileMemory() uint64 {
 			available = remaining
 			known = true
 		}
+	}
+	if policy.Context.Err() != nil {
+		return 0
 	}
 	return available
 }
