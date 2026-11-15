@@ -1,9 +1,6 @@
 package genericplan
 
-import (
-	"cmp"
-	"slices"
-)
+import "slices"
 
 // CatalogLimits bounds compiler memory and validation work before planning.
 type CatalogLimits struct {
@@ -147,48 +144,10 @@ func (b *Builder) AddDeclaration(value Declaration) error {
 	if len(b.declarations) >= b.limits.MaxDeclarations {
 		return fail(CodeCatalogBudgetExceeded, "declaration count exceeds %d", b.limits.MaxDeclarations)
 	}
-	if value.Definition.IsZero() {
-		return fail(CodeInvalidDeclaration, "declaration %q has no definition digest", value.ID)
+	normalized, err := canonicalDeclaration(value, b.limits)
+	if err != nil {
+		return err
 	}
-	if len(value.Parameters) == 0 || len(value.Parameters) > b.limits.MaxTypeParameters {
-		return fail(CodeInvalidDeclaration, "declaration %q parameter count is outside 1..%d", value.ID, b.limits.MaxTypeParameters)
-	}
-	if len(value.Constraints) > b.limits.MaxConstraints {
-		return fail(CodeCatalogBudgetExceeded, "declaration %q constraint count exceeds %d", value.ID, b.limits.MaxConstraints)
-	}
-	if len(value.Dependencies) > b.limits.MaxDependencies {
-		return fail(CodeCatalogBudgetExceeded, "declaration %q dependency count exceeds %d", value.ID, b.limits.MaxDependencies)
-	}
-
-	parameters := make([]TypeParameter, len(value.Parameters))
-	seen := make(map[string]struct{}, len(value.Parameters))
-	for index, parameter := range value.Parameters {
-		if !validIdentifier(parameter.Name) {
-			return fail(CodeInvalidIdentifier, "declaration %q parameter %q is invalid", value.ID, parameter.Name)
-		}
-		if _, duplicate := seen[parameter.Name]; duplicate {
-			return fail(CodeInvalidDeclaration, "declaration %q parameter %q is duplicated", value.ID, parameter.Name)
-		}
-		seen[parameter.Name] = struct{}{}
-		abilities, err := canonicalAbilities(parameter.Abilities)
-		if err != nil {
-			return err
-		}
-		parameters[index] = TypeParameter{Name: parameter.Name, Abilities: abilities}
-	}
-	value.Parameters = parameters
-	value.Constraints = cloneConstraints(value.Constraints)
-	slices.SortFunc(value.Constraints, func(left, right CapabilityConstraint) int {
-		leftKey := expressionListKey(string(left.Capability), left.Arguments)
-		rightKey := expressionListKey(string(right.Capability), right.Arguments)
-		return cmp.Compare(leftKey, rightKey)
-	})
-	value.Dependencies = cloneDependencies(value.Dependencies)
-	slices.SortFunc(value.Dependencies, func(left, right Dependency) int {
-		leftKey := expressionListKey(string(left.Declaration), left.Arguments)
-		rightKey := expressionListKey(string(right.Declaration), right.Arguments)
-		return cmp.Compare(leftKey, rightKey)
-	})
-	b.declarations[value.ID] = value
+	b.declarations[value.ID] = normalized
 	return nil
 }
