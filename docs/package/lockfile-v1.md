@@ -24,6 +24,25 @@ contradictory IDs, unknown edge endpoints, duplicate bindings, noncanonical orde
 as stale. `WriteAtomic` writes only canonical validated bytes through a flushed same-directory
 temporary file and rename.
 
+`Read` accepts only a regular file of at most 8 MiB. Inspection captures a stable file identity
+through an opened parent root, including on Windows where plain path metadata can defer identity
+lookup. The default opener uses the shared rooted regular-file admission, and the reader compares
+the opened handle's identity, kind and size against the inspection before reading content. A
+replacement regular file, final symlink, special file or oversized opened file is rejected. Reads
+remain capped at the byte limit plus one probe byte if the same file grows after admission.
+
+The existing `Read(path)` signature and parse-error raw-byte result remain unchanged. The internal
+Go `ReadWithOptions` entry optionally accepts a caller context and per-call inspection/open
+operations; nil fields retain Background and the host operations. An injected inspection must
+capture file identity at inspection time, as `os.Root.Lstat` does. The reader owns and closes
+each returned file. I/O, close and cancellation failures retain their causes and return neither
+a successful document nor raw bytes. Cancellation is checked between bounded reads, including
+final EOF and close; synchronous filesystem calls themselves are not preempted. Consecutive
+zero-byte successful reads fail with `io.ErrNoProgress` at 100 attempts.
+
+Handle identity does not make an in-place concurrent rewrite an atomic content snapshot;
+`MatchesWorkspace` still owns comparison with the newly validated workspace.
+
 The library does not decide whether a CLI invocation may refresh a missing/stale lock. ADR 0147
 selects one compiler-bundled Stage 0 SDK package without filesystem discovery; public stable build
 policy remains separate.
