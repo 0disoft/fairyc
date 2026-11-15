@@ -125,6 +125,19 @@ are build dependencies; neither is installed automatically. Project-owned Python
 helpers are executable build code. Generated/default helpers use only CLI/resource
 checks; custom helpers are not hostile-code isolated.
 
+Each helper retains a three-minute execution deadline and a 65,536-byte cap
+per output stream (the exact cap is accepted; one extra byte fails). Output-pipe
+draining has a separate two-second bound after helper exit or cancellation, so
+a descendant retaining a pipe cannot keep build/package waiting indefinitely.
+Cancellation uses the existing host process-tree handling; incomplete output,
+pipe-drain failure and cancellation never produce a successful helper result.
+The internal Go `RunHelperWithOptions` entry accepts optional caller context and
+process runner, defaulting to `context.Background` and `exec.Cmd.Run`; the
+existing `RunHelper` signature is unchanged. Errors preserve process, context
+and cancellation causes for `errors.Is`, without including captured output.
+The pipe bound does not sandbox or guarantee termination of detached descendants
+that outlive an already-exited helper.
+
 Package always builds release, refreshes/verifies the lock according to --locked,
 and calls the existing helper with the built EXE and root/dist. The compiler
 bounds helper streams/time, validates its receipt and verifies the retained

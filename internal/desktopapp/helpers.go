@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -110,7 +109,7 @@ type capture struct {
 
 func (b *capture) Write(p []byte) (int, error) {
 	n := len(p)
-	remaining := 65536 - b.data.Len()
+	remaining := helperOutputBytes - b.data.Len()
 	if n > remaining {
 		b.exceeded = true
 		p = p[:remaining]
@@ -119,26 +118,7 @@ func (b *capture) Write(p []byte) (int, error) {
 	return n, nil
 }
 func RunHelper(python Python, root, script string, arguments ...string) ([]byte, error) {
-	helper, err := Helper(root, script)
-	if err != nil {
-		return nil, fmt.Errorf("desktop helper %s is missing or outside the project", script)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	defer cancel()
-	args := append(append([]string{}, python.prefix...), "-E", "-s", "-B", helper)
-	args = append(args, arguments...)
-	command := exec.CommandContext(ctx, python.path, args...)
-	command.Dir = filepath.Dir(helper)
-	var out, diag capture
-	command.Stdout = &out
-	command.Stderr = &diag
-	if err = command.Run(); err != nil {
-		return nil, fmt.Errorf("desktop helper %s failed; run python -B %s manually for details", script, script)
-	}
-	if out.exceeded || diag.exceeded {
-		return nil, errors.New("desktop helper output exceeded 64 KiB")
-	}
-	return out.data.Bytes(), nil
+	return RunHelperWithOptions(python, root, script, arguments)
 }
 
 func PrepareBuild(root string) error {
