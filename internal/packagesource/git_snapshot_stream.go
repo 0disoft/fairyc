@@ -4,10 +4,8 @@ import (
 	"archive/zip"
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"io"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -16,36 +14,9 @@ import (
 )
 
 func streamGitObjectCommand(ctx context.Context, repository string, input []byte, consume func(io.Reader) error, args ...string) error {
-	ctx, cancel := context.WithCancel(ctx)
+	processContext, cancel := context.WithCancel(ctx)
 	defer cancel()
-	return consumeGitProcess(configuredGitObjectCommand(ctx, repository, input, args...), cancel, consume)
-}
-
-// Stop a rejected producer before Wait: draining arbitrary blob output would
-// defeat early admission. Every successfully started child is reaped once.
-func consumeGitProcess(command *exec.Cmd, cancel context.CancelFunc, consume func(io.Reader) error) error {
-	stdout, err := command.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	defer stdout.Close()
-	command.Stderr = &boundedGitBuffer{limit: 4096}
-	if err = command.Start(); err != nil {
-		return fmt.Errorf("local Git object command failed: %w", err)
-	}
-	readErr := consume(stdout)
-	if readErr != nil {
-		cancel()
-	}
-	closeErr := stdout.Close()
-	waitErr := command.Wait()
-	if readErr != nil {
-		return readErr
-	}
-	if err = errors.Join(closeErr, waitErr); err != nil {
-		return fmt.Errorf("local Git object command failed: %w", err)
-	}
-	return nil
+	return consumeGitProcess(configuredGitObjectCommand(processContext, repository, input, args...), cancel, consume, gitProcessOptions{Context: ctx})
 }
 
 func writeGitSnapshotBlobs(ctx context.Context, input io.Reader, entries []gitTreeBlob, writer *zip.Writer) ([]byte, error) {

@@ -100,6 +100,18 @@ object interpretation still trusts the local Git reader. This does not add
 publisher authentication. Optional per-operation blob I/O callbacks retain host
 defaults; the existing context is checked during reads, hashing and ZIP writes.
 Cancellation is cooperative and cannot interrupt an already blocked host call.
+The Go Git-process consumer separately owns its stdout pipe. Caller cancellation
+closes that pipe and stops the producer, releasing a blocked read even when a
+descendant retains the write end. This is required before `Cmd.Wait`: its existing
+wait delay alone does not bound a consumer blocked before entering Wait. Every
+successfully started producer is waited once, the output closes once, and the
+cancellation watcher finishes before the consumer returns. Read/close/wait errors
+and the caller's cancellation cause are retained; cancelling a rejected producer
+does not itself relabel a parse failure as caller cancellation. Per-call internal
+options default to Background and the host stdout/start/wait operations. Injected
+output streams must release pending reads on Close, and process operations must
+retain their existing ownership and cancellation semantics. Descendant termination
+is not claimed; closing the owned read end prevents it from retaining this reader.
 
 Only regular blob modes are accepted; symlinks/gitlinks/submodules, nested VCS
 metadata, unsafe/case-colliding paths, invalid package manifests and nested
