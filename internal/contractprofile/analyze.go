@@ -228,23 +228,7 @@ func Analyze(program mir.Program, loopBudgets map[string]uint64) Report {
 				weight, overflow := operationCost(operation)
 				node.localCost, overflow = saturatingAdd(node.localCost, weight, overflow)
 				node.localCostOverflow = node.localCostOverflow || overflow
-				if rawPointerOperation(operation) || operationContainsRawType(operation) {
-					report.Violations = append(report.Violations, violationAt(
-						"CP1003",
-						function.Name,
-						operation.Span,
-						"raw-pointer MIR operation is unavailable in the deterministic contract profile",
-					))
-				}
-				if operationContainsFloatType(operation) {
-					report.Violations = append(report.Violations, violationAt(
-						"CP1013",
-						function.Name,
-						operation.Span,
-						"floating-point MIR operation is unavailable until every backend shares exact semantics",
-					))
-				}
-				appendTargetTypeViolations(&report, function.Name, operation.Span, "MIR operation", operationTypes(operation)...)
+				appendOperationTypeViolations(&report, function.Name, operation)
 				if regionAllocationOperation(operation.Kind) {
 					report.Violations = append(report.Violations, violationAt(
 						"CP1005",
@@ -258,23 +242,7 @@ func Analyze(program mir.Program, loopBudgets map[string]uint64) Report {
 			weight, overflow := terminatorCost(block.Terminator)
 			node.localCost, overflow = saturatingAdd(node.localCost, weight, overflow)
 			node.localCostOverflow = node.localCostOverflow || overflow
-			if terminatorContainsRawType(block.Terminator) {
-				report.Violations = append(report.Violations, violationAt(
-					"CP1003",
-					function.Name,
-					block.Terminator.Span,
-					"raw-pointer call or return transport is unavailable in the deterministic contract profile",
-				))
-			}
-			if terminatorContainsFloatType(block.Terminator) {
-				report.Violations = append(report.Violations, violationAt(
-					"CP1013",
-					function.Name,
-					block.Terminator.Span,
-					"floating-point call or return transport is unavailable until every backend shares exact semantics",
-				))
-			}
-			appendTargetTypeViolations(&report, function.Name, block.Terminator.Span, "MIR terminator", terminatorTypes(block.Terminator)...)
+			appendTerminatorTypeViolations(&report, function.Name, block.Terminator)
 			if block.Terminator.Kind != mir.TerminatorCall {
 				continue
 			}

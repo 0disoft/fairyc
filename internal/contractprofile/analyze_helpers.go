@@ -165,25 +165,6 @@ func containsCScalarType(value hir.Type) bool {
 	return false
 }
 
-func operationTypes(operation mir.Operation) []hir.Type {
-	result := []hir.Type{operation.Type, operation.OwnerType, operation.IndexType}
-	for _, operand := range operation.Operands {
-		result = append(result, operand.Type)
-	}
-	return result
-}
-
-func terminatorTypes(terminator mir.Terminator) []hir.Type {
-	result := []hir.Type{terminator.ReturnValue.Type, terminator.SwitchType}
-	for _, operand := range terminator.Arguments {
-		result = append(result, operand.Type)
-	}
-	for _, operand := range terminator.SwitchOperands {
-		result = append(result, operand.Type)
-	}
-	return result
-}
-
 func containsFloatType(value hir.Type) bool {
 	text := value.String()
 	return containsTypeToken(text, "f32") ||
@@ -241,48 +222,6 @@ func rawPointerOperation(operation mir.Operation) bool {
 	default:
 		return false
 	}
-}
-
-func operationContainsRawType(operation mir.Operation) bool {
-	if containsRawType(operation.Type) || containsRawType(operation.OwnerType) || containsRawType(operation.IndexType) {
-		return true
-	}
-	for _, operand := range operation.Operands {
-		if containsRawType(operand.Type) {
-			return true
-		}
-	}
-	return false
-}
-
-func operationContainsFloatType(operation mir.Operation) bool {
-	if containsFloatType(operation.Type) || containsFloatType(operation.OwnerType) || containsFloatType(operation.IndexType) {
-		return true
-	}
-	for _, operand := range operation.Operands {
-		if containsFloatType(operand.Type) {
-			return true
-		}
-	}
-	return false
-}
-
-func terminatorContainsRawType(terminator mir.Terminator) bool {
-	for _, operand := range terminator.Arguments {
-		if containsRawType(operand.Type) {
-			return true
-		}
-	}
-	return containsRawType(terminator.ReturnValue.Type)
-}
-
-func terminatorContainsFloatType(terminator mir.Terminator) bool {
-	for _, operand := range terminator.Arguments {
-		if containsFloatType(operand.Type) {
-			return true
-		}
-	}
-	return containsFloatType(terminator.ReturnValue.Type) || containsFloatType(terminator.SwitchType)
 }
 
 func regionAllocationOperation(kind mir.OperationKind) bool {
