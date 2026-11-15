@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -233,69 +232,7 @@ func replaceBuildArtifact(sourceRoot, relativePath string, contents []byte) erro
 }
 
 func publishBuildArtifact(sourceRoot, relativePath string, contents []byte, replace bool) error {
-	if _, err := validateBuildOutput(relativePath); err != nil {
-		return err
-	}
-	if len(contents) == 0 {
-		return fmt.Errorf("refusing to write an empty executable")
-	}
-	root, err := os.OpenRoot(sourceRoot)
-	if err != nil {
-		return fmt.Errorf("open source root for build output: %w", err)
-	}
-	defer root.Close()
-	localPath := filepath.FromSlash(relativePath)
-	parent := filepath.Dir(localPath)
-	if err := root.MkdirAll(parent, 0o755); err != nil {
-		return fmt.Errorf("create build output directory %q: %w", path.Dir(relativePath), err)
-	}
-	temporaryPath, file, err := createBuildStagingFile(root, parent)
-	if err != nil {
-		return err
-	}
-	stagingExists := true
-	defer func() {
-		if stagingExists {
-			_ = root.Remove(temporaryPath)
-		}
-	}()
-	if _, err := bytes.NewReader(contents).WriteTo(file); err != nil {
-		_ = file.Close()
-		return fmt.Errorf("write staged build output: %w", err)
-	}
-	if err := file.Chmod(0o700); err != nil {
-		_ = file.Close()
-		return fmt.Errorf("set staged build output executable mode: %w", err)
-	}
-	if err := file.Sync(); err != nil {
-		_ = file.Close()
-		return fmt.Errorf("sync staged build output: %w", err)
-	}
-	if err := file.Close(); err != nil {
-		return fmt.Errorf("close staged build output: %w", err)
-	}
-	if replace {
-		if err := root.Rename(temporaryPath, localPath); err != nil {
-			return fmt.Errorf("replace build output %q: %w", relativePath, err)
-		}
-		stagingExists = false
-		return nil
-	}
-	if err := root.Link(temporaryPath, localPath); err != nil {
-		if errors.Is(err, fs.ErrExist) {
-			return fmt.Errorf("build output %q already exists; refusing to overwrite it", relativePath)
-		}
-		return fmt.Errorf("promote build output %q: %w", relativePath, err)
-	}
-	if err := root.Remove(temporaryPath); err != nil {
-		removeErr := root.Remove(localPath)
-		if removeErr != nil {
-			return fmt.Errorf("remove staged build output after promotion: %v; rollback also failed: %v", err, removeErr)
-		}
-		return fmt.Errorf("remove staged build output after promotion: %w", err)
-	}
-	stagingExists = false
-	return nil
+	return publishBuildArtifactWithOptions(sourceRoot, relativePath, contents, replace)
 }
 
 func createBuildStagingFile(root *os.Root, parent string) (string, *os.File, error) {

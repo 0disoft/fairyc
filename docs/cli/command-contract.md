@@ -576,8 +576,19 @@ profile, target, or output default. The output must be a canonical forward-slash
 ignored source-root `build/` directory. Absolute, drive-relative, UNC, traversal, mixed-separator,
 overlong, platform-reserved, and escaping symbolic-link paths fail closed. The command stages and
 flushes the executable under the destination directory, promotes it without replacing an existing
-path, and removes ordinary staging residue. It emits no `.c` file, object, cache entry, manifest,
-package state, or network request. The provisional executable is not a supported target artifact or
+path, and removes ordinary staging residue. Successful link/rename is the publication commit
+point. If staging cleanup fails afterward, the command reports that error and retains the final
+output; it must not delete that path, which may already belong to another publisher. Cancellation
+observed before publication prevents promotion and attempts staging cleanup. Cancellation after
+publication likewise reports failure without removing a complete final output. Persistent cleanup
+errors can leave an owned temporary file for later inspection.
+
+The internal Go publication entry optionally accepts caller context and staging/promotion/removal
+operations. Defaults retain Background, random exclusive staging, host link/rename and removal;
+the existing required caller signatures remain unchanged. Staging injection controls random-name
+generation and file creation together. Cancellation checks are cooperative between I/O operations.
+No new CLI flags or timeouts are introduced. The command emits no `.c` file, object, cache entry,
+manifest, package state, or network request. The provisional executable is not a supported target artifact or
 a stable `fairyc build` result. It is uninstrumented and does not link the native differential
 drop recorder or sanitizer runtimes.
 
