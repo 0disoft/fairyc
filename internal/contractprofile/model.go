@@ -3,6 +3,7 @@
 package contractprofile
 
 import (
+	"cmp"
 	"encoding/json"
 	"slices"
 )
@@ -18,6 +19,12 @@ const (
 	LoopBudgetSemantics = "maximum aggregate metered cycle-edge traversals per function invocation"
 	// MaxLoopBudget keeps static multiplication and eventual runtime metering deliberately bounded.
 	MaxLoopBudget uint64 = 1_000_000
+)
+
+const (
+	reportStatusAccepted    = "accepted"
+	reportStatusDiagnostics = "source-diagnostics"
+	reportStatusRejected    = "profile-rejected"
 )
 
 // Location identifies one source-root-relative byte range without retaining source contents.
@@ -74,7 +81,7 @@ func NewReport() Report {
 	return Report{
 		SchemaVersion:       ReportSchema,
 		Profile:             ProfileID,
-		Status:              "profile-rejected",
+		Status:              reportStatusRejected,
 		CostUnit:            CostUnit,
 		LoopBudgetSemantics: LoopBudgetSemantics,
 		PersistentStorage:   false,
@@ -84,59 +91,59 @@ func NewReport() Report {
 	}
 }
 
-// Finalize canonicalizes ordering and derives the public decision fields.
+// Finalize replaces this report with canonical collections and decision fields.
+// Collections shared with other reports or caller-owned slices are not modified.
 func (r *Report) Finalize() {
 	if r == nil {
 		return
 	}
-	slices.SortFunc(r.Functions, func(left, right FunctionReport) int {
-		switch {
-		case left.Name < right.Name:
-			return -1
-		case left.Name > right.Name:
-			return 1
-		default:
-			return 0
-		}
-	})
-	for index := range r.Functions {
-		slices.Sort(r.Functions[index].InternalCalls)
-		r.Functions[index].InternalCalls = slices.Compact(r.Functions[index].InternalCalls)
-		if r.Functions[index].InternalCalls == nil {
-			r.Functions[index].InternalCalls = []string{}
-		}
-	}
-	slices.SortFunc(r.SourceDiagnostics, compareSourceDiagnostic)
-	r.SourceDiagnostics = slices.CompactFunc(r.SourceDiagnostics, func(left, right SourceDiagnostic) bool {
-		return compareSourceDiagnostic(left, right) == 0
-	})
-	slices.SortFunc(r.Violations, compareViolation)
-	r.Violations = slices.CompactFunc(r.Violations, func(left, right Violation) bool {
-		return compareViolation(left, right) == 0
-	})
-	if r.Functions == nil {
-		r.Functions = []FunctionReport{}
-	}
-	if r.SourceDiagnostics == nil {
-		r.SourceDiagnostics = []SourceDiagnostic{}
-	}
-	if r.Violations == nil {
-		r.Violations = []Violation{}
-	}
-	r.Accepted = len(r.SourceDiagnostics) == 0 && len(r.Violations) == 0
-	switch {
-	case r.Accepted:
-		r.Status = "accepted"
-	case len(r.SourceDiagnostics) != 0:
-		r.Status = "source-diagnostics"
-	default:
-		r.Status = "profile-rejected"
-	}
+	*r = canonicalReport(*r)
 }
 
-// JSON returns deterministic indented JSON followed by one newline.
+// canonicalReport never sorts or compacts caller-owned backing arrays.
+func canonicalReport(r Report) Report {
+	r.Functions = canonicalReportFunctions(r.Functions)
+	r.SourceDiagnostics = canonicalReportItems(r.SourceDiagnostics, compareSourceDiagnostic)
+	r.Violations = canonicalReportItems(r.Violations, compareViolation)
+	r.Accepted, r.Status = reportDecision(len(r.SourceDiagnostics), len(r.Violations))
+	return r
+}
+
+func canonicalReportFunctions(functions []FunctionReport) []FunctionReport {
+	functions = append([]FunctionReport{}, functions...)
+	slices.SortFunc(functions, func(left, right FunctionReport) int {
+		return cmp.Compare(left.Name, right.Name)
+	})
+	for index := range functions {
+		calls := append([]string{}, functions[index].InternalCalls...)
+		slices.Sort(calls)
+		functions[index].InternalCalls = slices.Compact(calls)
+	}
+	return functions
+}
+
+func canonicalReportItems[T any](values []T, compare func(T, T) int) []T {
+	items := append([]T{}, values...)
+	slices.SortFunc(items, compare)
+	return slices.CompactFunc(items, func(left, right T) bool {
+		return compare(left, right) == 0
+	})
+}
+
+func reportDecision(diagnostics, violations int) (bool, string) {
+	if diagnostics != 0 {
+		return false, reportStatusDiagnostics
+	}
+	if violations != 0 {
+		return false, reportStatusRejected
+	}
+	return true, reportStatusAccepted
+}
+
+// JSON returns deterministic indented JSON followed by one newline without
+// modifying the report or any collection shared with its caller.
 func (r Report) JSON() ([]byte, error) {
-	r.Finalize()
+	r = canonicalReport(r)
 	value, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		return nil, err
