@@ -9,9 +9,10 @@ description: fairyc 기본 명령어 정리와 함께 입문자가 자주 만나
 
 | 명령어 | 언제 쓰나요? |
 | --- | --- |
-| `fairyc new <이름> --uid <고유ID>` | 새 패키지 프로젝트 폴더를 처음 만들 때 |
+| `fairyc new <이름> --uid <고유ID> [--template <console\|win32>]` | 새 콘솔 또는 Win32 데스크톱 프로젝트 폴더를 처음 만들 때 |
 | `fairyc check [--locked]` | 실행 파일은 안 만들고 문법·타입·빌림 검사만 빠르게 돌릴 때 |
 | `fairyc build [--release] [--locked]` | `build/<이름>.exe` 실행 파일을 폴더에 생성할 때 (`--release`는 최적화) |
+| `fairyc package [--locked] [--json]` | Windows x64 Win32 프로젝트를 릴리스 빌드하고 `dist/`에 무서명 로컬 ZIP을 검증·생성할 때 |
 | `fairyc run [--release] [--locked] [-- <인자...>]` | 임시로 빌드해서 바로 실행해 보고 싶을 때 |
 | `fairyc test [--native] [--locked]` | `tests/` 아래 테스트를 인터프리터(기본) 또는 네이티브 바이너리(`--native`)로 돌릴 때 |
 | `fairyc explain <에러코드>` | 컴파일러가 뱉은 `E2101` 같은 코드의 뜻이 궁금할 때 |

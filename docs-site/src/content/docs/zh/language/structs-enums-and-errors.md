@@ -58,7 +58,7 @@ fn i32 main() {
 ```c
 enum ParseError {
     Empty;
-    InvalidByte { usize offset; u8 byte; }
+    InvalidByte { u8 offset; u8 byte; };
 }
 ```
 

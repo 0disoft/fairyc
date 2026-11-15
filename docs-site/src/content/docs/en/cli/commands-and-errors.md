@@ -9,9 +9,10 @@ Here is a practical cheat sheet for the stable `fairyc` CLI commands and the com
 
 | Command | When to Use It |
 | --- | --- |
-| `fairyc new <name> --uid <uid>` | Create a new package folder |
+| `fairyc new <name> --uid <uid> [--template <console\|win32>]` | Create a new console or Win32 desktop package folder |
 | `fairyc check [--locked]` | Fast syntax, type, and borrow check without compiling C |
 | `fairyc build [--release] [--locked]` | Produce `build/<name>.exe` (Windows) or `build/<name>` (Linux) |
+| `fairyc package [--locked] [--json]` | Build a release Win32 desktop project and validate an unsigned local ZIP under `dist/` (Windows x64) |
 | `fairyc run [--release] [--locked] [-- <args...>]` | Compile and run a temporary binary right away |
 | `fairyc test [--native] [--locked]` | Run `tests/` in the interpreter or as native binaries (`--native`) |
 | `fairyc explain <code>` | Read details on a diagnostic code like `E2101` |

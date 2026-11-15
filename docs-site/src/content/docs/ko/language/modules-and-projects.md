@@ -45,13 +45,22 @@ fn i32 main() {
 패키지 설정은 `fairy.toml`에 적습니다. 직접 의존하는 로컬 경로나 표준 라이브러리를 `[dependencies]` 아래에 연결하면 됩니다.
 
 ```toml
-[package]
-name = "my_app"
-uid = "example.my-app"
-version = "0.1.0"
+schema = "fairyc.manifest/v1"
 
-[dependencies]
-answer = { path = "../libs/answer" }
+[package]
+uid = "example.my-app"
+name = "my-app"
+version = "0.1.0"
+language = "fairyc-language/20"
+source = "src"
+
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "0.1.0"
+features = []
 ```
 
 - `[workspace]`를 루트 `fairy.toml`에 두면 여러 앱/라이브러리 패키지를 한 묶음으로 관리할 수 있습니다.

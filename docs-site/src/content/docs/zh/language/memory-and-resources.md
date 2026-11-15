@@ -57,11 +57,14 @@ resource Buffer {
 当需要分配大量生命周期相同的临时缓冲区时，可以使用 `region` 代码块：
 
 ```c
-fn Result<i32, MyError> parse_temp(Region arena, ref u8[] input) {
-    region scratch in arena {
+import std::alloc as alloc;
+
+fn i32 use_scratch(alloc::Arena arena) {
+    var alloc::Arena mutable_arena = arena;
+    region scratch in ref mut mutable_arena {
         // scratch 内的临时分配会在离开代码块时一并重置
     }
-    return .ok(0);
+    return 0;
 }
 ```
 

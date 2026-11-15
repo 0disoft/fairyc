@@ -9,9 +9,10 @@ Aquí tienes una guía rápida práctica de los comandos estables de la CLI `fai
 
 | Comando | Cuándo usarlo |
 | --- | --- |
-| `fairyc new <name> --uid <uid>` | Crear una carpeta de paquete nueva |
+| `fairyc new <name> --uid <uid> [--template <console\|win32>]` | Crear una carpeta de paquete nueva de consola o escritorio Win32 |
 | `fairyc check [--locked]` | Comprobación rápida de sintaxis, tipos y préstamos sin compilar C |
 | `fairyc build [--release] [--locked]` | Generar `build/<name>.exe` (Windows) o `build/<name>` (Linux) |
+| `fairyc package [--locked] [--json]` | Compilar en modo release un proyecto de escritorio Win32 y validar un ZIP local sin firmar en `dist/` (Windows x64) |
 | `fairyc run [--release] [--locked] [-- <args...>]` | Compilar y ejecutar de inmediato un binario temporal |
 | `fairyc test [--native] [--locked]` | Ejecutar `tests/` en el intérprete o como binarios nativos (`--native`) |
 | `fairyc explain <code>` | Leer detalles sobre un código de diagnóstico como `E2101` |

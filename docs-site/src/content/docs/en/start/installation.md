@@ -3,27 +3,41 @@ title: Installation and Setup
 description: Build the Stage 0 fairyc compiler from source and make sure your C toolchain is ready.
 ---
 
-There is no standalone installer or prebuilt binary download yet. You build `fairyc` from the repository source and pair it with your platform's C compiler.
+There is no standalone installer wizard (`.msi`) or prebuilt Linux archive yet. You can either download the **experimental Windows x64 preview ZIP** from GitHub Releases or **build the latest `main` compiler from source**.
 
-## Prerequisites
+| Install Method | Target Version / Snapshot | Best For |
+| --- | --- | --- |
+| **Option A: Preview ZIP** | `v0.1.0-preview.1` (`2026-10-25`, commit `682d6591`) | Trying core console builds on Windows x64 without Go or Bun |
+| **Option B: Build from source** | `main` development build (`sdk: 0.0.0-stage0.87`, commit `e1d48cb7`) | Latest features including `new --template win32`, `package`, and Linux builds |
 
-1. **Git, Go, and Bun**: Needed to compile the Stage 0 Go compiler (`tools/run-go.ts` wraps Go through Bun).
-2. **A native C compiler** (needed for `fairyc build`, `fairyc run`, and `fairyc test --native`):
-   - **Windows**: Visual Studio / Build Tools with the **MSVC x64 C/C++ compiler** and **Windows SDK**.
-   - **Linux**: `gcc` or `clang` available on `PATH`.
+> Note: Because `v0.1.0-preview.1` is an earlier snapshot, recent additions such as `fairyc new --template win32` and `fairyc package` require **Option B (Build from source)**.
 
-> **Tip:** `fairyc check` and interpreter-mode `fairyc test` do not invoke a C compiler, so you can type-check code even before configuring MSVC or GCC.
+## Host C Toolchain (Shared Prerequisite)
 
-## Clone the Repository
+`fairyc check` and interpreter-mode `fairyc test` run without a C compiler, whereas native `fairyc build`, `fairyc run`, and `fairyc test --native` require a platform C toolchain:
 
-If you do not have the source locally yet, clone the [fairyc GitHub repository](https://github.com/0disoft/fairyc) and move into the repository root:
+- **Windows**: Visual Studio / Build Tools with the **MSVC x64 C/C++ compiler** and **Windows SDK**. (Win32 desktop resources and `fairyc package` also require **Python 3.11+** on `PATH`.)
+- **Linux**: `gcc` or `clang` available on `PATH`.
+
+## Option A: Windows Preview ZIP (`v0.1.0-preview.1`)
+
+To try the core Windows x64 CLI without installing Go or Bun, download `fairyc-windows-amd64-preview-candidate.zip` and its `.sha256` file from [GitHub Releases (`v0.1.0-preview.1`)](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1):
+
+```powershell
+# Verify SHA-256, extract, and check version
+Get-FileHash .\fairyc-windows-amd64-preview-candidate.zip -Algorithm SHA256
+Expand-Archive .\fairyc-windows-amd64-preview-candidate.zip -DestinationPath .\fairyc-preview
+.\fairyc-preview\fairyc.exe --version
+```
+
+## Option B: Build `fairyc` from Source (`main`)
+
+To use the latest Stage 0 commands (`--template win32`, `fairyc package`, Linux GNU x64 builds), ensure **Git, Go, and Bun** are installed, then clone the [fairyc GitHub repository](https://github.com/0disoft/fairyc) and move into the repository root:
 
 ```bash
 git clone https://github.com/0disoft/fairyc.git
 cd fairyc
 ```
-
-## Building `fairyc`
 
 From the `fairyc` repository root:
 

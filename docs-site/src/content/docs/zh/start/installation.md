@@ -3,27 +3,41 @@ title: 安装与环境配置
 description: 从源码构建 Stage 0 fairyc 编译器，并确认你的 C 工具链已准备就绪。
 ---
 
-目前尚未提供独立安装包或预编译二进制下载。你需要从仓库源码自行构建 `fairyc`，并搭配你所在平台的 C 编译器使用。
+目前尚未提供独立安装向导（`.msi` 等）或 Linux 预编译压缩包，但你可以直接下载 <strong>GitHub Releases 上的 Windows x64 预览版 ZIP</strong>，或者 <strong>从仓库源码构建最新 `main` 分支编译器</strong>。
 
-## 前置依赖
+| 安装方式 | 对应版本 / 基线 | 适用场景与范围 |
+| --- | --- | --- |
+| <strong>方式 A：预览版 ZIP</strong> | `v0.1.0-preview.1`（`2026-10-25`，提交 `682d6591`） | 无需安装 Go/Bun，在 Windows x64 上快速试用核心控制台与语言子集 |
+| <strong>方式 B：从源码构建</strong> | `main` 开发构建（`sdk: 0.0.0-stage0.87`，提交 `e1d48cb7`） | 需要 `new --template win32`、`package` 等最新桌面特性或 Linux 构建时 |
 
-1. <strong>Git、Go 和 Bun</strong>：用于编译 Stage 0 Go 编译器（`tools/run-go.ts` 会通过 Bun 封装调用 Go）。
-2. <strong>原生 C 编译器</strong>（运行 `fairyc build`、`fairyc run` 和 `fairyc test --native` 时需要）：
-   - <strong>Windows</strong>：安装带有 <strong>MSVC x64 C/C++ 编译器</strong> 和 <strong>Windows SDK</strong> 的 Visual Studio / Build Tools。
-   - <strong>Linux</strong>：确保 `PATH` 中有可用的 `gcc` 或 `clang`。
+> <strong>提示</strong>：`v0.1.0-preview.1` 属于早期快照；`fairyc new --template win32` 和 `fairyc package` 等近期新增功能请使用<strong>方式 B（源码构建）</strong>。
 
-> <strong>提示</strong>：`fairyc check` 和解释器模式的 `fairyc test` 不会调用 C 编译器，因此即使尚未配置 MSVC 或 GCC，你也可以先对代码进行类型检查。
+## 准备原生 C 工具链（通用前提）
 
-## 克隆并进入源码仓库
+`fairyc check` 与解释器模式的 `fairyc test` 不调用 C 编译器，但生成原生可执行文件的 `fairyc build`、`fairyc run` 与 `fairyc test --native` 需要宿主平台 C 工具链：
 
-如果本地尚未获取源码，请先从 [fairyc GitHub 仓库](https://github.com/0disoft/fairyc)克隆并进入仓库根目录：
+- <strong>Windows</strong>：安装带有 <strong>MSVC x64 C/C++ 编译器</strong> 和 <strong>Windows SDK</strong> 的 Visual Studio / Build Tools。（若使用 Win32 桌面资源与 `fairyc package`，还需在 `PATH` 中安装 <strong>Python 3.11+</strong>。）
+- <strong>Linux</strong>：确保 `PATH` 中有可用的 `gcc` 或 `clang`。
+
+## 方式 A：使用 Windows 预览版 ZIP（`v0.1.0-preview.1`）
+
+若不想安装 Go/Bun，仅在 Windows x64 上试用核心 CLI，可前往 [GitHub Releases（`v0.1.0-preview.1`）](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1) 下载 `fairyc-windows-amd64-preview-candidate.zip` 及其 `.sha256` 校验文件：
+
+```powershell
+# 校验 SHA-256 后解压并查看版本
+Get-FileHash .\fairyc-windows-amd64-preview-candidate.zip -Algorithm SHA256
+Expand-Archive .\fairyc-windows-amd64-preview-candidate.zip -DestinationPath .\fairyc-preview
+.\fairyc-preview\fairyc.exe --version
+```
+
+## 方式 B：从仓库源码构建最新 `fairyc`
+
+若需使用最新 Stage 0 命令（`--template win32`、`fairyc package`、Linux GNU x64 构建等），请先准备 <strong>Git、Go 和 Bun</strong>，然后克隆 [fairyc GitHub 仓库](https://github.com/0disoft/fairyc)并进入根目录：
 
 ```bash
 git clone https://github.com/0disoft/fairyc.git
 cd fairyc
 ```
-
-## 构建 `fairyc`
 
 在 `fairyc` 仓库根目录下运行：
 

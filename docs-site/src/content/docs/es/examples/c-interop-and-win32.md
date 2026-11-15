@@ -94,3 +94,43 @@ fairyc build --release
 En la compilación release bloqueada para Windows x64 del `2026-11-13` (`fairyc-go.exe build --locked --release`, incrustando un `.ico` de 9 tamaños, `VERSIONINFO` y el manifiesto de Common Controls v6), `FairyHash.exe` midió `196,096` bytes (`191.5 KiB`; `188,416` bytes antes de incrustar esos recursos de icono y versión).
 
 > Estas mediciones de tamaño corresponden a esas compilaciones release concretas de Windows x64 MSVC con sus adaptadores en C y CRT estática: son cifras reales de ejemplo, no una garantía general para todos los binarios de Fairy C.
+
+## 5. Flujo completo de aplicación Win32 (de `new --template win32` a `package`)
+
+Con la compilación actual desde `main`, puedes generar una aplicación de escritorio Win32, configurar su icono y versión, compilar en release y empaquetar un ZIP portátil sin firmar. (Preparar recursos de escritorio y empaquetar requiere Windows x64, MSVC + Windows SDK y **Python 3.11+** en `PATH`.)
+
+1. **Crear el proyecto Win32**: Genera `fairy.toml`, `app.toml`, `fairy.windows.json`, `native/app.ico`, `native/app.rc` y el código/pruebas iniciales.
+
+   ```powershell
+   fairyc new my-tool --uid example.my-tool --template win32
+   cd my-tool
+   ```
+
+2. **Configurar icono, identidad y versión**:
+   - **Icono e identidad (`app.toml`)**: Edita `product_name`, `company_name`, `description`, `executable_name` e `icon = "native/app.ico"` (una ruta `.ico` relativa al proyecto).
+   - **Versión (`fairy.toml`)**: Define `[package] version = "0.1.0"`, que alimenta el recurso `VERSIONINFO` y los metadatos del paquete.
+
+   ```toml
+   [app]
+   product_name = "My Tool"
+   company_name = "Example Co"
+   description = "My Tool desktop utility"
+   executable_name = "my-tool.exe"
+   package_name = "my-tool"
+   assembly_name = "example.my-tool"
+   icon = "native/app.ico"
+   ```
+
+3. **Comprobar, probar y compilar en release**:
+
+   ```powershell
+   fairyc check
+   fairyc test --locked --file tests/domain.fy
+   fairyc build --locked --release
+   ```
+
+4. **Crear y validar el ZIP portátil (`package`)**: Genera un archivo ZIP local sin firmar y su informe de verificación en `dist/`.
+
+   ```powershell
+   fairyc package --locked --json
+   ```

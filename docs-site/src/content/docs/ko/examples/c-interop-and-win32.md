@@ -96,3 +96,43 @@ fairyc build --release
 아이콘(`.ico`), 버전 정보(`VERSIONINFO`), 공용 컨트롤 매니페스트까지 포함한 `2026-11-13` Windows x64 릴리스(`--locked --release`) 포터블 빌드 기준 `FairyHash.exe` 크기는 `196,096`바이트(`191.5 KiB`)로 측정되었습니다(리소스 추가 전 빌드는 `188,416`바이트).
 
 > 위 `121 KiB`, `191.5 KiB` 크기는 두 예제를 해당 Windows x64 MSVC 릴리스 조건과 C 브리지 구성으로 빌드했을 때의 구체적인 사례 수치일 뿐, 모든 Fairy C 프로그램이 항상 이 크기로 나온다는 뜻은 아닙니다.
+
+## 5. Win32 앱 생성부터 ZIP 패키징까지 (`new --template win32` → `package`)
+
+최신 소스 빌드(`main`)에서는 `--template win32`로 데스크톱 앱 프로젝트를 생성하고 `fairyc package`로 배포용 무서명 로컬 ZIP까지 한 번에 만들 수 있습니다. (`build`와 `package` 단계에는 Windows x64, MSVC + Windows SDK, 그리고 <strong>Python 3.11+</strong>이 `PATH`에 필요합니다.)
+
+1. **프로젝트 생성**: `--template win32`로 기본 C 브리지, `fairy.windows.json`, `app.toml`, 기본 아이콘(`native/app.ico`), 리소스 스크립트(`native/app.rc`)가 포함된 스켈레톤을 만듭니다.
+
+   ```powershell
+   fairyc new my-tool --uid example.my-tool --template win32
+   cd my-tool
+   ```
+
+2. **아이콘·버전·앱 정보 설정**:
+   - **앱 이름·아이콘 (`app.toml`)**: `product_name`, `company_name`, `description`, `executable_name`, `icon = "native/app.ico"` 등을 편집해 원하는 아이콘 파일(상대 `.ico` 경로)과 제품 정보를 지정합니다.
+   - **버전 (`fairy.toml`)**: `[package]` 아래 `version = "0.1.0"`이 실행 파일 `VERSIONINFO`와 패키징 버전에 반영됩니다.
+
+   ```toml
+   [app]
+   product_name = "My Tool"
+   company_name = "Example Co"
+   description = "My Tool desktop utility"
+   executable_name = "my-tool.exe"
+   package_name = "my-tool"
+   assembly_name = "example.my-tool"
+   icon = "native/app.ico"
+   ```
+
+3. **검사·테스트·릴리스 빌드**:
+
+   ```powershell
+   fairyc check
+   fairyc test --locked --file tests/domain.fy
+   fairyc build --locked --release
+   ```
+
+4. **무서명 로컬 ZIP 생성 (`package`)**: `dist/` 아래에 체크섬과 검증 리포트를 포함한 로컬 ZIP 아카이브를 생성합니다.
+
+   ```powershell
+   fairyc package --locked --json
+   ```

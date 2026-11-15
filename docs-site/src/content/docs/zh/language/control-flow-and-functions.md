@@ -70,8 +70,8 @@ fn i32 apply_once(fn i32(i32) f, i32 x) {
 }
 
 fn i32 make_result() {
-    i32 offset = 7;
-    fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
+    let i32 offset = 7;
+    let fn i32(i32) add_offset = fn [i32 offset] i32(i32 x) {
         return x + offset;
     };
     return apply_once(add_offset, 70);

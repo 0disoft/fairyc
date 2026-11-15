@@ -44,13 +44,22 @@ Wildcard imports (`*`) and circular module dependencies are disallowed.
 Define packages and direct dependencies in `fairy.toml`:
 
 ```toml
-[package]
-name = "my_app"
-uid = "example.my-app"
-version = "0.1.0"
+schema = "fairyc.manifest/v1"
 
-[dependencies]
-answer = { path = "../libs/answer" }
+[package]
+uid = "example.my-app"
+name = "my-app"
+version = "0.1.0"
+language = "fairyc-language/20"
+source = "src"
+
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "0.1.0"
+features = []
 ```
 
 - A root `[workspace]` section lets you manage multiple packages together (`examples/workspace_quickstart` shows this layout).

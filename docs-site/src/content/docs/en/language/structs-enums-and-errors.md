@@ -58,7 +58,7 @@ Use `enum` to represent mutually exclusive variants, optionally carrying named i
 ```c
 enum ParseError {
     Empty;
-    InvalidByte { usize offset; u8 byte; }
+    InvalidByte { u8 offset; u8 byte; };
 }
 ```
 

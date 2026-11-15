@@ -3,27 +3,41 @@ title: 설치와 환경 준비
 description: 소스에서 fairyc를 빌드하고 C 툴체인을 연결하는 방법을 설명합니다.
 ---
 
-아직 미리 빌드된 설치 파일(`.msi`, `.tar.gz` 등)은 따로 배포되지 않습니다. 대신 저장소에서 `fairyc` 실행 파일을 직접 빌드한 다음, 운영체제의 C 컴파일러와 함께 사용합니다.
+별도 설치 마법사(`.msi` 등)나 Linux용 프리빌드 아카이브는 아직 제공되지 않습니다. 대신 **GitHub Releases의 Windows x64 프리뷰 ZIP**을 받아 바로 체험하거나, **저장소 소스에서 최신 `main` 버전을 직접 빌드**해 사용할 수 있습니다.
 
-## 미리 준비할 것
+| 설치 방식 | 대응 버전 / 기준 | 포함 범위 및 권장 용도 |
+| --- | --- | --- |
+| **방법 A: 프리뷰 ZIP** | `v0.1.0-preview.1` (`2026-10-25`, 커밋 `682d6591`) | Go/Bun 없이 Windows x64 콘솔·언어 코어를 빠르게 시험할 때 |
+| **방법 B: 소스 빌드** | `main` 개발 빌드 (`sdk: 0.0.0-stage0.87`, 커밋 `e1d48cb7`) | `new --template win32`, `package` 등 최신 Win32/데스크톱·Linux 기능을 쓸 때 |
 
-1. **Git, Go, Bun**: Stage 0 컴파일러가 Go로 작성되어 있어 빌드에 필요합니다.
-2. **운영체제 C 컴파일러** (`build`, `run`, `test --native` 실행 시 필요):
-   - **Windows**: Visual Studio 또는 Build Tools에서 **MSVC x64 C/C++ 컴파일러**와 **Windows SDK**를 설치해 주세요.
-   - **Linux**: `PATH`에서 `gcc` 또는 `clang`을 실행할 수 있어야 합니다.
+> 참고: 프리뷰 ZIP(`v0.1.0-preview.1`)은 초기 스냅샷이므로, `--template win32`나 `fairyc package` 같은 최근 기능은 <strong>방법 B(소스 빌드)</strong>를 사용해 주세요.
 
-> **참고:** 문법이나 빌림만 검사하는 `fairyc check`와 인터프리터 모드 `fairyc test`는 C 컴파일러 없이도 돌아갑니다. 하지만 실제 실행 파일을 만들 때는 MSVC나 GCC/Clang이 꼭 필요합니다.
+## 운영체제 C 컴파일러 준비 (공통)
 
-## 저장소 내려받고 이동하기
+문법·빌림 검사(`fairyc check`)와 인터프리터 테스트(`fairyc test`)는 C 컴파일러 없이도 실행되지만, 실제 네이티브 바이너리를 만드는 `build`, `run`, `test --native`에는 운영체제 C 툴체인이 필요합니다.
 
-아직 소스 코드가 없다면 [fairyc GitHub 저장소](https://github.com/0disoft/fairyc)를 복제한 뒤 저장소 루트 폴더로 이동합니다.
+- **Windows**: Visual Studio 또는 Build Tools에서 **MSVC x64 C/C++ 컴파일러**와 **Windows SDK**를 설치해 주세요. (`new --template win32` 리소스 준비 및 `fairyc package`를 쓰려면 <strong>Python 3.11+</strong>도 필요합니다.)
+- **Linux**: `PATH`에서 `gcc` 또는 `clang`을 실행할 수 있어야 합니다.
+
+## 방법 A: Windows 프리뷰 ZIP으로 바로 실행하기 (`v0.1.0-preview.1`)
+
+Go/Bun을 설치하지 않고 Windows x64에서 코어 CLI만 바로 실행하려면 [GitHub Releases (`v0.1.0-preview.1`)](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)에서 `fairyc-windows-amd64-preview-candidate.zip`과 `.sha256` 파일을 내려받습니다.
+
+```powershell
+# SHA-256 확인 후 압축 해제
+Get-FileHash .\fairyc-windows-amd64-preview-candidate.zip -Algorithm SHA256
+Expand-Archive .\fairyc-windows-amd64-preview-candidate.zip -DestinationPath .\fairyc-preview
+.\fairyc-preview\fairyc.exe --version
+```
+
+## 방법 B: 저장소 소스에서 최신 `fairyc` 빌드하기
+
+최신 Stage 0 기능(`--template win32`, `fairyc package`, Linux GNU x64 빌드 등)을 쓰려면 **Git, Go, Bun**을 준비한 뒤 [fairyc GitHub 저장소](https://github.com/0disoft/fairyc)를 복제해 빌드합니다.
 
 ```bash
 git clone https://github.com/0disoft/fairyc.git
 cd fairyc
 ```
-
-## `fairyc` 빌드하기
 
 `fairyc` 저장소 루트 폴더에서 아래 명령을 실행합니다.
 

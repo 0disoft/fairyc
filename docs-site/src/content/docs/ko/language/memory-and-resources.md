@@ -59,12 +59,15 @@ resource Buffer {
 잠깐 쓰고 버릴 임시 버퍼들을 매번 개별 해제하기 번거로울 때는 `region` 구문을 씁니다.
 
 ```c
-fn Result<i32, MyError> parse_temp(Region arena, ref u8[] input) {
-    region scratch in arena {
-        // 이 블록 안에서 scratch로 할당한 임시 메모리는
+import std::alloc as alloc;
+
+fn i32 use_scratch(alloc::Arena arena) {
+    var alloc::Arena mutable_arena = arena;
+    region scratch in ref mut mutable_arena {
+        // 이 블록 안에서 scratch에 할당한 임시 데이터는
         // 블록을 빠져나갈 때 한꺼번에 정리됩니다.
     }
-    return .ok(0);
+    return 0;
 }
 ```
 

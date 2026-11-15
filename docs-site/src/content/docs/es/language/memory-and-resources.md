@@ -57,11 +57,14 @@ Los campos de un recurso permanecen privados fuera del módulo que lo define, ma
 Cuando asignas muchos búferes de vida corta que comparten un mismo tiempo de vida, usa un bloque `region`:
 
 ```c
-fn Result<i32, MyError> parse_temp(Region arena, ref u8[] input) {
-    region scratch in arena {
+import std::alloc as alloc;
+
+fn i32 use_scratch(alloc::Arena arena) {
+    var alloc::Arena mutable_arena = arena;
+    region scratch in ref mut mutable_arena {
         // Las asignaciones temporales dentro de scratch se reinician juntas al salir del bloque
     }
-    return .ok(0);
+    return 0;
 }
 ```
 

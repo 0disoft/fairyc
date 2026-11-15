@@ -44,13 +44,22 @@ fn i32 main() {
 在 `fairy.toml` 中定义包信息与直接依赖：
 
 ```toml
-[package]
-name = "my_app"
-uid = "example.my-app"
-version = "0.1.0"
+schema = "fairyc.manifest/v1"
 
-[dependencies]
-answer = { path = "../libs/answer" }
+[package]
+uid = "example.my-app"
+name = "my-app"
+version = "0.1.0"
+language = "fairyc-language/20"
+source = "src"
+
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "0.1.0"
+features = []
 ```
 
 - 根目录下的 `[workspace]` 节允许你一起管理多个包（`examples/workspace_quickstart` 展示了这种目录结构）。

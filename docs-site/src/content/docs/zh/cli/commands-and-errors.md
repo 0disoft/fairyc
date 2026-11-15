@@ -9,9 +9,10 @@ description: 常用的 fairyc CLI 命令、退出码说明以及常见编译错�
 
 | 命令 | 使用场景 |
 | --- | --- |
-| `fairyc new <name> --uid <uid>` | 创建一个新的包目录 |
+| `fairyc new <name> --uid <uid> [--template <console\|win32>]` | 创建一个新的控制台或 Win32 桌面包目录 |
 | `fairyc check [--locked]` | 快速执行语法、类型和借用检查，不编译 C 代码 |
 | `fairyc build [--release] [--locked]` | 生成 `build/<name>.exe`（Windows）或 `build/<name>`（Linux） |
+| `fairyc package [--locked] [--json]` | 对 Windows x64 Win32 桌面项目执行发布构建，并在 `dist/` 下校验并生成未签名本地 ZIP |
 | `fairyc run [--release] [--locked] [-- <args...>]` | 立即编译并运行临时二进制文件 |
 | `fairyc test [--native] [--locked]` | 在解释器中运行 `tests/`，或以原生二进制方式运行（`--native`） |
 | `fairyc explain <code>` | 查看如 `E2101` 这类诊断码的详细说明 |

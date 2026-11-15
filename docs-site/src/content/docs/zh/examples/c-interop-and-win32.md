@@ -94,3 +94,43 @@ fairyc build --release
 在 `2026-11-13` 的 Windows x64 锁定发布构建（`fairyc-go.exe build --locked --release`，嵌入了 9 种尺寸的 `.ico` 图标、`VERSIONINFO` 和 Common Controls v6 清单）中，`FairyHash.exe` 体积为 `196,096` 字节（`191.5 KiB`；在嵌入这些图标与版本资源之前为 `188,416` 字节）。
 
 > 上述体积测量结果仅针对这些特定的 Windows x64 MSVC release 构建及其 C 桥接代码和静态 CRT——它们是具体示例的实测数据，并非对所有 Fairy C 二进制文件体积的统一保证。
+
+## 5. Win32 应用端到端工作流（从 `new --template win32` 到 `package`）
+
+使用最新源码构建（`main`）的编译器，你可以直接通过 `--template win32` 生成桌面应用骨架、配置图标与版本，并构建及打包为本地未签名便携 ZIP。（桌面资源准备与打包步骤需要 Windows x64、MSVC + Windows SDK，以及在 `PATH` 中安装 <strong>Python 3.11+</strong>。）
+
+1. <strong>创建 Win32 项目</strong>：自动生成 `fairy.toml`、`app.toml`、`fairy.windows.json`、`native/app.ico`、`native/app.rc` 以及初始源码和测试。
+
+   ```powershell
+   fairyc new my-tool --uid example.my-tool --template win32
+   cd my-tool
+   ```
+
+2. <strong>配置图标、应用信息与版本</strong>：
+   - <strong>图标与应用信息（`app.toml`）</strong>：修改 `product_name`、`company_name`、`description`、`executable_name` 以及 `icon = "native/app.ico"`（指向项目内的相对 `.ico` 路径）。
+   - <strong>版本号（`fairy.toml`）</strong>：`[package]` 下的 `version = "0.1.0"` 会同时用于 `VERSIONINFO` 资源和打包元数据。
+
+   ```toml
+   [app]
+   product_name = "My Tool"
+   company_name = "Example Co"
+   description = "My Tool desktop utility"
+   executable_name = "my-tool.exe"
+   package_name = "my-tool"
+   assembly_name = "example.my-tool"
+   icon = "native/app.ico"
+   ```
+
+3. <strong>检查、测试并执行发布构建</strong>：
+
+   ```powershell
+   fairyc check
+   fairyc test --locked --file tests/domain.fy
+   fairyc build --locked --release
+   ```
+
+4. <strong>生成并校验便携 ZIP（`package`）</strong>：在 `dist/` 目录下生成未签名本地 ZIP 归档并输出校验报告。
+
+   ```powershell
+   fairyc package --locked --json
+   ```

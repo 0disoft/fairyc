@@ -94,3 +94,43 @@ fairyc build --release
 In the `2026-11-13` Windows x64 locked release build (`fairyc-go.exe build --locked --release`, embedding a 9-size `.ico`, `VERSIONINFO`, and Common Controls v6 manifest), `FairyHash.exe` measured `196,096` bytes (`191.5 KiB`; `188,416` bytes prior to embedding those icon/version resources).
 
 > These size measurements apply to those specific Windows x64 MSVC release builds with their C shims and static CRT—they are concrete example figures, not a blanket guarantee for all Fairy C binaries.
+
+## 5. End-to-End Win32 App Workflow (`new --template win32` to `package`)
+
+With a current Stage 0 source build (`main`), you can scaffold a Win32 desktop project, customize its icon and version metadata, build a release executable, and package an unsigned portable ZIP. (Building and packaging desktop resources require Windows x64, MSVC + Windows SDK, and **Python 3.11+** on `PATH`.)
+
+1. **Create the Win32 project**: Generates `fairy.toml`, `app.toml`, `fairy.windows.json`, `native/app.ico`, `native/app.rc`, and starter source/tests.
+
+   ```powershell
+   fairyc new my-tool --uid example.my-tool --template win32
+   cd my-tool
+   ```
+
+2. **Configure icon, branding, and version**:
+   - **Icon and branding (`app.toml`)**: Edit `product_name`, `company_name`, `description`, `executable_name`, and `icon = "native/app.ico"` (a project-relative `.ico` path).
+   - **Version (`fairy.toml`)**: Set `[package] version = "0.1.0"`, which feeds `VERSIONINFO` and portable archive metadata.
+
+   ```toml
+   [app]
+   product_name = "My Tool"
+   company_name = "Example Co"
+   description = "My Tool desktop utility"
+   executable_name = "my-tool.exe"
+   package_name = "my-tool"
+   assembly_name = "example.my-tool"
+   icon = "native/app.ico"
+   ```
+
+3. **Check, test, and build the release binary**:
+
+   ```powershell
+   fairyc check
+   fairyc test --locked --file tests/domain.fy
+   fairyc build --locked --release
+   ```
+
+4. **Create and validate the portable ZIP (`package`)**: Outputs an unsigned local archive and verification receipt under `dist/`.
+
+   ```powershell
+   fairyc package --locked --json
+   ```

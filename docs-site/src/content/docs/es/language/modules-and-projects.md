@@ -44,13 +44,22 @@ No se permiten importaciones comodín (`*`) ni dependencias circulares entre mó
 Define paquetes y dependencias directas en `fairy.toml`:
 
 ```toml
-[package]
-name = "my_app"
-uid = "example.my-app"
-version = "0.1.0"
+schema = "fairyc.manifest/v1"
 
-[dependencies]
-answer = { path = "../libs/answer" }
+[package]
+uid = "example.my-app"
+name = "my-app"
+version = "0.1.0"
+language = "fairyc-language/20"
+source = "src"
+
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "0.1.0"
+features = []
 ```
 
 - Una sección raíz `[workspace]` te permite gestionar varios paquetes juntos (`examples/workspace_quickstart` muestra esta organización).
