@@ -520,95 +520,6 @@ func (index *QueryIndex) Show(symbolID string, request RelationRequest) (ShowRes
 	return result, nil
 }
 
-func (index *QueryIndex) Around(symbolID string, request RelationRequest) (AroundResult, error) {
-	relations, filter, err := validateRelationRequest(request)
-	if err != nil {
-		return AroundResult{}, err
-	}
-	rootPosition, err := index.resolveSymbol(symbolID)
-	if err != nil {
-		return AroundResult{}, err
-	}
-	context := index.contextFor(relations)
-	root := AroundNode{Depth: 0, Node: index.node(rootPosition)}
-	selection := newSelectionBudget(request.Budget)
-	mandatory := struct {
-		Context QueryContext `json:"context"`
-		Root    AroundNode   `json:"root"`
-	}{Context: context, Root: root}
-	if accepted, _, reserveErr := selection.reserveRecord(mandatory); reserveErr != nil {
-		return AroundResult{}, reserveErr
-	} else if !accepted {
-		return AroundResult{}, ErrQueryBudgetTooSmall
-	}
-	result := AroundResult{
-		Context: context, Subject: index.nodes[rootPosition].symbol.Visible, Direction: request.Direction,
-		RelationKinds: relations, Nodes: []AroundNode{root}, Budget: request.Budget,
-		Omissions: filterOmissions(relations),
-	}
-	seenNodes := map[int]struct{}{rootPosition: {}}
-	seenRelations := make(map[int]struct{})
-	frontier := []int{rootPosition}
-	exhausted := false
-	for depth := 0; depth < request.Budget.MaxDepth && len(frontier) != 0 && !exhausted; depth++ {
-		candidateRelations := index.frontierRelations(frontier, request.Direction, filter, seenRelations)
-		nextSet := make(map[int]struct{})
-		var frontierSymbols map[string]struct{}
-		for relationIndex := range candidateRelations {
-			relation := cloneQueryRelation(index.relations[relationIndex])
-			accepted, code, reserveErr := selection.reserveRelation(relation)
-			if reserveErr != nil {
-				return AroundResult{}, reserveErr
-			}
-			if !accepted {
-				result.Omissions = append(result.Omissions, unknownOmission(code, "relations"))
-				exhausted = true
-				break
-			}
-			result.Relations = append(result.Relations, relation)
-			seenRelations[relationIndex] = struct{}{}
-			// Membership is unchanged within this depth. Build it once, only
-			// after a relation fits the budget, and discard it at the next depth.
-			if frontierSymbols == nil {
-				frontierSymbols = make(map[string]struct{}, len(frontier))
-				for _, position := range frontier {
-					frontierSymbols[index.nodes[position].symbol.Visible] = struct{}{}
-				}
-			}
-			neighbors := index.adjacentNodes(frontierSymbols, relation, request.Direction)
-			for _, neighbor := range neighbors {
-				if _, seen := seenNodes[neighbor]; seen {
-					continue
-				}
-				node := AroundNode{Depth: depth + 1, Node: index.node(neighbor)}
-				accepted, code, reserveErr := selection.reserveRecord(node)
-				if reserveErr != nil {
-					return AroundResult{}, reserveErr
-				}
-				if !accepted {
-					result.Omissions = append(result.Omissions, unknownOmission(code, "nodes"))
-					exhausted = true
-					break
-				}
-				seenNodes[neighbor] = struct{}{}
-				nextSet[neighbor] = struct{}{}
-				result.Nodes = append(result.Nodes, node)
-				selection.usage.Depth = max(selection.usage.Depth, depth+1)
-			}
-			if exhausted {
-				break
-			}
-		}
-		frontier = sortedNodePositions(nextSet, index.nodes)
-	}
-	if !exhausted && len(frontier) != 0 && index.hasUnselectedExpansion(frontier, request.Direction, filter, seenRelations) {
-		result.Omissions = append(result.Omissions, unknownOmission(OmissionDepthLimit, "relations"))
-	}
-	result.Omissions = appendJoinOmissions(result.Omissions, result.Relations, request.Direction, filter)
-	result.Usage = selection.usage
-	return result, nil
-}
-
 // ResolveAttributionSubject resolves either canonical SymbolId form without inventing a name search
 // or requiring an unrelated relation query. The returned node and context are detached copies.
 func (index *QueryIndex) ResolveAttributionSubject(symbolID string) (AttributionSubject, error) {
@@ -886,21 +797,6 @@ func selectionRecordCost(value any) (uint64, error) {
 		return 0, fmt.Errorf("measure Atlas query record: %w", err)
 	}
 	return uint64(len(encoded)) + 1, nil
-}
-
-func (index *QueryIndex) adjacentNodes(frontierSymbols map[string]struct{}, relation QueryRelation, direction QueryDirection) []int {
-	set := make(map[int]struct{}, 2)
-	if (direction == DirectionOutgoing || direction == DirectionBoth) && relation.Target != nil && relation.Target.Symbol != "" {
-		if _, found := frontierSymbols[relation.Source]; found {
-			set[index.byVisible[relation.Target.Symbol]] = struct{}{}
-		}
-	}
-	if (direction == DirectionIncoming || direction == DirectionBoth) && relation.Target != nil && relation.Target.Symbol != "" {
-		if _, found := frontierSymbols[relation.Target.Symbol]; found {
-			set[index.byVisible[relation.Source]] = struct{}{}
-		}
-	}
-	return sortedNodePositions(set, index.nodes)
 }
 
 func sortedNodePositions(values map[int]struct{}, nodes []indexedQueryNode) []int {
