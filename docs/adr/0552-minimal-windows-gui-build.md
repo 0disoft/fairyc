@@ -32,6 +32,22 @@ Missing config preserves the current path. Build/link/resource failure must
 not replace a previously published executable. Linux ignores this Windows-only
 file. Compiler-host bootstrap never implicitly consumes application settings.
 
+The Go input loader retains each declared file's inspected OS identity, size
+and modification time, compares them with the opened handle before reading,
+and rechecks that handle after reading. Replacement, observable in-place
+changes, read/close failures and cancellation reject the entire project; no
+partial C/RC snapshot reaches compilation. Only an absent config at initial
+inspection selects the no-config path; disappearance after inspection is an error.
+`windowsbuild.Load` keeps its signature. `LoadWithOptions` accepts one optional
+`LoadOptions` value with per-call `Context`, `OpenRoot`, `Lstat` and `Open`
+dependencies; nil fields retain the host filesystem and Background context.
+Cancellation is cooperative between I/O calls with reads of at most 32 KiB,
+not preemption of blocked filesystem calls. A growing input is probed only up
+to its existing byte limit plus one; 100 consecutive empty successful reads
+fail with `io.ErrNoProgress`. Metadata checks do not provide an atomic or
+cryptographic snapshot against a writer that restores size and timestamps,
+and transitive native inputs remain outside this boundary.
+
 Initial UI integration uses a small project-owned C bridge for WndProc and
 message handling, called through the existing unsafe C import boundary. No
 retained Fairy callback, public export, raw Win32 SDK import generator or UI

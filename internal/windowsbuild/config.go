@@ -5,6 +5,7 @@ package windowsbuild
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -144,16 +145,39 @@ func (c Config) Validate() error {
 // snapshots declared C/RC text before compilation. Includes/assets are trusted
 // native-tool inputs, not a sandbox or part of the Fairy frontend lock.
 func Load(directory string) (*Project, error) {
+	return LoadWithOptions(directory)
+}
+
+// LoadWithOptions preserves Load's inputs and results while allowing callers to
+// supply cooperative cancellation and per-call filesystem dependencies.
+func LoadWithOptions(directory string, options ...LoadOptions) (project *Project, err error) {
+	policy, err := loadPolicy(options)
+	if err != nil {
+		return nil, err
+	}
+	if err := inputReadError(policy.Context, nil); err != nil {
+		return nil, err
+	}
 	absolute, err := filepath.Abs(directory)
 	if err != nil {
 		return nil, err
 	}
-	root, err := os.OpenRoot(absolute)
-	if err != nil {
+	root, err := policy.OpenRoot(absolute)
+	if root != nil {
+		defer func() {
+			err = inputReadError(policy.Context, errors.Join(err, root.Close()))
+			if err != nil {
+				project = nil
+			}
+		}()
+	}
+	if err = inputReadError(policy.Context, err); err != nil {
 		return nil, err
 	}
-	defer root.Close()
-	data, err := read(root, FileName, MaxConfigBytes)
+	if root == nil {
+		return nil, fmt.Errorf("Windows build root handle is missing")
+	}
+	data, err := read(root, FileName, MaxConfigBytes, policy)
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
@@ -171,7 +195,7 @@ func Load(directory string) (*Project, error) {
 		output *[]Input
 	}{{config.Sources, &p.CInputs}, {config.Resources, &p.RCInputs}} {
 		for _, name := range group.names {
-			data, err := read(root, name, MaxInputBytes)
+			data, err := read(root, name, MaxInputBytes, policy)
 			if err != nil {
 				return nil, fmt.Errorf("Windows build input %s: %w", name, err)
 			}
@@ -182,38 +206,8 @@ func Load(directory string) (*Project, error) {
 			*group.output = append(*group.output, Input{Name: name, Data: data})
 		}
 	}
+	if err := inputReadError(policy.Context, nil); err != nil {
+		return nil, err
+	}
 	return p, nil
-}
-
-func read(root *os.Root, name string, limit int) ([]byte, error) {
-	parts := strings.Split(name, "/")
-	for i := range parts {
-		info, err := root.Lstat(strings.Join(parts[:i+1], "/"))
-		if err != nil {
-			return nil, err
-		}
-		if info.Mode()&os.ModeSymlink != 0 {
-			return nil, fmt.Errorf("symlink build input %s", name)
-		}
-	}
-	f, err := root.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	s, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if !s.Mode().IsRegular() || s.Size() <= 0 || s.Size() > int64(limit) {
-		return nil, fmt.Errorf("invalid size/type for %s", name)
-	}
-	data, err := io.ReadAll(io.LimitReader(f, int64(limit)+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(data) != int(s.Size()) || len(data) > limit || !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
-		return nil, fmt.Errorf("invalid or changed UTF-8 build input %s", name)
-	}
-	return data, nil
 }
