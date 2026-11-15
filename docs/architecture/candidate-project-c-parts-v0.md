@@ -1,5 +1,27 @@
 # Candidate project C partitions v0
 
+## Candidate image publication (2026-11-15)
+
+The Go candidate image publisher keeps the existing nonempty, at-most-64-MiB
+image bound and `Publish`/`PublishWithin` signatures. `PublishWithOptions` and
+`PublishWithinWithOptions` accept one optional `PublicationOptions` value. Nil
+fields use Background, `crypto/rand.Read` and the existing write/sync/close/rename
+operations. The staging nonce must report exactly 16 bytes before file creation.
+
+After sync and close, publication rechecks the staging path's regular-file kind,
+retained OS identity and exact image size before rename. A replacement or short
+stage rejects without promoting it. Failure cleanup checks the retained identity
+before removing the temporary name. Successful rename consumes that name: later
+cleanup never removes a file newly created there or rolls back the final image.
+Cancellation before commit rejects and attempts owned-stage cleanup; cancellation
+observed after commit is reported while retaining the complete final image.
+
+Cancellation checks are cooperative between operations, not interruption of a
+blocked syscall. Identity checks and rename/unlink are separate syscalls, so this
+is not an atomic compare-and-rename/unlink against a hostile concurrent writer.
+Same-identity, same-size content rewrites are not authenticated by these metadata
+checks. Native output directories remain caller-trusted.
+
 ## Reuse authenticated SDK plans across native tests (2026-10-17)
 
 The test session now retains its authenticated `sdk::Plan` alongside the same
