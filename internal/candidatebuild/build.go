@@ -3,8 +3,6 @@ package candidatebuild
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -217,30 +215,6 @@ func readPacketInput(path string) ([]byte, error) {
 	}
 	if len(data) > maxPacket {
 		return nil, fmt.Errorf("packet input exceeds 96 MiB")
-	}
-	return data, nil
-}
-
-func cachedPacket(path, expected string) ([]byte, error) {
-	want, err := hex.DecodeString(expected)
-	if err != nil || len(want) != sha256.Size || path == "" {
-		return nil, fmt.Errorf("packet path and SHA256 digest are required")
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	data, err := io.ReadAll(io.LimitReader(file, maxPacket+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(data) > maxPacket {
-		return nil, fmt.Errorf("cached packet exceeds 96 MiB")
-	}
-	got := sha256.Sum256(data)
-	if !bytes.Equal(got[:], want) {
-		return nil, fmt.Errorf("cached packet SHA256 mismatch")
 	}
 	return data, nil
 }
