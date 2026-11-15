@@ -313,6 +313,20 @@ physical-media durability are not guaranteed. Output or lock-cleanup errors can 
 inspect hashes before retrying. Keep `fairy.lock` unchanged and run ordinary `check` before locked
 build/run/test. Language/runtime/SDK/map schemas do not change. MCP never exposes apply.
 Neither write authority nor certainty follows from an impact result.
+
+Go application records the exclusive temporary file's opened identity. Immediately
+before rename it reopens a regular file, checks that identity and exact length,
+then streams SHA-256 with a 32 KiB buffer against the verified overlay bytes.
+Same-size modifications and replaced temporaries reject without changing the
+original source. Failed staging cleanup removes only the observed owned file;
+successful rename releases ownership of the old temporary name. `Apply()` keeps
+its existing signature; `ApplyWithOptions` optionally supplies a context and
+temporary-creation/write/chmod/sync/close/rename operations with host defaults.
+The default context is Background. Cancellation propagates through workspace
+loading and checking and is observed around staging I/O. Cancellation after
+rename can return an error with `Applied=true`, preserving the committed source.
+These observations do not atomically exclude hostile writers or interrupt a
+blocked filesystem call. The Fairy-authored edit path is unchanged.
 Each fingerprint attempt shares directory spelling listings only within that
 attempt. Fresh attempts reread the directories; every selected path segment is
 still checked for symlinks and every opened input for regular-file bounds and

@@ -2,6 +2,7 @@ package sourceedit
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -10,7 +11,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/0disoft/fairyc/internal/durablefile"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -138,7 +138,18 @@ func snapshot(w workspaceloader.Workspace) (string, error) {
 
 // Apply commits exactly one already-verified authored file. It never removes an old destination
 // to recover from rename failure and never refreshes the production graph lock.
-func (p *Plan) Apply() (err error) {
+func (p *Plan) Apply() error { return p.ApplyWithOptions() }
+
+func (p *Plan) ApplyWithOptions(options ...ApplyOptions) (err error) {
+	policy, err := editApplyPolicy(options)
+	if err != nil {
+		return err
+	}
+	ctx := policy.Context
+	defer func() { err = errors.Join(err, ctx.Err(), context.Cause(ctx)) }()
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if p == nil || len(p.before) == 0 || len(p.after) == 0 || p.Report.Applied {
 		return fmt.Errorf("invalid or already applied edit plan")
 	}
@@ -152,7 +163,7 @@ func (p *Plan) Apply() (err error) {
 		return fmt.Errorf("exclusive edit lock unavailable: %w", err)
 	}
 	defer func() { err = errors.Join(err, root.Remove(lock)) }()
-	w, err := workspaceloader.Load(p.root)
+	w, err := workspaceloader.LoadContext(ctx, p.root)
 	if err != nil {
 		return err
 	}
@@ -163,7 +174,7 @@ func (p *Plan) Apply() (err error) {
 	if current != p.fingerprint {
 		return fmt.Errorf("workspace changed since edit preview")
 	}
-	if err := validateOverlay(p.root, filepath.Join(p.root, filepath.FromSlash(p.path)), p.after); err != nil {
+	if err := validateOverlayContext(ctx, p.root, filepath.Join(p.root, filepath.FromSlash(p.path)), p.after); err != nil {
 		return err
 	}
 	info, err := root.Lstat(filepath.FromSlash(p.path))
@@ -173,20 +184,35 @@ func (p *Plan) Apply() (err error) {
 	if info.Mode().Perm()&0200 == 0 {
 		return fmt.Errorf("source is read-only")
 	}
-	f, tmp, err := durablefile.CreateTemporary(root, filepath.Dir(filepath.FromSlash(p.path)))
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	f, tmp, err := policy.CreateTemporary(root, filepath.Dir(filepath.FromSlash(p.path)))
+	if err != nil {
+		if f != nil {
+			err = errors.Join(err, f.Close())
+		}
+		return err
+	}
+	if f == nil {
+		return fmt.Errorf("edit staging file is missing")
+	}
+	defer f.Close()
+	identity, err := f.Stat()
 	if err != nil {
 		return err
 	}
-	defer root.Remove(tmp)
-	_, writeErr := f.Write(p.after)
-	chmodErr := f.Chmod(info.Mode().Perm())
-	syncErr := f.Sync()
-	closeErr := f.Close()
-	if err := errors.Join(writeErr, chmodErr, syncErr, closeErr); err != nil {
+	staged := true
+	defer func() {
+		if staged {
+			err = errors.Join(err, removeEditStage(root, tmp, identity))
+		}
+	}()
+	if err := writeEditStage(f, p.after, info.Mode().Perm(), policy); err != nil {
 		return err
 	}
 	// Re-read the complete closure after staging, immediately before the atomic replacement.
-	w, err = workspaceloader.Load(p.root)
+	w, err = workspaceloader.LoadContext(ctx, p.root)
 	if err != nil {
 		return err
 	}
@@ -198,9 +224,14 @@ func (p *Plan) Apply() (err error) {
 	if err != nil || !bytes.Equal(before, p.before) {
 		return fmt.Errorf("source changed while staging edit")
 	}
-	if err := root.Rename(tmp, filepath.FromSlash(p.path)); err != nil {
+	if err := verifyEditStage(ctx, root, tmp, identity, p.after); err != nil {
 		return err
 	}
+	if err := policy.Rename(root, tmp, filepath.FromSlash(p.path)); err != nil {
+		return err
+	}
+	// Rename commits publication; the old staging name is no longer ours.
+	staged = false
 	p.Report.Applied = true
 	return nil
 }
