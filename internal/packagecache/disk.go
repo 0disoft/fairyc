@@ -275,58 +275,7 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 // Get returns the sole valid immutable generation for key. Corrupt files are removed best-effort;
 // multiple distinct valid generations are a conflict and therefore a safe miss.
 func (store *DiskStore) Get(key Key) (Record, bool) {
-	if store == nil || isZero(key[:]) {
-		return Record{}, false
-	}
-	keyDirectory := store.keyDirectoryName(key)
-	entries, err := readCacheDirectoryWithBudget(store.root, keyDirectory, store.newScanBudget())
-	if err != nil {
-		store.recordMiss()
-		return Record{}, false
-	}
-	slices.SortFunc(entries, func(left, right os.DirEntry) int { return strings.Compare(left.Name(), right.Name()) })
-	var candidate Record
-	validCount := 0
-	for _, entry := range entries {
-		if entry.IsDir() || !validGenerationName(entry.Name()) {
-			continue
-		}
-		path := filepath.Join(keyDirectory, entry.Name())
-		var sizeHint int64
-		if info, err := store.root.Lstat(path); err == nil {
-			sizeHint = info.Size()
-		}
-		record, readErr := store.readGeneration(path, entry.Name(), key, sizeHint)
-		if readErr != nil {
-			store.recordRejected()
-			_ = store.root.Remove(path)
-			continue
-		}
-		validCount++
-		if validCount == 1 {
-			candidate = record
-		} else {
-			// A conflict can never produce a hit. Keep counting and validating
-			// generations without retaining their potentially large payloads.
-			candidate = Record{}
-		}
-	}
-	if validCount != 1 {
-		if validCount > 1 {
-			store.recordRejectedBy(uint64(validCount))
-			for _, entry := range entries {
-				if validGenerationName(entry.Name()) {
-					_ = store.root.Remove(filepath.Join(keyDirectory, entry.Name()))
-				}
-			}
-		}
-		store.recordMiss()
-		removeEmptyKeyDirectory(store.root, keyDirectory)
-		return Record{}, false
-	}
-	store.recordHit()
-	// Each read decoded a fresh record; no store-owned payload is exposed.
-	return candidate, true
+	return store.GetWithOptions(key)
 }
 
 // DeleteIfMatch removes only the immutable generation whose canonical bytes exactly match
@@ -457,21 +406,20 @@ func (store *DiskStore) readGeneration(path, name string, expected Key, sizeHint
 	if err != nil {
 		return Record{}, err
 	}
-	defer file.Close()
-	encoded, err := readDiskBytes(file, sizeHint, store.limits.MaxRecordBytes)
-	if err != nil {
+	encoded, readErr := readDiskBytes(file, sizeHint, store.limits.MaxRecordBytes)
+	if err := errors.Join(readErr, file.Close()); err != nil {
 		return Record{}, err
 	}
 	digest := sha256.Sum256(encoded)
 	if hex.EncodeToString(digest[:])+".json" != name {
-		return Record{}, fmt.Errorf("package cache generation digest does not match its name")
+		return Record{}, fmt.Errorf("%w: digest does not match its name", errDiskGenerationCorrupt)
 	}
 	record, err := decodeDiskRecord(encoded, store.limits.MaxRecordBytes)
 	if err != nil {
-		return Record{}, err
+		return Record{}, fmt.Errorf("%w: %w", errDiskGenerationCorrupt, err)
 	}
 	if record.Key != expected {
-		return Record{}, fmt.Errorf("package cache generation key does not match its directory")
+		return Record{}, fmt.Errorf("%w: key does not match its directory", errDiskGenerationCorrupt)
 	}
 	return record, nil
 }

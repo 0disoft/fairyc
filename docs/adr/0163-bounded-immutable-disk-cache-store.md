@@ -27,8 +27,14 @@ the same bytes converge on the same name. Different valid generations for one ca
 producer conflict and therefore a miss; neither is selected by timestamp or filesystem order.
 
 Reads bound allocation before decoding, verify the filename digest, canonical bytes, embedded key,
-public-interface metadata, artifact kinds, and record shape. Corrupt generations are best-effort
-deleted and counted as rejected. Collection removes caller-expired temporary files and then the
+public-interface metadata, artifact kinds, and record shape. Only verified content corruption
+authorizes best-effort deletion and rejection accounting. A reader byte limit, failed read/close,
+or inaccessible generation is not proof of corruption: preserve the generation and return a safe
+miss for the whole lookup, since an unread sibling may hide a producer conflict. A generation
+removed concurrently may be skipped. `Get` retains its signature; `GetWithOptions` optionally
+supplies per-operation directory/read/removal callbacks and a background-by-default context.
+Cancellation stops subsequent I/O and rejects partial observations, but cannot preempt a blocked
+host syscall. Collection removes caller-expired temporary files and then the
 oldest immutable generations until entry and byte bounds both hold. Eviction time is a disposable
 hint, never correctness or source truth.
 
