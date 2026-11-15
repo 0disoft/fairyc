@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"slices"
 	"strings"
 
@@ -107,106 +106,16 @@ func validateStableArtifact(artifact StableArtifact, transfers bool) error {
 	if artifact.Coordinate == (packagegraph.CoordinateID{}) {
 		return fmt.Errorf("stable package MIR artifact has an empty PackageCoordinateId")
 	}
-	// ComputeContextID validates the descriptor before hashing its canonical bytes.
-	// Keep that single trust boundary ahead of all body and import checks.
+	// Keep context validation ahead of every body and import check.
 	contextID, err := ComputeContextID(artifact.Context, ^uint64(0))
 	if err != nil {
 		return err
 	}
-	owned := make(map[FunctionID]struct{}, len(artifact.Functions))
-	for index, body := range artifact.Functions {
-		if index > 0 && bytes.Compare(artifact.Functions[index-1].ID[:], body.ID[:]) >= 0 {
-			return fmt.Errorf("stable package MIR functions are not sorted and unique")
-		}
-		if body.Package != artifact.Coordinate || body.ContextID != contextID {
-			return fmt.Errorf("stable package MIR function identity or context is inconsistent")
-		}
-		if err := ValidateStableBody(body); err != nil {
-			return fmt.Errorf("stable function %s: %w", body.ID, err)
-		}
-		if !transfers {
-			for _, block := range body.Function.Blocks {
-				for _, operation := range block.Operations {
-					if operation.Kind == mir.OperationStorageLayout || operation.Kind == mir.OperationStorageTake || operation.Kind == mir.OperationStoragePut || operation.Kind == mir.OperationStorageBorrow || operation.Kind == mir.OperationStorageBorrowMut {
-						return fmt.Errorf("ordinary stable package MIR does not admit private storage operations")
-					}
-				}
-			}
-		}
-		owned[body.ID] = struct{}{}
+	owned, err := validateStableArtifactFunctions(artifact, contextID, transfers)
+	if err != nil {
+		return err
 	}
-	if len(owned) == 0 {
-		return fmt.Errorf("stable package MIR artifact has no owned functions")
-	}
-	imports := make(map[FunctionID]struct{}, len(artifact.Imports))
-	for index, id := range artifact.Imports {
-		if id == (FunctionID{}) || index > 0 && bytes.Compare(artifact.Imports[index-1][:], id[:]) >= 0 {
-			return fmt.Errorf("stable package MIR imports are not sorted and unique")
-		}
-		if _, duplicate := owned[id]; duplicate {
-			return fmt.Errorf("stable package MIR FunctionID %s is both owned and imported", id)
-		}
-		imports[id] = struct{}{}
-	}
-
-	referencedImports := make(map[FunctionID]struct{})
-	recordReference := func(id FunctionID) error {
-		if _, local := owned[id]; local {
-			return nil
-		}
-		if _, imported := imports[id]; !imported {
-			return fmt.Errorf("stable package MIR reference %s is neither owned nor imported", id)
-		}
-		referencedImports[id] = struct{}{}
-		return nil
-	}
-	for _, body := range artifact.Functions {
-		for _, block := range body.Function.Blocks {
-			for _, op := range block.Operations {
-				if op.Kind != mir.OperationCCallback && op.Kind != mir.OperationClosureCreate {
-					continue
-				}
-				id, err := ParseFunctionID(op.Variant)
-				if err != nil {
-					return err
-				}
-				if err := recordReference(id); err != nil {
-					return err
-				}
-			}
-		}
-		for _, call := range body.Calls {
-			switch {
-			case strings.HasPrefix(call.Target, bodyInternalCallPrefix):
-				id, err := ParseFunctionID(strings.TrimPrefix(call.Target, bodyInternalCallPrefix))
-				if err != nil {
-					return err
-				}
-				if err := recordReference(id); err != nil {
-					return err
-				}
-			case strings.HasPrefix(call.Target, bodyForeignCallPrefix):
-				index, err := parseForeignCallTarget(call.Target)
-				if err != nil {
-					return err
-				}
-				if index >= uint64(len(artifact.Context.ForeignFunctions)) {
-					return fmt.Errorf("stable foreign call index %d is outside the type context", index)
-				}
-			}
-		}
-	}
-	for _, resource := range artifact.Context.Resources {
-		if resource.DropFunctionID != (FunctionID{}) {
-			if err := recordReference(resource.DropFunctionID); err != nil {
-				return err
-			}
-		}
-	}
-	if !reflect.DeepEqual(imports, referencedImports) {
-		return fmt.Errorf("stable package MIR imports are not the exact external reference set")
-	}
-	return nil
+	return validateStableArtifactReferences(artifact, owned)
 }
 
 // EncodeStableArtifact returns canonical exact-version JSON under a mandatory caller limit.
