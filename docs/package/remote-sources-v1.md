@@ -109,6 +109,14 @@ transport errors and cancellation causes remain inspectable. Cache and package p
 outside this retry wrapper and are never automatically replayed. This policy describes the Go
 downloader; it does not claim retry parity for the Fairy-authored Windows transport.
 
+The Go downloader ignores a caller client's cookie jar on every attempt: no
+Cookie values are read from it and no Set-Cookie response updates it, including
+retry and failure responses. The caller client and its shared transport/TLS pool
+remain unchanged. Custom transports remain trusted caller code and must not add
+credentials themselves. Internal per-download options can replace retry waiting;
+nil uses the existing cancellable timer, while a nil context uses Background.
+All attempts and waits retain the single 30-second operation budget.
+
 Validate all entries and identity before caching an archive or publishing a directory. Write
 complete staged files beneath an opened contained root, then publish a new directory by rename
 under an exclusive fetch lock. Existing exact trees are reused; differing files or any extra
