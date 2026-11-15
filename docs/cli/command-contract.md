@@ -80,8 +80,18 @@ run an ordinary check before locked release execution because changing source ma
 
 No `fairy.lock` is generated: the first ordinary workspace command owns complete graph validation
 and lock publication. Files are exclusive creates under an opened root and synced before success.
-An ordinary post-create failure attempts contained rollback. A process or host crash may leave a
-partial directory, which a later invocation still refuses to merge or overwrite.
+An ordinary post-create failure attempts contained rollback. Creation records the new directory's
+identity, verifies its opened root, and rechecks the target before recursive removal. A missing
+target needs no further cleanup; a replaced target or unprovable identity is preserved and reported
+as a rollback failure. The recheck and removal are separate operations, not an atomic guarantee
+against hostile concurrent path changes. A process or host crash may leave a partial directory,
+which a later invocation still refuses to merge or overwrite.
+
+The internal Go `CreateWithOptions` entry optionally accepts a caller context and per-attempt
+exclusive-write/root-close operations; nil fields retain Background and the host operations.
+`Create` retains its required signature. Cancellation is checked between I/O operations and
+after closing the project root, and failed/cancelled attempts still try identity-checked rollback.
+Filesystem calls themselves are synchronous; these controls add no CLI flags or timeout.
 
 Success is exactly `created Fairy C package "<name>" at <name>`. Codes are 0 for success, 2 for
 invocation or identity rejection, 4 for internal/output failure, and 7 for parent, target,

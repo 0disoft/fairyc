@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 )
@@ -216,65 +215,7 @@ fairyc run --release --locked
 // Create creates exactly one new child directory below parentPath. Existing targets are never
 // opened or modified. Any ordinary failure after directory creation attempts a contained rollback.
 func Create(parentPath string, spec Spec) error {
-	if err := Validate(spec); err != nil {
-		return err
-	}
-	files := scaffoldFiles
-	directories := []string{"src", "tests"}
-	if spec.Template == "win32" {
-		var err error
-		files, directories, err = win32Files()
-		if err != nil {
-			return &Error{Reason: ReasonFilesystem, Path: "embedded win32 template", Cause: err}
-		}
-	}
-	parent, err := os.OpenRoot(parentPath)
-	if err != nil {
-		return &Error{Reason: ReasonParentUnavailable, Cause: err}
-	}
-	defer parent.Close()
-
-	// On Windows, Root.Mkdir can succeed for a dangling directory symlink.
-	// Reject existing entries before creation can acquire rollback ownership.
-	if _, err := parent.Lstat(spec.Name); err == nil {
-		return classifyCreateError(spec.Name, fs.ErrExist, true)
-	} else if !errors.Is(err, fs.ErrNotExist) {
-		return classifyCreateError(spec.Name, err, true)
-	}
-
-	if err := parent.Mkdir(spec.Name, 0o755); err != nil {
-		return classifyCreateError(spec.Name, err, true)
-	}
-	project, err := parent.OpenRoot(spec.Name)
-	if err != nil {
-		return rollback(parent, spec.Name, classifyCreateError(spec.Name, err, false))
-	}
-	projectOpen := true
-	closeProject := func() error {
-		if !projectOpen {
-			return nil
-		}
-		projectOpen = false
-		return project.Close()
-	}
-	defer closeProject()
-
-	for _, directory := range directories {
-		if err := project.MkdirAll(filepath.FromSlash(directory), 0o755); err != nil {
-			closeErr := closeProject()
-			return rollback(parent, spec.Name, errors.Join(classifyCreateError(filepath.ToSlash(filepath.Join(spec.Name, directory)), err, false), closeErr))
-		}
-	}
-	for _, file := range files {
-		if err := writeExclusive(project, file.path, file.content(spec)); err != nil {
-			closeErr := closeProject()
-			return rollback(parent, spec.Name, errors.Join(classifyCreateError(filepath.ToSlash(filepath.Join(spec.Name, file.path)), err, false), closeErr))
-		}
-	}
-	if err := closeProject(); err != nil {
-		return rollback(parent, spec.Name, classifyCreateError(spec.Name, err, false))
-	}
-	return nil
+	return CreateWithOptions(parentPath, spec)
 }
 
 func manifestBytes(spec Spec) []byte {
@@ -313,7 +254,19 @@ func classifyCreateError(path string, err error, target bool) error {
 	return &Error{Reason: reason, Path: path, Cause: err}
 }
 
-func rollback(parent *os.Root, name string, cause error) error {
+func rollback(parent *os.Root, name string, owned os.FileInfo, cause error) error {
+	current, err := parent.Lstat(name)
+	if errors.Is(err, fs.ErrNotExist) {
+		return cause
+	}
+	if err != nil {
+		return &Error{Reason: ReasonRollback, Path: name, Cause: errors.Join(cause, err)}
+	}
+	// Never recursively delete a path already observed to belong to someone
+	// else. This recheck is not atomic with RemoveAll against hostile writers.
+	if owned == nil || !current.IsDir() || current.Mode()&os.ModeSymlink != 0 || !os.SameFile(owned, current) {
+		return &Error{Reason: ReasonRollback, Path: name, Cause: errors.Join(cause, fmt.Errorf("project rollback target identity changed"))}
+	}
 	if err := parent.RemoveAll(name); err != nil {
 		return &Error{Reason: ReasonRollback, Path: name, Cause: errors.Join(cause, err)}
 	}
