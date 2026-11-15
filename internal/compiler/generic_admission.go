@@ -3,11 +3,9 @@ package compiler
 import (
 	"cmp"
 	"slices"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/genericsource"
-	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -22,56 +20,7 @@ func restrictGenericSignatures(checked semantic.Result, files []semantic.File, e
 		}) {
 		return checked
 	}
-	functions := make(map[string]bool, len(expansion.Origins))
-	for _, origin := range expansion.Origins {
-		functions[origin.GeneratedName] = true
-	}
-	seen := make(map[genericUnsupportedKey]struct{}, semantic.DefaultSemanticReportLimit)
-	unsupported := make([]semantic.Unsupported, 0, semantic.DefaultSemanticReportLimit)
-	var exhausted bool
-	var exhaustedAt hir.Span
-	for _, file := range files {
-		if exhausted {
-			break
-		}
-		for _, function := range file.Module.Functions {
-			if exhausted {
-				break
-			}
-			if !functions[function.Name] {
-				continue
-			}
-			check := func(reference ast.TypeReference) bool {
-				if unadmittedGenericScalar(reference) {
-					value := semantic.Unsupported{
-						Feature: "type " + strings.TrimSpace(reference.Text),
-						Span: hir.Span{Package: file.Package, Source: file.Path,
-							StartByte: reference.Span.StartByte, EndByte: reference.Span.EndByte},
-					}
-					key := genericUnsupportedKey{span: value.Span, feature: value.Feature}
-					if _, duplicate := seen[key]; duplicate {
-						return true
-					}
-					if len(unsupported) == semantic.DefaultSemanticReportLimit {
-						exhausted = true
-						exhaustedAt = value.Span
-						return false
-					}
-					seen[key] = struct{}{}
-					unsupported = append(unsupported, value)
-				}
-				return true
-			}
-			if !check(function.ResultType) {
-				break
-			}
-			for _, parameter := range function.Parameters {
-				if !check(parameter.Type) {
-					break
-				}
-			}
-		}
-	}
+	unsupported, exhaustedAt := collectGenericSignatureRestrictions(files, expansion.Origins)
 	if len(unsupported) == 0 {
 		return checked
 	}
@@ -81,16 +30,11 @@ func restrictGenericSignatures(checked semantic.Result, files []semantic.File, e
 			cmp.Compare(a.Span.EndByte, b.Span.EndByte), cmp.Compare(a.Feature, b.Feature))
 	})
 	result := semantic.Result{CompletedThrough: semantic.PhaseResolve, Unsupported: slices.Compact(unsupported)}
-	if exhausted {
+	if exhaustedAt != nil {
 		result.FailedPhase = semantic.PhaseType
-		result.Diagnostics = []semantic.Diagnostic{{Code: semantic.SemanticReportExhaustedCode, Primary: exhaustedAt}}
+		result.Diagnostics = []semantic.Diagnostic{{Code: semantic.SemanticReportExhaustedCode, Primary: *exhaustedAt}}
 	}
 	return result
-}
-
-type genericUnsupportedKey struct {
-	span    hir.Span
-	feature string
 }
 
 func unadmittedGenericScalar(reference ast.TypeReference) bool {

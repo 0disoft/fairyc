@@ -67,3 +67,102 @@ func TestRestrictGenericSignaturesBoundsTransportUnsupportedAtCollection(t *test
 func diagnosticSpan(start int) diagnostic.Span {
 	return diagnostic.Span{StartByte: start, EndByte: start + 1}
 }
+
+func TestRestrictGenericSignaturesReportBoundaryOrderAndOwnership(t *testing.T) {
+	limit := semantic.DefaultSemanticReportLimit
+	for _, test := range []struct {
+		name       string
+		count      int
+		duplicates bool
+		overflow   bool
+	}{
+		{name: "below limit", count: limit - 1},
+		{name: "exact limit", count: limit},
+		{name: "first excess parameter", count: limit + 1, overflow: true},
+		{name: "duplicates at limit", count: limit, duplicates: true},
+		{name: "duplicates before excess parameter", count: limit + 1, duplicates: true, overflow: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			files, expansion := genericRestrictionBoundaryInput(test.count, test.duplicates)
+			beforeFiles, beforeExpansion := genericRestrictionBoundaryInput(test.count, test.duplicates)
+			checked := semantic.Result{CompletedThrough: semantic.PhaseFlow,
+				Diagnostics: []semantic.Diagnostic{{Code: "existing"}},
+				Unsupported: []semantic.Unsupported{{Feature: "existing"}}}
+			beforeChecked := semantic.Result{CompletedThrough: semantic.PhaseFlow,
+				Diagnostics: []semantic.Diagnostic{{Code: "existing"}},
+				Unsupported: []semantic.Unsupported{{Feature: "existing"}}}
+			got := restrictGenericSignatures(checked, files, expansion)
+			if !reflect.DeepEqual(files, beforeFiles) || !reflect.DeepEqual(expansion, beforeExpansion) || !reflect.DeepEqual(checked, beforeChecked) {
+				t.Fatal("admission mutated source, provenance, or prior analysis")
+			}
+			wantCount := min(test.count, limit)
+			if len(got.Unsupported) != wantCount || cap(got.Unsupported) != limit || got.CompletedThrough != semantic.PhaseResolve {
+				t.Fatalf("unexpected bounded result: len=%d cap=%d phase=%s", len(got.Unsupported), cap(got.Unsupported), got.CompletedThrough)
+			}
+			for i, value := range got.Unsupported {
+				wantStart := i
+				if i == wantCount-1 {
+					wantStart = limit + 10 // The return type is visited first, but sorted last.
+				}
+				if value.Feature != "type ref u64" || value.Span != (hir.Span{Package: 7, Source: "main.fy", StartByte: wantStart, EndByte: wantStart + 1}) {
+					t.Fatalf("unsupported[%d] = %+v, want start %d", i, value, wantStart)
+				}
+			}
+			if !test.overflow {
+				if got.FailedPhase != semantic.PhaseNone || len(got.Diagnostics) != 0 {
+					t.Fatalf("premature exhaustion: %+v", got.Diagnostics)
+				}
+				return
+			}
+			wantDiagnostic := semantic.Diagnostic{Code: semantic.SemanticReportExhaustedCode,
+				Primary: hir.Span{Package: 7, Source: "main.fy", StartByte: limit - 1, EndByte: limit}}
+			if got.FailedPhase != semantic.PhaseType || !reflect.DeepEqual(got.Diagnostics, []semantic.Diagnostic{wantDiagnostic}) {
+				t.Fatalf("changed first excess diagnostic: %+v", got.Diagnostics)
+			}
+		})
+	}
+}
+
+func genericRestrictionBoundaryInput(count int, duplicates bool) ([]semantic.File, genericsource.PackageExpansion) {
+	badType := func(start int) ast.TypeReference {
+		return ast.TypeReference{Kind: ast.TypeKindReference, Text: " ref u64 ", Span: diagnosticSpan(start),
+			Element: &ast.TypeReference{Kind: ast.TypeKindNamed, Path: "u64"}}
+	}
+	function := ast.Function{Name: "generated", ResultType: badType(semantic.DefaultSemanticReportLimit + 10)}
+	for i := range count - 1 {
+		if duplicates {
+			function.Parameters = append(function.Parameters, ast.Parameter{Type: function.ResultType})
+		}
+		function.Parameters = append(function.Parameters, ast.Parameter{Type: badType(i)})
+	}
+	if duplicates {
+		function.Parameters = append(function.Parameters, ast.Parameter{Type: function.ResultType})
+	}
+	functions := []ast.Function{{Name: "ordinary", ResultType: badType(-1)}, function}
+	files := []semantic.File{{Package: 7, Path: "main.fy", Module: &ast.Module{Functions: functions}}}
+	if count > semantic.DefaultSemanticReportLimit {
+		// Exhaustion must stop before visiting another function or file.
+		files[0].Module.Functions = append(files[0].Module.Functions, ast.Function{Name: "generated", ResultType: badType(-2)})
+		files = append(files, semantic.File{Path: "must-not-be-visited.fy"})
+	}
+	return files, genericsource.PackageExpansion{Origins: []genericsource.SpecializationOrigin{{GeneratedName: "generated"}}}
+}
+
+func TestRestrictGenericSignaturesReturnsPriorAnalysisBeforeSourceTraversal(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		checked semantic.Result
+		origins []genericsource.SpecializationOrigin
+	}{
+		{name: "resolution failed", checked: semantic.Result{FailedPhase: semantic.PhaseResolve}, origins: []genericsource.SpecializationOrigin{{GeneratedName: "generated"}}},
+		{name: "no provenance", checked: semantic.Result{CompletedThrough: semantic.PhaseFlow}},
+		{name: "report exhausted", checked: semantic.Result{Diagnostics: []semantic.Diagnostic{{Code: semantic.SemanticReportExhaustedCode}}}, origins: []genericsource.SpecializationOrigin{{GeneratedName: "generated"}}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := restrictGenericSignatures(test.checked, []semantic.File{{}}, genericsource.PackageExpansion{Origins: test.origins})
+			if !reflect.DeepEqual(got, test.checked) {
+				t.Fatalf("replaced prior analysis: %+v", got)
+			}
+		})
+	}
+}
