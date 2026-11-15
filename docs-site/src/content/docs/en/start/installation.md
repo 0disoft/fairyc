@@ -14,6 +14,15 @@ There is no standalone installer or prebuilt binary download yet. You build `fai
 
 > **Tip:** `fairyc check` and interpreter-mode `fairyc test` do not invoke a C compiler, so you can type-check code even before configuring MSVC or GCC.
 
+## Clone the Repository
+
+If you do not have the source locally yet, clone the [fairyc GitHub repository](https://github.com/0disoft/fairyc) and move into the repository root:
+
+```bash
+git clone https://github.com/0disoft/fairyc.git
+cd fairyc
+```
+
 ## Building `fairyc`
 
 From the `fairyc` repository root:

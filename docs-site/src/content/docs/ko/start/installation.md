@@ -14,6 +14,15 @@ description: 소스에서 fairyc를 빌드하고 C 툴체인을 연결하는 방
 
 > **참고:** 문법이나 빌림만 검사하는 `fairyc check`와 인터프리터 모드 `fairyc test`는 C 컴파일러 없이도 돌아갑니다. 하지만 실제 실행 파일을 만들 때는 MSVC나 GCC/Clang이 꼭 필요합니다.
 
+## 저장소 내려받고 이동하기
+
+아직 소스 코드가 없다면 [fairyc GitHub 저장소](https://github.com/0disoft/fairyc)를 복제한 뒤 저장소 루트 폴더로 이동합니다.
+
+```bash
+git clone https://github.com/0disoft/fairyc.git
+cd fairyc
+```
+
 ## `fairyc` 빌드하기
 
 `fairyc` 저장소 루트 폴더에서 아래 명령을 실행합니다.

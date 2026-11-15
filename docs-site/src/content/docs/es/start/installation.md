@@ -14,6 +14,15 @@ Todavía no hay un instalador independiente ni binarios precompilados para desca
 
 > **Consejo:** `fairyc check` y `fairyc test` en modo intérprete no invocan un compilador de C, así que puedes verificar tipos e ideas antes de configurar MSVC o GCC.
 
+## Clonar el repositorio
+
+Si aún no tienes el código fuente en local, clona el [repositorio de fairyc en GitHub](https://github.com/0disoft/fairyc) y entra en la raíz del proyecto:
+
+```bash
+git clone https://github.com/0disoft/fairyc.git
+cd fairyc
+```
+
 ## Compilar `fairyc`
 
 Desde la raíz del repositorio `fairyc`:

@@ -5,6 +5,8 @@ description: Qué funciona hoy en Stage 0 de Fairy C, qué sigue incompleto y qu
 
 Fairy C es un **prototipo activo de compilador Stage 0**. Saber qué funciona hoy frente a lo que sigue en progreso ayuda a fijar expectativas realistas.
 
+> **Referencia verificada**: `2026-11-16` · commit [`e1d48cb7`](https://github.com/0disoft/fairyc/commit/e1d48cb7)
+
 ## Qué funciona hoy
 
 - Paquetes y dependencias locales por ruta `[workspace]` (`fairy.toml` + `fairy.lock`)

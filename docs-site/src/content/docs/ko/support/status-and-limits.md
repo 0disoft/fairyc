@@ -5,6 +5,8 @@ description: Stage 0 프로토타입에서 현재 쓸 수 있는 기능과 아�
 
 Fairy C는 지금 막 뼈대를 세워 실제 예제를 돌려 보는 **Stage 0 프로토타입**입니다. 시작하기 전에 현재 가능한 범위와 아직 부족한 부분을 간단히 짚고 넘어가면 좋습니다.
 
+> **검증 기준**: `2026-11-16` · 커밋 [`e1d48cb7`](https://github.com/0disoft/fairyc/commit/e1d48cb7)
+
 ## 지금 쓸 수 있는 것
 
 - 로컬 패키지 및 `[workspace]` 경로 의존성 관리(`fairy.toml`, `fairy.lock`)
@@ -13,7 +15,7 @@ Fairy C는 지금 막 뼈대를 세워 실제 예제를 돌려 보는 **Stage 0 
 - `@repr(C)`와 `unsafe extern C fn`을 통한 C 라이브러리·Win32 API 연동
 - 기본 SDK 모듈(`std::io`, `std::fs`, `std::bytes`, `std::alloc`, `std::text`, `std::vec`, `std::process`)
 
-Windows(MSVC + Windows SDK)와 Linux(GCC/Clang) 환경이 준비되어 있으면 위 기능들로 콘솔 도구나 작은 Win32 프로그램을 직접 빌드해 볼 수 있습니다. 다만 `fairyc targets`를 실행하면 두 타깃 모두 공식 사양 적합성 기준으로는 `supported: no`로 표시되는데, 이는 전체 표준 라이브러리와 전체 ABI 테스트가 아직 끝나지 않았기 때문입니다.
+Windows(MSVC + Windows SDK)와 Linux(GCC/Clang) 환경이 준비되어 있으면 위 기능들로 콘솔 도구나 작은 Win32 프로그램을 직접 빌드해 볼 수 있습니다. 다만 `fairyc targets`를 실행하면 두 타깃(`x86_64-windows-msvc`, `x86_64-linux-gnu`) 모두 공식 사양 적합성 기준으로는 `supported: no`로 표시되는데, 이는 전체 표준 라이브러리와 전체 ABI 테스트가 아직 끝나지 않았기 때문입니다.
 
 ## 아직 지원하지 않거나 제한되는 부분
 

@@ -32,12 +32,12 @@ const nativeArrowSelector = [
 	'[role="textbox"]',
 ].join(',');
 
-const directionalSelectSelector = ['starlight-lang-select select', 'starlight-theme-select select'].join(',');
-
 const widgetScopeSelector = [
 	'dialog',
 	'[role="dialog"]',
 	'starlight-search',
+	'starlight-lang-select',
+	'starlight-theme-select',
 	'.pagefind-ui',
 	'[data-pagefind-ui]',
 ].join(',');
@@ -153,7 +153,7 @@ const shouldUseDirectionalFocus = (event) => {
 
 	const target = event.target;
 	if (!(target instanceof HTMLElement)) return false;
-	if (target.closest(nativeArrowSelector) && !target.matches(directionalSelectSelector)) return false;
+	if (target.closest(nativeArrowSelector)) return false;
 	if (target.closest(widgetScopeSelector)) return false;
 
 	return target.matches(focusableSelector);
@@ -167,10 +167,7 @@ document.addEventListener('keydown', (event) => {
 
 	const direction = arrowDirections[event.key];
 	const next = findNextFocusableElement(current, direction);
-	if (!next) {
-		if (current.matches(directionalSelectSelector)) event.preventDefault();
-		return;
-	}
+	if (!next) return;
 
 	event.preventDefault();
 	next.focus();

@@ -14,6 +14,15 @@ description: 从源码构建 Stage 0 fairyc 编译器，并确认你的 C 工具
 
 > <strong>提示</strong>：`fairyc check` 和解释器模式的 `fairyc test` 不会调用 C 编译器，因此即使尚未配置 MSVC 或 GCC，你也可以先对代码进行类型检查。
 
+## 克隆并进入源码仓库
+
+如果本地尚未获取源码，请先从 [fairyc GitHub 仓库](https://github.com/0disoft/fairyc)克隆并进入仓库根目录：
+
+```bash
+git clone https://github.com/0disoft/fairyc.git
+cd fairyc
+```
+
 ## 构建 `fairyc`
 
 在 `fairyc` 仓库根目录下运行：

@@ -12,6 +12,7 @@ const languagePreferenceScript = `
 	const storageKey = ${JSON.stringify(languagePreference.storageKey)};
 	const defaultLocale = ${JSON.stringify(languagePreference.defaultLocale)};
 	const supportedLocales = new Set(${JSON.stringify(supportedLanguageCodes)});
+	const basePath = ${JSON.stringify(basePath)};
 
 	const normalizeLocale = (value) => {
 		if (!value || typeof value !== 'string') return undefined;
@@ -72,9 +73,23 @@ const languagePreferenceScript = `
 		}
 	};
 
+	const localeFromPathname = (pathname) => {
+		const trimmed = basePath && (pathname === basePath || pathname.startsWith(basePath + '/'))
+			? pathname.slice(basePath.length)
+			: pathname;
+		const firstSegment = trimmed.split('/').find(Boolean);
+		return normalizeLocale(firstSegment);
+	};
+
 	const initLanguagePreference = () => {
 		const select = document.querySelector('starlight-lang-select select');
 		if (!(select instanceof HTMLSelectElement)) return;
+
+		const urlLocale = localeFromPathname(window.location.pathname);
+		if (urlLocale) {
+			applyLocale(select, urlLocale, false);
+			return;
+		}
 
 		const stored = storedLocale();
 		const preferred = stored || preferredBrowserLocale();

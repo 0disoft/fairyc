@@ -5,6 +5,8 @@ description: 了解 Stage 0 Fairy C 目前已支持的功能、尚未完成的�
 
 Fairy C 目前是一个活跃开发中的 <strong>Stage 0 编译器原型</strong>。了解当前已经可用的功能与仍在开发中的部分，有助于建立合理的预期。
 
+> <strong>验证基线</strong>：`2026-11-16` · 提交 [`e1d48cb7`](https://github.com/0disoft/fairyc/commit/e1d48cb7)
+
 ## 目前已支持的功能
 
 - 包管理与本地 `[workspace]` 路径依赖（`fairy.toml` + `fairy.lock`）

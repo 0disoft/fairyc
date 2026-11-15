@@ -5,6 +5,8 @@ description: What works in Stage 0 Fairy C today, what is still incomplete, and 
 
 Fairy C is an active **Stage 0 compiler prototype**. Knowing what works today versus what is still in progress helps set realistic expectations.
 
+> **Verified snapshot**: `2026-11-16` · commit [`e1d48cb7`](https://github.com/0disoft/fairyc/commit/e1d48cb7)
+
 ## What Works Today
 
 - Packages and local `[workspace]` path dependencies (`fairy.toml` + `fairy.lock`)
