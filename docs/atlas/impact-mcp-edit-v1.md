@@ -206,9 +206,9 @@ version receives the supported server version; the client decides whether to con
 require the ready phase. There is no shell, network listener, sampling, prompts, client-root
 request, credentials, tasks or write tool. Metadata cannot grant authority.
 
-Limits: 1-1,024 messages (notifications count), 64 KiB/frame, nesting 16, 512 encoded bytes/ID,
-and 2 KiB-4 MiB/response payload. Duplicate keys, batches and invalid framing/IDs reject. Stdout
-contains only protocol frames. EOF ends the session. Every query revalidates locked current
+Limits: 1-1,024 messages (notifications count), 64 KiB/JSON frame payload (excluding LF or CRLF),
+nesting 16, 512 encoded bytes/ID, and 2 KiB-4 MiB/response payload. Duplicate keys, batches and
+invalid framing/IDs reject. Stdout contains only protocol frames. EOF ends the session. Every query revalidates locked current
 source; unavailable/stale input becomes `isError` without raw diagnostics. Session policy failures
 return 2, output failure 4; tool failure can leave the session usable.
 

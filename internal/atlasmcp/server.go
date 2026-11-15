@@ -4,6 +4,7 @@ package atlasmcp
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,13 +40,38 @@ var integerID = regexp.MustCompile(`^-?(0|[1-9][0-9]*)$`)
 
 // Serve reads newline-delimited JSON-RPC. Limits and the only capability are supplied by the host.
 func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact Impact) error {
+	return ServeWithOptions(input, output, maxMessages, maxOutput, impact)
+}
+
+// ServeOptions controls one session. A nil Context uses context.Background.
+// Input, output and impact remain caller-supplied I/O ports. Cancellation is
+// cooperative between reads and dispatch/write boundaries; it does not close
+// caller-owned streams or interrupt an in-flight host callback or syscall.
+type ServeOptions struct {
+	Context context.Context
+}
+
+// ServeWithOptions preserves Serve's required inputs and result shape.
+func ServeWithOptions(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact Impact, options ...ServeOptions) error {
+	if len(options) > 1 {
+		return fmt.Errorf("at most one MCP session options value is supported")
+	}
+	ctx := context.Background()
+	if len(options) == 1 && options[0].Context != nil {
+		ctx = options[0].Context
+	}
 	if maxMessages < 1 || maxMessages > 1024 || maxOutput < 2048 || maxOutput > 4<<20 || impact == nil {
 		return fmt.Errorf("invalid MCP session policy")
 	}
-	scanner := bufio.NewScanner(input)
-	scanner.Buffer(make([]byte, 4096), MaxInput+1)
+	scanner := bufio.NewScanner(mcpInput{ctx: ctx, reader: input})
+	// ScanLines strips CRLF as well as LF. Reserve both delimiter bytes while
+	// retaining the independent payload bound below, including the final EOF line.
+	scanner.Buffer(make([]byte, 4096), MaxInput+2)
 	initialized, ready := false, false
 	for count := 0; scanner.Scan(); count++ {
+		if err := mcpContextError(ctx); err != nil {
+			return err
+		}
 		if count >= maxMessages {
 			return fmt.Errorf("MCP message budget exhausted")
 		}
@@ -114,7 +140,13 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 					failure = &rpcError{-32602, "exact packageUid and symbol strings required"}
 					break
 				}
+				if err := mcpContextError(ctx); err != nil {
+					return err
+				}
 				data, err := impact(uid, symbol)
+				if stop := mcpContextError(ctx); stop != nil {
+					return stop
+				}
 				if err != nil {
 					result = map[string]any{"isError": true, "content": []any{map[string]string{"type": "text", "text": "Current locked Atlas query failed; inspect workspace and selector locally."}}}
 					break
@@ -126,6 +158,9 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 			default:
 				failure = &rpcError{-32601, "method not found"}
 			}
+		}
+		if err := mcpContextError(ctx); err != nil {
+			return err
 		}
 		wire, err := json.Marshal(response{Version: "2.0", ID: id, Result: result, Error: failure})
 		if err != nil {
@@ -140,11 +175,40 @@ func Serve(input io.Reader, output io.Writer, maxMessages, maxOutput int, impact
 			}
 		}
 		wire = append(wire, '\n')
+		if err := mcpContextError(ctx); err != nil {
+			return err
+		}
 		if _, err := output.Write(wire); err != nil {
 			return fmt.Errorf("%w: %v", ErrOutput, err)
 		}
 	}
+	if stop := mcpContextError(ctx); stop != nil {
+		return errors.Join(scanner.Err(), stop)
+	}
 	return scanner.Err()
+}
+
+func mcpContextError(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return errors.Join(err, context.Cause(ctx))
+	}
+	return nil
+}
+
+type mcpInput struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (input mcpInput) Read(buffer []byte) (int, error) {
+	if err := mcpContextError(input.ctx); err != nil {
+		return 0, err
+	}
+	n, err := input.reader.Read(buffer)
+	if stop := mcpContextError(input.ctx); stop != nil {
+		return n, errors.Join(err, stop)
+	}
+	return n, err
 }
 
 func validID(id json.RawMessage) bool {
