@@ -5,16 +5,12 @@ package desktopapp
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/0disoft/fairyc/internal/windowsbuild"
@@ -148,56 +144,5 @@ type Report struct {
 }
 
 func ParseReport(data []byte, root string) (Report, error) {
-	var result struct {
-		OK            bool   `json:"ok"`
-		Archive       string `json:"archive"`
-		ZipSHA256     string `json:"zipSha256"`
-		ExeBytes      int64  `json:"exeBytes"`
-		ZipBytes      int64  `json:"zipBytes"`
-		Signed        bool   `json:"signed"`
-		Published     bool   `json:"published"`
-		GUILaunched   bool   `json:"guiLaunched"`
-		InputInjected bool   `json:"inputInjected"`
-	}
-	if err := json.Unmarshal(data, &result); err != nil {
-		return Report{}, errors.New("invalid desktop packaging receipt")
-	}
-	root, err := filepath.Abs(root)
-	if err != nil {
-		return Report{}, err
-	}
-	root, err = filepath.EvalSymlinks(root)
-	if err != nil {
-		return Report{}, err
-	}
-	relative, err := filepath.Rel(filepath.Join(root, "dist"), result.Archive)
-	digest, hashErr := hex.DecodeString(result.ZipSHA256)
-	if err != nil || !filepath.IsLocal(relative) || filepath.Base(relative) != relative || !strings.HasSuffix(relative, ".zip") ||
-		!result.OK || result.Signed || result.Published || result.GUILaunched || result.InputInjected || result.ExeBytes <= 0 || result.ZipBytes <= 0 ||
-		hashErr != nil || len(digest) != sha256.Size || result.ZipSHA256 != strings.ToLower(result.ZipSHA256) {
-		return Report{}, errors.New("invalid desktop packaging receipt")
-	}
-	directory, err := os.OpenRoot(filepath.Join(root, "dist"))
-	if err != nil {
-		return Report{}, errors.New("packaged archive directory is missing")
-	}
-	defer directory.Close()
-	file, err := directory.Open(relative)
-	if err != nil {
-		return Report{}, errors.New("packaged archive is missing or outside dist")
-	}
-	defer file.Close()
-	info, err := file.Stat()
-	if err != nil || !info.Mode().IsRegular() || info.Size() > 33<<20 {
-		return Report{}, errors.New("packaged archive is missing or exceeds 33 MiB")
-	}
-	archive, err := io.ReadAll(io.LimitReader(file, (33<<20)+1))
-	if err != nil {
-		return Report{}, errors.New("packaged archive is missing")
-	}
-	actual := sha256.Sum256(archive)
-	if len(archive) > 33<<20 || int64(len(archive)) != result.ZipBytes || !bytes.Equal(actual[:], digest) {
-		return Report{}, errors.New("packaged archive checksum mismatch")
-	}
-	return Report{Schema: "fairyc.package-report/v1", Archive: "dist/" + relative, SHA256: result.ZipSHA256, ExeBytes: result.ExeBytes, ZipBytes: result.ZipBytes}, nil
+	return ParseReportWithOptions(data, root)
 }

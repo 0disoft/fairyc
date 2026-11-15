@@ -143,6 +143,20 @@ and calls the existing helper with the built EXE and root/dist. The compiler
 bounds helper streams/time, validates its receipt and verifies the retained
 archive's SHA-256/size/containment before reporting success. Plain stdout is
 `packaged: dist/<archive>.zip (unsigned, release, local only)` plus newline.
+
+Receipt verification retains the project root and opens an ordinary, unlinked
+`dist` directory beneath it. The directory identity must match before/after
+open; the archive must be an unlinked regular file directly inside that
+retained directory. An external directory link/junction or substituted directory
+cannot certify an outside archive as `dist/<archive>.zip`. Declared and observed
+archive bytes are each bounded by 33 MiB, inclusive. Read, close and cancellation
+failures return no success report and do not modify either archive or receipt.
+The internal Go `ParseReportWithOptions` entry optionally accepts caller context,
+directory opener, body reader and resource closer, defaulting to Background,
+Root.OpenRoot, io.ReadAll and Closer.Close. Context is checked around reads and
+completion; blocked host I/O remains cooperative. `ParseReport` keeps its
+existing signature and defaults.
+
 --json emits `fairyc.package-report/v1`: schema, archive (relative), sha256,
 exeBytes, zipBytes, signed=false, published=false. No absolute paths/helper chatter.
 Statuses are 0 success, 2 invocation/unsupported project or host, 3 source,
