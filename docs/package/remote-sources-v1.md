@@ -118,6 +118,19 @@ inspection/removal. A hostile process rewriting the same workspace during fetch 
 Ordinary errors clean the current stage/lock. Prior complete packages and verified cache blobs
 may remain if another package fails. Physical-media durability and global rollback are not promised.
 
+Go directory publication records the newly created stage's filesystem identity and
+rechecks it before rename and before failure cleanup. A replaced stage is preserved
+and rejected, rather than recursively deleting the replacement. Successful rename
+releases ownership of the old stage name; no cleanup runs against that name after
+commit, including when cancellation arrives immediately afterward. Cancellation
+and I/O/cleanup errors retain their causes; a committed installation can therefore
+remain present when the caller receives cancellation. Internal optional per-call
+random/write/sync/close/rename/remove operations retain host defaults. The existing
+context argument defaults to Background when nil. A nonce must contain exactly
+16 bytes, and staged writes must report the complete requested length. These are
+cooperative observations, not atomic protection against a hostile workspace writer
+or interruption of a blocked syscall. The Fairy-authored publication path is unchanged.
+
 ## Compiler and lock behavior
 
 After fetch, run `fairyc check` once to create/update ordinary `fairy.lock`; subsequent

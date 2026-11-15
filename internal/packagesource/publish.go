@@ -2,10 +2,10 @@ package packagesource
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -103,7 +103,21 @@ func verifyTreeWithin(ctx context.Context, root *os.Root, name string, b bundle,
 	return names.verifyStable(ctx, maxEntries)
 }
 
-func publish(ctx context.Context, root *os.Root, pin Pin, b bundle) (installed bool, err error) {
+func publish(ctx context.Context, root *os.Root, pin Pin, b bundle, options ...sourcePublishOptions) (installed bool, err error) {
+	policy, err := sourcePublicationPolicy(options)
+	if err != nil {
+		return false, err
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	defer func() { err = errors.Join(err, ctx.Err(), context.Cause(ctx)) }()
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if root == nil {
+		return false, fmt.Errorf("package publication requires an opened root")
+	}
 	if _, err := root.Lstat(pin.Path); err == nil {
 		return false, verifyTree(ctx, root, pin.Path, b)
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -113,14 +127,27 @@ func publish(ctx context.Context, root *os.Root, pin Pin, b bundle) (installed b
 		return false, err
 	}
 	var nonce [16]byte
-	if _, err := rand.Read(nonce[:]); err != nil {
+	n, err := policy.Random(nonce[:])
+	if err := errors.Join(err, ctx.Err()); err != nil {
 		return false, err
+	}
+	if n != len(nonce) {
+		return false, fmt.Errorf("package staging nonce: %w", io.ErrUnexpectedEOF)
 	}
 	stage := "vendor/.fairyc-source-" + hex.EncodeToString(nonce[:])
 	if err := root.Mkdir(stage, 0700); err != nil {
 		return false, err
 	}
-	defer func() { err = errors.Join(err, root.RemoveAll(stage)) }()
+	identity, err := root.Lstat(stage)
+	if err != nil {
+		return false, err
+	}
+	owned := true
+	defer func() {
+		if owned {
+			err = errors.Join(err, removeSourceStage(root, stage, identity, policy.RemoveAll))
+		}
+	}()
 	names := make([]string, 0, len(b.files))
 	for name := range b.files {
 		names = append(names, name)
@@ -138,10 +165,7 @@ func publish(ctx context.Context, root *os.Root, pin Pin, b bundle) (installed b
 		if err != nil {
 			return false, err
 		}
-		_, writeErr := file.Write(b.files[name])
-		syncErr := file.Sync()
-		closeErr := file.Close()
-		if err := errors.Join(writeErr, syncErr, closeErr); err != nil {
+		if err := writeSourceStageFile(ctx, file, b.files[name], policy); err != nil {
 			return false, err
 		}
 	}
@@ -153,8 +177,17 @@ func publish(ctx context.Context, root *os.Root, pin Pin, b bundle) (installed b
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return false, err
 	}
-	if err := root.Rename(stage, pin.Path); err != nil {
+	if err := checkSourceStage(root, stage, identity); err != nil {
 		return false, err
 	}
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if err := policy.Rename(root, stage, pin.Path); err != nil {
+		return false, err
+	}
+	// Rename commits the installation. This name no longer belongs to us,
+	// even when another directory appears there before the call returns.
+	owned = false
 	return true, nil
 }

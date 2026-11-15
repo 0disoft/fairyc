@@ -157,13 +157,7 @@ func TestRemoteSourcesCancelledStageCleanup(t *testing.T) {
 	if _, err := root.Lstat("vendor/math"); !os.IsNotExist(err) {
 		t.Fatal("published cancelled package")
 	}
-	dir, err := root.Open("vendor")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer dir.Close()
-	names, err := dir.Readdirnames(-1)
-	if err != nil || len(names) != 0 {
-		t.Fatalf("stage leaked: %v %v", names, err)
+	if _, err := root.Lstat("vendor"); !os.IsNotExist(err) {
+		t.Fatalf("pre-cancelled publication created vendor: %v", err)
 	}
 }
