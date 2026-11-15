@@ -52,69 +52,6 @@ func computeTransitiveCost(index int, nodes []functionAnalysis, loopBudgets map[
 	state[index] = 2
 }
 
-func markRecursiveFunctions(nodes []functionAnalysis) {
-	indexCounter := 0
-	indices := make([]int, len(nodes))
-	lowLink := make([]int, len(nodes))
-	onStack := make([]bool, len(nodes))
-	for index := range indices {
-		indices[index] = -1
-	}
-	var stack []int
-	var visit func(int)
-	visit = func(nodeIndex int) {
-		indices[nodeIndex] = indexCounter
-		lowLink[nodeIndex] = indexCounter
-		indexCounter++
-		stack = append(stack, nodeIndex)
-		onStack[nodeIndex] = true
-
-		edges := slices.Clone(nodes[nodeIndex].callTargets)
-		slices.Sort(edges)
-		edges = slices.Compact(edges)
-		for _, target := range edges {
-			if indices[target] == -1 {
-				visit(target)
-				lowLink[nodeIndex] = min(lowLink[nodeIndex], lowLink[target])
-			} else if onStack[target] {
-				lowLink[nodeIndex] = min(lowLink[nodeIndex], indices[target])
-			}
-		}
-		if lowLink[nodeIndex] != indices[nodeIndex] {
-			return
-		}
-		var component []int
-		for len(stack) != 0 {
-			last := stack[len(stack)-1]
-			stack = stack[:len(stack)-1]
-			onStack[last] = false
-			component = append(component, last)
-			if last == nodeIndex {
-				break
-			}
-		}
-		recursive := len(component) > 1
-		if len(component) == 1 {
-			for _, target := range nodes[component[0]].callTargets {
-				if target == component[0] {
-					recursive = true
-					break
-				}
-			}
-		}
-		if recursive {
-			for _, member := range component {
-				nodes[member].recursive = true
-			}
-		}
-	}
-	for index := range nodes {
-		if indices[index] == -1 {
-			visit(index)
-		}
-	}
-}
-
 func controlFlowCycleInfo(function mir.Function) (cycle bool, malformed bool, cycleEdges []CycleEdge) {
 	blockIndex := make(map[mir.BlockID]int, len(function.Blocks))
 	for index, block := range function.Blocks {

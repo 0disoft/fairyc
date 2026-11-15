@@ -320,8 +320,9 @@ func Analyze(program mir.Program, loopBudgets map[string]uint64) Report {
 		}
 	}
 
-	markRecursiveFunctions(nodes)
+	recursive := recursiveFunctionMask(nodes)
 	for index := range nodes {
+		nodes[index].recursive = recursive[index]
 		if !nodes[index].recursive {
 			continue
 		}
