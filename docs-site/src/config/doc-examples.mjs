@@ -23,11 +23,11 @@ source = "src"`,
 		source: `module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }`,
 	},
 	{
@@ -39,8 +39,8 @@ fn i32 main() {
 import main as app;
 
 @test
-fn void answer_is_42() {
-    assert(app::answer() == 42);
+fn void answer_is_77() {
+    assert(app::answer() == 77);
 }`,
 	},
 	{

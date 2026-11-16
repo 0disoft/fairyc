@@ -27,7 +27,7 @@ func TestStableNewCreatesAWorkspaceThatChecksAndTests(t *testing.T) {
 		t.Fatalf("generated locked check = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 	code, stdout, stderr = runForTest([]string{"test", "--locked"}, root)
-	if code != ExitSuccess || stdout != "test tests::main::answer_is_42 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
+	if code != ExitSuccess || stdout != "test tests::main::answer_is_77 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
 		t.Fatalf("generated test = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 

@@ -35,11 +35,11 @@ And look at `src/main.fy`:
 module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }
 ```
 
@@ -47,7 +47,7 @@ A quick breakdown:
 
 - `module main;` declares this file's module name. The entry file `src/main.fy` must be `module main;`.
 - `pub fn i32 answer()` puts the return type (`i32`) before the function name, and `pub` lets other modules (such as `tests/main.fy`) call it.
-- `fn i32 main()` is the entry point. Whatever `i32` it returns becomes the process exit code (`42 - 42` returns `0`).
+- `fn i32 main()` is the entry point. Whatever `i32` it returns becomes the process exit code (`77 - 77` returns `0`).
 
 ## 2. Check Syntax, Types, and Borrows
 
@@ -77,8 +77,8 @@ module tests::main;
 import main as app;
 
 @test
-fn void answer_is_42() {
-    assert(app::answer() == 42);
+fn void answer_is_77() {
+    assert(app::answer() == 77);
 }
 ```
 
@@ -91,7 +91,7 @@ fairyc test --locked
 Expected output:
 
 ```text
-test tests::main::answer_is_42 ... ok
+test tests::main::answer_is_77 ... ok
 test result: ok. 1 passed; 0 failed; lock verified
 ```
 

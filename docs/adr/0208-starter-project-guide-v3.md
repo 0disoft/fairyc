@@ -43,3 +43,10 @@ and launch a retained executable for output even though stable run now forwards 
 A newly created project now follows conventional process-success semantics without losing the
 answer-42 compiler and test proof. Generated README bytes change again, so this is starter v3 rather
 than a silent correction to v2.
+
+## Sample value update (2026-11-16)
+
+The current starter uses `77` for `answer()`, `answer_is_77`, and the corresponding assertions.
+Its entry returns `answer() - 77`, retaining successful status zero. This supersedes the historical
+sample value `42` above; the file set, commands, identities, and existing user projects are unchanged.
+The Go and Fairy C generators, generated guide, and introductory documentation use the same value.

@@ -40,11 +40,11 @@ source = "src"
 module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }
 ```
 
@@ -52,7 +52,7 @@ fn i32 main() {
 
 1. `module main;`: 이 파일의 모듈 이름입니다. 진입 파일인 `src/main.fy`는 `main` 모듈이어야 합니다.
 2. `pub fn i32 answer()`: C와 비슷하지만 함수 이름(`answer`) 앞에 반환 타입 `i32`가 오고, 앞에 `fn`이 붙습니다. `pub`은 테스트 파일 같은 다른 모듈에서도 이 함수를 부를 수 있게 열어 준다는 뜻입니다.
-3. `fn i32 main()`: 프로그램이 시작하는 지점입니다. 여기서 `return`한 `i32` 숫자가 운영체제에 돌려주는 프로세스 종료 코드(exit code)가 됩니다. `42 - 42`는 `0`이므로 정상 종료를 뜻하게 됩니다.
+3. `fn i32 main()`: 프로그램이 시작하는 지점입니다. 여기서 `return`한 `i32` 숫자가 운영체제에 돌려주는 프로세스 종료 코드(exit code)가 됩니다. `77 - 77`는 `0`이므로 정상 종료를 뜻하게 됩니다.
 
 ## 2. 문법·타입 검사하기 (`check`)
 
@@ -76,7 +76,7 @@ fairyc check --locked
 
 ## 3. 테스트 돌려보기 (`test`)
 
-`tests/main.fy`에는 이미 `answer() == 42`를 확인하는 테스트가 하나 들어 있습니다. 새 테스트를 추가할 때는 테스트 함수 위에 `@test`를 붙이면 됩니다.
+`tests/main.fy`에는 이미 `answer() == 77`를 확인하는 테스트가 하나 들어 있습니다. 새 테스트를 추가할 때는 테스트 함수 위에 `@test`를 붙이면 됩니다.
 
 ```c
 module tests::main;
@@ -84,8 +84,8 @@ module tests::main;
 import main as app;
 
 @test
-fn void answer_is_42() {
-    assert(app::answer() == 42);
+fn void answer_is_77() {
+    assert(app::answer() == 77);
 }
 ```
 
@@ -98,7 +98,7 @@ fairyc test --locked
 출력:
 
 ```text
-test tests::main::answer_is_42 ... ok
+test tests::main::answer_is_77 ... ok
 test result: ok. 1 passed; 0 failed; lock verified
 ```
 

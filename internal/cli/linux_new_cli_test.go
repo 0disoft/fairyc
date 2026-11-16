@@ -118,7 +118,7 @@ func checkLinuxNew(t *testing.T, artifact cdriver.NativeArtifact, backend []byte
 	run(root, []string{"check"}, 0)
 	run(root, []string{"check", "--locked"}, 0)
 	out, err = run(root, []string{"test", "--locked"}, 0)
-	if !strings.Contains(out, "test tests::main::answer_is_42 ... ok") || err != "" {
+	if !strings.Contains(out, "test tests::main::answer_is_77 ... ok") || err != "" {
 		t.Fatalf("new semantic starter: %q %q", out, err)
 	}
 	if err := os.WriteFile(filepath.Join(install, "fairyc-candidate-linux-build"), backend, 0700); err != nil {

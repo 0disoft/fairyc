@@ -35,11 +35,11 @@ source = "src"
 module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }
 ```
 
@@ -47,7 +47,7 @@ fn i32 main() {
 
 - `module main;` 声明当前文件的模块名称。入口文件 `src/main.fy` 必须声明为 `module main;`。
 - `pub fn i32 answer()` 将返回类型（`i32`）写在函数名之前，而 `pub` 允许其他模块（例如 `tests/main.fy`）调用该函数。
-- `fn i32 main()` 是程序入口点。它返回的 `i32` 值就是进程的退出码（`42 - 42` 返回 `0`）。
+- `fn i32 main()` 是程序入口点。它返回的 `i32` 值就是进程的退出码（`77 - 77` 返回 `0`）。
 
 ## 2. 检查语法、类型与借用
 
@@ -77,8 +77,8 @@ module tests::main;
 import main as app;
 
 @test
-fn void answer_is_42() {
-    assert(app::answer() == 42);
+fn void answer_is_77() {
+    assert(app::answer() == 77);
 }
 ```
 
@@ -91,7 +91,7 @@ fairyc test --locked
 预期输出：
 
 ```text
-test tests::main::answer_is_42 ... ok
+test tests::main::answer_is_77 ... ok
 test result: ok. 1 passed; 0 failed; lock verified
 ```
 

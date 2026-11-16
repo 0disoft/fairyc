@@ -140,7 +140,7 @@ func runStandaloneCompiler(
 		return 0, fmt.Errorf("execute standalone compiler generated starter test: %w", err)
 	}
 	if starterTestCode != cli.ExitSuccess || starterTestStderr != "" ||
-		starterTestStdout != "test tests::main::answer_is_42 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" {
+		starterTestStdout != "test tests::main::answer_is_77 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" {
 		return 0, fmt.Errorf("standalone compiler starter test returned code %d, stdout %q, stderr %q", starterTestCode, starterTestStdout, starterTestStderr)
 	}
 	starterNativeTestSource := `module tests::main;

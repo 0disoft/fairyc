@@ -108,11 +108,11 @@ var scaffoldFiles = []scaffoldFile{
 const mainSource = `module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }
 `
 
@@ -121,8 +121,8 @@ const testSource = `module tests::main;
 import main as app;
 
 @test
-fn void answer_is_42() {
-    assert(app::answer() == 42);
+fn void answer_is_77() {
+    assert(app::answer() == 77);
 }
 `
 
@@ -156,7 +156,7 @@ fairyc build --release --locked
 
 `+"`fairyc test --native`"+` compiles every test into a separate temporary Windows image.
 `+"`fairyc run`"+` forwards program output and returns `+"`main`"+`'s `+"`i32`"+` as the process status.
-The generated starter returns zero after checking that `+"`answer()`"+` is 42.
+The generated starter returns zero after checking that `+"`answer()`"+` is 77.
 
 ## Run on Linux
 

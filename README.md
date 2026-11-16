@@ -75,11 +75,11 @@ The generated `src/main.fy` contains a minimal complete program:
 module main;
 
 pub fn i32 answer() {
-    return 42;
+    return 77;
 }
 
 fn i32 main() {
-    return answer() - 42;
+    return answer() - 77;
 }
 ```
 

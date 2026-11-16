@@ -112,7 +112,7 @@ source = "src"`,
 		'libs/answer/src/answer.fy': `module answer;
 
 pub fn i32 value() {
-    return 42;
+    return 77;
 }`,
 	});
 	runInWorkspace(compilerExe, projectDir, ['check'], 'language & manifest check');

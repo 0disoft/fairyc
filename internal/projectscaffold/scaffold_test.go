@@ -97,7 +97,7 @@ fairyc build --release --locked
 
 ` + "`fairyc test --native`" + ` compiles every test into a separate temporary Windows image.
 ` + "`fairyc run`" + ` forwards program output and returns ` + "`main`" + `'s ` + "`i32`" + ` as the process status.
-The generated starter returns zero after checking that ` + "`answer()`" + ` is 42.
+The generated starter returns zero after checking that ` + "`answer()`" + ` is 77.
 
 ## Run on Linux
 
