@@ -44,6 +44,9 @@ per line, and it carries no authority by itself: authority stays with the docume
 - .gitignore excludes local, secret, build, and cache artifacts.
 - Generated, cache, and build output must not be used as design-document evidence.
 - Do not create large diffs that only change line endings.
+- Keep product documentation focused on Fairy C features, behavior, architecture, and substantive
+  improvements. Update examples when needed, but leave cosmetic and example-value change history
+  in Git rather than adding documentation or ADR entries. Keep agent policies in this file.
 
 ## Commit Messages and Attribution
 
