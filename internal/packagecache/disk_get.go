@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/directoryscan"
 )
 
 var errDiskGenerationCorrupt = errors.New("package cache generation is corrupt")
+
+// Any other verified generation count is a miss, never a selection by order.
+const diskHitGenerationCount = 1
 
 // DiskGetOptions supplies per-lookup I/O and Go's cancellation signal. Nil fields
 // retain the opened root and Background. Callbacks use root-relative paths and
@@ -38,16 +40,44 @@ func (store *DiskStore) GetWithOptions(key Key, options ...DiskGetOptions) (Reco
 	if len(options) > 1 {
 		return miss()
 	}
+	policy := store.diskGetPolicy(options)
+	ctx := policy.Context
+	if ctx.Err() != nil {
+		return miss()
+	}
+	keyDirectory := store.keyDirectoryName(key)
+	budget := store.newScanBudget()
+	budget.Context = ctx
+	entries, err := policy.ReadDirectory(keyDirectory, budget)
+	if err != nil || ctx.Err() != nil {
+		return miss()
+	}
+	names := diskGenerationCandidates(entries)
+	candidate, validCount, complete := store.readDiskGenerationCandidates(keyDirectory, key, names, policy)
+	if !complete {
+		return miss()
+	}
+	if validCount == diskHitGenerationCount {
+		store.recordHit()
+		return candidate, true
+	}
+	if validCount > diskHitGenerationCount {
+		store.recordRejectedBy(uint64(validCount))
+		if !removeDiskGenerationCandidates(keyDirectory, names, policy) {
+			return miss()
+		}
+	}
+	removeEmptyKeyDirectoryUsing(keyDirectory, ctx, store.root.Lstat, policy.Remove)
+	return miss()
+}
+
+func (store *DiskStore) diskGetPolicy(options []DiskGetOptions) DiskGetOptions {
 	var policy DiskGetOptions
 	if len(options) == 1 {
 		policy = options[0]
 	}
 	if policy.Context == nil {
 		policy.Context = context.Background()
-	}
-	ctx := policy.Context
-	if ctx.Err() != nil {
-		return miss()
 	}
 	if policy.ReadDirectory == nil {
 		policy.ReadDirectory = func(name string, budget *directoryscan.Budget) ([]os.DirEntry, error) {
@@ -69,41 +99,53 @@ func (store *DiskStore) GetWithOptions(key Key, options ...DiskGetOptions) (Reco
 	if policy.Remove == nil {
 		policy.Remove = store.root.Remove
 	}
-	keyDirectory := store.keyDirectoryName(key)
-	budget := store.newScanBudget()
-	budget.Context = ctx
-	entries, err := policy.ReadDirectory(keyDirectory, budget)
-	if err != nil || ctx.Err() != nil {
-		return miss()
-	}
-	slices.SortFunc(entries, func(left, right os.DirEntry) int { return strings.Compare(left.Name(), right.Name()) })
-	var candidate Record
-	validCount := 0
+	return policy
+}
+
+// Directory callbacks may share immutable snapshots. Retain and sort only
+// generation names in our own array; unowned entries never enter the sort.
+func diskGenerationCandidates(entries []os.DirEntry) []string {
+	var names []string
 	for _, entry := range entries {
-		if ctx.Err() != nil {
-			return miss()
-		}
-		if entry.IsDir() || !validGenerationName(entry.Name()) {
+		if entry.IsDir() {
 			continue
 		}
-		path := filepath.Join(keyDirectory, entry.Name())
-		record, readErr := policy.ReadGeneration(ctx, path, entry.Name(), key)
+		name := entry.Name()
+		if validGenerationName(name) {
+			names = append(names, name)
+		}
+	}
+	slices.Sort(names)
+	return names
+}
+
+// Incomplete observations cannot authorize a hit or conflict cleanup.
+func (store *DiskStore) readDiskGenerationCandidates(directory string, key Key, names []string, policy DiskGetOptions) (Record, int, bool) {
+	ctx := policy.Context
+	var candidate Record
+	validCount := 0
+	for _, name := range names {
 		if ctx.Err() != nil {
-			return miss()
+			return Record{}, 0, false
+		}
+		path := filepath.Join(directory, name)
+		record, readErr := policy.ReadGeneration(ctx, path, name, key)
+		if ctx.Err() != nil {
+			return Record{}, 0, false
 		}
 		if readErr != nil {
 			if errors.Is(readErr, os.ErrNotExist) {
 				continue // A concurrent collector removed this generation.
 			}
 			if !errors.Is(readErr, errDiskGenerationCorrupt) {
-				return miss() // An unread sibling may hide a producer conflict.
+				return Record{}, 0, false // An unread sibling may hide a producer conflict.
 			}
 			store.recordRejected()
 			_ = policy.Remove(path)
 			continue
 		}
 		validCount++
-		if validCount == 1 {
+		if validCount == diskHitGenerationCount {
 			candidate = record
 		} else {
 			// Validate/count later generations without retaining extra payloads.
@@ -111,23 +153,17 @@ func (store *DiskStore) GetWithOptions(key Key, options ...DiskGetOptions) (Reco
 		}
 	}
 	if ctx.Err() != nil {
-		return miss()
+		return Record{}, 0, false
 	}
-	if validCount != 1 {
-		if validCount > 1 {
-			store.recordRejectedBy(uint64(validCount))
-			for _, entry := range entries {
-				if ctx.Err() != nil {
-					return miss()
-				}
-				if !entry.IsDir() && validGenerationName(entry.Name()) {
-					_ = policy.Remove(filepath.Join(keyDirectory, entry.Name()))
-				}
-			}
+	return candidate, validCount, true
+}
+
+func removeDiskGenerationCandidates(directory string, names []string, policy DiskGetOptions) bool {
+	for _, name := range names {
+		if policy.Context.Err() != nil {
+			return false
 		}
-		removeEmptyKeyDirectoryUsing(keyDirectory, ctx, store.root.Lstat, policy.Remove)
-		return miss()
+		_ = policy.Remove(filepath.Join(directory, name))
 	}
-	store.recordHit()
-	return candidate, true
+	return true
 }
