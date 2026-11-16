@@ -45,6 +45,12 @@ per line, and it carries no authority by itself: authority stays with the docume
 - Generated, cache, and build output must not be used as design-document evidence.
 - Do not create large diffs that only change line endings.
 
+## Commit Messages and Attribution
+
+- Write commit subjects and bodies in English, following the existing gitmoji convention.
+- Use the configured human Git identity. Do not attribute commits to AI tools, models, agents,
+  or vendors as authors, committers, or `Co-authored-by` trailers. Preserve real human attribution.
+
 ## Before Editing
 
 - Read this file, VALIDATION.md, CHECKLIST.md, and .agents/context-map.md.
