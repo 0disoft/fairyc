@@ -24,42 +24,49 @@ func (f *borrowFlowAnalyzer) checkBorrowCreation(expression *ast.Expression, env
 // Implicit indexed stores use the same live-loan checks as explicit borrows.
 // The source node supplies expression liveness, including index and RHS uses.
 func (f *borrowFlowAnalyzer) checkNamedBorrowCreation(expression *ast.Expression, owner *symbol, kind string, environment borrowEnvironment) {
-	if f.summarizing || f.probing() {
-		return
-	}
-	if owner == nil {
+	if f.summarizing || f.probing() || owner == nil {
 		return
 	}
 	seen := map[hir.Span]bool{}
-	report := func(priorOwner *symbol, priorKind string, borrow, lastUse hir.Span) {
-		if owner != priorOwner || kind == "shared" && priorKind == "shared" || seen[borrow] {
-			return
-		}
-		seen[borrow] = true
-		f.analyzer.addDiagnostic("E2101", span(f.module.file.Path, expression.Span),
-			RelatedSpan{Role: "loan", Span: borrow}, RelatedSpan{Role: "last-use", Span: lastUse})
-	}
 	check := func(value borrowValueState, lastUse hir.Span) {
-		for _, id := range value.loans {
-			if id >= 0 && id < len(f.loans) {
-				loan := f.loans[id]
-				report(loan.owner, loan.fact.Kind, loan.fact.Borrow, lastUse)
+		for _, borrow := range borrowCreationConflicts(value, f.loans, owner, kind) {
+			if seen[borrow] {
+				continue
 			}
-		}
-		for _, pending := range value.pending {
-			report(pending.owner, pending.kind, pending.borrow, lastUse)
-		}
-	}
-	for binding, lastUse := range f.liveAfterExpression[expression] {
-		if value, exists := environment[binding]; exists {
-			check(value, lastUse)
+			seen[borrow] = true
+			f.analyzer.addDiagnostic("E2101", span(f.module.file.Path, expression.Span),
+				RelatedSpan{Role: "loan", Span: borrow}, RelatedSpan{Role: "last-use", Span: lastUse})
 		}
 	}
+	f.visitLiveOwnerBindings(owner, f.liveAfterExpression[expression], environment, check)
 	// Earlier arguments remain borrowed until the enclosing call completes even
 	// if their source-variable last use appears before this later argument.
 	for _, value := range f.callBorrows {
 		check(value, span(f.module.file.Path, expression.Span))
 	}
+}
+
+// Conflict selection only reads its inputs. The returned slice belongs to the
+// caller; valid shared accesses and unrelated owners require no allocation.
+func borrowCreationConflicts(value borrowValueState, loans []borrowLoanRecord, owner *symbol, kind string) []hir.Span {
+	var conflicts []hir.Span
+	for _, id := range value.loans {
+		if id < 0 || id >= len(loans) {
+			continue
+		}
+		loan := loans[id]
+		if loan.owner != owner || kind == "shared" && loan.fact.Kind == "shared" {
+			continue
+		}
+		conflicts = append(conflicts, loan.fact.Borrow)
+	}
+	for _, pending := range value.pending {
+		if pending.owner != owner || kind == "shared" && pending.kind == "shared" {
+			continue
+		}
+		conflicts = append(conflicts, pending.borrow)
+	}
+	return conflicts
 }
 
 // A scalar store retains its target borrow through RHS evaluation. Reading the
