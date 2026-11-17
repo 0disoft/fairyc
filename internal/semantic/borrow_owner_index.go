@@ -1,6 +1,12 @@
 package semantic
 
-import "github.com/0disoft/fairyc/internal/hir"
+import (
+	"cmp"
+	"math/bits"
+	"slices"
+
+	"github.com/0disoft/fairyc/internal/hir"
+)
 
 // borrowOwnerBindingIndex reverses the environment relation for owner
 // conflict checks. A binding can acquire candidates in sibling forks, so the
@@ -9,8 +15,8 @@ import "github.com/0disoft/fairyc/internal/hir"
 type borrowOwnerBindingIndex map[*symbol]*borrowOwnerBindingSet
 
 type borrowOwnerBindingSet struct {
-	ordered []*symbol
-	seen    map[*symbol]struct{}
+	ordered   []*symbol
+	positions map[*symbol]int
 }
 
 func (index *borrowOwnerBindingIndex) add(owner, binding *symbol) {
@@ -22,13 +28,13 @@ func (index *borrowOwnerBindingIndex) add(owner, binding *symbol) {
 	}
 	set := (*index)[owner]
 	if set == nil {
-		set = &borrowOwnerBindingSet{seen: make(map[*symbol]struct{})}
+		set = &borrowOwnerBindingSet{positions: make(map[*symbol]int)}
 		(*index)[owner] = set
 	}
-	if _, found := set.seen[binding]; found {
+	if _, found := set.positions[binding]; found {
 		return
 	}
-	set.seen[binding] = struct{}{}
+	set.positions[binding] = len(set.ordered)
 	set.ordered = append(set.ordered, binding)
 }
 
@@ -56,7 +62,29 @@ func (index *borrowOwnerBindingIndex) addValue(value borrowValueState, binding *
 
 func (f *borrowFlowAnalyzer) visitLiveOwnerBindings(owner *symbol, live borrowLiveMap, environment borrowEnvironment,
 	visit func(borrowValueState, hir.Span)) int {
-	candidates := f.ownerBindings.candidates(owner)
+	set := f.ownerBindings[owner]
+	if owner == nil || set == nil {
+		return 0
+	}
+	candidates := set.ordered
+	inspected := len(candidates)
+	// Prefer the live side only when scanning and sorting it is cheaper than
+	// scanning the owner's cumulative history. Divide to avoid size overflow.
+	if len(live) < len(candidates)/(bits.Len(uint(len(live)))+1) {
+		var scratch [8]*symbol
+		candidates = scratch[:0]
+		for binding := range live {
+			if _, found := set.positions[binding]; found {
+				candidates = append(candidates, binding)
+			}
+		}
+		// Map iteration must not reorder diagnostics or which report the budget
+		// admits first. Restore the original owner-index insertion order.
+		slices.SortFunc(candidates, func(left, right *symbol) int {
+			return cmp.Compare(set.positions[left], set.positions[right])
+		})
+		inspected = len(live)
+	}
 	for _, binding := range candidates {
 		lastUse, retained := live[binding]
 		if !retained {
@@ -66,5 +94,5 @@ func (f *borrowFlowAnalyzer) visitLiveOwnerBindings(owner *symbol, live borrowLi
 			visit(value, lastUse)
 		}
 	}
-	return len(candidates)
+	return inspected
 }
