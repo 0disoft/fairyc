@@ -113,11 +113,14 @@ func (r *executionState) evaluateUnary(locals map[mir.LocalID]runtimeValue, oper
 			if !exists || !scalarStoreValueMatches(referent, element) {
 				return runtimeValue{}, "", capabilityError("safe dereference has invalid scalar referent")
 			}
-			copied, err := r.cloneForValueCopy(referent)
-			return copied, "", err
+			value = referent
+		} else {
+			value.typ = element
 		}
-		value.typ = element
-		return value, "", nil
+		// Dereference produces an owned value now, before later operands can
+		// mutate its referent. Use the same bounded copy as scalar references.
+		copied, err := r.cloneForValueCopy(value)
+		return copied, "", err
 	}
 	if operation.OwnerType == hir.TypeI64 && operation.Type == hir.TypeI64 {
 		return unaryI64(operation.Operator, value)
