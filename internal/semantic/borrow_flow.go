@@ -98,6 +98,7 @@ type borrowReturnTarget struct {
 }
 
 type borrowFlowAnalyzer struct {
+	// Temporary call stacks must clear retired evidence with slices.Delete.
 	// Selecting a storage place does not read the named root's value. Other
 	// expressions inside its selectors remain ordinary reads.
 	ownerReadPlace      *ast.Expression
@@ -362,7 +363,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 			f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
 			_, reachable = f.evaluateExpression(statement.Expression, environment)
 			f.assignmentBorrow, f.assignmentLastUse = priorBorrow, priorLastUse
-			f.callBorrows = f.callBorrows[:base]
+			f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
 			return reachable
 		}
 		f.checkDirectOwnerMove(statement, statement.Expression, environment)
@@ -448,7 +449,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		}
 		base := len(f.callBorrows)
 		f.callBorrows = append(f.callBorrows, owner)
-		defer func() { f.callBorrows = f.callBorrows[:base] }()
+		defer func() { f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows)) }()
 		for _, argument := range expression.Children[1:] {
 			if _, reachable := f.evaluateConstructorMetadata(argument, expression.Children[0], environment); !reachable {
 				return borrowValueState{}, false
@@ -584,7 +585,10 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	case syntax.KindCall:
 		base := len(f.callBorrows)
 		accessBase := len(f.callAccesses)
-		defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+		defer func() {
+			f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+			f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+		}()
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
 			return borrowValueState{

@@ -1,6 +1,10 @@
 package semantic
 
-import "github.com/0disoft/fairyc/internal/ast"
+import (
+	"slices"
+
+	"github.com/0disoft/fairyc/internal/ast"
+)
 
 func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, environment borrowEnvironment) bool {
 	if index := indexedPlace(statement.Target); index != nil {
@@ -25,8 +29,8 @@ func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, e
 		f.assignmentBorrow = &held
 		f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
 		defer func() {
-			f.callBorrows = f.callBorrows[:base]
-			f.callAccesses = f.callAccesses[:accessBase]
+			f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+			f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
 			f.assignmentBorrow = priorBorrow
 			f.assignmentLastUse = priorLastUse
 		}()
@@ -50,7 +54,7 @@ func (f *borrowFlowAnalyzer) evaluateFieldAssignment(statement *ast.Statement, e
 	}
 	_, reachable := f.evaluateExpression(statement.Expression, environment)
 	f.assignmentBorrow, f.assignmentLastUse = priorBorrow, priorLastUse
-	f.callBorrows = f.callBorrows[:base]
+	f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
 	if reachable {
 		f.checkOwnerAssignment(statement, binding, environment)
 	}

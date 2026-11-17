@@ -1,6 +1,8 @@
 package semantic
 
 import (
+	"slices"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
@@ -81,7 +83,10 @@ func (f *borrowFlowAnalyzer) evaluateIndexedPlace(index *ast.Expression, mutable
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, value)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: value, mutable: mutable, span: span(f.module.file.Path, index.Span)})
-	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	defer func() {
+		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+	}()
 	if _, reachable = f.evaluateExpression(index.Children[1], environment); !reachable {
 		return borrowValueState{}, false
 	}
@@ -179,7 +184,10 @@ func (f *borrowFlowAnalyzer) evaluateArrayPlace(expression, selected *ast.Expres
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, value)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: value, mutable: mutable, span: span(f.module.file.Path, expression.Span)})
-	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	defer func() {
+		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+	}()
 	for _, selector := range selected.Children[1:] {
 		if _, reachable := f.evaluateExpression(selector, environment); !reachable {
 			return borrowValueState{}, false

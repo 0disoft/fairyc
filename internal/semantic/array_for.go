@@ -1,6 +1,8 @@
 package semantic
 
 import (
+	"slices"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
@@ -111,7 +113,7 @@ func (f *borrowFlowAnalyzer) evaluateArrayFor(prepared *ast.Expression, environm
 	environment[binding] = f.materialize(value, binding)
 	base := len(f.callBorrows)
 	f.callBorrows = append(f.callBorrows, environment[binding])
-	defer func() { f.callBorrows = f.callBorrows[:base] }()
+	defer func() { f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows)) }()
 	rest := &ast.Expression{Kind: syntax.KindBlock, Span: prepared.Span,
 		Block: &ast.Block{Span: prepared.Block.Span, Statements: prepared.Block.Statements[1:]}}
 	_, reachable = f.evaluateExpression(rest, environment)

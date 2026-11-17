@@ -1,6 +1,8 @@
 package semantic
 
 import (
+	"slices"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
@@ -128,7 +130,10 @@ func (f *borrowFlowAnalyzer) evaluateViewFor(statement *ast.Statement, environme
 	if statement.ByteFor.Type.Kind == ast.TypeKindReference && !statement.ByteFor.Type.Mutable {
 		f.callAccesses = append(f.callAccesses, borrowCallAccess{value: view, mutable: false, span: span(f.module.file.Path, statement.ByteFor.View.Span)})
 	}
-	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	defer func() {
+		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+	}()
 	_, reachable = f.evaluateExpression(prepared, environment)
 	return reachable
 }

@@ -16,7 +16,10 @@ func (f *borrowFlowAnalyzer) evaluateBorrowedIndex(expression *ast.Expression, e
 	base, accessBase := len(f.callBorrows), len(f.callAccesses)
 	f.callBorrows = append(f.callBorrows, receiver)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: false, span: span(f.module.file.Path, expression.Span)})
-	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	defer func() {
+		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+	}()
 	return f.evaluateExpression(expression.Children[1], environment)
 }
 
@@ -39,7 +42,10 @@ func (f *borrowFlowAnalyzer) evaluateSubview(expression *ast.Expression, environ
 	// Pure length reads are allowed; competing mutation is not.
 	f.callBorrows = append(f.callBorrows, receiver)
 	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: receiver, mutable: mutable, span: span(f.module.file.Path, expression.Span)})
-	defer func() { f.callBorrows = f.callBorrows[:base]; f.callAccesses = f.callAccesses[:accessBase] }()
+	defer func() {
+		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
+		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
+	}()
 	for _, bound := range expression.Children[1:] {
 		if _, reachable = f.evaluateExpression(bound, environment); !reachable {
 			return borrowValueState{}, false
@@ -174,7 +180,7 @@ func (f *borrowFlowAnalyzer) evaluateSubviewIndexStore(statement *ast.Statement,
 	}
 	base := len(f.callBorrows)
 	f.callBorrows = append(f.callBorrows, receiver)
-	defer func() { f.callBorrows = f.callBorrows[:base] }()
+	defer func() { f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows)) }()
 	if _, reachable = f.evaluateExpression(target.Children[1], environment); !reachable {
 		return false
 	}
