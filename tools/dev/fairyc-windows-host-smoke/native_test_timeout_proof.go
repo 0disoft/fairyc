@@ -21,7 +21,9 @@ func runStableNativeTestTimeoutProof(root string) (int, error) {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		code := cli.Run(testCase.arguments, testRoot, &stdout, &stderr)
-		wantStderr := "fairyc: build failed: execute native test tests::timeout::hangs: MSVC target executable exceeded 1s\n"
+		// The driver preserves the deadline cause and the owned Job's termination status.
+		// Keep exact matching so unexpected process or cleanup errors still fail the proof.
+		wantStderr := "fairyc: build failed: execute native test tests::timeout::hangs: MSVC target executable exceeded 1s: context deadline exceeded\nexit status 1\n"
 		if code != cli.ExitBuildFailure || stdout.Len() != 0 || stderr.String() != wantStderr {
 			return 0, fmt.Errorf("stable native-test timeout %s returned code %d, stdout %q, stderr %q", testCase.name, code, stdout.String(), stderr.String())
 		}
