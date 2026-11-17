@@ -175,7 +175,8 @@ fn i32 tree(syntax::Parsed parsed) {
 		{"", 512, 0, 1, 0, 0},
 		{"fn void kept() {}", 512, 1, 1, 0, 0},
 		{"module main; fn i32 broken( { } fn void kept() {}", 512, 2, 1, 27, 0},
-		{"module main; fn i32 bad() { fn void nested() {} } fn void kept() {}", 512, 2, 1, 26, 0},
+		// In expression position fn starts a closure. The missing [ is diagnosed at void.
+		{"module main; fn i32 bad() { fn void nested() {} } fn void kept() {}", 512, 2, 1, 31, 0},
 		{"module main; fn void ok() {} import a as b;", 512, 2, 1, 28, 0},
 		{"module main; fn void f() {}", 1, 0, 0, 0, 4},
 		{"module main;", 513, 0, 0, 0, 4},
@@ -183,7 +184,7 @@ fn i32 tree(syntax::Parsed parsed) {
 		{"module main; " + strings.Repeat("fn ?; ", 33), 512, 0, 0, 0, 4},
 	}
 	cases[5].offset = strings.Index(cases[5].input, "{")
-	cases[6].offset = strings.Index(cases[6].input, "fn void nested")
+	cases[6].offset = strings.Index(cases[6].input, "void nested")
 	cases[7].offset = strings.Index(cases[7].input, "import")
 	for _, body := range []string{"if (true) { var x = 1; } else ;", "{ x = ; }", "if (true) return;", "x += ;", "while (true) ;", "while (;", "break ; continue ; while (true) { break } ;"} {
 		input := "module main; fn void bad() { " + body + " } fn void kept() {}"
