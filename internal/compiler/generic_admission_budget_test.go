@@ -33,6 +33,7 @@ func TestRestrictGenericSignaturesPreservesReportExhaustion(t *testing.T) {
 }
 
 func TestRestrictGenericSignaturesBoundsTransportUnsupportedAtCollection(t *testing.T) {
+	// ADR 0555 admits Result<u64,i32>; an i64 error remains unsupported.
 	const generated = semantic.DefaultSemanticReportLimit + 64
 	functions := make([]ast.Function, 0, generated)
 	origins := make([]genericsource.SpecializationOrigin, 0, generated)
@@ -40,10 +41,10 @@ func TestRestrictGenericSignaturesBoundsTransportUnsupportedAtCollection(t *test
 		name := fmt.Sprintf("generated%d", index)
 		functions = append(functions, ast.Function{
 			Name: name,
-			ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Result",
+			ResultType: ast.TypeReference{Kind: ast.TypeKindNamed, Path: "Result", Text: "Result<u64,i64>",
 				Span: diagnosticSpan(index), Arguments: []ast.TypeReference{{
 					Kind: ast.TypeKindNamed, Path: "u64",
-				}, {Kind: ast.TypeKindNamed, Path: "i32"}}},
+				}, {Kind: ast.TypeKindNamed, Path: "i64"}}},
 		})
 		origins = append(origins, genericsource.SpecializationOrigin{GeneratedName: name})
 	}

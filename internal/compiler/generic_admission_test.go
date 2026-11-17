@@ -60,12 +60,18 @@ func TestGenericSignatureAdmissionPreservesCompositeSpellingAndResolution(t *tes
 		for _, shape := range []string{"ref T", "ptr T", "Result<T,i32>", "T[2]", "Option<Option<T>>", "ref Option<T>", "Option<ref T>", "Result<Option<T>,i32>", "Option<Result<T,i32>>", "ref T[]"} {
 			t.Run(scalar+"/"+shape, func(t *testing.T) {
 				// Typed forwarding has valid call arity and argument types: the two
-				// rejections must belong to the specialized signature, not a bad call.
+				// restrictions for closed shapes must belong to the specialized
+				// signature, not a bad call. ADRs 0555/0556 admit two former negatives.
 				concrete := strings.ReplaceAll(shape, "T", scalar)
 				text := fmt.Sprintf("module main;fn %[1]s id<T>(%[1]s value){return value;}fn %[2]s forward(%[2]s value){discard id<%[3]s>(value);return id<%[3]s>(value);}", shape, concrete, scalar)
 				file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", text)
 				result, err := compiler.CheckExplicitFiles([]semantic.File{file})
-				if err != nil || result.Verified || len(result.Semantic.Unsupported) != 2 || len(result.Semantic.Diagnostics) != 0 {
+				admitted := shape == "Result<T,i32>" || shape == "Option<Option<T>>"
+				wantUnsupported := 2
+				if admitted {
+					wantUnsupported = 0
+				}
+				if err != nil || result.Verified != admitted || len(result.Semantic.Unsupported) != wantUnsupported || len(result.Semantic.Diagnostics) != 0 {
 					t.Fatalf("composite signature: %v %+v", err, result.Semantic)
 				}
 				for _, row := range result.Semantic.Unsupported {
