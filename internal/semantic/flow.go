@@ -55,27 +55,11 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 	}
 	inventory := flowInventory{}
 	inventory.collectFunction(function.Body)
-	origins := make(map[*symbol]flowOrigin)
-	for index := range function.Parameters {
-		parameter := &function.Parameters[index]
-		value := a.parameter[parameter]
-		if value == nil {
-			continue
-		}
-		if _, _, ok := hir.BorrowElement(value.typ); ok {
-			origins[value] = flowOrigin{
-				name:        fmt.Sprintf("Param(%d)", index),
-				declaration: span(module.file.Path, parameter.NameSpan),
-			}
-		}
-	}
-
-	a.collectFlowOrigins(module, function.Body, origins)
 	a.borrowFlowFunction(module, function)
 	if a.borrowWorkExhausted(function) {
 		return // Incomplete borrow proofs cannot proceed to other flow passes.
 	}
-	a.collectRegionOriginFacts(module, &inventory, origins)
+	a.collectRegionOriginFacts(module, function, &inventory)
 	a.resourceFlowFunction(module, function)
 	a.resultFlowFunction(module, function)
 	if a.resultWork != nil && a.resultWork.exhausted {
@@ -84,34 +68,29 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 	a.mustUseFlowFunction(module, function)
 }
 
-func (a *analyzer) collectFlowOrigins(module *moduleScope, block *ast.Block, origins map[*symbol]flowOrigin) {
-	if block == nil {
-		return
-	}
-	for index := range block.Statements {
-		statement := &block.Statements[index]
-		if statement.Binding != nil {
-			bindingSymbol := a.bindingSymbols[statement.Binding]
-			candidates := a.expressionOrigins(module, statement.Binding.Expression, origins)
-			if bindingSymbol != nil && len(candidates) == 1 {
-				origins[bindingSymbol] = candidates[0]
+func (a *analyzer) collectFlowOrigins(module *moduleScope, function *ast.Function, inventory *flowInventory) map[*symbol]flowOrigin {
+	origins := make(map[*symbol]flowOrigin)
+	for index := range function.Parameters {
+		parameter := &function.Parameters[index]
+		value := a.parameter[parameter]
+		if value != nil {
+			if _, _, borrowed := hir.BorrowElement(value.typ); borrowed {
+				origins[value] = flowOrigin{name: fmt.Sprintf("Param(%d)", index), declaration: span(module.file.Path, parameter.NameSpan)}
 			}
 		}
-		a.collectFlowOriginsFromExpression(module, statement.Expression, origins)
 	}
-	a.collectFlowOriginsFromExpression(module, block.Tail, origins)
-}
-
-func (a *analyzer) collectFlowOriginsFromExpression(module *moduleScope, expression *ast.Expression, origins map[*symbol]flowOrigin) {
-	if expression == nil {
-		return
+	// Reuse the checked expression order, including classic and prepared for-in
+	// bodies. A separate recursive walk can silently omit new statement shapes.
+	for _, expression := range inventory.expressions {
+		binding := a.bindingForExpression(expression)
+		if binding == nil {
+			continue
+		}
+		if candidates := a.expressionOrigins(module, expression, origins); len(candidates) == 1 {
+			origins[binding] = candidates[0]
+		}
 	}
-	if expression.Block != nil {
-		a.collectFlowOrigins(module, expression.Block, origins)
-	}
-	for _, child := range expression.Children {
-		a.collectFlowOriginsFromExpression(module, child, origins)
-	}
+	return origins
 }
 
 func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expression, origins map[*symbol]flowOrigin) []flowOrigin {
@@ -180,11 +159,15 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 	return nil
 }
 
-func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flowInventory, origins map[*symbol]flowOrigin) {
+func (a *analyzer) collectRegionOriginFacts(module *moduleScope, function *ast.Function, inventory *flowInventory) {
 	var index regionOriginIndex
+	var origins map[*symbol]flowOrigin
 	for _, expression := range inventory.expressions {
 		if !a.isRegionAllocationCall(expression) {
 			continue
+		}
+		if origins == nil {
+			origins = a.collectFlowOrigins(module, function, inventory)
 		}
 		candidates := compactOrigins(a.expressionOrigins(module, expression, origins))
 		if len(candidates) != 1 {
