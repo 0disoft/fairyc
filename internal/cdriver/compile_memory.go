@@ -3,7 +3,8 @@ package cdriver
 import (
 	"context"
 	"os"
-	"path/filepath"
+	"path"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -76,17 +77,27 @@ func availableCompileMemoryWithOptions(options ...compileMemoryOptions) uint64 {
 	if data, err := readFile("/proc/self/cgroup"); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			fields := strings.SplitN(line, ":", 3)
-			if len(fields) != 3 || fields[0] != "0" || fields[1] != "" {
+			if len(fields) != 3 {
 				continue
 			}
-			root := "/sys/fs/cgroup"
+			var root, limitName, usedName string
+			hierarchy, hierarchyErr := strconv.ParseUint(fields[0], 10, 64)
+			switch {
+			case fields[0] == "0" && fields[1] == "":
+				root, limitName, usedName = "/sys/fs/cgroup", "memory.max", "memory.current"
+			case hierarchyErr == nil && hierarchy > 0 && slices.Contains(strings.Split(fields[1], ","), "memory"):
+				root, limitName, usedName = "/sys/fs/cgroup/memory", "memory.limit_in_bytes", "memory.usage_in_bytes"
+			default:
+				continue
+			}
 			// A subtree-mounted container may report paths with '..'; its mounted
 			// root is already covered above. Never follow them outside the mount.
 			if strings.Contains(fields[2], "..") {
 				continue
 			}
-			for dir := filepath.Join(root, strings.TrimPrefix(fields[2], "/")); dir != root; dir = filepath.Dir(dir) {
-				pairs = append(pairs, [2]string{filepath.Join(dir, "memory.max"), filepath.Join(dir, "memory.current")})
+			// These are Linux virtual paths even in host-independent tests.
+			for dir := path.Join(root, strings.TrimPrefix(fields[2], "/")); dir != root; dir = path.Dir(dir) {
+				pairs = append(pairs, [2]string{path.Join(dir, limitName), path.Join(dir, usedName)})
 			}
 		}
 	}
