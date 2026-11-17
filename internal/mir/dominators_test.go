@@ -16,6 +16,7 @@ func TestBlockDominatorsMatchesReference(t *testing.T) {
 	}{
 		{"diamond", 10, map[BlockID][]BlockID{10: {20, 30}, 20: {40}, 30: {40}, 40: nil}},
 		{"loop", 20, map[BlockID][]BlockID{10: {30}, 20: {10}, 30: {10, 40}, 40: nil}},
+		{"duplicate-self-edges", 10, map[BlockID][]BlockID{10: {20, 20}, 20: {20, 20, 30}, 30: {30, 40}, 40: nil}},
 		{"unreachable", 10, map[BlockID][]BlockID{10: {20}, 20: nil, 30: {40}, 40: {30}, 50: nil}},
 		{"unknown-successor", 10, map[BlockID][]BlockID{10: {20, 999}, 20: {20, 30}, 30: nil}},
 	}
@@ -46,6 +47,25 @@ func TestBlockDominatorsMatchesReference(t *testing.T) {
 				}
 				assertDominatorsMatchReference(t, &function, sample%2 == 0)
 			})
+		}
+	}
+}
+
+func TestBlockDominatorsUnknownPredecessorOrder(t *testing.T) {
+	// Cross a word boundary and reuse earlier scratch rows before the unknown
+	// predecessor. It must erase every inherited bit regardless of edge order.
+	for _, incoming := range [][]BlockID{{NoBlock, 63, 63}, {63, NoBlock, 63}, {63, 63, NoBlock}} {
+		function := dominatorChain(65, false)
+		predecessors := make(map[BlockID][]BlockID)
+		for id := BlockID(1); id < 64; id++ {
+			predecessors[id] = []BlockID{id - 1}
+		}
+		predecessors[64] = incoming
+		sets := blockDominators(&function, predecessors)
+		for candidate := BlockID(0); candidate < 65; candidate++ {
+			if got, want := sets.contains(64, candidate), candidate == 64; got != want {
+				t.Fatalf("incoming %v candidate %d: got %t, want %t", incoming, candidate, got, want)
+			}
 		}
 	}
 }

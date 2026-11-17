@@ -61,7 +61,9 @@ func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *bl
 	}
 	order := dominatorBlockOrder(function, indices, predecessors)
 	// Preserve the original fixed point, including unreachable components.
-	// Words are independent, so updates can reuse each row without a scratch set.
+	// Reuse one scratch row so each predecessor ID is resolved once per update,
+	// rather than once per word. Never overwrite a row before reading self edges.
+	next := make([]uint64, words)
 	for changed := true; changed; {
 		changed = false
 		for _, id := range order {
@@ -69,32 +71,40 @@ func blockDominators(function *Function, predecessors map[BlockID][]BlockID) *bl
 				continue
 			}
 			row := indices[id]
-			incoming := predecessors[id]
-			for word := range words {
-				next := uint64(0)
-				if len(incoming) > 0 {
-					next = ^uint64(0)
-					for _, predecessor := range incoming {
-						previous, found := indices[predecessor]
-						if !found {
-							next = 0
-							break
-						}
-						next &= sets.bits[previous*words+word]
-					}
-				}
-				if word == row/64 {
-					next |= uint64(1) << uint(row%64)
-				}
+			sets.intersectPredecessors(next, predecessors[id])
+			next[row/64] |= uint64(1) << uint(row%64)
+			for word, value := range next {
 				position := row*words + word
-				if sets.bits[position] != next {
-					sets.bits[position] = next
+				if sets.bits[position] != value {
+					sets.bits[position] = value
 					changed = true
 				}
 			}
 		}
 	}
 	return sets
+}
+
+func (sets *blockDominatorSets) intersectPredecessors(next []uint64, incoming []BlockID) {
+	if len(incoming) == 0 {
+		clear(next)
+		return
+	}
+	for index, predecessor := range incoming {
+		previous, found := sets.indices[predecessor]
+		if !found {
+			clear(next) // An unknown predecessor contributes the empty set.
+			return
+		}
+		bits := sets.bits[previous*sets.words : (previous+1)*sets.words]
+		if index == 0 {
+			copy(next, bits)
+			continue
+		}
+		for word, value := range bits {
+			next[word] &= value
+		}
+	}
 }
 
 // Visit predecessors before their users instead of depending on block storage
