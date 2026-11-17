@@ -511,7 +511,7 @@ func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 		{
 			name:     "Linux console only",
 			symbols:  []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stderr_write_i32_v0", "fy_std_stderr_write_u32_v0", "fy_std_stderr_write_usize_v0", "fy_std_stdin_read_v0"},
-			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
+			prefix:   "#ifndef _POSIX_C_SOURCE\n#define _POSIX_C_SOURCE 200809L\n#endif\n",
 			required: []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stderr_write_i32_v0", "fy_std_stderr_write_u32_v0", "fy_std_stderr_write_usize_v0", "fy_std_stdin_read_v0", "write(descriptor", "read(STDIN_FILENO"},
 			forbidden: []string{
 				"fy_std_linux_file_open_v0", "fy_std_system_heap_allocate_v0",
@@ -537,7 +537,7 @@ func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 		{
 			name:    "Linux File and Arena",
 			symbols: []string{"fy_std_linux_file_read_v0", "fy_std_region_begin_v0"},
-			prefix:  "#define _POSIX_C_SOURCE 200809L\n",
+			prefix:  "#ifndef _POSIX_C_SOURCE\n#define _POSIX_C_SOURCE 200809L\n#endif\n",
 			required: []string{
 				"#define _POSIX_C_SOURCE 200809L", "fy_std_linux_file_read_v0",
 				"fy_std_system_heap_allocate_v0", "fy_std_region_begin_v0",

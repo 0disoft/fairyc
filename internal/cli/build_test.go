@@ -77,7 +77,7 @@ func TestProductSupportSourceLinksOnlyCalledStandardLibraryClosure(t *testing.T)
 		{
 			name:     "Linux feature macro stays first",
 			symbols:  []string{"fy_std_linux_file_close_v0", "fy_std_buffer_drop_v0"},
-			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
+			prefix:   "#ifndef _POSIX_C_SOURCE\n#define _POSIX_C_SOURCE 200809L\n#endif\n",
 			required: []string{"fy_std_linux_file_close_v0", "fy_std_buffer_drop_v0", "fy_runtime_trap"},
 		},
 	}
