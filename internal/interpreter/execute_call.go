@@ -455,6 +455,13 @@ func (r *executionState) call(function *mir.Function, arguments []runtimeValue, 
 						value.payload = &scalarReference{fields: fields, field: fieldIndex}
 					}
 					value.typ = operation.Type
+				} else {
+					// A value load snapshots the field before later operands run;
+					// only field-borrow retains the owner's storage identity.
+					value, err = r.cloneForValueCopy(value)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
+					}
 				}
 				locals[operation.DestinationLocal] = value
 			case mir.OperationRegionEnter:
