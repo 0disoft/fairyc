@@ -255,19 +255,35 @@ func (inventory *flowInventory) collectBlock(block *ast.Block) {
 		return
 	}
 	for index := range block.Statements {
-		statement := &block.Statements[index]
-		if statement.Kind == syntax.KindReturn && statement.Expression != nil {
-			inventory.returns = append(inventory.returns, statement.Expression)
-		}
-		if statement.Binding != nil {
-			inventory.collectExpression(statement.Binding.Expression)
-		}
-		inventory.collectExpression(statement.Target)
-		inventory.collectExpression(statement.Expression)
+		inventory.collectStatement(&block.Statements[index])
 	}
 	if block.Tail != nil {
 		inventory.collectExpression(block.Tail)
 	}
+}
+
+func (inventory *flowInventory) collectStatement(statement *ast.Statement) {
+	if statement == nil {
+		return
+	}
+	if loop := statement.For; loop != nil {
+		// Classic loops keep these regions outside Expression. Prepared for-in
+		// expressions contain the same loop shape, so visit only that checked
+		// tree rather than also walking the source ByteFor body a second time.
+		inventory.collectStatement(loop.Initializer)
+		inventory.collectExpression(loop.Condition)
+		inventory.collectBlock(loop.Body)
+		inventory.collectStatement(loop.Post)
+		return
+	}
+	if statement.Kind == syntax.KindReturn && statement.Expression != nil {
+		inventory.returns = append(inventory.returns, statement.Expression)
+	}
+	if statement.Binding != nil {
+		inventory.collectExpression(statement.Binding.Expression)
+	}
+	inventory.collectExpression(statement.Target)
+	inventory.collectExpression(statement.Expression)
 }
 
 func (inventory *flowInventory) collectExpression(expression *ast.Expression) {
