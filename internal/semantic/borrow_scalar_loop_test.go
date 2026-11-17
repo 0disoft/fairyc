@@ -10,7 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-func scalarLoopFlow(t *testing.T, input string) (*borrowFlowAnalyzer, Result) {
+func scalarLoopFlow(t testing.TB, input string) (*borrowFlowAnalyzer, Result) {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(input)), source.DefaultLimits())
 	if err != nil || parsed.AST == nil {

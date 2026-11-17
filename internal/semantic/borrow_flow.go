@@ -924,8 +924,10 @@ func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environme
 	}
 	condition := expression.Children[0]
 	bodyExpression := expression.Children[1]
-	entry := cloneBorrowEnvironment(environment)
-	header := cloneBorrowEnvironment(entry)
+	// Entry and headers are read-only until the final join replaces environment.
+	// Each evaluation owns one clone; joins read their inputs and build new maps.
+	entry := environment
+	header := entry
 
 	// Every join can only add one of the function's finite source origins or
 	// canonical loan-site IDs. Probe iterations suppress diagnostics and return
@@ -942,14 +944,16 @@ func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environme
 			f.probeDepth--
 			break
 		}
-		bodyEnvironment := cloneBorrowEnvironment(conditionEnvironment)
+		// The condition's private map has no remaining readers. Transfer it to
+		// the body instead of cloning the entire incoming binding catalog again.
+		bodyEnvironment := conditionEnvironment
 		f.loops = append(f.loops, borrowLoopFrame{})
 		_, bodyReachable := f.evaluateExpression(bodyExpression, bodyEnvironment)
 		frame := f.loops[len(f.loops)-1]
 		f.loops = f.loops[:len(f.loops)-1]
 		f.probeDepth--
 
-		branches := []borrowEnvironment{cloneBorrowEnvironment(entry)}
+		branches := []borrowEnvironment{entry}
 		if bodyReachable {
 			branches = append(branches, bodyEnvironment)
 		}
@@ -970,17 +974,18 @@ func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environme
 	if _, reachable := f.evaluateExpression(condition, conditionEnvironment); !reachable {
 		return borrowValueState{}, false
 	}
-	bodyEnvironment := cloneBorrowEnvironment(conditionEnvironment)
+	bodyEnvironment := conditionEnvironment
 	f.loops = append(f.loops, borrowLoopFrame{})
 	_, _ = f.evaluateExpression(bodyExpression, bodyEnvironment)
 	frame := f.loops[len(f.loops)-1]
 	f.loops = f.loops[:len(f.loops)-1]
-	exits := []borrowEnvironment{cloneBorrowEnvironment(header)}
+	exits := []borrowEnvironment{header}
 	for _, edge := range frame.edges {
 		if edge.kind == syntax.KindBreak {
 			exits = append(exits, edge.environment)
 		}
 	}
+	// Complete the join before replacing the caller-owned entry map.
 	replaceBorrowEnvironment(environment, mergeBorrowEnvironments(entry, exits))
 	return borrowValueState{}, true
 }
