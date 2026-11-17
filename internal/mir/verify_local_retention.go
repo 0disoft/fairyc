@@ -7,14 +7,34 @@ type verificationRetention struct {
 	floor []int
 }
 
-// Conservatively bound every block reachable from each entry. Include even
-// unreachable later backedges, so this needs no per-block reachability sets.
+// Find the lowest execution-order rank reachable from each block, without
+// per-block reachability sets. Storage IDs need not follow execution order:
+// a switch continuation can be allocated before either arm.
 // Bounds and last mentions take linear work in blocks, edges and instructions.
 func verificationLocalRetention(function *Function) verificationRetention {
 	r := verificationRetention{last: make(map[hir.SymbolID]int), floor: make([]int, len(function.Blocks))}
+	indices := make(map[BlockID]int, len(function.Blocks))
+	predecessors := make(map[BlockID][]BlockID)
+	for i, block := range function.Blocks {
+		if block.ID != BlockID(i) {
+			return r // Malformed identity: retain all state for normal validation.
+		}
+		indices[block.ID] = i
+		for _, successor := range block.Terminator.Successors {
+			if successor < 0 || int(successor) >= len(function.Blocks) {
+				return r
+			}
+			predecessors[successor] = append(predecessors[successor], block.ID)
+		}
+	}
+	order := dominatorBlockOrder(function, indices, predecessors)
+	rank := make([]int, len(function.Blocks))
+	for i, block := range order {
+		rank[block] = i
+	}
 	mention := func(symbol hir.SymbolID, block int) {
 		if symbol >= 0 {
-			r.last[symbol] = block
+			r.last[symbol] = max(r.last[symbol], rank[block])
 		}
 	}
 	operands := func(values []Operand, block int) {
@@ -25,14 +45,6 @@ func verificationLocalRetention(function *Function) verificationRetention {
 		}
 	}
 	for i, block := range function.Blocks {
-		if block.ID != BlockID(i) {
-			return r // Malformed identity: retain all state for normal validation.
-		}
-		for _, successor := range block.Terminator.Successors {
-			if successor < 0 || int(successor) >= len(function.Blocks) {
-				return r
-			}
-		}
 		for _, op := range block.Operations {
 			mention(op.Symbol, i)
 			mention(hir.SymbolID(op.DestinationLocal), i)
@@ -44,19 +56,27 @@ func verificationLocalRetention(function *Function) verificationRetention {
 		operands(term.SwitchOperands, i)
 		operands([]Operand{term.ReturnValue}, i)
 	}
-	bound := len(function.Blocks)
-	for i := len(function.Blocks) - 1; i >= 0; i-- {
-		bound = min(bound, i)
-		for _, successor := range function.Blocks[i].Terminator.Successors {
-			bound = min(bound, int(successor))
-		}
-		r.floor[i] = bound
+	for i := range r.floor {
+		r.floor[i] = -1
 	}
-	// A later backedge may lead to an earlier backedge. Close those chains in
-	// ascending order, where every strictly earlier bound is already closed.
-	for i, bound := range r.floor {
-		if bound < i {
-			r.floor[i] = r.floor[bound]
+	// Ascending seeds reach predecessors in order of their minimum reachable rank.
+	// Each block is assigned once and each reverse edge is visited once.
+	var queue []BlockID
+	for _, root := range order {
+		if r.floor[root] >= 0 {
+			continue
+		}
+		r.floor[root] = rank[root]
+		queue = append(queue[:0], root)
+		for len(queue) > 0 {
+			block := queue[len(queue)-1]
+			queue = queue[:len(queue)-1]
+			for _, previous := range predecessors[block] {
+				if r.floor[previous] < 0 {
+					r.floor[previous] = rank[root]
+					queue = append(queue, previous)
+				}
+			}
 		}
 	}
 	return r
