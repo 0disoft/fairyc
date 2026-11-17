@@ -60,3 +60,39 @@ Windows wire tests are host-neutral transport checks, not C ABI/native observati
 Closing the remaining matrix requires native Linux execution with the reference toolchain
 and no missing or skipped required cases. Existing unrelated Windows failures can still
 block the C differential job; this oracle relocation does not repair those failures.
+
+## Windows dependency follow-up
+
+The same audited run's Windows native smoke failed first while building
+`examples/windows_target/main.fy` in the low profile, with CLI exit 4 and
+`internal compiler invariant failed`. `TestWindowsFairyParserLiterals` independently
+reproduces exit 4 locally. A direct smoke-source regression exposes the underlying
+MIR error: `V1002`, initialization state exceeds the 1,048,576-entry snapshot budget.
+
+The verifier retained ordinary locals after their final possible mention and copied
+them into later branch/join snapshots. Retire only non-resource locals whose last
+mention precedes a conservative lower bound on every successor's reachable blocks.
+Later backedges and chains of backedges lower that bound; resources, drop flags and
+Region state retain their existing checks. The snapshot limit is unchanged.
+This fixes the selected verifier cause rather than disabling Windows dependencies.
+
+Validation of this follow-up:
+
+- The previously rejected smoke source now verifies and emits Windows C.
+- Actual `experimental run-target` of that source returns 42 with MSVC 14.51.36231
+  in both low and optimized profiles, with no unexpected program output.
+- All `internal/mir` and `internal/mirverifyfixture` tests pass, including loop/budget
+  regressions and verifier mutation rejection. Related MIR/backend vet passes.
+- The existing `TestWindowsFairyParserLiterals` and
+  `TestWindowsFairyParserRecordExpressions` pass their native probes after the fix
+  (`go test -mod=readonly ./internal/cli -run
+  '^(TestWindowsFairyParserLiterals|TestWindowsFairyParserRecordExpressions)$'
+  -count=1 -timeout 3m`; package execution 163.808 seconds).
+- A controlled 1,024-local retention test keeps exactly two entries: a consumed
+  resource required for join checks and the future return value. Earlier mentions
+  remain retained when a backedge can reach them. Generated graph checks independently
+  compare the conservative bounds with actual reachability.
+
+These local observations cover the selected source and verifier boundary, not all
+Windows proof groups or hosted same-revision CI. Linux native execution and the
+pending observation inventory above remain unconfirmed.

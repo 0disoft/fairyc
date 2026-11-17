@@ -91,6 +91,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		state verificationState
 	}
 	joins := verificationJoinPoints(function)
+	retention := verificationLocalRetention(function)
 	remainingSnapshots := maxVerificationSnapshotEntries
 	queue := []pendingBlock{{id: function.Entry, state: initial}}
 	seen := make(map[BlockID]verificationState)
@@ -243,6 +244,7 @@ func verifyFunctionContext(ctx context.Context, function *Function, structTypes 
 		if terminator.Kind == TerminatorTrap || terminator.Kind == TerminatorUnreachable {
 			continue
 		}
+		retention.retire(state.live, terminator.Successors, resources)
 		for index, successor := range terminator.Successors {
 			if verificationReportsFull(failures) {
 				return failures
