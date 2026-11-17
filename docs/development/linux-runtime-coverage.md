@@ -7,6 +7,11 @@ This inventory supports the [Phase 2 exit decision](phase-status.md#phase-2-exit
 it does not promote target maturity.
 The [runtime contract](../runtime/runtime-stdlib-v0.md), Accepted ADRs, and owning fixtures retain authority.
 
+The [2026-11-18 native validation audit](linux-native-audit-20261118.md) records the
+current Linux test-build blocker and groups pending observations separately from
+the historical successful receipts below. Cross-platform static checks do not
+constitute a new Linux native receipt.
+
 ## Execution evidence
 
 [Frontend run 39798530273](https://github.com/0disoft/fairyc/actions/runs/39798530273)

@@ -30,16 +30,6 @@ type overlayCase struct {
 	initial, operations []overlayOperation
 }
 
-type overlayOraclePort struct {
-	contractstate.PersistencePort
-	writes []contractstate.PersistentWrite
-}
-
-func (port *overlayOraclePort) CompareAndPublish(hash contractstate.LayoutHash, version uint64, writes []contractstate.PersistentWrite) (contractstate.PersistentReceipt, error) {
-	port.writes = writes
-	return port.PersistencePort.CompareAndPublish(hash, version, writes)
-}
-
 func appendOverlayNumber(out []byte, value uint64, width int) []byte {
 	for shift := (width - 1) * 8; shift >= 0; shift -= 8 {
 		out = append(out, byte(value>>shift))
