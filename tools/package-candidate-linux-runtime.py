@@ -39,6 +39,10 @@ SOURCES = [
     'internal/candidatehost/linux_https_reader.c',
     'internal/candidatehost/linux_https_parent.c',
     'internal/candidatehost/linux_edit_file.c',
+    'internal/cstdlib/stage0_linux_file_paths.c',
+    'internal/cstdlib/stage0_linux_file_metadata.c',
+    'internal/cstdlib/stage0_linux_directory.c',
+    'internal/cstdlib/stage0_linux_directory_paths.c',
 ]
 PIN = ROOT / 'examples/lexer_candidate/src/linux_runtime_asset_pin.fy'
 

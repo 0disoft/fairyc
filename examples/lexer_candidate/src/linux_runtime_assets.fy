@@ -41,8 +41,10 @@ pub fn Result<bytes::Buffer,Problem> source(ref Bundle bundle,ref u8[] header,bo
     let usize editing=hosts(bundle,ref plan,33,33,1<<18,ref mut output)?;
     let usize tail=hosts(bundle,ref plan,21,25,1<<6,ref mut output)?;
     let usize remote=hosts(bundle,ref plan,28,32,1<<13,ref mut output)?;
-    var u32 id=1;while(id<=10){if(selection::contains(ref plan,id)){
-        let usize asset=if(id==1){2}else if(id==2){3}else if(id==3){5}else if(id==4){6}else if(id==5){7}else if(id==6){8}else if(id==7){10}else if(id==8){11}else if(id==9){12}else{13};
-        let usize n=part(bundle,asset,ref mut output)?;if(id==2 || id==6){let usize extra=part(bundle,asset+1,ref mut output)?;}
+    // Component IDs are in link order. Pack IDs remain stable as assets are appended.
+    let usize[14] assets=[2,3,34,35,36,37,5,6,7,8,10,11,12,13];
+    var u32 id=1;while(id<=14){if(selection::contains(ref plan,id)){
+        let usize asset=assets[(id-1) as usize];
+        let usize n=part(bundle,asset,ref mut output)?;if(asset==3 || asset==8){let usize extra=part(bundle,asset+1,ref mut output)?;}
     }id+=1;}if(plan.vectors){let usize n=part(bundle,14,ref mut output)?;}let usize n=scalar(bundle,trap,ref mut output)?;return .ok(output);
 }

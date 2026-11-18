@@ -12,7 +12,7 @@ pub struct Problem {u32 kind;usize start;usize end;}
 fn bool at(ref u8[] data,usize start,ref u8[] prefix){return start<=data.len && prefix.len<=data.len-start && bytes::equal(data[start..start+prefix.len],prefix);}
 fn bool word(u8 c){return c>=48 && c<=57 || c>=65 && c<=90 || c>=97 && c<=122 || c==95;}
 fn bool space(u8 c){return c==9 || c==10 || c==12 || c==13 || c==32;}
-pub fn bool contains(ref Plan p,u32 id){return id>=1 && id<=10 && (p.components & (1<<(id-1)))!=0;}
+pub fn bool contains(ref Plan p,u32 id){return id>=1 && id<=contract::component_count() && (p.components & (1<<(id-1)))!=0;}
 // Host mask order for assembly: rooted, process, capture, input, paths,
 // directory, retention, workspace, build scratch, starter, GNU; then package
 // directory, package file, clock, HTTPS protocol, worker, reader, parent.
@@ -46,9 +46,14 @@ pub fn Result<Plan,Problem> select(ref u8[] header){
         if((i==0 || !word(header[i-1])) && (at(header,i,b"fy_std_") || at(header,i,b"fy_private_vector_") || at(header,i,b"fairyc_private_"))){
             var usize end=i;while(end<header.len && word(header[end])){end+=1;}var usize call=end;while(call<header.len && space(header[call])){call+=1;}
             if(call<header.len && header[call]==40){let name=header[i..end];var u32 problem=0;
-                if(at(name,0,b"fy_std_windows_") || at(name,0,b"fairyc_private_windows_")){problem=5;}
-                else if(at(name,0,b"fy_std_")){let id=contract::component(name);if(id==0){problem=2;}else{plan.components|=contract::closure(id);if(id==9){plan.arguments=true;}}}
-                else if(at(name,0,b"fy_private_vector_")){if(!vector(name)){problem=3;}else{plan.vectors=true;plan.components|=contract::closure(3);}}
+                if(at(name,0,b"fairyc_private_windows_")){problem=5;}
+                else if(at(name,0,b"fy_std_")){
+                    // Portable std::fs still uses some legacy Windows ABI names.
+                    let id=contract::component(name);
+                    if(id==0){problem=if(at(name,0,b"fy_std_windows_")){5}else{2};}
+                    else{plan.components|=contract::closure(id);if(id==contract::process_args_id()){plan.arguments=true;}}
+                }
+                else if(at(name,0,b"fy_private_vector_")){if(!vector(name)){problem=3;}else{plan.vectors=true;plan.components|=contract::closure(contract::system_heap_id());}}
                 else if(at(name,0,b"fairyc_private_linux_")){let bits=host(name);if(bits==0){problem=4;}else{plan.hosts|=bits;}}
                 if(problem!=0){return .err(Problem{.kind=problem,.start=i,.end});}
             }i=end;

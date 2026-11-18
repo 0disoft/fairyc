@@ -78,6 +78,8 @@ func TestLinuxGNUCompanionRuntime(t *testing.T) {
 		[]string{"fairyc_private_linux_package_directory_publish_v1", "fairyc_private_linux_package_file_info_v1", "fairyc_private_linux_https_open_v1"})
 	components := []cstdlibcontract.Component{
 		cstdlibcontract.ComponentLinuxConsole, cstdlibcontract.ComponentLinuxFile,
+		cstdlibcontract.ComponentLinuxFilePaths, cstdlibcontract.ComponentLinuxFileMetadata,
+		cstdlibcontract.ComponentLinuxDirectory, cstdlibcontract.ComponentLinuxDirectoryPaths,
 		cstdlibcontract.ComponentSystemHeap, cstdlibcontract.ComponentByteCompare,
 		cstdlibcontract.ComponentBuffer, cstdlibcontract.ComponentLinuxFileBuffer,
 		cstdlibcontract.ComponentArena, cstdlibcontract.ComponentTextView,

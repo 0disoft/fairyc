@@ -29,7 +29,10 @@ func TestLinuxGNUCompanionRuntimeAssets(t *testing.T) {
 	cases := [][]string{{}, {"fy_std_stdout_write_all_v0"}, {"fy_std_file_open_v0"},
 		{"fy_std_system_heap_allocate_v0"}, {"fy_std_bytes_match_at_v0"}, {"fy_std_buffer_drop_v0"},
 		{"fy_std_file_read_append_v0"}, {"fy_std_arena_drop_v0"}, {"fy_std_text_utf8_valid_v0"},
-		{"fy_std_process_arg_v0"}, {"fy_std_string_copy_v0"}, {"fy_private_vector_reserve_v0"}}
+		{"fy_std_process_arg_v0"}, {"fy_std_string_copy_v0"}, {"fy_private_vector_reserve_v0"},
+		{"fy_std_windows_file_rename_v0"}, {"fy_std_windows_file_kind_v0"},
+		{"fy_std_windows_read_dir_open_v0"}, {"fy_std_windows_directory_create_v0"}}
+	standard := len(cases)
 	hosts := []string{"fairyc_private_linux_root_file_open_v1", "fairyc_private_linux_process_start_v1",
 		"fairyc_private_linux_capture_open_v1", "fairyc_private_linux_test_capture_open_v1",
 		"fairyc_private_linux_host_path_v1", "fairyc_private_linux_directory_scan_open_v1",
@@ -45,7 +48,7 @@ func TestLinuxGNUCompanionRuntimeAssets(t *testing.T) {
 		cases = append(cases, []string{name})
 	}
 	all := append([]string{}, hosts...)
-	for _, names := range cases[:12] {
+	for _, names := range cases[:standard] {
 		all = append(all, names...)
 	}
 	cases = append(cases, all,

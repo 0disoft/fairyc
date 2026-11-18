@@ -16,5 +16,5 @@ fn void expected(ref u8[] header,u32 components,u32 hosts,bool vectors,bool argu
     assert(!selection::select(b"/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\nfairyc_private_windows_open_v1();").is_ok);
     expected(b"/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\nnot_fy_std_unknown_v0(); fy_std_unknown_v0;",0,0,false,false);
     expected(b"/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\nfy_std_buffer_drop_v0\x0b();",0,0,false,false);
-    expected(b"/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\nfy_std_buffer_drop_v0\x0c();",20,0,false,false);
+    expected(b"/* fairyc.candidate-target/x86_64-linux-gnu/v1 */\nfy_std_buffer_drop_v0\x0c();",320,0,false,false);
 }
