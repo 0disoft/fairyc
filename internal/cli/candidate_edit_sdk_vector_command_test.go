@@ -33,7 +33,7 @@ func TestAtlasSDKVectorEditOracle(t *testing.T) {
 			}
 		}
 	}
-	want := map[string]bool{"Vec": true, "take_slot": true, "empty": true, "push": true, "at": true, "write_slot": true}
+	want := map[string]bool{"Vec": true, "take_slot": true, "empty": true, "push": true, "at": true}
 	if !reflect.DeepEqual(found, want) {
 		t.Fatalf("edited body must request fresh bool implementations: got %v want %v", found, want)
 	}

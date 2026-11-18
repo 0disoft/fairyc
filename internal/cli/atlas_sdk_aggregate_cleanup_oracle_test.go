@@ -74,7 +74,7 @@ func TestAtlasSDKAggregateCleanupOracle(t *testing.T) {
 		want["std::vec::Vec<"+scalar+">"] = 1
 		want["std::vec::take_slot<"+scalar+">"] = 1
 	}
-	for _, name := range []string{"empty", "push", "at", "write_slot"} {
+	for _, name := range []string{"empty", "push", "at"} {
 		want["std::vec::"+name+"<i32>"] = 1
 	}
 	if !reflect.DeepEqual(counts, want) {

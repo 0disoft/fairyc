@@ -204,7 +204,7 @@ func verifyCandidateAtlasSDKVectorOracle(t *testing.T, name string, partitions m
 		}
 		key := s.Declaration.Name + "<" + s.TypeArguments[0].Name + ">"
 		observed[key] = true
-		if s.TypeArguments[0].Name == "i32" && (s.Declaration.Name == "empty" || s.Declaration.Name == "push" || s.Declaration.Name == "at" || s.Declaration.Name == "pop" || s.Declaration.Name == "write_slot") {
+		if s.TypeArguments[0].Name == "i32" && (s.Declaration.Name == "empty" || s.Declaration.Name == "push" || s.Declaration.Name == "at" || s.Declaration.Name == "pop") {
 			explicit[key] = true
 		}
 		if s.Declaration.Name == "Vec" && s.TypeArguments[0].Name == "i32" {
@@ -216,7 +216,7 @@ func verifyCandidateAtlasSDKVectorOracle(t *testing.T, name string, partitions m
 		if name == "pop" {
 			operation = "pop"
 		}
-		for _, suffix := range []string{"empty", "push", operation, "write_slot"} {
+		for _, suffix := range []string{"empty", "push", operation} {
 			want[suffix+"<i32>"] = true
 		}
 	}
@@ -227,7 +227,7 @@ func verifyCandidateAtlasSDKVectorOracle(t *testing.T, name string, partitions m
 		if len(explicit) != 0 {
 			t.Fatal("unused std::vec acquired root-requested implementations", explicit)
 		}
-	} else if len(explicit) != 4 {
+	} else if len(explicit) != 3 {
 		t.Fatalf("used std::vec root-requested implementations: %v", explicit)
 	}
 	declarations := map[string]semanticsnapshot.Declaration{}

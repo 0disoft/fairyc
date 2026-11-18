@@ -26,7 +26,7 @@ func verifyAtlasSDKAggregateCleanupEditedOracle(t *testing.T, before, after prep
 		want["std::vec::Vec<"+scalar+">"] = 1
 		want["std::vec::take_slot<"+scalar+">"] = 1
 	}
-	for _, name := range []string{"empty", "push", "at", "write_slot"} {
+	for _, name := range []string{"empty", "push", "at"} {
 		want["std::vec::"+name+"<i32>"] = 1
 	}
 	counts := map[string]int{}

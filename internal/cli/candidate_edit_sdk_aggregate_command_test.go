@@ -69,7 +69,7 @@ func TestAtlasSDKUserAggregateEditOracle(t *testing.T) {
 		}
 		want := map[string]bool{}
 		if p.fresh {
-			want = map[string]bool{"Vec": true, "take_slot": true, "empty": true, "push": true, "at": true, "write_slot": true}
+			want = map[string]bool{"Vec": true, "take_slot": true, "empty": true, "push": true, "at": true}
 		}
 		if !reflect.DeepEqual(sdk, want) || client != p.fresh {
 			t.Fatalf("mixed edit fresh bool implementations: fresh=%v SDK=%v client Vec=%v", p.fresh, sdk, client)

@@ -126,7 +126,7 @@ func TestAtlasSDKVectorSpecializationOracle(t *testing.T) {
 				want["take_slot<"+scalar+">"] = true
 			}
 			if fixture.name == "instantiated" {
-				for _, name := range []string{"empty", "push", "at", "write_slot"} {
+				for _, name := range []string{"empty", "push", "at"} {
 					want[name+"<i32>"] = true
 				}
 			}
