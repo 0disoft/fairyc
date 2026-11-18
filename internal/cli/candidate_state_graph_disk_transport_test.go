@@ -149,11 +149,11 @@ func TestCandidateStateGraphDiskTransport(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		t.Run("three-families-and-binary", func(t *testing.T) {
+		t.Run("four-families-and-binary", func(t *testing.T) {
 			root := t.TempDir()
 			want := make(map[string][]byte)
 			total := 0
-			for _, marker := range []string{"FYCACHE0", "FYCACHE1", "FYSGCAC0"} {
+			for _, marker := range []string{"FYCACHE0", "FYCACHE1", "FYCACHE2", "FYSGCAC0"} {
 				raw := []byte(marker)
 				total += len(raw)
 				run(t, root, "put", raw, []byte(fmt.Sprintf("%d,%d,0", len(want)+1, total)))
@@ -164,7 +164,7 @@ func TestCandidateStateGraphDiskTransport(t *testing.T) {
 			raw := make([]byte, 131073)
 			copy(raw, "FYSGCAC0")
 			raw[65536], raw[len(raw)-1] = 42, 255
-			run(t, root, "put", raw, []byte(fmt.Sprintf("4,%d,0", total+len(raw))))
+			run(t, root, "put", raw, []byte(fmt.Sprintf("%d,%d,0", len(want)+1, total+len(raw))))
 			want[name(raw)] = raw
 			inventory(t, root, want)
 			run(t, root, "load", nil, raw)
@@ -173,12 +173,12 @@ func TestCandidateStateGraphDiskTransport(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			run(t, root, "put", raw, []byte(fmt.Sprintf("4,%d,0", total+len(raw))))
+			run(t, root, "put", raw, []byte(fmt.Sprintf("%d,%d,0", len(want), total+len(raw))))
 			after, err := os.Stat(filepath.Join(root, name(raw)))
 			if err != nil || !os.SameFile(before, after) || !before.ModTime().Equal(after.ModTime()) {
 				t.Fatalf("identical collision replaced the existing generation: %v", err)
 			}
-			for _, invalid := range []string{"", "FYSGCAC", "FYSGCAC1opaque", "FYCACHE2opaque", "unknown!"} {
+			for _, invalid := range []string{"", "FYSGCAC", "FYSGCAC1opaque", "FYCACHE3opaque", "unknown!"} {
 				run(t, root, "put", []byte(invalid), []byte("E7"))
 			}
 			run(t, root, "budget", raw, []byte("E9"))
