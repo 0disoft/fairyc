@@ -145,6 +145,47 @@ func TestLocalPersistenceRejectedWritesPreserveBytes(t *testing.T) {
 	}
 }
 
+func TestLocalPersistenceMergesSortedStateAndMixedWrites(t *testing.T) {
+	store, directory, layout, _ := localFixture(t)
+	reference, err := NewReferencePersistence(layout, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for version, writes := range [][]PersistentWrite{
+		{{Key: Key{5}, Value: []byte("keep")}, {Key: Key{3}, Value: []byte("old")}, {Key: Key{2}, Value: []byte("delete")}},
+		{{Key: Key{6}, Value: []byte{}}, {Key: Key{3}, Value: []byte("new")}, {Key: Key{4}, Deleted: true}, {Key: Key{2}, Deleted: true}, {Key: Key{1}, Value: []byte("insert")}},
+	} {
+		before, err := json.Marshal(writes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := store.CompareAndPublish(layout.Hash(), uint64(version), writes)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want, err := reference.CompareAndPublish(layout.Hash(), uint64(version), writes)
+		if err != nil || got != want {
+			t.Fatalf("receipt = %+v, want %+v (%v)", got, want, err)
+		}
+		after, err := json.Marshal(writes)
+		if err != nil || !bytes.Equal(before, after) {
+			t.Fatalf("publication changed caller writes: %s (%v)", after, err)
+		}
+	}
+	snapshot, err := reference.Snapshot(layout.Hash())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := encodeLocalState(localState{layout: layout, version: snapshot.Version, entries: snapshot.Entries}, localTestLimits())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(filepath.Join(directory, localStateName))
+	if err != nil || !bytes.Equal(got, want) {
+		t.Fatalf("published bytes differ from reference state: %v", err)
+	}
+}
+
 func TestLocalPersistenceCorruptionFailsClosed(t *testing.T) {
 	store, directory, layout, key := localFixture(t)
 	path := filepath.Join(directory, localStateName)

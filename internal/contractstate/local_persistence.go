@@ -18,8 +18,12 @@ var (
 	ErrPersistenceClosed = errors.New("local state persistence is closed")
 )
 
-const localStateName = "state-v1.bin"
-const localLockName = "state-v1.lock"
+const (
+	localStateName       = "state-v1.bin"
+	localLockName        = "state-v1.lock"
+	maxLocalStateBytes   = 16 << 20
+	maxLocalStateEntries = 65_536
+)
 
 // LocalPersistenceLimits bounds both decoding and complete-state publication.
 // These are separate from transaction-overlay limits and have no defaults.
@@ -30,7 +34,9 @@ type LocalPersistenceLimits struct {
 }
 
 func (limits LocalPersistenceLimits) validate() error {
-	if limits.MaxStateBytes <= 0 || limits.MaxStateBytes > 16<<20 || limits.MaxEntries <= 0 || limits.MaxEntries > 65536 || limits.MaxValueBytes <= 0 || int64(limits.MaxValueBytes) > limits.MaxStateBytes {
+	if limits.MaxStateBytes <= 0 || limits.MaxStateBytes > maxLocalStateBytes ||
+		limits.MaxEntries <= 0 || limits.MaxEntries > maxLocalStateEntries ||
+		limits.MaxValueBytes <= 0 || int64(limits.MaxValueBytes) > limits.MaxStateBytes {
 		return fmt.Errorf("local state limits require 1..16MiB bytes, 1..65536 entries and a positive bounded value size")
 	}
 	return nil
@@ -182,20 +188,7 @@ func (store *LocalPersistence) CompareAndPublish(hash LayoutHash, version uint64
 	if store == nil {
 		return receipt, ErrPersistenceClosed
 	}
-	if len(writes) > store.limits.MaxEntries {
-		return receipt, fmt.Errorf("local state mutation count limit exceeded")
-	}
-	var total int64
-	for _, write := range writes {
-		if len(write.Value) > store.limits.MaxValueBytes {
-			return receipt, ErrValueTooLarge
-		}
-		total += int64(len(write.Value))
-		if total > store.limits.MaxStateBytes {
-			return receipt, fmt.Errorf("local state mutation bytes exceed file size limit")
-		}
-	}
-	canonical, err := canonicalPersistentWrites(writes)
+	canonical, err := prepareLocalWrites(writes, store.limits)
 	if err != nil {
 		return receipt, err
 	}
@@ -217,18 +210,7 @@ func (store *LocalPersistence) CompareAndPublish(hash LayoutHash, version uint64
 		if version == math.MaxUint64 {
 			return fmt.Errorf("local state version exhausted")
 		}
-		values := make(map[Key][]byte, len(current.entries))
-		for _, entry := range current.entries {
-			values[entry.Key] = entry.Value
-		}
-		for _, write := range canonical {
-			if write.Deleted {
-				delete(values, write.Key)
-			} else {
-				values[write.Key] = write.Value
-			}
-		}
-		current.entries = sortedPersistentEntries(values)
+		current.entries = mergeLocalEntries(current.entries, canonical)
 		current.version++
 		if err := store.publish(current); err != nil {
 			return err
@@ -237,6 +219,52 @@ func (store *LocalPersistence) CompareAndPublish(hash LayoutHash, version uint64
 		return nil
 	})
 	return receipt, err
+}
+
+func prepareLocalWrites(writes []PersistentWrite, limits LocalPersistenceLimits) ([]PersistentWrite, error) {
+	if len(writes) > limits.MaxEntries {
+		return nil, fmt.Errorf("local state mutation count limit exceeded")
+	}
+	var total int64
+	for _, write := range writes {
+		if len(write.Value) > limits.MaxValueBytes {
+			return nil, ErrValueTooLarge
+		}
+		total += int64(len(write.Value))
+		if total > limits.MaxStateBytes {
+			return nil, fmt.Errorf("local state mutation bytes exceed file size limit")
+		}
+	}
+	return canonicalPersistentWrites(writes)
+}
+
+// Both inputs have sorted unique keys. Their value bytes are owned by this
+// publication attempt, so the result can borrow them until encoding completes.
+func mergeLocalEntries(entries []Entry, writes []PersistentWrite) []Entry {
+	merged := make([]Entry, 0, len(entries)+len(writes))
+	for len(entries) > 0 && len(writes) > 0 {
+		entry, write := entries[0], writes[0]
+		order := slices.Compare(entry.Key[:], write.Key[:])
+		if order < 0 {
+			merged = append(merged, entry)
+			entries = entries[1:]
+			continue
+		}
+		if order == 0 {
+			entries = entries[1:]
+		}
+		if !write.Deleted {
+			merged = append(merged, Entry{Key: write.Key, Value: write.Value})
+		}
+		writes = writes[1:]
+	}
+	merged = append(merged, entries...)
+	for _, write := range writes {
+		if !write.Deleted {
+			merged = append(merged, Entry{Key: write.Key, Value: write.Value})
+		}
+	}
+	return merged
 }
 
 func (store *LocalPersistence) PublishLayout(hash LayoutHash, version uint64, next Layout) (receipt PersistentReceipt, err error) {
