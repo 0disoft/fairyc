@@ -25,7 +25,7 @@
   "extensions": [
     ".fy"
   ],
-  "grammarSHA256": "2a55164dec8dedc08825fe057897357993e79e68ca5587c2fda9a6d969b196aa",
+  "grammarSHA256": "49e1b532c605fef149cf07c060c92cafee23420d6888177ad53df9708567f069",
   "identifierPattern": "[A-Za-z_][A-Za-z0-9_]*",
   "languageId": "fairyc",
   "lineComment": "//",
