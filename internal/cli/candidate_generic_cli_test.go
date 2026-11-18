@@ -39,7 +39,7 @@ func genericCLIWrappers(prefix string) string {
 func genericCLIRoot(prefix string, first, second int) string {
 	var seeds, calls strings.Builder
 	for _, v := range genericCLIValues {
-		fmt.Fprintf(&seeds, "fn %s seed_%s(){return seed_%s();}", v.fairy, v.fairy, v.fairy)
+		fmt.Fprintf(&seeds, "fn %s seed_%s(){assert(false);return seed_%s();}", v.fairy, v.fairy, v.fairy)
 		fmt.Fprintf(&calls, "discard probe_%s(seed_%s(),seed_%s(),0);", v.fairy, v.fairy, v.fairy)
 	}
 	return fmt.Sprintf("%sfn i32 main(){if(false){%s}return %spick<i32>(%d,%d);}", seeds.String(), calls.String(), prefix, first, second)
