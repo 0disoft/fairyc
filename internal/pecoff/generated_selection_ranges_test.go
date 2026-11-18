@@ -101,13 +101,20 @@ func TestGeneratedSelectionRangesAdvancePastSkippedSections(t *testing.T) {
 	binary.LittleEndian.PutUint16(object[coffFileHeaderBytes+3*coffSectionHeaderBytes+32:], 0)
 	binary.LittleEndian.PutUint16(object[symbolStart+3*54+22:], 0)
 	clear(image[0x200+3*64+4 : 0x200+3*64+36])
+	ownedMap := []byte(strings.Join(kept, "\n"))
 	report, err := InspectGeneratedCOMDATSelection(object, minimalAMD64COFF(), image,
-		[]byte(strings.Join(kept, "\n")), []byte("Discarded s0000002 from unit.obj\n"))
+		ownedMap, []byte("ICF note: \xff\x00\nDiscarded s0000002 from unit.obj\n"))
 	if err != nil || report.Retained != 2 || report.Discarded != 1 || report.AssociativeSectionInventory != 1 {
 		t.Fatalf("skipped sections: %+v / %v", report, err)
 	}
 	if report.Parents[1].RelocatedBytes != 0 || report.Parents[2].RelocatedBytes != 32 {
 		t.Fatalf("wrong relocation ranges after skipped/empty sections: %+v", report.Parents)
+	}
+	for _, invalid := range []string{"\x00", "\xff"} {
+		log := []byte("Discarded s0000002" + invalid + " from unit.obj\n")
+		if _, err := InspectGeneratedCOMDATSelection(object, minimalAMD64COFF(), image, ownedMap, log); err == nil || err.Error() != "invalid generated COMDAT discard symbol" {
+			t.Errorf("invalid discard symbol byte %q: %v", invalid, err)
+		}
 	}
 }
 

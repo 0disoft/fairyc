@@ -54,7 +54,10 @@ func InspectGeneratedUnwindSelection(unit, runtime, image, linkMap, linkLog []by
 	for _, entry := range entries {
 		entryCounts[entry]++
 	}
-	discards := generatedDiscardRecords(linkLog)
+	discards, err := generatedDiscardRecords(linkLog)
+	if err != nil {
+		return result, err
+	}
 	for _, input := range []struct {
 		name string
 		raw  []byte

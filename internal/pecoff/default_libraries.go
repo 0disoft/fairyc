@@ -1,7 +1,6 @@
 package pecoff
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"unicode/utf8"
@@ -159,8 +158,8 @@ func InspectMSVCDefaultLibraries(objects [][]byte, image, linkMap, verbose []byt
 }
 
 func inspectMSVCLibraryTrace(verbose []byte) ([]MSVCLibrary, error) {
-	if len(verbose) == 0 || len(verbose) > 8*1024*1024 || !utf8.Valid(verbose) || bytes.IndexByte(verbose, 0) >= 0 {
-		return nil, fmt.Errorf("invalid library trace text")
+	if len(verbose) == 0 || len(verbose) > 8*1024*1024 {
+		return nil, fmt.Errorf("invalid library trace size: %d bytes", len(verbose))
 	}
 	var libraries []MSVCLibrary
 	indexes := map[string]int{}
@@ -169,7 +168,17 @@ func inspectMSVCLibraryTrace(verbose []byte) ([]MSVCLibrary, error) {
 			return nil, fmt.Errorf("library trace line exceeds budget")
 		}
 		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "Searching ") && strings.HasSuffix(strings.ToLower(line), ".lib:") {
+		searching := strings.HasPrefix(line, "Searching ") && strings.HasSuffix(strings.ToLower(line), ".lib:")
+		loaded := strings.HasPrefix(line, "Loaded ") && strings.Contains(strings.ToLower(line), ".lib(")
+		if !searching && !loaded {
+			continue
+		}
+		// /VERBOSE combines library records with other tool diagnostics. Require
+		// valid text for the records used as library evidence.
+		if !utf8.ValidString(line) || strings.IndexByte(line, 0) >= 0 {
+			return nil, fmt.Errorf("invalid library trace record text")
+		}
+		if searching {
 			path := strings.TrimSuffix(strings.TrimPrefix(line, "Searching "), ":")
 			normalized := strings.ReplaceAll(path, `\`, "/")
 			at := strings.LastIndexByte(normalized, '/')
@@ -191,7 +200,7 @@ func inspectMSVCLibraryTrace(verbose []byte) ([]MSVCLibrary, error) {
 			}
 			indexes[name] = len(libraries)
 			libraries = append(libraries, MSVCLibrary{Name: name, Path: path})
-		} else if strings.HasPrefix(line, "Loaded ") && strings.Contains(strings.ToLower(line), ".lib(") {
+		} else {
 			text := strings.TrimPrefix(line, "Loaded ")
 			name, member, ok := strings.Cut(text, "(")
 			if !ok || !strings.HasSuffix(member, ")") {

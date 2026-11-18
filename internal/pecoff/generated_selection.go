@@ -1,11 +1,11 @@
 package pecoff
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"slices"
 	"strings"
+	"unicode/utf8"
 )
 
 const maxGeneratedCOMDATLinkLogBytes = 8 << 20
@@ -35,14 +35,17 @@ type GeneratedCOMDATSelection struct {
 // are inventoried only; this does not validate their unwind relocations.
 func InspectGeneratedCOMDATSelection(unit, runtime, image, linkMap, linkLog []byte) (GeneratedCOMDATSelection, error) {
 	var result GeneratedCOMDATSelection
-	if len(linkLog) == 0 || len(linkLog) > maxGeneratedCOMDATLinkLogBytes || bytes.IndexByte(linkLog, 0) >= 0 {
-		return result, fmt.Errorf("generated COMDAT linker log has invalid size or encoding")
+	if len(linkLog) == 0 || len(linkLog) > maxGeneratedCOMDATLinkLogBytes {
+		return result, fmt.Errorf("generated COMDAT linker log has invalid size")
 	}
 	peReport, err := InspectExecutable(image)
 	if err != nil {
 		return result, err
 	}
-	discards := generatedDiscardRecords(linkLog)
+	discards, err := generatedDiscardRecords(linkLog)
+	if err != nil {
+		return result, err
+	}
 	inputs := []struct {
 		name string
 		raw  []byte
@@ -73,7 +76,7 @@ func generatedObjectOwner(owner string) string {
 	return owner[strings.LastIndexByte(owner, '/')+1:]
 }
 
-func generatedDiscardRecords(log []byte) map[string]struct{} {
+func generatedDiscardRecords(log []byte) (map[string]struct{}, error) {
 	result := make(map[string]struct{})
 	for _, line := range strings.Split(string(log), "\n") {
 		value, ok := strings.CutPrefix(strings.TrimSpace(line), "Discarded ")
@@ -82,11 +85,14 @@ func generatedDiscardRecords(log []byte) map[string]struct{} {
 		}
 		for _, object := range []string{"unit.obj", "runtime.obj"} {
 			if symbol, ok := strings.CutSuffix(value, " from "+object); ok {
+				if !utf8.ValidString(symbol) || strings.IndexByte(symbol, 0) >= 0 {
+					return nil, fmt.Errorf("invalid generated COMDAT discard symbol")
+				}
 				result[object+":"+symbol] = struct{}{}
 			}
 		}
 	}
-	return result
+	return result, nil
 }
 
 func generatedImageBytes(image []byte, report Report, rva, count uint32) ([]byte, error) {
