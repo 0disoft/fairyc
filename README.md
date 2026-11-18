@@ -40,9 +40,15 @@ This is a development harness for synchronous callbacks, not a source-export or 
 
 ### Get the compiler
 
-Fairy C does not yet offer pre-built public installers. To build the compiler from source, follow the [Windows compiler build guide](DEVELOPMENT.md#building-the-windows-compiler-binary). If you are using an experimental ZIP distribution, extract it and keep the license files together. Go and Bun are required only for building the compiler from source, not for running the built executable.
+The experimental Windows AMD64 preview includes `fairyc.exe` and `fairyc-lsp.exe`.
+Download [v0.1.0-preview.2](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.2)
+as a [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip)
+with its [SHA-256 checksum](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip.sha256).
+Check that the ZIP hash matches the checksum file, then extract the unsigned ZIP and keep the license files together.
+See the [release document](docs/ops/release.md) for the verified source revision and build evidence.
 
-The recommended environment is Windows (x86_64/AMD64) with MSVC and the Windows SDK.
+The prebuilt executables run without Go or Bun. For source builds, follow the
+[Windows compiler build guide](DEVELOPMENT.md#building-the-windows-compiler-binary).
 
 For a small native desktop application, see the [minimal Win32 GUI example](examples/win32_minimal/README.md). Its optional `fairy.windows.json` selects the GUI subsystem, C bridge files, SDK libraries and `.rc` resources while keeping Fairy's ordinary `main()` entry.
 Install Microsoft's [C++ Build Tools](https://learn.microsoft.com/en-us/cpp/overview/acquire-msvc)
@@ -53,7 +59,7 @@ Contributors can also build and test the compiler on Linux using Go with GCC or 
 
 ### Create, test, and run
 
-Once `fairyc` is built, you can create and test a new project starter from any working directory. If `fairyc` is not on your PATH, use its relative or absolute path.
+With an extracted or source-built `fairyc`, you can create and test a project starter from any working directory. If `fairyc` is not on your PATH, use its absolute path so the same executable works after you change directories.
 
 ```text
 fairyc new hello-fairy --uid example.hello-fairy

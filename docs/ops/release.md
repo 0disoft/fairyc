@@ -1,10 +1,24 @@
 # Release
 
-- Status: Experimental Windows preview published: [v0.1.0-preview.1](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.1)
+## Published Windows AMD64 preview
 
-Latest local preparation: [2026-11-04 Frontend regression recheck and Windows ZIP verification](windows-preview-readiness-20261104.md).
-It records candidate `9bc77723`, including fresh execution outside the checkout;
-it does not change the published release or establish hosted CI/clean-machine evidence.
+[v0.1.0-preview.2](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.2) is the current experimental prerelease.
+It contains the unsigned Go Stage 0 compiler and language server for Windows AMD64.
+Download the [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip)
+and its [SHA-256 sidecar](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip.sha256).
+
+- Source revision `485592aa611626f427d248de659fa622e917d45f`, built with Go 1.27.1.
+- ZIP size 10,104,881 bytes. SHA-256 `03d1c345b21519bdb586357b0a1b8179334b0ded3954f28d794e1e6b4284b9ef`.
+- All 16 packaging smoke steps passed. The extracted executables passed LSP initialization and shutdown, starter checks, and native tests and runs in development and release modes. The ZIP, sidecar and all seven files listed in `SHA256SUMS.txt` passed hash verification.
+- All 17 jobs passed on the exact source revision, including Windows native smoke and Linux C differential. [CI results](https://github.com/0disoft/fairyc/actions/runs/44310233417/attempts/2)
+- After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved hash and passed all eight starter steps on the Windows build host. Separate-host verification for this release remains pending.
+
+Report vulnerabilities through [GitHub private reporting](https://github.com/0disoft/fairyc/security/advisories/new).
+
+## Historical local preparation (2026-11-04)
+
+The [frontend regression and Windows ZIP recheck](windows-preview-readiness-20261104.md)
+records local execution of the earlier `9bc77723` candidate outside the checkout.
 
 ## Windows editor preview draft (2026-10-28)
 
@@ -25,9 +39,9 @@ Linux target promotion, self-hosting and C-relative performance budgets are
 separate work.
 
 Source-built Linux GNU amd64 compilers also implement ordinary `build/run/test --native` with
-GCC or Clang and the production SDK. This does not add a Linux binary release
-or promote target conformance. Linux native results for this change are still pending;
-see [ADR 0426](../adr/0426-linux-native-workspace-tests.md).
+GCC or Clang and the production SDK. Linux C differential passed at the `preview.2` source revision.
+The release assets are Windows-only, and target maturity follows the existing contract.
+See [ADR 0426](../adr/0426-linux-native-workspace-tests.md) for the Linux workspace scope.
 
 Build one candidate from a clean `main` commit with
 `node tools/starter-smoke.mjs --package-local`. Record its commit, ZIP SHA-256,
@@ -122,10 +136,8 @@ entry records the user's report rather than an independently inspected remote re
   and `fairyc-native-verify-20261027-181502/results.json` under the laptop's Downloads;
   each directory also retains `REPORT.ko.txt`, and the native directory retains executables.
 
-These are separate-host execution and fresh-compilation results with development tools
-installed. They do not establish execution on a machine without MSVC/SDK, change
-`cleanMachineEvidence`, or approve publication. Exact-candidate CI and public download
-and private security-report route checks remain required before the next publication.
+These separate-host execution and fresh-compilation results used installed development tools
+and apply to the `1acc298e` candidate.
 
 ### Public distribution check (2026-10-27)
 
@@ -140,10 +152,9 @@ The build host checked GitHub without changing repository settings or publishing
   and checksum sidecar both return HTTP 200. The 4,648,779-byte ZIP matches its sidecar
   and GitHub asset digest: `d1dd38621691a92f99091f8b98d044cdf46739f0842a3264f9b9ff1ebe3fa73c`.
   These checks concern that older published artifact, not the GRAM13-tested candidate.
-- Remote `main` is `c7355d733adb609f894db16b268b69da9e11d31f`. The commit API
-  reports no commit for candidate `1acc298e99182f530e8f1ba480c701dd8873e033` (HTTP 422),
-  and its workflow-run query returns no runs. The candidate has not been pushed or published;
-  its exact-commit Windows CI gate remains pending.
+- At the time, remote `main` was `c7355d733adb609f894db16b268b69da9e11d31f`. The commit API
+  returned HTTP 422 for candidate `1acc298e99182f530e8f1ba480c701dd8873e033`,
+  and its workflow-run query returned no runs.
 
 Run CI on the candidate revision itself before publishing its retained ZIP. A push whose
 tip includes later documentation commits runs CI on that newer tip and does not by itself
@@ -158,14 +169,14 @@ smoke` job against that revision; changed-path classification, the Go matrix, th
 groups and the C differential job do not run. This is not a replacement for full CI or evidence
 that all Go and Linux checks passed.
 
-The workflow change and the candidate commit are still local and must both be pushed with separate
-approval before dispatch. After that approval, the current candidate command is:
+Once the workflow and the candidate commit are available on GitHub, dispatch with the full
+candidate SHA:
 
 ```text
-gh workflow run frontend.yml --ref main -f candidate_sha=315ef56991d20fa0716927e4fcecb464231db6a8
+gh workflow run frontend.yml --ref main -f candidate_sha=FULL_CANDIDATE_SHA
 ```
 
-The exact-candidate CI result remains unconfirmed until that run completes.
+Use the completed run's result as evidence for that candidate SHA.
 
 ## Owners
 
@@ -188,9 +199,8 @@ The exact-candidate CI result remains unconfirmed until that run completes.
   report route. Public issues are for nonsensitive bugs only.
 - Release blocker status: any failed user-path step, relevant exact-commit CI
   failure, artifact hash mismatch, or unavailable private security-report route.
-- Remaining operational risk: separate-host execution and fresh native compilation
-  on GRAM13 are user-reported above; execution without development tools remains
-  unverified. The first preview requires the user's separate MSVC installation and
+- Remaining operational risk: `preview.2` execution was verified on the build host.
+  Native builds, tests and runs require x64 MSVC and the Windows SDK. The preview
   offers no compatibility or response-time promise.
 
 Only publish after the gates above have been checked. After publication,
