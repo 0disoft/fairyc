@@ -19,7 +19,7 @@ import std::bytes as bytes;import std::process as process;
 }`
 	candidateAtlasProbeSize(t, "project_pack_cli", main, 2<<20, func(t *testing.T, image string) {
 		verifyLinuxAtlasPack(t, image)
-		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-pack", usage, linuxPackHelpActions())
+		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-pack", candidateUsage(), linuxPackHelpActions())
 	}, "linux_cli_data")
 }
 

@@ -147,6 +147,7 @@ func TestCandidateAtlasCLI(t *testing.T) {
 
 func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 	t.Helper()
+	help := candidateUsage()
 	for _, action := range []string{"", "overview", "show", "around"} {
 		for _, flag := range []string{"--help", "-h", "help"} {
 			args := []string{"experimental", "atlas-pack"}
@@ -155,14 +156,14 @@ func verifyCandidateAtlasCLIHelp(t *testing.T, image string) {
 			}
 			args = append(args, flag)
 			code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
-			if code != 0 || out != usage || diagnostic != "" {
+			if code != 0 || out != help || diagnostic != "" {
 				t.Fatalf("pack help %v: %d %q %q", args, code, out, diagnostic)
 			}
 		}
 	}
 	for _, args := range [][]string{{"--help"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "atlas-impact", "--help"}, {"experimental", "atlas-mcp", "--help"}, {"experimental", "atlas-edit", "--help"}, {"experimental", "atlas-symbols", "--help"}, {"experimental", "atlas-symbols", "list", "--help"}, {"experimental", "atlas-symbols", "list", "-h"}, {"experimental", "atlas-symbols", "list", "help"}, {"experimental", "atlas-calls", "--help"}, {"experimental", "atlas-calls", "list", "--help"}, {"experimental", "atlas-calls", "list", "-h"}, {"experimental", "atlas-calls", "list", "help"}} {
 		code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
-		if code != 0 || out != usage || diagnostic != "" {
+		if code != 0 || out != help || diagnostic != "" {
 			t.Fatalf("help %v: %d %q %q", args, code, out, diagnostic)
 		}
 	}

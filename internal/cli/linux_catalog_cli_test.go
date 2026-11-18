@@ -21,12 +21,13 @@ import std::bytes as bytes;import std::process as process;
 }`
 	candidateAtlasProbeSize(t, "project_catalog_cli", main, 2<<20, func(t *testing.T, image string) {
 		verifyLinuxAtlasSymbols(t, image)
+		help := candidateUsage()
 		for _, alias := range []string{"--help", "-h", "help"} {
 			for _, action := range [][]string{nil, {"list"}} {
 				args := append([]string{"default-help", "atlas-symbols"}, action...)
 				args = append(args, alias)
 				code, out, diagnostic := fetchCLIProcess(t, image, t.TempDir(), args, "")
-				if code != 0 || out != usage || diagnostic != "" {
+				if code != 0 || out != help || diagnostic != "" {
 					t.Fatalf("default catalog help %v: (%d,%q,%q)", args, code, out, diagnostic)
 				}
 			}

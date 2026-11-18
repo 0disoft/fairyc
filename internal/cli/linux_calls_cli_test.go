@@ -19,7 +19,7 @@ import std::bytes as bytes;import std::process as process;
 }`
 	candidateAtlasProbeSize(t, "project_calls_cli", main, 2<<20, func(t *testing.T, image string) {
 		verifyLinuxAtlasCalls(t, image)
-		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-calls", usage, [][]string{nil, {"list"}})
+		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-calls", candidateUsage(), [][]string{nil, {"list"}})
 	}, "linux_cli_data")
 }
 

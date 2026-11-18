@@ -81,9 +81,12 @@ func fetchCLIProcess(t *testing.T, image, root string, args []string, broken str
 func verifyCandidateFetchCLI(t *testing.T, image string) {
 	t.Helper()
 	command := []string{"experimental", "fetch-packages", "--offline"}
+	help := candidateUsage()
 	for _, args := range [][]string{{"experimental"}, {"experimental", "--help"}, {"experimental", "fetch-packages", "--help"}, {"experimental", "fetch-packages", "-h"}, {"experimental", "fetch-packages", "help"}, {"experimental", "unknown\ncommand"}, {"experimental", "unknown", "--help"}, {"experimental", "fetch-packages", "--bad"}, {"experimental", "fetch-packages", "--offline", "--offline"}, {"experimental", "fetch-packages", "--offline", "extra"}, {"experimental", "fetch-packages", "--"}, {"experimental", "fetch-packages", "--offline=true"}} {
 		r := t.TempDir()
 		want, stdout, stderr := runForTest(args, r)
+		stdout = strings.Replace(stdout, usage, help, 1)
+		stderr = strings.Replace(stderr, usage, help, 1)
 		code, out, diagnostic := fetchCLIProcess(t, image, r, args, "")
 		if code != want || out != stdout || diagnostic != stderr {
 			t.Fatalf("%v: code=%d/%d stdout %s stderr %s", args, code, want, fetchCLITextDiff(out, stdout), fetchCLITextDiff(diagnostic, stderr))

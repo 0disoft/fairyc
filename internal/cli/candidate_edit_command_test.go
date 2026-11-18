@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"slices"
 	"strings"
 	"testing"
 
@@ -23,14 +22,7 @@ func TestCandidateEditCommand(t *testing.T) {
 
 func verifyCandidateEditCommand(t *testing.T, image string) {
 	t.Helper()
-	// These package tooling commands belong to the Go frontend.
-	lines := strings.Split(usage, "\n")
-	lines = slices.DeleteFunc(lines, func(line string) bool {
-		return strings.HasPrefix(line, "  fairyc experimental registry-resolve ") ||
-			strings.HasPrefix(line, "  fairyc experimental registry-update ") ||
-			strings.HasPrefix(line, "  fairyc experimental git-snapshot ")
-	})
-	verifyCandidateEditCommandWithHelp(t, image, strings.Join(lines, "\n"))
+	verifyCandidateEditCommandWithHelp(t, image, candidateUsage())
 }
 
 func verifyCandidateEditCommandWithHelp(t *testing.T, image, help string) {

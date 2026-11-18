@@ -26,7 +26,7 @@ import std::bytes as bytes;import std::process as process;
 }`
 	candidateAtlasProbeSize(t, "project_edit_cli", main, 2<<20, func(t *testing.T, image string) {
 		verifyLinuxAtlasEdit(t, image)
-		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-edit", usage, [][]string{nil})
+		verifyLinuxAtlasCommandHelp(t, image, "default-help", "atlas-edit", candidateUsage(), [][]string{nil})
 		verifyLinuxEditApplication(t, image)
 	}, "linux_cli_data")
 }

@@ -54,7 +54,7 @@ func TestCandidateMCPCommand(t *testing.T) {
 
 func verifyCandidateMCPCommand(t *testing.T, image string) {
 	t.Helper()
-	verifyCandidateMCPCommandWithHelp(t, image, usage)
+	verifyCandidateMCPCommandWithHelp(t, image, candidateUsage())
 }
 
 func verifyCandidateMCPCommandWithHelp(t *testing.T, image, help string) {
