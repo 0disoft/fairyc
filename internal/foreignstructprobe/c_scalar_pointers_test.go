@@ -138,7 +138,9 @@ func TestCScalarPointersLinux(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				out, err := cdriver.ExecuteLinuxTarget(cdriver.Artifact{Bytes: artifact.Bytes, Toolchain: pair[0], Profile: profile})
+				out, err := cdriver.ExecuteLinuxTarget(cdriver.Artifact{
+					Bytes: artifact.Bytes, Toolchain: artifact.CallerToolchain, Profile: artifact.Profile, ConsumerMode: artifact.ConsumerMode,
+				})
 				if err != nil || out.ExitCode != 42 || out.Stdout != "" || out.Stderr != "" {
 					t.Fatalf("Linux pointer crossing: %+v %v", out, err)
 				}

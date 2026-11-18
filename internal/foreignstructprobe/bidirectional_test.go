@@ -232,7 +232,9 @@ func TestBidirectionalAggregateLinux(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				run, err := cdriver.ExecuteLinuxTarget(cdriver.Artifact{Bytes: a.Bytes, Toolchain: pair[0], Profile: profile})
+				run, err := cdriver.ExecuteLinuxTarget(cdriver.Artifact{
+					Bytes: a.Bytes, Toolchain: a.CallerToolchain, Profile: a.Profile, ConsumerMode: a.ConsumerMode,
+				})
 				if err != nil || run.ExitCode != 42 || run.Stdout != "" || run.Stderr != "" {
 					t.Fatalf("Linux aggregate crossing: %+v %v", run, err)
 				}
