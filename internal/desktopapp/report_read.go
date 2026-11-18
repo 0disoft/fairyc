@@ -83,18 +83,21 @@ func ParseReportWithOptions(data []byte, root string, options ...ReportReadOptio
 	if err != nil {
 		return Report{}, err
 	}
-	root, err = filepath.EvalSymlinks(root)
+	canonicalRoot, err := filepath.EvalSymlinks(root)
 	if err != nil {
 		return Report{}, err
 	}
-	relative, err := filepath.Rel(filepath.Join(root, "dist"), result.Archive)
+	relative, ok := packagingArchiveName(root, result.Archive)
+	if !ok {
+		relative, ok = packagingArchiveName(canonicalRoot, result.Archive)
+	}
 	digest, hashErr := hex.DecodeString(result.ZipSHA256)
-	if err != nil || !filepath.IsLocal(relative) || filepath.Base(relative) != relative || !strings.HasSuffix(relative, ".zip") ||
+	if !ok ||
 		!result.OK || result.Signed || result.Published || result.GUILaunched || result.InputInjected || result.ExeBytes <= 0 || result.ZipBytes <= 0 || result.ZipBytes > maxReportArchiveBytes ||
 		hashErr != nil || len(digest) != sha256.Size || result.ZipSHA256 != strings.ToLower(result.ZipSHA256) {
 		return Report{}, errors.New("invalid desktop packaging receipt")
 	}
-	project, err := os.OpenRoot(root)
+	project, err := os.OpenRoot(canonicalRoot)
 	if err != nil {
 		return Report{}, err
 	}
@@ -148,6 +151,11 @@ func ParseReportWithOptions(data []byte, root string, options ...ReportReadOptio
 		return Report{}, errors.New("packaged archive checksum mismatch")
 	}
 	return Report{Schema: "fairyc.package-report/v1", Archive: "dist/" + relative, SHA256: result.ZipSHA256, ExeBytes: result.ExeBytes, ZipBytes: result.ZipBytes}, nil
+}
+
+func packagingArchiveName(root, archive string) (string, bool) {
+	name, err := filepath.Rel(filepath.Join(root, "dist"), archive)
+	return name, err == nil && filepath.IsLocal(name) && filepath.Base(name) == name && strings.HasSuffix(name, ".zip")
 }
 
 type reportContextReader struct {

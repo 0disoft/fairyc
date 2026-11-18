@@ -120,11 +120,15 @@ func TestRunHelperPreservesArgumentsAndDefaults(t *testing.T) {
 	beforePrefix := slices.Clone(python.prefix)
 	arguments := []string{"--output", "path with spaces;$(literal)"}
 	beforeArguments := slices.Clone(arguments)
+	script, err := filepath.EvalSymlinks(filepath.Join(root, "helper.py"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	data, err := RunHelperWithOptions(python, root, "helper.py", arguments, HelperRunOptions{Run: func(command *exec.Cmd) error {
 		want := append([]string{python.path}, beforePrefix...)
-		want = append(want, "-E", "-s", "-B", filepath.Join(root, "helper.py"))
+		want = append(want, "-E", "-s", "-B", script)
 		want = append(want, beforeArguments...)
-		if !slices.Equal(command.Args, want) || command.Dir != root || command.WaitDelay != 2*time.Second || command.Cancel == nil {
+		if !slices.Equal(command.Args, want) || command.Dir != filepath.Dir(script) || command.WaitDelay != 2*time.Second || command.Cancel == nil {
 			t.Fatalf("invalid command configuration: %+v", command)
 		}
 		_, err := io.WriteString(command.Stdout, "receipt")
