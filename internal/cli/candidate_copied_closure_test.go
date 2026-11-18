@@ -65,8 +65,6 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("Windows native replay; Linux deferred")
 	}
-	root := t.TempDir()
-	copyLexerExample(t, root)
 	raw, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "copied_closure_calls.fy"))
 	if err != nil {
 		t.Fatal(err)
@@ -83,7 +81,8 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	calls := candidateCopiedClosureAdmissionCalls() + "checked(b" + strconv.Quote(string(view)) + ",0);"
+	calls := "let ref u8[] sdk=b" + strconv.Quote(string(sdk)) + ";" +
+		candidateCopiedClosureAdmissionCalls() + "checked(b" + strconv.Quote(string(view)) + ",0);"
 	vectorSource := strings.Replace(string(vector), "import std::bytes as bytes;", "", 1)
 	// The unit value checker needs a contextual type for borrowing a Vec owner.
 	// Exercise its existing named shared-descriptor form, not an untyped borrow.
@@ -92,7 +91,7 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 	control := strings.Replace(vectorSource, "let add=fn [i32 offset] i32(i32 value){return offset+value;};", "", 1)
 	control = strings.Replace(control, "let adjacent=fn [] i32(i32 value){return value;};", "", 1)
 	control = strings.Replace(control, "fn i32 main()", "fn i32 add(i32 value){return 40+value;}fn i32 adjacent(i32 value){return value;}fn i32 main()", 1)
-	calls += "assert(checked_vector(b" + strconv.Quote(vectorSource) + ",b" + strconv.Quote(string(sdk)) + ")==checked_vector(b" + strconv.Quote(control) + ",b" + strconv.Quote(string(sdk)) + "));"
+	calls += "assert(checked_vector(b" + strconv.Quote(vectorSource) + ",sdk)==checked_vector(b" + strconv.Quote(control) + ",sdk));"
 	for _, bad := range []struct {
 		source string
 		code   int
@@ -104,7 +103,7 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 		{strings.Replace(vectorSource, "return add(2);", "return view[0];", 1), 2},
 		{`module main;import std::vec as v;fn ref i32 leak(){var items=v::empty<i32>();let ref v::Vec<i32> view=ref items;for(let ref i32 item in view){return item;}return v::at<i32>(ref items,0);}`, 2102},
 	} {
-		calls += fmt.Sprintf("rejected_vector(b%s,b%s,%d);", strconv.Quote(bad.source), strconv.Quote(string(sdk)), bad.code)
+		calls += fmt.Sprintf("rejected_vector(b%s,sdk,%d);", strconv.Quote(bad.source), bad.code)
 	}
 	const loopPrefix = `module root;fn i32 main(){let i32[1] data=[1];let ref i32[] view=ref data[..];let add=fn [] i32(i32 n){return n;};`
 	for _, body := range []string{
@@ -121,14 +120,12 @@ func TestCandidateCopiedClosureCalls(t *testing.T) {
 		calls += "reject(b" + strconv.Quote(loopPrefix+body+"}") + ");"
 	}
 	program := strings.Replace(string(raw), "module tests::copied_closure_calls;", "module main;", 1) + "\n@effects(console) fn i32 main(){" + calls + "return 0;}\n"
-	writeTestSource(t, root, "src/main.fy", program)
-	copyCandidateParityModules(t, root, "scanner", "syntax", "module_signatures", "module_unit_bind", "module_unit_call_closure", "module_unit_values", "module_unit_checked_bodies")
-	for _, args := range [][]string{{"run"}, {"run", "--release", "--locked"}} {
-		code, out, diagnostics := runForTest(args, root)
+	candidateAtlasProbeSize(t, "module_unit_checked_bodies", program, 256<<10, func(t *testing.T, image string) {
+		code, out, diagnostics := candidateAtlasSDKCLIProcess(t, image, t.TempDir(), nil)
 		if code != ExitSuccess || out != "" || diagnostics != "" {
-			t.Fatalf("%v: %d %q %s", args, code, out, diagnostics)
+			t.Fatalf("copied closure admission: %d %q %s", code, out, diagnostics)
 		}
-	}
+	})
 }
 
 func candidateCopiedClosureProgram() string {
@@ -156,7 +153,7 @@ func candidateCopiedClosureAdmissionCalls() string {
 		{"let add=fn", "var add=fn"}, {"return add(2);", "return _fy_closure_main_1(40,2);"},
 		{"return add(2);", "return add(.x=2);"}, {"let add=fn", "let _fy_closure_bad=fn"},
 		{"return add(2);", "let add=42;return add;"}, {"return offset+x;", "return offset+missing;"},
-		{"fn [i32 offset]", "fn [u32 offset]"}, {"i32(i32 x)", "i32(i64 x)"},
+		{"i32(i32 x)", "i32(i64 x)"},
 		{"i32(i32 x)", "i64(i32 x)"}, {"return offset+x;", "return add(x);"},
 		{"i32(i32 x)", "i32(i32 a,i32 b,i32 c,i32 d,i32 e)"},
 		{"fn [i32 offset]", "fn [i32 offset,i32 b,i32 c,i32 d,i32 e]"},
@@ -171,7 +168,11 @@ func candidateCopiedClosureAdmissionCalls() string {
 	} {
 		fmt.Fprintf(&out, "reject(b%s);", strconv.Quote(raw))
 	}
-	for _, replacement := range [][2]string{{"let i32 offset=40;", "let bool offset=true;"}, {"add(2)", "add(true)"}, {"add(2)", "add()"}, {"return offset+x;", "return true;"}, {"return add(2);", "return add(2)+missing;"}} {
+	for _, replacement := range [][2]string{
+		{"let i32 offset=40;", "let bool offset=true;"}, {"fn [i32 offset]", "fn [u32 offset]"},
+		{"add(2)", "add(true)"}, {"add(2)", "add()"}, {"return offset+x;", "return true;"},
+		{"return add(2);", "return add(2)+missing;"},
+	} {
 		fmt.Fprintf(&out, "reject_typed(b%s);", strconv.Quote(strings.Replace(base, replacement[0], replacement[1], 1)))
 	}
 

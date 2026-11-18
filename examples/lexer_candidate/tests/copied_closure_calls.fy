@@ -20,7 +20,7 @@ fn syntax::Parsed parsed(ref u8[] raw){let b=switch(bytes::copy(raw)){case .ok(p
 }
 
 fn bool rejected(ref u8[] raw){let b=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{return false;}};let stream=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{return false;}};return switch(syntax::parse(stream,512)){case .ok(p):{syntax::problem_count(ref p)!=0}case .err(_):{true}};}
-pub fn void reject(ref u8[] raw){assert(rejected(raw));}
+@effects(console) pub fn void reject(ref u8[] raw){if(!rejected(raw)){discard io::write_stderr_bytes(raw);assert(false);}}
 
 // Use the actual authenticated SDK source, never a fabricated Vec declaration.
 @effects(console) pub fn u32 checked_vector(ref u8[] raw,ref u8[] sdk){
