@@ -12,16 +12,6 @@ import (
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
-func candidateAtlasReturnErrorSitesMain(t *testing.T) string {
-	t.Helper()
-	main := candidateAtlasAllocationSitesMain(t)
-	const imported = "import project_atlas_allocation_sites as drops;"
-	if strings.Count(main, imported) != 1 {
-		t.Fatal("missing return-error collector binding")
-	}
-	return strings.Replace(main, imported, "import project_atlas_return_error_sites as drops;", 1)
-}
-
 func TestCandidateAtlasReturnErrorSites(t *testing.T) {
 	type fixture struct {
 		name, root string
@@ -53,7 +43,7 @@ func TestCandidateAtlasReturnErrorSites(t *testing.T) {
 	}
 	// The development main uses ? only for test-owned JSON assembly. Keep its
 	// typed failure handler outside the compiler source under test.
-	main := candidateAtlasReturnErrorSitesMain(t)
+	main := candidateAtlasObservedSitesMain(t, "project_atlas_return_error_sites")
 	main = strings.Replace(main, "@effects(filesystem,console,environment) fn i32 main(){", "@effects(filesystem,console,environment) fn Result<i32,u32> execute(){", 1)
 	// Wrap all existing explicit i32 exits in Result without changing the source
 	// fixture, compiler implementation or independent Go expectations.

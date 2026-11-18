@@ -12,9 +12,9 @@ import (
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
-func candidateAtlasAllocationSitesMain(t *testing.T) string {
+func candidateAtlasObservedSitesMain(t *testing.T, collector string) string {
 	t.Helper()
-	main := strings.Replace(candidateAtlasMoveSitesMain(t), "import project_atlas_move_sites as drops;", "import project_atlas_allocation_sites as drops;", 1)
+	main := strings.Replace(candidateAtlasMoveSitesMain(t), "import project_atlas_move_sites as drops;", "import "+collector+" as drops;", 1)
 	// Compare standalone/batch APIs for every selected root frame. The batch
 	// still publishes all SDK frame observations against the independent oracle;
 	// do not repeat whole-program verification for each unrelated SDK helper.
@@ -23,6 +23,16 @@ func candidateAtlasAllocationSitesMain(t *testing.T) string {
 		t.Fatal("missing allocation single/batch comparison")
 	}
 	main = strings.Replace(main, call, "if(input::origin(ref source,f.module_index).owner==0){drops::collect(p,frame,65536,ref mut measured)}else{retained_sites(ref all,frame)}", 1)
+	return main + `
+fn Result<v::Vec<drops::Site>,u32> retained_sites(ref drops::Collection all,usize frame){
+ let r=drops::range(all,frame-1);var rows=v::empty<drops::Site>();var usize i=r.start;
+ while(i<r.end){if(!v::push<drops::Site>(ref mut rows,drops::at(all,i)).is_ok){return .err(2);}i+=1;}return .ok(rows);
+}`
+}
+
+func candidateAtlasAllocationSitesMain(t *testing.T) string {
+	t.Helper()
+	main := candidateAtlasObservedSitesMain(t, "project_atlas_allocation_sites")
 	const frameCountCheck = " if(drops::frame_count(ref all)!=ir::count(p)){return 7;}"
 	main = strings.Replace(main, frameCountCheck, frameCountCheck+`
  if(bytes::equal(mode,b"allocation-controls")){
@@ -37,10 +47,6 @@ func candidateAtlasAllocationSitesMain(t *testing.T) string {
   return 7;
  }`, 1)
 	return main + `
-fn Result<v::Vec<drops::Site>,u32> retained_sites(ref drops::Collection all,usize frame){
- let r=drops::range(all,frame-1);var rows=v::empty<drops::Site>();var usize i=r.start;
- while(i<r.end){if(!v::push<drops::Site>(ref mut rows,drops::at(all,i)).is_ok){return .err(2);}i+=1;}return .ok(rows);
-}
 fn u32 allocation_one(ref ir::Program p,usize frame,usize count,usize initial){
  var usize meter=initial;
  let result=drops::collect(p,frame,count,ref mut meter);
@@ -79,6 +85,13 @@ func TestCandidateAtlasAllocationSites(t *testing.T) {
 	items := atlasAllocationCollectorCases()
 	emptyRoot := writeWorkspaceSessionFixture(t, items[0].source)
 	controlRoot := writeWorkspaceSessionFixture(t, items[2].source)
+	// The native probe loads in locked mode. Only the corpus is prepared by
+	// the Go oracle, so create the two control lockfiles here.
+	for _, control := range []string{emptyRoot, controlRoot} {
+		if _, _, err := loadWorkspaceWithLock(control, false); err != nil {
+			t.Fatalf("prepare allocation control lockfile: %v", err)
+		}
+	}
 	root := writeWorkspaceSessionFixture(t, items[0].source)
 	modules := make(map[string]bool, len(items)-1)
 	for _, item := range items[1:] {
