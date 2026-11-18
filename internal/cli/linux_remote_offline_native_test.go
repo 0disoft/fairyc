@@ -31,7 +31,7 @@ func TestLinuxRemoteOfflineNative(t *testing.T) {
 	for _, compiler := range []string{"gcc", "clang"} {
 		for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 			t.Run(compiler+"/"+profile.Name, func(t *testing.T) {
-				artifact, err := cdriver.BuildLinuxTargetParts(t.TempDir(), compiler, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, false, time.Minute)
+				artifact, err := cdriver.BuildLinuxTargetParts(newLinuxRemoteBuildStage(t), compiler, profile, build.Header, "#include \"fy_project.h\"\n", build.Sources, support, false, time.Minute)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -120,6 +120,16 @@ func TestLinuxRemoteOfflineNative(t *testing.T) {
 			})
 		}
 	}
+}
+
+func newLinuxRemoteBuildStage(t *testing.T) string {
+	t.Helper()
+	// TempDir owns cleanup, but its returned directory need not have mode 0700.
+	stage, err := os.MkdirTemp(t.TempDir(), "stage-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return stage
 }
 
 // Check the exact deferred replay inputs on Windows without executing Linux.
