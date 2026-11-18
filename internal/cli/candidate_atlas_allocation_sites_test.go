@@ -76,33 +76,44 @@ fn u32 allocation_all(ref ir::Program p,usize count,usize initial){
 }
 
 func TestCandidateAtlasAllocationSites(t *testing.T) {
-	type fixture struct {
-		name, root string
-		want       map[string][]semanticsnapshot.Span
+	items := atlasAllocationCollectorCases()
+	emptyRoot := writeWorkspaceSessionFixture(t, items[0].source)
+	controlRoot := writeWorkspaceSessionFixture(t, items[2].source)
+	root := writeWorkspaceSessionFixture(t, items[0].source)
+	modules := make(map[string]bool, len(items)-1)
+	for _, item := range items[1:] {
+		module := "case_" + strings.ReplaceAll(item.name, "-", "_")
+		source := strings.Replace(item.source, "module main;", "module "+module+";", 1)
+		source = strings.Replace(source, "fn i32 main()", "fn i32 fixture_entry()", 1)
+		writeWorkspaceFile(t, root, "src/"+module+".fy", source)
+		modules[module] = false
 	}
-	var fixtures []fixture
-	for _, item := range atlasAllocationCollectorCases() {
-		root := writeWorkspaceSessionFixture(t, item.source)
-		var diagnostic bytes.Buffer
-		prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
-		if code != 0 {
-			t.Fatalf("allocation oracle %s: %d %s", item.name, code, &diagnostic)
-		}
-		want := map[string][]semanticsnapshot.Span{}
-		for _, part := range prepared.partitions {
-			for _, f := range part.Functions() {
-				want[atlasDropKey(f.Function, "", false)] = f.AllocationSites
-			}
-			for _, s := range part.Specializations() {
-				if s.Aggregate == nil {
-					want[atlasDropKey(s.Declaration, s.ID, false)] = s.Function.AllocationSites
-				}
-				if s.Cleanup != nil {
-					want[atlasDropKey(s.Declaration, s.ID, true)] = s.Cleanup.AllocationSites
-				}
+	var diagnostic bytes.Buffer
+	prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
+	if code != ExitSuccess {
+		t.Fatalf("allocation corpus oracle: %d %s", code, &diagnostic)
+	}
+	want := map[string][]semanticsnapshot.Span{}
+	for _, part := range prepared.partitions {
+		for _, f := range part.Functions() {
+			want[atlasDropKey(f.Function, "", false)] = f.AllocationSites
+			if f.Function.Name == "fixture_entry" {
+				modules[f.Function.Module] = true
 			}
 		}
-		fixtures = append(fixtures, fixture{item.name, root, want})
+		for _, s := range part.Specializations() {
+			if s.Aggregate == nil {
+				want[atlasDropKey(s.Declaration, s.ID, false)] = s.Function.AllocationSites
+			}
+			if s.Cleanup != nil {
+				want[atlasDropKey(s.Declaration, s.ID, true)] = s.Cleanup.AllocationSites
+			}
+		}
+	}
+	for module, seen := range modules {
+		if !seen {
+			t.Fatalf("allocation corpus is missing fixture %s", module)
+		}
 	}
 	// The development main uses ? only for test-owned JSON assembly. Keep its
 	// typed failure handler outside the compiler source under test.
@@ -118,60 +129,58 @@ func TestCandidateAtlasAllocationSites(t *testing.T) {
 	main += "\n@effects(filesystem,console,environment) fn i32 main(){return switch(execute()){case .ok(p):{p}case .err(_):{7}};}"
 	candidateAtlasProbeSize(t, "project_atlas_source", main, 2<<20, func(t *testing.T, image string) {
 		t.Setenv("PATH", "")
-		for _, f := range fixtures {
-			t.Run(f.name, func(t *testing.T) {
-				before := remoteTree(t, f.root)
-				code, out, stderr := candidateAtlasSDKCLIProcess(t, image, f.root, nil)
-				if code != 0 || stderr != "" {
-					t.Fatalf("allocation collector: %d %.3000s %.500s", code, out, stderr)
-				}
-				var rows []struct {
-					Key struct {
-						Package            string `json:"package_instance"`
-						Module, Kind, Name string
-					}
-					Specialization string
-					Cleanup        bool
-					Sites          []struct {
-						Package string `json:"package_instance"`
-						Source  string
-						Start   int `json:"start_byte"`
-						End     int `json:"end_byte"`
-					}
-				}
-				if err := json.Unmarshal([]byte(out), &rows); err != nil {
-					t.Fatal(err, out)
-				}
-				seen := map[string]bool{}
-				for _, row := range rows {
-					key := atlasDropKey(semanticsnapshot.DeclarationKey{PackageInstance: row.Key.Package, Module: row.Key.Module, Kind: semanticsnapshot.DeclarationKind(row.Key.Kind), Name: row.Key.Name}, row.Specialization, row.Cleanup)
-					want, ok := f.want[key]
-					if !ok || seen[key] {
-						t.Fatalf("unknown/duplicate allocation owner %s", key)
-					}
-					seen[key] = true
-					var actual []semanticsnapshot.Span
-					for _, s := range row.Sites {
-						actual = append(actual, semanticsnapshot.Span{PackageInstance: s.Package, Source: s.Source, StartByte: s.Start, EndByte: s.End})
-					}
-					if !slices.Equal(actual, want) {
-						t.Fatalf("allocation sites %s\n got %#v\nwant %#v", key, actual, want)
-					}
-				}
-				if len(seen) != len(f.want) {
-					t.Fatalf("allocation owner coverage: %d/%d", len(seen), len(f.want))
-				}
-				if !reflect.DeepEqual(before, remoteTree(t, f.root)) {
-					t.Fatal("collector changed workspace")
-				}
-			})
-			if t.Failed() {
-				return
+		t.Run("corpus", func(t *testing.T) {
+			before := remoteTree(t, root)
+			code, out, stderr := candidateAtlasSDKCLIProcess(t, image, root, nil)
+			if code != 0 || stderr != "" {
+				t.Fatalf("allocation collector: %d %.3000s %.500s", code, out, stderr)
 			}
+			var rows []struct {
+				Key struct {
+					Package            string `json:"package_instance"`
+					Module, Kind, Name string
+				}
+				Specialization string
+				Cleanup        bool
+				Sites          []struct {
+					Package string `json:"package_instance"`
+					Source  string
+					Start   int `json:"start_byte"`
+					End     int `json:"end_byte"`
+				}
+			}
+			if err := json.Unmarshal([]byte(out), &rows); err != nil {
+				t.Fatal(err, out)
+			}
+			seen := map[string]bool{}
+			for _, row := range rows {
+				key := atlasDropKey(semanticsnapshot.DeclarationKey{PackageInstance: row.Key.Package, Module: row.Key.Module, Kind: semanticsnapshot.DeclarationKind(row.Key.Kind), Name: row.Key.Name}, row.Specialization, row.Cleanup)
+				expected, ok := want[key]
+				if !ok || seen[key] {
+					t.Fatalf("unknown/duplicate allocation owner %s", key)
+				}
+				seen[key] = true
+				var actual []semanticsnapshot.Span
+				for _, s := range row.Sites {
+					actual = append(actual, semanticsnapshot.Span{PackageInstance: s.Package, Source: s.Source, StartByte: s.Start, EndByte: s.End})
+				}
+				if !slices.Equal(actual, expected) {
+					t.Fatalf("allocation sites %s\n got %#v\nwant %#v", key, actual, expected)
+				}
+			}
+			if len(seen) != len(want) {
+				t.Fatalf("allocation owner coverage: %d/%d", len(seen), len(want))
+			}
+			if !reflect.DeepEqual(before, remoteTree(t, root)) {
+				t.Fatal("collector changed workspace")
+			}
+		})
+		if t.Failed() {
+			return
 		}
 		t.Run("controls", func(t *testing.T) {
 			t.Run("bulk-zero-count-empty", func(t *testing.T) {
-				code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[0].root, []string{"bulk-zero-count"})
+				code, out, stderr := candidateAtlasSDKCLIProcess(t, image, emptyRoot, []string{"bulk-zero-count"})
 				if code != 0 || out != "" || stderr != "" {
 					t.Fatalf("allocation empty zero cap: %d %q %q", code, out, stderr)
 				}
@@ -184,7 +193,7 @@ func TestCandidateAtlasAllocationSites(t *testing.T) {
 				{"bulk-budget", "3"}, {"bulk-short-work", "3"}, {"bulk-exact-work", "0"}, {"bulk-more-work", "0"},
 				{"bulk-short-count", "3"}, {"bulk-exact-count", "0"}, {"bulk-more-count", "0"}, {"bulk-over-count", "9"},
 			}
-			code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[2].root, []string{"allocation-controls"})
+			code, out, stderr := candidateAtlasSDKCLIProcess(t, image, controlRoot, []string{"allocation-controls"})
 			rows, terminated := strings.CutSuffix(out, "\n")
 			results := strings.Split(rows, "\n")
 			if code != 0 || stderr != "" || !terminated || len(results) != len(controls) {
