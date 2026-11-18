@@ -401,7 +401,9 @@ func TestCompositeResultCacheNativeRestore(t *testing.T) {
 			checkCompositeResultCache(t, session, root, true)
 			if storage == StorageMemory {
 				workspace, warm := checkCompositeResultCache(t, session, root, true)
-				assertCompositeResultCacheNative(t, workspace, warm)
+				t.Run("native", func(t *testing.T) {
+					assertCompositeResultCacheNative(t, workspace, warm)
+				})
 				return
 			}
 			if err := session.Close(); err != nil {
@@ -418,7 +420,7 @@ func TestCompositeResultCacheNativeRestore(t *testing.T) {
 			command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestCompositeResultCacheChild$", "-test.count=1", "-test.v")
 			command.Env = append(os.Environ(), "FAIRYC_COMPOSITE_RESULT_ROOT="+root, "FAIRYC_COMPOSITE_RESULT_STORE="+cacheRoot)
 			output, err := command.CombinedOutput()
-			if err != nil || !strings.Contains(string(output), "composite-result-new-process-disk-42") {
+			if err != nil || !strings.Contains(string(output), "composite-result-new-process-disk-hit") {
 				t.Fatalf("fresh Result cache process: %v %s", err, output)
 			}
 			t.Logf("fresh child: %s", output)
@@ -434,8 +436,12 @@ func TestCompositeResultCacheChild(t *testing.T) {
 	session := compositeResultCacheSession(t, StorageDisk, os.Getenv("FAIRYC_COMPOSITE_RESULT_STORE"))
 	forbidCompositeResultCacheLowering(t, session)
 	workspace, restored := checkCompositeResultCache(t, session, root, true)
-	assertCompositeResultCacheNative(t, workspace, restored)
-	fmt.Println("composite-result-new-process-disk-42")
+	t.Run("native", func(t *testing.T) {
+		assertCompositeResultCacheNative(t, workspace, restored)
+	})
+	if !t.Failed() {
+		fmt.Println("composite-result-new-process-disk-hit")
+	}
 }
 
 func TestCompositeResultCacheInnerMetadataForgeryRepair(t *testing.T) {
