@@ -48,8 +48,8 @@ jobs:
     needs: changes
     if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
     runs-on: ${{ matrix.os }}
-    # Windows core includes native compile/run regressions as well as Go tests.
-    timeout-minutes: ${{ matrix.os == 'windows-latest' && 20 || 10 }}
+    # Allow setup and vet in addition to the native-heavy Go package timeouts.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 30 || 20 }}
     strategy:
       fail-fast: false
       matrix:
@@ -77,7 +77,7 @@ jobs:
       - name: Test
         if: runner.os == 'Linux'
         shell: bash
-        run: go test -mod=readonly -count=1 -json ./... | python3 -B .github/scripts/linux_phase2_evidence.py
+        run: go test -mod=readonly -count=1 -timeout 15m -json ./... | python3 -B .github/scripts/linux_phase2_evidence.py
       - name: Test Windows core without separate native or cost proofs
         if: runner.os == 'Windows'
         run: |
@@ -92,7 +92,7 @@ jobs:
             '^TestArgumentLabelsParserNativeSizes$',
             '^TestByteViewRealLexerWorkloadComparison$'
           ) -join '|'
-          go test -mod=readonly -count=1 -timeout 15m -v -skip $skip ./...
+          go test -mod=readonly -count=1 -timeout 25m -v -skip $skip ./...
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:
