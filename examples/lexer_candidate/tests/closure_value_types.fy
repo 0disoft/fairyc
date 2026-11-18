@@ -37,7 +37,7 @@ fn bytes::Buffer nested(usize depth){var bytes::Buffer raw=bytes::empty();var us
     let function=syntax::declaration_at(ref p,1);assert(syntax::type_at(ref p,function.result_type).kind==17);var usize i=0;var usize bindings=0;
     while(i<syntax::entry_count(ref p)){let e=syntax::entry_at(ref p,i);if(e.kind==2){assert(e.type_root!=0 && syntax::type_at(ref p,e.type_root).kind==17);assert(bytes::equal(syntax::type_text(ref p,e.type_root),b"fn /* binding */ i32(i32)"));assert(e.type_start==syntax::type_at(ref p,e.type_root).start && e.type_end==syntax::type_at(ref p,e.type_root).end);bindings+=1;}i+=1;}assert(bindings==1);
     let factory=b"module sample;fn fn i32(i32) make(i32 offset){let fn i32(i32) action=fn [i32 offset] i32(i32 x){return offset+x;};return action;}";
-    let written=retained(factory);assert(syntax::problem_count(ref written)==0 && !syntax::closure_prepared(ref written));assert(switch(syntax::parse(scanned(factory),512)){case .ok(_):{false}case .err(code):{code==4}});
+    let written=retained(factory);assert(syntax::problem_count(ref written)==0 && !syntax::closure_prepared(ref written));assert(switch(syntax::parse(scanned(factory),512)){case .ok(p):{syntax::problem_count(ref p)==0 && syntax::closure_prepared(ref p)}case .err(_):{false}});
 }
 @test fn void closure_type_parser_keeps_depth_and_node_bounds(){
     let fitting=nested(31);let stream=scanned(bytes::view(ref fitting));var v::Vec<nodes::Node> types=v::empty<nodes::Node>();let fit=nodes::parse(ref stream,0,0,ref mut types);assert(fit.root!=0 && fit.status==0 && v::at<nodes::Node>(ref types,fit.root-1).kind==17);
