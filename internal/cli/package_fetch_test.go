@@ -125,23 +125,7 @@ func TestRemotePackageCLINative(t *testing.T) {
 			t.Fatalf("prepare: %d %q %q", code, out, err)
 		}
 	}
-	commands := [][]string{{"run", "--locked"}, {"run", "--release", "--locked"}}
-	if runtime.GOOS == "linux" {
-		commands = nil
-		for _, cc := range []string{"gcc", "clang"} {
-			for _, p := range []string{"low", "optimized"} {
-				commands = append(commands, []string{"experimental", "run-workspace", "--target", "x86_64-linux-gnu", "--cc", cc, "--profile", p, "--locked"})
-			}
-		}
-	}
-	for _, args := range commands {
-		t.Run(strings.Join(args, "_"), func(t *testing.T) {
-			code, out, err := runForTest(args, root)
-			if code != 42 || out != "" || err != "" {
-				t.Fatalf("native dependency: %d %q %q", code, out, err)
-			}
-		})
-	}
+	checkLockedNativeWorkspaceStatus(t, root, 42)
 	var stderr bytes.Buffer
 	if code := Run([]string{"experimental", "fetch-packages", "--offline"}, root, failingWriter{}, &stderr); code != ExitInternalFailure {
 		t.Fatal("fetch output failure hidden")

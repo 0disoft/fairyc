@@ -122,19 +122,5 @@ func TestAtlasEditNative(t *testing.T) {
 	if code, out, err := runForTest([]string{"check"}, root); code != 0 || err != "" {
 		t.Fatalf("recheck %d %s %s", code, out, err)
 	}
-	commands := [][]string{{"run", "--locked"}, {"run", "--release", "--locked"}}
-	if runtime.GOOS == "linux" {
-		commands = nil
-		for _, cc := range []string{"gcc", "clang"} {
-			for _, p := range []string{"low", "optimized"} {
-				commands = append(commands, []string{"experimental", "run-workspace", "--target", "x86_64-linux-gnu", "--cc", cc, "--profile", p, "--locked"})
-			}
-		}
-	}
-	for _, args := range commands {
-		code, out, err := runForTest(args, root)
-		if code != 43 || out != "" || err != "" {
-			t.Fatalf("native edit %d %s %s", code, out, err)
-		}
-	}
+	checkLockedNativeWorkspaceStatus(t, root, 43)
 }

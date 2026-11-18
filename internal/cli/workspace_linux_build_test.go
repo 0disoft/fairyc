@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +14,34 @@ import (
 
 	"github.com/0disoft/fairyc/internal/target"
 )
+
+func checkLockedNativeWorkspaceStatus(t *testing.T, root string, status int) {
+	t.Helper()
+	if runtime.GOOS == "linux" {
+		for _, compiler := range []string{"gcc", "clang"} {
+			for _, profile := range []string{"low", "optimized"} {
+				t.Run(compiler+"/"+profile, func(t *testing.T) {
+					args := []string{"experimental", "run-workspace", "--target", "x86_64-linux-gnu", "--cc", compiler, "--profile", profile, "--locked"}
+					code, out, stderr := runForTest(args, root)
+					prefix := fmt.Sprintf("native workspace status: %d (x86_64-linux-gnu, %s ", status, compiler)
+					suffix := ", " + profile + ", lock verified)\n"
+					if code != ExitSuccess || stderr != "" || !strings.HasPrefix(out, prefix) || !strings.HasSuffix(out, suffix) || strings.Count(out, "\n") != 1 {
+						t.Fatalf("native workspace status: %d %q %q", code, out, stderr)
+					}
+				})
+			}
+		}
+		return
+	}
+	for _, args := range [][]string{{"run", "--locked"}, {"run", "--release", "--locked"}} {
+		t.Run(strings.Join(args, "_"), func(t *testing.T) {
+			code, out, stderr := runForTest(args, root)
+			if code != status || out != "" || stderr != "" {
+				t.Fatalf("native workspace status: %d %q %q", code, out, stderr)
+			}
+		})
+	}
+}
 
 func TestExperimentalLinuxVectorWorkspaceBuild(t *testing.T) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
