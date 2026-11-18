@@ -64,7 +64,15 @@ import project_catalog as catalog;import project_catalog_options as options;impo
 }`
 }
 
-func TestCandidateAtlasSourceVersion(t *testing.T) {
+const candidateAtlasSourceVersionParts = 4
+
+func TestCandidateAtlasSourceVersionPart1(t *testing.T) { testCandidateAtlasSourceVersion(t, 0) }
+func TestCandidateAtlasSourceVersionPart2(t *testing.T) { testCandidateAtlasSourceVersion(t, 1) }
+func TestCandidateAtlasSourceVersionPart3(t *testing.T) { testCandidateAtlasSourceVersion(t, 2) }
+func TestCandidateAtlasSourceVersionPart4(t *testing.T) { testCandidateAtlasSourceVersion(t, 3) }
+
+func testCandidateAtlasSourceVersion(t *testing.T, part int) {
+	t.Helper()
 	type fixture struct {
 		name, root string
 		minimum    int
@@ -143,6 +151,11 @@ fn i32 main(){let u8 n=1;let ptr u8 p=unsafe{ref n as ptr u8};let ref u8[] data=
 	fixtures = append(fixtures, fixture{"borrows-dependency", dependencyBorrows, 1, nil})
 	closureBorrows := writeWorkspaceSessionFixture(t, `module main;fn i32 main(){let i32 value=7;let ref i32 view=ref value;let add=fn [i32 value] i32(i32 n){return value+n;};return add(*view);}`)
 	fixtures = append(fixtures, fixture{"borrows-copied-closure", closureBorrows, 1, nil})
+	selected := fixtures[:0]
+	for i := part; i < len(fixtures); i += candidateAtlasSourceVersionParts {
+		selected = append(selected, fixtures[i])
+	}
+	fixtures = selected
 	for i := range fixtures {
 		f := &fixtures[i]
 		for v, schema := range []string{atlasmap.LogicalSchema, atlasmap.LogicalSchemaV2, atlasmap.LogicalSchemaV3} {

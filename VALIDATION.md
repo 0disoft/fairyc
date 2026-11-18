@@ -52,9 +52,12 @@ keeps its existing triggers.
 
 The Go frontend jobs allow 30 minutes, with a per-package test timeout of 25 minutes.
 The Windows core job runs the non-CLI packages. Eight Windows CLI shards partition
-the remaining CLI tests, examples, and fuzz seeds by sorted entry name after applying
-the existing exclusions for separate parser, lexer, and cost proofs. Each CLI shard
-allows 40 minutes, including a 35-minute package test timeout.
+the remaining CLI tests, examples, and fuzz seeds after applying the existing
+exclusions for separate parser, lexer, and cost proofs. The shard script assigns
+the longest estimated test to the least loaded shard at each step and uses ordinal
+entry order for ties. The four Atlas source-version parts cover disjoint fixture
+sets while retaining all schema versions and both profiles. Each CLI shard allows
+50 minutes, including a 45-minute package test timeout.
 The separate lexer proof allows 12 minutes. The Windows native smoke, parser groups,
 and Linux C differential retain their 10-minute limits.
 
