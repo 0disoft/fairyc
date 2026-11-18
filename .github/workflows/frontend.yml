@@ -66,6 +66,14 @@ jobs:
           cache: false
       - name: Vet
         run: go vet -mod=readonly ./...
+      - name: Provision Linux HTTPS headers
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          if [[ "$(dpkg-query -W -f='${Status}' libcurl4-openssl-dev 2>/dev/null || true)" != 'install ok installed' ]]; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends libcurl4-openssl-dev
+          fi
       - name: Test
         if: runner.os == 'Linux'
         shell: bash
