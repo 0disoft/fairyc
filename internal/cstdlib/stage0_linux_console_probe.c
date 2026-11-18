@@ -4,6 +4,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -84,6 +85,19 @@ static int fy_std_probe_console_stream_v0(
     }
     if (unavailable.status != UINT32_C(2) || unavailable.written != (size_t)0) {
         return failure_base + 7;
+    }
+    int broken_pipe[2];
+    saved_descriptor = dup(descriptor);
+    if (saved_descriptor < 0 || pipe(broken_pipe) != 0 || close(broken_pipe[0]) != 0 ||
+        dup2(broken_pipe[1], descriptor) < 0 || close(broken_pipe[1]) != 0) {
+        return failure_base + 8;
+    }
+    struct fy_std_console_write_result_v0 broken = write_all(payload, sizeof(payload));
+    if (dup2(saved_descriptor, descriptor) < 0 || close(saved_descriptor) != 0) {
+        return failure_base + 9;
+    }
+    if (broken.status != UINT32_C(3) || broken.written != (size_t)0) {
+        return failure_base + 10;
     }
     return 0;
 }
@@ -363,6 +377,11 @@ static int fy_std_probe_stderr_scalar_v0(void) {
 }
 
 int main(void) {
+    sigset_t pipe_signal;
+    if (signal(SIGPIPE, SIG_DFL) == SIG_ERR || sigemptyset(&pipe_signal) != 0 ||
+        sigaddset(&pipe_signal, SIGPIPE) != 0 || sigprocmask(SIG_UNBLOCK, &pipe_signal, NULL) != 0) {
+        return 60;
+    }
     int stdout_result = fy_std_probe_console_stream_v0(
         STDOUT_FILENO,
         fy_std_stdout_write_all_v0,

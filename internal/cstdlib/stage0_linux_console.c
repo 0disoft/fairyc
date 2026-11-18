@@ -6,8 +6,10 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 #include <unistd.h>
 
 struct fy_std_console_write_result_v0 {
@@ -52,7 +54,18 @@ static struct fy_std_console_write_result_v0 fy_std_console_write_all_v0(
         result.status = FY_STD_CONSOLE_WRITE_INVALID_INPUT_V0;
         return result;
     }
-    while (result.written < length) {
+    /* Keep the caller's signal disposition and mask, including a pending SIGPIPE. */
+    sigset_t pipe_signal, original_mask, pending;
+    if (sigemptyset(&pipe_signal) != 0 || sigaddset(&pipe_signal, SIGPIPE) != 0 ||
+        pthread_sigmask(SIG_BLOCK, &pipe_signal, &original_mask) != 0) {
+        result.status = FY_STD_CONSOLE_WRITE_FAILED_V0;
+        return result;
+    }
+    int was_pending = sigpending(&pending) == 0 ? sigismember(&pending, SIGPIPE) : -1;
+    if (was_pending < 0) {
+        result.status = FY_STD_CONSOLE_WRITE_FAILED_V0;
+    }
+    while (result.status == FY_STD_CONSOLE_WRITE_OK_V0 && result.written < length) {
         size_t remaining = length - result.written;
         size_t requested = remaining > (size_t)SSIZE_MAX ? (size_t)SSIZE_MAX : remaining;
         ssize_t completed;
@@ -60,16 +73,24 @@ static struct fy_std_console_write_result_v0 fy_std_console_write_all_v0(
             completed = write(descriptor, data + result.written, requested);
         } while (completed < 0 && errno == EINTR);
         if (completed < 0) {
-            result.status = errno == EBADF
+            int write_error = errno;
+            if (write_error == EPIPE && was_pending == 0) {
+                const struct timespec immediate = {0, 0};
+                while (sigtimedwait(&pipe_signal, NULL, &immediate) < 0 && errno == EINTR) {}
+            }
+            result.status = write_error == EBADF
                 ? FY_STD_CONSOLE_WRITE_STREAM_UNAVAILABLE_V0
                 : FY_STD_CONSOLE_WRITE_FAILED_V0;
-            return result;
+            break;
         }
         if (completed == 0) {
             result.status = FY_STD_CONSOLE_WRITE_NO_PROGRESS_V0;
-            return result;
+            break;
         }
         result.written += (size_t)completed;
+    }
+    if (pthread_sigmask(SIG_SETMASK, &original_mask, NULL) != 0) {
+        result.status = FY_STD_CONSOLE_WRITE_FAILED_V0;
     }
     return result;
 }
