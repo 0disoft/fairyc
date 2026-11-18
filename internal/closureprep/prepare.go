@@ -12,7 +12,11 @@ import (
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-const prefix = "_fy_closure_"
+const (
+	prefix                     = "_fy_closure_"
+	maxCopiedClosureCaptures   = 4
+	maxCopiedClosureParameters = 4
+)
 
 type Error struct {
 	Span   diagnostic.Span
@@ -67,87 +71,127 @@ func Prepare(m *ast.Module) (*ast.Module, error) {
 	out.Functions = append(out.Functions, x.functions...)
 	return &out, nil
 }
+
+type blockScope struct {
+	env      map[string]local
+	declared map[string]bool // only the outer body can declare closures
+	owned    bool
+}
+
+func (scope *blockScope) shadow(name string) {
+	if scope.declared != nil {
+		scope.declared[name] = true
+	}
+	if _, found := scope.env[name]; !found {
+		return
+	}
+	// Nested blocks borrow the enclosing environment until a local hides a closure.
+	if !scope.owned {
+		scope.env = maps.Clone(scope.env)
+		scope.owned = true
+	}
+	delete(scope.env, name)
+}
+
 func (x *lifter) block(b *ast.Block, env map[string]local, top bool, owner string) (*ast.Block, error) {
 	if b == nil {
 		return nil, nil
 	}
+	scope := blockScope{env: env}
+	if top {
+		scope = blockScope{env: maps.Clone(env), declared: maps.Clone(x.rootNames), owned: true}
+	}
 	out := *b
 	out.Statements = nil
-	env = maps.Clone(env)
-	declared := map[string]bool{}
-	if top {
-		declared = maps.Clone(x.rootNames)
-	}
-	for _, s := range b.Statements {
-		if s.Binding != nil && s.Binding.Expression != nil && s.Binding.Expression.Kind == syntax.KindClosure {
-			if !top || s.Binding.Mutable || declared[s.Binding.Name] {
-				return nil, fail(s.Span, "closure requires a unique immutable let in the outer function body")
+	for _, statement := range b.Statements {
+		binding := statement.Binding
+		if binding != nil && binding.Expression != nil && binding.Expression.Kind == syntax.KindClosure {
+			if !top || binding.Mutable || scope.declared[binding.Name] {
+				return nil, fail(statement.Span, "closure requires a unique immutable let in the outer function body")
 			}
-			if strings.HasPrefix(s.Binding.Name, prefix) {
-				return nil, fail(s.Span, "reserved closure binding name")
-			}
-			c := s.Binding.Expression.Closure
-			if err := validate(c, s.Span); err != nil {
+			statements, info, err := x.liftClosure(out.Statements, statement, scope.env, owner)
+			if err != nil {
 				return nil, err
 			}
-			if s.Binding.Type != nil {
-				if x.generic || !ClosureValueType(*s.Binding.Type) || len(c.Function.Parameters) != 1 {
-					return nil, fail(s.Span, "closure value requires monomorphic fn i32(i32) binding and literal signature")
-				}
-				prepared, err := x.valueBinding(s, c, env, owner)
-				if err != nil {
-					return nil, err
-				}
-				out.Statements = append(out.Statements, prepared)
-				env[s.Binding.Name] = local{value: true}
-				declared[s.Binding.Name] = true
-				continue
-			}
-			x.next++
-			name := fmt.Sprintf("%s%s_%d", prefix, owner, x.next)
-			fn := c.Function
-			fn.Name = name
-			fn.NameSpan = s.Binding.NameSpan
-			fn.Parameters = slices.Clone(c.Function.Parameters)
-			info := local{helper: name}
-			for i, cap := range c.Captures {
-				hidden := fmt.Sprintf("%scapture_%d_%d", prefix, x.next, i)
-				info.captures = append(info.captures, hidden)
-				typ := cap.Type
-				snapshot := &ast.Binding{Name: hidden, Span: cap.Span, NameSpan: cap.NameSpan, Type: &typ, Expression: &ast.Expression{Kind: syntax.KindPath, Text: cap.Name, Span: cap.NameSpan}}
-				// Reading another closure as a scalar capture is not a value conversion.
-				if _, ok := env[cap.Name]; ok {
-					return nil, fail(cap.Span, "closure values cannot be captured")
-				}
-				out.Statements = append(out.Statements, ast.Statement{Kind: syntax.KindBinding, Span: cap.Span, Binding: snapshot})
-			}
-			fn.Parameters = append(slices.Clone(c.Captures), fn.Parameters...)
-			x.functions = append(x.functions, fn)
-			env[s.Binding.Name] = info
-			declared[s.Binding.Name] = true
+			out.Statements = statements
+			scope.env[binding.Name], scope.declared[binding.Name] = info, true
 			continue
 		}
-		// A written binding may shadow an outer closure, but cannot redeclare a closure in this scope.
-		if s.Binding != nil {
-			if declared[s.Binding.Name] {
-				if _, ok := env[s.Binding.Name]; ok {
-					return nil, fail(s.Span, "duplicate closure binding")
-				}
-			}
-		}
-		next, err := x.statement(s, env, owner)
+		next, err := x.rewriteBlockStatement(statement, &scope, owner)
 		if err != nil {
 			return nil, err
 		}
 		out.Statements = append(out.Statements, next)
-		if s.Binding != nil {
-			delete(env, s.Binding.Name)
-			declared[s.Binding.Name] = true
-		}
 	}
 	var err error
-	out.Tail, err = x.expr(b.Tail, env, owner)
+	out.Tail, err = x.expr(b.Tail, scope.env, owner)
 	return &out, err
+}
+
+func (x *lifter) rewriteBlockStatement(statement ast.Statement, scope *blockScope, owner string) (ast.Statement, error) {
+	binding := statement.Binding
+	if binding != nil && scope.declared[binding.Name] {
+		if _, found := scope.env[binding.Name]; found {
+			return statement, fail(statement.Span, "duplicate closure binding")
+		}
+	}
+	next, err := x.statement(statement, scope.env, owner)
+	if err != nil {
+		return next, err
+	}
+	if binding != nil {
+		scope.shadow(binding.Name)
+	}
+	return next, nil
+}
+
+// statements is the output buffer owned by the current block.
+func (x *lifter) liftClosure(statements []ast.Statement, statement ast.Statement, env map[string]local, owner string) ([]ast.Statement, local, error) {
+	binding := statement.Binding
+	if strings.HasPrefix(binding.Name, prefix) {
+		return nil, local{}, fail(statement.Span, "reserved closure binding name")
+	}
+	closure := binding.Expression.Closure
+	if err := validate(closure, statement.Span); err != nil {
+		return nil, local{}, err
+	}
+	if binding.Type != nil {
+		if x.generic || !ClosureValueType(*binding.Type) || len(closure.Function.Parameters) != 1 {
+			return nil, local{}, fail(statement.Span, "closure value requires monomorphic fn i32(i32) binding and literal signature")
+		}
+		prepared, err := x.valueBinding(statement, closure, env, owner)
+		if err != nil {
+			return nil, local{}, err
+		}
+		return append(statements, prepared), local{value: true}, nil
+	}
+	x.next++
+	fn, info, snapshots, err := prepareDirectClosure(binding, closure, env, owner, x.next)
+	if err != nil {
+		return nil, local{}, err
+	}
+	x.functions = append(x.functions, fn)
+	return append(statements, snapshots[:len(closure.Captures)]...), info, nil
+}
+
+func prepareDirectClosure(binding *ast.Binding, closure *ast.Closure, env map[string]local, owner string, ordinal int) (ast.Function, local, [maxCopiedClosureCaptures]ast.Statement, error) {
+	var snapshots [maxCopiedClosureCaptures]ast.Statement
+	name := fmt.Sprintf("%s%s_%d", prefix, owner, ordinal)
+	info := local{helper: name}
+	for i, capture := range closure.Captures {
+		if _, found := env[capture.Name]; found {
+			return ast.Function{}, local{}, snapshots, fail(capture.Span, "closure values cannot be captured")
+		}
+		hidden := fmt.Sprintf("%scapture_%d_%d", prefix, ordinal, i)
+		info.captures = append(info.captures, hidden)
+		typ := capture.Type
+		snapshot := &ast.Binding{Name: hidden, Span: capture.Span, NameSpan: capture.NameSpan, Type: &typ, Expression: &ast.Expression{Kind: syntax.KindPath, Text: capture.Name, Span: capture.NameSpan}}
+		snapshots[i] = ast.Statement{Kind: syntax.KindBinding, Span: capture.Span, Binding: snapshot}
+	}
+	fn := closure.Function
+	fn.Name, fn.NameSpan = name, binding.NameSpan
+	fn.Parameters = append(slices.Clone(closure.Captures), closure.Function.Parameters...)
+	return fn, info, snapshots, nil
 }
 func (x *lifter) statement(s ast.Statement, env map[string]local, owner string) (ast.Statement, error) {
 	originalExpression := s.Expression
@@ -286,7 +330,8 @@ func validate(c *ast.Closure, span diagnostic.Span) error {
 	direct := func(t ast.TypeReference) bool {
 		return t.Kind == ast.TypeKindNamed && (t.Path == "i32" || t.Path == "u32") && len(t.Arguments) == 0
 	}
-	if c == nil || c.Function.Unsafe || c.Function.Public || c.Function.Owner != "" || len(c.Function.Attributes) != 0 || len(c.Function.TypeParameters) != 0 || len(c.Captures) > 4 || len(c.Function.Parameters) > 4 || !direct(c.Function.ResultType) || c.Function.Body == nil {
+	if c == nil || c.Function.Unsafe || c.Function.Public || c.Function.Owner != "" || len(c.Function.Attributes) != 0 || len(c.Function.TypeParameters) != 0 ||
+		len(c.Captures) > maxCopiedClosureCaptures || len(c.Function.Parameters) > maxCopiedClosureParameters || !direct(c.Function.ResultType) || c.Function.Body == nil {
 		return reject()
 	}
 	allowed := map[string]bool{}

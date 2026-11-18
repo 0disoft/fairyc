@@ -49,7 +49,7 @@ func ValidateValueTarget(fn ast.Function) error {
 		return fail(fn.Span, "closure value has no private lifted target")
 	}
 	count := fn.LiftedClosure.CaptureCount
-	if count < 0 || count > 4 || len(fn.Parameters) != count+1 {
+	if count < 0 || count > maxCopiedClosureCaptures || len(fn.Parameters) != count+1 {
 		return fail(fn.Span, "closure value target capture/argument count")
 	}
 	// Direct copied closures have a wider scalar family than first-class values.
