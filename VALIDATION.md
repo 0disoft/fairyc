@@ -50,15 +50,17 @@ diffs, new branches, tags, missing history, and failed path classification run c
 Manual Frontend runs without `candidate_sha` also execute the full checks. The scheduled/manual Measurements workflow
 keeps its existing triggers.
 
-The Go frontend jobs allow 30 minutes, with a per-package test timeout of 25 minutes.
-This leaves time for setup and vet alongside native compile/run regressions.
-The separate lexer proof allows 12 minutes. The Windows
-native smoke, parser groups, and Linux C differential retain their 10-minute limits.
+The Go frontend jobs and Windows Go CLI shards allow 30 minutes, with a per-package
+test timeout of 25 minutes. The Windows core job runs the non-CLI packages. Four Windows
+CLI shards partition the remaining CLI tests, examples, and fuzz seeds by sorted entry
+name after applying the existing exclusions for separate parser, lexer, and cost proofs.
+The separate lexer proof allows 12 minutes. The Windows native smoke, parser groups,
+and Linux C differential retain their 10-minute limits.
 
 `workflow_dispatch` also accepts an optional `candidate_sha`. An empty value keeps the full route
 above. A nonempty value must be a full 40-character lowercase hexadecimal commit SHA other than
 40 zeroes. That dispatch skips changed-path classification, the Go matrix, the separate Windows
-parser groups and the Linux C differential job; only the existing `Windows native target smoke`
+parser groups, Windows CLI shards, and the Linux C differential job; only the existing `Windows native target smoke`
 job runs, with its 10-minute limit. The job checks the input before checkout, checks out the
 requested SHA, and fails if `git rev-parse HEAD` differs from it. This path is available only
 after the workflow version and target commit are on the remote repository.

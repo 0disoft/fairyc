@@ -78,26 +78,38 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: go test -mod=readonly -count=1 -timeout 25m -json ./... | python3 -B .github/scripts/linux_phase2_evidence.py
-      - name: Test Windows core without separate native or cost proofs
+      - name: Test Windows core packages
         if: runner.os == 'Windows'
         run: |
-          $skip = @(
-            '^TestWindowsFairy(Lexer|Parser[A-Z])',
-            '^TestTokenIndexNominalTotalMSVC$',
-            '^TestTokenIndexNominalCostMSVC$',
-            '^TestTokenIndexStructCostMSVC$',
-            '^TestStableGenericWorkspaceGrowthMSVC$',
-            '^TestResultBranchReviewIsOkNativeSizes$',
-            '^TestScannerFieldShorthandNativeSizes$',
-            '^TestArgumentLabelsParserNativeSizes$',
-            '^TestByteViewRealLexerWorkloadComparison$'
-          ) -join '|'
-          go test -mod=readonly -count=1 -timeout 25m -v -skip $skip ./...
+          $packages = @(go list -mod=readonly ./...)
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $core = @($packages | Where-Object { $_ -ne 'github.com/0disoft/fairyc/internal/cli' })
+          if ($core.Count -ne $packages.Count - 1 -or $core.Count -eq 0) { throw 'Invalid Windows core package list' }
+          go test -mod=readonly -count=1 -timeout 25m -v @core
       - name: Race-test contract-state concurrency
         if: runner.os == 'Linux'
         env:
           CGO_ENABLED: "1"
         run: go test -race -mod=readonly -count=1 ./internal/contractstate
+
+  windows-cli:
+    name: Windows Go CLI (shard ${{ matrix.shard }})
+    needs: changes
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Test assigned CLI entries
+        run: .github/scripts/test-windows-cli.ps1 -Shard ${{ matrix.shard }} -ShardCount ${{ strategy.job-total }}
 
   windows-native:
     name: Windows native target smoke
@@ -215,7 +227,7 @@ jobs:
   native-c:
     name: C differential (Linux)
     if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') }}
-    needs: [validate, windows-native, windows-parser]
+    needs: [validate, windows-cli, windows-native, windows-parser]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
