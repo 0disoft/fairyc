@@ -40,7 +40,7 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkScannerDebugPair(t, "independent C", cRelease, cDebug, nil)
+	checkScannerDebugPair(t, "independent C", cRelease, cDebug, "", nil)
 	variants := realScannerVectorVariants(t)
 	var indexed map[string]uint32
 	for _, variant := range []realScannerVectorVariant{variants[0], variants[4]} {
@@ -52,7 +52,10 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 		if releaseUnit.Source != debugUnit.Source {
 			t.Fatalf("%s generated C changed between optimized builds", variant.name)
 		}
-		functions := checkScannerDebugPair(t, variant.name, release, debug, debugUnit.Functions)
+		functions := checkScannerDebugPair(t, variant.name, release, debug, debugUnit.Source, debugUnit.Functions)
+		if t.Failed() {
+			return
+		}
 		if indexed == nil {
 			indexed = functions
 			continue
@@ -69,7 +72,7 @@ func TestPrivateVectorSDKCandidateScannerDebugMapLayout(t *testing.T) {
 	}
 }
 
-func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact, sourceFunctions []string) map[string]uint32 {
+func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.WindowsHostArtifact, generatedSource string, sourceFunctions []string) map[string]uint32 {
 	t.Helper()
 	scannerFunctions := make(map[string]uint32)
 	t.Run(name, func(t *testing.T) {
@@ -223,6 +226,13 @@ func checkScannerDebugPair(t *testing.T, name string, release, debug cdriver.Win
 			if module.Name == "unit.obj" {
 				for _, procedure := range linked {
 					if procedure.Name == "main" {
+						continue
+					}
+					if suffix, generated := strings.CutPrefix(procedure.Name, "fy_drop_"); generated {
+						if _, err := strconv.ParseUint(suffix, 10, 32); err != nil ||
+							!strings.Contains(generatedSource, "void "+procedure.Name+"(") {
+							t.Fatalf("PDB cleanup procedure %q is absent from generated C", procedure.Name)
+						}
 						continue
 					}
 					indexText, ok := strings.CutPrefix(procedure.Name, "fy_fn_")
