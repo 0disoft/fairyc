@@ -23,10 +23,55 @@ func candidateAtlasAllocationSitesMain(t *testing.T) string {
 		t.Fatal("missing allocation single/batch comparison")
 	}
 	main = strings.Replace(main, call, "if(input::origin(ref source,f.module_index).owner==0){drops::collect(p,frame,65536,ref mut measured)}else{retained_sites(ref all,frame)}", 1)
+	const frameCountCheck = " if(drops::frame_count(ref all)!=ir::count(p)){return 7;}"
+	main = strings.Replace(main, frameCountCheck, frameCountCheck+`
+ if(bytes::equal(mode,b"allocation-controls")){
+  var usize frame=1;
+  while(frame<=ir::count(p)){
+   let f=clean::frame_at(clean,frame);let r=drops::range(ref all,frame-1);
+   if((f.kind==1 || f.kind==3) && input::origin(ref source,f.module_index).owner==0 && r.end>r.start){
+    return allocation_controls(p,ref all,frame,r.end-r.start,bulk_work);
+   }
+   frame+=1;
+  }
+  return 7;
+ }`, 1)
 	return main + `
 fn Result<v::Vec<drops::Site>,u32> retained_sites(ref drops::Collection all,usize frame){
  let r=drops::range(all,frame-1);var rows=v::empty<drops::Site>();var usize i=r.start;
  while(i<r.end){if(!v::push<drops::Site>(ref mut rows,drops::at(all,i)).is_ok){return .err(2);}i+=1;}return .ok(rows);
+}
+fn u32 allocation_one(ref ir::Program p,usize frame,usize count,usize initial){
+ var usize meter=initial;
+ let result=drops::collect(p,frame,count,ref mut meter);
+ return switch(result){case .ok(_):{0}case .err(code):{code}};
+}
+fn u32 allocation_all(ref ir::Program p,usize count,usize initial){
+ var usize meter=initial;
+ let result=drops::collect_all(p,count,ref mut meter);
+ return switch(result){case .ok(_):{0}case .err(code):{code}};
+}
+@effects(console) fn i32 allocation_controls(ref ir::Program p,ref drops::Collection all,usize frame,usize count,usize bulk_work){
+ var usize measured=0;
+ if(!drops::collect(p,frame,65536,ref mut measured).is_ok){return 8;}
+ var usize maximum=0;var usize i=0;
+ while(i<drops::frame_count(all)){
+  let r=drops::range(all,i);if(r.end-r.start>maximum){maximum=r.end-r.start;}i+=1;
+ }
+ let usize limit=16777216;
+ let u32[19] results=[
+  allocation_all(p,0,0),
+  allocation_one(p,0,65536,0),allocation_one(p,ir::count(p)+1,65536,0),
+  allocation_one(p,frame,65536,limit),
+  allocation_one(p,frame,65536,limit-measured+1),allocation_one(p,frame,65536,limit-measured),allocation_one(p,frame,65536,limit-measured-1),
+  allocation_one(p,frame,count-1,0),allocation_one(p,frame,count,0),allocation_one(p,frame,count+1,0),allocation_one(p,frame,65537,0),
+  allocation_all(p,maximum,limit),
+  allocation_all(p,maximum,limit-bulk_work+1),allocation_all(p,maximum,limit-bulk_work),allocation_all(p,maximum,limit-bulk_work-1),
+  allocation_all(p,maximum-1,0),allocation_all(p,maximum,0),allocation_all(p,maximum+1,0),allocation_all(p,65537,0)];
+ i=0;while(i<19){
+  if(!io::write_usize(results[i] as usize).is_ok || !io::write("\n").is_ok){return 4;}i+=1;
+ }
+ return 0;
 }`
 }
 
@@ -68,6 +113,7 @@ func TestCandidateAtlasAllocationSites(t *testing.T) {
 	main = strings.ReplaceAll(main, "return 7;", "return .ok(7);")
 	main = strings.ReplaceAll(main, "return if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4};", "return .ok(if(io::write_bytes(bytes::view(ref out)).is_ok){0}else{4});")
 	main = strings.ReplaceAll(main, "return switch(drops::collect", "return .ok(switch(drops::collect")
+	main = strings.Replace(main, "return allocation_controls(p,ref all,frame,r.end-r.start,bulk_work);", "return .ok(allocation_controls(p,ref all,frame,r.end-r.start,bulk_work));", 1)
 	main = strings.ReplaceAll(main, "io::write_usize(code as usize);7}};", "io::write_usize(code as usize);7}});")
 	main += "\n@effects(filesystem,console,environment) fn i32 main(){return switch(execute()){case .ok(p):{p}case .err(_):{7}};}"
 	candidateAtlasProbeSize(t, "project_atlas_source", main, 2<<20, func(t *testing.T, image string) {
@@ -124,30 +170,30 @@ func TestCandidateAtlasAllocationSites(t *testing.T) {
 			}
 		}
 		t.Run("controls", func(t *testing.T) {
-			for _, control := range []struct {
-				name          string
-				fixture, code int
-				output        string
-			}{{"bulk-zero-count-empty", 0, 0, ""}, {"bulk-zero-count-nonempty", 2, 7, "3"}} {
-				t.Run(control.name, func(t *testing.T) {
-					code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[control.fixture].root, []string{"bulk-zero-count"})
-					if code != control.code || out != control.output || stderr != "" {
-						t.Fatalf("allocation empty/nonempty zero cap: %d %q %q", code, out, stderr)
-					}
-				})
+			t.Run("bulk-zero-count-empty", func(t *testing.T) {
+				code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[0].root, []string{"bulk-zero-count"})
+				if code != 0 || out != "" || stderr != "" {
+					t.Fatalf("allocation empty zero cap: %d %q %q", code, out, stderr)
+				}
+			})
+			controls := []struct{ name, want string }{
+				{"bulk-zero-count-nonempty", "3"},
+				{"zero", "9"}, {"past", "9"}, {"budget", "3"},
+				{"short-work", "3"}, {"exact-work", "0"}, {"more-work", "0"},
+				{"short-count", "3"}, {"exact-count", "0"}, {"more-count", "0"}, {"over-count", "9"},
+				{"bulk-budget", "3"}, {"bulk-short-work", "3"}, {"bulk-exact-work", "0"}, {"bulk-more-work", "0"},
+				{"bulk-short-count", "3"}, {"bulk-exact-count", "0"}, {"bulk-more-count", "0"}, {"bulk-over-count", "9"},
 			}
-			for _, mode := range []string{"zero", "past", "budget", "short-work", "exact-work", "more-work", "short-count", "exact-count", "more-count", "over-count", "bulk-budget", "bulk-short-work", "bulk-exact-work", "bulk-more-work", "bulk-short-count", "bulk-exact-count", "bulk-more-count", "bulk-over-count"} {
-				t.Run(mode, func(t *testing.T) {
-					code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[2].root, []string{mode})
-					want := 0
-					failure := ""
-					if mode == "zero" || mode == "past" || mode == "over-count" || mode == "bulk-over-count" {
-						want, failure = 7, "9"
-					} else if mode == "budget" || mode == "short-work" || mode == "short-count" || mode == "bulk-budget" || mode == "bulk-short-work" || mode == "bulk-short-count" {
-						want, failure = 7, "3"
-					}
-					if code != want || out != failure || stderr != "" {
-						t.Fatalf("allocation control %s: %d/%d %q/%q %q", mode, code, want, out, failure, stderr)
+			code, out, stderr := candidateAtlasSDKCLIProcess(t, image, fixtures[2].root, []string{"allocation-controls"})
+			rows, terminated := strings.CutSuffix(out, "\n")
+			results := strings.Split(rows, "\n")
+			if code != 0 || stderr != "" || !terminated || len(results) != len(controls) {
+				t.Fatalf("allocation controls: %d %q %q", code, out, stderr)
+			}
+			for i, control := range controls {
+				t.Run(control.name, func(t *testing.T) {
+					if results[i] != control.want {
+						t.Fatalf("allocation control: got %q, want %q", results[i], control.want)
 					}
 				})
 			}
