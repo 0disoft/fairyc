@@ -11,7 +11,10 @@ and its [SHA-256 sidecar](https://github.com/0disoft/fairyc/releases/download/v0
 - ZIP size 10,104,881 bytes. SHA-256 `03d1c345b21519bdb586357b0a1b8179334b0ded3954f28d794e1e6b4284b9ef`.
 - All 16 packaging smoke steps passed. The extracted executables passed LSP initialization and shutdown, starter checks, and native tests and runs in development and release modes. The ZIP, sidecar and all seven files listed in `SHA256SUMS.txt` passed hash verification.
 - All 17 jobs passed on the exact source revision, including Windows native smoke and Linux C differential. [CI results](https://github.com/0disoft/fairyc/actions/runs/44310233417/attempts/2)
-- After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved hash and passed all eight starter steps on the Windows build host. Separate-host verification for this release remains pending.
+- After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved hash and passed all eight starter steps on the Windows build host.
+- The public ZIP passed all 15 verifier process checks on GRAM13 with Windows PowerShell 5.1, including direct execution of both newly built native profiles. The ZIP and all seven listed file hashes matched.
+
+To reproduce the check on Windows AMD64, follow the [GRAM13 public ZIP verification guide](windows-preview2-gram13.ko.md).
 
 Report vulnerabilities through [GitHub private reporting](https://github.com/0disoft/fairyc/security/advisories/new).
 
