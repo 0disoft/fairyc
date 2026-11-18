@@ -50,9 +50,9 @@ diffs, new branches, tags, missing history, and failed path classification run c
 Manual Frontend runs without `candidate_sha` also execute the full checks. The scheduled/manual Measurements workflow
 keeps its existing triggers.
 
-The Go frontend jobs allow 30 minutes on Windows and 20 minutes on Ubuntu, with per-package
-test timeouts of 25 and 15 minutes respectively. This leaves time for setup and vet alongside
-native compile/run regressions. The separate lexer proof allows 12 minutes. The Windows
+The Go frontend jobs allow 30 minutes, with a per-package test timeout of 25 minutes.
+This leaves time for setup and vet alongside native compile/run regressions.
+The separate lexer proof allows 12 minutes. The Windows
 native smoke, parser groups, and Linux C differential retain their 10-minute limits.
 
 `workflow_dispatch` also accepts an optional `candidate_sha`. An empty value keeps the full route
@@ -91,7 +91,7 @@ packages are installed; GCC 13 and Clang 18 are exposed through a job-local PATH
 Package patch versions remain unpinned. The full native fixture command still validates actual
 headers, linking, startup, and sanitizers; version preflight is not a replacement for that execution.
 
-The Linux Go suite runs exactly once, with `go test -mod=readonly -count=1 -timeout 15m -json ./...` piped
+The Linux Go suite runs exactly once, with `go test -mod=readonly -count=1 -timeout 25m -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
 package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v5` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
