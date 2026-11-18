@@ -126,6 +126,9 @@ func publish(ctx context.Context, root *os.Root, pin Pin, b bundle, options ...s
 	if err := directory(root, "vendor", true); err != nil {
 		return false, err
 	}
+	if err := rejectCaseAlias(root, path.Dir(pin.Path), path.Base(pin.Path)); err != nil {
+		return false, err
+	}
 	var nonce [16]byte
 	n, err := policy.Random(nonce[:])
 	if err := errors.Join(err, ctx.Err()); err != nil {
@@ -175,6 +178,9 @@ func publish(ctx context.Context, root *os.Root, pin Pin, b bundle, options ...s
 	if _, err := root.Lstat(pin.Path); err == nil {
 		return false, fmt.Errorf("package destination appeared during fetch")
 	} else if !errors.Is(err, os.ErrNotExist) {
+		return false, err
+	}
+	if err := rejectCaseAlias(root, path.Dir(pin.Path), path.Base(pin.Path)); err != nil {
 		return false, err
 	}
 	if err := checkSourceStage(root, stage, identity); err != nil {

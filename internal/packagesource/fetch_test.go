@@ -143,6 +143,39 @@ func TestRemoteSourcesFetchTLSInstallReuseRestore(t *testing.T) {
 	}
 }
 
+func TestRemoteSourcesRejectCaseAliases(t *testing.T) {
+	data := archiveBytes(t)
+	pin := testPin()
+	pin.SHA256 = hash(data)
+	for _, name := range []string{"cache", "member"} {
+		t.Run(name, func(t *testing.T) {
+			dir := fixtureWorkspace(t, pin)
+			cache := filepath.Join(dir, CachePath)
+			if err := os.MkdirAll(cache, 0700); err != nil {
+				t.Fatal(err)
+			}
+			extension := ".zip"
+			if name == "cache" {
+				extension = ".ZIP"
+			} else if err := os.MkdirAll(filepath.Join(dir, "vendor", "Math"), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(cache, pin.SHA256+extension), data, 0600); err != nil {
+				t.Fatal(err)
+			}
+			var calls int
+			client := &http.Client{Transport: sourceRoundTripFunc(func(*http.Request) (*http.Response, error) {
+				calls++
+				return nil, context.Canceled
+			})}
+			result, err := (Fetcher{Client: client}).Fetch(t.Context(), dir, false)
+			if err == nil || !strings.Contains(err.Error(), "noncanonical path case") || calls != 0 || result.Installed != 0 {
+				t.Fatalf("case alias: result=%+v requests=%d err=%v", result, calls, err)
+			}
+		})
+	}
+}
+
 func TestRemoteSourcesCancelledStageCleanup(t *testing.T) {
 	root, err := os.OpenRoot(t.TempDir())
 	if err != nil {

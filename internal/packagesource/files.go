@@ -36,11 +36,16 @@ func directory(root *os.Root, name string, create bool) error {
 		}
 		current = path.Join(current, part)
 		info, err := root.Lstat(current)
-		if errors.Is(err, os.ErrNotExist) && create {
-			if err := root.Mkdir(current, 0700); err != nil && !errors.Is(err, os.ErrExist) {
-				return err
+		if errors.Is(err, os.ErrNotExist) {
+			if caseErr := rejectCaseAlias(root, parent, part); caseErr != nil {
+				return caseErr
 			}
-			info, err = root.Lstat(current)
+			if create {
+				if err := root.Mkdir(current, 0700); err != nil && !errors.Is(err, os.ErrExist) {
+					return err
+				}
+				info, err = root.Lstat(current)
+			}
 		}
 		if err != nil {
 			return err
@@ -53,6 +58,33 @@ func directory(root *os.Root, name string, create bool) error {
 		}
 	}
 	return nil
+}
+
+// A case-sensitive host can report an alias as missing. Check the directory
+// before treating the path as available for a download or publication.
+func rejectCaseAlias(root *os.Root, parent, name string) error {
+	f, err := root.Open(parent)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	for {
+		entries, err := f.ReadDir(128)
+		for _, entry := range entries {
+			if actual := entry.Name(); actual != name && strings.EqualFold(actual, name) {
+				return fmt.Errorf("noncanonical path case: %s", path.Join(parent, name))
+			}
+		}
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func exactName(root *os.Root, parent, name string) error {

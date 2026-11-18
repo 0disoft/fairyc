@@ -103,10 +103,14 @@ func (f Fetcher) prepareWithin(ctx context.Context, root *os.Root, pin Pin, lang
 	if limit <= 0 || expanded <= 0 || files <= 0 {
 		return bundle{}, nil, false, fmt.Errorf("source fetch budget exhausted")
 	}
-	data, err := readRegular(root, path.Join(CachePath, pin.SHA256+".zip"), int64(limit))
+	archive := pin.SHA256 + ".zip"
+	data, err := readRegular(root, path.Join(CachePath, archive), int64(limit))
 	hit := err == nil
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
+			return bundle{}, nil, false, err
+		}
+		if err := rejectCaseAlias(root, CachePath, archive); err != nil {
 			return bundle{}, nil, false, err
 		}
 		if offline {
