@@ -321,14 +321,17 @@ def verify_dpi(session):
     applied = session.request(dict(command='click'))
     rows, prior = [], applied
     for dpi in (96, 144, 192, 96, baseline['windowDpi']):
-        width, height = (640 * dpi + 48) // 96, (360 * dpi + 48) // 96
+        # Stay above Fairy's 400x240 DIP minimum while fitting a small
+        # desktop at the largest synthetic scale (960x540 at 192 DPI).
+        width, height = (480 * dpi + 48) // 96, (270 * dpi + 48) // 96
         row = session.request(dict(command='dpi-test', dpi=dpi, width=width, height=height))
         check_layout(row)
         if row['dpi'] != dpi or row['dpiChanges'] != prior['dpiChanges'] + 1 or row['dpiInjections'] != prior['dpiInjections'] + 1:
             raise RuntimeError('DPI event was not accepted by Fairy')
         expected = dict(x=applied['window']['x'], y=applied['window']['y'], width=width, height=height)
         if row['dpiSuggested'] != expected or row['dpiApplied'] != expected or row['window'] != expected:
-            raise RuntimeError('Fairy did not apply the suggested DPI rectangle')
+            raise RuntimeError(f'DPI {dpi} rectangle: expected {expected}, suggested {row["dpiSuggested"]}, '
+                               f'applied {row["dpiApplied"]}, measured {row["window"]}')
         if row['windowDpi'] != baseline['windowDpi']:
             raise RuntimeError('OS DPI changed during the injected-message test')
         for key in ('input', 'result', 'status', 'edits', 'clicks'):
