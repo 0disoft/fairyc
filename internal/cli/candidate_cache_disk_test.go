@@ -22,7 +22,8 @@ func TestCandidateCacheDiskWindows(t *testing.T) {
 		t.Skip("Windows cache regression requires Windows amd64")
 	}
 	root := t.TempDir()
-	copyLexerFileCLIExample(t, root)
+	copyLexerExample(t, root)
+	copyCandidateParityModules(t, root, "project_cache_disk", "windows_rooted_file", "file_source")
 	fixture, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", "project_cache_disk.fy"))
 	if err != nil {
 		t.Fatal(err)
