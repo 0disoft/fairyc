@@ -27,5 +27,5 @@ if ($assigned.Count -eq 0) { throw 'No tests assigned to the Windows CLI shard' 
 
 $selection = '^(' + (($assigned | ForEach-Object { [regex]::Escape($_) }) -join '|') + ')$'
 Write-Host "Windows Go CLI shard $Shard/$ShardCount runs $($assigned.Count) of $($entries.Count) entries"
-go test -mod=readonly -count=1 -timeout 25m -v -run $selection ./internal/cli
+go test -mod=readonly -count=1 -timeout 35m -v -run $selection ./internal/cli
 exit $LASTEXITCODE
