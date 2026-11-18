@@ -30,11 +30,10 @@ func TestEmissionTransportAcrossResponsibilitySplit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Include source bytes and Unit metadata for production and drop-trace profiles
-	// of 52 cases. Refreshed for intentional conditional-branch braces; the
-	// generated C formatting changes without changing MIR or runtime behavior.
-	const wantHash = "7bd6f790248d811337150509279df30cadd6759cf213c06b924a284ee12e9c08"
-	if len(units) != 104 || len(encoded) != 447846 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
+	// Include source bytes and Unit metadata for both emission profiles of all
+	// 52 cases. The native differential suite checks the behavior of these units.
+	const wantHash = "06230ec446dbb29c730050585902a4a766f1e1d1060f946198f435684f60dd0b"
+	if len(units) != 104 || len(encoded) != 466480 || fmt.Sprintf("%x", sha256.Sum256(encoded)) != wantHash {
 		t.Fatalf("transport changed: units=%d bytes=%d sha256=%x", len(units), len(encoded), sha256.Sum256(encoded))
 	}
 }
