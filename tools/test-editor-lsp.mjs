@@ -41,6 +41,11 @@ try{
  assert.match(hover.contents.value,/helper/);
  const references=await connection.sendRequest('textDocument/references',{textDocument:{uri},position,context:{includeDeclaration:true}});
  assert.deepEqual(references.map(ref=>ref.range.start.line),[1,2]);
+ const legend=init.capabilities.semanticTokensProvider.legend;
+ const functionToken=legend.tokenTypes.indexOf('function');
+ assert(functionToken >= 0);
+ const tokens=await connection.sendRequest('textDocument/semanticTokens/full',{textDocument:{uri}});
+ assert.deepEqual(tokens.data.filter((_,index)=>index%5===3),[functionToken,functionToken,functionToken]);
  const returnColumn=text.split('\n')[1].indexOf('7');
  const replaceReturn=(width,newText)=>({
   range:{start:{line:1,character:returnColumn},end:{line:1,character:returnColumn+width}},
@@ -49,6 +54,7 @@ try{
  wait=diagnostics(2);
  connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:2},contentChanges:[replaceReturn(1,'false')]});
  assert((await wait).diagnostics.length>0);
+ assert.deepEqual((await connection.sendRequest('textDocument/semanticTokens/full',{textDocument:{uri}})).data,[]);
  wait=diagnostics(3);
  connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:3},contentChanges:[
   replaceReturn(5,'7'),

@@ -39,6 +39,10 @@ terminates the session.
   unavailable or ambiguous analysis.
 - Prefix completion for keywords, built-in types, module declarations,
   parameters, locals and exact imported-module public declarations.
+- Full-document semantic tokens for authored declarations and compiler-resolved
+  names in the current clean analysis. Tokens use UTF-16 coordinates and
+  distinguish declarations and read-only constants. An unavailable analysis
+  returns an empty token stream. Results are limited to 32,768 tokens.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
@@ -82,8 +86,8 @@ The VS Code development extension 0.1.2 assigns attribute scopes to
 `bytes::Buffer` are scoped as namespace/type in declarations, return types,
 parameters, fields and single-line generic/array types. Ordinary calls such as
 `bytes::empty()` remain functions. Comments and strings retain their own scopes.
-These TextMate rules use syntax positions, not capitalization or resolved SDK
-symbols; they are not semantic tokens or a complete multiline type parser.
+These TextMate rules use syntax positions. The language server provides
+semantic tokens when the current compiler analysis is available.
 Theme settings choose the actual colors. Reload the editor after updating the
 development extension files to load the regenerated grammar.
 
@@ -110,7 +114,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename, semantic tokens, member completion, embedded-SDK
+Rename, member completion, embedded-SDK
 virtual source navigation and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 

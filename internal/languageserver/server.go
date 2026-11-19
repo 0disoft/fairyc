@@ -71,8 +71,12 @@ func (s *server) handle(m message) error {
 				"textDocumentSync":   map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}},
 				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
 				"documentRangeFormattingProvider": true,
-				"completionProvider":              map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
-				"workspace":                       map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
+				"semanticTokensProvider": map[string]any{
+					"legend": map[string]any{"tokenTypes": semanticTokenTypes, "tokenModifiers": semanticTokenModifiers},
+					"full":   true,
+				},
+				"completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
+				"workspace":          map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
 			},
 		}, 0, "")
 	}
@@ -206,7 +210,7 @@ func (s *server) handle(m message) error {
 		default:
 			return s.response(m.ID, edits, 0, "")
 		}
-	case "textDocument/definition", "textDocument/completion", "textDocument/hover", "textDocument/references":
+	case "textDocument/definition", "textDocument/completion", "textDocument/hover", "textDocument/references", "textDocument/semanticTokens/full":
 		var p struct {
 			documentParams
 			Context struct {
@@ -223,9 +227,13 @@ func (s *server) handle(m message) error {
 		if d.needsFullText {
 			return s.response(m.ID, nil, -32801, "document needs full synchronization")
 		}
-		offset, ok := d.positionByte(p.Position)
-		if !ok {
-			return bad("invalid UTF-16 position")
+		var offset int
+		if m.Method != "textDocument/semanticTokens/full" {
+			var ok bool
+			offset, ok = d.positionByte(p.Position)
+			if !ok {
+				return bad("invalid UTF-16 position")
+			}
 		}
 		if s.analysisPending {
 			if err := s.recheckFocused(d.URI, false); err != nil {
@@ -241,6 +249,15 @@ func (s *server) handle(m message) error {
 			return s.response(m.ID, s.definition(d, offset), 0, "")
 		case "textDocument/hover":
 			return s.response(m.ID, s.hover(d, offset), 0, "")
+		case "textDocument/semanticTokens/full":
+			tokens, err := s.semanticTokens(d)
+			if errors.Is(err, errSemanticTokenLimit) {
+				return s.response(m.ID, nil, -32803, err.Error())
+			}
+			if err != nil {
+				return err
+			}
+			return s.response(m.ID, tokens, 0, "")
 		case "textDocument/references":
 			if p.Context.IncludeDeclaration == nil {
 				return bad("reference context must include includeDeclaration")

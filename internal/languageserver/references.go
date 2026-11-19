@@ -5,8 +5,6 @@ import (
 	"errors"
 	"slices"
 
-	"github.com/0disoft/fairyc/internal/ast"
-	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -120,89 +118,10 @@ func (a *analysis) authoredDeclaration(path string, offset int) (hir.Span, bool)
 	if module == nil {
 		return hir.Span{}, false
 	}
-	match := func(span diagnostic.Span) bool {
-		return span.StartByte <= offset && offset < span.EndByte
-	}
-	makeSpan := func(span diagnostic.Span) hir.Span {
-		return hir.Span{Package: key.Package, Source: key.Path, StartByte: span.StartByte, EndByte: span.EndByte}
-	}
-	fieldSpan := func(fields []ast.FieldDeclaration) diagnostic.Span {
-		for _, field := range fields {
-			if match(field.NameSpan) {
-				return field.NameSpan
-			}
-		}
-		return diagnostic.Span{}
-	}
-	for _, item := range module.Imports {
-		if match(item.AliasSpan) {
-			return makeSpan(item.AliasSpan), true
-		}
-	}
-	for _, item := range module.Structs {
-		if match(item.NameSpan) {
-			return makeSpan(item.NameSpan), true
-		}
-		if span := fieldSpan(item.Fields); span.EndByte > span.StartByte {
-			return makeSpan(span), true
-		}
-	}
-	for _, item := range module.Resources {
-		if match(item.NameSpan) {
-			return makeSpan(item.NameSpan), true
-		}
-		if span := fieldSpan(item.Fields); span.EndByte > span.StartByte {
-			return makeSpan(span), true
-		}
-	}
-	for _, item := range module.Enums {
-		if match(item.NameSpan) {
-			return makeSpan(item.NameSpan), true
-		}
-		for _, variant := range item.Variants {
-			if match(variant.NameSpan) {
-				return makeSpan(variant.NameSpan), true
-			}
-			if span := fieldSpan(variant.Fields); span.EndByte > span.StartByte {
-				return makeSpan(span), true
-			}
-		}
-	}
-	for _, state := range module.States {
-		for _, field := range state.Fields {
-			if match(field.NameSpan) {
-				return makeSpan(field.NameSpan), true
-			}
-		}
-	}
-	for _, fn := range module.Functions {
-		if match(fn.NameSpan) {
-			return makeSpan(fn.NameSpan), true
-		}
-		for _, parameter := range fn.Parameters {
-			if match(parameter.NameSpan) {
-				return makeSpan(parameter.NameSpan), true
-			}
-		}
-	}
-	for _, fn := range module.ForeignFunctions {
-		if match(fn.NameSpan) {
-			return makeSpan(fn.NameSpan), true
-		}
-		for _, parameter := range fn.Parameters {
-			if match(parameter.NameSpan) {
-				return makeSpan(parameter.NameSpan), true
-			}
-		}
-	}
-	for _, binding := range module.Bindings {
-		if match(binding.NameSpan) {
-			return makeSpan(binding.NameSpan), true
-		}
-	}
-	for _, constant := range module.Constants {
-		if match(constant.NameSpan) {
-			return makeSpan(constant.NameSpan), true
+	for declaration := range authoredDeclarations(module) {
+		span := declaration.span
+		if span.StartByte <= offset && offset < span.EndByte {
+			return hir.Span{Package: key.Package, Source: key.Path, StartByte: span.StartByte, EndByte: span.EndByte}, true
 		}
 	}
 	return hir.Span{}, false
