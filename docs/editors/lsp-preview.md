@@ -56,6 +56,11 @@ terminates the session.
   server checks the resulting syntax before offering an insertion at the
   current document version. Clients need code action literals and versioned
   workspace edits.
+- Rename for local bindings and plain private functions within one open
+  document. The server recompiles the proposed text and compares the resolved
+  declarations before returning a versioned edit. This catches name capture
+  even when the edited program still type-checks. Public names, the entry
+  point, generic specializations and shorthand field spellings are excluded.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
@@ -127,7 +132,6 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename is not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native

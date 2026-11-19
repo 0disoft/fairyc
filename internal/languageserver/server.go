@@ -29,6 +29,7 @@ type server struct {
 	workspaceRoots        []string
 	initialized, shutdown bool
 	versionedEdits        bool
+	renameSupported       bool
 	sdkSourceNavigation   bool
 	analysisPending       bool
 	analysisBudget        int64
@@ -67,10 +68,15 @@ func (s *server) handle(m message) error {
 		s.workspaceRoots = roots
 		s.initialized = true
 		s.sdkSourceNavigation = p.InitializationOptions.SDKSourceNavigation
-		s.versionedEdits = p.Capabilities.Workspace.WorkspaceEdit.DocumentChanges && p.Capabilities.TextDocument.CodeAction.LiteralSupport != nil
+		s.renameSupported = p.Capabilities.Workspace.WorkspaceEdit.DocumentChanges
+		s.versionedEdits = s.renameSupported && p.Capabilities.TextDocument.CodeAction.LiteralSupport != nil
 		var codeActionProvider any = false
+		var renameProvider any = false
 		if s.versionedEdits {
 			codeActionProvider = map[string]any{"codeActionKinds": []string{"quickfix"}}
+		}
+		if s.renameSupported {
+			renameProvider = map[string]bool{"prepareProvider": true}
 		}
 		return s.response(m.ID, map[string]any{
 			"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"},
@@ -80,6 +86,7 @@ func (s *server) handle(m message) error {
 				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
 				"documentRangeFormattingProvider": true,
 				"codeActionProvider":              codeActionProvider,
+				"renameProvider":                  renameProvider,
 				"experimental":                    map[string]bool{"fairycSdkSourceNavigation": s.sdkSourceNavigation},
 				"semanticTokensProvider": map[string]any{
 					"legend": map[string]any{"tokenTypes": semanticTokenTypes, "tokenModifiers": semanticTokenModifiers},
@@ -199,6 +206,51 @@ func (s *server) handle(m message) error {
 			return err
 		}
 		return s.recheck()
+	case "textDocument/prepareRename", "textDocument/rename":
+		if !s.renameSupported {
+			return s.response(m.ID, nil, -32601, "method not supported")
+		}
+		var p struct {
+			documentParams
+			NewName string `json:"newName"`
+		}
+		if json.Unmarshal(m.Params, &p) != nil {
+			return bad("invalid rename parameters")
+		}
+		d := s.docs[p.TextDocument.URI]
+		if d == nil {
+			return bad("document is not open")
+		}
+		if d.needsFullText {
+			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+		}
+		offset, valid := d.positionByte(p.Position)
+		if !valid {
+			return bad("invalid UTF-16 rename position")
+		}
+		if err := s.ensureAnalysis(d); err != nil {
+			return err
+		}
+		plan, err := s.planRename(d, offset)
+		if errors.Is(err, errRenameUnavailable) && m.Method == "textDocument/prepareRename" {
+			return s.response(m.ID, nil, 0, "")
+		}
+		if err == nil && m.Method == "textDocument/prepareRename" {
+			return s.response(m.ID, map[string]any{
+				"range": textRange(d.Text, plan.cursor.start, plan.cursor.end), "placeholder": plan.target.Name,
+			}, 0, "")
+		}
+		if err == nil {
+			var edits []documentEdit
+			edits, err = s.rename(d, plan, p.NewName)
+			if err == nil {
+				return s.response(m.ID, map[string]any{"documentChanges": edits}, 0, "")
+			}
+		}
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return err
+		}
+		return s.response(m.ID, nil, -32803, err.Error())
 	case "textDocument/codeAction":
 		var p struct {
 			documentParams

@@ -107,6 +107,15 @@ func (s *server) probeMemberReceiver(d *document, offset int) *analysis {
 	if len(d.Text) >= s.documentByteLimit(d.URI) {
 		return nil
 	}
+	text := make([]byte, 0, len(d.Text)+1)
+	text = append(text, d.Text[:offset]...)
+	text = append(text, '_')
+	text = append(text, d.Text[offset:]...)
+	view, _ := s.probeDocument(d, text)
+	return view
+}
+
+func (s *server) probeDocument(d *document, text []byte) (*analysis, error) {
 	ctx := s.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -115,15 +124,7 @@ func (s *server) probeMemberReceiver(d *document, offset int) *analysis {
 	for uri, opened := range s.docs {
 		probe.docs[uri] = &document{URI: uri, Path: opened.Path, Text: opened.Text, needsFullText: opened.needsFullText}
 	}
-	text := make([]byte, 0, len(d.Text)+1)
-	text = append(text, d.Text[:offset]...)
-	text = append(text, '_')
-	text = append(text, d.Text[offset:]...)
 	focus := &document{URI: d.URI, Path: d.Path, Text: text}
 	probe.docs[d.URI] = focus
-	view, err := probe.analyzeContext(ctx, focus, d.View.root)
-	if err != nil {
-		return nil
-	}
-	return view
+	return probe.analyzeContext(ctx, focus, d.View.root)
 }

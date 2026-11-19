@@ -496,8 +496,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   families through typed HIR; they remain grammar trivia and carry no rendered or semantic meaning.
   ADR 0375 adds an editor-internal immutable green tree and a deterministic full-file formatter that
   changes only lexer-owned whitespace after proving identical parser shape and significant tokens.
-  Incremental reparse, LSP, SCIP, semantic rename, and structural edits remain deferred until
-  measured editor work requires them.
+  The local LSP preview exposes editor capabilities including verified single-document rename.
+  Its request contracts and coverage are described in [the editor preview](../editors/lsp-preview.md).
+  Incremental reparse, SCIP and broader structural edits remain deferred until measured editor
+  work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Already-resolved multi-package input carries a deterministic build-local package discriminator and
   exact import-provider bindings. Semantic module identity is package plus source-visible module

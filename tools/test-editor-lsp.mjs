@@ -50,6 +50,13 @@ try{
  assert.match(hover.contents.value,/helper/);
  const references=await connection.sendRequest('textDocument/references',{textDocument:{uri},position,context:{includeDeclaration:true}});
  assert.deepEqual(references.map(ref=>ref.range.start.line),[1,2]);
+ assert.equal(init.capabilities.renameProvider.prepareProvider,true);
+ const prepared=await connection.sendRequest('textDocument/prepareRename',{textDocument:{uri},position});
+ assert.equal(prepared.placeholder,'helper');
+ const renamed=await connection.sendRequest('textDocument/rename',{textDocument:{uri},position,newName:'answer'});
+ assert.deepEqual(renamed.documentChanges,[{
+  textDocument:{uri,version:1},edits:references.map(ref=>({range:ref.range,newText:'answer'})),
+ }]);
  const legend=init.capabilities.semanticTokensProvider.legend;
  const functionToken=legend.tokenTypes.indexOf('function');
  assert(functionToken >= 0);
