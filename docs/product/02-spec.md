@@ -498,8 +498,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   changes only lexer-owned whitespace after proving identical parser shape and significant tokens.
   The local LSP preview exposes editor capabilities including verified single-document rename.
   Its request contracts and coverage are described in [the editor preview](../editors/lsp-preview.md).
-  Incremental reparse, SCIP and broader structural edits remain deferred until measured editor
-  work requires them.
+  Workspace reloads in the LSP preview can reuse lossless syntax for byte-identical files.
+  Within-file incremental reparse, SCIP and broader structural edits remain deferred until
+  measured editor work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Already-resolved multi-package input carries a deterministic build-local package discriminator and
   exact import-provider bindings. Semantic module identity is package plus source-visible module

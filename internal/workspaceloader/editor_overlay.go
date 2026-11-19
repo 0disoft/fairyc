@@ -16,6 +16,21 @@ func LoadEditorOverlays(root string, overlays map[string][]byte) (Workspace, err
 }
 
 func LoadEditorOverlaysContext(ctx context.Context, root string, overlays map[string][]byte) (Workspace, error) {
+	return loadEditorOverlays(ctx, root, overlays, nil)
+}
+
+// LoadEditorSyntaxContext rebuilds the workspace from current inputs and can
+// reuse checked syntax trees for files with identical paths and bytes.
+func LoadEditorSyntaxContext(ctx context.Context, root string, overlays map[string][]byte, previous *EditorSyntaxSnapshot) (Workspace, *EditorSyntaxSnapshot, error) {
+	reuse := &editorSyntaxReuse{previous: previous, next: EditorSyntaxSnapshot{trees: make(map[editorSyntaxKey]editorSyntaxEntry)}}
+	workspace, err := loadEditorOverlays(ctx, root, overlays, reuse)
+	if err != nil {
+		return Workspace{}, nil, err
+	}
+	return workspace, &reuse.next, nil
+}
+
+func loadEditorOverlays(ctx context.Context, root string, overlays map[string][]byte, reuse *editorSyntaxReuse) (Workspace, error) {
 	if err := ctx.Err(); err != nil {
 		return Workspace{}, err
 	}
@@ -43,5 +58,5 @@ func LoadEditorOverlaysContext(ctx context.Context, root string, overlays map[st
 		total += len(data)
 		copied[absolute] = slices.Clone(data)
 	}
-	return loadWorkspaceOverlaysContext(ctx, canonical, false, copied)
+	return loadWorkspaceInputs(ctx, canonical, false, copied, reuse)
 }

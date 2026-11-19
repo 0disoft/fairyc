@@ -11,6 +11,7 @@ import (
 const (
 	defaultAnalysisSourceBudget int64 = 128 << 20
 	analysisBudgetDiagnostic          = "analysis-budget-unavailable"
+	maxSessionSyntaxWeight      int64 = 16 << 20
 )
 
 type analysisBudgetCandidate struct {
@@ -75,6 +76,16 @@ func (s *server) retainedAnalysisSourceBytes() int64 {
 	var total int64
 	for a := range s.retainedAnalyses() {
 		total += analysisSourceBytes(a)
+	}
+	return total
+}
+
+func (s *server) retainedSyntaxWeight() int64 {
+	var total int64
+	for a := range s.retainedAnalyses() {
+		if a.syntaxSnapshot != nil {
+			total += a.syntaxSnapshot.Weight()
+		}
 	}
 	return total
 }

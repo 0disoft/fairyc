@@ -12,7 +12,6 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
-	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
@@ -127,6 +126,7 @@ type limits struct {
 	bytes   int64
 	entries int
 	root    *os.Root
+	syntax  *editorSyntaxReuse
 }
 
 // Load reads only the named root manifest, its explicit members, and their explicit source roots.
@@ -145,6 +145,10 @@ func loadWorkspaceOverlays(root string, vectorCandidate bool, overlays map[strin
 }
 
 func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandidate bool, overlays map[string][]byte) (result Workspace, err error) {
+	return loadWorkspaceInputs(ctx, root, vectorCandidate, overlays, nil)
+}
+
+func loadWorkspaceInputs(ctx context.Context, root string, vectorCandidate bool, overlays map[string][]byte, reuse *editorSyntaxReuse) (result Workspace, err error) {
 	if err := ctx.Err(); err != nil {
 		return Workspace{}, err
 	}
@@ -179,7 +183,10 @@ func loadWorkspaceOverlaysContext(ctx context.Context, root string, vectorCandid
 	packages := make([]Package, 0, len(packagePaths))
 	uidPaths := make(map[string]string, len(packagePaths))
 	pathIndexes := make(map[string]int, len(packagePaths))
-	budget := limits{ctx: ctx, root: boundary}
+	if reuse != nil {
+		reuse.next.root = workspaceRoot
+	}
+	budget := limits{ctx: ctx, root: boundary, syntax: reuse}
 	directories := newDirectoryResolver()
 	directories.budget = &budget
 	directories.root = boundary
@@ -414,7 +421,7 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 		if budget.bytes > MaxSourceBytes {
 			return Package{}, &LoadError{Reason: ReasonSourceLimit, Detail: fmt.Sprintf("workspace exceeds %d source bytes", MaxSourceBytes)}
 		}
-		analysis, err := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
+		analysis, err := budget.syntax.analyze(absolute, relative, contents)
 		if err != nil {
 			return Package{}, &LoadError{Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute), Cause: err, Detail: err.Error()}
 		}

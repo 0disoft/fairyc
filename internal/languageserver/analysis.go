@@ -48,6 +48,7 @@ type analysis struct {
 	clean           bool
 	root            string
 	snapshot        *workspaceloader.FileSnapshot
+	syntaxSnapshot  *workspaceloader.EditorSyntaxSnapshot
 	standalone      [sha256.Size]byte
 	standaloneValid bool
 	lastUsed        uint64
@@ -194,7 +195,14 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 				return previous, nil
 			}
 		}
-		workspace, err := workspaceloader.LoadEditorOverlaysContext(ctx, root, overlays)
+		var previousSyntax *workspaceloader.EditorSyntaxSnapshot
+		if d.View != nil && d.View.root == root {
+			previousSyntax = d.View.syntaxSnapshot
+		}
+		if previousSyntax == nil && d.LastClean != nil && d.LastClean.root == root {
+			previousSyntax = d.LastClean.syntaxSnapshot
+		}
+		workspace, parsedSyntax, err := workspaceloader.LoadEditorSyntaxContext(ctx, root, overlays, previousSyntax)
 		if err != nil {
 			var load *workspaceloader.LoadError
 			if errors.As(err, &load) && len(load.Diagnostics) > 0 {
@@ -226,6 +234,9 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			return nil, err
 		} else if !retained {
 			return s.analysisBudgetUnavailable(d, root, overlays), nil
+		}
+		if parsedSyntax.Weight() > 0 && parsedSyntax.Weight() <= maxSessionSyntaxWeight-s.retainedSyntaxWeight() {
+			a.syntaxSnapshot = parsedSyntax
 		}
 		input, err := workspace.SemanticInput()
 		if err != nil {
