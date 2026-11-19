@@ -16,7 +16,7 @@ func TestQueryRecoversAnalysisAfterRejectedSupersedingChange(t *testing.T) {
 				root, filename := editorFixture(t)
 				uri := fileURI(filename)
 				var output bytes.Buffer
-				s := server{out: &output, root: root, initialized: true, docs: map[string]*document{}}
+				s := server{out: &output, workspaceRoots: []string{root}, initialized: true, docs: map[string]*document{}}
 				before := "module main;\nfn i32 before() { return 1; }\nfn i32 main() { return before(); }\n"
 				after := "// shifted\n" + strings.ReplaceAll(before, "before", "after_value")
 				send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{"uri": uri, "languageId": "fairyc", "version": 1, "text": before}})

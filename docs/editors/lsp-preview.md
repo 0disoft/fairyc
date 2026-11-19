@@ -47,13 +47,16 @@ terminates the session.
 - Unsaved new .fy sources under explicit project source roots.
 - UTF-16 positions, including non-ASCII source and supplementary-plane characters.
 
-Initialize with one local workspace folder. For each document the nearest
-`fairy.toml` inside that folder identifies its package. If that exact package
+Initialize with local workspace folders and add or remove them during the
+session. The most specific containing folder bounds each document's project
+lookup. Removing a folder keeps its open text and rechecks it as a single file
+when no other folder contains it. The nearest `fairy.toml` inside the selected
+folder identifies its package. If that exact package
 directory is a declared member of a valid ancestor `[workspace]`, the nearest
 such ancestor selects the project, so sibling members and the root's reachable
 dependency closure remain available. A nested package that its ancestors do not
 declare stays in its own project scope. Selection never goes above the
-initialized folder or through a symlinked package directory. Declared members,
+selected folder or through a symlinked package directory. Declared members,
 local dependencies and the bundled SDK are loaded using the compiler's ordinary
 workspace rules. Source contents are overlaid in memory and receive fresh graph,
 digest and compilation identities. A file without a manifest receives
@@ -88,7 +91,7 @@ adapter launches the same server; it does not download tools.
 
 ## Explicit preview limits
 
-One workspace folder per session, 32 open documents, 8 MiB per source document,
+Up to 64 workspace folders per session, 32 open documents, 8 MiB per source document,
 32 MiB total open text, 9 MiB per framed message, and the compiler's existing
 workspace/source guards. A session retains at most 128 MiB of analyzed source in
 unique `View` and last-clean analyses. The charge covers each loaded workspace
@@ -108,7 +111,6 @@ no watcher runs inside the server.
 Rename, semantic tokens, member completion, embedded-SDK
 virtual source navigation, range formatting and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
-Multi-root support is deferred.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native
 server and Tree-sitter tests do not imply a Zed/WASM or macOS/Linux GUI smoke test.

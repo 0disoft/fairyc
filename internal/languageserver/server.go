@@ -26,7 +26,7 @@ type document struct {
 type server struct {
 	ctx                   context.Context
 	out                   io.Writer
-	root                  string
+	workspaceRoots        []string
 	initialized, shutdown bool
 	analysisPending       bool
 	analysisBudget        int64
@@ -54,36 +54,26 @@ func (s *server) handle(m message) error {
 		if s.initialized {
 			return s.response(m.ID, nil, -32600, "already initialized")
 		}
-		var p struct {
-			RootURI          string `json:"rootUri"`
-			RootPath         string `json:"rootPath"`
-			WorkspaceFolders []struct {
-				URI string `json:"uri"`
-			} `json:"workspaceFolders"`
-		}
+		var p initializeParams
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid initialize parameters")
 		}
-		if len(p.WorkspaceFolders) > 1 {
-			return bad("preview supports one workspace folder")
+		roots, err := p.roots()
+		if err != nil {
+			return bad(err.Error())
 		}
-		if p.RootURI == "" && len(p.WorkspaceFolders) == 1 {
-			p.RootURI = p.WorkspaceFolders[0].URI
-		}
-		if p.RootURI != "" {
-			var err error
-			s.root, err = filePath(p.RootURI)
-			if err != nil {
-				return bad(err.Error())
-			}
-		} else if p.RootPath != "" {
-			if !filepath.IsAbs(p.RootPath) {
-				return bad("rootPath must be absolute")
-			}
-			s.root = filepath.Clean(p.RootPath)
-		}
+		s.workspaceRoots = roots
 		s.initialized = true
-		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
+		return s.response(m.ID, map[string]any{
+			"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"},
+			"capabilities": map[string]any{
+				"positionEncoding":   "utf-16",
+				"textDocumentSync":   map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}},
+				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
+				"completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
+				"workspace":          map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
+			},
+		}, 0, "")
 	}
 	if !s.initialized {
 		return s.response(m.ID, nil, -32002, "server not initialized")
@@ -111,7 +101,7 @@ func (s *server) handle(m message) error {
 		}
 		d := p.TextDocument
 		filename, err := filePath(d.URI)
-		if err != nil || filepath.Ext(filename) != ".fy" || (s.root != "" && !contained(s.root, filename)) {
+		if err != nil || filepath.Ext(filename) != ".fy" || (len(s.workspaceRoots) > 0 && s.workspaceRoot(filename) == "") {
 			return bad("document is outside the local workspace or is not .fy")
 		}
 		if _, exists := s.docs[d.URI]; exists {
@@ -157,6 +147,19 @@ func (s *server) handle(m message) error {
 	case "textDocument/didSave":
 		return s.recheck()
 	case "workspace/didChangeWatchedFiles":
+		return s.recheck()
+	case "workspace/didChangeWorkspaceFolders":
+		var p struct {
+			Event *workspaceFolderChange `json:"event"`
+		}
+		if json.Unmarshal(m.Params, &p) != nil || p.Event == nil {
+			return bad("invalid workspace folder change")
+		}
+		roots, err := p.Event.apply(s.workspaceRoots)
+		if err != nil {
+			return bad(err.Error())
+		}
+		s.workspaceRoots = roots
 		return s.recheck()
 	case "textDocument/didClose":
 		var p documentParams

@@ -16,8 +16,7 @@ async function start(context) {
   context.subscriptions.push(watcher);
   client = new LanguageClient('fairyc', 'Fairy C', { command, args: [] }, {
     documentSelector: [{ scheme: 'file', language: 'fairyc' }],
-    synchronize: { fileEvents: watcher },
-    workspaceFolder: vscode.workspace.workspaceFolders?.[0]
+    synchronize: { fileEvents: watcher }
   });
   try { await client.start(); }
   catch (error) { client = undefined; vscode.window.showErrorMessage('Fairy C language server could not start. Check fairyc.server.path.'); }

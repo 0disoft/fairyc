@@ -49,7 +49,7 @@ func requestID(raw json.RawMessage) string {
 
 func rechecks(method string) bool {
 	switch method {
-	case "textDocument/didOpen", "textDocument/didChange", "textDocument/didSave", "textDocument/didClose", "workspace/didChangeWatchedFiles":
+	case "textDocument/didOpen", "textDocument/didChange", "textDocument/didSave", "textDocument/didClose", "workspace/didChangeWatchedFiles", "workspace/didChangeWorkspaceFolders":
 		return true
 	default:
 		return false

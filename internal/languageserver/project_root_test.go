@@ -141,7 +141,7 @@ func TestProjectRootDoesNotWidenAboveInitializedFolder(t *testing.T) {
 	_, appDirectory, _ := siblingWorkspaceFixture(t)
 	filename := filepath.Join(appDirectory, "src", "a.fy")
 	var output bytes.Buffer
-	s := server{root: appDirectory, out: &output, docs: map[string]*document{}}
+	s := server{workspaceRoots: []string{appDirectory}, out: &output, docs: map[string]*document{}}
 	if got := s.projectRoot(filename); got != appDirectory {
 		t.Fatalf("initialized member project root = %q, want %q", got, appDirectory)
 	}
@@ -160,7 +160,7 @@ func TestProjectRootRejectsSymlinkedPackageDirectory(t *testing.T) {
 		t.Skipf("symlink creation unavailable: %v", err)
 	}
 	var output bytes.Buffer
-	s := server{root: root, out: &output, docs: map[string]*document{}}
+	s := server{workspaceRoots: []string{root}, out: &output, docs: map[string]*document{}}
 	if got := s.projectRoot(filepath.Join(linked, "src", "main.fy")); got != "" {
 		t.Fatalf("symlinked package selected project root %q", got)
 	}

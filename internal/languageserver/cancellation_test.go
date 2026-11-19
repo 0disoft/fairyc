@@ -79,7 +79,7 @@ func TestCanceledRecheckPreservesPublishedView(t *testing.T) {
 	old := &analysis{clean: true}
 	d := &document{URI: fileURI(filename), Path: filename, Text: []byte("module main; fn i32 main(){return 0;}"), Version: 2, View: old, LastClean: old}
 	var out bytes.Buffer
-	s := server{ctx: ctx, root: root, out: &out, docs: map[string]*document{d.URI: d}}
+	s := server{ctx: ctx, workspaceRoots: []string{root}, out: &out, docs: map[string]*document{d.URI: d}}
 	if err := s.recheck(); !errors.Is(err, context.Canceled) || out.Len() != 0 || d.View != old || d.LastClean != old {
 		t.Fatalf("canceled recheck: %v output=%q", err, out.String())
 	}

@@ -111,7 +111,7 @@ func TestReferencesIncludeUnusedNamedDeclarations(t *testing.T) {
 	}
 	uri := fileURI(filename)
 	var out bytes.Buffer
-	s := server{out: &out, root: root, initialized: true, docs: map[string]*document{}}
+	s := server{out: &out, workspaceRoots: []string{root}, initialized: true, docs: map[string]*document{}}
 	text := `module main;
 import answer as unused_module;
 struct Point { i32 x_component; }

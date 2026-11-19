@@ -57,22 +57,22 @@ type analysis struct {
 }
 
 func (s *server) projectRoot(filename string) string {
-	// Parent lookup stays within the one explicitly initialized workspace folder and refuses
-	// symlinked package paths.
-	if s.root == "" || !projectDirectoryPath(s.root, s.root) {
+	// The nearest explicitly listed folder bounds parent lookup.
+	boundary := s.workspaceRoot(filename)
+	if boundary == "" || !projectDirectoryPath(boundary, boundary) {
 		return ""
 	}
 	packageDirectory := ""
-	for directory := filepath.Dir(filename); contained(s.root, directory); directory = filepath.Dir(directory) {
+	for directory := filepath.Dir(filename); contained(boundary, directory); directory = filepath.Dir(directory) {
 		info, err := os.Lstat(filepath.Join(directory, "fairy.toml"))
 		if err == nil && info.Mode().IsRegular() {
-			if !projectDirectoryPath(s.root, directory) {
+			if !projectDirectoryPath(boundary, directory) {
 				return ""
 			}
 			packageDirectory = directory
 			break
 		}
-		if directory == s.root || directory == filepath.Dir(directory) {
+		if sameDocumentPath(directory, boundary) || directory == filepath.Dir(directory) {
 			break
 		}
 	}
@@ -81,11 +81,11 @@ func (s *server) projectRoot(filename string) string {
 	}
 	// A member manifest cannot carry the outer catalog. Prefer the nearest explicit
 	// workspace whose members name this package directory exactly.
-	for directory := filepath.Dir(packageDirectory); contained(s.root, directory); directory = filepath.Dir(directory) {
+	for directory := filepath.Dir(packageDirectory); contained(boundary, directory); directory = filepath.Dir(directory) {
 		if workspaceContainsPackage(directory, packageDirectory) {
 			return directory
 		}
-		if directory == s.root || directory == filepath.Dir(directory) {
+		if sameDocumentPath(directory, boundary) || directory == filepath.Dir(directory) {
 			break
 		}
 	}
