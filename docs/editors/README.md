@@ -14,7 +14,7 @@ verification commands. The VSIX contains the syntax assets and JavaScript
 language client, but not the compiler or language server executable. Syntax and
 editor configuration work without a server. Set `fairyc.server.path` to the
 absolute `fairyc-lsp` executable path to enable diagnostics, definition
-navigation, hover, references and completion in a trusted workspace. No Marketplace publication is
+navigation, hover, references, completion and formatting in a trusted workspace. No Marketplace publication is
 claimed.
 
 The shared `fairyc-lsp` server provides the same features to each client. See [the LSP preview contract](lsp-preview.md) for build/setup,

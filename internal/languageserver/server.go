@@ -82,7 +82,7 @@ func (s *server) handle(m message) error {
 			s.root = filepath.Clean(p.RootPath)
 		}
 		s.initialized = true
-		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 1, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
+		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 1, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
 	}
 	if !s.initialized {
 		return s.response(m.ID, nil, -32002, "server not initialized")
@@ -169,6 +169,26 @@ func (s *server) handle(m message) error {
 			return err
 		}
 		return s.recheck()
+	case "textDocument/formatting":
+		var p documentParams
+		if json.Unmarshal(m.Params, &p) != nil {
+			return bad("invalid formatting parameters")
+		}
+		d := s.docs[p.TextDocument.URI]
+		if d == nil {
+			return bad("document is not open")
+		}
+		edits, err := s.formatDocument(d)
+		switch {
+		case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+			return err
+		case errors.Is(err, errFormattingLimit):
+			return s.response(m.ID, nil, -32803, err.Error())
+		case err != nil:
+			return s.response(m.ID, nil, -32803, "document could not be formatted")
+		default:
+			return s.response(m.ID, edits, 0, "")
+		}
 	case "textDocument/definition", "textDocument/completion", "textDocument/hover", "textDocument/references":
 		var p struct {
 			documentParams
