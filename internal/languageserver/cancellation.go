@@ -127,6 +127,7 @@ type incomingMessage struct {
 	message message
 	ctx     context.Context
 	token   uint64
+	fault   *rpcFault
 	err     error
 }
 
@@ -170,7 +171,8 @@ func queueMessages(ctx context.Context, reader *bufio.Reader, control *requestCo
 			return
 		}
 		m, err := readMessageWithOptions(reader, messageReadOptions{Context: ctx})
-		if err != nil {
+		var fault *rpcFault
+		if err != nil && !errors.As(err, &fault) {
 			select {
 			case queued <- incomingMessage{err: err}:
 			case <-ctx.Done():
@@ -196,7 +198,7 @@ func queueMessages(ctx context.Context, reader *bufio.Reader, control *requestCo
 			return
 		}
 		select {
-		case queued <- incomingMessage{message: m, ctx: requestCtx, token: token}:
+		case queued <- incomingMessage{message: m, ctx: requestCtx, token: token, fault: fault}:
 		case <-ctx.Done():
 			control.finish(token)
 			return

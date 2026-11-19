@@ -10,6 +10,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 const maxMessage = 9 << 20
@@ -20,6 +21,13 @@ type message struct {
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params"`
 }
+
+type rpcFault struct {
+	code    int
+	message string
+}
+
+func (fault *rpcFault) Error() string { return fault.message }
 
 func readMessage(in *bufio.Reader) (message, error) {
 	return readMessageWithOptions(in)
@@ -88,17 +96,35 @@ func readMessageWithOptions(in *bufio.Reader, options ...messageReadOptions) (me
 	if count != length {
 		return message{}, io.ErrUnexpectedEOF
 	}
-	var m message
-	if err := json.Unmarshal(bytes, &m); err != nil {
-		return message{}, err
-	}
-	if m.JSONRPC != "2.0" || m.Method == "" {
-		return message{}, errors.New("invalid JSON-RPC request")
-	}
+	m, err := decodeMessage(bytes)
 	if err := ctx.Err(); err != nil {
 		return message{}, err
 	}
+	return m, err
+}
+
+func decodeMessage(body []byte) (message, error) {
+	if !utf8.Valid(body) {
+		return message{}, &rpcFault{-32700, "Parse error"}
+	}
+	var m message
+	err := json.Unmarshal(body, &m)
+	var syntax *json.SyntaxError
+	if errors.As(err, &syntax) {
+		return message{}, &rpcFault{-32700, "Parse error"}
+	}
+	if err != nil || m.JSONRPC != "2.0" || m.Method == "" || !validMessageID(m.ID) {
+		return message{}, &rpcFault{-32600, "Invalid Request"}
+	}
 	return m, nil
+}
+
+func validMessageID(id json.RawMessage) bool {
+	if len(id) == 0 || id[0] == '"' {
+		return true
+	}
+	var number int32
+	return id[0] != 'n' && json.Unmarshal(id, &number) == nil
 }
 func writeMessage(out io.Writer, value any) error {
 	data, err := json.Marshal(value)
@@ -161,6 +187,14 @@ func ServeContext(ctx context.Context, in io.Reader, out, stderr io.Writer) int 
 					return 0
 				}
 				return fail(next.err)
+			}
+			if next.fault != nil {
+				err := s.response(json.RawMessage("null"), nil, next.fault.code, next.fault.message)
+				requests.finish(next.token)
+				if err != nil {
+					return fail(err)
+				}
+				continue
 			}
 			m := next.message
 			if m.Method == "exit" {

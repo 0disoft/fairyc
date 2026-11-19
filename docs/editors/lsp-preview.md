@@ -11,6 +11,10 @@ with exit code 1. Headers are bounded to 8 KiB, bodies to 9 MiB; duplicate
 `Content-Length` fields reject even when the first value is negative. Frame
 reads share the session context and check cancellation around body reads of at
 most 32 KiB. A blocked reader still needs to be closed by its owner to unblock.
+After consuming a complete frame, malformed UTF-8 or JSON receives JSON-RPC
+`-32700` and an invalid request envelope receives `-32600`. Both use a null
+response ID and leave the session ready for the next frame. Invalid framing
+terminates the session.
 
 ## Capabilities
 
@@ -103,7 +107,7 @@ no watcher runs inside the server.
 Rename, semantic tokens, member completion, embedded-SDK
 virtual source navigation, range formatting and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
-Multi-root support and complete malformed-input JSON-RPC recovery are deferred.
+Multi-root support is deferred.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native
 server and Tree-sitter tests do not imply a Zed/WASM or macOS/Linux GUI smoke test.
