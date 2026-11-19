@@ -39,6 +39,29 @@ are tracked in `docs/ops/windows-candidate-atlas-unsafe-cli-20261106.md`.
 Linux command selection remains separate. Body editing retains
 its narrower selection policy; see the owning contract for exact admission.
 
+## Experimental symbol-based test plan
+
+`fairyc experimental test-plan --symbol <module::function|symbol-id> [--package <package-uid>]`
+recommends tests in one root-reachable local package. The default is the root package.
+The selector accepts a qualified function name or a visible or full Atlas SymbolId.
+
+The Go frontend discovers tests as for `test --list` and builds a fresh Atlas v3
+index from the same checked source snapshot, including the selected package's
+`tests/` files. The command runs no tests and reads or writes no lock or map files.
+
+The `fairyc.test-plan/v1` JSON report contains `package_uid`, `symbol`, `recommendation`,
+`tests` and `reasons`. In test-list order, each recommended test appears once with a
+canonical `test` identity and one shortest `path` from that test to the selected function.
+Use those identities with `fairyc test --package <package-uid> --exact <test>`.
+
+`selected-tests` describes coverage of ordinary, resolved calls within the selected
+package. Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
+cross-package calls, generic call coverage and unmapped tests cause `all-tests`.
+Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.
+Known paths are retained alongside the fallback reasons. Run `fairyc test --package
+<package-uid>` for the full package suite. The recommendation covers call paths only
+and has no effect on CI test selection.
+
 ## Stable version inspection v1
 
 `fairyc --version` reports compiler module version, SDK identity/version, language

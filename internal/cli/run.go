@@ -48,6 +48,7 @@ Usage:
   fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file <workspace-file> --expected-source-sha256 <hash> [--apply]
   fairyc experimental atlas-mcp --allow-impact --max-packages <n> --max-calls <n> --max-depth <n> --max-symbols <n> --max-output-bytes <n> --max-requests <n>
   fairyc experimental atlas-impact --package-uid <uid> --symbol <symbol-id> --max-packages <n> --max-calls <n> --max-depth <0..64> --max-symbols <n> --max-output-bytes <n> [--locked]
+  fairyc experimental test-plan --symbol <module::function|symbol-id> [--package <package-uid>]
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
@@ -244,6 +245,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runAtlasMCP(args[1:], sourceRoot, stdin, stdout, stderr)
 	case "atlas-impact":
 		return runAtlasImpact(args[1:], sourceRoot, stdout, stderr)
+	case "test-plan":
+		return runTestPlan(args[1:], sourceRoot, stdout, stderr)
 	case "fetch-packages":
 		return runPackageFetch(args[1:], sourceRoot, stdout, stderr)
 	case "registry-resolve", "registry-update":
