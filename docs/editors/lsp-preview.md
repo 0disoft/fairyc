@@ -20,6 +20,12 @@ most 32 KiB. A blocked reader still needs to be closed by its owner to unblock.
 - Hover for resolved names and function declarations in a clean current analysis.
   It shows a plain-text function signature or symbol kind and name, with the
   checked value type when available. Unavailable or ambiguous facts yield no hover.
+- Find references to a resolved name across the current project analysis, including
+  unopened local files and unsaved source overlays. Clients can include the local
+  declaration. Results are deduplicated, ordered by URI and position, and limited
+  to 4,096 locations and the protocol response budget. Oversized results fail
+  explicitly. The search covers recorded path uses and returns no references for
+  unavailable or ambiguous analysis.
 - Prefix completion for keywords, built-in types, module declarations,
   parameters, locals and exact imported-module public declarations.
 - Unsaved new .fy sources under explicit project source roots.
@@ -83,7 +89,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename, references, semantic tokens, member completion, embedded-SDK
+Rename, semantic tokens, member completion, embedded-SDK
 virtual source navigation, formatting and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 Multi-root support and complete malformed-input JSON-RPC recovery are deferred.

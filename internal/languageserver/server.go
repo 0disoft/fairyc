@@ -3,6 +3,7 @@ package languageserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/0disoft/fairyc/internal/source"
 	"io"
@@ -81,7 +82,7 @@ func (s *server) handle(m message) error {
 			s.root = filepath.Clean(p.RootPath)
 		}
 		s.initialized = true
-		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 1, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
+		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 1, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
 	}
 	if !s.initialized {
 		return s.response(m.ID, nil, -32002, "server not initialized")
@@ -168,8 +169,13 @@ func (s *server) handle(m message) error {
 			return err
 		}
 		return s.recheck()
-	case "textDocument/definition", "textDocument/completion", "textDocument/hover":
-		var p documentParams
+	case "textDocument/definition", "textDocument/completion", "textDocument/hover", "textDocument/references":
+		var p struct {
+			documentParams
+			Context struct {
+				IncludeDeclaration *bool `json:"includeDeclaration"`
+			} `json:"context"`
+		}
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid position parameters")
 		}
@@ -195,6 +201,18 @@ func (s *server) handle(m message) error {
 			return s.response(m.ID, s.definition(d, offset), 0, "")
 		case "textDocument/hover":
 			return s.response(m.ID, s.hover(d, offset), 0, "")
+		case "textDocument/references":
+			if p.Context.IncludeDeclaration == nil {
+				return bad("reference context must include includeDeclaration")
+			}
+			locations, err := s.references(d, offset, *p.Context.IncludeDeclaration)
+			if errors.Is(err, errReferenceLimit) {
+				return s.response(m.ID, nil, -32803, err.Error())
+			}
+			if err != nil {
+				return err
+			}
+			return s.response(m.ID, locations, 0, "")
 		default:
 			return s.response(m.ID, s.completion(d, offset), 0, "")
 		}

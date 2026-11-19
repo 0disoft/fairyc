@@ -13,7 +13,7 @@ func main() {
 			fmt.Println("fairyc-lsp 0.1.0")
 			return
 		case "--help", "-h":
-			fmt.Println("fairyc-lsp: local stdio Language Server Protocol preview (diagnostics, definition, completion)")
+			fmt.Println("fairyc-lsp: local stdio Language Server Protocol preview (diagnostics, definition, hover, references, completion)")
 			return
 		default:
 			fmt.Fprintln(os.Stderr, "fairyc-lsp accepts no server arguments")
