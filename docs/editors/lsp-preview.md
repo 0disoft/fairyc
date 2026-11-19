@@ -32,7 +32,8 @@ terminates the session.
   checked value type when available. Unavailable or ambiguous facts yield no hover.
 - Find references to a resolved name across the current project analysis, including
   unopened local files and unsaved source overlays. Clients can include the local
-  declaration. Results are deduplicated, ordered by URI and position, and limited
+  declaration, including unused nominal types, variants, fields, import aliases
+  and parameters. Results are deduplicated, ordered by URI and position, and limited
   to 4,096 locations and the protocol response budget. Oversized results fail
   explicitly. The search covers recorded path uses and returns no references for
   unavailable or ambiguous analysis.

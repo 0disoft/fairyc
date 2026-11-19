@@ -103,3 +103,45 @@ func TestReferenceLimitRejectsInsteadOfTruncating(t *testing.T) {
 		t.Fatalf("oversized references returned %d results, error %v", len(got), err)
 	}
 }
+
+func TestReferencesIncludeUnusedNamedDeclarations(t *testing.T) {
+	root, filename := editorFixture(t)
+	if err := os.WriteFile(filepath.Join(root, "src", "answer.fy"), []byte("module answer;"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	uri := fileURI(filename)
+	var out bytes.Buffer
+	s := server{out: &out, root: root, initialized: true, docs: map[string]*document{}}
+	text := `module main;
+import answer as unused_module;
+struct Point { i32 x_component; }
+resource Owned { i32 owned_value; cleanup {} }
+enum Event { Ready { i32 ready_value; }; }
+@contract_uid("editor.references")
+state { cell u64 unused_cell; }
+unsafe extern C fn i32 native_check(i32 native_arg);
+fn i32 main() { return 0; }
+`
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 1, "languageId": "fairyc", "text": text,
+	}})
+	d := s.docs[uri]
+	if d == nil || d.View == nil || !d.View.clean {
+		t.Fatalf("fixture did not check cleanly: %s", out.String())
+	}
+	for _, name := range []string{
+		"unused_module", "Point", "x_component", "Owned", "owned_value", "Event", "Ready", "ready_value", "unused_cell", "native_arg",
+	} {
+		t.Run(name, func(t *testing.T) {
+			start := strings.Index(text, name)
+			got, err := s.references(d, start, true)
+			want := []Location{{URI: uri, Range: textRange(d.Text, start, start+len(name))}}
+			if err != nil || !slices.Equal(got, want) {
+				t.Fatalf("references = %+v (%v), want %+v", got, err, want)
+			}
+			if got, err := s.references(d, start, false); err != nil || len(got) != 0 {
+				t.Fatalf("references with declaration excluded = %+v (%v)", got, err)
+			}
+		})
+	}
+}
