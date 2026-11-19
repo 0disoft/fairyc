@@ -65,8 +65,9 @@ the longest estimated test to the least loaded shard at each step and uses ordin
 entry order for ties. The four Atlas source-version parts cover disjoint fixture
 sets while retaining all schema versions and both profiles. Each CLI shard allows
 50 minutes, including a 45-minute package test timeout.
-The separate lexer proof allows 12 minutes. The Windows native smoke, parser groups,
-and Linux C differential retain their 10-minute limits.
+The Windows lexer proof allows 17 minutes for the job, including an explicit 15-minute
+Go package timeout for all lexer tests. The Windows native smoke, parser groups,
+and Linux C differential retain their 10-minute job limits.
 
 `workflow_dispatch` also accepts an optional `candidate_sha`. An empty value keeps the full route
 above. A nonempty value must be a full 40-character lowercase hexadecimal commit SHA other than

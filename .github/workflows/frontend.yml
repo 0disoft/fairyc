@@ -211,8 +211,8 @@ jobs:
     needs: changes
     if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || (needs.changes.outputs.route != 'docs' && needs.changes.outputs.route != 'windows-preview')) }}
     runs-on: windows-latest
-    # The lexer proof approaches ten minutes before checkout/setup/cleanup.
-    timeout-minutes: ${{ matrix.group == 'lexer' && 12 || 10 }}
+    # Give the full lexer corpus its package timeout plus setup and cleanup.
+    timeout-minutes: ${{ matrix.group == 'lexer' && 17 || 10 }}
     # All groups remain required by native-c. Separate runners avoid shared
     # native-build state; verbose output preserves the active test on timeout.
     strategy:
@@ -236,7 +236,7 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: Run required Fairy native proof group
-        run: go test -mod=readonly -count=1 -v -run '${{ matrix.tests }}' ./internal/cli
+        run: go test -mod=readonly -count=1 -timeout ${{ matrix.group == 'lexer' && '15m' || '10m' }} -v -run '${{ matrix.tests }}' ./internal/cli
 
   native-c:
     name: C differential (Linux)
