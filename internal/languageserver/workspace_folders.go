@@ -16,6 +16,18 @@ type initializeParams struct {
 	RootURI          string            `json:"rootUri"`
 	RootPath         string            `json:"rootPath"`
 	WorkspaceFolders []workspaceFolder `json:"workspaceFolders"`
+	Capabilities     struct {
+		TextDocument struct {
+			CodeAction struct {
+				LiteralSupport *struct{} `json:"codeActionLiteralSupport"`
+			} `json:"codeAction"`
+		} `json:"textDocument"`
+		Workspace struct {
+			WorkspaceEdit struct {
+				DocumentChanges bool `json:"documentChanges"`
+			} `json:"workspaceEdit"`
+		} `json:"workspace"`
+	} `json:"capabilities"`
 }
 
 func (p initializeParams) roots() ([]string, error) {

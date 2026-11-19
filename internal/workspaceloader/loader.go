@@ -59,6 +59,7 @@ type LoadError struct {
 	Source             []byte
 	Diagnostics        []diagnostic.Diagnostic
 	AbsoluteSourcePath string
+	RelativeSourcePath string
 }
 
 func (e *LoadError) Unwrap() error { return e.Cause }
@@ -421,7 +422,8 @@ func loadPackageOverlays(packagePath, directory, sourceRoot string, manifest pro
 			return Package{}, &LoadError{
 				Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute),
 				Detail: fmt.Sprintf("parser diagnostics: %+v", analysis.Tree.Diagnostics),
-				Source: slices.Clone(contents), Diagnostics: slices.Clone(analysis.Tree.Diagnostics), AbsoluteSourcePath: absolute,
+				Source: slices.Clone(contents), Diagnostics: slices.Clone(analysis.Tree.Diagnostics),
+				AbsoluteSourcePath: absolute, RelativeSourcePath: relative,
 			}
 		}
 		if previous, duplicate := modulePaths[analysis.AST.Path]; duplicate {

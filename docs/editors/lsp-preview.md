@@ -46,6 +46,10 @@ terminates the session.
   names in the current clean analysis. Tokens use UTF-16 coordinates and
   distinguish declarations and read-only constants. An unavailable analysis
   returns an empty token stream. Results are limited to 32,768 tokens.
+- Quick fixes for isolated missing punctuation reported by the parser. The
+  server checks the resulting syntax before offering an insertion at the
+  current document version. Clients need code action literals and versioned
+  workspace edits.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
@@ -117,8 +121,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename, embedded-SDK
-virtual source navigation and code actions are not advertised.
+Rename and embedded-SDK virtual source navigation are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native

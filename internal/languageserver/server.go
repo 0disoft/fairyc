@@ -28,6 +28,7 @@ type server struct {
 	out                   io.Writer
 	workspaceRoots        []string
 	initialized, shutdown bool
+	versionedEdits        bool
 	analysisPending       bool
 	analysisBudget        int64
 	analysisClock         uint64
@@ -64,6 +65,11 @@ func (s *server) handle(m message) error {
 		}
 		s.workspaceRoots = roots
 		s.initialized = true
+		s.versionedEdits = p.Capabilities.Workspace.WorkspaceEdit.DocumentChanges && p.Capabilities.TextDocument.CodeAction.LiteralSupport != nil
+		var codeActionProvider any = false
+		if s.versionedEdits {
+			codeActionProvider = map[string]any{"codeActionKinds": []string{"quickfix"}}
+		}
 		return s.response(m.ID, map[string]any{
 			"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"},
 			"capabilities": map[string]any{
@@ -71,6 +77,7 @@ func (s *server) handle(m message) error {
 				"textDocumentSync":   map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}},
 				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
 				"documentRangeFormattingProvider": true,
+				"codeActionProvider":              codeActionProvider,
 				"semanticTokensProvider": map[string]any{
 					"legend": map[string]any{"tokenTypes": semanticTokenTypes, "tokenModifiers": semanticTokenModifiers},
 					"full":   true,
@@ -176,6 +183,31 @@ func (s *server) handle(m message) error {
 			return err
 		}
 		return s.recheck()
+	case "textDocument/codeAction":
+		var p struct {
+			documentParams
+			Range   json.RawMessage   `json:"range"`
+			Context codeActionContext `json:"context"`
+		}
+		if json.Unmarshal(m.Params, &p) != nil {
+			return bad("invalid code action parameters")
+		}
+		d := s.docs[p.TextDocument.URI]
+		if d == nil {
+			return bad("document is not open")
+		}
+		if d.needsFullText {
+			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+		}
+		start, end, valid := rangeOffsets(d.Text, p.Range)
+		if !valid {
+			return bad("invalid UTF-16 code action range")
+		}
+		actions, err := s.codeActions(d, start, end, p.Context)
+		if err != nil {
+			return err
+		}
+		return s.response(m.ID, actions, 0, "")
 	case "textDocument/formatting", "textDocument/rangeFormatting":
 		var p struct {
 			documentParams
@@ -235,14 +267,8 @@ func (s *server) handle(m message) error {
 				return bad("invalid UTF-16 position")
 			}
 		}
-		if s.analysisPending {
-			if err := s.recheckFocused(d.URI, false); err != nil {
-				return err
-			}
-		} else if d.analysisEvicted || d.View == nil {
-			if err := s.recheckFocused(d.URI, true); err != nil {
-				return err
-			}
+		if err := s.ensureAnalysis(d); err != nil {
+			return err
 		}
 		switch m.Method {
 		case "textDocument/definition":
@@ -280,6 +306,16 @@ func (s *server) handle(m message) error {
 	default:
 		return s.response(m.ID, nil, -32601, "method not supported")
 	}
+}
+
+func (s *server) ensureAnalysis(d *document) error {
+	if s.analysisPending {
+		return s.recheckFocused(d.URI, false)
+	}
+	if d.analysisEvicted || d.View == nil {
+		return s.recheckFocused(d.URI, true)
+	}
+	return nil
 }
 func (s *server) fits(uri, text string) bool {
 	return len(text) <= s.documentByteLimit(uri) && utf8.ValidString(text)

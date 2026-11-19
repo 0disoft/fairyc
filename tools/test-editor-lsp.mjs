@@ -21,7 +21,11 @@ const diagnostics=version=>new Promise(resolve=>diagnosticWaiters.set(version,re
 const timeout=setTimeout(()=>{child.kill();throw Error('Native LSP smoke timed out '+stderr);},15000);
 try{
  connection.listen();
- const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities:{}});
+ const capabilities={
+  workspace:{workspaceEdit:{documentChanges:true}},
+  textDocument:{codeAction:{codeActionLiteralSupport:{codeActionKind:{valueSet:['quickfix']}}}},
+ };
+ const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities});
  assert.equal(init.capabilities.positionEncoding,'utf-16');
  assert.equal(init.capabilities.textDocumentSync.change,2);
  assert(init.capabilities.completionProvider.triggerCharacters.includes('.'));
@@ -78,10 +82,22 @@ try{
   textDocument:{uri},position:{line:0,character:memberText.lastIndexOf('point.')+'point.'.length},
  });
  assert.deepEqual(members,[{label:'row',kind:5,detail:'field'}]);
+ const missingSemicolon='module main; fn i32 main() { return 42 }';
+ wait=diagnostics(5);
+ connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:5},contentChanges:[{text:missingSemicolon}]});
+ const damaged=(await wait).diagnostics;
+ assert.deepEqual(damaged.map(d=>d.code),['E0007']);
+ const fixes=await connection.sendRequest('textDocument/codeAction',{
+  textDocument:{uri},range:damaged[0].range,context:{diagnostics:damaged,only:['quickfix']},
+ });
+ assert.equal(fixes.length,1);
+ assert.deepEqual(fixes[0].edit.documentChanges,[{
+  textDocument:{uri,version:5},edits:[{range:damaged[0].range,newText:';'}],
+ }]);
  assert.equal(fs.readFileSync(filename,'utf8'),'module main; fn i32 main() { return 0; }');
  assert.equal(await connection.sendRequest('shutdown'),null);
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, hover, references, document/range formatting, incremental edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, quick fixes, hover, references, document/range formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}
