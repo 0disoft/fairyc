@@ -258,5 +258,6 @@ if (!$result.passed) {
   Write-Host "FAIL [$($result.failedStage)] $($result.error)"
   exit 1
 }
+Write-Host "PASS: $tag ZIP SHA-256 $($result.actualZipSHA256)"
 Write-Host "PASS: $($steps.Count)/$($stepNames.Count) process checks"
 exit 0
