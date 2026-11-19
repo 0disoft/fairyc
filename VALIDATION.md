@@ -58,7 +58,7 @@ Manual Frontend runs without `candidate_sha` also execute the full checks. The s
 keeps its existing triggers.
 
 The Go frontend jobs allow 30 minutes, with a per-package test timeout of 25 minutes.
-The Windows core job runs the non-CLI packages. Eight Windows CLI shards partition
+The Windows core job runs the non-CLI packages. Twelve Windows CLI shards partition
 the remaining CLI tests, examples, and fuzz seeds after applying the existing
 exclusions for separate parser, lexer, and cost proofs. The shard script assigns
 the longest estimated test to the least loaded shard at each step and uses ordinal
