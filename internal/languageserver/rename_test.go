@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -63,7 +64,7 @@ func TestRenameVersionedEditsKeepExactBindings(t *testing.T) {
 			t.Fatalf("rename result = %+v (%v)", result, err)
 		}
 		edit := result.DocumentChanges[0]
-		if edit.TextDocument != (documentID{URI: uri, Version: 7}) || len(edit.Edits) != scenario.count {
+		if edit.TextDocument.URI != uri || edit.TextDocument.Version == nil || *edit.TextDocument.Version != 7 || len(edit.Edits) != scenario.count {
 			t.Fatalf("wrong versioned edit = %+v", edit)
 		}
 		for _, item := range edit.Edits {
@@ -86,5 +87,102 @@ func TestRenameVersionedEditsKeepExactBindings(t *testing.T) {
 	}
 	if current, err := os.ReadFile(path); err != nil || !bytes.Equal(current, disk) || string(doc.Text) != text || doc.Version != 7 {
 		t.Fatal("rename changed files or open document state")
+	}
+}
+
+func TestRenameWorkspaceFunctionAcrossPackages(t *testing.T) {
+	root, app, library := siblingWorkspaceFixture(t)
+	mainPath := filepath.Join(root, "src", "main.fy")
+	appPath := filepath.Join(app, "src", "a.fy")
+	libraryPath := filepath.Join(library, "src", "b.fy")
+	const appText = "module a; import b as b; pub fn i32 value() { /* 😀 */ return b::value() + 1; }"
+	const libraryText = "module b; pub fn i32 value() { return 42; }"
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{
+		"rootUri":      fileURI(root),
+		"capabilities": map[string]any{"workspace": map[string]any{"workspaceEdit": map[string]bool{"documentChanges": true}}},
+	})
+	appURI := fileURI(appPath)
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": appURI, "version": 9, "languageId": "fairyc", "text": appText,
+	}})
+	d := s.docs[appURI]
+	if d.View == nil || !d.View.clean {
+		t.Fatal("fixture did not check cleanly")
+	}
+	offset := strings.Index(appText, "b::value()") + len("b::")
+	request := map[string]any{
+		"textDocument": documentID{URI: appURI},
+		"position":     bytePosition(d.Text, offset),
+		"newName":      "calculate",
+	}
+	out.Reset()
+	send(t, &s, 2, "textDocument/prepareRename", request)
+	var prep struct {
+		Range       Range
+		Placeholder string
+	}
+	if err := json.Unmarshal(editorResult(t, &out), &prep); err != nil || prep.Placeholder != "value" ||
+		prep.Range != textRange(d.Text, offset, offset+len("value")) {
+		t.Fatalf("qualified prepareRename = %+v (%v)", prep, err)
+	}
+
+	out.Reset()
+	send(t, &s, 3, "textDocument/rename", request)
+	raw := editorResult(t, &out)
+	if !bytes.Contains(raw, []byte(`"version":null`)) {
+		t.Fatalf("closed document needs an explicit null version: %s", raw)
+	}
+	var result struct{ DocumentChanges []documentEdit }
+	if err := json.Unmarshal(raw, &result); err != nil || len(result.DocumentChanges) != 2 {
+		t.Fatalf("rename result = %+v (%v)", result, err)
+	}
+	want := map[string]string{
+		appURI:               strings.Replace(appText, "b::value", "b::calculate", 1),
+		fileURI(libraryPath): strings.Replace(libraryText, "value", "calculate", 1),
+	}
+	for _, edit := range result.DocumentChanges {
+		version := edit.TextDocument.Version
+		text := []byte(libraryText)
+		if edit.TextDocument.URI == appURI {
+			text = d.Text
+			if version == nil || *version != 9 {
+				t.Fatalf("wrong open version: %v", version)
+			}
+		} else if version != nil {
+			t.Fatalf("wrong closed version: %v", version)
+		}
+		if len(edit.Edits) != 1 {
+			t.Fatalf("wrong number of edits for %s: %v", edit.TextDocument.URI, edit.Edits)
+		}
+		item := edit.Edits[0]
+		start, ok := positionByte(text, item.Range.Start)
+		end, valid := positionByte(text, item.Range.End)
+		if !ok || !valid || string(text[start:end]) != "value" ||
+			string(text[:start])+item.NewText+string(text[end:]) != want[edit.TextDocument.URI] {
+			t.Fatalf("wrong edit for %s: %+v", edit.TextDocument.URI, item)
+		}
+		delete(want, edit.TextDocument.URI)
+	}
+	if len(want) != 0 || string(d.Text) != appText || d.Version != 9 || len(s.docs) != 1 {
+		t.Fatal("rename missed edits or changed open document state")
+	}
+	for path, expected := range map[string]string{
+		appPath:     "module a; import b as b; pub fn i32 value() { return b::value(); }",
+		libraryPath: libraryText,
+		mainPath:    "module main; import a as a; fn i32 main() { return a::value(); }",
+	} {
+		if current, err := os.ReadFile(path); err != nil || string(current) != expected {
+			t.Fatalf("rename changed %s on disk: %q (%v)", path, current, err)
+		}
+	}
+
+	// A disk edit without a watcher event invalidates the original ranges.
+	writeProjectRootFile(t, libraryPath, "\n"+libraryText)
+	out.Reset()
+	send(t, &s, 4, "textDocument/rename", request)
+	if !strings.Contains(out.String(), errRenameChangesResolution.Error()) {
+		t.Fatalf("rename accepted changed disk inputs: %s", &out)
 	}
 }

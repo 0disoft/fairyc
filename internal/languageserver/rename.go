@@ -2,7 +2,9 @@ package languageserver
 
 import (
 	"bytes"
+	"context"
 	"errors"
+	"maps"
 	"slices"
 	"sort"
 
@@ -12,13 +14,19 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var errRenameUnavailable = errors.New("rename requires a verified local binding or private function")
+var errRenameUnavailable = errors.New("rename requires a verified local binding or plain workspace function")
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
 	target semantic.SymbolCoordinate
-	spans  []tokenSpan
+	files  []renameFile
 	cursor tokenSpan
+}
+
+type renameFile struct {
+	sourceView
+	id    editableDocumentID
+	spans []tokenSpan
 }
 
 func (s *server) planRename(d *document, offset int) (renamePlan, error) {
@@ -38,11 +46,13 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		return renamePlan{}, err
 	}
 	at := offset
+	declarationFile := sourceView{Path: d.Path, Text: d.Text, Module: module}
 	if found {
 		file, ok := view.file(target.Declaration)
-		if !ok || file.Path != d.Path {
+		if !ok || file.Path == "" || file.Module == nil {
 			return renamePlan{}, errRenameUnavailable
 		}
+		declarationFile, module = file, file.Module
 		at = target.Declaration.StartByte
 	}
 	name, kind := "", ""
@@ -55,7 +65,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		}
 	}
 	for _, fn := range module.Functions {
-		if fn.NameSpan.StartByte <= at && at < fn.NameSpan.EndByte && !fn.Public && fn.Owner == "" &&
+		if fn.NameSpan.StartByte <= at && at < fn.NameSpan.EndByte && (!fn.Public || view.root != "") && fn.Owner == "" &&
 			fn.Name != "main" && len(fn.Attributes) == 0 && len(fn.TypeParameters) == 0 {
 			name, kind = fn.Name, "function"
 			decl.StartByte, decl.EndByte = fn.NameSpan.StartByte, fn.NameSpan.EndByte
@@ -68,11 +78,30 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 	if !found {
 		target = semantic.SymbolCoordinate{Package: key.Package, Module: module.Path, Name: name, Kind: kind, Declaration: decl}
 	}
-	declaration := tokenSpan{decl.StartByte, decl.EndByte}
-	if !identifierSpan(d.Text, declaration) || string(d.Text[declaration.start:declaration.end]) != name {
-		return renamePlan{}, errRenameUnavailable
+	files := make(map[string]sourceView)
+	spans := make(map[string]map[tokenSpan]struct{})
+	count := 0
+	add := func(file sourceView, span tokenSpan) error {
+		if file.Path == "" || (view.root != "" && !contained(view.root, file.Path)) ||
+			!identifierSpan(file.Text, span) || string(file.Text[span.start:span.end]) != name {
+			return errRenameUnavailable
+		}
+		if spans[file.Path] == nil {
+			files[file.Path] = file
+			spans[file.Path] = make(map[tokenSpan]struct{})
+		}
+		if _, exists := spans[file.Path][span]; !exists {
+			if count == maxReferenceLocations {
+				return errReferenceLimit
+			}
+			count++
+			spans[file.Path][span] = struct{}{}
+		}
+		return nil
 	}
-	spans := map[tokenSpan]struct{}{declaration: {}}
+	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}); err != nil {
+		return renamePlan{}, err
+	}
 	for i, resolution := range view.result.Resolutions {
 		if i%256 == 0 && s.ctx != nil && s.ctx.Err() != nil {
 			return renamePlan{}, s.ctx.Err()
@@ -81,41 +110,59 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			continue
 		}
 		file, ok := view.file(resolution.Use)
-		span := tokenSpan{resolution.Use.StartByte, resolution.Use.EndByte}
-		if !ok || file.Path != d.Path || !identifierSpan(d.Text, span) || string(d.Text[span.start:span.end]) != name {
+		end := resolution.Use.EndByte
+		start := end - len(name)
+		if !ok || end > len(file.Text) || start < 0 || start < resolution.Use.StartByte ||
+			(start != resolution.Use.StartByte && (start < 2 || string(file.Text[start-2:start]) != "::")) {
 			return renamePlan{}, errRenameUnavailable
 		}
-		spans[span] = struct{}{}
-		if len(spans) > maxReferenceLocations {
-			return renamePlan{}, errReferenceLimit
+		if err := add(file, tokenSpan{start, end}); err != nil {
+			return renamePlan{}, err
 		}
 	}
-	// A shorthand field has one spelling for both the field and the value.
-	// Neither name can be edited in isolation without an explicit expansion.
-	tokens := lexer.Lex(source.NewFile(key.Path, d.Text), source.NewBudget(source.DefaultLimits(), len(d.Text)))
-	if len(tokens.Diagnostics) > 0 {
-		return renamePlan{}, errRenameUnavailable
-	}
-	var plan renamePlan
-	plan.target = target
-	previous := ""
-	for _, token := range tokens.Tokens {
-		if token.Kind == lexer.Trivia || token.Kind == lexer.EOF {
-			continue
-		}
-		span := tokenSpan{token.Span.StartByte, token.Span.EndByte}
-		if _, matches := spans[span]; matches {
-			if previous == "." {
-				return renamePlan{}, errRenameUnavailable
-			}
-			plan.spans = append(plan.spans, span)
-			if span.start <= offset && offset < span.end {
-				plan.cursor = span
+	plan := renamePlan{target: target}
+	for _, path := range slices.Sorted(maps.Keys(files)) {
+		file := files[path]
+		id := editableDocumentID{URI: fileURI(path)}
+		for _, opened := range s.docs {
+			if sameDocumentPath(opened.Path, path) {
+				if !bytes.Equal(opened.Text, file.Text) {
+					return renamePlan{}, errRenameUnavailable
+				}
+				version := opened.Version
+				id = editableDocumentID{URI: opened.URI, Version: &version}
+				break
 			}
 		}
-		previous = token.Text(d.Text)
+		entry := renameFile{sourceView: file, id: id}
+		tokens := lexer.Lex(source.NewFile(path, file.Text), source.NewBudget(source.DefaultLimits(), len(file.Text)))
+		if len(tokens.Diagnostics) > 0 {
+			return renamePlan{}, errRenameUnavailable
+		}
+		previous := ""
+		for _, token := range tokens.Tokens {
+			if token.Kind == lexer.Trivia || token.Kind == lexer.EOF {
+				continue
+			}
+			span := tokenSpan{token.Span.StartByte, token.Span.EndByte}
+			if _, matches := spans[path][span]; matches {
+				// A shorthand field shares its spelling with the value.
+				if previous == "." {
+					return renamePlan{}, errRenameUnavailable
+				}
+				entry.spans = append(entry.spans, span)
+				if sameDocumentPath(d.Path, path) && span.start <= offset && offset < span.end {
+					plan.cursor = span
+				}
+			}
+			previous = token.Text(file.Text)
+		}
+		if len(entry.spans) != len(spans[path]) {
+			return renamePlan{}, errRenameUnavailable
+		}
+		plan.files = append(plan.files, entry)
 	}
-	if len(plan.spans) != len(spans) || plan.cursor.start == plan.cursor.end {
+	if plan.cursor.start == plan.cursor.end {
 		return renamePlan{}, errRenameUnavailable
 	}
 	return plan, nil
@@ -133,53 +180,90 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 		return []documentEdit{}, nil
 	}
 	delta := len(name) - len(plan.target.Name)
-	size := len(d.Text) + delta*len(plan.spans)
-	if size > s.documentByteLimit(d.URI) {
-		return nil, errors.New("renamed document exceeds the editor byte limit")
+	replacements := make(map[string][]byte, len(plan.files))
+	edits := make([]documentEdit, 0, len(plan.files))
+	responseBudget := maxMessage - 1024
+	openBytes := 0
+	for _, opened := range s.docs {
+		openBytes += len(opened.Text)
 	}
-	text := make([]byte, 0, size)
-	edits := make([]textEdit, 0, len(plan.spans))
-	index := newPositionIndex(d.Text)
-	previousEnd := 0
-	for _, span := range plan.spans {
-		text = append(text, d.Text[previousEnd:span.start]...)
-		text = append(text, name...)
-		edits = append(edits, textEdit{Range: Range{index.bytePosition(span.start), index.bytePosition(span.end)}, NewText: name})
-		previousEnd = span.end
+	for _, file := range plan.files {
+		size := len(file.Text) + delta*len(file.spans)
+		if file.id.Version != nil {
+			openBytes += size - len(file.Text)
+		}
+		if size > source.DefaultLimits().MaxBytes || openBytes > maxOpenDocumentBytes {
+			return nil, errors.New("renamed document exceeds the editor byte limit")
+		}
+		responseBudget -= 6*len(file.id.URI) + 128 + len(file.spans)*(6*len(name)+128)
+		if responseBudget < 0 {
+			return nil, errReferenceLimit
+		}
+		text := make([]byte, 0, size)
+		edit := documentEdit{TextDocument: file.id, Edits: make([]textEdit, 0, len(file.spans))}
+		index := newPositionIndex(file.Text)
+		previousEnd := 0
+		for _, span := range file.spans {
+			text = append(text, file.Text[previousEnd:span.start]...)
+			text = append(text, name...)
+			edit.Edits = append(edit.Edits, textEdit{Range: Range{index.bytePosition(span.start), index.bytePosition(span.end)}, NewText: name})
+			previousEnd = span.end
+		}
+		replacements[file.Path] = append(text, file.Text[previousEnd:]...)
+		edits = append(edits, edit)
 	}
-	text = append(text, d.Text[previousEnd:]...)
-	rechecked, err := s.probeDocument(d, text)
+	rechecked, err := s.probeDocuments(d, replacements)
 	if err != nil {
 		return nil, err
 	}
-	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d, rechecked, text, plan, name, delta) {
+	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d.View, rechecked, replacements, plan, name, delta) {
 		return nil, errRenameChangesResolution
 	}
-	if s.ctx != nil && s.ctx.Err() != nil {
-		return nil, s.ctx.Err()
+	ctx := s.ctx
+	if ctx == nil {
+		ctx = context.Background()
 	}
-	return []documentEdit{{TextDocument: documentID{URI: d.URI, Version: d.Version}, Edits: edits}}, nil
+	if root := d.View.root; root != "" {
+		original := make(map[string][]byte)
+		for _, opened := range s.docs {
+			if contained(root, opened.Path) {
+				original[opened.Path] = opened.Text
+			}
+		}
+		current, err := d.View.snapshot.Matches(ctx, original)
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		if err != nil || !current {
+			return nil, errRenameChangesResolution
+		}
+	}
+	return edits, ctx.Err()
 }
 
-func sameRenameBindings(d *document, after *analysis, text []byte, plan renamePlan, name string, delta int) bool {
-	before := d.View
+func sameRenameBindings(before, after *analysis, replacements map[string][]byte, plan renamePlan, name string, delta int) bool {
 	if len(before.files) != len(after.files) || len(before.result.Resolutions) != len(after.result.Resolutions) {
 		return false
 	}
 	for key, file := range before.files {
 		current, ok := after.files[key]
 		expected := file.Text
-		if file.Path == d.Path {
+		if text, changed := replacements[file.Path]; changed {
 			expected = text
 		}
 		if !ok || file.Path != current.Path || !bytes.Equal(expected, current.Text) {
 			return false
 		}
 	}
+	spans := make(map[string][]tokenSpan, len(plan.files))
+	for _, file := range plan.files {
+		spans[file.Path] = file.spans
+	}
 	translate := func(span hir.Span) hir.Span {
-		if file, ok := before.file(span); ok && file.Path == d.Path {
+		if file, ok := before.file(span); ok && len(spans[file.Path]) != 0 {
+			edits := spans[file.Path]
 			shift := func(offset int) int {
-				return offset + delta*sort.Search(len(plan.spans), func(i int) bool { return plan.spans[i].end > offset })
+				return offset + delta*sort.Search(len(edits), func(i int) bool { return edits[i].end > offset })
 			}
 			span.StartByte, span.EndByte = shift(span.StartByte), shift(span.EndByte)
 		}

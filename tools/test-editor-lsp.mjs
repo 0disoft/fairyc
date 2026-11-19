@@ -123,5 +123,5 @@ try{
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, quick fixes, SDK source, hover, references, document/range formatting, incremental edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, rename, quick fixes, SDK source, hover, references, document/range formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}

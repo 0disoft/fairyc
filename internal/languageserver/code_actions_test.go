@@ -58,7 +58,7 @@ func TestCodeActionInsertsVerifiedTokenWithDocumentVersion(t *testing.T) {
 	edit := actions[0].Edit.DocumentChanges[0]
 	offset := strings.Index(text, "42") + 2
 	wantRange := textRange(d.Text, offset, offset)
-	if edit.TextDocument != (documentID{URI: uri, Version: 3}) || len(edit.Edits) != 1 || edit.Edits[0] != (textEdit{Range: wantRange, NewText: ";"}) {
+	if edit.TextDocument.URI != uri || edit.TextDocument.Version == nil || *edit.TextDocument.Version != 3 || len(edit.Edits) != 1 || edit.Edits[0] != (textEdit{Range: wantRange, NewText: ";"}) {
 		t.Fatalf("unexpected version or edit: %+v", edit)
 	}
 	if string(d.Text) != text || d.Version != 3 {

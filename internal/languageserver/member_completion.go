@@ -111,11 +111,11 @@ func (s *server) probeMemberReceiver(d *document, offset int) *analysis {
 	text = append(text, d.Text[:offset]...)
 	text = append(text, '_')
 	text = append(text, d.Text[offset:]...)
-	view, _ := s.probeDocument(d, text)
+	view, _ := s.probeDocuments(d, map[string][]byte{d.Path: text})
 	return view
 }
 
-func (s *server) probeDocument(d *document, text []byte) (*analysis, error) {
+func (s *server) probeDocuments(d *document, replacements map[string][]byte) (*analysis, error) {
 	ctx := s.ctx
 	if ctx == nil {
 		ctx = context.Background()
@@ -124,7 +124,17 @@ func (s *server) probeDocument(d *document, text []byte) (*analysis, error) {
 	for uri, opened := range s.docs {
 		probe.docs[uri] = &document{URI: uri, Path: opened.Path, Text: opened.Text, needsFullText: opened.needsFullText}
 	}
-	focus := &document{URI: d.URI, Path: d.Path, Text: text}
+	for path, text := range replacements {
+		uri := fileURI(path)
+		for key, opened := range s.docs {
+			if sameDocumentPath(opened.Path, path) {
+				uri = key
+				break
+			}
+		}
+		probe.docs[uri] = &document{URI: uri, Path: path, Text: text}
+	}
+	focus := probe.docs[d.URI]
 	probe.docs[d.URI] = focus
 	return probe.analyzeContext(ctx, focus, d.View.root)
 }

@@ -35,9 +35,14 @@ type codeActionContext struct {
 	Only        []string        `json:"only"`
 }
 
+type editableDocumentID struct {
+	URI     string `json:"uri"`
+	Version *int   `json:"version"`
+}
+
 type documentEdit struct {
-	TextDocument documentID `json:"textDocument"`
-	Edits        []textEdit `json:"edits"`
+	TextDocument editableDocumentID `json:"textDocument"`
+	Edits        []textEdit         `json:"edits"`
 }
 
 type codeAction struct {
@@ -92,7 +97,7 @@ func (s *server) codeActions(d *document, start, end int, requested codeActionCo
 		return empty, nil
 	}
 	action.Edit.DocumentChanges = []documentEdit{{
-		TextDocument: documentID{URI: d.URI, Version: d.Version},
+		TextDocument: editableDocumentID{URI: d.URI, Version: &d.Version},
 		Edits:        []textEdit{{Range: r, NewText: fix.token}},
 	}}
 	return []codeAction{action}, nil

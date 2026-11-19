@@ -389,8 +389,10 @@ func (s *server) fits(uri, text string) bool {
 	return len(text) <= s.documentByteLimit(uri) && utf8.ValidString(text)
 }
 
+const maxOpenDocumentBytes = 32 << 20
+
 func (s *server) documentByteLimit(uri string) int {
-	remaining := 32 << 20
+	remaining := maxOpenDocumentBytes
 	for key, d := range s.docs {
 		if key != uri {
 			remaining -= len(d.Text)

@@ -56,11 +56,16 @@ terminates the session.
   server checks the resulting syntax before offering an insertion at the
   current document version. Clients need code action literals and versioned
   workspace edits.
-- Rename for local bindings and plain private functions within one open
-  document. The server recompiles the proposed text and compares the resolved
-  declarations before returning a versioned edit. This catches name capture
-  even when the edited program still type-checks. Public names, the entry
-  point, generic specializations and shorthand field spellings are excluded.
+- Rename for local bindings and plain functions across the current checked
+  workspace, including qualified calls across loaded packages. The server
+  recompiles all proposed edits together and compares resolved declarations
+  before returning one edit per changed document. Open documents carry their
+  current version. Closed documents carry a null version and their disk inputs
+  are revalidated before the reply. The server leaves application of edits to
+  the client. Consumers outside the loaded source graph, including separate
+  test source roots, are outside this search. Standalone documents support
+  local bindings and private functions. The entry point, methods, attributed
+  functions, generic specializations and shorthand field spellings are excluded.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
