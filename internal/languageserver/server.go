@@ -70,8 +70,9 @@ func (s *server) handle(m message) error {
 				"positionEncoding":   "utf-16",
 				"textDocumentSync":   map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}},
 				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
-				"completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
-				"workspace":          map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
+				"documentRangeFormattingProvider": true,
+				"completionProvider":              map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
+				"workspace":                       map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
 			},
 		}, 0, "")
 	}
@@ -171,8 +172,11 @@ func (s *server) handle(m message) error {
 			return err
 		}
 		return s.recheck()
-	case "textDocument/formatting":
-		var p documentParams
+	case "textDocument/formatting", "textDocument/rangeFormatting":
+		var p struct {
+			documentParams
+			Range json.RawMessage `json:"range"`
+		}
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid formatting parameters")
 		}
@@ -183,7 +187,15 @@ func (s *server) handle(m message) error {
 		if d.needsFullText {
 			return s.response(m.ID, nil, -32801, "document needs full synchronization")
 		}
-		edits, err := s.formatDocument(d)
+		start, end := 0, len(d.Text)
+		if m.Method == "textDocument/rangeFormatting" {
+			var valid bool
+			start, end, valid = rangeOffsets(d.Text, p.Range)
+			if !valid {
+				return bad("invalid UTF-16 formatting range")
+			}
+		}
+		edits, err := s.formatDocument(d, start, end)
 		switch {
 		case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
 			return err

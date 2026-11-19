@@ -41,7 +41,7 @@ func applyDocumentChanges(original []byte, changes json.RawMessage, sizeLimit in
 		if remainingWork < 0 {
 			return nil, errors.New("document change work limit exceeded")
 		}
-		start, end, ok := documentChangeOffsets(text, change.Range)
+		start, end, ok := rangeOffsets(text, change.Range)
 		if !ok {
 			return nil, errors.New("invalid UTF-16 change range")
 		}
@@ -62,7 +62,7 @@ func applyDocumentChanges(original []byte, changes json.RawMessage, sizeLimit in
 	return text, nil
 }
 
-func documentChangeOffsets(text []byte, raw json.RawMessage) (start, end int, ok bool) {
+func rangeOffsets(text []byte, raw json.RawMessage) (start, end int, ok bool) {
 	type editPosition struct {
 		Line      *int `json:"line"`
 		Character *int `json:"character"`

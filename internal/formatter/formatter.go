@@ -1,4 +1,4 @@
-// Package formatter owns the first deterministic full-file editor formatting slice.
+// Package formatter owns deterministic whitespace formatting.
 package formatter
 
 import (
@@ -81,6 +81,16 @@ type Result struct {
 // trivia, and verifies that the formatted file has the identical parser shape and
 // non-trivia token sequence before returning rewritten bytes.
 func Format(relativePath string, input []byte, limits source.Limits) (Result, error) {
+	return FormatRange(relativePath, input, limits, 0, len(input))
+}
+
+// FormatRange formats only whitespace within [start, end) and verifies the
+// complete resulting file. A nonempty selection ending at EOF can also insert
+// a final newline.
+func FormatRange(relativePath string, input []byte, limits source.Limits, start, end int) (Result, error) {
+	if start < 0 || end < start || end > len(input) {
+		return Result{}, errors.New("invalid formatting byte range")
+	}
 	before, err := frontend.AnalyzeSyntax(source.NewFile(relativePath, input), limits)
 	if err != nil {
 		return Result{}, err
@@ -95,7 +105,7 @@ func Format(relativePath string, input []byte, limits source.Limits) (Result, er
 		return Result{Bytes: slices.Clone(input), Tree: green, Malformed: true}, ErrMalformedSource
 	}
 
-	formatted := formatTrivia(before.Tree)
+	formatted := formatTrivia(before.Tree, start, end)
 	after, err := frontend.AnalyzeSyntax(source.NewFile(relativePath, formatted), limits)
 	if err != nil {
 		return Result{}, err
@@ -156,7 +166,7 @@ func BuildGreen(tree *syntax.Tree) (GreenTree, error) {
 	return green, nil
 }
 
-func formatTrivia(tree *syntax.Tree) []byte {
+func formatTrivia(tree *syntax.Tree, start, end int) []byte {
 	result := make([]byte, 0, len(tree.Source)+1)
 	last := len(tree.Tokens) - 1
 	for last >= 0 && tree.Tokens[last].Kind == lexer.EOF {
@@ -166,18 +176,21 @@ func formatTrivia(tree *syntax.Tree) []byte {
 		if token.Kind == lexer.EOF {
 			continue
 		}
-		text := []byte(token.Text(tree.Source))
-		if token.Kind == lexer.Trivia && token.Trivia == lexer.TriviaWhitespace {
-			formatted := canonicalWhitespace(text)
-			if index == last {
+		tokenStart, tokenEnd := token.Span.StartByte, token.Span.EndByte
+		from, to := max(start, tokenStart), min(end, tokenEnd)
+		if from < to && token.Kind == lexer.Trivia && token.Trivia == lexer.TriviaWhitespace {
+			formatted := canonicalWhitespace(tree.Source[from:to])
+			if index == last && to == len(tree.Source) {
 				trimHorizontalSuffix(&formatted)
 			}
+			result = append(result, tree.Source[tokenStart:from]...)
 			result = append(result, formatted...)
+			result = append(result, tree.Source[to:tokenEnd]...)
 			continue
 		}
-		result = append(result, text...)
+		result = append(result, tree.Source[tokenStart:tokenEnd]...)
 	}
-	if len(result) > 0 && result[len(result)-1] != '\n' {
+	if start < end && end == len(tree.Source) && len(result) > 0 && result[len(result)-1] != '\n' {
 		result = append(result, '\n')
 	}
 	return result

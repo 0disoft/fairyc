@@ -39,11 +39,13 @@ terminates the session.
   unavailable or ambiguous analysis.
 - Prefix completion for keywords, built-in types, module declarations,
   parameters, locals and exact imported-module public declarations.
-- Whole-document formatting for the current open text. The compiler's
+- Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
   returning an edit in the original document's UTF-16 coordinates. Unchanged
-  or malformed text produces no edits.
+  or malformed text produces no edits. Range formatting limits whitespace
+  changes to a nonempty selection and adds a missing final newline only when
+  the selection reaches the end of the file.
 - Unsaved new .fy sources under explicit project source roots.
 - UTF-16 positions, including non-ASCII source and supplementary-plane characters.
 
@@ -109,7 +111,7 @@ deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
 Rename, semantic tokens, member completion, embedded-SDK
-virtual source navigation, range formatting and code actions are not advertised.
+virtual source navigation and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native

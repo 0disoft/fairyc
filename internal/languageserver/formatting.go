@@ -17,13 +17,16 @@ type textEdit struct {
 
 var errFormattingLimit = errors.New("formatted document exceeds the response limit")
 
-func (s *server) formatDocument(d *document) ([]textEdit, error) {
+func (s *server) formatDocument(d *document, start, end int) ([]textEdit, error) {
 	if s.ctx != nil {
 		if err := s.ctx.Err(); err != nil {
 			return nil, err
 		}
 	}
-	result, err := formatter.Format(filepath.Base(d.Path), d.Text, source.DefaultLimits())
+	if start == end {
+		return []textEdit{}, nil
+	}
+	result, err := formatter.FormatRange(filepath.Base(d.Path), d.Text, source.DefaultLimits(), start, end)
 	if s.ctx != nil {
 		if canceled := s.ctx.Err(); canceled != nil {
 			return nil, canceled
@@ -38,7 +41,8 @@ func (s *server) formatDocument(d *document) ([]textEdit, error) {
 	if bytes.Equal(result.Bytes, d.Text) {
 		return []textEdit{}, nil
 	}
-	newText := string(result.Bytes)
+	replacementEnd := len(result.Bytes) - (len(d.Text) - end)
+	newText := string(result.Bytes[start:replacementEnd])
 	// JSON escaping can expand the edit beyond the framed protocol's budget.
 	const textBudget = maxMessage - 1024
 	if 6*len(newText)+2 > textBudget {
@@ -50,5 +54,6 @@ func (s *server) formatDocument(d *document) ([]textEdit, error) {
 			return nil, errFormattingLimit
 		}
 	}
-	return []textEdit{{Range: Range{End: bytePosition(d.Text, len(d.Text))}, NewText: newText}}, nil
+	index := newPositionIndex(d.Text)
+	return []textEdit{{Range: Range{Start: index.bytePosition(start), End: index.bytePosition(end)}, NewText: newText}}, nil
 }

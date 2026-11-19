@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -63,5 +64,55 @@ func TestDocumentFormattingReturnsVerifiedOverlayEdit(t *testing.T) {
 		if edits := query(); len(edits) != 0 {
 			t.Fatalf("unchanged or malformed source returned edits: %+v", edits)
 		}
+	}
+}
+
+func TestRangeFormattingKeepsTextOutsideSelection(t *testing.T) {
+	root, filename := editorFixture(t)
+	uri := fileURI(filename)
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{"rootUri": fileURI(root)})
+	if !bytes.Contains(editorResult(t, &out), []byte(`"documentRangeFormattingProvider":true`)) {
+		t.Fatal("range formatting capability missing")
+	}
+	input := "module main;  \r\nfn i32 main() { /* 😀 */ return 0; }  \r\n// keep \r\n"
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 1, "languageId": "fairyc", "text": input,
+	}})
+	start := strings.Index(input, "}  ") + 1
+	end := strings.Index(input, "// keep")
+	selection := textRange([]byte(input), start, end)
+	query := func(r Range) {
+		t.Helper()
+		out.Reset()
+		send(t, &s, 2, "textDocument/rangeFormatting", map[string]any{
+			"textDocument": documentID{URI: uri},
+			"range":        r,
+			"options":      map[string]any{"tabSize": 4, "insertSpaces": true},
+		})
+	}
+	query(selection)
+	var edits []textEdit
+	if err := json.Unmarshal(editorResult(t, &out), &edits); err != nil ||
+		!slices.Equal(edits, []textEdit{{Range: selection, NewText: "\n"}}) {
+		t.Fatalf("range edit = %+v (%v)", edits, err)
+	}
+	if got := input[:start] + edits[0].NewText + input[end:]; got !=
+		"module main;  \r\nfn i32 main() { /* 😀 */ return 0; }\n// keep \r\n" {
+		t.Fatalf("unexpected formatted source %q", got)
+	}
+	if d := s.docs[uri]; string(d.Text) != input || d.Version != 1 {
+		t.Fatal("range formatting changed the open text or version")
+	}
+	query(Range{Start: selection.Start, End: selection.Start})
+	if got := string(editorResult(t, &out)); got != "[]" {
+		t.Fatalf("empty selection returned %s", got)
+	}
+	midSurrogate := bytePosition([]byte(input), strings.Index(input, "😀"))
+	midSurrogate.Character++
+	query(Range{Start: midSurrogate, End: selection.End})
+	if !strings.Contains(out.String(), `"code":-32602`) {
+		t.Fatal("range formatting accepted the middle of a surrogate pair")
 	}
 }

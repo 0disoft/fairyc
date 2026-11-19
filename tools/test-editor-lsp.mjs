@@ -24,7 +24,7 @@ try{
  const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities:{}});
  assert.equal(init.capabilities.positionEncoding,'utf-16');
  assert.equal(init.capabilities.textDocumentSync.change,2);
- for(const capability of ['definitionProvider','hoverProvider','referencesProvider','documentFormattingProvider']){
+ for(const capability of ['definitionProvider','hoverProvider','referencesProvider','documentFormattingProvider','documentRangeFormattingProvider']){
   assert.equal(init.capabilities[capability],true);
  }
  connection.sendNotification('initialized',{});
@@ -58,10 +58,15 @@ try{
  const formatting=await connection.sendRequest('textDocument/formatting',{textDocument:{uri},options:{tabSize:4,insertSpaces:true}});
  assert.equal(formatting.length,1);
  assert.equal(formatting[0].newText,text);
+ const selection={start:{line:0,character:12},end:{line:1,character:0}};
+ const rangeFormatting=await connection.sendRequest('textDocument/rangeFormatting',{
+  textDocument:{uri},range:selection,options:{tabSize:4,insertSpaces:true},
+ });
+ assert.deepEqual(rangeFormatting,[{range:selection,newText:'\n'}]);
  assert.equal(fs.readFileSync(filename,'utf8'),'module main; fn i32 main() { return 0; }');
  assert.equal(await connection.sendRequest('shutdown'),null);
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, hover, references, formatting, incremental edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, hover, references, document/range formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}
