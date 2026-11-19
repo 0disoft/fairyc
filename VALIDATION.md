@@ -42,8 +42,15 @@ General validation routes must stay stack-neutral unless a runner file explicitl
 `frontend.yml` first runs a lightweight changed-path check. Root Markdown, documentation and
 agent-guide Markdown, example/editor/fixture READMEs, example/editor guides, and images under
 `assets/brand/`, `docs/`, or `diagrams/` can skip compiler jobs when they are the only changes.
-Mermaid files under `diagrams/` also qualify. Other paths, including fixture JSON, grammar,
-source, dependency files, and workflows, retain the full compiler checks.
+Mermaid files under `diagrams/` also qualify. A change to
+`tools/windows-preview/verify-preview2.ps1` by itself or with these documentation paths
+runs the Windows public preview ZIP job. It uses Windows PowerShell 5.1 to download and
+verify the public preview.2 ZIP, require all 15 process checks, and confirm that a
+corrupted copy is rejected before extraction or execution. Compiler jobs, including
+the Windows CLI shards and Linux C differential, are skipped on this route.
+
+Other paths, including fixture JSON, grammar, source, dependency files, and workflows,
+retain the full compiler checks. Removing the preview verifier also takes the full route.
 
 The check reads the complete push diff or PR merge-base diff, including removed paths. Empty
 diffs, new branches, tags, missing history, and failed path classification run compiler checks.

@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:
-      run_tests: ${{ steps.paths.outputs.run_tests }}
+      route: ${{ steps.paths.outputs.route }}
     steps:
       - name: Check out history for the complete push or PR diff
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -39,14 +39,14 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
-      - name: Decide whether compiler checks are needed
+      - name: Select validation route
         id: paths
         run: python3 .github/scripts/ci_changes.py >> "$GITHUB_OUTPUT"
 
   validate:
     name: Go frontend (${{ matrix.os }})
     needs: changes
-    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || (needs.changes.outputs.route != 'docs' && needs.changes.outputs.route != 'windows-preview')) }}
     runs-on: ${{ matrix.os }}
     # Allow setup and vet in addition to the native-heavy Go package timeouts.
     timeout-minutes: 30
@@ -95,7 +95,7 @@ jobs:
   windows-cli:
     name: Windows Go CLI (shard ${{ matrix.shard }})
     needs: changes
-    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || (needs.changes.outputs.route != 'docs' && needs.changes.outputs.route != 'windows-preview')) }}
     runs-on: windows-latest
     timeout-minutes: 50
     strategy:
@@ -111,10 +111,24 @@ jobs:
       - name: Test assigned CLI entries
         run: .github/scripts/test-windows-cli.ps1 -Shard ${{ matrix.shard }} -ShardCount ${{ strategy.job-total }}
 
+  windows-preview:
+    name: Windows public preview ZIP
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.result == 'success' && needs.changes.outputs.route == 'windows-preview' }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Verify public ZIP and reject a corrupt copy
+        shell: powershell
+        run: .github/scripts/test-windows-preview.ps1 -OutputDirectory $env:RUNNER_TEMP
+
   windows-native:
     name: Windows native target smoke
     needs: changes
-    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') || needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') || needs.changes.result != 'success' || (needs.changes.outputs.route != 'docs' && needs.changes.outputs.route != 'windows-preview')) }}
     runs-on: windows-latest
     env:
       CANDIDATE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || '' }}
@@ -195,7 +209,7 @@ jobs:
   windows-parser:
     name: Windows candidate proof (${{ matrix.group }})
     needs: changes
-    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || needs.changes.outputs.run_tests != 'false') }}
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') && (needs.changes.result != 'success' || (needs.changes.outputs.route != 'docs' && needs.changes.outputs.route != 'windows-preview')) }}
     runs-on: windows-latest
     # The lexer proof approaches ten minutes before checkout/setup/cleanup.
     timeout-minutes: ${{ matrix.group == 'lexer' && 12 || 10 }}
@@ -226,7 +240,8 @@ jobs:
 
   native-c:
     name: C differential (Linux)
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') }}
+    # Compiler dependencies are intentionally skipped for docs and preview-only routes.
+    if: ${{ success() && !(github.event_name == 'workflow_dispatch' && inputs.candidate_sha != '') }}
     needs: [validate, windows-cli, windows-native, windows-parser]
     runs-on: ubuntu-24.04
     timeout-minutes: 10

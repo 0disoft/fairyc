@@ -1,4 +1,4 @@
-"""Skip compiler checks only when a complete Git diff contains known documentation paths."""
+"""Select validation from a complete Git diff, defaulting to the compiler suite."""
 
 import json
 import os
@@ -6,6 +6,9 @@ from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import sys
+
+
+PREVIEW_VERIFIER = "tools/windows-preview/verify-preview2.ps1"
 
 
 def documentation_path(name):
@@ -25,7 +28,7 @@ def documentation_path(name):
     return parts[0] == "diagrams" and path.suffix == ".mmd"
 
 
-def needs_checks(event_name, event, directory=Path(".")):
+def validation_route(event_name, event, directory=Path(".")):
     try:
         if event_name == "push" and not event["ref"].startswith("refs/tags/"):
             base, head = event["before"], event["after"]
@@ -35,29 +38,40 @@ def needs_checks(event_name, event, directory=Path(".")):
             head = event["pull_request"]["head"]["sha"]
             refs = [f"{base}...{head}"]
         else:
-            return True
+            return "full"
         if not all(re.fullmatch(r"[0-9a-f]{40}", sha) and sha != "0" * 40 for sha in (base, head)):
-            return True
+            return "full"
         result = subprocess.run(
-            ["git", "diff", "--no-renames", "--name-only", "-z", *refs, "--"],
+            ["git", "diff", "--no-renames", "--name-status", "-z", *refs, "--"],
             cwd=directory, capture_output=True, check=True, timeout=60,
         )
-        paths = [os.fsdecode(name) for name in result.stdout.split(b"\0") if name]
-        return not paths or not all(documentation_path(name) for name in paths)
+        if not result.stdout.endswith(b"\0"):
+            return "full"
+        fields = result.stdout[:-1].split(b"\0")
+        if len(fields) % 2:
+            return "full"
+        route = "docs"
+        for status, name in zip(fields[::2], fields[1::2]):
+            path = os.fsdecode(name)
+            if path == PREVIEW_VERIFIER and status in {b"A", b"M"}:
+                route = "windows-preview"
+            elif not documentation_path(path):
+                return "full"
+        return route
     except (KeyError, TypeError, ValueError, OSError, subprocess.SubprocessError):
         # Missing history or an unreadable diff must never suppress compiler checks.
-        return True
+        return "full"
 
 
 def main():
-    run = True
+    route = "full"
     try:
         event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
-        run = needs_checks(os.environ.get("GITHUB_EVENT_NAME", ""), event)
+        route = validation_route(os.environ.get("GITHUB_EVENT_NAME", ""), event)
     except (KeyError, OSError, ValueError):
         pass
-    print(f"run_tests={'true' if run else 'false'}")
-    print("Compiler checks required." if run else "Documentation-only change; compiler checks skipped.", file=sys.stderr)
+    print(f"route={route}")
+    print(f"Frontend validation route: {route}", file=sys.stderr)
 
 
 if __name__ == "__main__":

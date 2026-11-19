@@ -54,11 +54,11 @@ def step_script(step):
     return textwrap.dedent(re.search(r"^        run: \|\n((?:          .*\n)+)", block, re.M).group(1))
 
 
-def permits(job, event, candidate="", changes="success", run_tests="true", cancelled=False):
+def permits(job, event, candidate="", changes="success", route="full", cancelled=False, success=True):
     expression = re.search(r"^    if: \$\{\{ (.+) \}\}$", job_block(job), re.M).group(1)
     values = {"github.event_name": event, "inputs.candidate_sha": candidate,
-              "needs.changes.result": changes, "needs.changes.outputs.run_tests": run_tests,
-              "cancelled()": cancelled}
+              "needs.changes.result": changes, "needs.changes.outputs.route": route,
+              "cancelled()": cancelled, "success()": success}
     for name, value in values.items():
         expression = expression.replace(name, repr(value))
     expression = re.sub(r"!(?!=)", " not ", expression).replace("&&", " and ").replace("||", " or ").strip()
@@ -71,20 +71,32 @@ def permits(job, event, candidate="", changes="success", run_tests="true", cance
 
 
 class CandidateRouting(unittest.TestCase):
+    compiler_jobs = ("validate", "windows-cli", "windows-native", "windows-parser")
+
     def test_candidate_only_enables_windows_native_even_when_changes_is_skipped(self):
         for candidate in ("1" * 40, "invalid-input"):
-            enabled = {job for job in ("changes", "validate", "windows-native", "windows-parser", "native-c")
-                       if permits(job, "workflow_dispatch", candidate, changes="skipped", run_tests="")}
+            enabled = {job for job in ("changes", *self.compiler_jobs, "windows-preview", "native-c")
+                       if permits(job, "workflow_dispatch", candidate, changes="skipped", route="")}
             self.assertEqual(enabled, {"windows-native"})
 
     def test_regular_events_and_empty_manual_input_preserve_full_guards(self):
         for event in ("push", "pull_request", "workflow_dispatch"):
-            for job in ("changes", "validate", "windows-native", "windows-parser", "native-c"):
+            for job in ("changes", *self.compiler_jobs, "native-c"):
                 self.assertTrue(permits(job, event))
-        for job in ("validate", "windows-native", "windows-parser"):
-            self.assertFalse(permits(job, "push", run_tests="false"))
-            self.assertTrue(permits(job, "push", changes="failure", run_tests=""))
+            self.assertFalse(permits("windows-preview", event))
+        for job in self.compiler_jobs:
+            self.assertTrue(permits(job, "push", changes="failure", route=""))
+            self.assertTrue(permits(job, "push", route=""))
             self.assertFalse(permits(job, "workflow_dispatch", "1" * 40, cancelled=True))
+
+    def test_preview_only_and_docs_only_skip_compiler_and_linux_differential(self):
+        for route in ("docs", "windows-preview"):
+            for job in self.compiler_jobs:
+                self.assertFalse(permits(job, "push", route=route))
+            self.assertFalse(permits("native-c", "push", route=route, success=False))
+            self.assertEqual(permits("windows-preview", "push", route=route), route == "windows-preview")
+        self.assertFalse(permits("windows-preview", "push", changes="failure", route="windows-preview"))
+        self.assertFalse(permits("windows-preview", "push", route="windows-preview", cancelled=True))
 
 
 @unittest.skipUnless(PWSH, "PowerShell 7 is required to execute Windows workflow blocks locally")
