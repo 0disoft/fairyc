@@ -17,6 +17,9 @@ most 32 KiB. A blocked reader still needs to be closed by its owner to unblock.
 - Full document synchronization with monotonically increasing versions.
 - Compiler syntax, type, ownership and unsupported-feature diagnostics.
 - Definition locations from current compiler resolution facts.
+- Hover for resolved names and function declarations in a clean current analysis.
+  It shows a plain-text function signature or symbol kind and name, with the
+  checked value type when available. Unavailable or ambiguous facts yield no hover.
 - Prefix completion for keywords, built-in types, module declarations,
   parameters, locals and exact imported-module public declarations.
 - Unsaved new .fy sources under explicit project source roots.
@@ -80,7 +83,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename, references, semantic tokens, hover, member completion, embedded-SDK
+Rename, references, semantic tokens, member completion, embedded-SDK
 virtual source navigation, formatting and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 Multi-root support and complete malformed-input JSON-RPC recovery are deferred.
