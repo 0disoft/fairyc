@@ -14,7 +14,13 @@ most 32 KiB. A blocked reader still needs to be closed by its owner to unblock.
 
 ## Capabilities
 
-- Full document synchronization with monotonically increasing versions.
+- Incremental document synchronization with monotonically increasing versions.
+  Ranged UTF-16 edits in a notification use the text produced by earlier edits
+  in that notification. A full-text replacement also works. The server rejects
+  a whole batch if any range is invalid, any intermediate text exceeds the
+  document budget or the sum of input document and replacement bytes across
+  ranged edits exceeds 128 MiB. After a rejected batch, send full text or
+  close and reopen the document before sending more ranges.
 - Compiler syntax, type, ownership and unsupported-feature diagnostics.
 - Definition locations from current compiler resolution facts.
 - Hover for resolved names and function declarations in a clean current analysis.

@@ -16,6 +16,7 @@ type document struct {
 	URI, Path       string
 	Text            []byte
 	Version         int
+	needsFullText   bool
 	View            *analysis
 	LastClean       *analysis
 	analysisEvicted bool
@@ -82,7 +83,7 @@ func (s *server) handle(m message) error {
 			s.root = filepath.Clean(p.RootPath)
 		}
 		s.initialized = true
-		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 1, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
+		return s.response(m.ID, map[string]any{"serverInfo": map[string]any{"name": "fairyc-lsp", "version": "0.1.0"}, "capabilities": map[string]any{"positionEncoding": "utf-16", "textDocumentSync": map[string]any{"openClose": true, "change": 2, "save": map[string]any{"includeText": false}}, "definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true, "completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}}}}, 0, "")
 	}
 	if !s.initialized {
 		return s.response(m.ID, nil, -32002, "server not initialized")
@@ -128,11 +129,8 @@ func (s *server) handle(m message) error {
 		return s.recheck()
 	case "textDocument/didChange":
 		var p struct {
-			TextDocument   documentID `json:"textDocument"`
-			ContentChanges []struct {
-				Text  string `json:"text"`
-				Range *Range `json:"range"`
-			} `json:"contentChanges"`
+			TextDocument   documentID      `json:"textDocument"`
+			ContentChanges json.RawMessage `json:"contentChanges"`
 		}
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid change parameters")
@@ -144,14 +142,15 @@ func (s *server) handle(m message) error {
 		if p.TextDocument.Version <= d.Version {
 			return nil
 		}
-		if len(p.ContentChanges) != 1 || p.ContentChanges[0].Range != nil {
-			return bad("full document synchronization required")
+		text, err := applyDocumentChanges(d.Text, p.ContentChanges, s.documentByteLimit(d.URI), d.needsFullText)
+		if err != nil {
+			d.needsFullText = true
+			s.analysisPending = true
+			return bad(err.Error())
 		}
-		if !s.fits(d.URI, p.ContentChanges[0].Text) {
-			return bad("editor document limit exceeded")
-		}
-		d.Text = []byte(p.ContentChanges[0].Text)
+		d.Text = text
 		d.Version = p.TextDocument.Version
+		d.needsFullText = false
 		d.completionIndex = nil
 		d.positionIndex = nil
 		return s.recheck()
@@ -178,6 +177,9 @@ func (s *server) handle(m message) error {
 		if d == nil {
 			return bad("document is not open")
 		}
+		if d.needsFullText {
+			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+		}
 		edits, err := s.formatDocument(d)
 		switch {
 		case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
@@ -202,6 +204,9 @@ func (s *server) handle(m message) error {
 		d := s.docs[p.TextDocument.URI]
 		if d == nil {
 			return bad("document is not open")
+		}
+		if d.needsFullText {
+			return s.response(m.ID, nil, -32801, "document needs full synchronization")
 		}
 		offset, ok := d.positionByte(p.Position)
 		if !ok {
@@ -241,16 +246,17 @@ func (s *server) handle(m message) error {
 	}
 }
 func (s *server) fits(uri, text string) bool {
-	if !utf8.ValidString(text) || len(text) > source.DefaultLimits().MaxBytes {
-		return false
-	}
-	total := len(text)
+	return len(text) <= s.documentByteLimit(uri) && utf8.ValidString(text)
+}
+
+func (s *server) documentByteLimit(uri string) int {
+	remaining := 32 << 20
 	for key, d := range s.docs {
 		if key != uri {
-			total += len(d.Text)
+			remaining -= len(d.Text)
 		}
 	}
-	return total <= 32<<20
+	return min(remaining, source.DefaultLimits().MaxBytes)
 }
 func (s *server) recheck() error {
 	return s.recheckFocused("", false)
@@ -346,7 +352,7 @@ func (s *server) recheckFocused(focusURI string, onlyFocus bool) error {
 }
 
 func (s *server) setDocumentView(d *document, view *analysis) {
-	if d.LastClean != nil && d.LastClean.root != view.root {
+	if d.LastClean != nil && (d.LastClean.root != view.root || view.unsynchronized) {
 		d.LastClean = nil
 	}
 	d.View = view

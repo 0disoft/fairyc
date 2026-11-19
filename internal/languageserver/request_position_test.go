@@ -71,7 +71,7 @@ func TestRequestPositionIndexInvalidatesBeforeCanceledAnalysis(t *testing.T) {
 		t.Helper()
 		item := map[string]any{"text": text}
 		if partial {
-			item["range"] = Range{}
+			item["range"] = Range{End: Position{Line: 10000}}
 		}
 		params, err := json.Marshal(map[string]any{"textDocument": documentID{URI: uri, Version: version}, "contentChanges": []any{item}})
 		if err != nil {

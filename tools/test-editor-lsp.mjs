@@ -22,7 +22,11 @@ const timeout=setTimeout(()=>{child.kill();throw Error('Native LSP smoke timed o
 try{
  connection.listen();
  const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities:{}});
- assert.equal(init.capabilities.positionEncoding,'utf-16');assert.equal(init.capabilities.definitionProvider,true);
+ assert.equal(init.capabilities.positionEncoding,'utf-16');
+ assert.equal(init.capabilities.textDocumentSync.change,2);
+ for(const capability of ['definitionProvider','hoverProvider','referencesProvider','documentFormattingProvider']){
+  assert.equal(init.capabilities[capability],true);
+ }
  connection.sendNotification('initialized',{});
  let wait=diagnostics(1);
  connection.sendNotification('textDocument/didOpen',{textDocument:{uri,languageId:'fairyc',version:1,text}});
@@ -32,16 +36,32 @@ try{
  assert.equal(definition.length,1);assert.equal(definition[0].range.start.line,1);
  const completion=await connection.sendRequest('textDocument/completion',{textDocument:{uri},position:{line:2,character:character+3}});
  assert(completion.some(c=>c.label==='helper'));
+ const position={line:2,character:character+1};
+ const hover=await connection.sendRequest('textDocument/hover',{textDocument:{uri},position});
+ assert.match(hover.contents.value,/helper/);
+ const references=await connection.sendRequest('textDocument/references',{textDocument:{uri},position,context:{includeDeclaration:true}});
+ assert.deepEqual(references.map(ref=>ref.range.start.line),[1,2]);
+ const returnColumn=text.split('\n')[1].indexOf('7');
+ const replaceReturn=(width,newText)=>({
+  range:{start:{line:1,character:returnColumn},end:{line:1,character:returnColumn+width}},
+  text:newText,
+ });
  wait=diagnostics(2);
- connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:2},contentChanges:[{text:text.replace('return 7','return false')}]});
+ connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:2},contentChanges:[replaceReturn(1,'false')]});
  assert((await wait).diagnostics.length>0);
  wait=diagnostics(3);
- connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:3},contentChanges:[{text}]});
+ connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:3},contentChanges:[
+  replaceReturn(5,'7'),
+  {range:{start:{line:0,character:12},end:{line:0,character:12}},text:'  '},
+ ]});
  assert.equal((await wait).diagnostics.length,0);
+ const formatting=await connection.sendRequest('textDocument/formatting',{textDocument:{uri},options:{tabSize:4,insertSpaces:true}});
+ assert.equal(formatting.length,1);
+ assert.equal(formatting[0].newText,text);
  assert.equal(fs.readFileSync(filename,'utf8'),'module main; fn i32 main() { return 0; }');
  assert.equal(await connection.sendRequest('shutdown'),null);
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, unsaved edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, hover, references, formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}

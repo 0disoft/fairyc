@@ -32,7 +32,8 @@ func bytePosition(text []byte, offset int) Position {
 			break
 		}
 		i += n
-		if r == '\n' {
+		crlf := r == '\r' && i < len(text) && text[i] == '\n'
+		if r == '\n' || r == '\r' && !crlf {
 			p.Line++
 			p.Character = 0
 		} else if r != '\r' {
@@ -51,7 +52,12 @@ func positionByte(text []byte, p Position) (int, bool) {
 	line := 0
 	i := 0
 	for line < p.Line && i < len(text) {
-		if text[i] == '\n' {
+		if text[i] == '\r' {
+			if i+1 < len(text) && text[i+1] == '\n' {
+				i++
+			}
+			line++
+		} else if text[i] == '\n' {
 			line++
 		}
 		i++

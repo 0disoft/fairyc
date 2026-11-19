@@ -51,6 +51,7 @@ type analysis struct {
 	standaloneValid bool
 	lastUsed        uint64
 	budgetExceeded  bool
+	unsynchronized  bool
 	sourceCharge    int64
 	sourceCharged   bool
 }
@@ -159,16 +160,28 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			result, err = nil, canceled
 		}
 	}()
-	if previous := d.View; root == "" && previous != nil && previous.root == "" && previous.standaloneValid && previous.standalone == sha256.Sum256(d.Text) {
+	if previous := d.View; !d.needsFullText && root == "" && previous != nil && previous.root == "" && previous.standaloneValid && previous.standalone == sha256.Sum256(d.Text) {
 		return previous, nil
 	}
 	a := &analysis{root: root, files: map[sourceKey]sourceView{}, imports: map[sourceKey]hir.PackageID{}, diagnostics: map[string][]lspDiagnostic{}}
+	if d.needsFullText && root == "" {
+		a.unsynchronized = true
+		a.add(d.Path, d.Text, 0, 0, "editor-document-unsynchronized", "Document needs full synchronization")
+		return a, nil
+	}
 	if root != "" {
 		overlays := map[string][]byte{}
 		for _, opened := range s.docs {
 			if contained(root, opened.Path) {
 				overlays[opened.Path] = opened.Text
+				a.unsynchronized = a.unsynchronized || opened.needsFullText
 			}
+		}
+		if a.unsynchronized {
+			for filename, text := range overlays {
+				a.add(filename, text, 0, 0, "editor-document-unsynchronized", "An open document in this project needs full synchronization")
+			}
+			return a, nil
 		}
 		if previous := d.View; previous != nil && previous.root == root && previous.snapshot != nil {
 			current, err := previous.snapshot.Matches(ctx, overlays)

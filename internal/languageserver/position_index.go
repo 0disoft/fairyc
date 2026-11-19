@@ -11,7 +11,6 @@ const positionCheckpointBytes = 1024
 type positionCheckpoint struct {
 	offset   int
 	position Position
-	afterCR  bool
 }
 
 // A positionIndex belongs to one immutable source in an analysis or document snapshot.
@@ -21,7 +20,6 @@ type positionIndex struct {
 	checkpoints []positionCheckpoint
 	scanned     int
 	position    Position
-	afterCR     bool
 }
 
 func newPositionIndex(text []byte) *positionIndex {
@@ -37,22 +35,20 @@ func (index *positionIndex) bytePosition(offset int) Position {
 				break
 			}
 			index.scanned += width
-			if r == '\n' {
+			crlf := r == '\r' && index.scanned < len(index.text) && index.text[index.scanned] == '\n'
+			if r == '\n' || r == '\r' && !crlf {
 				index.position.Line++
 				index.position.Character = 0
-				index.afterCR = false
-			} else if r == '\r' {
-				// Keep this set until LF, even through text following a lone CR.
-				index.afterCR = true
-			} else {
+			} else if !crlf {
 				index.position.Character++
 				if r > 0xffff {
 					index.position.Character++
 				}
 			}
 			last := index.checkpoints[len(index.checkpoints)-1]
-			if index.scanned-last.offset >= positionCheckpointBytes {
-				index.checkpoints = append(index.checkpoints, positionCheckpoint{index.scanned, index.position, index.afterCR})
+			// CRLF has no client position between the two bytes.
+			if !crlf && index.scanned-last.offset >= positionCheckpointBytes {
+				index.checkpoints = append(index.checkpoints, positionCheckpoint{index.scanned, index.position})
 			}
 		}
 		return index.position
@@ -71,25 +67,18 @@ func (index *positionIndex) bytePosition(offset int) Position {
 
 // positionByte reuses sparse checkpoints for incoming UTF-16 request positions.
 // Checkpoints within a long line avoid rescanning its prefix on every request.
-// A checkpoint after CR cannot admit columns on that line: the linear oracle
-// stops at the first CR even if no LF follows it.
 func (index *positionIndex) positionByte(p Position) (int, bool) {
 	if p.Line < 0 || p.Character < 0 {
 		return 0, false
 	}
 	for index.scanned < len(index.text) && (index.position.Line < p.Line ||
-		index.position.Line == p.Line && !index.afterCR && index.position.Character < p.Character) {
+		index.position.Line == p.Line && index.position.Character < p.Character) {
 		index.bytePosition(min(len(index.text), index.scanned+positionCheckpointBytes))
 	}
 	point := max(0, sort.Search(len(index.checkpoints), func(i int) bool {
 		position := index.checkpoints[i].position
 		return position.Line > p.Line || position.Line == p.Line && position.Character > p.Character
 	})-1)
-	if index.checkpoints[point].afterCR {
-		point = max(0, sort.Search(len(index.checkpoints), func(i int) bool {
-			return index.checkpoints[i].position.Line >= p.Line
-		})-1)
-	}
 	checkpoint := index.checkpoints[point]
 	column := p.Character
 	if checkpoint.position.Line == p.Line {
