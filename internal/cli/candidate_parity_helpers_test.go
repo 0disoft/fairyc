@@ -11,14 +11,15 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// Native candidate help covers the shared CLI commands. Registry resolution,
-// registry update, and Git snapshots currently belong to the Go frontend.
+// Native candidate help covers shared CLI commands. The exclusions below
+// belong to the Go frontend.
 func candidateUsage() string {
 	lines := strings.Split(usage, "\n")
 	lines = slices.DeleteFunc(lines, func(line string) bool {
 		return strings.HasPrefix(line, "  fairyc experimental registry-resolve ") ||
 			strings.HasPrefix(line, "  fairyc experimental registry-update ") ||
-			strings.HasPrefix(line, "  fairyc experimental git-snapshot ")
+			strings.HasPrefix(line, "  fairyc experimental git-snapshot ") ||
+			strings.HasPrefix(line, "  fairyc experimental test-plan ")
 	})
 	return strings.Join(lines, "\n")
 }
