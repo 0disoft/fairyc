@@ -82,7 +82,22 @@ function Invoke-Probe([string]$Name, [string]$File, [string]$Directory,
   $process.StartInfo = $start
   $started = $false
   try {
-    $started = $process.Start()
+    $originalInputEncoding = $null
+    try {
+      if ($Stdin) {
+        if ($start.PSObject.Properties['StandardInputEncoding']) {
+          $start.StandardInputEncoding = $utf8
+        } elseif ([Console]::InputEncoding.GetPreamble().Length -ne 0) {
+          # .NET Framework initializes the stdin writer from the console encoding.
+          # Its initial flush can write a BOM before the raw LSP frame.
+          $originalInputEncoding = [Console]::InputEncoding
+          [Console]::InputEncoding = $utf8
+        }
+      }
+      $started = $process.Start()
+    } finally {
+      if ($null -ne $originalInputEncoding) { [Console]::InputEncoding = $originalInputEncoding }
+    }
     if (!$started) { throw 'Process did not start' }
     $stdoutTask = $process.StandardOutput.ReadToEndAsync()
     $stderrTask = $process.StandardError.ReadToEndAsync()
