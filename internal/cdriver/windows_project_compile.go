@@ -107,9 +107,8 @@ func compileWindowsCompilerHostProject(ctx context.Context, toolchain WindowsHos
 	return names, nil
 }
 
-// Compiler-host-only context adapter. Preserve the ordinary runner's flags,
-// per-command timeout, bounded combined output and owned-PID tree cancellation;
-// do not change the shared ordinary target command helper or public API.
+// Compiler-host-only context adapter. Keep each tool tree in an owned Windows
+// job so a worker finishes only after the tool and its descendants exit.
 func runWindowsProjectCompileCommand(parent context.Context, name string, environment []string, directory string, limit int, timeout time.Duration, arguments ...string) error {
 	if timeout <= 0 || timeout > 10*time.Minute {
 		return fmt.Errorf("MSVC command timeout must be in (0,10m]")
@@ -117,13 +116,12 @@ func runWindowsProjectCompileCommand(parent context.Context, name string, enviro
 	ctx, cancel := context.WithTimeout(parent, timeout)
 	defer cancel()
 	command := exec.CommandContext(ctx, name, arguments...)
-	configureToolCancellation(command)
 	command.WaitDelay = 2 * time.Second
 	command.Env = environment
 	command.Dir = directory
 	output := boundedBuffer{limit: limit}
 	command.Stdout, command.Stderr = &output, &output
-	err := command.Run()
+	_, _, err := runOwnedWindowsProcess(command, "")
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		return fmt.Errorf("MSVC host command exceeded %s: %w", timeout, ctx.Err())
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sync"
 	"syscall"
 	"time"
 	"unsafe"
@@ -35,14 +36,19 @@ func runOwnedWindowsProcess(command *exec.Cmd, trapEnvironment string) (string, 
 	attributes.CreationFlags |= windows.CREATE_SUSPENDED
 	attributes.HideWindow = true
 	command.SysProcAttr = &attributes
+	// Let admission finish before cancellation inspects the job. Cmd.Start
+	// can launch its context watcher before the suspended child is assigned.
+	admissionDone := make(chan struct{})
+	admitted := false
+	cleanup := sync.OnceValue(func() error { return terminateOwnedWindowsJob(job) })
 	command.Cancel = func() error {
-		err := windows.TerminateJobObject(job, 1)
-		// Cancellation may race the suspended process's assignment to the Job.
-		killErr := command.Process.Kill()
-		if errors.Is(killErr, os.ErrProcessDone) {
-			killErr = nil
+		<-admissionDone
+		if admitted {
+			if err := cleanup(); err == nil {
+				return nil
+			}
 		}
-		return errors.Join(err, killErr)
+		return command.Process.Kill()
 	}
 	start := func(cmd *exec.Cmd) error {
 		if err := cmd.Start(); err != nil {
@@ -51,11 +57,13 @@ func runOwnedWindowsProcess(command *exec.Cmd, trapEnvironment string) (string, 
 		process, err := windows.OpenProcess(windows.PROCESS_SET_QUOTA|windows.PROCESS_TERMINATE, false, uint32(cmd.Process.Pid))
 		if err == nil {
 			err = windows.AssignProcessToJobObject(job, process)
+			admitted = err == nil
 			windows.CloseHandle(process)
 		}
 		if err == nil {
 			err = resumeOwnedWindowsProcess(uint32(cmd.Process.Pid))
 		}
+		close(admissionDone)
 		if err != nil {
 			_ = cmd.Process.Kill()
 			_ = cmd.Wait()
@@ -65,9 +73,9 @@ func runOwnedWindowsProcess(command *exec.Cmd, trapEnvironment string) (string, 
 	}
 	wait := func(cmd *exec.Cmd) error {
 		err := cmd.Wait()
-		if cleanup := terminateOwnedWindowsJob(job); cleanup != nil {
+		if cleanupErr := cleanup(); cleanupErr != nil {
 			// Do not hide a cleanup failure behind an ExitError's ordinary exit status.
-			return fmt.Errorf("execution result %v; clean up execution job: %w", err, cleanup)
+			return fmt.Errorf("execution result %v; clean up execution job: %w", err, cleanupErr)
 		}
 		return err
 	}
@@ -105,34 +113,73 @@ func resumeOwnedWindowsProcess(pid uint32) error {
 	return fmt.Errorf("suspended process %d has no primary thread", pid)
 }
 
-type executionJobAccounting struct {
-	TotalUserTime, TotalKernelTime, PeriodUserTime, PeriodKernelTime     int64
-	PageFaultCount, TotalProcesses, ActiveProcesses, TerminatedProcesses uint32
-}
+const windowsJobCleanupTimeout = 5 * time.Second
 
 func terminateOwnedWindowsJob(job windows.Handle) error {
+	deadline := time.Now().Add(windowsJobCleanupTimeout)
+	// Block new runnable descendants before taking the process-handle snapshot.
+	// An existing member already occupies the one available slot.
+	limits := windows.JOBOBJECT_EXTENDED_LIMIT_INFORMATION{}
+	limits.BasicLimitInformation.LimitFlags = windows.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | windows.JOB_OBJECT_LIMIT_ACTIVE_PROCESS
+	limits.BasicLimitInformation.ActiveProcessLimit = 1
+	_, limitErr := windows.SetInformationJobObject(job, windows.JobObjectExtendedLimitInformation,
+		uintptr(unsafe.Pointer(&limits)), uint32(unsafe.Sizeof(limits)))
+	handles, snapshotErr := openWindowsJobProcesses(job)
+	defer func() {
+		for _, handle := range handles {
+			windows.CloseHandle(handle)
+		}
+	}()
+	// Termination can clear job membership before the process objects signal.
+	// Keep the handles across that call and wait on each under one deadline.
 	if err := windows.TerminateJobObject(job, 1); err != nil {
-		return err
+		return errors.Join(limitErr, snapshotErr, err)
 	}
-	deadline := time.Now().Add(5 * time.Second)
+	for _, handle := range handles {
+		remaining := max(0, time.Until(deadline))
+		event, err := windows.WaitForSingleObject(handle, uint32(remaining.Round(time.Millisecond)/time.Millisecond))
+		if err != nil {
+			return errors.Join(limitErr, snapshotErr, err)
+		}
+		if event != windows.WAIT_OBJECT_0 {
+			return errors.Join(limitErr, snapshotErr, fmt.Errorf("execution job process did not exit: wait status %d", event))
+		}
+	}
+	return errors.Join(limitErr, snapshotErr)
+}
+
+func openWindowsJobProcesses(job windows.Handle) ([]windows.Handle, error) {
+	// JOBOBJECT_BASIC_PROCESS_ID_LIST has two DWORDs followed by ULONG_PTRs.
+	const headerWords = int(8 / unsafe.Sizeof(uintptr(0)))
+	buffer := make([]uintptr, headerWords+16)
 	for {
-		var accounting executionJobAccounting
-		if err := windows.QueryInformationJobObject(job, windows.JobObjectBasicAccountingInformation,
-			uintptr(unsafe.Pointer(&accounting)), uint32(unsafe.Sizeof(accounting)), nil); err != nil {
-			return err
+		err := windows.QueryInformationJobObject(job, windows.JobObjectBasicProcessIdList,
+			uintptr(unsafe.Pointer(&buffer[0])), uint32(uintptr(len(buffer))*unsafe.Sizeof(buffer[0])), nil)
+		counts := (*[2]uint32)(unsafe.Pointer(&buffer[0]))
+		if errors.Is(err, windows.ERROR_MORE_DATA) && counts[0] > uint32(len(buffer)-headerWords) {
+			buffer = make([]uintptr, headerWords+int(counts[0]))
+			continue
 		}
-		if accounting.ActiveProcesses == 0 {
-			return nil
+		if err != nil {
+			return nil, err
 		}
-		if time.Now().After(deadline) {
-			return fmt.Errorf("execution job descendants did not exit")
+		var handles []windows.Handle
+		for _, pid := range buffer[headerWords : headerWords+int(counts[1])] {
+			handle, err := windows.OpenProcess(windows.SYNCHRONIZE, false, uint32(pid))
+			if errors.Is(err, windows.ERROR_INVALID_PARAMETER) {
+				continue // Exited between the job query and OpenProcess.
+			}
+			if err != nil {
+				return handles, err
+			}
+			handles = append(handles, handle)
 		}
-		time.Sleep(time.Millisecond)
+		return handles, nil
 	}
 }
 
-// ActiveProcesses can reach zero just before Windows releases the last image
-// section (or its scanner handle). Retry only transient access/sharing failures.
+// A scanner can retain a handle after process exit. Retry only transient
+// access or sharing failures.
 func removeOwnedWindowsDirectory(path string) error {
 	deadline := time.Now().Add(5 * time.Second)
 	for {
