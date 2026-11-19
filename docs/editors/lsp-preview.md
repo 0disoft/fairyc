@@ -38,7 +38,10 @@ terminates the session.
   explicitly. The search covers recorded path uses and returns no references for
   unavailable or ambiguous analysis.
 - Prefix completion for keywords, built-in types, module declarations,
-  parameters, locals and exact imported-module public declarations.
+  parameters, locals and exact imported-module public declarations. After
+  `.` the checked receiver type selects visible nominal fields and methods.
+  For an incomplete member expression the server can check a temporary
+  in-memory overlay. Further syntax errors can prevent suggestions.
 - Full-document semantic tokens for authored declarations and compiler-resolved
   names in the current clean analysis. Tokens use UTF-16 coordinates and
   distinguish declarations and read-only constants. An unavailable analysis
@@ -114,7 +117,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename, member completion, embedded-SDK
+Rename, embedded-SDK
 virtual source navigation and code actions are not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 

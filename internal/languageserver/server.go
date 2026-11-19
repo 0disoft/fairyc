@@ -75,7 +75,7 @@ func (s *server) handle(m message) error {
 					"legend": map[string]any{"tokenTypes": semanticTokenTypes, "tokenModifiers": semanticTokenModifiers},
 					"full":   true,
 				},
-				"completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":"}},
+				"completionProvider": map[string]any{"resolveProvider": false, "triggerCharacters": []string{":", "."}},
 				"workspace":          map[string]any{"workspaceFolders": map[string]bool{"supported": true, "changeNotifications": true}},
 			},
 		}, 0, "")
@@ -271,7 +271,11 @@ func (s *server) handle(m message) error {
 			}
 			return s.response(m.ID, locations, 0, "")
 		default:
-			return s.response(m.ID, s.completion(d, offset), 0, "")
+			items := s.completion(d, offset)
+			if s.ctx != nil && s.ctx.Err() != nil {
+				return s.ctx.Err()
+			}
+			return s.response(m.ID, items, 0, "")
 		}
 	default:
 		return s.response(m.ID, nil, -32601, "method not supported")

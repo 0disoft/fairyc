@@ -47,7 +47,7 @@ func (s *server) completion(d *document, offset int) []Completion {
 	}
 	prefix := string(d.Text[start:offset])
 	if start > 0 && d.Text[start-1] == '.' {
-		return out
+		return s.memberCompletion(d, start-1, prefix)
 	}
 	symbols := completionCandidates{}
 	add := func(label string, kind int, detail string) {
@@ -70,7 +70,7 @@ func (s *server) completion(d *document, offset int) []Completion {
 			local, localKey = d.LastClean.completionLocal(d.Path)
 		}
 		if start >= 2 && string(d.Text[start-2:start]) == "::" {
-			// Only exact source import aliases are offered; no guessed member/type completion.
+			// Qualified completion requires an exact source import alias.
 			aliasEnd := start - 2
 			aliasStart := aliasEnd
 			for aliasStart > 0 && identifierByte(d.Text[aliasStart-1]) {

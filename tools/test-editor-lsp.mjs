@@ -24,6 +24,7 @@ try{
  const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities:{}});
  assert.equal(init.capabilities.positionEncoding,'utf-16');
  assert.equal(init.capabilities.textDocumentSync.change,2);
+ assert(init.capabilities.completionProvider.triggerCharacters.includes('.'));
  for(const capability of ['definitionProvider','hoverProvider','referencesProvider','documentFormattingProvider','documentRangeFormattingProvider']){
   assert.equal(init.capabilities[capability],true);
  }
@@ -69,10 +70,18 @@ try{
   textDocument:{uri},range:selection,options:{tabSize:4,insertSpaces:true},
  });
  assert.deepEqual(rangeFormatting,[{range:selection,newText:'\n'}]);
+ const memberText='module main; struct Point { i32 row; } fn i32 read(ref Point point) { return point.; }';
+ wait=diagnostics(4);
+ connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:4},contentChanges:[{text:memberText}]});
+ assert((await wait).diagnostics.length>0);
+ const members=await connection.sendRequest('textDocument/completion',{
+  textDocument:{uri},position:{line:0,character:memberText.lastIndexOf('point.')+'point.'.length},
+ });
+ assert.deepEqual(members,[{label:'row',kind:5,detail:'field'}]);
  assert.equal(fs.readFileSync(filename,'utf8'),'module main; fn i32 main() { return 0; }');
  assert.equal(await connection.sendRequest('shutdown'),null);
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, hover, references, document/range formatting, incremental edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, hover, references, document/range formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}
