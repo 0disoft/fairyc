@@ -4,6 +4,7 @@ package sdkstdlib
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"slices"
 	"sort"
 	"strings"
@@ -39,6 +40,18 @@ type Definition struct {
 	Modules        []packagegraph.Module
 	Digest         packagecontent.Digest
 	SourceIdentity string
+}
+
+// ReadSource serves source text directly from the embedded SDK catalog.
+func ReadSource(relative string) ([]byte, error) {
+	leaf, ok := strings.CutPrefix(relative, "std/")
+	if !ok || !fs.ValidPath(relative) || strings.Contains(leaf, "/") || !strings.HasSuffix(leaf, ".fy") {
+		return nil, fs.ErrNotExist
+	}
+	if leaf == "vec.fy" {
+		return slices.Clone(vectorSource), nil
+	}
+	return sourceFS.ReadFile("sources/" + relative)
 }
 
 func Load() (Definition, error) {

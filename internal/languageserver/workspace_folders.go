@@ -13,10 +13,13 @@ type workspaceFolder struct {
 }
 
 type initializeParams struct {
-	RootURI          string            `json:"rootUri"`
-	RootPath         string            `json:"rootPath"`
-	WorkspaceFolders []workspaceFolder `json:"workspaceFolders"`
-	Capabilities     struct {
+	RootURI               string            `json:"rootUri"`
+	RootPath              string            `json:"rootPath"`
+	WorkspaceFolders      []workspaceFolder `json:"workspaceFolders"`
+	InitializationOptions struct {
+		SDKSourceNavigation bool `json:"fairycSdkSourceNavigation"`
+	} `json:"initializationOptions"`
+	Capabilities struct {
 		TextDocument struct {
 			CodeAction struct {
 				LiteralSupport *struct{} `json:"codeActionLiteralSupport"`

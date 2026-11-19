@@ -17,8 +17,9 @@ absolute `fairyc-lsp` executable path to enable diagnostics, definition
 navigation, hover, references, completion and formatting in a trusted workspace. No Marketplace publication is
 claimed.
 
-The shared `fairyc-lsp` server provides the same features to each client. See [the LSP preview contract](lsp-preview.md) for build/setup,
-supported capabilities and explicit limitations.
+The VS Code adapter also opens embedded SDK definitions in read-only virtual
+documents. See [the LSP preview contract](lsp-preview.md) for the shared
+server's capabilities and client requirements.
 
 ## Tree-sitter and Zed
 

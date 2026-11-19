@@ -16,9 +16,20 @@ async function start(context) {
   context.subscriptions.push(watcher);
   client = new LanguageClient('fairyc', 'Fairy C', { command, args: [] }, {
     documentSelector: [{ scheme: 'file', language: 'fairyc' }],
+    initializationOptions: { fairycSdkSourceNavigation: true },
     synchronize: { fileEvents: watcher }
   });
-  try { await client.start(); }
+  try {
+    await client.start();
+    if (client.initializeResult?.capabilities.experimental?.fairycSdkSourceNavigation) {
+      const sdkClient = client;
+      context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('fairyc-sdk', {
+        provideTextDocumentContent(uri, token) {
+          return sdkClient.sendRequest('fairyc/sdkSource', { uri: uri.toString() }, token);
+        }
+      }));
+    }
+  }
   catch (error) { client = undefined; vscode.window.showErrorMessage('Fairy C language server could not start. Check fairyc.server.path.'); }
 }
 async function deactivate() { if (client) { await client.stop(); client = undefined; } }

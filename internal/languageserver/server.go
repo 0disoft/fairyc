@@ -29,6 +29,7 @@ type server struct {
 	workspaceRoots        []string
 	initialized, shutdown bool
 	versionedEdits        bool
+	sdkSourceNavigation   bool
 	analysisPending       bool
 	analysisBudget        int64
 	analysisClock         uint64
@@ -65,6 +66,7 @@ func (s *server) handle(m message) error {
 		}
 		s.workspaceRoots = roots
 		s.initialized = true
+		s.sdkSourceNavigation = p.InitializationOptions.SDKSourceNavigation
 		s.versionedEdits = p.Capabilities.Workspace.WorkspaceEdit.DocumentChanges && p.Capabilities.TextDocument.CodeAction.LiteralSupport != nil
 		var codeActionProvider any = false
 		if s.versionedEdits {
@@ -78,6 +80,7 @@ func (s *server) handle(m message) error {
 				"definitionProvider": true, "hoverProvider": true, "referencesProvider": true, "documentFormattingProvider": true,
 				"documentRangeFormattingProvider": true,
 				"codeActionProvider":              codeActionProvider,
+				"experimental":                    map[string]bool{"fairycSdkSourceNavigation": s.sdkSourceNavigation},
 				"semanticTokensProvider": map[string]any{
 					"legend": map[string]any{"tokenTypes": semanticTokenTypes, "tokenModifiers": semanticTokenModifiers},
 					"full":   true,
@@ -99,6 +102,19 @@ func (s *server) handle(m message) error {
 	case "shutdown":
 		s.shutdown = true
 		return s.response(m.ID, nil, 0, "")
+	case "fairyc/sdkSource":
+		if !s.sdkSourceNavigation {
+			return s.response(m.ID, nil, -32601, "method not supported")
+		}
+		var p documentID
+		if json.Unmarshal(m.Params, &p) != nil {
+			return bad("invalid SDK source parameters")
+		}
+		text, ok := readSDKSource(p.URI)
+		if !ok {
+			return bad("unknown embedded SDK source URI")
+		}
+		return s.response(m.ID, text, 0, "")
 	case "textDocument/didOpen":
 		var p struct {
 			TextDocument struct {

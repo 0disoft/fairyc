@@ -27,6 +27,12 @@ terminates the session.
   close and reopen the document before sending more ranges.
 - Compiler syntax, type, ownership and unsupported-feature diagnostics.
 - Definition locations from current compiler resolution facts.
+- Read-only embedded SDK navigation for clients that set
+  `initializationOptions.fairycSdkSourceNavigation`. The server returns
+  `fairyc-sdk://stdlib/<sha256>/std/<source>.fy` locations and serves their
+  exact text through `fairyc/sdkSource` with a `uri` parameter. The VS Code
+  extension registers the content provider. The source hash ties coordinates
+  to the matching embedded text across workspace reloads.
 - Hover for resolved names and function declarations in a clean current analysis.
   It shows a plain-text function signature or symbol kind and name, with the
   checked value type when available. Unavailable or ambiguous facts yield no hover.
@@ -121,7 +127,7 @@ cancellation of superseded requests and edits; incremental reparsing is
 deferred. Saved external changes are refreshed on watched-file notifications;
 no watcher runs inside the server.
 
-Rename and embedded-SDK virtual source navigation are not advertised.
+Rename is not advertised.
 The grammar is for editor recovery, not a substitute for semantic checking.
 
 This is a local preview, not a Marketplace/Zed-registry release. Windows native

@@ -129,7 +129,13 @@ func (a *analysis) authoredDeclaration(path string, offset int) (hir.Span, bool)
 
 func (a *analysis) referenceLocation(span hir.Span) (Location, bool) {
 	file, ok := a.file(span)
-	if !ok || file.Path == "" || span.StartByte < 0 || span.EndByte <= span.StartByte || span.EndByte > len(file.Text) {
+	if !ok || span.StartByte < 0 || span.EndByte <= span.StartByte || span.EndByte > len(file.Text) {
+		return Location{}, false
+	}
+	if file.SDKURI != "" {
+		return Location{file.SDKURI, a.sourceRange(file.SDKURI, file.Text, span.StartByte, span.EndByte)}, true
+	}
+	if file.Path == "" {
 		return Location{}, false
 	}
 	return Location{fileURI(file.Path), a.sourceRange(file.Path, file.Text, span.StartByte, span.EndByte)}, true

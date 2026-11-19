@@ -28,6 +28,7 @@ type sourceView struct {
 	Path   string
 	Text   []byte
 	Module *ast.Module
+	SDKURI string
 }
 type lspDiagnostic struct {
 	Range    Range  `json:"range"`
@@ -245,11 +246,15 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 				continue
 			}
 			for _, file := range loaded.Sources {
-				physical := filepath.Join(loaded.SourceRoot, filepath.FromSlash(file.Path))
+				view := sourceView{Text: file.Bytes, Module: file.Module}
 				if loaded.SourceKind == workspaceloader.SourceKindSDK {
-					physical = ""
+					if s.sdkSourceNavigation {
+						view.SDKURI = sdkSourceURI(file.Path, file.Bytes)
+					}
+				} else {
+					view.Path = filepath.Join(loaded.SourceRoot, filepath.FromSlash(file.Path))
 				}
-				a.files[sourceKey{p.ID, file.Path}] = sourceView{physical, file.Bytes, file.Module}
+				a.files[sourceKey{p.ID, file.Path}] = view
 			}
 		}
 		result, err := workspacecompiler.CheckContext(ctx, workspace)
@@ -282,7 +287,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			a.add(d.Path, d.Text, diag.Span.StartByte, diag.Span.EndByte, diag.Code, diag.Code)
 		}
 		a.insertion = singleSyntaxInsertion(d.Path, filepath.Base(d.Path), parsed.Tree.Diagnostics)
-		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{d.Path, d.Text, parsed.AST}
+		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{Path: d.Path, Text: d.Text, Module: parsed.AST}
 		a.sourceCharge, a.sourceCharged = int64(len(d.Text)), true
 		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
 			return nil, err

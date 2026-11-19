@@ -25,11 +25,9 @@ func (s *server) definition(d *document, offset int) []Location {
 	var scratch [8]int
 	for _, index := range d.View.definitionCandidates(d.Path, offset, scratch[:0]) {
 		r := d.View.result.Resolutions[index]
-		target, ok := d.View.file(r.Target.Declaration)
-		if !ok || target.Path == "" {
-			continue
+		if target, ok := d.View.referenceLocation(r.Target.Declaration); ok {
+			locations = append(locations, target)
 		}
-		locations = append(locations, Location{fileURI(target.Path), d.View.sourceRange(target.Path, target.Text, r.Target.Declaration.StartByte, r.Target.Declaration.EndByte)})
 	}
 	return locations
 }

@@ -25,7 +25,11 @@ try{
   workspace:{workspaceEdit:{documentChanges:true}},
   textDocument:{codeAction:{codeActionLiteralSupport:{codeActionKind:{valueSet:['quickfix']}}}},
  };
- const init=await connection.sendRequest('initialize',{processId:process.pid,rootUri:pathToFileURL(root).href,capabilities});
+ const init=await connection.sendRequest('initialize',{
+  processId:process.pid,rootUri:pathToFileURL(root).href,capabilities,
+  initializationOptions:{fairycSdkSourceNavigation:true},
+ });
+ assert.equal(init.capabilities.experimental.fairycSdkSourceNavigation,true);
  assert.equal(init.capabilities.positionEncoding,'utf-16');
  assert.equal(init.capabilities.textDocumentSync.change,2);
  assert(init.capabilities.completionProvider.triggerCharacters.includes('.'));
@@ -94,10 +98,23 @@ try{
  assert.deepEqual(fixes[0].edit.documentChanges,[{
   textDocument:{uri,version:5},edits:[{range:damaged[0].range,newText:';'}],
  }]);
+ const sdkText='module main; import std::bytes as bytes; fn bool same() { return bytes::equal(b"x", b"x"); }';
+ wait=diagnostics(6);
+ connection.sendNotification('textDocument/didChange',{textDocument:{uri,version:6},contentChanges:[{text:sdkText}]});
+ assert.equal((await wait).diagnostics.length,0);
+ const sdkLocations=await connection.sendRequest('textDocument/definition',{
+  textDocument:{uri},position:{line:0,character:sdkText.indexOf('bytes::equal')+'bytes::'.length},
+ });
+ assert.equal(sdkLocations.length,1);
+ const sdkLocation=sdkLocations[0];
+ assert.match(sdkLocation.uri,/^fairyc-sdk:\/\/stdlib\/[a-f0-9]{64}\/std\/bytes\.fy$/);
+ const sdkSource=await connection.sendRequest('fairyc/sdkSource',{uri:sdkLocation.uri});
+ const sdkLine=sdkSource.split('\n')[sdkLocation.range.start.line];
+ assert.equal(sdkLine.slice(sdkLocation.range.start.character,sdkLocation.range.end.character),'equal');
  assert.equal(fs.readFileSync(filename,'utf8'),'module main; fn i32 main() { return 0; }');
  assert.equal(await connection.sendRequest('shutdown'),null);
  const exited=new Promise((resolve,reject)=>{child.once('exit',code=>code===0?resolve():reject(Error('server exit '+code+' '+stderr)));});
  connection.sendNotification('exit');await exited;
  assert.equal(stderr,'');
- console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, quick fixes, hover, references, document/range formatting, incremental edits, shutdown passed');
+ console.log('Native fairyc-lsp + vscode-jsonrpc: initialize, diagnostics, definition, completion, semantic tokens, quick fixes, SDK source, hover, references, document/range formatting, incremental edits, shutdown passed');
 }finally{clearTimeout(timeout);connection.dispose();if(child.exitCode===null)child.kill();}
