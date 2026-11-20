@@ -21,10 +21,11 @@ verification. Cross-module calls use explicit import aliases, public template vi
 package ownership. Tests use the loaded test overlay. Repeated calls remain executable calls even
 when their static specialization dependency is deduplicated.
 
-Executable type arguments must be explicit `bool`, `u8`, `i32`, `u32`, or `usize`, or directly
-forwarded type parameters bound to that set. The planner's larger scalar vocabulary does not
+The original admission required explicit `bool`, `u8`, `i32`, `u32`, or `usize` type arguments,
+or directly forwarded type parameters bound to that set. The Go frontend's later inference rules
+are below. The planner's larger scalar vocabulary does not
 admit additional ordinary typed-HIR types or C scalar arguments. In generic
-workspaces, generated names beginning `_fy_generic_` are reserved. Inference, nominal/composite type arguments, generic
+workspaces, generated names beginning `_fy_generic_` are reserved. Nominal/composite type arguments, generic
 methods, user-defined capabilities/interfaces, dynamic dispatch, recursive specialization and
 unbounded expansion remain rejected. Planner defaults bound depth and total/per-declaration
 specializations. Workspaces without generic declarations retain ordinary analysis and diagnostics
@@ -122,7 +123,7 @@ generic sharing or resource-element ownership admission.
 [ADR 0494](0494-broader-scalar-generic-transport.md) supersedes the direct scalar signature
 restriction for the Go Stage 0 prototype. Composite transport signatures remain closed.
 
-### Argument inference in the Go frontend
+### Type argument inference in the Go frontend
 
 The Go generic preparation path also admits direct calls such as
 `identity(42)`. It infers scalar type arguments from locals, parameters,
@@ -133,21 +134,27 @@ constraints. A forwarded type parameter remains symbolic until its enclosing
 function is specialized. Exact package imports and visibility rules apply to
 inferred calls.
 
-For an integer literal, another typed argument for the same parameter provides
-the type. Literal-only evidence defaults to `i32`. Conflicting fixed types
-and missing evidence report E4502 at the call. A contextual constructor such as
-`.none` by itself supplies no payload type, and the expected return type does
-not participate in inference. Ordinary checking still owns conversion, range,
-argument-label, effect and ownership rules, including which composite shapes
-can be transported.
+The written type of a local initializer or the enclosing function's declared
+result at a return can also constrain the call's result, including through
+parentheses and block values. For example, `let Option<u32> value = pack(42);`
+binds `T` to `u32` when `pack<T>` returns `Option<T>`. A typed result can also
+determine a binder that occurs only in the result. Call arguments still supply
+their own evidence. A contextual constructor such as `.none` supplies no
+payload type by itself.
+
+For an integer literal, another typed argument or result constraint for the
+same parameter provides the type. Literal-only evidence defaults to `i32`.
+Conflicting fixed types and missing evidence report E4502 at the call.
+Ordinary checking still owns conversion, range, argument-label, effect and
+ownership rules, including which composite shapes can be transported.
 
 Inference binds requests before the existing planner runs. It retains source
 spans, leaves the original AST intact and shares identities and expansion
 limits with explicit calls to the same implementation. The
-`inferred-scalars` and `inferred-containers` fixtures exercise local type
-evidence, typed and literal arguments, forwarding, nested constructors and
-deduplication across the interpreter and Windows native profiles. The
-Fairy-authored compiler's inference path remains separate.
+`inferred-scalars`, `inferred-containers` and `inferred-results` fixtures
+exercise local type evidence, typed and literal arguments, forwarding, nested
+constructors, typed results and deduplication across the interpreter and Windows
+native profiles. The Fairy-authored compiler's inference path remains separate.
 
 ## Materialized syntax bound
 

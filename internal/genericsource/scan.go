@@ -18,6 +18,7 @@ type sourceVisitor struct {
 	nodes         *uint64
 	inference     *inferenceScope
 	inferred      map[*ast.Expression][]ast.TypeReference
+	resultType    *ast.TypeReference
 }
 
 func (v sourceVisitor) node() {
@@ -67,6 +68,7 @@ func (v sourceVisitor) function(value ast.Function) error {
 	v.node()
 	if v.inference != nil {
 		v.inference = v.inference.child()
+		v.resultType = &value.ResultType
 	}
 	for _, attribute := range value.Attributes {
 		v.node()
@@ -87,10 +89,14 @@ func (v sourceVisitor) function(value ast.Function) error {
 		v.typ(parameter.Type)
 	}
 	v.typ(value.ResultType)
-	return v.block(value.Body)
+	return v.blockExpected(value.Body, v.resultType)
 }
 
 func (v sourceVisitor) block(value *ast.Block) error {
+	return v.blockExpected(value, nil)
+}
+
+func (v sourceVisitor) blockExpected(value *ast.Block, expected *ast.TypeReference) error {
 	if value == nil {
 		return nil
 	}
@@ -103,7 +109,7 @@ func (v sourceVisitor) block(value *ast.Block) error {
 			return err
 		}
 	}
-	return v.expr(value.Tail)
+	return v.exprExpected(value.Tail, expected)
 }
 
 func (v sourceVisitor) statement(value *ast.Statement) error {
@@ -121,7 +127,7 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 		if value.Binding.Type != nil {
 			v.typ(*value.Binding.Type)
 		}
-		if err := v.expr(value.Binding.Expression); err != nil {
+		if err := v.exprExpected(value.Binding.Expression, value.Binding.Type); err != nil {
 			return err
 		}
 		if v.inference != nil {
@@ -140,7 +146,11 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 	if err := v.expr(value.Target); err != nil {
 		return err
 	}
-	if err := v.expr(value.Expression); err != nil {
+	var expected *ast.TypeReference
+	if value.Kind == syntax.KindReturn {
+		expected = v.resultType
+	}
+	if err := v.exprExpected(value.Expression, expected); err != nil {
 		return err
 	}
 	if value.For != nil {
@@ -196,6 +206,10 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 }
 
 func (v sourceVisitor) expr(value *ast.Expression) error {
+	return v.exprExpected(value, nil)
+}
+
+func (v sourceVisitor) exprExpected(value *ast.Expression, expected *ast.TypeReference) error {
 	if value == nil {
 		return nil
 	}
@@ -249,17 +263,25 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 			}
 		}
 	}
+	var childExpected *ast.TypeReference
+	if value.Kind == syntax.KindGroup && len(value.Children) == 1 {
+		childExpected = expected
+	}
 	for _, child := range value.Children {
-		if err := v.expr(child); err != nil {
+		if err := v.exprExpected(child, childExpected); err != nil {
 			return err
 		}
 	}
-	if err := v.block(value.Block); err != nil {
+	var tailExpected *ast.TypeReference
+	if value.Kind == syntax.KindBlock {
+		tailExpected = expected
+	}
+	if err := v.blockExpected(value.Block, tailExpected); err != nil {
 		return err
 	}
 	if v.expression != nil {
 		if v.inference != nil {
-			if err := v.inference.infer(value, &result); err != nil {
+			if err := v.inference.infer(value, &result, expected); err != nil {
 				return v.inference.module.at(value.Span, FailureRequest, err)
 			}
 			if len(v.inference.module.inferred[value]) != 0 {

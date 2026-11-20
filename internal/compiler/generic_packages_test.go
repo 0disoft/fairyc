@@ -75,7 +75,7 @@ func TestGenericPackagesResolveAndExecute(t *testing.T) {
 }
 
 func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
-	for _, name := range []string{"private", "inferred-private", "missing-coordinate", "duplicate-coordinate", "missing-provider", "conflicting-provider", "unconstrained", "alias-collision", "cycle", "global-budget"} {
+	for _, name := range []string{"private", "inferred-private", "missing-coordinate", "duplicate-coordinate", "missing-provider", "conflicting-provider", "unconstrained", "conflicting-result", "alias-collision", "cycle", "global-budget"} {
 		t.Run(name, func(t *testing.T) {
 			input, coordinates := genericPackageInput(t)
 			limits := genericplan.DefaultPlanLimits()
@@ -94,7 +94,9 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 			case "conflicting-provider":
 				input.Imports = append(input.Imports, semantic.PackageImport{FromPackage: 1, ImportPath: "util", ToPackage: 3})
 			case "unconstrained":
-				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(null); }")
+				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { let value = u::wrap(null); return 0; }")
+			case "conflicting-result":
+				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(true); }")
 			case "alias-collision":
 				input.Files[1].Module.Imports[0].Alias = "wrap"
 			case "cycle":
@@ -104,7 +106,7 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 				limits.MaxSpecializations = 1
 			}
 			result, _, err := compiler.CheckGenericPackages(input, coordinates, limits)
-			code := map[string]string{"private": "E0103", "inferred-private": "E0103", "unconstrained": "E4502", "alias-collision": "E4501", "cycle": "E4503", "global-budget": "E4503"}[name]
+			code := map[string]string{"private": "E0103", "inferred-private": "E0103", "unconstrained": "E4502", "conflicting-result": "E4502", "alias-collision": "E4501", "cycle": "E4503", "global-budget": "E4503"}[name]
 			if code != "" {
 				if err != nil || result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != code {
 					t.Fatalf("expected source diagnostic %s: %v %+v", code, err, result.Semantic)

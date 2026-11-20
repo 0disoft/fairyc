@@ -10,8 +10,8 @@ func writeGenericCLIWorkspace(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
 	writeNativeWorkspace(t, root, true)
-	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer; pub fn T value<T>(T input) { return input; }")
-	writeWorkspaceFile(t, root, "src/main.fy", "module main; import answer as answer; fn i32 main() { return answer::value(42); }")
+	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer; pub fn T value<T>(T input) { return input; } pub fn T from_result<T>() { return 42; }")
+	writeWorkspaceFile(t, root, "src/main.fy", "module main; import answer as answer; fn i32 main() { return answer::from_result(); }")
 	writeWorkspaceFile(t, root, "tests/main.fy", "module tests::main; import answer as answer; @test fn void generic_answer() { assert(answer::value<i32>(42) == 42); }")
 	return root
 }

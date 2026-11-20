@@ -174,7 +174,7 @@ func (s *inferenceScope) constrain(formal, actual *ast.TypeReference, integer bo
 	return nil
 }
 
-func (s *inferenceScope) infer(original, call *ast.Expression) error {
+func (s *inferenceScope) infer(original, call *ast.Expression, expected *ast.TypeReference) error {
 	if call.Kind != syntax.KindCall || len(call.Children) == 0 || call.Children[0].Kind != syntax.KindPath {
 		return nil
 	}
@@ -197,6 +197,9 @@ func (s *inferenceScope) infer(original, call *ast.Expression) error {
 		if err := s.constrain(&fn.Parameters[index].Type, typ, integer, fn.TypeParameters, bindings); err != nil {
 			return fmt.Errorf("cannot infer type arguments for %q: %w", callee.Text, err)
 		}
+	}
+	if err := s.constrain(&fn.ResultType, expected, false, fn.TypeParameters, bindings); err != nil {
+		return fmt.Errorf("cannot infer type arguments for %q: %w", callee.Text, err)
 	}
 	selector.TypeArguments = make([]ast.TypeReference, 0, len(fn.TypeParameters))
 	for _, name := range fn.TypeParameters {

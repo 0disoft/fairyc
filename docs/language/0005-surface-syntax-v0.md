@@ -355,7 +355,10 @@ nominal arguments to user functions, nested generic types or private storage int
 
 Every reached instantiation is substituted to concrete types before ordinary semantic/Flow and MIR
 verification. Identical requests are deduplicated by exact defining-package identity; repeated
-source calls still execute. Inference, generic methods, user generic resource/struct/enum declarations,
+source calls still execute. The Go frontend can infer scalar type arguments from admitted value
+arguments and from the written result context of a local initializer or return. See
+[ADR 0385](../adr/0385-stable-explicit-scalar-generics.md#type-argument-inference-in-the-go-frontend)
+for evidence and conflict rules. Generic methods, user generic resource/struct/enum declarations,
 static interfaces, recursive specialization and unbounded expansion remain excluded. Unused source
 templates are retained for identity and documentation but are not proof of executable body checking.
 The stable workspace and explicit-file CLI entry points perform specialization; raw semantic-only
@@ -687,4 +690,4 @@ An argument may repeat its positional parameter name: `f(value, .minimum = 1, .d
 
 ## Explicit exclusions
 
-Function overloading, default arguments and argument reordering, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user-defined generic aggregates/methods and inferred instantiation, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
+Function overloading, default arguments and argument reordering, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user-defined generic aggregates/methods, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
