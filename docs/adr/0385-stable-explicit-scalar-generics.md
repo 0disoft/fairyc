@@ -162,9 +162,12 @@ arguments from integer and boolean literals, scalar casts, and written scalar
 result contexts in local initializers and returns. It stores inferred requests
 under the same declaration and ordered argument key as an explicit call.
 Candidate checking and lowering also consume those requests for direct calls in
-ordinary functions. The typed call and restored artifact retain the written
-call site and the concrete specialization identity. Calls inside specialized
-templates and copied bodies still use explicit type arguments.
+ordinary functions and retained function bodies. An enclosing template's scalar
+type parameter can supply evidence through a written result type or cast. The
+source plan retains that parameter until the caller's concrete specialization
+is known. The typed call and restored artifact retain the written call site and
+the concrete specialization identity. Cleanup bodies still require explicit
+type arguments for executable calls.
 
 ## Materialized syntax bound
 

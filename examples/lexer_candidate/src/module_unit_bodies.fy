@@ -32,7 +32,20 @@ fn Result<v::Vec<usize>,join::Problem> annotations(ref ast::Ast p,ref syntax::Pa
     if(limited){return .err(fail(10,instance.module_index,0,0));}return .ok(resolved);
 }
 fn Result<v::Vec<Edge>,join::Problem> edges(ref generics::Plan instances,ref ast::Ast body,usize owner,bool cleaning,usize module_index,usize start,usize end,ref mut usize work){
-    var v::Vec<Edge> result=v::empty<Edge>();let usize count=if(cleaning){generics::cleanup_dependency_count(instances)}else{generics::dependency_count(instances)};var usize i=0;while(i<count){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}let target=if(cleaning){generics::cleanup_dependency_at(instances,i)}else{generics::dependency_at(instances,i)};if(target.owner==owner){var usize expression=1;while(expression<=ast::expression_count(body) && ast::expression_origin(body,expression)!=target.source_index){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}expression+=1;}if(expression>ast::expression_count(body) || ast::expression_at(body,expression).kind!=20){return .err(fail(9,module_index,start,end));}if(!v::push<Edge>(ref mut result,Edge{.expression,.target}).is_ok){return .err(fail(11,module_index,start,end));}}i+=1;}
+    var v::Vec<Edge> result=v::empty<Edge>();let usize count=if(cleaning){generics::cleanup_dependency_count(instances)}else{generics::dependency_count(instances)};var usize i=0;var usize expression=1;
+    while(i<count){
+        if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}
+        let target=if(cleaning){generics::cleanup_dependency_at(instances,i)}else{generics::dependency_at(instances,i)};i+=1;
+        if(target.owner!=owner){continue;}
+        while(expression<=ast::expression_count(body) && ast::expression_origin(body,expression)<target.source_index){
+            if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}expression+=1;
+        }
+        if(expression>ast::expression_count(body) || ast::expression_origin(body,expression)!=target.source_index){return .err(fail(9,module_index,start,end));}
+        let kind=ast::expression_at(body,expression).kind;
+        if(kind!=20 && !(kind==6 && target.instance!=0)){return .err(fail(9,module_index,start,end));}
+        if(!v::push<Edge>(ref mut result,Edge{.expression,.target}).is_ok){return .err(fail(11,module_index,start,end));}
+        expression+=1;
+    }
     i=1;while(i<=ast::expression_count(body)){if(ast::expression_at(body,i).kind==20){var usize e=0;var usize found=0;while(e<v::len<Edge>(ref result)){if(!ast::charge(work,1)){return .err(fail(10,module_index,start,end));}if(v::at<Edge>(ref result,e).expression==i){found+=1;}e+=1;}if(found!=1){let n=ast::expression_at(body,i);return .err(fail(9,module_index,n.start,n.end));}}i+=1;}return .ok(result);
 }
 // Generic bodies are collected before cleanups. On a cleanup-only cache miss,

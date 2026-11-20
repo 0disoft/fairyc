@@ -40,11 +40,16 @@ fn bool storage(ref u8[] name){return bytes::equal(name,b"storage_size") || byte
 fn u32 inferred_edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,usize expected,usize target,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut usize work){
     let template=catalog::template_at(c,target-1);
     let provider=v::at<syntax::Parsed>(sources,template.module_index);
-    let inferred=switch(inference::solve(p,id,provider,template.declaration,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
+    let usize owner=if(context.root){0}else{catalog::template_at(c,context.template_index).declaration+1};
+    let inferred=switch(inference::solve(p,owner,id,provider,template.declaration,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
     let first=v::len<model::Argument>(args);let names_first=bytes::len(names);
     var usize i=0;
     while(i<inferred.count){
-        let code=model::argument(names,args,inference::spelling(inferred.types[i]),false,work);
+        let value=inferred.types[i];
+        let code=if(inference::forwarded(value)){
+            let node=syntax::generic_parameter_at(p,owner-1,inference::forwarded_index(value));
+            model::argument(names,args,syntax::source_view(p)[node.start..node.end],true,work)
+        }else{model::argument(names,args,inference::spelling(value),false,work)};
         if(code!=0){return code;}i+=1;
     }
     return model::edge_bounded(names,args,edges,target,catalog::text(c,template.id),context.first,first,names_first,if(context.root){4096}else{32},work);

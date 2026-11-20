@@ -38,12 +38,12 @@ fn void append(ref mut bytes::Buffer raw,ref u8[] part){assert(bytes::append(raw
 @test
 @effects(console)
 fn void inferred_scalar_calls_restore_and_execute(){
-    let raw=b"module root;fn T id<T>(T value){return value;}fn T answer<T>(){return 42;}fn i32 main(){let u32 value={id(42)};assert(value==42);assert(id(true));discard id<i32>(42);discard id(42);return answer();}";
+    let raw=b"module root;fn T id<T>(T value){return value;}fn T answer<T>(){return id(42);}fn T relay<T>(){return answer();}fn i32 main(){let u32 value={relay()};assert(value==42);assert(id(true));discard id<i32>(42);discard id(42);return relay<i32>();}";
     let result=compiled(raw);
     let owner=core::checked_program(ref result);
     let program=checked::ir_program(owner);
     var usize entry=0;var usize i=1;
-    while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==4){entry=i;}i+=1;}
+    while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==5){entry=i;}i+=1;}
     assert(entry!=0);
     let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
     let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;

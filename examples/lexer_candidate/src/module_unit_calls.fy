@@ -78,12 +78,18 @@ pub fn Result<Plan,join::Problem> build(ref v::Vec<syntax::Parsed> sources,ref s
     while(kind<=3){i=1;var usize offset=0;var usize module_at=interfaces::first(imported);let usize count=if(kind==1){bodies::count(owned)}else if(kind==2){bodies::cleanup_count(owned)}else{ordinary::count(original)};while(i<=count){let usize module_index=if(kind==1){bodies::signature(bodies::at(owned,i)).module_index}else if(kind==2){bodies::cleanup_info(bodies::cleanup_at(owned,i)).module_index}else{ordinary::module_index(ordinary::at(original,i))};let usize declaration=if(kind==1){bodies::signature(bodies::at(owned,i)).declaration}else if(kind==2){bodies::cleanup_info(bodies::cleanup_at(owned,i)).declaration}else{ordinary::declaration(ordinary::at(original,i))};let source=v::at<syntax::Parsed>(sources,module_index);let resolved=if(kind==1){names::function_at(concrete,i)}else if(kind==2){names::cleanup_at(concrete,i)}else{ordinary::resolved(ordinary::at(original,i))};var usize expression=1;
         if(kind==3){while(module_at<module_index){if(!charge(ref mut work,1)){return .err(fail(10,module_index,0,0));}offset+=syntax::expression_count(v::at<syntax::Parsed>(sources,module_at));module_at+=1;}}
         let contract=contracts::check_names(sources,metadata,module_index,declaration,kind==2,resolved,ref mut work);if(contract.code!=0){return .err(contract);}
+        var usize edge=0;
         while(expression<=names::use_count(resolved)){if(!charge(ref mut work,1)){return .err(fail(10,module_index,0,0));}let usize source_index=if(kind==1){ast::expression_origin(bodies::body_ast(bodies::at(owned,i)),expression)}else if(kind==2){ast::expression_origin(bodies::cleanup_ast(bodies::cleanup_at(owned,i)),expression)}else{ordinary::expression_origin(ordinary::at(original,i),expression)};let e=syntax::expression_at(source,source_index);
-            if(kind==3 && e.kind==6 && generics::call_at(interfaces::specializations(imported),offset+source_index).instance!=0){
-                let callee=local_expression(ordinary::at(original,i),e.left);let usize use=if(callee==0){0}else{names::use_at(resolved,callee)};
+            var usize instance=0;
+            if(kind==1 && edge<bodies::edge_count(bodies::at(owned,i))){
+                let next=bodies::edge_at(bodies::at(owned,i),edge);
+                if(next.expression==expression){edge+=1;if(e.kind==6){instance=next.target.instance;}}
+            }else if(kind==3 && e.kind==6){instance=generics::call_at(interfaces::specializations(imported),offset+source_index).instance;}
+            if(instance!=0){
+                let callee=if(kind==1){ast::expression_at(bodies::body_ast(bodies::at(owned,i)),expression).left}else{local_expression(ordinary::at(original,i),e.left)};
+                let usize use=if(callee==0){0}else{names::use_at(resolved,callee)};
                 if(use==0){return .err(fail(12,module_index,e.start,e.end));}
                 let r=names::reference_at(resolved,use);
-                let instance=generics::call_at(interfaces::specializations(imported),offset+source_index).instance;
                 let target=generics::at(interfaces::specializations(imported),instance);
                 if(r.kind!=2 || r.declaration_kind!=3 || r.source_index!=e.left || r.module_index!=target.module_index || r.declaration!=target.declaration){return .err(fail(4501,module_index,e.start,e.end));}
                 specialized+=1;expression+=1;continue;

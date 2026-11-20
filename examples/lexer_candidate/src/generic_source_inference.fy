@@ -7,6 +7,12 @@ import std::bytes as bytes;
 pub struct Arguments { usize count; u32[8] types; }
 struct Constraint { u32 fixed; bool integer; }
 
+// Concrete scalar tags end at 38. Keep a distinct representation for each
+// source binder until the selected caller instance supplies its argument.
+pub fn u32 binder_base(){return 64;}
+pub fn bool forwarded(u32 code){return code>=binder_base();}
+pub fn usize forwarded_index(u32 code){return (code-binder_base()) as usize;}
+
 // Derive a written scalar context for a call without changing parser IDs.
 // Only a return or typed initializer and its transparent value wrappers
 // provide context, as in the source request walk.
@@ -61,21 +67,28 @@ fn Result<usize,u32> named_root(ref syntax::Parsed p, usize root, ref mut usize 
     return .ok(0);
 }
 
-fn Result<u32,u32> scalar_root(ref syntax::Parsed p, usize root, ref mut usize work) {
+fn Result<u32,u32> scalar_root(ref syntax::Parsed p, usize owner, usize root, ref mut usize work) {
     let name=named_root(p,root,work)?;
     if (name==0) { return .ok(0); }
     let text=syntax::type_text(p,name);
     if (!budget::charge(work,text.len+1)) { return .err(10); }
-    return .ok(scalars::scalar(text));
+    let scalar=scalars::scalar(text);
+    if(scalar!=0 || owner==0){return .ok(scalar);}
+    let binder=binder_index(p,owner-1,name,syntax::generic_parameter_count(p,owner-1),work)?;
+    if(binder==0){return .ok(0);}
+    var u32 code=binder_base();
+    var usize i=1;
+    while(i<binder){code+=1;i+=1;}
+    return .ok(code);
 }
 
-fn Result<Constraint,u32> evidence(ref syntax::Parsed p, usize root, ref mut usize work) {
+fn Result<Constraint,u32> evidence(ref syntax::Parsed p, usize owner, usize root, ref mut usize work) {
     var usize id=root;
     while (id!=0) {
         if (!budget::charge(work,1)) { return .err(10); }
         let n=syntax::expression_at(p,id);
         if (n.kind==3) { id=n.left; continue; }
-        if (n.kind==23) { return .ok(Constraint{.fixed=scalar_root(p,n.right,work)?,.integer=false}); }
+        if (n.kind==23) { return .ok(Constraint{.fixed=scalar_root(p,owner,n.right,work)?,.integer=false}); }
         if (n.kind==1) {
             let raw=syntax::expression_text(p,id);
             let boolean=bytes::equal(raw,b"true") || bytes::equal(raw,b"false");
@@ -105,14 +118,14 @@ fn Result<usize,u32> binder_index(ref syntax::Parsed provider, usize declaration
 
 // Side-effect-free request inference apart from charging the caller's work meter.
 // The source planner keeps argument order and feeds these scalars into its usual key.
-pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize call,
+pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize call,
     ref syntax::Parsed provider, usize declaration, usize expected, ref mut usize work) {
     let target=syntax::declaration_at(provider,declaration);
     let count=syntax::generic_parameter_count(provider,declaration);
     if (count==0 || count>8) { return .err(4502); }
     var u32[8] fixed=[0;8];
     var bool[8] integers=[false;8];
-    let result=scalar_root(caller,expected,work)?;
+    let result=scalar_root(caller,owner,expected,work)?;
     if (result!=0) {
         let binder=binder_index(provider,declaration,target.result_type,count,work)?;
         if (binder!=0) { fixed[binder-1]=result; }
@@ -129,7 +142,7 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize call,
         if (argument>=call) { return .err(9); }
         let link=syntax::expression_at(caller,argument);
         if (link.kind!=7 || link.left==0 || link.left>=argument || link.right>=argument) { return .err(9); }
-        let actual=evidence(caller,link.left,work)?;
+        let actual=evidence(caller,owner,link.left,work)?;
         if (actual.fixed!=0 || actual.integer) {
             let binder=binder_index(provider,declaration,entry.type_root,count,work)?;
             if (binder!=0) {

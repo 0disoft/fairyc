@@ -44,14 +44,22 @@ fn Result<usize,join::Problem> inferred_target(ref signatures::Program metadata,
     let target=signatures::declaration_at(metadata,found.item);
     return .ok(if(target.kind==3 && target.parameters!=0){found.item}else{0});
 }
-fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,syntax::Declaration owner,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
+fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,usize caller,ref v::Vec<usize> parent,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
     let e=syntax::expression_at(source,call);
+    let owner=syntax::declaration_at(source,caller-1);
     let expected=switch(inference::expected_root(source,owner,call,ref mut work.work)){case .ok(root):{root}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
-    let solved=switch(inference::solve(source,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    let usize symbolic=if(v::len<usize>(parent)==0){0}else{caller};
+    let solved=switch(inference::solve(source,symbolic,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
     if(!charge(work,0)){return .err(fail(4503,module_index,e.start,e.end));}
     var v::Vec<usize> args=v::empty<usize>();var usize i=0;
     while(i<solved.count){
         let scalar=solved.types[i];
+        if(inference::forwarded(scalar)){
+            let index=inference::forwarded_index(scalar);
+            if(index>=v::len<usize>(parent)){return .err(fail(4502,module_index,e.start,e.end));}
+            if(!v::push<usize>(ref mut args,*v::at<usize>(parent,index)).is_ok){return .err(fail(11,module_index,e.start,e.end));}
+            i+=1;continue;
+        }
         var usize id=source_arguments::named(inference::spelling(scalar));
         if(id==0){
             if(!charge(work,types::count(graph)+1)){return .err(fail(4503,module_index,e.start,e.end));}
@@ -97,6 +105,19 @@ pub fn join::Problem forward(ref v::Vec<syntax::Parsed> sources,ref signatures::
                 }
             }
             if(v::len<Dependency>(dependencies)>=16384 || !v::push<Dependency>(dependencies,Dependency{.owner=id,.source_index=i,.instance=target,.aggregate_type,.intrinsic,.intrinsic_type,.slice,.inline_declaration=0,.inline_unsafe=false}).is_ok){return fail(if(v::len<Dependency>(dependencies)>=16384){4503}else{11},item.module_index,e.start,e.end);}
+        }else if(e.kind==6 && e.start>=d.start && e.end<=d.end){
+            let found=switch(inferred_target(metadata,source,item.module_index,i,work)){case .ok(p):{p}case .err(p):{return p;}};
+            if(found!=0){
+                let callee=signatures::declaration_at(metadata,found);
+                let provider=v::at<syntax::Parsed>(sources,callee.module_index);
+                let args=switch(inferred_arguments(source,item.module_index,i,item.declaration,ref parent,provider,callee.declaration,graph,work)){case .ok(p):{p}case .err(p):{return p;}};
+                let target=switch(instantiate(sources,metadata,callee.module_index,callee.declaration,ref args,graph,instances,arguments,parameters,work,item.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};
+                if(*v::at<u8>(states,target-1)==1){return fail(4503,item.module_index,e.start,e.end);}
+                let p=forward(sources,metadata,graph,instances,arguments,parameters,dependencies,states,work,target,depth+1);
+                if(p.code!=0){return p;}
+                if(v::len<Dependency>(dependencies)>=16384){return fail(4503,item.module_index,e.start,e.end);}
+                if(!v::push<Dependency>(dependencies,Dependency{.owner=id,.source_index=i,.instance=target,.aggregate_type=0,.intrinsic=0,.intrinsic_type=0,.slice=false,.inline_declaration=0,.inline_unsafe=false}).is_ok){return fail(11,item.module_index,e.start,e.end);}
+            }
         }i+=1;
     }{let slot=v::at_mut<u8>(states,id-1);*slot=2;}return fail(0,0,0,0);
 }
@@ -122,7 +143,8 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
                 if(d.generic_parameters==0 && d.kind!=12){
                     let target=signatures::declaration_at(metadata,found);
                     let provider=v::at<syntax::Parsed>(sources,target.module_index);
-                    let args=switch(inferred_arguments(source,module_index,i,d,provider,target.declaration,graph,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
+                    let empty=v::empty<usize>();
+                    let args=switch(inferred_arguments(source,module_index,i,caller,ref empty,provider,target.declaration,graph,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
                     call.instance=switch(instantiate(sources,metadata,target.module_index,target.declaration,ref args,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut budget,module_index,e.start,e.end)){case .ok(id):{id}case .err(p):{return .err(p);}};
                 }
             }
