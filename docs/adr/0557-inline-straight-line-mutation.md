@@ -11,6 +11,7 @@ straight-line initializer/assignment steps and sixty-four expression nodes are
 admitted. Existing same-module resolved inline call limits remain unchanged.
 Compound assignment, parameter/field/indirect assignment, branches, loops,
 other types, resources and cross-module calls remain separate families.
+ADR 0561 separately admits conditional value expressions in the Go bootstrap.
 
 Each declaration or assignment defines a new canonical value version. A path
 reads the latest preceding version of its local; an immutable snapshot retains

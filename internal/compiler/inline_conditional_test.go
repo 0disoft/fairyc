@@ -1,0 +1,76 @@
+package compiler_test
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/inlinebody"
+	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/mircodec"
+	"github.com/0disoft/fairyc/internal/semantic"
+)
+
+func TestInlineConditionalIdentityAndExecution(t *testing.T) {
+	const declaration = `@inline pub fn i32 choose(i32 x, i32 divisor) {
+    return if (x < 0) { 42 / divisor } else if (x == 0) { 41 } else { x + 1 };
+}`
+	const main = `fn i32 main() {
+    assert(choose(-1, 2) == 21);
+    assert(choose(0, 0) == 41);
+    return choose(41, 0);
+}`
+	check := func(source string) compiler.Result {
+		t.Helper()
+		return checkInlineCalls(t, "module main;"+source+main)
+	}
+	result := check(declaration)
+	marker := inlineMutationMarker(result)
+	if marker == "" || inlineMutationMarker(check(strings.ReplaceAll(declaration, "x", "input"))) != marker {
+		t.Fatal("parameter rename changed the inline identity")
+	}
+	for _, edit := range [][2]string{{"x < 0", "x <= -1"}, {"42 / divisor", "44 / divisor"}, {"{ 41 }", "{ 40 }"}, {"x + 1", "x + 2"}} {
+		if inlineMutationMarker(check(strings.Replace(declaration, edit[0], edit[1], 1))) == marker {
+			t.Fatalf("conditional edit %v kept the old inline identity", edit)
+		}
+	}
+	wire, err := mircodec.Encode(result.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restored, err := mircodec.Decode(wire, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := inlinebody.VerifyProgram(result.Semantic.HIR, restored); err != nil {
+		t.Fatal(err)
+	}
+	value, err := interpreter.Execute(restored, "main::main")
+	if err != nil || value.Kind != interpreter.OutcomeReturn || value.Value != 42 {
+		t.Fatalf("restored conditional: %+v %v", value, err)
+	}
+	for _, profile := range []cbackend.Profile{cbackend.Stage0Profile(), cbackend.Stage0WindowsMSVCProfile()} {
+		if _, err := cbackend.Emit(restored, "main::main", profile); err != nil {
+			t.Fatal(err)
+		}
+	}
+	runExpandedLanguageNative(t, result, "main::main", "")
+}
+
+func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
+	for _, body := range []string{
+		"return if (x == 0 && x < 1) { 42 } else { 0 };",
+		"return if (x == 0) { let i32 local = 42; local } else { 0 };",
+		"if (x == 0) { return 42; } return 0;",
+	} {
+		t.Run(body, func(t *testing.T) {
+			input := "module main; @inline pub fn i32 choose(i32 x) {" + body + "} fn i32 main() { return choose(0); }"
+			result, err := compiler.Check([]semantic.File{parseCompilerFile(t, hir.DefaultPackage, "main.fy", input)})
+			if err != nil || result.Verified || len(result.Semantic.Unsupported) == 0 {
+				t.Fatalf("expected unsupported inline body: %v %+v", err, result.Semantic)
+			}
+		})
+	}
+}

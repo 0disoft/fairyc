@@ -91,7 +91,7 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 	if err != nil {
 		return nil, nil, err
 	}
-	version := inlineEncodingVersion(len(initializers) != 0, len(callees) != 0, encoder.mutating)
+	version := inlineEncodingVersion(len(initializers) != 0, len(callees) != 0, encoder.mutating, encoder.branches)
 	if len(initializers) != 0 {
 		root = inlineEncodingNode{Op: "bindings", Children: append(initializers, root)}
 	}

@@ -446,3 +446,5 @@ Product scope remains owned by `docs/product/02-spec.md`. Validation names are o
 - [0558: Copied closure u32 signatures and captures](0558-copied-closure-u32-scalars.md)
 
 - [0559: Linux portable filesystem extensions](0559-linux-portable-filesystem-extensions.md)
+
+- [0561: Conditional expressions in Go inline bodies](0561-inline-conditional-expressions.md)

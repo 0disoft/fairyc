@@ -31,6 +31,7 @@ type inlineFunctionEncoder struct {
 	callees  *[]*Function
 	count    int
 	mutating bool
+	branches bool
 }
 
 func (encoder *inlineFunctionEncoder) prepare(fn Function) ([]Statement, *Expression, error) {
@@ -99,15 +100,47 @@ func inlineStatementBinding(statement Statement, locals map[SymbolID]Local, para
 }
 
 func (encoder *inlineFunctionEncoder) expression(e *Expression) (inlineEncodingNode, error) {
+	return encoder.typedExpression(e, TypeI32, false)
+}
+
+func (encoder *inlineFunctionEncoder) typedExpression(e *Expression, typ Type, branchArm bool) (inlineEncodingNode, error) {
 	encoder.count++
-	if e == nil || encoder.count > inlineMaxExpressionNodes || e.Type != TypeI32 || len(e.Effects) != 0 || e.Block != nil || len(e.Arms) != 0 || e.UnsafeScope != nil {
+	if e == nil || encoder.count > inlineMaxExpressionNodes || e.Type != typ || len(e.Effects) != 0 || len(e.Arms) != 0 || e.UnsafeScope != nil {
 		return inlineEncodingNode{}, fmt.Errorf("@inline requires at most 64 pure i32 expression nodes")
+	}
+	if branchArm && e.Kind == ExpressionBlock && e.Block != nil && len(e.Block.Statements) == 0 && len(e.Children) == 0 {
+		return encoder.expression(e.Block.Tail)
+	}
+	if e.Block != nil {
+		return inlineEncodingNode{}, fmt.Errorf("@inline if arms require a value expression without statements")
 	}
 	if e.Kind == ExpressionGroup {
 		if len(e.Children) != 1 {
 			return inlineEncodingNode{}, fmt.Errorf("invalid inline group")
 		}
-		return encoder.expression(&e.Children[0])
+		return encoder.typedExpression(&e.Children[0], typ, branchArm)
+	}
+	if typ == TypeBool {
+		return encoder.condition(e)
+	}
+	if e.Kind == ExpressionIf {
+		if len(e.Children) != 3 {
+			return inlineEncodingNode{}, fmt.Errorf("@inline if requires two value arms")
+		}
+		condition, err := encoder.typedExpression(&e.Children[0], TypeBool, false)
+		if err != nil {
+			return inlineEncodingNode{}, err
+		}
+		thenValue, err := encoder.typedExpression(&e.Children[1], TypeI32, true)
+		if err != nil {
+			return inlineEncodingNode{}, err
+		}
+		elseValue, err := encoder.typedExpression(&e.Children[2], TypeI32, true)
+		if err != nil {
+			return inlineEncodingNode{}, err
+		}
+		encoder.branches = true
+		return inlineEncodingNode{Op: "if", Children: []inlineEncodingNode{condition, thenValue, elseValue}}, nil
 	}
 	n, children, err := encoder.expressionNode(e)
 	if err != nil {
@@ -125,6 +158,24 @@ func (encoder *inlineFunctionEncoder) expression(e *Expression) (inlineEncodingN
 		n.Children = append(n.Children, child)
 	}
 	return n, nil
+}
+
+func (encoder *inlineFunctionEncoder) condition(e *Expression) (inlineEncodingNode, error) {
+	if e.Kind == ExpressionLiteral && len(e.Children) == 0 && (e.Value == "true" || e.Value == "false") {
+		return inlineEncodingNode{Op: "literal", Value: e.Value}, nil
+	}
+	if e.Kind != ExpressionBinary || len(e.Children) != 2 || !strings.Contains(" == != < <= > >= ", " "+e.Operator+" ") {
+		return inlineEncodingNode{}, fmt.Errorf("@inline if conditions require a bool literal or an i32 comparison")
+	}
+	left, err := encoder.expression(&e.Children[0])
+	if err != nil {
+		return inlineEncodingNode{}, err
+	}
+	right, err := encoder.expression(&e.Children[1])
+	if err != nil {
+		return inlineEncodingNode{}, err
+	}
+	return inlineEncodingNode{Op: e.Operator, Children: []inlineEncodingNode{left, right}}, nil
 }
 
 func (encoder *inlineFunctionEncoder) expressionNode(e *Expression) (inlineEncodingNode, []Expression, error) {
@@ -189,7 +240,10 @@ func inlineLiteralValue(text string) (string, error) {
 	return strconv.FormatInt(value, 10), nil
 }
 
-func inlineEncodingVersion(hasBindings, hasCalls, mutating bool) string {
+func inlineEncodingVersion(hasBindings, hasCalls, mutating, branches bool) string {
+	if branches {
+		return "fairyc.inline-function/v5"
+	}
 	if mutating {
 		return "fairyc.inline-function/v4"
 	}
