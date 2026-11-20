@@ -32,9 +32,7 @@ func TestAtlasImpactLockedCurrentAndReadOnly(t *testing.T) {
 	}
 }
 
-func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
-	const uid = "example.session.app"
-	root := writeWorkspaceSessionFixture(t, `module main;
+const atlasConcreteImpactSource = `module main;
 fn i32 leaf<T>(T marker) {
     discard marker;
     let copied = fn [] i32(i32 value) { return 40 + value; };
@@ -44,7 +42,11 @@ fn i32 relay<T>(T marker) { return leaf<T>(marker); }
 fn i32 signed() { return relay<i32>(42); }
 fn i32 boolean() { return relay<bool>(true); }
 fn i32 main() { return signed() + boolean(); }
-`)
+`
+
+func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
+	const uid = "example.session.app"
+	root := writeWorkspaceSessionFixture(t, atlasConcreteImpactSource)
 	var diagnostic bytes.Buffer
 	prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
 	if code != ExitSuccess {

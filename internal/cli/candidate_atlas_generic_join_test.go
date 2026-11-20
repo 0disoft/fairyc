@@ -136,6 +136,32 @@ fn i32 main(){let a=Token<i32>{.value=1};let b=Token<u8>{.value=2};discard wrap<
 				}
 			}
 		}
+		concrete := candidateAtlasImpactFixture(t, atlasmap.LogicalSchemaV3, atlasConcreteImpactSource)
+		for _, part := range concrete.prepared.partitions {
+			if part.Header().PackageUID != "example.session.app" {
+				continue
+			}
+			for _, symbol := range part.Symbols() {
+				if symbol.Declaration.Name != "leaf" && !strings.HasPrefix(symbol.Declaration.Name, "_fy_closure_") {
+					continue
+				}
+				for _, limits := range [][2]int{{8, 64}, {3, 64}, {8, 4}} {
+					want, err := concrete.index.Impact(part.Header().PackageInstance, symbol.Visible, limits[0], limits[1])
+					if err != nil {
+						t.Fatal(err)
+					}
+					canonical, err := json.Marshal(want)
+					if err != nil {
+						t.Fatal(err)
+					}
+					code, out := run(concrete.data, concrete.current, []int{1, 0}, part.Header().PackageInstance,
+						symbol.Visible, limits[0], limits[1], 2, 128, 100000, false)
+					if code != 0 || out != string(canonical) {
+						t.Fatalf("concrete impact %s limits %v differs: %d\ngot %s\nwant %s", symbol.Declaration.Name, limits, code, out, canonical)
+					}
+				}
+			}
+		}
 		for _, bad := range []struct {
 			name            string
 			order           []int
