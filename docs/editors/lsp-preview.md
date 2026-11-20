@@ -23,8 +23,10 @@ terminates the session.
   in that notification. A full-text replacement also works. The server rejects
   a whole batch if any range is invalid, any intermediate text exceeds the
   document budget or the sum of input document and replacement bytes across
-  ranged edits exceeds 128 MiB. After a rejected batch, send full text or
-  close and reopen the document before sending more ranges.
+  ranged edits exceeds 128 MiB. Rejection retains the previous buffer and
+  records the rejected version. Semantic requests cannot use the stale buffer
+  or its project analysis. Recovery requires full text at a higher version,
+  or a close and reopen.
 - Compiler syntax, type, ownership and unsupported-feature diagnostics.
 - Definition locations from current compiler resolution facts.
 - Read-only embedded SDK navigation for clients that set

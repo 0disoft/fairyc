@@ -88,7 +88,7 @@ func TestRequestPositionIndexInvalidatesBeforeCanceledAnalysis(t *testing.T) {
 	cancel()
 	s.ctx = ctx
 	updated := "module main;\n// 한😀\nfn i32 main(){return 0;}"
-	if err := s.handle(change(2, updated, false)); !errors.Is(err, context.Canceled) || d.positionIndex != nil {
+	if err := s.handle(change(3, updated, false)); !errors.Is(err, context.Canceled) || d.positionIndex != nil {
 		t.Fatalf("accepted change retained stale index after cancellation: %v", err)
 	}
 	want := strings.Index(updated, "\nfn")

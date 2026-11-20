@@ -17,6 +17,7 @@ type document struct {
 	Text            []byte
 	Version         int
 	needsFullText   bool
+	rejectedVersion int
 	View            *analysis
 	LastClean       *analysis
 	analysisEvicted bool
@@ -164,18 +165,21 @@ func (s *server) handle(m message) error {
 		if d == nil {
 			return bad("document is not open")
 		}
-		if p.TextDocument.Version <= d.Version {
+		version := p.TextDocument.Version
+		if version <= d.Version || (d.needsFullText && version <= d.rejectedVersion) {
 			return nil
 		}
 		text, err := applyDocumentChanges(d.Text, p.ContentChanges, s.documentByteLimit(d.URI), d.needsFullText)
 		if err != nil {
 			d.needsFullText = true
+			d.rejectedVersion = version
 			s.analysisPending = true
 			return bad(err.Error())
 		}
 		d.Text = text
-		d.Version = p.TextDocument.Version
+		d.Version = version
 		d.needsFullText = false
+		d.rejectedVersion = 0
 		d.completionIndex = nil
 		d.positionIndex = nil
 		return s.recheck()

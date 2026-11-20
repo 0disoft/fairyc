@@ -6,9 +6,85 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/source"
 )
+
+func TestOversizedDocumentChangeBlocksDefinitionsUntilNewFullText(t *testing.T) {
+	for _, limit := range []string{"document", "session"} {
+		t.Run(limit, func(t *testing.T) {
+			root, filename := editorFixture(t)
+			other := fileURI(filepath.Join(root, "src", "answer.fy"))
+			uri := fileURI(filename)
+			var out bytes.Buffer
+			s := server{out: &out, workspaceRoots: []string{root}, initialized: true, docs: map[string]*document{}}
+			const answer = "module answer;\npub fn i32 value() { return 42; }"
+			const main = "module main; import answer as answer; fn i32 main() { return answer::value(); }"
+			open := func(uri, text string) {
+				send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+					"uri": uri, "languageId": "fairyc", "version": 1, "text": text,
+				}})
+			}
+			open(other, answer)
+			open(uri, main)
+			change := func(version int, text string) {
+				t.Helper()
+				send(t, &s, 0, "textDocument/didChange", map[string]any{
+					"textDocument": documentID{URI: other, Version: version}, "contentChanges": []any{map[string]string{"text": text}},
+				})
+			}
+			definition := func(uri, text string) string {
+				t.Helper()
+				out.Reset()
+				send(t, &s, 1, "textDocument/definition", map[string]any{
+					"textDocument": documentID{URI: uri}, "position": bytePosition([]byte(text), strings.Index(text, "value")+1),
+				})
+				return out.String()
+			}
+			if wire := definition(uri, main); !strings.Contains(wire, other) || !strings.Contains(wire, `"result":[{`) {
+				t.Fatalf("version 1 definition: %s", wire)
+			}
+			size := source.DefaultLimits().MaxBytes + 1
+			if limit == "session" {
+				// Model retained buffers without parsing unrelated large documents.
+				filler := make([]byte, source.DefaultLimits().MaxBytes)
+				for _, name := range []string{"a", "b", "c"} {
+					s.docs[name] = &document{Text: filler}
+				}
+				size = s.documentByteLimit(other) + 1
+			}
+			d := s.docs[other]
+			out.Reset()
+			change(2, strings.Repeat(" ", size))
+			if d.Version != 1 || d.rejectedVersion != 2 || string(d.Text) != answer || !strings.Contains(out.String(), "editor document limit exceeded") {
+				t.Fatal("oversized version was not rejected while preserving the accepted buffer")
+			}
+			delete(s.docs, "a")
+			delete(s.docs, "b")
+			delete(s.docs, "c")
+			out.Reset()
+			change(1, answer)
+			change(2, answer)
+			if out.Len() != 0 || !d.needsFullText {
+				t.Fatal("delayed or repeated version cleared the synchronization failure")
+			}
+			if wire := definition(other, answer); !strings.Contains(wire, `"code":-32801`) {
+				t.Fatalf("definition in unsynchronized document: %s", wire)
+			}
+			if wire := definition(uri, main); strings.Contains(wire, `"result":[{`) {
+				t.Fatalf("definition in dependent document used stale facts: %s", wire)
+			}
+			change(3, "\n"+answer)
+			if wire := definition(uri, main); d.Version != 3 || d.needsFullText || !strings.Contains(wire, other) ||
+				!strings.Contains(wire, `"start":{"line":2,`) {
+				t.Fatalf("version 3 definition: %s", wire)
+			}
+		})
+	}
+}
 
 func TestIncrementalDocumentChangesUseUpdatedUTF16Coordinates(t *testing.T) {
 	original := []byte("한😀x\r\nold\rnext\n")
