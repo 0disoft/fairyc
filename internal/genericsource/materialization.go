@@ -8,16 +8,17 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 )
 
-// The parser admits at most one million syntax nodes in one source file. Keep
-// one source-sized materialization allowance while bounding repeated deep
-// copies before emit allocates their bodies, types and closures.
+// The parser admits at most one million syntax nodes in one source file. Give
+// original declarations and generic specializations independent source-sized
+// allowances so the amount of written code does not spend the expansion budget.
 const defaultMaterializedASTNodeBudget uint64 = 1 << 20
 
 type materializationTask struct {
-	module *expander
-	span   diagnostic.Span
-	nodes  uint64
-	copies uint64
+	module      *expander
+	span        diagnostic.Span
+	nodes       uint64
+	copies      uint64
+	specialized bool
 }
 
 func checkMaterializationBudget(modules []*expander, plan genericplan.Plan, budget uint64) error {
@@ -28,9 +29,13 @@ func checkMaterializationBudget(modules []*expander, plan genericplan.Plan, budg
 	if err != nil {
 		return err
 	}
-	var total uint64
+	var ordinary, specialized uint64
 	for _, task := range tasks {
-		total, err = addMaterializedNodeWork(total, task.nodes, task.copies, budget)
+		total := &ordinary
+		if task.specialized {
+			total = &specialized
+		}
+		*total, err = addMaterializedNodeWork(*total, task.nodes, task.copies, budget)
 		if err != nil {
 			return task.module.at(task.span, FailureExpansion, err)
 		}
@@ -76,7 +81,7 @@ func materializationTasks(modules []*expander, plan genericplan.Plan) ([]materia
 			if err != nil {
 				return nil, module.at(function.Span, FailureExpansion, err)
 			}
-			tasks = append(tasks, materializationTask{module: module, span: function.Span, nodes: nodes, copies: copies})
+			tasks = append(tasks, materializationTask{module: module, span: function.Span, nodes: nodes, copies: copies, specialized: len(function.TypeParameters) != 0})
 		}
 		for _, aggregate := range module.sourceAggregates() {
 			shape := aggregate.shape()
@@ -91,7 +96,7 @@ func materializationTasks(modules []*expander, plan genericplan.Plan) ([]materia
 			if err != nil {
 				return nil, module.at(shape.Span, FailureExpansion, err)
 			}
-			tasks = append(tasks, materializationTask{module: module, span: shape.Span, nodes: nodes, copies: copies})
+			tasks = append(tasks, materializationTask{module: module, span: shape.Span, nodes: nodes, copies: copies, specialized: len(shape.TypeParameters) != 0})
 		}
 	}
 	return tasks, nil

@@ -79,16 +79,20 @@ func TestMaterializationBudgetBelowAtAndOver(t *testing.T) {
 	if work >= defaultMaterializedASTNodeBudget {
 		t.Fatalf("fixture work %d exceeds the production budget", work)
 	}
-	if err := checkMaterializationBudget([]*expander{x}, plan, work+1); err != nil {
+	budget := max(plainNodes, 3*templateNodes)
+	if err := checkMaterializationBudget([]*expander{x}, plan, budget+1); err != nil {
 		t.Fatalf("below budget rejected: %v", err)
 	}
-	if err := checkMaterializationBudget([]*expander{x}, plan, work); err != nil {
+	if err := checkMaterializationBudget([]*expander{x}, plan, budget); err != nil {
 		t.Fatalf("exact budget rejected: %v", err)
 	}
-	err = checkMaterializationBudget([]*expander{x}, plan, work-1)
+	err = checkMaterializationBudget([]*expander{x}, plan, budget-1)
 	var source *SourceError
 	if !errors.As(err, &source) || genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
 		t.Fatalf("over budget error = %v", err)
+	}
+	if err := checkMaterializationBudget([]*expander{x}, genericplan.Plan{}, plainNodes-1); genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
+		t.Fatalf("over ordinary budget error = %v", err)
 	}
 	after, err := json.Marshal(module)
 	if err != nil {
