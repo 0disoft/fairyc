@@ -19,6 +19,11 @@ import (
 
 func TestCandidateGenericTransportPipeline(t *testing.T) {
 	source, observer := candidateGenericTransportSource()
+	const explicit = "return id<T>(value);"
+	if strings.Count(source, explicit) != 1 {
+		t.Fatal("missing direct scalar call to adapt")
+	}
+	source = strings.Replace(source, explicit, "discard id<T>(value);return id(value);", 1)
 	runCandidateGenericTransportPipeline(t, source, observer)
 }
 
@@ -59,7 +64,7 @@ func runCandidateGenericTransportPipeline(t *testing.T, source, observer string)
 	program := strings.Replace(string(data), "module tests::module_generic_transport;", "module main;", 1)
 	program = strings.ReplaceAll(program, "@test", "") + "\n@effects(console) fn i32 main(){extended_transport_keeps_operations_and_composite_signatures_closed();emit_transport(b" + strconv.Quote(source) + ");return 0;}\n"
 	writeTestSource(t, root, "src/main.fy", program)
-	copyCandidateParityModules(t, root, "project_compiler_core", "module_project_identified_ir", "module_public_type_text", "module_catalog", "module_unit_c_emit", "module_project_complete_c", "module_unit_body_ir_model", "module_unit_cleanup_mir_model", "module_project_artifact_encode", "module_project_artifact_decode", "candidate_artifact_wire", "generic_transport_scalars", "c_text", "syntax", "scanner")
+	copyCandidateParityModules(t, root, "project_compiler_core", "module_project_identified_ir", "module_public_type_text", "module_catalog", "module_unit_c_emit", "module_project_complete_c", "module_unit_body_ir_model", "module_unit_cleanup_mir_model", "module_unit_interpreter", "module_project_artifact_encode", "module_project_artifact_decode", "candidate_artifact_wire", "generic_transport_scalars", "c_text", "syntax", "scanner")
 	build, support := candidateParityBuildParts(t, root)
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
