@@ -1,12 +1,34 @@
 package hir
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 )
 
-const InlineFunctionPrefix = "fyinlinefn1-sha256-"
+const (
+	InlineFunctionPrefix = "fyinlinefn1-sha256-"
+	InlineLoopPrefix     = "fyinlinefn2-sha256-"
+	inlineLoopEncoding   = "fairyc.inline-function/v7"
+)
+
+func ValidInlineFunctionID(id string) bool {
+	if len(id) != len(InlineFunctionPrefix)+2*sha256.Size {
+		return false
+	}
+	prefix, digest := id[:len(InlineFunctionPrefix)], id[len(InlineFunctionPrefix):]
+	if prefix != InlineFunctionPrefix && prefix != InlineLoopPrefix {
+		return false
+	}
+	for i := range len(digest) {
+		b := digest[i]
+		if !(b >= '0' && b <= '9' || b >= 'a' && b <= 'f') {
+			return false
+		}
+	}
+	return true
+}
 
 // InlineModuleResolver admits only actual inline declarations in one module.
 // Callers must keep the module immutable while using the resolver.
@@ -32,6 +54,7 @@ func InlineFunctionID(fn Function, resolvers ...func(SymbolID) *Function) (strin
 	// only actual same-module exported nongeneric @inline declarations.
 	state := make(map[SymbolID]uint8)
 	var root []byte
+	prefix := InlineFunctionPrefix
 	var visit func(Function) error
 	visit = func(current Function) error {
 		if state[current.Symbol] == 1 {
@@ -50,6 +73,9 @@ func InlineFunctionID(fn Function, resolvers ...func(SymbolID) *Function) (strin
 		}
 		if current.Symbol == fn.Symbol {
 			root = data
+			if bytes.HasPrefix(root, []byte(`{"Version":"`+inlineLoopEncoding+`"`)) {
+				prefix = InlineLoopPrefix
+			}
 		}
 		for _, callee := range callees {
 			if err := visit(*callee); err != nil {
@@ -62,7 +88,7 @@ func InlineFunctionID(fn Function, resolvers ...func(SymbolID) *Function) (strin
 	if err := visit(fn); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s%x", InlineFunctionPrefix, sha256.Sum256(root)), nil
+	return fmt.Sprintf("%s%x", prefix, sha256.Sum256(root)), nil
 }
 
 func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]byte, []*Function, error) {
@@ -77,7 +103,8 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 		return nil, nil, err
 	}
 	for _, statement := range statements {
-		if statement.Kind == StatementExpressionStatement && inlineStatementIf(statement.Expression) {
+		if statement.Kind == StatementWhile || statement.Kind == StatementFor ||
+			statement.Kind == StatementExpressionStatement && inlineStatementIf(statement.Expression) {
 			root, returns, err := encoder.statementBlock(&fn.Body, true)
 			if err != nil {
 				return nil, nil, err
@@ -85,7 +112,11 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 			if !returns || len(encoder.declared) != len(encoder.locals) {
 				return nil, nil, fmt.Errorf("@inline statement body requires all locals and a return on every path")
 			}
-			return inlineEncoding("fairyc.inline-function/v6", len(fn.Parameters), root, callees)
+			version := "fairyc.inline-function/v6"
+			if encoder.hasLoop {
+				version = inlineLoopEncoding
+			}
+			return inlineEncoding(version, len(fn.Parameters), root, callees)
 		}
 	}
 	var initializers []inlineEncodingNode

@@ -1,7 +1,6 @@
 package mir
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"strings"
 
@@ -9,7 +8,6 @@ import (
 )
 
 const (
-	inlineIdentityHexBytes = 2 * sha256.Size
 	inlineMaxParameters    = 4
 	inlineMaxBlocks        = 256
 	inlineMaxOperations    = 128
@@ -34,7 +32,8 @@ func verifyInlineFunction(fn *Function, functions map[hir.SymbolID]*Function) []
 	if detail := inlineBodyFailure(fn.Entry, fn.Blocks); detail != "" {
 		return reject(detail)
 	}
-	if !inlineControlFlowAcyclic(fn.Blocks) {
+	if !inlineControlFlowAcyclic(fn.Blocks) &&
+		(!strings.HasPrefix(fn.InlineBody, hir.InlineLoopPrefix) || !inlineControlFlowStructured(fn)) {
 		return reject("cyclic or invalid control flow")
 	}
 	// Whole-program call authority is required even for restored artifacts.
@@ -45,18 +44,7 @@ func verifyInlineFunction(fn *Function, functions map[hir.SymbolID]*Function) []
 }
 
 func validInlineIdentity(identity string) bool {
-	// Check the fixed wire shape before inspecting bytes; never decode an
-	// untrusted, potentially oversized marker just to validate its spelling.
-	if len(identity) != len(hir.InlineFunctionPrefix)+inlineIdentityHexBytes || !strings.HasPrefix(identity, hir.InlineFunctionPrefix) {
-		return false
-	}
-	for index := len(hir.InlineFunctionPrefix); index < len(identity); index++ {
-		value := identity[index]
-		if !(value >= '0' && value <= '9' || value >= 'a' && value <= 'f') {
-			return false
-		}
-	}
-	return true
+	return hir.ValidInlineFunctionID(identity)
 }
 
 func inlineSignatureFailure(fn *Function) string {

@@ -33,6 +33,8 @@ type inlineFunctionEncoder struct {
 	mutating  bool
 	branches  bool
 	armLocals []SymbolID
+	hasLoop   bool
+	loopDepth int
 }
 
 func (encoder *inlineFunctionEncoder) prepare(fn Function) ([]Statement, *Expression, error) {

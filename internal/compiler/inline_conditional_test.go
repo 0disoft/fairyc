@@ -64,7 +64,7 @@ func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 		"return if ((x == 0) == true) { 42 } else { 0 };",
 		"return if (x == 0) { var i32 local = 42; local } else { 0 };",
 		"var i32 y = 0; return if (x == 0) { y = 42; y } else { 0 };",
-		"if (x == 0) { while (true) { return 42; } } return 0;",
+		"if (x == 0) { while (true) { assert(false); } } return 0;",
 	} {
 		t.Run(body, func(t *testing.T) {
 			input := "module main; @inline pub fn i32 choose(i32 x) {" + body + "} fn i32 main() { return choose(0); }"

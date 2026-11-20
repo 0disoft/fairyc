@@ -87,6 +87,23 @@ func TestInlineVerificationOnlyAcceptsDetachedEmptyUnreachableJoins(t *testing.T
 	checkInlineVerification(t, fn, functions, "calls and resource/control-flow extensions are closed")
 }
 
+func TestInlineVerificationLoopMarkerAdmitsOnlyNaturalBackEdges(t *testing.T) {
+	const rejected = "cyclic or invalid control flow"
+	fn := inlineVerificationFixture(5)
+	fn.Blocks[0].Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{1}}
+	fn.Blocks[1].Terminator = Terminator{Kind: TerminatorSwitch, Successors: []BlockID{2, 3}}
+	fn.Blocks[2].Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{1}}
+	functions := map[hir.SymbolID]*Function{fn.Symbol: fn}
+	checkInlineVerification(t, fn, functions, rejected)
+	fn.InlineBody = hir.InlineLoopPrefix + strings.Repeat("a7", 32)
+	checkInlineVerification(t, fn, functions, "")
+	fn.Blocks[0].Terminator = Terminator{Kind: TerminatorSwitch, Successors: []BlockID{1, 2}}
+	checkInlineVerification(t, fn, functions, rejected)
+	fn.Blocks[0].Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{1}}
+	fn.Blocks[4].Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{4}}
+	checkInlineVerification(t, fn, functions, rejected)
+}
+
 func TestInlineVerificationLimitsAndControlFlow(t *testing.T) {
 	for _, test := range []struct {
 		name  string

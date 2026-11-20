@@ -56,6 +56,17 @@ func (encoder *inlineFunctionEncoder) statementBlock(block *Block, root bool) (i
 
 func (encoder *inlineFunctionEncoder) controlStatement(statement Statement) (inlineEncodingNode, bool, error) {
 	switch statement.Kind {
+	case StatementWhile:
+		node, err := encoder.whileStatement(statement.Expression)
+		return node, false, err
+	case StatementFor:
+		node, err := encoder.forStatement(statement.For)
+		return node, false, err
+	case StatementBreak, StatementContinue:
+		if encoder.loopDepth == 0 {
+			return inlineEncodingNode{}, false, fmt.Errorf("@inline loop control requires an enclosing loop")
+		}
+		return inlineEncodingNode{Op: statement.Kind.String()}, false, nil
 	case StatementExpressionStatement:
 		return encoder.branchStatement(statement.Expression)
 	case StatementReturn:

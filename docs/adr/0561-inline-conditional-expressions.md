@@ -41,8 +41,7 @@ Both compilers also admit void `if` statements with optional `else` or
 `else if`, lexical `i32` declarations, early returns and plain assignments to
 visible mutable `i32` locals. The root must return a value on every path.
 Each statement, expression and arm block counts toward the shared 64-node
-budget. The 16-local limit and the MIR operation and acyclicity limits still
-apply. Loops are outside this admission.
+budget. The 16-local limit and the MIR operation limit still apply.
 
 Statement bodies use `fairyc.inline-function/v6`. Ordered `block` and
 `if-statement` nodes preserve evaluation order. `let` and `var` declare lexical
@@ -53,3 +52,17 @@ join. An all-returning branch may leave an empty MIR join with no incoming edge.
 Existing v1–v5 encodings are preserved. The Fairy candidate independently
 checks statement coverage, lexical slots and return paths before accepting a
 restored v6 marker.
+
+The Go bootstrap also admits `while` and classic `for` with the same pure
+conditions and lexical assignment rules. `break` and `continue` use the nearest
+enclosing loop. A classic `for` keeps its initializer in scope through the
+condition, body and post clause. A loop by itself does not satisfy the root's
+return requirement. Iteration count and trap behavior follow ordinary loops.
+
+Loop bodies use the `fairyc.inline-function/v7` encoding and
+`fyinlinefn2-sha256-` carrier. It records the loop kind, condition, body, loop
+control statements, and every present or omitted `for` clause. The MIR verifier
+admits reachable `goto` back edges only when the target dominates the source.
+Removing those edges must leave an acyclic graph. The same block, operation and
+acyclic call-graph limits apply. The previous carrier still requires acyclic
+MIR. The Fairy candidate's loop support remains separate.

@@ -36,8 +36,7 @@ func Compute(coordinate packagegraph.CoordinateID, entries []Entry) (Hash, error
 	entries = slices.Clone(entries)
 	slices.SortFunc(entries, func(a, b Entry) int { return strings.Compare(a.Name, b.Name) })
 	for i, e := range entries {
-		raw, err := hex.DecodeString(strings.TrimPrefix(e.Body, hir.InlineFunctionPrefix))
-		if e.Name == "" || !strings.HasPrefix(e.Body, hir.InlineFunctionPrefix) || len(raw) != 32 || err != nil || e.Body != strings.ToLower(e.Body) || i > 0 && e.Name == entries[i-1].Name {
+		if e.Name == "" || !hir.ValidInlineFunctionID(e.Body) || i > 0 && e.Name == entries[i-1].Name {
 			return Hash{}, fmt.Errorf("invalid or duplicate inline export")
 		}
 	}

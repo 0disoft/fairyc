@@ -41,7 +41,7 @@ func TestInlineLocalsClosedForms(t *testing.T) {
 	bodies := map[string]string{
 		"compound": "var i32 x=1;x+=1;return x;", "assign": "let i32 x=1;x=2;return x;",
 		"call": "let i32 x=h();return x;", "discard": "let i32 x=1;discard x;return x;",
-		"loop": "var i32 x=1;while(x<2){x=x+1;}return x;", "type": "let i64 x=1;return 42;",
+		"loop-compound": "var i32 x=1;while(x<2){x+=1;}return x;", "type": "let i64 x=1;return 42;",
 		"forward": "let i32 a=b;let i32 b=2;return a;", "self": "let i32 x=x;return x;",
 		"after_return": "return 42;let i32 x=1;", "many": many.String() + "return 42;",
 		"budget": "let i32 unused=1;let i32 second=1;return " + strings.Repeat("1+", 31) + "1;",
