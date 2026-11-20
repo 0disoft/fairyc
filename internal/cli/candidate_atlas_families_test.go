@@ -131,8 +131,8 @@ func verifyCandidateAtlasFamilyContext(t *testing.T, got, want atlasmap.QueryCon
 	for _, relation := range []string{"reads", "test-calls", "writes"} {
 		want.MapOmissions = append(want.MapOmissions, relation+":unavailable:candidate-atlas-not-collected")
 	}
-	if want.Completeness[0].External != 0 {
-		want.MapOmissions = append(want.MapOmissions, "calls:partial:external-ffi")
+	for _, reason := range want.Completeness[0].Reasons {
+		want.MapOmissions = append(want.MapOmissions, "calls:"+string(want.Completeness[0].Status)+":"+reason)
 	}
 	sort.Strings(want.MapOmissions)
 	if !reflect.DeepEqual(got, want) {

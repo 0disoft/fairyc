@@ -16,7 +16,7 @@ func TestCandidateAtlasEffectCompleteness(t *testing.T) {
  while(version<=3){var usize external=0;while(external<=1){var usize borrowed=0;while(borrowed<=1){
   let usize templates=if(version==1){0}else{2};let usize implementations=if(version==1){0}else{3};
   let legacy=switch(header::completeness_observed_version(5,external,templates,implementations,version,borrowed==1,ref mut work)){case .ok(p):{p}case .err(_):{return 7;}};
-  let collected=switch(header::completeness_collected_version(5,external,templates,implementations,version,borrowed==1,true,ref mut work)){case .ok(p):{p}case .err(_):{return 7;}};
+  let collected=switch(header::completeness_collected_version(5,external,0,templates,implementations,version,borrowed==1,true,ref mut work)){case .ok(p):{p}case .err(_):{return 7;}};
   if(version!=1 || external!=0 || borrowed!=0){discard io::write(",");}
   discard io::write_bytes(bytes::view(ref legacy));discard io::write(",");discard io::write_bytes(bytes::view(ref collected));borrowed+=1;
  }external+=1;}version+=1;}

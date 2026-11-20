@@ -56,6 +56,24 @@ fn Result<v::Vec<Call>,u32> calls(ref input::Input p,ref ir::Program program,ref
   discard add(p,context,projection,frame,ref mut result,Call{.target=site.declaration,.frame=0,.specialization=site.node+1,.start=site.start,.end=site.end,.external=false},meter)?;
  }return .ok(result);
 }
+// One checked invocation row represents one source site, even when defer
+// lowering emits that invocation at more than one CFG exit.
+fn Result<usize,u32> omitted_cleanup_calls(ref ir::Program program,ref instances::Instances context,ref reach::Observations reached,ref mut usize meter){
+ let plan=ir::cleanup_ir(program);var usize total=0;var usize frame=1;
+ while(frame<=ir::count(program)){
+  if(!work::charge(meter,1)){return .err(3);}
+  let id=frame;frame+=1;
+  if(clean::frame_at(plan,id).kind!=2 || instances::frame_identity(context,id).len!=0){continue;}
+  let body=ir::at(program,id);var usize i=0;
+  while(i<ir::call_count(body)){
+   if(!work::charge(meter,1)){return .err(3);}
+   let call=ir::call_at(body,i);i+=1;
+   if(call.checked && (call.kind==1 || call.kind==2) && reach::completed(reached,id,call.expression,meter)?){total+=1;}
+  }
+ }
+ return .ok(total);
+}
+
 struct Counts{usize calls;usize external;usize drops;usize traps;usize unsafe_sites;usize moves;usize allocations;usize errors;usize loans;}
 fn Result<Counts,u32> body(ref mut bytes::Buffer out,ref input::Input p,ref ir::Program program,ref signatures::Program metadata,ref instances::Instances context,ref closures::Projection projection,closures::Row projected,usize frame,ref drops::Collection observed,ref unsafe_sites::Collection unsafe_observed,ref moves::Collection moved,ref allocations::Collection allocated,ref error_sites::Collection propagated,ref observations::Table borrowed,ref reach::Observations reached,ref mut usize meter){
  let row=projected.declaration;let calls=calls(p,program,context,projection,row,frame,reached,meter)?;var usize total=0;var usize external=0;
@@ -91,7 +109,7 @@ fn Result<Counts,u32> body(ref mut bytes::Buffer out,ref input::Input p,ref ir::
   discard w::pair(out,b"kind",if(site.mutable){b"mutable"}else{b"shared"},meter)?;discard w::raw(out,if(site.escapes){b",\"escapes\":true}"}else{b",\"escapes\":false}"},meter)?;j+=1;
  }discard w::raw(out,b"]}",meter)?;return .ok(Counts{.calls=total,.external,.drops=sites.end-sites.start,.traps=trap_count,.unsafe_sites=unsafe_count,.moves=moved_range.end-moved_range.start,.allocations=allocation_range.end-allocation_range.start,.errors=error_range.end-error_range.start,.loans=loan_count});
 }
-pub resource Summaries{bytes::Buffer text;bytes::Buffer specializations;usize calls;usize drops;usize traps;usize unsafe_sites;usize moves;usize allocations;usize errors;usize loans;usize external;usize functions;usize specialization_count;usize templates;usize implementations;bool observed_borrows;cleanup{}}
+pub resource Summaries{bytes::Buffer text;bytes::Buffer specializations;usize calls;usize drops;usize traps;usize unsafe_sites;usize moves;usize allocations;usize errors;usize loans;usize external;usize omitted_cleanups;usize functions;usize specialization_count;usize templates;usize implementations;bool observed_borrows;cleanup{}}
 pub fn ref u8[] text(ref Summaries p){return bytes::view(ref p.text);}
 pub fn ref u8[] specializations(ref Summaries p){return bytes::view(ref p.specializations);}
 pub fn usize count(ref Summaries p){return p.calls;}
@@ -104,6 +122,7 @@ pub fn usize return_error_count(ref Summaries p){return p.errors;}
 pub fn usize borrow_count(ref Summaries p){return p.loans;}
 pub fn bool borrows_observed(ref Summaries p){return p.observed_borrows;}
 pub fn usize external_count(ref Summaries p){return p.external;}
+pub fn usize omitted_cleanup_count(ref Summaries p){return p.omitted_cleanups;}
 pub fn usize function_count(ref Summaries p){return p.functions;}
 pub fn usize specialization_count(ref Summaries p){return p.specialization_count;}
 pub fn usize template_count(ref Summaries p){return p.templates;}
@@ -129,6 +148,7 @@ fn Result<Summaries,u32> summaries_mode(ref input::Input p,ref ir::Program progr
  let allocated=allocations::collect_all(program,65536,meter)?;
  let propagated=error_sites::collect_all(program,65536,meter)?;
  let reached=reach::collect_all(program,meter)?;
+ let omitted_cleanups=omitted_cleanup_calls(program,context,ref reached,meter)?;
  var out=bytes::empty();discard w::raw(ref mut out,b"[",meter)?;var usize total=0;var usize drop_total=0;var usize trap_total=0;var usize unsafe_total=0;var usize move_total=0;var usize allocation_total=0;var usize error_total=0;var usize loan_total=0;var usize external=0;var usize functions=0;var usize i=0;
  while(i<closures::count(projection)){
   if(!work::charge(meter,1)){return .err(3);}let projected=closures::at(projection,i);let row=projected.declaration;i+=1;let d=syntax::declaration_at(input::source(p,row.module_index),row.declaration);if(d.kind!=3 || d.generic_parameters!=0){continue;}
@@ -143,5 +163,5 @@ fn Result<Summaries,u32> summaries_mode(ref input::Input p,ref ir::Program progr
   if(row.type==0 || row.frame!=0){if(row.type==0 && row.frame==0 && !instances::inline_leaf(context,row)){return .err(103);}discard w::raw(ref mut specs,if(row.type==0){b",\"function\":"}else{b",\"cleanup\":"},meter)?;let c=body(ref mut specs,p,program,metadata,context,projection,closures::plain(row.declaration),row.frame,ref observed,ref unsafe_observed,ref moved,ref allocated,ref propagated,borrowed,ref reached,meter)?;total+=c.calls;drop_total+=c.drops;trap_total+=c.traps;unsafe_total+=c.unsafe_sites;move_total+=c.moves;allocation_total+=c.allocations;error_total+=c.errors;loan_total+=c.loans;external+=c.external;}
   discard w::raw(ref mut specs,b"}",meter)?;specialized+=1;
  }
- discard w::raw(ref mut specs,b"]",meter)?;return .ok(Summaries{.text=out,.specializations=specs,.calls=total,.drops=drop_total,.traps=trap_total,.unsafe_sites=unsafe_total,.moves=move_total,.allocations=allocation_total,.errors=error_total,.loans=loan_total,.observed_borrows=observations::ready(borrowed),.external,.functions,.specialization_count=specialized,.templates=instances::template_count(context),.implementations=instances::count(context)});
+ discard w::raw(ref mut specs,b"]",meter)?;return .ok(Summaries{.text=out,.specializations=specs,.calls=total,.drops=drop_total,.traps=trap_total,.unsafe_sites=unsafe_total,.moves=move_total,.allocations=allocation_total,.errors=error_total,.loans=loan_total,.observed_borrows=observations::ready(borrowed),.external,.omitted_cleanups,.functions,.specialization_count=specialized,.templates=instances::template_count(context),.implementations=instances::count(context)});
 }
