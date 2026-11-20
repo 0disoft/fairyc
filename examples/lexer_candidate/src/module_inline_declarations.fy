@@ -12,11 +12,44 @@ fn Info invalid(Info info){var Info out=info;out.code=3;return out;}
 fn bool i32_type(ref syntax::Parsed p,usize root){return root!=0 && syntax::type_at(p,root).kind==1 && scalars::primitive(p,root)==1;}
 fn ref u8[] local_name(ref syntax::Parsed p,syntax::Statement s){if(s.kind==2 && s.entry!=0){let a=syntax::entry_at(p,s.entry-1);return syntax::source_view(p)[a.name_start..a.name_end];}if(s.kind==4 && s.target!=0 && syntax::expression_at(p,s.target).kind==2){return syntax::expression_text(p,s.target);}return b"";}
 fn bool bound(ref syntax::Parsed p,syntax::Declaration d,ref u8[] name,usize visible){var usize i=0;while(i<visible){let s=syntax::statement_at(p,syntax::block_statement(p,d.body,i));if(bytes::equal(name,local_name(p,s))){return true;}i+=1;}i=d.entry_start;while(i<d.entry_start+d.entry_count){let a=syntax::entry_at(p,i);if(a.kind==1 && bytes::equal(name,syntax::source_view(p)[a.name_start..a.name_end])){return true;}i+=1;}return false;}
-fn bool has_calls(ref syntax::Parsed p,syntax::Declaration d){let b=syntax::statement_at(p,d.body);var usize i=1;while(i<=syntax::expression_count(p)){let e=syntax::expression_at(p,i);if(e.kind==6 && e.start>=b.start && e.end<=b.end){return true;}i+=1;}return false;}
+fn bool has_kind(ref syntax::Parsed p,syntax::Declaration d,u32 kind){let b=syntax::statement_at(p,d.body);var usize i=1;while(i<=syntax::expression_count(p)){let e=syntax::expression_at(p,i);if(e.kind==kind && e.start>=b.start && e.end<=b.end){return true;}i+=1;}return false;}
 fn bool edge(ref syntax::Parsed p,syntax::Declaration d,usize target,ref mut v::Vec<Row> graph){var usize owner=64;var usize callee=64;var usize i=0;while(i<v::len<Row>(graph)){let row=*v::at<Row>(graph,i);if(syntax::declaration_at(p,row.declaration).name_start==d.name_start){owner=i;}if(row.declaration==target){callee=i;}i+=1;}if(owner==64 || callee==64){return false;}let usize one=1;let row=v::at_mut<Row>(graph,owner);row.edges=row.edges|(one<<callee);return true;}
+fn bool condition(ref syntax::Parsed p,syntax::Declaration d,usize id,usize visible,ref mut usize count,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(id==0 || id>syntax::expression_count(p) || *count>=64){return json::reject(work,9);}
+    ;*count+=1;
+    let e=syntax::expression_at(p,id);
+    if(e.kind==3){return e.left<id && condition(p,d,e.left,visible,count,out,work,graph);}
+    let op=syntax::expression_text(p,id);
+    if(e.kind==1){return identity::boolean(out,op,work);}
+    return e.kind==5 && e.left<id && e.right<id && identity::comparison(op) &&
+        identity::branch(out,op,work) && expression(p,d,e.left,visible,count,out,work,graph) &&
+        json::raw(out,b",",work) && expression(p,d,e.right,visible,count,out,work,graph) && json::raw(out,b"]}",work);
+}
+fn bool value_block(ref syntax::Parsed p,syntax::Declaration d,usize block,usize parent,usize visible,ref mut usize count,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(block==0 || block>syntax::statement_count(p)){return json::reject(work,9);}
+    let row=syntax::statement_at(p,block);
+    return row.kind==1 && row.first==0 && row.second==0 && row.expression<parent &&
+        expression(p,d,row.expression,visible,count,out,work,graph);
+}
 fn bool expression(ref syntax::Parsed p,syntax::Declaration d,usize id,usize visible,ref mut usize count,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
     if(id==0 || id>syntax::expression_count(p) || *count>=64){return json::reject(work,9);};*count+=1;let e=syntax::expression_at(p,id);
     if(e.kind==3){return e.left<id && expression(p,d,e.left,visible,count,out,work,graph);}
+    if(e.kind==13){
+        if(e.left>=id || e.right==0 || e.right>=id){return json::reject(work,9);}
+        let arms=syntax::expression_at(p,e.right);
+        if(arms.kind!=14 || arms.right==0 || arms.right>=e.right){return json::reject(work,9);}
+        if(!identity::branch(out,b"if",work) || !condition(p,d,e.left,visible,count,out,work,graph) ||
+            *count>=64 || !json::raw(out,b",",work)){return json::reject(work,9);}
+        ;*count+=1;
+        if(!value_block(p,d,arms.left,e.right,visible,count,out,work,graph) || !json::raw(out,b",",work)){return json::reject(work,9);}
+        let other=syntax::expression_at(p,arms.right);
+        if(other.kind==12){
+            if(*count>=64){return json::reject(work,9);}
+            ;*count+=1;
+            if(!value_block(p,d,other.left,arms.right,visible,count,out,work,graph)){return json::reject(work,9);}
+        }else if(other.kind!=13 || !expression(p,d,arms.right,visible,count,out,work,graph)){return json::reject(work,9);}
+        return json::raw(out,b"]}",work);
+    }
     if(e.kind==1){let n=switch(identity::integer(syntax::expression_text(p,id))){case .ok(n):{n}case .err(_):{return json::reject(work,9);}};return identity::leaf(out,b"literal",n,work);}
     if(e.kind==2){let name=syntax::expression_text(p,id);var usize local=visible;while(local>0){local-=1;let st=syntax::statement_at(p,syntax::block_statement(p,d.body,local));if(bytes::equal(name,local_name(p,st))){return identity::leaf(out,b"local",local,work);}}var usize i=d.entry_start;var usize position=0;while(i<d.entry_start+d.entry_count){let a=syntax::entry_at(p,i);if(a.kind==1){if(bytes::equal(name,syntax::source_view(p)[a.name_start..a.name_end])){return identity::leaf(out,b"path",position,work);}position+=1;}i+=1;}return json::reject(work,9);}
     if(e.kind==6){
@@ -44,7 +77,7 @@ fn Info read_body(ref syntax::Parsed p,usize declaration,ref mut v::Vec<Row> gra
     i=0;while(i<locals){let id=syntax::block_statement(p,d.body,i);let s=syntax::statement_at(p,id);if(s.expression==0){return invalid(info);}if(s.kind==2){if(s.entry==0){return invalid(info);}let a=syntax::entry_at(p,s.entry-1);if((a.kind!=2 && a.kind!=3) || a.type_root!=0 && !i32_type(p,a.type_root)){return invalid(info);}declarations+=1;mutating=mutating || a.kind==3;}
         else if(s.kind==4){let name=local_name(p,s);if(name.len==0 || !bytes::equal(syntax::assignment_operator(p,id),b"=")){return invalid(info);}var bool writable=false;var usize j=0;while(j<i){let old=syntax::statement_at(p,syntax::block_statement(p,d.body,j));if(old.kind==2 && bytes::equal(name,local_name(p,old))){writable=syntax::entry_at(p,old.entry-1).kind==3;}j+=1;}if(!writable){return invalid(info);}mutating=true;}else{return invalid(info);}i+=1;}if(declarations>16){return invalid(info);}
     var bytes::Buffer out=bytes::empty();var json::Ledger work=json::empty();var usize nodes=0;
-    if(!if(mutating){identity::steps_header(ref mut out,info.parameters,ref mut work)}else if(has_calls(p,d)){identity::calls_header(ref mut out,info.parameters,locals!=0,ref mut work)}else if(locals==0){identity::header(ref mut out,info.parameters,ref mut work)}else{identity::locals_header(ref mut out,info.parameters,ref mut work)}){return invalid(info);}
+    if(!if(has_kind(p,d,13)){identity::conditional_header(ref mut out,info.parameters,locals!=0,mutating,ref mut work)}else if(mutating){identity::steps_header(ref mut out,info.parameters,ref mut work)}else if(has_kind(p,d,6)){identity::calls_header(ref mut out,info.parameters,locals!=0,ref mut work)}else if(locals==0){identity::header(ref mut out,info.parameters,ref mut work)}else{identity::locals_header(ref mut out,info.parameters,ref mut work)}){return invalid(info);}
     i=0;while(i<locals){let s=syntax::statement_at(p,syntax::block_statement(p,d.body,i));if(!expression(p,d,s.expression,i,ref mut nodes,ref mut out,ref mut work,graph) || !json::raw(ref mut out,b",",ref mut work)){return invalid(info);}i+=1;}
     if(!expression(p,d,info.expression,locals,ref mut nodes,ref mut out,ref mut work,graph) || locals!=0 && !json::raw(ref mut out,b"]}",ref mut work)){return invalid(info);}info.hash=switch(identity::finish(ref mut out,ref mut work)){case .ok(h):{h}case .err(_):{return invalid(info);}};return info;
 }

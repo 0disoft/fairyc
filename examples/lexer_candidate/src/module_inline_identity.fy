@@ -13,6 +13,19 @@ pub fn bool locals_header(ref mut bytes::Buffer out,usize arity,ref mut json::Le
 pub fn bool calls_header(ref mut bytes::Buffer out,usize arity,bool locals,ref mut json::Ledger work){return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v3\",\"Arity\":",work) && json::number(out,arity,work) && json::raw(out,b",\"Root\":",work) && (!locals || branch(out,b"bindings",work));}
 // Straight-line mutable bindings use SSA-versioned initializer positions.
 pub fn bool steps_header(ref mut bytes::Buffer out,usize arity,ref mut json::Ledger work){return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v4\",\"Arity\":",work) && json::number(out,arity,work) && json::raw(out,b",\"Root\":",work) && branch(out,b"bindings",work);}
+pub fn bool conditional_header(ref mut bytes::Buffer out,usize arity,bool locals,bool mutating,ref mut json::Ledger work){
+    return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v5\",\"Arity\":",work) &&
+        json::number(out,arity,work) && json::raw(out,b",\"Root\":",work) &&
+        (!locals || branch(out,if(mutating){b"mutable-bindings"}else{b"bindings"},work));
+}
+pub fn bool comparison(ref u8[] op){
+    return bytes::equal(op,b"==") || bytes::equal(op,b"!=") || bytes::equal(op,b"<") ||
+        bytes::equal(op,b"<=") || bytes::equal(op,b">") || bytes::equal(op,b">=");
+}
+pub fn bool boolean(ref mut bytes::Buffer out,ref u8[] value,ref mut json::Ledger work){
+    return (bytes::equal(value,b"true") || bytes::equal(value,b"false")) &&
+        json::raw(out,b"{\"Op\":\"literal\",\"Value\":",work) && json::quoted(out,value,work) && json::raw(out,b",\"Children\":null}",work);
+}
 pub fn bool call(ref mut bytes::Buffer out,ref u8[] name,bool arguments,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":\"call\",\"Value\":",work) && json::quoted(out,name,work) && json::raw(out,if(arguments){b",\"Children\":["}else{b",\"Children\":null}"},work);}
 pub fn bool leaf(ref mut bytes::Buffer out,ref u8[] op,usize value,ref mut json::Ledger work){return json::raw(out,b"{\"Op\":",work) && json::quoted(out,op,work) && json::raw(out,b",\"Value\":\"",work) && json::number(out,value,work) && json::raw(out,b"\",\"Children\":null}",work);}
 pub fn bool operator(ref u8[] op,bool binary){return bytes::equal(op,b"+") || bytes::equal(op,b"-") || binary && (bytes::equal(op,b"*") || bytes::equal(op,b"/") || bytes::equal(op,b"%"));}

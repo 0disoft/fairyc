@@ -93,7 +93,11 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 	}
 	version := inlineEncodingVersion(len(initializers) != 0, len(callees) != 0, encoder.mutating, encoder.branches)
 	if len(initializers) != 0 {
-		root = inlineEncodingNode{Op: "bindings", Children: append(initializers, root)}
+		op := "bindings"
+		if encoder.branches && encoder.mutating {
+			op = "mutable-bindings"
+		}
+		root = inlineEncodingNode{Op: op, Children: append(initializers, root)}
 	}
 	data, err := json.Marshal(struct {
 		Version string

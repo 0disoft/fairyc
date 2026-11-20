@@ -19,9 +19,14 @@ import (
 	"github.com/0disoft/fairyc/internal/cruntime"
 )
 
-func TestCandidateInlineLocalsPipeline(t *testing.T)   { runCandidateInlineLocalsPipeline(t, false) }
-func TestCandidateInlineMutationPipeline(t *testing.T) { runCandidateInlineLocalsPipeline(t, true) }
-func runCandidateInlineLocalsPipeline(t *testing.T, mutation bool) {
+func TestCandidateInlineLocalsPipeline(t *testing.T) { runCandidateInlineLocalsPipeline(t, "locals") }
+func TestCandidateInlineMutationPipeline(t *testing.T) {
+	runCandidateInlineLocalsPipeline(t, "mutation")
+}
+func TestCandidateInlineConditionalPipeline(t *testing.T) {
+	runCandidateInlineLocalsPipeline(t, "conditional")
+}
+func runCandidateInlineLocalsPipeline(t *testing.T, family string) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private compiler-host replay currently requires Windows AMD64; Linux deferred")
 	}
@@ -40,12 +45,18 @@ func runCandidateInlineLocalsPipeline(t *testing.T, mutation bool) {
 		"return -2147483648;", "let i32 minimum=-2147483648;return minimum;",
 		"return a/b;", "let i32 unused=10/b;let i32 numerator=a;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;",
 	).Replace(string(data)))
-	if mutation {
+	if family == "mutation" {
 		data = []byte(strings.NewReplacer(
 			"let i32 left=a*1000+b*100;let i32 right=c*10+d;return left+right;", "var i32 left=a*1000+b*100;let i32 right=c*10+d;left=left+right;return left;",
 			"let i32 added=x+2;let doubled=added*2;return doubled/2;", "var i32 added=x;let before=added;added=before+2;let copied=added;added=copied*2;return added/2;",
 			"let i32 minimum=-2147483648;return minimum;", "var i32 minimum=0;minimum=-2147483648;return minimum;",
 			"let i32 unused=10/b;let i32 numerator=a;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;", "var i32 numerator=a;let i32 unused=10/b;numerator=numerator;let i32 doubled=a*2;let i32 denominator=b;return numerator/denominator;",
+		).Replace(string(data)))
+	}
+	if family == "conditional" {
+		data = []byte(strings.NewReplacer(
+			"let i32 added=x+2;", "let i32 added=if (x < 0) { 1/0 } else if (x == 0) { 2 } else { x+2 };",
+			"let i32 unused=10/b;", "let i32 unused=if (b == 0) { 10/b } else { 0 };",
 		).Replace(string(data)))
 	}
 	program := strings.Replace(string(data), "module tests::module_inline_pipeline;", "module main;", 1)
@@ -80,6 +91,17 @@ func runCandidateInlineLocalsPipeline(t *testing.T, mutation bool) {
 	writeTestSource(t, root, "src/main.fy", program)
 	copyCandidateParityModules(t, root, "project_compiler_core", "module_project_identified_ir", "module_project_interfaces", "module_public_type_text", "module_catalog", "module_unit_c_emit", "module_project_complete_c", "module_unit_body_ir_model", "module_unit_cleanup_mir_model", "module_program_artifact_encode", "module_program_artifact_decode", "module_body_artifact_encode", "module_body_artifact_decode", "module_inline_identity", "candidate_artifact_wire", "syntax", "scanner", "module_project_artifact_encode", "module_project_artifact_decode", "module_program_artifact_wire")
 	build, support := candidateParityBuildParts(t, root)
+	support = "#include <stdio.h>\n" + strings.Replace(support, "    _Exit((int)(FY_RUNTIME_TRAP_EXIT_BASE + category));", `    fprintf(stderr, "producer trap %u", category);
+    if (fy_trap_receipt_length >= 20) {
+        uint64_t start = 0, end = 0;
+        for (unsigned i = 0; i < 8; ++i) {
+            start |= (uint64_t)fy_trap_receipt[4 + i] << (8 * i);
+            end |= (uint64_t)fy_trap_receipt[12 + i] << (8 * i);
+        }
+        fprintf(stderr, " %.*s:%llu..%llu", (int)(fy_trap_receipt_length - 20), fy_trap_receipt + 20,
+                (unsigned long long)start, (unsigned long long)end);
+    }
+    _Exit((int)(FY_RUNTIME_TRAP_EXIT_BASE + category));`, 1)
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		t.Fatal(err)

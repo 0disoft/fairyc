@@ -17,6 +17,9 @@ import (
 func TestCandidateInlineLocalsIdentity(t *testing.T) {
 	var probe strings.Builder
 	for _, decl := range []string{
+		"@inline pub fn i32 choose(i32 x){return if (x < 0) { 1/0 } else if ((x == 0)) { 41 } else { x+1 };}",
+		"@inline pub fn i32 choose(i32 x){let i32 y=if (true) { x } else { 0 };return if (y != 0) { y } else { 42 };}",
+		"@inline pub fn i32 choose(i32 x){var i32 y=if (true) { x } else { 0 };return if (y != 0) { y } else { 42 };}",
 		"@inline pub fn i32 add(i32 x){var i32 value=x;value=value+2;let old=value;value=old+value;return value/2;}",
 		"@inline pub fn i32 add(i32 x){let i32 a=x+2;let b=a*2;return b/2;}",
 		"@inline pub fn i32 add(i32 renamed){let left=(renamed+0x2);let i32 right=left*0b10;return (right/2);}",
@@ -50,6 +53,8 @@ func TestCandidateInlineLocalsIdentity(t *testing.T) {
 		probe.WriteString("}\n")
 	}
 	for _, decl := range []string{
+		"@inline pub fn i32 choose(i32 x){return if (x < 0 && x >= -1) { 41 } else { 42 };}",
+		"@inline pub fn i32 choose(){return if (true) { let i32 value=42; value } else { 0 };}",
 		"@inline pub fn i32 f(){let i32 x=h();return x;}",
 		"@inline pub fn i32 f(){let i32 x=1;x=2;return x;}",
 		"@inline pub fn i32 f(){let i64 x=1;return 42;}",
