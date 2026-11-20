@@ -415,3 +415,57 @@ func TestRenameEnumMembersUsesCheckedVariantAndPayload(t *testing.T) {
 		}
 	}
 }
+
+func TestRenameMethodParameterPreservesReceiver(t *testing.T) {
+	root, path := editorFixture(t)
+	uri := fileURI(path)
+	const text = "module main; struct Point { i32 value; }\n" +
+		"fn i32 Point::add(ref Point this, i32 input) { return this.value + input; }\n" +
+		"fn i32 Point::fixed(i32 factor) { return factor; }\n"
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{
+		"rootUri":      fileURI(root),
+		"capabilities": map[string]any{"workspace": map[string]any{"workspaceEdit": map[string]bool{"documentChanges": true}}},
+	})
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 1, "languageId": "fairyc", "text": text,
+	}})
+	d := s.docs[uri]
+	if d.View == nil || !d.View.clean {
+		t.Fatalf("fixture did not check cleanly: %s", &out)
+	}
+	request := func(method, needle, name string) {
+		t.Helper()
+		out.Reset()
+		send(t, &s, 2, method, map[string]any{
+			"textDocument": documentID{URI: uri},
+			"position":     bytePosition(d.Text, strings.Index(text, needle)),
+			"newName":      name,
+		})
+	}
+	for _, old := range []string{"input", "factor"} {
+		request("textDocument/rename", old+";", "amount")
+		var result struct{ DocumentChanges []documentEdit }
+		if err := json.Unmarshal(editorResult(t, &out), &result); err != nil || len(result.DocumentChanges) != 1 {
+			t.Fatalf("%s rename = %+v (%v)", old, result, err)
+		}
+		edits := result.DocumentChanges[0].Edits
+		if len(edits) != 2 {
+			t.Fatalf("%s edits = %+v", old, edits)
+		}
+		for i, start := range []int{strings.Index(text, old), strings.LastIndex(text, old)} {
+			if want := (textEdit{Range: textRange(d.Text, start, start+len(old)), NewText: "amount"}); edits[i] != want {
+				t.Fatalf("%s edit %d = %+v, want %+v", old, i, edits[i], want)
+			}
+		}
+	}
+	request("textDocument/prepareRename", "this.value", "")
+	if got := string(editorResult(t, &out)); got != "null" {
+		t.Fatalf("receiver was renameable: %s", got)
+	}
+	request("textDocument/rename", "factor;", "this")
+	if !strings.Contains(out.String(), "this is reserved for the method receiver") {
+		t.Fatalf("accepted a new receiver name: %s", &out)
+	}
+}

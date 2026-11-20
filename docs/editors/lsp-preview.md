@@ -56,7 +56,7 @@ terminates the session.
   parser. The server checks the resulting syntax at the current document
   version. A deletion must also preserve all other significant tokens and
   comments. Clients need code action literals and versioned workspace edits.
-- Rename for local bindings, ordinary function parameters, plain functions,
+- Rename for local bindings, function and method parameters, plain functions,
   owner-qualified callables, plain struct/resource fields and plain enum
   variants and payload fields across the current checked workspace.
   Parameter edits include verified named argument labels. Callable edits
@@ -70,8 +70,8 @@ terminates the session.
   are revalidated before the reply. The server leaves application of edits to
   the client. Consumers outside the loaded source graph, including separate
   test source roots, are outside this search. Standalone documents support
-  local bindings, ordinary function parameters, private callables and plain
-  struct/resource and enum members. The entry point name, method parameters,
+  local bindings, function and method parameters, private callables and plain
+  struct/resource and enum members. The entry point name, method receiver this,
   attributed function names and aggregate layouts, and generic specializations
   are excluded. Start a shorthand-related rename at the declaration or another
   unambiguous use. The server expands a shared initializer token to an explicit

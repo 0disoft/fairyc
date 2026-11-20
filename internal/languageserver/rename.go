@@ -20,10 +20,11 @@ var errRenameUnavailable = errors.New("rename requires a verified local binding,
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
-	target semantic.SymbolCoordinate
-	name   string
-	files  []renameFile
-	cursor tokenSpan
+	target         semantic.SymbolCoordinate
+	name           string
+	files          []renameFile
+	cursor         tokenSpan
+	ownerParameter bool
 }
 
 type renameFile struct {
@@ -64,6 +65,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		at = target.Declaration.StartByte
 	}
 	name, owner, kind := "", "", ""
+	ownerParameter := false
 	decl := hir.Span{Source: key.Path, Package: key.Package}
 	for _, binding := range module.Bindings {
 		if binding.NameSpan.StartByte <= at && at < binding.NameSpan.EndByte {
@@ -73,9 +75,13 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		}
 	}
 	for _, fn := range module.Functions {
-		if fn.Owner == "" && len(fn.TypeParameters) == 0 {
+		if len(fn.TypeParameters) == 0 {
 			for _, parameter := range fn.Parameters {
 				if parameter.NameSpan.StartByte <= at && at < parameter.NameSpan.EndByte {
+					ownerParameter = fn.Owner != ""
+					if ownerParameter && parameter.Name == "this" {
+						return renamePlan{}, errRenameUnavailable
+					}
 					name, kind = parameter.Name, "parameter"
 					decl.StartByte, decl.EndByte = parameter.NameSpan.StartByte, parameter.NameSpan.EndByte
 					break
@@ -178,7 +184,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		file, _ := view.file(use)
 		spans[file.Path][tokenSpan{use.StartByte, use.EndByte}] = true
 	}
-	plan := renamePlan{target: target, name: name}
+	plan := renamePlan{target: target, name: name, ownerParameter: ownerParameter}
 	for _, path := range slices.Sorted(maps.Keys(files)) {
 		file := files[path]
 		id := editableDocumentID{URI: fileURI(path)}
@@ -274,6 +280,9 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	}
 	if plan.target.Kind == "function" && plan.target.Name == plan.name && name == "main" {
 		return nil, errors.New("main is reserved for the program entry point")
+	}
+	if plan.ownerParameter && name == "this" {
+		return nil, errors.New("this is reserved for the method receiver")
 	}
 	if name == plan.name {
 		return []documentEdit{}, nil
