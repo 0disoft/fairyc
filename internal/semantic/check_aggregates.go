@@ -57,7 +57,7 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 			continue
 		}
 		seen[fieldExpression.Text] = struct{}{}
-		if name, ok := c.module.file.Module.RecordFieldNames[fieldExpression.Span]; ok {
+		if name, ok := c.module.file.Module.FieldSelectorNames[fieldExpression.Span]; ok {
 			c.recordFieldResolution(constructor, field, name)
 		}
 		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
@@ -87,6 +87,7 @@ func (c *typeChecker) checkContextualEnumPath(expression *ast.Expression, result
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload variant used without record construction")
 		return hir.TypeInvalid
 	}
+	c.recordEnumVariantResolution(info.symbol, variant, expression.Span)
 	result.Kind = hir.ExpressionEnumVariant
 	result.Symbol = info.symbol.id
 	result.Variant = name
@@ -108,6 +109,7 @@ func (c *typeChecker) checkContextualEnumRecord(expression *ast.Expression, resu
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown contextual enum variant "+name)
 		return hir.TypeInvalid
 	}
+	c.recordEnumVariantResolution(info.symbol, variant, expression.Children[0].Span)
 	result.Kind = hir.ExpressionEnumVariant
 	result.Symbol = info.symbol.id
 	result.Variant = name
@@ -123,6 +125,9 @@ func (c *typeChecker) checkContextualEnumRecord(expression *ast.Expression, resu
 			continue
 		}
 		seen[fieldExpression.Text] = struct{}{}
+		if name, ok := c.module.file.Module.FieldSelectorNames[fieldExpression.Span]; ok {
+			c.recordFieldResolution(info.symbol, field, name)
+		}
 		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
 		result.Children = appendExpression(result.Children, value)
 		result.Fields = append(result.Fields, fieldExpression.Text)
@@ -216,6 +221,21 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	}
 	result.Operator = expression.Text
 	return field.typ
+}
+
+func (c *typeChecker) recordEnumVariantResolution(owner *symbol, variant enumVariant, path diagnostic.Span) {
+	end := path.EndByte
+	start := end - len(variant.name)
+	if start <= path.StartByte || start >= end || variant.declaration.EndByte <= variant.declaration.StartByte {
+		return
+	}
+	c.analyzer.selectorResolutions = append(c.analyzer.selectorResolutions, Resolution{
+		Use: sourceSpan(c.module.file.Path, start, end),
+		Target: SymbolCoordinate{
+			Package: owner.packageID, Module: owner.module, Name: owner.name + "::" + variant.name,
+			Kind: "enum-variant", Declaration: variant.declaration,
+		},
+	})
 }
 
 func (c *typeChecker) recordFieldResolution(owner *symbol, field resourceField, name diagnostic.Span) {

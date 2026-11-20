@@ -13,22 +13,22 @@ import (
 
 // Module is one source file after syntax-only lowering.
 type Module struct {
-	Path             string
-	Span             diagnostic.Span
-	SourceSize       int
-	SourceLineStarts []int
-	Imports          []Import
-	Constants        []Constant
-	StaticAssertions []StaticAssertion
-	States           []StateDeclaration
-	Structs          []Struct
-	Resources        []Resource
-	Enums            []Enum
-	ForeignFunctions []ForeignFunction
-	Functions        []Function
-	Bindings         []Binding
-	Literals         []Literal
-	RecordFieldNames map[diagnostic.Span]diagnostic.Span `json:"-"`
+	Path               string
+	Span               diagnostic.Span
+	SourceSize         int
+	SourceLineStarts   []int
+	Imports            []Import
+	Constants          []Constant
+	StaticAssertions   []StaticAssertion
+	States             []StateDeclaration
+	Structs            []Struct
+	Resources          []Resource
+	Enums              []Enum
+	ForeignFunctions   []ForeignFunction
+	Functions          []Function
+	Bindings           []Binding
+	Literals           []Literal
+	FieldSelectorNames map[diagnostic.Span]diagnostic.Span `json:"-"`
 }
 
 // StateDeclaration is the single package-owned persistent-state schema admitted by source.
@@ -286,11 +286,11 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	if !found || root.Kind != syntax.KindSource {
 		return nil, errors.New("syntax tree has no source root")
 	}
-	// Named field initializers have sparse source coordinates. Keep them
+	// Field initializer and pattern labels have sparse source coordinates. Keep them
 	// outside Expression so unrelated expressions do not grow.
 	var fieldNames map[diagnostic.Span]diagnostic.Span
 	for _, node := range tree.Nodes {
-		if node.Kind == syntax.KindField && len(node.Children) == 1 && node.NameSpan.EndByte > node.NameSpan.StartByte {
+		if node.Kind == syntax.KindField && (node.Cooked != "" || len(node.Children) == 1) && node.NameSpan.EndByte > node.NameSpan.StartByte {
 			if fieldNames == nil {
 				fieldNames = make(map[diagnostic.Span]diagnostic.Span)
 			}
@@ -304,11 +304,11 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		}
 	}
 	module := &Module{
-		Path:             tree.Module,
-		Span:             root.Span,
-		SourceSize:       len(tree.Source),
-		RecordFieldNames: fieldNames,
-		SourceLineStarts: lineStarts,
+		Path:               tree.Module,
+		Span:               root.Span,
+		SourceSize:         len(tree.Source),
+		FieldSelectorNames: fieldNames,
+		SourceLineStarts:   lineStarts,
 	}
 	for _, childID := range root.Children {
 		child, ok := tree.Node(childID)

@@ -343,3 +343,57 @@ func TestRenameFieldChecksWritesInitializersAndOwner(t *testing.T) {
 		t.Fatalf("accepted field with shared shorthand spelling: %s", got)
 	}
 }
+
+func TestRenameEnumMembersUsesCheckedVariantAndPayload(t *testing.T) {
+	root, path := editorFixture(t)
+	uri := fileURI(path)
+	const text = "module main;\n" +
+		"enum Event { Empty; Pair { i32 value; }; Other { i32 value; }; }\n" +
+		"fn Event make() { return .Pair{.value = 42}; }\n" +
+		"fn Event empty() { return .Empty; }\n" +
+		"fn i32 main() { return switch (make()) {\n" +
+		"case .Empty: { 0 }\ncase .Pair{. /* field */ value = item}: { item }\n" +
+		"case .Other{.value = item}: { item }\n}; }\n"
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{
+		"rootUri":      fileURI(root),
+		"capabilities": map[string]any{"workspace": map[string]any{"workspaceEdit": map[string]bool{"documentChanges": true}}},
+	})
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 1, "languageId": "fairyc", "text": text,
+	}})
+	d := s.docs[uri]
+	if d.View == nil || !d.View.clean {
+		t.Fatalf("fixture did not check cleanly: %s", &out)
+	}
+	for _, scenario := range []struct {
+		name, replacement string
+		want              []int
+	}{
+		{"Pair", "Payload", []int{strings.Index(text, "Pair"), strings.Index(text, ".Pair") + 1, strings.LastIndex(text, ".Pair") + 1}},
+		{"Empty", "None", []int{strings.Index(text, "Empty"), strings.Index(text, ".Empty") + 1, strings.LastIndex(text, ".Empty") + 1}},
+		{"value", "amount", []int{strings.Index(text, "value"), strings.Index(text, ".value") + 1, strings.Index(text, "value = item")}},
+	} {
+		out.Reset()
+		send(t, &s, 2, "textDocument/rename", map[string]any{
+			"textDocument": documentID{URI: uri},
+			"position":     bytePosition(d.Text, scenario.want[2]),
+			"newName":      scenario.replacement,
+		})
+		var result struct{ DocumentChanges []documentEdit }
+		if err := json.Unmarshal(editorResult(t, &out), &result); err != nil || len(result.DocumentChanges) != 1 {
+			t.Fatalf("%s rename = %+v (%v)", scenario.name, result, err)
+		}
+		edits := result.DocumentChanges[0].Edits
+		if len(edits) != len(scenario.want) {
+			t.Fatalf("%s edits = %+v", scenario.name, edits)
+		}
+		for i, edit := range edits {
+			start := scenario.want[i]
+			if edit.NewText != scenario.replacement || edit.Range != textRange(d.Text, start, start+len(scenario.name)) {
+				t.Fatalf("%s edit %d = %+v", scenario.name, i, edit)
+			}
+		}
+	}
+}

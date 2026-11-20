@@ -16,7 +16,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, workspace callable, or field")
+var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, workspace callable, field, or enum variant")
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
@@ -85,10 +85,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		}
 	}
 	if name == "" {
-		name, owner, decl = renameFieldDeclaration(module, at, decl)
-		if name != "" {
-			kind = "field"
-		}
+		name, owner, kind, decl = renameMemberDeclaration(module, at, decl)
 	}
 	qualified := name
 	if owner != "" {
@@ -200,7 +197,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 	return plan, nil
 }
 
-func renameFieldDeclaration(module *ast.Module, offset int, decl hir.Span) (string, string, hir.Span) {
+func renameMemberDeclaration(module *ast.Module, offset int, decl hir.Span) (string, string, string, hir.Span) {
 	match := func(owner string, fields []ast.FieldDeclaration) (string, string, hir.Span) {
 		for _, field := range fields {
 			if field.NameSpan.StartByte <= offset && offset < field.NameSpan.EndByte {
@@ -213,18 +210,32 @@ func renameFieldDeclaration(module *ast.Module, offset int, decl hir.Span) (stri
 	for _, structure := range module.Structs {
 		if len(structure.Attributes) == 0 && len(structure.TypeParameters) == 0 {
 			if name, owner, span := match(structure.Name, structure.Fields); name != "" {
-				return name, owner, span
+				return name, owner, "field", span
 			}
 		}
 	}
 	for _, resource := range module.Resources {
 		if len(resource.Attributes) == 0 && len(resource.TypeParameters) == 0 {
 			if name, owner, span := match(resource.Name, resource.Fields); name != "" {
-				return name, owner, span
+				return name, owner, "field", span
 			}
 		}
 	}
-	return "", "", decl
+	for _, enumeration := range module.Enums {
+		if len(enumeration.Attributes) != 0 {
+			continue
+		}
+		for _, variant := range enumeration.Variants {
+			if variant.NameSpan.StartByte <= offset && offset < variant.NameSpan.EndByte {
+				decl.StartByte, decl.EndByte = variant.NameSpan.StartByte, variant.NameSpan.EndByte
+				return variant.Name, enumeration.Name, "enum-variant", decl
+			}
+			if name, owner, span := match(enumeration.Name, variant.Fields); name != "" {
+				return name, owner, "field", span
+			}
+		}
+	}
+	return "", "", "", decl
 }
 
 func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEdit, error) {

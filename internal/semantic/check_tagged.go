@@ -114,6 +114,9 @@ func (c *typeChecker) checkEnumMatch(expression *ast.Expression, result *hir.Exp
 			return hir.TypeInvalid
 		}
 		seen[variant.name] = struct{}{}
+		if len(pattern.Children) > 0 {
+			c.recordEnumVariantResolution(info.symbol, variant, pattern.Children[0].Span)
+		}
 		arm := hir.MatchArm{Variant: variant.name, Binding: hir.NoSymbol}
 		boundFields := make(map[string]struct{}, len(pattern.Children)-1)
 		for _, fieldExpression := range pattern.Children[1:] {
@@ -128,6 +131,9 @@ func (c *typeChecker) checkEnumMatch(expression *ast.Expression, result *hir.Exp
 				return hir.TypeInvalid
 			}
 			boundFields[fieldExpression.Text] = struct{}{}
+			if name, ok := c.module.file.Module.FieldSelectorNames[fieldExpression.Span]; ok {
+				c.recordFieldResolution(info.symbol, field, name)
+			}
 			binding.typ = field.typ
 			bindingSpan := span(c.module.file.Path, fieldExpression.Span)
 			c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding.id, Name: binding.name, Type: field.typ, Span: bindingSpan})

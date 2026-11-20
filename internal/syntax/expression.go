@@ -335,14 +335,14 @@ func (p *parser) parseSwitchPattern() NodeID {
 			} else {
 				p.expect(".")
 			}
-			field := p.parseName()
+			field, fieldSpan := p.parseNameWithSpan()
 			if p.acceptsPreviousRevision() && !p.match("=") {
 				p.expect(":")
 			} else if !p.acceptsPreviousRevision() {
 				p.expect("=")
 			}
 			binding := p.parseName()
-			children = append(children, p.addNode(KindField, fieldStart, nil, field, binding))
+			children = append(children, p.addNamedNode(KindField, fieldStart, nil, field, binding, fieldSpan))
 			if !p.match(",") {
 				break
 			}
