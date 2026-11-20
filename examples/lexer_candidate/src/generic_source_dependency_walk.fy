@@ -94,7 +94,18 @@ fn u32 expression(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref 
     if(n.kind==10){if(n.left==0 || n.left>=id){return 9;}var usize base=n.left;let g=syntax::expression_at(p,base);if(g.kind==20){base=g.left;if(base==0 || base>=n.left || syntax::expression_at(p,base).kind!=2){return 4501;}let path=syntax::expression_at(p,base);let name=switch(arguments::path(p,path.start,path.end,work)){case .ok(value):{value}case .err(code):{return code;}};let target=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),0,work)){case .ok(value):{value}case .err(code):{return code;}};if(target==0){return 4501;}let code=edge(c,sources,p,context,bytes::view(ref name),g.right,0,names,args,edges,ranges,work);if(code!=0){return code;}let arg_code=list(p,g.right,7,pending,work);if(arg_code!=0){return arg_code;}}
         let code=push(pending,2,base,work);return if(code!=0){code}else{expr_list(p,n.right,11,true,0,pending,work)};
     }
-    if(n.kind==6){if(n.left==0 || n.left>=id){return 9;}let base=syntax::expression_at(p,n.left);if(base.kind==2){let name=switch(arguments::path(p,base.start,base.end,work)){case .ok(value):{value}case .err(code):{return code;}};let found=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),3,work)){case .ok(value):{value}case .err(code):{return code;}};if(found!=0){let inferred=inferred_edge(c,sources,p,context,id,expected,found,names,args,edges,work);if(inferred!=0){return inferred;}}}let code=push(pending,2,n.left,work);return if(code!=0){code}else{expr_list(p,n.right,7,false,0,pending,work)};}
+    if(n.kind==6){
+        if(n.left==0 || n.left>=id || n.right>=id){return 9;}
+        let base=syntax::expression_at(p,n.left);
+        if(base.kind==2){
+            let name=switch(arguments::path(p,base.start,base.end,work)){case .ok(value):{value}case .err(code):{return code;}};
+            let found=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),3,work)){case .ok(value):{value}case .err(code):{return code;}};
+            if(found!=0){let inferred=inferred_edge(c,sources,p,context,id,expected,found,names,args,edges,work);if(inferred!=0){return inferred;}}
+        }
+        let payload=switch(inference::constructor_context(p,n,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
+        let code=push(pending,2,n.left,work);
+        return if(code!=0){code}else{expr_list(p,n.right,7,false,payload,pending,work)};
+    }
     if(n.kind==26){if(n.right==0 || n.right>=id){return 9;}let bounds=syntax::expression_at(p,n.right);if(bounds.kind!=27){return 9;}let a=push(pending,2,n.left,work);if(a!=0){return a;}let b=push(pending,2,bounds.left,work);return if(b!=0){b}else{push(pending,2,bounds.right,work)};}
     if(n.kind==23){let code=push(pending,2,n.left,work);return if(code!=0){code}else{push(pending,1,n.right,work)};}
     if(n.kind==3){return push_expected(pending,2,n.left,expected,work);}

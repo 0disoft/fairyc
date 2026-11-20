@@ -8,6 +8,8 @@ import std::bytes as bytes;
 pub struct Arguments { usize count; u32[8] types; }
 struct Constraint { u32 fixed; bool integer; }
 struct ArgumentEvidence { usize binder; Constraint actual; }
+struct Tagged { usize first; usize second; }
+struct ResultConstraints { usize count; u32[8] fixed; }
 
 // Concrete scalar tags end at 38. Keep a distinct representation for each
 // source binder until the selected caller instance supplies its argument.
@@ -43,7 +45,7 @@ fn Result<usize,u32> value_child(ref syntax::Parsed p,syntax::Expression n,synta
     return .ok(0);
 }
 
-// Derive the same written scalar context as the source request walk.
+// Derive the same written result context as the source request walk.
 pub fn Result<usize,u32> expected_root(ref syntax::Parsed p, syntax::Declaration owner, usize call, ref mut usize work) {
     let site=syntax::expression_at(p,call);
     var usize i=1;
@@ -59,9 +61,13 @@ pub fn Result<usize,u32> expected_root(ref syntax::Parsed p, syntax::Declaration
             if(!budget::charge(work,1)){return .err(10);}
             let n=syntax::expression_at(p,root);
             if(!covers(n.start,n.end,site)){break;}
-            root=value_child(p,n,site,work)?;
+            if(n.kind==6){
+                expected=constructor_context(p,n,expected,work)?;
+                if(expected==0){break;}
+                root=syntax::expression_at(p,n.right).left;
+            }else{root=value_child(p,n,site,work)?;}
         }
-        if(root==call){return .ok(expected);}
+        if(root==call && expected!=0){return .ok(expected);}
     }
     return .ok(0);
 }
@@ -147,23 +153,62 @@ fn Result<usize,u32> binder_index(ref syntax::Parsed provider, usize declaration
     return .ok(0);
 }
 
-// Constructors contribute only the payload they actually carry. The type links
-// run right-to-left, so Result's first link is the error type.
-fn Result<usize,u32> constructor_payload(ref syntax::Parsed provider,usize root,ref u8[] constructor,ref mut usize work){
-    let t=syntax::type_at(provider,root);
-    if(t.kind!=6 || t.left==0 || t.right==0){return .ok(0);}
-    let name=syntax::type_text(provider,t.left);
-    if(!budget::charge(work,name.len+constructor.len+1)){return .err(10);}
-    let last=syntax::type_at(provider,t.right);
+// The parser links type arguments in reverse source order.
+fn Result<Tagged,u32> tagged(ref syntax::Parsed p,usize root,ref mut usize work){
+    let empty=Tagged{.first=0,.second=0};
+    if(root==0){return .ok(empty);}
+    let t=syntax::type_at(p,root);
+    if(t.kind!=6 || t.left==0 || t.right==0){return .ok(empty);}
+    let name=syntax::type_text(p,t.left);
+    if(!budget::charge(work,name.len+1)){return .err(10);}
+    let last=syntax::type_at(p,t.right);
     if(last.kind!=7){return .err(9);}
-    if(bytes::equal(name,b"Option")){
-        return .ok(if(last.right==0 && bytes::equal(constructor,b"some")){last.left}else{0});
+    if(last.right==0 && bytes::equal(name,b"Option")){
+        return .ok(Tagged{.first=last.left,.second=0});
     }
-    if(!bytes::equal(name,b"Result") || last.right==0){return .ok(0);}
-    let first=syntax::type_at(provider,last.right);
+    if(last.right==0 || !bytes::equal(name,b"Result")){return .ok(empty);}
+    let first=syntax::type_at(p,last.right);
     if(first.kind!=7){return .err(9);}
-    if(first.right!=0){return .ok(0);}
-    return .ok(if(bytes::equal(constructor,b"ok")){first.left}else if(bytes::equal(constructor,b"err")){last.left}else{0});
+    return .ok(if(first.right==0){Tagged{.first=first.left,.second=last.left}}else{empty});
+}
+
+fn Result<usize,u32> constructor_payload(ref syntax::Parsed p,usize root,ref u8[] name,ref mut usize work){
+    if(!budget::charge(work,name.len)){return .err(10);}
+    let shape=tagged(p,root,work)?;
+    if(shape.second==0){return .ok(if(bytes::equal(name,b"some")){shape.first}else{0});}
+    if(bytes::equal(name,b"ok")){return .ok(shape.first);}
+    return .ok(if(bytes::equal(name,b"err")){shape.second}else{0});
+}
+
+pub fn Result<usize,u32> constructor_context(ref syntax::Parsed p,syntax::Expression call,usize expected,ref mut usize work){
+    if(expected==0 || call.left==0 || call.right==0){return .ok(0);}
+    if(syntax::expression_at(p,call.left).kind!=28){return .ok(0);}
+    let argument=syntax::expression_at(p,call.right);
+    if(argument.kind!=7 || argument.left==0 || argument.right!=0){return .ok(0);}
+    let root=ungroup_type(p,expected,work)?;
+    return constructor_payload(p,root,syntax::expression_text(p,call.left),work);
+}
+
+// Unify only matching tagged shapes. Each scalar occurrence can constrain
+// a binder, including multiple occurrences of the same binder in a Result.
+fn Result<bool,u32> constrain_result(ref syntax::Parsed caller,usize owner,usize actual,
+    ref syntax::Parsed provider,usize declaration,usize formal,ref mut ResultConstraints constraints,ref mut usize work){
+    if(actual==0 || formal==0){return .ok(true);}
+    let binder=binder_index(provider,declaration,formal,constraints.count,work)?;
+    if(binder!=0){
+        let value=scalar_root(caller,owner,actual,work)?;
+        if(value==0){return .ok(true);}
+        let prior=constraints.fixed[binder-1];
+        if(prior!=0 && prior!=value){return .err(4502);}
+        constraints.fixed[binder-1]=value;
+        return .ok(true);
+    }
+    let pattern=tagged(provider,ungroup_type(provider,formal,work)?,work)?;
+    if(pattern.first==0){return .ok(true);}
+    let supplied=tagged(caller,ungroup_type(caller,actual,work)?,work)?;
+    if(supplied.first==0 || (pattern.second==0)!=(supplied.second==0)){return .ok(true);}
+    discard constrain_result(caller,owner,supplied.first,provider,declaration,pattern.first,constraints,work)?;
+    return constrain_result(caller,owner,supplied.second,provider,declaration,pattern.second,constraints,work);
 }
 
 fn Result<ArgumentEvidence,u32> argument_evidence(ref syntax::Parsed caller,usize owner,usize argument,
@@ -198,13 +243,9 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
     let target=syntax::declaration_at(provider,declaration);
     let count=syntax::generic_parameter_count(provider,declaration);
     if (count==0 || count>8) { return .err(4502); }
-    var u32[8] fixed=[0;8];
+    var ResultConstraints constraints=ResultConstraints{.count,.fixed=[0;8]};
     var bool[8] integers=[false;8];
-    let result=scalar_root(caller,owner,expected,work)?;
-    if (result!=0) {
-        let binder=binder_index(provider,declaration,target.result_type,count,work)?;
-        if (binder!=0) { fixed[binder-1]=result; }
-    }
+    discard constrain_result(caller,owner,expected,provider,declaration,target.result_type,ref mut constraints,work)?;
     var usize parameter=target.entry_start+target.entry_count;
     var usize argument=syntax::expression_at(caller,call).right;
     // Both lists are consumed in reverse source order, in one pass each.
@@ -221,8 +262,8 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
         if (evidence.binder!=0) {
             let index=evidence.binder-1;
             let actual=evidence.actual;
-            if (fixed[index]!=0 && actual.fixed!=0 && fixed[index]!=actual.fixed) { return .err(4502); }
-            if (actual.fixed!=0) { fixed[index]=actual.fixed; }
+            if (constraints.fixed[index]!=0 && actual.fixed!=0 && constraints.fixed[index]!=actual.fixed) { return .err(4502); }
+            if (actual.fixed!=0) { constraints.fixed[index]=actual.fixed; }
             integers[index]=integers[index] || actual.integer;
         }
         argument=link.right;
@@ -230,9 +271,9 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
     if (argument!=0) { return .err(4502); }
     var usize i=0;
     while (i<count) {
-        if (fixed[i]==0 && integers[i]) { fixed[i]=1; }
-        if (fixed[i]==0) { return .err(4502); }
+        if (constraints.fixed[i]==0 && integers[i]) { constraints.fixed[i]=1; }
+        if (constraints.fixed[i]==0) { return .err(4502); }
         i+=1;
     }
-    return .ok(Arguments{.count,.types=fixed});
+    return .ok(Arguments{.count,.types=constraints.fixed});
 }

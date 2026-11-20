@@ -78,6 +78,21 @@ fn void inferred_constructor_calls_restore_and_execute(){
 }
 @test
 @effects(console)
+fn void inferred_tagged_results_restore_and_execute(){
+    let raw=b"module root;fn T answer<T>(){return 42;}fn Option<T> option<T>(){return .some(answer());}fn Result<A,B> result<A,B>(){return .ok(answer());}fn i32 main(){let Option<i32> left=option();let Result<i32,u32> right=result();let Option<Result<i32,u32>> nested=.some(.err(answer()));assert(switch(nested){case .some(payload):{!payload.is_ok}case .none:{false}});assert(right.is_ok);return switch(left){case .some(value):{value}case .none:{0}};}";
+    let result=compiled(raw);
+    let owner=core::checked_program(ref result);
+    let program=checked::ir_program(owner);
+    var usize entry=0;var usize i=1;
+    while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==5){entry=i;}i+=1;}
+    assert(entry!=0);
+    let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
+    let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);
+    assert(outcome.error==0 && outcome.trap==0 && outcome.bits==42);
+}
+@test
+@effects(console)
 fn void inferred_cleanup_calls_share_explicit_instances(){
     let raw=b"module root;fn T id<T>(T value){return value;}resource Hold<T>{T value;cleanup{let T inferred=id(42);let T written=id<T>(42);assert(inferred==written);}}fn i32 main(){let value=Hold<u32>{.value=42};discard value;return 42;}";
     let result=compiled_mode(raw,true);
