@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
-	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
 type impactOptions struct {
@@ -33,10 +32,8 @@ func parseImpact(arguments []string) (impactOptions, error) {
 			}
 			o.uid = value
 		case "--symbol":
-			if _, err := symbolidentity.ParseVisibleID(value); err != nil {
-				if _, err := symbolidentity.ParseFullDigest(value); err != nil {
-					return fmt.Errorf("canonical SymbolId required")
-				}
+			if err := atlasmap.ValidateImpactSelector(value); err != nil {
+				return err
 			}
 			o.symbol = value
 		default:

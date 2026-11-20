@@ -71,9 +71,10 @@ type WorkspaceCallIndex struct {
 // values are needed while validating and joining, but keeping their files, declarations, and
 // relation indexes afterward would duplicate facts that the workspace call ledger cannot query.
 type workspaceCallPackage struct {
-	context   QueryContext
-	byVisible map[string]struct{}
-	byFull    map[string]string
+	context              QueryContext
+	byVisible            map[string]struct{}
+	byFull               map[string]string
+	specializationOwners map[string]string
 }
 
 // NewWorkspaceCallIndex validates every package through NewQueryIndex, requires the complete direct
@@ -309,6 +310,12 @@ func compactWorkspaceCallPackage(index *QueryIndex) workspaceCallPackage {
 	for _, node := range index.nodes {
 		result.byVisible[node.symbol.Visible] = struct{}{}
 		result.byFull[node.symbol.Full] = node.symbol.Visible
+		for _, implementation := range node.specializations {
+			if result.specializationOwners == nil {
+				result.specializationOwners = make(map[string]string)
+			}
+			result.specializationOwners[implementation.ID] = node.symbol.Visible
+		}
 	}
 	return result
 }

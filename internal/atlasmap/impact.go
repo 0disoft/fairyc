@@ -4,8 +4,10 @@ import (
 	"cmp"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
 type ImpactNode struct {
@@ -14,27 +16,55 @@ type ImpactNode struct {
 }
 
 type ImpactResult struct {
-	Schema            string          `json:"schema"`
-	Scope             string          `json:"scope"`
-	State             string          `json:"state"`
-	Subject           WorkspaceSymbol `json:"subject"`
-	Nodes             []ImpactNode    `json:"nodes"`
-	Contexts          []QueryContext  `json:"contexts"`
-	TraversalComplete bool            `json:"traversalComplete"`
-	Omissions         []string        `json:"omissions"`
+	Schema                string          `json:"schema"`
+	Scope                 string          `json:"scope"`
+	State                 string          `json:"state"`
+	Subject               WorkspaceSymbol `json:"subject"`
+	SubjectSpecialization string          `json:"subjectSpecialization,omitempty"`
+	Nodes                 []ImpactNode    `json:"nodes"`
+	Contexts              []QueryContext  `json:"contexts"`
+	TraversalComplete     bool            `json:"traversalComplete"`
+	Omissions             []string        `json:"omissions"`
+}
+
+// ValidateImpactSelector checks the syntax before opening a workspace.
+func ValidateImpactSelector(selector string) error {
+	_, _, err := parseImpactSelector(selector)
+	return err
+}
+
+func parseImpactSelector(selector string) (string, string, error) {
+	symbol, implementation, concrete := strings.Cut(selector, "#")
+	if _, err := symbolidentity.ParseVisibleID(symbol); err != nil {
+		if _, err := symbolidentity.ParseFullDigest(symbol); err != nil {
+			return "", "", fmt.Errorf("canonical SymbolId required")
+		}
+	}
+	if concrete && !validSpecializationID(implementation) {
+		return "", "", fmt.Errorf("canonical specialization ID required after #")
+	}
+	return symbol, implementation, nil
 }
 
 // Impact traverses only compiler-resolved reverse calls in the exact-current joined closure.
+// A SymbolId#specialization selector starts at exactly one verified implementation.
 // Even a complete traversal is bounded evidence, never proof that a change is safe.
 func (index *WorkspaceCallIndex) Impact(instance, symbol string, maxDepth, maxSymbols int) (ImpactResult, error) {
 	if maxDepth < 0 || maxDepth > 64 || maxSymbols < 1 || maxSymbols > 4096 {
 		return ImpactResult{}, fmt.Errorf("invalid impact traversal limits")
 	}
+	symbol, specialization, err := parseImpactSelector(symbol)
+	if err != nil {
+		return ImpactResult{}, err
+	}
 	root, err := index.ResolveSymbol(instance, symbol)
 	if err != nil {
 		return ImpactResult{}, err
 	}
-	r := ImpactResult{Schema: "fairyc.atlas-impact/v1", Scope: "resolved-direct-call-reachability", State: "bounded", Subject: root, Nodes: []ImpactNode{{Subject: root}}, Contexts: []QueryContext{}, TraversalComplete: true, Omissions: []string{"non-call-dependencies-not-analyzed", "external-callback-and-dynamic-targets-not-inferred", "outside-workspace-callers-not-analyzed"}}
+	if specialization != "" && index.packages[instance].specializationOwners[specialization] != root.Symbol {
+		return ImpactResult{}, fmt.Errorf("impact specialization is not owned by the selected declaration")
+	}
+	r := ImpactResult{Schema: "fairyc.atlas-impact/v1", Scope: "resolved-direct-call-reachability", State: "bounded", Subject: root, SubjectSpecialization: specialization, Nodes: []ImpactNode{{Subject: root}}, Contexts: []QueryContext{}, TraversalComplete: true, Omissions: []string{"non-call-dependencies-not-analyzed", "external-callback-and-dynamic-targets-not-inferred", "outside-workspace-callers-not-analyzed"}}
 	instances := make([]string, 0, len(index.packages))
 	for instance := range index.packages {
 		instances = append(instances, instance)
@@ -56,8 +86,9 @@ func (index *WorkspaceCallIndex) Impact(instance, symbol string, maxDepth, maxSy
 		endpoint workspaceCallEndpoint
 		depth    int
 	}
-	queue := []step{{endpoint: workspaceCallEndpoint{symbol: root}}}
-	visited := make(map[workspaceCallEndpoint]bool)
+	start := workspaceCallEndpoint{symbol: root, specialization: specialization}
+	queue := []step{{endpoint: start}}
+	visited := map[workspaceCallEndpoint]bool{start: true}
 	reported := map[WorkspaceSymbol]bool{root: true}
 	depthCut, symbolCut := false, false
 	for next := 0; next < len(queue); next++ {
@@ -66,12 +97,12 @@ func (index *WorkspaceCallIndex) Impact(instance, symbol string, maxDepth, maxSy
 		if node.endpoint.specialization != "" {
 			positions = index.incomingSpecializations[node.endpoint]
 		}
-		// The root query covers all its implementations. Every subsequent step
-		// follows the specific implementation that reached the prior endpoint.
+		// Declaration queries cover the root's full incoming call set. Concrete
+		// steps follow only edges for the matching implementation.
 		for _, position := range positions {
 			call := index.calls[position]
 			caller := workspaceCallEndpoint{call.Source, call.SourceSpecialization}
-			if caller.symbol == root || visited[caller] {
+			if visited[caller] || (specialization == "" && caller.symbol == root) {
 				continue
 			}
 			if node.depth >= maxDepth {

@@ -24,6 +24,14 @@ construction limit bounds the implementation work. The report includes source/co
 interface identities and original completeness facts, not source text or host paths. Output is
 buffered and size-checked before writing. No partial document is emitted on budget failure.
 
+In the Go CLI and Go MCP host, append `#<specialization-id>` to a visible or full
+SymbolId to start traversal at one verified implementation, for example
+`<symbol-id>#g0_<64-lowercase-hex-digits>`. The implementation must belong to
+the selected declaration in the exact-current partition. Saved catalogs from
+older source revisions may contain IDs that no longer resolve. The report
+includes `subjectSpecialization` for this form. A bare SymbolId continues to
+select the declaration as a whole.
+
 `state` is bounded or partial, never exact safe-change evidence. `traversalComplete` only describes
 the admitted resolved-call graph. Unknown/external coverage, partial maps and explicit traversal
 cutoffs remain visible. Non-call/type/effects dependencies, outside-workspace callers, dynamic

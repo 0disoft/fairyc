@@ -54,6 +54,8 @@ func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
 	}
 
 	symbols := map[string]string{}
+	fullSymbols := map[string]string{}
+	implementations := map[string]string{}
 	var lifted string
 	for _, partition := range prepared.partitions {
 		if partition.Header().PackageUID != uid {
@@ -61,31 +63,37 @@ func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
 		}
 		for _, symbol := range partition.Symbols() {
 			symbols[symbol.Declaration.Name] = symbol.Visible
+			fullSymbols[symbol.Declaration.Name] = symbol.Full
 		}
 		for _, implementation := range partition.Specializations() {
-			if implementation.Declaration.Name == "leaf" && len(implementation.TypeArguments) == 1 &&
-				implementation.TypeArguments[0].Name == "bool" &&
-				len(implementation.Function.Calls) == 1 {
+			if implementation.Declaration.Name != "leaf" || len(implementation.TypeArguments) != 1 {
+				continue
+			}
+			typ := implementation.TypeArguments[0].Name
+			implementations[typ] = implementation.ID
+			if typ == "bool" && len(implementation.Function.Calls) == 1 {
 				lifted = implementation.Function.Calls[0].Target.Name
 			}
 		}
 	}
-	if lifted == "" || symbols[lifted] == "" {
-		t.Fatal("missing bool closure target")
+	if lifted == "" || symbols[lifted] == "" || implementations["bool"] == "" || implementations["i32"] == "" {
+		t.Fatal("missing concrete leaf targets")
 	}
 	for _, tc := range []struct {
-		subject string
-		want    map[string]int
+		name, selector, implementation string
+		want                           map[string]int
 	}{
-		{lifted, map[string]int{lifted: 0, "leaf": 1, "relay": 2, "boolean": 3, "main": 4}},
-		{"leaf", map[string]int{"leaf": 0, "relay": 1, "boolean": 2, "signed": 2, "main": 3}},
+		{"lifted", symbols[lifted], "", map[string]int{lifted: 0, "leaf": 1, "relay": 2, "boolean": 3, "main": 4}},
+		{"declaration", symbols["leaf"], "", map[string]int{"leaf": 0, "relay": 1, "boolean": 2, "signed": 2, "main": 3}},
+		{"bool", symbols["leaf"] + "#" + implementations["bool"], implementations["bool"], map[string]int{"leaf": 0, "relay": 1, "boolean": 2, "main": 3}},
+		{"i32", fullSymbols["leaf"] + "#" + implementations["i32"], implementations["i32"], map[string]int{"leaf": 0, "relay": 1, "signed": 2, "main": 3}},
 	} {
-		t.Run(tc.subject, func(t *testing.T) {
-			args := append([]string{"experimental", "atlas-impact"}, impactArgs(uid, symbols[tc.subject])...)
+		t.Run(tc.name, func(t *testing.T) {
+			args := append([]string{"experimental", "atlas-impact"}, impactArgs(uid, tc.selector)...)
 			code, out, stderr := runForTest(args, root)
 			var impact atlasmap.ImpactResult
 			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &impact) != nil ||
-				!impact.TraversalComplete || len(impact.Nodes) != len(tc.want) {
+				!impact.TraversalComplete || len(impact.Nodes) != len(tc.want) || impact.SubjectSpecialization != tc.implementation {
 				t.Fatalf("impact %d %q %q", code, out, stderr)
 			}
 			for name, depth := range tc.want {
@@ -96,5 +104,38 @@ func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
 				}
 			}
 		})
+	}
+	t.Run("mcp concrete selector", func(t *testing.T) {
+		selector := symbols["leaf"] + "#" + implementations["bool"]
+		input := `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"cli-test","version":"1"}}}` + "\n" +
+			`{"jsonrpc":"2.0","method":"notifications/initialized"}` + "\n" +
+			`{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"atlas_impact","arguments":{"packageUid":"` + uid + `","symbol":"` + selector + `"}}}` + "\n"
+		args := []string{"experimental", "atlas-mcp", "--allow-impact", "--max-packages", "8", "--max-calls", "128",
+			"--max-depth", "8", "--max-symbols", "64", "--max-output-bytes", "100000", "--max-requests", "3"}
+		var out, stderr bytes.Buffer
+		if code := RunWithInput(args, root, strings.NewReader(input), &out, &stderr); code != ExitSuccess || stderr.Len() != 0 {
+			t.Fatalf("MCP %d %s %s", code, &out, &stderr)
+		}
+		replies := strings.Split(strings.TrimSpace(out.String()), "\n")
+		var reply struct {
+			Result struct {
+				Error   bool                  `json:"isError"`
+				Content atlasmap.ImpactResult `json:"structuredContent"`
+			}
+		}
+		if len(replies) != 2 || json.Unmarshal([]byte(replies[1]), &reply) != nil || reply.Result.Error ||
+			reply.Result.Content.SubjectSpecialization != implementations["bool"] || len(reply.Result.Content.Nodes) != 4 {
+			t.Fatalf("unexpected MCP result: %s", &out)
+		}
+	})
+	for _, selector := range []string{
+		symbols["relay"] + "#" + implementations["bool"],
+		symbols["leaf"] + "#g0_" + strings.Repeat("0", 64),
+		symbols["leaf"] + "#",
+	} {
+		args := append([]string{"experimental", "atlas-impact"}, impactArgs(uid, selector)...)
+		if code, out, stderr := runForTest(args, root); code != ExitInvalidInvocation || out != "" || stderr == "" {
+			t.Fatalf("invalid implementation %q: %d %q %q", selector, code, out, stderr)
+		}
 	}
 }

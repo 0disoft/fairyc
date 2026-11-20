@@ -7,8 +7,8 @@ import (
 	"io"
 	"strconv"
 
+	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/atlasmcp"
-	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
 func runAtlasMCP(arguments []string, root string, stdin io.Reader, stdout, stderr io.Writer) int {
@@ -53,10 +53,8 @@ func runAtlasMCP(arguments []string, root string, stdin io.Reader, stdout, stder
 		if err := validateAtlasPackageUID("atlas-mcp", uid); err != nil {
 			return nil, err
 		}
-		if _, err := symbolidentity.ParseVisibleID(symbol); err != nil {
-			if _, err := symbolidentity.ParseFullDigest(symbol); err != nil {
-				return nil, err
-			}
+		if err := atlasmap.ValidateImpactSelector(symbol); err != nil {
+			return nil, err
 		}
 		selected := o
 		selected.uid, selected.symbol = uid, symbol
