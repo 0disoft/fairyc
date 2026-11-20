@@ -99,13 +99,41 @@ pub fn i32 bridge() {
 			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
 		},
 		{
+			name: "closure-parameter",
+			library: `fn i32 apply(fn i32(i32) action) { return action(2); }
+pub fn i32 bridge() {
+    let i32 offset = 40;
+    let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
+    return apply(action);
+}`,
+			call:     "library::bridge()",
+			selector: "library::_fy_closure_bridge_1",
+			path:     []string{selectedTest, "library::bridge", "library::apply", "library::_fy_closure_bridge_1"},
+		},
+		{
+			name: "closure-return",
+			library: `fn fn i32(i32) make(i32 offset) {
+    let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
+    return action;
+}
+fn fn i32(i32) relay(fn i32(i32) action) { return action; }
+pub fn i32 bridge() {
+    let action = relay(make(40));
+    return action(2);
+}`,
+			call:     "library::bridge()",
+			selector: "library::_fy_closure_make_1",
+			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_make_1"},
+		},
+		{
 			name: "closure-parameter-fallback",
 			library: `fn i32 apply(fn i32(i32) action) { return action(2); }
 pub fn i32 bridge() {
     let i32 offset = 40;
     let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
     let copy = action;
-    return copy(2) + apply(copy) - 42;
+    let fn i32(i32) other = fn [] i32(i32 x) { return 40 + x; };
+    return copy(2) + apply(copy) + apply(other) - 84;
 }`,
 			call:     "library::bridge()",
 			selector: "library::_fy_closure_bridge_1",

@@ -40,7 +40,7 @@ func (index *QueryIndex) buildTestPlanClosures(program mir.Program, packageID hi
 	}
 
 	graph := testPlanClosureGraph{incoming: make(map[string][]string)}
-	work := maxTestPlanClosureWork
+	trace := newClosureTrace(program, packageID)
 	for _, fn := range program.Functions {
 		source := byName[fn.Name]
 		if source == "" || fn.Span.Package != packageID ||
@@ -49,7 +49,6 @@ func (index *QueryIndex) buildTestPlanClosures(program mir.Program, packageID hi
 			}) {
 			continue
 		}
-		definitions := closureLocalDefinitions(fn)
 		// Copies of one site count as recovered only if every copy is resolved.
 		sites := make(map[hir.Span]bool)
 		for _, block := range fn.Blocks {
@@ -57,8 +56,8 @@ func (index *QueryIndex) buildTestPlanClosures(program mir.Program, packageID hi
 			if call.Kind != mir.TerminatorClosureCall {
 				continue
 			}
-			symbol := resolveLocalClosure(call.Arguments[0], definitions, &work)
-			if work < 0 {
+			symbol := trace.resolve(fn.Symbol, call.Arguments[0], "", nil, 0)
+			if trace.work < 0 {
 				return testPlanClosureGraph{}
 			}
 			target := targets[symbol]
@@ -82,70 +81,4 @@ func (index *QueryIndex) buildTestPlanClosures(program mir.Program, packageID hi
 		graph.incoming[target] = slices.Compact(sources)
 	}
 	return graph
-}
-
-// The MIR verifier enforces a single definition for closure carriers. Mark
-// ambiguous destinations anyway so ordinary multi-write locals cannot become
-// accidental evidence when tracing a value.
-func closureLocalDefinitions(fn mir.Function) map[mir.LocalID]*mir.Operation {
-	definitions := make(map[mir.LocalID]*mir.Operation)
-	for _, local := range fn.Parameters {
-		definitions[local] = nil
-	}
-	for _, block := range fn.Blocks {
-		if term := block.Terminator; term.Kind == mir.TerminatorCall || term.Kind == mir.TerminatorClosureCall {
-			definitions[term.DestinationLocal] = nil
-		}
-		for i := range block.Operations {
-			op := &block.Operations[i]
-			switch op.Kind {
-			case mir.OperationClosureCreate, mir.OperationAssign, mir.OperationFieldRead, mir.OperationStructConstruct:
-				if _, found := definitions[op.DestinationLocal]; found {
-					definitions[op.DestinationLocal] = nil
-				} else {
-					definitions[op.DestinationLocal] = op
-				}
-			}
-		}
-	}
-	return definitions
-}
-
-func resolveLocalClosure(value mir.Operand, definitions map[mir.LocalID]*mir.Operation, work *int) hir.SymbolID {
-	field := ""
-	for value.Kind == mir.OperandLocal {
-		*work--
-		if *work < 0 {
-			break
-		}
-		op := definitions[value.Local]
-		if op == nil {
-			break
-		}
-		switch op.Kind {
-		case mir.OperationClosureCreate:
-			if field == "" {
-				return op.Symbol
-			}
-			return hir.NoSymbol
-		case mir.OperationAssign:
-			value = op.Operands[0]
-		case mir.OperationFieldRead:
-			if field != "" || op.Type != hir.TypeClosureI32 {
-				return hir.NoSymbol
-			}
-			field, value = op.Field, op.Operands[0]
-		case mir.OperationStructConstruct:
-			*work -= len(op.Fields)
-			if field == "" || *work < 0 {
-				return hir.NoSymbol
-			}
-			position := slices.Index(op.Fields, field)
-			if position < 0 {
-				return hir.NoSymbol
-			}
-			field, value = "", op.Operands[position]
-		}
-	}
-	return hir.NoSymbol
 }
