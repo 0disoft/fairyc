@@ -2,6 +2,7 @@ module generic_source_inference;
 import syntax as syntax;
 import static_operation_declarations as scalars;
 import project_path as budget;
+import generic_source_binding_types as bindings;
 import std::bytes as bytes;
 
 pub struct Arguments { usize count; u32[8] types; }
@@ -90,6 +91,10 @@ fn Result<Constraint,u32> evidence(ref syntax::Parsed p, usize owner, usize root
         let n=syntax::expression_at(p,id);
         if (n.kind==3) { id=n.left; continue; }
         if (n.kind==23) { return .ok(Constraint{.fixed=scalar_root(p,owner,n.right,work)?,.integer=false}); }
+        if (n.kind==2 && owner!=0) {
+            let written=bindings::written_root(p,owner,id,work)?;
+            return .ok(Constraint{.fixed=scalar_root(p,owner,written,work)?,.integer=false});
+        }
         if (n.kind==1) {
             let raw=syntax::expression_text(p,id);
             let boolean=bytes::equal(raw,b"true") || bytes::equal(raw,b"false");
@@ -153,8 +158,9 @@ fn Result<ArgumentEvidence,u32> argument_evidence(ref syntax::Parsed caller,usiz
             id=link.left;
             continue;
         }
+        let binder=binder_index(provider,declaration,expected,count,work)?;
+        if(binder==0){break;}
         let actual=evidence(caller,owner,id,work)?;
-        let usize binder=if(actual.fixed!=0 || actual.integer){binder_index(provider,declaration,expected,count,work)?}else{0};
         return .ok(ArgumentEvidence{.binder,.actual});
     }
     return .ok(ArgumentEvidence{.binder=0,.actual=Constraint{.fixed=0,.integer=false}});

@@ -15,7 +15,7 @@ import generic_package_bindings as bindings;
 // Iterative traversal follows Go transform's executable AST projection. Parser
 // list/header nodes and inert written ByteFor view/type facts are not expressions.
 struct Task {u32 kind;usize node;usize expected;}
-struct Context {usize template_index;usize module_index;usize first;bool vector;bool root;}
+struct Context {usize template_index;usize module_index;usize first;usize owner;bool vector;bool root;}
 fn u32 push_expected(ref mut v::Vec<Task> pending,u32 kind,usize node,usize expected,ref mut usize work){if(node==0){return 0;}if(v::len<Task>(pending)>=65536 || !budget::charge(work,1)){return 10;}return if(v::push<Task>(pending,Task{.kind,.node,.expected}).is_ok){0}else{11};}
 fn u32 push(ref mut v::Vec<Task> pending,u32 kind,usize node,ref mut usize work){return push_expected(pending,kind,node,0,work);}
 fn u32 list(ref syntax::Parsed p,usize tail,u32 kind,ref mut v::Vec<Task> pending,ref mut usize work){var usize link=tail;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::type_count(p)){return 9;}let n=syntax::type_at(p,link);if(n.kind!=kind || n.left==0 || n.left>=link || n.right>=link){return 9;}let code=push(pending,1,n.left,work);if(code!=0){return code;}link=n.right;}return 0;}
@@ -40,7 +40,7 @@ fn bool storage(ref u8[] name){return bytes::equal(name,b"storage_size") || byte
 fn u32 inferred_edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,usize expected,usize target,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut usize work){
     let template=catalog::template_at(c,target-1);
     let provider=v::at<syntax::Parsed>(sources,template.module_index);
-    let usize owner=if(context.root){0}else{catalog::template_at(c,context.template_index).declaration+1};
+    let owner=context.owner;
     let inferred=switch(inference::solve(p,owner,id,provider,template.declaration,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
     let first=v::len<model::Argument>(args);let names_first=bytes::len(names);
     var usize i=0;
@@ -58,7 +58,7 @@ fn u32 inferred_edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,r
 // Error-only source location recovery shares the authenticated argument adapter;
 // it never parses text, specializes a body or constructs an executable artifact.
 pub fn Result<bytes::Buffer,u32> request_key(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize module_index,ref u8[] name,usize tail,u32 kind,ref mut usize work){
-    if(module_index>=v::len<syntax::Parsed>(sources)){return .err(9);}let p=v::at<syntax::Parsed>(sources,module_index);var bytes::Buffer names=bytes::empty();var v::Vec<model::Argument> args=v::empty<model::Argument>();var v::Vec<model::Edge> edges=v::empty<model::Edge>();var v::Vec<model::Range> ranges=v::empty<model::Range>();let context=Context{.template_index=0,.module_index,.first=0,.vector=false,.root=true};let code=edge(c,sources,p,context,name,tail,kind,ref mut names,ref mut args,ref mut edges,ref mut ranges,work);if(code!=0){return .err(code);}if(v::len<model::Edge>(ref edges)==0){return .ok(bytes::empty());}if(v::len<model::Edge>(ref edges)!=1){return .err(9);}let row=*v::at<model::Edge>(ref edges,0);let key=bytes::view(ref names)[row.key.start..row.key.end];if(!budget::charge(work,key.len+1)){return .err(10);}return switch(bytes::copy(key)){case .ok(value):{.ok(value)}case .err(_):{.err(11)}};
+    if(module_index>=v::len<syntax::Parsed>(sources)){return .err(9);}let p=v::at<syntax::Parsed>(sources,module_index);var bytes::Buffer names=bytes::empty();var v::Vec<model::Argument> args=v::empty<model::Argument>();var v::Vec<model::Edge> edges=v::empty<model::Edge>();var v::Vec<model::Range> ranges=v::empty<model::Range>();let context=Context{.template_index=0,.module_index,.first=0,.owner=0,.vector=false,.root=true};let code=edge(c,sources,p,context,name,tail,kind,ref mut names,ref mut args,ref mut edges,ref mut ranges,work);if(code!=0){return .err(code);}if(v::len<model::Edge>(ref edges)==0){return .ok(bytes::empty());}if(v::len<model::Edge>(ref edges)!=1){return .err(9);}let row=*v::at<model::Edge>(ref edges,0);let key=bytes::view(ref names)[row.key.start..row.key.end];if(!budget::charge(work,key.len+1)){return .err(10);}return switch(bytes::copy(key)){case .ok(value):{.ok(value)}case .err(_):{.err(11)}};
 }
 fn u32 binding(ref catalog::Catalog c,Context context,ref u8[] name,ref mut usize work){if(!budget::charge(work,name.len+1)){return 10;}if(name.len>=12 && bytes::equal(name[..12],b"_fy_generic_") || context.vector && storage(name)){return 4501;}let function=switch(catalog::lookup(c,context.module_index,name,3,work)){case .ok(value):{value}case .err(code):{return code;}};let aggregate=switch(catalog::lookup(c,context.module_index,name,0,work)){case .ok(value):{value}case .err(code):{return code;}};return if(function!=0 || aggregate!=0){4501}else{0};}
 fn u32 typ(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut v::Vec<Task> pending,ref mut usize work){
@@ -125,11 +125,11 @@ fn model::Problem scan_written(ref catalog::Catalog c,ref v::Vec<syntax::Parsed>
     }return model::Problem{.code,.module_index=context.module_index,.declaration,.start,.end};
 }
 pub fn model::Problem collect(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize template_index,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
-    let row=catalog::template_at(c,template_index);let context=Context{.template_index,.module_index=row.module_index,.first=v::len<model::Edge>(edges),.vector=!catalog::parameter_at(c,row.first).scalar,.root=false};var model::Problem problem=scan(c,sources,row.declaration,context,names,args,edges,ranges,work);if(problem.code==0){problem.code=model::finish(edges,names,ranges,context.first,work);}return problem;
+    let row=catalog::template_at(c,template_index);let context=Context{.template_index,.module_index=row.module_index,.first=v::len<model::Edge>(edges),.owner=row.declaration+1,.vector=!catalog::parameter_at(c,row.first).scalar,.root=false};var model::Problem problem=scan(c,sources,row.declaration,context,names,args,edges,ranges,work);if(problem.code==0){problem.code=model::finish(edges,names,ranges,context.first,work);}return problem;
 }
 // Direct source roots reuse the executable projection, never a flat expression scan.
 // Global deduplication preserves one exact declaration/ordered-concrete tuple.
 pub fn model::Problem collect_root(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize module_index,usize declaration,bool vector,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
     if(module_index>=v::len<syntax::Parsed>(sources) || declaration==0 || declaration>=syntax::declaration_count(v::at<syntax::Parsed>(sources,module_index))){return model::Problem{.code=9,.module_index,.declaration,.start=0,.end=0};}let d=syntax::declaration_at(v::at<syntax::Parsed>(sources,module_index),declaration);if(d.generic_parameters!=0 || (d.kind!=3 && d.kind!=4 && d.kind!=6)){return model::Problem{.code=9,.module_index,.declaration,.start=d.start,.end=d.end};}
-    let context=Context{.template_index=0,.module_index,.first=0,.vector,.root=true};return scan(c,sources,declaration,context,names,args,edges,ranges,work);
+    let context=Context{.template_index=0,.module_index,.first=0,.owner=declaration+1,.vector,.root=true};return scan(c,sources,declaration,context,names,args,edges,ranges,work);
 }

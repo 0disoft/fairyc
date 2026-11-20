@@ -48,8 +48,7 @@ pub fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed
     let e=syntax::expression_at(source,call);
     let owner=syntax::declaration_at(source,caller-1);
     let expected=switch(inference::expected_root(source,owner,call,ref mut work.work)){case .ok(root):{root}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
-    let usize symbolic=if(v::len<usize>(parent)==0){0}else{caller};
-    let solved=switch(inference::solve(source,symbolic,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    let solved=switch(inference::solve(source,caller,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
     if(!charge(work,0)){return .err(fail(4503,module_index,e.start,e.end));}
     var v::Vec<usize> args=v::empty<usize>();var usize i=0;
     while(i<solved.count){

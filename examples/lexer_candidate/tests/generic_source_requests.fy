@@ -47,7 +47,7 @@ fn u32 root_rejected(ref u8[] raw){let input=small_sources(raw,provider());let i
 @test
 fn void inferred_scalar_roots_share_explicit_request_keys(){
     let input=small_sources(
-        b"module root;import helper as a;fn i32 use(){discard a::id(1);discard a::id<i32>(2);discard a::id(true);let u32 chosen=(a::id(3));discard chosen;return a::answer();}",
+        b"module root;import helper as a;fn i32 use(i32 n){discard a::id(n);discard a::id<i32>(2);if(true){let bool n=true;discard a::id(n);}let u32 chosen=(a::id(3));discard a::id(chosen);return a::answer();}",
         b"module helper;pub fn T id<T>(T value){return value;}pub fn T answer<T>(){return 42;}");
     let imports=small_imports();let digits=small_digits();
     let c=collected(ref input,ref imports,ref digits,0);var usize work=0;
@@ -66,6 +66,8 @@ fn void inferred_scalar_roots_share_explicit_request_keys(){
     assert(signed==2 && unsigned==1 && boolean==1);
     assert(root_rejected(b"module root;import helper as a;fn i32 use(){return a::id(true);}")==4502);
     assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id(null);}")==4502);
+    assert(root_rejected(b"module root;import helper as a;fn void use(i32 n){if(true){let n=true;discard a::id(n);}}")==4502);
+    assert(root_rejected(b"module root;import helper as a;fn void use(){if(true){let i32 n=1;}discard a::id(n);}")==4502);
 }
 @test
 fn void rejects_stale_private_unknown_arity_and_generated_roots(){assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::secret<i32>(1);}")==13);assert(root_rejected(b"module root;import helper as a;fn void use(){discard missing<i32>(1);}")==101);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<i32,i64>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<ref i32>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id();}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){let i32 id=1;discard _fy_generic_hidden;}")==4501);let input=small_sources(root(),provider());let imports=small_imports();let digits=small_digits();let c=collected(ref input,ref imports,ref digits,0);let changed=small_sources(root(),b"module helper;pub fn T id<T>(T value){return value+1;}");var usize work=0;assert(switch(requests::build(c,ref changed,ref mut work)){case .ok(_):{false}case .err(p):{p.code==12 && p.module_index==1}});}
