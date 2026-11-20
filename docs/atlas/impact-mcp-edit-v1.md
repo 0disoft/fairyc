@@ -112,6 +112,10 @@ Only resolved calls consume the explicit package/call join ceilings.
 
 `project_atlas_impact` performs the same bounded reverse-call traversal, visible/full
 selector normalization, canonical selection and cutoff reporting as the Go core.
+It builds transient incoming lists for declarations and concrete implementations
+from the admitted edges and visits only the corresponding callers. Lists retain
+the join order used by bounded selection. The index shares the query's work
+budget and is released with the traversal.
 `project_atlas_impact_json` buffers the complete existing impact JSON document and
 checks its output ceiling before returning bytes. Shared work bounds apply to the
 reader, identity checks, join, traversal and output. No source bodies or host paths

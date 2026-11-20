@@ -1,6 +1,7 @@
 module project_atlas_impact;
 import project_atlas_join as join;
 import project_atlas_options as options;
+import project_atlas_reverse as reverse;
 import project_path as work;
 import std::vec as v;
 
@@ -47,17 +48,16 @@ pub fn Result<Impact,u32> explore(ref join::Graph g,ref u8[] instance,ref u8[] s
  if(!v::push<Node>(ref mut nodes,subject).is_ok ||
     !v::push<Step>(ref mut queue,Step{.node=subject,.implementation}).is_ok){return .err(2);}
 
+ let incoming=reverse::build(g,meter)?;
  var usize next=0;
  while(next<v::len<Step>(ref queue)){
   let current=*v::at<Step>(ref queue,next);
-  var usize i=0;
-  while(i<join::edge_count(g)){
+  var usize i=reverse::first(ref incoming,g,current.node.subject,current.implementation,meter)?;
+  while(i!=0){
    if(!work::charge(meter,1)){return .err(3);}
-   let edge=join::edge(g,i);
-   i+=1;
-   if(!join::equal(edge.target,current.node.subject) ||
-      current.implementation!=0 && edge.target_implementation!=current.implementation ||
-      implementation==0 && join::equal(edge.source,root)){continue;}
+   let edge=join::edge(g,i-1);
+   i=reverse::next(ref incoming,i,current.implementation!=0);
+   if(implementation==0 && join::equal(edge.source,root)){continue;}
 
    let seen=visited(ref queue,edge.source,edge.source_implementation,meter)?;
    if(seen.implementation){continue;}

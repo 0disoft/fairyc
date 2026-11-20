@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
@@ -126,7 +128,11 @@ func TestCandidateAtlasImpact(t *testing.T) {
 	for _, f := range baseFixtures {
 		fixtures = append(fixtures, candidateAtlasExactCoverage(t, f))
 	}
-	candidateAtlasProbe(t, "project_atlas_impact_json", atlasImpactMain, func(t *testing.T, image string) {
+	main := strings.Replace(atlasImpactMain, "fn Result<bytes::Buffer,u32> query(", "@effects(console) fn Result<bytes::Buffer,u32> query(", 1)
+	main = strings.Replace(main, "let result=impact::explore(", "let start=meter;let result=impact::explore(", 1)
+	main = strings.Replace(main, ";return output::render(", `;if(process::arg_count()>1){discard io::write_usize(meter-start);discard io::write("\n");}return output::render(`, 1)
+	candidateAtlasProbe(t, "project_atlas_impact_json", main, func(t *testing.T, image string) {
+		t.Run("reverse-work", func(t *testing.T) { verifyCandidateAtlasReverseWork(t, image) })
 		for fi, f := range fixtures {
 			t.Run(fmt.Sprintf("fixture-%d", fi), func(t *testing.T) {
 				run := func(instance, symbol string, depth, symbols, packages, calls, outputBytes int, order []int, expect bool) {
@@ -259,4 +265,81 @@ func TestCandidateAtlasImpact(t *testing.T) {
 			})
 		}
 	})
+}
+
+func verifyCandidateAtlasReverseWork(t *testing.T, image string) {
+	t.Helper()
+	const chain, unrelated = 56, 70
+	var source strings.Builder
+	source.WriteString("module main;fn i32 link0(){return 0;}")
+	for i := 1; i <= chain; i++ {
+		fmt.Fprintf(&source, "fn i32 link%d(){return link%d();}", i, i-1)
+	}
+	source.WriteString("fn i32 unrelated(){return 0;}")
+	for i := 0; i < unrelated; i++ {
+		fmt.Fprintf(&source, "fn i32 other%d(){return unrelated();}", i)
+	}
+	fmt.Fprintf(&source, "fn i32 main(){return link%d();}", chain)
+	fixture := candidateAtlasImpactFixture(t, atlasmap.LogicalSchema, source.String())
+	var instance, symbol string
+	resolveWork := 0
+	for _, partition := range fixture.prepared.partitions {
+		header := partition.Header()
+		resolveWork += len(header.PackageInstance)*2 + 1
+		if header.PackageUID != "example.session.app" {
+			continue
+		}
+		instance = header.PackageInstance
+		for i, candidate := range partition.Symbols() {
+			if candidate.Declaration.Name == "link0" {
+				symbol = candidate.Visible
+				resolveWork += (i + 1) * (len(symbol) + 256)
+				break
+			}
+		}
+		break
+	}
+	if symbol == "" {
+		t.Fatal("missing chain root")
+	}
+
+	query, err := json.Marshal(map[string]any{
+		"instance": instance, "symbol": symbol, "depth": 64, "symbols": 64,
+		"packages": 2, "calls": 128, "bytes": 100000,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	packet := append(query, '\n')
+	for i, data := range fixture.data {
+		packet = append(packet, data...)
+		packet = append(packet, '\n')
+		packet = append(packet, fixture.current[i]...)
+		packet = append(packet, '\n')
+	}
+	code, out := candidateAtlasProcess(t, image, packet, "meter")
+	work, body, ok := strings.Cut(out, "\n")
+	used, err := strconv.Atoi(work)
+	if code != 0 || !ok || err != nil {
+		t.Fatalf("work probe: %d %s", code, out)
+	}
+	want, err := fixture.index.Impact(instance, symbol, 64, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	canonical, err := json.Marshal(want)
+	if err != nil || body != string(canonical) || len(want.Nodes) != chain+2 || !want.TraversalComplete {
+		t.Fatalf("chain result differs: %v %s", err, body)
+	}
+
+	// A chain inserts one new caller per step, so the old visitation scan
+	// charges 1+...+(N-1). Its ordered output charges one compare per node.
+	nodes, edges := len(want.Nodes), len(fixture.index.Calls())
+	commonWork := resolveWork + nodes*(nodes-1)/2 + (nodes-1)*256
+	oldIncomingWork := nodes * edges
+	newIncomingWork := used - commonWork
+	t.Logf("nodes=%d calls=%d incoming work %d -> %d", nodes, edges, oldIncomingWork, newIncomingWork)
+	if newIncomingWork <= 0 || newIncomingWork >= oldIncomingWork/2 {
+		t.Fatalf("reverse index did not cut incoming work by at least half")
+	}
 }
