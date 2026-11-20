@@ -263,12 +263,8 @@ func (v sourceVisitor) exprExpected(value *ast.Expression, expected *ast.TypeRef
 			}
 		}
 	}
-	var childExpected *ast.TypeReference
-	if value.Kind == syntax.KindGroup && len(value.Children) == 1 {
-		childExpected = expected
-	}
-	for _, child := range value.Children {
-		if err := v.exprExpected(child, childExpected); err != nil {
+	for index, child := range value.Children {
+		if err := v.exprExpected(child, inferenceChildExpected(value, index, expected)); err != nil {
 			return err
 		}
 	}

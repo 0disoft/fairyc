@@ -140,6 +140,49 @@ func inferenceContainer(ref *ast.TypeReference) bool {
 		(ref.Path == "Option" && len(ref.Arguments) == 1 || ref.Path == "Result" && len(ref.Arguments) == 2)
 }
 
+// Forward a written result constraint only to expressions that produce it.
+func inferenceChildExpected(parent *ast.Expression, index int, expected *ast.TypeReference) *ast.TypeReference {
+	if expected == nil {
+		return nil
+	}
+	switch parent.Kind {
+	case syntax.KindGroup, syntax.KindUnsafe:
+		if len(parent.Children) == 1 {
+			return expected
+		}
+	case syntax.KindIf, syntax.KindSwitch:
+		if index > 0 {
+			return expected
+		}
+	case syntax.KindPattern:
+		if parent.Text == "arm" && len(parent.Children) == 2 && index == 1 {
+			return expected
+		}
+	case syntax.KindCall:
+		if len(parent.Children) != 2 || index != 1 || parent.Children[0].Kind != syntax.KindPath {
+			return nil
+		}
+		container := ungroupInferenceType(expected)
+		if !inferenceContainer(container) {
+			return nil
+		}
+		switch parent.Children[0].Text {
+		case ".some":
+			if container.Path == "Option" {
+				return &container.Arguments[0]
+			}
+		case ".ok", ".err":
+			if container.Path == "Result" {
+				if parent.Children[0].Text == ".err" {
+					return &container.Arguments[1]
+				}
+				return &container.Arguments[0]
+			}
+		}
+	}
+	return nil
+}
+
 type inferenceConstraint struct {
 	typ     string
 	integer bool

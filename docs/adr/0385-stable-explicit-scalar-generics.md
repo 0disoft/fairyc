@@ -136,7 +136,8 @@ inferred calls.
 
 The written type of a local initializer or the enclosing function's declared
 result at a return can also constrain the call's result, including through
-parentheses and block values. For example, `let Option<u32> value = pack(42);`
+parentheses, block values, `if` branches, `switch` arm bodies and contextual
+`.some`, `.ok` and `.err` payloads. For example, `let Option<u32> value = pack(42);`
 binds `T` to `u32` when `pack<T>` returns `Option<T>`. A typed result can also
 determine a binder that occurs only in the result. Call arguments still supply
 their own evidence. A contextual constructor such as `.none` supplies no
