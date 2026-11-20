@@ -8,7 +8,7 @@ This development example exercises the checked-in synchronous `unsafe extern C f
 accepted=2 callbacks=5
 ```
 
-On Windows, the program's stdout line ends with CRLF. The harness then prints an `interop ok: ...` line with the selected profile and MSVC version.
+The program ends the line with CRLF on Windows and LF on Linux. The harness then prints an `interop ok: ...` line with the selected profile and C compiler version.
 
 ## Files
 
@@ -26,10 +26,19 @@ go run ./tools/dev/fairyc-c-interop --profile low
 go run ./tools/dev/fairyc-c-interop --profile optimized
 ```
 
-Both profiles must print the expected line and exit with status 0. The harness sends `main.fy` through the normal frontend, HIR, borrow Flow, and verified MIR, emits through the private C11 backend, compiles the Fairy output and original C source as separate MSVC objects, links them, and executes the result.
+On native Linux amd64, use Go and the [reference GNU toolchain](../../docs/abi/linux-toolchain-v0.md). Select a compiler explicitly:
+
+```sh
+go run ./tools/dev/fairyc-c-interop --cc gcc --profile low
+go run ./tools/dev/fairyc-c-interop --cc gcc --profile optimized
+go run ./tools/dev/fairyc-c-interop --cc clang --profile low
+go run ./tools/dev/fairyc-c-interop --cc clang --profile optimized
+```
+
+Both profiles must print the expected line and exit with status 0. The harness sends `main.fy` through the normal frontend, HIR, borrow Flow, and verified MIR. It emits target-specific C11, passes the Fairy output and the C companion as separate translation units, links them, and executes the result.
 
 ## Integration boundary
 
 The C-to-Fairy direction is a synchronous, same-thread, call-bounded callback made while `legacy_filter` is running. It is not a Fairy source export or a retained or asynchronous callback. This is an `unsafe` boundary with a trusted contract: C must keep the context valid while calls are active, must not retain or use the callback or context after return, and must avoid unwinding or `longjmp` across Fairy frames.
 
-This is a developer integration harness, not `fairyc build --c-file` and not a supported public export or library feature. Generated C11 is a compiler-private bootstrap transport under [ADR 0335](../../docs/adr/0335-private-c11-bootstrap-transport.md), not a stable generated-C interface or standalone distribution format. Native Linux execution remains queued, and this harness does not use WSL.
+This is a developer integration harness, not `fairyc build --c-file` and not a supported public export or library feature. Generated C11 is a compiler-private bootstrap transport under [ADR 0335](../../docs/adr/0335-private-c11-bootstrap-transport.md), not a stable generated-C interface or standalone distribution format.
