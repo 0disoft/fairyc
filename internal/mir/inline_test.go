@@ -78,6 +78,15 @@ func TestInlineVerificationIdentityAndErrorOrder(t *testing.T) {
 	}
 }
 
+func TestInlineVerificationOnlyAcceptsDetachedEmptyUnreachableJoins(t *testing.T) {
+	fn := inlineVerificationFixture(2)
+	fn.Blocks[1].Terminator.Kind = TerminatorUnreachable
+	functions := map[hir.SymbolID]*Function{fn.Symbol: fn}
+	checkInlineVerification(t, fn, functions, "")
+	fn.Blocks[0].Terminator = Terminator{Kind: TerminatorGoto, Successors: []BlockID{1}}
+	checkInlineVerification(t, fn, functions, "calls and resource/control-flow extensions are closed")
+}
+
 func TestInlineVerificationLimitsAndControlFlow(t *testing.T) {
 	for _, test := range []struct {
 		name  string

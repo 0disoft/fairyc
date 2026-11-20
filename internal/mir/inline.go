@@ -31,7 +31,7 @@ func verifyInlineFunction(fn *Function, functions map[hir.SymbolID]*Function) []
 	if detail := inlineSignatureFailure(fn); detail != "" {
 		return reject(detail)
 	}
-	if detail := inlineBodyFailure(fn.Blocks); detail != "" {
+	if detail := inlineBodyFailure(fn.Entry, fn.Blocks); detail != "" {
 		return reject(detail)
 	}
 	if !inlineControlFlowAcyclic(fn.Blocks) {
@@ -71,8 +71,9 @@ func inlineSignatureFailure(fn *Function) string {
 	return ""
 }
 
-func inlineBodyFailure(blocks []Block) string {
+func inlineBodyFailure(entry BlockID, blocks []Block) string {
 	operations := 0
+	var incoming []bool
 	for _, block := range blocks {
 		for _, op := range block.Operations {
 			operations++
@@ -84,6 +85,15 @@ func inlineBodyFailure(blocks []Block) string {
 		}
 		switch block.Terminator.Kind {
 		case TerminatorReturn, TerminatorGoto, TerminatorSwitch, TerminatorTrap, TerminatorCall:
+		case TerminatorUnreachable:
+			// Lowering leaves an empty join when both if arms return.
+			if incoming == nil {
+				incoming = inlineBlockPredecessors(blocks)
+			}
+			if block.ID != entry && block.ID >= 0 && int(block.ID) < len(incoming) && !incoming[block.ID] && len(block.Operations) == 0 && len(block.Terminator.Successors) == 0 {
+				continue
+			}
+			return "calls and resource/control-flow extensions are closed"
 		default:
 			return "calls and resource/control-flow extensions are closed"
 		}
@@ -92,6 +102,18 @@ func inlineBodyFailure(blocks []Block) string {
 		return "body exceeds operation budget"
 	}
 	return ""
+}
+
+func inlineBlockPredecessors(blocks []Block) []bool {
+	incoming := make([]bool, len(blocks))
+	for _, block := range blocks {
+		for _, id := range block.Terminator.Successors {
+			if id >= 0 && int(id) < len(incoming) {
+				incoming[id] = true
+			}
+		}
+	}
+	return incoming
 }
 
 func inlineControlFlowAcyclic(blocks []Block) bool {

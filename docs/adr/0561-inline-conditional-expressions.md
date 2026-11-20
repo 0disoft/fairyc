@@ -11,8 +11,8 @@ supplies an `i32` tail expression without statements, or another conditional in
 an `else if` chain. Both compilers also admit immutable `i32` bindings in
 value arms. Every initializer, assignment and return shares the existing
 64-node limit, which also counts conditions, arm blocks and groups. Arm
-declarations share the function's 16-local limit. Statement branches,
-assignment within arms and loops remain outside this admission.
+declarations share the function's 16-local limit. Value arms retain the
+immutable-binding restriction.
 
 Canonical `fairyc.inline-function/v5` encodes the condition, then arm and else
 arm in that order. Both arms participate in identity even if the condition is
@@ -36,3 +36,18 @@ trap source spans and private C linkage apply. The Fairy candidate computes the
 identity during source admission. Its detached verifier checks bool conditions,
 `i32` results and each arm's binding records and tail. It rebuilds lexical
 visibility before recomputing the marker and accepting a restored body.
+
+The Go bootstrap also admits void `if` statements with optional `else` or
+`else if`, lexical `i32` declarations, early returns and plain assignments to
+visible mutable `i32` locals. The root must return a value on every path.
+Each statement, expression and arm block counts toward the shared 64-node
+budget. The 16-local limit and the MIR operation and acyclicity limits still
+apply. Loops are outside this admission.
+
+Statement bodies use `fairyc.inline-function/v6`. Ordered `block` and
+`if-statement` nodes preserve evaluation order. `let` and `var` declare lexical
+slots, `assign` names its destination slot, and `return` records the returned
+expression. Slots depend on active declaration depth, starting at 64, so
+assignment changes the slot's value without changing its identity at a branch
+join. An all-returning branch may leave an empty MIR join with no incoming edge.
+Existing v1–v5 encodings are preserved. The Fairy candidate currently admits v5.

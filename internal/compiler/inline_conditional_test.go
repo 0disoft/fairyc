@@ -64,7 +64,7 @@ func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 		"return if ((x == 0) == true) { 42 } else { 0 };",
 		"return if (x == 0) { var i32 local = 42; local } else { 0 };",
 		"var i32 y = 0; return if (x == 0) { y = 42; y } else { 0 };",
-		"if (x == 0) { return 42; } return 0;",
+		"if (x == 0) { while (true) { return 42; } } return 0;",
 	} {
 		t.Run(body, func(t *testing.T) {
 			input := "module main; @inline pub fn i32 choose(i32 x) {" + body + "} fn i32 main() { return choose(0); }"
@@ -74,6 +74,50 @@ func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInlineStatementBranches(t *testing.T) {
+	const body = `var i32 result = 0;
+    if (x == 0) { return 40; }
+    if (x < 0) { result = 2; }
+    else if (x == 1) { let i32 local = 1; result = local + 1; }
+    else { result = 10 / x; }
+    return result;`
+	const source = `
+@inline pub fn i32 finish(i32 x) {
+    if (x == 0) { return choose(0); } else { return choose(-1); };
+}
+fn i32 main() { assert(choose(1) == 2); return finish(0) + finish(2); }`
+	check := func(body string) compiler.Result {
+		t.Helper()
+		return checkInlineCalls(t, `module main; @inline pub fn i32 choose(i32 x) {`+body+`}`+source)
+	}
+	result := check(body)
+	marker := inlineMutationMarker(result)
+	for _, edit := range [][2]string{{"x < 0", "x < -1"}, {"result = 2", "result = 3"}, {"return 40", "return 39"}} {
+		if inlineMutationMarker(check(strings.Replace(body, edit[0], edit[1], 1))) == marker {
+			t.Fatalf("statement branch edit %v did not change its identity", edit)
+		}
+	}
+	if marker == "" || inlineMutationMarker(check(strings.ReplaceAll(body, "result", "renamed"))) != marker {
+		t.Fatal("renaming a lexical slot changed its identity")
+	}
+	wire, err := mircodec.Encode(result.MIR, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restored, err := mircodec.Decode(wire, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := inlinebody.VerifyProgram(result.Semantic.HIR, restored); err != nil {
+		t.Fatal(err)
+	}
+	value, err := interpreter.Execute(restored, "main::main")
+	if err != nil || value.Kind != interpreter.OutcomeReturn || value.Value != 42 {
+		t.Fatalf("restored statement branches: %+v %v", value, err)
+	}
+	runExpandedLanguageNative(t, result, "main::main", "")
 }
 
 func TestInlineConditionalArmBindings(t *testing.T) {

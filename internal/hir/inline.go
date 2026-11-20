@@ -76,6 +76,18 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 	if err != nil {
 		return nil, nil, err
 	}
+	for _, statement := range statements {
+		if statement.Kind == StatementExpressionStatement && inlineStatementIf(statement.Expression) {
+			root, returns, err := encoder.statementBlock(&fn.Body, true)
+			if err != nil {
+				return nil, nil, err
+			}
+			if !returns || len(encoder.declared) != len(encoder.locals) {
+				return nil, nil, fmt.Errorf("@inline statement body requires all locals and a return on every path")
+			}
+			return inlineEncoding("fairyc.inline-function/v6", len(fn.Parameters), root, callees)
+		}
+	}
 	var initializers []inlineEncodingNode
 	for i, statement := range statements {
 		initializer, err := encoder.statement(statement, i)
@@ -101,11 +113,15 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 		}
 		root = inlineEncodingNode{Op: op, Children: append(initializers, root)}
 	}
+	return inlineEncoding(version, len(fn.Parameters), root, callees)
+}
+
+func inlineEncoding(version string, arity int, root inlineEncodingNode, callees []*Function) ([]byte, []*Function, error) {
 	data, err := json.Marshal(struct {
 		Version string
 		Arity   int
 		Root    inlineEncodingNode
-	}{version, len(fn.Parameters), root})
+	}{version, arity, root})
 	if err != nil {
 		return nil, nil, err
 	}

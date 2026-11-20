@@ -168,24 +168,16 @@ func (encoder *inlineFunctionEncoder) valueBlock(block *Block) (inlineEncodingNo
 	if len(block.Statements) > len(encoder.locals)-len(encoder.declared) {
 		return inlineEncodingNode{}, fmt.Errorf("@inline arm declarations exceed the local budget")
 	}
-	depth := len(encoder.armLocals)
-	defer func() {
-		for _, symbol := range encoder.armLocals[depth:] {
-			delete(encoder.bound, symbol)
-		}
-		encoder.armLocals = encoder.armLocals[:depth]
-	}()
+	defer encoder.closeScope(len(encoder.armLocals))
 	node := inlineEncodingNode{Op: "arm-bindings", Children: make([]inlineEncodingNode, 0, len(block.Statements)+1)}
 	for _, statement := range block.Statements {
 		if statement.Kind != StatementBinding || encoder.locals[statement.Binding].Mutable {
 			return inlineEncodingNode{}, fmt.Errorf("@inline arms require immutable i32 bindings")
 		}
-		// Arm-local versions follow the reserved range of root statement versions.
-		initializer, err := encoder.statement(statement, inlineMaxSteps+len(encoder.armLocals))
+		initializer, err := encoder.scopedBinding(statement)
 		if err != nil {
 			return inlineEncodingNode{}, err
 		}
-		encoder.armLocals = append(encoder.armLocals, statement.Binding)
 		node.Children = append(node.Children, initializer)
 	}
 	tail, err := encoder.expression(block.Tail)
