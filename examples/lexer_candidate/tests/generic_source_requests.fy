@@ -45,7 +45,30 @@ fn requests::Requests detached_requests(ref mut usize work){let input=small_sour
 fn void owns_unique_roots_and_exact_shared_work(){var usize cost=0;let detached=detached_requests(ref mut cost);let data=requests::data(ref detached);assert(model::edge_count(data)==1 && model::argument_count(data)==1 && model::range_at(data,0).count==1);let row=model::edge_at(data,0);let target=templates::template_at(requests::templates(ref detached),row.target-1);assert(bytes::equal(templates::text(requests::templates(ref detached),target.name),b"id") && bytes::equal(model::text(data,model::argument_at(data,0).name),b"i32"));var usize work=16777216-cost;let fit=detached_requests(ref mut work);assert(work==16777216 && model::edge_count(requests::data(ref fit))==1);let input=small_sources(b"module root;import helper as a;fn void use(){discard a::id<i32>(1);discard a::id<i32>(2);}pub fn T unused<T>(T value){return a::id<i64>(1);}",provider());let imports=small_imports();let digits=small_digits();let original=collected(ref input,ref imports,ref digits,0);work=16777216-cost+1;assert(switch(requests::build(original,ref input,ref mut work)){case .ok(_):{false}case .err(p):{p.code==10}} && work<=16777216);}
 fn u32 root_rejected(ref u8[] raw){let input=small_sources(raw,provider());let imports=small_imports();let digits=small_digits();let c=collected(ref input,ref imports,ref digits,0);var usize work=0;return switch(requests::build(c,ref input,ref mut work)){case .ok(_):{0}case .err(p):{assert(p.module_index==0 && p.declaration!=0 && p.start<p.end);p.code}};}
 @test
-fn void rejects_stale_private_unknown_arity_and_generated_roots(){assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::secret<i32>(1);}")==13);assert(root_rejected(b"module root;import helper as a;fn void use(){discard missing<i32>(1);}")==101);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<i32,i64>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<ref i32>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){let i32 id=1;discard _fy_generic_hidden;}")==4501);let input=small_sources(root(),provider());let imports=small_imports();let digits=small_digits();let c=collected(ref input,ref imports,ref digits,0);let changed=small_sources(root(),b"module helper;pub fn T id<T>(T value){return value+1;}");var usize work=0;assert(switch(requests::build(c,ref changed,ref mut work)){case .ok(_):{false}case .err(p):{p.code==12 && p.module_index==1}});}
+fn void inferred_scalar_roots_share_explicit_request_keys(){
+    let input=small_sources(
+        b"module root;import helper as a;fn i32 use(){discard a::id(1);discard a::id<i32>(2);discard a::id(true);let u32 chosen=(a::id(3));discard chosen;return a::answer();}",
+        b"module helper;pub fn T id<T>(T value){return value;}pub fn T answer<T>(){return 42;}");
+    let imports=small_imports();let digits=small_digits();
+    let c=collected(ref input,ref imports,ref digits,0);var usize work=0;
+    let actual=switch(requests::build(c,ref input,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);return;}};
+    let data=requests::data(ref actual);assert(model::edge_count(data)==4 && model::argument_count(data)==4);
+    var usize i=0;var usize signed=0;var usize unsigned=0;var usize boolean=0;
+    while(i<model::edge_count(data)){
+        let row=model::edge_at(data,i);assert(row.count==1);
+        let arg=model::argument_at(data,row.first);assert(!arg.parameter);
+        let name=model::text(data,arg.name);
+        if(bytes::equal(name,b"i32")){signed+=1;}
+        if(bytes::equal(name,b"u32")){unsigned+=1;}
+        if(bytes::equal(name,b"bool")){boolean+=1;}
+        i+=1;
+    }
+    assert(signed==2 && unsigned==1 && boolean==1);
+    assert(root_rejected(b"module root;import helper as a;fn i32 use(){return a::id(true);}")==4502);
+    assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id(null);}")==4502);
+}
+@test
+fn void rejects_stale_private_unknown_arity_and_generated_roots(){assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::secret<i32>(1);}")==13);assert(root_rejected(b"module root;import helper as a;fn void use(){discard missing<i32>(1);}")==101);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<i32,i64>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id<ref i32>(1);}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id();}")==4502);assert(root_rejected(b"module root;import helper as a;fn void use(){let i32 id=1;discard _fy_generic_hidden;}")==4501);let input=small_sources(root(),provider());let imports=small_imports();let digits=small_digits();let c=collected(ref input,ref imports,ref digits,0);let changed=small_sources(root(),b"module helper;pub fn T id<T>(T value){return value+1;}");var usize work=0;assert(switch(requests::build(c,ref changed,ref mut work)){case .ok(_):{false}case .err(p):{p.code==12 && p.module_index==1}});}
 @test
 fn void unused_templates_do_not_create_direct_roots(){let input=small_sources(root(),provider());let imports=small_imports();let digits=small_digits();let c=collected(ref input,ref imports,ref digits,0);var usize work=0;let actual=switch(requests::build(c,ref input,ref mut work)){case .ok(value):{value}case .err(_):{assert(false);return;}};assert(model::edge_count(requests::data(ref actual))==0 && model::argument_count(requests::data(ref actual))==0 && model::range_count(requests::data(ref actual))==1);}
 @test

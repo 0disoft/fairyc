@@ -155,7 +155,13 @@ limits with explicit calls to the same implementation. The
 `inferred-scalars`, `inferred-containers` and `inferred-results` fixtures
 exercise local type evidence, typed and literal arguments, forwarding, nested
 constructors, typed results and deduplication across the interpreter and Windows
-native profiles. The Fairy-authored compiler's inference path remains separate.
+native profiles.
+
+The Fairy-authored candidate's source request collector also infers scalar
+arguments from integer and boolean literals, scalar casts, and written scalar
+result contexts in local initializers and returns. It stores inferred requests
+under the same declaration and ordered argument key as an explicit call.
+Executable candidate checking and lowering still require explicit type arguments.
 
 ## Materialized syntax bound
 

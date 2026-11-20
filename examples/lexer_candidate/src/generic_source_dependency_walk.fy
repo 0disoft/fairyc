@@ -2,6 +2,7 @@ module generic_source_dependency_walk;
 import generic_source_dependency_model as model;
 import generic_source_catalog as catalog;
 import generic_source_arguments as arguments;
+import generic_source_inference as inference;
 import generic_source_view_loop_json as loops;
 import generic_source_json as json;
 import project_path as budget;
@@ -13,9 +14,10 @@ import generic_package_bindings as bindings;
 
 // Iterative traversal follows Go transform's executable AST projection. Parser
 // list/header nodes and inert written ByteFor view/type facts are not expressions.
-struct Task {u32 kind;usize node;}
+struct Task {u32 kind;usize node;usize expected;}
 struct Context {usize template_index;usize module_index;usize first;bool vector;bool root;}
-fn u32 push(ref mut v::Vec<Task> pending,u32 kind,usize node,ref mut usize work){if(node==0){return 0;}if(v::len<Task>(pending)>=65536 || !budget::charge(work,1)){return 10;}return if(v::push<Task>(pending,Task{.kind,.node}).is_ok){0}else{11};}
+fn u32 push_expected(ref mut v::Vec<Task> pending,u32 kind,usize node,usize expected,ref mut usize work){if(node==0){return 0;}if(v::len<Task>(pending)>=65536 || !budget::charge(work,1)){return 10;}return if(v::push<Task>(pending,Task{.kind,.node,.expected}).is_ok){0}else{11};}
+fn u32 push(ref mut v::Vec<Task> pending,u32 kind,usize node,ref mut usize work){return push_expected(pending,kind,node,0,work);}
 fn u32 list(ref syntax::Parsed p,usize tail,u32 kind,ref mut v::Vec<Task> pending,ref mut usize work){var usize link=tail;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::type_count(p)){return 9;}let n=syntax::type_at(p,link);if(n.kind!=kind || n.left==0 || n.left>=link || n.right>=link){return 9;}let code=push(pending,1,n.left,work);if(code!=0){return code;}link=n.right;}return 0;}
 // Go prepares generic sources only when templates exist. With none, explicit
 // application of an ordinary callable stays unsupported in ordinary typing.
@@ -35,6 +37,18 @@ fn u32 edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax
     }return model::edge_bounded(names,args,edges,target,catalog::text(c,template.id),context.first,first,names_first,if(context.root){4096}else{32},work);
 }
 fn bool storage(ref u8[] name){return bytes::equal(name,b"storage_size") || bytes::equal(name,b"storage_alignment") || bytes::equal(name,b"storage_take") || bytes::equal(name,b"storage_put") || bytes::equal(name,b"storage_borrow") || bytes::equal(name,b"storage_borrow_mut") || bytes::equal(name,b"storage_element_address");}
+fn u32 inferred_edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,usize expected,usize target,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut usize work){
+    let template=catalog::template_at(c,target-1);
+    let provider=v::at<syntax::Parsed>(sources,template.module_index);
+    let inferred=switch(inference::solve(p,id,provider,template.declaration,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
+    let first=v::len<model::Argument>(args);let names_first=bytes::len(names);
+    var usize i=0;
+    while(i<inferred.count){
+        let code=model::argument(names,args,inference::spelling(inferred.types[i]),false,work);
+        if(code!=0){return code;}i+=1;
+    }
+    return model::edge_bounded(names,args,edges,target,catalog::text(c,template.id),context.first,first,names_first,if(context.root){4096}else{32},work);
+}
 // Reconstruct one canonical direct request key from an original source node.
 // Error-only source location recovery shares the authenticated argument adapter;
 // it never parses text, specializes a body or constructs an executable artifact.
@@ -59,11 +73,11 @@ fn u32 typ(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax:
     }return 9;
 }
 fn u32 expr_list(ref syntax::Parsed p,usize tail,u32 kind,bool entries,ref mut v::Vec<Task> pending,ref mut usize work){var usize link=tail;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::expression_count(p)){return 9;}let n=syntax::expression_at(p,link);if(n.kind!=kind || n.left==0 || n.left>=link || n.right>=link){return 9;}let code=push(pending,2,if(entries){link}else{n.left},work);if(code!=0){return code;}link=n.right;}return 0;}
-fn u32 expression(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut v::Vec<Task> pending,ref mut usize work){
+fn u32 expression(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref syntax::Parsed p,Context context,usize id,usize expected,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut v::Vec<Task> pending,ref mut usize work){
     if(id>syntax::expression_count(p)){return 9;}let n=syntax::expression_at(p,id);
     if(n.kind==34){let h=syntax::expression_at(p,n.right);var usize i=0;while(i<h.right/129+h.right%129){let e=syntax::entry_at(p,h.left+i-1);let code=push(pending,1,e.type_root,work);if(code!=0){return code;}i+=1;}let code=push(pending,1,h.token,work);return if(code!=0){code}else{push(pending,3,n.left,work)};}
     if(n.kind==1 || n.kind==17 || n.kind==28 || n.kind==33){return 0;}if(n.kind==2){let name=switch(arguments::path(p,n.start,n.end,work)){case .ok(value):{value}case .err(code):{return code;}};return switch(arguments::generated(bytes::view(ref name),work)){case .ok(value):{if(value){4501}else{0}}case .err(code):{code}};}
-    if(n.kind==12 || n.kind==31){return push(pending,3,n.left,work);}
+    if(n.kind==12 || n.kind==31){return push_expected(pending,3,n.left,expected,work);}
     if(n.kind==13){if(n.right==0 || n.right>=id){return 9;}let branches=syntax::expression_at(p,n.right);if(branches.kind!=14){return 9;}let a=push(pending,2,n.left,work);if(a!=0){return a;}let b=push(pending,3,branches.left,work);return if(b!=0){b}else{push(pending,2,branches.right,work)};}
     if(n.kind==15){let code=push(pending,2,n.left,work);return if(code!=0){code}else{expr_list(p,n.right,19,false,pending,work)};}
     if(n.kind==18){let code=push(pending,2,n.left,work);return if(code!=0){code}else{push(pending,3,n.right,work)};}
@@ -75,21 +89,23 @@ fn u32 expression(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,ref 
     if(n.kind==10){if(n.left==0 || n.left>=id){return 9;}var usize base=n.left;let g=syntax::expression_at(p,base);if(g.kind==20){base=g.left;if(base==0 || base>=n.left || syntax::expression_at(p,base).kind!=2){return 4501;}let path=syntax::expression_at(p,base);let name=switch(arguments::path(p,path.start,path.end,work)){case .ok(value):{value}case .err(code):{return code;}};let target=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),0,work)){case .ok(value):{value}case .err(code):{return code;}};if(target==0){return 4501;}let code=edge(c,sources,p,context,bytes::view(ref name),g.right,0,names,args,edges,ranges,work);if(code!=0){return code;}let arg_code=list(p,g.right,7,pending,work);if(arg_code!=0){return arg_code;}}
         let code=push(pending,2,base,work);return if(code!=0){code}else{expr_list(p,n.right,11,true,pending,work)};
     }
-    if(n.kind==6){if(n.left==0 || n.left>=id){return 9;}let base=syntax::expression_at(p,n.left);if(base.kind==2){let name=switch(arguments::path(p,base.start,base.end,work)){case .ok(value):{value}case .err(code):{return code;}};let found=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),3,work)){case .ok(value):{value}case .err(code):{return code;}};if(found!=0){return 4502;}}let code=push(pending,2,n.left,work);return if(code!=0){code}else{expr_list(p,n.right,7,false,pending,work)};}
+    if(n.kind==6){if(n.left==0 || n.left>=id){return 9;}let base=syntax::expression_at(p,n.left);if(base.kind==2){let name=switch(arguments::path(p,base.start,base.end,work)){case .ok(value):{value}case .err(code):{return code;}};let found=switch(catalog::lookup(c,context.module_index,bytes::view(ref name),3,work)){case .ok(value):{value}case .err(code):{return code;}};if(found!=0){let inferred=inferred_edge(c,sources,p,context,id,expected,found,names,args,edges,work);if(inferred!=0){return inferred;}}}let code=push(pending,2,n.left,work);return if(code!=0){code}else{expr_list(p,n.right,7,false,pending,work)};}
     if(n.kind==26){if(n.right==0 || n.right>=id){return 9;}let bounds=syntax::expression_at(p,n.right);if(bounds.kind!=27){return 9;}let a=push(pending,2,n.left,work);if(a!=0){return a;}let b=push(pending,2,bounds.left,work);return if(b!=0){b}else{push(pending,2,bounds.right,work)};}
     if(n.kind==23){let code=push(pending,2,n.left,work);return if(code!=0){code}else{push(pending,1,n.right,work)};}
-    if(n.kind==3 || n.kind==4 || n.kind==8 || n.kind==11 || n.kind==21 || n.kind==22 || n.kind==30){return push(pending,2,n.left,work);}
+    if(n.kind==3){return push_expected(pending,2,n.left,expected,work);}
+    if(n.kind==4 || n.kind==8 || n.kind==11 || n.kind==21 || n.kind==22 || n.kind==30){return push(pending,2,n.left,work);}
     if(n.kind==5 || n.kind==9 || n.kind==29){let code=push(pending,2,n.left,work);return if(code!=0){code}else{push(pending,2,n.right,work)};}return 9;
 }
-fn u32 statement(ref catalog::Catalog c,ref syntax::Parsed p,Context context,usize id,ref mut v::Vec<Task> pending,ref mut usize work){
+fn u32 statement(ref catalog::Catalog c,ref syntax::Parsed p,Context context,usize id,usize expected,usize result_type,ref mut v::Vec<Task> pending,ref mut usize work){
     if(id>syntax::statement_count(p)){return 9;}let s=syntax::statement_at(p,id);
-    if(s.kind==1){let code=push(pending,2,s.expression,work);if(code!=0){return code;}var usize link=s.first;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::statement_count(p)){return 9;}let n=syntax::statement_at(p,link);if(n.kind!=7 || n.first==0 || n.first>=link || n.second>=link){return 9;}let next=push(pending,3,n.first,work);if(next!=0){return next;}link=n.second;}return 0;}
-    if(s.kind==2){if(s.entry==0 || s.entry>syntax::entry_count(p)){return 9;}let e=syntax::entry_at(p,s.entry-1);let code=binding(c,context,syntax::source_view(p)[e.name_start..e.name_end],work);if(code!=0){return code;}let value=push(pending,2,e.expression,work);return if(value!=0){value}else{push(pending,1,e.type_root,work)};}
+    if(s.kind==1){let code=push_expected(pending,2,s.expression,expected,work);if(code!=0){return code;}var usize link=s.first;while(link!=0){if(!budget::charge(work,1)){return 10;}if(link>syntax::statement_count(p)){return 9;}let n=syntax::statement_at(p,link);if(n.kind!=7 || n.first==0 || n.first>=link || n.second>=link){return 9;}let next=push(pending,3,n.first,work);if(next!=0){return next;}link=n.second;}return 0;}
+    if(s.kind==2){if(s.entry==0 || s.entry>syntax::entry_count(p)){return 9;}let e=syntax::entry_at(p,s.entry-1);let code=binding(c,context,syntax::source_view(p)[e.name_start..e.name_end],work);if(code!=0){return code;}let value=push_expected(pending,2,e.expression,e.type_root,work);return if(value!=0){value}else{push(pending,1,e.type_root,work)};}
     if(s.kind==9 || s.kind==10){return 0;}
     if(s.kind==14){if(s.second==0 || s.second>syntax::statement_count(p)){return 9;}let header=syntax::statement_at(p,s.second);if(header.kind!=15){return 9;}let a=push(pending,3,header.first,work);if(a!=0){return a;}let b=push(pending,3,header.second,work);if(b!=0){return b;}let block=push(pending,3,s.first,work);return if(block!=0){block}else{push(pending,2,s.expression,work)};}
     if(s.kind==8 || s.kind==17){let code=push(pending,3,s.first,work);return if(code!=0){code}else{push(pending,2,s.expression,work)};}
     if(s.kind==18){var json::Ledger ledger=json::empty();let admitted=loops::admitted(p,s,ref mut ledger);if(!budget::charge(work,ledger.used)){return 10;}if(ledger.code!=0){return ledger.code;}let code=push(pending,3,s.first,work);if(code!=0){return code;}if(!admitted){return 0;}let name=syntax::expression_at(p,s.target);let checked=binding(c,context,syntax::source_view(p)[name.start..name.end],work);if(checked!=0){return checked;}let value=push(pending,2,s.expression,work);return if(value!=0){value}else{push(pending,1,s.second,work)};}
-    if(s.kind==3 || s.kind==4 || s.kind==6 || s.kind==11 || s.kind==12 || s.kind==13 || s.kind==16){let code=push(pending,2,s.expression,work);return if(code!=0 || s.kind!=4){code}else{push(pending,2,s.target,work)};}return 9;
+    if(s.kind==3){return push_expected(pending,2,s.expression,result_type,work);}
+    if(s.kind==4 || s.kind==6 || s.kind==11 || s.kind==12 || s.kind==13 || s.kind==16){let code=push(pending,2,s.expression,work);return if(code!=0 || s.kind!=4){code}else{push(pending,2,s.target,work)};}return 9;
 }
 fn model::Problem scan(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,usize declaration,Context context,ref mut bytes::Buffer names,ref mut v::Vec<model::Argument> args,ref mut v::Vec<model::Edge> edges,ref mut v::Vec<model::Range> ranges,ref mut usize work){
     let original=v::at<syntax::Parsed>(sources,context.module_index);if(syntax::closure_prepared(original)){let written=switch(syntax::written_copy(original,work)){case .ok(p):{p}case .err(code):{return model::Problem{.code,.module_index=context.module_index,.declaration,.start=0,.end=0};}};if(declaration>=syntax::declaration_count(ref written)){return model::Problem{.code=0,.module_index=context.module_index,.declaration,.start=0,.end=0};}return scan_written(c,sources,ref written,declaration,context,names,args,edges,ranges,work);}return scan_written(c,sources,original,declaration,context,names,args,edges,ranges,work);
@@ -99,7 +115,7 @@ fn model::Problem scan_written(ref catalog::Catalog c,ref v::Vec<syntax::Parsed>
     if(d.kind==3){code=push(ref mut pending,1,d.result_type,work);var usize i=d.entry_start;while(i<d.entry_start+d.entry_count && code==0){if(!budget::charge(work,1)){code=10;break;}let e=syntax::entry_at(p,i);if(e.kind==1){code=binding(c,context,syntax::source_view(p)[e.name_start..e.name_end],work);if(code==0){code=push(ref mut pending,1,e.type_root,work);}}i+=1;}if(code==0 && operations::operation(p,declaration+1).kind!=1){code=push(ref mut pending,3,d.body,work);}}
     else{var usize i=d.field_start;while(i<d.field_start+d.field_count && code==0){if(!budget::charge(work,1)){code=10;break;}code=push(ref mut pending,1,syntax::field_at(p,i).type_root,work);i+=1;}if(code==0){code=push(ref mut pending,3,d.cleanup_body,work);}}
     while(v::len<Task>(ref pending)!=0 && code==0){if(!budget::charge(work,1)){code=10;break;}let task=*v::at<Task>(ref pending,v::len<Task>(ref pending)-1);discard v::pop<Task>(ref mut pending);
-        code=if(task.kind==1){typ(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else if(task.kind==2){expression(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else{statement(c,p,context,task.node,ref mut pending,work)};
+        code=if(task.kind==1){typ(c,sources,p,context,task.node,names,args,edges,ranges,ref mut pending,work)}else if(task.kind==2){expression(c,sources,p,context,task.node,task.expected,names,args,edges,ranges,ref mut pending,work)}else{statement(c,p,context,task.node,task.expected,d.result_type,ref mut pending,work)};
         if(code!=0){if(task.kind==1){let n=syntax::type_at(p,task.node);start=n.start;end=n.end;}else if(task.kind==2){let n=syntax::expression_at(p,task.node);start=n.start;end=n.end;if(code==101 && catalog::count(c)==0 && n.kind==20 && n.left!=0){let name=syntax::expression_at(p,n.left);start=name.start;end=name.end;}}else{let n=syntax::statement_at(p,task.node);start=n.start;end=n.end;}}
     }return model::Problem{.code,.module_index=context.module_index,.declaration,.start,.end};
 }
