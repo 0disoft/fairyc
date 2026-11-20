@@ -67,6 +67,25 @@ func TestInspectMSVCMapSymbolsRequiresExactUniquePublicRows(t *testing.T) {
 	}
 }
 
+func TestInspectMSVCMapSymbolsValidatesOnlySelectedRecords(t *testing.T) {
+	const selected = " 0001:00000020 mainCRTStartup 0000000140001020 f libcmt:exe_main.obj\r\n"
+	const unrelated = " 0001:00000024 unused 0000000140001024 f other"
+	for _, invalid := range []string{"\xff", "\x00"} {
+		data := []byte(unrelated + invalid + ".obj\r\n" + selected)
+		got, err := inspectMSVCMapSymbols(data, "mainCRTStartup")
+		if err != nil || got["mainCRTStartup"].Owner != "libcmt:exe_main.obj" {
+			t.Fatalf("unselected record affected evidence: %v %v", got, err)
+		}
+		data = []byte(strings.Replace(selected, "exe_main", "exe"+invalid+"main", 1))
+		if _, err := inspectMSVCMapSymbols(data, "mainCRTStartup"); err == nil || !strings.Contains(err.Error(), "invalid record text") {
+			t.Fatalf("corrupt selected record: %v", err)
+		}
+	}
+	if _, err := inspectMSVCMapSymbols(nil, "mainCRTStartup"); err == nil || !strings.Contains(err.Error(), "invalid size") {
+		t.Fatalf("empty map: %v", err)
+	}
+}
+
 func TestInspectArchiveCOMDATLinkBindsIndexMapAndFinalImage(t *testing.T) {
 	archive, direct, image, linkMap, spec := testArchiveCOMDATLinkInputs()
 	report, err := InspectArchiveCOMDATLink(archive, direct, image, linkMap, spec)

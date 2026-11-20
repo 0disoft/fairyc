@@ -292,8 +292,8 @@ func requirePickAnyReadOnlyCOMDAT(object []byte, report ObjectReport, name, role
 }
 
 func inspectMSVCMapSymbols(data []byte, names ...string) (map[string]msvcMapSymbol, error) {
-	if len(data) == 0 || len(data) > maxMSVCMapBytes || !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0 {
-		return nil, fmt.Errorf("MSVC link map has invalid text size or encoding")
+	if len(data) == 0 || len(data) > maxMSVCMapBytes {
+		return nil, fmt.Errorf("MSVC link map has invalid size: %d bytes", len(data))
 	}
 	wanted := make(map[string]struct{}, len(names))
 	for _, name := range names {
@@ -311,6 +311,10 @@ func inspectMSVCMapSymbols(data []byte, names ...string) (map[string]msvcMapSymb
 		name := fields[1]
 		if _, needed := wanted[name]; !needed || !validMSVCMapSectionOffset(fields[0]) {
 			continue
+		}
+		// Unrelated map rows do not contribute symbol or owner evidence.
+		if !utf8.ValidString(line) || strings.IndexByte(line, 0) >= 0 {
+			return nil, fmt.Errorf("MSVC link map symbol %q has invalid record text", name)
 		}
 		address, err := strconv.ParseUint(strings.TrimPrefix(fields[2], "0x"), 16, 64)
 		if err != nil || address == 0 {
