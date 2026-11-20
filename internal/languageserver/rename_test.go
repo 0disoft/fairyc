@@ -274,3 +274,72 @@ func TestRenameMethodKeepsOwnerAndUpdatesBothCallForms(t *testing.T) {
 		t.Fatalf("accepted conflicting method name: %s", &out)
 	}
 }
+
+func TestRenameFieldChecksWritesInitializersAndOwner(t *testing.T) {
+	root, path := editorFixture(t)
+	uri := fileURI(path)
+	const prefix = "module main; struct Point { i32 value; i32 other; } struct Other { i32 value; }\n" +
+		"fn i32 main() { let i32 value = 40; var Point point = Point{. /* field */ "
+	const suffix = ", .other = 0}; let Other other = Other{.value = 2}; " +
+		"point.value = point.value + other.value; return point.value; }"
+	const text = prefix + "value = value" + suffix
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{
+		"rootUri":      fileURI(root),
+		"capabilities": map[string]any{"workspace": map[string]any{"workspaceEdit": map[string]bool{"documentChanges": true}}},
+	})
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 1, "languageId": "fairyc", "text": text,
+	}})
+	d := s.docs[uri]
+	if d.View == nil || !d.View.clean {
+		t.Fatalf("fixture did not check cleanly: %s", &out)
+	}
+	request := func(method string, offset int, name string) {
+		t.Helper()
+		out.Reset()
+		send(t, &s, 2, method, map[string]any{
+			"textDocument": documentID{URI: uri},
+			"position":     bytePosition(d.Text, offset),
+			"newName":      name,
+		})
+	}
+	request("textDocument/rename", len(prefix), "coordinate")
+	var result struct{ DocumentChanges []documentEdit }
+	if err := json.Unmarshal(editorResult(t, &out), &result); err != nil || len(result.DocumentChanges) != 1 {
+		t.Fatalf("field rename = %+v (%v)", result, err)
+	}
+	changes := result.DocumentChanges[0]
+	want := []int{
+		strings.Index(text, "value; i32"),
+		len(prefix),
+		strings.Index(text, "point.value =") + len("point."),
+		strings.Index(text, "point.value +") + len("point."),
+		strings.Index(text, "return point.value") + len("return point."),
+	}
+	if changes.TextDocument.URI != uri || len(changes.Edits) != len(want) {
+		t.Fatalf("field changes = %+v", changes)
+	}
+	for i, edit := range changes.Edits {
+		if edit.NewText != "coordinate" || edit.Range != textRange(d.Text, want[i], want[i]+len("value")) {
+			t.Fatalf("unexpected field edit at %d: %+v", want[i], edit)
+		}
+	}
+	request("textDocument/rename", want[0], "other")
+	if !strings.Contains(out.String(), errRenameChangesResolution.Error()) {
+		t.Fatalf("accepted duplicate field name: %s", &out)
+	}
+
+	send(t, &s, 0, "textDocument/didChange", map[string]any{
+		"textDocument":   documentID{URI: uri, Version: 2},
+		"contentChanges": []map[string]string{{"text": prefix + "value" + suffix}},
+	})
+	if !d.View.clean {
+		t.Fatalf("shorthand fixture did not check cleanly: %s", &out)
+	}
+	request("textDocument/prepareRename", want[0], "")
+	if got := string(editorResult(t, &out)); got != "null" {
+		t.Fatalf("accepted field with shared shorthand spelling: %s", got)
+	}
+}

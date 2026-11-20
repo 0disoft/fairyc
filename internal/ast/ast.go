@@ -28,6 +28,7 @@ type Module struct {
 	Functions        []Function
 	Bindings         []Binding
 	Literals         []Literal
+	RecordFieldNames map[diagnostic.Span]diagnostic.Span `json:"-"`
 }
 
 // StateDeclaration is the single package-owned persistent-state schema admitted by source.
@@ -285,6 +286,17 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	if !found || root.Kind != syntax.KindSource {
 		return nil, errors.New("syntax tree has no source root")
 	}
+	// Named field initializers have sparse source coordinates. Keep them
+	// outside Expression so unrelated expressions do not grow.
+	var fieldNames map[diagnostic.Span]diagnostic.Span
+	for _, node := range tree.Nodes {
+		if node.Kind == syntax.KindField && len(node.Children) == 1 && node.NameSpan.EndByte > node.NameSpan.StartByte {
+			if fieldNames == nil {
+				fieldNames = make(map[diagnostic.Span]diagnostic.Span)
+			}
+			fieldNames[node.Span] = node.NameSpan
+		}
+	}
 	lineStarts := []int{0}
 	for index, value := range tree.Source {
 		if value == '\n' {
@@ -295,6 +307,7 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		Path:             tree.Module,
 		Span:             root.Span,
 		SourceSize:       len(tree.Source),
+		RecordFieldNames: fieldNames,
 		SourceLineStarts: lineStarts,
 	}
 	for _, childID := range root.Children {

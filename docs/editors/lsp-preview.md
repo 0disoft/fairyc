@@ -56,20 +56,22 @@ terminates the session.
   parser. The server checks the resulting syntax at the current document
   version. A deletion must also preserve all other significant tokens and
   comments. Clients need code action literals and versioned workspace edits.
-- Rename for local bindings, ordinary function parameters, plain functions
-  and owner-qualified callables across the current checked workspace.
+- Rename for local bindings, ordinary function parameters, plain functions,
+  owner-qualified callables and plain struct/resource fields across the current
+  checked workspace.
   Parameter edits include verified named argument labels. Callable edits
   include qualified paths and type-checked receiver calls in loaded packages.
-  The server
-  recompiles all proposed edits together and compares resolved declarations
+  Field edits include reads, writes and explicit initializer labels selected by
+  the checked aggregate type. The server recompiles all proposed edits together and compares resolved declarations
   before returning one edit per changed document. Open documents carry their
   current version. Closed documents carry a null version and their disk inputs
   are revalidated before the reply. The server leaves application of edits to
   the client. Consumers outside the loaded source graph, including separate
   test source roots, are outside this search. Standalone documents support
-  local bindings, ordinary function parameters and private callables. The
-  entry point name, method parameters, attributed function names, generic
-  specializations and shorthand field spellings are excluded.
+  local bindings, ordinary function parameters, private callables and plain
+  struct/resource fields. The entry point name, method parameters, attributed
+  function names and aggregate layouts, enum fields, generic specializations
+  and shorthand field spellings are excluded.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before

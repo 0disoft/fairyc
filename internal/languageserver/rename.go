@@ -9,13 +9,14 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, or workspace callable")
+var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, workspace callable, or field")
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
@@ -83,6 +84,12 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			break
 		}
 	}
+	if name == "" {
+		name, owner, decl = renameFieldDeclaration(module, at, decl)
+		if name != "" {
+			kind = "field"
+		}
+	}
 	qualified := name
 	if owner != "" {
 		qualified = owner + "::" + name
@@ -128,6 +135,10 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			return renamePlan{}, s.ctx.Err()
 		}
 		if resolution.Target != target {
+			if selectors[resolution.Use] {
+				// A shorthand initializer is both a field and a value use.
+				return renamePlan{}, errRenameUnavailable
+			}
 			continue
 		}
 		file, ok := view.file(resolution.Use)
@@ -187,6 +198,33 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		return renamePlan{}, errRenameUnavailable
 	}
 	return plan, nil
+}
+
+func renameFieldDeclaration(module *ast.Module, offset int, decl hir.Span) (string, string, hir.Span) {
+	match := func(owner string, fields []ast.FieldDeclaration) (string, string, hir.Span) {
+		for _, field := range fields {
+			if field.NameSpan.StartByte <= offset && offset < field.NameSpan.EndByte {
+				decl.StartByte, decl.EndByte = field.NameSpan.StartByte, field.NameSpan.EndByte
+				return field.Name, owner, decl
+			}
+		}
+		return "", "", decl
+	}
+	for _, structure := range module.Structs {
+		if len(structure.Attributes) == 0 && len(structure.TypeParameters) == 0 {
+			if name, owner, span := match(structure.Name, structure.Fields); name != "" {
+				return name, owner, span
+			}
+		}
+	}
+	for _, resource := range module.Resources {
+		if len(resource.Attributes) == 0 && len(resource.TypeParameters) == 0 {
+			if name, owner, span := match(resource.Name, resource.Fields); name != "" {
+				return name, owner, span
+			}
+		}
+	}
+	return "", "", decl
 }
 
 func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEdit, error) {

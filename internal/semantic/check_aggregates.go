@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
 	"strings"
 )
@@ -56,6 +57,9 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 			continue
 		}
 		seen[fieldExpression.Text] = struct{}{}
+		if name, ok := c.module.file.Module.RecordFieldNames[fieldExpression.Span]; ok {
+			c.recordFieldResolution(constructor, field, name)
+		}
 		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
 		result.Children = appendExpression(result.Children, value)
 		result.Fields = append(result.Fields, fieldExpression.Text)
@@ -183,9 +187,10 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow {
 		receiverType = element
 	}
+	var owner *symbol
 	fields := map[string]resourceField(nil)
 	if info, found := c.analyzer.resourceType(receiverType); found {
-		owner := info.symbol
+		owner = info.symbol
 		if owner.packageID != c.module.key.packageID || owner.module != c.module.file.Module.Path {
 			c.analyzer.addDiagnostic("E0103", span(c.module.file.Path, expression.Span), RelatedSpan{
 				Role: "declaration", Span: span(owner.source, owner.declaration),
@@ -194,7 +199,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 		}
 		fields = info.fields
 	} else if info, found := c.analyzer.structType(receiverType); found {
-		fields = info.fields
+		owner, fields = info.symbol, info.fields
 	}
 	if fields == nil {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "field access on a non-aggregate value")
@@ -205,6 +210,23 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown resource field "+expression.Text)
 		return hir.TypeInvalid
 	}
+	end := expression.Span.EndByte
+	if start := end - len(expression.Text); start >= expression.Children[0].Span.EndByte && start < end {
+		c.recordFieldResolution(owner, field, diagnostic.Span{StartByte: start, EndByte: end})
+	}
 	result.Operator = expression.Text
 	return field.typ
+}
+
+func (c *typeChecker) recordFieldResolution(owner *symbol, field resourceField, name diagnostic.Span) {
+	if owner == nil || field.declaration.EndByte <= field.declaration.StartByte {
+		return
+	}
+	c.analyzer.selectorResolutions = append(c.analyzer.selectorResolutions, Resolution{
+		Use: span(c.module.file.Path, name),
+		Target: SymbolCoordinate{
+			Package: owner.packageID, Module: owner.module, Name: owner.name + "::" + field.name,
+			Kind: "field", Declaration: field.declaration,
+		},
+	})
 }
