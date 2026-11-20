@@ -25,7 +25,7 @@ A separate bounded Go batch preview verifies multiple private body replacements 
 workspace overlay. Explicit batch apply stages originals and replacements, then publishes
 by file and attempts reverse-order restoration on failure. Failed restoration retains
 its recovery journal and backups. Multi-file visibility and crash recovery follow the
-limits in the owning contract. Go edits to private generic functions require concrete
+limits in the owning contract. Go and Fairy edits to private generic functions require concrete
 specializations in the baseline and successful verification of all their original bindings
 in the edited workspace. Rename inference, public/foreign/attributed functions,
 SDK/vendor writes, formatting rewrites and MCP writes remain excluded.

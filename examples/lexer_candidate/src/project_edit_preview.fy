@@ -1,5 +1,6 @@
 module project_edit_preview;
 import project_edit_body as edit;
+import project_edit_generic as generic;
 import project_edit_snapshot as snapshots;
 import windows_rooted_file as host;
 import project_workspace_lock as loader;
@@ -29,7 +30,7 @@ import std::bytes as bytes;
 import std::vec as v;
 import syntax as syntax;
 
-pub resource Selection{input::Input original;public_type::Coordinates table;declarations::Row selected;bytes::Buffer path;bytes::Buffer module_name;bytes::Buffer function;v::Vec<bytes::Buffer> production_roots;bytes::Buffer fingerprint;cleanup{}}
+pub resource Selection{input::Input original;public_type::Coordinates table;declarations::Row selected;bytes::Buffer path;bytes::Buffer module_name;bytes::Buffer function;v::Vec<bytes::Buffer> production_roots;bytes::Buffer fingerprint;generic::Coverage coverage;cleanup{}}
 pub resource Preview{Selection selection;edit::Change change;bytes::Buffer report;cleanup{}}
 pub struct Problem{u32 stage;u32 code;}
 fn Problem fail(u32 stage,u32 code){return Problem{.stage,.code};}
@@ -85,7 +86,8 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     }
     if(matches!=1){return .err(fail(1,3));}
     let parsed=input::source(ref original,selected.module_index);
-    if(syntax::declaration_at(parsed,selected.declaration).kind!=3){return .err(fail(1,3));}
+    let declaration=syntax::declaration_at(parsed,selected.declaration);
+    if(declaration.kind!=3){return .err(fail(1,3));}
     var path=bytes::empty();
     if(!bytes::append(ref mut path,sources::package_value(root_sources,b"source")).is_ok || !bytes::append_byte(ref mut path,47).is_ok || !bytes::append(ref mut path,input::file(ref original,selected.module_index)).is_ok){return .err(fail(6,2));}
     if(vendor(bytes::view(ref path))){return .err(fail(1,4));}
@@ -95,7 +97,14 @@ fn Result<bytes::Buffer,u32> render(ref u8[] path,ref u8[] module_name,ref u8[] 
     let opened=switch(host::open(root)){case .ok(p):{p}case .err(_):{return .err(fail(2,1));}};
     let observed=switch(snapshots::from_resolved(ref opened,resolved)){case .ok(p):{p}case .err(code):{return .err(fail(2,code));}};
     let fingerprint=switch(bytes::copy(snapshots::digest(ref observed))){case .ok(p):{p}case .err(_):{return .err(fail(6,2));}};
-    return .ok(Selection{.original,.table,.selected,.path,.module_name,.function,.production_roots,.fingerprint});
+    let coverage=if(declaration.generic_parameters==0){generic::empty()}else{
+        let required=switch(generic::collect(ref original,ref table,compiler::checked_program(ref complete),selected,aggregates,ref mut meter)){
+            case .ok(p):{p}case .err(code):{return .err(fail(3,code));}
+        };
+        if(generic::count(ref required)==0){return .err(fail(8,1));}
+        required
+    };
+    return .ok(Selection{.original,.table,.selected,.path,.module_name,.function,.production_roots,.fingerprint,.coverage});
 }
 pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u8[] body){
     if(expected.len!=64 || body.len>edit::maximum_body()){return .err(fail(1,1));}
@@ -105,6 +114,15 @@ pub fn Result<Preview,Problem> finish(Selection selected,ref u8[] expected,ref u
     var usize source_work=0;var usize link_work=0;
     let aggregates=switch(mode::aggregates(ref edited,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(5,code));}};
     let verified=switch(if(aggregates){compiler::build_complete_aggregate_sources(input::sources(ref edited),input::owners(ref edited),input::bindings(ref edited),ref selected.table,ref mut source_work,ref mut link_work)}else{compiler::build_complete(ref edited,ref selected.table,ref mut source_work,ref mut link_work)}){case .ok(p):{p}case .err(e):{return .err(fail(5,e.code));}};
+    if(generic::count(ref selected.coverage)!=0){
+        let current=switch(generic::collect(ref edited,ref selected.table,compiler::checked_program(ref verified),selected.selected,aggregates,ref mut meter)){
+            case .ok(p):{p}case .err(code):{return .err(fail(5,code));}
+        };
+        let preserved=switch(generic::preserves(ref selected.coverage,ref current,ref mut meter)){
+            case .ok(value):{value}case .err(code):{return .err(fail(5,code));}
+        };
+        if(!preserved){return .err(fail(9,1));}
+    }
     let report=switch(render(bytes::view(ref selected.path),bytes::view(ref selected.module_name),bytes::view(ref selected.function),ref change,false,ref mut meter)){case .ok(p):{p}case .err(code):{return .err(fail(6,code));}};
     return .ok(Preview{.selection=selected,.change,.report});
 }

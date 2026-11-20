@@ -63,7 +63,6 @@ func TestCandidateEditBody(t *testing.T) {
 		{name: "missing", target: "absent", body: "{return 43;}"},
 		{name: "public", source: "module main;pub fn i32 leaf(){return 42;}fn i32 main(){return leaf();}", body: "{return 43;}"},
 		{name: "unsafe", source: "module main;unsafe fn i32 leaf(){return 42;}fn i32 main(){return 42;}", body: "{return 43;}"},
-		{name: "generic", source: "module main;fn T leaf<T>(T value){return value;}fn i32 main(){return 42;}", body: "{return 43;}"},
 		{name: "attributed", source: "module main;@effects(console) fn i32 leaf(){return 42;}fn i32 main(){return 42;}", body: "{return 43;}"},
 	}
 	for _, r := range "\t\n\v\f\r \u0085\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000" {

@@ -60,7 +60,7 @@ pub fn Result<Change,u32> replace(ref syntax::Parsed source,usize declaration,re
     if(raw.len>8388608 || !work::charge(meter,raw.len+body.len+65)){return .err(3);}
     if(declaration>=syntax::declaration_count(source) || syntax::problem_count(source)!=0 || scanner::diagnostic_count(syntax::source_stream(source))!=0){return .err(1);}
     let d=syntax::declaration_at(source,declaration);
-    if(d.kind!=3 || d.public || d.unsafe_end!=d.unsafe_start || d.owner_end!=d.owner_start || d.generic_parameters!=0 || d.attribute_count!=0 || d.body==0 || d.body>syntax::statement_count(source) || bytes::equal(syntax::declaration_name(source,declaration+1),b"main")){return .err(1);}
+    if(d.kind!=3 || d.public || d.unsafe_end!=d.unsafe_start || d.owner_end!=d.owner_start || d.attribute_count!=0 || d.body==0 || d.body>syntax::statement_count(source) || bytes::equal(syntax::declaration_name(source,declaration+1),b"main")){return .err(1);}
     let span=syntax::statement_at(source,d.body);
     if(span.kind!=1 || span.start>span.end || span.end>raw.len){return .err(1);}
     let before_hash=digest(raw)?;
