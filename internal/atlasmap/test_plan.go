@@ -42,30 +42,7 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 	if wantCleanup && !cleanups.complete {
 		reasons = append(reasons, "cleanup-call-coverage")
 	}
-	type step struct {
-		next  string
-		depth int
-	}
-	truncated := len(subjects) > maxTestPlanSymbols
-	queue := subjects[:min(len(subjects), maxTestPlanSymbols)]
-	parents := make(map[string]step, len(queue))
-	for _, subject := range queue {
-		parents[subject] = step{}
-	}
-	for i := 0; i < len(queue); i++ {
-		target := queue[i]
-		depth := parents[target].depth
-		enqueue := func(source string) {
-			if _, visited := parents[source]; visited {
-				return
-			}
-			if depth == maxTestPlanDepth || len(queue) == maxTestPlanSymbols {
-				truncated = true
-				return
-			}
-			parents[source] = step{next: target, depth: depth + 1}
-			queue = append(queue, source)
-		}
+	parents, truncated := walkTestPlan(subjects, func(target string, enqueue func(string)) {
 		if strings.Contains(target, "#") {
 			for _, source := range specializedIncoming[target] {
 				enqueue(source)
@@ -83,18 +60,65 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 		for _, source := range closures.incoming[target] {
 			enqueue(source)
 		}
-	}
+	})
 	if truncated {
 		reasons = append(reasons, "traversal-limit")
 	}
+	return testPlanPaths(tests, index.testPlanTestSymbols(), parents, reasons, func(at string) string {
+		if label, found := index.testPlanEndpointLabel(at); found {
+			return label
+		}
+		if label, found := closures.labels[at]; found {
+			return label
+		}
+		return at
+	})
+}
 
-	testSymbols := make(map[string]string, len(tests))
+func (index *QueryIndex) testPlanTestSymbols() map[string]string {
+	testSymbols := make(map[string]string)
 	for _, node := range index.nodes {
 		if index.files[node.declaration.Span.Source].Kind == semanticsnapshot.FileKindTest &&
 			node.declaration.Key.Kind == semanticsnapshot.DeclarationFunction {
 			testSymbols[testPlanLabel(node.declaration.Key)] = node.symbol.Visible
 		}
 	}
+	return testSymbols
+}
+
+type testPlanStep[E comparable] struct {
+	next  E
+	depth int
+}
+
+func walkTestPlan[E comparable](subjects []E, incoming func(E, func(E))) (map[E]testPlanStep[E], bool) {
+	truncated := len(subjects) > maxTestPlanSymbols
+	queue := slices.Clone(subjects[:min(len(subjects), maxTestPlanSymbols)])
+	parents := make(map[E]testPlanStep[E], len(queue))
+	for _, subject := range queue {
+		parents[subject] = testPlanStep[E]{}
+	}
+	for i := 0; i < len(queue); i++ {
+		target := queue[i]
+		depth := parents[target].depth
+		incoming(target, func(source E) {
+			if _, visited := parents[source]; visited {
+				return
+			}
+			if depth == maxTestPlanDepth || len(queue) == maxTestPlanSymbols {
+				truncated = true
+				return
+			}
+			parents[source] = testPlanStep[E]{next: target, depth: depth + 1}
+			queue = append(queue, source)
+		})
+	}
+	return parents, truncated
+}
+
+func testPlanPaths[E comparable](tests []string, testSymbols map[string]E, parents map[E]testPlanStep[E], reasons []string, label func(E) string) ([]TestPlanPath, []string) {
+	paths := []TestPlanPath{}
+	var zero E
 	unmapped := false
 	for _, test := range tests {
 		symbol, exists := testSymbols[test]
@@ -106,14 +130,8 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 			continue
 		}
 		path := make([]string, 0, parents[symbol].depth+1)
-		for at := symbol; at != ""; at = parents[at].next {
-			if label, found := index.testPlanEndpointLabel(at); found {
-				path = append(path, label)
-			} else if label, found := closures.labels[at]; found {
-				path = append(path, label)
-			} else {
-				path = append(path, at)
-			}
+		for at := symbol; at != zero; at = parents[at].next {
+			path = append(path, label(at))
 		}
 		paths = append(paths, TestPlanPath{Test: test, Path: path})
 	}

@@ -99,6 +99,12 @@ func NewWorkspaceCallIndexV3(partitions []Partition, expectations map[string]Loa
 }
 
 func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget, schema string) (*WorkspaceCallIndex, error) {
+	return joinWorkspaceCalls(partitions, expectations, budget, schema, make(map[string]*QueryIndex))
+}
+
+// packageIndexes is scratch state the caller may also use for a query that
+// needs declaration facts alongside the resolved calls.
+func joinWorkspaceCalls(partitions []Partition, expectations map[string]LoadExpectation, budget WorkspaceCallBudget, schema string, packageIndexes map[string]*QueryIndex) (*WorkspaceCallIndex, error) {
 	if budget.MaxPackages <= 0 || budget.MaxCalls < 0 {
 		return nil, fmt.Errorf("Atlas workspace call join budget is invalid")
 	}
@@ -135,7 +141,6 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 		incomingSpecializations: make(map[workspaceCallEndpoint][]int),
 		packages:                make(map[string]workspaceCallPackage, len(ordered)),
 	}
-	packageIndexes := make(map[string]*QueryIndex, len(ordered))
 	for _, partition := range ordered {
 		header := partition.data.header
 		expectation := expectations[header.PackageInstance]

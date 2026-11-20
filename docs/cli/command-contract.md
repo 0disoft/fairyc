@@ -52,7 +52,7 @@ its narrower selection policy; see the owning contract for exact admission.
 
 ## Experimental symbol-based test plan
 
-`fairyc experimental test-plan --symbol <module::function|module::Resource::cleanup|symbol-id> [--package <package-uid>]`
+`fairyc experimental test-plan --symbol <module::function|module::Resource::cleanup|symbol-id> [--package <package-uid>] [--symbol-package <package-uid>]`
 recommends tests in one root-reachable local package. The default is the root package.
 The selector accepts a qualified function name or a visible or full Atlas SymbolId.
 Append concrete type arguments without spaces, as in `library::target<i32>`,
@@ -98,14 +98,26 @@ paths retain the caller chain that supplied each target. Unresolved targets and
 trace limits require `all-tests`.
 Closure tracing allows 65,536 steps and up to 64 nested call, argument or
 result lookups.
-Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
-cross-package calls, templates without checked implementations, and unmapped
-tests cause `all-tests`. A template that has no executable implementation in
-the current workspace does not limit queries about other functions.
+In the default package-local mode, missing symbols, unavailable Atlas data,
+incomplete call facts, foreign or cross-package calls, templates without
+checked implementations, and unmapped tests cause `all-tests`. A template
+without an executable implementation in the current workspace does not limit
+queries about other functions.
 Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.
 Known paths are retained alongside the fallback reasons. Run `fairyc test --package
 <package-uid>` for the full package suite. The recommendation covers call paths only
 and has no effect on CI test selection.
+
+Use `--symbol-package` to select a declaration from another root-reachable
+local package. The test package still comes from `--package`, and the report
+adds `symbol_package_uid`. Steps outside the test package are prefixed with
+their package UID. This mode joins current Atlas v3 partitions and follows
+compiler-resolved direct calls, preserving concrete implementation IDs.
+Incomplete call facts, including unresolved indirect calls, foreign calls and
+nonempty resource cleanup coverage, require `all-tests` and retain any known
+direct paths. The join admits up to 4,096 packages and 65,536 call records.
+An exceeded join budget reports `workspace-call-limit`. The same traversal
+limits apply to the joined graph.
 
 ## Stable version inspection v1
 

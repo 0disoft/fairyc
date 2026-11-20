@@ -13,27 +13,32 @@ import (
 )
 
 type testPlanReport struct {
-	Schema    string                  `json:"schema"`
-	Package   string                  `json:"package_uid"`
-	Symbol    string                  `json:"symbol"`
-	Recommend string                  `json:"recommendation"`
-	Tests     []atlasmap.TestPlanPath `json:"tests"`
-	Reasons   []string                `json:"reasons"`
+	Schema        string                  `json:"schema"`
+	Package       string                  `json:"package_uid"`
+	Symbol        string                  `json:"symbol"`
+	SymbolPackage string                  `json:"symbol_package_uid,omitempty"`
+	Recommend     string                  `json:"recommendation"`
+	Tests         []atlasmap.TestPlanPath `json:"tests"`
+	Reasons       []string                `json:"reasons"`
 }
 
 func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int {
-	var symbol, uid string
+	var symbol, uid, subjectUID string
 	_, err := parseCommandFlags(args, flagSchema{
 		Command: "test-plan", Experimental: true, Required: []string{"--symbol"},
-		Flags: []flagDefinition{{Name: "--symbol", Kind: flagScalar}, {Name: "--package", Kind: flagScalar}},
+		Flags: []flagDefinition{{Name: "--symbol", Kind: flagScalar}, {Name: "--package", Kind: flagScalar}, {Name: "--symbol-package", Kind: flagScalar}},
 	}, func(flag, value string) error {
+		if flag == "--symbol" {
+			symbol = value
+			return nil
+		}
+		if err := validateAtlasPackageUID("test-plan", value); err != nil {
+			return err
+		}
 		if flag == "--package" {
-			if err := validateAtlasPackageUID("test-plan", value); err != nil {
-				return err
-			}
 			uid = value
 		} else {
-			symbol = value
+			subjectUID = value
 		}
 		return nil
 	})
@@ -48,6 +53,14 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
+	subjectPath := selected.Path
+	if subjectUID != "" && subjectUID != selected.Manifest.Package.UID {
+		subject, err := selectWorkspaceTestPackage(workspace, subjectUID)
+		if err != nil {
+			return invocationError(stderr, err.Error())
+		}
+		subjectPath = subject.Path
+	}
 	workspace, err = workspaceloader.WithPackageTests(workspace, selected.Path)
 	if err != nil {
 		return packageFailure(stderr, err)
@@ -57,21 +70,24 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 		return code
 	}
 	report := testPlanReport{
-		Schema: "fairyc.test-plan/v1", Package: selected.Manifest.Package.UID, Symbol: symbol,
+		Schema: "fairyc.test-plan/v1", Package: selected.Manifest.Package.UID, Symbol: symbol, SymbolPackage: subjectUID,
 		Tests: []atlasmap.TestPlanPath{}, Reasons: []string{},
 	}
-	input, code := buildTestPlanIndex(workspace, selected.Path, stderr)
+	input, code := buildTestPlanIndex(workspace, selected.Path, subjectPath, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	if input.index == nil {
-		report.Reasons = append(report.Reasons, "atlas-unavailable")
-	} else {
-		identities := make([]string, len(tests))
-		for i, test := range tests {
-			identities[i] = test.display
-		}
+	identities := make([]string, len(tests))
+	for i, test := range tests {
+		identities[i] = test.display
+	}
+	switch {
+	case input.subjectInstance != "":
+		report.Tests, report.Reasons = atlasmap.WorkspaceTestPlan(input.partitions, input.expectations, input.testInstance, input.subjectInstance, symbol, identities)
+	case input.index != nil:
 		report.Tests, report.Reasons = input.index.TestPlan(symbol, identities, input.result, input.packageID)
+	default:
+		report.Reasons = append(report.Reasons, "atlas-unavailable")
 	}
 	return writeTestPlan(report, stdout, stderr)
 }
@@ -79,12 +95,15 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 // Compile the test-augmented snapshot once. Atlas identities are independently
 // checked against that snapshot, with no persisted maps or lock updates.
 type testPlanInput struct {
-	index     *atlasmap.QueryIndex
-	result    compiler.Result
-	packageID hir.PackageID
+	index                         *atlasmap.QueryIndex
+	result                        compiler.Result
+	packageID                     hir.PackageID
+	partitions                    []atlasmap.Partition
+	expectations                  map[string]atlasmap.LoadExpectation
+	testInstance, subjectInstance string
 }
 
-func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string, stderr io.Writer) (testPlanInput, int) {
+func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath, subjectPath string, stderr io.Writer) (testPlanInput, int) {
 	result, err := workspacecompiler.CheckGeneric(workspace)
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
@@ -122,6 +141,16 @@ func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string,
 		return testPlanInput{}, ExitSuccess
 	}
 	instance := instances[packageID].String()
+	if subjectPath != packagePath {
+		subjectID, err := workspace.PackageID(subjectPath)
+		if err != nil {
+			return testPlanInput{}, ExitSuccess
+		}
+		return testPlanInput{
+			partitions: partitions, expectations: expectations,
+			testInstance: instance, subjectInstance: instances[subjectID].String(),
+		}, ExitSuccess
+	}
 	for _, partition := range partitions {
 		if partition.Header().PackageInstance == instance {
 			if index, err := atlasmap.NewQueryIndexV3(partition, expectations[instance]); err == nil {
