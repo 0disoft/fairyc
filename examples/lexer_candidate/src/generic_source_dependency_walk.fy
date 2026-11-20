@@ -41,7 +41,8 @@ fn u32 inferred_edge(ref catalog::Catalog c,ref v::Vec<syntax::Parsed> sources,r
     let template=catalog::template_at(c,target-1);
     let provider=v::at<syntax::Parsed>(sources,template.module_index);
     let owner=context.owner;
-    let inferred=switch(inference::solve(p,owner,id,provider,template.declaration,expected,work)){case .ok(value):{value}case .err(code):{return code;}};
+    let site=inference::Site{.module_index=context.module_index,.owner,.call=id,.expected};
+    let inferred=switch(inference::solve(p,site,provider,template.declaration,sources,.some(c),.none,work)){case .ok(value):{value}case .err(code):{return code;}};
     let first=v::len<model::Argument>(args);let names_first=bytes::len(names);
     var usize i=0;
     while(i<inferred.count){

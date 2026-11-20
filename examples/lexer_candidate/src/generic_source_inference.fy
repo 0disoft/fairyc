@@ -3,11 +3,22 @@ import syntax as syntax;
 import static_operation_declarations as scalars;
 import project_path as budget;
 import generic_source_binding_types as bindings;
+import generic_source_catalog as catalog;
+import generic_source_arguments as paths;
+import module_signatures as signatures;
 import std::bytes as bytes;
+import std::vec as v;
 
 pub struct Arguments { usize count; u32[8] types; }
 struct Tagged { usize first; usize second; }
 struct Constraints { usize count; u32[8] fixed; bool[8] integers; }
+struct EvidenceType { usize owner; usize root; Arguments args; }
+struct Target { usize module_index; usize declaration; }
+pub struct Site { usize module_index; usize owner; usize call; usize expected; }
+
+fn EvidenceType written_type(usize owner,usize root){
+    return EvidenceType{.owner,.root,.args=Arguments{.count=0,.types=[0;8]}};
+}
 
 // Concrete scalar tags end at 38. Keep a distinct representation for each
 // source binder until the selected caller instance supplies its argument.
@@ -176,21 +187,93 @@ fn Result<bool,u32> constrain_fixed(ref mut Constraints constraints,usize binder
 
 // Each scalar in a matching tagged shape can constrain a binder, including
 // multiple occurrences of the same binder in a Result.
-fn Result<bool,u32> constrain_type(ref syntax::Parsed caller,usize owner,usize actual,
+fn Result<bool,u32> constrain_type(ref syntax::Parsed caller,EvidenceType actual,
     ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,ref mut usize work){
-    if(actual==0 || formal==0){return .ok(true);}
+    if(actual.root==0 || formal==0){return .ok(true);}
     let binder=binder_index(provider,declaration,formal,constraints.count,work)?;
-    if(binder!=0){return constrain_fixed(constraints,binder,scalar_root(caller,owner,actual,work)?);}
+    if(binder!=0){
+        let scalar=scalar_root(caller,actual.owner,actual.root,work)?;
+        if(actual.args.count==0 || !forwarded(scalar)){return constrain_fixed(constraints,binder,scalar);}
+        let index=forwarded_index(scalar);
+        if(index>=actual.args.count){return .err(9);}
+        return constrain_fixed(constraints,binder,actual.args.types[index]);
+    }
     let pattern=tagged(provider,ungroup_type(provider,formal,work)?,work)?;
     if(pattern.first==0){return .ok(true);}
-    let supplied=tagged(caller,ungroup_type(caller,actual,work)?,work)?;
+    let supplied=tagged(caller,ungroup_type(caller,actual.root,work)?,work)?;
     if(supplied.first==0 || (pattern.second==0)!=(supplied.second==0)){return .ok(true);}
-    discard constrain_type(caller,owner,supplied.first,provider,declaration,pattern.first,constraints,work)?;
-    return constrain_type(caller,owner,supplied.second,provider,declaration,pattern.second,constraints,work);
+    let first=EvidenceType{.owner=actual.owner,.root=supplied.first,.args=actual.args};
+    let second=EvidenceType{.owner=actual.owner,.root=supplied.second,.args=actual.args};
+    discard constrain_type(caller,first,provider,declaration,pattern.first,constraints,work)?;
+    return constrain_type(caller,second,provider,declaration,pattern.second,constraints,work);
 }
 
-fn Result<bool,u32> constrain_argument(ref syntax::Parsed caller,usize owner,usize argument,
-    ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,ref mut usize work){
+fn Result<Target,u32> nested_target(usize module_index,ref u8[] name,Option<ref catalog::Catalog> templates,
+    Option<ref signatures::Program> metadata,ref mut usize work){
+    let absent=Target{.module_index,.declaration=0};
+    switch(templates){
+        case .some(c):{
+            let found=catalog::lookup(c,module_index,name,3,work)?;
+            if(found==0){return .ok(absent);}
+            let t=catalog::template_at(c,found-1);
+            return .ok(Target{.module_index=t.module_index,.declaration=t.declaration+1});
+        }
+        case .none:{}
+    };
+    switch(metadata){
+        case .some(m):{
+            var usize probes=0;
+            let found=signatures::declaration_lookup_measured(m,module_index,name,ref mut probes);
+            if(!budget::charge(work,probes)){return .err(10);}
+            if(found.code!=0){return .ok(absent);}
+            let t=signatures::declaration_at(m,found.item);
+            if(t.kind==3 && t.parameters!=0){return .ok(Target{.module_index=t.module_index,.declaration=t.declaration});}
+        }
+        case .none:{}
+    };
+    return .ok(absent);
+}
+
+fn Result<Arguments,u32> written_arguments(ref syntax::Parsed caller,usize owner,usize selector,usize count,ref mut usize work){
+    if(count==0 || count>8 || syntax::specialization_argument_count(caller,selector)!=count){return .err(4502);}
+    var Arguments args=Arguments{.count,.types=[0;8]};
+    var usize i=0;
+    while(i<count){
+        args.types[i]=scalar_root(caller,owner,syntax::specialization_argument(caller,selector,i),work)?;
+        i+=1;
+    }
+    return .ok(args);
+}
+
+// Recursion only follows argument expressions, whose parser IDs are strictly
+// smaller than the enclosing call. It never traverses the callee's body.
+fn Result<bool,u32> constrain_nested(ref syntax::Parsed caller,Site site,usize id,
+    ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,
+    ref v::Vec<syntax::Parsed> sources,Option<ref catalog::Catalog> templates,Option<ref signatures::Program> metadata,ref mut usize work){
+    let call=syntax::expression_at(caller,id);
+    if(call.left==0 || call.left>=id){return .err(9);}
+    let selector=syntax::expression_at(caller,call.left);
+    let explicit=selector.kind==20;
+    let name=if(explicit){syntax::expression_at(caller,selector.left)}else{selector};
+    if(name.kind!=2 || name.token>=1048576){return .ok(true);}
+    let spelling=paths::path(caller,name.start,name.end,work)?;
+    let found=nested_target(site.module_index,bytes::view(ref spelling),templates,metadata,work)?;
+    if(found.declaration==0){return .ok(true);}
+    let source=v::at<syntax::Parsed>(sources,found.module_index);
+    let d=syntax::declaration_at(source,found.declaration-1);
+    let args=if(explicit){
+        written_arguments(caller,site.owner,call.left,syntax::generic_parameter_count(source,found.declaration-1),work)?
+    }else{
+        let nested=Site{.module_index=site.module_index,.owner=site.owner,.call=id,.expected=0};
+        solve(caller,nested,source,found.declaration-1,sources,templates,metadata,work)?
+    };
+    let actual=EvidenceType{.owner=found.declaration,.root=d.result_type,.args};
+    return constrain_type(source,actual,provider,declaration,formal,constraints,work);
+}
+
+fn Result<bool,u32> constrain_argument(ref syntax::Parsed caller,Site site,usize argument,
+    ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,
+    ref v::Vec<syntax::Parsed> sources,Option<ref catalog::Catalog> templates,Option<ref signatures::Program> metadata,ref mut usize work){
     var usize id=argument;
     var usize expected=formal;
     while(id!=0 && expected!=0){
@@ -214,28 +297,29 @@ fn Result<bool,u32> constrain_argument(ref syntax::Parsed caller,usize owner,usi
             if(syntax::literal_kind(caller,id)==5){constraints.integers[binder-1]=true;}
             break;
         }
-        if(n.kind==23){return constrain_type(caller,owner,n.right,provider,declaration,expected,constraints,work);}
-        if(n.kind!=2 || owner==0){break;}
+        if(n.kind==6){return constrain_nested(caller,site,id,provider,declaration,expected,constraints,sources,templates,metadata,work);}
+        if(n.kind==23){return constrain_type(caller,written_type(site.owner,n.right),provider,declaration,expected,constraints,work);}
+        if(n.kind!=2 || site.owner==0){break;}
         let binder=binder_index(provider,declaration,expected,constraints.count,work)?;
         if(binder==0 && tagged(provider,expected,work)?.first==0){break;}
-        let written=bindings::written_root(caller,owner,id,work)?;
-        if(binder!=0){return constrain_fixed(constraints,binder,scalar_root(caller,owner,written,work)?);}
-        return constrain_type(caller,owner,written,provider,declaration,expected,constraints,work);
+        let written=bindings::written_root(caller,site.owner,id,work)?;
+        if(binder!=0){return constrain_fixed(constraints,binder,scalar_root(caller,site.owner,written,work)?);}
+        return constrain_type(caller,written_type(site.owner,written),provider,declaration,expected,constraints,work);
     }
     return .ok(true);
 }
 
 // Side-effect-free request inference apart from charging the caller's work meter.
 // The source planner keeps argument order and feeds these scalars into its usual key.
-pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize call,
-    ref syntax::Parsed provider, usize declaration, usize expected, ref mut usize work) {
+pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, Site site, ref syntax::Parsed provider, usize declaration,
+    ref v::Vec<syntax::Parsed> sources,Option<ref catalog::Catalog> templates,Option<ref signatures::Program> metadata,ref mut usize work) {
     let target=syntax::declaration_at(provider,declaration);
     let count=syntax::generic_parameter_count(provider,declaration);
     if (count==0 || count>8) { return .err(4502); }
     var Constraints constraints=Constraints{.count,.fixed=[0;8],.integers=[false;8]};
-    discard constrain_type(caller,owner,expected,provider,declaration,target.result_type,ref mut constraints,work)?;
+    discard constrain_type(caller,written_type(site.owner,site.expected),provider,declaration,target.result_type,ref mut constraints,work)?;
     var usize parameter=target.entry_start+target.entry_count;
-    var usize argument=syntax::expression_at(caller,call).right;
+    var usize argument=syntax::expression_at(caller,site.call).right;
     // Both lists are consumed in reverse source order, in one pass each.
     while (parameter>target.entry_start) {
         parameter-=1;
@@ -243,10 +327,10 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
         let entry=syntax::entry_at(provider,parameter);
         if (entry.kind!=1) { continue; }
         if (argument==0) { return .err(4502); }
-        if (argument>=call) { return .err(9); }
+        if (argument>=site.call) { return .err(9); }
         let link=syntax::expression_at(caller,argument);
         if (link.kind!=7 || link.left==0 || link.left>=argument || link.right>=argument) { return .err(9); }
-        discard constrain_argument(caller,owner,link.left,provider,declaration,entry.type_root,ref mut constraints,work)?;
+        discard constrain_argument(caller,site,link.left,provider,declaration,entry.type_root,ref mut constraints,sources,templates,metadata,work)?;
         argument=link.right;
     }
     if (argument!=0) { return .err(4502); }

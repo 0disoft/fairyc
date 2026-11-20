@@ -47,7 +47,7 @@ fn u32 root_rejected(ref u8[] raw){let input=small_sources(raw,provider());let i
 @test
 fn void inferred_scalar_roots_share_explicit_request_keys(){
     let input=small_sources(
-        b"module root;import helper as a;fn i32 use(i32 n){discard a::id(n);discard a::id<i32>(2);if(true){let bool n=true;discard a::id(n);}let u32 chosen=(a::id(3));discard a::id(chosen);return a::answer();}",
+        b"module root;import helper as a;fn i32 use(i32 n){discard a::id(n);discard a::id(a::id<i32>(2));if(true){let bool n=true;discard a::id(a::id(n));}let u32 chosen=(a::id(3));discard a::id(chosen);return a::answer();}",
         b"module helper;pub fn T id<T>(T value){return value;}pub fn T answer<T>(){return 42;}");
     let imports=small_imports();let digits=small_digits();
     let c=collected(ref input,ref imports,ref digits,0);var usize work=0;
@@ -66,6 +66,8 @@ fn void inferred_scalar_roots_share_explicit_request_keys(){
     assert(signed==2 && unsigned==1 && boolean==1);
     assert(root_rejected(b"module root;import helper as a;fn i32 use(){return a::id(true);}")==4502);
     assert(root_rejected(b"module root;import helper as a;fn void use(){discard a::id(null);}")==4502);
+    assert(root_rejected(b"module root;import helper as a;fn i32 use(){return a::id(a::id(true));}")==4502);
+    assert(root_rejected(b"module root;import helper as a;fn i32 use(){return a::id(a::secret(42));}")==13);
     assert(root_rejected(b"module root;import helper as a;fn void use(i32 n){if(true){let n=true;discard a::id(n);}}")==4502);
     assert(root_rejected(b"module root;import helper as a;fn void use(){if(true){let i32 n=1;}discard a::id(n);}")==4502);
     assert(root_rejected(b"module root;import helper as a;fn T unknown<T>(){return 1;}fn i32 use(){return if(unknown()){1}else{2};}")==4502);

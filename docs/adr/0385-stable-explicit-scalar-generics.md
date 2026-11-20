@@ -169,8 +169,11 @@ or `.err` expression. For an `Option` or `Result` parameter, the candidate
 matches the written type of a local, parameter, or cast against the formal
 type. It also follows matching `.some`, `.ok`, and `.err` arguments to
 their payloads. A constructor supplies evidence only for the payload it
-carries. The candidate stores inferred requests under the same declaration and ordered
-argument key as an explicit call.
+carries. The specialized return type of an inner generic call can constrain
+an outer argument, including scalar types inside `Option` or `Result`.
+Type arguments still come from the inner call's own evidence. The candidate
+stores inferred requests under the same declaration and ordered argument
+key as an explicit call.
 Candidate checking and lowering also consume those requests for direct calls in
 ordinary functions, retained function bodies, and resource cleanup bodies. An
 enclosing function or resource template's scalar type parameter can supply

@@ -82,7 +82,7 @@ fn void inferred_constructor_calls_restore_and_execute(){
 @test
 @effects(console)
 fn void inferred_tagged_results_restore_and_execute(){
-    let raw=b"module root;fn T answer<T>(){return 42;}fn Option<T> option<T>(){return .some(answer());}fn Result<A,B> result<A,B>(){return .ok(answer());}fn i32 main(){let Option<i32> left=option();let Result<i32,u32> right=result();let Option<Result<i32,u32>> nested=.some(.err(answer()));assert(switch(nested){case .some(payload):{!payload.is_ok}case .none:{false}});assert(right.is_ok);return switch(left){case .some(value):{value}case .none:{0}};}";
+    let raw=b"module root;fn T answer<T>(){return 42;}fn Option<T> option<T>(){return .some(answer());}fn Result<A,B> result<A,B>(){return .ok(answer());}fn i32 main(){let Option<i32> left=option();let Result<i32,u32> right=result();let Option<Result<i32,u32>> nested=.some(.err(answer()));assert(switch(nested){case .some(payload):{!payload.is_ok}case .none:{false}});assert(right.is_ok);assert(present(wrap(42)));assert(present(wrap<u32>(42)));assert(check(ready(42)));assert(check(relay(true)));return switch(left){case .some(value):{value}case .none:{0}};}fn Option<T> wrap<T>(T value){return .some(value);}fn bool present<T>(Option<T> value){return switch(value){case .some(_):{true}case .none:{false}};}fn Result<T,u32> ready<T>(T value){return .ok(value);}fn bool check<T,E>(Result<T,E> value){return value.is_ok;}fn Result<T,u32> relay<T>(T value){let ok=check(ready(value));assert(ok);return ready(value);}";
     let result=compiled(raw);
     let owner=core::checked_program(ref result);
     let program=checked::ir_program(owner);

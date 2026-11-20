@@ -44,11 +44,12 @@ pub fn Result<usize,join::Problem> inferred_target(ref signatures::Program metad
     let target=signatures::declaration_at(metadata,found.item);
     return .ok(if(target.kind==3 && target.parameters!=0){found.item}else{0});
 }
-pub fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,usize caller,ref v::Vec<usize> parent,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
+pub fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,usize caller,ref v::Vec<usize> parent,ref syntax::Parsed provider,usize declaration,ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,ref mut v::Vec<types::Type> graph,ref mut Budget work){
     let e=syntax::expression_at(source,call);
     let owner=syntax::declaration_at(source,caller-1);
     let expected=switch(inference::expected_root(source,owner,call,ref mut work.work)){case .ok(root):{root}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
-    let solved=switch(inference::solve(source,caller,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    let site=inference::Site{.module_index,.owner=caller,.call,.expected};
+    let solved=switch(inference::solve(source,site,provider,declaration-1,sources,.none,.some(metadata),ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
     if(!charge(work,0)){return .err(fail(4503,module_index,e.start,e.end));}
     var v::Vec<usize> args=v::empty<usize>();var usize i=0;
     while(i<solved.count){
@@ -109,7 +110,7 @@ pub fn join::Problem forward(ref v::Vec<syntax::Parsed> sources,ref signatures::
             if(found!=0){
                 let callee=signatures::declaration_at(metadata,found);
                 let provider=v::at<syntax::Parsed>(sources,callee.module_index);
-                let args=switch(inferred_arguments(source,item.module_index,i,item.declaration,ref parent,provider,callee.declaration,graph,work)){case .ok(p):{p}case .err(p):{return p;}};
+                let args=switch(inferred_arguments(source,item.module_index,i,item.declaration,ref parent,provider,callee.declaration,sources,metadata,graph,work)){case .ok(p):{p}case .err(p):{return p;}};
                 let target=switch(instantiate(sources,metadata,callee.module_index,callee.declaration,ref args,graph,instances,arguments,parameters,work,item.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};
                 if(*v::at<u8>(states,target-1)==1){return fail(4503,item.module_index,e.start,e.end);}
                 let p=forward(sources,metadata,graph,instances,arguments,parameters,dependencies,states,work,target,depth+1);
@@ -143,7 +144,7 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
                     let target=signatures::declaration_at(metadata,found);
                     let provider=v::at<syntax::Parsed>(sources,target.module_index);
                     let empty=v::empty<usize>();
-                    let args=switch(inferred_arguments(source,module_index,i,caller,ref empty,provider,target.declaration,graph,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
+                    let args=switch(inferred_arguments(source,module_index,i,caller,ref empty,provider,target.declaration,sources,metadata,graph,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
                     call.instance=switch(instantiate(sources,metadata,target.module_index,target.declaration,ref args,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut budget,module_index,e.start,e.end)){case .ok(id):{id}case .err(p):{return .err(p);}};
                 }
             }

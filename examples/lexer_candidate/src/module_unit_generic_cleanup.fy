@@ -43,7 +43,7 @@ pub fn join::Problem requests(ref v::Vec<syntax::Parsed> sources,ref signatures:
         if(found!=0){
             let callee=signatures::declaration_at(metadata,found);
             let provider=v::at<syntax::Parsed>(sources,callee.module_index);
-            let forwarded=switch(m::inferred_arguments(original,t.module_index,i,t.declaration,ref args,provider,callee.declaration,graph,budget)){case .ok(p):{p}case .err(p):{return p;}};
+            let forwarded=switch(m::inferred_arguments(original,t.module_index,i,t.declaration,ref args,provider,callee.declaration,sources,metadata,graph,budget)){case .ok(p):{p}case .err(p):{return p;}};
             let target=switch(m::instantiate(sources,metadata,callee.module_index,callee.declaration,ref forwarded,graph,instances,arguments,parameters,budget,t.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};
             let problem=m::forward(sources,metadata,graph,instances,arguments,parameters,dependencies,ref mut states,budget,target,1);
             if(problem.code!=0){return problem;}
