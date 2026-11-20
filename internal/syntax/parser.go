@@ -32,6 +32,8 @@ func parse(file source.File, limits source.Limits, mode parseMode, editor *edito
 	var lexed lexer.Result
 	if mode == parsePreviousRevision {
 		lexed = lexer.LexPreviousRevision(file, budget)
+	} else if editor != nil {
+		lexed = editor.lex(file, budget)
 	} else {
 		lexed = lexer.Lex(file, budget)
 	}

@@ -91,9 +91,12 @@ func (b *Budget) ChargeWork(units int) bool {
 	return true
 }
 
-// ReuseParserPrefix charges an already verified prefix under this parse's
-// post-lexing limits. A failed admission leaves the budget ready for a full parse.
-func (b *Budget) ReuseParserPrefix(tokens, nodes, work int) bool {
+// WorkUnits reports the cumulative charge at a verified scanner boundary.
+func (b *Budget) WorkUnits() int { return b.workUnits }
+
+// ReuseSyntax charges verified scanner or parser work. Failed admission leaves
+// the budget unchanged so ordinary scanning can report the exact exhaustion.
+func (b *Budget) ReuseSyntax(tokens, nodes, work int) bool {
 	if b.Exhausted() || tokens < 0 || nodes < 0 || work < 0 ||
 		tokens > b.limits.MaxTokens-b.tokens ||
 		nodes > b.limits.MaxNodes-b.nodes ||

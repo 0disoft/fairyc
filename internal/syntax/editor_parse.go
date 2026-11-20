@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
@@ -13,6 +14,7 @@ type EditorParseSnapshot struct {
 	path        string
 	limits      source.Limits
 	tree        *Tree
+	lexer       *lexer.EditorLexSnapshot
 	prefixes    []parsePrefix
 	reusedItems int
 }
@@ -28,7 +30,17 @@ type editorParseState struct {
 	observed, syntheticTokens int
 }
 
-// ParseEditor relexes the new bytes and resumes at a verified top-level item
+func (state *editorParseState) lex(file source.File, budget *source.Budget) lexer.Result {
+	var previous *lexer.EditorLexSnapshot
+	if state.previous != nil {
+		previous = state.previous.lexer
+	}
+	result, next := lexer.LexEditor(file, budget, previous)
+	state.next.lexer = next
+	return result
+}
+
+// ParseEditor reuses verified tokens and resumes at a verified top-level item
 // boundary when the old parser saw the exact same prefix.
 func ParseEditor(file source.File, limits source.Limits, previous *EditorParseSnapshot) (*Tree, *EditorParseSnapshot) {
 	if previous != nil && (previous.path != file.RelativePath || previous.limits != limits) {
@@ -45,7 +57,7 @@ func ParseEditor(file source.File, limits source.Limits, previous *EditorParseSn
 
 // CheckpointWeight bounds the retained prefix metadata, including unused capacity.
 func (s *EditorParseSnapshot) CheckpointWeight() int64 {
-	return int64(cap(s.prefixes))*64 + int64(len(s.path)) + 128
+	return int64(cap(s.prefixes))*64 + int64(len(s.path)) + 128 + s.lexer.CheckpointWeight()
 }
 
 // ReusedItems reports the count of top-level items restored from a prior parse.
@@ -71,8 +83,8 @@ func (p *parser) restoreEditorPrefix() []NodeID {
 		return nil
 	}
 	old := previous.tree
-	match := 0
 	through := previous.prefixes[len(previous.prefixes)-1].observed
+	match := min(p.editor.next.lexer.ReusedPrefix(), through+1)
 	for match <= through && match < min(len(p.tree.Tokens), len(old.Tokens)) {
 		token := old.Tokens[match]
 		if token != p.tree.Tokens[match] ||
@@ -88,7 +100,7 @@ func (p *parser) restoreEditorPrefix() []NodeID {
 		}
 		// advance charges one work unit per consumed significant token; each
 		// contextual split charges one additional work unit and synthetic token.
-		if !p.budget.ReuseParserPrefix(prefix.syntheticTokens, prefix.nodes, prefix.position+prefix.syntheticTokens) {
+		if !p.budget.ReuseSyntax(prefix.syntheticTokens, prefix.nodes, prefix.position+prefix.syntheticTokens) {
 			// Reparse to emit the same diagnostic at the first exhausted token.
 			return nil
 		}

@@ -74,6 +74,7 @@ type scanner struct {
 	diagnostics      []diagnostic.Diagnostic
 	hasExhausted     bool
 	previousRevision bool
+	editor           *editorLexState
 }
 
 func (s *scanner) run() {
@@ -86,7 +87,7 @@ func (s *scanner) run() {
 		s.emitEOF()
 		return
 	}
-	if len(s.source) >= 3 && s.source[0] == 0xef && s.source[1] == 0xbb && s.source[2] == 0xbf {
+	if s.position == 0 && s.matchAt(0, "\xef\xbb\xbf") {
 		if !s.budget.ChargeWork(3) {
 			s.emitExhausted()
 			s.emitWithoutBudget(Invalid, 0, len(s.source), "")
@@ -98,6 +99,9 @@ func (s *scanner) run() {
 		s.position = 3
 	}
 	for s.position < len(s.source) && !s.budget.Exhausted() {
+		if s.editor != nil && s.editor.atBoundary(s) {
+			break
+		}
 		start := s.position
 		if !s.budget.ChargeWork(1) {
 			break
