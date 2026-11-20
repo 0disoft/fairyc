@@ -23,7 +23,6 @@ pub fn ref u8[] instance(ref Graph g,usize p){return name(ref g.packages,p);}
 pub fn ref u8[] visible(ref Graph g,Symbol s){return wire::string(validate::tree(partition(g,s.package)),s.token,b"visible");}
 pub fn bool equal(Symbol a,Symbol b){return a.package==b.package && a.token==b.token;}
 pub fn bool before(ref Graph g,Symbol a,Symbol b){if(a.package!=b.package){return model::before(instance(g,a.package),instance(g,b.package));}return model::before(visible(g,a),visible(g,b));}
-pub fn Result<bool,u32> contains(ref Graph g,Symbol s,ref mut usize meter){if(s.package>=package_count(g)){return .ok(false);}let part=partition(g,s.package);var usize i=0;while(i<validate::symbol_count(part)){if(!work::charge(meter,1)){return .err(3);}if(validate::symbol(part,i)==s.token){return .ok(true);}i+=1;}return .ok(false);}
 pub fn bool partial(ref Graph g){return g.partial;}
 pub fn usize edge_count(ref Graph g){return v::len<Edge>(ref g.edges);}
 pub fn usize max_packages(ref Graph g){return g.max_packages;}
@@ -34,13 +33,25 @@ fn bool key_equal(ref json::Tree a,usize x,ref json::Tree b,usize y,ref mut usiz
 fn Result<Symbol,u32> lookup(ref Packages g,usize p,ref json::Tree source,usize key,ref mut usize meter){let partition=part(g,p);let token=validate::symbol_for_key(partition,source,key,meter)?;return if(token<json::count(validate::tree(partition))){.ok(Symbol{.package=p,.token})}else{.err(9)};}
 pub fn Result<Symbol,u32> resolve(ref Graph g,ref u8[] package_instance,ref u8[] symbol,ref mut usize meter){let p=find_package(ref g.packages,package_instance,meter);if(p==package_count(g)){return .err(9);}let partition=partition(g,p);let t=validate::tree(partition);var usize i=0;while(i<validate::symbol_count(partition)){let s=validate::symbol(partition,i);if(!work::charge(meter,symbol.len+256)){return .err(3);}if(bytes::equal(wire::string(t,s,b"visible"),symbol) || bytes::equal(wire::string(t,s,b"full"),symbol)){return .ok(Symbol{.package=p,.token=s});}i+=1;}return .err(9);}
 pub fn ref u8[] source_specialization(ref Graph g,Edge edge){let p=partition(g,edge.source.package);return wire::string(validate::tree(p),edge.source_implementation,b"id");}
-pub fn ref u8[] target_specialization(ref Graph g,Edge edge){let p=partition(g,edge.target.package);return wire::string(validate::tree(p),edge.target_implementation,b"id");}
+pub fn ref u8[] specialization(ref Graph g,usize package,usize token){
+ let p=partition(g,package);
+ return wire::string(validate::tree(p),token,b"id");
+}
+pub fn ref u8[] target_specialization(ref Graph g,Edge edge){return specialization(g,edge.target.package,edge.target_implementation);}
 // IDs are canonical and sorted by semantic admission; resolve against the exact
 // target partition, then require its original declaration, not just ID presence.
 fn Result<usize,u32> implementation(ref validate::Partition p,ref u8[] id,ref mut usize meter){
  let t=validate::tree(p);var usize lo=0;var usize hi=validate::specialization_count(p);
  while(lo<hi){if(!work::charge(meter,id.len+68)){return .err(3);}let mid=lo+(hi-lo)/2;let row=validate::specialization(p,mid);let value=wire::string(t,row,b"id");if(bytes::equal(value,id)){return .ok(row);}if(model::before(value,id)){lo=mid+1;}else{hi=mid;}}
  return .err(9);
+}
+pub fn Result<usize,u32> resolve_specialization(ref Graph g,Symbol subject,ref u8[] id,ref mut usize meter){
+ let p=partition(g,subject.package);
+ let token=implementation(p,id,meter)?;
+ let t=validate::tree(p);
+ let order=model::keys(t,wire::field(t,token,b"declaration"),wire::field(t,subject.token,b"declaration"),meter);
+ if(order==2){return .err(3);}
+ return if(order==0){.ok(token)}else{.err(9)};
 }
 // Preserve canonical specialization-ID order within each original declaration.
 // Never rescan every implementation for every symbol (including SDK symbols).

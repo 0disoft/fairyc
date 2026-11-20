@@ -64,7 +64,7 @@ func verifyCandidateAtlasGenericCommand(t *testing.T, image string) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Schema != want.Schema || got.Scope != want.Scope || got.State != "partial" || !reflect.DeepEqual(got.Subject, want.Subject) || !reflect.DeepEqual(got.Nodes, want.Nodes) || got.TraversalComplete != want.TraversalComplete || !reflect.DeepEqual(got.Omissions, want.Omissions) || len(got.Contexts) != len(want.Contexts) {
+		if got.Schema != want.Schema || got.Scope != want.Scope || got.State != "partial" || !reflect.DeepEqual(got.Subject, want.Subject) || got.SubjectSpecialization != want.SubjectSpecialization || !reflect.DeepEqual(got.Nodes, want.Nodes) || got.TraversalComplete != want.TraversalComplete || !reflect.DeepEqual(got.Omissions, want.Omissions) || len(got.Contexts) != len(want.Contexts) {
 			t.Fatalf("generic impact differs: got %s want %+v", out, want)
 		}
 		for i, context := range got.Contexts {
@@ -92,6 +92,16 @@ func verifyCandidateAtlasGenericCommand(t *testing.T, image string) {
 	}
 	if selections != 3 || symbol == "" {
 		t.Fatalf("generic symbol coverage: %d", selections)
+	}
+	implementations := 0
+	for _, implementation := range selected.Specializations() {
+		if implementation.Declaration.Name == "id" {
+			query(selected, symbol+"#"+implementation.ID, index)
+			implementations++
+		}
+	}
+	if implementations != 2 {
+		t.Fatalf("expected two concrete id implementations, found %d", implementations)
 	}
 	base := append([]string{"experimental", "atlas-impact"}, impactArgs(selected.Header().PackageUID, symbol)...)
 	for _, bound := range [][2]string{{"--max-calls", "6"}, {"--max-packages", "1"}} {

@@ -24,7 +24,7 @@ construction limit bounds the implementation work. The report includes source/co
 interface identities and original completeness facts, not source text or host paths. Output is
 buffered and size-checked before writing. No partial document is emitted on budget failure.
 
-In the Go CLI and Go MCP host, append `#<specialization-id>` to a visible or full
+In the Go and Fairy CLI and MCP hosts, append `#<specialization-id>` to a visible or full
 SymbolId to start traversal at one verified implementation, for example
 `<symbol-id>#g0_<64-lowercase-hex-digits>`. The implementation must belong to
 the selected declaration in the exact-current partition. Saved catalogs from

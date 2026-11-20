@@ -85,11 +85,11 @@ fn i32 main(){let a=Token<i32>{.value=1};let b=Token<u8>{.value=2};discard wrap<
 	main := strings.ReplaceAll(atlasImpactMain, "current::read(", "current::read_generics(")
 	main = strings.Replace(main, "import project_atlas_wire as wire;", "import project_atlas_wire as wire;import project_atlas_validate as validate;", 1)
 	main = strings.Replace(main, "fn Result<bytes::Buffer,u32> query(", "@effects(console) fn Result<bytes::Buffer,u32> query(", 1)
-	main = strings.Replace(main, ";let subject=join::resolve(", `;if(process::arg_count()>1){
+	main = strings.Replace(main, ";let result=impact::explore(", `;if(process::arg_count()>1){
  var usize i=0;while(i<join::edge_count(ref graph)){let e=join::edge(ref graph,i);let p=join::partition(ref graph,e.source.package);let t=validate::tree(p);let span=wire::field(t,e.call,b"span");
  discard io::write_bytes(join::instance(ref graph,e.source.package));discard io::write_bytes(b"\t");discard io::write_bytes(join::visible(ref graph,e.source));discard io::write_bytes(b"\t");discard io::write_bytes(join::source_specialization(ref graph,e));discard io::write_bytes(b"\t");discard io::write_bytes(if(e.resource_body){b"cleanup"}else{b""});discard io::write_bytes(b"\t");
  discard io::write_bytes(join::instance(ref graph,e.target.package));discard io::write_bytes(b"\t");discard io::write_bytes(join::visible(ref graph,e.target));discard io::write_bytes(b"\t");discard io::write_bytes(join::target_specialization(ref graph,e));discard io::write_bytes(b"\t");discard io::write_bytes(wire::string(t,span,b"source"));discard io::write_bytes(b"\t");discard io::write_usize(wire::integer(t,span,b"start_byte"));discard io::write_bytes(b"\t");discard io::write_usize(wire::integer(t,span,b"end_byte"));discard io::write_bytes(b"\n");i+=1;
- }return .ok(bytes::empty());}let subject=join::resolve(`, 1)
+ }return .ok(bytes::empty());}let result=impact::explore(`, 1)
 	candidateAtlasProbe(t, "project_atlas_impact_json", main, func(t *testing.T, image string) {
 		run := func(maps, expected [][]byte, order []int, instance, symbol string, depth, symbols, packages, calls, output int, edges bool) (int, string) {
 			t.Helper()
@@ -141,12 +141,35 @@ fn i32 main(){let a=Token<i32>{.value=1};let b=Token<u8>{.value=2};discard wrap<
 			if part.Header().PackageUID != "example.session.app" {
 				continue
 			}
+			var leaf string
+			var foreign string
+			var selectors []string
 			for _, symbol := range part.Symbols() {
-				if symbol.Declaration.Name != "leaf" && !strings.HasPrefix(symbol.Declaration.Name, "_fy_closure_") {
-					continue
+				switch {
+				case symbol.Declaration.Name == "leaf":
+					leaf = symbol.Visible
+					selectors = append(selectors, leaf)
+					for _, impl := range part.Specializations() {
+						if impl.Declaration == symbol.Declaration {
+							id := symbol.Visible
+							if impl.TypeArguments[0].Name == "i32" {
+								id = symbol.Full
+							}
+							selectors = append(selectors, id+"#"+impl.ID)
+						} else if impl.Declaration.Name == "relay" {
+							foreign = impl.ID
+						}
+					}
+				case strings.HasPrefix(symbol.Declaration.Name, "_fy_closure_"):
+					selectors = append(selectors, symbol.Visible)
 				}
+			}
+			if leaf == "" || foreign == "" || len(selectors) != 5 {
+				t.Fatalf("missing concrete selector fixtures: %v", selectors)
+			}
+			for _, selector := range selectors {
 				for _, limits := range [][2]int{{8, 64}, {3, 64}, {8, 4}} {
-					want, err := concrete.index.Impact(part.Header().PackageInstance, symbol.Visible, limits[0], limits[1])
+					want, err := concrete.index.Impact(part.Header().PackageInstance, selector, limits[0], limits[1])
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -155,10 +178,23 @@ fn i32 main(){let a=Token<i32>{.value=1};let b=Token<u8>{.value=2};discard wrap<
 						t.Fatal(err)
 					}
 					code, out := run(concrete.data, concrete.current, []int{1, 0}, part.Header().PackageInstance,
-						symbol.Visible, limits[0], limits[1], 2, 128, 100000, false)
+						selector, limits[0], limits[1], 2, 128, 100000, false)
 					if code != 0 || out != string(canonical) {
-						t.Fatalf("concrete impact %s limits %v differs: %d\ngot %s\nwant %s", symbol.Declaration.Name, limits, code, out, canonical)
+						t.Fatalf("concrete impact %s limits %v differs: %d\ngot %s\nwant %s", selector, limits, code, out, canonical)
 					}
+				}
+			}
+			for _, invalid := range []struct {
+				selector string
+				problem  string
+			}{
+				{leaf + "#", "2"},
+				{leaf + "#" + foreign, "9"},
+				{leaf + "#g0_" + strings.Repeat("0", 64), "9"},
+			} {
+				if code, out := run(concrete.data, concrete.current, []int{1, 0}, part.Header().PackageInstance,
+					invalid.selector, 8, 64, 2, 128, 100000, false); code != 7 || out != invalid.problem {
+					t.Fatalf("bad selector %q: %d %q", invalid.selector, code, out)
 				}
 			}
 		}

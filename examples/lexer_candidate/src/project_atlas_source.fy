@@ -49,5 +49,5 @@ pub fn ref join::Graph admitted_graph(ref Loaded p){return ref p.graph;}
 }
 @effects(filesystem,environment) pub fn Result<bytes::Buffer,Problem> query(ref u8[] root,ref options::Options o){
  let loaded=load(root,o)?;let joined=admitted_graph(ref loaded);var usize query_work=loaded.work;
- let subject=switch(join::resolve(joined,join::instance(joined,loaded.selected),options::symbol(o),ref mut query_work)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};let result=switch(impact::explore(joined,subject,options::depth(o),options::symbols(o),ref mut query_work)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};return switch(output::render(joined,ref result,options::output(o),ref mut query_work)){case .ok(p):{.ok(p)}case .err(code):{.err(fail(4,code))}};
+ let result=switch(impact::explore(joined,join::instance(joined,loaded.selected),options::symbol(o),options::depth(o),options::symbols(o),ref mut query_work)){case .ok(p):{p}case .err(code):{return .err(fail(4,code));}};return switch(output::render(joined,ref result,options::output(o),ref mut query_work)){case .ok(p):{.ok(p)}case .err(code):{.err(fail(4,code))}};
 }
