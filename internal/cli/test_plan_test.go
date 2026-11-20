@@ -160,21 +160,28 @@ pub fn i32 alternate() {
 			path:      []string{selectedTest, "library::bridge", "library::relay", "library::apply", "library::_fy_closure_bridge_1"},
 		},
 		{
-			name: "closure-ambiguous-return",
+			name: "closure-branch-return",
 			library: `fn fn i32(i32) choose(bool first, fn i32(i32) left, fn i32(i32) right) {
     if (first) { return left; }
     return right;
 }
+fn i32 apply(bool first, fn i32(i32) left, fn i32(i32) right) {
+    let action = choose(first, left, right);
+    return action(2);
+}
 pub fn i32 bridge(bool first) {
     let fn i32(i32) left = fn [] i32(i32 x) { return 40 + x; };
     let fn i32(i32) right = fn [] i32(i32 x) { return 44 - x; };
-    let action = choose(first, left, right);
-    return left(2) + action(2) - 42;
+    return apply(first, left, right);
+}
+pub fn i32 alternate(bool first) {
+    let fn i32(i32) other = fn [] i32(i32 x) { return 21 * x; };
+    return apply(first, other, other);
 }`,
-			call:     "library::bridge(true)",
-			selector: "library::_fy_closure_bridge_1",
-			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
-			reason:   "incomplete-call-coverage",
+			call:      "library::bridge(false)",
+			otherCall: "library::alternate(true) == 42",
+			selector:  "library::_fy_closure_bridge_2",
+			path:      []string{selectedTest, "library::bridge", "library::apply", "library::_fy_closure_bridge_2"},
 		},
 		{
 			name: "cycle",

@@ -104,9 +104,9 @@ func (trace *closureTrace) body(symbol hir.SymbolID) closureBody {
 	return body
 }
 
-func (trace *closureTrace) resolve(function hir.SymbolID, value mir.Operand, field string, frame *closureFrame, depth int) hir.SymbolID {
+func (trace *closureTrace) resolve(function hir.SymbolID, value mir.Operand, field string, frame *closureFrame, depth int) []hir.SymbolID {
 	if depth == maxTestPlanDepth || trace.work < 0 {
-		return hir.NoSymbol
+		return nil
 	}
 	body := trace.body(function)
 	for value.Kind == mir.OperandLocal {
@@ -121,7 +121,7 @@ func (trace *closureTrace) resolve(function hir.SymbolID, value mir.Operand, fie
 			switch op.Kind {
 			case mir.OperationClosureCreate:
 				if field == "" {
-					return op.Symbol
+					return []hir.SymbolID{op.Symbol}
 				}
 			case mir.OperationAssign:
 				value = op.Operands[0]
@@ -147,42 +147,44 @@ func (trace *closureTrace) resolve(function hir.SymbolID, value mir.Operand, fie
 		}
 		break
 	}
-	return hir.NoSymbol
+	return nil
 }
 
-func (trace *closureTrace) result(call closureCall, field string, parent *closureFrame, depth int) hir.SymbolID {
+func (trace *closureTrace) result(call closureCall, field string, parent *closureFrame, depth int) []hir.SymbolID {
 	if call.term.ForeignABI != "" {
-		return hir.NoSymbol
+		return nil
 	}
 	callee := call.term.Callee
 	frame := &closureFrame{call: call, parent: parent}
-	target := hir.NoSymbol
+	var targets []hir.SymbolID
 	for _, value := range trace.body(callee).returns {
 		resolved := trace.resolve(callee, value, field, frame, depth)
-		if resolved == hir.NoSymbol || target != hir.NoSymbol && target != resolved {
-			return hir.NoSymbol
+		trace.work -= len(resolved)
+		if len(resolved) == 0 || trace.work < 0 {
+			return nil
 		}
-		target = resolved
+		targets = append(targets, resolved...)
 	}
-	return target
+	slices.Sort(targets)
+	return slices.Compact(targets)
 }
 
-func (trace *closureTrace) parameter(function hir.SymbolID, position int, field string, frame *closureFrame, depth int) hir.SymbolID {
+func (trace *closureTrace) parameter(function hir.SymbolID, position int, field string, frame *closureFrame, depth int) []hir.SymbolID {
 	if frame != nil {
 		return trace.resolve(frame.call.caller, frame.call.term.Arguments[position], field, frame.parent, depth)
 	}
-	// An unqualified graph edge must hold under every observed caller. If
-	// callers supply different targets, attaching either edge would attribute
-	// one caller's test to the other caller's closure.
-	target := hir.NoSymbol
+	// Share an edge only when all observed callers supply the same target
+	// set. Otherwise invocation traces the caller chains separately.
+	var targets []hir.SymbolID
 	for _, call := range trace.callers[function] {
 		resolved := trace.resolve(call.caller, call.term.Arguments[position], field, nil, depth)
-		if resolved == hir.NoSymbol || target != hir.NoSymbol && target != resolved {
-			return hir.NoSymbol
+		trace.work -= len(resolved)
+		if len(resolved) == 0 || trace.work < 0 || len(targets) != 0 && !slices.Equal(targets, resolved) {
+			return nil
 		}
-		target = resolved
+		targets = resolved
 	}
-	return target
+	return targets
 }
 
 // Split a disagreeing invocation by its verified callers. Extend the active
@@ -195,10 +197,19 @@ func (trace *closureTrace) invocation(function hir.SymbolID, value mir.Operand, 
 		if trace.work < 0 || sources[outer] == "" {
 			return false
 		}
-		target := trace.resolve(function, value, "", frame, 0)
-		if target != hir.NoSymbol {
-			trace.work -= depth
-			return trace.work >= 0 && record(target, frame)
+		targets := trace.resolve(function, value, "", frame, 0)
+		if len(targets) != 0 {
+			trace.work -= len(targets) * (depth + 1)
+			if trace.work < 0 {
+				return false
+			}
+			complete := true
+			for _, target := range targets {
+				if !record(target, frame) {
+					complete = false
+				}
+			}
+			return complete
 		}
 		if trace.work < 0 || depth == maxTestPlanDepth-1 {
 			return false

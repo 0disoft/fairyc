@@ -80,9 +80,11 @@ If cleanup graph construction exceeds 65,536 call observations and drop-type vis
 the command retains the ordinary Atlas paths and recommends `all-tests`.
 For copied closures, the command follows immutable copies, direct struct fields,
 and ordinary function parameters and results within the package. Returned values
-are traced with the argument bindings of their call site. When callers supply
-different closures to the same function, paths retain the caller chain that
-supplied each target. Unresolved targets and trace limits require `all-tests`.
+are traced with the argument bindings of their call site. If each return can be
+resolved, the planner includes all its possible targets. Paths through a branch
+are conditional. When callers supply different closures to the same function,
+paths retain the caller chain that supplied each target. Unresolved targets and
+trace limits require `all-tests`.
 Closure tracing allows 65,536 steps and up to 64 nested call, argument or
 result lookups.
 Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
