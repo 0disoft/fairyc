@@ -52,8 +52,8 @@ flush that could turn known success into a generic failure. Normal pre-publicati
 errors preserve the old bytes and remove staging. A process killed before rename can
 leave an ignored `.tmp-*` file; a killed process after successful publication leaves
 the new complete state observable on reopen. These are process-restart guarantees.
-Directory-entry persistence after power loss, hardware retention, rollback attacks,
-backup/recovery and ambiguous remote commit handling are not certified. This prototype
+Directory-entry persistence after power loss, hardware retention, rollback attacks
+and ambiguous remote commit handling are not certified. This prototype
 does not discharge the production durability requirements in ADR 0376.
 
 The local lock is released when each operation ends or the process exits. There is no
@@ -94,6 +94,30 @@ I/O/backend/output failure, 6 transaction rejection, 7 conflict/layout drift/bus
 report; unexpected implementation panics remain panics. A report-output failure after
 publication is explicitly described as possibly committed and must not trigger an
 automatic retry. There is no default compiler CLI integration or target flag.
+
+## Explicit local backup and restore
+
+`go run -mod=readonly ./tools/dev/fairyc-state <backup|restore>
+<existing-store-directory> <source.fy> <existing-backup-directory>` uses the
+verified experimental graph source path to establish the expected layout.
+Both actions operate on the same bounded local record and never execute the
+transaction body. They return the v1 report with the action and layout hash.
+
+`backup` reads and validates the complete committed record under the store
+lock and releases the lock before staging the detached bytes. It publishes
+`state-backup-v1.bin` in the existing trusted backup directory by linking the
+synced staging file to an unused name on the same filesystem. An existing
+backup causes an error and keeps its original bytes. The backup directory's
+filesystem must support hard links.
+
+`restore` verifies the size, checksum, canonical encoding and exact expected
+layout before touching the destination. It requires a directory without
+either store authority file and uses the ordinary exclusive creation and
+atomic publication path. The original version and every entry are preserved.
+Restore refuses missing or invalid backups, mismatched layouts and existing
+stores. A process interrupted during creation can leave a lock or staging
+file for operator inspection. The record checksum detects accidental damage.
+Use a trusted backup directory and trusted backups as for the local store.
 
 ## Explicit native graph developer mode
 

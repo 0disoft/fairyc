@@ -24,6 +24,7 @@ const usage = `Experimental local Fairy state runner
 
 Usage: fairyc-state <init|execute|snapshot> <existing-store-directory> <source.fy>
        fairyc-state <init|execute|snapshot> <existing-store-directory> <source.fy> --engine native-graph --profile low|optimized
+       fairyc-state <backup|restore> <existing-store-directory> <source.fy> <existing-backup-directory>
 
 The original three-argument form uses Go MIR and single-cell source admission.
 Native graph mode uses fresh graph source admission and actual Windows amd64
@@ -32,6 +33,8 @@ builds/runs the native image; init/snapshot never execute the transaction body.
 
 One source file and exactly one transaction are accepted. init exclusively creates
 state; execute performs one attempt; snapshot never runs the transaction body.
+backup captures a committed state; restore requires a fresh store directory.
+Both use state-backup-v1.bin and verify the layout against source.
 Store policy: 16 MiB file, 65536 entries, 64 KiB/value.
 Execution policy: 1024 writes, 1 MiB write bytes, 64 KiB/value, 1024-byte map keys.
 Exit codes: 0 success, 2 invocation, 3 source rejection, 4 I/O/backend failure,
@@ -70,6 +73,12 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) in
 			return 4
 		}
 		return 0
+	}
+	if len(args) == 4 && (args[0] == "backup" || args[0] == "restore") {
+		if args[1] == "" || filepath.Ext(args[2]) != ".fy" || args[3] == "" {
+			return fail(2, errors.New(usage))
+		}
+		return runStateBackup(ctx, args, stdout, fail)
 	}
 	if len(args) != 3 {
 		return runNative(ctx, args, stdout, stderr)

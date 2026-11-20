@@ -62,43 +62,44 @@ var _ PersistencePort = (*LocalPersistence)(nil)
 // CreateLocalPersistence exclusively creates a new store. Existing state or lock
 // files are never overwritten, including remnants of an interrupted creation.
 func CreateLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits) (*LocalPersistence, error) {
-	return openLocalPersistence(directory, initial, limits, true)
+	if err := limits.validate(); err != nil {
+		return nil, err
+	}
+	record, err := encodeLocalState(localState{layout: initial}, limits)
+	if err != nil {
+		return nil, err
+	}
+	return openLocalPersistence(directory, initial, limits, record)
 }
 
 // OpenLocalPersistence opens an existing store. Missing authority files fail
 // closed instead of silently resetting previously committed data.
 func OpenLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits) (*LocalPersistence, error) {
-	return openLocalPersistence(directory, initial, limits, false)
+	return openLocalPersistence(directory, initial, limits, nil)
 }
 
-func openLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits, create bool) (*LocalPersistence, error) {
+func openLocalPersistence(directory string, initial Layout, limits LocalPersistenceLimits, initialRecord []byte) (*LocalPersistence, error) {
 	if err := validateLayout(initial); err != nil {
 		return nil, err
 	}
 	if err := limits.validate(); err != nil {
 		return nil, err
 	}
-	if directory == "" {
-		return nil, fmt.Errorf("local state directory is required")
-	}
-	absolute, err := filepath.Abs(directory)
-	if err != nil {
-		return nil, err
-	}
-	info, err := os.Lstat(absolute)
-	if err != nil {
-		return nil, err
-	}
-	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
-		return nil, fmt.Errorf("local state root must be a real directory")
-	}
-	root, err := os.OpenRoot(absolute)
+	root, err := openLocalRoot(directory)
 	if err != nil {
 		return nil, err
 	}
 	store := &LocalPersistence{root: root, limits: limits}
+	create := initialRecord != nil
 	flags := os.O_RDWR
 	if create {
+		if _, err := root.Lstat(localStateName); !errors.Is(err, os.ErrNotExist) {
+			_ = root.Close()
+			if err == nil {
+				return nil, os.ErrExist
+			}
+			return nil, err
+		}
 		flags |= os.O_CREATE | os.O_EXCL
 	}
 	store.lock, err = store.openRegular(localLockName, flags)
@@ -109,7 +110,7 @@ func openLocalPersistence(directory string, initial Layout, limits LocalPersiste
 	err = store.withLock(func() error {
 		current, err := store.load()
 		if errors.Is(err, os.ErrNotExist) && create {
-			return store.publish(localState{layout: cloneLayout(initial)})
+			return store.publishRecord(initialRecord)
 		}
 		if err != nil {
 			return err
@@ -127,6 +128,24 @@ func openLocalPersistence(directory string, initial Layout, limits LocalPersiste
 		return nil, err
 	}
 	return store, nil
+}
+
+func openLocalRoot(directory string) (*os.Root, error) {
+	if directory == "" {
+		return nil, fmt.Errorf("local state directory is required")
+	}
+	absolute, err := filepath.Abs(directory)
+	if err != nil {
+		return nil, err
+	}
+	info, err := os.Lstat(absolute)
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("local state root must be a real directory")
+	}
+	return os.OpenRoot(absolute)
 }
 
 func (store *LocalPersistence) Close() error {
@@ -324,23 +343,36 @@ func (store *LocalPersistence) openRegular(name string, flags int) (*os.File, er
 }
 
 func (store *LocalPersistence) load() (localState, error) {
+	state, _, err := store.readRecord()
+	return state, err
+}
+
+func (store *LocalPersistence) readRecord() (localState, []byte, error) {
 	file, err := store.openRegular(localStateName, os.O_RDONLY)
 	if err != nil {
-		return localState{}, err
+		return localState{}, nil, err
 	}
 	defer file.Close()
+	encoded, err := readLocalStateBytes(file, store.limits)
+	if err != nil {
+		return localState{}, nil, err
+	}
+	state, err := decodeLocalState(encoded, store.limits)
+	if err != nil {
+		return localState{}, nil, err
+	}
+	return state, encoded, nil
+}
+
+func readLocalStateBytes(file *os.File, limits LocalPersistenceLimits) ([]byte, error) {
 	info, err := file.Stat()
 	if err != nil {
-		return localState{}, err
+		return nil, err
 	}
-	if info.Size() > store.limits.MaxStateBytes {
-		return localState{}, fmt.Errorf("local state exceeds file size limit")
+	if info.Size() > limits.MaxStateBytes {
+		return nil, fmt.Errorf("local state exceeds file size limit")
 	}
-	encoded, err := io.ReadAll(io.LimitReader(file, store.limits.MaxStateBytes+1))
-	if err != nil {
-		return localState{}, err
-	}
-	return decodeLocalState(encoded, store.limits)
+	return io.ReadAll(io.LimitReader(file, limits.MaxStateBytes+1))
 }
 
 func (store *LocalPersistence) publish(current localState) error {
@@ -348,21 +380,15 @@ func (store *LocalPersistence) publish(current localState) error {
 	if err != nil {
 		return err
 	}
-	file, temporary, err := durablefile.CreateTemporary(store.root, ".")
+	return store.publishRecord(encoded)
+}
+
+func (store *LocalPersistence) publishRecord(encoded []byte) error {
+	temporary, err := stageLocalRecord(store.root, encoded)
 	if err != nil {
 		return err
 	}
 	defer store.root.Remove(temporary)
-	defer file.Close()
-	if _, err := file.Write(encoded); err != nil {
-		return err
-	}
-	if err := file.Sync(); err != nil {
-		return err
-	}
-	if err := file.Close(); err != nil {
-		return err
-	}
 	if store.beforePublish != nil {
 		if err := store.beforePublish(); err != nil {
 			return err
@@ -376,6 +402,22 @@ func (store *LocalPersistence) publish(current localState) error {
 		return err
 	}
 	return store.root.Rename(temporary, localStateName)
+}
+
+func stageLocalRecord(root *os.Root, encoded []byte) (string, error) {
+	file, name, err := durablefile.CreateTemporary(root, ".")
+	if err != nil {
+		return "", err
+	}
+	_, writeErr := file.Write(encoded)
+	if writeErr == nil {
+		writeErr = file.Sync()
+	}
+	if err := errors.Join(writeErr, file.Close()); err != nil {
+		_ = root.Remove(name)
+		return "", err
+	}
+	return name, nil
 }
 
 // Keep snapshots independent from future callers even when entries are empty.
