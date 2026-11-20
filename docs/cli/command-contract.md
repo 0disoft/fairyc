@@ -20,6 +20,11 @@ No stable safe-change guarantee, arbitrary rename, new map schema or candidate p
 Impact/MCP never update source or lock; apply leaves the lock stale for the next ordinary check.
 Output failure can follow successful source replacement.
 
+The same [Atlas contract](../atlas/impact-mcp-edit-v1.md#semantic-diff) owns
+`atlas-diff`. Use `--package-uid` for one package or `--workspace` with
+`--max-packages` for the root-reachable graph. Both modes require the baseline,
+declaration and output limits, and current locks in both workspaces.
+
 The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite
 signature types and opaque external C calls. Only resolved calls consume the

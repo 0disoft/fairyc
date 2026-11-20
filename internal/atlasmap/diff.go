@@ -42,11 +42,7 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 	if maxDeclarations < 1 {
 		return DiffResult{}, fmt.Errorf("invalid Atlas diff declaration limit")
 	}
-	old, new := before.data.header, after.data.header
-	if old.LogicalSchema != LogicalSchemaV3 || new.LogicalSchema != LogicalSchemaV3 ||
-		old.PackageCoordinate != new.PackageCoordinate || old.Language != new.Language ||
-		old.CompilerBuild != new.CompilerBuild || old.Target != new.Target ||
-		old.TargetScope != new.TargetScope || old.RuntimeABI != new.RuntimeABI {
+	if !matchingDiffContext(before, after) {
 		return DiffResult{}, fmt.Errorf("Atlas diff requires matching package, compiler and target identities")
 	}
 	if err := compatibilityError(before, expectedBefore); err != nil {
@@ -60,31 +56,31 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 		return DiffResult{}, fmt.Errorf("Atlas diff declarations exceed limit")
 	}
 
+	return compareDiffFacts(before, after, bodyFingerprints), nil
+}
+
+func matchingDiffContext(before, after Partition) bool {
+	old, current := before.data.header, after.data.header
+	return old.LogicalSchema == LogicalSchemaV3 && current.LogicalSchema == LogicalSchemaV3 &&
+		old.PackageCoordinate == current.PackageCoordinate && old.Language == current.Language &&
+		old.CompilerBuild == current.CompilerBuild && old.Target == current.Target &&
+		old.TargetScope == current.TargetScope && old.RuntimeABI == current.RuntimeABI
+}
+
+func compareDiffFacts(before, after Partition, bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte)) DiffResult {
+	state, omissions := diffCoverage(before, after)
 	result := DiffResult{
-		Schema: "fairyc.atlas-diff/v1", State: "bounded",
+		Schema: "fairyc.atlas-diff/v1", State: state,
 		Before: diffContext(before), After: diffContext(after),
 		Changes:   []DiffChange{},
-		Omissions: []string{"behavior-equivalence-not-analyzed", "renames-not-inferred"},
-	}
-	for _, context := range []QueryContext{result.Before, result.After} {
-		if context.Generation != GenerationExact || len(context.MapOmissions) != 0 {
-			result.State = "partial"
-		}
-		for _, fact := range context.Completeness {
-			if fact.Status != semanticsnapshot.CompletenessExact || fact.External != 0 || fact.Unknown != 0 {
-				result.State = "partial"
-			}
-		}
-	}
-	if len(before.data.specializations) != 0 || len(after.data.specializations) != 0 {
-		result.State = "partial"
-		result.Omissions = append(result.Omissions, "specialized-implementation-deltas-not-compared")
+		Omissions: omissions,
 	}
 
 	keys := make(map[diffKey]struct{})
 	left, right := diffDeclarations(before, keys), diffDeclarations(after, keys)
 	leftBodies, rightBodies := diffBodies(before), diffBodies(after)
-	leftCode, rightCode := bodyFingerprints()
+	var leftCode, rightCode map[string][sha256.Size]byte
+	haveFingerprints := false
 	missingBody := false
 	for key := range keys {
 		a, aok := left[key]
@@ -106,6 +102,10 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 				change.Facts = append(change.Facts, "observations")
 			}
 			if key.kind == semanticsnapshot.DeclarationFunction && (leftBodies[key].present || rightBodies[key].present) {
+				if !haveFingerprints {
+					leftCode, rightCode = bodyFingerprints()
+					haveFingerprints = true
+				}
 				name := key.module + "::" + key.name
 				a, aok := leftCode[name]
 				b, bok := rightCode[name]
@@ -134,7 +134,30 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 		}
 		return cmp.Compare(a.Name, b.Name)
 	})
-	return result, nil
+	return result
+}
+
+func diffCoverage(partitions ...Partition) (string, []string) {
+	state := "bounded"
+	omissions := []string{"behavior-equivalence-not-analyzed", "renames-not-inferred"}
+	specializations := false
+	for _, partition := range partitions {
+		header := partition.data.header
+		if header.GenerationStatus != GenerationExact || len(header.Omissions) != 0 {
+			state = "partial"
+		}
+		for _, fact := range partition.data.completeness {
+			if fact.Status != semanticsnapshot.CompletenessExact || fact.External != 0 || fact.Unknown != 0 {
+				state = "partial"
+			}
+		}
+		specializations = specializations || len(partition.data.specializations) != 0
+	}
+	if specializations {
+		state = "partial"
+		omissions = append(omissions, "specialized-implementation-deltas-not-compared")
+	}
+	return state, omissions
 }
 
 func diffContext(partition Partition) QueryContext {

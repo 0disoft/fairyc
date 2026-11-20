@@ -17,13 +17,15 @@ import (
 func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
 	const command = "atlas-diff"
 	var baseline, uid string
-	var declarations, output uint64
-	required := []string{"--baseline", "--package-uid", "--max-declarations", "--max-output-bytes"}
-	flags := make([]flagDefinition, 0, len(required))
-	for _, flag := range required {
-		flags = append(flags, flagDefinition{Name: flag, Kind: flagScalar})
-	}
-	_, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: flags, Required: required}, func(flag, value string) error {
+	var packages, declarations, output uint64
+	seen, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: []flagDefinition{
+		{Name: "--baseline", Kind: flagScalar},
+		{Name: "--package-uid", Kind: flagScalar},
+		{Name: "--workspace", Kind: flagSwitch},
+		{Name: "--max-packages", Kind: flagScalar},
+		{Name: "--max-declarations", Kind: flagScalar},
+		{Name: "--max-output-bytes", Kind: flagScalar},
+	}, Required: []string{"--baseline", "--max-declarations", "--max-output-bytes"}}, func(flag, value string) error {
 		switch flag {
 		case "--baseline":
 			if strings.TrimSpace(value) == "" || strings.ContainsRune(value, 0) {
@@ -33,6 +35,10 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		case "--package-uid":
 			uid = value
 			return validateAtlasPackageUID(command, value)
+		case "--max-packages":
+			var err error
+			packages, err = parseAtlasPositiveLimit(command, flag, value, maxAtlasPackRecords)
+			return err
 		case "--max-declarations":
 			var err error
 			declarations, err = parseAtlasPositiveLimit(command, flag, value, maxAtlasPackRecords)
@@ -47,6 +53,13 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
+	if err := validateFlagRules(
+		flagRule{Invalid: seen["--workspace"] == seen["--package-uid"], Message: "atlas-diff requires exactly one of --package-uid and --workspace"},
+		flagRule{Invalid: seen["--workspace"] && packages == 0, Message: "atlas-diff --workspace requires --max-packages"},
+		flagRule{Invalid: !seen["--workspace"] && packages != 0, Message: "atlas-diff --max-packages requires --workspace"},
+	); err != nil {
+		return invocationError(stderr, err.Error())
+	}
 	if !filepath.IsAbs(baseline) {
 		baseline = filepath.Join(sourceRoot, baseline)
 	}
@@ -59,16 +72,23 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if code != ExitSuccess {
 		return code
 	}
-	old, ok := uniqueDiffPartition(before.partitions, uid)
-	new, found := uniqueDiffPartition(after.partitions, uid)
-	if !ok || !found {
-		return invocationError(stderr, "atlas-diff requires exactly one selected package in each workspace")
+	fingerprints := func(old, new atlasmap.Partition) (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
+		return atlasDiffFingerprints(before, old, oldCheck.MIR), atlasDiffFingerprints(after, new, newCheck.MIR)
 	}
-	report, err := atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
-		after.expectations[new.Header().PackageInstance], int(declarations),
-		func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
-			return atlasDiffFingerprints(before, old, oldCheck.MIR), atlasDiffFingerprints(after, new, newCheck.MIR)
-		})
+	var report any
+	if seen["--workspace"] {
+		report, err = atlasmap.CompareWorkspaceV3(before.partitions, after.partitions, before.expectations, after.expectations,
+			int(packages), int(declarations), fingerprints)
+	} else {
+		old, ok := uniqueDiffPartition(before.partitions, uid)
+		new, found := uniqueDiffPartition(after.partitions, uid)
+		if !ok || !found {
+			return invocationError(stderr, "atlas-diff requires exactly one selected package in each workspace")
+		}
+		report, err = atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
+			after.expectations[new.Header().PackageInstance], int(declarations),
+			func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) { return fingerprints(old, new) })
+	}
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}

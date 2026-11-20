@@ -61,6 +61,22 @@ and source changes that leave these projections unchanged are outside its scope.
 The declaration limit covers both selected partitions together. Either limit
 failure leaves stdout empty.
 
+For the whole root-reachable graph, use
+`fairyc experimental atlas-diff --baseline <workspace-directory> --workspace
+--max-packages <n> --max-declarations <n> --max-output-bytes <n>`.
+This mode returns `fairyc.atlas-workspace-diff/v1`. The package and declaration
+limits count records across both snapshots, including unchanged packages.
+Every package must have an independent current expectation and its direct
+dependencies must be present. Comparison pairs packages by source-independent
+coordinate, which includes UID, version and features. Package rows sort by
+coordinate and carry exact contexts and sorted direct dependency coordinates
+for each side. An absent package has a null context and an empty dependency list.
+Added and removed packages list their declarations. Matched packages report
+changes in the same declaration and executable facts as the single-package
+mode, as well as changed direct dependencies. An `unchanged` row reports
+equality within that comparison's coverage. Any partial package makes the
+whole report partial. A limit failure leaves stdout empty.
+
 ## Fairy reader and impact core
 
 The private Fairy implementation reads canonical v1/v3 envelopes, validates

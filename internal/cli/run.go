@@ -49,6 +49,7 @@ Usage:
   fairyc experimental atlas-mcp --allow-impact --max-packages <n> --max-calls <n> --max-depth <n> --max-symbols <n> --max-output-bytes <n> --max-requests <n>
   fairyc experimental atlas-impact --package-uid <uid> --symbol <symbol-id> --max-packages <n> --max-calls <n> --max-depth <0..64> --max-symbols <n> --max-output-bytes <n> [--locked]
   fairyc experimental atlas-diff --baseline <workspace-directory> --package-uid <uid> --max-declarations <n> --max-output-bytes <n>
+  fairyc experimental atlas-diff --baseline <workspace-directory> --workspace --max-packages <n> --max-declarations <n> --max-output-bytes <n>
   fairyc experimental test-plan --symbol <module::function|symbol-id> [--package <package-uid>]
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
