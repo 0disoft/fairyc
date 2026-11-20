@@ -297,6 +297,13 @@ fn Result<bool,u32> constrain_argument(ref syntax::Parsed caller,Site site,usize
             if(syntax::literal_kind(caller,id)==5){constraints.integers[binder-1]=true;}
             break;
         }
+        if(n.kind==4 && n.left!=0 && n.left<id && bytes::equal(syntax::expression_text(caller,id),b"-")){
+            let operand=syntax::expression_at(caller,n.left);
+            if(operand.kind!=1 || syntax::literal_kind(caller,n.left)!=5){break;}
+            let binder=binder_index(provider,declaration,expected,constraints.count,work)?;
+            if(binder!=0){constraints.integers[binder-1]=true;}
+            break;
+        }
         if(n.kind==6){return constrain_nested(caller,site,id,provider,declaration,expected,constraints,sources,templates,metadata,work);}
         if(n.kind==23){return constrain_type(caller,written_type(site.owner,n.right),provider,declaration,expected,constraints,work);}
         if(n.kind!=2 || site.owner==0){break;}

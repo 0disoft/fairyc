@@ -52,6 +52,16 @@ func (s *inferenceScope) scalar(ref *ast.TypeReference) string {
 	return ""
 }
 
+func inferenceIntegerLiteral(e *ast.Expression) bool {
+	if e == nil || e.Kind != syntax.KindLiteral || e.Text == "" || e.Text[0] < '0' || e.Text[0] > '9' {
+		return false
+	}
+	raw := e.Text
+	base := strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0X") ||
+		strings.HasPrefix(raw, "0b") || strings.HasPrefix(raw, "0B")
+	return base || !strings.ContainsAny(raw, ".eE")
+}
+
 // evidence returns a known source type or an integer literal that can take a
 // type from another occurrence of the same binder.
 func (s *inferenceScope) evidence(e *ast.Expression) (typ *ast.TypeReference, integer bool) {
@@ -68,12 +78,9 @@ func (s *inferenceScope) evidence(e *ast.Expression) (typ *ast.TypeReference, in
 			typ := ast.NamedTypeReference("bool", e.Span)
 			return &typ, false
 		}
-		raw := e.Text
-		if raw != "" && raw[0] >= '0' && raw[0] <= '9' {
-			base := strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0X") ||
-				strings.HasPrefix(raw, "0b") || strings.HasPrefix(raw, "0B")
-			return nil, base || !strings.ContainsAny(raw, ".eE")
-		}
+		return nil, inferenceIntegerLiteral(e)
+	case syntax.KindPrefix:
+		return nil, e.Text == "-" && len(e.Children) == 1 && inferenceIntegerLiteral(e.Children[0])
 	case syntax.KindCall:
 		return s.genericResult(e), false
 	}

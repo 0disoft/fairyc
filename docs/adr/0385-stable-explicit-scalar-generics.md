@@ -145,6 +145,8 @@ payload type by itself.
 
 For an integer literal, another typed argument or result constraint for the
 same parameter provides the type. Literal-only evidence defaults to `i32`.
+Both frontends also collect this evidence from a unary minus applied directly
+to an integer literal, as in `identity(-42)`.
 Conflicting fixed types and missing evidence report E4502 at the call.
 Ordinary checking still owns conversion, range, argument-label, effect and
 ownership rules, including which composite shapes can be transported.
