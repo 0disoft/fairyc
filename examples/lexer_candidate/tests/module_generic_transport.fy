@@ -57,6 +57,27 @@ fn void inferred_scalar_calls_restore_and_execute(){
 }
 @test
 @effects(console)
+fn void inferred_constructor_calls_restore_and_execute(){
+    let raw=b"module root;fn bool nested<T>(Option<Option<T>> value){discard value;return true;}fn bool success<T>(Result<T,u32> value){discard value;return true;}fn bool failure<T>(Result<i32,T> value){discard value;return true;}fn i32 main(){let u8 number=42;assert(nested((.some(.some(42)))));assert(nested<i32>(.some(.some(42))));assert(success(.ok(number as u32)));assert(failure(.err(true)));return 42;}";
+    let result=compiled(raw);
+    let owner=core::checked_program(ref result);
+    let program=checked::ir_program(owner);
+    var usize entry=0;var usize i=1;
+    while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==5){entry=i;}i+=1;}
+    assert(entry!=0);
+    let body=ir::at(program,entry);
+    assert(ir::call_count(body)==4);
+    let inferred=ir::call_at(body,0);
+    assert(inferred.instance!=0 && inferred.instance==ir::call_at(body,1).instance);
+    let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
+    let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);
+    assert(outcome.error==0 && outcome.trap==0 && outcome.bits==42);
+    rejected(b"module root;fn bool accept<T>(Option<T> value){discard value;return true;}fn i32 main(){discard accept(.none);return 0;}");
+    rejected(b"module root;fn bool accept<T>(Result<T,u32> value){discard value;return true;}fn i32 main(){discard accept(.err(42));return 0;}");
+}
+@test
+@effects(console)
 fn void inferred_cleanup_calls_share_explicit_instances(){
     let raw=b"module root;fn T id<T>(T value){return value;}resource Hold<T>{T value;cleanup{let T inferred=id(42);let T written=id<T>(42);assert(inferred==written);}}fn i32 main(){let value=Hold<u32>{.value=42};discard value;return 42;}";
     let result=compiled_mode(raw,true);

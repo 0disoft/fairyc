@@ -6,6 +6,7 @@ import std::bytes as bytes;
 
 pub struct Arguments { usize count; u32[8] types; }
 struct Constraint { u32 fixed; bool integer; }
+struct ArgumentEvidence { usize binder; Constraint actual; }
 
 // Concrete scalar tags end at 38. Keep a distinct representation for each
 // source binder until the selected caller instance supplies its argument.
@@ -56,20 +57,20 @@ pub fn ref u8[] spelling(u32 code) {
     return b"bool";
 }
 
-fn Result<usize,u32> named_root(ref syntax::Parsed p, usize root, ref mut usize work) {
+fn Result<usize,u32> ungroup_type(ref syntax::Parsed p, usize root, ref mut usize work) {
     var usize node=root;
     while (node!=0) {
         if (!budget::charge(work,1)) { return .err(10); }
         let n=syntax::type_at(p,node);
-        if (n.kind!=5) { return .ok(if (n.kind==1) { node } else { 0 }); }
+        if (n.kind!=5) { return .ok(node); }
         node=n.left;
     }
     return .ok(0);
 }
 
 fn Result<u32,u32> scalar_root(ref syntax::Parsed p, usize owner, usize root, ref mut usize work) {
-    let name=named_root(p,root,work)?;
-    if (name==0) { return .ok(0); }
+    let name=ungroup_type(p,root,work)?;
+    if (name==0 || syntax::type_at(p,name).kind!=1) { return .ok(0); }
     let text=syntax::type_text(p,name);
     if (!budget::charge(work,text.len+1)) { return .err(10); }
     let scalar=scalars::scalar(text);
@@ -101,8 +102,8 @@ fn Result<Constraint,u32> evidence(ref syntax::Parsed p, usize owner, usize root
 
 fn Result<usize,u32> binder_index(ref syntax::Parsed provider, usize declaration, usize formal_root,
     usize count, ref mut usize work) {
-    let root=named_root(provider,formal_root,work)?;
-    if (root==0) { return .ok(0); }
+    let root=ungroup_type(provider,formal_root,work)?;
+    if (root==0 || syntax::type_at(provider,root).kind!=1) { return .ok(0); }
     let formal=syntax::type_text(provider,root);
     var usize i=0;
     while (i<count) {
@@ -114,6 +115,49 @@ fn Result<usize,u32> binder_index(ref syntax::Parsed provider, usize declaration
         i+=1;
     }
     return .ok(0);
+}
+
+// Constructors contribute only the payload they actually carry. The type links
+// run right-to-left, so Result's first link is the error type.
+fn Result<usize,u32> constructor_payload(ref syntax::Parsed provider,usize root,ref u8[] constructor,ref mut usize work){
+    let t=syntax::type_at(provider,root);
+    if(t.kind!=6 || t.left==0 || t.right==0){return .ok(0);}
+    let name=syntax::type_text(provider,t.left);
+    if(!budget::charge(work,name.len+constructor.len+1)){return .err(10);}
+    let last=syntax::type_at(provider,t.right);
+    if(last.kind!=7){return .err(9);}
+    if(bytes::equal(name,b"Option")){
+        return .ok(if(last.right==0 && bytes::equal(constructor,b"some")){last.left}else{0});
+    }
+    if(!bytes::equal(name,b"Result") || last.right==0){return .ok(0);}
+    let first=syntax::type_at(provider,last.right);
+    if(first.kind!=7){return .err(9);}
+    if(first.right!=0){return .ok(0);}
+    return .ok(if(bytes::equal(constructor,b"ok")){first.left}else if(bytes::equal(constructor,b"err")){last.left}else{0});
+}
+
+fn Result<ArgumentEvidence,u32> argument_evidence(ref syntax::Parsed caller,usize owner,usize argument,
+    ref syntax::Parsed provider,usize declaration,usize formal,usize count,ref mut usize work){
+    var usize id=argument;
+    var usize expected=formal;
+    while(id!=0 && expected!=0){
+        if(!budget::charge(work,1)){return .err(10);}
+        let n=syntax::expression_at(caller,id);
+        if(n.kind==3){id=n.left;continue;}
+        expected=ungroup_type(provider,expected,work)?;
+        if(expected==0){break;}
+        if(n.kind==6 && n.left!=0 && n.right!=0 && syntax::expression_at(caller,n.left).kind==28){
+            let link=syntax::expression_at(caller,n.right);
+            if(link.kind!=7 || link.right!=0 || link.left==0 || link.left>=n.right || n.right>=id){break;}
+            expected=constructor_payload(provider,expected,syntax::expression_text(caller,n.left),work)?;
+            id=link.left;
+            continue;
+        }
+        let actual=evidence(caller,owner,id,work)?;
+        let usize binder=if(actual.fixed!=0 || actual.integer){binder_index(provider,declaration,expected,count,work)?}else{0};
+        return .ok(ArgumentEvidence{.binder,.actual});
+    }
+    return .ok(ArgumentEvidence{.binder=0,.actual=Constraint{.fixed=0,.integer=false}});
 }
 
 // Side-effect-free request inference apart from charging the caller's work meter.
@@ -142,15 +186,13 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
         if (argument>=call) { return .err(9); }
         let link=syntax::expression_at(caller,argument);
         if (link.kind!=7 || link.left==0 || link.left>=argument || link.right>=argument) { return .err(9); }
-        let actual=evidence(caller,owner,link.left,work)?;
-        if (actual.fixed!=0 || actual.integer) {
-            let binder=binder_index(provider,declaration,entry.type_root,count,work)?;
-            if (binder!=0) {
-                let index=binder-1;
-                if (fixed[index]!=0 && actual.fixed!=0 && fixed[index]!=actual.fixed) { return .err(4502); }
-                if (actual.fixed!=0) { fixed[index]=actual.fixed; }
-                integers[index]=integers[index] || actual.integer;
-            }
+        let evidence=argument_evidence(caller,owner,link.left,provider,declaration,entry.type_root,count,work)?;
+        if (evidence.binder!=0) {
+            let index=evidence.binder-1;
+            let actual=evidence.actual;
+            if (fixed[index]!=0 && actual.fixed!=0 && fixed[index]!=actual.fixed) { return .err(4502); }
+            if (actual.fixed!=0) { fixed[index]=actual.fixed; }
+            integers[index]=integers[index] || actual.integer;
         }
         argument=link.right;
     }
