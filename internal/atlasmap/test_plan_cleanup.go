@@ -13,14 +13,17 @@ const ordinaryCleanupOmission = "ordinary-cleanup-call-not-retained"
 const maxTestPlanCleanupWork = 65536
 
 type testPlanCleanupGraph struct {
-	incoming        map[string][]string
-	recovered       int
-	genericComplete bool
+	incoming  map[string][]string
+	recovered int
+	complete  bool
 }
 
 // The map has no edges from drop obligations to their cleanup bodies. Those
 // bindings come from the same verified MIR used to produce the query index.
-func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.PackageID) testPlanCleanupGraph {
+func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.PackageID, wantCleanup bool) testPlanCleanupGraph {
+	if wantCleanup {
+		return index.buildTestPlanCleanups(result, packageID)
+	}
 	for _, node := range index.nodes {
 		for _, facts := range node.specializations {
 			if facts.Cleanup != nil {
@@ -50,9 +53,12 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 		case semanticsnapshot.DeclarationFunction:
 			functions[name] = node.symbol.Visible
 		case semanticsnapshot.DeclarationResource:
-			cleanupNames[hir.ParseType(name)] = testPlanLabel(key) + "::cleanup"
+			if node.declaration.DropKind == string(hir.ResourceDropNonEmpty) {
+				cleanupNames[hir.ParseType(name)] = testPlanLabel(key) + testPlanCleanupSuffix
+			}
 		}
 	}
+	ordinaryCleanups := len(cleanupNames)
 	genericCleanupTypes, expectedCleanups := index.bindTestPlanSpecializations(result.GenericProvenance, packageID, functions, cleanupNames)
 	names := make(map[hir.SymbolID]string)
 	matchedCleanups := 0
@@ -64,7 +70,7 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 			names[fn.Symbol] = functions[fn.Name]
 		} else {
 			names[fn.Symbol] = cleanupNames[fn.DropGlueFor]
-			if genericCleanupTypes[fn.DropGlueFor] {
+			if names[fn.Symbol] != "" {
 				matchedCleanups++
 			}
 		}
@@ -80,8 +86,8 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 		target hir.SymbolID
 	}
 	graph := testPlanCleanupGraph{
-		incoming:        make(map[string][]string),
-		genericComplete: matchedCleanups == expectedCleanups,
+		incoming: make(map[string][]string),
+		complete: matchedCleanups == ordinaryCleanups+expectedCleanups,
 	}
 	work := 0
 	for _, fn := range program.Functions {

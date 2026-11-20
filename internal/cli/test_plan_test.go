@@ -45,6 +45,17 @@ pub fn i32 bridge() {
 			path: []string{selectedTest, "library::bridge", "library::Token::cleanup", "library::answer"},
 		},
 		{
+			name: "cleanup-subject",
+			library: `resource Token { i32 value; cleanup { assert(this.value == 42); } }
+pub fn i32 bridge() {
+    let Token token = Token { .value = 42 };
+    return token.value;
+}`,
+			call:     "library::bridge()",
+			selector: "library::Token::cleanup",
+			path:     []string{selectedTest, "library::bridge", "library::Token::cleanup"},
+		},
+		{
 			name: "nested-cleanup",
 			library: `resource Token {
     i32 value;
@@ -300,6 +311,7 @@ fn T exercise<T>(T value) {
     let Token<T> token = Token<T> { .value = value };
     return token.value;
 }
+
 pub fn i32 signed() { return exercise<i32>(42); }
 pub fn bool boolean() { return exercise<bool>(true); }
 `)
@@ -308,18 +320,92 @@ import library as library;
 @test fn void checks_bool() { assert(library::boolean()); }
 @test fn void checks_i32() { assert(library::signed() == 42); }
 `)
-	for _, tc := range []struct{ typ, entry string }{{"i32", "signed"}, {"bool", "boolean"}} {
-		t.Run(tc.typ, func(t *testing.T) {
-			selector := "library::observe<" + tc.typ + ">"
+	type testCase struct {
+		selector string
+		want     []atlasmap.TestPlanPath
+	}
+	all := testCase{selector: "library::Token::cleanup"}
+	var tests []testCase
+	for _, tc := range []struct{ typ, entry string }{{"bool", "boolean"}, {"i32", "signed"}} {
+		test := "tests::plan::checks_" + tc.typ
+		cleanup := "library::Token<" + tc.typ + ">::cleanup"
+		path := []string{test, "library::" + tc.entry, "library::exercise<" + tc.typ + ">", cleanup}
+		cleanupPath := atlasmap.TestPlanPath{Test: test, Path: path}
+		all.want = append(all.want, cleanupPath)
+		observe := "library::observe<" + tc.typ + ">"
+		tests = append(tests,
+			testCase{cleanup, []atlasmap.TestPlanPath{cleanupPath}},
+			testCase{observe, []atlasmap.TestPlanPath{{Test: test, Path: append(slices.Clone(path), observe)}}},
+		)
+	}
+	for _, tc := range append(tests, all) {
+		t.Run(tc.selector, func(t *testing.T) {
+			selector := tc.selector
 			code, out, stderr := runForTest([]string{"experimental", "test-plan", "--symbol", selector}, root)
 			var got testPlanReport
 			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &got) != nil {
 				t.Fatalf("test-plan = (%d, %s, %s)", code, out, stderr)
 			}
-			test := "tests::plan::checks_" + tc.typ
-			want := []string{test, "library::" + tc.entry, "library::exercise<" + tc.typ + ">", "library::Token<" + tc.typ + ">::cleanup", selector}
-			if got.Recommend != "selected-tests" || len(got.Reasons) != 0 || len(got.Tests) != 1 || got.Tests[0].Test != test || !slices.Equal(got.Tests[0].Path, want) {
-				t.Fatalf("want selected test with path %v, got %s", want, out)
+			if got.Recommend != "selected-tests" || len(got.Reasons) != 0 ||
+				!slices.EqualFunc(got.Tests, tc.want, func(a, b atlasmap.TestPlanPath) bool {
+					return a.Test == b.Test && slices.Equal(a.Path, b.Path)
+				}) {
+				t.Fatalf("want selected tests with paths %v, got %s", tc.want, out)
+			}
+		})
+	}
+}
+
+func TestExperimentalTestPlanCleanupSelectors(t *testing.T) {
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "src/library.fy", `module library;
+resource Token { i32 value; cleanup { assert(this.value == 42); } }
+resource Empty { i32 value; cleanup {} }
+pub fn i32 use_token() {
+    let Token token = Token { .value = 42 };
+    return token.value;
+}
+`)
+	writeWorkspaceFile(t, root, "tests/plan.fy", `module tests::plan;
+import library as library;
+@test fn void checks_token() { assert(library::use_token() == 42); }
+`)
+	code, out, stderr := runForTest([]string{
+		"experimental", "atlas-symbols", "list", "--catalog-version", "3",
+		"--package-uid", "example.stable-test.app",
+		"--kind", "resource", "--name", "Token",
+		"--max-symbols", "4", "--max-selection-bytes", "1048576", "--max-output-bytes", "2097152",
+	}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("atlas-symbols = (%d, %s, %s)", code, out, stderr)
+	}
+	symbols := decodeAtlasSymbols(t, out).Catalog.Symbols
+	if len(symbols) != 1 {
+		t.Fatalf("expected exactly one resource: %s", out)
+	}
+	for _, tc := range []struct{ selector, reason string }{
+		{symbols[0].Symbol.Visible + "::cleanup", ""},
+		{symbols[0].Symbol.Full + "::cleanup", ""},
+		{"library::Empty::cleanup", "cleanup-call-coverage"},
+		{"library::use_token::cleanup", "symbol-not-found"},
+	} {
+		t.Run(tc.selector, func(t *testing.T) {
+			code, out, stderr := runForTest([]string{"experimental", "test-plan", "--symbol", tc.selector}, root)
+			var got testPlanReport
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &got) != nil {
+				t.Fatalf("test-plan = (%d, %s, %s)", code, out, stderr)
+			}
+			if tc.reason != "" {
+				if got.Recommend != "all-tests" || len(got.Tests) != 0 || !slices.Equal(got.Reasons, []string{tc.reason}) {
+					t.Fatalf("want full suite with %s, got %s", tc.reason, out)
+				}
+				return
+			}
+			path := []string{"tests::plan::checks_token", "library::use_token", "library::Token::cleanup"}
+			if got.Recommend != "selected-tests" || len(got.Reasons) != 0 || len(got.Tests) != 1 ||
+				got.Tests[0].Test != path[0] || !slices.Equal(got.Tests[0].Path, path) {
+				t.Fatalf("want selected test with path %v, got %s", path, out)
 			}
 		})
 	}

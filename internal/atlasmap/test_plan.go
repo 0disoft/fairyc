@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	maxTestPlanDepth   = 64
-	maxTestPlanSymbols = 4096
+	maxTestPlanDepth      = 64
+	maxTestPlanSymbols    = 4096
+	testPlanCleanupSuffix = "::cleanup"
 )
 
 type TestPlanPath struct {
@@ -23,16 +24,23 @@ type TestPlanPath struct {
 // paths when coverage is incomplete so the caller can recommend the full suite.
 // result and packageID must come from the verified compilation used by index.
 func (index *QueryIndex) TestPlan(selector string, tests []string, result compiler.Result, packageID hir.PackageID) ([]TestPlanPath, []string) {
-	subjects, found := index.testPlanSubjects(selector)
+	selector, wantCleanup := strings.CutSuffix(selector, testPlanCleanupSuffix)
+	subjects, found := index.testPlanSubjects(selector, wantCleanup)
 	paths := []TestPlanPath{}
 	if !found {
 		return paths, []string{"symbol-not-found"}
 	}
-	cleanups := index.testPlanCleanups(result, packageID)
+	cleanups := index.testPlanCleanups(result, packageID, wantCleanup)
 	closures := index.testPlanClosures(result.MIR, packageID)
-	reasons, specializedIncoming := index.testPlanCallFacts(cleanups.recovered+closures.recovered, cleanups.genericComplete)
+	reasons, specializedIncoming := index.testPlanCallFacts(cleanups.recovered+closures.recovered, cleanups.complete)
 	if len(subjects) == 0 {
+		if wantCleanup {
+			return paths, append(reasons, "cleanup-call-coverage")
+		}
 		return paths, append(reasons, "generic-call-coverage")
+	}
+	if wantCleanup && !cleanups.complete {
+		reasons = append(reasons, "cleanup-call-coverage")
 	}
 	type step struct {
 		next  string
@@ -64,7 +72,7 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 			}
 		} else {
 			for _, pos := range index.incoming[target] {
-				if call := index.relations[pos]; index.localTestPlanCall(call, cleanups.genericComplete) && call.Target.Specialization == "" {
+				if call := index.relations[pos]; index.localTestPlanCall(call, cleanups.complete) && call.Target.Specialization == "" {
 					enqueue(testPlanEndpoint(call.Source, call.SourceSpecialization))
 				}
 			}
@@ -115,9 +123,9 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 	return paths, reasons
 }
 
-func (index *QueryIndex) testPlanSubjects(selector string) ([]string, bool) {
+func (index *QueryIndex) testPlanSubjects(selector string, wantCleanup bool) ([]string, bool) {
 	name, concrete, hasArguments := strings.Cut(selector, "<")
-	node, found := index.testPlanSubject(name)
+	node, found := index.testPlanSubject(name, wantCleanup)
 	if !found {
 		return nil, false
 	}
@@ -125,20 +133,30 @@ func (index *QueryIndex) testPlanSubjects(selector string) ([]string, bool) {
 		if hasArguments {
 			return nil, false
 		}
+		if wantCleanup {
+			if node.declaration.DropKind != string(hir.ResourceDropNonEmpty) {
+				return nil, true
+			}
+			return []string{testPlanLabel(node.declaration.Key) + testPlanCleanupSuffix}, true
+		}
 		return []string{node.symbol.Visible}, true
 	}
 	var subjects []string
 	for _, facts := range node.specializations {
-		if facts.Function != nil && (!hasArguments || concrete == testPlanTypeArguments(facts.TypeArguments)+">") {
+		hasBody := !wantCleanup && facts.Function != nil || wantCleanup && facts.Cleanup != nil
+		if hasBody && (!hasArguments || concrete == testPlanTypeArguments(facts.TypeArguments)+">") {
 			subjects = append(subjects, testPlanEndpoint(node.symbol.Visible, facts.ID))
 		}
 	}
 	return subjects, !hasArguments || len(subjects) != 0
 }
 
-func (index *QueryIndex) testPlanSubject(selector string) (*indexedQueryNode, bool) {
+func (index *QueryIndex) testPlanSubject(selector string, wantCleanup bool) (*indexedQueryNode, bool) {
 	if position, err := index.resolveSymbol(selector); err == nil {
 		node := &index.nodes[position]
+		if wantCleanup {
+			return node, node.declaration.Key.Kind == semanticsnapshot.DeclarationResource
+		}
 		return node, node.declaration.Key.Kind == semanticsnapshot.DeclarationFunction ||
 			node.declaration.Key.Kind == semanticsnapshot.DeclarationForeignFunction
 	}
@@ -150,8 +168,11 @@ func (index *QueryIndex) testPlanSubject(selector string) (*indexedQueryNode, bo
 		PackageInstance: index.header.PackageInstance,
 		Module:          selector[:separator], Name: selector[separator+2:], Kind: semanticsnapshot.DeclarationFunction,
 	}
+	if wantCleanup {
+		key.Kind = semanticsnapshot.DeclarationResource
+	}
 	position, found := index.byKey[key]
-	if !found {
+	if !found && !wantCleanup {
 		key.Kind = semanticsnapshot.DeclarationForeignFunction
 		position, found = index.byKey[key]
 	}
@@ -237,7 +258,7 @@ func (index *QueryIndex) testPlanEndpointLabel(endpoint string) (string, bool) {
 			if facts.ID == specialization {
 				label += "<" + testPlanTypeArguments(facts.TypeArguments) + ">"
 				if facts.Cleanup != nil {
-					label += "::cleanup"
+					label += testPlanCleanupSuffix
 				}
 				return label, true
 			}

@@ -52,13 +52,19 @@ its narrower selection policy; see the owning contract for exact admission.
 
 ## Experimental symbol-based test plan
 
-`fairyc experimental test-plan --symbol <module::function|symbol-id> [--package <package-uid>]`
+`fairyc experimental test-plan --symbol <module::function|module::Resource::cleanup|symbol-id> [--package <package-uid>]`
 recommends tests in one root-reachable local package. The default is the root package.
 The selector accepts a qualified function name or a visible or full Atlas SymbolId.
 Append concrete type arguments without spaces, as in `library::target<i32>`,
 to select one checked implementation. A template selector without arguments
 includes all of its checked implementations. Paths include the concrete type
 arguments and do not mix calls from different implementations.
+
+Select a resource cleanup body with `library::Token::cleanup`,
+`library::Token<i32>::cleanup`, or its resource SymbolId with a `::cleanup` suffix.
+A generic cleanup selector without type arguments includes every checked cleanup
+implementation. A resource with no checked cleanup body causes `all-tests` with
+`cleanup-call-coverage` when selected without type arguments.
 
 The Go frontend discovers tests as for `test --list` and builds a fresh Atlas v3
 index from the same checked source snapshot, including the selected package's
