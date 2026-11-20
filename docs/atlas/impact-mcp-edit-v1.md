@@ -16,7 +16,11 @@ an incomplete join fail; no old cached map is silently substituted. Ambiguous fe
 UIDs reject. Package/call construction ceilings are explicit and at most 65,536.
 
 The JSON `fairyc.atlas-impact/v1` lists the subject at depth 0, deduplicated reverse-call reachable
-symbols, deterministic depths, and exact-current package contexts. It includes source/compiler/
+symbols, deterministic depths, and exact-current package contexts. In the Go CLI and MCP host,
+the selected declaration covers all its checked implementations. Subsequent reverse-call steps
+follow matching concrete implementation IDs. A declaration reached through multiple implementations
+appears once at its shortest depth. The symbol limit counts distinct declarations, and the call
+construction limit bounds the implementation work. The report includes source/compiler/
 interface identities and original completeness facts, not source text or host paths. Output is
 buffered and size-checked before writing. No partial document is emitted on budget failure.
 

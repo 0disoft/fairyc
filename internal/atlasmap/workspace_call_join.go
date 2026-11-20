@@ -50,15 +50,21 @@ type JoinedCall struct {
 	Provenance           semanticsnapshot.Provenance
 }
 
+type workspaceCallEndpoint struct {
+	symbol         WorkspaceSymbol
+	specialization string
+}
+
 // WorkspaceCallIndex is an immutable, bounded reverse-call ledger over a caller-supplied complete
 // exact-current workspace partition set. It does not replace package-local QueryIndex traversal.
 type WorkspaceCallIndex struct {
-	budget   WorkspaceCallBudget
-	usage    WorkspaceCallUsage
-	calls    []JoinedCall
-	outgoing map[WorkspaceSymbol][]int
-	incoming map[WorkspaceSymbol][]int
-	packages map[string]workspaceCallPackage
+	budget                  WorkspaceCallBudget
+	usage                   WorkspaceCallUsage
+	calls                   []JoinedCall
+	outgoing                map[WorkspaceSymbol][]int
+	incoming                map[WorkspaceSymbol][]int
+	incomingSpecializations map[workspaceCallEndpoint][]int
+	packages                map[string]workspaceCallPackage
 }
 
 // workspaceCallPackage is the compact package state retained after construction. Full QueryIndex
@@ -125,7 +131,8 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 		budget:   budget,
 		usage:    WorkspaceCallUsage{Packages: len(ordered)},
 		outgoing: make(map[WorkspaceSymbol][]int), incoming: make(map[WorkspaceSymbol][]int),
-		packages: make(map[string]workspaceCallPackage, len(ordered)),
+		incomingSpecializations: make(map[workspaceCallEndpoint][]int),
+		packages:                make(map[string]workspaceCallPackage, len(ordered)),
 	}
 	packageIndexes := make(map[string]*QueryIndex, len(ordered))
 	for _, partition := range ordered {
@@ -210,6 +217,10 @@ func newWorkspaceCallIndex(partitions []Partition, expectations map[string]LoadE
 			index.calls = append(index.calls, call)
 			index.outgoing[call.Source] = append(index.outgoing[call.Source], callPosition)
 			index.incoming[call.Target] = append(index.incoming[call.Target], callPosition)
+			if call.TargetSpecialization != "" {
+				endpoint := workspaceCallEndpoint{call.Target, call.TargetSpecialization}
+				index.incomingSpecializations[endpoint] = append(index.incomingSpecializations[endpoint], callPosition)
+			}
 			if call.Source.PackageInstance != call.Target.PackageInstance {
 				index.usage.CrossPackageCalls++
 			}

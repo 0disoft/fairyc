@@ -52,26 +52,42 @@ func (index *WorkspaceCallIndex) Impact(instance, symbol string, maxDepth, maxSy
 			}
 		}
 	}
-	seen := map[WorkspaceSymbol]bool{root: true}
+	type step struct {
+		endpoint workspaceCallEndpoint
+		depth    int
+	}
+	queue := []step{{endpoint: workspaceCallEndpoint{symbol: root}}}
+	visited := make(map[workspaceCallEndpoint]bool)
+	reported := map[WorkspaceSymbol]bool{root: true}
 	depthCut, symbolCut := false, false
-	for next := 0; next < len(r.Nodes); next++ {
-		node := r.Nodes[next]
-		// The ledger's deterministic order makes capped selection independent of caller map order.
-		for _, position := range index.incoming[node.Subject] {
-			caller := index.calls[position].Source
-			if seen[caller] {
+	for next := 0; next < len(queue); next++ {
+		node := queue[next]
+		positions := index.incoming[node.endpoint.symbol]
+		if node.endpoint.specialization != "" {
+			positions = index.incomingSpecializations[node.endpoint]
+		}
+		// The root query covers all its implementations. Every subsequent step
+		// follows the specific implementation that reached the prior endpoint.
+		for _, position := range positions {
+			call := index.calls[position]
+			caller := workspaceCallEndpoint{call.Source, call.SourceSpecialization}
+			if caller.symbol == root || visited[caller] {
 				continue
 			}
-			if node.Depth >= maxDepth {
+			if node.depth >= maxDepth {
 				depthCut = true
 				continue
 			}
-			if len(r.Nodes) >= maxSymbols {
-				symbolCut = true
-				continue
+			if !reported[caller.symbol] {
+				if len(r.Nodes) >= maxSymbols {
+					symbolCut = true
+					continue
+				}
+				reported[caller.symbol] = true
+				r.Nodes = append(r.Nodes, ImpactNode{Subject: caller.symbol, Depth: node.depth + 1})
 			}
-			seen[caller] = true
-			r.Nodes = append(r.Nodes, ImpactNode{Subject: caller, Depth: node.Depth + 1})
+			visited[caller] = true
+			queue = append(queue, step{endpoint: caller, depth: node.depth + 1})
 		}
 	}
 	if depthCut || symbolCut {

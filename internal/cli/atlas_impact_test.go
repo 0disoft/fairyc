@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
+	"slices"
 	"strings"
 	"testing"
 
@@ -27,5 +29,70 @@ func TestAtlasImpactLockedCurrentAndReadOnly(t *testing.T) {
 	writeWorkspaceFile(t, root, "src/main.fy", workspaceSessionRootSource+"\n")
 	if code, out, _ := runForTest(args, root); code != ExitPackageFailure || out != "" {
 		t.Fatal("stale lock admitted")
+	}
+}
+
+func TestAtlasImpactPreservesConcreteCallPaths(t *testing.T) {
+	const uid = "example.session.app"
+	root := writeWorkspaceSessionFixture(t, `module main;
+fn i32 leaf<T>(T marker) {
+    discard marker;
+    let copied = fn [] i32(i32 value) { return 40 + value; };
+    return copied(2);
+}
+fn i32 relay<T>(T marker) { return leaf<T>(marker); }
+fn i32 signed() { return relay<i32>(42); }
+fn i32 boolean() { return relay<bool>(true); }
+fn i32 main() { return signed() + boolean(); }
+`)
+	var diagnostic bytes.Buffer
+	prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
+	if code != ExitSuccess {
+		t.Fatalf("prepare impact symbols: %d %s", code, &diagnostic)
+	}
+
+	symbols := map[string]string{}
+	var lifted string
+	for _, partition := range prepared.partitions {
+		if partition.Header().PackageUID != uid {
+			continue
+		}
+		for _, symbol := range partition.Symbols() {
+			symbols[symbol.Declaration.Name] = symbol.Visible
+		}
+		for _, implementation := range partition.Specializations() {
+			if implementation.Declaration.Name == "leaf" && len(implementation.TypeArguments) == 1 &&
+				implementation.TypeArguments[0].Name == "bool" &&
+				len(implementation.Function.Calls) == 1 {
+				lifted = implementation.Function.Calls[0].Target.Name
+			}
+		}
+	}
+	if lifted == "" || symbols[lifted] == "" {
+		t.Fatal("missing bool closure target")
+	}
+	for _, tc := range []struct {
+		subject string
+		want    map[string]int
+	}{
+		{lifted, map[string]int{lifted: 0, "leaf": 1, "relay": 2, "boolean": 3, "main": 4}},
+		{"leaf", map[string]int{"leaf": 0, "relay": 1, "boolean": 2, "signed": 2, "main": 3}},
+	} {
+		t.Run(tc.subject, func(t *testing.T) {
+			args := append([]string{"experimental", "atlas-impact"}, impactArgs(uid, symbols[tc.subject])...)
+			code, out, stderr := runForTest(args, root)
+			var impact atlasmap.ImpactResult
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &impact) != nil ||
+				!impact.TraversalComplete || len(impact.Nodes) != len(tc.want) {
+				t.Fatalf("impact %d %q %q", code, out, stderr)
+			}
+			for name, depth := range tc.want {
+				if !slices.ContainsFunc(impact.Nodes, func(node atlasmap.ImpactNode) bool {
+					return node.Subject.Symbol == symbols[name] && node.Depth == depth
+				}) {
+					t.Fatalf("missing %s at depth %d: %s", name, depth, out)
+				}
+			}
+		})
 	}
 }
