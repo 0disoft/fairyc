@@ -72,7 +72,7 @@ func materializationTasks(modules []*expander, plan genericplan.Plan) ([]materia
 			if copies == 0 {
 				continue
 			}
-			nodes, err := materializedFunctionNodes(*function)
+			nodes, err := materializedFunctionNodes(*function, module.inferred)
 			if err != nil {
 				return nil, module.at(function.Span, FailureExpansion, err)
 			}
@@ -87,7 +87,7 @@ func materializationTasks(modules []*expander, plan genericplan.Plan) ([]materia
 			if copies == 0 {
 				continue
 			}
-			nodes, err := materializedAggregateNodes(aggregate)
+			nodes, err := materializedAggregateNodes(aggregate, module.inferred)
 			if err != nil {
 				return nil, module.at(shape.Span, FailureExpansion, err)
 			}
@@ -97,15 +97,15 @@ func materializationTasks(modules []*expander, plan genericplan.Plan) ([]materia
 	return tasks, nil
 }
 
-func materializedFunctionNodes(function ast.Function) (uint64, error) {
+func materializedFunctionNodes(function ast.Function, inferred map[*ast.Expression][]ast.TypeReference) (uint64, error) {
 	var nodes uint64
-	err := (sourceVisitor{nodes: &nodes}).function(function)
+	err := (sourceVisitor{nodes: &nodes, inferred: inferred}).function(function)
 	return nodes, err
 }
 
-func materializedAggregateNodes(aggregate aggregateTemplate) (uint64, error) {
+func materializedAggregateNodes(aggregate aggregateTemplate, inferred map[*ast.Expression][]ast.TypeReference) (uint64, error) {
 	var nodes uint64
-	visitor := sourceVisitor{nodes: &nodes}
+	visitor := sourceVisitor{nodes: &nodes, inferred: inferred}
 	shape := aggregate.shape()
 	for _, field := range shape.Fields {
 		visitor.node()

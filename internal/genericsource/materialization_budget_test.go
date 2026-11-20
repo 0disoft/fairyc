@@ -65,11 +65,11 @@ func TestMaterializationBudgetBelowAtAndOver(t *testing.T) {
 	if err != nil || work == 0 {
 		t.Fatalf("materialized work = %d, error = %v", work, err)
 	}
-	plainNodes, err := materializedFunctionNodes(plain)
+	plainNodes, err := materializedFunctionNodes(plain, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	templateNodes, err := materializedFunctionNodes(template)
+	templateNodes, err := materializedFunctionNodes(template, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

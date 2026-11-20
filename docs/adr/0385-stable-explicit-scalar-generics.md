@@ -122,6 +122,30 @@ generic sharing or resource-element ownership admission.
 [ADR 0494](0494-broader-scalar-generic-transport.md) supersedes the direct scalar signature
 restriction for the Go Stage 0 prototype. Composite transport signatures remain closed.
 
+### Argument inference in the Go frontend
+
+The Go generic preparation path now also admits direct calls such as
+`identity(42)`. Every type parameter must be inferred from a value parameter
+whose written type is that parameter. This supports scalar locals and
+parameters, explicit casts, bool and integer literals, and scalar results of
+nested generic calls. A forwarded type parameter remains symbolic until its
+enclosing function is specialized. Exact package imports and visibility rules
+apply to inferred calls.
+
+For an integer literal, another typed argument for the same parameter provides
+the type. Literal-only evidence defaults to `i32`. Conflicting fixed types
+and missing evidence report E4502 at the call. The expected return type and
+composite formal parameters do not participate in inference. Ordinary checking
+still owns conversion, range, argument-label, effect and ownership rules.
+
+Inference binds requests before the existing planner runs. It retains source
+spans, leaves the original AST intact and shares identities and expansion
+limits with explicit calls to the same implementation. The
+`inferred-scalars` fixture exercises local type evidence, typed and
+literal arguments, forwarding, nesting and deduplication across the interpreter
+and Windows native profiles. The Fairy-authored compiler's inference path
+remains separate.
+
 ## Materialized syntax bound
 
 Go source preparation preflights the cumulative emitted function/aggregate syntax

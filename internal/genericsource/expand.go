@@ -89,6 +89,7 @@ type expander struct {
 	imports               map[string]*expander
 	allowPublic           bool
 	requests              map[string]diagnostic.Span
+	inferred              map[*ast.Expression][]ast.TypeReference
 	operations            map[string]*staticOperation
 	allowNominal          bool
 	allowStorage          bool
@@ -184,7 +185,7 @@ func (x *expander) declare(b *genericplan.Builder) ([]genericplan.Request, error
 			declaration.Parameters = append(declaration.Parameters, value)
 		}
 		var typeError error
-		t := sourceVisitor{binding: func(name string, span diagnostic.Span) error {
+		t := sourceVisitor{inference: &inferenceScope{module: x, parameters: fn.TypeParameters}, binding: func(name string, span diagnostic.Span) error {
 			return x.at(span, FailureDeclaration, x.checkBinding(name))
 		}, expression: func(e *ast.Expression) (err error) {
 			defer func() { err = x.at(e.Span, FailureRequest, err) }()
@@ -380,7 +381,7 @@ func (x *expander) instantiate(fn ast.Function, bindings map[string]ast.TypeRefe
 	}
 	fn.Attributes = attrs
 	var typeError error
-	t := transform{bindings: bindings, expression: func(e *ast.Expression) error {
+	t := transform{bindings: bindings, inferred: x.inferred, expression: func(e *ast.Expression) error {
 		return x.rewriteSpecialization(e, names)
 	}}
 	t.typeReference = func(ref *ast.TypeReference) {

@@ -17,7 +17,8 @@ func TestGenericPackageSourceFailuresPublishOnlyDiagnostics(t *testing.T) {
 		{"fn T id<T,T>(T v) { return v; } fn i32 main() { return 0; }", "fn T id<T,T>(T v) { return v; }", "E4501"},
 		{"fn T id<T>(T v) { return id<T>(v); } fn i32 main() { return id<i32>(42); }", "id<i32>", "E4503"},
 		{"fn i32 main() { return missing<i32>(42); }", "missing<i32>", "E0101"},
-		{"fn T id<T>(T v) { return v; } fn i32 main() { return id(42); }", "id(42)", "E4502"},
+		{"fn i32 constant<T>() { return 42; } fn i32 main() { return constant(); }", "constant()", "E4502"},
+		{"fn T first<T>(T a, T b) { return a; } fn i32 main() { let i32 n = 42; return first(n, true); }", "first(n, true)", "E4502"},
 	} {
 		t.Run(test.code+test.primary, func(t *testing.T) {
 			// Non-ASCII trivia and CRLF retain original byte coordinates.

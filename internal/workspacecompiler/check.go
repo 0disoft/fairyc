@@ -13,7 +13,7 @@ import (
 // Check compiles the current resolved workspace without reading or writing an
 // artifact cache. Source input and generic ownership come from the same loaded
 // workspace; callers cannot supply a disconnected coordinate map. Stable workspace
-// commands share this entry point for ordinary and explicit scalar generic source.
+// commands share this entry point for ordinary source and scalar generic calls.
 func Check(workspace workspaceloader.Workspace) (compiler.Result, error) {
 	return CheckContext(context.Background(), workspace)
 }

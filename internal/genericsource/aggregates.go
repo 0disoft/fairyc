@@ -171,7 +171,7 @@ func (x *expander) declareAggregates(builder *genericplan.Builder) ([]genericpla
 			declaration.Parameters = append(declaration.Parameters, value)
 		}
 		var typeError error
-		t := sourceVisitor{typeReference: func(ref *ast.TypeReference) {
+		t := sourceVisitor{inference: &inferenceScope{module: x, parameters: shape.TypeParameters}, typeReference: func(ref *ast.TypeReference) {
 			if typeError == nil {
 				typeError = x.registerAggregateType(*ref, shape.TypeParameters, &declaration, &dependencies, &requests)
 			}
@@ -279,7 +279,7 @@ func (x *expander) emitAggregates(result *ast.Module, plan genericplan.Plan, nam
 	emit := func(aggregate aggregateTemplate, name string, bindings map[string]ast.TypeReference) error {
 		shape := aggregate.shape()
 		var typeError error
-		t := transform{bindings: bindings, typeReference: func(ref *ast.TypeReference) {
+		t := transform{bindings: bindings, inferred: x.inferred, typeReference: func(ref *ast.TypeReference) {
 			if typeError == nil {
 				typeError = x.rewriteAggregateType(ref, names)
 			}

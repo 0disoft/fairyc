@@ -48,13 +48,31 @@ func TestGenericSourcePlansSubstitutesAndExecutes(t *testing.T) {
 	}
 }
 
+func TestGenericSourceInfersScalarArguments(t *testing.T) {
+	file := parseCompilerFile(t, hir.DefaultPackage, "main.fy", genericFixtureSource(t, "pass/inferred-scalars/main.fy"))
+	before, _ := json.Marshal(file.Module)
+	result, plan, err := compiler.CheckGenericFunctions(file, genericplan.DefaultPlanLimits())
+	if err != nil || !result.Verified || len(plan.Specializations) != 3 {
+		t.Fatalf("compile: %v, semantic=%+v, plan=%+v", err, result.Semantic, plan)
+	}
+	outcome, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("execute: %+v %v", outcome, err)
+	}
+	after, _ := json.Marshal(file.Module)
+	if string(before) != string(after) {
+		t.Fatal("inference changed caller syntax")
+	}
+}
+
 func TestGenericSourceRejectsUnadmittedShapes(t *testing.T) {
 	cases := map[string]string{
 		"reserved-intrinsic":       `fn T source_location<T>(T x) { return x; } fn i32 main() { return source_location<i32>(42); }`,
 		"builtin-container-shadow": `fn Option<i32> id<Option>() { return .some(42); } fn i32 main() { return 0; }`,
 		"constant-collision":       `const i32 id = 7; fn T id<T>(T x) { return x; } fn i32 main() { return id<i32>(42); }`,
 		"qualified":                `fn T id<T>(T x) { return x; } fn i32 main() { return main::id<i32>(42); }`,
-		"implicit":                 `fn T id<T>(T x) { return x; } fn i32 main() { return id(42); }`,
+		"result-only":              `fn i32 constant<T>() { return 42; } fn i32 main() { return constant(); }`,
+		"inferred-cycle":           `fn T id<T>(T x) { return id(x); } fn i32 main() { return id(42); }`,
 		"arity":                    `fn T id<T>(T x) { return x; } fn i32 main() { return id<i32, bool>(42); }`,
 		"cycle":                    `fn T id<T>(T x) { return id<T>(x); } fn i32 main() { return id<i32>(42); }`,
 		"unknown":                  `fn i32 main() { return missing<i32>(42); }`,

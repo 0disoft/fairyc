@@ -75,13 +75,16 @@ func TestGenericPackagesResolveAndExecute(t *testing.T) {
 }
 
 func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
-	for _, name := range []string{"private", "missing-coordinate", "duplicate-coordinate", "missing-provider", "conflicting-provider", "implicit", "alias-collision", "cycle", "global-budget"} {
+	for _, name := range []string{"private", "inferred-private", "missing-coordinate", "duplicate-coordinate", "missing-provider", "conflicting-provider", "unconstrained", "alias-collision", "cycle", "global-budget"} {
 		t.Run(name, func(t *testing.T) {
 			input, coordinates := genericPackageInput(t)
 			limits := genericplan.DefaultPlanLimits()
 			switch name {
 			case "private":
 				input.Files[1].Module.Functions[0].Public = false
+			case "inferred-private":
+				input.Files[1].Module.Functions[0].Public = false
+				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(42); }")
 			case "missing-coordinate":
 				delete(coordinates, 2)
 			case "duplicate-coordinate":
@@ -90,8 +93,8 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 				input.Imports = input.Imports[1:]
 			case "conflicting-provider":
 				input.Imports = append(input.Imports, semantic.PackageImport{FromPackage: 1, ImportPath: "util", ToPackage: 3})
-			case "implicit":
-				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(42); }")
+			case "unconstrained":
+				input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(null); }")
 			case "alias-collision":
 				input.Files[1].Module.Imports[0].Alias = "wrap"
 			case "cycle":
@@ -101,7 +104,7 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 				limits.MaxSpecializations = 1
 			}
 			result, _, err := compiler.CheckGenericPackages(input, coordinates, limits)
-			code := map[string]string{"private": "E0103", "implicit": "E4502", "alias-collision": "E4501", "cycle": "E4503", "global-budget": "E4503"}[name]
+			code := map[string]string{"private": "E0103", "inferred-private": "E0103", "unconstrained": "E4502", "alias-collision": "E4501", "cycle": "E4503", "global-budget": "E4503"}[name]
 			if code != "" {
 				if err != nil || result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != code {
 					t.Fatalf("expected source diagnostic %s: %v %+v", code, err, result.Semantic)
@@ -110,6 +113,20 @@ func TestGenericPackagesRejectInvalidBoundaries(t *testing.T) {
 				t.Fatalf("invalid package plumbing was not an error: %v %+v", err, result.Semantic)
 			}
 		})
+	}
+}
+
+func TestGenericPackagesInferForwardedArguments(t *testing.T) {
+	input, coordinates := genericPackageInput(t)
+	input.Files[0] = parseCompilerFile(t, 1, "main.fy", "module main; import util as u; fn i32 main() { return u::wrap(42); }")
+	input.Files[1] = parseCompilerFile(t, 2, "util.fy", "module util; import core as c; pub fn T wrap<T>(T value) { return c::id(value); }")
+	result, plan, err := compiler.CheckGenericPackages(input, coordinates, genericplan.DefaultPlanLimits())
+	if err != nil || !result.Verified || len(plan.Specializations) != 2 {
+		t.Fatalf("compile: %v %+v %+v", err, result.Semantic, plan)
+	}
+	outcome, err := interpreter.Execute(result.MIR, hir.QualifiedModulePath(1, "main")+"::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("execute: %+v %v", outcome, err)
 	}
 }
 

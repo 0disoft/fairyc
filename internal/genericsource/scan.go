@@ -5,6 +5,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 // sourceVisitor walks caller-owned syntax without cloning it. Planning uses the
@@ -15,6 +16,8 @@ type sourceVisitor struct {
 	binding       func(string, diagnostic.Span) error
 	typeReference func(*ast.TypeReference)
 	nodes         *uint64
+	inference     *inferenceScope
+	inferred      map[*ast.Expression][]ast.TypeReference
 }
 
 func (v sourceVisitor) node() {
@@ -62,6 +65,9 @@ func (v sourceVisitor) typePointer(value *ast.TypeReference) *ast.TypeReference 
 
 func (v sourceVisitor) function(value ast.Function) error {
 	v.node()
+	if v.inference != nil {
+		v.inference = v.inference.child()
+	}
 	for _, attribute := range value.Attributes {
 		v.node()
 		for range attribute.Arguments {
@@ -70,6 +76,9 @@ func (v sourceVisitor) function(value ast.Function) error {
 	}
 	for _, parameter := range value.Parameters {
 		v.node()
+		if v.inference != nil {
+			v.inference.bind(parameter.Name, v.inference.scalar(&parameter.Type))
+		}
 		if v.binding != nil {
 			if err := v.binding(parameter.Name, parameter.Span); err != nil {
 				return err
@@ -86,6 +95,9 @@ func (v sourceVisitor) block(value *ast.Block) error {
 		return nil
 	}
 	v.node()
+	if v.inference != nil {
+		v.inference = v.inference.child()
+	}
 	for i := range value.Statements {
 		if err := v.statement(&value.Statements[i]); err != nil {
 			return err
@@ -112,6 +124,17 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 		if err := v.expr(value.Binding.Expression); err != nil {
 			return err
 		}
+		if v.inference != nil {
+			typ := v.inference.scalar(value.Binding.Type)
+			if value.Binding.Type == nil {
+				var integer bool
+				typ, integer = v.inference.evidence(value.Binding.Expression)
+				if integer {
+					typ = "i32"
+				}
+			}
+			v.inference.bind(value.Binding.Name, typ)
+		}
 	}
 	if err := v.expr(value.Target); err != nil {
 		return err
@@ -121,6 +144,9 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 	}
 	if value.For != nil {
 		v.node()
+		if v.inference != nil {
+			v.inference = v.inference.child()
+		}
 		if err := v.statement(value.For.Initializer); err != nil {
 			return err
 		}
@@ -150,7 +176,12 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 			return err
 		}
 		if value.Expression == nil {
-			if err := v.block(loop.Body); err != nil {
+			body := v
+			if body.inference != nil {
+				body.inference = body.inference.child()
+				body.inference.bind(loop.Name, body.inference.scalar(&loop.Type))
+			}
+			if err := body.block(loop.Body); err != nil {
 				return err
 			}
 		} else if err := inert.block(loop.Body); err != nil {
@@ -176,7 +207,14 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 			v.node()
 			v.typ(capture.Type)
 		}
-		if err := v.function(value.Closure.Function); err != nil {
+		closure := v
+		if v.inference != nil {
+			closure.inference = &inferenceScope{module: v.inference.module, parameters: v.inference.parameters}
+			for _, capture := range value.Closure.Captures {
+				closure.inference.bind(capture.Name, closure.inference.scalar(&capture.Type))
+			}
+		}
+		if err := closure.function(value.Closure.Function); err != nil {
 			return err
 		}
 	}
@@ -191,6 +229,25 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 	for _, argument := range value.TypeArguments {
 		v.typ(argument)
 	}
+	if arguments := v.inferred[value]; len(arguments) != 0 {
+		v.node()
+		for _, argument := range arguments {
+			v.typ(argument)
+		}
+	}
+	if v.inference != nil && value.Kind == syntax.KindPattern && value.Text == "arm" && len(value.Children) == 2 {
+		v.inference = v.inference.child()
+		pattern := value.Children[0]
+		if len(pattern.Children) > 1 {
+			for _, binding := range pattern.Children[1:] {
+				name := binding.Text
+				if binding.Kind == syntax.KindField {
+					name = binding.Cooked
+				}
+				v.inference.bind(name, "")
+			}
+		}
+	}
 	for _, child := range value.Children {
 		if err := v.expr(child); err != nil {
 			return err
@@ -200,6 +257,16 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 		return err
 	}
 	if v.expression != nil {
+		if v.inference != nil {
+			if err := v.inference.infer(value, &result); err != nil {
+				return v.inference.module.at(value.Span, FailureRequest, err)
+			}
+			if len(v.inference.module.inferred[value]) != 0 {
+				if err := v.expression(result.Children[0]); err != nil {
+					return err
+				}
+			}
+		}
 		return v.expression(&result)
 	}
 	return nil

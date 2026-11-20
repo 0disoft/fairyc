@@ -7,6 +7,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/syntax"
 )
 
 // transform owns newly allocated syntax. Source locations keep pointing at the
@@ -16,6 +17,7 @@ type transform struct {
 	expression    func(*ast.Expression) error
 	binding       func(string, diagnostic.Span) error
 	typeReference func(*ast.TypeReference)
+	inferred      map[*ast.Expression][]ast.TypeReference
 }
 
 func (t transform) typ(v ast.TypeReference) ast.TypeReference {
@@ -215,6 +217,19 @@ func (t transform) expr(v *ast.Expression) (*ast.Expression, error) {
 		result.Children[i], err = t.expr(child)
 		if err != nil {
 			return nil, err
+		}
+	}
+	if arguments := t.inferred[v]; len(arguments) != 0 {
+		callee := result.Children[0]
+		selector := ast.Expression{Kind: syntax.KindSpecialize, Span: callee.Span,
+			Children: []*ast.Expression{callee}, TypeArguments: t.types(arguments)}
+		if err := t.expression(&selector); err != nil {
+			return nil, err
+		}
+		result.Children[0] = &selector
+		if result.CallLabels != nil {
+			// Generic calls use the existing label-admission boundary.
+			result.CallLabels.ExplicitTypeArguments = true
 		}
 	}
 	var err error
