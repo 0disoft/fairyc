@@ -18,6 +18,10 @@ func analyzeEmission(program mir.Program, entry string, profile Profile, storage
 }
 
 func analyzeEmissionContext(ctx context.Context, program mir.Program, entry string, profile Profile, storageTransfers bool) (*emissionAnalysis, error) {
+	return analyzeEmissionTrace(ctx, program, entry, profile, storageTransfers, nil)
+}
+
+func analyzeEmissionTrace(ctx context.Context, program mir.Program, entry string, profile Profile, storageTransfers bool, record func(from, to *mir.Function, reason string)) (*emissionAnalysis, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -70,7 +74,7 @@ func analyzeEmissionContext(ctx context.Context, program mir.Program, entry stri
 	if err != nil {
 		return nil, err
 	}
-	reachable, reachableForeign, err := reachableFunctionIndices(program, functions, bySymbol, entryIndex)
+	reachable, reachableForeign, err := traceReachableFunctionIndices(program, functions, bySymbol, entryIndex, record)
 	if err != nil {
 		return nil, err
 	}

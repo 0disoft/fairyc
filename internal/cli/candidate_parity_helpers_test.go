@@ -20,7 +20,8 @@ func candidateUsage() string {
 			strings.HasPrefix(line, "  fairyc experimental registry-update ") ||
 			strings.HasPrefix(line, "  fairyc experimental git-snapshot ") ||
 			strings.HasPrefix(line, "  fairyc experimental test-plan ") ||
-			strings.HasPrefix(line, "  fairyc experimental atlas-diff ")
+			strings.HasPrefix(line, "  fairyc experimental atlas-diff ") ||
+			strings.HasPrefix(line, "  fairyc experimental why-emitted ")
 	})
 	return strings.Join(lines, "\n")
 }

@@ -63,6 +63,10 @@ func indexFunctions(functions []mir.Function, entry string) (map[hir.SymbolID]in
 // referenced by reachable calls. Foreign declarations are filtered separately
 // so dead declarations cannot leak prototypes, guards, or scalar features.
 func reachableFunctionIndices(program mir.Program, functions []mir.Function, bySymbol map[hir.SymbolID]int, entryIndex int) (map[int]struct{}, map[hir.SymbolID]struct{}, error) {
+	return traceReachableFunctionIndices(program, functions, bySymbol, entryIndex, nil)
+}
+
+func traceReachableFunctionIndices(program mir.Program, functions []mir.Function, bySymbol map[hir.SymbolID]int, entryIndex int, record func(from, to *mir.Function, reason string)) (map[int]struct{}, map[hir.SymbolID]struct{}, error) {
 	resourceTypes := make(map[hir.Type]mir.ResourceType, len(program.ResourceTypes))
 	for index := range program.ResourceTypes {
 		resourceTypes[program.ResourceTypes[index].Type] = program.ResourceTypes[index]
@@ -75,12 +79,15 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 	pending := []int{entryIndex}
 	// Mark on discovery so shared callees occupy the pending stack only once.
 	// The returned set is unchanged after all scheduled functions are expanded.
-	enqueue := func(index int) {
-		if _, seen := visited[index]; seen {
+	enqueue := func(from, to int, reason string) {
+		if _, seen := visited[to]; seen {
 			return
 		}
-		visited[index] = struct{}{}
-		pending = append(pending, index)
+		visited[to] = struct{}{}
+		pending = append(pending, to)
+		if record != nil {
+			record(&functions[from], &functions[to], reason)
+		}
 	}
 	for len(pending) != 0 {
 		index := pending[len(pending)-1]
@@ -97,7 +104,11 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 					if !found {
 						return nil, nil, fmt.Errorf("missing callback target %d", operation.Symbol)
 					}
-					enqueue(target)
+					reason := "callback"
+					if operation.Kind == mir.OperationClosureCreate {
+						reason = "closure"
+					}
+					enqueue(index, target, reason)
 				}
 				if operation.Kind != mir.OperationDrop {
 					continue
@@ -114,7 +125,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 					if !found {
 						return nil, nil, fmt.Errorf("resource %q names missing drop symbol %d", resourceType, dropSymbol)
 					}
-					enqueue(target)
+					enqueue(index, target, "drop")
 				}
 			}
 			terminator := block.Terminator
@@ -129,7 +140,7 @@ func reachableFunctionIndices(program mir.Program, functions []mir.Function, byS
 			if !found {
 				return nil, nil, fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
 			}
-			enqueue(target)
+			enqueue(index, target, "call")
 		}
 	}
 	return visited, reachableForeign, nil
