@@ -43,7 +43,7 @@ fn void append(ref mut bytes::Buffer raw,ref u8[] part){assert(bytes::append(raw
 @test
 @effects(console)
 fn void inferred_scalar_calls_restore_and_execute(){
-    let raw=b"module root;fn T id<T>(T value){return value;}fn T answer<T>(){return id(42);}fn T relay<T>(){return answer();}fn T forward<T>(T value){let local=id(value);return local;}fn i32 main(){let u32 value={relay()};assert(value==42);assert(id(true));discard id<i32>(42);discard id(42);let i32 number=42;if(true){let bool number=true;assert(id(number));}assert(id(number)==42);return forward<i32>(number);}";
+    let raw=b"module root;fn T id<T>(T value){return value;}fn T answer<T>(){return id(42);}fn T relay<T>(){return answer();}fn T forward<T>(T value){let local=id(value);return local;}fn i32 main(){let u32 value={relay()};assert(value==42);assert(id(true));discard id<i32>(42);discard id(42);let i32 number=42;if(true){let bool number=true;assert(id(number));}assert(id(number)==42);let u32 branch=if (true) {let u32 inner=42;assert(id(inner)==42);relay()} else if (false) {relay()} else {let Option<bool> choice=.some(true);switch (choice) {case .some(_):{relay()} case .none:{relay()}}};assert(branch==42);return forward<i32>(number);}";
     let result=compiled(raw);
     let owner=core::checked_program(ref result);
     let program=checked::ir_program(owner);

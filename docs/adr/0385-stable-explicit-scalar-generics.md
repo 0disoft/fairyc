@@ -160,7 +160,9 @@ native profiles.
 The Fairy-authored candidate's source request collector also infers scalar
 arguments from integer and boolean literals, scalar casts, written parameter
 and local types, and written scalar result contexts in local initializers and
-returns. For an `Option` or `Result`
+returns. A scalar result context reaches the values of `if` branches and
+`switch` arms, including nested branches. Conditions, subjects and patterns
+receive no result context from the enclosing expression. For an `Option` or `Result`
 parameter, it also follows matching `.some`, `.ok`, and `.err` arguments to
 their payloads. A constructor supplies evidence only for the payload it
 carries. It stores inferred requests under the same declaration and ordered

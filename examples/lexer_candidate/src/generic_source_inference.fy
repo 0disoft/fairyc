@@ -15,9 +15,35 @@ pub fn u32 binder_base(){return 64;}
 pub fn bool forwarded(u32 code){return code>=binder_base();}
 pub fn usize forwarded_index(u32 code){return (code-binder_base()) as usize;}
 
-// Derive a written scalar context for a call without changing parser IDs.
-// Only a return or typed initializer and its transparent value wrappers
-// provide context, as in the source request walk.
+fn bool covers(usize start,usize end,syntax::Expression site){
+    return start<=site.start && site.end<=end;
+}
+
+// A result constraint follows only value-producing children. In particular,
+// it cannot reach the condition, the switch subject, or a case pattern.
+fn Result<usize,u32> value_child(ref syntax::Parsed p,syntax::Expression n,syntax::Expression site,ref mut usize work){
+    if(n.kind==3){return .ok(n.left);}
+    if(n.kind==12 || n.kind==31){return .ok(syntax::statement_at(p,n.left).expression);}
+    if(n.kind==13){
+        let branches=syntax::expression_at(p,n.right);
+        let first=syntax::statement_at(p,branches.left);
+        return .ok(if(covers(first.start,first.end,site)){first.expression}else{branches.right});
+    }
+    if(n.kind==15){
+        var usize link=n.right;
+        while(link!=0){
+            if(!budget::charge(work,1)){return .err(10);}
+            let row=syntax::expression_at(p,link);
+            let arm=syntax::expression_at(p,row.left);
+            let body=syntax::statement_at(p,arm.right);
+            if(covers(body.start,body.end,site)){return .ok(body.expression);}
+            link=row.right;
+        }
+    }
+    return .ok(0);
+}
+
+// Derive the same written scalar context as the source request walk.
 pub fn Result<usize,u32> expected_root(ref syntax::Parsed p, syntax::Declaration owner, usize call, ref mut usize work) {
     let site=syntax::expression_at(p,call);
     var usize i=1;
@@ -32,9 +58,8 @@ pub fn Result<usize,u32> expected_root(ref syntax::Parsed p, syntax::Declaration
         while(root>call){
             if(!budget::charge(work,1)){return .err(10);}
             let n=syntax::expression_at(p,root);
-            if(n.kind==3){root=n.left;}
-            else if(n.kind==12 || n.kind==31){root=syntax::statement_at(p,n.left).expression;}
-            else{break;}
+            if(!covers(n.start,n.end,site)){break;}
+            root=value_child(p,n,site,work)?;
         }
         if(root==call){return .ok(expected);}
     }
