@@ -7,6 +7,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lexer"
@@ -14,11 +15,12 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, or plain workspace function")
+var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, or workspace callable")
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
 	target semantic.SymbolCoordinate
+	name   string
 	files  []renameFile
 	cursor tokenSpan
 }
@@ -55,7 +57,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		declarationFile, module = file, file.Module
 		at = target.Declaration.StartByte
 	}
-	name, kind := "", ""
+	name, owner, kind := "", "", ""
 	decl := hir.Span{Source: key.Path, Package: key.Package}
 	for _, binding := range module.Bindings {
 		if binding.NameSpan.StartByte <= at && at < binding.NameSpan.EndByte {
@@ -74,23 +76,27 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 				}
 			}
 		}
-		if fn.NameSpan.StartByte <= at && at < fn.NameSpan.EndByte && (!fn.Public || view.root != "") && fn.Owner == "" &&
-			fn.Name != "main" && len(fn.Attributes) == 0 && len(fn.TypeParameters) == 0 {
-			name, kind = fn.Name, "function"
+		if fn.NameSpan.StartByte <= at && at < fn.NameSpan.EndByte && (!fn.Public || view.root != "") &&
+			(fn.Name != "main" || fn.Owner != "") && len(fn.Attributes) == 0 && len(fn.TypeParameters) == 0 {
+			name, owner, kind = fn.Name, fn.Owner, "function"
 			decl.StartByte, decl.EndByte = fn.NameSpan.StartByte, fn.NameSpan.EndByte
 			break
 		}
 	}
-	if name == "" || found && (target.Name != name || target.Kind != kind) {
+	qualified := name
+	if owner != "" {
+		qualified = owner + "::" + name
+	}
+	if name == "" || found && (target.Name != qualified || target.Kind != kind) {
 		return renamePlan{}, errRenameUnavailable
 	}
 	if !found {
-		target = semantic.SymbolCoordinate{Package: key.Package, Module: module.Path, Name: name, Kind: kind, Declaration: decl}
+		target = semantic.SymbolCoordinate{Package: key.Package, Module: module.Path, Name: qualified, Kind: kind, Declaration: decl}
 	}
 	files := make(map[string]sourceView)
 	spans := make(map[string]map[tokenSpan]bool)
 	count := 0
-	add := func(file sourceView, span tokenSpan, label bool) error {
+	add := func(file sourceView, span tokenSpan, selector bool) error {
 		if file.Path == "" || (view.root != "" && !contained(view.root, file.Path)) ||
 			!identifierSpan(file.Text, span) || string(file.Text[span.start:span.end]) != name {
 			return errRenameUnavailable
@@ -105,16 +111,16 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			}
 			count++
 		}
-		spans[file.Path][span] = spans[file.Path][span] || label
+		spans[file.Path][span] = spans[file.Path][span] || selector
 		return nil
 	}
 	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}, false); err != nil {
 		return renamePlan{}, err
 	}
-	labels := make(map[hir.Span]bool)
-	for _, label := range view.result.ArgumentLabels {
-		if label.Target == target {
-			labels[label.Use] = true
+	selectors := make(map[hir.Span]bool)
+	for _, selector := range view.result.SelectorResolutions {
+		if selector.Target == target {
+			selectors[selector.Use] = true
 		}
 	}
 	for i, resolution := range view.result.Resolutions {
@@ -131,11 +137,11 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			(start != resolution.Use.StartByte && (start < 2 || string(file.Text[start-2:start]) != "::")) {
 			return renamePlan{}, errRenameUnavailable
 		}
-		if err := add(file, tokenSpan{start, end}, labels[resolution.Use]); err != nil {
+		if err := add(file, tokenSpan{start, end}, selectors[resolution.Use]); err != nil {
 			return renamePlan{}, err
 		}
 	}
-	plan := renamePlan{target: target}
+	plan := renamePlan{target: target, name: name}
 	for _, path := range slices.Sorted(maps.Keys(files)) {
 		file := files[path]
 		id := editableDocumentID{URI: fileURI(path)}
@@ -160,9 +166,9 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 				continue
 			}
 			span := tokenSpan{token.Span.StartByte, token.Span.EndByte}
-			if label, matches := spans[path][span]; matches {
+			if selector, matches := spans[path][span]; matches {
 				// A shorthand field shares its spelling with the value.
-				if previous == "." && !label {
+				if previous == "." && !selector {
 					return renamePlan{}, errRenameUnavailable
 				}
 				entry.spans = append(entry.spans, span)
@@ -188,13 +194,14 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	if len(name) > 255 || !source.ValidIdentifier(name) || slices.Contains(keywords, name) {
 		return nil, errors.New("new name must be a Fairy C identifier of up to 255 bytes")
 	}
-	if plan.target.Kind == "function" && name == "main" {
+	if plan.target.Kind == "function" && plan.target.Name == plan.name && name == "main" {
 		return nil, errors.New("main is reserved for the program entry point")
 	}
-	if name == plan.target.Name {
+	if name == plan.name {
 		return []documentEdit{}, nil
 	}
-	delta := len(name) - len(plan.target.Name)
+	delta := len(name) - len(plan.name)
+	qualified := strings.TrimSuffix(plan.target.Name, plan.name) + name
 	replacements := make(map[string][]byte, len(plan.files))
 	edits := make([]documentEdit, 0, len(plan.files))
 	responseBudget := maxMessage - 1024
@@ -231,7 +238,7 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	if err != nil {
 		return nil, err
 	}
-	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d.View, rechecked, replacements, plan, name, delta) {
+	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d.View, rechecked, replacements, plan, qualified, delta) {
 		return nil, errRenameChangesResolution
 	}
 	ctx := s.ctx

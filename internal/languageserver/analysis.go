@@ -317,7 +317,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
 		}
 	}
-	a.result.Resolutions = append(a.result.Resolutions, a.result.ArgumentLabels...)
+	a.result.Resolutions = append(a.result.Resolutions, a.result.SelectorResolutions...)
 	for _, diag := range a.result.Diagnostics {
 		f, ok := a.file(diag.Primary)
 		if !ok || f.Path == "" {

@@ -172,6 +172,14 @@ func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Ex
 	receiver, receiverType = c.sharedCallArgument(&calleeExpression.Children[0], receiver, receiverType, expectedReceiver)
 	c.requireType("E1006", span(c.module.file.Path, receiverExpression.Span), receiverType, expectedReceiver, span(callee.source, callee.function.Parameters[0].Type.Span))
 	c.analyzer.methodCalls[expression] = callee
+	end := calleeExpression.Span.EndByte
+	start := end - len(calleeExpression.Text)
+	if start >= receiverExpression.Span.EndByte && start < end {
+		c.analyzer.selectorResolutions = append(c.analyzer.selectorResolutions, Resolution{
+			Use:    sourceSpan(c.module.file.Path, start, end),
+			Target: callee.coordinate(),
+		})
+	}
 	result.Symbol = callee.id
 	c.checkCallEffects(calleeExpression, result, callee)
 	result.Children = append(result.Children, hir.Expression{

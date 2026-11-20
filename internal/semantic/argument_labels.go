@@ -32,7 +32,7 @@ func (a *analyzer) checkCallArgumentLabels(module *moduleScope, expression *ast.
 			continue
 		}
 		parameter := callee.function.Parameters[label.Index]
-		a.argumentLabels = append(a.argumentLabels, Resolution{
+		a.selectorResolutions = append(a.selectorResolutions, Resolution{
 			Use: span(module.file.Path, label.NameSpan),
 			Target: SymbolCoordinate{
 				Package: callee.packageID, Module: callee.module,

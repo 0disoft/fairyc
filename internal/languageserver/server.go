@@ -237,7 +237,7 @@ func (s *server) handle(m message) error {
 		}
 		if err == nil && m.Method == "textDocument/prepareRename" {
 			return s.response(m.ID, map[string]any{
-				"range": textRange(d.Text, plan.cursor.start, plan.cursor.end), "placeholder": plan.target.Name,
+				"range": textRange(d.Text, plan.cursor.start, plan.cursor.end), "placeholder": plan.name,
 			}, 0, "")
 		}
 		if err == nil {

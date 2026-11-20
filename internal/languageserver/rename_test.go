@@ -188,3 +188,89 @@ func TestRenameWorkspaceFunctionAcrossPackages(t *testing.T) {
 		t.Fatalf("rename accepted changed disk inputs: %s", &out)
 	}
 }
+
+func TestRenameMethodKeepsOwnerAndUpdatesBothCallForms(t *testing.T) {
+	root, path := editorFixture(t)
+	uri := fileURI(path)
+	geometry := filepath.Join(root, "src", "geometry.fy")
+	const library = "module geometry;\n" +
+		"pub struct Point { i32 value; }\npub struct Other { i32 value; }\n" +
+		"pub fn i32 Point::read(ref Point this) { return this.value; }\n" +
+		"pub fn i32 Point::taken(ref Point this) { return 1; }\n" +
+		"pub fn i32 Other::read(ref Other this) { return this.value; }\n" +
+		"pub fn i32 direct(ref Point point) { return Point::read(point); }\n"
+	writeProjectRootFile(t, geometry, library)
+	const text = "module main; import geometry as geo;\n" +
+		"fn i32 inspect(ref geo::Point point, ref geo::Other other) {\n" +
+		"return /* 😀 */ point. /* method */ read() + other.read(); }\n"
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{
+		"rootUri":      fileURI(root),
+		"capabilities": map[string]any{"workspace": map[string]any{"workspaceEdit": map[string]bool{"documentChanges": true}}},
+	})
+	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+		"uri": uri, "version": 12, "languageId": "fairyc", "text": text,
+	}})
+	d := s.docs[uri]
+	if d.View == nil || !d.View.clean {
+		t.Fatalf("fixture did not check cleanly: %s", &out)
+	}
+	offset := strings.Index(text, "read()")
+	request := map[string]any{
+		"textDocument": documentID{URI: uri},
+		"position":     bytePosition(d.Text, offset),
+		"newName":      "measure",
+	}
+	out.Reset()
+	send(t, &s, 2, "textDocument/prepareRename", request)
+	var prep struct {
+		Range       Range
+		Placeholder string
+	}
+	if err := json.Unmarshal(editorResult(t, &out), &prep); err != nil || prep.Placeholder != "read" ||
+		prep.Range != textRange(d.Text, offset, offset+len("read")) {
+		t.Fatalf("method prepareRename = %+v (%v)", prep, err)
+	}
+	out.Reset()
+	send(t, &s, 3, "textDocument/rename", request)
+	var result struct{ DocumentChanges []documentEdit }
+	if err := json.Unmarshal(editorResult(t, &out), &result); err != nil || len(result.DocumentChanges) != 2 {
+		t.Fatalf("rename result = %+v (%v)", result, err)
+	}
+	want := map[string][]int{
+		uri: {offset},
+		fileURI(geometry): {
+			strings.Index(library, "Point::read") + len("Point::"),
+			strings.LastIndex(library, "Point::read") + len("Point::"),
+		},
+	}
+	for _, changes := range result.DocumentChanges {
+		expected := want[changes.TextDocument.URI]
+		if len(expected) == 0 || len(changes.Edits) != len(expected) {
+			t.Fatalf("unexpected edits: %+v", changes)
+		}
+		data := []byte(library)
+		if changes.TextDocument.URI == uri {
+			data = d.Text
+			if changes.TextDocument.Version == nil || *changes.TextDocument.Version != 12 {
+				t.Fatalf("open version: %+v", changes.TextDocument)
+			}
+		} else if changes.TextDocument.Version != nil {
+			t.Fatalf("closed version: %+v", changes.TextDocument)
+		}
+		for i, edit := range changes.Edits {
+			start := expected[i]
+			if edit.Range != textRange(data, start, start+len("read")) || edit.NewText != "measure" {
+				t.Fatalf("wrong method edit %+v at byte %d", edit, start)
+			}
+		}
+		delete(want, changes.TextDocument.URI)
+	}
+	out.Reset()
+	request["newName"] = "taken"
+	send(t, &s, 4, "textDocument/rename", request)
+	if !strings.Contains(out.String(), errRenameChangesResolution.Error()) {
+		t.Fatalf("accepted conflicting method name: %s", &out)
+	}
+}

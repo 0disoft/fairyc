@@ -92,7 +92,7 @@ type analyzer struct {
 	diagnostics           []Diagnostic
 	diagnosticBudget      diagnosticBudget
 	resolutions           []Resolution
-	argumentLabels        []Resolution
+	selectorResolutions   []Resolution
 	types                 []TypeFact
 	borrows               []BorrowFact
 	unsupported           []Unsupported
@@ -794,15 +794,16 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 		return
 	}
 	a.resolutions = append(a.resolutions, Resolution{
-		Use: span(module.file.Path, expression.Span),
-		Target: SymbolCoordinate{
-			Package:     target.packageID,
-			Module:      target.module,
-			Name:        target.name,
-			Kind:        target.kind,
-			Declaration: span(target.source, target.declaration),
-		},
+		Use:    span(module.file.Path, expression.Span),
+		Target: target.coordinate(),
 	})
+}
+
+func (value *symbol) coordinate() SymbolCoordinate {
+	return SymbolCoordinate{
+		Package: value.packageID, Module: value.module, Name: value.name, Kind: value.kind,
+		Declaration: span(value.source, value.declaration),
+	}
 }
 
 func (a *analyzer) ownerSymbol(module *moduleScope, name string) *symbol {
