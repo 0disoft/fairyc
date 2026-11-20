@@ -62,11 +62,14 @@ The `fairyc.test-plan/v1` JSON report contains `package_uid`, `symbol`, `recomme
 `tests` and `reasons`. In test-list order, each recommended test appears once with a
 canonical `test` identity and one shortest `path` from that test to the selected function.
 Use those identities with `fairyc test --package <package-uid> --exact <test>`.
+The planner uses Atlas v3's experimental aggregate admission. Running a
+recommended test still follows the stable test command's source admission.
 
 `selected-tests` describes coverage of resolved call paths within the selected
 package. The fresh verified MIR also connects resource drop obligations to ordinary
-cleanup bodies. These paths can include a `module::Resource::cleanup` step. Cleanup
-paths can be conditional on control flow or the active payload of a tagged value.
+and specialized cleanup bodies. Paths can include `module::Resource::cleanup`
+or `module::Resource<i32>::cleanup`. Cleanup paths can be conditional on control
+flow or the active payload of a tagged value.
 If cleanup graph construction exceeds 65,536 call observations and drop-type visits,
 the command retains the ordinary Atlas paths and recommends `all-tests`.
 For copied closures, the command follows immutable copies, direct struct fields,

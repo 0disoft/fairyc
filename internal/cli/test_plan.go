@@ -6,8 +6,8 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -71,7 +71,7 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 		for i, test := range tests {
 			identities[i] = test.display
 		}
-		report.Tests, report.Reasons = input.index.TestPlan(symbol, identities, input.program, input.packageID)
+		report.Tests, report.Reasons = input.index.TestPlan(symbol, identities, input.result, input.packageID)
 	}
 	return writeTestPlan(report, stdout, stderr)
 }
@@ -80,12 +80,12 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 // checked against that snapshot, with no persisted maps or lock updates.
 type testPlanInput struct {
 	index     *atlasmap.QueryIndex
-	program   mir.Program
+	result    compiler.Result
 	packageID hir.PackageID
 }
 
 func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string, stderr io.Writer) (testPlanInput, int) {
-	result, err := workspacecompiler.Check(workspace)
+	result, err := workspacecompiler.CheckGeneric(workspace)
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
 			return testPlanInput{}, ExitInternalFailure
@@ -125,7 +125,7 @@ func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string,
 	for _, partition := range partitions {
 		if partition.Header().PackageInstance == instance {
 			if index, err := atlasmap.NewQueryIndexV3(partition, expectations[instance]); err == nil {
-				return testPlanInput{index: index, program: result.MIR, packageID: packageID}, ExitSuccess
+				return testPlanInput{index: index, result: result, packageID: packageID}, ExitSuccess
 			}
 			break
 		}

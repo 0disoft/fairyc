@@ -4,8 +4,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
@@ -21,16 +21,16 @@ type TestPlanPath struct {
 
 // TestPlan shows one shortest exact local path per discovered test. Keep known
 // paths when coverage is incomplete so the caller can recommend the full suite.
-// program and packageID must come from the verified compilation used by index.
-func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.Program, packageID hir.PackageID) ([]TestPlanPath, []string) {
+// result and packageID must come from the verified compilation used by index.
+func (index *QueryIndex) TestPlan(selector string, tests []string, result compiler.Result, packageID hir.PackageID) ([]TestPlanPath, []string) {
 	subjects, found := index.testPlanSubjects(selector)
 	paths := []TestPlanPath{}
 	if !found {
 		return paths, []string{"symbol-not-found"}
 	}
-	cleanups := index.testPlanCleanups(program, packageID)
-	closures := index.testPlanClosures(program, packageID)
-	reasons, specializedIncoming := index.testPlanCallFacts(cleanups.recovered + closures.recovered)
+	cleanups := index.testPlanCleanups(result, packageID)
+	closures := index.testPlanClosures(result.MIR, packageID)
+	reasons, specializedIncoming := index.testPlanCallFacts(cleanups.recovered+closures.recovered, cleanups.genericComplete)
 	if len(subjects) == 0 {
 		return paths, append(reasons, "generic-call-coverage")
 	}
@@ -64,7 +64,7 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 			}
 		} else {
 			for _, pos := range index.incoming[target] {
-				if call := index.relations[pos]; index.localTestPlanCall(call) && call.Target.Specialization == "" {
+				if call := index.relations[pos]; index.localTestPlanCall(call, cleanups.genericComplete) && call.Target.Specialization == "" {
 					enqueue(testPlanEndpoint(call.Source, call.SourceSpecialization))
 				}
 			}
@@ -161,7 +161,7 @@ func (index *QueryIndex) testPlanSubject(selector string) (*indexedQueryNode, bo
 	return &index.nodes[position], true
 }
 
-func (index *QueryIndex) testPlanCallFacts(recoveredCalls int) ([]string, map[string][]string) {
+func (index *QueryIndex) testPlanCallFacts(recoveredCalls int, genericCleanupsComplete bool) ([]string, map[string][]string) {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
@@ -191,7 +191,7 @@ func (index *QueryIndex) testPlanCallFacts(recoveredCalls int) ([]string, map[st
 			continue
 		case call.Target != nil && call.Target.PackageInstance != index.header.PackageInstance:
 			add("cross-package-call")
-		case !index.localTestPlanCall(call):
+		case !index.localTestPlanCall(call, genericCleanupsComplete):
 			add("unsupported-call-edge")
 		case call.Target.Specialization != "":
 			target := testPlanEndpoint(call.Target.Symbol, call.Target.Specialization)
@@ -202,9 +202,10 @@ func (index *QueryIndex) testPlanCallFacts(recoveredCalls int) ([]string, map[st
 	return reasons, specialized
 }
 
-func (index *QueryIndex) localTestPlanCall(call QueryRelation) bool {
+func (index *QueryIndex) localTestPlanCall(call QueryRelation, genericCleanupsComplete bool) bool {
 	return call.Kind == RelationCalls && call.Target != nil && call.Target.Symbol != "" &&
-		call.Target.PackageInstance == index.header.PackageInstance && call.SourceBody == "" && call.Span != nil &&
+		call.Target.PackageInstance == index.header.PackageInstance &&
+		(call.SourceBody == "" || genericCleanupsComplete && call.SourceBody == "cleanup" && call.SourceSpecialization != "") && call.Span != nil &&
 		call.Certainty == semanticsnapshot.CertaintyExact && call.Provenance == semanticsnapshot.ProvenanceCompilerObserved
 }
 
@@ -234,7 +235,11 @@ func (index *QueryIndex) testPlanEndpointLabel(endpoint string) (string, bool) {
 	if concrete {
 		for _, facts := range node.specializations {
 			if facts.ID == specialization {
-				return label + "<" + testPlanTypeArguments(facts.TypeArguments) + ">", true
+				label += "<" + testPlanTypeArguments(facts.TypeArguments) + ">"
+				if facts.Cleanup != nil {
+					label += "::cleanup"
+				}
+				return label, true
 			}
 		}
 		return "", false

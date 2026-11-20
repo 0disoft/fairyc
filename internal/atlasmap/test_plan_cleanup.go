@@ -3,6 +3,7 @@ package atlasmap
 import (
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -12,22 +13,31 @@ const ordinaryCleanupOmission = "ordinary-cleanup-call-not-retained"
 const maxTestPlanCleanupWork = 65536
 
 type testPlanCleanupGraph struct {
-	incoming  map[string][]string
-	recovered int
+	incoming        map[string][]string
+	recovered       int
+	genericComplete bool
 }
 
-// The persisted map reports these calls as omitted. Only the CLI's fresh,
-// verified MIR can attach executable drop obligations and private cleanup bodies.
-func (index *QueryIndex) testPlanCleanups(program mir.Program, packageID hir.PackageID) testPlanCleanupGraph {
+// The map has no edges from drop obligations to their cleanup bodies. Those
+// bindings come from the same verified MIR used to produce the query index.
+func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.PackageID) testPlanCleanupGraph {
+	for _, node := range index.nodes {
+		for _, facts := range node.specializations {
+			if facts.Cleanup != nil {
+				return index.buildTestPlanCleanups(result, packageID)
+			}
+		}
+	}
 	for _, record := range index.completeness {
 		if record.Relation == "calls" && slices.Contains(record.Reasons, ordinaryCleanupOmission) {
-			return index.buildTestPlanCleanups(program, packageID)
+			return index.buildTestPlanCleanups(result, packageID)
 		}
 	}
 	return testPlanCleanupGraph{}
 }
 
-func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hir.PackageID) testPlanCleanupGraph {
+func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID hir.PackageID) testPlanCleanupGraph {
+	program := result.MIR
 	functions := make(map[string]string)
 	cleanupNames := make(map[hir.Type]string)
 	for _, node := range index.nodes {
@@ -43,7 +53,9 @@ func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hi
 			cleanupNames[hir.ParseType(name)] = testPlanLabel(key) + "::cleanup"
 		}
 	}
+	genericCleanupTypes, expectedCleanups := index.bindTestPlanSpecializations(result.GenericProvenance, packageID, functions, cleanupNames)
 	names := make(map[hir.SymbolID]string)
+	matchedCleanups := 0
 	for _, fn := range program.Functions {
 		if fn.Span.Package != packageID {
 			continue
@@ -52,6 +64,9 @@ func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hi
 			names[fn.Symbol] = functions[fn.Name]
 		} else {
 			names[fn.Symbol] = cleanupNames[fn.DropGlueFor]
+			if genericCleanupTypes[fn.DropGlueFor] {
+				matchedCleanups++
+			}
 		}
 	}
 	resources := make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes))
@@ -64,7 +79,10 @@ func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hi
 		span   hir.Span
 		target hir.SymbolID
 	}
-	graph := testPlanCleanupGraph{incoming: make(map[string][]string)}
+	graph := testPlanCleanupGraph{
+		incoming:        make(map[string][]string),
+		genericComplete: matchedCleanups == expectedCleanups,
+	}
 	work := 0
 	for _, fn := range program.Functions {
 		source := names[fn.Symbol]
@@ -88,7 +106,7 @@ func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hi
 				}
 			}
 			term := block.Terminator
-			if fn.DropGlueFor == (hir.Type{}) || term.Kind != mir.TerminatorCall || term.ForeignABI != "" {
+			if fn.DropGlueFor == (hir.Type{}) || genericCleanupTypes[fn.DropGlueFor] || term.Kind != mir.TerminatorCall || term.ForeignABI != "" {
 				continue
 			}
 			target := names[term.Callee]
@@ -113,6 +131,50 @@ func (index *QueryIndex) buildTestPlanCleanups(program mir.Program, packageID hi
 		graph.incoming[target] = slices.Compact(sources)
 	}
 	return graph
+}
+
+// Join the exact implementation IDs recorded by Atlas to the compiler-owned
+// generated names. Display labels and resource type spellings are independent.
+func (index *QueryIndex) bindTestPlanSpecializations(provenance compiler.GenericProvenance, packageID hir.PackageID, functions map[string]string, cleanups map[hir.Type]string) (map[hir.Type]bool, int) {
+	type implementation struct {
+		module   string
+		endpoint string
+		cleanup  bool
+	}
+	implementations := make(map[string]implementation)
+	expectedCleanups := 0
+	for _, node := range index.nodes {
+		for _, facts := range node.specializations {
+			if facts.Function == nil && facts.Cleanup == nil {
+				continue
+			}
+			implementations[facts.ID] = implementation{
+				module: node.declaration.Key.Module, endpoint: testPlanEndpoint(node.symbol.Visible, facts.ID),
+				cleanup: facts.Cleanup != nil,
+			}
+			if facts.Cleanup != nil {
+				expectedCleanups++
+			}
+		}
+	}
+	types := make(map[hir.Type]bool, expectedCleanups)
+	if len(implementations) == 0 {
+		return types, expectedCleanups
+	}
+	for _, origin := range provenance.Specializations() {
+		facts, found := implementations[string(origin.Specialization)]
+		if !found {
+			continue
+		}
+		name := hir.QualifiedModulePath(packageID, facts.module) + "::" + origin.GeneratedName
+		if facts.cleanup {
+			typ := hir.ParseType(name)
+			cleanups[typ], types[typ] = facts.endpoint, true
+		} else {
+			functions[name] = facts.endpoint
+		}
+	}
+	return types, expectedCleanups
 }
 
 func (graph testPlanCleanupGraph) addDropEdges(source string, root hir.Type, resources map[hir.Type]*mir.ResourceType, names map[hir.SymbolID]string, seen map[hir.Type]struct{}, work *int) bool {

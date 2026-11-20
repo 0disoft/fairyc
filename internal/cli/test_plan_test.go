@@ -282,3 +282,38 @@ import library as library;
 		})
 	}
 }
+
+func TestExperimentalTestPlanGenericCleanup(t *testing.T) {
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "src/library.fy", `module library;
+fn T observe<T>(T value) { return value; }
+resource Token<T> { T value; cleanup { discard observe<T>(this.value); } }
+fn T exercise<T>(T value) {
+    let Token<T> token = Token<T> { .value = value };
+    return token.value;
+}
+pub fn i32 signed() { return exercise<i32>(42); }
+pub fn bool boolean() { return exercise<bool>(true); }
+`)
+	writeWorkspaceFile(t, root, "tests/plan.fy", `module tests::plan;
+import library as library;
+@test fn void checks_bool() { assert(library::boolean()); }
+@test fn void checks_i32() { assert(library::signed() == 42); }
+`)
+	for _, tc := range []struct{ typ, entry string }{{"i32", "signed"}, {"bool", "boolean"}} {
+		t.Run(tc.typ, func(t *testing.T) {
+			selector := "library::observe<" + tc.typ + ">"
+			code, out, stderr := runForTest([]string{"experimental", "test-plan", "--symbol", selector}, root)
+			var got testPlanReport
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &got) != nil {
+				t.Fatalf("test-plan = (%d, %s, %s)", code, out, stderr)
+			}
+			test := "tests::plan::checks_" + tc.typ
+			want := []string{test, "library::" + tc.entry, "library::exercise<" + tc.typ + ">", "library::Token<" + tc.typ + ">::cleanup", selector}
+			if got.Recommend != "selected-tests" || len(got.Reasons) != 0 || len(got.Tests) != 1 || got.Tests[0].Test != test || !slices.Equal(got.Tests[0].Path, want) {
+				t.Fatalf("want selected test with path %v, got %s", want, out)
+			}
+		})
+	}
+}
