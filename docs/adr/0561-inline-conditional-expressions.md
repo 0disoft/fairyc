@@ -8,7 +8,7 @@ Admit value-producing `if` expressions in the existing public, safe, pure
 `i32` inline family. Conditions are bool literals or the six comparisons
 between admitted `i32` expressions, composed with `!`, `&&` and `||`. Each arm
 supplies an `i32` tail expression without statements, or another conditional in
-an `else if` chain. The Go bootstrap also admits immutable `i32` bindings in
+an `else if` chain. Both compilers also admit immutable `i32` bindings in
 value arms. Every initializer, assignment and return shares the existing
 64-node limit, which also counts conditions, arm blocks and groups. Arm
 declarations share the function's 16-local limit. Statement branches,
@@ -34,5 +34,5 @@ Ordinary MIR lowering short-circuits logical operands and executes only the
 selected arm. The existing acyclic CFG and operation verification, checked arithmetic,
 trap source spans and private C linkage apply. The Fairy candidate computes the
 identity during source admission. Its detached verifier checks bool conditions,
-`i32` results and that each arm block has a tail and no statements, then
-recomputes the marker before accepting a restored body.
+`i32` results and each arm's binding records and tail. It rebuilds lexical
+visibility before recomputing the marker and accepting a restored body.

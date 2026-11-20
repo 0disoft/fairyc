@@ -23,6 +23,7 @@ pub fn bool comparison(ref u8[] op){
         bytes::equal(op,b"<=") || bytes::equal(op,b">") || bytes::equal(op,b">=");
 }
 pub fn bool logical(ref u8[] op){return bytes::equal(op,b"&&") || bytes::equal(op,b"||");}
+pub fn usize arm_position(usize depth){return 64+depth;}
 pub fn bool boolean(ref mut bytes::Buffer out,ref u8[] value,ref mut json::Ledger work){
     return (bytes::equal(value,b"true") || bytes::equal(value,b"false")) &&
         json::raw(out,b"{\"Op\":\"literal\",\"Value\":",work) && json::quoted(out,value,work) && json::raw(out,b",\"Children\":null}",work);
