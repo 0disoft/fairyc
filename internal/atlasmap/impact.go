@@ -46,6 +46,22 @@ func parseImpactSelector(selector string) (string, string, error) {
 	return symbol, implementation, nil
 }
 
+// ResolveCallSelector binds an optional implementation to its current declaration.
+func (index *WorkspaceCallIndex) ResolveCallSelector(instance, selector string) (WorkspaceSymbol, string, error) {
+	symbol, specialization, err := parseImpactSelector(selector)
+	if err != nil {
+		return WorkspaceSymbol{}, "", err
+	}
+	subject, err := index.ResolveSymbol(instance, symbol)
+	if err != nil {
+		return WorkspaceSymbol{}, "", err
+	}
+	if specialization != "" && index.packages[instance].specializationOwners[specialization] != subject.Symbol {
+		return WorkspaceSymbol{}, "", fmt.Errorf("%w: specialization is not owned by the selected declaration", ErrSymbolNotFound)
+	}
+	return subject, specialization, nil
+}
+
 // Impact traverses only compiler-resolved reverse calls in the exact-current joined closure.
 // A SymbolId#specialization selector starts at exactly one verified implementation.
 // Even a complete traversal is bounded evidence, never proof that a change is safe.
@@ -53,16 +69,9 @@ func (index *WorkspaceCallIndex) Impact(instance, symbol string, maxDepth, maxSy
 	if maxDepth < 0 || maxDepth > 64 || maxSymbols < 1 || maxSymbols > 4096 {
 		return ImpactResult{}, fmt.Errorf("invalid impact traversal limits")
 	}
-	symbol, specialization, err := parseImpactSelector(symbol)
+	root, specialization, err := index.ResolveCallSelector(instance, symbol)
 	if err != nil {
 		return ImpactResult{}, err
-	}
-	root, err := index.ResolveSymbol(instance, symbol)
-	if err != nil {
-		return ImpactResult{}, err
-	}
-	if specialization != "" && index.packages[instance].specializationOwners[specialization] != root.Symbol {
-		return ImpactResult{}, fmt.Errorf("impact specialization is not owned by the selected declaration")
 	}
 	r := ImpactResult{Schema: "fairyc.atlas-impact/v1", Scope: "resolved-direct-call-reachability", State: "bounded", Subject: root, SubjectSpecialization: specialization, Nodes: []ImpactNode{{Subject: root}}, Contexts: []QueryContext{}, TraversalComplete: true, Omissions: []string{"non-call-dependencies-not-analyzed", "external-callback-and-dynamic-targets-not-inferred", "outside-workspace-callers-not-analyzed"}}
 	instances := make([]string, 0, len(index.packages))

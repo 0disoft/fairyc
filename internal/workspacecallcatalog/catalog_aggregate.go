@@ -31,7 +31,7 @@ func ParseChecksumV2(value string) (ChecksumV2, error) {
 }
 
 // EncodeV2 emits cleanup-owned calls from an exact-current v3 workspace join.
-// Selection remains declaration-based and does not model implicit drop scheduling.
+// Selection accepts a declaration or one concrete implementation.
 func EncodeV2(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string, direction atlasmap.QueryDirection, maxBytes uint64) ([]byte, error) {
 	return encode(index, packageInstance, symbolID, direction, maxBytes, 2)
 }

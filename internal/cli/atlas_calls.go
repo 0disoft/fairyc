@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
@@ -106,11 +107,6 @@ func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 			}
 			options.packageUID = value
 		case "--symbol":
-			if _, err := symbolidentity.ParseVisibleID(value); err != nil {
-				if _, fullErr := symbolidentity.ParseFullDigest(value); fullErr != nil {
-					return fmt.Errorf("experimental command \"atlas-calls list\" requires --symbol as a canonical visible or full SymbolId")
-				}
-			}
 			options.symbol = value
 		case "--direction":
 			options.direction = atlasmap.QueryDirection(value)
@@ -140,6 +136,18 @@ func parseAtlasCallsOptions(arguments []string) (atlasCallsOptions, error) {
 	})
 	if err != nil {
 		return atlasCallsOptions{}, err
+	}
+	if strings.Contains(options.symbol, "#") {
+		if options.catalogVersion != "2" {
+			return atlasCallsOptions{}, fmt.Errorf("atlas-calls concrete selection requires --catalog-version 2")
+		}
+		if err := atlasmap.ValidateImpactSelector(options.symbol); err != nil {
+			return atlasCallsOptions{}, err
+		}
+	} else if _, err := symbolidentity.ParseVisibleID(options.symbol); err != nil {
+		if _, err := symbolidentity.ParseFullDigest(options.symbol); err != nil {
+			return atlasCallsOptions{}, fmt.Errorf("experimental command \"atlas-calls list\" requires --symbol as a canonical visible or full SymbolId")
+		}
 	}
 
 	return options, nil

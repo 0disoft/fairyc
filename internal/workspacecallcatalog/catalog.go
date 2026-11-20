@@ -124,7 +124,7 @@ func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string
 	if direction != atlasmap.DirectionOutgoing && direction != atlasmap.DirectionIncoming && direction != atlasmap.DirectionBoth {
 		return nil, fmt.Errorf("workspace call catalog direction %q is invalid", direction)
 	}
-	subject, err := index.ResolveSymbol(packageInstance, symbolID)
+	subject, specialization, err := index.ResolveCallSelector(packageInstance, symbolID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +145,9 @@ func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string
 	if context.LogicalSchema != schema {
 		return nil, fmt.Errorf("workspace call catalog requires %s maps", schema)
 	}
+	if specialization != "" && catalogVersion != 2 {
+		return nil, fmt.Errorf("concrete selection requires workspace call catalog v2")
+	}
 	calls, err := selectCalls(index, packageInstance, symbolID, direction)
 	if err != nil {
 		return nil, err
@@ -153,7 +156,7 @@ func encode(index *atlasmap.WorkspaceCallIndex, packageInstance, symbolID string
 	usage := index.Usage()
 	catalog := Catalog{
 		Context:   context,
-		Subject:   Symbol{PackageInstance: subject.PackageInstance, Symbol: subject.Symbol},
+		Subject:   Symbol{PackageInstance: subject.PackageInstance, Symbol: subject.Symbol, Specialization: specialization},
 		Direction: direction,
 		Budget:    Budget{MaxPackages: budget.MaxPackages, MaxCalls: budget.MaxCalls},
 		Usage: Usage{

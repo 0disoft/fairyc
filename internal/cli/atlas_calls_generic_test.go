@@ -130,3 +130,53 @@ func TestExperimentalAtlasCallsCatalogVersionAndFailurePolicy(t *testing.T) {
 		t.Fatalf("source diagnostics: %d %s %s", code, output, stderr)
 	}
 }
+
+func TestExperimentalAtlasCallsV2SelectsConcreteEndpoints(t *testing.T) {
+	root := writeAtlasGenericWorkspace(t)
+	const appUID = "example.session.app"
+	const libUID = "example.session.answer"
+	source := atlasGenericFunctionSymbol(t, root, appUID, "id")
+	target := atlasGenericFunctionSymbol(t, root, libUID, "value")
+	run := func(uid, symbol, direction string) workspacecallcatalog.Catalog {
+		t.Helper()
+		args := append(atlasCallsArguments(uid, symbol, direction), "--catalog-version", "2")
+		code, out, stderr := runForTest(append([]string{"experimental", "atlas-calls"}, args...), root)
+		var result struct {
+			Catalog workspacecallcatalog.Catalog `json:"catalog"`
+		}
+		if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &result) != nil {
+			t.Fatalf("concrete call catalog = (%d, %s, %s)", code, out, stderr)
+		}
+		return result.Catalog
+	}
+	all := run(appUID, source.Visible, "outgoing")
+	if len(all.Calls) != 2 || all.Subject.Specialization != "" ||
+		all.Calls[0].Source.Specialization == all.Calls[1].Source.Specialization ||
+		all.Calls[0].Target.Specialization == all.Calls[1].Target.Specialization {
+		t.Fatalf("expected both distinct cross-package implementations: %+v", all)
+	}
+	for _, call := range all.Calls {
+		outgoing := run(appUID, source.Visible+"#"+call.Source.Specialization, "outgoing")
+		incoming := run(libUID, target.Full+"#"+call.Target.Specialization, "incoming")
+		if outgoing.Subject != call.Source || incoming.Subject != call.Target ||
+			!reflect.DeepEqual(outgoing.Calls, []workspacecallcatalog.Call{call}) ||
+			!reflect.DeepEqual(incoming.Calls, []workspacecallcatalog.Call{call}) {
+			t.Fatalf("concrete forward/reverse result differs: %+v / %+v", outgoing, incoming)
+		}
+		both := run(appUID, source.Full+"#"+call.Source.Specialization, "both")
+		if len(both.Calls) != 2 || both.Subject != call.Source {
+			t.Fatalf("expected one incoming and one outgoing call: %+v", both)
+		}
+	}
+	for _, tc := range []struct{ selector, version string }{
+		{source.Visible + "#" + all.Calls[0].Target.Specialization, "2"},
+		{source.Visible + "#" + all.Calls[0].Source.Specialization, "1"},
+		{source.Visible + "#invalid", "2"},
+	} {
+		args := append(atlasCallsArguments(appUID, tc.selector, "outgoing"), "--catalog-version", tc.version)
+		code, out, stderr := runForTest(append([]string{"experimental", "atlas-calls"}, args...), root)
+		if code != ExitInvalidInvocation || out != "" || stderr == "" {
+			t.Fatalf("rejected selector = (%d, %s, %s)", code, out, stderr)
+		}
+	}
+}

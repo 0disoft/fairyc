@@ -23,8 +23,13 @@ The v1 envelope and catalog layout remain unchanged. Each call may start with
 `source_body: "cleanup"` before `source`. It is present only for calls observed in
 a concrete resource cleanup. Source and target retain their package instance,
 original declaration SymbolId and optional concrete specialization ID. Ordinary
-function calls omit `source_body`. The subject remains a declaration selector,
-never a specialization or cleanup execution selector.
+function calls omit `source_body`. A bare SymbolId selects the whole declaration.
+Append `#<specialization-id>` to a visible or full SymbolId to select one checked
+implementation. The implementation must belong to that declaration in the
+selected package's current map. The checksummed catalog includes the selected
+ID in `subject.specialization`. Incoming calls match the target implementation
+and outgoing calls match the source implementation, including calls from
+specialized cleanup bodies.
 
 Ordering follows v1 with source body inserted after source SymbolId and before
 source specialization. An absent body sorts as an empty string. Direction `both`
@@ -70,7 +75,8 @@ direction, package/call and output limits. Both commands use the same current
 workspace and aggregate-aware uncached compiler. Incoming selection on a helper
 function reports cleanup callers with their original resource IDs.
 
-Only canonical catalog values 0, 1 and 2 are accepted once. Default 0 and explicit
+Concrete selectors require `--catalog-version 2`. Only canonical catalog values
+0, 1 and 2 are accepted once. Default 0 and explicit
 0/1 keep their existing source-admission and output policies. `--locked` retains
 its exact no-write behavior; otherwise lock refresh can precede later failures.
 Source failures return diagnostics with no catalog, invalid selectors/budgets

@@ -271,17 +271,30 @@ func (index *WorkspaceCallIndex) Calls() []JoinedCall {
 }
 
 func (index *WorkspaceCallIndex) OutgoingCalls(packageInstance, symbolID string) ([]JoinedCall, error) {
-	key, err := index.resolveWorkspaceSymbol(packageInstance, symbolID)
+	key, specialization, err := index.ResolveCallSelector(packageInstance, symbolID)
 	if err != nil {
 		return nil, err
 	}
-	return index.selectCalls(index.outgoing[key]), nil
+	positions := index.outgoing[key]
+	if specialization == "" {
+		return index.selectCalls(positions), nil
+	}
+	result := []JoinedCall{}
+	for _, position := range positions {
+		if call := index.calls[position]; call.SourceSpecialization == specialization {
+			result = append(result, call)
+		}
+	}
+	return result, nil
 }
 
 func (index *WorkspaceCallIndex) IncomingCalls(packageInstance, symbolID string) ([]JoinedCall, error) {
-	key, err := index.resolveWorkspaceSymbol(packageInstance, symbolID)
+	key, specialization, err := index.ResolveCallSelector(packageInstance, symbolID)
 	if err != nil {
 		return nil, err
+	}
+	if specialization != "" {
+		return index.selectCalls(index.incomingSpecializations[workspaceCallEndpoint{key, specialization}]), nil
 	}
 	return index.selectCalls(index.incoming[key]), nil
 }
