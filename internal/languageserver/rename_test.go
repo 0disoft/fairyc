@@ -338,9 +338,27 @@ func TestRenameFieldChecksWritesInitializersAndOwner(t *testing.T) {
 	if !d.View.clean {
 		t.Fatalf("shorthand fixture did not check cleanly: %s", &out)
 	}
-	request("textDocument/prepareRename", want[0], "")
+	for _, scenario := range []struct {
+		from, count     int
+		name, shorthand string
+	}{
+		{want[0], 5, "coordinate", "coordinate = value"},
+		{strings.Index(prefix, "value = 40"), 2, "input", "value = input"},
+	} {
+		request("textDocument/rename", scenario.from, scenario.name)
+		var result struct{ DocumentChanges []documentEdit }
+		if err := json.Unmarshal(editorResult(t, &out), &result); err != nil || len(result.DocumentChanges) != 1 {
+			t.Fatalf("expanded rename = %+v (%v)", result, err)
+		}
+		edits := result.DocumentChanges[0].Edits
+		shared := textRange(d.Text, len(prefix), len(prefix)+len("value"))
+		if len(edits) != scenario.count || edits[1] != (textEdit{Range: shared, NewText: scenario.shorthand}) {
+			t.Fatalf("wrong shorthand expansion: %+v", edits)
+		}
+	}
+	request("textDocument/prepareRename", len(prefix), "")
 	if got := string(editorResult(t, &out)); got != "null" {
-		t.Fatalf("accepted field with shared shorthand spelling: %s", got)
+		t.Fatalf("picked one of two bindings at the shared token: %s", got)
 	}
 }
 

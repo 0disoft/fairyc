@@ -29,7 +29,12 @@ type renamePlan struct {
 type renameFile struct {
 	sourceView
 	id    editableDocumentID
-	spans []tokenSpan
+	spans []renameSpan
+}
+
+type renameSpan struct {
+	tokenSpan
+	shorthand bool
 }
 
 func (s *server) planRename(d *document, offset int) (renamePlan, error) {
@@ -100,7 +105,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 	files := make(map[string]sourceView)
 	spans := make(map[string]map[tokenSpan]bool)
 	count := 0
-	add := func(file sourceView, span tokenSpan, selector bool) error {
+	add := func(file sourceView, span tokenSpan) error {
 		if file.Path == "" || (view.root != "" && !contained(view.root, file.Path)) ||
 			!identifierSpan(file.Text, span) || string(file.Text[span.start:span.end]) != name {
 			return errRenameUnavailable
@@ -114,28 +119,19 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 				return errReferenceLimit
 			}
 			count++
+			spans[file.Path][span] = false
 		}
-		spans[file.Path][span] = spans[file.Path][span] || selector
 		return nil
 	}
-	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}, false); err != nil {
+	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}); err != nil {
 		return renamePlan{}, err
 	}
-	selectors := make(map[hir.Span]bool)
-	for _, selector := range view.result.SelectorResolutions {
-		if selector.Target == target {
-			selectors[selector.Use] = true
-		}
-	}
+	uses := make(map[hir.Span]struct{})
 	for i, resolution := range view.result.Resolutions {
 		if i%256 == 0 && s.ctx != nil && s.ctx.Err() != nil {
 			return renamePlan{}, s.ctx.Err()
 		}
 		if resolution.Target != target {
-			if selectors[resolution.Use] {
-				// A shorthand initializer is both a field and a value use.
-				return renamePlan{}, errRenameUnavailable
-			}
 			continue
 		}
 		file, ok := view.file(resolution.Use)
@@ -145,9 +141,42 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			(start != resolution.Use.StartByte && (start < 2 || string(file.Text[start-2:start]) != "::")) {
 			return renamePlan{}, errRenameUnavailable
 		}
-		if err := add(file, tokenSpan{start, end}, selectors[resolution.Use]); err != nil {
+		if err := add(file, tokenSpan{start, end}); err != nil {
 			return renamePlan{}, err
 		}
+		uses[resolution.Use] = struct{}{}
+	}
+	selectors := make(map[hir.Span]semantic.SymbolCoordinate)
+	for _, selector := range view.result.SelectorResolutions {
+		if _, selected := uses[selector.Use]; selected {
+			if previous, exists := selectors[selector.Use]; exists && previous != selector.Target {
+				return renamePlan{}, errRenameUnavailable
+			}
+			selectors[selector.Use] = selector.Target
+		}
+	}
+	shorthand := make(map[string]map[tokenSpan]struct{})
+	for _, resolution := range view.result.Resolutions {
+		if _, selected := uses[resolution.Use]; !selected || resolution.Target == target {
+			continue
+		}
+		field, value := target, resolution.Target
+		if target.Kind != "field" {
+			field, value = resolution.Target, target
+		}
+		if field.Kind != "field" || (value.Kind != "local" && value.Kind != "parameter") ||
+			selectors[resolution.Use] != field {
+			return renamePlan{}, errRenameUnavailable
+		}
+		file, _ := view.file(resolution.Use)
+		if shorthand[file.Path] == nil {
+			shorthand[file.Path] = make(map[tokenSpan]struct{})
+		}
+		shorthand[file.Path][tokenSpan{resolution.Use.StartByte, resolution.Use.EndByte}] = struct{}{}
+	}
+	for use := range selectors {
+		file, _ := view.file(use)
+		spans[file.Path][tokenSpan{use.StartByte, use.EndByte}] = true
 	}
 	plan := renamePlan{target: target, name: name}
 	for _, path := range slices.Sorted(maps.Keys(files)) {
@@ -175,11 +204,11 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			}
 			span := tokenSpan{token.Span.StartByte, token.Span.EndByte}
 			if selector, matches := spans[path][span]; matches {
-				// A shorthand field shares its spelling with the value.
-				if previous == "." && !selector {
+				_, shared := shorthand[path][span]
+				if previous == "." && !selector || shared && previous != "." {
 					return renamePlan{}, errRenameUnavailable
 				}
-				entry.spans = append(entry.spans, span)
+				entry.spans = append(entry.spans, renameSpan{span, shared})
 				if sameDocumentPath(d.Path, path) && span.start <= offset && offset < span.end {
 					plan.cursor = span
 				}
@@ -249,24 +278,32 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	if name == plan.name {
 		return []documentEdit{}, nil
 	}
-	delta := len(name) - len(plan.name)
 	qualified := strings.TrimSuffix(plan.target.Name, plan.name) + name
 	replacements := make(map[string][]byte, len(plan.files))
 	edits := make([]documentEdit, 0, len(plan.files))
+	translations := make(map[string][]renameTranslation, len(plan.files))
 	responseBudget := maxMessage - 1024
 	openBytes := 0
 	for _, opened := range s.docs {
 		openBytes += len(opened.Text)
 	}
 	for _, file := range plan.files {
-		size := len(file.Text) + delta*len(file.spans)
+		size := len(file.Text)
+		responseBudget -= 6*len(file.id.URI) + 128
+		for _, span := range file.spans {
+			n := len(name)
+			if span.shorthand {
+				n += len(plan.name) + len(" = ")
+			}
+			size += n - (span.end - span.start)
+			responseBudget -= 6*n + 128
+		}
 		if file.id.Version != nil {
 			openBytes += size - len(file.Text)
 		}
 		if size > source.DefaultLimits().MaxBytes || openBytes > maxOpenDocumentBytes {
 			return nil, errors.New("renamed document exceeds the editor byte limit")
 		}
-		responseBudget -= 6*len(file.id.URI) + 128 + len(file.spans)*(6*len(name)+128)
 		if responseBudget < 0 {
 			return nil, errReferenceLimit
 		}
@@ -274,12 +311,27 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 		edit := documentEdit{TextDocument: file.id, Edits: make([]textEdit, 0, len(file.spans))}
 		index := newPositionIndex(file.Text)
 		previousEnd := 0
+		moved := make([]renameTranslation, 0, len(file.spans))
 		for _, span := range file.spans {
 			text = append(text, file.Text[previousEnd:span.start]...)
-			text = append(text, name...)
-			edit.Edits = append(edit.Edits, textEdit{Range: Range{index.bytePosition(span.start), index.bytePosition(span.end)}, NewText: name})
+			replacement := name
+			translation := renameTranslation{tokenSpan: span.tokenSpan}
+			if span.shorthand {
+				field, value := plan.name, name
+				if plan.target.Kind == "field" {
+					field, value = name, plan.name
+				}
+				replacement = field + " = " + value
+				translation.field = tokenSpan{len(text), len(text) + len(field)}
+				translation.value = tokenSpan{len(text) + len(field) + len(" = "), len(text) + len(replacement)}
+			}
+			text = append(text, replacement...)
+			translation.shift = len(text) - span.end
+			moved = append(moved, translation)
+			edit.Edits = append(edit.Edits, textEdit{Range: Range{index.bytePosition(span.start), index.bytePosition(span.end)}, NewText: replacement})
 			previousEnd = span.end
 		}
+		translations[file.Path] = moved
 		replacements[file.Path] = append(text, file.Text[previousEnd:]...)
 		edits = append(edits, edit)
 	}
@@ -287,7 +339,7 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	if err != nil {
 		return nil, err
 	}
-	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d.View, rechecked, replacements, plan, qualified, delta) {
+	if rechecked == nil || !rechecked.clean || !sameRenameBindings(d.View, rechecked, replacements, translations, plan.target, qualified) {
 		return nil, errRenameChangesResolution
 	}
 	ctx := s.ctx
@@ -312,7 +364,15 @@ func (s *server) rename(d *document, plan renamePlan, name string) ([]documentEd
 	return edits, ctx.Err()
 }
 
-func sameRenameBindings(before, after *analysis, replacements map[string][]byte, plan renamePlan, name string, delta int) bool {
+// renameTranslation records the cumulative byte shift after one edit and
+// the two resulting identifier ranges for an expanded shorthand.
+type renameTranslation struct {
+	tokenSpan
+	shift        int
+	field, value tokenSpan
+}
+
+func sameRenameBindings(before, after *analysis, replacements map[string][]byte, translations map[string][]renameTranslation, target semantic.SymbolCoordinate, name string) bool {
 	if len(before.files) != len(after.files) || len(before.result.Resolutions) != len(after.result.Resolutions) {
 		return false
 	}
@@ -326,17 +386,27 @@ func sameRenameBindings(before, after *analysis, replacements map[string][]byte,
 			return false
 		}
 	}
-	spans := make(map[string][]tokenSpan, len(plan.files))
-	for _, file := range plan.files {
-		spans[file.Path] = file.spans
-	}
-	translate := func(span hir.Span) hir.Span {
-		if file, ok := before.file(span); ok && len(spans[file.Path]) != 0 {
-			edits := spans[file.Path]
-			shift := func(offset int) int {
-				return offset + delta*sort.Search(len(edits), func(i int) bool { return edits[i].end > offset })
+	translate := func(span hir.Span, kind string) hir.Span {
+		file, _ := before.file(span)
+		edits := translations[file.Path]
+		startEdit := sort.Search(len(edits), func(i int) bool { return edits[i].end > span.StartByte })
+		if kind != "" && startEdit < len(edits) {
+			edit := edits[startEdit]
+			if edit.field.end > edit.field.start && edit.start == span.StartByte && edit.end == span.EndByte {
+				selected := edit.value
+				if kind == "field" {
+					selected = edit.field
+				}
+				span.StartByte, span.EndByte = selected.start, selected.end
+				return span
 			}
-			span.StartByte, span.EndByte = shift(span.StartByte), shift(span.EndByte)
+		}
+		endEdit := sort.Search(len(edits), func(i int) bool { return edits[i].end > span.EndByte })
+		if startEdit > 0 {
+			span.StartByte += edits[startEdit-1].shift
+		}
+		if endEdit > 0 {
+			span.EndByte += edits[endEdit-1].shift
 		}
 		return span
 	}
@@ -345,11 +415,11 @@ func sameRenameBindings(before, after *analysis, replacements map[string][]byte,
 		found[use]++
 	}
 	for _, use := range before.result.Resolutions {
-		if use.Target == plan.target {
+		if use.Target == target {
 			use.Target.Name = name
 		}
-		use.Use = translate(use.Use)
-		use.Target.Declaration = translate(use.Target.Declaration)
+		use.Use = translate(use.Use, use.Target.Kind)
+		use.Target.Declaration = translate(use.Target.Declaration, "")
 		if found[use] == 0 {
 			return false
 		}

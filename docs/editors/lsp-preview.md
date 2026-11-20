@@ -72,8 +72,10 @@ terminates the session.
   test source roots, are outside this search. Standalone documents support
   local bindings, ordinary function parameters, private callables and plain
   struct/resource and enum members. The entry point name, method parameters,
-  attributed function names and aggregate layouts, generic specializations and
-  shorthand field spellings are excluded.
+  attributed function names and aggregate layouts, and generic specializations
+  are excluded. Start a shorthand-related rename at the declaration or another
+  unambiguous use. The server expands a shared initializer token to an explicit
+  field/value pair and verifies both bindings before returning the edit.
 - Whole-document and range formatting for the current open text. The compiler's
   whitespace formatter normalizes CRLF, trailing horizontal whitespace and the
   final newline. It verifies the parser shape and significant tokens before
