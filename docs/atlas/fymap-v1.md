@@ -174,7 +174,9 @@ repeats current source/compiler/interface acceptance. Dependency targets and cro
 calls remain explicit unjoined omissions. Exact behavior is defined in
 `docs/atlas/fymap-query-v1.md`.
 
-`impact` and semantic `diff` are deferred until incomplete-edge behavior and identity stability are validated. Semantic diff eventually reports one of `Exact`, `Bounded`, `Partial`, `Heuristic`, or `Unavailable`; a heuristic rename is never applied as fact.
+[Atlas impact and semantic diff](impact-mcp-edit-v1.md) cover the bounded,
+compiler-observed facts of verified v3 source partitions. Fuller semantic
+comparison and heuristic rename detection remain deferred.
 
 Transport v1 readers require exact schema, encoding, checksum, logical-model, and identity-algorithm
 matches and reject unknown fields. A future compatible reader may introduce a separately versioned

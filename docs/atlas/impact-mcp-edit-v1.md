@@ -27,6 +27,32 @@ targets and callbacks are not inferred. Adding/removing a declaration does not i
 The existing interface/effects review remains the separate comparison tool for its documented
 ordinary-interface subset; none of its uncertainty becomes an unchanged declaration here.
 
+## Semantic diff
+
+`fairyc experimental atlas-diff --baseline <workspace-directory> --package-uid <uid>
+--max-declarations <n> --max-output-bytes <n>` compares the baseline with the current
+workspace. Both workspaces need valid, current `fairy.lock` files. A relative
+baseline is resolved from the current workspace. This Go Stage 0 command reads
+the two workspaces without updating locks, fetching dependencies, or writing maps.
+
+The command selects exactly one reachable package instance by UID in each
+workspace. It compares v3 partitions with the same source-independent package
+coordinate, language, compiler and target context. Changes sort by module, kind
+and name and show additions, removals and modifications. Modification categories
+are declaration shape, observed call sequence, and observations such as trap
+categories, borrow kinds and counts of unsafe, move, drop, allocation and
+error-return sites. Call targets use package coordinates to ignore source-only
+instance changes. Byte offsets and line maps are evidence metadata and do not
+affect declaration or call equality.
+
+Output is `fairyc.atlas-diff/v1` JSON. Its two contexts carry the exact source
+identities and completeness ledgers. `bounded` covers the compared facts.
+`partial` records incomplete map facts, opaque or unknown calls, or concrete
+specialization bodies outside this comparison. Renames, full behavior equivalence,
+and source changes that leave these projections unchanged are outside its scope.
+The declaration limit covers both selected partitions together. Either limit
+failure leaves stdout empty.
+
 ## Fairy reader and impact core
 
 The private Fairy implementation reads canonical v1/v3 envelopes, validates
