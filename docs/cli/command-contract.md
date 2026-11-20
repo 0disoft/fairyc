@@ -67,10 +67,11 @@ If cleanup graph construction exceeds 65,536 call observations and drop-type vis
 the command retains the ordinary Atlas paths and recommends `all-tests`.
 For copied closures, the command follows immutable copies, direct struct fields,
 and ordinary function parameters and results within the package. Returned values
-are traced with the argument bindings of their call site. An invocation through
-a parameter requires agreement from all observed callers. Missing or disagreeing
-targets and trace limits require `all-tests`. Closure tracing allows 65,536 steps
-and up to 64 nested argument or result lookups.
+are traced with the argument bindings of their call site. When callers supply
+different closures to the same function, paths retain the caller chain that
+supplied each target. Unresolved targets and trace limits require `all-tests`.
+Closure tracing allows 65,536 steps and up to 64 nested call, argument or
+result lookups.
 Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
 cross-package calls, generic call coverage and unmapped tests cause `all-tests`.
 Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.

@@ -184,3 +184,39 @@ func (trace *closureTrace) parameter(function hir.SymbolID, position int, field 
 	}
 	return target
 }
+
+// Split a disagreeing invocation by its verified callers. Extend the active
+// stack at its outer end so argument lookup follows exactly that call chain.
+func (trace *closureTrace) invocation(function hir.SymbolID, value mir.Operand, sources map[hir.SymbolID]string, record func(hir.SymbolID, *closureFrame) bool) bool {
+	var frame *closureFrame
+	var visit func(hir.SymbolID, **closureFrame, int) bool
+	visit = func(outer hir.SymbolID, next **closureFrame, depth int) bool {
+		trace.work--
+		if trace.work < 0 || sources[outer] == "" {
+			return false
+		}
+		target := trace.resolve(function, value, "", frame, 0)
+		if target != hir.NoSymbol {
+			trace.work -= depth
+			return trace.work >= 0 && record(target, frame)
+		}
+		if trace.work < 0 || depth == maxTestPlanDepth-1 {
+			return false
+		}
+		callers := trace.callers[outer]
+		complete := len(callers) != 0
+		for _, call := range callers {
+			caller := closureFrame{call: call}
+			*next = &caller
+			if !visit(call.caller, &caller.parent, depth+1) {
+				complete = false
+			}
+			if trace.work < 0 {
+				break
+			}
+		}
+		*next = nil
+		return complete
+	}
+	return visit(function, &frame, 0)
+}

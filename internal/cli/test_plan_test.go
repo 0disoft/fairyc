@@ -10,12 +10,13 @@ func TestExperimentalTestPlanCalls(t *testing.T) {
 	const packageUID = "example.stable-test.app"
 	const selectedTest = "tests::plan::checks_answer"
 	for _, tc := range []struct {
-		name     string
-		library  string
-		call     string
-		selector string
-		path     []string
-		reason   string
+		name      string
+		library   string
+		call      string
+		otherCall string
+		selector  string
+		path      []string
+		reason    string
 	}{
 		{
 			name: "direct",
@@ -126,7 +127,7 @@ pub fn i32 bridge() {
 			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_make_1"},
 		},
 		{
-			name: "closure-parameter-fallback",
+			name: "closure-mixed-same-caller",
 			library: `fn i32 apply(fn i32(i32) action) { return action(2); }
 pub fn i32 bridge() {
     let i32 offset = 40;
@@ -136,6 +137,39 @@ pub fn i32 bridge() {
     return copy(2) + apply(copy) + apply(other) - 84;
 }`,
 			call:     "library::bridge()",
+			selector: "library::_fy_closure_bridge_1",
+			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
+		},
+		{
+			name: "closure-distinct-callers",
+			library: `fn i32 apply(fn i32(i32) action) { return action(2); }
+fn i32 relay(fn i32(i32) action) { return apply(action); }
+pub fn i32 bridge() {
+    let fn i32(i32) action = fn [] i32(i32 x) { return 40 + x; };
+    return relay(action);
+}
+pub fn i32 alternate() {
+    let fn i32(i32) action = fn [] i32(i32 x) { return 44 - x; };
+    return relay(action);
+}`,
+			call:      "library::bridge()",
+			otherCall: "library::alternate() == 42",
+			selector:  "library::_fy_closure_bridge_1",
+			path:      []string{selectedTest, "library::bridge", "library::relay", "library::apply", "library::_fy_closure_bridge_1"},
+		},
+		{
+			name: "closure-ambiguous-return",
+			library: `fn fn i32(i32) choose(bool first, fn i32(i32) left, fn i32(i32) right) {
+    if (first) { return left; }
+    return right;
+}
+pub fn i32 bridge(bool first) {
+    let fn i32(i32) left = fn [] i32(i32 x) { return 40 + x; };
+    let fn i32(i32) right = fn [] i32(i32 x) { return 44 - x; };
+    let action = choose(first, left, right);
+    return left(2) + action(2) - 42;
+}`,
+			call:     "library::bridge(true)",
 			selector: "library::_fy_closure_bridge_1",
 			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
 			reason:   "incomplete-call-coverage",
@@ -161,9 +195,13 @@ fn i32 right(i32 n) {
 			writeStableTestWorkspace(t, root)
 			writeWorkspaceFile(t, root, "src/library.fy",
 				"module library;\npub fn i32 answer() { return 42; }\n"+tc.library+"\n")
+			otherCall := tc.otherCall
+			if otherCall == "" {
+				otherCall = "true"
+			}
 			writeWorkspaceFile(t, root, "tests/plan.fy", "module tests::plan;\nimport library as library;\n"+
 				"@test\nfn void checks_answer() { assert("+tc.call+" == 42); }\n"+
-				"@test\nfn void unrelated() { assert(true); }\n")
+				"@test\nfn void unrelated() { assert("+otherCall+"); }\n")
 			selector := "library::answer"
 			if tc.selector != "" {
 				selector = tc.selector

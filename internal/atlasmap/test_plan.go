@@ -89,6 +89,8 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 		for at := symbol; at != ""; at = parents[at].next {
 			if position, found := index.byVisible[at]; found {
 				path = append(path, testPlanLabel(index.nodes[position].declaration.Key))
+			} else if label, found := closures.labels[at]; found {
+				path = append(path, label)
 			} else {
 				path = append(path, at)
 			}
