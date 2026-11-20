@@ -28,10 +28,11 @@ type inlineFunctionEncoder struct {
 	declared   map[SymbolID]bool
 	resolve    func(SymbolID) *Function
 	// A separate result slice keeps the lookup maps from escaping with targets.
-	callees  *[]*Function
-	count    int
-	mutating bool
-	branches bool
+	callees   *[]*Function
+	count     int
+	mutating  bool
+	branches  bool
+	armLocals []SymbolID
 }
 
 func (encoder *inlineFunctionEncoder) prepare(fn Function) ([]Statement, *Expression, error) {
@@ -108,11 +109,11 @@ func (encoder *inlineFunctionEncoder) typedExpression(e *Expression, typ Type, b
 	if e == nil || encoder.count > inlineMaxExpressionNodes || e.Type != typ || len(e.Effects) != 0 || len(e.Arms) != 0 || e.UnsafeScope != nil {
 		return inlineEncodingNode{}, fmt.Errorf("@inline requires at most 64 pure i32 expression nodes")
 	}
-	if branchArm && e.Kind == ExpressionBlock && e.Block != nil && len(e.Block.Statements) == 0 && len(e.Children) == 0 {
-		return encoder.expression(e.Block.Tail)
+	if branchArm && e.Kind == ExpressionBlock && e.Block != nil && len(e.Children) == 0 {
+		return encoder.valueBlock(e.Block)
 	}
 	if e.Block != nil {
-		return inlineEncodingNode{}, fmt.Errorf("@inline if arms require a value expression without statements")
+		return inlineEncodingNode{}, fmt.Errorf("@inline blocks are only supported as if value arms")
 	}
 	if e.Kind == ExpressionGroup {
 		if len(e.Children) != 1 {
@@ -158,6 +159,41 @@ func (encoder *inlineFunctionEncoder) typedExpression(e *Expression, typ Type, b
 		n.Children = append(n.Children, child)
 	}
 	return n, nil
+}
+
+func (encoder *inlineFunctionEncoder) valueBlock(block *Block) (inlineEncodingNode, error) {
+	if len(block.Statements) == 0 {
+		return encoder.expression(block.Tail)
+	}
+	if len(block.Statements) > len(encoder.locals)-len(encoder.declared) {
+		return inlineEncodingNode{}, fmt.Errorf("@inline arm declarations exceed the local budget")
+	}
+	depth := len(encoder.armLocals)
+	defer func() {
+		for _, symbol := range encoder.armLocals[depth:] {
+			delete(encoder.bound, symbol)
+		}
+		encoder.armLocals = encoder.armLocals[:depth]
+	}()
+	node := inlineEncodingNode{Op: "arm-bindings", Children: make([]inlineEncodingNode, 0, len(block.Statements)+1)}
+	for _, statement := range block.Statements {
+		if statement.Kind != StatementBinding || encoder.locals[statement.Binding].Mutable {
+			return inlineEncodingNode{}, fmt.Errorf("@inline arms require immutable i32 bindings")
+		}
+		// Arm-local versions follow the reserved range of root statement versions.
+		initializer, err := encoder.statement(statement, inlineMaxSteps+len(encoder.armLocals))
+		if err != nil {
+			return inlineEncodingNode{}, err
+		}
+		encoder.armLocals = append(encoder.armLocals, statement.Binding)
+		node.Children = append(node.Children, initializer)
+	}
+	tail, err := encoder.expression(block.Tail)
+	if err != nil {
+		return inlineEncodingNode{}, err
+	}
+	node.Children = append(node.Children, tail)
+	return node, nil
 }
 
 func (encoder *inlineFunctionEncoder) condition(e *Expression) (inlineEncodingNode, error) {

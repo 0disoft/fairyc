@@ -84,10 +84,12 @@ func inlineFunctionEncoding(fn Function, resolve func(SymbolID) *Function) ([]by
 		}
 		initializers = append(initializers, initializer)
 	}
-	if len(encoder.declared) != len(encoder.locals) {
+	root, err := encoder.expression(expression)
+	// A missing result cannot declare locals. Preserve the declaration error
+	// in that case, and otherwise let encoding visit the result's arms first.
+	if len(encoder.declared) != len(encoder.locals) && (err == nil || expression == nil) {
 		return nil, nil, fmt.Errorf("@inline local declaration count mismatch")
 	}
-	root, err := encoder.expression(expression)
 	if err != nil {
 		return nil, nil, err
 	}

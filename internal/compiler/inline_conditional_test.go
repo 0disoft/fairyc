@@ -62,7 +62,8 @@ func TestInlineConditionalIdentityAndExecution(t *testing.T) {
 func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 	for _, body := range []string{
 		"return if ((x == 0) == true) { 42 } else { 0 };",
-		"return if (x == 0) { let i32 local = 42; local } else { 0 };",
+		"return if (x == 0) { var i32 local = 42; local } else { 0 };",
+		"var i32 y = 0; return if (x == 0) { y = 42; y } else { 0 };",
 		"if (x == 0) { return 42; } return 0;",
 	} {
 		t.Run(body, func(t *testing.T) {
@@ -73,6 +74,33 @@ func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInlineConditionalArmBindings(t *testing.T) {
+	const body = `let i32 seed = 41;
+    let i32 selected = if (x == 0) {
+        let i32 branch_value = seed + 1;
+        if (branch_value == 42) { let i32 nested = branch_value; nested } else { 0 }
+    } else { let i32 branch_value = 10 / x; branch_value };
+    return selected;`
+	check := func(body string) compiler.Result {
+		t.Helper()
+		return checkInlineCalls(t, `module main; @inline pub fn i32 choose(i32 x) {`+body+`}
+fn i32 main() { assert(choose(2) == 5); return choose(0); }`)
+	}
+	result := check(body)
+	marker := inlineMutationMarker(result)
+	if marker == "" || inlineMutationMarker(check(strings.ReplaceAll(body, "branch_value", "renamed"))) != marker {
+		t.Fatal("renaming arm locals changed the inline identity")
+	}
+	if inlineMutationMarker(check(strings.Replace(body, "10 / x", "12 / x", 1))) == marker {
+		t.Fatal("editing the alternate initializer kept the old inline identity")
+	}
+	value, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || value.Kind != interpreter.OutcomeReturn || value.Value != 42 {
+		t.Fatalf("arm binding evaluation: %+v %v", value, err)
+	}
+	runExpandedLanguageNative(t, result, "main::main", "")
 }
 
 func TestInlineConditionalShortCircuit(t *testing.T) {
