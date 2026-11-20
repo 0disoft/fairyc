@@ -12,8 +12,8 @@ import (
 )
 
 func runAtlasEdit(arguments []string, root string, stdout, stderr io.Writer) int {
-	if len(arguments) > 0 && arguments[0] == "preview-batch" {
-		return runAtlasEditBatch(arguments[1:], root, stdout, stderr)
+	if len(arguments) > 0 && (arguments[0] == "preview-batch" || arguments[0] == "apply-batch") {
+		return runAtlasEditBatch(arguments[0], arguments[1:], root, stdout, stderr)
 	}
 	if len(arguments) == 0 || arguments[0] != "replace-body" {
 		return invocationError(stderr, "atlas-edit requires replace-body")

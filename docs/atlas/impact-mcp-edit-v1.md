@@ -336,8 +336,27 @@ changed file must parse with every replacement at its expected body extent.
 The complete workspace is then verified with all replacements in one overlay.
 The bounded `fairyc.structural-body-edit-batch/v1` report lists entries in
 request order, with original byte ranges and before/after whole-file hashes.
-Entries for the same file share the combined after hash. This Go command
-only previews. Multi-file publication remains deferred.
+Entries for the same file share the combined after hash.
+
+`fairyc experimental atlas-edit apply-batch --package-uid <root-uid> --edit-file edits/batch.json`
+validates the request again and acquires the same exclusive workspace edit lock
+as single-file apply. It stages and syncs the original and replacement bytes for
+each file, records their paths and SHA-256 values in a recovery journal, and
+rechecks the workspace. It publishes files in path order using one rename per
+file. Each rename verifies the staged replacement and the current original
+against their expected identities and bytes. Successful reports mark every
+entry as applied. The production graph lock still requires an ordinary check
+after applying changes.
+
+On a publication failure, the command attempts to restore earlier files in
+reverse order. Each restore checks that the destination still contains the
+published replacement and that the original backup passes verification. If
+restoration fails, the error identifies the journal in `.fairyc-edit.lock`
+and preserves the remaining original backups. After interruption, inspect the
+journal and compare current file hashes before manually restoring a backup or
+removing the edit lock. Application uses separate file renames. Readers can
+observe intermediate states, and process or power loss can require manual
+recovery.
 
 The Fairy editor now accepts local workspaces containing generic struct/resource
 templates and concrete aggregate function signatures. Its selector derives all

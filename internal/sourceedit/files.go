@@ -136,6 +136,8 @@ func snapshot(w workspaceloader.Workspace) (string, error) {
 	return Digest([]byte(b.String())), nil
 }
 
+const editLock = ".fairyc-edit.lock"
+
 // Apply commits exactly one already-verified authored file. It never removes an old destination
 // to recover from rename failure and never refreshes the production graph lock.
 func (p *Plan) Apply() error { return p.ApplyWithOptions() }
@@ -158,11 +160,10 @@ func (p *Plan) ApplyWithOptions(options ...ApplyOptions) (err error) {
 		return err
 	}
 	defer root.Close()
-	const lock = ".fairyc-edit.lock"
-	if err := root.Mkdir(lock, 0700); err != nil {
+	if err := root.Mkdir(editLock, 0700); err != nil {
 		return fmt.Errorf("exclusive edit lock unavailable: %w", err)
 	}
-	defer func() { err = errors.Join(err, root.Remove(lock)) }()
+	defer func() { err = errors.Join(err, root.Remove(editLock)) }()
 	w, err := workspaceloader.LoadContext(ctx, p.root)
 	if err != nil {
 		return err

@@ -85,4 +85,24 @@ func TestAtlasEditBatchChecksAllBodiesWithoutWrites(t *testing.T) {
 			t.Fatalf("batch changed %s: %v", path, err)
 		}
 	}
+	writeRequest(edits)
+	args[2] = "apply-batch"
+	code, stdout, diagnostics = runForTest(args, root)
+	if code != ExitSuccess || diagnostics != "" || json.Unmarshal([]byte(stdout), &result) != nil || len(result.Edits) != 3 {
+		t.Fatalf("apply = %d %s %s", code, stdout, diagnostics)
+	}
+	for _, report := range result.Edits {
+		if !report.Applied {
+			t.Fatalf("missing applied status: %+v", report)
+		}
+	}
+	for path, want := range map[string]string{"src/main.fy": afterMain, "src/other.fy": afterOther, "fairy.lock": string(lock)} {
+		data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
+		if err != nil || string(data) != want {
+			t.Fatalf("batch applied unexpected bytes to %s: %v", path, err)
+		}
+	}
+	if code, output, _ := runForTest(args, root); code != ExitPackageFailure || output != "" {
+		t.Fatalf("stale apply = %d %s", code, output)
+	}
 }

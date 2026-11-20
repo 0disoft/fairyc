@@ -19,10 +19,10 @@ type atlasEditBatchRequest struct {
 	} `json:"edits"`
 }
 
-func runAtlasEditBatch(args []string, root string, stdout, stderr io.Writer) int {
+func runAtlasEditBatch(action string, args []string, root string, stdout, stderr io.Writer) int {
 	var uid, filename string
 	_, err := parseCommandFlags(args, flagSchema{
-		Command: "atlas-edit preview-batch", Experimental: true,
+		Command: "atlas-edit " + action, Experimental: true,
 		Required: []string{"--package-uid", "--edit-file"},
 		Flags:    []flagDefinition{{Name: "--package-uid", Kind: flagScalar}, {Name: "--edit-file", Kind: flagScalar}},
 	}, func(flag, value string) error {
@@ -69,13 +69,23 @@ func runAtlasEditBatch(args []string, root string, stdout, stderr io.Writer) int
 		}
 		edits = append(edits, sourceedit.BodyEdit{Module: key.Module, Function: key.Name, Expected: edit.ExpectedSHA256, Body: body})
 	}
-	report, err := sourceedit.PreviewBodies(prepared.workspace, edits)
+	plan, err := sourceedit.PlanBodies(prepared.workspace, edits)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	data, err := json.Marshal(report)
+	data, err := json.Marshal(plan.Report)
 	if err != nil || len(data) > 32<<10 {
 		return invocationError(stderr, "edit batch report exceeds output byte limit")
+	}
+	if action == "apply-batch" {
+		if err := plan.ApplyWithOptions(); err != nil {
+			return packageFailure(stderr, err)
+		}
+		// Applied states encode as true, which is shorter than false.
+		data, err = json.Marshal(plan.Report)
+		if err != nil {
+			return internalError(stderr)
+		}
 	}
 	if written, err := stdout.Write(data); err != nil || written != len(data) {
 		return outputError(stderr)

@@ -21,7 +21,10 @@ Impact/MCP never update source or lock; apply leaves the lock stale for the next
 Output failure can follow successful source replacement. The Go command
 `atlas-edit preview-batch --package-uid <root-uid> --edit-file <workspace-file>`
 validates multiple replacements together and reports the proposed file hashes
-without writing source or lock files.
+without writing source or lock files. The corresponding `atlas-edit apply-batch`
+command uses the same arguments and publishes the verified file replacements.
+The [Atlas contract](../atlas/impact-mcp-edit-v1.md) specifies rollback and
+manual recovery after a partial apply.
 
 The same [Atlas contract](../atlas/impact-mcp-edit-v1.md#semantic-diff) owns
 `atlas-diff`. Use `--package-uid` for one package or `--workspace` with

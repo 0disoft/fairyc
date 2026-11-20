@@ -22,10 +22,11 @@ verify the complete production workspace and ensure no sibling/signature was inj
 requires an explicit CLI switch and repeat input/identity checks before one contained atomic file
 replacement. Keep `fairy.lock` unchanged so a later locked compile rejects until ordinary check.
 A separate bounded Go batch preview verifies multiple private body replacements in one
-workspace overlay. Multi-file publication, rename inference, public/foreign/generic/attributed
+workspace overlay. Explicit batch apply stages originals and replacements, then publishes
+by file and attempts reverse-order restoration on failure. Failed restoration retains
+its recovery journal and backups. Multi-file visibility and crash recovery follow the
+limits in the owning contract. Rename inference, public/foreign/generic/attributed
 functions, SDK/vendor writes, formatting rewrites and MCP writes remain excluded.
-Do not claim crash-proof multi-file transactions or protection against hostile concurrent
-workspace writers.
 
 No target/language/SDK promotion, dependency or hosted runner change accompanies these local tools.
 Windows provides local evidence; native Linux execution remains in the combined deferred queue.
