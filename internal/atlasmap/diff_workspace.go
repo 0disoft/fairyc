@@ -30,6 +30,7 @@ type WorkspacePackageDiff struct {
 // fingerprints are requested.
 func CompareWorkspaceV3(before, after []Partition, beforeExpected, afterExpected map[string]LoadExpectation,
 	maxPackages, maxDeclarations int,
+	oldAliases, newAliases map[string]string,
 	bodyFingerprints func(Partition, Partition) (map[string][sha256.Size]byte, map[string][sha256.Size]byte),
 ) (WorkspaceDiffResult, error) {
 	if len(before) == 0 || len(after) == 0 || maxPackages < 1 ||
@@ -67,7 +68,7 @@ func CompareWorkspaceV3(before, after []Partition, beforeExpected, afterExpected
 			if !matchingDiffContext(old, current) {
 				return WorkspaceDiffResult{}, fmt.Errorf("Atlas workspace diff requires matching compiler and target identities for %s", coordinate)
 			}
-			report := compareDiffFacts(old, current,
+			report := compareDiffFacts(old, current, oldAliases, newAliases,
 				func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
 					return bodyFingerprints(old, current)
 				})
@@ -137,6 +138,12 @@ func oneSidedWorkspaceDiff(entry WorkspacePackageDiff, partition Partition, acti
 		key := declaration.Key
 		entry.Changes = append(entry.Changes, DiffChange{Module: key.Module, Kind: key.Kind, Name: key.Name, Action: action})
 	}
+	if action == "added" {
+		entry.Changes = appendSpecializationDiff(entry.Changes, Partition{}, partition, nil, nil, nil)
+	} else {
+		entry.Changes = appendSpecializationDiff(entry.Changes, partition, Partition{}, nil, nil, nil)
+	}
+	sortDiffChanges(entry.Changes)
 	return entry
 }
 

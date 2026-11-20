@@ -53,10 +53,19 @@ declaration and call sequence match. If a stable body projection is unavailable,
 the report is partial and records `executable-body-comparison-incomplete`.
 Neither executable graphs nor their fingerprints appear in the output.
 
+Concrete generic implementations are matched by original declaration and
+ordered scalar type arguments. Their rows include `typeArguments` and sort
+after the corresponding declaration row. Changes include added and removed
+instantiations, concrete aggregate shape, observed calls and resource cleanup,
+and the verified MIR for specialized functions and nonempty cleanups. The
+comparison normalizes concrete call targets and nominal types to the original
+package coordinate, declaration and arguments. A reissued specialization ID
+alone does not change the report.
+
 Output is `fairyc.atlas-diff/v1` JSON. Its two contexts carry the exact source
 identities and completeness ledgers. `bounded` covers the compared facts.
-`partial` records incomplete map facts, opaque or unknown calls, or concrete
-specialization bodies outside this comparison. Renames, full behavior equivalence,
+`partial` records incomplete map facts, opaque or unknown calls, or unavailable
+body projections. Uninstantiated template bodies remain unavailable. Renames, full behavior equivalence,
 and source changes that leave these projections unchanged are outside its scope.
 The declaration limit covers both selected partitions together. Either limit
 failure leaves stdout empty.

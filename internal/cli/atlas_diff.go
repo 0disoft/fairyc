@@ -72,13 +72,15 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if code != ExitSuccess {
 		return code
 	}
+	oldAliases := atlasmap.DiffSpecializationAliases(before.partitions)
+	newAliases := atlasmap.DiffSpecializationAliases(after.partitions)
 	fingerprints := func(old, new atlasmap.Partition) (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
-		return atlasDiffFingerprints(before, old, oldCheck.MIR), atlasDiffFingerprints(after, new, newCheck.MIR)
+		return atlasDiffFingerprints(before, old, oldCheck.MIR, oldAliases), atlasDiffFingerprints(after, new, newCheck.MIR, newAliases)
 	}
 	var report any
 	if seen["--workspace"] {
 		report, err = atlasmap.CompareWorkspaceV3(before.partitions, after.partitions, before.expectations, after.expectations,
-			int(packages), int(declarations), fingerprints)
+			int(packages), int(declarations), oldAliases, newAliases, fingerprints)
 	} else {
 		old, ok := uniqueDiffPartition(before.partitions, uid)
 		new, found := uniqueDiffPartition(after.partitions, uid)
@@ -86,7 +88,7 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 			return invocationError(stderr, "atlas-diff requires exactly one selected package in each workspace")
 		}
 		report, err = atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
-			after.expectations[new.Header().PackageInstance], int(declarations),
+			after.expectations[new.Header().PackageInstance], int(declarations), oldAliases, newAliases,
 			func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) { return fingerprints(old, new) })
 	}
 	if err != nil {
@@ -120,7 +122,7 @@ func uniqueDiffPartition(partitions []atlasmap.Partition, uid string) (atlasmap.
 	return selected, found
 }
 
-func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.Partition, program mir.Program) map[string][sha256.Size]byte {
+func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.Partition, program mir.Program, aliases map[string]string) map[string][sha256.Size]byte {
 	packages, err := prepared.workspace.SemanticPackages()
 	if err != nil {
 		return nil
@@ -143,7 +145,7 @@ func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.P
 		if err != nil {
 			return nil
 		}
-		fingerprints, err := packageartifact.ExecutableBodyFingerprints(artifact, maxBodyBytes)
+		fingerprints, err := packageartifact.ExecutableBodyFingerprints(artifact, maxBodyBytes, aliases)
 		if err != nil {
 			return nil
 		}

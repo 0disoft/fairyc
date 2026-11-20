@@ -11,11 +11,12 @@ import (
 )
 
 type DiffChange struct {
-	Module string                           `json:"module"`
-	Kind   semanticsnapshot.DeclarationKind `json:"kind"`
-	Name   string                           `json:"name"`
-	Action string                           `json:"action"`
-	Facts  []string                         `json:"facts,omitempty"`
+	Module        string                           `json:"module"`
+	Kind          semanticsnapshot.DeclarationKind `json:"kind"`
+	Name          string                           `json:"name"`
+	Action        string                           `json:"action"`
+	Facts         []string                         `json:"facts,omitempty"`
+	TypeArguments []string                         `json:"typeArguments,omitempty"`
 }
 
 type DiffResult struct {
@@ -37,6 +38,7 @@ type diffKey struct {
 // coordinate. Source offsets and source-dependent instance IDs are excluded
 // from equality, and changed names remain separate additions and removals.
 func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpectation, maxDeclarations int,
+	oldAliases, newAliases map[string]string,
 	bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte),
 ) (DiffResult, error) {
 	if maxDeclarations < 1 {
@@ -56,7 +58,7 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 		return DiffResult{}, fmt.Errorf("Atlas diff declarations exceed limit")
 	}
 
-	return compareDiffFacts(before, after, bodyFingerprints), nil
+	return compareDiffFacts(before, after, oldAliases, newAliases, bodyFingerprints), nil
 }
 
 func matchingDiffContext(before, after Partition) bool {
@@ -67,7 +69,7 @@ func matchingDiffContext(before, after Partition) bool {
 		old.TargetScope == current.TargetScope && old.RuntimeABI == current.RuntimeABI
 }
 
-func compareDiffFacts(before, after Partition, bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte)) DiffResult {
+func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string]string, bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte)) DiffResult {
 	state, omissions := diffCoverage(before, after)
 	result := DiffResult{
 		Schema: "fairyc.atlas-diff/v1", State: state,
@@ -78,10 +80,23 @@ func compareDiffFacts(before, after Partition, bodyFingerprints func() (map[stri
 
 	keys := make(map[diffKey]struct{})
 	left, right := diffDeclarations(before, keys), diffDeclarations(after, keys)
-	leftBodies, rightBodies := diffBodies(before), diffBodies(after)
+	leftBodies, rightBodies := diffBodies(before, oldAliases), diffBodies(after, newAliases)
 	var leftCode, rightCode map[string][sha256.Size]byte
 	haveFingerprints := false
 	missingBody := false
+	compareCode := func(change *DiffChange, oldName, newName string) {
+		if !haveFingerprints {
+			leftCode, rightCode = bodyFingerprints()
+			haveFingerprints = true
+		}
+		a, aok := leftCode[oldName]
+		b, bok := rightCode[newName]
+		if !aok || !bok {
+			missingBody = true
+		} else if a != b {
+			change.Facts = append(change.Facts, "executable-body")
+		}
+	}
 	for key := range keys {
 		a, aok := left[key]
 		b, bok := right[key]
@@ -95,25 +110,10 @@ func compareDiffFacts(before, after Partition, bodyFingerprints func() (map[stri
 			if !reflect.DeepEqual(a, b) {
 				change.Facts = append(change.Facts, "declaration")
 			}
-			if !reflect.DeepEqual(leftBodies[key].calls, rightBodies[key].calls) {
-				change.Facts = append(change.Facts, "calls")
-			}
-			if !reflect.DeepEqual(leftBodies[key].observations, rightBodies[key].observations) {
-				change.Facts = append(change.Facts, "observations")
-			}
+			compareBodyFacts(&change, leftBodies[key], rightBodies[key])
 			if key.kind == semanticsnapshot.DeclarationFunction && (leftBodies[key].present || rightBodies[key].present) {
-				if !haveFingerprints {
-					leftCode, rightCode = bodyFingerprints()
-					haveFingerprints = true
-				}
 				name := key.module + "::" + key.name
-				a, aok := leftCode[name]
-				b, bok := rightCode[name]
-				if !aok || !bok {
-					missingBody = true
-				} else if a != b {
-					change.Facts = append(change.Facts, "executable-body")
-				}
+				compareCode(&change, name, name)
 			}
 			if len(change.Facts) == 0 {
 				continue
@@ -121,26 +121,33 @@ func compareDiffFacts(before, after Partition, bodyFingerprints func() (map[stri
 		}
 		result.Changes = append(result.Changes, change)
 	}
+	result.Changes = appendSpecializationDiff(result.Changes, before, after, oldAliases, newAliases, compareCode)
 	if missingBody {
 		result.State = "partial"
 		result.Omissions = append(result.Omissions, "executable-body-comparison-incomplete")
 	}
-	slices.SortFunc(result.Changes, func(a, b DiffChange) int {
+	sortDiffChanges(result.Changes)
+	return result
+}
+
+func sortDiffChanges(changes []DiffChange) {
+	slices.SortFunc(changes, func(a, b DiffChange) int {
 		if n := cmp.Compare(a.Module, b.Module); n != 0 {
 			return n
 		}
 		if n := cmp.Compare(a.Kind, b.Kind); n != 0 {
 			return n
 		}
-		return cmp.Compare(a.Name, b.Name)
+		if n := cmp.Compare(a.Name, b.Name); n != 0 {
+			return n
+		}
+		return slices.Compare(a.TypeArguments, b.TypeArguments)
 	})
-	return result
 }
 
 func diffCoverage(partitions ...Partition) (string, []string) {
 	state := "bounded"
 	omissions := []string{"behavior-equivalence-not-analyzed", "renames-not-inferred"}
-	specializations := false
 	for _, partition := range partitions {
 		header := partition.data.header
 		if header.GenerationStatus != GenerationExact || len(header.Omissions) != 0 {
@@ -151,11 +158,6 @@ func diffCoverage(partitions ...Partition) (string, []string) {
 				state = "partial"
 			}
 		}
-		specializations = specializations || len(partition.data.specializations) != 0
-	}
-	if specializations {
-		state = "partial"
-		omissions = append(omissions, "specialized-implementation-deltas-not-compared")
 	}
 	return state, omissions
 }
@@ -175,24 +177,28 @@ func diffDeclarations(partition Partition, keys map[diffKey]struct{}) map[diffKe
 	for _, declaration := range partition.Declarations() {
 		key := diffKey{declaration.Key.Module, declaration.Key.Kind, declaration.Key.Name}
 		keys[key] = struct{}{}
-		declaration.Key.PackageInstance = ""
-		declaration.Span = semanticsnapshot.Span{}
-		for i := range declaration.Parameters {
-			declaration.Parameters[i].Span = semanticsnapshot.Span{}
-		}
-		for i := range declaration.Fields {
-			declaration.Fields[i].Span = semanticsnapshot.Span{}
-		}
-		for i := range declaration.Variants {
-			variant := &declaration.Variants[i]
-			variant.Span = semanticsnapshot.Span{}
-			for j := range variant.Fields {
-				variant.Fields[j].Span = semanticsnapshot.Span{}
-			}
-		}
+		normalizeDiffDeclaration(&declaration)
 		result[key] = declaration
 	}
 	return result
+}
+
+func normalizeDiffDeclaration(declaration *semanticsnapshot.Declaration) {
+	declaration.Key.PackageInstance = ""
+	declaration.Span = semanticsnapshot.Span{}
+	for i := range declaration.Parameters {
+		declaration.Parameters[i].Span = semanticsnapshot.Span{}
+	}
+	for i := range declaration.Fields {
+		declaration.Fields[i].Span = semanticsnapshot.Span{}
+	}
+	for i := range declaration.Variants {
+		variant := &declaration.Variants[i]
+		variant.Span = semanticsnapshot.Span{}
+		for j := range variant.Fields {
+			variant.Fields[j].Span = semanticsnapshot.Span{}
+		}
+	}
 }
 
 type bodyDiffFacts struct {
@@ -207,29 +213,50 @@ type bodyObservations struct {
 	unsafe, moves, drops, allocations, errors int
 }
 
-func diffBodies(partition Partition) map[diffKey]bodyDiffFacts {
+func diffCoordinates(partition Partition) map[string]string {
 	coordinates := make(map[string]string)
 	for _, ref := range partition.data.header.PackageReferences {
 		coordinates[ref.Instance] = ref.Coordinate
 	}
+	return coordinates
+}
+
+func diffBodies(partition Partition, aliases map[string]string) map[diffKey]bodyDiffFacts {
+	coordinates := diffCoordinates(partition)
 	result := make(map[diffKey]bodyDiffFacts, len(partition.data.functions))
 	for _, body := range partition.Functions() {
-		calls := body.Calls
-		for i := range calls {
-			calls[i].Span = semanticsnapshot.Span{}
-			if coordinate, found := coordinates[calls[i].Target.PackageInstance]; found {
-				calls[i].Target.PackageInstance = coordinate
-			}
-		}
-		for i := range body.Borrows {
-			body.Borrows[i].Span = semanticsnapshot.Span{}
-		}
 		key := diffKey{body.Function.Module, body.Function.Kind, body.Function.Name}
-		result[key] = bodyDiffFacts{present: true, calls: calls, observations: bodyObservations{
-			traps: body.TrapCategories, borrows: body.Borrows,
-			unsafe: len(body.UnsafeSites), moves: len(body.MoveSites), drops: len(body.DropSites),
-			allocations: len(body.AllocationSites), errors: len(body.ReturnErrorSites),
-		}}
+		result[key] = normalizeDiffBody(body, coordinates, aliases)
 	}
 	return result
+}
+
+func normalizeDiffBody(body semanticsnapshot.FunctionSummary, coordinates, aliases map[string]string) bodyDiffFacts {
+	for i := range body.Calls {
+		call := &body.Calls[i]
+		call.Span = semanticsnapshot.Span{}
+		if coordinate, found := coordinates[call.Target.PackageInstance]; found {
+			call.Target.PackageInstance = coordinate
+		}
+		if alias, found := aliases[call.Specialization]; found {
+			call.Specialization = alias
+		}
+	}
+	for i := range body.Borrows {
+		body.Borrows[i].Span = semanticsnapshot.Span{}
+	}
+	return bodyDiffFacts{present: true, calls: body.Calls, observations: bodyObservations{
+		traps: body.TrapCategories, borrows: body.Borrows,
+		unsafe: len(body.UnsafeSites), moves: len(body.MoveSites), drops: len(body.DropSites),
+		allocations: len(body.AllocationSites), errors: len(body.ReturnErrorSites),
+	}}
+}
+
+func compareBodyFacts(change *DiffChange, before, after bodyDiffFacts) {
+	if !reflect.DeepEqual(before.calls, after.calls) {
+		change.Facts = append(change.Facts, "calls")
+	}
+	if before.present != after.present || !reflect.DeepEqual(before.observations, after.observations) {
+		change.Facts = append(change.Facts, "observations")
+	}
 }

@@ -148,3 +148,75 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 		t.Fatalf("stale baseline: %d stdout=%q", code, stdout)
 	}
 }
+
+func TestAtlasDiffConcreteGenericImplementations(t *testing.T) {
+	const dependency = "module answer; pub fn i32 value<T>(T x) { let T observed = x; return 42; }"
+	const source = `module main; import answer as answer;
+struct Cell<T> { T value; }
+resource Token<T> {
+    Cell<T> payload;
+    cleanup { let i32 observed = answer::value<T>(this.payload.value); let i32 marker = 5; }
+}
+fn Token<T> make<T>(T value) { return Token<T> { .payload = Cell<T> { .value = value } }; }
+fn i32 main() { let Token<i32> a = make<i32>(42); return a.payload.value; }
+`
+	makeWorkspace := func(app, lib string) string {
+		t.Helper()
+		root := writeWorkspaceSessionFixture(t, app)
+		writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", lib)
+		if _, _, err := loadWorkspaceWithLock(root, false); err != nil {
+			t.Fatalf("prepare lock: %v", err)
+		}
+		return root
+	}
+	read := func(before, root string) map[string]atlasmap.WorkspacePackageDiff {
+		t.Helper()
+		args := []string{"experimental", "atlas-diff", "--baseline", before, "--workspace", "--max-packages", "4",
+			"--max-declarations", "24", "--max-output-bytes", "100000"}
+		code, stdout, stderr := runForTest(args, root)
+		var report atlasmap.WorkspaceDiffResult
+		if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(stdout), &report) != nil || len(report.Packages) != 2 ||
+			strings.Contains(stdout, "_fy_generic_") {
+			t.Fatalf("atlas diff: %d stdout=%q stderr=%q", code, stdout, stderr)
+		}
+		result := make(map[string]atlasmap.WorkspacePackageDiff, len(report.Packages))
+		for _, row := range report.Packages {
+			if slices.Contains(row.Omissions, "executable-body-comparison-incomplete") {
+				t.Fatalf("missing concrete MIR projection for %s: %s", row.After.PackageUID, stdout)
+			}
+			result[row.After.PackageUID] = row
+		}
+		return result
+	}
+	const app, lib = "example.session.app", "example.session.answer"
+	before := makeWorkspace(source, dependency)
+	shifted := read(before, makeWorkspace("\n"+source, "\n"+dependency))
+	if shifted[app].Action != "unchanged" || shifted[lib].Action != "unchanged" {
+		t.Fatalf("position-only changes affected generic comparison: %+v", shifted)
+	}
+	changed := read(before, makeWorkspace(strings.Replace(source, "marker = 5", "marker = 6", 1), strings.Replace(dependency, "return 42", "return 43", 1)))
+	for _, tc := range []struct {
+		uid  string
+		want atlasmap.DiffChange
+	}{
+		{app, atlasmap.DiffChange{Module: "main", Kind: "resource", Name: "Token", Action: "modified", Facts: []string{"executable-body"}, TypeArguments: []string{"i32"}}},
+		{lib, atlasmap.DiffChange{Module: "answer", Kind: "function", Name: "value", Action: "modified", Facts: []string{"executable-body"}, TypeArguments: []string{"i32"}}},
+	} {
+		if !reflect.DeepEqual(changed[tc.uid].Changes, []atlasmap.DiffChange{tc.want}) {
+			t.Fatalf("%s concrete body changes = %+v, want %+v", tc.uid, changed[tc.uid].Changes, tc.want)
+		}
+	}
+	more := makeWorkspace(strings.Replace(source, "return a.payload.value", "let Token<u32> b = make<u32>(7); return a.payload.value", 1), dependency)
+	for _, tc := range []struct{ baseline, current, action string }{{before, more, "added"}, {more, before, "removed"}} {
+		rows := read(tc.baseline, tc.current)
+		for _, want := range []atlasmap.DiffChange{
+			{Module: "main", Kind: "function", Name: "make", Action: tc.action, TypeArguments: []string{"u32"}},
+			{Module: "main", Kind: "resource", Name: "Token", Action: tc.action, TypeArguments: []string{"u32"}},
+			{Module: "main", Kind: "struct", Name: "Cell", Action: tc.action, TypeArguments: []string{"u32"}},
+		} {
+			if !slices.ContainsFunc(rows[app].Changes, func(change atlasmap.DiffChange) bool { return reflect.DeepEqual(change, want) }) {
+				t.Fatalf("missing implementation change %+v in %+v", want, rows[app].Changes)
+			}
+		}
+	}
+}
