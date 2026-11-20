@@ -45,6 +45,14 @@ error-return sites. Call targets use package coordinates to ignore source-only
 instance changes. Byte offsets and line maps are evidence metadata and do not
 affect declaration or call equality.
 
+Ordinary function bodies also compare their verified executable MIR graphs.
+The comparison normalizes block, local and diagnostic entity identities, and
+uses stable function and foreign declaration identities for calls. A changed
+literal or operation can therefore report `executable-body` even when the
+declaration and call sequence match. If a stable body projection is unavailable,
+the report is partial and records `executable-body-comparison-incomplete`.
+Neither executable graphs nor their fingerprints appear in the output.
+
 Output is `fairyc.atlas-diff/v1` JSON. Its two contexts carry the exact source
 identities and completeness ledgers. `bounded` covers the compared facts.
 `partial` records incomplete map facts, opaque or unknown calls, or concrete

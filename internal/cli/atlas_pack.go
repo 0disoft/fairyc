@@ -152,6 +152,10 @@ func prepareAtlasWorkspaceVersion(sourceRoot string, locked bool, stderr io.Writ
 }
 
 func prepareAtlasWorkspaceSchema(sourceRoot string, locked bool, stderr io.Writer, schema string) (preparedAtlasWorkspace, int) {
+	return prepareAtlasWorkspaceWithResult(sourceRoot, locked, stderr, schema, nil)
+}
+
+func prepareAtlasWorkspaceWithResult(sourceRoot string, locked bool, stderr io.Writer, schema string, checked *compiler.Result) (preparedAtlasWorkspace, int) {
 	if schema != atlasmap.LogicalSchema && schema != atlasmap.LogicalSchemaV2 && schema != atlasmap.LogicalSchemaV3 {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
@@ -206,6 +210,9 @@ func prepareAtlasWorkspaceSchema(sourceRoot string, locked bool, stderr io.Write
 	expectations, err := current(workspace, result, compilerBuild)
 	if err != nil {
 		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	if checked != nil {
+		*checked = result
 	}
 	return preparedAtlasWorkspace{
 		workspace: workspace, snapshot: snapshot, partitions: partitions, expectations: expectations,

@@ -2,6 +2,7 @@ package atlasmap
 
 import (
 	"cmp"
+	"crypto/sha256"
 	"fmt"
 	"reflect"
 	"slices"
@@ -35,7 +36,9 @@ type diffKey struct {
 // CompareV3 compares bounded, exact-current facts for the same package
 // coordinate. Source offsets and source-dependent instance IDs are excluded
 // from equality, and changed names remain separate additions and removals.
-func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpectation, maxDeclarations int) (DiffResult, error) {
+func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpectation, maxDeclarations int,
+	bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte),
+) (DiffResult, error) {
 	if maxDeclarations < 1 {
 		return DiffResult{}, fmt.Errorf("invalid Atlas diff declaration limit")
 	}
@@ -81,6 +84,8 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 	keys := make(map[diffKey]struct{})
 	left, right := diffDeclarations(before, keys), diffDeclarations(after, keys)
 	leftBodies, rightBodies := diffBodies(before), diffBodies(after)
+	leftCode, rightCode := bodyFingerprints()
+	missingBody := false
 	for key := range keys {
 		a, aok := left[key]
 		b, bok := right[key]
@@ -100,11 +105,25 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 			if !reflect.DeepEqual(leftBodies[key].observations, rightBodies[key].observations) {
 				change.Facts = append(change.Facts, "observations")
 			}
+			if key.kind == semanticsnapshot.DeclarationFunction && (leftBodies[key].present || rightBodies[key].present) {
+				name := key.module + "::" + key.name
+				a, aok := leftCode[name]
+				b, bok := rightCode[name]
+				if !aok || !bok {
+					missingBody = true
+				} else if a != b {
+					change.Facts = append(change.Facts, "executable-body")
+				}
+			}
 			if len(change.Facts) == 0 {
 				continue
 			}
 		}
 		result.Changes = append(result.Changes, change)
+	}
+	if missingBody {
+		result.State = "partial"
+		result.Omissions = append(result.Omissions, "executable-body-comparison-incomplete")
 	}
 	slices.SortFunc(result.Changes, func(a, b DiffChange) int {
 		if n := cmp.Compare(a.Module, b.Module); n != 0 {
@@ -154,6 +173,7 @@ func diffDeclarations(partition Partition, keys map[diffKey]struct{}) map[diffKe
 }
 
 type bodyDiffFacts struct {
+	present      bool
 	calls        []semanticsnapshot.Call
 	observations bodyObservations
 }
@@ -182,7 +202,7 @@ func diffBodies(partition Partition) map[diffKey]bodyDiffFacts {
 			body.Borrows[i].Span = semanticsnapshot.Span{}
 		}
 		key := diffKey{body.Function.Module, body.Function.Kind, body.Function.Name}
-		result[key] = bodyDiffFacts{calls: calls, observations: bodyObservations{
+		result[key] = bodyDiffFacts{present: true, calls: calls, observations: bodyObservations{
 			traps: body.TrapCategories, borrows: body.Borrows,
 			unsafe: len(body.UnsafeSites), moves: len(body.MoveSites), drops: len(body.DropSites),
 			allocations: len(body.AllocationSites), errors: len(body.ReturnErrorSites),

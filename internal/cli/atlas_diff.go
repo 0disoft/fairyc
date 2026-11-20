@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,9 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
+	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/packageartifact"
 )
 
 func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -46,11 +50,12 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if !filepath.IsAbs(baseline) {
 		baseline = filepath.Join(sourceRoot, baseline)
 	}
-	before, code := prepareAtlasWorkspaceSchema(baseline, true, stderr, atlasmap.LogicalSchemaV3)
+	var oldCheck, newCheck compiler.Result
+	before, code := prepareAtlasWorkspaceWithResult(baseline, true, stderr, atlasmap.LogicalSchemaV3, &oldCheck)
 	if code != ExitSuccess {
 		return code
 	}
-	after, code := prepareAtlasWorkspaceSchema(sourceRoot, true, stderr, atlasmap.LogicalSchemaV3)
+	after, code := prepareAtlasWorkspaceWithResult(sourceRoot, true, stderr, atlasmap.LogicalSchemaV3, &newCheck)
 	if code != ExitSuccess {
 		return code
 	}
@@ -60,7 +65,10 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		return invocationError(stderr, "atlas-diff requires exactly one selected package in each workspace")
 	}
 	report, err := atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
-		after.expectations[new.Header().PackageInstance], int(declarations))
+		after.expectations[new.Header().PackageInstance], int(declarations),
+		func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
+			return atlasDiffFingerprints(before, old, oldCheck.MIR), atlasDiffFingerprints(after, new, newCheck.MIR)
+		})
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
@@ -90,4 +98,36 @@ func uniqueDiffPartition(partitions []atlasmap.Partition, uid string) (atlasmap.
 		selected, found = partition, true
 	}
 	return selected, found
+}
+
+func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.Partition, program mir.Program) map[string][sha256.Size]byte {
+	packages, err := prepared.workspace.SemanticPackages()
+	if err != nil {
+		return nil
+	}
+	instance := partition.Header().PackageInstance
+	identities, err := prepared.workspace.PackageIdentities()
+	if err != nil {
+		return nil
+	}
+	coordinates, err := prepared.workspace.PackageCoordinates()
+	if err != nil {
+		return nil
+	}
+	for _, pkg := range packages {
+		if pkg.Instance.String() != instance {
+			continue
+		}
+		const maxBodyBytes = 32 << 20
+		artifact, err := packageartifact.Extract(program, pkg.ID, identities, coordinates)
+		if err != nil {
+			return nil
+		}
+		fingerprints, err := packageartifact.ExecutableBodyFingerprints(artifact, maxBodyBytes)
+		if err != nil {
+			return nil
+		}
+		return fingerprints
+	}
+	return nil
 }

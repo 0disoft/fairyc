@@ -13,10 +13,12 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 	const base = "module main; import answer as answer;\n" +
 		"fn i32 local() { return 1; }\n" +
 		"fn i32 removed() { return 0; }\n" +
+		"fn i32 literal() { return 10; }\n" +
 		"fn i32 main() { return answer::value(); }\n"
 	const update = "module main; import answer as answer;\n\n" +
 		"pub fn i32 local() { return 1; }\n" +
 		"fn i32 added() { return 0; }\n" +
+		"fn i32 literal() { return 11; }\n" +
 		"fn i32 main() { return local(); }\n"
 	before := writeWorkspaceSessionFixture(t, base)
 	shifted := writeWorkspaceSessionFixture(t, "\n"+base)
@@ -46,8 +48,9 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 	}
 	want := []atlasmap.DiffChange{
 		{Module: "main", Kind: "function", Name: "added", Action: "added"},
+		{Module: "main", Kind: "function", Name: "literal", Action: "modified", Facts: []string{"executable-body"}},
 		{Module: "main", Kind: "function", Name: "local", Action: "modified", Facts: []string{"declaration"}},
-		{Module: "main", Kind: "function", Name: "main", Action: "modified", Facts: []string{"calls"}},
+		{Module: "main", Kind: "function", Name: "main", Action: "modified", Facts: []string{"calls", "executable-body"}},
 		{Module: "main", Kind: "function", Name: "removed", Action: "removed"},
 	}
 	if got := read(after); !reflect.DeepEqual(got.Changes, want) {
