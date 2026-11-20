@@ -112,10 +112,14 @@ Use `--symbol-package` to select a declaration from another root-reachable
 local package. The test package still comes from `--package`, and the report
 adds `symbol_package_uid`. Steps outside the test package are prefixed with
 their package UID. This mode joins current Atlas v3 partitions and follows
-compiler-resolved direct calls, preserving concrete implementation IDs.
-Incomplete call facts, including unresolved indirect calls, foreign calls and
-nonempty resource cleanup coverage, require `all-tests` and retain any known
-direct paths. The join admits up to 4,096 packages and 65,536 call records.
+compiler-resolved direct calls and verified MIR cleanup paths, preserving
+concrete implementation IDs. For example, a test that drops a value returned
+by a dependency can be reached from that dependency's `Resource::cleanup`
+selector or from a function called by the cleanup.
+Unresolved indirect calls, foreign calls and incomplete cleanup analysis
+require `all-tests` and retain any known paths. Cleanup recovery allows
+65,536 call observations and drop-type visits across the workspace.
+The join admits up to 4,096 packages and 65,536 call records.
 An exceeded join budget reports `workspace-call-limit`. The same traversal
 limits apply to the joined graph.
 

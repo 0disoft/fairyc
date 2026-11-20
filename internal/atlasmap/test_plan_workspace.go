@@ -5,15 +5,17 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
 const maxTestPlanWorkspaceCalls = 65536
 
-// WorkspaceTestPlan finds direct call paths across exact-current partitions
-// while keeping test discovery and execution in one package instance.
-func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpectation, testInstance, subjectInstance, selector string, tests []string) ([]TestPlanPath, []string) {
+// WorkspaceTestPlan finds call and cleanup paths across exact-current
+// partitions. The package IDs and MIR belong to the compilation that produced
+// the partitions.
+func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpectation, testInstance, subjectInstance, selector string, tests []string, result compiler.Result, packageIDs map[string]hir.PackageID) ([]TestPlanPath, []string) {
 	packages := make(map[string]*QueryIndex)
 	ledger, err := joinWorkspaceCalls(partitions, expectations, WorkspaceCallBudget{
 		MaxPackages: maxTestPlanSymbols, MaxCalls: maxTestPlanWorkspaceCalls,
@@ -30,9 +32,10 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 	switch {
 	case !found:
 		return empty, []string{"symbol-not-found"}
-	case cleanup:
-		return empty, []string{"cleanup-call-coverage"}
 	case len(subjects) == 0:
+		if cleanup {
+			return empty, []string{"cleanup-call-coverage"}
+		}
 		return empty, []string{"generic-call-coverage"}
 	}
 	roots := make([]workspaceCallEndpoint, 0, min(len(subjects), maxTestPlanSymbols+1))
@@ -40,7 +43,8 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 		symbol, specialization, _ := strings.Cut(subject, "#")
 		roots = append(roots, workspaceCallEndpoint{WorkspaceSymbol{subjectInstance, symbol}, specialization})
 	}
-	reasons := workspaceTestPlanCoverage(packages)
+	cleanups := workspaceTestPlanCleanups(result, packages, packageIDs)
+	reasons := workspaceTestPlanCoverage(packages, cleanups)
 	parents, truncated := walkTestPlan(roots, func(target workspaceCallEndpoint, enqueue func(workspaceCallEndpoint)) {
 		positions := ledger.incoming[target.symbol]
 		if target.specialization != "" {
@@ -48,9 +52,12 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 		}
 		for _, position := range positions {
 			call := ledger.calls[position]
-			if call.SourceBody == "" && call.TargetSpecialization == target.specialization {
+			if call.TargetSpecialization == target.specialization {
 				enqueue(workspaceCallEndpoint{call.Source, call.SourceSpecialization})
 			}
+		}
+		for _, source := range cleanups.incoming[target] {
+			enqueue(source)
 		}
 	})
 	if truncated {
@@ -63,7 +70,11 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 	return testPlanPaths(tests, testSymbols, parents, reasons, func(at workspaceCallEndpoint) string {
 		instance := at.symbol.PackageInstance
 		pkg := packages[instance]
-		label, _ := pkg.testPlanEndpointLabel(testPlanEndpoint(at.symbol.Symbol, at.specialization))
+		endpoint := testPlanEndpoint(at.symbol.Symbol, at.specialization)
+		label, found := pkg.testPlanEndpointLabel(endpoint)
+		if !found {
+			label = endpoint
+		}
 		if instance != testInstance {
 			return pkg.header.PackageUID + "::" + label
 		}
@@ -71,29 +82,49 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 	})
 }
 
-func workspaceTestPlanCoverage(packages map[string]*QueryIndex) []string {
+func workspaceTestPlanCleanups(result compiler.Result, packages map[string]*QueryIndex, packageIDs map[string]hir.PackageID) testPlanCleanupGraph[workspaceCallEndpoint] {
+	bindings := testPlanCleanupBindings[workspaceCallEndpoint]{
+		functions: make(map[string]workspaceCallEndpoint), cleanups: make(map[hir.Type]workspaceCallEndpoint),
+	}
+	for instance, pkg := range packages {
+		packageID, found := packageIDs[instance]
+		if !found || !result.Verified {
+			return testPlanCleanupGraph[workspaceCallEndpoint]{}
+		}
+		bindings.addPackage(pkg, packageID, func(symbol, specialization string) workspaceCallEndpoint {
+			return workspaceCallEndpoint{WorkspaceSymbol{instance, symbol}, specialization}
+		})
+	}
+	if bindings.expectedCleanups == 0 {
+		return testPlanCleanupGraph[workspaceCallEndpoint]{complete: true}
+	}
+	return buildTestPlanCleanupGraph(result, bindings)
+}
+
+func workspaceTestPlanCoverage(packages map[string]*QueryIndex, cleanups testPlanCleanupGraph[workspaceCallEndpoint]) []string {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
 			reasons = append(reasons, reason)
 		}
 	}
+	if !cleanups.complete {
+		add("cleanup-call-coverage")
+	}
 	for _, pkg := range packages {
 		for _, record := range pkg.completeness {
 			if record.Relation != "calls" {
 				continue
 			}
-			if record.Status != semanticsnapshot.CompletenessExact || record.Unknown != 0 || record.External != 0 {
+			exact := record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0
+			// Each partition carries the same workspace-wide completeness counts.
+			exact = exact || cleanups.complete && cleanups.recovered > 0 && record.Unknown == cleanups.recovered &&
+				slices.Equal(record.Reasons, []string{ordinaryCleanupOmission})
+			if !exact || record.External != 0 {
 				add("incomplete-call-coverage")
 			}
 			if record.External != 0 {
 				add("external-ffi")
-			}
-		}
-		for _, node := range pkg.nodes {
-			if node.declaration.Key.Kind == semanticsnapshot.DeclarationResource && node.declaration.DropKind == string(hir.ResourceDropNonEmpty) {
-				add("cleanup-call-coverage")
-				break
 			}
 		}
 	}

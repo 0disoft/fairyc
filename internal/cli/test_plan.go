@@ -83,7 +83,7 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 	}
 	switch {
 	case input.subjectInstance != "":
-		report.Tests, report.Reasons = atlasmap.WorkspaceTestPlan(input.partitions, input.expectations, input.testInstance, input.subjectInstance, symbol, identities)
+		report.Tests, report.Reasons = atlasmap.WorkspaceTestPlan(input.partitions, input.expectations, input.testInstance, input.subjectInstance, symbol, identities, input.result, input.packageIDs)
 	case input.index != nil:
 		report.Tests, report.Reasons = input.index.TestPlan(symbol, identities, input.result, input.packageID)
 	default:
@@ -100,6 +100,7 @@ type testPlanInput struct {
 	packageID                     hir.PackageID
 	partitions                    []atlasmap.Partition
 	expectations                  map[string]atlasmap.LoadExpectation
+	packageIDs                    map[string]hir.PackageID
 	testInstance, subjectInstance string
 }
 
@@ -146,8 +147,12 @@ func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath, subjec
 		if err != nil {
 			return testPlanInput{}, ExitSuccess
 		}
+		packageIDs := make(map[string]hir.PackageID, len(instances))
+		for id, instance := range instances {
+			packageIDs[instance.String()] = id
+		}
 		return testPlanInput{
-			partitions: partitions, expectations: expectations,
+			partitions: partitions, expectations: expectations, result: result, packageIDs: packageIDs,
 			testInstance: instance, subjectInstance: instances[subjectID].String(),
 		}, ExitSuccess
 	}

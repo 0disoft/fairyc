@@ -12,15 +12,15 @@ import (
 const ordinaryCleanupOmission = "ordinary-cleanup-call-not-retained"
 const maxTestPlanCleanupWork = 65536
 
-type testPlanCleanupGraph struct {
-	incoming  map[string][]string
+type testPlanCleanupGraph[E comparable] struct {
+	incoming  map[E][]E
 	recovered int
 	complete  bool
 }
 
 // The map has no edges from drop obligations to their cleanup bodies. Those
 // bindings come from the same verified MIR used to produce the query index.
-func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.PackageID, wantCleanup bool) testPlanCleanupGraph {
+func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.PackageID, wantCleanup bool) testPlanCleanupGraph[string] {
 	if wantCleanup {
 		return index.buildTestPlanCleanups(result, packageID)
 	}
@@ -36,43 +36,35 @@ func (index *QueryIndex) testPlanCleanups(result compiler.Result, packageID hir.
 			return index.buildTestPlanCleanups(result, packageID)
 		}
 	}
-	return testPlanCleanupGraph{}
+	return testPlanCleanupGraph[string]{}
 }
 
-func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID hir.PackageID) testPlanCleanupGraph {
-	program := result.MIR
-	functions := make(map[string]string)
-	cleanupNames := make(map[hir.Type]string)
-	for _, node := range index.nodes {
-		key := node.declaration.Key
-		if len(node.declaration.TypeParameters) != 0 {
-			continue
-		}
-		name := hir.QualifiedModulePath(packageID, testPlanLabel(key))
-		switch key.Kind {
-		case semanticsnapshot.DeclarationFunction:
-			functions[name] = node.symbol.Visible
-		case semanticsnapshot.DeclarationResource:
-			if node.declaration.DropKind == string(hir.ResourceDropNonEmpty) {
-				cleanupNames[hir.ParseType(name)] = testPlanLabel(key) + testPlanCleanupSuffix
-			}
-		}
+func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID hir.PackageID) testPlanCleanupGraph[string] {
+	bindings := testPlanCleanupBindings[string]{
+		functions: make(map[string]string), cleanups: make(map[hir.Type]string),
 	}
-	ordinaryCleanups := len(cleanupNames)
-	genericCleanupTypes, expectedCleanups := index.bindTestPlanSpecializations(result.GenericProvenance, packageID, functions, cleanupNames)
-	names := make(map[hir.SymbolID]string)
+	bindings.addPackage(index, packageID, testPlanEndpoint)
+	graph := buildTestPlanCleanupGraph(result, bindings)
+	for target, sources := range graph.incoming {
+		slices.Sort(sources)
+		graph.incoming[target] = slices.Compact(sources)
+	}
+	return graph
+}
+
+func buildTestPlanCleanupGraph[E comparable](result compiler.Result, bindings testPlanCleanupBindings[E]) testPlanCleanupGraph[E] {
+	program := result.MIR
+	genericCleanupTypes := bindings.bindSpecializations(result.GenericProvenance)
+	names := make(map[hir.SymbolID]E)
 	matchedCleanups := 0
 	for _, fn := range program.Functions {
-		if fn.Span.Package != packageID {
-			continue
-		}
 		if fn.DropGlueFor == (hir.Type{}) {
-			names[fn.Symbol] = functions[fn.Name]
-		} else {
-			names[fn.Symbol] = cleanupNames[fn.DropGlueFor]
-			if names[fn.Symbol] != "" {
-				matchedCleanups++
+			if endpoint, found := bindings.functions[fn.Name]; found {
+				names[fn.Symbol] = endpoint
 			}
+		} else if endpoint, found := bindings.cleanups[fn.DropGlueFor]; found {
+			names[fn.Symbol] = endpoint
+			matchedCleanups++
 		}
 	}
 	resources := make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes))
@@ -85,14 +77,14 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 		span   hir.Span
 		target hir.SymbolID
 	}
-	graph := testPlanCleanupGraph{
-		incoming: make(map[string][]string),
-		complete: matchedCleanups == ordinaryCleanups+expectedCleanups,
+	graph := testPlanCleanupGraph[E]{
+		incoming: make(map[E][]E),
+		complete: matchedCleanups == bindings.expectedCleanups,
 	}
 	work := 0
 	for _, fn := range program.Functions {
-		source := names[fn.Symbol]
-		if source == "" {
+		source, found := names[fn.Symbol]
+		if !found {
 			continue
 		}
 		locals := make(map[hir.SymbolID]hir.Type, len(fn.Resources))
@@ -108,15 +100,15 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 				}
 				root, found := locals[op.Symbol]
 				if !found || !graph.addDropEdges(source, root, resources, names, seenTypes, &work) {
-					return testPlanCleanupGraph{}
+					return testPlanCleanupGraph[E]{}
 				}
 			}
 			term := block.Terminator
 			if fn.DropGlueFor == (hir.Type{}) || genericCleanupTypes[fn.DropGlueFor] || term.Kind != mir.TerminatorCall || term.ForeignABI != "" {
 				continue
 			}
-			target := names[term.Callee]
-			if target == "" {
+			target, found := names[term.Callee]
+			if !found {
 				continue
 			}
 			site := callSite{span: term.Span, target: term.Callee}
@@ -125,65 +117,86 @@ func (index *QueryIndex) buildTestPlanCleanups(result compiler.Result, packageID
 			}
 			work++
 			if work > maxTestPlanCleanupWork {
-				return testPlanCleanupGraph{}
+				return testPlanCleanupGraph[E]{}
 			}
 			seenCalls[site] = struct{}{}
 			graph.recovered++
 			graph.incoming[target] = append(graph.incoming[target], source)
 		}
 	}
-	for target, sources := range graph.incoming {
-		slices.Sort(sources)
-		graph.incoming[target] = slices.Compact(sources)
-	}
 	return graph
 }
 
-// Join the exact implementation IDs recorded by Atlas to the compiler-owned
-// generated names. Display labels and resource type spellings are independent.
-func (index *QueryIndex) bindTestPlanSpecializations(provenance compiler.GenericProvenance, packageID hir.PackageID, functions map[string]string, cleanups map[hir.Type]string) (map[hir.Type]bool, int) {
-	type implementation struct {
-		module   string
-		endpoint string
-		cleanup  bool
-	}
-	implementations := make(map[string]implementation)
-	expectedCleanups := 0
+type testPlanCleanupBinding[E comparable] struct {
+	module   string
+	endpoint E
+	cleanup  bool
+}
+
+type testPlanCleanupBindings[E comparable] struct {
+	functions        map[string]E
+	cleanups         map[hir.Type]E
+	implementations  map[string]testPlanCleanupBinding[E]
+	expectedCleanups int
+}
+
+func (bindings *testPlanCleanupBindings[E]) addPackage(index *QueryIndex, packageID hir.PackageID, endpoint func(string, string) E) {
 	for _, node := range index.nodes {
+		key := node.declaration.Key
+		name := hir.QualifiedModulePath(packageID, testPlanLabel(key))
+		if len(node.declaration.TypeParameters) == 0 {
+			switch key.Kind {
+			case semanticsnapshot.DeclarationFunction:
+				bindings.functions[name] = endpoint(node.symbol.Visible, "")
+			case semanticsnapshot.DeclarationResource:
+				if node.declaration.DropKind == string(hir.ResourceDropNonEmpty) {
+					bindings.cleanups[hir.ParseType(name)] = endpoint(testPlanLabel(key)+testPlanCleanupSuffix, "")
+					bindings.expectedCleanups++
+				}
+			}
+		}
 		for _, facts := range node.specializations {
 			if facts.Function == nil && facts.Cleanup == nil {
 				continue
 			}
-			implementations[facts.ID] = implementation{
-				module: node.declaration.Key.Module, endpoint: testPlanEndpoint(node.symbol.Visible, facts.ID),
+			if bindings.implementations == nil {
+				bindings.implementations = make(map[string]testPlanCleanupBinding[E])
+			}
+			bindings.implementations[facts.ID] = testPlanCleanupBinding[E]{
+				module: hir.QualifiedModulePath(packageID, key.Module), endpoint: endpoint(node.symbol.Visible, facts.ID),
 				cleanup: facts.Cleanup != nil,
 			}
 			if facts.Cleanup != nil {
-				expectedCleanups++
+				bindings.expectedCleanups++
 			}
 		}
 	}
-	types := make(map[hir.Type]bool, expectedCleanups)
-	if len(implementations) == 0 {
-		return types, expectedCleanups
+}
+
+// Join the exact implementation IDs recorded by Atlas to the compiler-owned
+// generated names. Display labels and resource type spellings are independent.
+func (bindings testPlanCleanupBindings[E]) bindSpecializations(provenance compiler.GenericProvenance) map[hir.Type]bool {
+	if len(bindings.implementations) == 0 {
+		return nil
 	}
+	types := make(map[hir.Type]bool)
 	for _, origin := range provenance.Specializations() {
-		facts, found := implementations[string(origin.Specialization)]
+		facts, found := bindings.implementations[string(origin.Specialization)]
 		if !found {
 			continue
 		}
-		name := hir.QualifiedModulePath(packageID, facts.module) + "::" + origin.GeneratedName
+		name := facts.module + "::" + origin.GeneratedName
 		if facts.cleanup {
 			typ := hir.ParseType(name)
-			cleanups[typ], types[typ] = facts.endpoint, true
+			bindings.cleanups[typ], types[typ] = facts.endpoint, true
 		} else {
-			functions[name] = facts.endpoint
+			bindings.functions[name] = facts.endpoint
 		}
 	}
-	return types, expectedCleanups
+	return types
 }
 
-func (graph testPlanCleanupGraph) addDropEdges(source string, root hir.Type, resources map[hir.Type]*mir.ResourceType, names map[hir.SymbolID]string, seen map[hir.Type]struct{}, work *int) bool {
+func (graph testPlanCleanupGraph[E]) addDropEdges(source E, root hir.Type, resources map[hir.Type]*mir.ResourceType, names map[hir.SymbolID]E, seen map[hir.Type]struct{}, work *int) bool {
 	pending := []hir.Type{root}
 	for len(pending) != 0 {
 		typ := pending[len(pending)-1]
@@ -197,7 +210,7 @@ func (graph testPlanCleanupGraph) addDropEdges(source string, root hir.Type, res
 		}
 		seen[typ] = struct{}{}
 		if resource := resources[typ]; resource != nil {
-			if cleanup := names[resource.DropSymbol]; cleanup != "" {
+			if cleanup, found := names[resource.DropSymbol]; found {
 				graph.incoming[cleanup] = append(graph.incoming[cleanup], source)
 			}
 			for _, field := range resource.Fields {
