@@ -22,7 +22,8 @@ func candidateUsage() string {
 			strings.HasPrefix(line, "  fairyc experimental test-plan ") ||
 			strings.HasPrefix(line, "  fairyc experimental atlas-diff ") ||
 			strings.HasPrefix(line, "  fairyc experimental why-emitted ") ||
-			line == "  fairyc experimental scip"
+			line == "  fairyc experimental scip" ||
+			strings.HasPrefix(line, "  fairyc experimental atlas-edit preview-batch ")
 	})
 	return strings.Join(lines, "\n")
 }

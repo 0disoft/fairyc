@@ -18,7 +18,10 @@ ADR 0499 admits separately gated `atlas-impact`, `atlas-mcp --allow-impact`, and
 uncertainty/limits, MCP lifecycle/permissions and root-private AST body preview/application.
 No stable safe-change guarantee, arbitrary rename, new map schema or candidate parity is admitted.
 Impact/MCP never update source or lock; apply leaves the lock stale for the next ordinary check.
-Output failure can follow successful source replacement.
+Output failure can follow successful source replacement. The Go command
+`atlas-edit preview-batch --package-uid <root-uid> --edit-file <workspace-file>`
+validates multiple replacements together and reports the proposed file hashes
+without writing source or lock files.
 
 The same [Atlas contract](../atlas/impact-mcp-edit-v1.md#semantic-diff) owns
 `atlas-diff`. Use `--package-uid` for one package or `--workspace` with

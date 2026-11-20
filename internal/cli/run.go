@@ -46,6 +46,7 @@ Usage:
   fairyc experimental registry-update <trust.json> <catalog.json> <signature.json> <requests.json> <current-sources.json>
   fairyc experimental git-snapshot <local-repository> <full-commit> <output.zip>
   fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <symbol-id> --body-file <workspace-file> --expected-source-sha256 <hash> [--apply]
+  fairyc experimental atlas-edit preview-batch --package-uid <root-uid> --edit-file <workspace-file>
   fairyc experimental atlas-mcp --allow-impact --max-packages <n> --max-calls <n> --max-depth <n> --max-symbols <n> --max-output-bytes <n> --max-requests <n>
   fairyc experimental atlas-impact --package-uid <uid> --symbol <symbol-id> --max-packages <n> --max-calls <n> --max-depth <0..64> --max-symbols <n> --max-output-bytes <n> [--locked]
   fairyc experimental atlas-diff --baseline <workspace-directory> --package-uid <uid> --max-declarations <n> --max-output-bytes <n>

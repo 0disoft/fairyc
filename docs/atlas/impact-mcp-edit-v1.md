@@ -320,8 +320,24 @@ fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <s
 
 The body file holds one complete braced body, at most 64 KiB, in a portable regular workspace
 file outside production roots. Exact current IDs select root-owned, private, safe, non-entry,
-nongeneric functions without owners/attributes. SDK/member/vendor writes, renames, public/foreign/
-generic/attributed declarations and multi-file edits remain excluded.
+nongeneric functions without owners/attributes. These target restrictions also apply to
+batch previews.
+
+`fairyc experimental atlas-edit preview-batch --package-uid <root-uid> --edit-file edits/batch.json`
+checks 1 to 16 replacements together. The request is one JSON object with an
+`edits` array. Each entry supplies `symbol`, `bodyFile`, and
+`expectedSourceSha256`. The request and body files use the same portable,
+bounded, regular-file input rules as single-body edits. All selectors and
+hashes refer to the same locked source snapshot.
+
+Batches may target several distinct functions in the same file or in
+different root source files. Duplicate or overlapping bodies fail. Each
+changed file must parse with every replacement at its expected body extent.
+The complete workspace is then verified with all replacements in one overlay.
+The bounded `fairyc.structural-body-edit-batch/v1` report lists entries in
+request order, with original byte ranges and before/after whole-file hashes.
+Entries for the same file share the combined after hash. This Go command
+only previews. Multi-file publication remains deferred.
 
 The Fairy editor now accepts local workspaces containing generic struct/resource
 templates and concrete aggregate function signatures. Its selector derives all

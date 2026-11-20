@@ -21,9 +21,11 @@ raw source SHA-256 and AST body span. A preview must replace exactly that span, 
 verify the complete production workspace and ensure no sibling/signature was injected. Applying
 requires an explicit CLI switch and repeat input/identity checks before one contained atomic file
 replacement. Keep `fairy.lock` unchanged so a later locked compile rejects until ordinary check.
-Multi-file edits, rename inference, public/foreign/generic/attributed functions, SDK/vendor writes,
-formatting rewrites and MCP writes remain excluded. Do not claim crash-proof multi-file transactions
-or protection against hostile concurrent workspace writers.
+A separate bounded Go batch preview verifies multiple private body replacements in one
+workspace overlay. Multi-file publication, rename inference, public/foreign/generic/attributed
+functions, SDK/vendor writes, formatting rewrites and MCP writes remain excluded.
+Do not claim crash-proof multi-file transactions or protection against hostile concurrent
+workspace writers.
 
 No target/language/SDK promotion, dependency or hosted runner change accompanies these local tools.
 Windows provides local evidence; native Linux execution remains in the combined deferred queue.

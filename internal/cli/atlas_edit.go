@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
@@ -11,6 +12,9 @@ import (
 )
 
 func runAtlasEdit(arguments []string, root string, stdout, stderr io.Writer) int {
+	if len(arguments) > 0 && arguments[0] == "preview-batch" {
+		return runAtlasEditBatch(arguments[1:], root, stdout, stderr)
+	}
 	if len(arguments) == 0 || arguments[0] != "replace-body" {
 		return invocationError(stderr, "atlas-edit requires replace-body")
 	}
@@ -36,27 +40,13 @@ func runAtlasEdit(arguments []string, root string, stdout, stderr io.Writer) int
 	if code != ExitSuccess {
 		return code
 	}
-	pkg, ok := prepared.workspace.Package(".")
-	if !ok || pkg.Manifest.Package.UID != values["--package-uid"] {
-		return invocationError(stderr, "only the exact root package is editable")
+	partition, code := atlasEditPartition(prepared, values["--package-uid"], stderr)
+	if code != ExitSuccess {
+		return code
 	}
-	p, found := selectAtlasPartition(prepared.partitions, values["--package-uid"])
-	if !found {
-		return invocationError(stderr, "edit package not found")
-	}
-	if _, err := atlasmap.NewQueryIndexV3(p, prepared.expectations[p.Header().PackageInstance]); err != nil {
-		return internalError(stderr)
-	}
-	var key semanticsnapshot.DeclarationKey
-	matches := 0
-	for _, symbol := range p.Symbols() {
-		if symbol.Visible == values["--symbol"] || symbol.Full == values["--symbol"] {
-			key = symbol.Declaration
-			matches++
-		}
-	}
-	if matches != 1 || key.Kind != semanticsnapshot.DeclarationFunction {
-		return invocationError(stderr, "edit subject must be one exact ordinary function")
+	key, err := atlasEditFunction(partition, values["--symbol"])
+	if err != nil {
+		return invocationError(stderr, err.Error())
 	}
 	opened, err := os.OpenRoot(prepared.workspace.Root)
 	if err != nil {
@@ -91,4 +81,34 @@ func runAtlasEdit(arguments []string, root string, stdout, stderr io.Writer) int
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func atlasEditPartition(prepared preparedAtlasWorkspace, uid string, stderr io.Writer) (atlasmap.Partition, int) {
+	pkg, ok := prepared.workspace.Package(".")
+	if !ok || pkg.Manifest.Package.UID != uid {
+		return atlasmap.Partition{}, invocationError(stderr, "only the exact root package is editable")
+	}
+	p, found := selectAtlasPartition(prepared.partitions, uid)
+	if !found {
+		return atlasmap.Partition{}, invocationError(stderr, "edit package not found")
+	}
+	if _, err := atlasmap.NewQueryIndexV3(p, prepared.expectations[p.Header().PackageInstance]); err != nil {
+		return atlasmap.Partition{}, internalError(stderr)
+	}
+	return p, ExitSuccess
+}
+
+func atlasEditFunction(p atlasmap.Partition, selector string) (semanticsnapshot.DeclarationKey, error) {
+	var key semanticsnapshot.DeclarationKey
+	matches := 0
+	for _, symbol := range p.Symbols() {
+		if symbol.Visible == selector || symbol.Full == selector {
+			key = symbol.Declaration
+			matches++
+		}
+	}
+	if matches != 1 || key.Kind != semanticsnapshot.DeclarationFunction {
+		return semanticsnapshot.DeclarationKey{}, fmt.Errorf("edit subject must be one exact ordinary function")
+	}
+	return key, nil
 }
