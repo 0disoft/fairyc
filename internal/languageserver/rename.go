@@ -14,7 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var errRenameUnavailable = errors.New("rename requires a verified local binding or plain workspace function")
+var errRenameUnavailable = errors.New("rename requires a verified local binding, function parameter, or plain workspace function")
 var errRenameChangesResolution = errors.New("rename changes source bindings or fails compiler checks")
 
 type renamePlan struct {
@@ -65,6 +65,15 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		}
 	}
 	for _, fn := range module.Functions {
+		if fn.Owner == "" && len(fn.TypeParameters) == 0 {
+			for _, parameter := range fn.Parameters {
+				if parameter.NameSpan.StartByte <= at && at < parameter.NameSpan.EndByte {
+					name, kind = parameter.Name, "parameter"
+					decl.StartByte, decl.EndByte = parameter.NameSpan.StartByte, parameter.NameSpan.EndByte
+					break
+				}
+			}
+		}
 		if fn.NameSpan.StartByte <= at && at < fn.NameSpan.EndByte && (!fn.Public || view.root != "") && fn.Owner == "" &&
 			fn.Name != "main" && len(fn.Attributes) == 0 && len(fn.TypeParameters) == 0 {
 			name, kind = fn.Name, "function"
@@ -79,28 +88,34 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 		target = semantic.SymbolCoordinate{Package: key.Package, Module: module.Path, Name: name, Kind: kind, Declaration: decl}
 	}
 	files := make(map[string]sourceView)
-	spans := make(map[string]map[tokenSpan]struct{})
+	spans := make(map[string]map[tokenSpan]bool)
 	count := 0
-	add := func(file sourceView, span tokenSpan) error {
+	add := func(file sourceView, span tokenSpan, label bool) error {
 		if file.Path == "" || (view.root != "" && !contained(view.root, file.Path)) ||
 			!identifierSpan(file.Text, span) || string(file.Text[span.start:span.end]) != name {
 			return errRenameUnavailable
 		}
 		if spans[file.Path] == nil {
 			files[file.Path] = file
-			spans[file.Path] = make(map[tokenSpan]struct{})
+			spans[file.Path] = make(map[tokenSpan]bool)
 		}
 		if _, exists := spans[file.Path][span]; !exists {
 			if count == maxReferenceLocations {
 				return errReferenceLimit
 			}
 			count++
-			spans[file.Path][span] = struct{}{}
 		}
+		spans[file.Path][span] = spans[file.Path][span] || label
 		return nil
 	}
-	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}); err != nil {
+	if err := add(declarationFile, tokenSpan{decl.StartByte, decl.EndByte}, false); err != nil {
 		return renamePlan{}, err
+	}
+	labels := make(map[hir.Span]bool)
+	for _, label := range view.result.ArgumentLabels {
+		if label.Target == target {
+			labels[label.Use] = true
+		}
 	}
 	for i, resolution := range view.result.Resolutions {
 		if i%256 == 0 && s.ctx != nil && s.ctx.Err() != nil {
@@ -116,7 +131,7 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 			(start != resolution.Use.StartByte && (start < 2 || string(file.Text[start-2:start]) != "::")) {
 			return renamePlan{}, errRenameUnavailable
 		}
-		if err := add(file, tokenSpan{start, end}); err != nil {
+		if err := add(file, tokenSpan{start, end}, labels[resolution.Use]); err != nil {
 			return renamePlan{}, err
 		}
 	}
@@ -145,9 +160,9 @@ func (s *server) planRename(d *document, offset int) (renamePlan, error) {
 				continue
 			}
 			span := tokenSpan{token.Span.StartByte, token.Span.EndByte}
-			if _, matches := spans[path][span]; matches {
+			if label, matches := spans[path][span]; matches {
 				// A shorthand field shares its spelling with the value.
-				if previous == "." {
+				if previous == "." && !label {
 					return renamePlan{}, errRenameUnavailable
 				}
 				entry.spans = append(entry.spans, span)

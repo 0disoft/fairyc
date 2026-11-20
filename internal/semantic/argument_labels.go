@@ -27,5 +27,19 @@ func (a *analyzer) checkCallArgumentLabels(module *moduleScope, expression *ast.
 			return false
 		}
 	}
+	for _, label := range labels.Labels {
+		if label.NameSpan.EndByte <= label.NameSpan.StartByte {
+			continue
+		}
+		parameter := callee.function.Parameters[label.Index]
+		a.argumentLabels = append(a.argumentLabels, Resolution{
+			Use: span(module.file.Path, label.NameSpan),
+			Target: SymbolCoordinate{
+				Package: callee.packageID, Module: callee.module,
+				Name: parameter.Name, Kind: "parameter",
+				Declaration: span(callee.source, parameter.NameSpan),
+			},
+		})
+	}
 	return true
 }

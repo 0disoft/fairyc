@@ -799,7 +799,7 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 				if expression.CallLabels == nil {
 					expression.CallLabels = &CallArgumentLabels{}
 				}
-				expression.CallLabels.Labels = append(expression.CallLabels.Labels, ArgumentLabel{Index: len(expression.Children) - 1, Name: label.Text, Span: label.Span})
+				expression.CallLabels.Labels = append(expression.CallLabels.Labels, ArgumentLabel{Index: len(expression.Children) - 1, Name: label.Text, Span: label.Span, NameSpan: label.NameSpan})
 				child = label.Children[0]
 			}
 		}

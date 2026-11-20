@@ -56,21 +56,23 @@ type packageImportKey struct {
 type Result struct {
 	// Set by the compiler coordinator when source templates were expanded or
 	// removed. Consumers cannot recover those declarations from ordinary HIR.
-	RequiresGenericProvenance bool              `json:"-"`
-	NominalTypes              []NominalTypeFact `json:"-"`
-	HIR                       hir.Package
-	CompletedThrough          Phase
-	FailedPhase               Phase
-	Diagnostics               []Diagnostic
-	Resolutions               []Resolution
-	Types                     []TypeFact
-	Borrows                   []BorrowFact
-	RegionOrigins             []RegionOriginFact
-	ResultHandling            []ResultHandlingFact
-	Effects                   []EffectFact
-	ResourceStates            []ResourceStateFact // Populated only by AnalyzeWithResourceStates.
-	Constants                 []ConstantFact
-	Unsupported               []Unsupported
+	RequiresGenericProvenance bool `json:"-"`
+	// ArgumentLabels records checked parameter uses outside the path-resolution contract.
+	ArgumentLabels   []Resolution      `json:"-"`
+	NominalTypes     []NominalTypeFact `json:"-"`
+	HIR              hir.Package
+	CompletedThrough Phase
+	FailedPhase      Phase
+	Diagnostics      []Diagnostic
+	Resolutions      []Resolution
+	Types            []TypeFact
+	Borrows          []BorrowFact
+	RegionOrigins    []RegionOriginFact
+	ResultHandling   []ResultHandlingFact
+	Effects          []EffectFact
+	ResourceStates   []ResourceStateFact // Populated only by AnalyzeWithResourceStates.
+	Constants        []ConstantFact
+	Unsupported      []Unsupported
 }
 
 // ConstantFact retains one private module constant without adding an executable HIR declaration.
@@ -320,6 +322,7 @@ func analyzeWithContextOptions(ctx context.Context, files []File, bindings map[p
 	analyzer.finish()
 	result.Diagnostics = analyzer.diagnostics
 	result.Resolutions = analyzer.resolutions
+	result.ArgumentLabels = analyzer.argumentLabels
 	result.Types = analyzer.types
 	result.Borrows = analyzer.borrows
 	result.RegionOrigins = analyzer.regionOrigins
@@ -419,6 +422,10 @@ func (a *analyzer) finish() {
 	slices.SortFunc(a.resolutions, func(left, right Resolution) int {
 		return compareSpan(left.Use, right.Use)
 	})
+	slices.SortFunc(a.argumentLabels, func(left, right Resolution) int {
+		return compareSpan(left.Use, right.Use)
+	})
+	a.argumentLabels = slices.Compact(a.argumentLabels)
 	slices.SortFunc(a.types, func(left, right TypeFact) int {
 		if n := compareSpan(left.Expression, right.Expression); n != 0 {
 			return n

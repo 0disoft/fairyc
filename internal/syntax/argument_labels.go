@@ -8,10 +8,10 @@ func (p *parser) parseCallArgument() NodeID {
 		start := p.currentFullIndex()
 		p.advance()
 		if p.current().Kind == lexer.Identifier {
-			name := p.parseName()
+			name, nameSpan := p.parseNameWithSpan()
 			p.expect("=")
 			value := p.parseExpression(0, true)
-			return p.addNode(KindArgumentLabel, start, []NodeID{value}, name, "")
+			return p.addNamedNode(KindArgumentLabel, start, []NodeID{value}, name, "", nameSpan)
 		}
 	}
 	return p.parseExpression(0, true)

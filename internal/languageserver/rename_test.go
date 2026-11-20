@@ -21,7 +21,7 @@ func TestRenameVersionedEditsKeepExactBindings(t *testing.T) {
 	if !bytes.Contains(editorResult(t, &out), []byte(`"renameProvider":{"prepareProvider":true}`)) {
 		t.Fatal("rename capability missing")
 	}
-	const text = "module main;\nfn i32 helper(i32 base) { let i32 chosen = 1; if (true) { let i32 nested = 2; /* 😀 */ return chosen + nested; } return chosen + base; }\nfn i32 main() { return helper(3); }"
+	const text = "module main;\nfn i32 helper(i32 base) { let i32 chosen = 1; if (true) { let i32 nested = 2; /* 😀 */ return chosen + nested; } return chosen + base; }\nfn i32 main() { return helper(. /* label */ base = 3); }"
 	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
 		"uri": uri, "version": 7, "languageId": "fairyc", "text": text,
 	}})
@@ -56,7 +56,9 @@ func TestRenameVersionedEditsKeepExactBindings(t *testing.T) {
 		count                    int
 	}{
 		{"chosen + nested", "chosen", "answer", 3},
-		{"helper(3)", "helper", "compute_value", 2},
+		{"helper(. ", "helper", "compute_value", 2},
+		{"base = 3", "base", "input", 3},
+		{"base) {", "base", "input", 3},
 	} {
 		call("textDocument/rename", scenario.needle, scenario.newName)
 		var result struct{ DocumentChanges []documentEdit }

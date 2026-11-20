@@ -92,6 +92,7 @@ type analyzer struct {
 	diagnostics           []Diagnostic
 	diagnosticBudget      diagnosticBudget
 	resolutions           []Resolution
+	argumentLabels        []Resolution
 	types                 []TypeFact
 	borrows               []BorrowFact
 	unsupported           []Unsupported

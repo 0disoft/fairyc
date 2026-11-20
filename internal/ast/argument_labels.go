@@ -9,7 +9,8 @@ type CallArgumentLabels struct {
 }
 
 type ArgumentLabel struct {
-	Index int
-	Name  string
-	Span  diagnostic.Span
+	Index    int
+	Name     string
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span `json:"-"`
 }
