@@ -38,6 +38,18 @@ pub fn join::Problem requests(ref v::Vec<syntax::Parsed> sources,ref signatures:
             else{target=switch(m::instantiate(sources,metadata,callee.module_index,callee.declaration,ref forwarded,graph,instances,arguments,parameters,budget,t.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};let problem=m::forward(sources,metadata,graph,instances,arguments,parameters,dependencies,ref mut states,budget,target,1);if(problem.code!=0){return problem;}}
         }
         if(v::len<m::Dependency>(dependencies)+v::len<m::Dependency>(cleanup_dependencies)>=16384 || !v::push<m::Dependency>(cleanup_dependencies,m::Dependency{.owner=id,.source_index=i,.instance=target,.aggregate_type,.intrinsic,.intrinsic_type,.slice,.inline_declaration,.inline_unsafe=inline_declaration!=0}).is_ok){return m::fail(if(v::len<m::Dependency>(dependencies)+v::len<m::Dependency>(cleanup_dependencies)>=16384){4503}else{11},t.module_index,e.start,e.end);}
+    }else if(e.kind==6 && e.start>=d.cleanup_start && e.end<=d.cleanup_end){
+        let found=switch(m::inferred_target(metadata,original,t.module_index,i,budget)){case .ok(n):{n}case .err(p):{return p;}};
+        if(found!=0){
+            let callee=signatures::declaration_at(metadata,found);
+            let provider=v::at<syntax::Parsed>(sources,callee.module_index);
+            let forwarded=switch(m::inferred_arguments(original,t.module_index,i,t.declaration,ref args,provider,callee.declaration,graph,budget)){case .ok(p):{p}case .err(p):{return p;}};
+            let target=switch(m::instantiate(sources,metadata,callee.module_index,callee.declaration,ref forwarded,graph,instances,arguments,parameters,budget,t.module_index,e.start,e.end)){case .ok(n):{n}case .err(p):{return p;}};
+            let problem=m::forward(sources,metadata,graph,instances,arguments,parameters,dependencies,ref mut states,budget,target,1);
+            if(problem.code!=0){return problem;}
+            if(v::len<m::Dependency>(dependencies)+v::len<m::Dependency>(cleanup_dependencies)>=16384){return m::fail(4503,t.module_index,e.start,e.end);}
+            if(!v::push<m::Dependency>(cleanup_dependencies,m::Dependency{.owner=id,.source_index=i,.instance=target,.aggregate_type=0,.intrinsic=0,.intrinsic_type=0,.slice=false,.inline_declaration=0,.inline_unsafe=false}).is_ok){return m::fail(11,t.module_index,e.start,e.end);}
+        }
     }i+=1;}
     if(v::len<m::Dependency>(dependencies)+v::len<m::Dependency>(cleanup_dependencies)>16384){return m::fail(4503,t.module_index,d.cleanup_start,d.cleanup_end);}if(!v::push<m::Cleanup>(cleanups,m::Cleanup{.type,.module_index=t.module_index,.declaration=t.declaration,.argument_start,.argument_count=v::len<usize>(ref args),.start=d.cleanup_start,.end=d.cleanup_end,.effects=contract.bits,.abilities=ability.bits,.receiver_kind=10}).is_ok){return m::fail(11,t.module_index,d.start,d.end);}return m::fail(0,0,0,0);
 }

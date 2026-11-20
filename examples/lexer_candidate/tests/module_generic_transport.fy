@@ -21,15 +21,20 @@ import std::io as io;
 
 fn syntax::Parsed parsed(ref u8[] raw){let b=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{assert(false);return parsed(raw);}};let stream=switch(scanner::collect(b,false,65536,1048576,256,16777216)){case .ok(p):{p}case .err(_):{assert(false);return parsed(raw);}};return switch(syntax::parse(stream,512)){case .ok(p):{assert(syntax::problem_count(ref p)==0);p}case .err(_):{assert(false);parsed(raw)}};}
 fn coordinates::Coordinates table(){let raw=b"fypc1-sha256-1111111111111111111111111111111111111111111111111111111111111111";let names=switch(bytes::copy(raw)){case .ok(p):{p}case .err(_):{assert(false);return table();}};var v::Vec<coordinates::Coordinate> rows=v::empty<coordinates::Coordinate>();assert(v::push<coordinates::Coordinate>(ref mut rows,coordinates::Coordinate{.owner=0,.start=0,.end=raw.len}).is_ok);return coordinates::assemble(names,rows);}
-@effects(console) fn core::Complete compiled(ref u8[] raw){
+@effects(console) fn core::Complete compiled_mode(ref u8[] raw,bool aggregates){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(raw)).is_ok);
     var v::Vec<usize> owners=v::empty<usize>();assert(v::push<usize>(ref mut owners,0).is_ok);let imports=v::empty<catalog::Binding>();let table=table();var usize work=0;var usize linking=0;
-    let result=switch(core::build_complete_sources(ref sources,ref owners,ref imports,ref table,ref mut work,ref mut linking)){case .ok(p):{p}case .err(e):{discard io::write_stderr_u32(e.phase);discard io::write_stderr_u32(e.stage);discard io::write_stderr_u32(e.code);discard io::write_stderr_usize(e.start);assert(false);return compiled(raw);}};
-    work=0;let saved=switch(encode::encode(core::checked_program(ref result),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return compiled(raw);}};work=0;
-    let detached=switch(decode::decode(wire::content(ref saved),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return compiled(raw);}};
+    let result=switch(if(aggregates){core::build_complete_aggregate_sources(ref sources,ref owners,ref imports,ref table,ref mut work,ref mut linking)}else{core::build_complete_sources(ref sources,ref owners,ref imports,ref table,ref mut work,ref mut linking)}){
+        case .ok(p):{p}
+        case .err(e):{discard io::write_stderr_u32(e.phase);discard io::write_stderr("/");discard io::write_stderr_u32(e.stage);discard io::write_stderr("/");discard io::write_stderr_u32(e.code);discard io::write_stderr("/");discard io::write_stderr_usize(e.start);assert(false);return compiled_mode(raw,aggregates);}
+    };
+    work=0;let saved=switch(encode::encode(core::checked_program(ref result),ref mut work)){case .ok(p):{p}case .err(_):{assert(false);return compiled_mode(raw,aggregates);}};work=0;
+    let artifact=wire::content(ref saved);
+    let detached=switch(if(aggregates){decode::decode_aggregates(artifact,ref mut work)}else{decode::decode(artifact,ref mut work)}){case .ok(p):{p}case .err(_):{assert(false);return compiled_mode(raw,aggregates);}};
     var usize source_work=0;var usize artifact_work=0;var usize link_work=0;
-    return switch(core::restore_complete_sources(detached,ref sources,ref owners,ref imports,ref table,ref mut source_work,ref mut artifact_work,ref mut link_work)){case .ok(p):{p}case .err(_):{assert(false);compiled(raw)}};
+    return switch(if(aggregates){core::restore_complete_aggregate_sources(detached,ref sources,ref owners,ref imports,ref table,ref mut source_work,ref mut artifact_work,ref mut link_work)}else{core::restore_complete_sources(detached,ref sources,ref owners,ref imports,ref table,ref mut source_work,ref mut artifact_work,ref mut link_work)}){case .ok(p):{p}case .err(e):{discard io::write_stderr_u32(e.code);assert(false);compiled_mode(raw,aggregates)}};
 }
+@effects(console) fn core::Complete compiled(ref u8[] raw){return compiled_mode(raw,false);}
 fn void rejected(ref u8[] raw){
     var v::Vec<syntax::Parsed> sources=v::empty<syntax::Parsed>();assert(v::push<syntax::Parsed>(ref mut sources,parsed(raw)).is_ok);var v::Vec<usize> owners=v::empty<usize>();assert(v::push<usize>(ref mut owners,0).is_ok);let imports=v::empty<catalog::Binding>();let table=table();var usize work=0;var usize linking=0;
     assert(switch(core::build_complete_sources(ref sources,ref owners,ref imports,ref table,ref mut work,ref mut linking)){case .ok(_):{false}case .err(e):{e.code!=0 && e.end>e.start && e.end<=raw.len}});
@@ -45,6 +50,30 @@ fn void inferred_scalar_calls_restore_and_execute(){
     var usize entry=0;var usize i=1;
     while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==5){entry=i;}i+=1;}
     assert(entry!=0);
+    let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
+    let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);
+    assert(outcome.error==0 && outcome.trap==0 && outcome.bits==42);
+}
+@test
+@effects(console)
+fn void inferred_cleanup_calls_share_explicit_instances(){
+    let raw=b"module root;fn T id<T>(T value){return value;}resource Hold<T>{T value;cleanup{let T inferred=id(42);let T written=id<T>(42);assert(inferred==written);}}fn i32 main(){let value=Hold<u32>{.value=42};discard value;return 42;}";
+    let result=compiled_mode(raw,true);
+    let owner=core::checked_program(ref result);
+    let program=checked::ir_program(owner);
+    var usize entry=0;var usize cleanup_frame=0;var usize i=1;
+    while(i<=ir::count(program)){
+        let frame=clean::frame_at(ir::cleanup_ir(program),i);
+        if(frame.kind==2){cleanup_frame=i;}
+        if(frame.declaration==4){entry=i;}
+        i+=1;
+    }
+    assert(entry!=0 && cleanup_frame!=0);
+    let body=ir::at(program,cleanup_frame);
+    assert(ir::call_count(body)==2);
+    let inferred=ir::call_at(body,0);
+    assert(inferred.instance!=0 && inferred.instance==ir::call_at(body,1).instance);
     let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
     let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
     let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);

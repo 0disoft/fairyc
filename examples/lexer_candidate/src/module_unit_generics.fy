@@ -31,7 +31,7 @@ pub fn usize instance_limit(){return 256;}
 pub fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 pub fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
 fn usize owner(ref syntax::Parsed p,usize start,usize end,ref mut Budget work){var usize i=0;while(i<syntax::declaration_count(p)){if(!charge(work,1)){return 0;}let d=syntax::declaration_at(p,i);if(d.kind!=1 && start>=d.start && end<=d.end){return i+1;}i+=1;}return 0;}
-fn Result<usize,join::Problem> inferred_target(ref signatures::Program metadata,ref syntax::Parsed source,usize module_index,usize call,ref mut Budget work){
+pub fn Result<usize,join::Problem> inferred_target(ref signatures::Program metadata,ref syntax::Parsed source,usize module_index,usize call,ref mut Budget work){
     let e=syntax::expression_at(source,call);
     let base=syntax::expression_at(source,e.left);
     if(base.kind!=2 || base.token>=1048576){return .ok(0);}
@@ -44,7 +44,7 @@ fn Result<usize,join::Problem> inferred_target(ref signatures::Program metadata,
     let target=signatures::declaration_at(metadata,found.item);
     return .ok(if(target.kind==3 && target.parameters!=0){found.item}else{0});
 }
-fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,usize caller,ref v::Vec<usize> parent,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
+pub fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,usize caller,ref v::Vec<usize> parent,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
     let e=syntax::expression_at(source,call);
     let owner=syntax::declaration_at(source,caller-1);
     let expected=switch(inference::expected_root(source,owner,call,ref mut work.work)){case .ok(root):{root}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
@@ -140,7 +140,7 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
                 let caller=owner(source,e.start,e.end,ref mut budget);
                 if(caller==0){return .err(fail(if(budget.work>=1048576){4503}else{4501},module_index,e.start,e.end));}
                 let d=syntax::declaration_at(source,caller-1);
-                if(d.generic_parameters==0 && d.kind!=12){
+                if(d.generic_parameters==0 && d.kind!=12 && d.kind!=6){
                     let target=signatures::declaration_at(metadata,found);
                     let provider=v::at<syntax::Parsed>(sources,target.module_index);
                     let empty=v::empty<usize>();
