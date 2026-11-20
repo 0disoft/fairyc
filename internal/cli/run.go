@@ -76,6 +76,7 @@ Usage:
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental why-emitted <entry.fy> --symbol <name> [--source <file.fy>]...
+  fairyc experimental why-emitted --workspace --target <target-id> --symbol <name> [--locked]
   fairyc experimental scip
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>

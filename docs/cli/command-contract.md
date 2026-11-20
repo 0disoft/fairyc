@@ -352,6 +352,7 @@ The current Go prototype implements twenty-seven deliberately unstable developer
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` | Lower one explicit FY module closure in the admitted constrained-C subset through verified MIR and emit the provisional transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source-set diagnostics or capability errors on stderr |
 | `fairyc experimental why-emitted <entry.fy> --symbol <name> [--source <file.fy>]...` | Explain why an internal function is retained by the same constrained C emission path | One `fairyc.why-emitted/v1` JSON object on stdout |
+| `fairyc experimental why-emitted --workspace --target <target-id> --symbol <name> [--locked]` | Explain retention in the target-selected workspace emitter | One `fairyc.why-emitted/v1` JSON object on stdout |
 | `fairyc experimental scip` | Export verified definitions and references from a locked local workspace | One binary SCIP index on stdout |
 | `fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one explicitly closed verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source-set, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one explicitly closed FY module set through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer, Arena, owned-text, CStr, and UTF-8 validation dependency closures when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source-set, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
@@ -615,6 +616,13 @@ discovery path. Steps are labeled `call`, `callback`, `closure`, or
 Unknown, ambiguous, and foreign names fail with exit code 2. The report
 describes the emitter's reachability pass. It does not predict runtime call
 order or linker retention.
+
+The `--workspace` form resolves the same root entry and package closure as
+`emit-workspace-c`. It takes the same target and lock options, including the
+same SDK storage admission. Full MIR names in its report include a build-local
+package prefix when present. Use an unambiguous final name segment or pass a
+full name from the same workspace. This mode emits only the explanation to
+stdout and requires no native toolchain.
 
 `experimental emit-c` shares the same explicit source closure, semantics, Flow, MIR-lowering,
 verifier, and zero-argument entry-module `main() -> i32` path, then invokes only the constrained C emitter.

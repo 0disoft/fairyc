@@ -33,6 +33,15 @@ func (err EmissionSelectorError) Error() string {
 // EmitWithExplanation observes the same discovery edges used by Emit.
 // The first discovery of a function records exactly one predecessor.
 func EmitWithExplanation(program mir.Program, entry string, profile Profile, selector string) (Unit, EmissionExplanation, error) {
+	return emitWithExplanation(program, entry, profile, selector, false)
+}
+
+// EmitStorageTransfersWithExplanation observes the SDK storage-enabled emitter.
+func EmitStorageTransfersWithExplanation(program mir.Program, entry string, profile Profile, selector string) (Unit, EmissionExplanation, error) {
+	return emitWithExplanation(program, entry, profile, selector, true)
+}
+
+func emitWithExplanation(program mir.Program, entry string, profile Profile, selector string, storageTransfers bool) (Unit, EmissionExplanation, error) {
 	var selected *mir.Function
 	qualified := strings.Contains(selector, "::")
 	for i := range program.Functions {
@@ -52,7 +61,7 @@ func EmitWithExplanation(program mir.Program, entry string, profile Profile, sel
 		return Unit{}, EmissionExplanation{}, EmissionSelectorError{selector}
 	}
 	predecessors := make(map[hir.SymbolID]emissionPredecessor)
-	plan, err := analyzeEmissionTrace(context.Background(), program, entry, profile, false, func(from, to *mir.Function, reason string) {
+	plan, err := analyzeEmissionTrace(context.Background(), program, entry, profile, storageTransfers, func(from, to *mir.Function, reason string) {
 		predecessors[to.Symbol] = emissionPredecessor{from.Symbol, EmissionStep{From: from.Name, To: to.Name, Reason: reason}}
 	})
 	if err != nil {

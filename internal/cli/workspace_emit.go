@@ -35,13 +35,8 @@ func runExperimentalWorkspaceEmit(arguments []string, sourceRoot string, stdout,
 	if code != ExitSuccess {
 		return code
 	}
-	var profile cbackend.Profile
-	switch options.targetID {
-	case target.X8664LinuxGNU:
-		profile = cbackend.Stage0Profile()
-	case target.X8664WindowsMSVC:
-		profile = cbackend.Stage0WindowsMSVCProfile()
-	default:
+	profile, ok := workspaceEmissionProfile(options.targetID)
+	if !ok {
 		return internalError(stderr)
 	}
 	emit := cbackend.Emit
@@ -71,6 +66,17 @@ func runExperimentalWorkspaceEmit(arguments []string, sourceRoot string, stdout,
 	return ExitSuccess
 }
 
+func workspaceEmissionProfile(id target.ID) (cbackend.Profile, bool) {
+	switch id {
+	case target.X8664LinuxGNU:
+		return cbackend.Stage0Profile(), true
+	case target.X8664WindowsMSVC:
+		return cbackend.Stage0WindowsMSVCProfile(), true
+	default:
+		return cbackend.Profile{}, false
+	}
+}
+
 func rejectRemovedStableEmit(stderr io.Writer) int {
 	return invocationError(
 		stderr,
@@ -97,7 +103,7 @@ func parseExperimentalWorkspaceEmitOptions(arguments []string) (experimentalWork
 			options.locked = true
 		case "--target":
 			candidate := target.ID(value)
-			if candidate != target.X8664LinuxGNU && candidate != target.X8664WindowsMSVC {
+			if _, ok := workspaceEmissionProfile(candidate); !ok {
 				return fmt.Errorf(`experimental command %q does not know target %q`, experimentalWorkspaceCCommand, value)
 			}
 			options.targetID = candidate
