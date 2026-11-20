@@ -37,7 +37,7 @@ identity during source admission. Its detached verifier checks bool conditions,
 `i32` results and each arm's binding records and tail. It rebuilds lexical
 visibility before recomputing the marker and accepting a restored body.
 
-The Go bootstrap also admits void `if` statements with optional `else` or
+Both compilers also admit void `if` statements with optional `else` or
 `else if`, lexical `i32` declarations, early returns and plain assignments to
 visible mutable `i32` locals. The root must return a value on every path.
 Each statement, expression and arm block counts toward the shared 64-node
@@ -50,4 +50,6 @@ slots, `assign` names its destination slot, and `return` records the returned
 expression. Slots depend on active declaration depth, starting at 64, so
 assignment changes the slot's value without changing its identity at a branch
 join. An all-returning branch may leave an empty MIR join with no incoming edge.
-Existing v1–v5 encodings are preserved. The Fairy candidate currently admits v5.
+Existing v1–v5 encodings are preserved. The Fairy candidate independently
+checks statement coverage, lexical slots and return paths before accepting a
+restored v6 marker.

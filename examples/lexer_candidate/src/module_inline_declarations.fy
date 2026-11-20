@@ -105,6 +105,103 @@ fn bool expression(ref syntax::Parsed p,syntax::Declaration d,usize id,usize vis
     if(!identity::operator(op,e.kind==5) || e.left>=id || !identity::branch(out,op,work) || !expression(p,d,e.left,visible,walk,out,work,graph)){return json::reject(work,9);}
     if(e.kind==5 && (e.right>=id || !json::raw(out,b",",work) || !expression(p,d,e.right,visible,walk,out,work,graph))){return json::reject(work,9);}return json::raw(out,b"]}",work);
 }
+// 0 is invalid, 1 falls through, 2 returns on every path.
+fn u32 control_if(ref syntax::Parsed p,syntax::Declaration d,usize id,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(id==0 || id>syntax::expression_count(p) || walk.nodes>=64){return 0;}
+    let e=syntax::expression_at(p,id);
+    if(e.kind!=13 || e.left>=id || e.right==0 || e.right>=id){return 0;}
+    let arms=syntax::expression_at(p,e.right);
+    if(arms.kind!=14 || arms.right>=e.right){return 0;}
+    walk.nodes+=1;
+    if(!identity::branch(out,b"if-statement",work) || !condition(p,d,e.left,0,walk,out,work,graph) ||
+        !json::raw(out,b",",work) || walk.nodes>=64){return 0;}
+    walk.nodes+=1;
+    let left=control_block(p,d,arms.left,false,walk,out,work,graph);
+    if(left==0){return 0;}
+    var u32 right=1;
+    if(arms.right!=0){
+        if(!json::raw(out,b",",work)){return 0;}
+        let other=syntax::expression_at(p,arms.right);
+        if(other.kind==13){right=control_if(p,d,arms.right,walk,out,work,graph);}
+        else if(other.kind==12 && walk.nodes<64){
+            walk.nodes+=1;
+            right=control_block(p,d,other.left,false,walk,out,work,graph);
+        }else{return 0;}
+    }
+    return if(right==0 || !json::raw(out,b"]}",work)){0}else if(left==2 && right==2){2}else{1};
+}
+fn u32 control_item(ref syntax::Parsed p,syntax::Declaration d,usize id,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(walk.nodes>=64){return 0;}
+    walk.nodes+=1;
+    let s=syntax::statement_at(p,id);
+    if(s.kind==6){return control_if(p,d,s.expression,walk,out,work,graph);}
+    if(s.kind==3){
+        return if(identity::branch(out,b"return",work) && expression(p,d,s.expression,0,walk,out,work,graph) &&
+            json::raw(out,b"]}",work)){2}else{0};
+    }
+    if(s.kind==2){
+        if(s.entry==0 || walk.declarations>=16){return 0;}
+        let entry=syntax::entry_at(p,s.entry-1);
+        if((entry.kind!=2 && entry.kind!=3) || entry.type_root!=0 && !i32_type(p,entry.type_root)){return 0;}
+        walk.declarations+=1;
+        if(!identity::branch(out,if(entry.kind==3){b"var"}else{b"let"},work) ||
+            !expression(p,d,s.expression,0,walk,out,work,graph) || !json::raw(out,b"]}",work)){return 0;}
+        let slot=walk.depth;
+        walk.bindings[slot]=id;
+        walk.depth+=1;
+        return 1;
+    }
+    if(s.kind!=4 || !bytes::equal(syntax::assignment_operator(p,id),b"=")){return 0;}
+    let name=local_name(p,s);
+    let slot=arm_binding(p,walk,name);
+    if(name.len==0 || slot==0){return 0;}
+    let binding=syntax::statement_at(p,walk.bindings[slot-1]);
+    if(syntax::entry_at(p,binding.entry-1).kind!=3){return 0;}
+    return if(identity::assignment(out,identity::arm_position(slot-1),work) &&
+        expression(p,d,s.expression,0,walk,out,work,graph) && json::raw(out,b"]}",work)){1}else{0};
+}
+fn u32 control_block(ref syntax::Parsed p,syntax::Declaration d,usize block,bool root,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(block==0 || block>syntax::statement_count(p)){return 0;}
+    let b=syntax::statement_at(p,block);
+    if(b.kind!=1 || b.second>64-walk.nodes){return 0;}
+    if(b.second==0 && b.expression==0){return if(identity::empty_block(out,work)){1}else{0};}
+    if(!identity::branch(out,b"block",work)){return 0;}
+    let depth=walk.depth;
+    var u32 flow=1;
+    var usize i=0;
+    while(i<b.second){
+        if(i!=0 && !json::raw(out,b",",work)){return 0;}
+        let current=control_item(p,d,syntax::block_statement(p,block,i),walk,out,work,graph);
+        if(current==0){return 0;}
+        if(current==2){flow=2;}
+        i+=1;
+    }
+    if(b.expression!=0){
+        if(i!=0 && !json::raw(out,b",",work)){return 0;}
+        if(root){
+            if(!identity::branch(out,b"return",work) || !expression(p,d,b.expression,0,walk,out,work,graph) ||
+                !json::raw(out,b"]}",work)){return 0;}
+            flow=2;
+        }else{
+            let current=control_if(p,d,b.expression,walk,out,work,graph);
+            if(current==0){return 0;}
+            if(current==2){flow=2;}
+        }
+    }
+    walk.depth=depth;
+    return if(json::raw(out,b"]}",work)){flow}else{0};
+}
+fn Info read_control(ref syntax::Parsed p,syntax::Declaration d,Info info,ref mut v::Vec<Row> graph){
+    var bytes::Buffer out=bytes::empty();
+    var json::Ledger work=json::empty();
+    var Walk walk=Walk{.nodes=0,.declarations=0,.depth=0,.bindings=[0;16]};
+    if(!identity::statement_header(ref mut out,info.parameters,ref mut work) ||
+        control_block(p,d,d.body,true,ref mut walk,ref mut out,ref mut work,graph)!=2){return invalid(info);}
+    var Info result=info;
+    result.hash=switch(identity::finish(ref mut out,ref mut work)){case .ok(h):{h}case .err(_):{return invalid(info);}};
+    return result;
+}
+
 fn Info signature(ref syntax::Parsed p,usize declaration){
     let d=syntax::declaration_at(p,declaration);var Info info=Info{.annotated=false,.code=0,.start=d.name_start,.end=d.name_end,.expression=0,.parameters=0,.hash=[0;8]};var usize i=0;
     while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);if(bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"inline")){info.start=a.start;info.end=a.end;if(info.annotated || a.argument_count!=0){return invalid(info);}info.annotated=true;}i+=1;}
@@ -116,7 +213,14 @@ fn Info signature(ref syntax::Parsed p,usize declaration){
 }
 fn Info read_body(ref syntax::Parsed p,usize declaration,ref mut v::Vec<Row> graph){
     let d=syntax::declaration_at(p,declaration);var Info info=signature(p,declaration);if(!info.annotated || info.code!=0){return info;}var usize i=0;
-    let b=syntax::statement_at(p,d.body);if(b.kind!=1){return invalid(info);}let count=syntax::block_statement_count(p,d.body);var usize locals=count;if(b.expression!=0){info.expression=b.expression;}else{if(count==0){return invalid(info);}let last=syntax::statement_at(p,syntax::block_statement(p,d.body,count-1));if(last.kind!=3 || last.expression==0){return invalid(info);}info.expression=last.expression;locals-=1;}if(locals>64){return invalid(info);}var usize declarations=0;var bool mutating=false;
+    let b=syntax::statement_at(p,d.body);if(b.kind!=1){return invalid(info);}let count=syntax::block_statement_count(p,d.body);
+    if(count>65){return invalid(info);}
+    while(i<count){
+        let s=syntax::statement_at(p,syntax::block_statement(p,d.body,i));
+        if(s.kind==6 && s.expression!=0 && syntax::expression_at(p,s.expression).kind==13){return read_control(p,d,info,graph);}
+        i+=1;
+    }
+    var usize locals=count;if(b.expression!=0){info.expression=b.expression;}else{if(count==0){return invalid(info);}let last=syntax::statement_at(p,syntax::block_statement(p,d.body,count-1));if(last.kind!=3 || last.expression==0){return invalid(info);}info.expression=last.expression;locals-=1;}if(locals>64){return invalid(info);}var usize declarations=0;var bool mutating=false;
     i=0;while(i<locals){let id=syntax::block_statement(p,d.body,i);let s=syntax::statement_at(p,id);if(s.expression==0){return invalid(info);}if(s.kind==2){if(s.entry==0){return invalid(info);}let a=syntax::entry_at(p,s.entry-1);if((a.kind!=2 && a.kind!=3) || a.type_root!=0 && !i32_type(p,a.type_root)){return invalid(info);}declarations+=1;mutating=mutating || a.kind==3;}
         else if(s.kind==4){let name=local_name(p,s);if(name.len==0 || !bytes::equal(syntax::assignment_operator(p,id),b"=")){return invalid(info);}var bool writable=false;var usize j=0;while(j<i){let old=syntax::statement_at(p,syntax::block_statement(p,d.body,j));if(old.kind==2 && bytes::equal(name,local_name(p,old))){writable=syntax::entry_at(p,old.entry-1).kind==3;}j+=1;}if(!writable){return invalid(info);}mutating=true;}else{return invalid(info);}i+=1;}if(declarations>16){return invalid(info);}
     var bytes::Buffer out=bytes::empty();var json::Ledger work=json::empty();var Walk walk=Walk{.nodes=0,.declarations,.depth=0,.bindings=[0;16]};

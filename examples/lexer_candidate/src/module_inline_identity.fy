@@ -24,6 +24,17 @@ pub fn bool comparison(ref u8[] op){
 }
 pub fn bool logical(ref u8[] op){return bytes::equal(op,b"&&") || bytes::equal(op,b"||");}
 pub fn usize arm_position(usize depth){return 64+depth;}
+pub fn bool statement_header(ref mut bytes::Buffer out,usize arity,ref mut json::Ledger work){
+    return arity<=4 && json::raw(out,b"{\"Version\":\"fairyc.inline-function/v6\",\"Arity\":",work) &&
+        json::number(out,arity,work) && json::raw(out,b",\"Root\":",work);
+}
+pub fn bool empty_block(ref mut bytes::Buffer out,ref mut json::Ledger work){
+    return json::raw(out,b"{\"Op\":\"block\",\"Value\":\"\",\"Children\":null}",work);
+}
+pub fn bool assignment(ref mut bytes::Buffer out,usize slot,ref mut json::Ledger work){
+    return json::raw(out,b"{\"Op\":\"assign\",\"Value\":\"",work) && json::number(out,slot,work) &&
+        json::raw(out,b"\",\"Children\":[",work);
+}
 pub fn bool boolean(ref mut bytes::Buffer out,ref u8[] value,ref mut json::Ledger work){
     return (bytes::equal(value,b"true") || bytes::equal(value,b"false")) &&
         json::raw(out,b"{\"Op\":\"literal\",\"Value\":",work) && json::quoted(out,value,work) && json::raw(out,b",\"Children\":null}",work);
