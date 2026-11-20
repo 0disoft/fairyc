@@ -142,11 +142,15 @@ analysis is evicted; affected open files receive an unavailable diagnostic and
 reload their project on the next definition or completion request. One incoming
 workspace is still loaded and parsed under the existing 64 MiB workspace guard
 before retention admission; the 128 MiB figure limits retained source, not
-transient project-load working memory. Workspace reloads can reuse private
-syntax trees for local files whose path and bytes match the previous analysis.
-Each workspace generation can retain up to an estimated 8 MiB of these trees,
-with a separate 16 MiB session limit. Changed files still receive a full parse.
-The server lowers fresh ASTs and rechecks the workspace after each change.
+transient project-load working memory. Workspace reloads reuse private syntax
+trees for byte-identical local files. A changed local file is lexed again. If
+the previous clean parse has a top-level checkpoint whose consumed and observed
+tokens still match exactly, parsing resumes after that prefix. Reused nodes,
+contextual tokens and parser work count toward the same budget as a fresh parse.
+Without an eligible checkpoint the parser starts at the beginning. Each
+generation can retain an estimated 8 MiB of syntax and checkpoints, with a
+separate 16 MiB session limit. The server lowers fresh ASTs and rechecks the
+workspace after each change.
 Work is synchronous with cooperative cancellation of superseded requests and
 edits. Saved external changes are refreshed on watched-file notifications.
 

@@ -18,7 +18,21 @@ type SyntaxResult struct {
 
 // AnalyzeSyntax parses one immutable source, verifies lossless reconstruction, and lowers clean syntax.
 func AnalyzeSyntax(file source.File, limits source.Limits) (SyntaxResult, error) {
-	tree := syntax.Parse(file, limits)
+	return lowerSyntax(file, syntax.Parse(file, limits))
+}
+
+// AnalyzeEditorSyntax produces the same syntax and AST as a fresh parse while
+// retaining eligible top-level prefix checkpoints for the next editor version.
+func AnalyzeEditorSyntax(file source.File, limits source.Limits, previous *syntax.EditorParseSnapshot) (SyntaxResult, *syntax.EditorParseSnapshot, error) {
+	tree, snapshot := syntax.ParseEditor(file, limits, previous)
+	result, err := lowerSyntax(file, tree)
+	if err != nil {
+		snapshot = nil
+	}
+	return result, snapshot, err
+}
+
+func lowerSyntax(file source.File, tree *syntax.Tree) (SyntaxResult, error) {
 	reconstructed, ok := tree.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, file.Bytes) {
 		return SyntaxResult{}, errors.New("lossless syntax reconstruction failed")

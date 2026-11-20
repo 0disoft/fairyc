@@ -11,9 +11,11 @@ import (
 
 func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 	root := t.TempDir()
+	const answerPrefix = "module answer; fn i32 unused() { return 3; }\n"
+	const answerStart = answerPrefix + "pub fn i32 value() { return "
 	writePackage(t, root, ".", rootManifest(""), map[string]string{
 		"src/main.fy":   "module main; import answer as answer; fn i32 main() { return answer::value(); }\n",
-		"src/answer.fy": "module answer; pub fn i32 value() { return 1; }\n",
+		"src/answer.fy": answerStart + "1; }\n",
 		"src/other.fy":  "module other; fn i32 unused() { return 3; }\n",
 	})
 	ctx := context.Background()
@@ -22,7 +24,7 @@ func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 		t.Fatalf("initial syntax snapshot: %v", err)
 	}
 	answer := filepath.Join(root, "src", "answer.fy")
-	overlay := map[string][]byte{answer: []byte("module answer; pub fn i32 value() { return 2; }\n")}
+	overlay := map[string][]byte{answer: []byte(answerStart + "2; }\n")}
 	reloaded, next, err := LoadEditorSyntaxContext(ctx, root, overlay, previous)
 	if err != nil {
 		t.Fatal(err)
@@ -41,6 +43,10 @@ func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 	if hits != 2 || misses != 1 || before.Packages[0].Digest == reloaded.Packages[0].Digest {
 		t.Fatalf("reload: hits=%d misses=%d changed digest=%v", hits, misses, before.Packages[0].Digest != reloaded.Packages[0].Digest)
 	}
+	key := editorSyntaxKey{answer, "answer.fy"}
+	if snapshot := next.trees[key].checkpoints; snapshot == nil || snapshot.ReusedItems() != 1 {
+		t.Fatal("changed file did not reuse the unchanged function prefix")
+	}
 	fresh, err := LoadEditorOverlaysContext(ctx, root, overlay)
 	if err != nil || !reflect.DeepEqual(reloaded, fresh) {
 		t.Fatalf("reused syntax did not lower to the same workspace as a fresh parse: %v", err)
@@ -51,15 +57,14 @@ func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 		}
 	}
 	// A same-length disk replacement must miss even without an editor overlay.
-	if err := os.WriteFile(answer, []byte("module answer; pub fn i32 value() { return 9; }\n"), 0600); err != nil {
+	if err := os.WriteFile(answer, []byte(answerStart+"9; }\n"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	_, disk, err := LoadEditorSyntaxContext(ctx, root, nil, next)
-	key := editorSyntaxKey{answer, "answer.fy"}
 	if err != nil || disk.trees[key].tree == nil || disk.trees[key].tree == next.trees[key].tree {
 		t.Fatalf("same-length on-disk change reused syntax: %v", err)
 	}
-	overlay[answer] = []byte("module answer; pub fn i32 value() { return 2 }")
+	overlay[answer] = []byte(answerStart + "2 }")
 	_, bad, err := LoadEditorSyntaxContext(ctx, root, overlay, next)
 	var load *LoadError
 	if !errors.As(err, &load) || load.Reason != ReasonSourceSyntax || bad != nil {

@@ -91,6 +91,21 @@ func (b *Budget) ChargeWork(units int) bool {
 	return true
 }
 
+// ReuseParserPrefix charges an already verified prefix under this parse's
+// post-lexing limits. A failed admission leaves the budget ready for a full parse.
+func (b *Budget) ReuseParserPrefix(tokens, nodes, work int) bool {
+	if b.Exhausted() || tokens < 0 || nodes < 0 || work < 0 ||
+		tokens > b.limits.MaxTokens-b.tokens ||
+		nodes > b.limits.MaxNodes-b.nodes ||
+		work > b.limits.MaxWorkUnits-b.workUnits {
+		return false
+	}
+	b.tokens += tokens
+	b.nodes += nodes
+	b.workUnits += work
+	return true
+}
+
 // Enter charges one recursive grammar level.
 func (b *Budget) Enter() bool {
 	if b == nil || b.exhausted {

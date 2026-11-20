@@ -14,8 +14,9 @@ const maxEditorSyntaxWeight = 8 << 20
 type editorSyntaxKey struct{ absolute, relative string }
 
 type editorSyntaxEntry struct {
-	tree   *syntax.Tree
-	weight int64
+	tree        *syntax.Tree
+	checkpoints *syntax.EditorParseSnapshot
+	weight      int64
 }
 
 // EditorSyntaxSnapshot retains private, lossless trees for one workspace
@@ -35,9 +36,13 @@ type editorSyntaxReuse struct {
 }
 
 func (reuse *editorSyntaxReuse) analyze(absolute, relative string, contents []byte) (frontend.SyntaxResult, error) {
+	if reuse == nil {
+		return frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
+	}
 	key := editorSyntaxKey{absolute, relative}
-	if reuse != nil && reuse.previous != nil && reuse.previous.root == reuse.next.root {
-		entry := reuse.previous.trees[key]
+	var entry editorSyntaxEntry
+	if reuse.previous != nil && reuse.previous.root == reuse.next.root {
+		entry = reuse.previous.trees[key]
 		if entry.tree != nil && bytes.Equal(entry.tree.Source, contents) {
 			module, err := ast.Lower(entry.tree)
 			if err == nil {
@@ -46,11 +51,12 @@ func (reuse *editorSyntaxReuse) analyze(absolute, relative string, contents []by
 			}
 		}
 	}
-	result, err := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
-	if reuse != nil && err == nil && result.AST != nil {
-		remaining := int64(maxEditorSyntaxWeight) - reuse.next.weight
-		weight := editorTreeWeight(key, result.Tree, remaining)
-		reuse.retain(key, editorSyntaxEntry{tree: result.Tree, weight: weight})
+	result, checkpoints, err := frontend.AnalyzeEditorSyntax(source.NewFile(relative, contents), source.DefaultLimits(), entry.checkpoints)
+	if err == nil && result.AST != nil {
+		checkpointWeight := checkpoints.CheckpointWeight()
+		remaining := int64(maxEditorSyntaxWeight) - reuse.next.weight - checkpointWeight
+		weight := editorTreeWeight(key, result.Tree, remaining) + checkpointWeight
+		reuse.retain(key, editorSyntaxEntry{tree: result.Tree, checkpoints: checkpoints, weight: weight})
 	}
 	return result, err
 }

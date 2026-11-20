@@ -11,12 +11,18 @@ func (p *parser) parseSource() NodeID {
 	}
 	defer p.leave()
 	start := p.currentFullIndex()
-	children := []NodeID{p.parseModule()}
-	for !p.budget.Exhausted() && p.at("import") {
-		children = append(children, p.parseImport())
+	children := p.restoreEditorPrefix()
+	if children == nil {
+		children = []NodeID{p.parseModule()}
+		for !p.budget.Exhausted() && p.at("import") {
+			children = append(children, p.parseImport())
+		}
 	}
 	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		children = append(children, p.parseItem())
+		if p.editor != nil {
+			p.recordEditorPrefix(len(children))
+		}
 	}
 	return p.addNode(KindSource, start, children, "", "")
 }

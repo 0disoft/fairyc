@@ -18,16 +18,16 @@ const (
 // Parse performs UTF-8-aware lexing, lossless CST construction, recovery, and module validation
 // for the current product grammar.
 func Parse(file source.File, limits source.Limits) *Tree {
-	return parse(file, limits, parseCurrent)
+	return parse(file, limits, parseCurrent, nil)
 }
 
 // ParsePreviousRevision accepts the immediately preceding source grammar for the standalone
 // migration package. Product compilation must call Parse instead.
 func ParsePreviousRevision(file source.File, limits source.Limits) *Tree {
-	return parse(file, limits, parsePreviousRevision)
+	return parse(file, limits, parsePreviousRevision, nil)
 }
 
-func parse(file source.File, limits source.Limits, mode parseMode) *Tree {
+func parse(file source.File, limits source.Limits, mode parseMode, editor *editorParseState) *Tree {
 	budget := source.NewBudget(limits, len(file.Bytes))
 	var lexed lexer.Result
 	if mode == parsePreviousRevision {
@@ -42,6 +42,7 @@ func parse(file source.File, limits source.Limits, mode parseMode) *Tree {
 		Diagnostics: append([]diagnostic.Diagnostic(nil), lexed.Diagnostics...),
 	}
 	parser := newParser(file, tree, budget, mode)
+	parser.editor = editor
 	if !budget.Exhausted() {
 		tree.Root = parser.parseSource()
 	}
@@ -63,6 +64,7 @@ type parser struct {
 	lastEndByte   int
 	splitShift    bool
 	hasExhausted  bool
+	editor        *editorParseState
 }
 
 func newParser(file source.File, tree *Tree, budget *source.Budget, mode parseMode) *parser {
@@ -94,11 +96,12 @@ func (p *parser) isPreviousRevision() bool {
 }
 
 func (p *parser) current() lexer.Token {
+	index := p.currentFullIndex()
 	if p.position >= len(p.significant) {
 		position := len(p.tree.Source)
 		return lexer.Token{Kind: lexer.EOF, Span: diagnostic.Span{StartByte: position, EndByte: position}}
 	}
-	token := p.tree.Tokens[p.significant[p.position]]
+	token := p.tree.Tokens[index]
 	if p.splitShift {
 		token.Span.StartByte++
 	}
@@ -106,10 +109,14 @@ func (p *parser) current() lexer.Token {
 }
 
 func (p *parser) currentFullIndex() int {
-	if p.position >= len(p.significant) {
-		return len(p.tree.Tokens) - 1
+	index := len(p.tree.Tokens) - 1
+	if p.position < len(p.significant) {
+		index = p.significant[p.position]
 	}
-	return p.significant[p.position]
+	if p.editor != nil {
+		p.editor.observed = max(p.editor.observed, index)
+	}
+	return index
 }
 
 func (p *parser) currentText() string {
@@ -119,10 +126,17 @@ func (p *parser) currentText() string {
 func (p *parser) peek(offset int) lexer.Token {
 	position := p.position + offset
 	if position < 0 || position >= len(p.significant) {
+		if p.editor != nil {
+			p.editor.observed = max(p.editor.observed, len(p.tree.Tokens)-1)
+		}
 		end := len(p.tree.Source)
 		return lexer.Token{Kind: lexer.EOF, Span: diagnostic.Span{StartByte: end, EndByte: end}}
 	}
-	return p.tree.Tokens[p.significant[position]]
+	index := p.significant[position]
+	if p.editor != nil {
+		p.editor.observed = max(p.editor.observed, index)
+	}
+	return p.tree.Tokens[index]
 }
 
 func (p *parser) peekText(offset int) string {
@@ -177,6 +191,9 @@ func (p *parser) expectTypeClose() bool {
 		if token.Span.EndByte-token.Span.StartByte == 2 && p.budget.ChargeToken() && p.budget.ChargeWork(1) {
 			p.lastFullIndex = p.currentFullIndex()
 			p.lastEndByte = token.Span.StartByte + 1
+			if p.editor != nil {
+				p.editor.syntheticTokens++
+			}
 			p.splitShift = true
 			return true
 		}
