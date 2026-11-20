@@ -47,9 +47,11 @@ func TestWhyEmittedWorkspace(t *testing.T) {
 				!slices.Equal(report.Path, []cbackend.EmissionStep{{From: report.Entry, To: report.Symbol, Reason: "call"}}) {
 				t.Fatalf("explanation: %d %q %q", code, out, diagnostics)
 			}
-			code, full, diagnostics := runForTest(append(args, string(id), "--symbol", report.Symbol), root)
-			if code != ExitSuccess || diagnostics != "" || full != out {
-				t.Fatalf("exact selector: %d %q %q", code, full, diagnostics)
+			for _, selector := range []string{report.Symbol, "answer::value"} {
+				code, selected, diagnostics := runForTest(append(args, string(id), "--symbol", selector), root)
+				if code != ExitSuccess || diagnostics != "" || selected != out {
+					t.Fatalf("selector %q: %d %q %q", selector, code, selected, diagnostics)
+				}
 			}
 		})
 	}
@@ -59,6 +61,36 @@ func TestWhyEmittedWorkspace(t *testing.T) {
 	writeWorkspaceFile(t, root, "src/main.fy", workspaceSessionRootSource+"\n")
 	if code, out, _ := runForTest(append(args, string(target.X8664LinuxGNU), "--symbol", "value"), root); code != ExitPackageFailure || out != "" {
 		t.Fatalf("stale lock: %d %q", code, out)
+	}
+}
+
+func TestWhyEmittedWorkspaceCleanupSelector(t *testing.T) {
+	root := writeWorkspaceSessionFixture(t, `module main;
+resource Token { i32 value; cleanup { let i32 observed = this.value; } }
+fn i32 close_token() {
+    let Token token = Token { .value = 42 };
+    return token.value;
+}
+fn i32 main() { return close_token(); }
+`)
+	if _, _, err := loadWorkspaceWithLock(root, false); err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []target.ID{target.X8664LinuxGNU, target.X8664WindowsMSVC} {
+		t.Run(string(id), func(t *testing.T) {
+			args := []string{"experimental", "why-emitted", "--workspace", "--locked", "--target", string(id), "--symbol"}
+			code, out, stderr := runForTest(append(args, "main::Token::cleanup"), root)
+			var report cbackend.EmissionExplanation
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &report) != nil ||
+				!report.Emitted || !strings.HasSuffix(report.Symbol, "::main::$drop$Token") || len(report.Path) != 2 ||
+				report.Path[0].Reason != "call" || report.Path[1].Reason != "drop" || report.Path[1].To != report.Symbol {
+				t.Fatalf("cleanup explanation: %d %q %q", code, out, stderr)
+			}
+			code, exact, stderr := runForTest(append(args, report.Symbol), root)
+			if code != ExitSuccess || stderr != "" || exact != out {
+				t.Fatalf("MIR selector: %d %q %q", code, exact, stderr)
+			}
+		})
 	}
 }
 

@@ -33,6 +33,7 @@ fn i32 main(){return close_token()+invoke()+cycle_left(2);}
 		{"main", true, []cbackend.EmissionStep{}},
 		{"close_token", true, []cbackend.EmissionStep{{From: entry, To: "main::close_token", Reason: "call"}}},
 		{"main::$drop$Token", true, []cbackend.EmissionStep{{From: entry, To: "main::close_token", Reason: "call"}, {From: "main::close_token", To: "main::$drop$Token", Reason: "drop"}}},
+		{"main::Token::cleanup", true, []cbackend.EmissionStep{{From: entry, To: "main::close_token", Reason: "call"}, {From: "main::close_token", To: "main::$drop$Token", Reason: "drop"}}},
 		{"handler", true, []cbackend.EmissionStep{{From: entry, To: "main::invoke", Reason: "call"}, {From: "main::invoke", To: "main::handler", Reason: "callback"}}},
 		{"cycle_right", true, []cbackend.EmissionStep{{From: entry, To: "main::cycle_left", Reason: "call"}, {From: "main::cycle_left", To: "main::cycle_right", Reason: "call"}}},
 		{"unused", false, []cbackend.EmissionStep{}},

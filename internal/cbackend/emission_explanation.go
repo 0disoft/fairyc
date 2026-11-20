@@ -46,11 +46,7 @@ func emitWithExplanation(program mir.Program, entry string, profile Profile, sel
 	qualified := strings.Contains(selector, "::")
 	for i := range program.Functions {
 		function := &program.Functions[i]
-		name := function.Name
-		if index := strings.LastIndex(name, "::"); !qualified && index >= 0 {
-			name = name[index+len("::"):]
-		}
-		if name == selector {
+		if matchesEmissionSelector(function, selector, qualified) {
 			if selected != nil {
 				return Unit{}, EmissionExplanation{}, EmissionSelectorError{selector}
 			}
@@ -72,6 +68,26 @@ func emitWithExplanation(program mir.Program, entry string, profile Profile, sel
 		return Unit{}, EmissionExplanation{}, err
 	}
 	return unit, explainEmissionPath(entry, selected, predecessors), nil
+}
+
+func matchesEmissionSelector(function *mir.Function, selector string, qualified bool) bool {
+	name := function.Name
+	if !qualified {
+		if index := strings.LastIndex(name, "::"); index >= 0 {
+			name = name[index+len("::"):]
+		}
+		return name == selector
+	}
+	prefix := hir.QualifiedModulePath(function.Span.Package, "")
+	if name == selector || strings.TrimPrefix(name, prefix) == selector {
+		return true
+	}
+	resource := function.DropGlueFor.Descriptor()
+	if resource.Kind != hir.TypeKindNominal {
+		return false
+	}
+	owner, cleanup := strings.CutSuffix(selector, "::cleanup")
+	return cleanup && (owner == resource.Name || owner == strings.TrimPrefix(resource.Name, prefix))
 }
 
 type emissionPredecessor struct {

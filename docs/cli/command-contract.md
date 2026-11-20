@@ -619,9 +619,10 @@ only through verified width and representability checks and reports `invalid-shi
 `integer-overflow` when both conditions could apply.
 
 `experimental why-emitted` uses the same source set and C emitter as
-`emit-c`. Select an internal function by its full MIR name or an unambiguous
-final name segment. For example, `--symbol 'main::$drop$Token'` selects the
-cleanup function generated for `Token` in module `main`. The report includes
+`emit-c`. Select an internal function by its module-qualified source name,
+full MIR name, or an unambiguous final name segment. For example,
+`--symbol 'main::Token::cleanup'` selects the cleanup function generated for
+`Token` in module `main`. Its full MIR name is also accepted. The report includes
 the entry, selected name, an `emitted` boolean, and one deterministic
 discovery path. Steps are labeled `call`, `callback`, `closure`, or
 `drop`. The entry and known unused functions have empty paths.
@@ -632,8 +633,8 @@ order or linker retention.
 The `--workspace` form resolves the same root entry and package closure as
 `emit-workspace-c`. It takes the same target and lock options, including the
 same SDK storage admission. Full MIR names in its report include a build-local
-package prefix when present. Use an unambiguous final name segment or pass a
-full name from the same workspace. This mode emits only the explanation to
+package prefix when present. If the same source name matches in several packages,
+pass the full MIR name from the same workspace. This mode emits only the explanation to
 stdout and requires no native toolchain.
 
 `experimental emit-c` shares the same explicit source closure, semantics, Flow, MIR-lowering,
