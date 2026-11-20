@@ -19,6 +19,7 @@ type GenericDeclaration struct {
 	Name              string
 	Span              hir.Span
 	NameSpan          hir.Span
+	BodySpan          hir.Span
 	DocumentationSpan hir.Span
 	Parameters        []string
 	Public            bool
@@ -86,12 +87,20 @@ func genericProvenance(input semantic.PackageInput, owners map[hir.PackageID]gen
 		if original.documentation.EndByte > original.documentation.StartByte {
 			documentation = hir.Span{Package: file.Package, Source: file.Path, StartByte: original.documentation.StartByte, EndByte: original.documentation.EndByte}
 		}
+		var body hir.Span
+		if original.body.EndByte > original.body.StartByte {
+			if original.body.StartByte < declaration.Span.StartByte || original.body.EndByte > declaration.Span.EndByte {
+				return GenericProvenance{}, fmt.Errorf("generic body escapes its original declaration")
+			}
+			body = hir.Span{Package: file.Package, Source: file.Path, StartByte: original.body.StartByte, EndByte: original.body.EndByte}
+		}
 		result.declarations = append(result.declarations, GenericDeclaration{Kind: declaration.Kind, ID: declaration.ID,
 			Package: file.Package, Module: declaration.Module, Name: declaration.Name, Public: declaration.Public,
 			Span:              hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.Span.StartByte, EndByte: declaration.Span.EndByte},
 			NameSpan:          hir.Span{Package: file.Package, Source: file.Path, StartByte: declaration.NameSpan.StartByte, EndByte: declaration.NameSpan.EndByte},
 			Parameters:        slices.Clone(declaration.Parameters),
 			DocumentationSpan: documentation,
+			BodySpan:          body,
 			Signature:         cloneGenericSignature(original.signature)})
 	}
 	result.origins = slices.Clone(expansion.Origins)

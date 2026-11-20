@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"sync"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -29,6 +30,12 @@ type DiffResult struct {
 	Omissions []string     `json:"omissions"`
 }
 
+// DiffFingerprints carries private comparison evidence from one verified source snapshot.
+type DiffFingerprints struct {
+	Executable     map[string][sha256.Size]byte
+	TemplateSyntax map[string][sha256.Size]byte
+}
+
 type diffKey struct {
 	module string
 	kind   semanticsnapshot.DeclarationKind
@@ -40,7 +47,7 @@ type diffKey struct {
 // from equality, and changed names remain separate additions and removals.
 func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpectation, maxDeclarations int,
 	oldAliases, newAliases map[string]string,
-	bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte),
+	bodyFingerprints func() (DiffFingerprints, DiffFingerprints),
 ) (DiffResult, error) {
 	if maxDeclarations < 1 {
 		return DiffResult{}, fmt.Errorf("invalid Atlas diff declaration limit")
@@ -70,7 +77,7 @@ func matchingDiffContext(before, after Partition) bool {
 		old.TargetScope == current.TargetScope && old.RuntimeABI == current.RuntimeABI
 }
 
-func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string]string, bodyFingerprints func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte)) DiffResult {
+func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string]string, bodyFingerprints func() (DiffFingerprints, DiffFingerprints)) DiffResult {
 	state, omissions := diffCoverage(before, after)
 	result := DiffResult{
 		Schema: "fairyc.atlas-diff/v1", State: state,
@@ -82,19 +89,16 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 	keys := make(map[diffKey]struct{})
 	left, right := diffDeclarations(before, keys), diffDeclarations(after, keys)
 	leftBodies, rightBodies := diffBodies(before, oldAliases), diffBodies(after, newAliases)
-	var leftCode, rightCode map[string][sha256.Size]byte
-	haveFingerprints := false
-	missingBody := false
+	var leftCode, rightCode DiffFingerprints
+	loadFingerprints := sync.OnceFunc(func() { leftCode, rightCode = bodyFingerprints() })
+	missingBody, missingTemplate := false, false
 	compareCode := func(change *DiffChange, oldName, newName string) {
 		if oldName == "" && newName == "" {
 			return
 		}
-		if !haveFingerprints {
-			leftCode, rightCode = bodyFingerprints()
-			haveFingerprints = true
-		}
-		a, aok := leftCode[oldName]
-		b, bok := rightCode[newName]
+		loadFingerprints()
+		a, aok := leftCode.Executable[oldName]
+		b, bok := rightCode.Executable[newName]
 		if (oldName != "" && !aok) || (newName != "" && !bok) {
 			missingBody = true
 		} else if aok != bok || a != b {
@@ -122,6 +126,20 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 			if key.kind == semanticsnapshot.DeclarationResource {
 				compareCode(&change, cleanupDiffBodyName(a), cleanupDiffBodyName(b))
 			}
+			if len(a.TypeParameters) != 0 && len(b.TypeParameters) != 0 {
+				oldBody, newBody := hasTemplateBody(a), hasTemplateBody(b)
+				if oldBody || newBody {
+					loadFingerprints()
+					name := key.module + "::" + key.name
+					oldHash, oldOK := leftCode.TemplateSyntax[name]
+					newHash, newOK := rightCode.TemplateSyntax[name]
+					if oldBody && !oldOK || newBody && !newOK {
+						missingTemplate = true
+					} else if oldBody != newBody || oldHash != newHash {
+						change.Facts = append(change.Facts, "template-body-syntax")
+					}
+				}
+			}
 			if len(change.Facts) == 0 {
 				continue
 			}
@@ -133,8 +151,17 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 		result.State = "partial"
 		result.Omissions = append(result.Omissions, "executable-body-comparison-incomplete")
 	}
+	if missingTemplate {
+		result.State = "partial"
+		result.Omissions = append(result.Omissions, "template-body-syntax-comparison-incomplete")
+	}
 	sortDiffChanges(result.Changes)
 	return result
+}
+
+func hasTemplateBody(declaration semanticsnapshot.Declaration) bool {
+	return declaration.Key.Kind == semanticsnapshot.DeclarationFunction ||
+		declaration.Key.Kind == semanticsnapshot.DeclarationResource && declaration.DropKind == "source-declared"
 }
 
 func cleanupDiffBodyName(declaration semanticsnapshot.Declaration) string {

@@ -1,7 +1,6 @@
 package atlasmap
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"maps"
 	"slices"
@@ -31,7 +30,7 @@ type WorkspacePackageDiff struct {
 func CompareWorkspaceV3(before, after []Partition, beforeExpected, afterExpected map[string]LoadExpectation,
 	maxPackages, maxDeclarations int,
 	oldAliases, newAliases map[string]string,
-	bodyFingerprints func(Partition, Partition) (map[string][sha256.Size]byte, map[string][sha256.Size]byte),
+	bodyFingerprints func(Partition, Partition) (DiffFingerprints, DiffFingerprints),
 ) (WorkspaceDiffResult, error) {
 	if len(before) == 0 || len(after) == 0 || maxPackages < 1 ||
 		len(before) > maxPackages || len(after) > maxPackages-len(before) {
@@ -69,7 +68,7 @@ func CompareWorkspaceV3(before, after []Partition, beforeExpected, afterExpected
 				return WorkspaceDiffResult{}, fmt.Errorf("Atlas workspace diff requires matching compiler and target identities for %s", coordinate)
 			}
 			report := compareDiffFacts(old, current, oldAliases, newAliases,
-				func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
+				func() (DiffFingerprints, DiffFingerprints) {
 					return bodyFingerprints(old, current)
 				})
 			entry.Before, entry.After = &report.Before, &report.After

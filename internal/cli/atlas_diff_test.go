@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
+	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
 func TestAtlasDiffWorkspace(t *testing.T) {
@@ -209,14 +210,17 @@ fn i32 main() { let Token<i32> a = make<i32>(42); return a.payload.value; }
 	}
 	changed := read(before, makeWorkspace(strings.Replace(source, "marker = 5", "marker = 6", 1), strings.Replace(dependency, "return 42", "return 43", 1)))
 	for _, tc := range []struct {
-		uid  string
-		want atlasmap.DiffChange
+		uid, module, kind, name string
 	}{
-		{app, atlasmap.DiffChange{Module: "main", Kind: "resource", Name: "Token", Action: "modified", Facts: []string{"executable-body"}, TypeArguments: []string{"i32"}}},
-		{lib, atlasmap.DiffChange{Module: "answer", Kind: "function", Name: "value", Action: "modified", Facts: []string{"executable-body"}, TypeArguments: []string{"i32"}}},
+		{app, "main", "resource", "Token"},
+		{lib, "answer", "function", "value"},
 	} {
-		if !reflect.DeepEqual(changed[tc.uid].Changes, []atlasmap.DiffChange{tc.want}) {
-			t.Fatalf("%s concrete body changes = %+v, want %+v", tc.uid, changed[tc.uid].Changes, tc.want)
+		want := []atlasmap.DiffChange{
+			{Module: tc.module, Kind: semanticsnapshot.DeclarationKind(tc.kind), Name: tc.name, Action: "modified", Facts: []string{"template-body-syntax"}},
+			{Module: tc.module, Kind: semanticsnapshot.DeclarationKind(tc.kind), Name: tc.name, Action: "modified", Facts: []string{"executable-body"}, TypeArguments: []string{"i32"}},
+		}
+		if !reflect.DeepEqual(changed[tc.uid].Changes, want) {
+			t.Fatalf("%s generic body changes = %+v, want %+v", tc.uid, changed[tc.uid].Changes, want)
 		}
 	}
 	more := makeWorkspace(strings.Replace(source, "return a.payload.value", "let Token<u32> b = make<u32>(7); return a.payload.value", 1), dependency)
@@ -231,5 +235,60 @@ fn i32 main() { let Token<i32> a = make<i32>(42); return a.payload.value; }
 				t.Fatalf("missing implementation change %+v in %+v", want, rows[app].Changes)
 			}
 		}
+	}
+}
+
+func TestAtlasDiffUninstantiatedTemplateBodies(t *testing.T) {
+	const app = "example.session.app"
+	const original = `module main;
+fn T unused<T>(T value) { let i32 marker = 41; return value; }
+resource Token<T> {
+    T value;
+    cleanup { let i32 marker = 51; }
+}
+fn i32 main() { return 0; }
+`
+	workspace := func(text string) string {
+		t.Helper()
+		root := writeWorkspaceSessionFixture(t, text)
+		if _, _, err := loadWorkspaceWithLock(root, false); err != nil {
+			t.Fatal(err)
+		}
+		return root
+	}
+	baseline := workspace(original)
+	initial := remoteTree(t, baseline)
+	for _, tc := range []struct {
+		name string
+		text string
+		want []atlasmap.DiffChange
+	}{
+		{"trivia", strings.Replace(original, "marker = 41", "marker /* a comment */ =\n 41", 1), []atlasmap.DiffChange{}},
+		{"tokens", strings.NewReplacer("marker = 41", "marker = 42", "marker = 51", "marker = 52").Replace(original), []atlasmap.DiffChange{
+			{Module: "main", Kind: "function", Name: "unused", Action: "modified", Facts: []string{"template-body-syntax"}},
+			{Module: "main", Kind: "resource", Name: "Token", Action: "modified", Facts: []string{"template-body-syntax"}},
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			current := workspace(tc.text)
+			tree := remoteTree(t, current)
+			args := []string{"experimental", "atlas-diff", "--baseline", baseline, "--package-uid", app,
+				"--max-declarations", "24", "--max-output-bytes", "100000"}
+			code, out, stderr := runForTest(args, current)
+			var report atlasmap.DiffResult
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &report) != nil ||
+				report.State != "partial" || slices.Contains(report.Omissions, "template-body-syntax-comparison-incomplete") ||
+				!reflect.DeepEqual(report.Changes, tc.want) {
+				t.Fatalf("template diff: %d stdout=%q stderr=%q", code, out, stderr)
+			}
+			if !slices.ContainsFunc(report.After.Completeness, func(fact semanticsnapshot.Completeness) bool {
+				return fact.Relation == "generic-template-bodies" && fact.Status == semanticsnapshot.CompletenessUnavailable
+			}) {
+				t.Fatal("template comparison lost semantic coverage limitations")
+			}
+			if !reflect.DeepEqual(initial, remoteTree(t, baseline)) || !reflect.DeepEqual(tree, remoteTree(t, current)) {
+				t.Fatal("template diff modified a workspace")
+			}
+		})
 	}
 }

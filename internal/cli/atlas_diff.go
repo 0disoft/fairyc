@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/compiler"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packageartifact"
 )
 
@@ -74,8 +72,8 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	}
 	oldAliases := atlasmap.DiffSpecializationAliases(before.partitions)
 	newAliases := atlasmap.DiffSpecializationAliases(after.partitions)
-	fingerprints := func(old, new atlasmap.Partition) (map[string][sha256.Size]byte, map[string][sha256.Size]byte) {
-		return atlasDiffFingerprints(before, old, oldCheck.MIR, oldAliases), atlasDiffFingerprints(after, new, newCheck.MIR, newAliases)
+	fingerprints := func(old, new atlasmap.Partition) (atlasmap.DiffFingerprints, atlasmap.DiffFingerprints) {
+		return atlasDiffFingerprints(before, old, oldCheck, oldAliases), atlasDiffFingerprints(after, new, newCheck, newAliases)
 	}
 	var report any
 	if seen["--workspace"] {
@@ -89,7 +87,7 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		}
 		report, err = atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
 			after.expectations[new.Header().PackageInstance], int(declarations), oldAliases, newAliases,
-			func() (map[string][sha256.Size]byte, map[string][sha256.Size]byte) { return fingerprints(old, new) })
+			func() (atlasmap.DiffFingerprints, atlasmap.DiffFingerprints) { return fingerprints(old, new) })
 	}
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -122,34 +120,34 @@ func uniqueDiffPartition(partitions []atlasmap.Partition, uid string) (atlasmap.
 	return selected, found
 }
 
-func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.Partition, program mir.Program, aliases map[string]string) map[string][sha256.Size]byte {
+func atlasDiffFingerprints(prepared preparedAtlasWorkspace, partition atlasmap.Partition, checked compiler.Result, aliases map[string]string) atlasmap.DiffFingerprints {
 	packages, err := prepared.workspace.SemanticPackages()
 	if err != nil {
-		return nil
+		return atlasmap.DiffFingerprints{}
 	}
 	instance := partition.Header().PackageInstance
-	identities, err := prepared.workspace.PackageIdentities()
-	if err != nil {
-		return nil
-	}
-	coordinates, err := prepared.workspace.PackageCoordinates()
-	if err != nil {
-		return nil
-	}
 	for _, pkg := range packages {
 		if pkg.Instance.String() != instance {
 			continue
 		}
+		result := atlasmap.DiffFingerprints{
+			TemplateSyntax: atlasTemplateSyntax(prepared.workspace, pkg.ID, checked.GenericProvenance),
+		}
+		identities, err := prepared.workspace.PackageIdentities()
+		if err != nil {
+			return result
+		}
+		coordinates, err := prepared.workspace.PackageCoordinates()
+		if err != nil {
+			return result
+		}
+		artifact, err := packageartifact.Extract(checked.MIR, pkg.ID, identities, coordinates)
+		if err != nil {
+			return result
+		}
 		const maxBodyBytes = 32 << 20
-		artifact, err := packageartifact.Extract(program, pkg.ID, identities, coordinates)
-		if err != nil {
-			return nil
-		}
-		fingerprints, err := packageartifact.ExecutableBodyFingerprints(artifact, maxBodyBytes, aliases)
-		if err != nil {
-			return nil
-		}
-		return fingerprints
+		result.Executable, _ = packageartifact.ExecutableBodyFingerprints(artifact, maxBodyBytes, aliases)
+		return result
 	}
-	return nil
+	return atlasmap.DiffFingerprints{}
 }

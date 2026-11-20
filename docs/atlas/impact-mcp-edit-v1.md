@@ -76,11 +76,20 @@ comparison normalizes concrete call targets and nominal types to the original
 package coordinate, declaration and arguments. A reissued specialization ID
 alone does not change the report.
 
+Matched generic functions and resource cleanups also compare the token spelling
+of their original bodies, ignoring comments, whitespace, and positions. A token
+change appears as `template-body-syntax` on the declaration row, including when
+no specialization exists. Verified executable changes still appear on their
+concrete implementation rows. Template syntax comparison retains the
+`generic-template-bodies` semantic coverage limitation and exposes no body text
+or fingerprints. If a required syntax fingerprint is unavailable, the report
+records `template-body-syntax-comparison-incomplete`.
+
 Output is `fairyc.atlas-diff/v1` JSON. Its two contexts carry the exact source
 identities and completeness ledgers. `bounded` covers the compared facts.
 `partial` records incomplete map facts, opaque or unknown calls, or unavailable
-body projections. Uninstantiated template bodies remain unavailable. Renames, full behavior equivalence,
-and source changes that leave these projections unchanged are outside its scope.
+body projections. Renames, full behavior equivalence, and source changes that
+leave these projections unchanged are outside its scope.
 The declaration limit covers both selected partitions together. Either limit
 failure leaves stdout empty.
 
