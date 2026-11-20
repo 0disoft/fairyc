@@ -59,9 +59,14 @@ Append concrete type arguments without spaces, as in `library::target<i32>`,
 to select one checked implementation. A template selector without arguments
 includes all of its checked implementations. Paths include the concrete type
 arguments and do not mix calls from different implementations.
+For a visible or full SymbolId, append `#<specialization-id>` from the current
+Atlas catalog. The implementation must belong to that declaration in the
+checked snapshot. Invalid or stale selectors return `all-tests` with
+`symbol-not-found`.
 
 Select a resource cleanup body with `library::Token::cleanup`,
 `library::Token<i32>::cleanup`, or its resource SymbolId with a `::cleanup` suffix.
+For one resource implementation, use `<symbol-id>#<specialization-id>::cleanup`.
 A generic cleanup selector without type arguments includes every checked cleanup
 implementation. A resource with no checked cleanup body causes `all-tests` with
 `cleanup-call-coverage` when selected without type arguments.

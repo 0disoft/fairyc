@@ -125,12 +125,20 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 
 func (index *QueryIndex) testPlanSubjects(selector string, wantCleanup bool) ([]string, bool) {
 	name, concrete, hasArguments := strings.Cut(selector, "<")
+	var specialization string
+	if strings.Contains(selector, "#") {
+		var err error
+		name, specialization, err = parseImpactSelector(selector)
+		if err != nil {
+			return nil, false
+		}
+	}
 	node, found := index.testPlanSubject(name, wantCleanup)
 	if !found {
 		return nil, false
 	}
 	if len(node.declaration.TypeParameters) == 0 {
-		if hasArguments {
+		if hasArguments || specialization != "" {
 			return nil, false
 		}
 		if wantCleanup {
@@ -144,11 +152,12 @@ func (index *QueryIndex) testPlanSubjects(selector string, wantCleanup bool) ([]
 	var subjects []string
 	for _, facts := range node.specializations {
 		hasBody := !wantCleanup && facts.Function != nil || wantCleanup && facts.Cleanup != nil
-		if hasBody && (!hasArguments || concrete == testPlanTypeArguments(facts.TypeArguments)+">") {
+		if hasBody && (specialization == "" || facts.ID == specialization) &&
+			(!hasArguments || concrete == testPlanTypeArguments(facts.TypeArguments)+">") {
 			subjects = append(subjects, testPlanEndpoint(node.symbol.Visible, facts.ID))
 		}
 	}
-	return subjects, !hasArguments || len(subjects) != 0
+	return subjects, !hasArguments && specialization == "" || len(subjects) != 0
 }
 
 func (index *QueryIndex) testPlanSubject(selector string, wantCleanup bool) (*indexedQueryNode, bool) {

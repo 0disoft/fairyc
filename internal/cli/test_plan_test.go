@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
@@ -269,6 +271,8 @@ import library as library;
 `)
 	signed := atlasmap.TestPlanPath{Test: "tests::plan::checks_i32", Path: []string{"tests::plan::checks_i32", "library::signed", "library::relay<i32>", "library::target<i32>"}}
 	boolean := atlasmap.TestPlanPath{Test: "tests::plan::checks_bool", Path: []string{"tests::plan::checks_bool", "library::boolean", "library::relay<bool>", "library::target<bool>"}}
+	target, targetIDs := testPlanSpecializationIDs(t, root, "target")
+	_, relayIDs := testPlanSpecializationIDs(t, root, "relay")
 	for _, tc := range []struct {
 		selector string
 		want     []atlasmap.TestPlanPath
@@ -278,6 +282,11 @@ import library as library;
 		{selector: "library::target<bool>", want: []atlasmap.TestPlanPath{boolean}},
 		{selector: "library::target", want: []atlasmap.TestPlanPath{boolean, signed}},
 		{selector: "library::unused", reason: "generic-call-coverage"},
+		{selector: target.Visible + "#" + targetIDs["i32"], want: []atlasmap.TestPlanPath{signed}},
+		{selector: target.Full + "#" + targetIDs["bool"], want: []atlasmap.TestPlanPath{boolean}},
+		{selector: target.Visible + "#" + relayIDs["i32"], reason: "symbol-not-found"},
+		{selector: target.Visible + "#g0_" + strings.Repeat("0", 64), reason: "symbol-not-found"},
+		{selector: target.Visible + "#", reason: "symbol-not-found"},
 	} {
 		t.Run(tc.selector, func(t *testing.T) {
 			code, out, stderr := runForTest([]string{"experimental", "test-plan", "--symbol", tc.selector}, root)
@@ -325,6 +334,7 @@ import library as library;
 		want     []atlasmap.TestPlanPath
 	}
 	all := testCase{selector: "library::Token::cleanup"}
+	token, cleanupIDs := testPlanSpecializationIDs(t, root, "Token")
 	var tests []testCase
 	for _, tc := range []struct{ typ, entry string }{{"bool", "boolean"}, {"i32", "signed"}} {
 		test := "tests::plan::checks_" + tc.typ
@@ -335,6 +345,7 @@ import library as library;
 		observe := "library::observe<" + tc.typ + ">"
 		tests = append(tests,
 			testCase{cleanup, []atlasmap.TestPlanPath{cleanupPath}},
+			testCase{token.Visible + "#" + cleanupIDs[tc.typ] + "::cleanup", []atlasmap.TestPlanPath{cleanupPath}},
 			testCase{observe, []atlasmap.TestPlanPath{{Test: test, Path: append(slices.Clone(path), observe)}}},
 		)
 	}
@@ -354,6 +365,33 @@ import library as library;
 			}
 		})
 	}
+}
+
+func testPlanSpecializationIDs(t *testing.T, root, name string) (atlasSymbolReference, map[string]string) {
+	t.Helper()
+	var diagnostic bytes.Buffer
+	prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
+	if code != ExitSuccess {
+		t.Fatalf("prepare Atlas catalog: %d %s", code, &diagnostic)
+	}
+	var symbol atlasSymbolReference
+	ids := map[string]string{}
+	for _, partition := range prepared.partitions {
+		for _, row := range partition.Symbols() {
+			if row.Declaration.Module == "library" && row.Declaration.Name == name {
+				symbol = atlasSymbolReference{Visible: row.Visible, Full: row.Full}
+			}
+		}
+		for _, row := range partition.Specializations() {
+			if row.Declaration.Module == "library" && row.Declaration.Name == name && len(row.TypeArguments) == 1 {
+				ids[row.TypeArguments[0].Name] = row.ID
+			}
+		}
+	}
+	if symbol.Visible == "" || ids["bool"] == "" || ids["i32"] == "" {
+		t.Fatalf("missing Atlas symbol or implementations for %s", name)
+	}
+	return symbol, ids
 }
 
 func TestExperimentalTestPlanCleanupSelectors(t *testing.T) {
