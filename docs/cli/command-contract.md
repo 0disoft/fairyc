@@ -65,6 +65,10 @@ cleanup bodies. These paths can include a `module::Resource::cleanup` step. Clea
 paths can be conditional on control flow or the active payload of a tagged value.
 If cleanup graph construction exceeds 65,536 call observations and drop-type visits,
 the command retains the ordinary Atlas paths and recommends `all-tests`.
+For copied closures, the command follows immutable local copies and direct fields
+of locally constructed structs to the exact lifted function. A closure passed
+through a parameter or return value can leave the target unresolved and require
+`all-tests`. Closure tracing has its own 65,536-step limit.
 Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
 cross-package calls, generic call coverage and unmapped tests cause `all-tests`.
 Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.

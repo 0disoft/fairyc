@@ -56,6 +56,10 @@ builtin identity and are not represented as this slice kind. The ordinary
 snapshot, generic headers and Atlas V3 transport; the SDK-private executable MIR
 is not an Atlas admission claim.
 
+The canonical copied closure type `fn i32(i32)` uses the existing `builtin`
+type reference. Function parameters and results and ordinary struct fields
+retain that type without exposing the closure's runtime layout.
+
 ## Records
 
 The v0 snapshot contains detached, canonically sorted package, file, module, declaration,

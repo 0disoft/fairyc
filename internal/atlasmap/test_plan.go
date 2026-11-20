@@ -29,7 +29,8 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 		return paths, []string{"symbol-not-found"}
 	}
 	cleanups := index.testPlanCleanups(program, packageID)
-	reasons := index.testPlanOmissions(cleanups.recovered)
+	closures := index.testPlanClosures(program, packageID)
+	reasons := index.testPlanOmissions(cleanups.recovered + closures.recovered)
 	type step struct {
 		next  string
 		depth int
@@ -57,6 +58,9 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 			}
 		}
 		for _, source := range cleanups.incoming[target] {
+			enqueue(source)
+		}
+		for _, source := range closures.incoming[target] {
 			enqueue(source)
 		}
 	}
@@ -122,7 +126,7 @@ func (index *QueryIndex) testPlanSubject(selector string) (string, bool) {
 	return index.nodes[position].symbol.Visible, true
 }
 
-func (index *QueryIndex) testPlanOmissions(recoveredCleanups int) []string {
+func (index *QueryIndex) testPlanOmissions(recoveredCalls int) []string {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
@@ -134,8 +138,10 @@ func (index *QueryIndex) testPlanOmissions(recoveredCleanups int) []string {
 		if record.Relation == "calls" {
 			callsExact = record.External == 0 &&
 				(record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0 ||
-					recoveredCleanups > 0 && recoveredCleanups == record.Unknown &&
-						slices.Equal(record.Reasons, []string{ordinaryCleanupOmission}))
+					recoveredCalls > 0 && recoveredCalls == record.Unknown &&
+						!slices.ContainsFunc(record.Reasons, func(reason string) bool {
+							return reason != ordinaryCleanupOmission && reason != indirectClosureOmission
+						}))
 		}
 		if record.Relation == "generic-template-bodies" {
 			add("generic-call-coverage")

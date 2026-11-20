@@ -10,11 +10,12 @@ func TestExperimentalTestPlanCalls(t *testing.T) {
 	const packageUID = "example.stable-test.app"
 	const selectedTest = "tests::plan::checks_answer"
 	for _, tc := range []struct {
-		name    string
-		library string
-		call    string
-		path    []string
-		reason  string
+		name     string
+		library  string
+		call     string
+		selector string
+		path     []string
+		reason   string
 	}{
 		{
 			name: "direct",
@@ -71,6 +72,47 @@ pub fn i32 bridge() {
 			reason: "incomplete-call-coverage",
 		},
 		{
+			name: "copied-closure",
+			library: `pub fn i32 bridge() {
+    let i32 offset = 40;
+    let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
+    let copy = action;
+    return copy(2);
+}`,
+			call:     "library::bridge()",
+			selector: "library::_fy_closure_bridge_1",
+			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
+		},
+		{
+			name: "closure-field",
+			library: `struct Box { i32 arg; fn i32(i32) action; }
+pub fn i32 bridge() {
+    let i32 offset = 40;
+    let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
+    let Box stored = Box { .action = action, .arg = 2 };
+    let Box copy = stored;
+    let fn i32(i32) extracted = copy.action;
+    return extracted(copy.arg);
+}`,
+			call:     "library::bridge()",
+			selector: "library::_fy_closure_bridge_1",
+			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
+		},
+		{
+			name: "closure-parameter-fallback",
+			library: `fn i32 apply(fn i32(i32) action) { return action(2); }
+pub fn i32 bridge() {
+    let i32 offset = 40;
+    let fn i32(i32) action = fn [i32 offset] i32(i32 x) { return offset + x; };
+    let copy = action;
+    return copy(2) + apply(copy) - 42;
+}`,
+			call:     "library::bridge()",
+			selector: "library::_fy_closure_bridge_1",
+			path:     []string{selectedTest, "library::bridge", "library::_fy_closure_bridge_1"},
+			reason:   "incomplete-call-coverage",
+		},
+		{
 			name: "cycle",
 			library: `unsafe extern C fn i32 host_value();
 pub fn i32 left(i32 n) {
@@ -95,6 +137,9 @@ fn i32 right(i32 n) {
 				"@test\nfn void checks_answer() { assert("+tc.call+" == 42); }\n"+
 				"@test\nfn void unrelated() { assert(true); }\n")
 			selector := "library::answer"
+			if tc.selector != "" {
+				selector = tc.selector
+			}
 			if tc.name == "direct" {
 				selector = atlasFunctionSymbolForPackage(t, root, packageUID, "answer").Visible
 			}
