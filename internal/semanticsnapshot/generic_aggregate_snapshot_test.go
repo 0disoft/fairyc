@@ -102,6 +102,10 @@ func TestAggregateSnapshotJoinsTypesCleanupCallsAndDocumentation(t *testing.T) {
 	if aggregates != 4 || cleanup != 2 || borrows != 2 {
 		t.Fatalf("observations: %d/%d/%d", aggregates, cleanup, borrows)
 	}
+	calls := findCompleteness(t, snapshot.Completeness(), "calls")
+	if calls.Status != semanticsnapshot.CompletenessExact || calls.Unknown != 0 {
+		t.Fatalf("summarized generic cleanups reported as missing: %+v", calls)
+	}
 	if strings.Contains(fmt.Sprint(snapshot.Specializations()), "corrupt") {
 		t.Fatal("snapshot aggregate or cleanup getter aliases storage")
 	}

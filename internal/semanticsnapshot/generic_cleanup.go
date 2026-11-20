@@ -10,10 +10,10 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-func buildGenericCleanupSummaries(result compiler.Result, implementations map[DeclarationKey]SpecializationSummary, metadata map[hir.PackageID]packageMetadata, symbols map[hir.SymbolID]DeclarationKey, foreign map[hir.SymbolID]Declaration, private map[hir.SymbolID]struct{}) (map[DeclarationKey]FunctionSummary, []semantic.BorrowFact, int, int, error) {
+func buildGenericCleanupSummaries(result compiler.Result, implementations map[DeclarationKey]SpecializationSummary, metadata map[hir.PackageID]packageMetadata, symbols map[hir.SymbolID]DeclarationKey, foreign map[hir.SymbolID]Declaration, private map[hir.SymbolID]struct{}) (map[DeclarationKey]FunctionSummary, []semantic.BorrowFact, int, int, map[hir.SymbolID]DeclarationKey, error) {
 	view, err := selectGenericCleanupFunctions(result.MIR.Functions, genericCleanupOwners(implementations), metadata, private)
 	if err != nil {
-		return nil, nil, 0, 0, err
+		return nil, nil, 0, 0, nil, err
 	}
 	// With no selected cleanup, the summary builder only reads the original symbols.
 	// A selected view owns its copy before installing any synthetic bindings.
@@ -27,13 +27,13 @@ func buildGenericCleanupSummaries(result compiler.Result, implementations map[De
 	program.Functions = view.functions
 	values, resolved, external, err := buildFunctionSummaries(program, cleanup, metadata, cleanupSymbols, foreign, private, view.bounds)
 	if err != nil {
-		return nil, nil, 0, 0, err
+		return nil, nil, 0, 0, nil, err
 	}
 	summaries, err := bindGenericCleanupSummaries(values, view.owners, implementations)
 	if err != nil {
-		return nil, nil, 0, 0, err
+		return nil, nil, 0, 0, nil, err
 	}
-	return summaries, ordinary, resolved, external, nil
+	return summaries, ordinary, resolved, external, view.bindings, nil
 }
 
 func genericCleanupOwners(implementations map[DeclarationKey]SpecializationSummary) map[string]DeclarationKey {

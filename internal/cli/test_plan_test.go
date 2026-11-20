@@ -27,6 +27,18 @@ func TestExperimentalTestPlanCalls(t *testing.T) {
 			path:    []string{selectedTest, "library::bridge", "library::answer"},
 		},
 		{
+			name: "cleanup",
+			library: `resource Token {
+    i32 value;
+    cleanup { discard answer(); }
+}
+pub fn i32 bridge() {
+    let Token token = Token { .value = 42 };
+    return token.value;
+}`,
+			call: "library::bridge()",
+		},
+		{
 			name: "cycle",
 			library: `unsafe extern C fn i32 host_value();
 pub fn i32 left(i32 n) {
@@ -59,8 +71,16 @@ fn i32 right(i32 n) {
 			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &got) != nil {
 				t.Fatalf("test-plan = (%d, %s, %s)", code, out, stderr)
 			}
-			if got.Schema != "fairyc.test-plan/v1" || got.Package != packageUID || got.Symbol != selector ||
-				len(got.Tests) != 1 || got.Tests[0].Test != selectedTest || !slices.Equal(got.Tests[0].Path, tc.path) {
+			if got.Schema != "fairyc.test-plan/v1" || got.Package != packageUID || got.Symbol != selector {
+				t.Fatalf("unexpected plan identity: %s", out)
+			}
+			if tc.name == "cleanup" {
+				if len(got.Tests) != 0 || got.Recommend != "all-tests" || !slices.Contains(got.Reasons, "incomplete-call-coverage") {
+					t.Fatalf("cleanup call did not request the full suite: %s", out)
+				}
+				return
+			}
+			if len(got.Tests) != 1 || got.Tests[0].Test != selectedTest || !slices.Equal(got.Tests[0].Path, tc.path) {
 				t.Fatalf("unexpected plan: %s; want path %v", out, tc.path)
 			}
 			if tc.name == "cycle" {

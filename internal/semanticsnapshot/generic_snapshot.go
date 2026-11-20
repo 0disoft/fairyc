@@ -51,7 +51,7 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 	if err != nil {
 		return Snapshot{}, err
 	}
-	cleanup, ordinaryBorrows, cleanupResolved, cleanupExternal, err := buildGenericCleanupSummaries(result, implementations, metadata, symbols, foreign, private)
+	cleanup, ordinaryBorrows, cleanupResolved, cleanupExternal, cleanupSymbols, err := buildGenericCleanupSummaries(result, implementations, metadata, symbols, foreign, private)
 	if err != nil {
 		return Snapshot{}, err
 	}
@@ -139,7 +139,7 @@ func BuildCompiler(result compiler.Result, packages []PackageInput) (Snapshot, e
 		})
 	}
 	slices.SortFunc(documentation, func(a, b DeclarationDocumentation) int { return compareDeclarationKey(a.Declaration, b.Declaration) })
-	completeness := buildCompleteness(resolved+cleanupResolved, external+cleanupExternal)
+	completeness := buildCompleteness(resolved+cleanupResolved, external+cleanupExternal, countOmittedCalls(result.MIR, cleanupSymbols))
 	completeness = append(completeness,
 		Completeness{Relation: "generic-specializations", Status: CompletenessExact, Resolved: len(specializations)},
 		Completeness{Relation: "generic-template-bodies", Status: CompletenessUnavailable, Unknown: len(generic), Reasons: []string{"bodies-checked-only-after-specialization"}},

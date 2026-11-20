@@ -60,7 +60,7 @@ func buildOrdinarySnapshot(semanticResult semantic.Result, program mir.Program, 
 	if err != nil {
 		return Snapshot{}, err
 	}
-	completeness := buildCompleteness(resolvedCalls, externalCalls)
+	completeness := buildCompleteness(resolvedCalls, externalCalls, countOmittedCalls(program, nil))
 	return Snapshot{data: snapshotData{
 		packages: stablePackages, files: files, modules: modules, declarations: declarations,
 		documentation: documentation, functions: functions, completeness: completeness,
@@ -979,11 +979,22 @@ func canonicalSpans(values []Span) []Span {
 	return slices.Compact(values)
 }
 
-func buildCompleteness(resolvedCalls, externalCalls int) []Completeness {
-	calls := Completeness{Relation: "calls", Status: CompletenessExact, Resolved: resolvedCalls, External: externalCalls}
+func buildCompleteness(resolvedCalls, externalCalls int, omitted omittedCallCoverage) []Completeness {
+	calls := Completeness{
+		Relation: "calls", Status: CompletenessExact, Resolved: resolvedCalls, External: externalCalls,
+		Unknown: omitted.cleanups + omitted.closures,
+	}
 	if externalCalls != 0 {
+		calls.Reasons = append(calls.Reasons, "external-ffi")
+	}
+	if omitted.closures != 0 {
+		calls.Reasons = append(calls.Reasons, "indirect-closure-call")
+	}
+	if omitted.cleanups != 0 {
+		calls.Reasons = append(calls.Reasons, "ordinary-cleanup-call-not-retained")
+	}
+	if len(calls.Reasons) != 0 {
 		calls.Status = CompletenessPartial
-		calls.Reasons = []string{"external-ffi"}
 	}
 	result := []Completeness{
 		{Relation: "allocates", Status: CompletenessExact},

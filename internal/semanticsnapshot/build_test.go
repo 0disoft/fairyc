@@ -213,6 +213,30 @@ fn i32 main() { return unsafe { answer() }; }
 	}
 }
 
+func TestBuildCountsUnrepresentedCallSites(t *testing.T) {
+	t.Parallel()
+	text := `module main;
+fn i32 answer() { return 42; }
+resource Token { i32 value; cleanup { discard answer(); } }
+fn i32 main() {
+    let Token token = Token { .value = answer() };
+    let fn i32(i32) action = fn [] i32(i32 n) { return n; };
+    return action(token.value);
+}
+`
+	result := compileSinglePackage(t, hir.DefaultPackage, "main.fy", text)
+	packages := []semanticsnapshot.PackageInput{packageInput(t, hir.DefaultPackage, "example.snapshot.omissions", "omissions", "1", "main.fy", text, "root")}
+	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, packages)
+	if err != nil {
+		t.Fatal(err)
+	}
+	calls := findCompleteness(t, snapshot.Completeness(), "calls")
+	if calls.Status != semanticsnapshot.CompletenessPartial || calls.Resolved != 1 || calls.Unknown != 2 ||
+		!slices.Equal(calls.Reasons, []string{"indirect-closure-call", "ordinary-cleanup-call-not-retained"}) {
+		t.Fatalf("call completeness = %+v", calls)
+	}
+}
+
 func TestBuildRetainsStructuredDeclarationTypesAndHidesCompilerDropGlue(t *testing.T) {
 	t.Parallel()
 	text := `module api;

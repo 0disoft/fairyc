@@ -129,10 +129,15 @@ in-memory sidecar is removed.
 
 ## Completeness
 
-Completeness is relation-specific. Local direct calls, effects, traps, unsafe sites, moves, drops,
+Completeness is relation-specific. Retained local direct calls, effects, traps, unsafe sites, moves, drops,
 Region placement, Result propagation, and borrow facts are exact for the implemented Stage 0 MIR.
 The presence of a foreign C call makes only `calls` partial and records `external-ffi`; its local
 declaration and call site remain known, while behavior beyond the ABI boundary is opaque.
+An indirect closure invocation or direct call in an ordinary resource cleanup also makes
+`calls` partial. The ledger counts distinct omitted call observations in `unknown` and records
+`indirect-closure-call` or `ordinary-cleanup-call-not-retained`. Copies of a deferred call at
+multiple exits count once per body. Direct calls in summarized concrete generic cleanups
+remain in the resolved or external counts.
 
 For generic source, generic-specializations is exact for the checked concrete implementation set.
 generic-template-bodies remains unavailable for every original template: checking a specialization

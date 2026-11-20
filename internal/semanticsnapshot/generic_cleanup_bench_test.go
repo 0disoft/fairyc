@@ -44,7 +44,7 @@ func BenchmarkGenericCleanupOwners(b *testing.B) {
 			b.ReportAllocs()
 			b.ResetTimer()
 			for b.Loop() {
-				summaries, borrows, resolved, external, err := buildGenericCleanupSummaries(compiler.Result{}, implementations, metadata, nil, nil, nil)
+				summaries, borrows, resolved, external, _, err := buildGenericCleanupSummaries(compiler.Result{}, implementations, metadata, nil, nil, nil)
 				if err != nil || len(summaries) != 0 || len(borrows) != 0 || resolved != 0 || external != 0 {
 					b.Fatalf("empty-cleanup summaries changed: %v", err)
 				}

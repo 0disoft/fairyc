@@ -48,7 +48,8 @@ func newCleanupSelectionFixture() cleanupSelectionFixture {
 }
 
 func (fixture cleanupSelectionFixture) build() (map[DeclarationKey]FunctionSummary, []semantic.BorrowFact, int, int, error) {
-	return buildGenericCleanupSummaries(fixture.result, fixture.implementations, fixture.metadata, fixture.symbols, nil, fixture.private)
+	summaries, ordinary, resolved, external, _, err := buildGenericCleanupSummaries(fixture.result, fixture.implementations, fixture.metadata, fixture.symbols, nil, fixture.private)
+	return summaries, ordinary, resolved, external, err
 }
 
 func TestGenericCleanupSelectionPreservesInputsAndCallTargets(t *testing.T) {
@@ -152,7 +153,7 @@ func BenchmarkGenericCleanupUnselectedSymbols(b *testing.B) {
 			}
 			b.ReportAllocs()
 			for b.Loop() {
-				summaries, ordinary, resolved, external, err := buildGenericCleanupSummaries(compiler.Result{}, nil, nil, symbols, nil, nil)
+				summaries, ordinary, resolved, external, _, err := buildGenericCleanupSummaries(compiler.Result{}, nil, nil, symbols, nil, nil)
 				if err != nil || len(summaries) != 0 || len(ordinary) != 0 || resolved != 0 || external != 0 {
 					b.Fatalf("unselected cleanup changed: %v", err)
 				}
