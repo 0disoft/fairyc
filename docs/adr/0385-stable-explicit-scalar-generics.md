@@ -161,7 +161,10 @@ The Fairy-authored candidate's source request collector also infers scalar
 arguments from integer and boolean literals, scalar casts, and written scalar
 result contexts in local initializers and returns. It stores inferred requests
 under the same declaration and ordered argument key as an explicit call.
-Executable candidate checking and lowering still require explicit type arguments.
+Candidate checking and lowering also consume those requests for direct calls in
+ordinary functions. The typed call and restored artifact retain the written
+call site and the concrete specialization identity. Calls inside specialized
+templates and copied bodies still use explicit type arguments.
 
 ## Materialized syntax bound
 

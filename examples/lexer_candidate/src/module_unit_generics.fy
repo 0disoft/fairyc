@@ -15,6 +15,8 @@ import std::bytes as bytes;
 import std::vec as v;
 import resource_abilities as abilities;
 import generic_scalar_arguments as source_arguments;
+import generic_source_inference as inference;
+import generic_source_arguments as source_paths;
 
 pub struct Instance {usize module_index;usize declaration;usize argument_start;usize argument_count;usize result;usize parameter_start;usize parameter_count;u32 effects;bool must_use;bool unsafe_call;}
 pub struct Call {usize instance;usize aggregate_type;u32 intrinsic;bool deferred;}
@@ -29,6 +31,38 @@ pub fn usize instance_limit(){return 256;}
 pub fn join::Problem fail(u32 code,usize module_index,usize start,usize end){return join::Problem{.code,.module_index,.start,.end};}
 pub fn bool charge(ref mut Budget work,usize amount){if(work.work>1048576 || amount>1048576-work.work){return false;}work.work+=amount;return true;}
 fn usize owner(ref syntax::Parsed p,usize start,usize end,ref mut Budget work){var usize i=0;while(i<syntax::declaration_count(p)){if(!charge(work,1)){return 0;}let d=syntax::declaration_at(p,i);if(d.kind!=1 && start>=d.start && end<=d.end){return i+1;}i+=1;}return 0;}
+fn Result<usize,join::Problem> inferred_target(ref signatures::Program metadata,ref syntax::Parsed source,usize module_index,usize call,ref mut Budget work){
+    let e=syntax::expression_at(source,call);
+    let base=syntax::expression_at(source,e.left);
+    if(base.kind!=2 || base.token>=1048576){return .ok(0);}
+    let name=switch(source_paths::path(source,base.start,base.end,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    if(!charge(work,0)){return .err(fail(4503,module_index,e.start,e.end));}
+    var usize probes=0;
+    let found=signatures::declaration_lookup_measured(metadata,module_index,bytes::view(ref name),ref mut probes);
+    if(!charge(work,probes)){return .err(fail(4503,module_index,e.start,e.end));}
+    if(found.code!=0){return .ok(0);}
+    let target=signatures::declaration_at(metadata,found.item);
+    return .ok(if(target.kind==3 && target.parameters!=0){found.item}else{0});
+}
+fn Result<v::Vec<usize>,join::Problem> inferred_arguments(ref syntax::Parsed source,usize module_index,usize call,syntax::Declaration owner,ref syntax::Parsed provider,usize declaration,ref mut v::Vec<types::Type> graph,ref mut Budget work){
+    let e=syntax::expression_at(source,call);
+    let expected=switch(inference::expected_root(source,owner,call,ref mut work.work)){case .ok(root):{root}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    let solved=switch(inference::solve(source,call,provider,declaration-1,expected,ref mut work.work)){case .ok(p):{p}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};
+    if(!charge(work,0)){return .err(fail(4503,module_index,e.start,e.end));}
+    var v::Vec<usize> args=v::empty<usize>();var usize i=0;
+    while(i<solved.count){
+        let scalar=solved.types[i];
+        var usize id=source_arguments::named(inference::spelling(scalar));
+        if(id==0){
+            if(!charge(work,types::count(graph)+1)){return .err(fail(4503,module_index,e.start,e.end));}
+            id=types::canonical(graph,types::Type{.kind=1,.scalar,.module_index=0,.declaration=0,.first=0,.second=0});
+            if(id==0){return .err(fail(if(types::count(graph)>=4096){4503}else{11},module_index,e.start,e.end));}
+        }
+        if(!v::push<usize>(ref mut args,id).is_ok){return .err(fail(11,module_index,e.start,e.end));}
+        i+=1;
+    }
+    return .ok(args);
+}
 pub fn bool shadow(ref syntax::Parsed p,usize caller,ref u8[] name,ref mut Budget work){let d=syntax::declaration_at(p,caller-1);var usize i=0;while(i<syntax::entry_count(p)){if(!charge(work,1)){return true;}let e=syntax::entry_at(p,i);if(e.start>=d.start && e.end<=d.end && bytes::equal(syntax::source_view(p)[e.name_start..e.name_end],name)){return true;}i+=1;}return false;}
 pub fn Result<usize,join::Problem> instantiate(ref v::Vec<syntax::Parsed> sources,ref signatures::Program metadata,usize module_index,usize declaration,ref v::Vec<usize> args,ref mut v::Vec<types::Type> graph,ref mut v::Vec<Instance> instances,ref mut v::Vec<usize> arguments,ref mut v::Vec<usize> parameters,ref mut Budget work,usize caller,usize start,usize end){
     let source=v::at<syntax::Parsed>(sources,module_index);let d=syntax::declaration_at(source,declaration-1);let usize count=v::len<usize>(args);
@@ -77,6 +111,19 @@ fn Result<Plan,join::Problem> collect(ref v::Vec<syntax::Parsed> sources,ref sig
                     while(j<syntax::specialization_argument_count(source,i)){let empty=v::empty<usize>();let r=signatures::resolve_argument(metadata,source,module_index,0,syntax::specialization_argument(source,i,j),ref empty,graph);if(r.problem.code!=0){return .err(fail(r.problem.code,module_index,r.problem.start,r.problem.end));}if(!v::push<usize>(ref mut args,r.type).is_ok){return .err(fail(11,module_index,e.start,e.end));}j+=1;}
                     if(signatures::aggregate_types(metadata) && (target.kind==4 || target.kind==6)){let empty=v::empty<usize>();call.aggregate_type=switch(aggregate_plan::construction(metadata,source,module_index,caller,ref empty,i,true,graph,ref mut budget.work)){case .ok(n):{n}case .err(code):{return .err(fail(code,module_index,e.start,e.end));}};}
                     else{call.instance=switch(instantiate(sources,metadata,target.module_index,target.declaration,ref args,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut budget,module_index,e.start,e.end)){case .ok(id):{id}case .err(p):{return .err(p);}};}
+                }
+            }
+        }else if(e.kind==6){
+            let found=switch(inferred_target(metadata,source,module_index,i,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
+            if(found!=0){
+                let caller=owner(source,e.start,e.end,ref mut budget);
+                if(caller==0){return .err(fail(if(budget.work>=1048576){4503}else{4501},module_index,e.start,e.end));}
+                let d=syntax::declaration_at(source,caller-1);
+                if(d.generic_parameters==0 && d.kind!=12){
+                    let target=signatures::declaration_at(metadata,found);
+                    let provider=v::at<syntax::Parsed>(sources,target.module_index);
+                    let args=switch(inferred_arguments(source,module_index,i,d,provider,target.declaration,graph,ref mut budget)){case .ok(p):{p}case .err(p):{return .err(p);}};
+                    call.instance=switch(instantiate(sources,metadata,target.module_index,target.declaration,ref args,graph,ref mut instances,ref mut arguments,ref mut parameters,ref mut budget,module_index,e.start,e.end)){case .ok(id):{id}case .err(p):{return .err(p);}};
                 }
             }
         }if(!v::push<Call>(ref mut calls,call).is_ok){return .err(fail(11,module_index,e.start,e.end));}i+=1;

@@ -7,6 +7,7 @@ import module_unit_c_emit as c;
 import module_project_complete_c as complete_c;
 import module_unit_body_ir_model as ir;
 import module_unit_cleanup_mir_model as clean;
+import module_unit_interpreter as interpreter;
 import module_project_artifact_encode as encode;
 import module_project_artifact_decode as decode;
 import candidate_artifact_wire as wire;
@@ -34,6 +35,21 @@ fn void rejected(ref u8[] raw){
     assert(switch(core::build_complete_sources(ref sources,ref owners,ref imports,ref table,ref mut work,ref mut linking)){case .ok(_):{false}case .err(e):{e.code!=0 && e.end>e.start && e.end<=raw.len}});
 }
 fn void append(ref mut bytes::Buffer raw,ref u8[] part){assert(bytes::append(raw,part).is_ok);}
+@test
+@effects(console)
+fn void inferred_scalar_calls_restore_and_execute(){
+    let raw=b"module root;fn T id<T>(T value){return value;}fn T answer<T>(){return 42;}fn i32 main(){let u32 value={id(42)};assert(value==42);assert(id(true));discard id<i32>(42);discard id(42);return answer();}";
+    let result=compiled(raw);
+    let owner=core::checked_program(ref result);
+    let program=checked::ir_program(owner);
+    var usize entry=0;var usize i=1;
+    while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==4){entry=i;}i+=1;}
+    assert(entry!=0);
+    let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
+    let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
+    let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);
+    assert(outcome.error==0 && outcome.trap==0 && outcome.bits==42);
+}
 @test fn void extended_transport_keeps_operations_and_composite_signatures_closed(){
     var u32 scalar=32;while(scalar<=38){let name=transport::name(scalar);var usize shape=0;while(shape<8){
         var bytes::Buffer raw=bytes::empty();append(ref mut raw,b"module root;");

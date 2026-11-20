@@ -7,6 +7,32 @@ import std::bytes as bytes;
 pub struct Arguments { usize count; u32[8] types; }
 struct Constraint { u32 fixed; bool integer; }
 
+// Derive a written scalar context for a call without changing parser IDs.
+// Only a return or typed initializer and its transparent value wrappers
+// provide context, as in the source request walk.
+pub fn Result<usize,u32> expected_root(ref syntax::Parsed p, syntax::Declaration owner, usize call, ref mut usize work) {
+    let site=syntax::expression_at(p,call);
+    var usize i=1;
+    while(i<=syntax::statement_count(p)){
+        if(!budget::charge(work,1)){return .err(10);}
+        let s=syntax::statement_at(p,i);i+=1;
+        if(s.start<owner.start || s.end>owner.end || s.start>site.start || s.end<site.end){continue;}
+        var usize root=s.expression;var usize expected=0;
+        if(s.kind==3){expected=owner.result_type;}
+        else if(s.kind==2){let e=syntax::entry_at(p,s.entry-1);root=e.expression;expected=e.type_root;}
+        if(expected==0){continue;}
+        while(root>call){
+            if(!budget::charge(work,1)){return .err(10);}
+            let n=syntax::expression_at(p,root);
+            if(n.kind==3){root=n.left;}
+            else if(n.kind==12 || n.kind==31){root=syntax::statement_at(p,n.left).expression;}
+            else{break;}
+        }
+        if(root==call){return .ok(expected);}
+    }
+    return .ok(0);
+}
+
 pub fn ref u8[] spelling(u32 code) {
     if (code==32) { return b"i8"; }
     if (code==33) { return b"i16"; }
