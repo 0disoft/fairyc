@@ -21,6 +21,15 @@ fn bool condition(ref syntax::Parsed p,syntax::Declaration d,usize id,usize visi
     if(e.kind==3){return e.left<id && condition(p,d,e.left,visible,count,out,work,graph);}
     let op=syntax::expression_text(p,id);
     if(e.kind==1){return identity::boolean(out,op,work);}
+    if(e.kind==4 && bytes::equal(op,b"!")){
+        return e.left<id && identity::branch(out,op,work) &&
+            condition(p,d,e.left,visible,count,out,work,graph) && json::raw(out,b"]}",work);
+    }
+    if(e.kind==5 && identity::logical(op)){
+        return e.left<id && e.right<id && identity::branch(out,op,work) &&
+            condition(p,d,e.left,visible,count,out,work,graph) && json::raw(out,b",",work) &&
+            condition(p,d,e.right,visible,count,out,work,graph) && json::raw(out,b"]}",work);
+    }
     return e.kind==5 && e.left<id && e.right<id && identity::comparison(op) &&
         identity::branch(out,op,work) && expression(p,d,e.left,visible,count,out,work,graph) &&
         json::raw(out,b",",work) && expression(p,d,e.right,visible,count,out,work,graph) && json::raw(out,b"]}",work);

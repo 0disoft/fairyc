@@ -55,8 +55,8 @@ func runCandidateInlineLocalsPipeline(t *testing.T, family string) {
 	}
 	if family == "conditional" {
 		data = []byte(strings.NewReplacer(
-			"let i32 added=x+2;", "let i32 added=if (x < 0) { 1/0 } else if (x == 0) { 2 } else { x+2 };",
-			"let i32 unused=10/b;", "let i32 unused=if (b == 0) { 10/b } else { 0 };",
+			"let i32 added=x+2;", "let i32 added=if (x < 0 && 1/0 == 0) { 0 } else if (x == 0) { 2 } else { x+2 };",
+			"let i32 unused=10/b;", "let i32 unused=if (!(b != 0) || 1/b == 0) { 10/b } else { 0 };",
 		).Replace(string(data)))
 	}
 	program := strings.Replace(string(data), "module tests::module_inline_pipeline;", "module main;", 1)

@@ -61,7 +61,7 @@ func TestInlineConditionalIdentityAndExecution(t *testing.T) {
 
 func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 	for _, body := range []string{
-		"return if (x == 0 && x < 1) { 42 } else { 0 };",
+		"return if ((x == 0) == true) { 42 } else { 0 };",
 		"return if (x == 0) { let i32 local = 42; local } else { 0 };",
 		"if (x == 0) { return 42; } return 0;",
 	} {
@@ -73,4 +73,25 @@ func TestInlineConditionalAdmissionBoundaries(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInlineConditionalShortCircuit(t *testing.T) {
+	const body = `return if (x != 0 && 42 / x == 21) { 7 }
+        else if (!(x != 0) || 42 / x == 1) { 42 } else { 0 };`
+	const main = `fn i32 main() { assert(choose(2) == 7); return choose(0); }`
+	check := func(expression string) compiler.Result {
+		t.Helper()
+		return checkInlineCalls(t, "module main; @inline pub fn i32 choose(i32 x) {"+expression+"}"+main)
+	}
+	result := check(body)
+	for _, edit := range [][2]string{{"&&", "||"}, {"||", "&&"}, {"!(x != 0)", "(x != 0)"}} {
+		if inlineMutationMarker(check(strings.Replace(body, edit[0], edit[1], 1))) == inlineMutationMarker(result) {
+			t.Fatalf("logical edit %v kept the old inline identity", edit)
+		}
+	}
+	value, err := interpreter.Execute(result.MIR, "main::main")
+	if err != nil || value.Kind != interpreter.OutcomeReturn || value.Value != 42 {
+		t.Fatalf("short-circuit evaluation: %+v %v", value, err)
+	}
+	runExpandedLanguageNative(t, result, "main::main", "")
 }

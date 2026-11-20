@@ -17,6 +17,15 @@ fn bool condition(ref ir::Body b,ref clean::Program p,usize id,usize arity,usize
     if(e.kind==3){return e.left<id && condition(b,p,e.left,arity,visible,versions,walk,out,work);}
     let op=ir::node_text(b,index-1);
     if(e.kind==1){return e.left==0 && e.right==0 && identity::boolean(out,op,work);}
+    if(e.kind==4 && bytes::equal(op,b"!")){
+        return e.left<id && e.right==0 && identity::branch(out,op,work) &&
+            condition(b,p,e.left,arity,visible,versions,walk,out,work) && json::raw(out,b"]}",work);
+    }
+    if(e.kind==5 && identity::logical(op)){
+        return e.left<id && e.right<id && identity::branch(out,op,work) &&
+            condition(b,p,e.left,arity,visible,versions,walk,out,work) && json::raw(out,b",",work) &&
+            condition(b,p,e.right,arity,visible,versions,walk,out,work) && json::raw(out,b"]}",work);
+    }
     return e.kind==5 && e.left<id && e.right<id && identity::comparison(op) &&
         identity::branch(out,op,work) && expression(b,p,e.left,arity,visible,versions,walk,out,work) &&
         json::raw(out,b",",work) && expression(b,p,e.right,arity,visible,versions,walk,out,work) && json::raw(out,b"]}",work);

@@ -164,18 +164,30 @@ func (encoder *inlineFunctionEncoder) condition(e *Expression) (inlineEncodingNo
 	if e.Kind == ExpressionLiteral && len(e.Children) == 0 && (e.Value == "true" || e.Value == "false") {
 		return inlineEncodingNode{Op: "literal", Value: e.Value}, nil
 	}
-	if e.Kind != ExpressionBinary || len(e.Children) != 2 || !strings.Contains(" == != < <= > >= ", " "+e.Operator+" ") {
-		return inlineEncodingNode{}, fmt.Errorf("@inline if conditions require a bool literal or an i32 comparison")
+	operandType := TypeI32
+	arity := 2
+	kind := ExpressionBinary
+	switch e.Operator {
+	case "!":
+		operandType, arity, kind = TypeBool, 1, ExpressionPrefix
+	case "&&", "||":
+		operandType = TypeBool
+	case "==", "!=", "<", "<=", ">", ">=":
+	default:
+		return inlineEncodingNode{}, fmt.Errorf("unsupported @inline condition")
 	}
-	left, err := encoder.expression(&e.Children[0])
-	if err != nil {
-		return inlineEncodingNode{}, err
+	if e.Kind != kind || len(e.Children) != arity {
+		return inlineEncodingNode{}, fmt.Errorf("invalid @inline condition operands")
 	}
-	right, err := encoder.expression(&e.Children[1])
-	if err != nil {
-		return inlineEncodingNode{}, err
+	children := make([]inlineEncodingNode, arity)
+	for i := range e.Children {
+		child, err := encoder.typedExpression(&e.Children[i], operandType, false)
+		if err != nil {
+			return inlineEncodingNode{}, err
+		}
+		children[i] = child
 	}
-	return inlineEncodingNode{Op: e.Operator, Children: []inlineEncodingNode{left, right}}, nil
+	return inlineEncodingNode{Op: e.Operator, Children: children}, nil
 }
 
 func (encoder *inlineFunctionEncoder) expressionNode(e *Expression) (inlineEncodingNode, []Expression, error) {
