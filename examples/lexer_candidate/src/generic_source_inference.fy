@@ -6,10 +6,8 @@ import generic_source_binding_types as bindings;
 import std::bytes as bytes;
 
 pub struct Arguments { usize count; u32[8] types; }
-struct Constraint { u32 fixed; bool integer; }
-struct ArgumentEvidence { usize binder; Constraint actual; }
 struct Tagged { usize first; usize second; }
-struct ResultConstraints { usize count; u32[8] fixed; }
+struct Constraints { usize count; u32[8] fixed; bool[8] integers; }
 
 // Concrete scalar tags end at 38. Keep a distinct representation for each
 // source binder until the selected caller instance supplies its argument.
@@ -115,27 +113,6 @@ fn Result<u32,u32> scalar_root(ref syntax::Parsed p, usize owner, usize root, re
     return .ok(code);
 }
 
-fn Result<Constraint,u32> evidence(ref syntax::Parsed p, usize owner, usize root, ref mut usize work) {
-    var usize id=root;
-    while (id!=0) {
-        if (!budget::charge(work,1)) { return .err(10); }
-        let n=syntax::expression_at(p,id);
-        if (n.kind==3) { id=n.left; continue; }
-        if (n.kind==23) { return .ok(Constraint{.fixed=scalar_root(p,owner,n.right,work)?,.integer=false}); }
-        if (n.kind==2 && owner!=0) {
-            let written=bindings::written_root(p,owner,id,work)?;
-            return .ok(Constraint{.fixed=scalar_root(p,owner,written,work)?,.integer=false});
-        }
-        if (n.kind==1) {
-            let raw=syntax::expression_text(p,id);
-            let boolean=bytes::equal(raw,b"true") || bytes::equal(raw,b"false");
-            return .ok(Constraint{.fixed=if (boolean) { 6 } else { 0 },.integer=syntax::literal_kind(p,id)==5});
-        }
-        break;
-    }
-    return .ok(Constraint{.fixed=0,.integer=false});
-}
-
 fn Result<usize,u32> binder_index(ref syntax::Parsed provider, usize declaration, usize formal_root,
     usize count, ref mut usize work) {
     let root=ungroup_type(provider,formal_root,work)?;
@@ -189,30 +166,31 @@ pub fn Result<usize,u32> constructor_context(ref syntax::Parsed p,syntax::Expres
     return constructor_payload(p,root,syntax::expression_text(p,call.left),work);
 }
 
-// Unify only matching tagged shapes. Each scalar occurrence can constrain
-// a binder, including multiple occurrences of the same binder in a Result.
-fn Result<bool,u32> constrain_result(ref syntax::Parsed caller,usize owner,usize actual,
-    ref syntax::Parsed provider,usize declaration,usize formal,ref mut ResultConstraints constraints,ref mut usize work){
+fn Result<bool,u32> constrain_fixed(ref mut Constraints constraints,usize binder,u32 value){
+    if(value==0){return .ok(true);}
+    let prior=constraints.fixed[binder-1];
+    if(prior!=0 && prior!=value){return .err(4502);}
+    constraints.fixed[binder-1]=value;
+    return .ok(true);
+}
+
+// Each scalar in a matching tagged shape can constrain a binder, including
+// multiple occurrences of the same binder in a Result.
+fn Result<bool,u32> constrain_type(ref syntax::Parsed caller,usize owner,usize actual,
+    ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,ref mut usize work){
     if(actual==0 || formal==0){return .ok(true);}
     let binder=binder_index(provider,declaration,formal,constraints.count,work)?;
-    if(binder!=0){
-        let value=scalar_root(caller,owner,actual,work)?;
-        if(value==0){return .ok(true);}
-        let prior=constraints.fixed[binder-1];
-        if(prior!=0 && prior!=value){return .err(4502);}
-        constraints.fixed[binder-1]=value;
-        return .ok(true);
-    }
+    if(binder!=0){return constrain_fixed(constraints,binder,scalar_root(caller,owner,actual,work)?);}
     let pattern=tagged(provider,ungroup_type(provider,formal,work)?,work)?;
     if(pattern.first==0){return .ok(true);}
     let supplied=tagged(caller,ungroup_type(caller,actual,work)?,work)?;
     if(supplied.first==0 || (pattern.second==0)!=(supplied.second==0)){return .ok(true);}
-    discard constrain_result(caller,owner,supplied.first,provider,declaration,pattern.first,constraints,work)?;
-    return constrain_result(caller,owner,supplied.second,provider,declaration,pattern.second,constraints,work);
+    discard constrain_type(caller,owner,supplied.first,provider,declaration,pattern.first,constraints,work)?;
+    return constrain_type(caller,owner,supplied.second,provider,declaration,pattern.second,constraints,work);
 }
 
-fn Result<ArgumentEvidence,u32> argument_evidence(ref syntax::Parsed caller,usize owner,usize argument,
-    ref syntax::Parsed provider,usize declaration,usize formal,usize count,ref mut usize work){
+fn Result<bool,u32> constrain_argument(ref syntax::Parsed caller,usize owner,usize argument,
+    ref syntax::Parsed provider,usize declaration,usize formal,ref mut Constraints constraints,ref mut usize work){
     var usize id=argument;
     var usize expected=formal;
     while(id!=0 && expected!=0){
@@ -228,12 +206,23 @@ fn Result<ArgumentEvidence,u32> argument_evidence(ref syntax::Parsed caller,usiz
             id=link.left;
             continue;
         }
-        let binder=binder_index(provider,declaration,expected,count,work)?;
-        if(binder==0){break;}
-        let actual=evidence(caller,owner,id,work)?;
-        return .ok(ArgumentEvidence{.binder,.actual});
+        if(n.kind==1){
+            let binder=binder_index(provider,declaration,expected,constraints.count,work)?;
+            if(binder==0){break;}
+            let raw=syntax::expression_text(caller,id);
+            if(bytes::equal(raw,b"true") || bytes::equal(raw,b"false")){return constrain_fixed(constraints,binder,6);}
+            if(syntax::literal_kind(caller,id)==5){constraints.integers[binder-1]=true;}
+            break;
+        }
+        if(n.kind==23){return constrain_type(caller,owner,n.right,provider,declaration,expected,constraints,work);}
+        if(n.kind!=2 || owner==0){break;}
+        let binder=binder_index(provider,declaration,expected,constraints.count,work)?;
+        if(binder==0 && tagged(provider,expected,work)?.first==0){break;}
+        let written=bindings::written_root(caller,owner,id,work)?;
+        if(binder!=0){return constrain_fixed(constraints,binder,scalar_root(caller,owner,written,work)?);}
+        return constrain_type(caller,owner,written,provider,declaration,expected,constraints,work);
     }
-    return .ok(ArgumentEvidence{.binder=0,.actual=Constraint{.fixed=0,.integer=false}});
+    return .ok(true);
 }
 
 // Side-effect-free request inference apart from charging the caller's work meter.
@@ -243,9 +232,8 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
     let target=syntax::declaration_at(provider,declaration);
     let count=syntax::generic_parameter_count(provider,declaration);
     if (count==0 || count>8) { return .err(4502); }
-    var ResultConstraints constraints=ResultConstraints{.count,.fixed=[0;8]};
-    var bool[8] integers=[false;8];
-    discard constrain_result(caller,owner,expected,provider,declaration,target.result_type,ref mut constraints,work)?;
+    var Constraints constraints=Constraints{.count,.fixed=[0;8],.integers=[false;8]};
+    discard constrain_type(caller,owner,expected,provider,declaration,target.result_type,ref mut constraints,work)?;
     var usize parameter=target.entry_start+target.entry_count;
     var usize argument=syntax::expression_at(caller,call).right;
     // Both lists are consumed in reverse source order, in one pass each.
@@ -258,20 +246,13 @@ pub fn Result<Arguments,u32> solve(ref syntax::Parsed caller, usize owner, usize
         if (argument>=call) { return .err(9); }
         let link=syntax::expression_at(caller,argument);
         if (link.kind!=7 || link.left==0 || link.left>=argument || link.right>=argument) { return .err(9); }
-        let evidence=argument_evidence(caller,owner,link.left,provider,declaration,entry.type_root,count,work)?;
-        if (evidence.binder!=0) {
-            let index=evidence.binder-1;
-            let actual=evidence.actual;
-            if (constraints.fixed[index]!=0 && actual.fixed!=0 && constraints.fixed[index]!=actual.fixed) { return .err(4502); }
-            if (actual.fixed!=0) { constraints.fixed[index]=actual.fixed; }
-            integers[index]=integers[index] || actual.integer;
-        }
+        discard constrain_argument(caller,owner,link.left,provider,declaration,entry.type_root,ref mut constraints,work)?;
         argument=link.right;
     }
     if (argument!=0) { return .err(4502); }
     var usize i=0;
     while (i<count) {
-        if (constraints.fixed[i]==0 && integers[i]) { constraints.fixed[i]=1; }
+        if (constraints.fixed[i]==0 && constraints.integers[i]) { constraints.fixed[i]=1; }
         if (constraints.fixed[i]==0) { return .err(4502); }
         i+=1;
     }

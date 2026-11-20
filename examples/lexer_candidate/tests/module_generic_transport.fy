@@ -58,7 +58,7 @@ fn void inferred_scalar_calls_restore_and_execute(){
 @test
 @effects(console)
 fn void inferred_constructor_calls_restore_and_execute(){
-    let raw=b"module root;fn bool nested<T>(Option<Option<T>> value){discard value;return true;}fn bool success<T>(Result<T,u32> value){discard value;return true;}fn bool failure<T>(Result<i32,T> value){discard value;return true;}fn i32 main(){let u8 number=42;assert(nested((.some(.some(42)))));assert(nested<i32>(.some(.some(42))));assert(success(.ok(number as u32)));assert(failure(.err(true)));return 42;}";
+    let raw=b"module root;fn bool nested<T>(Option<Option<T>> value){discard value;return true;}fn bool success<T>(Result<T,u32> value){discard value;return true;}fn bool failure<T>(Result<i32,T> value){discard value;return true;}fn i32 main(){let u8 number=42;assert(nested((.some(.some(42)))));assert(nested<i32>(.some(.some(42))));assert(success(.ok(number as u32)));assert(failure(.err(true)));let Option<Option<i32>> absent=.none;assert(nested(absent));let Result<u32,u32> accepted=.ok(42);assert(success(accepted));let Result<i32,bool> failed=.err(true);assert(failure(failed));return 42;}";
     let result=compiled(raw);
     let owner=core::checked_program(ref result);
     let program=checked::ir_program(owner);
@@ -66,9 +66,12 @@ fn void inferred_constructor_calls_restore_and_execute(){
     while(i<=ir::count(program)){if(clean::frame_at(ir::cleanup_ir(program),i).declaration==5){entry=i;}i+=1;}
     assert(entry!=0);
     let body=ir::at(program,entry);
-    assert(ir::call_count(body)==4);
+    assert(ir::call_count(body)==7);
     let inferred=ir::call_at(body,0);
     assert(inferred.instance!=0 && inferred.instance==ir::call_at(body,1).instance);
+    assert(inferred.instance==ir::call_at(body,4).instance);
+    assert(ir::call_at(body,2).instance==ir::call_at(body,5).instance);
+    assert(ir::call_at(body,3).instance==ir::call_at(body,6).instance);
     let plan=switch(interpreter::prepare(program)){case .ok(p):{p}case .err(_):{assert(false);return;}};
     let args=v::empty<usize>();var heap=v::empty<usize>();var usize steps=65536;
     let outcome=interpreter::execute(owner,ref plan,entry,ref args,ref mut heap,ref mut steps,0);

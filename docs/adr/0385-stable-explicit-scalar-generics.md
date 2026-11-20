@@ -165,10 +165,11 @@ returns. A result context reaches the values of `if` branches and
 receive no result context from the enclosing expression. The candidate pairs
 matching `Option` and `Result` result types to collect scalar constraints.
 Written result contexts also reach the payload of a matching `.some`, `.ok`,
-or `.err` expression. For an `Option` or `Result`
-parameter, it also follows matching `.some`, `.ok`, and `.err` arguments to
+or `.err` expression. For an `Option` or `Result` parameter, the candidate
+matches the written type of a local, parameter, or cast against the formal
+type. It also follows matching `.some`, `.ok`, and `.err` arguments to
 their payloads. A constructor supplies evidence only for the payload it
-carries. It stores inferred requests under the same declaration and ordered
+carries. The candidate stores inferred requests under the same declaration and ordered
 argument key as an explicit call.
 Candidate checking and lowering also consume those requests for direct calls in
 ordinary functions, retained function bodies, and resource cleanup bodies. An
