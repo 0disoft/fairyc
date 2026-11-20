@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
@@ -85,15 +86,18 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 	haveFingerprints := false
 	missingBody := false
 	compareCode := func(change *DiffChange, oldName, newName string) {
+		if oldName == "" && newName == "" {
+			return
+		}
 		if !haveFingerprints {
 			leftCode, rightCode = bodyFingerprints()
 			haveFingerprints = true
 		}
 		a, aok := leftCode[oldName]
 		b, bok := rightCode[newName]
-		if !aok || !bok {
+		if (oldName != "" && !aok) || (newName != "" && !bok) {
 			missingBody = true
-		} else if a != b {
+		} else if aok != bok || a != b {
 			change.Facts = append(change.Facts, "executable-body")
 		}
 	}
@@ -115,6 +119,9 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 				name := key.module + "::" + key.name
 				compareCode(&change, name, name)
 			}
+			if key.kind == semanticsnapshot.DeclarationResource {
+				compareCode(&change, cleanupDiffBodyName(a), cleanupDiffBodyName(b))
+			}
 			if len(change.Facts) == 0 {
 				continue
 			}
@@ -128,6 +135,13 @@ func compareDiffFacts(before, after Partition, oldAliases, newAliases map[string
 	}
 	sortDiffChanges(result.Changes)
 	return result
+}
+
+func cleanupDiffBodyName(declaration semanticsnapshot.Declaration) string {
+	if declaration.DropKind != string(hir.ResourceDropNonEmpty) {
+		return ""
+	}
+	return declaration.Key.Module + "::$drop$" + declaration.Key.Name
 }
 
 func sortDiffChanges(changes []DiffChange) {

@@ -92,16 +92,19 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 		"fn i32 local() { return 1; }\n" +
 		"fn i32 removed() { return 0; }\n" +
 		"fn i32 literal() { return 10; }\n" +
+		"resource Token { i32 value; cleanup { let i32 marker = 5; } }\n" +
 		"fn i32 main() { return answer::value(); }\n"
 	const update = "module main; import answer as answer;\n\n" +
 		"pub fn i32 local() { return 1; }\n" +
 		"fn i32 added() { return 0; }\n" +
 		"fn i32 literal() { return 11; }\n" +
+		"resource Token { i32 value; cleanup { let i32 marker = 6; } }\n" +
 		"fn i32 main() { return local(); }\n"
 	before := writeWorkspaceSessionFixture(t, base)
 	shifted := writeWorkspaceSessionFixture(t, "\n"+base)
 	after := writeWorkspaceSessionFixture(t, update)
-	for _, root := range []string{before, shifted, after} {
+	emptyCleanup := writeWorkspaceSessionFixture(t, strings.Replace(base, "cleanup { let i32 marker = 5; }", "cleanup {}", 1))
+	for _, root := range []string{before, shifted, after, emptyCleanup} {
 		if code, _, diag := runForTest([]string{"check"}, root); code != ExitSuccess {
 			t.Fatalf("prepare locked fixture: %d %s", code, diag)
 		}
@@ -119,6 +122,9 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 		if err := json.Unmarshal([]byte(stdout), &report); err != nil || report.Schema != "fairyc.atlas-diff/v1" {
 			t.Fatalf("decode %s: %v", stdout, err)
 		}
+		if slices.Contains(report.Omissions, "executable-body-comparison-incomplete") {
+			t.Fatalf("missing executable comparison: %s", stdout)
+		}
 		return report
 	}
 	if got := read(shifted); len(got.Changes) != 0 || got.Before.PackageInstance == got.After.PackageInstance {
@@ -130,9 +136,16 @@ func TestAtlasDiffComparesLockedFacts(t *testing.T) {
 		{Module: "main", Kind: "function", Name: "local", Action: "modified", Facts: []string{"declaration"}},
 		{Module: "main", Kind: "function", Name: "main", Action: "modified", Facts: []string{"calls", "executable-body"}},
 		{Module: "main", Kind: "function", Name: "removed", Action: "removed"},
+		{Module: "main", Kind: "resource", Name: "Token", Action: "modified", Facts: []string{"executable-body"}},
 	}
 	if got := read(after); !reflect.DeepEqual(got.Changes, want) {
 		t.Fatalf("changes = %+v, want %+v", got.Changes, want)
+	}
+	want = []atlasmap.DiffChange{
+		{Module: "main", Kind: "resource", Name: "Token", Action: "modified", Facts: []string{"declaration", "executable-body"}},
+	}
+	if got := read(emptyCleanup); !reflect.DeepEqual(got.Changes, want) {
+		t.Fatalf("cleanup removal = %+v, want %+v", got.Changes, want)
 	}
 	for _, flag := range []string{"--max-declarations", "--max-output-bytes"} {
 		capped := replaceWorkspaceSessionArgument(args, flag, "1")
