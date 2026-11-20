@@ -72,7 +72,7 @@ func prepareGenericPackageGraphContext(ctx context.Context, input semantic.Packa
 		if file.Module == nil {
 			return semantic.PackageInput{}, genericsource.PackageExpansion{}, fmt.Errorf("generic source module is nil")
 		}
-		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package]}
+		modules[i] = genericsource.PackageModule{Module: file.Module, Owner: owners[file.Package], Imports: bindings[file.Package], Test: file.Test}
 	}
 	sourcePolicy := admission.Policy[genericplan.PackageID]{Capabilities: policy.Capabilities, ScalarAggregates: policy.ScalarAggregates}
 	if policy.StorageOwners != nil {

@@ -82,6 +82,7 @@ func PrepareModuleWithCapabilities(module *ast.Module, owner genericplan.Package
 type expander struct {
 	ctx                   context.Context
 	module                *ast.Module
+	testSource            bool
 	owner                 genericplan.PackageID
 	templates             map[string]ast.Function
 	aggregates            map[string]aggregateTemplate

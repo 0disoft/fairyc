@@ -17,6 +17,8 @@ type PackageModule struct {
 	Module  *ast.Module
 	Owner   genericplan.PackageID
 	Imports map[string]genericplan.PackageID
+	// Test is set by the caller for a file admitted by the test harness.
+	Test bool
 }
 
 // ExpandPackages specializes one closed, already-resolved source graph in a
@@ -126,6 +128,7 @@ func PrepareWithPolicyContext(ctx context.Context, inputs []PackageModule, limit
 		}
 		allowStorage := storageOwners == nil || storageOwners[input.Owner]
 		x := &expander{ctx: ctx, module: input.Module, owner: input.Owner, templates: map[string]ast.Function{}, names: map[string]bool{}, imports: map[string]*expander{}, allowPublic: true, allowStorage: capabilities.AllowsStorageQueries() && allowStorage, allowNominal: capabilities.AllowsNominalArguments(), packageNominal: capabilities.AllowsNominalArguments(), allowStorageTransfers: capabilities.AllowsStorageTransfers() && allowStorage}
+		x.testSource = input.Test
 		x.scalarTemplatesOnly = capabilities.SDKTemplates() && !allowStorage
 		x.scalarAggregates = policy.ScalarAggregates && x.scalarTemplatesOnly
 		modules[key], ordered[i] = x, x

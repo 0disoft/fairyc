@@ -8,9 +8,8 @@ import (
 	"github.com/0disoft/fairyc/internal/genericplan"
 )
 
-// The parser admits at most one million syntax nodes in one source file. Give
-// original declarations and generic specializations independent source-sized
-// allowances so the amount of written code does not spend the expansion budget.
+// Use one parser-sized allowance for each workspace-wide category: production
+// source, test-overlay source, and specializations from either source.
 const defaultMaterializedASTNodeBudget uint64 = 1 << 20
 
 type materializationTask struct {
@@ -29,11 +28,13 @@ func checkMaterializationBudget(modules []*expander, plan genericplan.Plan, budg
 	if err != nil {
 		return err
 	}
-	var ordinary, specialized uint64
+	var ordinary, test, specialized uint64
 	for _, task := range tasks {
 		total := &ordinary
 		if task.specialized {
 			total = &specialized
+		} else if task.module.testSource {
+			total = &test
 		}
 		*total, err = addMaterializedNodeWork(*total, task.nodes, task.copies, budget)
 		if err != nil {

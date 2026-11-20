@@ -120,3 +120,37 @@ func TestMaterializedNodeWorkZeroAndOverflow(t *testing.T) {
 		t.Fatalf("addition overflow error = %v", err)
 	}
 }
+
+func TestMaterializationBudgetCountsTestOverlaySeparately(t *testing.T) {
+	written := materializationBudgetFunction("run", false)
+	template := materializationBudgetFunction("id", true)
+	production := &expander{owner: "owner", module: &ast.Module{
+		Path: "app", Functions: []ast.Function{written, template},
+	}}
+	overlay := &expander{owner: "owner", testSource: true, module: &ast.Module{
+		Path: "tests::app", Functions: []ast.Function{written, template},
+	}}
+	modules := []*expander{production, overlay}
+	nodes, err := materializedFunctionNodes(written, nil)
+	if err != nil || nodes == 0 {
+		t.Fatalf("written AST work = %d, error = %v", nodes, err)
+	}
+	if err := checkMaterializationBudget(modules, genericplan.Plan{}, nodes); err != nil {
+		t.Fatalf("exact production and test allowances rejected: %v", err)
+	}
+	overlay.module.Functions = append(overlay.module.Functions, written)
+	if err := checkMaterializationBudget(modules, genericplan.Plan{}, nodes); genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
+		t.Fatalf("excess test source work error = %v", err)
+	}
+	overlay.module.Functions = overlay.module.Functions[:2]
+	plan := genericplan.Plan{Specializations: []genericplan.Specialization{
+		{Declaration: production.id("id")}, {Declaration: overlay.id("id")},
+	}}
+	templateNodes, err := materializedFunctionNodes(template, nil)
+	if err != nil || templateNodes == 0 {
+		t.Fatalf("template AST work = %d, error = %v", templateNodes, err)
+	}
+	if err := checkMaterializationBudget(modules, plan, max(nodes, templateNodes)); genericplan.ErrorCode(err) != genericplan.CodePlanningBudgetExceeded {
+		t.Fatalf("specializations did not share one allowance: %v", err)
+	}
+}

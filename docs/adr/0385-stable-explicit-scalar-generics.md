@@ -171,8 +171,11 @@ artifacts retain the written call site and concrete specialization identity.
 ## Materialized syntax bound
 
 Go source preparation preflights emitted function and aggregate syntax before
-cloning. Original declarations and generic specializations each have a
-1,048,576-node allowance across the workspace, including nested types,
-expressions and copied local closures. Excess work uses G2006 and the original
-source location. Count and depth planner limits remain independent. Declaration
+cloning. Original production declarations, original test-overlay declarations,
+and generic specializations each have a 1,048,576-node allowance across the
+workspace, including nested types, expressions and copied local closures. All
+specializations share one allowance, regardless of which source declared them.
+The test harness marks test files when loading the overlay. Test selection still
+checks the complete overlay. Excess work uses G2006 and the original source
+location. Count and depth planner limits remain independent. Declaration
 collection walks caller-owned syntax.
