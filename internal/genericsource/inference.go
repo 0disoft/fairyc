@@ -13,33 +13,38 @@ type inferenceScope struct {
 	module     *expander
 	parameters []string
 	parent     *inferenceScope
-	bindings   map[string]string
+	bindings   map[string]*ast.TypeReference
 }
 
 func (s *inferenceScope) child() *inferenceScope {
 	return &inferenceScope{module: s.module, parameters: s.parameters, parent: s}
 }
 
-func (s *inferenceScope) bind(name, typ string) {
+func (s *inferenceScope) bind(name string, typ *ast.TypeReference) {
 	if s.bindings == nil {
-		s.bindings = make(map[string]string)
+		s.bindings = make(map[string]*ast.TypeReference)
 	}
 	s.bindings[name] = typ
 }
 
-func (s *inferenceScope) binding(name string) string {
+func (s *inferenceScope) binding(name string) *ast.TypeReference {
 	for current := s; current != nil; current = current.parent {
 		if typ, found := current.bindings[name]; found {
 			return typ
 		}
 	}
-	return ""
+	return nil
 }
 
-func (s *inferenceScope) scalar(ref *ast.TypeReference) string {
+func ungroupInferenceType(ref *ast.TypeReference) *ast.TypeReference {
 	for ref != nil && ref.Kind == ast.TypeKindGrouped {
 		ref = ref.Element
 	}
+	return ref
+}
+
+func (s *inferenceScope) scalar(ref *ast.TypeReference) string {
+	ref = ungroupInferenceType(ref)
 	if ref != nil && ref.Kind == ast.TypeKindNamed && len(ref.Arguments) == 0 &&
 		(slices.Contains(scalarTypes, ref.Path) || slices.Contains(s.parameters, ref.Path)) {
 		return ref.Path
@@ -47,39 +52,40 @@ func (s *inferenceScope) scalar(ref *ast.TypeReference) string {
 	return ""
 }
 
-// evidence returns a fixed scalar type or an integer literal that can take a
+// evidence returns a known source type or an integer literal that can take a
 // type from another occurrence of the same binder.
-func (s *inferenceScope) evidence(e *ast.Expression) (typ string, integer bool) {
+func (s *inferenceScope) evidence(e *ast.Expression) (typ *ast.TypeReference, integer bool) {
 	for e != nil && e.Kind == syntax.KindGroup && len(e.Children) == 1 {
 		e = e.Children[0]
 	}
 	if e == nil {
-		return "", false
+		return nil, false
 	}
 	switch e.Kind {
 	case syntax.KindPath:
 		return s.binding(e.Text), false
 	case syntax.KindCast:
-		return s.scalar(e.Type), false
+		return e.Type, false
 	case syntax.KindLiteral:
 		if e.Text == "true" || e.Text == "false" {
-			return "bool", false
+			typ := ast.NamedTypeReference("bool", e.Span)
+			return &typ, false
 		}
 		raw := e.Text
 		if raw != "" && raw[0] >= '0' && raw[0] <= '9' {
 			base := strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0X") ||
 				strings.HasPrefix(raw, "0b") || strings.HasPrefix(raw, "0B")
-			return "", base || !strings.ContainsAny(raw, ".eE")
+			return nil, base || !strings.ContainsAny(raw, ".eE")
 		}
 	case syntax.KindCall:
 		return s.genericResult(e), false
 	}
-	return "", false
+	return nil, false
 }
 
-func (s *inferenceScope) genericResult(call *ast.Expression) string {
+func (s *inferenceScope) genericResult(call *ast.Expression) *ast.TypeReference {
 	if len(call.Children) == 0 {
-		return ""
+		return nil
 	}
 	callee := call.Children[0]
 	arguments := s.module.inferred[call]
@@ -87,26 +93,85 @@ func (s *inferenceScope) genericResult(call *ast.Expression) string {
 		arguments, callee = callee.TypeArguments, callee.Children[0]
 	}
 	if callee.Kind != syntax.KindPath {
-		return ""
+		return nil
 	}
 	target, found := s.module.lookup(callee.Text)
 	if !found || (target.module != s.module && !target.module.templates[target.name].Public) {
-		return ""
+		return nil
 	}
 	fn := target.module.templates[target.name]
-	if fn.ResultType.Kind != ast.TypeKindNamed || len(fn.ResultType.Arguments) != 0 {
-		return ""
+	if len(arguments) != len(fn.TypeParameters) {
+		return nil
 	}
-	if index := slices.Index(fn.TypeParameters, fn.ResultType.Path); index >= 0 {
-		if index < len(arguments) {
-			return s.scalar(&arguments[index])
+	return specializeInferenceResult(&fn.ResultType, fn.TypeParameters, arguments)
+}
+
+func specializeInferenceResult(ref *ast.TypeReference, parameters []string, arguments []ast.TypeReference) *ast.TypeReference {
+	ref = ungroupInferenceType(ref)
+	if ref == nil || ref.Kind != ast.TypeKindNamed {
+		return nil
+	}
+	if len(ref.Arguments) == 0 {
+		if index := slices.Index(parameters, ref.Path); index >= 0 {
+			return &arguments[index]
 		}
-		return ""
+		if slices.Contains(scalarTypes, ref.Path) {
+			return ref
+		}
+		return nil
 	}
-	if slices.Contains(scalarTypes, fn.ResultType.Path) {
-		return fn.ResultType.Path
+	if !inferenceContainer(ref) {
+		return nil
 	}
-	return ""
+	result := *ref
+	result.Arguments = make([]ast.TypeReference, len(ref.Arguments))
+	for i := range ref.Arguments {
+		argument := specializeInferenceResult(&ref.Arguments[i], parameters, arguments)
+		if argument == nil {
+			return nil
+		}
+		result.Arguments[i] = *argument
+	}
+	return &result
+}
+
+func inferenceContainer(ref *ast.TypeReference) bool {
+	return ref != nil && ref.Kind == ast.TypeKindNamed &&
+		(ref.Path == "Option" && len(ref.Arguments) == 1 || ref.Path == "Result" && len(ref.Arguments) == 2)
+}
+
+type inferenceConstraint struct {
+	typ     string
+	integer bool
+}
+
+func (s *inferenceScope) constrain(formal, actual *ast.TypeReference, integer bool, parameters []string, bindings map[string]inferenceConstraint) error {
+	formal, actual = ungroupInferenceType(formal), ungroupInferenceType(actual)
+	if formal == nil || formal.Kind != ast.TypeKindNamed {
+		return nil
+	}
+	if len(formal.Arguments) == 0 && slices.Contains(parameters, formal.Path) {
+		typ := s.scalar(actual)
+		previous := bindings[formal.Path]
+		if typ != "" {
+			if previous.typ != "" && previous.typ != typ {
+				return fmt.Errorf("conflicting types for parameter %s: %s and %s", formal.Path, previous.typ, typ)
+			}
+			previous.typ = typ
+		}
+		previous.integer = previous.integer || integer
+		bindings[formal.Path] = previous
+		return nil
+	}
+	if !inferenceContainer(formal) || !inferenceContainer(actual) || formal.Path != actual.Path {
+		return nil
+	}
+	for i := range formal.Arguments {
+		if err := s.constrain(&formal.Arguments[i], &actual.Arguments[i], false, parameters, bindings); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *inferenceScope) infer(original, call *ast.Expression) error {
@@ -126,26 +191,12 @@ func (s *inferenceScope) infer(original, call *ast.Expression) error {
 	if len(call.Children)-1 != len(fn.Parameters) {
 		return fmt.Errorf("cannot infer type arguments for %q with a different value argument count", callee.Text)
 	}
-	type constraint struct {
-		typ     string
-		integer bool
-	}
-	bindings := make(map[string]constraint, len(fn.TypeParameters))
-	for index, formal := range fn.Parameters {
-		ref := formal.Type
-		if ref.Kind != ast.TypeKindNamed || len(ref.Arguments) != 0 || !slices.Contains(fn.TypeParameters, ref.Path) {
-			continue
-		}
+	bindings := make(map[string]inferenceConstraint, len(fn.TypeParameters))
+	for index := range fn.Parameters {
 		typ, integer := s.evidence(call.Children[index+1])
-		previous := bindings[ref.Path]
-		if typ != "" {
-			if previous.typ != "" && previous.typ != typ {
-				return fmt.Errorf("conflicting type arguments for %q parameter %s: %s and %s", callee.Text, ref.Path, previous.typ, typ)
-			}
-			previous.typ = typ
+		if err := s.constrain(&fn.Parameters[index].Type, typ, integer, fn.TypeParameters, bindings); err != nil {
+			return fmt.Errorf("cannot infer type arguments for %q: %w", callee.Text, err)
 		}
-		previous.integer = previous.integer || integer
-		bindings[ref.Path] = previous
 	}
 	selector.TypeArguments = make([]ast.TypeReference, 0, len(fn.TypeParameters))
 	for _, name := range fn.TypeParameters {

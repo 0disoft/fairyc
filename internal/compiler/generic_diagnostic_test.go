@@ -19,6 +19,7 @@ func TestGenericPackageSourceFailuresPublishOnlyDiagnostics(t *testing.T) {
 		{"fn i32 main() { return missing<i32>(42); }", "missing<i32>", "E0101"},
 		{"fn i32 constant<T>() { return 42; } fn i32 main() { return constant(); }", "constant()", "E4502"},
 		{"fn T first<T>(T a, T b) { return a; } fn i32 main() { let i32 n = 42; return first(n, true); }", "first(n, true)", "E4502"},
+		{"fn T first<T>(Option<T> a, T b) { return b; } fn i32 main() { let Option<bool> n = .some(true); let i32 m = 42; return first(n, m); }", "first(n, m)", "E4502"},
 	} {
 		t.Run(test.code+test.primary, func(t *testing.T) {
 			// Non-ASCII trivia and CRLF retain original byte coordinates.

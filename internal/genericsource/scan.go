@@ -77,7 +77,7 @@ func (v sourceVisitor) function(value ast.Function) error {
 	for _, parameter := range value.Parameters {
 		v.node()
 		if v.inference != nil {
-			v.inference.bind(parameter.Name, v.inference.scalar(&parameter.Type))
+			v.inference.bind(parameter.Name, &parameter.Type)
 		}
 		if v.binding != nil {
 			if err := v.binding(parameter.Name, parameter.Span); err != nil {
@@ -125,12 +125,13 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 			return err
 		}
 		if v.inference != nil {
-			typ := v.inference.scalar(value.Binding.Type)
-			if value.Binding.Type == nil {
+			typ := value.Binding.Type
+			if typ == nil {
 				var integer bool
 				typ, integer = v.inference.evidence(value.Binding.Expression)
 				if integer {
-					typ = "i32"
+					defaultType := ast.NamedTypeReference("i32", value.Binding.Span)
+					typ = &defaultType
 				}
 			}
 			v.inference.bind(value.Binding.Name, typ)
@@ -179,7 +180,7 @@ func (v sourceVisitor) statement(value *ast.Statement) error {
 			body := v
 			if body.inference != nil {
 				body.inference = body.inference.child()
-				body.inference.bind(loop.Name, body.inference.scalar(&loop.Type))
+				body.inference.bind(loop.Name, &loop.Type)
 			}
 			if err := body.block(loop.Body); err != nil {
 				return err
@@ -211,7 +212,7 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 		if v.inference != nil {
 			closure.inference = &inferenceScope{module: v.inference.module, parameters: v.inference.parameters}
 			for _, capture := range value.Closure.Captures {
-				closure.inference.bind(capture.Name, closure.inference.scalar(&capture.Type))
+				closure.inference.bind(capture.Name, &capture.Type)
 			}
 		}
 		if err := closure.function(value.Closure.Function); err != nil {
@@ -244,7 +245,7 @@ func (v sourceVisitor) expr(value *ast.Expression) error {
 				if binding.Kind == syntax.KindField {
 					name = binding.Cooked
 				}
-				v.inference.bind(name, "")
+				v.inference.bind(name, nil)
 			}
 		}
 	}

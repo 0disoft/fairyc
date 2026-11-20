@@ -124,27 +124,30 @@ restriction for the Go Stage 0 prototype. Composite transport signatures remain 
 
 ### Argument inference in the Go frontend
 
-The Go generic preparation path now also admits direct calls such as
-`identity(42)`. Every type parameter must be inferred from a value parameter
-whose written type is that parameter. This supports scalar locals and
-parameters, explicit casts, bool and integer literals, and scalar results of
-nested generic calls. A forwarded type parameter remains symbolic until its
-enclosing function is specialized. Exact package imports and visibility rules
-apply to inferred calls.
+The Go generic preparation path also admits direct calls such as
+`identity(42)`. It infers scalar type arguments from locals, parameters,
+explicit casts, bool and integer literals, and results of nested generic calls.
+For a typed `Option` or `Result` argument, it matches the corresponding
+constructor in the formal parameter and recursively collects scalar
+constraints. A forwarded type parameter remains symbolic until its enclosing
+function is specialized. Exact package imports and visibility rules apply to
+inferred calls.
 
 For an integer literal, another typed argument for the same parameter provides
 the type. Literal-only evidence defaults to `i32`. Conflicting fixed types
-and missing evidence report E4502 at the call. The expected return type and
-composite formal parameters do not participate in inference. Ordinary checking
-still owns conversion, range, argument-label, effect and ownership rules.
+and missing evidence report E4502 at the call. A contextual constructor such as
+`.none` by itself supplies no payload type, and the expected return type does
+not participate in inference. Ordinary checking still owns conversion, range,
+argument-label, effect and ownership rules, including which composite shapes
+can be transported.
 
 Inference binds requests before the existing planner runs. It retains source
 spans, leaves the original AST intact and shares identities and expansion
 limits with explicit calls to the same implementation. The
-`inferred-scalars` fixture exercises local type evidence, typed and
-literal arguments, forwarding, nesting and deduplication across the interpreter
-and Windows native profiles. The Fairy-authored compiler's inference path
-remains separate.
+`inferred-scalars` and `inferred-containers` fixtures exercise local type
+evidence, typed and literal arguments, forwarding, nested constructors and
+deduplication across the interpreter and Windows native profiles. The
+Fairy-authored compiler's inference path remains separate.
 
 ## Materialized syntax bound
 
