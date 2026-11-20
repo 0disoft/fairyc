@@ -55,9 +55,6 @@ func (s *inferenceScope) scalar(ref *ast.TypeReference) string {
 // evidence returns a known source type or an integer literal that can take a
 // type from another occurrence of the same binder.
 func (s *inferenceScope) evidence(e *ast.Expression) (typ *ast.TypeReference, integer bool) {
-	for e != nil && e.Kind == syntax.KindGroup && len(e.Children) == 1 {
-		e = e.Children[0]
-	}
 	if e == nil {
 		return nil, false
 	}
@@ -140,6 +137,31 @@ func inferenceContainer(ref *ast.TypeReference) bool {
 		(ref.Path == "Option" && len(ref.Arguments) == 1 || ref.Path == "Result" && len(ref.Arguments) == 2)
 }
 
+func inferenceConstructorPayload(call *ast.Expression, expected *ast.TypeReference) *ast.TypeReference {
+	if call.Kind != syntax.KindCall || len(call.Children) != 2 || call.Children[0].Kind != syntax.KindPath {
+		return nil
+	}
+	container := ungroupInferenceType(expected)
+	if !inferenceContainer(container) {
+		return nil
+	}
+	switch call.Children[0].Text {
+	case ".some":
+		if container.Path == "Option" {
+			return &container.Arguments[0]
+		}
+	case ".ok":
+		if container.Path == "Result" {
+			return &container.Arguments[0]
+		}
+	case ".err":
+		if container.Path == "Result" {
+			return &container.Arguments[1]
+		}
+	}
+	return nil
+}
+
 // Forward a written result constraint only to expressions that produce it.
 func inferenceChildExpected(parent *ast.Expression, index int, expected *ast.TypeReference) *ast.TypeReference {
 	if expected == nil {
@@ -159,25 +181,8 @@ func inferenceChildExpected(parent *ast.Expression, index int, expected *ast.Typ
 			return expected
 		}
 	case syntax.KindCall:
-		if len(parent.Children) != 2 || index != 1 || parent.Children[0].Kind != syntax.KindPath {
-			return nil
-		}
-		container := ungroupInferenceType(expected)
-		if !inferenceContainer(container) {
-			return nil
-		}
-		switch parent.Children[0].Text {
-		case ".some":
-			if container.Path == "Option" {
-				return &container.Arguments[0]
-			}
-		case ".ok", ".err":
-			if container.Path == "Result" {
-				if parent.Children[0].Text == ".err" {
-					return &container.Arguments[1]
-				}
-				return &container.Arguments[0]
-			}
+		if index == 1 {
+			return inferenceConstructorPayload(parent, expected)
 		}
 	}
 	return nil
@@ -186,6 +191,22 @@ func inferenceChildExpected(parent *ast.Expression, index int, expected *ast.Typ
 type inferenceConstraint struct {
 	typ     string
 	integer bool
+}
+
+func (s *inferenceScope) constrainArgument(formal *ast.TypeReference, argument *ast.Expression, parameters []string, bindings map[string]inferenceConstraint) error {
+	for argument != nil {
+		if argument.Kind == syntax.KindGroup && len(argument.Children) == 1 {
+			argument = argument.Children[0]
+			continue
+		}
+		payload := inferenceConstructorPayload(argument, formal)
+		if payload == nil {
+			break
+		}
+		formal, argument = payload, argument.Children[1]
+	}
+	typ, integer := s.evidence(argument)
+	return s.constrain(formal, typ, integer, parameters, bindings)
 }
 
 func (s *inferenceScope) constrain(formal, actual *ast.TypeReference, integer bool, parameters []string, bindings map[string]inferenceConstraint) error {
@@ -236,8 +257,7 @@ func (s *inferenceScope) infer(original, call *ast.Expression, expected *ast.Typ
 	}
 	bindings := make(map[string]inferenceConstraint, len(fn.TypeParameters))
 	for index := range fn.Parameters {
-		typ, integer := s.evidence(call.Children[index+1])
-		if err := s.constrain(&fn.Parameters[index].Type, typ, integer, fn.TypeParameters, bindings); err != nil {
+		if err := s.constrainArgument(&fn.Parameters[index].Type, call.Children[index+1], fn.TypeParameters, bindings); err != nil {
 			return fmt.Errorf("cannot infer type arguments for %q: %w", callee.Text, err)
 		}
 	}
