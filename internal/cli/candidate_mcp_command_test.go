@@ -147,6 +147,85 @@ func verifyCandidateMCPCommandWithHelp(t *testing.T, image, help string) {
 	}
 	verifyCandidateMCPLive(t, image, root, source, call)
 	verifyCandidateMCPBrokenOutput(t, image, root)
+	t.Run("concrete", func(t *testing.T) { verifyCandidateMCPConcrete(t, image) })
+}
+
+func verifyCandidateMCPConcrete(t *testing.T, image string) {
+	t.Helper()
+	const uid = "example.session.app"
+	root := candidateAtlasGenericProductionWorkspace(t, atlasGenericProductionUsedSource)
+	var diagnostic bytes.Buffer
+	prepared, code := prepareAtlasWorkspaceSchema(root, false, &diagnostic, atlasmap.LogicalSchemaV3)
+	if code != 0 {
+		t.Fatalf("concrete MCP oracle: %d %s", code, &diagnostic)
+	}
+	index, err := atlasmap.NewWorkspaceCallIndexV3(prepared.partitions, prepared.expectations, atlasmap.WorkspaceCallBudget{MaxPackages: 8, MaxCalls: 128})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var instance, symbol, goodID, foreignID string
+	for _, p := range prepared.partitions {
+		if p.Header().PackageUID != uid {
+			continue
+		}
+		instance = p.Header().PackageInstance
+		for _, s := range p.Symbols() {
+			if s.Declaration.Name == "wrap" {
+				symbol = s.Full
+			}
+		}
+		for _, impl := range p.Specializations() {
+			switch impl.Declaration.Name {
+			case "wrap":
+				goodID = impl.ID
+			case "choose":
+				foreignID = impl.ID
+			}
+		}
+	}
+	if instance == "" || symbol == "" || goodID == "" || foreignID == "" {
+		t.Fatal("missing concrete MCP fixture")
+	}
+	good := symbol + "#" + goodID
+	want, err := index.Impact(instance, good, 8, 64)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	input := strings.Join([]string{
+		mcpInitialize, mcpReady,
+		candidateMCPCall(uid, symbol+"#"+foreignID, 2),
+		candidateMCPCall(uid, symbol+"#", 3),
+		candidateMCPCall(uid, good, 4),
+		"",
+	}, "\n")
+	before := remoteTree(t, root)
+	code, out, stderr := candidateMCPProcess(t, image, root, candidateMCPArguments(), input)
+	lines := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	if code != 0 || stderr != "" || len(lines) != 4 {
+		t.Fatalf("concrete MCP: %d %s %s", code, out, stderr)
+	}
+	for i, line := range lines[1:] {
+		var reply struct {
+			ID     int `json:"id"`
+			Result struct {
+				IsError bool                  `json:"isError"`
+				Data    atlasmap.ImpactResult `json:"structuredContent"`
+			} `json:"result"`
+		}
+		if err := json.Unmarshal([]byte(line), &reply); err != nil || reply.ID != i+2 || reply.Result.IsError != (i < 2) {
+			t.Fatalf("unexpected concrete MCP response: %s", line)
+		}
+		if i == 2 {
+			got := reply.Result.Data
+			if got.SubjectSpecialization != goodID || got.Subject != want.Subject || !reflect.DeepEqual(got.Nodes, want.Nodes) || got.TraversalComplete != want.TraversalComplete {
+				t.Fatalf("concrete MCP impact differs: %s", line)
+			}
+		}
+	}
+	if !reflect.DeepEqual(before, remoteTree(t, root)) {
+		t.Fatal("concrete MCP changed workspace")
+	}
 }
 
 func verifyCandidateMCPLive(t *testing.T, image, root, source, call string) {
