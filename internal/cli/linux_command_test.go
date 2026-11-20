@@ -27,10 +27,10 @@ fn i32 main() {
 
 func runLinuxCandidateFixture(t *testing.T, modules []string, fixtureName, entry, extraSupport string) {
 	t.Helper()
-	runLinuxCandidateFixtureSources(t, modules, fixtureName, entry, extraSupport, nil)
+	runLinuxCandidateFixtureSources(t, modules, filepath.Join("tests", fixtureName+".fy"), entry, extraSupport, nil)
 }
 
-func runLinuxCandidateFixtureSources(t *testing.T, modules []string, fixtureName, entry, extraSupport string, overrides map[string]string) {
+func runLinuxCandidateFixtureSources(t *testing.T, modules []string, fixturePath, entry, extraSupport string, overrides map[string]string) {
 	t.Helper()
 	root := t.TempDir()
 	writeTestSource(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
@@ -51,10 +51,11 @@ source = "src"
 	for name, source := range overrides {
 		writeTestSource(t, root, "src/"+name+".fy", source)
 	}
-	fixture, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", "tests", fixtureName+".fy"))
+	fixture, err := os.ReadFile(filepath.Join("..", "..", "examples", "lexer_candidate", fixturePath))
 	if err != nil {
 		t.Fatal(err)
 	}
+	fixtureName := strings.TrimSuffix(filepath.Base(fixturePath), ".fy")
 	client := strings.NewReplacer("module tests::"+fixtureName+";", "module main;", "@test ", "").Replace(string(fixture)) + entry
 	writeTestSource(t, root, "src/main.fy", client)
 	workspace, err := workspaceloader.LoadVectorCandidate(root)

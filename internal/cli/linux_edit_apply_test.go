@@ -40,7 +40,7 @@ func TestLinuxEditApplyPolicy(t *testing.T) {
 		}
 		support = strings.Replace(support, declaration, replacement, 1)
 	}
-	runLinuxCandidateFixtureSources(t, []string{"linux_command", "linux_rooted_file", "linux_directory", "linux_package_directory", "linux_edit_fs", "linux_edit_file", "linux_edit_apply", "project_manifest_values", "project_edit_options"}, "linux_edit_apply", `
+	runLinuxCandidateFixtureSources(t, []string{"linux_command", "linux_rooted_file", "linux_directory", "linux_package_directory", "linux_edit_fs", "linux_edit_file", "linux_edit_apply", "project_manifest_values", "project_edit_options"}, filepath.Join("fixtures", "linux_edit_apply.fy"), `
 @effects(filesystem,environment) fn i32 main(){
  publishes_once_with_private_staging_and_preserved_old_alias();
  refuses_lock_stage_and_anonymous_creation_failures();
