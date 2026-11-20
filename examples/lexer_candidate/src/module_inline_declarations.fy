@@ -6,9 +6,9 @@ import generic_source_json as json;
 import std::bytes as bytes;
 import std::vec as v;
 
-pub struct Info{bool annotated;u32 code;usize start;usize end;usize expression;usize parameters;u32[8] hash;}
+pub struct Info{bool annotated;bool loop;u32 code;usize start;usize end;usize expression;usize parameters;u32[8] hash;}
 struct Row{usize declaration;usize edges;Info info;}
-struct Walk { usize nodes; usize declarations; usize depth; usize[16] bindings; }
+struct Walk { usize nodes; usize declarations; usize depth; usize loop_depth; usize[16] bindings; }
 
 fn usize arm_binding(ref syntax::Parsed p,ref Walk walk,ref u8[] name){
     var usize i=walk.depth;
@@ -130,10 +130,40 @@ fn u32 control_if(ref syntax::Parsed p,syntax::Declaration d,usize id,ref mut Wa
     }
     return if(right==0 || !json::raw(out,b"]}",work)){0}else if(left==2 && right==2){2}else{1};
 }
+fn bool loop_clause(ref syntax::Parsed p,syntax::Declaration d,usize id,bool initializer,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    if(id==0){return identity::omitted(out,work);}
+    if(id>syntax::statement_count(p)){return false;}
+    let clause=syntax::statement_at(p,id);
+    return (clause.kind==4 || initializer && clause.kind==2) && control_item(p,d,id,walk,out,work,graph)==1;
+}
+fn u32 control_loop(ref syntax::Parsed p,syntax::Declaration d,syntax::Statement s,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
+    let depth=walk.depth;
+    if(s.kind==8){
+        if(!identity::branch(out,b"while",work) || !condition(p,d,s.expression,0,walk,out,work,graph)){return 0;}
+    }else{
+        if(s.second==0 || s.second>syntax::statement_count(p)){return 0;}
+        let header=syntax::statement_at(p,s.second);
+        if(header.kind!=15 || !identity::branch(out,b"for",work) ||
+            !loop_clause(p,d,header.first,true,walk,out,work,graph) || !json::raw(out,b",",work) ||
+            !(if(s.expression==0){identity::omitted(out,work)}else{condition(p,d,s.expression,0,walk,out,work,graph)}) ||
+            !json::raw(out,b",",work) || !loop_clause(p,d,header.second,false,walk,out,work,graph)){return 0;}
+    }
+    if(walk.nodes>=64 || !json::raw(out,b",",work)){return 0;}
+    walk.nodes+=1;
+    walk.loop_depth+=1;
+    let body=control_block(p,d,s.first,false,walk,out,work,graph);
+    walk.loop_depth-=1;
+    walk.depth=depth;
+    return if(body!=0 && json::raw(out,b"]}",work)){1}else{0};
+}
 fn u32 control_item(ref syntax::Parsed p,syntax::Declaration d,usize id,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work,ref mut v::Vec<Row> graph){
     if(walk.nodes>=64){return 0;}
     walk.nodes+=1;
     let s=syntax::statement_at(p,id);
+    if(s.kind==8 || s.kind==14){return control_loop(p,d,s,walk,out,work,graph);}
+    if(s.kind==9 || s.kind==10){
+        return if(walk.loop_depth!=0 && identity::loop_control(out,s.kind==9,work)){1}else{0};
+    }
     if(s.kind==6){return control_if(p,d,s.expression,walk,out,work,graph);}
     if(s.kind==3){
         return if(identity::branch(out,b"return",work) && expression(p,d,s.expression,0,walk,out,work,graph) &&
@@ -194,8 +224,8 @@ fn u32 control_block(ref syntax::Parsed p,syntax::Declaration d,usize block,bool
 fn Info read_control(ref syntax::Parsed p,syntax::Declaration d,Info info,ref mut v::Vec<Row> graph){
     var bytes::Buffer out=bytes::empty();
     var json::Ledger work=json::empty();
-    var Walk walk=Walk{.nodes=0,.declarations=0,.depth=0,.bindings=[0;16]};
-    if(!identity::statement_header(ref mut out,info.parameters,ref mut work) ||
+    var Walk walk=Walk{.nodes=0,.declarations=0,.depth=0,.loop_depth=0,.bindings=[0;16]};
+    if(!identity::statement_header(ref mut out,info.parameters,info.loop,ref mut work) ||
         control_block(p,d,d.body,true,ref mut walk,ref mut out,ref mut work,graph)!=2){return invalid(info);}
     var Info result=info;
     result.hash=switch(identity::finish(ref mut out,ref mut work)){case .ok(h):{h}case .err(_):{return invalid(info);}};
@@ -203,7 +233,7 @@ fn Info read_control(ref syntax::Parsed p,syntax::Declaration d,Info info,ref mu
 }
 
 fn Info signature(ref syntax::Parsed p,usize declaration){
-    let d=syntax::declaration_at(p,declaration);var Info info=Info{.annotated=false,.code=0,.start=d.name_start,.end=d.name_end,.expression=0,.parameters=0,.hash=[0;8]};var usize i=0;
+    let d=syntax::declaration_at(p,declaration);var Info info=Info{.annotated=false,.loop=false,.code=0,.start=d.name_start,.end=d.name_end,.expression=0,.parameters=0,.hash=[0;8]};var usize i=0;
     while(i<d.attribute_count){let a=syntax::attribute_at(p,d.attribute_start+i);if(bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"inline")){info.start=a.start;info.end=a.end;if(info.annotated || a.argument_count!=0){return invalid(info);}info.annotated=true;}i+=1;}
     i=0;while(i<d.cleanup_attribute_count){let a=syntax::attribute_at(p,d.cleanup_attribute_start+i);if(bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"inline")){info.start=a.start;info.end=a.end;return invalid(info);}i+=1;}
     if(!info.annotated){return info;}if(d.kind!=3 || !d.public || d.unsafe_end!=0 || d.owner_end!=0 || d.generic_parameters!=0 || !i32_type(p,d.result_type) || d.body==0){return invalid(info);}
@@ -215,6 +245,15 @@ fn Info read_body(ref syntax::Parsed p,usize declaration,ref mut v::Vec<Row> gra
     let d=syntax::declaration_at(p,declaration);var Info info=signature(p,declaration);if(!info.annotated || info.code!=0){return info;}var usize i=0;
     let b=syntax::statement_at(p,d.body);if(b.kind!=1){return invalid(info);}let count=syntax::block_statement_count(p,d.body);
     if(count>65){return invalid(info);}
+    // Parser statement IDs are in postorder. The function block follows all
+    // statements in its subtree, with earlier functions outside its span.
+    var usize candidate=d.body-1;
+    while(candidate!=0){
+        let row=syntax::statement_at(p,candidate);
+        if(row.start<b.start){break;}
+        if(row.kind==8 || row.kind==14){info.loop=true;return read_control(p,d,info,graph);}
+        candidate-=1;
+    }
     while(i<count){
         let s=syntax::statement_at(p,syntax::block_statement(p,d.body,i));
         if(s.kind==6 && s.expression!=0 && syntax::expression_at(p,s.expression).kind==13){return read_control(p,d,info,graph);}
@@ -223,7 +262,7 @@ fn Info read_body(ref syntax::Parsed p,usize declaration,ref mut v::Vec<Row> gra
     var usize locals=count;if(b.expression!=0){info.expression=b.expression;}else{if(count==0){return invalid(info);}let last=syntax::statement_at(p,syntax::block_statement(p,d.body,count-1));if(last.kind!=3 || last.expression==0){return invalid(info);}info.expression=last.expression;locals-=1;}if(locals>64){return invalid(info);}var usize declarations=0;var bool mutating=false;
     i=0;while(i<locals){let id=syntax::block_statement(p,d.body,i);let s=syntax::statement_at(p,id);if(s.expression==0){return invalid(info);}if(s.kind==2){if(s.entry==0){return invalid(info);}let a=syntax::entry_at(p,s.entry-1);if((a.kind!=2 && a.kind!=3) || a.type_root!=0 && !i32_type(p,a.type_root)){return invalid(info);}declarations+=1;mutating=mutating || a.kind==3;}
         else if(s.kind==4){let name=local_name(p,s);if(name.len==0 || !bytes::equal(syntax::assignment_operator(p,id),b"=")){return invalid(info);}var bool writable=false;var usize j=0;while(j<i){let old=syntax::statement_at(p,syntax::block_statement(p,d.body,j));if(old.kind==2 && bytes::equal(name,local_name(p,old))){writable=syntax::entry_at(p,old.entry-1).kind==3;}j+=1;}if(!writable){return invalid(info);}mutating=true;}else{return invalid(info);}i+=1;}if(declarations>16){return invalid(info);}
-    var bytes::Buffer out=bytes::empty();var json::Ledger work=json::empty();var Walk walk=Walk{.nodes=0,.declarations,.depth=0,.bindings=[0;16]};
+    var bytes::Buffer out=bytes::empty();var json::Ledger work=json::empty();var Walk walk=Walk{.nodes=0,.declarations,.depth=0,.loop_depth=0,.bindings=[0;16]};
     if(!if(has_kind(p,d,13)){identity::conditional_header(ref mut out,info.parameters,locals!=0,mutating,ref mut work)}else if(mutating){identity::steps_header(ref mut out,info.parameters,ref mut work)}else if(has_kind(p,d,6)){identity::calls_header(ref mut out,info.parameters,locals!=0,ref mut work)}else if(locals==0){identity::header(ref mut out,info.parameters,ref mut work)}else{identity::locals_header(ref mut out,info.parameters,ref mut work)}){return invalid(info);}
     i=0;while(i<locals){let s=syntax::statement_at(p,syntax::block_statement(p,d.body,i));if(!expression(p,d,s.expression,i,ref mut walk,ref mut out,ref mut work,graph) || !json::raw(ref mut out,b",",ref mut work)){return invalid(info);}i+=1;}
     if(!expression(p,d,info.expression,locals,ref mut walk,ref mut out,ref mut work,graph) || locals!=0 && !json::raw(ref mut out,b"]}",ref mut work)){return invalid(info);}info.hash=switch(identity::finish(ref mut out,ref mut work)){case .ok(h):{h}case .err(_):{return invalid(info);}};return info;
@@ -240,5 +279,5 @@ pub fn Info read(ref syntax::Parsed p,usize declaration){
     // Ordinary declarations keep the allocation-free path. Most compiler
     // sources contain no inline annotation; do not allocate one graph per fn.
     let d=syntax::declaration_at(p,declaration);var bool requested=false;var usize i=0;while(i<d.attribute_count+d.cleanup_attribute_count){let a=syntax::attribute_at(p,if(i<d.attribute_count){d.attribute_start+i}else{d.cleanup_attribute_start+i-d.attribute_count});if(bytes::equal(syntax::source_view(p)[a.name_start..a.name_end],b"inline")){requested=true;break;}i+=1;}
-    if(!requested){return Info{.annotated=false,.code=0,.start=d.name_start,.end=d.name_end,.expression=0,.parameters=0,.hash=[0;8]};}var v::Vec<Row> graph=v::empty<Row>();let root=read_graph(p,declaration,ref mut graph);if(!root.annotated || root.code!=0){return root;}i=0;while(i<v::len<Row>(ref graph)){let selected=v::at<Row>(ref graph,i).declaration;let info=read_body(p,selected,ref mut graph);if(!info.annotated || info.code!=0){return invalid(root);}{let row=v::at_mut<Row>(ref mut graph,i);row.info=info;}i+=1;}return if(acyclic(ref graph)){v::at<Row>(ref graph,0).info}else{invalid(root)};
+    if(!requested){return Info{.annotated=false,.loop=false,.code=0,.start=d.name_start,.end=d.name_end,.expression=0,.parameters=0,.hash=[0;8]};}var v::Vec<Row> graph=v::empty<Row>();let root=read_graph(p,declaration,ref mut graph);if(!root.annotated || root.code!=0){return root;}i=0;while(i<v::len<Row>(ref graph)){let selected=v::at<Row>(ref graph,i).declaration;let info=read_body(p,selected,ref mut graph);if(!info.annotated || info.code!=0){return invalid(root);}{let row=v::at_mut<Row>(ref mut graph,i);row.info=info;}i+=1;}return if(acyclic(ref graph)){v::at<Row>(ref graph,0).info}else{invalid(root)};
 }

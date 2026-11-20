@@ -29,6 +29,9 @@ func TestCandidateInlineConditionalPipeline(t *testing.T) {
 func TestCandidateInlineStatementPipeline(t *testing.T) {
 	runCandidateInlineLocalsPipeline(t, "statement")
 }
+func TestCandidateInlineLoopPipeline(t *testing.T) {
+	runCandidateInlineLocalsPipeline(t, "loop")
+}
 func runCandidateInlineLocalsPipeline(t *testing.T, family string) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		t.Skip("private compiler-host replay currently requires Windows AMD64; Linux deferred")
@@ -66,6 +69,12 @@ func runCandidateInlineLocalsPipeline(t *testing.T, family string) {
 		data = []byte(strings.NewReplacer(
 			"let i32 added=x+2;let doubled=added*2;return doubled/2;", "var i32 added=0;if (x==0) { return 2; } else if (x<0) { added=1/0; } else { let value=x+2; added=value; } return added;",
 			"let i32 unused=10/b;", "if (b==0) { let i32 unused=10/b; }",
+		).Replace(string(data)))
+	}
+	if family == "loop" {
+		data = []byte(strings.NewReplacer(
+			"let i32 added=x+2;let doubled=added*2;return doubled/2;", "var i32 added=x;for(var i32 i=0;i<4;i=i+1){if(i==1){continue;}if(i==3){break;}added=added+1;}return added;",
+			"let i32 unused=10/b;", "while(b==0){let i32 unused=10/b;break;}",
 		).Replace(string(data)))
 	}
 	program := strings.Replace(string(data), "module tests::module_inline_pipeline;", "module main;", 1)

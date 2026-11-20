@@ -10,6 +10,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -25,6 +26,8 @@ func TestCandidateInlineLocalsIdentity(t *testing.T) {
 		"@inline pub fn i32 choose(i32 x){var i32 y=0;if(x==0){return 42;}if(x<0){y=2;}else if(x==1){let v=1;y=v+1;}else{y=10/x;}return y;}",
 		"@inline pub fn i32 choose(i32 x){if(x==0){return 42;}else{return 1;};}",
 		"@inline pub fn i32 choose(i32 x){if(x==0){}return 42;}",
+		"@inline pub fn i32 choose(i32 x){var i32 y=0;for(var i32 i=0;i<x;i=i+1){if(i==2){continue;}if(i==6){break;}y=y+i;}while(y<42 && x>0){y=y+1;}return y;}",
+		"@inline pub fn i32 choose(i32 x){if(x==0){for(;;){break;}}return 42;}",
 		"@inline pub fn i32 add(i32 x){var i32 value=x;value=value+2;let old=value;value=old+value;return value/2;}",
 		"@inline pub fn i32 add(i32 x){let i32 a=x+2;let b=a*2;return b/2;}",
 		"@inline pub fn i32 add(i32 renamed){let left=(renamed+0x2);let i32 right=left*0b10;return (right/2);}",
@@ -47,11 +50,15 @@ func TestCandidateInlineLocalsIdentity(t *testing.T) {
 				id = fn.InlineBody
 			}
 		}
-		raw, err := hex.DecodeString(strings.TrimPrefix(id, "fyinlinefn1-sha256-"))
+		loop := strings.HasPrefix(id, hir.InlineLoopPrefix)
+		if !hir.ValidInlineFunctionID(id) {
+			t.Fatal("missing Go identity", id)
+		}
+		raw, err := hex.DecodeString(id[len(hir.InlineFunctionPrefix):])
 		if err != nil || len(raw) != 32 {
 			t.Fatal("missing Go identity", id)
 		}
-		fmt.Fprintf(&probe, "{let p=switch(make(b%s)){case .ok(p):{p}case .err(_):{assert(false);return 1;}};let info=inline::read(ref p,1);assert(info.annotated && info.code==0);", strconv.Quote(input))
+		fmt.Fprintf(&probe, "{let p=switch(make(b%s)){case .ok(p):{p}case .err(_):{assert(false);return 1;}};let info=inline::read(ref p,1);assert(info.annotated && info.code==0 && info.loop==%t);", strconv.Quote(input), loop)
 		for i := 0; i < 8; i++ {
 			fmt.Fprintf(&probe, "assert(info.hash[%d]==%d);", i, binary.BigEndian.Uint32(raw[i*4:]))
 		}

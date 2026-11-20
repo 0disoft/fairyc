@@ -9,7 +9,7 @@ import syntax as syntax;
 struct Walk {
     usize nodes; usize calls; usize block_count; usize[64] blocks;
     usize arm_statements; usize depth; usize declarations; usize declared;
-    bool statement_mode; usize[4] visited; usize visited_count;
+    bool statement_mode; usize loop_depth; usize[4] visited; usize visited_count;
 }
 fn bool declare(ref mut Walk walk,usize binding,usize arity){
     if(binding<=arity || binding>20){return false;}
@@ -185,10 +185,50 @@ fn u32 control_if(ref ir::Body b,ref clean::Program p,usize id,usize arity,usize
     return if(right==0 || !json::raw(out,b"]}",work)){0}else if(left==2 && right==2){2}else{1};
 }
 struct Slots { usize[20] versions; }
-fn u32 control_item(ref ir::Body b,ref clean::Program p,usize item,usize parent,usize arity,ref mut Slots active,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work){
-    let s=ir::statement_at(b,item-1).value;
-    if(walk.nodes>=64 || s.expression==0 || parent!=0 && s.expression>=parent){return 0;}
+fn bool loop_clause(ref ir::Body b,ref clean::Program p,usize id,usize parent,usize arity,bool initializer,ref mut Slots active,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    if(id==0){return identity::omitted(out,work);}
+    let item=ir::statement(b,id);
+    if(item==0 || !visit_statement(walk,item)){return false;}
+    let clause=ir::statement_at(b,item-1).value;
+    return (clause.kind==4 || initializer && clause.kind==2) &&
+        control_item(b,p,item,parent,arity,active,walk,out,work)==1;
+}
+fn u32 control_loop(ref ir::Body b,ref clean::Program p,ir::Statement row,usize parent,usize arity,usize[20] versions,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    let s=row.value;
+    if(s.first==0 || s.first>=row.source_index){return 0;}
+    let depth=walk.depth;
+    var Slots active=Slots{.versions};
+    if(s.kind==8){
+        if(!identity::branch(out,b"while",work) ||
+            !condition(b,p,s.expression,arity,0,active.versions,walk,out,work)){return 0;}
+    }else{
+        let header_id=ir::statement(b,s.second);
+        if(s.second>=row.source_index || header_id==0 || !visit_statement(walk,header_id)){return 0;}
+        let header=ir::statement_at(b,header_id-1).value;
+        if(header.kind!=15 || header.first>=s.second || header.second>=s.second || !identity::branch(out,b"for",work) ||
+            !loop_clause(b,p,header.first,parent,arity,true,ref mut active,walk,out,work) || !json::raw(out,b",",work) ||
+            !(if(s.expression==0){identity::omitted(out,work)}else{condition(b,p,s.expression,arity,0,active.versions,walk,out,work)}) ||
+            !json::raw(out,b",",work) || !loop_clause(b,p,header.second,parent,arity,false,ref mut active,walk,out,work)){return 0;}
+    }
+    if(walk.nodes>=64 || !json::raw(out,b",",work)){return 0;}
     walk.nodes+=1;
+    walk.loop_depth+=1;
+    let body=control_block(b,p,s.first,parent,false,arity,active.versions,walk,out,work);
+    walk.loop_depth-=1;
+    walk.depth=depth;
+    return if(body!=0 && json::raw(out,b"]}",work)){1}else{0};
+}
+fn u32 control_item(ref ir::Body b,ref clean::Program p,usize item,usize parent,usize arity,ref mut Slots active,ref mut Walk walk,ref mut bytes::Buffer out,ref mut json::Ledger work){
+    let row=ir::statement_at(b,item-1);
+    let s=row.value;
+    if(walk.nodes>=64 || parent!=0 && s.expression>=parent){return 0;}
+    walk.nodes+=1;
+    if(s.kind==8 || s.kind==14){return control_loop(b,p,row,parent,arity,active.versions,walk,out,work);}
+    if(s.kind==9 || s.kind==10){
+        return if(s.expression==0 && s.first==0 && s.second==0 && walk.loop_depth!=0 &&
+            identity::loop_control(out,s.kind==9,work)){1}else{0};
+    }
+    if(s.expression==0){return 0;}
     if(s.kind==6){return control_if(b,p,s.expression,arity,active.versions,walk,out,work);}
     if(s.kind==3){
         return if(identity::branch(out,b"return",work) && expression(b,p,s.expression,arity,0,active.versions,walk,out,work) &&
@@ -268,6 +308,16 @@ fn bool uses_control(ref ir::Body b,syntax::Statement root){
     return false;
 }
 
+fn bool has_loop(ref ir::Body b){
+    var usize i=0;
+    while(i<ir::statement_count(b)){
+        let kind=ir::statement_at(b,i).value.kind;
+        if(kind==8 || kind==14){return true;}
+        i+=1;
+    }
+    return false;
+}
+
 // An absent marker is ordinary IR. A present marker must describe this exact
 // pure detached body, including its result and original lexical parameter order.
 pub fn u32 check(ref ir::Body b,ref clean::Program p,usize frame){
@@ -277,10 +327,11 @@ pub fn u32 check(ref ir::Body b,ref clean::Program p,usize frame){
     let min_statements=1+2*root.second;if(ir::statement_count(b)<min_statements){return 1001;}
     var bytes::Buffer out=bytes::empty();
     var json::Ledger work=json::empty();
-    var Walk walk=Walk{.nodes=0,.calls=0,.block_count=0,.blocks=[0;64],.arm_statements=0,.depth=0,.declarations=0,.declared=0,.statement_mode=false,.visited=[0;4],.visited_count=0};
-    if(uses_control(b,root)){
+    var Walk walk=Walk{.nodes=0,.calls=0,.block_count=0,.blocks=[0;64],.arm_statements=0,.depth=0,.declarations=0,.declared=0,.statement_mode=false,.loop_depth=0,.visited=[0;4],.visited_count=0};
+    let loop=has_loop(b);
+    if(loop || uses_control(b,root)){
         walk.statement_mode=true;
-        if(!identity::statement_header(ref mut out,arity,ref mut work) ||
+        if(!identity::statement_header(ref mut out,arity,loop,ref mut work) ||
             control_block(b,p,ir::body(b),0,true,arity,[0;20],ref mut walk,ref mut out,ref mut work)!=2 ||
             walk.declarations!=locals || walk.calls!=ir::call_count(b) || walk.visited_count!=ir::statement_count(b)){
             return 1001;

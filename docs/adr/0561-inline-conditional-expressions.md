@@ -53,7 +53,7 @@ Existing v1–v5 encodings are preserved. The Fairy candidate independently
 checks statement coverage, lexical slots and return paths before accepting a
 restored v6 marker.
 
-The Go bootstrap also admits `while` and classic `for` with the same pure
+Both compilers also admit `while` and classic `for` with the same pure
 conditions and lexical assignment rules. `break` and `continue` use the nearest
 enclosing loop. A classic `for` keeps its initializer in scope through the
 condition, body and post clause. A loop by itself does not satisfy the root's
@@ -61,8 +61,11 @@ return requirement. Iteration count and trap behavior follow ordinary loops.
 
 Loop bodies use the `fairyc.inline-function/v7` encoding and
 `fyinlinefn2-sha256-` carrier. It records the loop kind, condition, body, loop
-control statements, and every present or omitted `for` clause. The MIR verifier
+control statements, and every present or omitted `for` clause. The Go MIR verifier
 admits reachable `goto` back edges only when the target dominates the source.
 Removing those edges must leave an acyclic graph. The same block, operation and
 acyclic call-graph limits apply. The previous carrier still requires acyclic
-MIR. The Fairy candidate's loop support remains separate.
+MIR. Before accepting restored bodies, the Fairy candidate recomputes the v7
+marker from typed statements and independently checks the loop header records,
+lexical slots, and nesting of loop controls. Its package cache keys use the same
+loop carrier as the Go bootstrap.
