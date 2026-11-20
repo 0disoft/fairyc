@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"slices"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/atlasmap"
 )
 
 func TestExperimentalTestPlanCalls(t *testing.T) {
@@ -227,6 +229,55 @@ fn i32 right(i32 n) {
 				}
 			} else if got.Recommend != "selected-tests" || len(got.Reasons) != 0 {
 				t.Fatalf("expected a selected-test recommendation: %s", out)
+			}
+		})
+	}
+}
+
+func TestExperimentalTestPlanGenericSpecializations(t *testing.T) {
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "src/library.fy", `module library;
+fn T target<T>(T value) { return value; }
+fn T relay<T>(T value) { return target<T>(value); }
+fn T unused<T>(T value) { return value; }
+pub fn i32 signed() { return relay<i32>(42); }
+pub fn bool boolean() { return relay<bool>(true); }
+`)
+	writeWorkspaceFile(t, root, "tests/plan.fy", `module tests::plan;
+import library as library;
+@test fn void checks_bool() { assert(library::boolean()); }
+@test fn void checks_i32() { assert(library::signed() == 42); }
+`)
+	signed := atlasmap.TestPlanPath{Test: "tests::plan::checks_i32", Path: []string{"tests::plan::checks_i32", "library::signed", "library::relay<i32>", "library::target<i32>"}}
+	boolean := atlasmap.TestPlanPath{Test: "tests::plan::checks_bool", Path: []string{"tests::plan::checks_bool", "library::boolean", "library::relay<bool>", "library::target<bool>"}}
+	for _, tc := range []struct {
+		selector string
+		want     []atlasmap.TestPlanPath
+		reason   string
+	}{
+		{selector: "library::target<i32>", want: []atlasmap.TestPlanPath{signed}},
+		{selector: "library::target<bool>", want: []atlasmap.TestPlanPath{boolean}},
+		{selector: "library::target", want: []atlasmap.TestPlanPath{boolean, signed}},
+		{selector: "library::unused", reason: "generic-call-coverage"},
+	} {
+		t.Run(tc.selector, func(t *testing.T) {
+			code, out, stderr := runForTest([]string{"experimental", "test-plan", "--symbol", tc.selector}, root)
+			var got testPlanReport
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(out), &got) != nil {
+				t.Fatalf("test-plan = (%d, %s, %s)", code, out, stderr)
+			}
+			if !slices.EqualFunc(got.Tests, tc.want, func(a, b atlasmap.TestPlanPath) bool {
+				return a.Test == b.Test && slices.Equal(a.Path, b.Path)
+			}) {
+				t.Fatalf("unexpected paths: %s, want %+v", out, tc.want)
+			}
+			if tc.reason == "" {
+				if got.Recommend != "selected-tests" || len(got.Reasons) != 0 {
+					t.Fatalf("expected selected tests: %s", out)
+				}
+			} else if got.Recommend != "all-tests" || !slices.Contains(got.Reasons, tc.reason) {
+				t.Fatalf("expected full suite with %s: %s", tc.reason, out)
 			}
 		})
 	}

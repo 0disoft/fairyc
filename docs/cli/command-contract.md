@@ -49,6 +49,10 @@ its narrower selection policy; see the owning contract for exact admission.
 `fairyc experimental test-plan --symbol <module::function|symbol-id> [--package <package-uid>]`
 recommends tests in one root-reachable local package. The default is the root package.
 The selector accepts a qualified function name or a visible or full Atlas SymbolId.
+Append concrete type arguments without spaces, as in `library::target<i32>`,
+to select one checked implementation. A template selector without arguments
+includes all of its checked implementations. Paths include the concrete type
+arguments and do not mix calls from different implementations.
 
 The Go frontend discovers tests as for `test --list` and builds a fresh Atlas v3
 index from the same checked source snapshot, including the selected package's
@@ -73,7 +77,9 @@ supplied each target. Unresolved targets and trace limits require `all-tests`.
 Closure tracing allows 65,536 steps and up to 64 nested call, argument or
 result lookups.
 Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
-cross-package calls, generic call coverage and unmapped tests cause `all-tests`.
+cross-package calls, templates without checked implementations, and unmapped
+tests cause `all-tests`. A template that has no executable implementation in
+the current workspace does not limit queries about other functions.
 Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.
 Known paths are retained alongside the fallback reasons. Run `fairyc test --package
 <package-uid>` for the full package suite. The recommendation covers call paths only

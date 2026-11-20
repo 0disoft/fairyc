@@ -23,21 +23,27 @@ type TestPlanPath struct {
 // paths when coverage is incomplete so the caller can recommend the full suite.
 // program and packageID must come from the verified compilation used by index.
 func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.Program, packageID hir.PackageID) ([]TestPlanPath, []string) {
-	subject, found := index.testPlanSubject(selector)
+	subjects, found := index.testPlanSubjects(selector)
 	paths := []TestPlanPath{}
 	if !found {
 		return paths, []string{"symbol-not-found"}
 	}
 	cleanups := index.testPlanCleanups(program, packageID)
 	closures := index.testPlanClosures(program, packageID)
-	reasons := index.testPlanOmissions(cleanups.recovered + closures.recovered)
+	reasons, specializedIncoming := index.testPlanCallFacts(cleanups.recovered + closures.recovered)
+	if len(subjects) == 0 {
+		return paths, append(reasons, "generic-call-coverage")
+	}
 	type step struct {
 		next  string
 		depth int
 	}
-	parents := map[string]step{subject: {}}
-	queue := []string{subject}
-	truncated := false
+	truncated := len(subjects) > maxTestPlanSymbols
+	queue := subjects[:min(len(subjects), maxTestPlanSymbols)]
+	parents := make(map[string]step, len(queue))
+	for _, subject := range queue {
+		parents[subject] = step{}
+	}
 	for i := 0; i < len(queue); i++ {
 		target := queue[i]
 		depth := parents[target].depth
@@ -52,9 +58,15 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 			parents[source] = step{next: target, depth: depth + 1}
 			queue = append(queue, source)
 		}
-		for _, pos := range index.incoming[target] {
-			if call := index.relations[pos]; index.ordinaryTestPlanCall(call) {
-				enqueue(call.Source)
+		if strings.Contains(target, "#") {
+			for _, source := range specializedIncoming[target] {
+				enqueue(source)
+			}
+		} else {
+			for _, pos := range index.incoming[target] {
+				if call := index.relations[pos]; index.localTestPlanCall(call) && call.Target.Specialization == "" {
+					enqueue(testPlanEndpoint(call.Source, call.SourceSpecialization))
+				}
 			}
 		}
 		for _, source := range cleanups.incoming[target] {
@@ -87,8 +99,8 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 		}
 		path := make([]string, 0, parents[symbol].depth+1)
 		for at := symbol; at != ""; at = parents[at].next {
-			if position, found := index.byVisible[at]; found {
-				path = append(path, testPlanLabel(index.nodes[position].declaration.Key))
+			if label, found := index.testPlanEndpointLabel(at); found {
+				path = append(path, label)
 			} else if label, found := closures.labels[at]; found {
 				path = append(path, label)
 			} else {
@@ -103,15 +115,36 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.P
 	return paths, reasons
 }
 
-func (index *QueryIndex) testPlanSubject(selector string) (string, bool) {
+func (index *QueryIndex) testPlanSubjects(selector string) ([]string, bool) {
+	name, concrete, hasArguments := strings.Cut(selector, "<")
+	node, found := index.testPlanSubject(name)
+	if !found {
+		return nil, false
+	}
+	if len(node.declaration.TypeParameters) == 0 {
+		if hasArguments {
+			return nil, false
+		}
+		return []string{node.symbol.Visible}, true
+	}
+	var subjects []string
+	for _, facts := range node.specializations {
+		if facts.Function != nil && (!hasArguments || concrete == testPlanTypeArguments(facts.TypeArguments)+">") {
+			subjects = append(subjects, testPlanEndpoint(node.symbol.Visible, facts.ID))
+		}
+	}
+	return subjects, !hasArguments || len(subjects) != 0
+}
+
+func (index *QueryIndex) testPlanSubject(selector string) (*indexedQueryNode, bool) {
 	if position, err := index.resolveSymbol(selector); err == nil {
-		node := index.nodes[position]
-		return node.symbol.Visible, node.declaration.Key.Kind == semanticsnapshot.DeclarationFunction ||
+		node := &index.nodes[position]
+		return node, node.declaration.Key.Kind == semanticsnapshot.DeclarationFunction ||
 			node.declaration.Key.Kind == semanticsnapshot.DeclarationForeignFunction
 	}
 	separator := strings.LastIndex(selector, "::")
 	if separator < 0 {
-		return "", false
+		return nil, false
 	}
 	key := semanticsnapshot.DeclarationKey{
 		PackageInstance: index.header.PackageInstance,
@@ -123,12 +156,12 @@ func (index *QueryIndex) testPlanSubject(selector string) (string, bool) {
 		position, found = index.byKey[key]
 	}
 	if !found {
-		return "", false
+		return nil, false
 	}
-	return index.nodes[position].symbol.Visible, true
+	return &index.nodes[position], true
 }
 
-func (index *QueryIndex) testPlanOmissions(recoveredCalls int) []string {
+func (index *QueryIndex) testPlanCallFacts(recoveredCalls int) ([]string, map[string][]string) {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
@@ -145,13 +178,11 @@ func (index *QueryIndex) testPlanOmissions(recoveredCalls int) []string {
 							return reason != ordinaryCleanupOmission && reason != indirectClosureOmission
 						}))
 		}
-		if record.Relation == "generic-template-bodies" {
-			add("generic-call-coverage")
-		}
 	}
 	if !callsExact {
 		add("incomplete-call-coverage")
 	}
+	specialized := make(map[string][]string)
 	for _, call := range index.relations {
 		switch {
 		case call.Kind == RelationCallsForeign:
@@ -160,19 +191,55 @@ func (index *QueryIndex) testPlanOmissions(recoveredCalls int) []string {
 			continue
 		case call.Target != nil && call.Target.PackageInstance != index.header.PackageInstance:
 			add("cross-package-call")
-		case !index.ordinaryTestPlanCall(call):
+		case !index.localTestPlanCall(call):
 			add("unsupported-call-edge")
+		case call.Target.Specialization != "":
+			target := testPlanEndpoint(call.Target.Symbol, call.Target.Specialization)
+			specialized[target] = append(specialized[target], testPlanEndpoint(call.Source, call.SourceSpecialization))
 		}
 	}
 	slices.Sort(reasons)
-	return reasons
+	return reasons, specialized
 }
 
-func (index *QueryIndex) ordinaryTestPlanCall(call QueryRelation) bool {
+func (index *QueryIndex) localTestPlanCall(call QueryRelation) bool {
 	return call.Kind == RelationCalls && call.Target != nil && call.Target.Symbol != "" &&
-		call.Target.PackageInstance == index.header.PackageInstance && call.SourceSpecialization == "" &&
-		call.SourceBody == "" && call.Target.Specialization == "" && call.Span != nil &&
+		call.Target.PackageInstance == index.header.PackageInstance && call.SourceBody == "" && call.Span != nil &&
 		call.Certainty == semanticsnapshot.CertaintyExact && call.Provenance == semanticsnapshot.ProvenanceCompilerObserved
+}
+
+func testPlanEndpoint(symbol, specialization string) string {
+	if specialization == "" {
+		return symbol
+	}
+	return symbol + "#" + specialization
+}
+
+func testPlanTypeArguments(arguments []semanticsnapshot.TypeRef) string {
+	names := make([]string, len(arguments))
+	for i, argument := range arguments {
+		names[i] = argument.Name
+	}
+	return strings.Join(names, ",")
+}
+
+func (index *QueryIndex) testPlanEndpointLabel(endpoint string) (string, bool) {
+	symbol, specialization, concrete := strings.Cut(endpoint, "#")
+	position, found := index.byVisible[symbol]
+	if !found {
+		return "", false
+	}
+	node := &index.nodes[position]
+	label := testPlanLabel(node.declaration.Key)
+	if concrete {
+		for _, facts := range node.specializations {
+			if facts.ID == specialization {
+				return label + "<" + testPlanTypeArguments(facts.TypeArguments) + ">", true
+			}
+		}
+		return "", false
+	}
+	return label, true
 }
 
 func testPlanLabel(key semanticsnapshot.DeclarationKey) string {
