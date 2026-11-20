@@ -3,11 +3,12 @@ package atlasmap
 import (
 	"errors"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
-	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/mir"
 )
 
 const maxTestPlanWorkspaceCalls = 65536
@@ -44,7 +45,8 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 		roots = append(roots, workspaceCallEndpoint{WorkspaceSymbol{subjectInstance, symbol}, specialization})
 	}
 	cleanups := workspaceTestPlanCleanups(result, packages, packageIDs)
-	reasons := workspaceTestPlanCoverage(packages, cleanups)
+	closures := workspaceTestPlanClosures(result, packages, packageIDs)
+	reasons := workspaceTestPlanCoverage(packages, cleanups, closures.recovered)
 	parents, truncated := walkTestPlan(roots, func(target workspaceCallEndpoint, enqueue func(workspaceCallEndpoint)) {
 		positions := ledger.incoming[target.symbol]
 		if target.specialization != "" {
@@ -59,6 +61,9 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 		for _, source := range cleanups.incoming[target] {
 			enqueue(source)
 		}
+		for _, source := range closures.incoming[target] {
+			enqueue(source)
+		}
 	})
 	if truncated {
 		reasons = append(reasons, "traversal-limit")
@@ -68,6 +73,9 @@ func WorkspaceTestPlan(partitions []Partition, expectations map[string]LoadExpec
 		testSymbols[test] = workspaceCallEndpoint{symbol: WorkspaceSymbol{testInstance, symbol}}
 	}
 	return testPlanPaths(tests, testSymbols, parents, reasons, func(at workspaceCallEndpoint) string {
+		if source, found := closures.aliases[at]; found {
+			at = source
+		}
 		instance := at.symbol.PackageInstance
 		pkg := packages[instance]
 		endpoint := testPlanEndpoint(at.symbol.Symbol, at.specialization)
@@ -101,7 +109,42 @@ func workspaceTestPlanCleanups(result compiler.Result, packages map[string]*Quer
 	return buildTestPlanCleanupGraph(result, bindings)
 }
 
-func workspaceTestPlanCoverage(packages map[string]*QueryIndex, cleanups testPlanCleanupGraph[workspaceCallEndpoint]) []string {
+func workspaceTestPlanClosures(result compiler.Result, packages map[string]*QueryIndex, packageIDs map[string]hir.PackageID) testPlanClosureGraph[workspaceCallEndpoint] {
+	if !result.Verified {
+		return testPlanClosureGraph[workspaceCallEndpoint]{}
+	}
+	for _, pkg := range packages {
+		for _, record := range pkg.completeness {
+			if record.Relation == "calls" && slices.Contains(record.Reasons, indirectClosureOmission) {
+				return buildWorkspaceTestPlanClosures(result.MIR, packages, packageIDs)
+			}
+		}
+	}
+	return testPlanClosureGraph[workspaceCallEndpoint]{}
+}
+
+func buildWorkspaceTestPlanClosures(program mir.Program, packages map[string]*QueryIndex, packageIDs map[string]hir.PackageID) testPlanClosureGraph[workspaceCallEndpoint] {
+	byName := make(map[string]workspaceCallEndpoint)
+	included := make(map[hir.PackageID]bool, len(packages))
+	for instance, pkg := range packages {
+		packageID, found := packageIDs[instance]
+		if !found {
+			return testPlanClosureGraph[workspaceCallEndpoint]{}
+		}
+		included[packageID] = true
+		addTestPlanClosureSources(pkg, packageID, byName, func(symbol string) workspaceCallEndpoint {
+			return workspaceCallEndpoint{symbol: WorkspaceSymbol{instance, symbol}}
+		})
+	}
+	return buildTestPlanClosureGraph(program, byName,
+		func(id hir.PackageID) bool { return included[id] },
+		func(source workspaceCallEndpoint, id int) workspaceCallEndpoint {
+			source.symbol.Symbol = "\x00" + strconv.Itoa(id)
+			return source
+		})
+}
+
+func workspaceTestPlanCoverage(packages map[string]*QueryIndex, cleanups testPlanCleanupGraph[workspaceCallEndpoint], recoveredClosures int) []string {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
@@ -116,11 +159,8 @@ func workspaceTestPlanCoverage(packages map[string]*QueryIndex, cleanups testPla
 			if record.Relation != "calls" {
 				continue
 			}
-			exact := record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0
 			// Each partition carries the same workspace-wide completeness counts.
-			exact = exact || cleanups.complete && cleanups.recovered > 0 && record.Unknown == cleanups.recovered &&
-				slices.Equal(record.Reasons, []string{ordinaryCleanupOmission})
-			if !exact || record.External != 0 {
+			if !testPlanCallsExact(record, cleanups.recovered+recoveredClosures) {
 				add("incomplete-call-coverage")
 			}
 			if record.External != 0 {

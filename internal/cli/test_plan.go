@@ -53,8 +53,8 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	subjectPath := selected.Path
-	if subjectUID != "" && subjectUID != selected.Manifest.Package.UID {
+	var subjectPath string
+	if subjectUID != "" {
 		subject, err := selectWorkspaceTestPackage(workspace, subjectUID)
 		if err != nil {
 			return invocationError(stderr, err.Error())
@@ -142,7 +142,7 @@ func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath, subjec
 		return testPlanInput{}, ExitSuccess
 	}
 	instance := instances[packageID].String()
-	if subjectPath != packagePath {
+	if subjectPath != "" {
 		subjectID, err := workspace.PackageID(subjectPath)
 		if err != nil {
 			return testPlanInput{}, ExitSuccess

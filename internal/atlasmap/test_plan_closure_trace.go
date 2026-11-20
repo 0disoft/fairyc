@@ -36,7 +36,7 @@ type closureBody struct {
 	returns []mir.Operand
 }
 
-func newClosureTrace(program mir.Program, pkg hir.PackageID) closureTrace {
+func newClosureTrace(program mir.Program, include func(hir.PackageID) bool) closureTrace {
 	trace := closureTrace{
 		functions: make(map[hir.SymbolID]*mir.Function),
 		callers:   make(map[hir.SymbolID][]closureCall),
@@ -45,7 +45,7 @@ func newClosureTrace(program mir.Program, pkg hir.PackageID) closureTrace {
 	}
 	for i := range program.Functions {
 		fn := &program.Functions[i]
-		if fn.Span.Package == pkg {
+		if include(fn.Span.Package) {
 			trace.functions[fn.Symbol] = fn
 		}
 	}
@@ -189,12 +189,12 @@ func (trace *closureTrace) parameter(function hir.SymbolID, position int, field 
 
 // Split a disagreeing invocation by its verified callers. Extend the active
 // stack at its outer end so argument lookup follows exactly that call chain.
-func (trace *closureTrace) invocation(function hir.SymbolID, value mir.Operand, sources map[hir.SymbolID]string, record func(hir.SymbolID, *closureFrame) bool) bool {
+func (trace *closureTrace) invocation(function hir.SymbolID, value mir.Operand, hasSource func(hir.SymbolID) bool, record func(hir.SymbolID, *closureFrame) bool) bool {
 	var frame *closureFrame
 	var visit func(hir.SymbolID, **closureFrame, int) bool
 	visit = func(outer hir.SymbolID, next **closureFrame, depth int) bool {
 		trace.work--
-		if trace.work < 0 || sources[outer] == "" {
+		if trace.work < 0 || !hasSource(outer) {
 			return false
 		}
 		targets := trace.resolve(function, value, "", frame, 0)

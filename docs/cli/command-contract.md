@@ -108,14 +108,17 @@ Known paths are retained alongside the fallback reasons. Run `fairyc test --pack
 <package-uid>` for the full package suite. The recommendation covers call paths only
 and has no effect on CI test selection.
 
-Use `--symbol-package` to select a declaration from another root-reachable
-local package. The test package still comes from `--package`, and the report
+Use `--symbol-package` to select a declaration in the root-reachable local
+workspace, including in the test package itself. The test package still comes
+from `--package`, and the report
 adds `symbol_package_uid`. Steps outside the test package are prefixed with
 their package UID. This mode joins current Atlas v3 partitions and follows
 compiler-resolved direct calls and verified MIR cleanup paths, preserving
 concrete implementation IDs. For example, a test that drops a value returned
 by a dependency can be reached from that dependency's `Resource::cleanup`
-selector or from a function called by the cleanup.
+selector or from a function called by the cleanup. Copied closure arguments
+and results can also cross package boundaries. The planner tracks the caller
+chain that supplies each resolved closure target within the same trace limits.
 Unresolved indirect calls, foreign calls and incomplete cleanup analysis
 require `all-tests` and retain any known paths. Cleanup recovery allows
 65,536 call observations and drop-type visits across the workspace.

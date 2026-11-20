@@ -65,10 +65,10 @@ func (index *QueryIndex) TestPlan(selector string, tests []string, result compil
 		reasons = append(reasons, "traversal-limit")
 	}
 	return testPlanPaths(tests, index.testPlanTestSymbols(), parents, reasons, func(at string) string {
-		if label, found := index.testPlanEndpointLabel(at); found {
-			return label
+		if source, found := closures.aliases[at]; found {
+			at = source
 		}
-		if label, found := closures.labels[at]; found {
+		if label, found := index.testPlanEndpointLabel(at); found {
 			return label
 		}
 		return at
@@ -219,12 +219,7 @@ func (index *QueryIndex) testPlanCallFacts(recoveredCalls int, genericCleanupsCo
 	callsExact := false
 	for _, record := range index.completeness {
 		if record.Relation == "calls" {
-			callsExact = record.External == 0 &&
-				(record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0 ||
-					recoveredCalls > 0 && recoveredCalls == record.Unknown &&
-						!slices.ContainsFunc(record.Reasons, func(reason string) bool {
-							return reason != ordinaryCleanupOmission && reason != indirectClosureOmission
-						}))
+			callsExact = testPlanCallsExact(record, recoveredCalls)
 		}
 	}
 	if !callsExact {
@@ -248,6 +243,15 @@ func (index *QueryIndex) testPlanCallFacts(recoveredCalls int, genericCleanupsCo
 	}
 	slices.Sort(reasons)
 	return reasons, specialized
+}
+
+func testPlanCallsExact(record semanticsnapshot.Completeness, recoveredCalls int) bool {
+	return record.External == 0 &&
+		(record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0 ||
+			recoveredCalls > 0 && recoveredCalls == record.Unknown &&
+				!slices.ContainsFunc(record.Reasons, func(reason string) bool {
+					return reason != ordinaryCleanupOmission && reason != indirectClosureOmission
+				}))
 }
 
 func (index *QueryIndex) localTestPlanCall(call QueryRelation, genericCleanupsComplete bool) bool {
