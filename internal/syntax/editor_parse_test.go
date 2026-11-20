@@ -58,6 +58,56 @@ func TestEditorParseMatchesBatchAtTokenLimit(t *testing.T) {
 	}
 }
 
+func TestEditorParseRebasesSuffixAcrossRevisions(t *testing.T) {
+	const header = "module main;\nfn i32 first() { return 1; }\n"
+	const tail = "/// Tail documentation\nfn i32 tail(Option<Option<i32>> value) { return 7; }\n" +
+		"resource Token { i32 id; cleanup {} }\nfn i32 last() { return 9; }\n"
+	const oldItem = "fn i32 changed() { return 2; }\n"
+	const newItems = "fn i32 inserted() { return 3; }\nfn i32 changed() { return 200 + 1; }\n"
+	limits := source.DefaultLimits()
+	initial := source.NewFile("main.fy", []byte(header+oldItem+tail))
+	_, previous := ParseEditor(initial, limits, nil)
+	for _, step := range []struct {
+		text string
+		want int
+	}{
+		{header + newItems + tail, 3},
+		{header + newItems + strings.Replace(tail, "/// Tail", "// Tail", 1), 3},
+		{header + newItems + strings.Replace(tail, "return 7", "return 71", 1), 2},
+		{header + oldItem + tail, 2},
+		{header + oldItem + tail, 0},
+	} {
+		file := source.NewFile("main.fy", []byte(step.text))
+		got, next := ParseEditor(file, limits, previous)
+		if want := Parse(file, limits); !reflect.DeepEqual(got, want) {
+			t.Fatalf("incremental and batch differ for %q: diagnostics %v/%v", step.text, got.Diagnostics, want.Diagnostics)
+		}
+		if next == nil || next.reusedSuffixItems != step.want {
+			t.Fatalf("suffix reuse for %q: got %v, want %d", step.text, next.reusedSuffixItems, step.want)
+		}
+		previous = next
+	}
+}
+
+func TestEditorParseSuffixMatchesBatchAtNodeLimit(t *testing.T) {
+	const header = "module main;\n"
+	const item = "fn i32 changed() { return 1; }\n"
+	const tail = "fn i32 tail() { return 2; }\nfn i32 last() { return 3; }\n"
+	initial := source.NewFile("main.fy", []byte(header+item+tail))
+	limits := source.DefaultLimits()
+	limits.MaxNodes = len(Parse(initial, limits).Nodes)
+	_, previous := ParseEditor(initial, limits, nil)
+	if previous == nil {
+		t.Fatal("initial parse did not fit")
+	}
+	updated := source.NewFile("main.fy", []byte(header+strings.Replace(item, "return 1", "return 1 + 2", 1)+tail))
+	got, next := ParseEditor(updated, limits, previous)
+	want := Parse(updated, limits)
+	if next != nil || want.ErrorFree() || !reflect.DeepEqual(got, want) {
+		t.Fatalf("node budget: got %v, batch %v", got.Diagnostics, want.Diagnostics)
+	}
+}
+
 func BenchmarkEditorParseTailEdit(b *testing.B) {
 	var src strings.Builder
 	src.WriteString("module main;\n")

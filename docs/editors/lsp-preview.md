@@ -150,9 +150,12 @@ resume after a checkpoint with an identical byte prefix and lookahead. It can
 reuse an identical suffix when the new scan reaches the matching token boundary,
 shifting reused spans to their new positions. If the previous clean parse has a
 top-level checkpoint whose consumed and observed tokens still match exactly,
-the parser also resumes after that prefix. Reused tokens, literal expansion,
-nodes and parser work count toward the same budget as a fresh parse. With no
-eligible checkpoint, the corresponding stage starts from the beginning. Each
+the parser also resumes after that prefix. When parsing reaches a matching
+top-level boundary in the verified token suffix, it reuses the remaining
+declarations with current source spans, documentation and node IDs.
+Reused tokens, literal expansion, nodes and parser work count toward the
+same budget as a fresh parse. With no eligible checkpoint, the corresponding
+stage starts from the beginning. Each
 generation can retain an estimated 8 MiB of syntax and checkpoints, with a
 separate 16 MiB session limit. The server lowers fresh ASTs and rechecks the
 workspace after each change.

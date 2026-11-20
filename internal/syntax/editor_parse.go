@@ -11,12 +11,13 @@ import (
 // EditorParseSnapshot owns the checkpoints for one current-grammar parse.
 // Its tree and child lists are immutable for as long as the snapshot is retained.
 type EditorParseSnapshot struct {
-	path        string
-	limits      source.Limits
-	tree        *Tree
-	lexer       *lexer.EditorLexSnapshot
-	prefixes    []parsePrefix
-	reusedItems int
+	path              string
+	limits            source.Limits
+	tree              *Tree
+	lexer             *lexer.EditorLexSnapshot
+	prefixes          []parsePrefix
+	reusedItems       int
+	reusedSuffixItems int
 }
 
 type parsePrefix struct {
@@ -28,6 +29,7 @@ type parsePrefix struct {
 type editorParseState struct {
 	previous, next            *EditorParseSnapshot
 	observed, syntheticTokens int
+	suffix                    editorParseSuffix
 }
 
 func (state *editorParseState) lex(file source.File, budget *source.Budget) lexer.Result {
@@ -40,8 +42,8 @@ func (state *editorParseState) lex(file source.File, budget *source.Budget) lexe
 	return result
 }
 
-// ParseEditor reuses verified tokens and resumes at a verified top-level item
-// boundary when the old parser saw the exact same prefix.
+// ParseEditor reuses verified tokens and top-level subtrees when the current
+// parser reaches the matching declaration boundaries.
 func ParseEditor(file source.File, limits source.Limits, previous *EditorParseSnapshot) (*Tree, *EditorParseSnapshot) {
 	if previous != nil && (previous.path != file.RelativePath || previous.limits != limits) {
 		previous = nil
@@ -60,7 +62,7 @@ func (s *EditorParseSnapshot) CheckpointWeight() int64 {
 	return int64(cap(s.prefixes))*64 + int64(len(s.path)) + 128 + s.lexer.CheckpointWeight()
 }
 
-// ReusedItems reports the count of top-level items restored from a prior parse.
+// ReusedItems reports the count of top-level items restored in the prefix.
 func (s *EditorParseSnapshot) ReusedItems() int { return s.reusedItems }
 
 func (p *parser) recordEditorPrefix(items int) {
@@ -110,7 +112,7 @@ func (p *parser) restoreEditorPrefix() []NodeID {
 		p.tree.Nodes = slices.Clone(old.Nodes[:prefix.nodes])
 		p.tree.Module = old.Module
 		p.editor.next.prefixes = slices.Clone(previous.prefixes[:i+1])
-		p.editor.next.reusedItems = i + 1
+		p.editor.next.reusedItems = prefix.items - previous.prefixes[0].items
 		return slices.Clone(old.Nodes[old.Root].Children[:prefix.items])
 	}
 	return nil

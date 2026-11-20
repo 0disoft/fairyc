@@ -17,8 +17,16 @@ func (p *parser) parseSource() NodeID {
 		for !p.budget.Exhausted() && p.at("import") {
 			children = append(children, p.parseImport())
 		}
+		if p.editor != nil {
+			p.recordEditorPrefix(len(children))
+		}
 	}
+	p.prepareEditorSuffix()
 	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		if suffix := p.restoreEditorSuffix(children); suffix != nil {
+			children = suffix
+			break
+		}
 		children = append(children, p.parseItem())
 		if p.editor != nil {
 			p.recordEditorPrefix(len(children))
