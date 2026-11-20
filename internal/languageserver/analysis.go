@@ -54,7 +54,7 @@ type analysis struct {
 	lastUsed        uint64
 	budgetExceeded  bool
 	unsynchronized  bool
-	insertion       *syntaxInsertion
+	repair          *syntaxRepair
 	sourceCharge    int64
 	sourceCharged   bool
 }
@@ -210,7 +210,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 				if filename == "" {
 					filename = filepath.Join(root, filepath.FromSlash(load.Path))
 				}
-				a.insertion = singleSyntaxInsertion(filename, load.RelativeSourcePath, load.Diagnostics)
+				a.repair = singleSyntaxRepair(filename, load.RelativeSourcePath, load.Diagnostics)
 				for _, diag := range load.Diagnostics {
 					a.add(filename, load.Source, diag.Span.StartByte, diag.Span.EndByte, diag.Code, diag.Code)
 				}
@@ -297,7 +297,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 		for _, diag := range parsed.Tree.Diagnostics {
 			a.add(d.Path, d.Text, diag.Span.StartByte, diag.Span.EndByte, diag.Code, diag.Code)
 		}
-		a.insertion = singleSyntaxInsertion(d.Path, filepath.Base(d.Path), parsed.Tree.Diagnostics)
+		a.repair = singleSyntaxRepair(d.Path, filepath.Base(d.Path), parsed.Tree.Diagnostics)
 		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{Path: d.Path, Text: d.Text, Module: parsed.AST}
 		a.sourceCharge, a.sourceCharged = int64(len(d.Text)), true
 		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {

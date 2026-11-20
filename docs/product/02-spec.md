@@ -496,7 +496,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   families through typed HIR; they remain grammar trivia and carry no rendered or semantic meaning.
   ADR 0375 adds an editor-internal immutable green tree and a deterministic full-file formatter that
   changes only lexer-owned whitespace after proving identical parser shape and significant tokens.
-  The local LSP preview exposes editor capabilities including verified single-document rename.
+  The local LSP preview exposes editor capabilities including verified rename across the loaded
+  source graph and verified punctuation quick fixes.
   Its request contracts and coverage are described in [the editor preview](../editors/lsp-preview.md).
   Workspace reloads in the LSP preview can reuse lossless syntax for byte-identical files.
   Within-file incremental reparse, SCIP and broader structural edits remain deferred until

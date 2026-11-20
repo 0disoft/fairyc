@@ -52,10 +52,10 @@ terminates the session.
   names in the current clean analysis. Tokens use UTF-16 coordinates and
   distinguish declarations and read-only constants. An unavailable analysis
   returns an empty token stream. Results are limited to 32,768 tokens.
-- Quick fixes for isolated missing punctuation reported by the parser. The
-  server checks the resulting syntax before offering an insertion at the
-  current document version. Clients need code action literals and versioned
-  workspace edits.
+- Quick fixes for isolated missing or skipped punctuation reported by the
+  parser. The server checks the resulting syntax at the current document
+  version. A deletion must also preserve all other significant tokens and
+  comments. Clients need code action literals and versioned workspace edits.
 - Rename for local bindings and plain functions across the current checked
   workspace, including qualified calls across loaded packages. The server
   recompiles all proposed edits together and compares resolved declarations
