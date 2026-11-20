@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
 
@@ -19,13 +21,15 @@ type TestPlanPath struct {
 
 // TestPlan shows one shortest exact local path per discovered test. Keep known
 // paths when coverage is incomplete so the caller can recommend the full suite.
-func (index *QueryIndex) TestPlan(selector string, tests []string) ([]TestPlanPath, []string) {
+// program and packageID must come from the verified compilation used by index.
+func (index *QueryIndex) TestPlan(selector string, tests []string, program mir.Program, packageID hir.PackageID) ([]TestPlanPath, []string) {
 	subject, found := index.testPlanSubject(selector)
 	paths := []TestPlanPath{}
 	if !found {
 		return paths, []string{"symbol-not-found"}
 	}
-	reasons := index.testPlanOmissions()
+	cleanups := index.testPlanCleanups(program, packageID)
+	reasons := index.testPlanOmissions(cleanups.recovered)
 	type step struct {
 		next  string
 		depth int
@@ -36,20 +40,24 @@ func (index *QueryIndex) TestPlan(selector string, tests []string) ([]TestPlanPa
 	for i := 0; i < len(queue); i++ {
 		target := queue[i]
 		depth := parents[target].depth
-		for _, pos := range index.incoming[target] {
-			call := index.relations[pos]
-			if !index.ordinaryTestPlanCall(call) {
-				continue
-			}
-			if _, visited := parents[call.Source]; visited {
-				continue
+		enqueue := func(source string) {
+			if _, visited := parents[source]; visited {
+				return
 			}
 			if depth == maxTestPlanDepth || len(queue) == maxTestPlanSymbols {
 				truncated = true
-				continue
+				return
 			}
-			parents[call.Source] = step{next: target, depth: depth + 1}
-			queue = append(queue, call.Source)
+			parents[source] = step{next: target, depth: depth + 1}
+			queue = append(queue, source)
+		}
+		for _, pos := range index.incoming[target] {
+			if call := index.relations[pos]; index.ordinaryTestPlanCall(call) {
+				enqueue(call.Source)
+			}
+		}
+		for _, source := range cleanups.incoming[target] {
+			enqueue(source)
 		}
 	}
 	if truncated {
@@ -75,7 +83,11 @@ func (index *QueryIndex) TestPlan(selector string, tests []string) ([]TestPlanPa
 		}
 		path := make([]string, 0, parents[symbol].depth+1)
 		for at := symbol; at != ""; at = parents[at].next {
-			path = append(path, testPlanLabel(index.nodes[index.byVisible[at]].declaration.Key))
+			if position, found := index.byVisible[at]; found {
+				path = append(path, testPlanLabel(index.nodes[position].declaration.Key))
+			} else {
+				path = append(path, at)
+			}
 		}
 		paths = append(paths, TestPlanPath{Test: test, Path: path})
 	}
@@ -110,7 +122,7 @@ func (index *QueryIndex) testPlanSubject(selector string) (string, bool) {
 	return index.nodes[position].symbol.Visible, true
 }
 
-func (index *QueryIndex) testPlanOmissions() []string {
+func (index *QueryIndex) testPlanOmissions(recoveredCleanups int) []string {
 	reasons := []string{}
 	add := func(reason string) {
 		if !slices.Contains(reasons, reason) {
@@ -120,7 +132,10 @@ func (index *QueryIndex) testPlanOmissions() []string {
 	callsExact := false
 	for _, record := range index.completeness {
 		if record.Relation == "calls" {
-			callsExact = record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0 && record.External == 0
+			callsExact = record.External == 0 &&
+				(record.Status == semanticsnapshot.CompletenessExact && record.Unknown == 0 ||
+					recoveredCleanups > 0 && recoveredCleanups == record.Unknown &&
+						slices.Equal(record.Reasons, []string{ordinaryCleanupOmission}))
 		}
 		if record.Relation == "generic-template-bodies" {
 			add("generic-call-coverage")

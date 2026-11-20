@@ -6,6 +6,8 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/buildidentity"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -58,71 +60,77 @@ func runTestPlan(args []string, sourceRoot string, stdout, stderr io.Writer) int
 		Schema: "fairyc.test-plan/v1", Package: selected.Manifest.Package.UID, Symbol: symbol,
 		Tests: []atlasmap.TestPlanPath{}, Reasons: []string{},
 	}
-	index, code := buildTestPlanIndex(workspace, selected.Path, stderr)
+	input, code := buildTestPlanIndex(workspace, selected.Path, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	if index == nil {
+	if input.index == nil {
 		report.Reasons = append(report.Reasons, "atlas-unavailable")
 	} else {
 		identities := make([]string, len(tests))
 		for i, test := range tests {
 			identities[i] = test.display
 		}
-		report.Tests, report.Reasons = index.TestPlan(symbol, identities)
+		report.Tests, report.Reasons = input.index.TestPlan(symbol, identities, input.program, input.packageID)
 	}
 	return writeTestPlan(report, stdout, stderr)
 }
 
 // Compile the test-augmented snapshot once. Atlas identities are independently
 // checked against that snapshot, with no persisted maps or lock updates.
-func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string, stderr io.Writer) (*atlasmap.QueryIndex, int) {
+type testPlanInput struct {
+	index     *atlasmap.QueryIndex
+	program   mir.Program
+	packageID hir.PackageID
+}
+
+func buildTestPlanIndex(workspace workspaceloader.Workspace, packagePath string, stderr io.Writer) (testPlanInput, int) {
 	result, err := workspacecompiler.Check(workspace)
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
-			return nil, ExitInternalFailure
+			return testPlanInput{}, ExitInternalFailure
 		}
-		return nil, ExitSourceDiagnostics
+		return testPlanInput{}, ExitSourceDiagnostics
 	}
 	if len(result.Semantic.Unsupported) != 0 {
 		if err := writeStableUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
-			return nil, ExitInternalFailure
+			return testPlanInput{}, ExitInternalFailure
 		}
-		return nil, ExitSourceDiagnostics
+		return testPlanInput{}, ExitSourceDiagnostics
 	}
 	if err != nil || !result.Verified {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	instances, err := workspace.PackageIdentities()
 	if err != nil {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	identity, err := buildidentity.Current()
 	if err != nil {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	_, partitions, err := atlasmap.PrepareWorkspaceV3(workspace, result, identity)
 	if err != nil {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	expectations, err := atlasmap.CurrentWorkspaceExpectationsV3(workspace, result, identity)
 	if err != nil {
-		return nil, ExitSuccess
+		return testPlanInput{}, ExitSuccess
 	}
 	instance := instances[packageID].String()
 	for _, partition := range partitions {
 		if partition.Header().PackageInstance == instance {
 			if index, err := atlasmap.NewQueryIndexV3(partition, expectations[instance]); err == nil {
-				return index, ExitSuccess
+				return testPlanInput{index: index, program: result.MIR, packageID: packageID}, ExitSuccess
 			}
 			break
 		}
 	}
-	return nil, ExitSuccess
+	return testPlanInput{}, ExitSuccess
 }
 
 func writeTestPlan(report testPlanReport, stdout, stderr io.Writer) int {

@@ -59,8 +59,13 @@ The `fairyc.test-plan/v1` JSON report contains `package_uid`, `symbol`, `recomme
 canonical `test` identity and one shortest `path` from that test to the selected function.
 Use those identities with `fairyc test --package <package-uid> --exact <test>`.
 
-`selected-tests` describes coverage of ordinary, resolved calls within the selected
-package. Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
+`selected-tests` describes coverage of resolved call paths within the selected
+package. The fresh verified MIR also connects resource drop obligations to ordinary
+cleanup bodies. These paths can include a `module::Resource::cleanup` step. Cleanup
+paths can be conditional on control flow or the active payload of a tagged value.
+If cleanup graph construction exceeds 65,536 call observations and drop-type visits,
+the command retains the ordinary Atlas paths and recommends `all-tests`.
+Missing symbols, unavailable Atlas data, incomplete call facts, foreign or
 cross-package calls, generic call coverage and unmapped tests cause `all-tests`.
 Traversal also recommends `all-tests` if it cuts off at 64 edges or 4,096 symbols.
 Known paths are retained alongside the fallback reasons. Run `fairyc test --package

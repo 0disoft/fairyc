@@ -14,6 +14,7 @@ func TestExperimentalTestPlanCalls(t *testing.T) {
 		library string
 		call    string
 		path    []string
+		reason  string
 	}{
 		{
 			name: "direct",
@@ -37,6 +38,37 @@ pub fn i32 bridge() {
     return token.value;
 }`,
 			call: "library::bridge()",
+			path: []string{selectedTest, "library::bridge", "library::Token::cleanup", "library::answer"},
+		},
+		{
+			name: "nested-cleanup",
+			library: `resource Token {
+    i32 value;
+    cleanup { discard answer(); }
+}
+resource Wrapper { Token token; cleanup {} }
+pub fn i32 bridge() {
+    let Option<Wrapper> wrapped = .some(Wrapper { .token = Token { .value = 42 } });
+    discard wrapped;
+    return 42;
+}`,
+			call: "library::bridge()",
+			path: []string{selectedTest, "library::bridge", "library::Token::cleanup", "library::answer"},
+		},
+		{
+			name: "cleanup-with-ffi",
+			library: `unsafe extern C fn i32 host_value();
+resource Token {
+    i32 value;
+    cleanup { discard answer(); discard unsafe { host_value() }; }
+}
+pub fn i32 bridge() {
+    let Token token = Token { .value = 42 };
+    return token.value;
+}`,
+			call:   "library::bridge()",
+			path:   []string{selectedTest, "library::bridge", "library::Token::cleanup", "library::answer"},
+			reason: "incomplete-call-coverage",
 		},
 		{
 			name: "cycle",
@@ -49,8 +81,9 @@ fn i32 right(i32 n) {
     if (n < 0) { return unsafe { host_value() }; }
     return left(n);
 }`,
-			call: "library::left(2) + library::left(0) - 42",
-			path: []string{selectedTest, "library::left", "library::answer"},
+			call:   "library::left(2) + library::left(0) - 42",
+			path:   []string{selectedTest, "library::left", "library::answer"},
+			reason: "external-ffi",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -74,18 +107,12 @@ fn i32 right(i32 n) {
 			if got.Schema != "fairyc.test-plan/v1" || got.Package != packageUID || got.Symbol != selector {
 				t.Fatalf("unexpected plan identity: %s", out)
 			}
-			if tc.name == "cleanup" {
-				if len(got.Tests) != 0 || got.Recommend != "all-tests" || !slices.Contains(got.Reasons, "incomplete-call-coverage") {
-					t.Fatalf("cleanup call did not request the full suite: %s", out)
-				}
-				return
-			}
 			if len(got.Tests) != 1 || got.Tests[0].Test != selectedTest || !slices.Equal(got.Tests[0].Path, tc.path) {
 				t.Fatalf("unexpected plan: %s; want path %v", out, tc.path)
 			}
-			if tc.name == "cycle" {
-				if got.Recommend != "all-tests" || !slices.Contains(got.Reasons, "external-ffi") {
-					t.Fatalf("opaque branch in cycle did not request the full suite: %s", out)
+			if tc.reason != "" {
+				if got.Recommend != "all-tests" || !slices.Contains(got.Reasons, tc.reason) {
+					t.Fatalf("expected full suite recommendation with %s: %s", tc.reason, out)
 				}
 			} else if got.Recommend != "selected-tests" || len(got.Reasons) != 0 {
 				t.Fatalf("expected a selected-test recommendation: %s", out)
