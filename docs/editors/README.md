@@ -21,6 +21,26 @@ The VS Code adapter also opens embedded SDK definitions in read-only virtual
 documents. See [the LSP preview contract](lsp-preview.md) for the shared
 server's capabilities and client requirements.
 
+## Offline SCIP index
+
+Run `fairyc check` to create or refresh the workspace lock, then run
+`fairyc experimental scip > index.scip` from the same workspace in a shell
+that preserves binary stdout. On Windows, `cmd.exe` supports this redirection.
+The experimental Go frontend command verifies the existing lock and
+compiles the current source before writing a binary
+[SCIP index](https://github.com/scip-code/scip/tree/v0.10.0).
+
+The index contains root-reachable local files, with workspace-relative
+paths, UTF-8 byte columns, authored global definitions and compiler-resolved
+references. Referenced locals and same-document parameters use document-local
+symbols. Built-in, bundled SDK and out-of-workspace targets are omitted.
+Ambiguous uses and unrecorded relationships are omitted. If more than one
+package instance maps to the same document path, the export fails.
+The index includes the workspace root URI and omits file contents.
+The exporter writes no project files and buffers its output before writing.
+A missing or stale lock, failed verification or budget overflow produces no
+index. Limits are 131,072 occurrence candidates and 16 MiB of encoded output.
+
 ## Tree-sitter and Zed
 
 `editors/tree-sitter-fairyc` supplies the grammar, nested-comment scanner,

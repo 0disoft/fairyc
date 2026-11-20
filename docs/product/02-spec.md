@@ -501,8 +501,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Its request contracts and coverage are described in [the editor preview](../editors/lsp-preview.md).
   Workspace reloads in the LSP preview can reuse lossless syntax for byte-identical files.
   Changed workspace files can reuse verified prefix and suffix tokens and the top-level
-  subtrees at matching parser boundaries. SCIP and broader structural edits remain deferred
-  until measured editor work requires them.
+  subtrees at matching parser boundaries. The experimental SCIP export projects verified local
+  workspace definitions and references for offline navigation. Broader structural edits remain
+  deferred until measured editor work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Already-resolved multi-package input carries a deterministic build-local package discriminator and
   exact import-provider bindings. Semantic module identity is package plus source-visible module

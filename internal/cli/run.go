@@ -74,6 +74,7 @@ Usage:
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental why-emitted <entry.fy> --symbol <name> [--source <file.fy>]...
+  fairyc experimental scip
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
@@ -305,6 +306,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runEmitC(args[1:], sourceRoot, stdout, stderr)
 	case "why-emitted":
 		return runWhyEmitted(args[1:], sourceRoot, stdout, stderr)
+	case "scip":
+		return runSCIP(args[1:], sourceRoot, stdout, stderr)
 	case "build":
 		return runBuild(args[1:], sourceRoot, stdout, stderr)
 	case "build-target":
