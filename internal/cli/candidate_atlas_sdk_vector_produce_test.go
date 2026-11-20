@@ -278,7 +278,8 @@ func candidateAtlasSDKVectorType(value semanticsnapshot.TypeRef, scalar string) 
 }
 
 type candidateAtlasSDKVectorGlobal struct {
-	calls, external, templates, implementations int
+	calls, external, unknown, templates, implementations int
+	callReasons                                          []string
 }
 
 func candidateAtlasSDKVectorGlobalOracle(t *testing.T, partitions map[string]atlasmap.Partition) candidateAtlasSDKVectorGlobal {
@@ -300,9 +301,11 @@ func candidateAtlasSDKVectorGlobalOracle(t *testing.T, partitions map[string]atl
 			t.Fatalf("Go calls oracle missing for %s", p.Header().PackageInstance)
 		}
 		if !set {
-			result.calls, result.external, result.templates = calls.Resolved, calls.External, templates.Unknown
+			result.calls, result.external, result.unknown, result.templates = calls.Resolved, calls.External, calls.Unknown, templates.Unknown
+			result.callReasons = calls.Reasons
 			set = true
-		} else if calls.Resolved != result.calls || calls.External != result.external || templates.Unknown != result.templates {
+		} else if calls.Resolved != result.calls || calls.External != result.external || calls.Unknown != result.unknown ||
+			!slices.Equal(calls.Reasons, result.callReasons) || templates.Unknown != result.templates {
 			t.Fatalf("Go global completeness changed across partitions")
 		}
 		result.implementations += len(p.Specializations())
@@ -354,11 +357,16 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 		t.Fatalf("SDK vector generation status/omissions: %+v", h)
 	}
 	wantRows := map[string]semanticsnapshot.Completeness{}
-	callStatus, callReason := semanticsnapshot.CompletenessExact, ""
-	if global.external != 0 {
-		callStatus, callReason = semanticsnapshot.CompletenessPartial, "external-ffi"
+	callStatus, callReasons := semanticsnapshot.CompletenessExact, global.callReasons
+	// Fixtures that project call rows independently supply the external count.
+	if global.external != 0 && len(callReasons) == 0 {
+		callReasons = []string{"external-ffi"}
 	}
-	wantRows["calls"] = semanticsnapshot.Completeness{Relation: "calls", Status: callStatus, Resolved: global.calls, External: global.external}
+	if len(callReasons) != 0 {
+		callStatus = semanticsnapshot.CompletenessPartial
+	}
+	wantRows["calls"] = semanticsnapshot.Completeness{Relation: "calls", Status: callStatus, Resolved: global.calls,
+		External: global.external, Unknown: global.unknown, Reasons: callReasons}
 	wantRows["drops"] = semanticsnapshot.Completeness{Relation: "drops", Status: semanticsnapshot.CompletenessExact}
 	wantRows["may-trap"] = semanticsnapshot.Completeness{Relation: "may-trap", Status: semanticsnapshot.CompletenessExact}
 	wantRows["uses-unsafe"] = semanticsnapshot.Completeness{Relation: "uses-unsafe", Status: semanticsnapshot.CompletenessExact}
@@ -369,11 +377,6 @@ func verifyCandidateAtlasSDKVectorCompleteness(t *testing.T, got, want atlasmap.
 	wantRows["borrows"] = semanticsnapshot.Completeness{Relation: "borrows", Status: semanticsnapshot.CompletenessExact}
 	wantRows["generic-specializations"] = semanticsnapshot.Completeness{Relation: "generic-specializations", Status: semanticsnapshot.CompletenessExact, Resolved: global.implementations}
 	wantRows["generic-template-bodies"] = semanticsnapshot.Completeness{Relation: "generic-template-bodies", Status: semanticsnapshot.CompletenessUnavailable, Unknown: global.templates, Reasons: []string{"bodies-checked-only-after-specialization"}}
-	if callReason != "" {
-		row := wantRows["calls"]
-		row.Reasons = []string{callReason}
-		wantRows["calls"] = row
-	}
 	for _, relation := range []string{"reads", "test-calls", "writes"} {
 		wantRows[relation] = semanticsnapshot.Completeness{Relation: relation, Status: semanticsnapshot.CompletenessUnavailable, Reasons: []string{"candidate-atlas-not-collected"}}
 	}
