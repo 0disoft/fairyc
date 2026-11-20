@@ -28,6 +28,7 @@ CASES = {
 def collect(lines, output=sys.stdout):
     passed, skipped, errors = set(), set(), []
     tails = defaultdict(lambda: deque(maxlen=80))
+    running = defaultdict(set)
     for line in lines:
         try:
             event = json.loads(line)
@@ -40,6 +41,16 @@ def collect(lines, output=sys.stdout):
         key = package, test
         selected = (package, test.split("/")[0]) in ROOTS
         action = event.get("Action")
+        if test:
+            if action in ("run", "cont"):
+                running[package].add(test)
+            elif action in ("pause", "pass", "skip", "fail"):
+                running[package].discard(test)
+        elif action in ("pass", "skip", "fail", "build-fail"):
+            unfinished = running.pop(package, ())
+            if action == "fail" and unfinished:
+                names = ", ".join(sorted(unfinished))
+                print(f"{package}: test still running at package failure: {names}", file=output, flush=True)
         if "Output" in event:
             if selected or not test:
                 print(event["Output"], end="", file=output, flush=True)

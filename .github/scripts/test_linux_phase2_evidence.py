@@ -77,6 +77,33 @@ class LinuxPhase2Evidence(unittest.TestCase):
         self.assertIn("bad assertion", output)
         self.assertNotIn("noise", output)
 
+    def test_package_failure_names_only_unfinished_running_tests(self):
+        package = "example/timeout"
+        items = [
+            ("TestBusy", "run"),
+            ("TestBusy/child", "run"),
+            ("TestPaused", "run"),
+            ("TestPaused", "pause"),
+            ("TestResumed", "run"),
+            ("TestResumed", "pause"),
+            ("TestResumed", "cont"),
+            ("TestFinished", "run"),
+            ("TestFinished", "pass"),
+            ("", "fail"),
+        ]
+        report, output = self.run_events(events() + [
+            {"Package": package, "Test": test, "Action": action}
+            for test, action in items
+        ])
+        self.assertFalse(report["complete"])
+        self.assertEqual(report["errors"], [f"failed: {package}::"])
+        self.assertIn(
+            f"{package}: test still running at package failure: TestBusy, TestBusy/child, TestResumed",
+            output,
+        )
+        self.assertNotIn("TestPaused", output)
+        self.assertNotIn("TestFinished", output)
+
     def test_empty_malformed_and_wrong_identity_cannot_pass(self):
         for lines in ([], ["not-json"], ["[]"], [json.dumps({"Action": "pass", "Package": "wrong"})]):
             with self.subTest(lines=lines):

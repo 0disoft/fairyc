@@ -107,7 +107,8 @@ headers, linking, startup, and sanitizers; version preflight is not a replacemen
 
 The Linux Go suite runs exactly once, with `go test -mod=readonly -count=1 -timeout 25m -json ./...` piped
 into `python3 -B .github/scripts/linux_phase2_evidence.py`, which streams selected test output,
-package summaries and failures. The validator emits `fairyc.phase2-linux-evidence/v5` and marks a
+package summaries and failures. If a package fails with tests still running, the log names them.
+The validator emits `fairyc.phase2-linux-evidence/v5` and marks a
 run complete only when `TestLinuxFileProgressNative`, `TestSystemHeapOOMNative`,
 `TestLinuxPreparedPublication`, `TestBytesEqualExecution`, `TestBytesCompareExecution`,
 `TestCheckedI64DecimalExecution`, `TestLinuxTrapReceiptProgressNative`, and
