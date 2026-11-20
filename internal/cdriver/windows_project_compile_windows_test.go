@@ -56,6 +56,34 @@ func TestWindowsProjectCompileSerialParallelPE(t *testing.T) {
 	}
 }
 
+func TestWindowsProjectCompileDeadlinePreservesCleanupFailure(t *testing.T) {
+	root := t.TempDir()
+	cause := errors.New("could not verify process termination")
+	cleanup := &windowsJobCleanupError{
+		wait:    &exec.ExitError{},
+		cleanup: fmt.Errorf("%s: %w", root, cause),
+	}
+	output := boundedBuffer{limit: 16, truncated: true}
+	err := windowsProjectSourceError{
+		"fy_unit_0.c", root, windowsProjectCommandResult(context.DeadlineExceeded, cleanup, output, time.Second),
+	}
+	if !errors.Is(err, context.DeadlineExceeded) || !errors.Is(err, cause) {
+		t.Fatalf("deadline and cleanup did not both survive compilation: %v", err)
+	}
+	if !strings.Contains(err.Error(), "exceeded 1s") ||
+		!strings.Contains(err.Error(), "clean up execution job: <temporary>") || strings.Contains(err.Error(), root) {
+		t.Fatalf("unexpected diagnostic: %v", err)
+	}
+	var exit *exec.ExitError
+	if errors.As(cleanup, &exit) {
+		t.Fatal("cleanup failure was classified as a normal tool exit")
+	}
+	ordinary := windowsProjectCommandResult(context.DeadlineExceeded, errors.New("tool killed"), output, time.Second)
+	if ordinary.Error() != "MSVC host command exceeded 1s: context deadline exceeded" {
+		t.Fatalf("ordinary deadline changed: %v", ordinary)
+	}
+}
+
 // The helper is only ever launched by this test through its own context. It
 // creates one owned descendant; no process-name enumeration or global kill.
 func TestWindowsProjectCompileProcessHelper(t *testing.T) {

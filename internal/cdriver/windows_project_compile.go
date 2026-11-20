@@ -81,7 +81,7 @@ func compileWindowsCompilerHostProject(ctx context.Context, toolchain WindowsHos
 		objectPath := filepath.Join(directory, objectName)
 		if err := runWindowsProjectCompileCommand(ctx, toolchain.Path, toolchain.Environment, directory, maxProcessOutput, timeout,
 			"/nologo", "/std:c11", "/TC", "/MT", "/Brepro", optimization, "/c", sourcePath, "/Fo:"+objectPath); err != nil {
-			return fmt.Errorf("compile project source %s: %s", source.Name, strings.ReplaceAll(err.Error(), directory, "<temporary>"))
+			return windowsProjectSourceError{source.Name, directory, err}
 		}
 		contents, err := readArtifact(objectPath)
 		if err != nil {
@@ -122,17 +122,46 @@ func runWindowsProjectCompileCommand(parent context.Context, name string, enviro
 	output := boundedBuffer{limit: limit}
 	command.Stdout, command.Stderr = &output, &output
 	_, _, err := runOwnedWindowsProcess(command, "")
-	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return fmt.Errorf("MSVC host command exceeded %s: %w", timeout, ctx.Err())
-	}
-	if ctx.Err() != nil {
-		return ctx.Err()
+	return windowsProjectCommandResult(ctx.Err(), err, output, timeout)
+}
+
+type windowsJobCleanupError struct {
+	wait, cleanup error
+}
+
+func (err *windowsJobCleanupError) Error() string {
+	return fmt.Sprintf("execution result %v; clean up execution job: %v", err.wait, err.cleanup)
+}
+
+func (err *windowsJobCleanupError) Unwrap() error { return err.cleanup }
+
+type windowsProjectSourceError struct {
+	name, directory string
+	cause           error
+}
+
+func (err windowsProjectSourceError) Error() string {
+	return "compile project source " + err.name + ": " + strings.ReplaceAll(err.cause.Error(), err.directory, "<temporary>")
+}
+
+func (err windowsProjectSourceError) Unwrap() error { return err.cause }
+
+func windowsProjectCommandResult(contextErr, runErr error, output boundedBuffer, timeout time.Duration) error {
+	if contextErr != nil {
+		if errors.Is(contextErr, context.DeadlineExceeded) {
+			contextErr = fmt.Errorf("MSVC host command exceeded %s: %w", timeout, contextErr)
+		}
+		var cleanup *windowsJobCleanupError
+		if errors.As(runErr, &cleanup) {
+			return errors.Join(contextErr, fmt.Errorf("clean up execution job: %w", cleanup.cleanup))
+		}
+		return contextErr
 	}
 	if output.truncated {
-		return fmt.Errorf("MSVC host command exceeded %d output bytes", limit)
+		return fmt.Errorf("MSVC host command exceeded %d output bytes", output.limit)
 	}
-	if err != nil {
-		return fmt.Errorf("MSVC host command failed: %w: %s", err, strings.TrimSpace(output.String()))
+	if runErr != nil {
+		return fmt.Errorf("MSVC host command failed: %w: %s", runErr, strings.TrimSpace(output.String()))
 	}
 	return nil
 }

@@ -75,7 +75,7 @@ func runOwnedWindowsProcess(command *exec.Cmd, trapEnvironment string) (string, 
 		err := cmd.Wait()
 		if cleanupErr := cleanup(); cleanupErr != nil {
 			// Do not hide a cleanup failure behind an ExitError's ordinary exit status.
-			return fmt.Errorf("execution result %v; clean up execution job: %w", err, cleanupErr)
+			return &windowsJobCleanupError{wait: err, cleanup: cleanupErr}
 		}
 		return err
 	}
