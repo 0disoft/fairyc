@@ -319,9 +319,13 @@ fairyc experimental atlas-edit replace-body --package-uid <root-uid> --symbol <s
 ```
 
 The body file holds one complete braced body, at most 64 KiB, in a portable regular workspace
-file outside production roots. Exact current IDs select root-owned, private, safe, non-entry,
-nongeneric functions without owners/attributes. These target restrictions also apply to
-batch previews.
+file outside production roots. Exact current IDs select root-owned, private, safe, non-entry
+functions without owners or attributes. The Go command accepts a generic function's logical-v3
+declaration ID when the locked workspace has at least one concrete specialization. Preview and
+apply require the edited workspace to verify every previously observed type binding for the
+selected template. A batch that removes the last use of any required binding fails. Coverage
+is limited to the concrete bindings observed in the current workspace. The Fairy candidate
+continues to admit ordinary function targets.
 
 `fairyc experimental atlas-edit preview-batch --package-uid <root-uid> --edit-file edits/batch.json`
 checks 1 to 16 replacements together. The request is one JSON object with an

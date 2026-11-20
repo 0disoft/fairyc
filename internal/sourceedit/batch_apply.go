@@ -69,7 +69,7 @@ func (p *BatchPlan) ApplyWithOptions(options ...ApplyOptions) (err error) {
 	for _, file := range p.files {
 		overlays[filepath.Join(p.root, filepath.FromSlash(file.path))] = file.after
 	}
-	if err := validateOverlays(ctx, p.root, overlays); err != nil {
+	if err := validateOverlays(ctx, p.root, overlays, p.required); err != nil {
 		return err
 	}
 	for _, file := range p.files {

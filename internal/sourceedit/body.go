@@ -36,6 +36,7 @@ type Plan struct {
 	Report                  Report
 	root, path, fingerprint string
 	before, after           []byte
+	required                genericCoverage
 }
 
 func Digest(data []byte) string { s := sha256.Sum256(data); return hex.EncodeToString(s[:]) }
@@ -49,7 +50,12 @@ func PlanBody(w workspaceloader.Workspace, module, name, expected string, body [
 	if err != nil {
 		return Plan{}, err
 	}
-	if err := validateOverlayContext(context.Background(), w.Root, edit.absolute, after); err != nil {
+	ctx := context.Background()
+	required, err := requireGenericCoverage(ctx, w, []preparedBody{edit})
+	if err != nil {
+		return Plan{}, err
+	}
+	if err := validateOverlays(ctx, w.Root, map[string][]byte{edit.absolute: after}, required); err != nil {
 		return Plan{}, err
 	}
 	fingerprint, err := snapshot(w)
@@ -57,7 +63,7 @@ func PlanBody(w workspaceloader.Workspace, module, name, expected string, body [
 		return Plan{}, err
 	}
 	report := edit.report(after)
-	return Plan{Report: report, root: w.Root, path: edit.relative, fingerprint: fingerprint, before: bytes.Clone(edit.file.Bytes), after: after}, nil
+	return Plan{Report: report, root: w.Root, path: edit.relative, fingerprint: fingerprint, before: bytes.Clone(edit.file.Bytes), after: after, required: required}, nil
 }
 
 type BodyEdit struct {
@@ -71,6 +77,7 @@ type preparedBody struct {
 	module, function   string
 	start, end, name   int
 	body               []byte
+	generic            bool
 }
 
 func prepareBody(w workspaceloader.Workspace, edit BodyEdit) (preparedBody, error) {
@@ -102,8 +109,8 @@ func prepareBody(w workspaceloader.Workspace, edit BodyEdit) (preparedBody, erro
 			}
 		}
 	}
-	if selected == nil || selected.Public || selected.Unsafe || selected.Owner != "" || selected.Name == "main" || len(selected.TypeParameters) != 0 || len(selected.Attributes) != 0 || selected.Body == nil {
-		return preparedBody{}, fmt.Errorf("only private ordinary safe non-entry functions without attributes are editable")
+	if selected == nil || selected.Public || selected.Unsafe || selected.Owner != "" || selected.Name == "main" || len(selected.Attributes) != 0 || selected.Body == nil {
+		return preparedBody{}, fmt.Errorf("only private safe non-entry functions without owners or attributes are editable")
 	}
 	if len(expected) != 64 || Digest(file.Bytes) != expected {
 		return preparedBody{}, fmt.Errorf("expected source SHA-256 is stale or invalid")
@@ -122,7 +129,7 @@ func prepareBody(w workspaceloader.Workspace, edit BodyEdit) (preparedBody, erro
 		return preparedBody{}, fmt.Errorf("vendor source is not editable")
 	}
 	return preparedBody{file: file, absolute: absolute, relative: relative, module: module, function: name,
-		start: span.StartByte, end: span.EndByte, name: selected.NameSpan.StartByte, body: body}, nil
+		start: span.StartByte, end: span.EndByte, name: selected.NameSpan.StartByte, body: body, generic: len(selected.TypeParameters) != 0}, nil
 }
 
 func composeBodies(edits []preparedBody) ([]byte, error) {
@@ -168,11 +175,7 @@ func (edit preparedBody) report(after []byte) Report {
 		BeforeSHA256: Digest(edit.file.Bytes), AfterSHA256: Digest(after), Verified: true}
 }
 
-func validateOverlayContext(ctx context.Context, root, absolute string, after []byte) error {
-	return validateOverlays(ctx, root, map[string][]byte{absolute: after})
-}
-
-func validateOverlays(ctx context.Context, root string, overlays map[string][]byte) error {
+func validateOverlays(ctx context.Context, root string, overlays map[string][]byte, required genericCoverage) error {
 	w, err := workspaceloader.LoadEditorOverlaysContext(ctx, root, overlays)
 	if err != nil {
 		return fmt.Errorf("edited workspace load failed: %w", errors.Join(err, ctx.Err(), context.Cause(ctx)))
@@ -183,5 +186,5 @@ func validateOverlays(ctx context.Context, root string, overlays map[string][]by
 	if err != nil || !r.Verified || len(r.Semantic.Diagnostics) != 0 || len(r.Semantic.Unsupported) != 0 {
 		return errors.Join(fmt.Errorf("edited workspace failed semantic/MIR validation"), err, ctx.Err(), context.Cause(ctx))
 	}
-	return nil
+	return required.check(r.GenericProvenance)
 }

@@ -175,7 +175,7 @@ func (p *Plan) ApplyWithOptions(options ...ApplyOptions) (err error) {
 	if current != p.fingerprint {
 		return fmt.Errorf("workspace changed since edit preview")
 	}
-	if err := validateOverlayContext(ctx, p.root, filepath.Join(p.root, filepath.FromSlash(p.path)), p.after); err != nil {
+	if err := validateOverlays(ctx, p.root, map[string][]byte{filepath.Join(p.root, filepath.FromSlash(p.path)): p.after}, p.required); err != nil {
 		return err
 	}
 	info, err := root.Lstat(filepath.FromSlash(p.path))
