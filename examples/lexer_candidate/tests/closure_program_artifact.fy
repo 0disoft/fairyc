@@ -9,7 +9,7 @@ import module_program_artifact_decode as decode;
 import module_program_artifact_wire as framing;
 import candidate_artifact_wire as wire;
 import module_signatures as signatures;
-import closure_program_scalar_sample as sample;
+import tests::module_body_artifact_sample as sample;
 import syntax as syntax;
 import scanner as scanner;
 import std::bytes as bytes;

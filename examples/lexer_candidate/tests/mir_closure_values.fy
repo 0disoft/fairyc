@@ -65,7 +65,7 @@ fn u32 signature_only(bool old){
     return switch(m::assemble_closures(source,payload,targets,signatures,functions,locals,blocks,operations,edges,0,shapes::empty(),v::empty<m::Drop>(),v::empty<m::ClosureTarget>())){case .err(e):{e.code}case .ok(p):{verify::check(ref p).code}};
 }
 @test
-pub fn void closure_mir_checks_targets_captures_and_initialization(){
+fn void closure_mir_checks_targets_captures_and_initialization(){
     var usize count=0;while(count<=4){assert(probe(count,0)==0);count+=1;}
     assert(probe(5,0)!=0);
     assert(probe(1,25)==0);

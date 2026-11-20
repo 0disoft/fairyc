@@ -89,7 +89,7 @@ fn bool refused(ref m::Program p,u32 mutation){
     let rebuilt=m::assemble_closures(source,payload,targets,signatures,functions,locals,blocks,operations,edges,m::module_index(p),nominal,v::empty<m::Drop>(),metadata);
     return switch(rebuilt){case .err(_):{true}case .ok(forged):{var bytes::Buffer out=bytes::empty();assert(bytes::append(ref mut out,b"prefix").is_ok);let code=emit::render(ref forged,ref mut out);code!=0 && bytes::equal(bytes::view(ref out),b"prefix")}};
 }
-@test @effects(console) pub fn void closure_c_refuses_forged_mir_before_output(){
+@test @effects(console) fn void closure_c_refuses_forged_mir_before_output(){
     let p=program(b"module main;fn fn i32(i32) make(i32 base){let fn i32(i32) action=fn [i32 base] i32(i32 x){return base+x;};return action;}fn i32 main(){let fn i32(i32) action=make(40);return action(2);}",b"forged-MIR-baseline");
     assert(proof::check(ref p).code==0);var u32 mutation=1;while(mutation<=28){if(!refused(ref p,mutation)){discard io::write_stderr("closure-C accepted forged mutation=");discard io::write_stderr_u32(mutation);discard io::write_stderr("\n");assert(false);}mutation+=1;}
 }

@@ -54,6 +54,7 @@ func candidateClosureProgramArtifactWorkspace(t *testing.T) (string, int) {
 		t.Fatalf("program artifact fixture syntax: %v %+v", err, parsed.Tree.Diagnostics)
 	}
 	main := strings.Replace(string(raw), "module tests::closure_program_artifact;", "module main;", 1)
+	main = strings.Replace(main, "import tests::module_body_artifact_sample ", "import closure_program_scalar_sample ", 1)
 	var golden strings.Builder
 	for _, b := range closureProgramScalarGolden() {
 		fmt.Fprintf(&golden, "\\x%02x", b)
