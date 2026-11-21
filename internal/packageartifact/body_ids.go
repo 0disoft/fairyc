@@ -42,7 +42,7 @@ func canonicalizeFunctionGraphIDs(function mir.Function) (mir.Function, bodyGrap
 		}
 		return addLocal(mir.LocalID(value))
 	}
-	addOperand := func(value mir.Operand) error {
+	addOperand := func(value *mir.Operand) error {
 		if value.Kind != mir.OperandLocal && value.Kind != mir.OperandRegion {
 			return nil
 		}
@@ -64,35 +64,25 @@ func canonicalizeFunctionGraphIDs(function mir.Function) (mir.Function, bodyGrap
 			return mir.Function{}, bodyGraphShape{}, err
 		}
 	}
-	for _, block := range result.Blocks {
-		for _, operation := range block.Operations {
+	for blockIndex := range result.Blocks {
+		block := &result.Blocks[blockIndex]
+		for operationIndex := range block.Operations {
+			operation := &block.Operations[operationIndex]
 			if operationCarriesLocalSymbol(operation.Kind) {
 				if err := addSymbol(operation.Symbol); err != nil {
 					return mir.Function{}, bodyGraphShape{}, err
 				}
 			}
-			for _, operand := range operation.Operands {
-				if err := addOperand(operand); err != nil {
-					return mir.Function{}, bodyGraphShape{}, err
-				}
+			if err := visitOperands(operation.Operands, addOperand); err != nil {
+				return mir.Function{}, bodyGraphShape{}, err
 			}
 			if err := addLocal(operation.DestinationLocal); err != nil {
 				return mir.Function{}, bodyGraphShape{}, err
 			}
 		}
-		terminator := block.Terminator
-		if err := addOperand(terminator.ReturnValue); err != nil {
+		terminator := &block.Terminator
+		if err := visitTerminatorOperands(terminator, addOperand); err != nil {
 			return mir.Function{}, bodyGraphShape{}, err
-		}
-		for _, operand := range terminator.Arguments {
-			if err := addOperand(operand); err != nil {
-				return mir.Function{}, bodyGraphShape{}, err
-			}
-		}
-		for _, operand := range terminator.SwitchOperands {
-			if err := addOperand(operand); err != nil {
-				return mir.Function{}, bodyGraphShape{}, err
-			}
 		}
 		if err := addLocal(terminator.DestinationLocal); err != nil {
 			return mir.Function{}, bodyGraphShape{}, err
@@ -241,10 +231,8 @@ func rewriteFunctionGraphIDs(function *mir.Function, locals map[mir.LocalID]mir.
 			if err != nil {
 				return err
 			}
-			for operandIndex := range operation.Operands {
-				if err := operand(&operation.Operands[operandIndex]); err != nil {
-					return err
-				}
+			if err := visitOperands(operation.Operands, operand); err != nil {
+				return err
 			}
 		}
 		terminator := &current.Terminator
@@ -262,18 +250,8 @@ func rewriteFunctionGraphIDs(function *mir.Function, locals map[mir.LocalID]mir.
 		if err != nil {
 			return err
 		}
-		if err := operand(&terminator.ReturnValue); err != nil {
+		if err := visitTerminatorOperands(terminator, operand); err != nil {
 			return err
-		}
-		for operandIndex := range terminator.Arguments {
-			if err := operand(&terminator.Arguments[operandIndex]); err != nil {
-				return err
-			}
-		}
-		for operandIndex := range terminator.SwitchOperands {
-			if err := operand(&terminator.SwitchOperands[operandIndex]); err != nil {
-				return err
-			}
 		}
 	}
 	return nil

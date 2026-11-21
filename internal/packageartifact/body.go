@@ -676,31 +676,39 @@ func walkFunctionTypes(function *mir.Function, visit func(*hir.Type) error) erro
 					return err
 				}
 			}
-			for operandIndex := range operation.Operands {
-				if err := mapOperand(&operation.Operands[operandIndex]); err != nil {
-					return err
-				}
+			if err := visitOperands(operation.Operands, mapOperand); err != nil {
+				return err
 			}
 		}
 		terminator := &function.Blocks[blockIndex].Terminator
 		if err := mapType(&terminator.SwitchType); err != nil {
 			return err
 		}
-		if err := mapOperand(&terminator.ReturnValue); err != nil {
+		if err := visitTerminatorOperands(terminator, mapOperand); err != nil {
 			return err
-		}
-		for operandIndex := range terminator.Arguments {
-			if err := mapOperand(&terminator.Arguments[operandIndex]); err != nil {
-				return err
-			}
-		}
-		for operandIndex := range terminator.SwitchOperands {
-			if err := mapOperand(&terminator.SwitchOperands[operandIndex]); err != nil {
-				return err
-			}
 		}
 	}
 	return nil
+}
+
+func visitOperands(operands []mir.Operand, visit func(*mir.Operand) error) error {
+	for index := range operands {
+		if err := visit(&operands[index]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Visitation order is part of the stable body's local ID assignment.
+func visitTerminatorOperands(terminator *mir.Terminator, visit func(*mir.Operand) error) error {
+	if err := visit(&terminator.ReturnValue); err != nil {
+		return err
+	}
+	if err := visitOperands(terminator.Arguments, visit); err != nil {
+		return err
+	}
+	return visitOperands(terminator.SwitchOperands, visit)
 }
 
 func mapFunctionSpans(function *mir.Function, transform func(hir.Span) (hir.Span, error)) error {
