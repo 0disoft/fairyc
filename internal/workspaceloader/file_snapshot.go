@@ -28,6 +28,12 @@ type FileSnapshot struct {
 	overlays    [sha256.Size]byte
 }
 
+// NewLockedFileSnapshot binds a disk-only snapshot to the digest of the exact
+// lock bytes already read and validated against workspace by the caller.
+func NewLockedFileSnapshot(workspace Workspace, verifiedLock [sha256.Size]byte) *FileSnapshot {
+	return &FileSnapshot{workspace: workspace, lock: verifiedLock, lockPresent: true, overlays: overlayFingerprint(nil)}
+}
+
 func CaptureFileSnapshot(ctx context.Context, workspace Workspace, overlays map[string][]byte) (*FileSnapshot, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

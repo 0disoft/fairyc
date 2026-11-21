@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -96,6 +97,10 @@ func parseOptionalLocked(command string, arguments []string) (bool, error) {
 }
 
 func loadWorkspaceWithLock(sourceRoot string, locked bool) (workspaceloader.Workspace, string, error) {
+	return loadWorkspaceWithLockDigest(sourceRoot, locked, nil)
+}
+
+func loadWorkspaceWithLockDigest(sourceRoot string, locked bool, verifiedLock *[sha256.Size]byte) (workspaceloader.Workspace, string, error) {
 	workspace, err := workspaceloader.Load(sourceRoot)
 	if err != nil {
 		return workspaceloader.Workspace{}, "", err
@@ -111,12 +116,15 @@ func loadWorkspaceWithLock(sourceRoot string, locked bool) (workspaceloader.Work
 	lockPath := filepath.Join(sourceRoot, lockfile.FileName)
 	lockState := "unchanged"
 	if locked {
-		existing, _, err := lockfile.Read(lockPath)
+		existing, contents, err := lockfile.Read(lockPath)
 		if err != nil {
 			return workspaceloader.Workspace{}, "", fmt.Errorf("locked workspace requires a valid %s: %w", lockfile.FileName, err)
 		}
 		if err := lockfile.MatchesWorkspace(existing, workspace); err != nil {
 			return workspaceloader.Workspace{}, "", err
+		}
+		if verifiedLock != nil {
+			*verifiedLock = sha256.Sum256(contents)
 		}
 		lockState = "verified"
 	} else {

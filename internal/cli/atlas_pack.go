@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -88,6 +89,7 @@ type preparedAtlasQuery struct {
 
 type preparedAtlasWorkspace struct {
 	workspace    workspaceloader.Workspace
+	verifiedLock [sha256.Size]byte
 	snapshot     semanticsnapshot.Snapshot
 	partitions   []atlasmap.Partition
 	expectations map[string]atlasmap.LoadExpectation
@@ -159,7 +161,8 @@ func prepareAtlasWorkspaceWithResult(sourceRoot string, locked bool, stderr io.W
 	if schema != atlasmap.LogicalSchema && schema != atlasmap.LogicalSchemaV2 && schema != atlasmap.LogicalSchemaV3 {
 		return preparedAtlasWorkspace{}, internalError(stderr)
 	}
-	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
+	var verifiedLock [sha256.Size]byte
+	workspace, _, err := loadWorkspaceWithLockDigest(sourceRoot, locked, &verifiedLock)
 	if err != nil {
 		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
 	}
@@ -215,7 +218,7 @@ func prepareAtlasWorkspaceWithResult(sourceRoot string, locked bool, stderr io.W
 		*checked = result
 	}
 	return preparedAtlasWorkspace{
-		workspace: workspace, snapshot: snapshot, partitions: partitions, expectations: expectations,
+		workspace: workspace, verifiedLock: verifiedLock, snapshot: snapshot, partitions: partitions, expectations: expectations,
 	}, ExitSuccess
 }
 

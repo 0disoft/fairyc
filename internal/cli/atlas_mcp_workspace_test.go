@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"os"
@@ -123,20 +122,21 @@ func TestAtlasMCPSessionInvalidatesInputsAndRecovers(t *testing.T) {
 	}
 }
 
-func TestAtlasMCPSessionRejectsInvalidLockCapturedAfterPreparation(t *testing.T) {
+func TestAtlasMCPSessionRejectsLockChangedBetweenPreparationAndSnapshot(t *testing.T) {
 	root := writeWorkspaceSessionFixture(t, workspaceSessionRootSource)
 	symbol := atlasFunctionSymbolForPackage(t, root, "example.session.answer", "value")
 	o := impactOptions{uid: "example.session.answer", symbol: symbol.Visible, packages: 8, calls: 128, depth: 8, symbols: 64, output: 100000}
-	session := atlasImpactSession{root: root}
-	if _, code := session.document(o, io.Discard); code != ExitSuccess {
+	workspace, code := prepareAtlasWorkspaceSchema(root, true, io.Discard, atlasmap.LogicalSchemaV3)
+	if code != ExitSuccess {
 		t.Fatal(code)
 	}
+	// Initialize the snapshot after an intervening write, using the digest
+	// from locked preparation rather than the bytes now on disk.
 	writeWorkspaceFile(t, root, "fairy.lock", "invalid lock\n")
-	// Reproduce a lock edit between locked preparation and snapshot capture.
-	var err error
-	session.files, err = workspaceloader.CaptureFileSnapshot(context.Background(), session.prepared.workspace.workspace, nil)
-	if err != nil {
-		t.Fatal(err)
+	session := atlasImpactSession{
+		root:     root,
+		prepared: &preparedAtlasImpact{workspace: workspace},
+		files:    workspaceloader.NewLockedFileSnapshot(workspace.workspace, workspace.verifiedLock),
 	}
 	if data, code := session.document(o, io.Discard); code != ExitPackageFailure || len(data) != 0 {
 		t.Fatalf("unvalidated lock reused = %d, %s", code, data)

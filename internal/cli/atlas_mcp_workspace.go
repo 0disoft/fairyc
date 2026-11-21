@@ -3,10 +3,8 @@ package cli
 import (
 	"context"
 	"io"
-	"path/filepath"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
-	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -22,12 +20,7 @@ func (session *atlasImpactSession) document(o impactOptions, stderr io.Writer) (
 	current := false
 	if session.prepared != nil && session.files != nil {
 		matches, err := session.files.Matches(context.Background(), nil)
-		if err == nil && matches {
-			// Capture may race a lock edit after preparation. Validate its meaning
-			// as well as its exact bytes before reusing a locked result.
-			lock, _, err := lockfile.Read(filepath.Join(session.root, lockfile.FileName))
-			current = err == nil && lockfile.MatchesWorkspace(lock, session.prepared.workspace.workspace) == nil
-		}
+		current = err == nil && matches
 	}
 	if !current {
 		// Release the old graph even when replacement inputs cannot be loaded.
@@ -37,9 +30,7 @@ func (session *atlasImpactSession) document(o impactOptions, stderr io.Writer) (
 			return nil, code
 		}
 		session.prepared = &preparedAtlasImpact{workspace: workspace}
-		// Snapshot failures disable reuse, without changing this fresh query's
-		// established preparation or diagnostic behavior.
-		session.files, _ = workspaceloader.CaptureFileSnapshot(context.Background(), workspace.workspace, nil)
+		session.files = workspaceloader.NewLockedFileSnapshot(workspace.workspace, workspace.verifiedLock)
 	}
 	return session.prepared.document(o, stderr)
 }
