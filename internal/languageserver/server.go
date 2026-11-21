@@ -32,6 +32,7 @@ type server struct {
 	versionedEdits        bool
 	renameSupported       bool
 	sdkSourceNavigation   bool
+	diagnosticRelatedInfo bool
 	analysisPending       bool
 	analysisBudget        int64
 	analysisClock         uint64
@@ -69,6 +70,7 @@ func (s *server) handle(m message) error {
 		s.workspaceRoots = roots
 		s.initialized = true
 		s.sdkSourceNavigation = p.InitializationOptions.SDKSourceNavigation
+		s.diagnosticRelatedInfo = p.Capabilities.TextDocument.PublishDiagnostics.RelatedInformation
 		s.renameSupported = p.Capabilities.Workspace.WorkspaceEdit.DocumentChanges
 		s.versionedEdits = s.renameSupported && p.Capabilities.TextDocument.CodeAction.LiteralSupport != nil
 		var codeActionProvider any = false

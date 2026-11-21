@@ -33,7 +33,7 @@ func (s *server) references(d *document, offset int, includeDeclaration bool) ([
 	if !found {
 		if includeDeclaration {
 			if span, ok := view.authoredDeclaration(d.Path, offset); ok {
-				if location, ok := view.referenceLocation(span); ok {
+				if location, ok := view.sourceLocation(span); ok {
 					locations = append(locations, location)
 				}
 			}
@@ -44,7 +44,7 @@ func (s *server) references(d *document, offset int, includeDeclaration bool) ([
 	seen := make(map[Location]struct{})
 	budget := maxMessage - 1024
 	add := func(span hir.Span) error {
-		location, ok := view.referenceLocation(span)
+		location, ok := view.sourceLocation(span)
 		if _, duplicate := seen[location]; !ok || duplicate {
 			return nil
 		}
@@ -127,7 +127,7 @@ func (a *analysis) authoredDeclaration(path string, offset int) (hir.Span, bool)
 	return hir.Span{}, false
 }
 
-func (a *analysis) referenceLocation(span hir.Span) (Location, bool) {
+func (a *analysis) sourceLocation(span hir.Span) (Location, bool) {
 	file, ok := a.file(span)
 	if !ok || span.StartByte < 0 || span.EndByte <= span.StartByte || span.EndByte > len(file.Text) {
 		return Location{}, false

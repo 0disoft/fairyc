@@ -31,11 +31,17 @@ type sourceView struct {
 	SDKURI string
 }
 type lspDiagnostic struct {
-	Range    Range  `json:"range"`
-	Severity int    `json:"severity"`
-	Code     string `json:"code"`
-	Source   string `json:"source"`
-	Message  string `json:"message"`
+	Range              Range                   `json:"range"`
+	Severity           int                     `json:"severity"`
+	Code               string                  `json:"code"`
+	Source             string                  `json:"source"`
+	Message            string                  `json:"message"`
+	RelatedInformation []diagnosticRelatedInfo `json:"relatedInformation,omitempty"`
+}
+
+type diagnosticRelatedInfo struct {
+	Location Location `json:"location"`
+	Message  string   `json:"message"`
 }
 type analysis struct {
 	result          semantic.Result
@@ -327,7 +333,11 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 		if diag.ExpectedType != hir.ParseType("") || diag.ActualType != hir.ParseType("") {
 			message += ": expected " + diag.ExpectedType.String() + ", got " + diag.ActualType.String()
 		}
-		a.add(f.Path, f.Text, diag.Primary.StartByte, diag.Primary.EndByte, diag.Code, message)
+		var related []diagnosticRelatedInfo
+		if s.diagnosticRelatedInfo && diag.Code == "E2105" {
+			related = a.borrowMoveRelatedInfo(diag)
+		}
+		a.add(f.Path, f.Text, diag.Primary.StartByte, diag.Primary.EndByte, diag.Code, message, related...)
 	}
 	for _, u := range a.result.Unsupported {
 		if f, ok := a.file(u.Span); ok && f.Path != "" {
@@ -353,7 +363,32 @@ func (a *analysis) file(span hir.Span) (sourceView, bool) {
 	f, ok := a.files[key]
 	return f, ok
 }
-func (a *analysis) add(filename string, text []byte, start, end int, code, message string) {
+func (a *analysis) borrowMoveRelatedInfo(diag semantic.Diagnostic) []diagnosticRelatedInfo {
+	var locations []diagnosticRelatedInfo
+	for _, related := range diag.Related {
+		var message string
+		switch related.Role {
+		case "owner":
+			message = "Owner declared here"
+		case "loan":
+			message = "Borrow created here"
+		case "last-use":
+			// Flow uses the move span as a fallback for loans held by a loop or call.
+			if related.Span == diag.Primary {
+				continue
+			}
+			message = "Borrow last used here"
+		default:
+			continue
+		}
+		if location, ok := a.sourceLocation(related.Span); ok {
+			locations = append(locations, diagnosticRelatedInfo{Location: location, Message: message})
+		}
+	}
+	return locations
+}
+
+func (a *analysis) add(filename string, text []byte, start, end int, code, message string, related ...diagnosticRelatedInfo) {
 	if strings.TrimSpace(message) == "" {
 		message = code
 	}
@@ -361,5 +396,8 @@ func (a *analysis) add(filename string, text []byte, start, end int, code, messa
 	if start != 0 || end != 0 {
 		location = a.sourceRange(filename, text, start, end)
 	}
-	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{location, 1, code, "fairyc", message})
+	a.diagnostics[filename] = append(a.diagnostics[filename], lspDiagnostic{
+		Range: location, Severity: 1, Code: code, Source: "fairyc", Message: message,
+		RelatedInformation: related,
+	})
 }

@@ -25,7 +25,7 @@ func (s *server) definition(d *document, offset int) []Location {
 	var scratch [8]int
 	for _, index := range d.View.definitionCandidates(d.Path, offset, scratch[:0]) {
 		r := d.View.result.Resolutions[index]
-		if target, ok := d.View.referenceLocation(r.Target.Declaration); ok {
+		if target, ok := d.View.sourceLocation(r.Target.Declaration); ok {
 			locations = append(locations, target)
 		}
 	}

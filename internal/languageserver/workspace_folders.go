@@ -21,6 +21,9 @@ type initializeParams struct {
 	} `json:"initializationOptions"`
 	Capabilities struct {
 		TextDocument struct {
+			PublishDiagnostics struct {
+				RelatedInformation bool `json:"relatedInformation"`
+			} `json:"publishDiagnostics"`
 			CodeAction struct {
 				LiteralSupport *struct{} `json:"codeActionLiteralSupport"`
 			} `json:"codeAction"`

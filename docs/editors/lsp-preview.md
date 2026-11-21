@@ -28,6 +28,10 @@ terminates the session.
   or its project analysis. Recovery requires full text at a higher version,
   or a close and reopen.
 - Compiler syntax, type, ownership and unsupported-feature diagnostics.
+  For `E2105` owner moves, the main location marks the move. Clients that
+  advertise `textDocument.publishDiagnostics.relatedInformation` also receive
+  navigable owner declarations, borrow origins and known last uses from the
+  current analysis, in UTF-16 coordinates.
 - Definition locations from current compiler resolution facts.
 - Read-only embedded SDK navigation for clients that set
   `initializationOptions.fairycSdkSourceNavigation`. The server returns
