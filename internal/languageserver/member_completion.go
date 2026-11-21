@@ -120,9 +120,9 @@ func (s *server) probeDocuments(d *document, replacements map[string][]byte) (*a
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	probe := server{docs: make(map[string]*document, len(s.docs)), analysisBudget: s.analysisBudget}
+	documents := make(map[string]*document, len(s.docs))
 	for uri, opened := range s.docs {
-		probe.docs[uri] = &document{URI: uri, Path: opened.Path, Text: opened.Text, needsFullText: opened.needsFullText}
+		documents[uri] = &document{URI: uri, Path: opened.Path, Text: opened.Text, needsFullText: opened.needsFullText}
 	}
 	for path, text := range replacements {
 		uri := fileURI(path)
@@ -132,9 +132,9 @@ func (s *server) probeDocuments(d *document, replacements map[string][]byte) (*a
 				break
 			}
 		}
-		probe.docs[uri] = &document{URI: uri, Path: path, Text: text}
+		documents[uri] = &document{URI: uri, Path: path, Text: text}
 	}
-	focus := probe.docs[d.URI]
-	probe.docs[d.URI] = focus
-	return probe.analyzeContext(ctx, focus, d.View.root)
+	return analyzeDocument(ctx, documents[d.URI], d.View.root, documents, analysisOptions{
+		sourceLimit: s.analysisSourceLimit(),
+	})
 }

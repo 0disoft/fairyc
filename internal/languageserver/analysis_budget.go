@@ -181,12 +181,12 @@ func (s *server) publishAnalysisBudget(d *document, message string) error {
 	})
 }
 
-func (s *server) analysisBudgetUnavailable(d *document, root string, overlays map[string][]byte) *analysis {
+func analysisBudgetUnavailable(d *document, root string, overlays map[string][]byte, limit int64) *analysis {
 	a := &analysis{
 		root: root, files: map[sourceKey]sourceView{}, imports: map[sourceKey]hir.PackageID{},
 		diagnostics: map[string][]lspDiagnostic{}, budgetExceeded: true,
 	}
-	message := fmt.Sprintf("Analysis source set exceeds the session retention budget of %d bytes.", s.analysisSourceLimit())
+	message := fmt.Sprintf("Analysis source set exceeds the session retention budget of %d bytes.", limit)
 	if len(overlays) == 0 {
 		a.add(d.Path, d.Text, 0, 0, analysisBudgetDiagnostic, message)
 		return a

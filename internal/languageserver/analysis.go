@@ -160,7 +160,39 @@ func (s *server) analyze(d *document, root string) *analysis {
 	return result
 }
 
-func (s *server) analyzeContext(ctx context.Context, d *document, root string) (result *analysis, err error) {
+type analysisOptions struct {
+	sourceLimit           int64
+	reserveSource         func(int64) (bool, error)
+	retainedSyntaxWeight  func() int64
+	sdkSourceNavigation   bool
+	diagnosticRelatedInfo bool
+}
+
+func (options analysisOptions) admitSource(required int64) (bool, error) {
+	if options.reserveSource != nil {
+		return options.reserveSource(required)
+	}
+	return required >= 0 && required <= options.sourceLimit, nil
+}
+
+func (options analysisOptions) syntaxRoom() int64 {
+	if options.retainedSyntaxWeight == nil {
+		return maxSessionSyntaxWeight
+	}
+	return maxSessionSyntaxWeight - options.retainedSyntaxWeight()
+}
+
+func (s *server) analyzeContext(ctx context.Context, d *document, root string) (*analysis, error) {
+	return analyzeDocument(ctx, d, root, s.docs, analysisOptions{
+		sourceLimit:           s.analysisSourceLimit(),
+		reserveSource:         s.reserveAnalysisSource,
+		retainedSyntaxWeight:  s.retainedSyntaxWeight,
+		sdkSourceNavigation:   s.sdkSourceNavigation,
+		diagnosticRelatedInfo: s.diagnosticRelatedInfo,
+	})
+}
+
+func analyzeDocument(ctx context.Context, d *document, root string, documents map[string]*document, options analysisOptions) (result *analysis, err error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -180,7 +212,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 	}
 	if root != "" {
 		overlays := map[string][]byte{}
-		for _, opened := range s.docs {
+		for _, opened := range documents {
 			if contained(root, opened.Path) {
 				overlays[opened.Path] = opened.Text
 				a.unsynchronized = a.unsynchronized || opened.needsFullText
@@ -228,20 +260,20 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 				}
 			}
 			a.sourceCharge, a.sourceCharged = analysisSourceBytes(a), true
-			if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+			if retained, err := options.admitSource(a.sourceCharge); err != nil {
 				return nil, err
 			} else if !retained {
-				return s.analysisBudgetUnavailable(d, root, overlays), nil
+				return analysisBudgetUnavailable(d, root, overlays, options.sourceLimit), nil
 			}
 			return a, nil
 		}
 		a.sourceCharge, a.sourceCharged = workspaceSourceBytes(workspace), true
-		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+		if retained, err := options.admitSource(a.sourceCharge); err != nil {
 			return nil, err
 		} else if !retained {
-			return s.analysisBudgetUnavailable(d, root, overlays), nil
+			return analysisBudgetUnavailable(d, root, overlays, options.sourceLimit), nil
 		}
-		if parsedSyntax.Weight() > 0 && parsedSyntax.Weight() <= maxSessionSyntaxWeight-s.retainedSyntaxWeight() {
+		if parsedSyntax.Weight() > 0 && parsedSyntax.Weight() <= options.syntaxRoom() {
 			a.syntaxSnapshot = parsedSyntax
 		}
 		input, err := workspace.SemanticInput()
@@ -265,7 +297,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			for _, file := range loaded.Sources {
 				view := sourceView{Text: file.Bytes, Module: file.Module}
 				if loaded.SourceKind == workspaceloader.SourceKindSDK {
-					if s.sdkSourceNavigation {
+					if options.sdkSourceNavigation {
 						view.SDKURI = sdkSourceURI(file.Path, file.Bytes)
 					}
 				} else {
@@ -306,10 +338,10 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 		a.repair = singleSyntaxRepair(d.Path, filepath.Base(d.Path), parsed.Tree.Diagnostics)
 		a.files[sourceKey{0, filepath.Base(d.Path)}] = sourceView{Path: d.Path, Text: d.Text, Module: parsed.AST}
 		a.sourceCharge, a.sourceCharged = int64(len(d.Text)), true
-		if retained, err := s.reserveAnalysisSource(a.sourceCharge); err != nil {
+		if retained, err := options.admitSource(a.sourceCharge); err != nil {
 			return nil, err
 		} else if !retained {
-			return s.analysisBudgetUnavailable(d, root, nil), nil
+			return analysisBudgetUnavailable(d, root, nil, options.sourceLimit), nil
 		}
 		if parsed.AST == nil {
 			return a, nil
@@ -334,7 +366,7 @@ func (s *server) analyzeContext(ctx context.Context, d *document, root string) (
 			message += ": expected " + diag.ExpectedType.String() + ", got " + diag.ActualType.String()
 		}
 		var related []diagnosticRelatedInfo
-		if s.diagnosticRelatedInfo && diag.Code == "E2105" {
+		if options.diagnosticRelatedInfo && diag.Code == "E2105" {
 			related = a.borrowMoveRelatedInfo(diag)
 		}
 		a.add(f.Path, f.Text, diag.Primary.StartByte, diag.Primary.EndByte, diag.Code, message, related...)
