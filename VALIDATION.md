@@ -61,8 +61,23 @@ The Go frontend jobs allow 30 minutes, with a per-package test timeout of 25 min
 The Windows core job runs the non-CLI packages. Twelve Windows CLI shards partition
 the remaining CLI tests, examples, and fuzz seeds after applying the existing
 exclusions for separate parser, lexer, and cost proofs. The shard script assigns
-the longest estimated test to the least loaded shard at each step and uses ordinal
-entry order for ties. The four Atlas source-version parts cover disjoint fixture
+the longest estimated test to the least loaded shard at each step, breaking ties
+by ordinal entry order and then by the lowest shard index.
+`.github/scripts/windows-cli-timings.json` records top-level test, example, and
+fuzz elapsed times in hundredths of a second from a completed Windows CLI matrix.
+A recorded zero costs one hundredth of a second in the planner. Unmeasured entries
+cost three seconds. The current Go test listing determines coverage.
+
+To refresh the weights, save each successful Windows CLI job log in a separate
+`.log` file using `gh run view RUN_ID --job JOB_ID --log`. Run
+`python -B .github/scripts/windows_cli_timings.py RUN_ID LOG_DIRECTORY` and save
+its output as UTF-8 in the timings file. The extractor requires one result for
+each reported entry and all shards from the same matrix. Inspect the complete
+assignment with `.github/scripts/test-windows-cli.ps1 -ShardCount 12 -PlanOnly`.
+Use a subsequent run to compare the longest Windows CLI job and the sum of
+Windows CLI job durations, both measured from job start to completion.
+
+The four Atlas source-version parts cover disjoint fixture
 sets while retaining all schema versions and both profiles. Each CLI shard allows
 50 minutes, including a 45-minute package test timeout.
 The Windows lexer proof allows 17 minutes for the job, including an explicit 15-minute
