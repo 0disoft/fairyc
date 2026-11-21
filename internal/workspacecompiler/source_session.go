@@ -19,14 +19,6 @@ type sourceCacheSession interface {
 	Close() error
 }
 
-type sourceMode uint8
-
-const (
-	sourceOrdinary sourceMode = iota
-	sourceGeneric
-	sourceSDKStorage
-)
-
 // SourceSession owns one active cache family. A source-mode transition releases
 // the old session before constructing the next, rather than keeping two LRUs.
 // Disk bounds and statistics apply to the selected format namespace, not every
@@ -74,20 +66,14 @@ func (session *SourceSession) CheckContext(ctx context.Context, workspace worksp
 	if authorityErr != nil {
 		return Result{}, authorityErr
 	}
-	sdkStorage := len(owners) != 0
-	if hasGenericAggregates(input) && !sdkStorage {
+	mode := classifySource(input, len(owners) != 0)
+	if mode == sourceUnsupportedAggregates {
 		compiled, err := compiler.CheckPackagesContext(ctx, input)
 		storage := StorageMemory
 		if session.configuration.Persistent != nil {
 			storage = StorageDisk
 		}
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: storage}}, err
-	}
-	mode := sourceOrdinary
-	if sdkStorage {
-		mode = sourceSDKStorage
-	} else if hasGenericDeclarations(input) {
-		mode = sourceGeneric
 	}
 	if session.active == nil || session.mode != mode {
 		if session.active != nil {

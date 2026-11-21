@@ -49,9 +49,11 @@ func checkContext(ctx context.Context, workspace workspaceloader.Workspace, gene
 	if err != nil {
 		return compiler.Result{}, err
 	}
-	if !generic && len(owners) == 0 && (hasGenericAggregates(input) || !hasGenericDeclarations(input)) {
-		// Preserve ordinary analysis and the unsupported-aggregate boundary.
-		return compiler.CheckPackagesContext(ctx, input)
+	if !generic {
+		switch classifySource(input, len(owners) != 0) {
+		case sourceOrdinary, sourceUnsupportedAggregates:
+			return compiler.CheckPackagesContext(ctx, input)
+		}
 	}
 	policy := admission.Policy[hir.PackageID]{}
 	if len(owners) != 0 {
@@ -63,6 +65,28 @@ func checkContext(ctx context.Context, workspace workspaceloader.Workspace, gene
 	}
 	compiled, _, err := compiler.CheckWithPolicyContext(ctx, input, coordinates, genericplan.DefaultPlanLimits(), policy)
 	return compiled, err
+}
+
+type sourceMode uint8
+
+const (
+	sourceOrdinary sourceMode = iota
+	sourceGeneric
+	sourceSDKStorage
+	sourceUnsupportedAggregates
+)
+
+func classifySource(input semantic.PackageInput, sdkStorage bool) sourceMode {
+	switch {
+	case sdkStorage:
+		return sourceSDKStorage
+	case hasGenericAggregates(input):
+		return sourceUnsupportedAggregates
+	case hasGenericDeclarations(input):
+		return sourceGeneric
+	default:
+		return sourceOrdinary
+	}
 }
 
 // Stable source admission stays separate from compiler-private aggregate
