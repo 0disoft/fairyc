@@ -220,7 +220,11 @@ func nativeWorkspaceTestProgram(input mir.Program, testEntry string, sdkStorage 
 		return mir.Program{}, "", fmt.Errorf("native test harness symbol space is exhausted")
 	}
 	harnessSymbol := maximumSymbol + 1
-	result := mir.Clone(input)
+	// Verification and emission read the existing MIR. Own the function table
+	// so each harness can append its entry without changing the checked program.
+	result := input
+	result.Functions = make([]mir.Function, len(input.Functions), len(input.Functions)+1)
+	copy(result.Functions, input.Functions)
 	result.Functions = append(result.Functions, mir.Function{
 		Symbol:       harnessSymbol,
 		Name:         nativeWorkspaceTestEntry,

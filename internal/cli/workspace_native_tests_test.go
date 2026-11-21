@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"slices"
 	"strings"
@@ -13,6 +14,23 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 )
+
+func BenchmarkNativeWorkspaceTestProgram(b *testing.B) {
+	program := nativeTestFixtureProgram()
+	template := program.Functions[0]
+	for i := 0; i < 1024; i++ {
+		function := template
+		function.Name = fmt.Sprintf("unused_%d", i)
+		function.Symbol = hir.SymbolID(i + 3)
+		program.Functions = append(program.Functions, function)
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		if _, _, err := nativeWorkspaceTestProgram(program, template.Name, false); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
 
 func TestNativeWorkspaceTestProgramAddsVerifiedI32Harness(t *testing.T) {
 	t.Parallel()
