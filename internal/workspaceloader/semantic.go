@@ -46,11 +46,21 @@ type SemanticPackage struct {
 	Dependencies []hir.PackageID
 }
 
-// SemanticInput converts the validated, root-reachable instance graph into build-local package
-// numbers and exact import-provider bindings. Numeric ids never enter lockfiles or diagnostics.
-func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
-	// Match the first-entry behavior of instance and Package without rescanning
-	// both catalogs for every resolved class. Rebuild for each Workspace call.
+func semanticPackageID(classIndex int) hir.PackageID {
+	return hir.PackageID(classIndex + 1)
+}
+
+func semanticClassIndex(packageID hir.PackageID) int {
+	return int(packageID) - 1
+}
+
+// representativeNode selects the canonical member of a checked nonempty class.
+func representativeNode(class packagegraph.InstanceClass) string {
+	return class.Members[0]
+}
+
+// semanticCatalog indexes the current workspace slices and keeps first matches.
+func (workspace Workspace) semanticCatalog() (map[string]*Instance, map[string]*Package) {
 	instances := make(map[string]*Instance, len(workspace.Instances))
 	for index := range workspace.Instances {
 		instance := &workspace.Instances[index]
@@ -65,22 +75,31 @@ func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
 			packages[loaded.Path] = loaded
 		}
 	}
+	return instances, packages
+}
+
+// SemanticInput converts the validated, root-reachable instance graph into build-local package
+// numbers and exact import-provider bindings. Numeric ids never enter lockfiles or diagnostics.
+func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
+	// Match the first-entry behavior of instance and Package without rescanning
+	// both catalogs for every resolved class. Rebuild for each Workspace call.
+	instances, packages := workspace.semanticCatalog()
 	nodePackages := make(map[string]hir.PackageID, len(workspace.Graph.Nodes))
 	input := semantic.PackageInput{}
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return semantic.PackageInput{}, fmt.Errorf("workspace has an empty package instance class")
 		}
-		packageID := hir.PackageID(index + 1)
+		packageID := semanticPackageID(index)
 		for _, member := range class.Members {
 			if _, duplicate := nodePackages[member]; duplicate {
 				return semantic.PackageInput{}, fmt.Errorf("workspace node %q belongs to multiple instance classes", member)
 			}
 			nodePackages[member] = packageID
 		}
-		mapping := instances[class.Members[0]]
+		mapping := instances[representativeNode(class)]
 		if mapping == nil {
-			return semantic.PackageInput{}, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+			return semantic.PackageInput{}, fmt.Errorf("workspace node %q has no package mapping", representativeNode(class))
 		}
 		loaded := packages[mapping.PackagePath]
 		if loaded == nil {
@@ -142,7 +161,7 @@ func (workspace Workspace) PackageIdentities() (map[hir.PackageID]packagegraph.I
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		packageID := hir.PackageID(index + 1)
+		packageID := semanticPackageID(index)
 		if packageID == hir.DefaultPackage {
 			return nil, fmt.Errorf("workspace package id overflow")
 		}
@@ -171,15 +190,15 @@ func (workspace Workspace) PackageCoordinates() (map[hir.PackageID]packagegraph.
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		node := nodes[class.Members[0]]
+		node := nodes[representativeNode(class)]
 		if node == nil {
-			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
+			return nil, fmt.Errorf("workspace graph node %q is missing", representativeNode(class))
 		}
 		coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.CoordinateOf(node.Identity))
 		if err != nil {
 			return nil, fmt.Errorf("compute package %q coordinate: %w", node.ID, err)
 		}
-		coordinates[hir.PackageID(index+1)] = coordinate
+		coordinates[semanticPackageID(index)] = coordinate
 	}
 	return coordinates, nil
 }
@@ -192,7 +211,7 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		packageID := hir.PackageID(index + 1)
+		packageID := semanticPackageID(index)
 		if packageID == hir.DefaultPackage {
 			return nil, fmt.Errorf("workspace package id overflow")
 		}
@@ -206,20 +225,7 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 
 	// Build per-call indexes: Workspace exposes mutable slices, so retaining these
 	// between calls could return stale metadata. Preserve first-match lookup order.
-	instances := make(map[string]*Instance, len(workspace.Instances))
-	for index := range workspace.Instances {
-		instance := &workspace.Instances[index]
-		if instances[instance.NodeID] == nil {
-			instances[instance.NodeID] = instance
-		}
-	}
-	packages := make(map[string]*Package, len(workspace.Packages))
-	for index := range workspace.Packages {
-		loaded := &workspace.Packages[index]
-		if packages[loaded.Path] == nil {
-			packages[loaded.Path] = loaded
-		}
-	}
+	instances, packages := workspace.semanticCatalog()
 	nodes := make(map[string]*packagegraph.Node, len(workspace.Graph.Nodes))
 	for index := range workspace.Graph.Nodes {
 		node := &workspace.Graph.Nodes[index]
@@ -236,18 +242,18 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 
 	result := make([]SemanticPackage, 0, len(workspace.Resolution.InstanceClasses))
 	for index, class := range workspace.Resolution.InstanceClasses {
-		packageID := hir.PackageID(index + 1)
-		mapping := instances[class.Members[0]]
+		packageID := semanticPackageID(index)
+		mapping := instances[representativeNode(class)]
 		if mapping == nil {
-			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+			return nil, fmt.Errorf("workspace node %q has no package mapping", representativeNode(class))
 		}
 		loaded := packages[mapping.PackagePath]
 		if loaded == nil {
 			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
 		}
-		node := nodes[class.Members[0]]
+		node := nodes[representativeNode(class)]
 		if node == nil {
-			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
+			return nil, fmt.Errorf("workspace graph node %q is missing", representativeNode(class))
 		}
 		for _, member := range class.Members[1:] {
 			other := instances[member]
@@ -297,32 +303,19 @@ func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
 	}
 	// Index only this call's mutable catalogs, preserving first-match behavior.
 	// File identity reuse below still revalidates source bytes on every call.
-	instances := make(map[string]*Instance, len(workspace.Instances))
-	for index := range workspace.Instances {
-		instance := &workspace.Instances[index]
-		if instances[instance.NodeID] == nil {
-			instances[instance.NodeID] = instance
-		}
-	}
-	packages := make(map[string]*Package, len(workspace.Packages))
-	for index := range workspace.Packages {
-		loaded := &workspace.Packages[index]
-		if packages[loaded.Path] == nil {
-			packages[loaded.Path] = loaded
-		}
-	}
+	instances, packages := workspace.semanticCatalog()
 	fileRanges := make(map[string][2]int)
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		packageID := hir.PackageID(index + 1)
+		packageID := semanticPackageID(index)
 		if packageID == hir.DefaultPackage {
 			return nil, fmt.Errorf("workspace package id overflow")
 		}
-		mapping := instances[class.Members[0]]
+		mapping := instances[representativeNode(class)]
 		if mapping == nil {
-			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+			return nil, fmt.Errorf("workspace node %q has no package mapping", representativeNode(class))
 		}
 		if span, found := fileRanges[mapping.PackagePath]; found {
 			for fileIndex := span[0]; fileIndex < span[1]; fileIndex++ {
@@ -405,7 +398,7 @@ func (workspace Workspace) RootPackageID() (hir.PackageID, error) {
 	}
 	for index, class := range workspace.Resolution.InstanceClasses {
 		if slices.Contains(class.Members, rootNode) {
-			return hir.PackageID(index + 1), nil
+			return semanticPackageID(index), nil
 		}
 	}
 	return hir.DefaultPackage, fmt.Errorf("workspace root graph node has no instance class")
@@ -430,13 +423,13 @@ func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) 
 		if len(class.Members) == 0 {
 			return hir.DefaultPackage, fmt.Errorf("workspace has an empty package instance class")
 		}
-		if _, found := matchingNodes[class.Members[0]]; !found {
+		if _, found := matchingNodes[representativeNode(class)]; !found {
 			continue
 		}
 		if result != hir.DefaultPackage {
 			return hir.DefaultPackage, fmt.Errorf("workspace package %q has multiple resolved instances", packagePath)
 		}
-		result = hir.PackageID(index + 1)
+		result = semanticPackageID(index)
 	}
 	if result == hir.DefaultPackage {
 		return hir.DefaultPackage, fmt.Errorf("workspace package %q is not root-reachable", packagePath)
@@ -450,26 +443,13 @@ func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) 
 func (workspace Workspace) RootReachableLocalPackagePaths() ([]string, error) {
 	// Resolve catalogs once instead of scanning them for every class and every
 	// sort comparison. Preserve first matches and rebuild after Workspace edits.
-	instances := make(map[string]*Instance, len(workspace.Instances))
-	for index := range workspace.Instances {
-		instance := &workspace.Instances[index]
-		if instances[instance.NodeID] == nil {
-			instances[instance.NodeID] = instance
-		}
-	}
-	packages := make(map[string]*Package, len(workspace.Packages))
-	for index := range workspace.Packages {
-		loaded := &workspace.Packages[index]
-		if packages[loaded.Path] == nil {
-			packages[loaded.Path] = loaded
-		}
-	}
+	instances, packages := workspace.semanticCatalog()
 	counts := make(map[string]int)
 	for _, class := range workspace.Resolution.InstanceClasses {
 		if len(class.Members) == 0 {
 			return nil, fmt.Errorf("workspace has an empty package instance class")
 		}
-		mapping := instances[class.Members[0]]
+		mapping := instances[representativeNode(class)]
 		if mapping == nil {
 			return nil, fmt.Errorf("workspace instance class %q has no package mapping", class.ID)
 		}
@@ -502,7 +482,7 @@ func (workspace Workspace) RootReachableLocalPackagePaths() ([]string, error) {
 // DiagnosticSource resolves one build-local semantic span back to a host-path-free workspace path
 // and immutable source bytes.
 func (workspace Workspace) DiagnosticSource(packageID hir.PackageID, sourcePath string) (string, []byte, bool) {
-	index := int(packageID) - 1
+	index := semanticClassIndex(packageID)
 	if index < 0 || index >= len(workspace.Resolution.InstanceClasses) {
 		return "", nil, false
 	}
@@ -510,7 +490,7 @@ func (workspace Workspace) DiagnosticSource(packageID hir.PackageID, sourcePath 
 	if len(class.Members) == 0 {
 		return "", nil, false
 	}
-	mapping, found := workspace.instance(class.Members[0])
+	mapping, found := workspace.instance(representativeNode(class))
 	if !found {
 		return "", nil, false
 	}
