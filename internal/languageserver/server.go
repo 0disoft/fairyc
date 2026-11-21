@@ -153,6 +153,7 @@ func (s *server) handle(m message) error {
 		if len(s.docs) >= 32 || !s.fits(d.URI, d.Text) {
 			return bad("editor document limit exceeded")
 		}
+		filename = documentDiskPath(filename)
 		s.docs[d.URI] = &document{URI: d.URI, Path: filename, Text: []byte(d.Text), Version: d.Version}
 		return s.recheck()
 	case "textDocument/didChange":

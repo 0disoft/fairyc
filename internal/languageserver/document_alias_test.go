@@ -2,10 +2,41 @@ package languageserver
 
 import (
 	"bytes"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 )
+
+func TestWindowsDocumentCaseAliasUsesUnsavedOverlay(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("Windows path case alias")
+	}
+	root, filename := editorFixture(t)
+	for _, name := range []string{"src/MAIN.fy", "SRC/main.fy", "SRC/MAIN.fy"} {
+		t.Run(name, func(t *testing.T) {
+			alias := fileURI(filepath.Join(root, filepath.FromSlash(name)))
+			var output bytes.Buffer
+			s := server{out: &output, docs: map[string]*document{}}
+			send(t, &s, 1, "initialize", map[string]any{"rootUri": fileURI(root)})
+			overlay := "module main;\nfn i32 unsaved() { return 7; }\nfn i32 main() { return unsaved(); }"
+			send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+				"uri": alias, "languageId": "fairyc", "version": 1, "text": overlay,
+			}})
+			d := s.docs[alias]
+			if d == nil || d.View == nil || !d.View.clean {
+				t.Fatalf("case alias did not receive a clean overlay: %s", &output)
+			}
+			if d.Path != filename || !strings.Contains(output.String(), alias) {
+				t.Fatalf("disk path = %q, diagnostics = %s", d.Path, &output)
+			}
+			definitions := s.definition(d, strings.LastIndex(overlay, "unsaved"))
+			if len(definitions) != 1 || definitions[0].URI != fileURI(filename) || definitions[0].Range.Start != (Position{Line: 1, Character: 7}) {
+				t.Fatalf("unsaved definition = %+v", definitions)
+			}
+		})
+	}
+}
 
 func TestDocumentAliasesCannotReplaceAnOpenOverlay(t *testing.T) {
 	root, filename := editorFixture(t)
