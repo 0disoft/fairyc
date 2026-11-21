@@ -23,8 +23,13 @@ func TestCandidateMCPStream(t *testing.T) {
 			{"eof", "one\nlast", "one\nlast\n", 0}, {"eof-cr", "last\r", "last\n", 0},
 			{"chunk-boundary", strings.Repeat("x", 4096) + "\r\nlast", strings.Repeat("x", 4096) + "\nlast\n", 0},
 			{"exact-frame", strings.Repeat("x", 65536) + "\n", strings.Repeat("x", 65536) + "\n", 0},
+			{"exact-frame-crlf", strings.Repeat("x", 65536) + "\r\nlast", strings.Repeat("x", 65536) + "\nlast\n", 0},
+			{"exact-frame-crlf-keeps-payload-cr", strings.Repeat("x", 65535) + "\r\r\n", strings.Repeat("x", 65535) + "\r\n", 0},
 			{"over-frame", strings.Repeat("x", 65537) + "\n", "", 2},
+			{"over-frame-crlf", strings.Repeat("x", 65537) + "\r\n", "", 2},
+			{"over-frame-interior-cr", strings.Repeat("x", 65536) + "\ry\n", "", 2},
 			{"exact-frame-eof", strings.Repeat("x", 65536), strings.Repeat("x", 65536) + "\n", 0},
+			{"exact-frame-eof-cr", strings.Repeat("x", 65536) + "\r", strings.Repeat("x", 65536) + "\n", 0},
 			{"oversize-after-progress", "first\n" + strings.Repeat("x", 65537), "first\n", 2},
 			{"many-frames", strings.Repeat("a\n", 1024), strings.Repeat("a\n", 1024), 0},
 		} {
