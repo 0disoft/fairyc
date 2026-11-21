@@ -463,13 +463,7 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 		prebuiltPaths = append(prebuiltPaths, path)
 		objectNames = append(objectNames, object.Name)
 	}
-	optimization := "/Od"
-	if profile == OptimizedProfile {
-		optimization = "/O2"
-	}
-	arguments := []string{
-		"/nologo", standardFlag, "/TC", "/W4", "/WX", "/MT", optimization,
-	}
+	arguments := msvcCompileArguments(profile, standardFlag)
 	if options.EmbeddedCodeView {
 		arguments = append(arguments, "/Z7")
 	}
@@ -552,6 +546,16 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 		LinkerVerbose: linkerVerbose,
 		Toolchain:     toolchain, Profile: profile, ConsumerMode: consumerMode,
 	}, nil
+}
+
+func msvcCompileArguments(profile Profile, standardFlag string) []string {
+	optimization := "/Od"
+	if profile == OptimizedProfile {
+		optimization = "/O2"
+	}
+	return []string{
+		"/nologo", standardFlag, "/TC", "/W4", "/WX", "/MT", optimization,
+	}
 }
 
 func msvcStandardFlag(mode ConsumerMode) (string, error) {

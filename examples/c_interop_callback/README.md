@@ -37,6 +37,26 @@ go run ./tools/dev/fairyc-c-interop --cc clang --profile optimized
 
 Both profiles must print the expected line and exit with status 0. The harness sends `main.fy` through the normal frontend, HIR, borrow Flow, and verified MIR. It emits target-specific C11, passes the Fairy output and the C companion as separate translation units, links them, and executes the result.
 
+## Check the header
+
+From the repository root, run the compile-only check with the same host toolchain
+and profile as the example:
+
+```text
+go run ./tools/dev/fairyc-c-interop --check-header --profile low
+go run ./tools/dev/fairyc-c-interop --check-header --cc gcc --profile low
+```
+
+The first command uses MSVC and the Windows SDK on Windows. On Linux, select
+`--cc gcc` or `--cc clang`. Both `low` and `optimized` are available.
+
+The check includes `legacy.h` and the generated Fairy declarations in one
+C11 translation unit. The header must declare every C function used by the
+example. Conflicting prototypes, including callback parameter and return
+types, fail during compilation. The mode discards its temporary object and
+exits before linking or running the example. A successful check prints
+`interop header ok: ...`. The unsafe provider obligations below still apply.
+
 ## Integration boundary
 
 The C-to-Fairy direction is a synchronous, same-thread, call-bounded callback made while `legacy_filter` is running. It is not a Fairy source export or a retained or asynchronous callback. This is an `unsafe` boundary with a trusted contract: C must keep the context valid while calls are active, must not retain or use the callback or context after return, and must avoid unwinding or `longjmp` across Fairy frames.
