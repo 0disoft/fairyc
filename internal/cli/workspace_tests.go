@@ -32,6 +32,7 @@ const stableLocatedTestListSchema = "fairyc.test-list/v3"
 const stableLocatedTestReportSchema = "fairyc.test-report/v3"
 const stableCapturedTestReportSchema = "fairyc.test-report/v4"
 const stableNativeTestTimeoutSeconds = 60
+const maxNativeTestJobs = 2
 
 type stableTestOptions struct {
 	locked          bool
@@ -41,6 +42,8 @@ type stableTestOptions struct {
 	stdinFile       string
 	timeoutSeconds  int
 	timeoutExplicit bool
+	jobs            int
+	jobsExplicit    bool
 	captureOutput   bool
 	list            bool
 	json            bool
@@ -250,7 +253,7 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 			nativeInput.replay = contents
 			nativeInput.replayEach = true
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, stderr)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, max(1, options.jobs), stderr)
 	} else {
 		interpreterOptions, err := workspaceArenaInterpreterOptions(workspace)
 		if err != nil {
@@ -493,7 +496,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 }
 
 func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
-	options := stableTestOptions{timeoutSeconds: stableNativeTestTimeoutSeconds}
+	options := stableTestOptions{timeoutSeconds: stableNativeTestTimeoutSeconds, jobs: 1}
 	_, err := parseCommandFlags(arguments, flagSchema{Command: "test", Flags: []flagDefinition{
 		{Name: "--locked", Kind: flagSwitch},
 		{Name: "--native", Kind: flagSwitch},
@@ -506,12 +509,13 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 		{Name: "--workspace", Kind: flagSwitch},
 		{Name: "--package", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires a package UID after --package`},
 		{Name: "--stdin-file", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires a portable workspace file after --stdin-file`},
+		{Name: "--jobs", Kind: flagScalar, ValueFirst: true, InlineValue: true},
 		{Name: "--timeout-seconds", Kind: flagScalar, ValueFirst: true, Missing: `command "test" requires canonical seconds after --timeout-seconds`},
 		{Name: "--exact", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test identity after --exact`, DuplicateValue: `command "test" received exact test %q more than once`},
 		{Name: "--file", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test path after --file`, DuplicateValue: `command "test" received test file %q more than once`},
 		{Name: "--dir", Kind: flagSlice, ValueFirst: true, Missing: `command "test" requires a test directory after --dir`, DuplicateValue: `command "test" received test directory %q more than once`},
 	}, Unknown: func(string) error {
-		return fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --stdin-file <portable-workspace-file>, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+		return fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --jobs <1..2>, --stdin, --stdin-file <portable-workspace-file>, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 	}}, func(flag, value string) error {
 		switch flag {
 		case "--locked":
@@ -542,6 +546,12 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			options.files = append(options.files, value)
 		case "--dir":
 			options.directories = append(options.directories, value)
+		case "--jobs":
+			jobs, err := strconv.Atoi(value)
+			if err != nil || strconv.Itoa(jobs) != value || jobs < 1 || jobs > maxNativeTestJobs {
+				return fmt.Errorf(`command "test" requires --jobs in canonical range 1 through %d`, maxNativeTestJobs)
+			}
+			options.jobs, options.jobsExplicit = jobs, true
 		case "--timeout-seconds":
 			seconds, err := strconv.Atoi(value)
 			if err != nil || strconv.Itoa(seconds) != value || seconds < 1 || seconds > stableNativeTestTimeoutSeconds {
@@ -559,6 +569,8 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 		flagRule{Invalid: len(options.files) != 0 && len(options.exact) != 0, Message: `command "test" does not combine --file with --exact`},
 		flagRule{Invalid: len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0), Message: `command "test" does not combine --dir with --file or --exact`},
 		flagRule{Invalid: options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0), Message: `command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`},
+		flagRule{Invalid: options.jobsExplicit && options.list, Message: "command \"test\" does not combine --list with --jobs"},
+		flagRule{Invalid: options.jobsExplicit && !options.native, Message: "command \"test\" requires --native when --jobs is supplied"},
 		flagRule{Invalid: options.release && !options.native, Message: `command "test" requires --native when --release is supplied`},
 		flagRule{Invalid: options.stdin && !options.native, Message: `command "test" requires --native when --stdin is supplied`},
 		flagRule{Invalid: options.timeoutExplicit && !options.native, Message: `command "test" requires --native when --timeout-seconds is supplied`},

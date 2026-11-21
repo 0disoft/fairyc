@@ -918,7 +918,7 @@ or program effects; no executable is retained.
 
 ## Stable workspace test v15
 
-`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--jobs <1..2>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
@@ -1024,6 +1024,13 @@ test process after compilation, linking, and PE inspection; omission preserves 6
 is code 6 execution-infrastructure failure, emits no completed report, stops later execution, and
 retains no artifact. It does not change compiler/toolchain timeouts or report schemas.
 
+Explicit `--jobs <1..2>` or `--jobs=<1..2>` is accepted only with native execution.
+The default is 1. With 2, C generation stays sequential and up to two C builds may overlap.
+Test processes, diagnostics, and the report are handled in the selected test order.
+On an infrastructure or capability failure, later test processes are not launched.
+The command waits for any started C builds to finish and remove their temporary files.
+The option leaves report bytes and exit-code rules unchanged.
+
 Explicit `--capture-output` is accepted only with native JSON execution. Before the delimiter it
 selects `fairyc.test-report/v4`; after the delimiter it is an ordinary program argument. Every v4
 outcome requires canonical padded base64 `stdoutBase64` and `stderrBase64` strings, including empty
@@ -1066,7 +1073,7 @@ separators. Consumers must match both identities before treating a retained span
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one host executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary host image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary host image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, direct caller stdin for exactly one selected native test or bounded stdin-file replay for every selected native test, an optional bounded process timeout, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
+| `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--jobs <1..2>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary host image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, direct caller stdin for exactly one selected native test or bounded stdin-file replay for every selected native test, an optional bounded process timeout, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
 | `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |

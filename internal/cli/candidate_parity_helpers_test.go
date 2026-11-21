@@ -14,9 +14,11 @@ import (
 // Native candidate help covers shared CLI commands. The exclusions below
 // belong to the Go frontend.
 func candidateUsage() string {
-	lines := strings.Split(usage, "\n")
+	lines := strings.Split(strings.Replace(usage, " [--jobs <1|2>]", "", 1), "\n")
 	lines = slices.DeleteFunc(lines, func(line string) bool {
-		return strings.HasPrefix(line, "  fairyc experimental registry-resolve ") ||
+		return strings.HasPrefix(line, "Native test --jobs=2 ") ||
+			line == "The default is one C build at a time." ||
+			strings.HasPrefix(line, "  fairyc experimental registry-resolve ") ||
 			strings.HasPrefix(line, "  fairyc experimental registry-update ") ||
 			strings.HasPrefix(line, "  fairyc experimental git-snapshot ") ||
 			strings.HasPrefix(line, "  fairyc experimental test-plan ") ||

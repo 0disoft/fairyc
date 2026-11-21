@@ -19,6 +19,7 @@ type flagDefinition struct {
 	Name           string
 	Kind           flagKind
 	ValueFirst     bool
+	InlineValue    bool
 	Missing        string
 	DuplicateValue string
 }
@@ -42,10 +43,9 @@ func (s flagSchema) label() string {
 	return fmt.Sprintf("command %q", s.Command)
 }
 
-// parseCommandFlags consumes exact flag tokens only. It never accepts --x=value,
-// short aliases, implicit booleans, or a terminator unless the owning command
-// explicitly handles them. Apply runs in source order before any later token or
-// required-flag check, preserving domain-validation diagnostic precedence.
+// parseCommandFlags consumes exact flag tokens. Inline --x=value requires opt-in.
+// Short aliases, implicit booleans, and terminators belong to the owning command.
+// Apply runs in source order before later token or required-flag checks.
 func parseCommandFlags(arguments []string, schema flagSchema, apply func(string, string) error) (map[string]bool, error) {
 	definitions := make(map[string]flagDefinition, len(schema.Flags))
 	for _, d := range schema.Flags {
@@ -56,6 +56,14 @@ func parseCommandFlags(arguments []string, schema flagSchema, apply func(string,
 	for index := 0; index < len(arguments); {
 		name := arguments[index]
 		definition, found := definitions[name]
+		value := ""
+		inline := false
+		if !found {
+			key, raw, hasEquals := strings.Cut(name, "=")
+			if candidate, ok := definitions[key]; hasEquals && ok && candidate.Kind != flagSwitch && candidate.InlineValue {
+				name, definition, found, value, inline = key, candidate, true, raw, true
+			}
+		}
 		if !found {
 			if schema.Forward != nil {
 				*schema.Forward = append(*schema.Forward, name)
@@ -67,7 +75,7 @@ func parseCommandFlags(arguments []string, schema flagSchema, apply func(string,
 			}
 			return nil, fmt.Errorf("%s does not accept flag %q", schema.label(), name)
 		}
-		missing := definition.Kind != flagSwitch && (index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--"))
+		missing := definition.Kind != flagSwitch && !inline && (index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--"))
 		if missing && definition.ValueFirst {
 			return nil, missingFlagValue(schema, definition)
 		}
@@ -77,8 +85,7 @@ func parseCommandFlags(arguments []string, schema flagSchema, apply func(string,
 		if missing {
 			return nil, missingFlagValue(schema, definition)
 		}
-		value := ""
-		if definition.Kind != flagSwitch {
+		if definition.Kind != flagSwitch && !inline {
 			value = arguments[index+1]
 			index++
 		}

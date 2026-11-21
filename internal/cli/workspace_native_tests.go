@@ -15,12 +15,14 @@ import (
 
 const nativeWorkspaceTestEntry = "$fairyc::native-test-harness::main"
 
-type nativeWorkspaceTestCompiler func(
+type nativeWorkspaceTestPrepare func(
 	program mir.Program,
 	entry string,
 	profile cdriver.Profile,
 	stderr io.Writer,
-) (nativeWorkspaceTestArtifact, int)
+) (nativeWorkspaceTestBuild, int)
+
+type nativeWorkspaceTestBuild func(io.Writer) (nativeWorkspaceTestArtifact, int)
 
 type nativeWorkspaceTestArtifact = nativeCompilation
 
@@ -53,10 +55,11 @@ func runNativeWorkspaceTests(
 	timeout time.Duration,
 	captureOutput bool,
 	sdkStorage bool,
+	jobs int,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
-	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
-		return compileNativeWorkspaceTest(program, entry, profile, sdkStorage, stderr)
+	prepare := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (nativeWorkspaceTestBuild, int) {
+		return prepareNativeWorkspaceTest(program, entry, profile, sdkStorage, stderr)
 	}
 	return runNativeWorkspaceTestsWith(
 		program,
@@ -67,8 +70,9 @@ func runNativeWorkspaceTests(
 		timeout,
 		captureOutput,
 		sdkStorage,
+		jobs,
 		stderr,
-		compile,
+		prepare,
 		executeNativeWorkspaceTest,
 	)
 }
@@ -82,21 +86,39 @@ func runNativeWorkspaceTestsWith(
 	timeout time.Duration,
 	captureOutput bool,
 	sdkStorage bool,
+	jobs int,
 	stderr io.Writer,
-	compile nativeWorkspaceTestCompiler,
+	prepare nativeWorkspaceTestPrepare,
 	execute nativeWorkspaceTestExecutor,
 ) ([]workspaceTestOutcome, int) {
 	outcomes := make([]workspaceTestOutcome, 0, len(tests))
-	for _, test := range tests {
-		testProgram, entry, err := nativeWorkspaceTestProgram(program, test.entry, sdkStorage)
-		if err != nil {
-			return nil, internalError(stderr)
+	// Each slot owns one build until its result is consumed. In particular,
+	// wait for speculative builds to finish their scratch cleanup on failure.
+	var pending [maxNativeTestJobs]<-chan nativeWorkspaceTestBuildResult
+	defer func() {
+		for _, done := range pending {
+			if done != nil {
+				<-done
+			}
 		}
-		artifact, code := compile(testProgram, entry, profile, stderr)
-		if code != ExitSuccess {
-			return nil, code
+	}()
+	start := func(test workspaceTest) <-chan nativeWorkspaceTestBuildResult {
+		return startNativeWorkspaceTestBuild(program, test, profile, sdkStorage, jobs > 1, prepare)
+	}
+	for index := range min(jobs, len(tests)) {
+		pending[index] = start(tests[index])
+	}
+	for index, test := range tests {
+		slot := index % jobs
+		result := <-pending[slot]
+		pending[slot] = nil
+		if len(result.diagnostics) != 0 {
+			_, _ = stderr.Write(result.diagnostics)
 		}
-		outcome, err := execute(artifact, input.reader(), programArguments, timeout)
+		if result.code != ExitSuccess {
+			return nil, result.code
+		}
+		outcome, err := execute(result.artifact, input.reader(), programArguments, timeout)
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
@@ -119,16 +141,55 @@ func runNativeWorkspaceTestsWith(
 			display: test.display, trapCategory: category, source: test.source,
 			stdout: outcome.Stdout, stderr: programStderr,
 		})
+		if next := index + jobs; next < len(tests) {
+			pending[slot] = start(tests[next])
+		}
 	}
 	return outcomes, ExitSuccess
 }
 
-func compileNativeWorkspaceTest(program mir.Program, entry string, profile cdriver.Profile, sdkStorage bool, stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
+type nativeWorkspaceTestBuildResult struct {
+	artifact    nativeWorkspaceTestArtifact
+	code        int
+	diagnostics []byte
+}
+
+func startNativeWorkspaceTestBuild(program mir.Program, test workspaceTest, profile cdriver.Profile, sdkStorage, asynchronous bool, prepare nativeWorkspaceTestPrepare) <-chan nativeWorkspaceTestBuildResult {
+	done := make(chan nativeWorkspaceTestBuildResult, 1)
+	var diagnostics bytes.Buffer
+	testProgram, entry, err := nativeWorkspaceTestProgram(program, test.entry, sdkStorage)
+	if err != nil {
+		code := internalError(&diagnostics)
+		done <- nativeWorkspaceTestBuildResult{code: code, diagnostics: diagnostics.Bytes()}
+		return done
+	}
+	build, code := prepare(testProgram, entry, profile, &diagnostics)
+	if code != ExitSuccess {
+		done <- nativeWorkspaceTestBuildResult{code: code, diagnostics: diagnostics.Bytes()}
+		return done
+	}
+	run := func() {
+		artifact, code := build(&diagnostics)
+		done <- nativeWorkspaceTestBuildResult{artifact: artifact, code: code, diagnostics: diagnostics.Bytes()}
+	}
+	if asynchronous {
+		go run()
+	} else {
+		run()
+	}
+	return done
+}
+
+func prepareNativeWorkspaceTest(program mir.Program, entry string, profile cdriver.Profile, sdkStorage bool, stderr io.Writer) (nativeWorkspaceTestBuild, int) {
 	id, err := cdriver.HostNativeTarget()
 	if err != nil {
-		return nativeWorkspaceTestArtifact{}, buildFailure(stderr, err)
+		return nil, buildFailure(stderr, err)
 	}
-	return compileNativeProgram(program, entry, workspaceTargetOptions{targetID: id, profile: profile}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, sdkStorage, stderr)
+	plan, code := prepareNativeProgram(program, entry, workspaceTargetOptions{targetID: id, profile: profile}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, sdkStorage, stderr)
+	if code != ExitSuccess {
+		return nil, code
+	}
+	return plan.compile, ExitSuccess
 }
 
 func executeNativeWorkspaceTest(artifact nativeWorkspaceTestArtifact, stdin io.Reader, programArguments []string, timeout time.Duration) (nativeWorkspaceTestOutcome, error) {

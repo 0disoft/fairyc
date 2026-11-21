@@ -52,7 +52,7 @@ fn void io_a() { streams(); }
 @effects(console)
 fn void io_b() { streams(); }
 `)
-	writeWorkspaceFile(t, root, "tests/timeout/hang.fy", "module tests::timeout::hang;\n@test\nfn void waits() { while (true) {} }\n")
+	writeWorkspaceFile(t, root, "tests/timeout/hang.fy", "module tests::timeout::hang;\n@test\nfn void waits() { while (true) {} }\n@test\nfn void z_passes() { assert(true); }\n")
 	if err := os.WriteFile(filepath.Join(root, "input.bin"), []byte{'A', 0}, 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -91,11 +91,33 @@ fn void io_b() { streams(); }
 			}
 		}
 	}
-	var out, diag strings.Builder
-	code := Run([]string{"test", "--native", "--locked", "--exact", "tests::timeout::hang::waits", "--timeout-seconds", "1"}, root, &out, &diag)
-	if code != ExitBuildFailure || out.String() != "" || !strings.Contains(diag.String(), "exceeded 1s") {
-		t.Fatalf("timeout: %d %q %q", code, out.String(), diag.String())
+	var serial, parallel, diag strings.Builder
+	args := []string{"test", "--native", "--locked", "--json", "--capture-output", "--locations", "--file", "tests/native.fy"}
+	code := Run(append(args, "--jobs=1"), root, &serial, &diag)
+	portableNativeReport(t, code, ExitProgramTrap, serial.String(), diag.String(), "development", 2)
+	diag.Reset()
+	code = Run(append(args, "--jobs=2"), root, &parallel, &diag)
+	portableNativeReport(t, code, ExitProgramTrap, parallel.String(), diag.String(), "development", 2)
+	if serial.String() != parallel.String() {
+		t.Fatalf("ordered reports differ: jobs=1 %q, jobs=2 %q", &serial, &parallel)
 	}
+
+	scratch := t.TempDir()
+	t.Setenv("TMPDIR", scratch)
+	t.Setenv("TMP", scratch)
+	t.Setenv("TEMP", scratch)
+	for _, jobs := range []string{"--jobs=1", "--jobs=2"} {
+		var out strings.Builder
+		diag.Reset()
+		code := Run([]string{"test", "--native", "--locked", "--file", "tests/timeout/hang.fy", "--timeout-seconds", "1", jobs}, root, &out, &diag)
+		if code != ExitBuildFailure || out.String() != "" || !strings.Contains(diag.String(), "exceeded 1s") {
+			t.Fatalf("%s timeout: %d %q %q", jobs, code, &out, &diag)
+		}
+		if entries, err := os.ReadDir(scratch); err != nil || len(entries) != 0 {
+			t.Fatalf("%s retained temporary files: %v, %v", jobs, entries, err)
+		}
+	}
+
 	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
 		t.Fatalf("native tests retained a build artifact: %v", err)
 	}

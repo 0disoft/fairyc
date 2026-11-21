@@ -78,7 +78,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, time.Minute, false, false, &stderr, compile, execute,
+		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, time.Minute, false, false, 1, &stderr, prepareTestBuild(compile), execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
 		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
@@ -115,8 +115,9 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 		time.Minute,
 		false,
 		false,
+		1,
 		&stderr,
-		compile,
+		prepareTestBuild(compile),
 		execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 1 || outcomes[0].display != tests[0].display {
@@ -147,7 +148,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 	outcomes, code := runNativeWorkspaceTestsWith(
 		program, tests, cdriver.LowProfile,
 		nativeWorkspaceTestInput{replay: []byte("fixture\x00bytes"), replayEach: true},
-		nil, time.Minute, false, false, &stderr, compile, execute,
+		nil, time.Minute, false, false, 1, &stderr, prepareTestBuild(compile), execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 || executions != 2 {
 		t.Fatalf("replayed native outcomes=%+v executions=%d code=%d stderr=%q", outcomes, executions, code, stderr.String())
@@ -183,7 +184,7 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsApartFromTrapControl(t *t
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, time.Minute, true, false, &stderr, compile, execute,
+		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, time.Minute, true, false, 1, &stderr, prepareTestBuild(compile), execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 ||
 		outcomes[0].trapCategory != "assertion-failed" || outcomes[0].stdout != string([]byte{0, 0xff}) ||
@@ -219,8 +220,9 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				time.Minute,
 				false,
 				false,
+				1,
 				&stderr,
-				compile,
+				prepareTestBuild(compile),
 				func(nativeWorkspaceTestArtifact, io.Reader, []string, time.Duration) (nativeWorkspaceTestOutcome, error) {
 					return test.outcome, nil
 				},
@@ -229,6 +231,14 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				t.Fatalf("native failure outcomes=%+v code=%d stderr=%q", outcomes, code, stderr.String())
 			}
 		})
+	}
+}
+
+func prepareTestBuild(compile func(mir.Program, string, cdriver.Profile, io.Writer) (nativeWorkspaceTestArtifact, int)) nativeWorkspaceTestPrepare {
+	return func(program mir.Program, entry string, profile cdriver.Profile, _ io.Writer) (nativeWorkspaceTestBuild, int) {
+		return func(stderr io.Writer) (nativeWorkspaceTestArtifact, int) {
+			return compile(program, entry, profile, stderr)
+		}, ExitSuccess
 	}
 }
 

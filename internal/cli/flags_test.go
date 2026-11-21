@@ -102,3 +102,36 @@ func TestDeclarativeFlagsInvocationContract(t *testing.T) {
 		}
 	}
 }
+
+func TestStableNativeTestJobsOptions(t *testing.T) {
+	for _, tt := range []struct {
+		args []string
+		jobs int
+		err  string
+	}{
+		{args: []string{"--native"}, jobs: 1},
+		{args: []string{"--native", "--jobs=1"}, jobs: 1},
+		{args: []string{"--native", "--jobs", "2"}, jobs: 2},
+		{args: []string{"--jobs=2", "--native"}, jobs: 2},
+		{args: []string{"--native", "--", "--jobs=2"}, jobs: 1},
+		{args: []string{"--jobs=2"}, err: "requires --native"},
+		{args: []string{"--list", "--jobs=2"}, err: "does not combine --list with --jobs"},
+		{args: []string{"--native", "--jobs"}, err: "requires a value for --jobs"},
+		{args: []string{"--native", "--jobs="}, err: "canonical range"},
+		{args: []string{"--native", "--jobs=0"}, err: "canonical range"},
+		{args: []string{"--native", "--jobs=02"}, err: "canonical range"},
+		{args: []string{"--native", "--jobs=3"}, err: "canonical range"},
+		{args: []string{"--native", "--jobs=1", "--jobs", "2"}, err: "received --jobs more than once"},
+	} {
+		opts, err := parseStableTestOptions(tt.args)
+		if tt.err != "" {
+			if err == nil || !strings.Contains(err.Error(), tt.err) {
+				t.Errorf("%v: error %v, want %q", tt.args, err, tt.err)
+			}
+			continue
+		}
+		if err != nil || opts.jobs != tt.jobs {
+			t.Errorf("%v: jobs %d, error %v; want jobs %d", tt.args, opts.jobs, err, tt.jobs)
+		}
+	}
+}

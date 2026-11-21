@@ -135,7 +135,7 @@ input rather than a promised standalone C package. Ordinary mode maintains `fair
 cross-release source product; the removed stable `fairyc emit c ...` spelling returns code 2 with
 the experimental migration direction.
 
-The stable `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--jobs <1..2>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 the root package's optional lowercase `tests/` directory after the production lock is handled, or
 exactly one root-reachable local member when its manifest UID is selected with `--package`;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument

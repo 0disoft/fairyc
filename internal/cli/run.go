@@ -37,7 +37,7 @@ Usage:
   fairyc build [--release] [--locked]
   fairyc package [--locked] [--json]
   fairyc run [--release] [--locked] [-- <program-args...>]
-  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
+  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--timeout-seconds <1..60>] [--jobs <1|2>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
   fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
@@ -109,6 +109,8 @@ native test is selected; native tests otherwise receive EOF. Explicit --capture-
 native JSON execution and adds exact base64 process streams to each outcome.
 Explicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.
 Explicit --timeout-seconds bounds each isolated native test process and defaults to 60 seconds.
+Native test --jobs=2 overlaps up to two C builds while preserving execution and report order.
+The default is one C build at a time.
 "fairyc experimental emit-workspace-c" writes one private, explicitly targeted C11 bootstrap unit
 to stdout without invoking a toolchain. Its generated source is compiler-internal transport, not a
 cross-release C API or standalone product artifact. Pass --release to build, run, or native test for
