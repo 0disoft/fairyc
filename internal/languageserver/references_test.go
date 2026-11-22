@@ -88,6 +88,74 @@ func TestReferencesResolveCurrentLocalAndImportedNames(t *testing.T) {
 	}
 }
 
+func TestScratchOverlayPreservesProjectHoverAndReferences(t *testing.T) {
+	root, mainPath := editorFixture(t)
+	mainURI := fileURI(mainPath)
+	providerPath := filepath.Join(root, "src", "answer.fy")
+	providerURI := fileURI(providerPath)
+	scratchPath := filepath.Join(root, "scratch.fy")
+	scratchURI := fileURI(scratchPath)
+	const provider = "module answer; pub fn i32 value() { return 42; }"
+	const main = "module main; import answer as answer; fn i32 main() { return answer::value(); }"
+	writeProjectRootFile(t, providerPath, provider)
+
+	var out bytes.Buffer
+	s := server{out: &out, docs: map[string]*document{}}
+	send(t, &s, 1, "initialize", map[string]any{"rootUri": fileURI(root)})
+	open := func(uri, text string) {
+		t.Helper()
+		out.Reset()
+		send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
+			"uri": uri, "version": 1, "languageId": "fairyc", "text": text,
+		}})
+	}
+	open(providerURI, provider)
+	open(mainURI, main)
+
+	query := func(method string) json.RawMessage {
+		t.Helper()
+		out.Reset()
+		send(t, &s, 2, "textDocument/"+method, map[string]any{
+			"textDocument": documentID{URI: mainURI},
+			"position":     bytePosition([]byte(main), strings.Index(main, "::value")+2),
+			"context":      map[string]bool{"includeDeclaration": true},
+		})
+		return editorResult(t, &out)
+	}
+	hover := query("hover")
+	var locations []Location
+	references := query("references")
+	if !bytes.Contains(hover, []byte("value")) || json.Unmarshal(references, &locations) != nil || len(locations) != 2 {
+		t.Fatalf("fixture hover = %s, references = %s", hover, references)
+	}
+
+	open(scratchURI, "module scratch; fn i32 scratch() { return 0; }")
+	diagnostics := s.docs[mainURI].View.diagnostics
+	if scratch := diagnostics[scratchPath]; len(scratch) != 1 || scratch[0].Code != "editor-source-not-in-project" ||
+		len(diagnostics[mainPath]) != 0 || len(diagnostics[providerPath]) != 0 ||
+		!strings.Contains(out.String(), "editor-source-not-in-project") || !strings.Contains(out.String(), scratchURI) {
+		t.Fatalf("expected a diagnostic only for scratch: %s", &out)
+	}
+	if got := query("hover"); !bytes.Equal(got, hover) {
+		t.Errorf("hover with scratch open = %s, want %s", got, hover)
+	}
+	if got := query("references"); !bytes.Equal(got, references) {
+		t.Errorf("references with scratch open = %s, want %s", got, references)
+	}
+
+	out.Reset()
+	send(t, &s, 0, "textDocument/didChange", map[string]any{
+		"textDocument":   documentID{URI: providerURI, Version: 2},
+		"contentChanges": []map[string]string{{"text": strings.Replace(provider, "return 42", "return false", 1)}},
+	})
+	if len(s.docs[providerURI].View.result.Diagnostics) == 0 {
+		t.Fatal("expected a compiler diagnostic in the dependency")
+	}
+	if got := query("references"); string(got) != "[]" {
+		t.Fatalf("references with a broken dependency = %s, want []", got)
+	}
+}
+
 func TestReferenceLimitRejectsInsteadOfTruncating(t *testing.T) {
 	d := &document{Path: filepath.Join(t.TempDir(), "references.fy"), Text: bytes.Repeat([]byte("a "), maxReferenceLocations+2)}
 	key := sourceKey{1, "references.fy"}

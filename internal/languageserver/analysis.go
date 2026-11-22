@@ -17,8 +17,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
+
+const sourceNotInProjectDiagnostic = "editor-source-not-in-project"
 
 type sourceKey struct {
 	Package hir.PackageID
@@ -321,7 +324,7 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 				}
 			}
 			if !included {
-				a.add(filename, text, 0, 0, "editor-source-not-in-project", "Source is outside the project's resolved source roots or reachable package closure")
+				a.add(filename, text, 0, 0, sourceNotInProjectDiagnostic, "Source is outside the project's resolved source roots or reachable package closure")
 			}
 		}
 	} else {
@@ -374,13 +377,14 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 			a.add(f.Path, f.Text, u.Span.StartByte, u.Span.EndByte, "unsupported-source", u.Feature)
 		}
 	}
-	a.clean = true
 	for _, diags := range a.diagnostics {
-		if len(diags) > 0 {
-			a.clean = false
-			break
+		// An excluded overlay has its own diagnostic and contributes no
+		// compiler facts to the shared project analysis.
+		if slices.ContainsFunc(diags, func(diag lspDiagnostic) bool { return diag.Code != sourceNotInProjectDiagnostic }) {
+			return a, nil
 		}
 	}
+	a.clean = true
 	return a, nil
 }
 func (a *analysis) file(span hir.Span) (sourceView, bool) {
