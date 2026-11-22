@@ -13,14 +13,12 @@ import (
 	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
-	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/semantic"
-	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -180,7 +178,6 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
 	slices.Sort(testFiles)
 	slices.Sort(testDirectories)
-	code := ExitSuccess
 	tests, err = selectWorkspaceTestDirectories(tests, testDirectories, options.directories)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -193,34 +190,14 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	checked, pipelineErr := workspacecompiler.Check(workspace)
-	if len(checked.Semantic.Diagnostics) != 0 {
-		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	if len(checked.Semantic.Unsupported) != 0 {
-		if err := writeStableUnsupportedSemantics(stderr, checked.Semantic.Unsupported); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	if pipelineErr != nil {
-		var failure *compiler.Error
-		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
-			return workspaceSubsetCapabilityError(
-				workspaceCompilePolicy{stableDiagnostics: true}, stderr, "semantic test", failure.Cause,
-			)
-		}
-		return pipelineFailure(stderr, pipelineErr)
-	}
-	if !checked.Verified {
-		return internalError(stderr)
+	policy := workspaceCompilePolicy{stableDiagnostics: true}
+	program, code := checkWorkspaceMIR(workspace, policy, "semantic test", stderr)
+	if code != ExitSuccess {
+		return code
 	}
 	sdkStorage, err := workspaceSDKStorage(workspace)
 	if err != nil {
-		return workspaceSubsetCapabilityError(workspaceCompilePolicy{stableDiagnostics: true}, stderr, "native test SDK", err)
+		return workspaceSubsetCapabilityError(policy, stderr, "native test SDK", err)
 	}
 	if options.stdin && len(tests) != 1 {
 		return invocationError(stderr, `command "test" requires exactly one selected test when --stdin is supplied`)
@@ -253,13 +230,13 @@ func runLoadedStableTest(workspace workspaceloader.Workspace, lockState string, 
 			nativeInput.replay = contents
 			nativeInput.replayEach = true
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, max(1, options.jobs), stderr)
+		outcomes, code = runNativeWorkspaceTests(program, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, sdkStorage, max(1, options.jobs), stderr)
 	} else {
 		interpreterOptions, err := workspaceArenaInterpreterOptions(workspace)
 		if err != nil {
 			return internalError(stderr)
 		}
-		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, interpreterOptions, stderr)
+		outcomes, code = runInterpreterWorkspaceTests(program, tests, interpreterOptions, stderr)
 	}
 	if code != ExitSuccess {
 		return code

@@ -1,19 +1,16 @@
 package cli
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"path"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
-	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/windowsbuild"
-	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -344,32 +341,9 @@ func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCo
 }
 
 func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockState string, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {
-	checked, pipelineErr := workspacecompiler.Check(workspace)
-	if len(checked.Semantic.Diagnostics) != 0 {
-		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
-			return loweredWorkspace{}, ExitInternalFailure
-		}
-		return loweredWorkspace{}, ExitSourceDiagnostics
-	}
-	if len(checked.Semantic.Unsupported) != 0 {
-		writeUnsupported := writeUnsupportedSemantics
-		if policy.stableDiagnostics {
-			writeUnsupported = writeStableUnsupportedSemantics
-		}
-		if err := writeUnsupported(stderr, checked.Semantic.Unsupported); err != nil {
-			return loweredWorkspace{}, ExitInternalFailure
-		}
-		return loweredWorkspace{}, ExitSourceDiagnostics
-	}
-	if pipelineErr != nil {
-		var failure *compiler.Error
-		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
-			return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, failure.Cause)
-		}
-		return loweredWorkspace{}, pipelineFailure(stderr, pipelineErr)
-	}
-	if !checked.Verified {
-		return loweredWorkspace{}, internalError(stderr)
+	program, code := checkWorkspaceMIR(workspace, policy, subset, stderr)
+	if code != ExitSuccess {
+		return loweredWorkspace{}, code
 	}
 	sdkStorage, err := workspaceSDKStorage(workspace)
 	if err != nil {
@@ -379,7 +353,7 @@ func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockSta
 	if err != nil {
 		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
-	entry, found := programEntry(checked.MIR, entryName)
+	entry, found := programEntry(program, entryName)
 	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
 		return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
 	}
@@ -392,7 +366,7 @@ func lowerLoadedWorkspaceExecutable(workspace workspaceloader.Workspace, lockSta
 		trapSources = workspaceTrapSources(workspace)
 	}
 	return loweredWorkspace{
-		program: checked.MIR, entryName: entryName, lockState: lockState,
+		program: program, entryName: entryName, lockState: lockState,
 		rootPackageName: rootPackage.Manifest.Package.Name,
 		sdkStorage:      sdkStorage,
 		trapSources:     trapSources,

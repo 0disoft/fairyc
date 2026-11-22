@@ -8,8 +8,10 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lockfile"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/workspacecompiler"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -83,6 +85,37 @@ func stableWorkspaceLoadFailure(stderr io.Writer, err error) (int, bool) {
 		return ExitInternalFailure, true
 	}
 	return ExitSourceDiagnostics, true
+}
+
+func checkWorkspaceMIR(workspace workspaceloader.Workspace, policy workspaceCompilePolicy, subset string, stderr io.Writer) (mir.Program, int) {
+	checked, pipelineErr := workspacecompiler.Check(workspace)
+	if len(checked.Semantic.Diagnostics) != 0 {
+		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
+			return mir.Program{}, ExitInternalFailure
+		}
+		return mir.Program{}, ExitSourceDiagnostics
+	}
+	if len(checked.Semantic.Unsupported) != 0 {
+		writeUnsupported := writeUnsupportedSemantics
+		if policy.stableDiagnostics {
+			writeUnsupported = writeStableUnsupportedSemantics
+		}
+		if err := writeUnsupported(stderr, checked.Semantic.Unsupported); err != nil {
+			return mir.Program{}, ExitInternalFailure
+		}
+		return mir.Program{}, ExitSourceDiagnostics
+	}
+	if pipelineErr != nil {
+		var failure *compiler.Error
+		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
+			return mir.Program{}, workspaceSubsetCapabilityError(policy, stderr, subset, failure.Cause)
+		}
+		return mir.Program{}, pipelineFailure(stderr, pipelineErr)
+	}
+	if !checked.Verified {
+		return mir.Program{}, internalError(stderr)
+	}
+	return checked.MIR, ExitSuccess
 }
 
 func parseOptionalLocked(command string, arguments []string) (bool, error) {
