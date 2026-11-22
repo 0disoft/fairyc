@@ -93,6 +93,19 @@ leave these projections unchanged are outside its scope.
 The declaration limit covers both selected partitions together. Either limit
 failure leaves stdout empty.
 
+To guard one function in the selected package, add
+`--symbol <module::function> --deny-new-effect filesystem`. Use its full
+source-qualified name, including an owner segment for a method. The function
+must have a unique compiler-declared entry in both snapshots. The guard rejects
+a new `filesystem` declaration, including one required by a direct call or
+implicit resource cleanup. A pre-existing `filesystem` declaration, source
+movement that preserves the qualified name, and changes to other effects or
+functions are allowed. It compares the declared effect set, so authority
+already declared in the baseline is outside the guard's scope.
+A newly denied effect or unavailable target exits with status 2, a diagnostic
+on stderr, and empty stdout. A pass emits the usual semantic diff JSON. The two
+flags must be used together and require single-package mode.
+
 For the whole root-reachable graph, use
 `fairyc experimental atlas-diff --baseline <workspace-directory> --workspace
 --max-packages <n> --max-declarations <n> --max-output-bytes <n>`.

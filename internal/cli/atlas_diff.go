@@ -9,17 +9,21 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packageartifact"
+	"github.com/0disoft/fairyc/internal/source"
 )
 
 func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
 	const command = "atlas-diff"
-	var baseline, uid string
+	var baseline, uid, symbol string
 	var packages, declarations, output uint64
 	seen, err := parseCommandFlags(arguments, flagSchema{Command: command, Experimental: true, Flags: []flagDefinition{
 		{Name: "--baseline", Kind: flagScalar},
 		{Name: "--package-uid", Kind: flagScalar},
 		{Name: "--workspace", Kind: flagSwitch},
+		{Name: "--symbol", Kind: flagScalar},
+		{Name: "--deny-new-effect", Kind: flagScalar},
 		{Name: "--max-packages", Kind: flagScalar},
 		{Name: "--max-declarations", Kind: flagScalar},
 		{Name: "--max-output-bytes", Kind: flagScalar},
@@ -33,6 +37,20 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		case "--package-uid":
 			uid = value
 			return validateAtlasPackageUID(command, value)
+		case "--symbol":
+			symbol = value
+			if !strings.Contains(value, "::") {
+				return fmt.Errorf("atlas-diff requires --symbol as a qualified function name")
+			}
+			for part := range strings.SplitSeq(value, "::") {
+				if !source.ValidIdentifier(part) {
+					return fmt.Errorf("atlas-diff requires --symbol as a qualified function name")
+				}
+			}
+		case "--deny-new-effect":
+			if value != string(hir.EffectFilesystem) {
+				return fmt.Errorf("atlas-diff --deny-new-effect requires filesystem")
+			}
 		case "--max-packages":
 			var err error
 			packages, err = parseAtlasPositiveLimit(command, flag, value, maxAtlasPackRecords)
@@ -55,6 +73,8 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		flagRule{Invalid: seen["--workspace"] == seen["--package-uid"], Message: "atlas-diff requires exactly one of --package-uid and --workspace"},
 		flagRule{Invalid: seen["--workspace"] && packages == 0, Message: "atlas-diff --workspace requires --max-packages"},
 		flagRule{Invalid: !seen["--workspace"] && packages != 0, Message: "atlas-diff --max-packages requires --workspace"},
+		flagRule{Invalid: seen["--symbol"] != seen["--deny-new-effect"], Message: "atlas-diff --symbol and --deny-new-effect must be used together"},
+		flagRule{Invalid: seen["--workspace"] && seen["--deny-new-effect"], Message: "atlas-diff --deny-new-effect requires --package-uid"},
 	); err != nil {
 		return invocationError(stderr, err.Error())
 	}
@@ -86,7 +106,7 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 			return invocationError(stderr, "atlas-diff requires exactly one selected package in each workspace")
 		}
 		report, err = atlasmap.CompareV3(old, new, before.expectations[old.Header().PackageInstance],
-			after.expectations[new.Header().PackageInstance], int(declarations), oldAliases, newAliases,
+			after.expectations[new.Header().PackageInstance], int(declarations), oldAliases, newAliases, symbol,
 			func() (atlasmap.DiffFingerprints, atlasmap.DiffFingerprints) { return fingerprints(old, new) })
 	}
 	if err != nil {

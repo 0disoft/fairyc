@@ -292,3 +292,88 @@ fn i32 main() { return 0; }
 		})
 	}
 }
+
+func TestAtlasDiffDenyNewEffect(t *testing.T) {
+	const header = `module main;
+@effects(filesystem)
+fn i32 touch() { return 1; }
+@effects(filesystem)
+resource Token { i32 value; cleanup { let i32 marker = touch(); } }
+fn i32 main() { return 0; }
+`
+	const parser = "fn i32 decode() { return 7; }"
+	const newEffect = "denied new effect \"filesystem\" on \"main::decode\""
+	checked := func(text string) string {
+		t.Helper()
+		root := writeWorkspaceSessionFixture(t, text)
+		if code, stdout, stderr := runForTest([]string{"check"}, root); code != ExitSuccess {
+			t.Fatalf("prepare locked workspace: %d stdout=%q stderr=%q", code, stdout, stderr)
+		}
+		return root
+	}
+	baseline := checked(header + parser)
+	args := []string{"experimental", "atlas-diff", "--baseline", baseline,
+		"--package-uid", "example.session.app", "--max-declarations", "32", "--max-output-bytes", "100000"}
+	guarded := append(slices.Clone(args), "--symbol", "main::decode", "--deny-new-effect", "filesystem")
+	for _, tc := range []struct {
+		name, text, diagnostic string
+	}{
+		{"position only", "\n" + header + "\n" + parser, ""},
+		{"console added", header + "@effects(console) " + parser, ""},
+		{"unrelated function gains filesystem", header + parser + "\n@effects(filesystem) fn i32 other() { return touch(); }", ""},
+		{"direct call", header + "@effects(filesystem) fn i32 decode() { return touch(); }", newEffect},
+		{"implicit cleanup", header + "@effects(filesystem) fn i32 decode() { let Token token = Token { .value = 7 }; return 7; }", newEffect},
+		{"missing current function", header, "in the current workspace"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			root := checked(tc.text)
+			code, stdout, stderr := runForTest(guarded, root)
+			if tc.diagnostic != "" {
+				if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, tc.diagnostic) {
+					t.Fatalf("guard: %d stdout=%q stderr=%q, want %q", code, stdout, stderr, tc.diagnostic)
+				}
+				if code, stdout, stderr = runForTest(args, root); code != ExitSuccess || !json.Valid([]byte(stdout)) || stderr != "" {
+					t.Fatalf("unguarded diff: %d stdout=%q stderr=%q", code, stdout, stderr)
+				}
+				return
+			}
+			var report atlasmap.DiffResult
+			if code != ExitSuccess || stderr != "" || json.Unmarshal([]byte(stdout), &report) != nil ||
+				report.Schema != "fairyc.atlas-diff/v1" {
+				t.Fatalf("guard: %d stdout=%q stderr=%q", code, stdout, stderr)
+			}
+		})
+	}
+	t.Run("missing baseline function", func(t *testing.T) {
+		missing := replaceWorkspaceSessionArgument(guarded, "--baseline", checked(header))
+		if code, out, diag := runForTest(missing, baseline); code != ExitInvalidInvocation || out != "" || !strings.Contains(diag, "in the baseline") {
+			t.Fatalf("missing baseline: %d stdout=%q stderr=%q", code, out, diag)
+		}
+	})
+	t.Run("existing filesystem allowed", func(t *testing.T) {
+		old := checked(header + "@effects(filesystem) " + parser)
+		current := checked(header + "@effects(filesystem) fn i32 decode() { return touch(); }")
+		alreadyDeclared := replaceWorkspaceSessionArgument(guarded, "--baseline", old)
+		if code, out, diag := runForTest(alreadyDeclared, current); code != ExitSuccess || !json.Valid([]byte(out)) || diag != "" {
+			t.Fatalf("existing filesystem: %d stdout=%q stderr=%q", code, out, diag)
+		}
+	})
+	t.Run("flag validation", func(t *testing.T) {
+		workspace := []string{"experimental", "atlas-diff", "--baseline", baseline, "--workspace",
+			"--max-packages", "4", "--max-declarations", "32", "--max-output-bytes", "100000"}
+		for _, tc := range []struct {
+			arguments []string
+			message   string
+		}{
+			{append(slices.Clone(args), "--deny-new-effect", "filesystem"), "must be used together"},
+			{append(slices.Clone(args), "--symbol", "main::decode"), "must be used together"},
+			{append(slices.Clone(workspace), guarded[len(args):]...), "requires --package-uid"},
+			{replaceWorkspaceSessionArgument(guarded, "--symbol", "decode"), "qualified function name"},
+			{replaceWorkspaceSessionArgument(guarded, "--deny-new-effect", "console"), "requires filesystem"},
+		} {
+			if code, out, diag := runForTest(tc.arguments, baseline); code != ExitInvalidInvocation || out != "" || !strings.Contains(diag, tc.message) {
+				t.Fatalf("flag validation: %d stdout=%q stderr=%q, want %q", code, out, diag, tc.message)
+			}
+		}
+	})
+}

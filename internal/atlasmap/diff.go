@@ -45,8 +45,9 @@ type diffKey struct {
 // CompareV3 compares bounded, exact-current facts for the same package
 // coordinate. Source offsets and source-dependent instance IDs are excluded
 // from equality, and changed names remain separate additions and removals.
+// A nonempty denyNewFilesystemFor selects one qualified function to guard.
 func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpectation, maxDeclarations int,
-	oldAliases, newAliases map[string]string,
+	oldAliases, newAliases map[string]string, denyNewFilesystemFor string,
 	bodyFingerprints func() (DiffFingerprints, DiffFingerprints),
 ) (DiffResult, error) {
 	if maxDeclarations < 1 {
@@ -66,7 +67,43 @@ func CompareV3(before, after Partition, expectedBefore, expectedAfter LoadExpect
 		return DiffResult{}, fmt.Errorf("Atlas diff declarations exceed limit")
 	}
 
+	if denyNewFilesystemFor != "" {
+		if err := checkDiffFilesystemEffect(before, after, denyNewFilesystemFor); err != nil {
+			return DiffResult{}, err
+		}
+	}
 	return compareDiffFacts(before, after, oldAliases, newAliases, bodyFingerprints), nil
+}
+
+func checkDiffFilesystemEffect(before, after Partition, symbol string) error {
+	old, ok := diffFunctionDeclaration(before, symbol)
+	if !ok {
+		return fmt.Errorf("atlas-diff cannot verify a unique function declaration for %q in the baseline", symbol)
+	}
+	current, ok := diffFunctionDeclaration(after, symbol)
+	if !ok {
+		return fmt.Errorf("atlas-diff cannot verify a unique function declaration for %q in the current workspace", symbol)
+	}
+	effect := string(hir.EffectFilesystem)
+	if !slices.Contains(old.Effects, effect) && slices.Contains(current.Effects, effect) {
+		return fmt.Errorf("atlas-diff denied new effect %q on %q", effect, symbol)
+	}
+	return nil
+}
+
+func diffFunctionDeclaration(partition Partition, symbol string) (semanticsnapshot.Declaration, bool) {
+	var result semanticsnapshot.Declaration
+	for _, declaration := range partition.data.declarations {
+		key := declaration.Key
+		if key.Kind != semanticsnapshot.DeclarationFunction || key.Module+"::"+key.Name != symbol {
+			continue
+		}
+		if result.Key.Kind != "" || declaration.Provenance != semanticsnapshot.ProvenanceCompilerDeclared {
+			return semanticsnapshot.Declaration{}, false
+		}
+		result = declaration
+	}
+	return result, result.Key.Kind != ""
 }
 
 func matchingDiffContext(before, after Partition) bool {
