@@ -2,13 +2,15 @@ package languageserver
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
 
-func writeProjectRootFile(t *testing.T, path, contents string) {
+func writeProjectRootFile(t testing.TB, path, contents string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
@@ -23,7 +25,7 @@ func projectRootManifest(uid, name, source, extra string) string {
 		"\"\nname = \"" + name + "\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/20\"\nsource = \"" + source + "\"\n\n" + extra
 }
 
-func siblingWorkspaceFixture(t *testing.T) (root, app, library string) {
+func siblingWorkspaceFixture(t testing.TB) (root, app, library string) {
 	t.Helper()
 	root = t.TempDir()
 	app = filepath.Join(root, "a")
@@ -48,6 +50,69 @@ func siblingWorkspaceFixture(t *testing.T) (root, app, library string) {
 	return root, app, library
 }
 
+func BenchmarkRecheckSiblingDocuments(b *testing.B) {
+	for _, count := range []int{1, 32} {
+		b.Run(fmt.Sprint(count), func(b *testing.B) {
+			root, app, _ := siblingWorkspaceFixture(b)
+			s := server{out: io.Discard, workspaceRoots: []string{root}, docs: make(map[string]*document)}
+			for i := range count {
+				module := fmt.Sprintf("open_%d", i)
+				path := filepath.Join(app, "src", module+".fy")
+				text := "module " + module + "; fn i32 local() { return 0; }"
+				writeProjectRootFile(b, path, text)
+				uri := fileURI(path)
+				s.docs[uri] = &document{URI: uri, Path: path, Text: []byte(text), Version: 1}
+			}
+			if err := s.recheck(); err != nil {
+				b.Fatal(err)
+			}
+			for _, d := range s.docs {
+				if d.View == nil || !d.View.clean || d.View.root != root || d.View.snapshot == nil {
+					b.Fatalf("document %s has no reusable workspace analysis", d.Path)
+				}
+			}
+			b.ReportAllocs()
+			for b.Loop() {
+				if err := s.recheck(); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func TestRecheckReloadsSiblingProjectRoot(t *testing.T) {
+	root, main := editorFixture(t)
+	s := server{out: io.Discard, workspaceRoots: []string{root}, docs: make(map[string]*document)}
+	for _, path := range []string{main, filepath.Join(root, "src", "other.fy")} {
+		text := "module " + strings.TrimSuffix(filepath.Base(path), ".fy") + "; fn i32 main() { return 0; }"
+		writeProjectRootFile(t, path, text)
+		uri := fileURI(path)
+		s.docs[uri] = &document{URI: uri, Path: path, Text: []byte(text), Version: 1}
+	}
+	checkRoot := func(want string) {
+		t.Helper()
+		if err := s.recheck(); err != nil {
+			t.Fatal(err)
+		}
+		for _, d := range s.docs {
+			if d.View == nil || d.View.root != want {
+				t.Fatalf("unexpected analysis root for %s, want %q", d.Path, want)
+			}
+		}
+	}
+	manifest := filepath.Join(root, "fairy.toml")
+	checkRoot(root)
+	if err := os.Rename(manifest, manifest+".bak"); err != nil {
+		t.Fatal(err)
+	}
+	checkRoot("")
+	if err := os.Rename(manifest+".bak", manifest); err != nil {
+		t.Fatal(err)
+	}
+	checkRoot(root)
+}
+
 func TestAncestorCatalogServesSiblingMembersInLSP(t *testing.T) {
 	root, appDirectory, libraryDirectory := siblingWorkspaceFixture(t)
 	appPath := filepath.Join(appDirectory, "src", "a.fy")
@@ -58,10 +123,10 @@ func TestAncestorCatalogServesSiblingMembersInLSP(t *testing.T) {
 	var output bytes.Buffer
 	s := server{out: &output, docs: map[string]*document{}}
 	send(t, &s, 1, "initialize", map[string]any{"rootUri": fileURI(root)})
-	if got := s.projectRoot(appPath); got != root {
+	if got := projectRoot(s.workspaceRoot(appPath), filepath.Dir(appPath)); got != root {
 		t.Fatalf("app project root = %q, want catalog %q", got, root)
 	}
-	if got := s.projectRoot(libraryPath); got != root {
+	if got := projectRoot(s.workspaceRoot(libraryPath), filepath.Dir(libraryPath)); got != root {
 		t.Fatalf("library project root = %q, want catalog %q", got, root)
 	}
 	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
@@ -125,7 +190,7 @@ func TestStandaloneNestedProjectKeepsItsOwnScope(t *testing.T) {
 	var output bytes.Buffer
 	s := server{out: &output, docs: map[string]*document{}}
 	send(t, &s, 1, "initialize", map[string]any{"rootUri": fileURI(root)})
-	if got := s.projectRoot(filename); got != standalone {
+	if got := projectRoot(s.workspaceRoot(filename), filepath.Dir(filename)); got != standalone {
 		t.Fatalf("standalone project root = %q, want %q", got, standalone)
 	}
 	send(t, &s, 0, "textDocument/didOpen", map[string]any{"textDocument": map[string]any{
@@ -142,7 +207,7 @@ func TestProjectRootDoesNotWidenAboveInitializedFolder(t *testing.T) {
 	filename := filepath.Join(appDirectory, "src", "a.fy")
 	var output bytes.Buffer
 	s := server{workspaceRoots: []string{appDirectory}, out: &output, docs: map[string]*document{}}
-	if got := s.projectRoot(filename); got != appDirectory {
+	if got := projectRoot(s.workspaceRoot(filename), filepath.Dir(filename)); got != appDirectory {
 		t.Fatalf("initialized member project root = %q, want %q", got, appDirectory)
 	}
 }
@@ -161,7 +226,8 @@ func TestProjectRootRejectsSymlinkedPackageDirectory(t *testing.T) {
 	}
 	var output bytes.Buffer
 	s := server{workspaceRoots: []string{root}, out: &output, docs: map[string]*document{}}
-	if got := s.projectRoot(filepath.Join(linked, "src", "main.fy")); got != "" {
+	filename := filepath.Join(linked, "src", "main.fy")
+	if got := projectRoot(s.workspaceRoot(filename), filepath.Dir(filename)); got != "" {
 		t.Fatalf("symlinked package selected project root %q", got)
 	}
 }

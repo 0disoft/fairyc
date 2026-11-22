@@ -76,13 +76,13 @@ func TestNearestWorkspaceFolderBoundsProjectLookup(t *testing.T) {
 	send(t, &s, 1, "initialize", map[string]any{
 		"workspaceFolders": []workspaceFolder{{URI: fileURI(outer)}, {URI: fileURI(nested)}},
 	})
-	if got := s.projectRoot(filename); got != nested {
+	if got := projectRoot(s.workspaceRoot(filename), filepath.Dir(filename)); got != nested {
 		t.Fatalf("nested lookup selected %q, want %q", got, nested)
 	}
 	send(t, &s, 0, "workspace/didChangeWorkspaceFolders", map[string]any{
 		"event": workspaceFolderChange{Removed: []workspaceFolder{{URI: fileURI(nested)}}},
 	})
-	if got := s.projectRoot(filename); got != outer {
+	if got := projectRoot(s.workspaceRoot(filename), filepath.Dir(filename)); got != outer {
 		t.Fatalf("project lookup after removal selected %q, want %q", got, outer)
 	}
 }

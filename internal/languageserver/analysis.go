@@ -65,14 +65,12 @@ type analysis struct {
 	sourceCharged   bool
 }
 
-func (s *server) projectRoot(filename string) string {
-	// The nearest explicitly listed folder bounds parent lookup.
-	boundary := s.workspaceRoot(filename)
+func projectRoot(boundary, startDirectory string) string {
 	if boundary == "" || !projectDirectoryPath(boundary, boundary) {
 		return ""
 	}
 	packageDirectory := ""
-	for directory := filepath.Dir(filename); contained(boundary, directory); directory = filepath.Dir(directory) {
+	for directory := startDirectory; contained(boundary, directory); directory = filepath.Dir(directory) {
 		info, err := os.Lstat(filepath.Join(directory, "fairy.toml"))
 		if err == nil && info.Mode().IsRegular() {
 			if !projectDirectoryPath(boundary, directory) {

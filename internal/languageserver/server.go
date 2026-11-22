@@ -433,10 +433,21 @@ func (s *server) recheckFocused(focusURI string, onlyFocus bool) error {
 	}
 	groups := make(map[string]*analysisGroup)
 	groupKeys := make([]string, 0)
+	type projectLocation struct {
+		boundary, directory string
+	}
+	// Share the filesystem lookup within this recheck; the next recheck must
+	// see manifest additions, removals, and changes to workspace membership.
+	roots := make(map[projectLocation]string)
 	focusGroup := ""
 	for _, uri := range keys {
 		d := s.docs[uri]
-		root := s.projectRoot(d.Path)
+		location := projectLocation{s.workspaceRoot(d.Path), filepath.Dir(d.Path)}
+		root, found := roots[location]
+		if !found {
+			root = projectRoot(location.boundary, location.directory)
+			roots[location] = root
+		}
 		key := root
 		if key == "" {
 			key = d.Path
