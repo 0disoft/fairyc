@@ -2,6 +2,8 @@ package languageserver
 
 import (
 	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 
 	"golang.org/x/sys/windows"
@@ -10,17 +12,27 @@ import (
 // Match the disk spelling used by the workspace walk while keeping the URI
 // supplied by the client. New files and other kinds of aliases keep their path.
 func documentDiskPath(path string) string {
-	name, err := windows.UTF16FromString(path)
-	if err != nil {
-		return path
+	// Query each name separately so expanding an 8.3 ancestor cannot discard
+	// the on-disk casing of its descendants.
+	var components []string
+	prefix := path
+	for parent := filepath.Dir(prefix); parent != prefix; parent = filepath.Dir(prefix) {
+		component := filepath.Base(prefix)
+		if name, err := windows.UTF16PtrFromString(prefix); err == nil {
+			var data windows.Win32finddata
+			if handle, err := windows.FindFirstFile(name, &data); err == nil {
+				windows.FindClose(handle)
+				if diskName := windows.UTF16ToString(data.FileName[:]); strings.EqualFold(diskName, component) {
+					component = diskName
+				}
+			}
+		}
+		components = append(components, component)
+		prefix = parent
 	}
-	buffer := make([]uint16, len(name))
-	n, err := windows.GetLongPathName(&name[0], &buffer[0], uint32(len(buffer)))
-	if err != nil || n >= uint32(len(buffer)) {
-		return path
-	}
-	spelling := windows.UTF16ToString(buffer[:n])
-	if spelling == path || !strings.EqualFold(spelling, path) {
+	slices.Reverse(components)
+	spelling := filepath.Join(append([]string{prefix}, components...)...)
+	if spelling == path {
 		return path
 	}
 	original, originalErr := os.Lstat(path)

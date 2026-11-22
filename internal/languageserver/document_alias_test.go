@@ -13,6 +13,11 @@ func TestWindowsDocumentCaseAliasUsesUnsavedOverlay(t *testing.T) {
 		t.Skip("Windows path case alias")
 	}
 	root, filename := editorFixture(t)
+	checkDocumentCaseAliasOverlay(t, root, filename)
+}
+
+func checkDocumentCaseAliasOverlay(t *testing.T, root, filename string) {
+	t.Helper()
 	for _, name := range []string{"src/MAIN.fy", "SRC/main.fy", "SRC/MAIN.fy"} {
 		t.Run(name, func(t *testing.T) {
 			alias := fileURI(filepath.Join(root, filepath.FromSlash(name)))
