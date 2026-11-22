@@ -249,10 +249,11 @@ cannot certify an outside archive as `dist/<archive>.zip`. Declared and observed
 archive bytes are each bounded by 33 MiB, inclusive. Read, close and cancellation
 failures return no success report and do not modify either archive or receipt.
 The internal Go `ParseReportWithOptions` entry optionally accepts caller context,
-directory opener, body reader and resource closer, defaulting to Background,
-Root.OpenRoot, io.ReadAll and Closer.Close. Context is checked around reads and
+directory opener, per-chunk reader and resource closer, defaulting to Background,
+Root.OpenRoot, Reader.Read and Closer.Close. The verifier counts bytes and hashes
+the archive in one pass with a 32 KiB buffer. Context is checked around reads and
 completion; blocked host I/O remains cooperative. `ParseReport` keeps its
-existing signature and defaults.
+existing signature and behavior.
 
 --json emits `fairyc.package-report/v1`: schema, archive (relative), sha256,
 exeBytes, zipBytes, signed=false, published=false. No absolute paths/helper chatter.

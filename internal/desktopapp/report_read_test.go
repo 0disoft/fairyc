@@ -18,7 +18,7 @@ import (
 	"github.com/0disoft/fairyc/internal/durablefile"
 )
 
-func reportReceipt(t *testing.T, root string, body []byte) []byte {
+func reportReceipt(t testing.TB, root string, body []byte) []byte {
 	t.Helper()
 	sum := sha256.Sum256(body)
 	data, err := json.Marshal(map[string]any{
@@ -94,7 +94,7 @@ func TestParseReportRejectsDirectoryReplacement(t *testing.T) {
 			}
 			return project.OpenRoot(name)
 		},
-		ReadAll: func(io.Reader) ([]byte, error) { read = true; return body, nil },
+		Read: func(reader io.Reader, buffer []byte) (int, error) { read = true; return reader.Read(buffer) },
 	})
 	if !errors.Is(err, durablefile.ErrIdentityChanged) || report != (Report{}) || read {
 		t.Fatalf("directory replacement accepted/read: report=%+v read=%v error=%v", report, read, err)
@@ -138,9 +138,9 @@ func TestParseReportArchiveByteBoundaries(t *testing.T) {
 				t.Fatal(err)
 			}
 			reads := 0
-			report, err := ParseReportWithOptions(receipt, root, ReportReadOptions{ReadAll: func(io.Reader) ([]byte, error) {
+			report, err := ParseReportWithOptions(receipt, root, ReportReadOptions{Read: func(io.Reader, []byte) (int, error) {
 				reads++
-				return nil, reachedRead
+				return 0, reachedRead
 			}})
 			if report != (Report{}) || err == nil || (size <= maxReportArchiveBytes) != errors.Is(err, reachedRead) || reads != intBool(size <= maxReportArchiveBytes) {
 				t.Fatalf("size=%d reads=%d report=%+v error=%v", size, reads, report, err)
@@ -161,7 +161,7 @@ func TestParseReportArchiveByteBoundaries(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = ParseReportWithOptions(data, root, ReportReadOptions{ReadAll: func(io.Reader) ([]byte, error) { return nil, reachedRead }})
+		_, err = ParseReportWithOptions(data, root, ReportReadOptions{Read: func(io.Reader, []byte) (int, error) { return 0, reachedRead }})
 		if (size > 0 && size <= maxReportArchiveBytes) != errors.Is(err, reachedRead) {
 			t.Fatalf("declared size=%d error=%v", size, err)
 		}
@@ -197,11 +197,14 @@ func TestParseReportReadFailuresAndCancellation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			report, err := ParseReportWithOptions(receipt, root, ReportReadOptions{Context: ctx, ReadAll: func(io.Reader) ([]byte, error) {
+			report, err := ParseReportWithOptions(receipt, root, ReportReadOptions{Context: ctx, Read: func(_ io.Reader, buffer []byte) (int, error) {
 				if tc.cancel {
 					cancel(cause)
 				}
-				return tc.data, tc.err
+				if tc.err != nil {
+					return copy(buffer, tc.data), tc.err
+				}
+				return copy(buffer, tc.data), io.EOF
 			}})
 			if err == nil || report != (Report{}) || tc.err != nil && !errors.Is(err, tc.err) || tc.cancel && (!errors.Is(err, context.Canceled) || !errors.Is(err, cause)) {
 				t.Fatalf("failure certified archive: report=%+v error=%v", report, err)
@@ -214,6 +217,18 @@ func TestParseReportReadFailuresAndCancellation(t *testing.T) {
 	got, err := os.ReadFile(filepath.Join(root, "dist", "app.zip"))
 	if err != nil || !bytes.Equal(got, body) {
 		t.Fatalf("failed verification changed archive: %q %v", got, err)
+	}
+}
+
+func TestParseReportRejectsCorruptedArchive(t *testing.T) {
+	root, body, receipt := reportFixture(t)
+	body[0] ^= 1
+	if err := os.WriteFile(filepath.Join(root, "dist", "app.zip"), body, 0600); err != nil {
+		t.Fatal(err)
+	}
+	report, err := ParseReport(receipt, root)
+	if report != (Report{}) || err == nil || err.Error() != "packaged archive checksum mismatch" {
+		t.Fatalf("corrupted archive certified: %+v %v", report, err)
 	}
 }
 
@@ -248,5 +263,73 @@ func TestParseReportOptionsAndCloseFailures(t *testing.T) {
 	})
 	if !errors.Is(err, closeFailure) || report != (Report{}) || closed != 3 {
 		t.Fatalf("close failure certified archive or stopped cleanup: report=%+v closed=%d error=%v", report, closed, err)
+	}
+}
+
+func reportArchiveFixture(t testing.TB, size int) (root string, receipt []byte) {
+	t.Helper()
+	root = t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "dist"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	body := bytes.Repeat([]byte{0xA5}, size)
+	if err := os.WriteFile(filepath.Join(root, "dist", "app.zip"), body, 0600); err != nil {
+		t.Fatal(err)
+	}
+	return root, reportReceipt(t, root, body)
+}
+
+func TestParseReportStreamsArchiveAtLimit(t *testing.T) {
+	root, receipt := reportArchiveFixture(t, maxReportArchiveBytes)
+	var expected struct {
+		SHA256 string `json:"zipSha256"`
+	}
+	if err := json.Unmarshal(receipt, &expected); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, grow := range []bool{false, true} {
+		t.Run(fmt.Sprintf("grow=%t", grow), func(t *testing.T) {
+			var readBytes int
+			report, err := ParseReportWithOptions(receipt, root, ReportReadOptions{
+				Read: func(reader io.Reader, buffer []byte) (int, error) {
+					if len(buffer) > 32<<10 {
+						t.Fatalf("read asked for %d bytes", len(buffer))
+					}
+					n, err := reader.Read(buffer)
+					if grow && err == io.EOF {
+						if readBytes != maxReportArchiveBytes || n != 0 || len(buffer) != 1 {
+							t.Fatalf("expected a one-byte probe at the limit, got offset=%d read=%d buffer=%d", readBytes, n, len(buffer))
+						}
+						buffer[0] = 1 // Simulate growth after the file size check.
+						n, err = 1, nil
+					}
+					readBytes += n
+					return n, err
+				},
+			})
+			if grow {
+				if readBytes != maxReportArchiveBytes+1 || report != (Report{}) || err == nil || err.Error() != "packaged archive checksum mismatch" {
+					t.Fatalf("excess stream accepted: bytes=%d report=%+v error=%v", readBytes, report, err)
+				}
+			} else if readBytes != maxReportArchiveBytes || err != nil || report.ZipBytes != maxReportArchiveBytes || report.SHA256 != expected.SHA256 {
+				t.Fatalf("stream differs from whole-file SHA-256: bytes=%d report=%+v error=%v", readBytes, report, err)
+			}
+		})
+	}
+}
+
+func BenchmarkParseReportArchive(b *testing.B) {
+	for _, mib := range []int{1, maxReportArchiveBytes >> 20} {
+		b.Run(fmt.Sprintf("%dMiB", mib), func(b *testing.B) {
+			root, receipt := reportArchiveFixture(b, mib<<20)
+			b.SetBytes(int64(mib) << 20)
+			b.ReportAllocs()
+			for b.Loop() {
+				if _, err := ParseReport(receipt, root); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }
