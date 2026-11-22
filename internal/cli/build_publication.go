@@ -88,7 +88,9 @@ func publishBuildArtifactWithOptions(sourceRoot, relativePath string, contents [
 	stagingExists := true
 	defer func() {
 		if stagingExists {
-			_ = policy.Remove(root, temporaryPath)
+			if cleanupErr := policy.Remove(root, temporaryPath); cleanupErr != nil && !errors.Is(cleanupErr, fs.ErrNotExist) {
+				err = errors.Join(err, fmt.Errorf("remove staged build output %q: %w", filepath.ToSlash(temporaryPath), cleanupErr))
+			}
 		}
 	}()
 	defer file.Close()

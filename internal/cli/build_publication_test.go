@@ -87,6 +87,31 @@ func TestBuildPublicationPersistentCleanupFailureRetainsImage(t *testing.T) {
 	}
 }
 
+func TestBuildPublicationReportsCleanupFailureBeforePromotion(t *testing.T) {
+	directory := t.TempDir()
+	promotionErr := errors.New("promotion denied")
+	staging := filepath.Join("build", ".fairyc-fixture.tmp")
+	err := publishBuildArtifactWithOptions(directory, "build/app.exe", []byte("image"), false, buildPublicationOptions{
+		CreateStaging: fixedBuildStaging,
+		Promote:       func(*os.Root, string, string, bool) error { return promotionErr },
+		Remove: func(_ *os.Root, name string) error {
+			if name != staging {
+				t.Fatalf("cleanup targeted %q, want %q", name, staging)
+			}
+			return os.ErrPermission
+		},
+	})
+	if !errors.Is(err, promotionErr) || !errors.Is(err, os.ErrPermission) || !strings.Contains(err.Error(), filepath.Base(staging)) {
+		t.Fatalf("missing promotion or staging cleanup failure: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(directory, staging)); err != nil {
+		t.Fatalf("retained staging file: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(directory, "build", "app.exe")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("unexpected final output: %v", err)
+	}
+}
+
 func TestBuildPublicationCancellationBeforeAndAfterCommit(t *testing.T) {
 	for _, replace := range []bool{false, true} {
 		for _, afterCommit := range []bool{false, true} {
