@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -66,11 +67,17 @@ func transientSourceStatus(code int) bool {
 }
 
 func transientSourceError(err error) bool {
-	if err == nil || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+	if err == nil || errors.Is(err, context.Canceled) {
 		return false
 	}
+	// Client.Do wraps transport errors in a URL error. A transport timeout
+	// may match DeadlineExceeded even while the shared request context is live.
+	var requestErr *url.Error
+	if errors.As(err, &requestErr) {
+		err = requestErr.Err
+	}
 	var network net.Error
-	return errors.As(err, &network) && (network.Timeout() || network.Temporary())
+	return errors.As(err, &network) && network != context.DeadlineExceeded && (network.Timeout() || network.Temporary())
 }
 
 func waitSourceRetry(ctx context.Context, delay time.Duration) error {

@@ -66,6 +66,30 @@ func TestSourceDownloadReportsHTTPStatus(t *testing.T) {
 	}
 }
 
+func TestSourceDownloadRecoversResponseHeaderTimeout(t *testing.T) {
+	var calls atomic.Int32
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) == 1 {
+			<-r.Context().Done()
+			return
+		}
+		_, _ = io.WriteString(w, "archive")
+	}))
+	defer server.Close()
+	transport := server.Client().Transport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = 200 * time.Millisecond
+	defer transport.CloseIdleConnections()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	pin := testPin()
+	pin.URL = server.URL + "/math.zip"
+	data, err := (Fetcher{Client: &http.Client{Transport: transport}}).download(ctx, pin)
+	if err != nil || string(data) != "archive" || calls.Load() != 2 {
+		t.Fatalf("header timeout recovery: body=%q, calls=%d, err=%v", data, calls.Load(), err)
+	}
+}
+
 type sourceRoundTripFunc func(*http.Request) (*http.Response, error)
 
 func (fn sourceRoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) { return fn(req) }
