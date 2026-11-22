@@ -50,10 +50,7 @@ type documentParams struct {
 
 func (s *server) handle(m message) error {
 	bad := func(reason string) error {
-		if len(m.ID) == 0 {
-			return s.notify("window/logMessage", map[string]any{"type": 2, "message": reason})
-		}
-		return s.response(m.ID, nil, -32602, reason)
+		return s.invalidParams(m.ID, reason)
 	}
 	if m.Method == "initialize" {
 		if s.initialized {
@@ -224,12 +221,9 @@ func (s *server) handle(m message) error {
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid rename parameters")
 		}
-		d := s.docs[p.TextDocument.URI]
+		d, err := s.synchronizedDocument(m.ID, p.TextDocument.URI)
 		if d == nil {
-			return bad("document is not open")
-		}
-		if d.needsFullText {
-			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+			return err
 		}
 		offset, valid := d.positionByte(p.Position)
 		if !valid {
@@ -267,12 +261,9 @@ func (s *server) handle(m message) error {
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid code action parameters")
 		}
-		d := s.docs[p.TextDocument.URI]
+		d, err := s.synchronizedDocument(m.ID, p.TextDocument.URI)
 		if d == nil {
-			return bad("document is not open")
-		}
-		if d.needsFullText {
-			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+			return err
 		}
 		start, end, valid := rangeOffsets(d.Text, p.Range)
 		if !valid {
@@ -291,12 +282,9 @@ func (s *server) handle(m message) error {
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid formatting parameters")
 		}
-		d := s.docs[p.TextDocument.URI]
+		d, err := s.synchronizedDocument(m.ID, p.TextDocument.URI)
 		if d == nil {
-			return bad("document is not open")
-		}
-		if d.needsFullText {
-			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+			return err
 		}
 		start, end := 0, len(d.Text)
 		if m.Method == "textDocument/rangeFormatting" {
@@ -327,12 +315,9 @@ func (s *server) handle(m message) error {
 		if json.Unmarshal(m.Params, &p) != nil {
 			return bad("invalid position parameters")
 		}
-		d := s.docs[p.TextDocument.URI]
+		d, err := s.synchronizedDocument(m.ID, p.TextDocument.URI)
 		if d == nil {
-			return bad("document is not open")
-		}
-		if d.needsFullText {
-			return s.response(m.ID, nil, -32801, "document needs full synchronization")
+			return err
 		}
 		var offset int
 		if m.Method != "textDocument/semanticTokens/full" {
@@ -381,6 +366,26 @@ func (s *server) handle(m message) error {
 	default:
 		return s.response(m.ID, nil, -32601, "method not supported")
 	}
+}
+
+func (s *server) invalidParams(id json.RawMessage, reason string) error {
+	if len(id) == 0 {
+		return s.notify("window/logMessage", map[string]any{"type": 2, "message": reason})
+	}
+	return s.response(id, nil, -32602, reason)
+}
+
+// A nil document means the request was rejected. The error reports any failure
+// to write the rejection, and can be nil when the response was sent.
+func (s *server) synchronizedDocument(id json.RawMessage, uri string) (*document, error) {
+	d := s.docs[uri]
+	if d == nil {
+		return nil, s.invalidParams(id, "document is not open")
+	}
+	if d.needsFullText {
+		return nil, s.response(id, nil, -32801, "document needs full synchronization")
+	}
+	return d, nil
 }
 
 func (s *server) ensureAnalysis(d *document) error {
