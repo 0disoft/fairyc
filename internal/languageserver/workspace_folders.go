@@ -49,6 +49,9 @@ func (p initializeParams) roots() ([]string, error) {
 	if !filepath.IsAbs(p.RootPath) {
 		return nil, errors.New("rootPath must be absolute")
 	}
+	if !localPathVolume(p.RootPath) {
+		return nil, errors.New("rootPath must use a local path")
+	}
 	return []string{filepath.Clean(p.RootPath)}, nil
 }
 

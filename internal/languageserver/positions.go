@@ -99,8 +99,26 @@ func filePath(uri string) (string, error) {
 	if !filepath.IsAbs(p) {
 		return "", errors.New("expected absolute file URI")
 	}
+	if !localPathVolume(p) {
+		return "", errors.New("expected local file URI")
+	}
 	return filepath.Clean(p), nil
 }
+
+// A Windows absolute path can address a network share or a device namespace.
+// Inspect the decoded path before any filesystem lookup.
+func localPathVolume(path string) bool {
+	if runtime.GOOS != "windows" {
+		return true
+	}
+	volume := filepath.VolumeName(path)
+	if len(volume) != 2 || volume[1] != ':' {
+		return false
+	}
+	drive := volume[0]
+	return (drive >= 'A' && drive <= 'Z') || (drive >= 'a' && drive <= 'z')
+}
+
 func fileURI(filename string) string {
 	p := filepath.ToSlash(filename)
 	if !strings.HasPrefix(p, "/") {
