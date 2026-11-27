@@ -32,6 +32,15 @@ var providers = map[target.ID]provider{
 	target.X8664LinuxGNU:    {cstdlib.SourceForSymbols, cstdlib.LinuxGNUVectorStorageSource, cruntime.LinuxRunSource},
 }
 
+const windowsRuntimeHeaderOptions = `#ifndef NOGDI
+#define NOGDI
+#endif
+#ifndef NOUSER
+#define NOUSER
+#endif
+
+`
+
 func Source(id target.ID, symbols []string, options Options) (string, error) {
 	selected, found := providers[id]
 	if !found {
@@ -113,6 +122,11 @@ func Source(id target.ID, symbols []string, options Options) (string, error) {
 	}
 	if windowsHost != "" {
 		support += "\n" + windowsHost
+	}
+	if id == target.X8664WindowsMSVC && strings.Contains(support, "#include <windows.h>\n") {
+		// The private runtime uses no GDI or USER APIs. Keep these options in
+		// its translation unit so user C and resource files get the full SDK.
+		support = windowsRuntimeHeaderOptions + support
 	}
 	return support, nil
 }

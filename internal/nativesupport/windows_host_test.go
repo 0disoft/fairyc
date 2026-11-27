@@ -45,7 +45,12 @@ func TestWindowsCandidateHostSelection(t *testing.T) {
 					before := append([]string(nil), backing...)
 					options.CandidateHost = true
 					got, err := Source(target.X8664WindowsMSVC, symbols, options)
-					if err != nil || got != base+"\n"+host {
+					want := base + "\n" + host
+					if !traps {
+						// The host introduces the first Windows SDK include.
+						want = windowsRuntimeHeaderOptions + want
+					}
+					if err != nil || got != want {
 						t.Fatalf("host must follow unchanged stdlib/vector/trap support (storage=%v traps=%v): %v", storage, traps, err)
 					}
 					if !reflect.DeepEqual(backing, before) {
@@ -54,6 +59,18 @@ func TestWindowsCandidateHostSelection(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestWindowsRuntimeHeaderOptions(t *testing.T) {
+	for _, traps := range []bool{false, true} {
+		source, err := Source(target.X8664WindowsMSVC, nil, Options{TrapReceipt: traps})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.HasPrefix(source, windowsRuntimeHeaderOptions) != traps {
+			t.Fatalf("Windows SDK header options must precede the first include (traps=%v)", traps)
+		}
 	}
 }
 
