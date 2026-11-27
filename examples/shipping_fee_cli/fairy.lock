@@ -1,0 +1,42 @@
+{
+  "schema": "fairyc.lock/v1",
+  "packageInstanceAlgorithm": "fairyc.package-instance/v1",
+  "sourceDigestAlgorithm": "fairyc.package-source/v1",
+  "language": "fairyc-language/20",
+  "root": "fypi1-sha256-7de3f02ce929053068afff4ff2654272f3333dddbe7d3d60643a29acb1213cd2",
+  "packages": [
+    {
+      "id": "fypi1-sha256-674bab7b189dd71fd8e59dfdd36327d4f5ea5dd5698f9920c9cc6700f85c3bf2",
+      "role": "standard-library",
+      "packageUid": "fairyc.std",
+      "sourceKind": "sdk",
+      "localPath": "",
+      "sdkIdentity": "fairyc-sdk-stdlib/0",
+      "runtimeAbi": "fairyc-runtime/0",
+      "sourceIdentity": "fairyc-sdk-stdlib/0;fairyc-runtime/0;fysrc1-sha256-c531e88e52b684a34cf9688eda19e5cafcc5788e7a4bbf7e5121e86874a7246a",
+      "sourceDigest": "fysrc1-sha256-c531e88e52b684a34cf9688eda19e5cafcc5788e7a4bbf7e5121e86874a7246a",
+      "version": "0.0.0-stage0.87",
+      "features": []
+    },
+    {
+      "id": "fypi1-sha256-7de3f02ce929053068afff4ff2654272f3333dddbe7d3d60643a29acb1213cd2",
+      "role": "root",
+      "packageUid": "example.shipping-fee",
+      "sourceKind": "local",
+      "localPath": ".",
+      "sdkIdentity": "",
+      "runtimeAbi": "",
+      "sourceIdentity": "fysrc1-sha256-00903ef1d8553ae14a001b66c3389142d2241d8c0a7af3f6d031fb3d14f0592a",
+      "sourceDigest": "fysrc1-sha256-00903ef1d8553ae14a001b66c3389142d2241d8c0a7af3f6d031fb3d14f0592a",
+      "version": "1.0.0",
+      "features": []
+    }
+  ],
+  "dependencies": [
+    {
+      "owner": "fypi1-sha256-7de3f02ce929053068afff4ff2654272f3333dddbe7d3d60643a29acb1213cd2",
+      "binding": "stdlib",
+      "target": "fypi1-sha256-674bab7b189dd71fd8e59dfdd36327d4f5ea5dd5698f9920c9cc6700f85c3bf2"
+    }
+  ]
+}
