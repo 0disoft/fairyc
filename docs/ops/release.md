@@ -13,6 +13,8 @@ and its [SHA-256 sidecar](https://github.com/0disoft/fairyc/releases/download/v0
 - The exact-revision workflow finished with 21 jobs passed and one skipped. Windows native smoke and Linux C differential both passed. [CI results](https://github.com/0disoft/fairyc/actions/runs/46048224274)
 - After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved size and hash, all seven internal file hashes matched, and a fresh starter passed all eight steps on the Windows build host.
 
+To verify preview.4 on GRAM13, use the [public ZIP verification guide](windows-preview4-gram13.ko.md).
+
 Report vulnerabilities through [GitHub private reporting](https://github.com/0disoft/fairyc/security/advisories/new).
 
 ### Historical preview.2 verification on GRAM13

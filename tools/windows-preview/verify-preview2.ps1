@@ -1,14 +1,32 @@
 #Requires -Version 5.1
 [CmdletBinding()]
-param([string]$ZipPath, [string]$OutputDirectory = (Join-Path $HOME 'Downloads'))
+param(
+  [string]$ZipPath,
+  [string]$OutputDirectory = (Join-Path $HOME 'Downloads'),
+  [ValidateSet('v0.1.0-preview.2', 'v0.1.0-preview.4')][string]$Release = 'v0.1.0-preview.2'
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$tag = 'v0.1.0-preview.2'
-$revision = '485592aa611626f427d248de659fa622e917d45f'
+$tag = $Release.ToLowerInvariant()
+$identity = switch ($tag) {
+  'v0.1.0-preview.2' { @{
+    revision = '485592aa611626f427d248de659fa622e917d45f'
+    bytes = 10104881
+    sha256 = '03d1c345b21519bdb586357b0a1b8179334b0ded3954f28d794e1e6b4284b9ef'
+    folder = 'fairyc-preview2-'
+  } }
+  'v0.1.0-preview.4' { @{
+    revision = 'd08fe22b21fb6eb8481915c34abb463a9aa69cb3'
+    bytes = 11001080
+    sha256 = 'd71ac2491e8059b54fe382613827d74046cb79e9f0f361364b6c29dcc454b930'
+    folder = 'fairyc-preview4-'
+  } }
+}
+$revision = $identity.revision
 $archiveName = 'fairyc-windows-amd64-preview-candidate.zip'
-$archiveHash = '03d1c345b21519bdb586357b0a1b8179334b0ded3954f28d794e1e6b4284b9ef'
+$archiveHash = $identity.sha256
 $baseUrl = "https://github.com/0disoft/fairyc/releases/download/$tag"
 $files = @('fairyc.exe','fairyc-lsp.exe','README.txt','LICENSE','LICENSING.md','THIRD_PARTY_NOTICES.md','GO-LICENSE.txt')
 $stepNames = @('compiler-version','lsp-version','lsp-protocol','new','check','check-locked','semantic-test')
@@ -16,7 +34,7 @@ foreach ($profile in 'development','release') {
   $stepNames += @("native-test-$profile","build-$profile","image-$profile","run-$profile")
 }
 $output = (Resolve-Path -LiteralPath $OutputDirectory).Path
-$root = Join-Path $output ('fairyc-preview2-' + [Guid]::NewGuid().ToString('N').Substring(0,12))
+$root = Join-Path $output ($identity.folder + [Guid]::NewGuid().ToString('N').Substring(0,12))
 $null = New-Item -ItemType Directory -Path $root
 $logs = Join-Path $root 'logs'
 $null = New-Item -ItemType Directory -Path $logs
@@ -182,7 +200,7 @@ try {
   $result.actualZipSHA256 = Get-Sha256 $zip
   $sidecar = [IO.File]::ReadAllText("$zip.sha256").TrimEnd("`r", "`n")
   if ($result.actualZipSHA256 -cne $archiveHash -or $sidecar -cne "$archiveHash  $archiveName" -or
-      (Get-Item -LiteralPath $zip).Length -ne 10104881) {
+      (Get-Item -LiteralPath $zip).Length -ne $identity.bytes) {
     throw "ZIP or sidecar differs. Expected $archiveHash; actual $($result.actualZipSHA256)"
   }
 
