@@ -88,6 +88,25 @@ class GitDiffRouting(unittest.TestCase):
                 self.write(name, "Test input\n")
                 self.assertEqual(self.push(self.base, self.commit()), "full")
 
+    def test_preview_ci_wrapper_and_its_routing_updates_use_preview_job(self):
+        wrapper = ".github/scripts/test-windows-preview.ps1"
+        router = ".github/scripts/ci_changes.py"
+        tests = ".github/scripts/test_ci_changes.py"
+        for path in (wrapper, router, tests):
+            self.write(path, "Initial CI helper\n")
+        base = self.commit()
+        for path in (router, tests):
+            self.write(path, "Updated routing\n")
+        routing_only = self.commit()
+        self.assertEqual(self.push(base, routing_only), "full")
+        self.write(wrapper, "Updated preview release\n")
+        head = self.commit()
+        self.assertEqual(self.push(base, head), "windows-preview")
+        self.assertEqual(self.push(routing_only, head), "windows-preview")
+        self.assertEqual(self.pull_request(base, head), "windows-preview")
+        self.git("rm", wrapper)
+        self.assertEqual(self.push(head, self.commit()), "full")
+
     def test_removing_preview_verifier_requires_full_checks(self):
         self.write(PREVIEW_VERIFIER, "Preview verifier\n")
         base = self.commit()

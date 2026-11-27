@@ -9,6 +9,8 @@ import sys
 
 
 PREVIEW_VERIFIER = "tools/windows-preview/verify-preview2.ps1"
+PREVIEW_SCRIPTS = {PREVIEW_VERIFIER, ".github/scripts/test-windows-preview.ps1"}
+ROUTING_FILES = {".github/scripts/ci_changes.py", ".github/scripts/test_ci_changes.py"}
 
 
 def documentation_path(name):
@@ -51,12 +53,17 @@ def validation_route(event_name, event, directory=Path(".")):
         if len(fields) % 2:
             return "full"
         route = "docs"
+        routing_changed = False
         for status, name in zip(fields[::2], fields[1::2]):
             path = os.fsdecode(name)
-            if path == PREVIEW_VERIFIER and status in {b"A", b"M"}:
+            if path in PREVIEW_SCRIPTS and status in {b"A", b"M"}:
                 route = "windows-preview"
+            elif path in ROUTING_FILES and status == b"M":
+                routing_changed = True
             elif not documentation_path(path):
                 return "full"
+        if routing_changed and route == "docs":
+            return "full"
         return route
     except (KeyError, TypeError, ValueError, OSError, subprocess.SubprocessError):
         # Missing history or an unreadable diff must never suppress compiler checks.
