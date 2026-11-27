@@ -120,7 +120,19 @@ func TestScratchOverlayPreservesProjectHoverAndReferences(t *testing.T) {
 			"position":     bytePosition([]byte(main), strings.Index(main, "::value")+2),
 			"context":      map[string]bool{"includeDeclaration": true},
 		})
-		return editorResult(t, &out)
+		// Recovery may publish diagnostics before the query response.
+		wire := out.Bytes()
+		var response struct {
+			ID     int             `json:"id"`
+			Result json.RawMessage `json:"result"`
+			Error  json.RawMessage `json:"error"`
+		}
+		body := bytes.LastIndex(wire, []byte("\r\n\r\n"))
+		if body < 0 || json.Unmarshal(wire[body+4:], &response) != nil ||
+			response.ID != 2 || response.Result == nil || response.Error != nil {
+			t.Fatalf("unexpected LSP response: %s", wire)
+		}
+		return response.Result
 	}
 	hover := query("hover")
 	var locations []Location
@@ -145,7 +157,34 @@ func TestScratchOverlayPreservesProjectHoverAndReferences(t *testing.T) {
 
 	out.Reset()
 	send(t, &s, 0, "textDocument/didChange", map[string]any{
+		"textDocument":   documentID{URI: scratchURI, Version: 2},
+		"contentChanges": json.RawMessage(`[{"range":{"start":{"line":1,"character":0},"end":{"line":1,"character":0}},"text":"x"}]`),
+	})
+	if !s.docs[scratchURI].needsFullText || !strings.Contains(out.String(), "invalid UTF-16 change range") {
+		t.Fatalf("expected scratch change to be rejected: %s", &out)
+	}
+	checkProjectQueries := func() {
+		t.Helper()
+		if got := query("hover"); !bytes.Equal(got, hover) {
+			t.Errorf("hover while scratch is unsynchronized = %s, want %s", got, hover)
+		}
+		if got := query("references"); !bytes.Equal(got, references) {
+			t.Errorf("references while scratch is unsynchronized = %s, want %s", got, references)
+		}
+	}
+	checkProjectQueries()
+
+	// A dependency edit invalidates the previous snapshot and forces a fresh load.
+	out.Reset()
+	send(t, &s, 0, "textDocument/didChange", map[string]any{
 		"textDocument":   documentID{URI: providerURI, Version: 2},
+		"contentChanges": []map[string]string{{"text": provider + "\n"}},
+	})
+	checkProjectQueries()
+
+	out.Reset()
+	send(t, &s, 0, "textDocument/didChange", map[string]any{
+		"textDocument":   documentID{URI: providerURI, Version: 3},
 		"contentChanges": []map[string]string{{"text": strings.Replace(provider, "return 42", "return false", 1)}},
 	})
 	if len(s.docs[providerURI].View.result.Diagnostics) == 0 {

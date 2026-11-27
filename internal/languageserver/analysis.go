@@ -213,17 +213,34 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 	}
 	if root != "" {
 		overlays := map[string][]byte{}
+		unsynchronized := map[string]struct{}{}
 		for _, opened := range documents {
 			if contained(root, opened.Path) {
 				overlays[opened.Path] = opened.Text
-				a.unsynchronized = a.unsynchronized || opened.needsFullText
+				if opened.needsFullText {
+					unsynchronized[opened.Path] = struct{}{}
+				}
 			}
 		}
-		if a.unsynchronized {
+		blockProject := func() *analysis {
+			view := &analysis{root: root, diagnostics: map[string][]lspDiagnostic{}, unsynchronized: true}
 			for filename, text := range overlays {
-				a.add(filename, text, 0, 0, "editor-document-unsynchronized", "An open document in this project needs full synchronization")
+				view.add(filename, text, 0, 0, "editor-document-unsynchronized", "An open document in this project needs full synchronization")
 			}
-			return a, nil
+			return view
+		}
+		// A rejected edit blocks project facts only when that document is a
+		// source in the current graph. Directory containment is not membership.
+		usesUnsynchronizedSource := func(files map[sourceKey]sourceView) bool {
+			if len(unsynchronized) == 0 {
+				return false
+			}
+			for _, file := range files {
+				if _, pending := unsynchronized[file.Path]; pending {
+					return true
+				}
+			}
+			return false
 		}
 		if previous := d.View; previous != nil && previous.root == root && previous.snapshot != nil {
 			current, err := previous.snapshot.Matches(ctx, overlays)
@@ -231,6 +248,9 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 				return nil, ctx.Err()
 			}
 			if err == nil && current {
+				if usesUnsynchronizedSource(previous.files) {
+					return blockProject(), nil
+				}
 				return previous, nil
 			}
 		}
@@ -243,6 +263,9 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 		}
 		workspace, parsedSyntax, err := workspaceloader.LoadEditorSyntaxContext(ctx, root, overlays, previousSyntax)
 		if err != nil {
+			if len(unsynchronized) != 0 {
+				return blockProject(), nil
+			}
 			var load *workspaceloader.LoadError
 			if errors.As(err, &load) && len(load.Diagnostics) > 0 {
 				filename := load.AbsoluteSourcePath
@@ -279,6 +302,9 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 		}
 		input, err := workspace.SemanticInput()
 		if err != nil {
+			if len(unsynchronized) != 0 {
+				return blockProject(), nil
+			}
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
 			return a, nil
 		}
@@ -287,6 +313,9 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 		}
 		packages, err := workspace.SemanticPackages()
 		if err != nil {
+			if len(unsynchronized) != 0 {
+				return blockProject(), nil
+			}
 			a.add(d.Path, d.Text, 0, 0, "editor-analysis-failed", internalDiagnostic(err))
 			return a, nil
 		}
@@ -306,6 +335,9 @@ func analyzeDocument(ctx context.Context, d *document, root string, documents ma
 				}
 				a.files[sourceKey{p.ID, file.Path}] = view
 			}
+		}
+		if usesUnsynchronizedSource(a.files) {
+			return blockProject(), nil
 		}
 		result, err := workspacecompiler.CheckContext(ctx, workspace)
 		a.result = result.Semantic
