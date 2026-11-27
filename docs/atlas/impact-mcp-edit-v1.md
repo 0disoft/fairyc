@@ -108,7 +108,7 @@ flags must be used together and require single-package mode.
 
 For the whole root-reachable graph, use
 `fairyc experimental atlas-diff --baseline <workspace-directory> --workspace
---max-packages <n> --max-declarations <n> --max-output-bytes <n>`.
+[--affected] --max-packages <n> --max-declarations <n> --max-output-bytes <n>`.
 This mode returns `fairyc.atlas-workspace-diff/v1`. The package and declaration
 limits count records across both snapshots, including unchanged packages.
 Every package must have an independent current expectation and its direct
@@ -121,6 +121,14 @@ changes in the same declaration and executable facts as the single-package
 mode, as well as changed direct dependencies. An `unchanged` row reports
 equality within that comparison's coverage. Any partial package makes the
 whole report partial. A limit failure leaves stdout empty.
+
+`--affected` adds an `affected` array to this report. Each package coordinate appears
+at most once, in coordinate order, with `before` and `after` booleans indicating the
+snapshot graphs where it directly or transitively consumes a changed package. Modified
+packages start the search in both graphs, removed packages in the baseline and added
+packages in the current graph. The array is empty when there are no such consumers.
+The `packages` rows keep their original actions and the output byte limit also applies
+to `affected`. Use this report to review impact. It does not establish which tests can be skipped.
 
 ## Fairy reader and impact core
 

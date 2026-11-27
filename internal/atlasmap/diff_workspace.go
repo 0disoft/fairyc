@@ -7,9 +7,16 @@ import (
 )
 
 type WorkspaceDiffResult struct {
-	Schema   string                 `json:"schema"`
-	State    string                 `json:"state"`
-	Packages []WorkspacePackageDiff `json:"packages"`
+	Schema   string                     `json:"schema"`
+	State    string                     `json:"state"`
+	Packages []WorkspacePackageDiff     `json:"packages"`
+	Affected []WorkspaceAffectedPackage `json:"affected,omitzero"`
+}
+
+type WorkspaceAffectedPackage struct {
+	Coordinate string `json:"coordinate"`
+	Before     bool   `json:"before"`
+	After      bool   `json:"after"`
 }
 
 type WorkspacePackageDiff struct {
@@ -85,6 +92,54 @@ func CompareWorkspaceV3(before, after []Partition, beforeExpected, afterExpected
 		result.Packages = append(result.Packages, entry)
 	}
 	return result, nil
+}
+
+// WithAffected adds the consumers of changed packages in the two verified graphs.
+func (report WorkspaceDiffResult) WithAffected() WorkspaceDiffResult {
+	before := workspaceDiffConsumers(report.Packages, true)
+	after := workspaceDiffConsumers(report.Packages, false)
+	report.Affected = []WorkspaceAffectedPackage{}
+	for _, pkg := range report.Packages {
+		if before[pkg.Coordinate] || after[pkg.Coordinate] {
+			report.Affected = append(report.Affected, WorkspaceAffectedPackage{
+				Coordinate: pkg.Coordinate, Before: before[pkg.Coordinate], After: after[pkg.Coordinate],
+			})
+		}
+	}
+	return report
+}
+
+func workspaceDiffConsumers(packages []WorkspacePackageDiff, before bool) map[string]bool {
+	reverse := make(map[string][]string, len(packages))
+	seen := make(map[string]bool, len(packages))
+	var queue []string
+	for _, pkg := range packages {
+		context, dependencies := pkg.After, pkg.AfterDependencies
+		if before {
+			context, dependencies = pkg.Before, pkg.BeforeDependencies
+		}
+		if context == nil {
+			continue
+		}
+		for _, dependency := range dependencies {
+			reverse[dependency] = append(reverse[dependency], pkg.Coordinate)
+		}
+		if pkg.Action != "unchanged" {
+			seen[pkg.Coordinate] = true
+			queue = append(queue, pkg.Coordinate)
+		}
+	}
+	affected := make(map[string]bool)
+	for i := 0; i < len(queue); i++ {
+		for _, consumer := range reverse[queue[i]] {
+			affected[consumer] = true
+			if !seen[consumer] {
+				seen[consumer] = true
+				queue = append(queue, consumer)
+			}
+		}
+	}
+	return affected
 }
 
 func indexWorkspaceDiff(partitions []Partition, expectations map[string]LoadExpectation, remaining *int) (map[string]Partition, error) {

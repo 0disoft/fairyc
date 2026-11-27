@@ -22,6 +22,7 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		{Name: "--baseline", Kind: flagScalar},
 		{Name: "--package-uid", Kind: flagScalar},
 		{Name: "--workspace", Kind: flagSwitch},
+		{Name: "--affected", Kind: flagSwitch},
 		{Name: "--symbol", Kind: flagScalar},
 		{Name: "--deny-new-effect", Kind: flagScalar},
 		{Name: "--max-packages", Kind: flagScalar},
@@ -73,6 +74,7 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 		flagRule{Invalid: seen["--workspace"] == seen["--package-uid"], Message: "atlas-diff requires exactly one of --package-uid and --workspace"},
 		flagRule{Invalid: seen["--workspace"] && packages == 0, Message: "atlas-diff --workspace requires --max-packages"},
 		flagRule{Invalid: !seen["--workspace"] && packages != 0, Message: "atlas-diff --max-packages requires --workspace"},
+		flagRule{Invalid: seen["--affected"] && !seen["--workspace"], Message: "atlas-diff --affected requires --workspace"},
 		flagRule{Invalid: seen["--symbol"] != seen["--deny-new-effect"], Message: "atlas-diff --symbol and --deny-new-effect must be used together"},
 		flagRule{Invalid: seen["--workspace"] && seen["--deny-new-effect"], Message: "atlas-diff --deny-new-effect requires --package-uid"},
 	); err != nil {
@@ -97,8 +99,13 @@ func runAtlasDiff(arguments []string, sourceRoot string, stdout, stderr io.Write
 	}
 	var report any
 	if seen["--workspace"] {
-		report, err = atlasmap.CompareWorkspaceV3(before.partitions, after.partitions, before.expectations, after.expectations,
+		var workspaceReport atlasmap.WorkspaceDiffResult
+		workspaceReport, err = atlasmap.CompareWorkspaceV3(before.partitions, after.partitions, before.expectations, after.expectations,
 			int(packages), int(declarations), oldAliases, newAliases, fingerprints)
+		if err == nil && seen["--affected"] {
+			workspaceReport = workspaceReport.WithAffected()
+		}
+		report = workspaceReport
 	} else {
 		old, ok := uniqueDiffPartition(before.partitions, uid)
 		new, found := uniqueDiffPartition(after.partitions, uid)

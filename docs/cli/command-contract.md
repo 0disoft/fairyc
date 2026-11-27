@@ -30,6 +30,8 @@ The same [Atlas contract](../atlas/impact-mcp-edit-v1.md#semantic-diff) owns
 `atlas-diff`. Use `--package-uid` for one package or `--workspace` with
 `--max-packages` for the root-reachable graph. Both modes require the baseline,
 declaration and output limits, and current locks in both workspaces.
+Add `--affected` in workspace mode to report direct and transitive consumers of
+changed packages in the two locked graphs.
 
 The Windows Fairy impact producer now admits ordinary functions, C foreign
 functions, structs, resources and enums in local packages, with checked composite

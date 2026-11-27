@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"slices"
 	"strings"
@@ -10,6 +11,86 @@ import (
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 )
+
+func TestAtlasDiffWorkspaceAffected(t *testing.T) {
+	const leafDependency = "[dependencies.leaf]\npath = \"libs/leaf\"\nversion = \"1.0.0\"\nfeatures = []\n"
+	fixture := func(withLeaf bool, leafValue int) string {
+		t.Helper()
+		root := writeWorkspaceSessionFixture(t, workspaceSessionRootSource)
+		if withLeaf {
+			rootManifest := strings.Replace(workspaceSessionRootManifest, `["libs/answer"]`, `["libs/answer", "libs/leaf"]`, 1)
+			writeWorkspaceFile(t, root, "fairy.toml", rootManifest)
+			writeWorkspaceFile(t, root, "libs/answer/fairy.toml", workspaceSessionMemberManifest+leafDependency)
+			writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer; import leaf as l; pub fn i32 value() { return l::value(); }\n")
+			writeWorkspaceFile(t, root, "libs/leaf/fairy.toml", strings.ReplaceAll(workspaceSessionMemberManifest, "answer", "leaf"))
+			writeWorkspaceFile(t, root, "libs/leaf/src/leaf.fy", fmt.Sprintf("module leaf; pub fn i32 value() { return %d; }\n", leafValue))
+		}
+		if code, out, err := runForTest([]string{"check"}, root); code != ExitSuccess || err != "" {
+			t.Fatalf("lock: %d stdout=%q stderr=%q", code, out, err)
+		}
+		return root
+	}
+	baseline, changed, removed := fixture(true, 42), fixture(true, 43), fixture(false, 0)
+	args := []string{"experimental", "atlas-diff", "--baseline", baseline, "--workspace", "--max-packages", "8",
+		"--max-declarations", "10", "--max-output-bytes", "100000"}
+	read := func(root string, args []string) (atlasmap.WorkspaceDiffResult, string) {
+		t.Helper()
+		code, stdout, stderr := runForTest(args, root)
+		if code != ExitSuccess || stderr != "" {
+			t.Fatalf("diff: %d stdout=%q stderr=%q", code, stdout, stderr)
+		}
+		var report atlasmap.WorkspaceDiffResult
+		if err := json.Unmarshal([]byte(stdout), &report); err != nil {
+			t.Fatal(err)
+		}
+		return report, stdout
+	}
+	withAffected := append(slices.Clone(args), "--affected")
+	plain, _ := read(changed, args)
+	changedReport, changedJSON := read(changed, withAffected)
+	if plain.Affected != nil || !reflect.DeepEqual(plain.Packages, changedReport.Packages) {
+		t.Fatal("affected mode changed the original package comparison")
+	}
+	var app, answer string
+	for _, pkg := range changedReport.Packages {
+		switch pkg.After.PackageUID {
+		case "example.session.app":
+			app = pkg.Coordinate
+		case "example.session.answer":
+			answer = pkg.Coordinate
+		case "example.session.leaf":
+			if pkg.Action != "modified" {
+				t.Fatalf("leaf action: %s", pkg.Action)
+			}
+			continue
+		}
+		if pkg.Action != "unchanged" {
+			t.Fatalf("consumer action: %s", pkg.Action)
+		}
+	}
+	want := []atlasmap.WorkspaceAffectedPackage{{Coordinate: answer, Before: true, After: true}, {Coordinate: app, Before: true, After: true}}
+	if !reflect.DeepEqual(changedReport.Affected, want) {
+		t.Fatalf("changed leaf: got %+v, want %+v", changedReport.Affected, want)
+	}
+	removedReport, _ := read(removed, withAffected)
+	want[0].After = false // answer consumed the removed leaf in the baseline only.
+	if !reflect.DeepEqual(removedReport.Affected, want) {
+		t.Fatalf("removed leaf: got %+v, want %+v", removedReport.Affected, want)
+	}
+	equalReport, _ := read(baseline, withAffected)
+	if equalReport.Affected == nil || len(equalReport.Affected) != 0 {
+		t.Fatalf("identical snapshots: %+v", equalReport.Affected)
+	}
+	limited := replaceWorkspaceSessionArgument(withAffected, "--max-output-bytes", fmt.Sprint(len(changedJSON)-1))
+	if code, out, err := runForTest(limited, changed); code != ExitInvalidInvocation || out != "" || !strings.Contains(err, "output exceeds byte limit") {
+		t.Fatalf("limit: %d stdout=%q stderr=%q", code, out, err)
+	}
+	single := []string{"experimental", "atlas-diff", "--baseline", baseline, "--package-uid", "example.session.app",
+		"--max-declarations", "10", "--max-output-bytes", "100000", "--affected"}
+	if code, out, err := runForTest(single, changed); code != ExitInvalidInvocation || out != "" || !strings.Contains(err, "--affected requires --workspace") {
+		t.Fatalf("single package: %d stdout=%q stderr=%q", code, out, err)
+	}
+}
 
 func TestAtlasDiffWorkspace(t *testing.T) {
 	const source = "module main; fn i32 main() { return 7; }\n"
