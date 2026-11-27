@@ -125,6 +125,8 @@ The lock serializes cooperating fetches; stale locks after a killed process requ
 inspection/removal. A hostile process rewriting the same workspace during fetch is not supported.
 Ordinary errors clean the current stage/lock. Prior complete packages and verified cache blobs
 may remain if another package fails. Physical-media durability and global rollback are not promised.
+In the Go CLI, Ctrl+C cancels `fetch-packages` through this cleanup path. An interrupted
+download reports a package preparation failure and can be retried after the command exits.
 
 Go directory publication records the newly created stage's filesystem identity and
 rechecks it before rename and before failure cleanup. A replaced stage is preserved
