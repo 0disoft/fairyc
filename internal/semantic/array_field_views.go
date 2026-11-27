@@ -111,17 +111,5 @@ func (f *borrowFlowAnalyzer) evaluateArrayFieldStore(statement *ast.Statement, e
 	if !reachable {
 		return false
 	}
-	base, accessBase := len(f.callBorrows), len(f.callAccesses)
-	priorBorrow, priorLastUse := f.assignmentBorrow, f.assignmentLastUse
-	f.callBorrows = append(f.callBorrows, held)
-	f.callAccesses = append(f.callAccesses, borrowCallAccess{value: held, mutable: true, store: true, span: span(f.module.file.Path, statement.Target.Span)})
-	f.assignmentBorrow = &held
-	f.assignmentLastUse = span(f.module.file.Path, statement.Target.Span)
-	defer func() {
-		f.callBorrows = slices.Delete(f.callBorrows, base, len(f.callBorrows))
-		f.callAccesses = slices.Delete(f.callAccesses, accessBase, len(f.callAccesses))
-		f.assignmentBorrow, f.assignmentLastUse = priorBorrow, priorLastUse
-	}()
-	_, reachable = f.evaluateExpression(statement.Expression, environment)
-	return reachable
+	return f.evaluateIndexedStoreRHS(statement, held, environment)
 }
