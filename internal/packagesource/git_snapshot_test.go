@@ -3,6 +3,7 @@ package packagesource
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -77,18 +78,24 @@ func TestLocalGitSnapshotCommittedBytes(t *testing.T) {
 	if string(b.files["src/main.fy"]) != "fn main() -> i32 { return 1; }\n" {
 		t.Fatal("working tree or export-ignore affected object snapshot")
 	}
-	for _, bad := range []string{"HEAD", commit[:12], strings.ToUpper(commit), strings.Repeat("f", 40)} {
+	for _, bad := range []string{"HEAD", commit[:12], strings.ToUpper(commit)} {
 		if _, err := PrepareGitSnapshot(t.Context(), dir, bad); err == nil {
 			t.Fatalf("mutable/invalid/missing commit accepted: %s", bad)
 		}
 	}
+	_, err = PrepareGitSnapshot(t.Context(), dir, strings.Repeat("f", len(commit)))
+	var exit *exec.ExitError
+	if !errors.As(err, &exit) || !strings.Contains(err.Error(), "verify immutable commit object") {
+		t.Fatalf("missing commit lost its Git cause: %v", err)
+	}
 	if _, err := PrepareGitSnapshot(t.Context(), filepath.Join(dir, "src"), commit); err == nil {
 		t.Fatal("implicit parent repository accepted")
 	}
-	ctx, cancel := context.WithCancel(t.Context())
-	cancel()
-	if _, err := PrepareGitSnapshot(ctx, dir, commit); err == nil {
-		t.Fatal("canceled snapshot accepted")
+	ctx, cancel := context.WithCancelCause(t.Context())
+	cause := errors.New("snapshot canceled by caller")
+	cancel(cause)
+	if _, err := PrepareGitSnapshot(ctx, dir, commit); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
+		t.Fatalf("snapshot lost its cancellation cause: %v", err)
 	}
 }
 

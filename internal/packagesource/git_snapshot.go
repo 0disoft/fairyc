@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -60,7 +61,7 @@ func gitObjectCommand(ctx context.Context, repository string, input []byte, limi
 	stderr := &boundedGitBuffer{limit: 4096}
 	command.Stdout = out
 	command.Stderr = stderr
-	if err := command.Run(); err != nil {
+	if err := errors.Join(command.Run(), ctx.Err(), context.Cause(ctx)); err != nil {
 		return nil, fmt.Errorf("local Git object command failed: %w", err)
 	}
 	return out.Bytes(), nil
@@ -94,7 +95,10 @@ func PrepareGitSnapshot(ctx context.Context, repository, commit string) (GitSnap
 		return GitSnapshot{}, fmt.Errorf("repository argument must name the worktree root")
 	}
 	resolved, err := gitObjectCommand(ctx, absolute, nil, 128, "rev-parse", "--verify", "--end-of-options", commit+"^{commit}")
-	if err != nil || strings.TrimSpace(string(resolved)) != commit {
+	if err != nil {
+		return GitSnapshot{}, fmt.Errorf("verify immutable commit object: %w", err)
+	}
+	if strings.TrimSpace(string(resolved)) != commit {
 		return GitSnapshot{}, fmt.Errorf("immutable commit object required")
 	}
 	tree, err := gitObjectCommand(ctx, absolute, nil, MaxFiles*(maxArchivePathBytes+128), "ls-tree", "-r", "-z", "--full-tree", commit)
