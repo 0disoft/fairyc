@@ -41,9 +41,9 @@ This is a development harness for synchronous callbacks, not a source-export or 
 ### Get the compiler
 
 The experimental Windows AMD64 preview includes `fairyc.exe` and `fairyc-lsp.exe`.
-Download [v0.1.0-preview.2](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.2)
-as a [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip)
-with its [SHA-256 checksum](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip.sha256).
+Download [v0.1.0-preview.4](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.4)
+as a [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.4/fairyc-windows-amd64-preview-candidate.zip)
+with its [SHA-256 checksum](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.4/fairyc-windows-amd64-preview-candidate.zip.sha256).
 Check that the ZIP hash matches the checksum file, then extract the unsigned ZIP and keep the license files together.
 See the [release document](docs/ops/release.md) for the verified source revision and build evidence.
 

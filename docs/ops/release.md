@@ -2,21 +2,25 @@
 
 ## Published Windows AMD64 preview
 
-[v0.1.0-preview.2](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.2) is the current experimental prerelease.
+[v0.1.0-preview.4](https://github.com/0disoft/fairyc/releases/tag/v0.1.0-preview.4) is the current experimental prerelease.
 It contains the unsigned Go Stage 0 compiler and language server for Windows AMD64.
-Download the [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip)
-and its [SHA-256 sidecar](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.2/fairyc-windows-amd64-preview-candidate.zip.sha256).
+Download the [ZIP](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.4/fairyc-windows-amd64-preview-candidate.zip)
+and its [SHA-256 sidecar](https://github.com/0disoft/fairyc/releases/download/v0.1.0-preview.4/fairyc-windows-amd64-preview-candidate.zip.sha256).
 
-- Source revision `485592aa611626f427d248de659fa622e917d45f`, built with Go 1.27.1.
-- ZIP size 10,104,881 bytes. SHA-256 `03d1c345b21519bdb586357b0a1b8179334b0ded3954f28d794e1e6b4284b9ef`.
+- Source revision `d08fe22b21fb6eb8481915c34abb463a9aa69cb3`, built with Go 1.27.1.
+- The 11,001,080-byte ZIP has SHA-256 `d71ac2491e8059b54fe382613827d74046cb79e9f0f361364b6c29dcc454b930`.
 - All 16 packaging smoke steps passed. The extracted executables passed LSP initialization and shutdown, starter checks, and native tests and runs in development and release modes. The ZIP, sidecar and all seven files listed in `SHA256SUMS.txt` passed hash verification.
-- All 17 jobs passed on the exact source revision, including Windows native smoke and Linux C differential. [CI results](https://github.com/0disoft/fairyc/actions/runs/44310233417/attempts/2)
-- After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved hash and passed all eight starter steps on the Windows build host.
-- The public ZIP passed all 15 verifier process checks on GRAM13 with Windows PowerShell 5.1, including direct execution of both newly built native profiles. The ZIP and all seven listed file hashes matched.
-
-To reproduce the check on Windows AMD64, follow the [GRAM13 public ZIP verification guide](windows-preview2-gram13.ko.md).
+- The exact-revision workflow finished with 21 jobs passed and one skipped. Windows native smoke and Linux C differential both passed. [CI results](https://github.com/0disoft/fairyc/actions/runs/46048224274)
+- After publication, anonymous downloads of both assets returned HTTP 200. The downloaded ZIP matched the approved size and hash, all seven internal file hashes matched, and a fresh starter passed all eight steps on the Windows build host.
 
 Report vulnerabilities through [GitHub private reporting](https://github.com/0disoft/fairyc/security/advisories/new).
+
+### Historical preview.2 verification on GRAM13
+
+The public preview.2 ZIP passed all 15 verifier process checks on GRAM13 with
+Windows PowerShell 5.1, including direct execution of both newly built native
+profiles. The ZIP and all seven listed file hashes matched.
+See the [preview.2 verification guide](windows-preview2-gram13.ko.md).
 
 ## Historical local preparation (2026-11-04)
 
@@ -42,7 +46,7 @@ Linux target promotion, self-hosting and C-relative performance budgets are
 separate work.
 
 Source-built Linux GNU amd64 compilers also implement ordinary `build/run/test --native` with
-GCC or Clang and the production SDK. Linux C differential passed at the `preview.2` source revision.
+GCC or Clang and the production SDK. Linux C differential passed at the `preview.4` source revision.
 The release assets are Windows-only, and target maturity follows the existing contract.
 See [ADR 0426](../adr/0426-linux-native-workspace-tests.md) for the Linux workspace scope.
 
@@ -202,7 +206,7 @@ Use the completed run's result as evidence for that candidate SHA.
   report route. Public issues are for nonsensitive bugs only.
 - Release blocker status: any failed user-path step, relevant exact-commit CI
   failure, artifact hash mismatch, or unavailable private security-report route.
-- Remaining operational risk: `preview.2` execution was verified on the build host.
+- Remaining operational risk: `preview.4` execution was verified on the build host.
   Native builds, tests and runs require x64 MSVC and the Windows SDK. The preview
   offers no compatibility or response-time promise.
 
