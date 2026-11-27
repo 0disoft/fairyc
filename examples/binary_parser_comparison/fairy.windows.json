@@ -1,0 +1,6 @@
+{
+  "schema": "fairyc.windows-build/v1",
+  "subsystem": "console",
+  "libraries": ["kernel32.lib"],
+  "sources": ["clock.c"]
+}
