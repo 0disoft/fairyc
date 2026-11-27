@@ -170,7 +170,8 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 		if len(args) == 2 && isHelp(args[1]) {
 			return writeHelp(stdout, stderr)
 		}
-		return runStableBuild(args[1:], sourceRoot, stdout, stderr)
+		_, code := runStableBuild(args[1:], sourceRoot, stdout, stderr)
+		return code
 	}
 	if args[0] == "run" {
 		if len(args) == 2 && isHelp(args[1]) {

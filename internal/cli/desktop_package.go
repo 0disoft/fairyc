@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/0disoft/fairyc/internal/desktopapp"
-	"github.com/0disoft/fairyc/internal/projectmanifest"
 )
 
 type desktopPackageReport = desktopapp.Report
@@ -52,22 +50,15 @@ func runStablePackage(arguments []string, root string, stdout, stderr io.Writer)
 	if seen["--locked"] {
 		buildArgs = append(buildArgs, "--locked")
 	}
-	if code := runStableBuild(buildArgs, root, io.Discard, stderr); code != ExitSuccess {
+	executable, code := runStableBuild(buildArgs, root, io.Discard, stderr)
+	if code != ExitSuccess {
 		return code
-	}
-	manifestBytes, err := os.ReadFile(filepath.Join(root, "fairy.toml"))
-	if err != nil {
-		return desktopPackageFailure(stderr, "cannot read package manifest", ExitPackageFailure)
-	}
-	manifest, err := projectmanifest.Parse(manifestBytes)
-	if err != nil {
-		return desktopPackageFailure(stderr, "invalid package manifest", ExitPackageFailure)
 	}
 	absolute, err := filepath.Abs(root)
 	if err != nil {
 		return internalError(stderr)
 	}
-	data, err := runDesktopHelper(python, root, "package_release.py", "--exe", filepath.Join(absolute, "build", manifest.Package.Name+".exe"), "--output", filepath.Join(absolute, "dist"))
+	data, err := runDesktopHelper(python, root, "package_release.py", "--exe", filepath.Join(absolute, filepath.FromSlash(executable)), "--output", filepath.Join(absolute, "dist"))
 	if err != nil {
 		return desktopPackageFailure(stderr, err.Error(), ExitBuildFailure)
 	}

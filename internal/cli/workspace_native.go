@@ -50,34 +50,34 @@ type workspaceCompilePolicy struct {
 	packageTrapSources bool
 }
 
-func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) (string, int) {
 	options, err := parseStableNativeOptions("build", arguments)
 	if err != nil {
-		return invocationError(stderr, err.Error())
+		return "", invocationError(stderr, err.Error())
 	}
 	native, err := stableNativeTargetOptions(options)
 	if err != nil {
-		return buildFailure(stderr, err)
+		return "", buildFailure(stderr, err)
 	}
 	if err := prepareDesktopBuild(sourceRoot); err != nil {
-		return desktopPackageFailure(stderr, err.Error(), ExitBuildFailure)
+		return "", desktopPackageFailure(stderr, err.Error(), ExitBuildFailure)
 	}
 	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
 	if code != ExitSuccess {
-		return code
+		return "", code
 	}
 	output := path.Join("build", compiled.rootPackageName+compiled.target.ExecutableSuffix)
 	if err := replaceBuildArtifact(sourceRoot, output, compiled.artifact.Bytes); err != nil {
-		return buildFailure(stderr, err)
+		return "", buildFailure(stderr, err)
 	}
 	profileName := "development"
 	if options.release {
 		profileName = "release"
 	}
 	if _, err := fmt.Fprintf(stdout, "built: %s (%s, %s, lock %s)\n", output, native.targetID, profileName, compiled.lockState); err != nil {
-		return outputError(stderr)
+		return "", outputError(stderr)
 	}
-	return ExitSuccess
+	return output, ExitSuccess
 }
 
 func stableNativeTargetOptions(options stableNativeOptions) (workspaceTargetOptions, error) {
