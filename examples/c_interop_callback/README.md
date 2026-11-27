@@ -37,6 +37,20 @@ go run ./tools/dev/fairyc-c-interop --cc clang --profile optimized
 
 Both profiles must print the expected line and exit with status 0. The harness sends `main.fy` through the normal frontend, HIR, borrow Flow, and verified MIR. It emits target-specific C11, passes the Fairy output and the C companion as separate translation units, links them, and executes the result.
 
+## Run with an MSVC C++ wrapper
+
+On Windows amd64, run the same harness with `--cpp`.
+
+```powershell
+go run ./tools/dev/fairyc-c-interop --cpp --profile low
+go run ./tools/dev/fairyc-c-interop --cpp --profile optimized
+go run ./tools/dev/fairyc-c-interop --cpp --check-header
+```
+
+The harness compiles [cpp_wrapper.cpp](cpp_wrapper.cpp) to its own object with MSVC C++20 and `/EHsc`, then links it with the generated Fairy C11 object and the C companion object. The [C ABI header](cpp_wrapper.h) exposes a fixed-width status, a release counter, and the existing synchronous callback and user data. The compile-only command checks that header against the generated declarations.
+
+[cpp.fy](cpp.fy) calls the wrapper twice with the existing Fairy predicate. Each call makes five visits and releases its C++-owned result exactly once. The first call returns the accepted count `2`. The second throws after `legacy_filter` and its callbacks return, then catches the exception inside the wrapper and returns `-2`. The harness checks exit status 0 and prints `C++ normal=2 exception=-2 releases=1/1` after the Fairy assertions pass.
+
 ## Check the header
 
 From the repository root, run the compile-only check with the same host toolchain

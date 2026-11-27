@@ -14,8 +14,26 @@ import (
 
 func TestInteropGNUEmission(t *testing.T) {
 	t.Chdir("../../..")
-	if _, err := emitInterop(filepath.Join("examples", "c_interop_callback"), cbackend.Stage0Profile()); err != nil {
+	if _, err := emitInterop(filepath.Join("examples", "c_interop_callback"), cbackend.Stage0Profile(), false); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestInteropCPP(t *testing.T) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		t.Skip("requires native Windows amd64 with MSVC")
+	}
+	t.Chdir("../../..")
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		t.Run(profile.Name, func(t *testing.T) {
+			args := []string{"--cpp", "--profile", profile.Name}
+			if err := run(append(args, "--check-header")); err != nil {
+				t.Fatal(err)
+			}
+			if err := run(args); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }
 

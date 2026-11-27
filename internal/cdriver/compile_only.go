@@ -42,6 +42,40 @@ func CompileWindowsMSVCC11Only(toolchain WindowsHostToolchain, profile Profile, 
 	})
 }
 
+// CompileWindowsMSVCCPP20Object builds a developer interoperability companion
+// with C++ exception handling enabled. The host builder links it as a COFF input.
+func CompileWindowsMSVCCPP20Object(toolchain WindowsHostToolchain, profile Profile, sourcePath string) (WindowsHostObject, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostObject{}, fmt.Errorf("MSVC C++ object build requires windows/amd64")
+	}
+	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
+		return WindowsHostObject{}, fmt.Errorf("invalid resolved MSVC host toolchain")
+	}
+	if profile != LowProfile && profile != OptimizedProfile {
+		return WindowsHostObject{}, fmt.Errorf("unsupported C++ profile %q", profile.Name)
+	}
+	if !filepath.IsAbs(sourcePath) || filepath.Ext(sourcePath) != ".cpp" {
+		return WindowsHostObject{}, fmt.Errorf("MSVC C++ object build requires an absolute .cpp path")
+	}
+	dir, err := os.MkdirTemp("", "fairyc-interop-cpp-")
+	if err != nil {
+		return WindowsHostObject{}, err
+	}
+	defer os.RemoveAll(dir)
+
+	const name = "wrapper.obj"
+	optimization := "/Od"
+	if profile == OptimizedProfile {
+		optimization = "/O2"
+	}
+	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, dir, "/nologo",
+		"/std:c++20", "/TP", "/EHsc", "/W4", "/WX", "/MT", optimization, "/c", sourcePath, "/Fo:"+name); err != nil {
+		return WindowsHostObject{}, fmt.Errorf("compile C++ wrapper: %s", strings.ReplaceAll(err.Error(), dir, "<temporary>"))
+	}
+	object, err := readArtifact(filepath.Join(dir, name))
+	return WindowsHostObject{Name: name, Bytes: object}, err
+}
+
 func compileC11Only(profile Profile, source string, compile func(dir, path string) error) error {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return fmt.Errorf("unsupported C profile %q", profile.Name)

@@ -31,6 +31,7 @@ func run(args []string) error {
 	flags := flag.NewFlagSet("fairyc-c-interop", flag.ContinueOnError)
 	name := flags.String("profile", "low", "native profile: low or optimized")
 	checkHeader := flags.Bool("check-header", false, "compile-check the C header against generated Fairy declarations")
+	cpp := flags.Bool("cpp", false, "link the separately compiled MSVC C++ wrapper (Windows only)")
 	cc := flags.String("cc", "", "Linux C compiler: gcc or clang (required on Linux)")
 	if err := flags.Parse(args); err != nil {
 		if err == flag.ErrHelp {
@@ -58,6 +59,9 @@ func run(args []string) error {
 		}
 		emission, wantOutput = cbackend.Stage0WindowsMSVCProfile(), "accepted=2 callbacks=5\r\n"
 	case "linux":
+		if *cpp {
+			return fmt.Errorf("--cpp requires Windows amd64 with MSVC")
+		}
 		if *cc != "gcc" && *cc != "clang" {
 			return fmt.Errorf("Linux requires --cc gcc or --cc clang")
 		}
@@ -68,12 +72,16 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
-	unit, err := emitInterop(root, emission)
+	unit, err := emitInterop(root, emission, *cpp)
 	if err != nil {
 		return err
 	}
 	if *checkHeader {
-		toolchain, err := checkInteropHeader(unit, filepath.Join(root, "legacy.h"), profile, *cc)
+		header := "legacy.h"
+		if *cpp {
+			header = "cpp_wrapper.h"
+		}
+		toolchain, err := checkInteropHeader(unit, filepath.Join(root, header), profile, *cc)
 		if err != nil {
 			return err
 		}
@@ -84,7 +92,11 @@ func run(args []string) error {
 	if err != nil {
 		return err
 	}
-	result, err := buildAndRun(unit.Source, companion, profile, *cc)
+	var cppSource string
+	if *cpp {
+		cppSource = filepath.Join(root, "cpp_wrapper.cpp")
+	}
+	result, err := buildAndRun(unit.Source, companion, profile, *cc, cppSource)
 	if err != nil {
 		return err
 	}
@@ -92,30 +104,44 @@ func run(args []string) error {
 		return fmt.Errorf("interop failed: exit=%d stdout=%q stderr=%q", result.exitCode, result.stdout, result.stderr)
 	}
 	fmt.Print(result.stdout)
+	if *cpp {
+		fmt.Printf("interop ok: %s, %s, three separately compiled objects; C++ normal=2 exception=-2 releases=1/1\n",
+			profile.Name, result.toolchain)
+		return nil
+	}
 	fmt.Printf("interop ok: %s, %s, two separately compiled objects\n", profile.Name, result.toolchain)
 	return nil
 }
 
-func emitInterop(root string, emission cbackend.Profile) (cbackend.Unit, error) {
-	raw, err := os.ReadFile(filepath.Join(root, "main.fy"))
-	if err != nil {
-		return cbackend.Unit{}, fmt.Errorf("read example (run from repository root): %w", err)
+func emitInterop(root string, emission cbackend.Profile, cpp bool) (cbackend.Unit, error) {
+	names, entry := []string{"main.fy"}, "main::main"
+	if cpp {
+		names = append(names, "cpp.fy")
+		entry = "cpp::main"
 	}
-	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", raw), source.DefaultLimits())
-	if err != nil {
-		return cbackend.Unit{}, fmt.Errorf("parse Fairy source: %w", err)
+	files := make([]semantic.File, 0, len(names))
+	for _, name := range names {
+		raw, err := os.ReadFile(filepath.Join(root, name))
+		if err != nil {
+			return cbackend.Unit{}, fmt.Errorf("read example (run from repository root): %w", err)
+		}
+		parsed, err := frontend.AnalyzeSyntax(source.NewFile(name, raw), source.DefaultLimits())
+		if err != nil {
+			return cbackend.Unit{}, fmt.Errorf("parse %s: %w", name, err)
+		}
+		if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
+			return cbackend.Unit{}, fmt.Errorf("%s syntax diagnostics: %+v", name, parsed.Tree.Diagnostics)
+		}
+		files = append(files, semantic.File{Path: name, Module: parsed.AST})
 	}
-	if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
-		return cbackend.Unit{}, fmt.Errorf("Fairy syntax diagnostics: %+v", parsed.Tree.Diagnostics)
-	}
-	checked, err := compiler.Check([]semantic.File{{Path: "main.fy", Module: parsed.AST}})
+	checked, err := compiler.Check(files)
 	if err != nil {
 		return cbackend.Unit{}, fmt.Errorf("check Fairy source: %w", err)
 	}
 	if !checked.Verified {
 		return cbackend.Unit{}, fmt.Errorf("Fairy admission failed: diagnostics=%+v unsupported=%+v", checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
 	}
-	return cbackend.Emit(checked.MIR, "main::main", emission)
+	return cbackend.Emit(checked.MIR, entry, emission)
 }
 
 func interopCompanion(root string) (string, error) {
@@ -180,7 +206,7 @@ type interopOutcome struct {
 	stdout, stderr, toolchain string
 }
 
-func buildAndRun(unit, companion string, profile cdriver.Profile, cc string) (interopOutcome, error) {
+func buildAndRun(unit, companion string, profile cdriver.Profile, cc, cppSource string) (interopOutcome, error) {
 	if runtime.GOOS == "linux" {
 		tc, err := cdriver.Resolve(target.X8664LinuxGNU, cc)
 		if err != nil {
@@ -197,12 +223,20 @@ func buildAndRun(unit, companion string, profile cdriver.Profile, cc string) (in
 	if err != nil {
 		return interopOutcome{}, err
 	}
-	artifact, err := cdriver.BuildWindowsMSVCABIProbe(tc, profile, unit, companion)
+	var options cdriver.WindowsMSVCBuildOptions
+	if cppSource != "" {
+		object, err := cdriver.CompileWindowsMSVCCPP20Object(tc, profile, cppSource)
+		if err != nil {
+			return interopOutcome{}, err
+		}
+		options.PrebuiltObjects = []cdriver.WindowsHostObject{object}
+	}
+	artifact, err := cdriver.BuildWindowsHostWithOptions(tc, profile, unit, companion, options)
 	if err != nil {
 		return interopOutcome{}, err
 	}
-	if len(artifact.Objects) != 2 {
-		return interopOutcome{}, fmt.Errorf("expected separate Fairy and C objects, got %d", len(artifact.Objects))
+	if want := 2 + len(options.PrebuiltObjects); len(artifact.Objects) != want {
+		return interopOutcome{}, fmt.Errorf("expected %d separately compiled objects, got %d", want, len(artifact.Objects))
 	}
 	result, err := cdriver.ExecuteWindowsMSVCABIProbe(artifact)
 	return interopOutcome{result.ExitCode, result.Stdout, result.Stderr, "MSVC " + tc.Version}, err
