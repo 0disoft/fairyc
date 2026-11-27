@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const extensionRoot = path.join(root, 'editors', 'vscode');
 const require = createRequire(path.join(extensionRoot, 'package.json'));
 const {createVSIX} = require('@vscode/vsce');
-const source = snapshotSource(root);
+const source = await snapshotSource(root);
 const lockfile = await fs.readFile(path.join(extensionRoot, 'package-lock.json'));
 const manifest = JSON.parse(await fs.readFile(path.join(extensionRoot, 'package.json'), 'utf8'));
 assert.equal(manifest.license, 'Apache-2.0');
@@ -21,7 +21,7 @@ const outputRoot = await fs.mkdtemp(path.join(releaseRoot, 'candidate-'));
 const filename = `${manifest.name}-${manifest.version}.vsix`;
 const packagePath = path.join(outputRoot, filename);
 await createVSIX({cwd: extensionRoot, packagePath, dependencies: true});
-assert.deepEqual(snapshotSource(root), source, 'Source changed during packaging; discard this candidate');
+assert.deepEqual(await snapshotSource(root), source, 'Source changed during packaging; discard this candidate');
 assert.deepEqual(await fs.readFile(path.join(extensionRoot, 'package-lock.json')), lockfile,
   'Dependency lockfile changed during packaging; discard this candidate');
 const digest = createHash('sha256').update(await fs.readFile(packagePath)).digest('hex');
