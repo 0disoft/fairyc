@@ -57,11 +57,7 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 	if err := os.WriteFile(sourcePath, []byte(runtimeSource), 0o600); err != nil {
 		return uncached()
 	}
-	optimization := "/Od"
-	if profile == OptimizedProfile {
-		optimization = "/O2"
-	}
-	flags := []string{"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization}
+	flags := msvcCompileArguments(profile, msvcC11Standard)
 	preprocessed, err := preprocessRuntime(toolchain.Path, toolchain.Environment, directory, append(append([]string{}, flags...), "/EP", "runtime.c"))
 	if err != nil {
 		return uncached()

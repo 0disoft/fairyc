@@ -558,10 +558,12 @@ func msvcCompileArguments(profile Profile, standardFlag string) []string {
 	}
 }
 
+const msvcC11Standard = "/std:c11"
+
 func msvcStandardFlag(mode ConsumerMode) (string, error) {
 	switch mode {
 	case C11ConsumerMode:
-		return "/std:c11", nil
+		return msvcC11Standard, nil
 	case C17ConsumerMode:
 		return "/std:c17", nil
 	default:

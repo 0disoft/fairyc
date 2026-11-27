@@ -36,7 +36,7 @@ func CompileWindowsMSVCC11Only(toolchain WindowsHostToolchain, profile Profile, 
 		return fmt.Errorf("invalid resolved MSVC host toolchain")
 	}
 	return compileC11Only(profile, source, func(dir, path string) error {
-		arguments := append(msvcCompileArguments(profile, "/std:c11"), "/c", path, "/Fo:header-check.obj")
+		arguments := append(msvcCompileArguments(profile, msvcC11Standard), "/c", path, "/Fo:header-check.obj")
 		_, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, dir, arguments...)
 		return err
 	})
