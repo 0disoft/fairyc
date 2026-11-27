@@ -35,9 +35,12 @@ def verify(compiler,companion=None):
         archive=project/report['archive'];digest=hashlib.sha256(archive.read_bytes()).hexdigest()
         if digest!=report['sha256'] or archive.stat().st_size!=report['zipBytes']: raise RuntimeError('package checksum mismatch')
         if archive.with_suffix('.zip.sha256').read_text().split()[0]!=digest: raise RuntimeError('sidecar mismatch')
+        exe=(project/'build/my-tool.exe').read_bytes()
         with zipfile.ZipFile(archive) as bundle:
             if len(bundle.namelist())!=4 or bundle.testzip(): raise RuntimeError('invalid portable archive')
-        previous=archive.read_bytes();exe=(project/'build/my-tool.exe').read_bytes();lock=(project/'fairy.lock').read_bytes()
+            if bundle.read('my-tool.exe')!=exe or report['exeBytes']!=len(exe):
+                raise RuntimeError('packaged executable or reported size differs from the published release build')
+        previous=archive.read_bytes();lock=(project/'fairy.lock').read_bytes()
         command([binary,'package','--locked'],project,6,dict(os.environ,PATH=''))
         settings.write_text(original.replace('executable_name = "my-tool.exe"','executable_name = "../escape.exe"'),encoding='utf-8')
         command([binary,'package','--locked'],project,6)
