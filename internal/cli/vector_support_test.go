@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/nativesupport"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -182,14 +183,17 @@ fn i32 main() {
 func TestWindowsVectorSupportSource(t *testing.T) {
 	for _, receipt := range []bool{false, true} {
 		got, err := windowsVectorSupportSource(nil, receipt)
-		var want string
-		if receipt {
-			want, _ = windowsTargetRunSupportSource(nil)
-		} else {
-			want, _ = windowsTargetSupportSource(nil)
+		if err != nil {
+			t.Fatal(err)
 		}
-		if err != nil || got != want {
-			t.Fatalf("ordinary support changed: %v", err)
+		// Compare the same native support path with SDK storage disabled so
+		// target-wide Windows header options are shared by both sides.
+		want, err := nativesupport.Source(target.X8664WindowsMSVC, nil, nativesupport.Options{TrapReceipt: receipt})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != want {
+			t.Fatalf("SDK storage changed support with no vector symbols (trap receipt=%v)", receipt)
 		}
 		if _, err := windowsVectorSupportSource([]string{"fy_private_vector_unknown_v0"}, receipt); err == nil {
 			t.Fatal("unknown runtime accepted")
