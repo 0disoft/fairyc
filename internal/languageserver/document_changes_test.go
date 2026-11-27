@@ -7,13 +7,14 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-func TestOversizedDocumentChangeBlocksDefinitionsUntilNewFullText(t *testing.T) {
+func TestOversizedDocumentChangeBlocksDefinitionsAndReferencesUntilNewFullText(t *testing.T) {
 	for _, limit := range []string{"document", "session"} {
 		t.Run(limit, func(t *testing.T) {
 			root, filename := editorFixture(t)
@@ -44,8 +45,40 @@ func TestOversizedDocumentChangeBlocksDefinitionsUntilNewFullText(t *testing.T) 
 				})
 				return out.String()
 			}
+			references := func() []Location {
+				t.Helper()
+				out.Reset()
+				send(t, &s, 2, "textDocument/references", map[string]any{
+					"textDocument": documentID{URI: uri},
+					"position":     bytePosition([]byte(main), strings.Index(main, "value")+1),
+					"context":      map[string]bool{"includeDeclaration": true},
+				})
+				// Refreshing analysis can publish diagnostics before the response.
+				wire := out.Bytes()
+				body := bytes.LastIndex(wire, []byte("\r\n\r\n"))
+				var response struct {
+					ID     int             `json:"id"`
+					Result []Location      `json:"result"`
+					Error  json.RawMessage `json:"error"`
+				}
+				if body < 0 || json.Unmarshal(wire[body+4:], &response) != nil ||
+					response.ID != 2 || response.Result == nil || response.Error != nil {
+					t.Fatalf("expected references response with a location array: %s", wire)
+				}
+				return response.Result
+			}
+			callStart := strings.Index(main, "answer::value")
+			call := Location{URI: uri, Range: textRange([]byte(main), callStart, callStart+len("answer::value"))}
+			wantReferences := func(dependency string) []Location {
+				start := strings.Index(dependency, "value")
+				declaration := Location{URI: other, Range: textRange([]byte(dependency), start, start+len("value"))}
+				return []Location{declaration, call}
+			}
 			if wire := definition(uri, main); !strings.Contains(wire, other) || !strings.Contains(wire, `"result":[{`) {
 				t.Fatalf("version 1 definition: %s", wire)
+			}
+			if got, want := references(), wantReferences(answer); !slices.Equal(got, want) {
+				t.Fatalf("version 1 references = %+v, want %+v", got, want)
 			}
 			size := source.DefaultLimits().MaxBytes + 1
 			if limit == "session" {
@@ -71,13 +104,20 @@ func TestOversizedDocumentChangeBlocksDefinitionsUntilNewFullText(t *testing.T) 
 			if out.Len() != 0 || !d.needsFullText {
 				t.Fatal("delayed or repeated version cleared the synchronization failure")
 			}
+			if got := references(); len(got) != 0 {
+				t.Fatalf("references after rejected change used stale facts: %+v", got)
+			}
 			if wire := definition(other, answer); !strings.Contains(wire, `"code":-32801`) {
 				t.Fatalf("definition in unsynchronized document: %s", wire)
 			}
 			if wire := definition(uri, main); strings.Contains(wire, `"result":[{`) {
 				t.Fatalf("definition in dependent document used stale facts: %s", wire)
 			}
-			change(3, "\n"+answer)
+			recovered := "\n" + answer
+			change(3, recovered)
+			if got, want := references(), wantReferences(recovered); !slices.Equal(got, want) {
+				t.Fatalf("version 3 references = %+v, want %+v", got, want)
+			}
 			if wire := definition(uri, main); d.Version != 3 || d.needsFullText || !strings.Contains(wire, other) ||
 				!strings.Contains(wire, `"start":{"line":2,`) {
 				t.Fatalf("version 3 definition: %s", wire)
