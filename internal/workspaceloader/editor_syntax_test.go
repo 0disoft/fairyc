@@ -3,9 +3,11 @@ package workspaceloader
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -51,6 +53,20 @@ func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(reloaded, fresh) {
 		t.Fatalf("reused syntax did not lower to the same workspace as a fresh parse: %v", err)
 	}
+	// The caller can reuse its edit buffer after loading, without changing
+	// either workspace or the private syntax retained for the next edit.
+	overlay[answer][0] = 'X'
+	if string(next.trees[key].tree.Source) != answerStart+"2; }\n" {
+		t.Fatal("syntax snapshot aliases the overlay buffer")
+	}
+	for _, workspace := range []Workspace{reloaded, fresh} {
+		loaded, _ := workspace.Package(".")
+		for _, file := range loaded.Sources {
+			if file.Path == "answer.fy" && string(file.Bytes) != answerStart+"2; }\n" {
+				t.Fatal("workspace source aliases the overlay buffer")
+			}
+		}
+	}
 	for i, left := range before.Packages[0].Sources {
 		if left.Module == reloaded.Packages[0].Sources[i].Module {
 			t.Fatalf("semantic input retained mutable AST for %s", left.Path)
@@ -64,10 +80,56 @@ func TestEditorSyntaxReloadReparsesOnlyChangedLocalFiles(t *testing.T) {
 	if err != nil || disk.trees[key].tree == nil || disk.trees[key].tree == next.trees[key].tree {
 		t.Fatalf("same-length on-disk change reused syntax: %v", err)
 	}
-	overlay[answer] = []byte(answerStart + "2 }")
+	const malformed = answerStart + "2 }"
+	overlay[answer] = []byte(malformed)
 	_, bad, err := LoadEditorSyntaxContext(ctx, root, overlay, next)
 	var load *LoadError
 	if !errors.As(err, &load) || load.Reason != ReasonSourceSyntax || bad != nil {
 		t.Fatalf("malformed overlay retained syntax or bypassed checks: %v", err)
+	}
+	overlay[answer][0] = 'X'
+	if string(load.Source) != malformed {
+		t.Fatal("syntax diagnostic source aliases the overlay buffer")
+	}
+}
+
+func BenchmarkEditorSyntaxReloadOpenOverlays(b *testing.B) {
+	for _, count := range []int{1, 4} {
+		b.Run(fmt.Sprint(count), func(b *testing.B) {
+			root := b.TempDir()
+			if err := os.WriteFile(filepath.Join(root, "fairy.toml"), []byte(rootManifest("")), 0600); err != nil {
+				b.Fatal(err)
+			}
+			sourceRoot := filepath.Join(root, "src")
+			if err := os.Mkdir(sourceRoot, 0700); err != nil {
+				b.Fatal(err)
+			}
+			overlays := make(map[string][]byte, count)
+			comment := "\n/*" + strings.Repeat("x", 1<<20) + "*/"
+			for i := range count {
+				name := fmt.Sprintf("open_%d", i)
+				overlays[filepath.Join(sourceRoot, name+".fy")] = []byte("module " + name + ";" + comment)
+			}
+			mainPath := filepath.Join(sourceRoot, "main.fy")
+			edits := [2][]byte{
+				[]byte("module main; fn i32 main() { return 1; }"),
+				[]byte("module main; fn i32 main() { return 2; }"),
+			}
+			overlays[mainPath] = edits[0]
+			_, previous, err := LoadEditorSyntaxContext(b.Context(), root, overlays, nil)
+			if err != nil {
+				b.Fatal(err)
+			}
+			b.ReportAllocs()
+			edit := 0
+			for b.Loop() {
+				edit = 1 - edit
+				overlays[mainPath] = edits[edit]
+				_, previous, err = LoadEditorSyntaxContext(b.Context(), root, overlays, previous)
+				if err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }

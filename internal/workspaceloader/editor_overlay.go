@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/0disoft/fairyc/internal/source"
 	"path/filepath"
-	"slices"
 	"strings"
 )
 
@@ -41,7 +40,7 @@ func loadEditorOverlays(ctx context.Context, root string, overlays map[string][]
 	if len(overlays) > MaxSourceFiles {
 		return Workspace{}, fmt.Errorf("too many editor overlays")
 	}
-	copied := make(map[string][]byte, len(overlays))
+	normalized := make(map[string][]byte, len(overlays))
 	total := 0
 	for filename, data := range overlays {
 		absolute, err := filepath.Abs(filename)
@@ -56,7 +55,9 @@ func loadEditorOverlays(ctx context.Context, root string, overlays map[string][]
 			return Workspace{}, fmt.Errorf("editor overlay byte limit")
 		}
 		total += len(data)
-		copied[absolute] = slices.Clone(data)
+		// The loader copies source bytes when publishing a workspace, syntax,
+		// or diagnostic. Keep the immutable input borrowed until then.
+		normalized[absolute] = data
 	}
-	return loadWorkspaceInputs(ctx, canonical, false, copied, reuse)
+	return loadWorkspaceInputs(ctx, canonical, false, normalized, reuse)
 }
