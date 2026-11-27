@@ -225,7 +225,7 @@ func buildAndRun(unit, companion string, profile cdriver.Profile, cc, cppSource 
 	}
 	var options cdriver.WindowsMSVCBuildOptions
 	if cppSource != "" {
-		object, err := cdriver.CompileWindowsMSVCCPP20Object(tc, profile, cppSource)
+		object, err := cdriver.CompileWindowsMSVCCPP23Object(tc, profile, cppSource)
 		if err != nil {
 			return interopOutcome{}, err
 		}

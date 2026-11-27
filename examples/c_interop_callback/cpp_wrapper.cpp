@@ -2,6 +2,8 @@
 
 #include <memory>
 
+static_assert(_MSVC_LANG > 202002L, "Build this wrapper in MSVC C++23 mode");
+
 namespace {
 struct RequestedException {};
 

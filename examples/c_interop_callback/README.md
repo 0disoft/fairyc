@@ -47,7 +47,7 @@ go run ./tools/dev/fairyc-c-interop --cpp --profile optimized
 go run ./tools/dev/fairyc-c-interop --cpp --check-header
 ```
 
-The harness compiles [cpp_wrapper.cpp](cpp_wrapper.cpp) to its own object with MSVC C++20 and `/EHsc`, then links it with the generated Fairy C11 object and the C companion object. The [C ABI header](cpp_wrapper.h) exposes a fixed-width status, a release counter, and the existing synchronous callback and user data. The compile-only command checks that header against the generated declarations.
+The harness compiles [cpp_wrapper.cpp](cpp_wrapper.cpp) to its own MSVC C++23 object with `/EHsc`, then links it with the generated Fairy C11 object and the C companion object. MSVC 14.52 and later use `/std:c++23`. Earlier toolsets need `/std:c++23preview` support. The [C ABI header](cpp_wrapper.h) exposes a fixed-width status, a release counter, and the existing synchronous callback and user data. The compile-only command checks that header against the generated declarations.
 
 [cpp.fy](cpp.fy) calls the wrapper twice with the existing Fairy predicate. Each call makes five visits and releases its C++-owned result exactly once. The first call returns the accepted count `2`. The second throws after `legacy_filter` and its callbacks return, then catches the exception inside the wrapper and returns `-2`. The harness checks exit status 0 and prints `C++ normal=2 exception=-2 releases=1/1` after the Fairy assertions pass.
 

@@ -42,9 +42,9 @@ func CompileWindowsMSVCC11Only(toolchain WindowsHostToolchain, profile Profile, 
 	})
 }
 
-// CompileWindowsMSVCCPP20Object builds a developer interoperability companion
+// CompileWindowsMSVCCPP23Object builds a C++23 developer interoperability companion
 // with C++ exception handling enabled. The host builder links it as a COFF input.
-func CompileWindowsMSVCCPP20Object(toolchain WindowsHostToolchain, profile Profile, sourcePath string) (WindowsHostObject, error) {
+func CompileWindowsMSVCCPP23Object(toolchain WindowsHostToolchain, profile Profile, sourcePath string) (WindowsHostObject, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostObject{}, fmt.Errorf("MSVC C++ object build requires windows/amd64")
 	}
@@ -56,6 +56,15 @@ func CompileWindowsMSVCCPP20Object(toolchain WindowsHostToolchain, profile Profi
 	}
 	if !filepath.IsAbs(sourcePath) || filepath.Ext(sourcePath) != ".cpp" {
 		return WindowsHostObject{}, fmt.Errorf("MSVC C++ object build requires an absolute .cpp path")
+	}
+	var major, minor int
+	if _, err := fmt.Sscanf(toolchain.Version, "%d.%d", &major, &minor); err != nil {
+		return WindowsHostObject{}, fmt.Errorf("invalid MSVC toolset version %q", toolchain.Version)
+	}
+	standard := "/std:c++23preview"
+	// MSVC 14.52 introduced the stable spelling.
+	if major > 14 || (major == 14 && minor >= 52) {
+		standard = "/std:c++23"
 	}
 	dir, err := os.MkdirTemp("", "fairyc-interop-cpp-")
 	if err != nil {
@@ -69,7 +78,7 @@ func CompileWindowsMSVCCPP20Object(toolchain WindowsHostToolchain, profile Profi
 		optimization = "/O2"
 	}
 	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, dir, "/nologo",
-		"/std:c++20", "/TP", "/EHsc", "/W4", "/WX", "/MT", optimization, "/c", sourcePath, "/Fo:"+name); err != nil {
+		standard, "/TP", "/EHsc", "/W4", "/WX", "/MT", optimization, "/c", sourcePath, "/Fo:"+name); err != nil {
 		return WindowsHostObject{}, fmt.Errorf("compile C++ wrapper: %s", strings.ReplaceAll(err.Error(), dir, "<temporary>"))
 	}
 	object, err := readArtifact(filepath.Join(dir, name))
