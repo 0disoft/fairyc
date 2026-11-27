@@ -1,0 +1,4 @@
+info: ready
+error: retry
+warning: ERROR is uppercase
+error: done
