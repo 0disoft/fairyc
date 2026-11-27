@@ -66,9 +66,6 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 	if err != nil {
 		return uncached()
 	}
-	if err := os.WriteFile(sourcePath, []byte(preprocessed), 0o600); err != nil {
-		return uncached()
-	}
 	identity := runtimeObjectIdentity{CompilerPath: toolchain.Path, CompilerVersion: toolchain.Version,
 		CompilerDigest: sha256.Sum256(compiler), Target: "x86_64-windows-msvc", Mode: C11ConsumerMode,
 		Profile: profile, Flags: flags, Environment: toolchain.Environment, Source: sourceDigest(runtimeSource),
@@ -79,7 +76,13 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 		defer store.Close()
 	}
 	var artifact WindowsHostArtifact
+	var snapshotWriteFailed bool
 	status, err := useRuntimeObject(store, key, func() ([]byte, error) {
+		// Only a fresh object compile consumes the preprocessed file.
+		if err := os.WriteFile(sourcePath, []byte(preprocessed), 0o600); err != nil {
+			snapshotWriteFailed = true
+			return nil, err
+		}
 		args := append(append([]string{}, flags...), "/c", "runtime.c", "/Fo:runtime.obj")
 		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory, args...); err != nil {
 			return nil, fmt.Errorf("compile runtime: %s", strings.ReplaceAll(err.Error(), directory, "<temporary>"))
@@ -93,6 +96,9 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 		artifact, err = buildWindowsUnitCached(toolchain, profile, unitSource, object, directory, identity, openUnit)
 		return err
 	})
+	if snapshotWriteFailed {
+		return uncached()
+	}
 	artifact.RuntimeCache = status
 	return artifact, err
 }
