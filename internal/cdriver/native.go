@@ -79,11 +79,12 @@ type NativeToolchain interface {
 }
 
 type NativeBuildOptions struct {
-	Windows                   *windowsbuild.Project
-	Profile                   Profile
-	UnitSource, RuntimeSource string
-	TrapControl               bool
-	Partitions                *CPartitions
+	Windows                     *windowsbuild.Project
+	Profile                     Profile
+	UnitSource, RuntimeSource   string
+	TrapControl                 bool
+	Partitions                  *CPartitions
+	OverlapRuntimePreprocessing bool
 }
 
 type NativeArtifact struct {

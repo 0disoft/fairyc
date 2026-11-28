@@ -14,14 +14,14 @@ import (
 // BuildWindowsMSVCTargetCached reuses exact-input runtime objects, plus generated
 // units for release builds, in bounded user caches. Linking always stays fresh.
 func BuildWindowsMSVCTargetCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
-	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, openRuntimeObjectStore, openUnitObjectStore)
+	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, openRuntimeObjectStore, openUnitObjectStore, false)
 }
 
 func buildWindowsRuntimeCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open runtimeStoreOpener) (WindowsHostArtifact, error) {
-	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, open, nil)
+	return buildWindowsObjectsCached(toolchain, profile, unitSource, runtimeSource, open, nil, false)
 }
 
-func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open, openUnit runtimeStoreOpener) (WindowsHostArtifact, error) {
+func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string, open, openUnit runtimeStoreOpener, overlapRuntime bool) (WindowsHostArtifact, error) {
 	// Development compilation is already cheap. Its measured time/space tradeoff
 	// does not justify retaining generated objects or another preprocessor pass.
 	if profile != OptimizedProfile {
@@ -58,7 +58,15 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 		return uncached()
 	}
 	flags := msvcCompileArguments(profile, msvcC11Standard)
+	var compiledUnit <-chan []byte
+	if overlapRuntime && profile == LowProfile && runtime.GOMAXPROCS(0) > 1 {
+		compiledUnit = startWindowsDevelopmentUnit(toolchain, directory, unitSource, flags)
+	}
 	preprocessed, err := preprocessRuntime(toolchain.Path, toolchain.Environment, directory, append(append([]string{}, flags...), "/EP", "runtime.c"))
+	var unitObject []byte
+	if compiledUnit != nil {
+		unitObject = <-compiledUnit
+	}
 	if err != nil {
 		return uncached()
 	}
@@ -88,6 +96,17 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 		_, err := pecoff.InspectObject(object)
 		return err
 	}, func(object []byte) error {
+		if unitObject != nil {
+			var err error
+			artifact, err = buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, nil, WindowsMSVCBuildOptions{
+				PrebuiltObjects: []WindowsHostObject{{Name: "unit.obj", Bytes: unitObject}, {Name: "runtime.obj", Bytes: object}},
+			})
+			if err == nil {
+				artifact.UnitCache = RuntimeCacheBypass
+				return nil
+			}
+		}
+		// Reuse the serial path to preserve CL diagnostics and fallback behavior.
 		var err error
 		artifact, err = buildWindowsUnitCached(toolchain, profile, unitSource, object, directory, identity, openUnit)
 		return err
@@ -97,4 +116,27 @@ func buildWindowsObjectsCached(toolchain WindowsHostToolchain, profile Profile, 
 	}
 	artifact.RuntimeCache = status
 	return artifact, err
+}
+
+// This speculative object has the lifetime of the current build. The caller
+// joins its compiler before starting a fallback or removing the temp directory.
+func startWindowsDevelopmentUnit(toolchain WindowsHostToolchain, directory, source string, flags []string) <-chan []byte {
+	directory = filepath.Join(directory, "unit")
+	if err := os.Mkdir(directory, 0o700); err != nil {
+		return nil
+	}
+	sourcePath := filepath.Join(directory, "unit.c")
+	if err := os.WriteFile(sourcePath, []byte(source), 0o600); err != nil {
+		return nil
+	}
+	result := make(chan []byte, 1)
+	go func() {
+		args := append(append([]string{}, flags...), "/c", sourcePath, "/Fo:unit.obj")
+		var object []byte
+		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, directory, args...); err == nil {
+			object, _ = readArtifact(filepath.Join(directory, "unit.obj"))
+		}
+		result <- object
+	}()
+	return result
 }

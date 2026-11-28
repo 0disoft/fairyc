@@ -3,7 +3,9 @@ package cli
 import (
 	"fmt"
 	"io"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -45,9 +47,10 @@ type loweredWorkspace struct {
 }
 
 type workspaceCompilePolicy struct {
-	stableDiagnostics  bool
-	runTrapReceipt     bool
-	packageTrapSources bool
+	stableDiagnostics           bool
+	runTrapReceipt              bool
+	packageTrapSources          bool
+	overlapRuntimePreprocessing bool
 }
 
 func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) (string, int) {
@@ -62,7 +65,9 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err := prepareDesktopBuild(sourceRoot); err != nil {
 		return "", desktopPackageFailure(stderr, err.Error(), ExitBuildFailure)
 	}
-	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
+	compiled, code := compileWorkspace(sourceRoot, native, workspaceCompilePolicy{
+		stableDiagnostics: true, overlapRuntimePreprocessing: true,
+	}, stderr)
 	if code != ExitSuccess {
 		return "", code
 	}
@@ -320,6 +325,11 @@ func prepareWorkspaceNativeBuild(sourceRoot string, options workspaceTargetOptio
 			return nativeBuildPlan{}, compiledNativeWorkspace{}, buildFailure(stderr, err)
 		}
 		options.windows = application
+		if policy.overlapRuntimePreprocessing && application == nil && options.profile == cdriver.LowProfile {
+			output := filepath.Join(sourceRoot, "build", lowered.rootPackageName+native.ExecutableSuffix)
+			_, err := os.Lstat(output)
+			policy.overlapRuntimePreprocessing = os.IsNotExist(err)
+		}
 	}
 	policy.packageTrapSources = policy.runTrapReceipt
 	plan, code := prepareNativeProgram(lowered.program, lowered.entryName, options, policy, lowered.sdkStorage, stderr)

@@ -6,8 +6,8 @@
 ## Decision
 
 [ADR 0486](0486-bounded-windows-generated-unit-reuse.md) later adds a separate two-entry
-generated-unit cache for Windows release builds. The runtime rules below, development builds
-and the Linux path remain unchanged.
+generated-unit cache for Windows release builds. Development builds and Linux
+use only the runtime object cache.
 
 Workspace native compilation reuses only the project-owned runtime/support C
 object. Generated Fairy C translation units are always compiled; linking and
@@ -17,6 +17,12 @@ package MIR reuse, executable reuse, LTO or general incremental compilation.
 Stable build/run/native-test and their shared experimental workspace paths use
 the adapter. Raw driver probes, sanitizer and cross-compiler evidence remain
 uncached.
+
+When the executable is missing, Windows development `fairyc build` can compile
+its generated unit while MSVC preprocesses the runtime. It joins the unit
+compile before linking or falling back to the serial path. The unit object is
+temporary, and each build still links against current host libraries. Native
+test scheduling keeps its own concurrency bound.
 
 The key includes a private version, host/target, C consumer mode, profile, exact
 compile flags, compiler path/version/image digest, environment, Linux libc

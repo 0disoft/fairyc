@@ -34,7 +34,7 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 	support := "int answer(void){return 5;}\n"
 	build := func(profile Profile, unit, runtime string, runtimeStatus, unitStatus RuntimeObjectCacheStatus, want int32) WindowsHostArtifact {
 		t.Helper()
-		artifact, err := buildWindowsObjectsCached(toolchain, profile, unit, runtime, openRuntime, openUnit)
+		artifact, err := buildWindowsObjectsCached(toolchain, profile, unit, runtime, openRuntime, openUnit, false)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -121,7 +121,7 @@ func TestWindowsGeneratedUnitCache(t *testing.T) {
 		t.Fatalf("unbounded unit retention: %+v %v", before, err)
 	}
 	if _, err := buildWindowsObjectsCached(toolchain, OptimizedProfile,
-		"int missing(void); int main(void){return missing();}\n", support, openRuntime, openUnit); err == nil {
+		"int missing(void); int main(void){return missing();}\n", support, openRuntime, openUnit, false); err == nil {
 		t.Fatal("missing symbol link falsely succeeded")
 	}
 	after, err := store.Stats()

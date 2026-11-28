@@ -58,7 +58,9 @@ func prepareNativeProgram(program mir.Program, entry string, options workspaceTa
 	if err != nil {
 		return nativeBuildPlan{}, buildFailure(stderr, err)
 	}
-	return nativeBuildPlan{options: nativeBuildOptions(build, options.profile, support, policy.runTrapReceipt), toolchain: toolchain, target: native}, ExitSuccess
+	buildOptions := nativeBuildOptions(build, options.profile, support, policy.runTrapReceipt)
+	buildOptions.OverlapRuntimePreprocessing = policy.overlapRuntimePreprocessing
+	return nativeBuildPlan{options: buildOptions, toolchain: toolchain, target: native}, ExitSuccess
 }
 
 func (plan nativeBuildPlan) compile(stderr io.Writer) (nativeCompilation, int) {

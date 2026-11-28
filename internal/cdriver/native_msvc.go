@@ -38,7 +38,8 @@ func (toolchain windowsNativeToolchain) Build(options NativeBuildOptions) (resul
 	if options.Windows != nil {
 		artifact, err = BuildWindowsApplicationParts(toolchain.toolchain, options.Profile, "/* application */\n", "typedef int fy_application_literals_unit;\n", []string{options.UnitSource}, options.RuntimeSource, commandTimeout, options.Windows)
 	} else {
-		artifact, err = BuildWindowsMSVCTargetCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource)
+		artifact, err = buildWindowsObjectsCached(toolchain.toolchain, options.Profile, options.UnitSource, options.RuntimeSource,
+			openRuntimeObjectStore, openUnitObjectStore, options.OverlapRuntimePreprocessing)
 	}
 	if err != nil {
 		return NativeArtifact{}, err

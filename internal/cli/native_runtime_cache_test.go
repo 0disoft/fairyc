@@ -28,7 +28,7 @@ func TestStableNativeRuntimeCache(t *testing.T) {
 		for _, want := range []cdriver.RuntimeObjectCacheStatus{cdriver.RuntimeCacheMiss, cdriver.RuntimeCacheHit} {
 			var diag strings.Builder
 			options := workspaceTargetOptions{profile: profile, locked: true}
-			policy := workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}
+			policy := workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true, overlapRuntimePreprocessing: true}
 			options.targetID = nativeWorkspaceTarget()
 			compiled, code := compileWorkspace(root, options, policy, &diag)
 			if code != 0 {
